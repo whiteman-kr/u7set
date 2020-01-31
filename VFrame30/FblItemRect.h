@@ -55,6 +55,10 @@ namespace VFrame30
 		//
 		virtual void draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* layer) const override;
 
+		// Draw item's label
+		//
+		virtual void drawLabel(CDrawParam* drawParam) const override;
+
 		// Draw debug info
 		//
 		virtual void drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const override;

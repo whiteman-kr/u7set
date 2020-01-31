@@ -79,21 +79,27 @@ namespace VFrame30
 		/// \brief Object name
 		Q_PROPERTY(QString ObjectName READ objectName)
 
-		/// \brief Blining phase. This value is inverted each time schema is being redrawn
-		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
+		/*! \brief Turns <b>ClickScript</b> script call when user clicks mouse button on schema item
 
-		/// \brief Turns <b>ClickScript</b> script call when user clicks on schema item
+		  When this property is set to true, <b>ClickScript</b> event handler is called when user clicks left mouse button on a schema item.
+
+		  \warning This property has no effect on SchemaItemPushButton and SchemaItemLineEdit.
+		*/
 		Q_PROPERTY(bool AcceptClick READ acceptClick WRITE setAcceptClick)
 
-		/*! \brief Contains mouse click event handler code.
-		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true.
-		*/
-		Q_PROPERTY(QString ClickScript READ clickScript)
+		/*! \brief Blinking phase. Value of this property is inverted approximately each 250 milliseconds
 
-		/*! \brief Contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn.
-		In most cases, this code is used to change visual apperance of an item before drawing.
+		Blinking phase.	Value of this property is inverted (switched from true to false or vice versa) approximately each 250 milliseconds.
+		Used to implement schema items blinking. For example, script code can paint an item with one color when value is set to true and
+		with another color when it is set to false.
+
+		Value inverting is based on system clock. This is required to synchronize blinking when multiple Monitor or TuningClient
+		applications run on the same computer.
+
+		\warning <b>PreDrawScript</b> code calling is not synchronized with BlinkPhase inverting. According to this, it is possible that BlinkPhase value will not changed
+		in two consecutive <b>PreDrawScript</b> calls.
 		*/
-		Q_PROPERTY(QString PreDrawScript READ preDrawScript)
+		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
 
 	protected:
 		SchemaItem();

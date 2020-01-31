@@ -233,9 +233,8 @@ void MonitorMainWindow::showLogo()
 	//
 	int toolBarSpacing = 0;
 
-	QLayout* toolBarLayout = m_toolBar->layout();
-
-	if (toolBarLayout != nullptr)
+	if (QLayout* toolBarLayout = m_toolBar->layout();
+		toolBarLayout != nullptr)
 	{
 		toolBarSpacing = toolBarLayout->spacing();
 	}

@@ -29,6 +29,10 @@ SelectSchemaWidget::SelectSchemaWidget(MonitorConfigController* configController
 	connect(configController, &MonitorConfigController::configurationArrived, this, &SelectSchemaWidget::slot_configurationArrived);
 	connect(m_centraWidget, &MonitorCentralWidget::signal_schemaChanged, this, &SelectSchemaWidget::slot_schemaChanged);
 
+	// It will make this button the size to 2 rows, it is important to keep toolbar always the same size, from the very start of app
+	//
+	m_button->setText(QString(" %1\n %2").arg("UNKNOWN").arg("Unknown Schema"));
+
 	return;
 }
 
@@ -36,7 +40,6 @@ void SelectSchemaWidget::clear()
 {
 	m_schemas.clear();
 	setCurrentSchema(QString());
-
 	return;
 }
 
@@ -59,7 +62,9 @@ bool SelectSchemaWidget::setCurrentSchema(QString schemaId)
 		}
 	}
 
-	m_button->setText(QString());
+	// It will make this button the size to 2 rows, it is important to keep toolbar always the same size, from the very start of app
+	//
+	m_button->setText(QString(" %1\n %2").arg("UNKNOWN").arg("Unknown Schema"));
 
 	return false;
 }

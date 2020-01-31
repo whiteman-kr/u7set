@@ -266,13 +266,17 @@ namespace VFrame30
 
 	void BaseSchemaWidget::zoomIn()
 	{
-		setZoom(zoom() + 20, false);
+		double value = (static_cast<int>(zoom()) / static_cast<int>(ZoomStep)) * static_cast<int>(ZoomStep);
+		setZoom(value + ZoomStep, false);
+
 		return;
 	}
 
 	void BaseSchemaWidget::zoomOut()
 	{
-		setZoom(zoom() - 20, false);
+		double value = (static_cast<int>(zoom()) / static_cast<int>(ZoomStep)) * static_cast<int>(ZoomStep);
+		setZoom(value - ZoomStep, false);
+
 		return;
 	}
 
@@ -328,12 +332,13 @@ namespace VFrame30
 
 	void BaseSchemaWidget::setZoom(double zoom, bool repaint, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
 	{
-		QPoint widgetCenterPoint(size().width() / 2, size().height() / 2);
+		QPoint widgetCenterPoint(viewport()->size().width() / 2,
+								 viewport()->size().height() / 2);
 
 		QPointF oldDocPos;
 		MousePosToDocPoint(widgetCenterPoint, &oldDocPos);
 
-		schemaView()->setZoom(zoom, repaint);
+		zoom = schemaView()->setZoom(zoom, repaint);	// new zoom can be set
 
 		QPointF newDocPos;
 		MousePosToDocPoint(widgetCenterPoint, &newDocPos);

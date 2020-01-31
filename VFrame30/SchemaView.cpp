@@ -103,6 +103,64 @@ namespace VFrame30
 		}
 	}
 
+	void SchemaView::deleteControlWidgets()
+	{
+		// Find all control items
+		//
+		std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema()->Layers)
+		{
+			for (SchemaItemPtr& item : layer->Items)
+			{
+				if (item->isControl() == false)
+				{
+					continue;
+				}
+
+				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
+				if (controlItem == nullptr)
+				{
+					Q_ASSERT(controlItem);
+					continue;
+				}
+
+				controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
+			}
+		}
+
+		// Remove all control widgets
+		//
+		QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+
+		for (QObject* childObject : childWidgets)
+		{
+			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
+
+			if (childWidget == nullptr)
+			{
+				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+				continue;
+			}
+
+			QString objectName{childWidget->objectName()};
+			QUuid widgetUuid{objectName};
+
+			if (widgetUuid.isNull() == true)
+			{
+				continue;
+			}
+
+			if (auto foundIt = controlItems.find(widgetUuid);
+				foundIt != controlItems.end())
+			{
+				delete childWidget;
+			}
+		}
+
+		return;
+	}
+
 	std::shared_ptr<Schema> SchemaView::schema()
 	{
 		return m_schema;
@@ -370,17 +428,63 @@ namespace VFrame30
 		return m_zoom;
 	}
 
-	void SchemaView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	double SchemaView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
-		value = value > 500 ? 500 : value;
-		value = value < 50 ? 50 : value;
-
-		m_zoom = value;
-
 		// Calc DPI
 		//
 		dpiX = (dpiX == 0) ? logicalDpiX() : dpiX;
 		dpiY = (dpiY == 0) ? logicalDpiY() : dpiY;
+
+		// if value is 0 then fit page into parent
+		//
+		if (value == 0)
+		{
+			QWidget* viewportWidget = this->parentWidget();		// Viewport can be real from QAbstractScrollArea or just any widget
+			QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget->parentWidget());
+
+			if (viewportWidget == nullptr)
+			{
+				Q_ASSERT(viewportWidget);
+				value = 100;
+			}
+			else
+			{
+				QSize viewportSize;
+
+				if (abstractScrollArea != nullptr)
+				{
+					viewportSize = abstractScrollArea->maximumViewportSize();
+				}
+				else
+				{
+					viewportSize = viewportWidget->size();
+				}
+
+				// Scale to fit viewportWidget
+				//
+				double vertScaleFactor = 1.0;
+				double horzScaleFactor = 1.0;
+
+				if (schema()->unit() == SchemaUnit::Display)
+				{
+					horzScaleFactor = (viewportSize.width() * 0.99) / schema()->docWidth();
+					vertScaleFactor = (viewportSize.height() * 0.99) / schema()->docHeight();
+				}
+				else
+				{
+					horzScaleFactor = (viewportSize.width() * 0.99) / (schema()->docWidth() * dpiX);
+					vertScaleFactor = (viewportSize.height() * 0.99) / (schema()->docHeight() * dpiY);
+				}
+
+				value = std::min(vertScaleFactor, horzScaleFactor) * 100.0;
+			}
+		}
+		else
+		{
+			value = qBound(50.0, value, 500.0);
+		}
+
+		m_zoom = value;
 
 		// resize widget
 		//
@@ -401,7 +505,7 @@ namespace VFrame30
 			this->repaint();
 		}
 
-		return;
+		return m_zoom;
 	}
 
 	const Session& SchemaView::session() const

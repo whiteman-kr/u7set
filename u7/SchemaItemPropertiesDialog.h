@@ -35,10 +35,10 @@ public:
 	void ensureVisible();
 
 private:
-    virtual void closeEvent(QCloseEvent * e);
-    virtual void done(int r);
+	virtual void closeEvent(QCloseEvent * e);
+	virtual void done(int r);
 
-    void saveSettings();
+	void saveSettings();
 
 private slots:
 	void propertiesModeTabChanged(int index);

@@ -172,6 +172,10 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 			QStringLiteral("LOW")
 		};
 
+	static const QString flagValueFalse = QStringLiteral(" (0)");
+	static const QString flagValueTrue = QStringLiteral(" (1)");
+	static const QString flagValueNonValid = QStringLiteral(" (?)");
+
 	QPainter painter(this);
 
 	static QBrush alertBrush(QColor(192, 0, 0));
@@ -190,76 +194,101 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 		{
 			// Draw the rectangle for flag
 			//
-			QRect flagRect = flag2Rect(flagNo);
-
 			bool flagValue = false;
+			bool flagValid = true;
 
 			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
+				bool flagAlert = false;
+
 				SignalFlagsFields flag = static_cast<SignalFlagsFields>(flagNo);
 
-				switch (flag)
+				if (flag != SignalFlagsFields::StateAvailable && m_flags.stateAvailable == false)
 				{
-				case SignalFlagsFields::Valid:
-					flagValue = m_flags.valid;
-					break;
-
-				case SignalFlagsFields::StateAvailable:
-					flagValue = m_flags.stateAvailable;
-					break;
-
-				case SignalFlagsFields::Simulated:
-					flagValue = m_flags.simulated;
-					break;
-
-				case SignalFlagsFields::Blocked:
-					flagValue = m_flags.blocked;
-					break;
-
-				case SignalFlagsFields::Mismatch:
-					flagValue = m_flags.mismatch;
-					break;
-
-				case SignalFlagsFields::AboveHighLimit:
-					flagValue = m_flags.aboveHighLimit;
-					break;
-
-				case SignalFlagsFields::BelowLowLimit:
-					flagValue = m_flags.belowLowLimit;
-					break;
-
-				default:
-					Q_ASSERT(false);
-				}
-
-				bool flagAlerted = flagValue;
-
-				if (flag == SignalFlagsFields::Valid ||
-						flag == SignalFlagsFields::StateAvailable)
-				{
-					// These two flags colors are inverted
+					// Flag is not valid
 					//
-					flagAlerted = !flagAlerted;
+					flagValid = false;
+					flagAlert = true;
+				}
+				else
+				{
+					// Flag is valid, get its value
+					//
+					switch (flag)
+					{
+					case SignalFlagsFields::Valid:
+						flagValue = m_flags.valid;
+						break;
+
+					case SignalFlagsFields::StateAvailable:
+						flagValue = m_flags.stateAvailable;
+						break;
+
+					case SignalFlagsFields::Simulated:
+						flagValue = m_flags.simulated;
+						break;
+
+					case SignalFlagsFields::Blocked:
+						flagValue = m_flags.blocked;
+						break;
+
+					case SignalFlagsFields::Mismatch:
+						flagValue = m_flags.mismatch;
+						break;
+
+					case SignalFlagsFields::AboveHighLimit:
+						flagValue = m_flags.aboveHighLimit;
+						break;
+
+					case SignalFlagsFields::BelowLowLimit:
+						flagValue = m_flags.belowLowLimit;
+						break;
+
+					default:
+						Q_ASSERT(false);
+					}
+
+					flagAlert = flagValue;
+
+					// Valid and StateAvailable flags colors are inverted
+					//
+					if (flag == SignalFlagsFields::Valid ||	flag == SignalFlagsFields::StateAvailable)
+					{
+						flagAlert = !flagAlert;
+					}
 				}
 
-				painter.setBrush(flagAlerted == true ? alertBrush : noAlertBrush);
+				//
+
+				painter.setBrush(flagAlert == true ? alertBrush : noAlertBrush);
 			}
 			else
 			{
 				painter.setBrush(noFlagBrush);
 			}
 
+			QRect flagRect = flag2Rect(flagNo);
+
 			painter.setPen(Qt::NoPen);
 			painter.drawRect(flagRect);
 
 			// Draw the text description for flag
+			//
 
 			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
 				painter.setPen(Qt::white);
 
 				QString text = flagNames[flagNo];
-				text += flagValue == true ? tr(" (1)") : tr(" (0)");
+
+				if (flagValid == true)
+				{
+					text += flagValue == true ? flagValueTrue : flagValueFalse;
+				}
+				else
+				{
+					text += flagValueNonValid;
+				}
 
 				painter.drawText(flagRect, Qt::AlignHCenter | Qt::AlignCenter, text);
 			}

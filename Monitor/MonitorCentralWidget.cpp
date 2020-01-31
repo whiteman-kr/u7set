@@ -93,6 +93,15 @@ void MonitorCentralWidget::slot_newTab()
 	}
 
 	slot_newSameTab(curTabWidget);
+
+	// Set zoom for new tab
+	//
+	if (auto newTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+		newTabWidget != nullptr)
+	{
+		newTabWidget->clientSchemaView()->setZoom(0);
+	}
+
 	return;
 }
 
@@ -268,6 +277,10 @@ void MonitorCentralWidget::slot_resetSchema()
 		}
 
 		tabPage->setSchema(schemaToLoad);
+
+		tabPage->clientSchemaView()->deleteControlWidgets();		// deleteControlWidgets after loading new schema, as it will delete old widgets and later they will be created
+		tabPage->clientSchemaView()->updateControlWidgets(false);
+
 		tabPage->resetHistory();
 
 		if (i == currentIndex())

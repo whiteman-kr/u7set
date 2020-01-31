@@ -590,6 +590,81 @@ namespace VFrame30
 		return;
 	}
 
+	void FblItemRect::drawLabel(CDrawParam* drawParam) const
+	{
+		if (drawParam == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		// --
+		//
+		QRectF labelRect{leftDocPt(), topDocPt(), widthDocPt(), heightDocPt()};
+
+		if (std::abs(labelRect.left() - labelRect.right()) < 0.000001)
+		{
+			labelRect.setRight(labelRect.left() + 0.000001);
+		}
+
+		if (std::abs(labelRect.bottom() - labelRect.top()) < 0.000001)
+		{
+			labelRect.setBottom(labelRect.top() + 0.000001);
+		}
+
+		// --
+		//
+		int alignFlags = Qt::AlignmentFlag::AlignCenter;
+
+		switch (labelPos())
+		{
+		case E::TextPos::LeftTop:
+			labelRect.moveBottomRight(labelRect.topLeft());
+			alignFlags = Qt::AlignRight | Qt::AlignBottom;
+			break;
+
+		case E::TextPos::Top:
+			labelRect.moveBottom(labelRect.top());
+			alignFlags = Qt::AlignHCenter | Qt::AlignBottom;
+			break;
+		case E::TextPos::RightTop:
+			labelRect.moveBottomLeft(labelRect.topRight());
+			alignFlags = Qt::AlignLeft | Qt::AlignBottom;
+			break;
+		case E::TextPos::Right:
+			labelRect.moveLeft(labelRect.right());
+			alignFlags = Qt::AlignLeft | Qt::AlignVCenter;
+			break;
+		case E::TextPos::RightBottom:
+			labelRect.moveTopLeft(labelRect.bottomRight());
+			alignFlags = Qt::AlignLeft | Qt::AlignTop;
+			break;
+		case E::TextPos::Bottom:
+			labelRect.moveTop(labelRect.bottom());
+			alignFlags = Qt::AlignHCenter | Qt::AlignTop;
+			break;
+		case E::TextPos::LeftBottom:
+			labelRect.moveTopRight(labelRect.bottomLeft());
+			alignFlags = Qt::AlignRight | Qt::AlignTop;
+			break;
+		case E::TextPos::Left:
+			labelRect.moveRight(labelRect.left());
+			alignFlags = Qt::AlignRight | Qt::AlignVCenter;
+			break;
+		default:
+			Q_ASSERT(false);
+		}
+
+		FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		p->setPen(Qt::darkGray);
+
+		DrawHelper::drawText(p, font, itemUnit(), label(), labelRect, Qt::TextDontClip | alignFlags);
+
+		return;
+	}
+
 	void FblItemRect::drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
 	{
 		QPainter* p = drawParam->painter();
