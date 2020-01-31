@@ -64,4 +64,6 @@ set #TUN_DSCR1 = 0, #TUN_DSCR2 = 1,#TUN_DSCR3 = 0, #TUN_DSCR4 = 1, #TUN_DSCR5 = 
 check #16AND_OUT == 0 // подаем 1 на каждый четный вход
 set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 1, #TUN_DSCR5 = 1, #TUN_DSCR6 = 1, #TUN_DSCR7 = 1, #TUN_DSCR8 = 1, #TUN_DSCR9 = 1, #TUN_DSCR10 = 1, #TUN_DSCR11 = 1, #TUN_DSCR12 = 1, #TUN_DSCR13 = 1, #TUN_DSCR14 = 1, #TUN_DSCR15 = 1, #TUN_DSCR16 = 1 
 check #16AND_OUT == 1 // подаем 1 на каждый вход
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0, #TUN_DSCR6 = 0, #TUN_DSCR7 = 0, #TUN_DSCR8 = 0, #TUN_DSCR9 = 0, #TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 0, #TUN_DSCR13 = 0, #TUN_DSCR14 = 0, #TUN_DSCR15 = 0, #TUN_DSCR16 = 0 
+check #16AND_OUT == 0 // на все 16 входов подается 0
 endtest
