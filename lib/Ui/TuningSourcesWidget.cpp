@@ -197,8 +197,8 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("IP", ts.info.lmip().c_str());
 	setDataItemNumber("Port", ts.info.lmport());
 	setDataItemText("Channel", ts.info.lmsubsystemchannel().c_str());
-	setDataItemNumber("SubsystemID", ts.info.lmsubsystemid());
-	setDataItemText("Subsystem", ts.info.lmsubsystem().c_str());
+	setDataItemNumber("SubsystemID", ts.info.lmsubsystemkey());
+	setDataItemText("Subsystem", ts.info.lmsubsystemid().c_str());
 
 	setDataItemNumber("LmNumber", ts.info.lmnumber());
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ts.info.lmmoduletype())).arg(QString::number(ts.info.lmmoduletype(), 16)));
@@ -509,7 +509,7 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 			connectionStrings << ts.info.lmsubsystemchannel().c_str();
 
-			connectionStrings << ts.info.lmsubsystem().c_str();
+			connectionStrings << ts.info.lmsubsystemid().c_str();
 			connectionStrings << QString::number(ts.info.lmnumber());
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);

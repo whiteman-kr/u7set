@@ -166,8 +166,8 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("IP", QString::fromStdString(ds.info.lmip()));
 	setDataItemNumber("Port", ds.info.lmport());
 	setDataItemText("Channel", QString::fromStdString(ds.info.lmsubsystemchannel()));
-	setDataItemNumber("SubsystemID", ds.info.lmsubsystemid());
-	setDataItemText("Subsystem", QString::fromStdString(ds.info.lmsubsystem()));
+	setDataItemNumber("SubsystemID", ds.info.lmsubsystemkey());
+	setDataItemText("Subsystem", QString::fromStdString(ds.info.lmsubsystemid()));
 
 	setDataItemNumber("LmNumber", ds.info.lmnumber());
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ds.info.lmmoduletype())).arg(QString::number(ds.info.lmmoduletype(), 16)));
@@ -383,7 +383,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 			connectionStrings << adsState.info.lmsubsystemchannel().c_str();
 
-			connectionStrings << adsState.info.lmsubsystem().c_str();
+			connectionStrings << adsState.info.lmsubsystemid().c_str();
 			connectionStrings << QString::number(adsState.info.lmnumber());
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);

@@ -176,9 +176,11 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	TEST_PTR_RETURN_FALSE(proto);
 
 	proto->set_id(ID());
+	proto->set_state(TO_INT(state()));
 	proto->set_datareceives(dataReceives());
 	proto->set_uptime(uptime());
 	proto->set_receiveddataid(receivedDataID());
+	proto->set_rupframeplanttime(rupFramePlantTime());
 	proto->set_rupframesqueuesize(rupFramesQueueSize());
 	proto->set_rupframesqueuecursize(rupFramesQueueCurSize());
 	proto->set_rupframesqueuecurmaxsize(rupFramesQueueCurMaxSize());
@@ -211,9 +213,11 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 void AppDataSource::setState(const Network::AppDataSourceState& proto)
 {
 	setID(proto.id());
+	DataSourceOnline::setState(static_cast<E::DataSourceState>(proto.state()));
 	setDataReceives(proto.datareceives());
 	setUptime(proto.uptime());
 	setReceivedDataID(proto.receiveddataid());
+	setRupFramePlantTime(proto.rupframeplanttime());
 	setRupFramesQueueSize(proto.rupframesqueuesize());
 	setRupFramesQueueCurSize(proto.rupframesqueuecursize());
 	setRupFramesQueueCurMaxSize(proto.rupframesqueuecurmaxsize());

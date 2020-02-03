@@ -154,7 +154,7 @@ const char* DataSource::PROP_LM_PRESET_NAME = "LmPresetName";
 const char* DataSource::PROP_LM_NUMBER = "LmNumber";
 const char* DataSource::PROP_LM_CHANNEL = "LmChannel";
 const char* DataSource::PROP_LM_SUBSYSTEM_KEY = "LmSubsystemKey";
-const char* DataSource::PROP_LM_SUBSYSTEM = "LmSubsystem";
+const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
 const char* DataSource::PROP_LM_MODULE_TYPE = "LmModuleType";
 const char* DataSource::PROP_LM_CAPTION = "LmCaption";
 const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
@@ -197,17 +197,17 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 
 	result &= DeviceHelper::getIntProperty(lm, PROP_DEVICE_LM_NUMBER, &m_lmNumber, log);
 	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_CHANNEL, &m_lmSubsystemChannel, log);
-	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_ID, &m_lmSubsystem, log);
+	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_ID, &m_lmSubsystemID, log);
 
-	if (subsystemKeyMap.contains(m_lmSubsystem) == false)
+	if (subsystemKeyMap.contains(m_lmSubsystemID) == false)
 	{
 		// Subsystem '%1' is not found in subsystem set (Logic Module '%2')
 		//
-		log->errCFG3001(m_lmSubsystem, lm->equipmentIdTemplate());
+		log->errCFG3001(m_lmSubsystemID, lm->equipmentIdTemplate());
 		return false;
 	}
 
-	m_lmSubsystemKey = subsystemKeyMap.value(m_lmSubsystem);
+	m_lmSubsystemKey = subsystemKeyMap.value(m_lmSubsystemID);
 	m_lmUniqueID = lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
 
 	LmEthernetAdapterProperties adapterProp;
@@ -303,7 +303,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(PROP_LM_PRESET_NAME, m_lmPresetName);
 
 	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType, true);
-	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
+	xml.writeStringAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
 	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_KEY, m_lmSubsystemKey);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
 	xml.writeStringAttribute(PROP_LM_CHANNEL, m_lmSubsystemChannel);
@@ -351,7 +351,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(PROP_LM_PRESET_NAME, &m_lmPresetName);
 
 	result &= xml.readIntAttribute(PROP_LM_MODULE_TYPE, &m_lmModuleType);
-	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
+	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM_ID,&m_lmSubsystemID);
 	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_KEY, &m_lmSubsystemKey);
 	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
 	result &= xml.readStringAttribute(PROP_LM_CHANNEL,&m_lmSubsystemChannel);
@@ -429,8 +429,8 @@ bool DataSource::getInfo(Network::DataSourceInfo* proto) const
 	proto->set_lmdatatype(TO_INT(m_lmDataType));
 	proto->set_lmip(m_lmAddressPort.addressStr().toStdString());
 	proto->set_lmport(m_lmAddressPort.port());
-	proto->set_lmsubsystemid(m_lmSubsystemKey);
-	proto->set_lmsubsystem(m_lmSubsystem.toStdString());
+	proto->set_lmsubsystemkey(m_lmSubsystemKey);
+	proto->set_lmsubsystemid(m_lmSubsystemID.toStdString());
 	proto->set_lmsubsystemchannel(m_lmSubsystemChannel.toStdString());
 	proto->set_lmnumber(m_lmNumber);
 	proto->set_lmmoduletype(m_lmModuleType);
@@ -452,8 +452,8 @@ bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 	m_lmCaption = QString::fromStdString(proto.lmcaption());
 	m_lmDataType = static_cast<DataType>(proto.lmdatatype());
 	m_lmAddressPort.setAddressPort(QString::fromStdString(proto.lmip()), proto.lmport());
-	m_lmSubsystemKey = proto.lmsubsystemid();
-	m_lmSubsystem = QString::fromStdString(proto.lmsubsystem());
+	m_lmSubsystemKey = proto.lmsubsystemkey();
+	m_lmSubsystemID = QString::fromStdString(proto.lmsubsystemid());
 	m_lmSubsystemChannel = QString::fromStdString(proto.lmsubsystemchannel());
 	m_lmNumber = proto.lmnumber();
 	m_lmModuleType = proto.lmmoduletype();
@@ -684,6 +684,48 @@ bool DataSourceOnline::reallocate(quint32 framesQuantity)
 	return true;
 }
 
+void DataSourceOnline::calcDataReceivingRate()
+{
+	if (m_prevCalcTime == -1)
+	{
+		m_prevCalcTime = QDateTime::currentMSecsSinceEpoch();
+		m_prevReceivedSize = m_receivedDataSize;
+		m_firstCalc = true;
+		return;
+	}
+
+	m_calcFramesCtr++;
+
+	if (m_calcFramesCtr < 100)
+	{
+		return;
+	}
+
+	m_calcFramesCtr = 0;
+
+	qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	qint64 dT = now - m_prevCalcTime;
+
+	if (m_firstCalc == false)
+	{
+		if (dT < DATA_RECEIVING_RATE_CALC_PERIOD)
+		{
+			return;
+		}
+	}
+
+	m_firstCalc = false;
+
+	m_dataReceivingRate = ((m_receivedDataSize - m_prevReceivedSize) / 1024.0) / (dT / 1000.0);		// KBytes per second
+
+	m_prevCalcTime = now;
+	m_prevReceivedSize = m_receivedDataSize;
+
+	return;
+}
+
+
 /*
 void DataSourceOnline::stop()
 {
@@ -759,12 +801,20 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					m_rupDataTimes = m_lastRupDataTimes;
 					m_rupDataTimes += APP_DATA_SOURCE_TIMEOUT;
 
+					m_state = E::DataSourceState::NoData;
+
 					m_dataRecevingTimeout = true;
 					m_dataReceives = false;
 					m_dataReadyToParsing = true;
+					m_firstRupFrame = true;
 
 					m_firstPacketSystemTime = 0;
 					m_lastPacketSystemTime = 0;
+
+					m_processedPacketCount = 0;
+					m_receivedDataSize = 0;
+					m_dataReceivingRate = 0;
+					m_prevCalcTime = -1;
 
 					updateUptime();
 				}
@@ -791,6 +841,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 		m_receivedFramesCount++;
 		m_receivedDataSize += sizeof(Rup::Frame);
 
+		calcDataReceivingRate();
+
 		if (m_dataProcessingEnabled == false)
 		{
 			break;
@@ -812,7 +864,10 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 			// rupFrame's data ID checking
 			//
-			if (rupFrameHeader.dataId != lmDataID())
+
+			m_receivedDataID = rupFrameHeader.dataId;
+
+			if (m_receivedDataID != lmDataID())
 			{
 				m_errorDataID++;
 
@@ -849,6 +904,9 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 			if (m_dataReadyToParsing == true)
 			{
+				m_rupFramePlantTime = m_rupDataTimes.plant.timeStamp;
+				m_processedPacketCount++;
+
 				// rupFrame's numerator tracking
 				//
 				quint16 numerator = rupFrameHeader.numerator;
