@@ -338,7 +338,18 @@ bool UalTester::runTuningThread()
 {
 	// init tuning socket thread - TuningSrv
 	//
-	m_pTuningSocket = new TuningSocket(m_softwareInfo, m_cfgSettings.tuningService_clientRequestIP, &m_tuningBase);
+	HostAddressPort tuningAddress;
+
+	if (m_cmdLineParam.packetSourceAddress().isEmpty() == true)
+	{
+		tuningAddress = m_cfgSettings.tuningService_clientRequestIP;
+	}
+	else
+	{
+		tuningAddress = m_cmdLineParam.packetSourceAddress();
+	}
+
+	m_pTuningSocket = new TuningSocket(m_softwareInfo, tuningAddress, &m_tuningBase);
 	if (m_pTuningSocket == nullptr)
 	{
 		return false;

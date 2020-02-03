@@ -148,6 +148,16 @@ namespace VFrame30
 
 		TuningValue tuningValue(value);
 
+		// Check range for analog signal
+		//
+		if (appSignal.toTuningType() != TuningValueType::Discrete)
+		{
+			if (value < appSignal.tuningLowBoundToVariant() || value > appSignal.tuningHighBoundToVariant())
+			{
+				return false;
+			}
+		}
+
 		ok = m_tcpClient->writeTuningSignal(appSignalId, tuningValue);
 
 		return ok;

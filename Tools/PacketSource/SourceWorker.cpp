@@ -16,7 +16,8 @@ SourceWorker::SourceWorker(QObject* pSource) :
 	m_pSource(pSource),
 	m_numerator(0),
 	m_sentFrames(0),
-	m_finishThread(false)
+	m_finishThread(false),
+	m_finished(false)
 {
 }
 
@@ -39,6 +40,19 @@ void SourceWorker::process()
 
 	QUdpSocket* pSocket = new QUdpSocket(this);
 	if (pSocket == nullptr)
+	{
+		emit finished();
+		return;
+	}
+
+	if (theOptions.build().appDataSrvIP().isEmpty() == true)
+	{
+		emit finished();
+		return;
+	}
+
+	QHostAddress appDataReceivingIP;
+	if (appDataReceivingIP.setAddress(theOptions.build().appDataSrvIP()) == false)
 	{
 		emit finished();
 		return;
@@ -94,9 +108,9 @@ void SourceWorker::process()
 			//
 			m_simFrame.rupFrame.calcCRC64();
 
-			// send udp
+			// send udp to AppDataReceivingIP of AppDataSrv
 			//
-			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
+			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), appDataReceivingIP, pSource->info().serverAddress.port());
 
 			if (sentBytes != sizeof(m_simFrame))
 			{
@@ -119,9 +133,12 @@ void SourceWorker::process()
 		m_numerator++;
 	}
 
+
 	pSocket->close();
 	delete pSocket;
+	pSocket = nullptr;
 
+	m_finished = true;
 	emit finished();
 }
 

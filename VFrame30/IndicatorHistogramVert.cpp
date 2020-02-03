@@ -24,7 +24,7 @@ namespace VFrame30
 
 	bool CustomSetPoint::save(Proto::VFrameSetPoint* message) const
 	{
-		if (message == false)
+		if (message == nullptr)
 		{
 			assert(message);
 			return false;

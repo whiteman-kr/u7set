@@ -228,7 +228,9 @@ class AppSignalParam
 	Q_PROPERTY(QString AppSignalID READ appSignalId)
 
 	/// \brief Custom Application Signal Identifier
-	Q_PROPERTY(QString CustomSignalID READ customSignalId)
+	Q_PROPERTY(QString CustomAppSignalID READ customSignalId)
+
+	Q_PROPERTY(QString CustomSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
 
 	/// \brief Signal Caption
 	Q_PROPERTY(QString Caption READ caption)
@@ -244,6 +246,18 @@ class AppSignalParam
 
 	/// \brief Signal channel
 	Q_PROPERTY(E::Channel Channel READ channel)
+
+	/// \brief Low Valid Range
+	Q_PROPERTY(double LowValidRange READ lowValidRange)
+
+	/// \brief High Valid Range
+	Q_PROPERTY(double HighValidRange READ highValidRange)
+
+	/// \brief Low Engineering Units
+	Q_PROPERTY(double LowEngineeringUnits READ lowEngineeringUnits)
+
+	/// \brief High Engineering Units
+	Q_PROPERTY(double HighEngineeringUnits READ highEngineeringUnits)
 
 	/// \brief Signal is tunable
 	Q_PROPERTY(bool EnableTuning READ enableTuning)

@@ -32,6 +32,11 @@ public:
 	Tcp::ConnectionState getConnectionState() const;
 	QString getStateToolTip();
 
+	int schemaCount() const;
+	QString schemaCaptionById(const QString& schemaId) const;
+	QString schemaCaptionByIndex(int schemaIndex) const;
+	QString schemaIdByIndex(int schemaIndex) const;
+
 	// signals
 	//
 signals:
@@ -77,6 +82,7 @@ private:
 	QByteArray m_globalScriptData;
 
 
+	mutable QMutex m_mutex;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 };
 

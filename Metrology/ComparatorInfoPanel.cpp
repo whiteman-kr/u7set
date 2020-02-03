@@ -154,7 +154,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 	stateStr += comparatorEx->cmpTypeStr();
 	stateStr += " ";
-	stateStr += comparatorEx->compareValueStr();
+	stateStr += comparatorEx->compareOnlineValueStr();
 	stateStr += " : ";
 	stateStr += comparatorEx->outputStateStr(theOptions.comparatorInfo().displayingStateTrue(), theOptions.comparatorInfo().displayingStateFalse());
 
@@ -302,6 +302,8 @@ void ComparatorInfoPanel::createInterface()
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
+
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &ComparatorInfoPanel::onListDoubleClicked);
 

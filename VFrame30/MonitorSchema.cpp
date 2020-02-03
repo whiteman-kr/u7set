@@ -8,7 +8,7 @@ namespace VFrame30
 
 	MonitorSchema::MonitorSchema(void)
 	{
-		qDebug() << "MonitorSchema::MonitorSchema(void)";
+		//qDebug() << "MonitorSchema::MonitorSchema(void)";
 
 		setUnit(SchemaUnit::Display);
 
@@ -30,7 +30,7 @@ namespace VFrame30
 	
 	MonitorSchema::~MonitorSchema(void)
 	{
-		qDebug() << "MonitorSchema::~MonitorSchema(void)";
+		//qDebug() << "MonitorSchema::~MonitorSchema(void)";
 	}
 
 	QStringList MonitorSchema::getSignalList() const

@@ -19,9 +19,11 @@ namespace PS
 	//
 	//
 
-	const int SUPPORT_VERSION		= 5;		// last version of Rup::VERSION
+	#define PS_SUPPORT_VERSION		5
 
-	const int SIM_FRAME_VERSION		= 1;		// last version of SimFrame
+	const int SUPPORT_VERSION		= PS_SUPPORT_VERSION;		// last known version of Rup::VERSION
+
+	const int SIM_FRAME_VERSION		= 1;						// last version of SimFrame
 
 	const int UDP_PORT				= 10000;
 
@@ -92,7 +94,7 @@ namespace PS
 		FrameBase&				frameBase() { return m_frameBase; }
 
 		//
-
+		//
 		bool					run();
 		bool					stop();
 
@@ -100,11 +102,12 @@ namespace PS
 		int						sentFrames();
 
 		//
-
-		void					initSignals(const SignalBase& signalBase);
+		//
+		void					loadSignals(const SignalBase& signalBase);
+		void					initSignalsState();
 
 		//
-
+		//
 		Source&					operator=(const Source& from);
 
 	signals:
@@ -133,12 +136,14 @@ private:
 	mutable QMutex			m_sourceMutex;
 	QVector<PS::Source>		m_sourceList;
 
+	QStringList				m_sourceIDForReload;
+
 public:
 
 	void					clear();
 	int						count() const;
 
-	int						readFromFile(const QString& path);
+	int						readFromFile();
 
 	int						append(const PS::Source &source);
 	void					remove(int index);
@@ -156,6 +161,11 @@ public:
 
 	void					runAllSoureces();
 	void					stopAllSoureces();
+
+	//
+	//
+	void					saveSourceState(PS::Source* pSource);
+	void					restoreSourcesState();
 
 signals:
 

@@ -321,6 +321,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0301.sql", "Upgrade to version 301, FSC Chassis preset has LM compatibility table"},
 	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
 	{":/DatabaseUpgrade/Upgrade0303.sql", "Upgrade to version 303, fixing misprint EngEneeringUnits -> EngIneeringUnits in presets"},
+	{":/DatabaseUpgrade/Upgrade0304.sql", "Upgrade to version 304, Validity signals linked to outputs in AOM_4PH, AFB ff_sr description fix (The Set signal has the priority)"},
+	{":/DatabaseUpgrade/Upgrade0305.sql", "Upgrade to version 305, fixing get_changeset_details"},	
 };
 
 int DbWorker::counter = 0;
@@ -4212,8 +4214,8 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* ou
 
 	// Request for history
 	//
-	QString request = QString("SELECT * FROM get_file_history(%1, %2)")
-			.arg(currentUser().userId())
+	QString request = QString("SELECT * FROM api.get_file_history('%1', %2)")
+			.arg(sessionKey())
 			.arg(file.fileId());
 
 	QSqlQuery q(db);
@@ -4268,8 +4270,8 @@ void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<D
 
 	// Request for history
 	//
-	QString request = QString("SELECT * FROM get_file_history_recursive(%1, %2)")
-			.arg(currentUser().userId())
+	QString request = QString("SELECT * FROM api.get_file_history_recursive('%1', %2)")
+			.arg(sessionKey())
 			.arg(parentFile.fileId());
 
 	QSqlQuery q(db);
@@ -4321,14 +4323,13 @@ void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 
 	// Request for data
 	//
-	QString request = QString("SELECT * FROM get_changeset_details(%1, %2)")
-			.arg(currentUser().userId())
-			.arg(changeset);
-
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
-	bool result = q.exec(request);
+	q.prepare("SELECT * FROM api.get_changeset_details(:sessionkey, :changeset);");
+	q.bindValue(":sessionkey", sessionKey());
+	q.bindValue(":changeset", changeset);
+
+	bool result = q.exec();
 	if (result == false)
 	{
 		emitError(db, tr("Error: ") +  q.lastError().text());

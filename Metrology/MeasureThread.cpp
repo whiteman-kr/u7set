@@ -217,7 +217,7 @@ bool MeasureThread::inputsOfmoduleIsSame()
 	E::ElectricUnit		electricUnitID = E::ElectricUnit::NoUnit;
 	E::SensorType		electricSensorType = E::SensorType::NoSensor;
 
-	Metrology::SignalParam signalParam;
+	Metrology::SignalParam param;
 
 	int channelCount = m_activeIoParamList.count();
 	for(int ch = 0; ch < channelCount; ch ++)
@@ -229,9 +229,9 @@ bool MeasureThread::inputsOfmoduleIsSame()
 
 		switch (theOptions.toolBar().signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:			signalParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_UNUSED:			param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
 			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signalParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
 			default:									assert(0);
 		}
 
@@ -239,17 +239,17 @@ bool MeasureThread::inputsOfmoduleIsSame()
 		{
 			eltalonIsFound = true;
 
-			electricLowLimit = signalParam.electricLowLimit();
-			electricHighLimit = signalParam.electricHighLimit();
-			electricUnitID = signalParam.electricUnitID();
-			electricSensorType = signalParam.electricSensorType();
+			electricLowLimit = param.electricLowLimit();
+			electricHighLimit = param.electricHighLimit();
+			electricUnitID = param.electricUnitID();
+			electricSensorType = param.electricSensorType();
 		}
 		else
 		{
-			if (compareFloat(electricLowLimit, signalParam.electricLowLimit()) == false ||
-				compareFloat(electricHighLimit, signalParam.electricHighLimit()) == false ||
-				electricUnitID != signalParam.electricUnitID() ||
-				electricSensorType != signalParam.electricSensorType())
+			if (compareDouble(electricLowLimit, param.electricLowLimit()) == false ||
+				compareDouble(electricHighLimit, param.electricHighLimit()) == false ||
+				electricUnitID != param.electricUnitID() ||
+				electricSensorType != param.electricSensorType())
 			{
 				return false;
 			}
@@ -604,7 +604,7 @@ void MeasureThread::run()
 			// suspend MeasureThread
 			// select next active analog signal
 			//
-			emit setNextMeasureSignal(signalIsSelected); // call signal how - Qt::BlockingQueuedConnection
+			emit setNextMeasureSignal(signalIsSelected); // call signal how - Qt::BlockingQueuedConnection and return signalIsSelected, if it == true - enable measure next signal, if it == false - dont measure next signal
 			//
 			// resume MeasureThread
 		}
@@ -843,8 +843,8 @@ void MeasureThread::measureComprators()
 
 					//
 					//
-					double compareVal = comparatorEx->compareValue();			// get compare value
-					double hysteresisVal = comparatorEx->hysteresisValue();		// get hysteresis value
+					double compareVal = comparatorEx->compareOnlineValue();			// get compare value
+					double hysteresisVal = comparatorEx->hysteresisOnlineValue();	// get hysteresis value
 
 					// calc start value for comaprator
 					//
@@ -856,19 +856,35 @@ void MeasureThread::measureComprators()
 
 					switch (pr)
 					{
-						case MEASURE_THREAD_CMP_PREAPRE_1:	deltaVal = hysteresisVal * 2;		break;	// 1 - go below return zone to switch comparator to logical 0 state
-						case MEASURE_THREAD_CMP_PREAPRE_2:	deltaVal = startValueForComapre;	break;	// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
-						default:							continue;
+						case MEASURE_THREAD_CMP_PREAPRE_1:		// 1 - go below return zone to switch comparator to logical 0 state
+
+							if (comparatorEx->deviation() == Metrology::ComparatorEx::DeviationType::NoUsed)
+							{
+								deltaVal = hysteresisVal * 2;	// for comparators Less and Greate
+							}
+							else
+							{
+								deltaVal = hysteresisVal / 2;	// for comparators Equal and NotEqual
+							}
+
+							break;
+
+						case MEASURE_THREAD_CMP_PREAPRE_2:		// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
+
+							deltaVal = startValueForComapre;
+
+							break;
+
+						default:
+							continue;
 					}
 
 					double engineeringVal = 0;
 
 					switch (comparatorEx->cmpType())
 					{
-						case E::CmpType::Equal:		engineeringVal = compareVal - deltaVal;		break;
-						case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;		break;
-						case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;		break;
-						case E::CmpType::NotEqual:	engineeringVal = compareVal;				break;
+						case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
+						case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
 						default:					continue;
 					}
 
@@ -1084,10 +1100,8 @@ void MeasureThread::measureComprators()
 				{
 					switch (comparatorEx->cmpType())
 					{
-						case E::CmpType::Equal:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
 						case E::CmpType::Greate:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
 						case E::CmpType::Less:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown() :	pCalibratorManager->stepUp(); 	break;
-						case E::CmpType::NotEqual:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown()	:	pCalibratorManager->stepUp();	break;
 						default:					continue;
 					}
 				}

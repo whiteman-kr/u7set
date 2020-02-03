@@ -43,10 +43,10 @@ check #ZERO_DERIV1 == 1
 check #NAN_DERIV1 == 0
 
 set #TUN_IN_FP1 = 997.8 , #TUN_RESET1 = 0, #TUN_PAUSE1 = 0, #TUN_KD1 = 2  , #TUN_TD1 = 10
-check #OUT_DERIV1 == 0
-check #PARAM_ERR_DERIV1 == 0
-check #OWERFLOW_DERIV1 == 0
-check #UNDERFLOW_DERIV1 ==  0
+check #OUT_DERIV1 == 0,0
+check #PARAM_ERR_DERIV1 == 0,0
+check #OWERFLOW_DERIV1 == 0,0
+check #UNDERFLOW_DERIV1 ==0,0
 check #ZERO_DERIV1 == 0
 check #NAN_DERIV1 == 0
 

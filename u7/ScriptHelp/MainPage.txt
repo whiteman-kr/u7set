@@ -20,6 +20,7 @@ usually process pre-draw event to define item apperance depending on some signal
 
 Properties of static schema items like 
 \ref VFrame30::SchemaItemLine "SchemaItemLine",
+\ref VFrame30::SchemaItemPath "SchemaItemPath",
 \ref VFrame30::SchemaItemRect "SchemaItemRect",
 \ref VFrame30::SchemaItemImage "SchemaItemImage"
 can be changed by pre-draw event too.
@@ -42,6 +43,8 @@ A few global classes can be accessed by scripts:
 
 - \ref VFrame30::ScriptSchemaView "ScriptSchemaView" class (<b>view</b> object) is used to access schema items and variables, 
 switch between schemas, display message boxes;
+
+- \ref VFrame30::ScriptSchema "ScriptSchema" class (<b>view.Schema</b> object) is used to access schema;
 
 - \ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class (<b>signals</b> object) is used to access 
 signal parameters (AppSignalParam) and values (AppSignalState) received from <b>ApplicationDataService</b>;
@@ -73,5 +76,10 @@ Script code error messages are displayed directly on appropriate schema item whe
  */
 
 /**
+ *  @defgroup widgets Widgets
+ */
+
+/**
  *  @defgroup groupParamsStates Signal Parameters and States
  */
+

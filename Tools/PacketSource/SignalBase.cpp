@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QProgressDialog>
 
+#include "Options.h"
+
 #include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"
 #include "../../lib/DataProtocols.h"
@@ -170,7 +172,7 @@ QString PS::Signal::stateStr() const
 
 		case E::SignalType::Discrete:
 
-			str = state() == 0.0 ? "No" : "Yes";
+			str = state() == 0.0 ? "No (0)" : "Yes (1)";
 
 			break;
 	}
@@ -265,17 +267,19 @@ double PS::Signal::state() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PS::Signal::setState(double state)
+bool PS::Signal::setState(double state)
 {
 	if (regBufAddr().offset() == BAD_ADDRESS || regBufAddr().bit() == BAD_ADDRESS)
 	{
-		return;
+		return false;
 	}
 
 	if (m_pValueData == nullptr)
 	{
-		return;
+		return false;
 	}
+
+	bool signalChanged = false;
 
 	switch (signalType())
 	{
@@ -293,6 +297,8 @@ void PS::Signal::setState(double state)
 
 						quint32 iState = reverseUint32(static_cast<quint32>(state));
 						*pDataPtr = iState;
+
+						signalChanged = true;
 					}
 					break;
 
@@ -306,6 +312,8 @@ void PS::Signal::setState(double state)
 
 						float fState = reverseFloat(static_cast<float>(state));
 						memcpy(pDataPtr, &fState, sizeof(float));
+
+						signalChanged = true;
 					}
 
 					break;
@@ -341,9 +349,13 @@ void PS::Signal::setState(double state)
 					case 0: *pDataPtr &= ~(0x1 << bitNo);		break;
 					case 1: *pDataPtr |= (0x1 << bitNo);		break;
 				}
+
+				signalChanged = true;
 			}
 			break;
 	}
+
+	return signalChanged;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -409,33 +421,37 @@ int SignalBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::readFromFile(const QString& path)
+int SignalBase::readFromFile()
 {
 	clear();
 
 	QString msgTitle = tr("Loading signals");
 
-	if (path.isEmpty() == true)
+	if (theOptions.build().buildDirPath().isEmpty() == true)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to signals directory!"));
+		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to build directory!"));
 		return 0;
 	}
 
 	// read Signals
 	//
+	QString signalsfile = theOptions.build().buildFile(BUILD_FILE_TYPE_SIGNALS).path();
+	if (signalsfile.isEmpty() == true)
+	{
+		QMessageBox::information(nullptr, msgTitle, tr("Signals file (%1) path is empty!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		return 0;
+	}
 
-	QString fileSignals = path + "/" + Builder::FILE_APP_SIGNALS_ASGS;
-
-	QFile fileSignalsAsgs(fileSignals);
+	QFile fileSignalsAsgs(signalsfile);
 	if (fileSignalsAsgs.exists() == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not found!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not found!").arg(signalsfile));
 		return 0;
 	}
 
 	if (fileSignalsAsgs.open(QIODevice::ReadOnly) == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not opened!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not opened!").arg(signalsfile));
 		return 0;
 	}
 
@@ -510,6 +526,19 @@ int SignalBase::append(const PS::Signal& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+PS::Signal* SignalBase::signalPtr(const QString& appSignalID) const
+{
+	if (appSignalID.isEmpty() == true)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return signalPtr(calcHash(appSignalID));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 {
 	if (hash == UNDEFINED_HASH)
@@ -538,16 +567,22 @@ PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalBase& SignalBase::operator=(const SignalBase& from)
+PS::Signal* SignalBase::signalPtr(int index) const
 {
+	PS::Signal* pSignal = nullptr;
+
 	m_signalMutex.lock();
 
-		m_signalList = from.m_signalList;
+		if (index >= 0 && index < m_signalList.count())
+		{
+			pSignal = (PS::Signal*) &m_signalList[index];
+		}
 
 	m_signalMutex.unlock();
 
-	return *this;
+	return pSignal;
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -568,23 +603,6 @@ PS::Signal SignalBase::signal(const Hash& hash) const
 	return signal;
 }
 
-// -------------------------------------------------------------------------------------------------------------------
-
-PS::Signal* SignalBase::signalPtr(int index) const
-{
-	PS::Signal* pSignal = nullptr;
-
-	m_signalMutex.lock();
-
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = (PS::Signal*) &m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
-}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -604,6 +622,8 @@ PS::Signal SignalBase::signal(int index) const
 	return signal;
 }
 
+
+
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::setSignal(int index, const PS::Signal &signal)
@@ -620,15 +640,51 @@ void SignalBase::setSignal(int index, const PS::Signal &signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PS::Signal* SignalBase::signalPtr(const QString& appSignalID) const
+void SignalBase::saveSignalState(PS::Signal* pSignal)
 {
-	if (appSignalID.isEmpty() == true)
+	if (pSignal == nullptr)
 	{
-		assert(false);
-		return nullptr;
+		return;
 	}
 
-	return signalPtr(calcHash(appSignalID));
+	SignalState ss;
+
+	ss.appSignalID = pSignal->appSignalID();
+	ss.state = pSignal->state();
+
+	m_signalStateList.append(ss);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::restoreSignalsState()
+{
+	int count = m_signalStateList.count();
+	for(int i = 0; i < count; i++)
+	{
+		PS::Signal* pSignal = signalPtr(m_signalStateList[i].appSignalID);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		pSignal->setState(m_signalStateList[i].state);
+	}
+
+	m_signalStateList.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalBase& SignalBase::operator=(const SignalBase& from)
+{
+	m_signalMutex.lock();
+
+		m_signalList = from.m_signalList;
+
+	m_signalMutex.unlock();
+
+	return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -730,6 +786,17 @@ QVariant SignalTable::data(const QModelIndex &index, int role) const
 		{
 			return QColor(0xD0, 0xD0, 0xD0);
 		}
+
+		if(pSignal->isDiscrete() == true)
+		{
+			return QColor(0x00, 0x00, 0xFF);
+		}
+		return QVariant();
+	}
+
+	if (role == Qt::BackgroundRole)
+	{
+		return QVariant();
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -1008,9 +1075,14 @@ void SignalStateDialog::onOk()
 
 		str.sprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
 		str += tr("\nRange of signal: %1").arg(m_pSignal->engineeringRangeStr());
+		str += tr("\nDo you want to change the signal state?");
 
-		QMessageBox::critical(this, windowTitle(), str);
-		return;
+		QMessageBox::StandardButton reply = QMessageBox::question(this, windowTitle(), str, QMessageBox::Yes|QMessageBox::No);
+		if (reply == QMessageBox::No)
+		{
+			reject();
+			return;
+		}
 	}
 
 	m_state = state;

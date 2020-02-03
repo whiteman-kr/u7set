@@ -1267,7 +1267,7 @@ void Signal::initCalculatedProperties()
 	m_hash = calcHash(m_appSignalID);
 }
 
-bool Signal::addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID)
+bool Signal::addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID)
 {
 	if (m_stateFlagsSignals.contains(flagType) == true)
 	{

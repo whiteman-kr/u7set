@@ -427,8 +427,7 @@ check #OUT_CMPC_FP_NE001 == 0
 set #TUN_IN_FP1 = 5.01
 check #OUT_CMPC_FP_NE001 == 1
 set #TUN_IN_FP1 = 12.99
-check #OUT_CMPC_FP_NE001 == 1
-set #TUN_IN_FP1 = -1	
+check #OUT_CMPC_FP_NE001 == 1	
 endtest
 
 test AFB_CMPС_FP_NE_1, AFB tests for CMPС_FP_NE element

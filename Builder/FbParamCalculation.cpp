@@ -450,8 +450,14 @@ namespace Builder
 				// Value of parameter '%1.%2' must be greater or equal to 0.
 				//
 				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
-
 				return false;
+			}
+
+			if ((iConf == BCOMP_32FP_EQU || iConf == BCOMP_32FP_NOT_EQU) && hysteresis == 0)
+			{
+				// Using value 0.0 for parameter %1.%2 is not recommend.
+				//
+				m_log->wrnALC5177(caption(), hysteresisParam.caption(), guid(), schemaID());
 			}
 
 			switch(iConf)
@@ -1378,6 +1384,13 @@ namespace Builder
 
 					return false;
 				}
+
+				if ((iConf == CMP_32FP_EQU || iConf == CMP_32FP_NOT_EQU) && hysteresis == 0)
+				{
+					// Using value 0.0 for parameter %1.%2 is not recommend.
+					//
+					m_log->wrnALC5177(caption(), hysteresisParam.caption(), guid(), schemaID());
+				}
 			}
 
 			return true;
@@ -1464,20 +1477,13 @@ namespace Builder
 				CHECK_SIGNED_INT32(i_lim_max);
 				CHECK_SIGNED_INT32(i_lim_min);
 
-				if (i_lim_min.signedIntValue() > i_lim_max.signedIntValue())
+				if (i_lim_min.signedIntValue() >= i_lim_max.signedIntValue())
 				{
 					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 					//
 					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
-				}
-
-				if (i_lim_min.signedIntValue() == i_lim_max.signedIntValue())
-				{
-					// Values of parameters %1.%2 and %1.%3 are equal.
-					//
-					m_log->wrnALC5139(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 				}
 			}
 
@@ -1494,20 +1500,13 @@ namespace Builder
 				CHECK_FLOAT32(i_lim_max);
 				CHECK_FLOAT32(i_lim_min);
 
-				if (i_lim_min.floatValue() > i_lim_max.floatValue())
+				if (i_lim_min.floatValue() >= i_lim_max.floatValue())
 				{
 					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 					//
 					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
-				}
-
-				if (static_cast<float>(i_lim_min.floatValue()) == static_cast<float>(i_lim_max.floatValue()))
-				{
-					// Values of parameters %1.%2 and %1.%3 are equal.
-					//
-					m_log->wrnALC5139(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 				}
 			}
 

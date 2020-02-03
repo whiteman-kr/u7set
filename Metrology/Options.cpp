@@ -1196,6 +1196,7 @@ void ModuleOption::load()
 
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
+	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
 	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
@@ -1209,6 +1210,7 @@ void ModuleOption::save()
 
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
+	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
 	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
 	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
@@ -1220,6 +1222,7 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
+	m_showNoValid = from.m_showNoValid;
 	m_suffixSN = from.m_suffixSN;
 	m_maxInputCount = from.m_maxInputCount;
 	m_maxComparatorCount = from.m_maxComparatorCount;
@@ -1339,12 +1342,7 @@ BackupOption& BackupOption::operator=(const BackupOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool compareFloat(float lFloat, float rFloat)
-{
-	return std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
-}
-
-bool compareFloat(double lDouble, double rDouble)
+bool compareDouble(double lDouble, double rDouble)
 {
 	return std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
 }

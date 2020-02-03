@@ -673,8 +673,8 @@ QString IoSignalParam::engineeringRangeStr() const
 
 					if (outParam.isValid() == true)
 					{
-						if (compareFloat(inParam.tuningLowBound().toDouble(), outParam.lowEngineeringUnits()) == false ||
-								compareFloat(inParam.tuningHighBound().toDouble(), outParam.highEngineeringUnits()) == false)
+						if (compareDouble(inParam.tuningLowBound().toDouble(), outParam.lowEngineeringUnits()) == false ||
+								compareDouble(inParam.tuningHighBound().toDouble(), outParam.highEngineeringUnits()) == false)
 						{
 							result += outParam.engineeringRangeStr();
 						}
@@ -1109,7 +1109,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 
 					for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 					{
-						Metrology::Signal* pSignalFromConnection = signalConnection.metrologySignal(type);
+						Metrology::Signal* pSignalFromConnection = signalConnection.signal(type);
 						if (pSignalFromConnection == nullptr || pSignalFromConnection->param().isValid() == false)
 						{
 							result = false;
@@ -1239,12 +1239,13 @@ void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
 
-	m_signalConnectionBase.empty();		// set all signal connection value nullptr
-	m_tuningBase.Signals().clear();		// remove all tuning signals
-	m_statisticBase.clear();
+		m_rackBase.clear();
+		m_signalConnectionBase.clearSignals();		// set all signal of connection in nullptr, but don't remove these signals
+		m_tuningBase.clear();
+		m_statisticBase.clear();
 
-	m_signalHashMap.clear();
-	m_signalList.clear();
+		m_signalHashMap.clear();
+		m_signalList.clear();
 
 	m_signalMutex.unlock();
 }
@@ -1887,7 +1888,7 @@ void SignalBase::initSignals()
 
 	updateRackParam();
 
-	m_signalConnectionBase.init();
+	m_signalConnectionBase.initSignals();
 
 	m_tuningBase.Signals().createSignalList();
 
@@ -2430,10 +2431,79 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		QVector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
 		for(std::shared_ptr<Comparator> comparator : comparatorList)
 		{
-			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
-			initComparatorSignals(comparatorEx.get());
+			std::shared_ptr<Metrology::ComparatorEx> comparatorEx;
 
-			metrologyComparatorList.append(comparatorEx);
+			switch (comparator->cmpType())
+			{
+				case E::CmpType::Equal:
+					{
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
+
+						metrologyComparatorList.append(comparatorEx);
+
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
+
+						metrologyComparatorList.append(comparatorEx);
+					}
+
+					break;
+
+				case E::CmpType::NotEqual:
+					{
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
+
+						metrologyComparatorList.append(comparatorEx);
+
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
+
+						metrologyComparatorList.append(comparatorEx);
+					}
+
+					break;
+
+				default:
+					{
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+						metrologyComparatorList.append(comparatorEx);
+					}
+
+					break;
+			}
 
 			if (metrologyComparatorList.count() >= theOptions.module().maxComparatorCount())
 			{
@@ -2443,6 +2513,8 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
+
+	//statistic().createComparatorList();
 
 	return true;
 }
@@ -2458,22 +2530,22 @@ bool SignalBase::initComparatorSignals(Metrology::ComparatorEx* pComparatorEx)
 
 	if (pComparatorEx->input().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetInputSignal(signalPtr(pComparatorEx->input().appSignalID()));
+		pComparatorEx->setInputSignal(signalPtr(pComparatorEx->input().appSignalID()));
 	}
 
 	if (pComparatorEx->compare().isConst() == false && pComparatorEx->compare().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetCompareSignal(signalPtr(pComparatorEx->compare().appSignalID()));
+		pComparatorEx->setCompareSignal(signalPtr(pComparatorEx->compare().appSignalID()));
 	}
 
 	if (pComparatorEx->hysteresis().isConst() == false && pComparatorEx->hysteresis().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetHysteresisSignal(signalPtr(pComparatorEx->hysteresis().appSignalID()));
+		pComparatorEx->setHysteresisSignal(signalPtr(pComparatorEx->hysteresis().appSignalID()));
 	}
 
 	if (pComparatorEx->output().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetOutputSignal(signalPtr(pComparatorEx->output().appSignalID()));
+		pComparatorEx->setOutputSignal(signalPtr(pComparatorEx->output().appSignalID()));
 	}
 
 	return pComparatorEx->signalsIsValid();

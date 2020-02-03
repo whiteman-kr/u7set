@@ -638,6 +638,7 @@ MeasureView::MeasureView(int measureType, QWidget *parent) :
 	}
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setWordWrap(false);
 
 	createContextMenu();
 

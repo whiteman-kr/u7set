@@ -1737,15 +1737,27 @@ void FileTests::get_workcopyTest()
 
 void FileTests::get_file_historyTest()
 {
+	// LogIn
+	//
 	QSqlQuery query;
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
+						.arg(m_projectAdministratorName)
+						.arg(m_projectAdministratorPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QString session_key = query.value(0).toString();
+
+	// --
+	//
 	QSqlQuery fileInstanceQuery;
 	QSqlQuery changeSetQuery;
 	QSqlQuery usersQuery;
 
 	// Create new file, and create history for it
 	//
-
-	bool ok = query.exec("SELECT * FROM add_file(1, 'getFileHistoryTest', 1, 'TEST', '{}');");
+	ok = query.exec("SELECT * FROM add_file(1, 'getFileHistoryTest', 1, 'TEST', '{}');");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -1778,44 +1790,11 @@ void FileTests::get_file_historyTest()
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	// Check history of the file with fileId
-
-	ok = query.exec(QString("SELECT * FROM get_file_history(1, %1)").arg(fileId));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-
-	ok = fileInstanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1 ORDER BY changeSetId desc").arg(fileId));
-
-	QVERIFY2(ok == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
-
-	while (query.next())
-	{
-		QVERIFY2(fileInstanceQuery.next() == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
-
-		QVERIFY2(fileInstanceQuery.value("changeSetId").toInt() == query.value("changesetId").toInt(), qPrintable("Error: changesetId is not match!"));
-		QVERIFY2(fileInstanceQuery.value("action").toInt() == query.value("action").toInt(), qPrintable("Error: action is not match"));
-
-		int changeSetId = query.value("changesetId").toInt();
-
-		ok = changeSetQuery.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(changeSetId));
-
-		QVERIFY2(ok == true, qPrintable(changeSetQuery.lastError().databaseText()));
-		QVERIFY2(changeSetQuery.first() == true, qPrintable(changeSetQuery.lastError().databaseText()));
-
-		QVERIFY2(changeSetQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable("Error: userId not match!"));
-		QVERIFY2(changeSetQuery.value("comment").toString() == query.value("comment").toString(), qPrintable("Error: comment is not match!"));
-
-		ok = usersQuery.exec(QString("SELECT userName FROM users WHERE userId = %1").arg(query.value("userId").toInt()));
-
-		QVERIFY2(ok == true, qPrintable(usersQuery.lastError().databaseText()));
-		QVERIFY2(usersQuery.first() == true, qPrintable(usersQuery.lastError().databaseText()));
-
-		QVERIFY2(usersQuery.value(0).toString() == query.value("userName").toString(), qPrintable("Error: wrong username returned"));
-	}
-
-	// Check file history with another user
 	//
+	ok = query.exec(QString("SELECT * FROM api.get_file_history('%1', %2)")
+						.arg(session_key)
+						.arg(fileId));
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2)").arg(m_user1.userId).arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = fileInstanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1 ORDER BY changeSetId desc").arg(fileId));
@@ -1825,14 +1804,17 @@ void FileTests::get_file_historyTest()
 	while (query.next())
 	{
 		QVERIFY2(fileInstanceQuery.next() == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
+
 		QVERIFY2(fileInstanceQuery.value("changeSetId").toInt() == query.value("changesetId").toInt(), qPrintable("Error: changesetId is not match!"));
 		QVERIFY2(fileInstanceQuery.value("action").toInt() == query.value("action").toInt(), qPrintable("Error: action is not match"));
+
 		int changeSetId = query.value("changesetId").toInt();
 
 		ok = changeSetQuery.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(changeSetId));
 
 		QVERIFY2(ok == true, qPrintable(changeSetQuery.lastError().databaseText()));
 		QVERIFY2(changeSetQuery.first() == true, qPrintable(changeSetQuery.lastError().databaseText()));
+
 		QVERIFY2(changeSetQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable("Error: userId not match!"));
 		QVERIFY2(changeSetQuery.value("comment").toString() == query.value("comment").toString(), qPrintable("Error: comment is not match!"));
 
@@ -1846,24 +1828,81 @@ void FileTests::get_file_historyTest()
 
 	// Check if function returns nothing
 	//
-
-	ok = query.exec(QString("SELECT * FROM get_file_history(1, %1)").arg(FileTests::maxValueId));
+	ok = query.exec(QString("SELECT * FROM api.get_file_history('%1', %2)")
+						.arg(session_key)
+						.arg(FileTests::maxValueId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Invalid fileId error expected"));
 
 	// Just added file must have no history
 	//
-
 	ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileHistoryTestFailFile', 1, 'TEST', '{}')").arg(m_user1.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(1, %1)").arg(query.value("id").toInt()));
+	ok = query.exec(QString("SELECT * FROM api.get_file_history('%1', %2)")
+						.arg(session_key)
+						.arg(query.value("id").toInt()));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Error: new file must not has history"));
+
+	// Administartor Log out
+	//
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Check file history with another user
+	//
+
+	// Log in as User1
+	//
+	ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
+						.arg(m_user1.username)
+						.arg(m_user1.password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	session_key = query.value(0).toString();
+
+	ok = query.exec(QString("SELECT * FROM api.get_file_history('%1', %2)").arg(session_key).arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = fileInstanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1 ORDER BY changeSetId desc").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
+
+	while (query.next())
+	{
+		QVERIFY2(fileInstanceQuery.next() == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
+		QVERIFY2(fileInstanceQuery.value("changeSetId").toInt() == query.value("changesetId").toInt(), qPrintable("Error: changesetId is not match!"));
+		QVERIFY2(fileInstanceQuery.value("action").toInt() == query.value("action").toInt(), qPrintable("Error: action is not match"));
+		int changeSetId = query.value("changesetId").toInt();
+
+		ok = changeSetQuery.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(changeSetId));
+
+		QVERIFY2(ok == true, qPrintable(changeSetQuery.lastError().databaseText()));
+		QVERIFY2(changeSetQuery.first() == true, qPrintable(changeSetQuery.lastError().databaseText()));
+		QVERIFY2(changeSetQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable("Error: userId not match!"));
+		QVERIFY2(changeSetQuery.value("comment").toString() == query.value("comment").toString(), qPrintable("Error: comment is not match!"));
+
+		ok = usersQuery.exec(QString("SELECT userName FROM users WHERE userId = %1").arg(query.value("userId").toInt()));
+
+		QVERIFY2(ok == true, qPrintable(usersQuery.lastError().databaseText()));
+		QVERIFY2(usersQuery.first() == true, qPrintable(usersQuery.lastError().databaseText()));
+
+		QVERIFY2(usersQuery.value(0).toString() == query.value("userName").toString(), qPrintable("Error: wrong username returned"));
+	}
+
+	// Administartor Log out
+	//
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	return;
 }
 
 void FileTests::get_file_stateTest()

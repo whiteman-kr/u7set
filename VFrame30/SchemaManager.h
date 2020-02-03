@@ -23,6 +23,13 @@ namespace VFrame30
 		//
 		virtual std::shared_ptr<VFrame30::Schema> schema(QString schemaId);
 
+		virtual int schemaCount() const;
+		virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex);
+
+		virtual QString schemaCaptionById(const QString& schemaId) const;
+		virtual QString schemaCaptionByIndex(int schemaIndex) const;
+		virtual QString schemaIdByIndex(int schemaIndex) const;
+
 	protected:
 		// Load schema, must be overriden to perform loading schema appropriate to client.
 		// Default implementation: assert(false);

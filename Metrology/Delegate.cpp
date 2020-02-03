@@ -197,7 +197,7 @@ void StatisticsStateDelegate::paint(QPainter *painter, const QStyleOptionViewIte
 	}
 
 	QRect textRect = option.rect;
-	textRect.setRect(option.rect.left() + 3, option.rect.top() + 3, option.rect.right(), option.rect.bottom());
+	textRect.setRect(option.rect.left() + 3, option.rect.top() + 3, option.rect.width() - 3, option.rect.height() - 3);
 	painter->drawText(textRect, Qt::AlignLeft, pSignal->param().appSignalID());
 }
 

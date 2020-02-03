@@ -266,7 +266,6 @@ namespace Metrology
 
 		// comparators
 		//
-
 		std::shared_ptr<ComparatorEx> comparator(int index) const;
 		void					setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
@@ -318,7 +317,6 @@ namespace Metrology
 	public:
 
 		SignalStatistic() {}
-		explicit SignalStatistic(const Hash& signalHash);
 		virtual ~SignalStatistic() {}
 
 		enum State
@@ -329,15 +327,10 @@ namespace Metrology
 
 	private:
 
-		Hash m_signalHash = UNDEFINED_HASH;
-
 		int m_measureCount = 0;
 		State m_state = State::Success;
 
 	public:
-
-		Hash signalHash() const { return m_signalHash; }
-		void setSignalHash(const Hash& hash) { m_signalHash = hash; }
 
 		int measureCount() const { return m_measureCount; }
 		void setMeasureCount(int count) { m_measureCount = count; }
@@ -384,6 +377,9 @@ namespace Metrology
 
 	// ==============================================================================================
 
+
+
+	// ----------------------------------------------------------------------------------------------
 	class ComparatorEx : public ::Comparator
 	{
 	public:
@@ -392,39 +388,59 @@ namespace Metrology
 		explicit ComparatorEx(Comparator* pComparator);
 		virtual ~ComparatorEx() {}
 
+		enum DeviationType
+		{
+			NoUsed,
+			Down,
+			Up,
+		};
+
 	private:
+
+		int m_index = -1;
 
 		Metrology::Signal* m_inputSignal = nullptr;
 		Metrology::Signal* m_compareSignal = nullptr;
 		Metrology::Signal* m_hysteresisSignal = nullptr;
 		Metrology::Signal* m_outputSignal = nullptr;
 
+		DeviationType m_deviationType = DeviationType::NoUsed;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
+
 	public:
 
 		void clear();
 		bool signalsIsValid() const;
 
+		int index() const { return m_index; }
+		void setIndex(int index) { m_index = index; }
+
 		Metrology::Signal* inputSignal() const { return m_inputSignal; }
-		void SetInputSignal(Metrology::Signal* pSignal) { m_inputSignal = pSignal; }
+		void setInputSignal(Metrology::Signal* pSignal) { m_inputSignal = pSignal; }
 
 		Metrology::Signal* compareSignal() const { return m_compareSignal; }
-		void SetCompareSignal(Metrology::Signal* pSignal) { m_compareSignal = pSignal; }
+		void setCompareSignal(Metrology::Signal* pSignal) { m_compareSignal = pSignal; }
 
 		Metrology::Signal* hysteresisSignal() const { return m_hysteresisSignal; }
-		void SetHysteresisSignal(Metrology::Signal* pSignal) { m_hysteresisSignal = pSignal; }
+		void setHysteresisSignal(Metrology::Signal* pSignal) { m_hysteresisSignal = pSignal; }
 
 		Metrology::Signal* outputSignal() const { return m_outputSignal; }
-		void SetOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
+		void setOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
+
+		DeviationType deviation() const { return m_deviationType; }
+		void setDeviation(DeviationType type) { m_deviationType = type; }
 
 		QString cmpTypeStr() const;
 
 		int valuePrecision() const;
 
-		double compareValue() const;
-		QString compareValueStr() const;
+		double compareOnlineValue() const;				// current online (run time) value
+		QString compareOnlineValueStr() const;			// str current oline (run time) value
+		double compareConstValue() const;				// default offine value
+		QString compareDefaultValueStr() const;			// str default offine value
 
-		double hysteresisValue() const;
-		QString hysteresisValueStr() const;
+		double hysteresisOnlineValue() const;			// current oline (run time) value
+		QString hysteresisOnlineValueStr() const;		// str current oline (run time) value
+		QString hysteresisDefaultValueStr() const;		// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;

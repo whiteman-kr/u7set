@@ -31,6 +31,7 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Physical range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engineering range"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator value"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Measure count"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "State"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal connection"),
@@ -50,9 +51,10 @@ const int					STATISTIC_COLUMN_APP_ID				= 0,
 							STATISTIC_COLUMN_EL_RANGE			= 9,
 							STATISTIC_COLUMN_PH_RANGE			= 10,
 							STATISTIC_COLUMN_EN_RANGE			= 11,
-							STATISTIC_COLUMN_MEASURE_COUNT		= 12,
-							STATISTIC_COLUMN_STATE				= 13,
-							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 14;
+							STATISTIC_COLUMN_CMP_VALUE			= 12,
+							STATISTIC_COLUMN_MEASURE_COUNT		= 13,
+							STATISTIC_COLUMN_STATE				= 14,
+							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 15;
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 {
@@ -68,6 +70,7 @@ const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 							150,	// STATISTIC_COLUMN_IN_EL_RANGE
 							150,	// STATISTIC_COLUMN_IN_PH_RANGE
 							150,	// STATISTIC_COLUMN_IN_EN_RANGE
+							100,	// STATISTIC_COLUMN_CMP_VALUE
 							100,	// STATISTIC_COLUMN_MEASURE_COUNT
 							100,	// STATISTIC_COLUMN_MEASURE_STATE
 							100,	// STATISTIC_COLUMN_SIGNAL_CONNECTION
@@ -142,7 +145,6 @@ private:
 	QLabel*					m_statusEmpty = nullptr;
 	QLabel*					m_statusMeasureInavlid = nullptr;
 	QLabel*					m_statusMeasured = nullptr;
-
 
 	QTableView*				m_pView = nullptr;
 	StatisticTable			m_signalTable;

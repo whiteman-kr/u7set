@@ -349,9 +349,10 @@ public:
 
 	void initCalculatedProperties();
 
-	bool addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID);
-	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
-	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
+	bool addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID);
+	QString getFlagSignalID(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
+	QStringList getFlagSignalsIDs() const { return m_stateFlagsSignals.values(); }
+	bool hasFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
 	void initTuningValues();
 

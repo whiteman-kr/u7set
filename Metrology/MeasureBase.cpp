@@ -585,9 +585,12 @@ double LinearityMeasurement::measure(int limitType) const
 
 QString LinearityMeasurement::measureStr(int limitType) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -755,9 +758,12 @@ double LinearityMeasurement::error(int limitType, int errotType) const
 
 QString LinearityMeasurement::errorStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int limitType = theOptions.linearity().showErrorFromLimit();
@@ -903,9 +909,12 @@ int LinearityMeasurement::errorResult() const
 
 QString LinearityMeasurement::errorResultStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int errResult = errorResult();
@@ -940,9 +949,12 @@ double LinearityMeasurement::measureItemArray(int limitType, int index) const
 
 QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -997,9 +1009,12 @@ double LinearityMeasurement::additionalParam(int paramType) const
 
 QString LinearityMeasurement::additionalParamStr(int paramType) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (paramType < 0 || paramType >= MEASURE_ADDITIONAL_PARAM_COUNT)
@@ -1177,7 +1192,7 @@ void ComparatorMeasurement::clear()
 
 	m_location.clear();
 
-	m_cmpType = E::CmpType::Equal;
+	m_cmpType = E::CmpType::Greate;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 	{
@@ -1280,7 +1295,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	setCmpType(comparatorEx->cmpType());
 
-	double engineering = comparatorEx->compareValue();
+	double engineering = comparatorEx->compareOnlineValue();
 	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -1363,10 +1378,8 @@ QString ComparatorMeasurement::cmpTypeStr() const
 
 	switch (m_cmpType)
 	{
-		case E::CmpType::Equal:		typeStr = "= ";	break;
-		case E::CmpType::Greate:	typeStr = "> ";	break;
-		case E::CmpType::Less:		typeStr = "< ";	break;
-		case E::CmpType::NotEqual:	typeStr = "!=";	break;
+		case E::CmpType::Greate:	typeStr = ">";	break;
+		case E::CmpType::Less:		typeStr = "<";	break;
 	}
 
 	return typeStr;
@@ -1428,9 +1441,12 @@ double ComparatorMeasurement::measure(int limitType) const
 
 QString ComparatorMeasurement::measureStr(int limitType) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -1598,9 +1614,12 @@ double ComparatorMeasurement::error(int limitType, int errotType) const
 
 QString ComparatorMeasurement::errorStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int limitType = theOptions.comparator().showErrorFromLimit();
@@ -1746,9 +1765,12 @@ int ComparatorMeasurement::errorResult() const
 
 QString ComparatorMeasurement::errorResultStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int errResult = errorResult();
@@ -2180,7 +2202,7 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 		return Metrology::SignalStatistic();
 	}
 
-	Metrology::SignalStatistic si(signalHash);
+	Metrology::SignalStatistic si;
 
 	m_measureMutex.lock();
 
@@ -2218,9 +2240,25 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 					break;
 
 				case MEASURE_TYPE_COMPARATOR:
+					{
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							break;
+						}
 
-					// dynamic_cast<ComparatorMeasurement*> (pMeasurement); for future realese
+//						if (compareFloat(pComparatorMeasurement->nominal(limitType), cmpValue) == false)
+//						{
+//							break;
+//						}
 
+						si.setMeasureCount(si.measureCount() + 1);
+
+						if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
+						{
+							si.setState(Metrology::SignalStatistic::State::Failed);
+						}
+					}
 					break;
 
 				default:

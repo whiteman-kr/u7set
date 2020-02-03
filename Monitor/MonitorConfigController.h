@@ -116,6 +116,11 @@ public:
 	ConfigSettings configuration() const;
 	QString configurationStartSchemaId() const;
 
+	int schemaCount() const;
+	QString schemaCaptionById(const QString& schemaId) const;
+	QString schemaCaptionByIndex(int schemaIndex) const;
+	QString schemaIdByIndex(int schemaIndex) const;
+
 	// Data section
 	//
 private:

@@ -21,24 +21,22 @@ const char* const TestFileCmd[] =
 				"var",
 				"set",
 				"check",
-				"apply",
 				"delay",
 };
 
-const int		TF_CMD_COUNT = sizeof(TestFileCmd)/sizeof(TestFileCmd[0]);
+const int		TF_CMD_COUNT		= sizeof(TestFileCmd)/sizeof(TestFileCmd[0]);
 
-const int		TF_CMD_UNKNOWN = -1,
-				TF_CMD_EMPTY = 0,
-				TF_CMD_TEST = 1,
-				TF_CMD_ENDTEST = 2,
-				TF_CMD_SCHEMA = 3,
-				TF_CMD_COMPATIBLE = 4,
-				TF_CMD_CONST = 5,
-				TF_CMD_VAR = 6,
-				TF_CMD_SET = 7,
-				TF_CMD_CHECK = 8,
-				TF_CMD_APPLY = 9,
-				TF_CMD_DELAY = 10;
+const int		TF_CMD_UNKNOWN		= -1,
+				TF_CMD_EMPTY		= 0,
+				TF_CMD_TEST			= 1,
+				TF_CMD_ENDTEST		= 2,
+				TF_CMD_SCHEMA		= 3,
+				TF_CMD_COMPATIBLE	= 4,
+				TF_CMD_CONST		= 5,
+				TF_CMD_VAR			= 6,
+				TF_CMD_SET			= 7,
+				TF_CMD_CHECK		= 8,
+				TF_CMD_DELAY		= 9;
 
 // ==============================================================================================
 

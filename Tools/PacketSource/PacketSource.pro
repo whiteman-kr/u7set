@@ -4,7 +4,13 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network sql qml xml
+QT       += core
+QT       += gui
+QT       += widgets
+QT       += network
+QT       += sql
+QT       += qml
+QT       += xml
 
 TARGET = PacketSource
 TEMPLATE = app
@@ -14,21 +20,20 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
-include(../warnings.pri)
+include(../../warnings.pri)
 
 win32:RC_ICONS += icons/PacketSource.ico
 
 # DESTDIR
 #
 win32 {
-CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
-CONFIG(release, debug|release): DESTDIR = ../../bin/release
+    CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
+    CONFIG(release, debug|release): DESTDIR = ../../bin/release
 }
 unix {
-CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
-CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
+    CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
+    CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
-
 
 SOURCES += \
 main.cpp \
@@ -64,10 +69,16 @@ SourceBase.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
-    PathOptionDialog.cpp \
     ../../lib/MemLeaksDetection.cpp \
     FindSignalPanel.cpp \
-    FrameDataPanel.cpp
+    FrameDataPanel.cpp \
+    ../../lib/SoftwareInfo.cpp \
+    ../../lib/CircularLogger.cpp \
+    ../../lib/Tcp.cpp \
+    UalTesterServer.cpp \
+    OptionsDialog.cpp \
+    History.cpp \
+    ../../lib/BuildInfo.cpp
 
 
 HEADERS += \
@@ -109,14 +120,20 @@ SourceBase.h \
     ../../lib/DeviceHelper.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
-    PathOptionDialog.h \
     Stable.h \
     ../../lib/MemLeaksDetection.h \
     FindSignalPanel.h \
-    FrameDataPanel.h
+    FrameDataPanel.h \
+    ../../lib/SoftwareInfo.h \
+    ../../lib/CircularLogger.h \
+    ../../lib/Tcp.h \
+    UalTesterServer.h \
+    OptionsDialog.h \
+    History.h \
+    ../../lib/BuildInfo.h
 
 RESOURCES += \
-resources.qrc
+    resources.qrc
 
 
 CONFIG += precompile_header
@@ -125,7 +142,7 @@ PRECOMPILED_HEADER = Stable.h
 
 #c++11 support for GCC
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+#unix:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Q_DEBUG define
@@ -168,5 +185,5 @@ unix {
 
 DISTFILES += \
 	../../Proto/network.proto \
-	../../Proto/serialization.proto \
-    icons/Search.png
+    ../../Proto/serialization.proto
+

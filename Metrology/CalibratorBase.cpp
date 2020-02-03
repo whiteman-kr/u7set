@@ -140,16 +140,19 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 		m_pInitAction = m_pCalibratorMenu->addAction(tr("&Initialization"));
 		m_pInitAction->setIcon(QIcon(":/icons/Calibrators.png"));
 		m_pInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
+
 		m_pCalibratorMenu->addSeparator();
+
 		m_pManageAction = m_pCalibratorMenu->addAction(tr("&Manage ..."));
 		m_pManageAction->setIcon(QIcon(":/icons/Manage.png"));
 		m_pManageAction->setShortcut(Qt::CTRL + Qt::Key_M);
+
 		m_pSettingsAction = m_pCalibratorMenu->addAction(tr("&Settings ..."));
 		m_pSettingsAction->setIcon(QIcon(":/icons/Settings.png"));
 		m_pSettingsAction->setShortcut(Qt::CTRL + Qt::Key_S);
+
 		m_pCopyAction = new QAction(tr("&Copy"), m_pInitDialog);
 		m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-		m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 		m_pMenuBar->addMenu(m_pCalibratorMenu);
 

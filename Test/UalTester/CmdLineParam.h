@@ -29,6 +29,7 @@ protected:
 
 	// optional keys
 	//
+	static const char* const SETTING_PACKET_SOURCE_IP;
 	static const char* const SETTING_ERROR_IGNORE;
 	static const char* const SETTING_TEST_ID;
 	static const char* const SETTING_FROM_TEST_ID;
@@ -43,16 +44,19 @@ private:
 
 	CommandLineParser m_cmdLineParser;
 
-	HostAddressPort m_cfgSocketAddress1;
-	HostAddressPort m_cfgSocketAddress2;
-
+	// main keys
+	//
 	QString m_cfgServiceIP1;
 	QString m_cfgServiceIP2;
 	QString m_equipmentID;
 	QStringList m_testFileNameList;
 
+	HostAddressPort m_cfgSocketAddress1;
+	HostAddressPort m_cfgSocketAddress2;
+
 	// optional keys
 	//
+	QString m_packetSourceIP;
 	QString m_errorIngnoreStr;
 	QString m_testID;
 	QString m_fromTestID;
@@ -60,6 +64,8 @@ private:
 	QString m_reportFileName;
 	QString m_presetLM;
 	QString m_optionFileName;
+
+	HostAddressPort m_packetSourceAddress;
 
 	bool m_errorIngnore = true;
 	bool m_enableTrace = false;
@@ -77,6 +83,7 @@ public:
 	QString equipmentID() const { return m_equipmentID; }
 	const QStringList& testFileNameList() const { return m_testFileNameList; }
 
+	HostAddressPort packetSourceAddress() const { return m_packetSourceAddress; }
 	bool errorIngnore() const { return m_errorIngnore; }
 	QString testID() const { return m_testID; }
 	QString fromTestID() const { return m_fromTestID; }

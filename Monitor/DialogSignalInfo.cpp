@@ -105,7 +105,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 
 	s += "<br>";
 
-	switch(c->intAnalogSignalFormat())
+	switch(c->inAnalogSignalFormat())
 	{
 		case E::AnalogAppSignalFormat::Float32:
 		{
@@ -149,6 +149,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 SignalFlagsWidget::SignalFlagsWidget(QWidget *parent)
 	: QWidget(parent)
 {
+	setMouseTracking(true);
 }
 
 void SignalFlagsWidget::updateControl(AppSignalStateFlags flags)
@@ -159,13 +160,11 @@ void SignalFlagsWidget::updateControl(AppSignalStateFlags flags)
 
 void SignalFlagsWidget::paintEvent(QPaintEvent *)
 {
-	const int colCount = 8;
-	const int rowCount = 2;
 
 	static const std::array<QString, static_cast<int>(SignalFlagsFields::Count)> flagNames =
 		{
 			QStringLiteral("VALID"),
-			QStringLiteral("STATE"),
+			QStringLiteral("ST.AVAIL"),
 			QStringLiteral("SIM"),
 			QStringLiteral("LOCK"),
 			QStringLiteral("MISMATCH"),
@@ -173,8 +172,9 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 			QStringLiteral("LOW")
 		};
 
-	double colWidth = size().width() / colCount;
-	double rowHeight = size().height() / rowCount;
+	static const QString flagValueFalse = QStringLiteral(" (0)");
+	static const QString flagValueTrue = QStringLiteral(" (1)");
+	static const QString flagValueNonValid = QStringLiteral(" (?)");
 
 	QPainter painter(this);
 
@@ -188,85 +188,186 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 	int flagNo = 0;
 
-	double y = 0;
-
-	for (int j = 0; j < rowCount; j++)
+	for (int j = 0; j < m_rowCount; j++)
 	{
-		double x = 0;
-
-		for (int i = 0; i < colCount; i++)
+		for (int i = 0; i < m_colCount; i++)
 		{
 			// Draw the rectangle for flag
 			//
-			QRect flagRect{static_cast<int>(x + 1),
-						   static_cast<int>(y + 1),
-						   static_cast<int>(colWidth - 2),
-						   static_cast<int>(rowHeight - 2)};
+			bool flagValue = false;
+			bool flagValid = true;
 
 			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
+				bool flagAlert = false;
 
-				bool value = false;
+				SignalFlagsFields flag = static_cast<SignalFlagsFields>(flagNo);
 
-				switch (static_cast<SignalFlagsFields>(flagNo))
+				if (flag != SignalFlagsFields::StateAvailable && m_flags.stateAvailable == false)
 				{
-				case SignalFlagsFields::Valid:
-					value = !m_flags.valid;
-					break;
+					// Flag is not valid
+					//
+					flagValid = false;
+					flagAlert = true;
+				}
+				else
+				{
+					// Flag is valid, get its value
+					//
+					switch (flag)
+					{
+					case SignalFlagsFields::Valid:
+						flagValue = m_flags.valid;
+						break;
 
-				case SignalFlagsFields::StateAvailable:
-					value = !m_flags.stateAvailable;
-					break;
+					case SignalFlagsFields::StateAvailable:
+						flagValue = m_flags.stateAvailable;
+						break;
 
-				case SignalFlagsFields::Simulated:
-					value = m_flags.simulated;
-					break;
+					case SignalFlagsFields::Simulated:
+						flagValue = m_flags.simulated;
+						break;
 
-				case SignalFlagsFields::Blocked:
-					value = m_flags.blocked;
-					break;
+					case SignalFlagsFields::Blocked:
+						flagValue = m_flags.blocked;
+						break;
 
-				case SignalFlagsFields::Mismatch:
-					value = m_flags.mismatch;
-					break;
+					case SignalFlagsFields::Mismatch:
+						flagValue = m_flags.mismatch;
+						break;
 
-				case SignalFlagsFields::AboveHighLimit:
-					value = m_flags.aboveHighLimit;
-					break;
+					case SignalFlagsFields::AboveHighLimit:
+						flagValue = m_flags.aboveHighLimit;
+						break;
 
-				case SignalFlagsFields::BelowLowLimit:
-					value = m_flags.belowLowLimit;
-					break;
+					case SignalFlagsFields::BelowLowLimit:
+						flagValue = m_flags.belowLowLimit;
+						break;
 
-				default:
-					Q_ASSERT(false);
+					default:
+						Q_ASSERT(false);
+					}
+
+					flagAlert = flagValue;
+
+					// Valid and StateAvailable flags colors are inverted
+					//
+					if (flag == SignalFlagsFields::Valid ||	flag == SignalFlagsFields::StateAvailable)
+					{
+						flagAlert = !flagAlert;
+					}
 				}
 
-				painter.setBrush(value == true ? alertBrush : noAlertBrush);
+				//
+
+				painter.setBrush(flagAlert == true ? alertBrush : noAlertBrush);
 			}
 			else
 			{
 				painter.setBrush(noFlagBrush);
 			}
 
+			QRect flagRect = flag2Rect(flagNo);
+
 			painter.setPen(Qt::NoPen);
 			painter.drawRect(flagRect);
 
 			// Draw the text description for flag
+			//
 
 			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
 				painter.setPen(Qt::white);
-				painter.drawText(flagRect, Qt::AlignHCenter | Qt::AlignCenter, flagNames[flagNo]);
-			}
 
-			x += colWidth;
+				QString text = flagNames[flagNo];
+
+				if (flagValid == true)
+				{
+					text += flagValue == true ? flagValueTrue : flagValueFalse;
+				}
+				else
+				{
+					text += flagValueNonValid;
+				}
+
+				painter.drawText(flagRect, Qt::AlignHCenter | Qt::AlignCenter, text);
+			}
 
 			flagNo++;
 		}
-
-		y += rowHeight;
 	}
+}
+
+
+
+void SignalFlagsWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	if (event == nullptr)
+	{
+		Q_ASSERT(event);
+		return;
+	}
+
+	static const std::array<QString, static_cast<int>(SignalFlagsFields::Count)> flagTooltips =
+		{
+			QStringLiteral("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
+			QStringLiteral("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
+			QStringLiteral("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
+			QStringLiteral("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
+			QStringLiteral("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
+			QStringLiteral("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
+			QStringLiteral("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
+		};
+
+	int flagAbove = point2Flag(event->pos());
+
+	if (m_lastFlagAbove != flagAbove)
+	{
+		m_lastFlagAbove = flagAbove;
+
+		if (flagAbove >= 0 && flagAbove < static_cast<int>(SignalFlagsFields::Count))
+		{
+			QToolTip::showText(mapToGlobal(event->pos()), flagTooltips[flagAbove], this);
+		}
+		else
+		{
+			QToolTip::hideText();
+		}
+	}
+}
+
+QRect SignalFlagsWidget::flag2Rect(int flagNo)
+{
+	double colWidth = size().width() / m_colCount;
+	double rowHeight = size().height() / m_rowCount;
+
+	int col = flagNo % m_colCount;
+	int row = flagNo / m_colCount;
+
+	const int frameWidth = 1;
+
+	double x = (colWidth + frameWidth) * col;
+	double y = (rowHeight + frameWidth) * row;
+
+	return QRect(static_cast<int>(x),
+				 static_cast<int>(y),
+				 static_cast<int>(colWidth - frameWidth * 2),
+				 static_cast<int>(rowHeight - frameWidth * 2));
+}
+
+int SignalFlagsWidget::point2Flag(const QPoint& pt)
+{
+	for (int i = 0; i < static_cast<int>(SignalFlagsFields::Count); i++)
+	{
+		QRect r = flag2Rect(i);
+
+		if (r.contains(pt) == true)
+		{
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 //
@@ -523,7 +624,7 @@ void DialogSignalInfo::prepareSetpointsContextMenu(const QPoint& pos)
 
 	m_contextMenuSchemaId = item->text(static_cast<int>(SetpointsColumns::SchemaId));
 
-	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Index), Qt::UserRole).toInt();
+	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Type), Qt::UserRole).toInt();
 
 	// Switch
 
@@ -724,7 +825,6 @@ void DialogSignalInfo::fillSetpoints()
 	ui->treeSetpoints->clear();
 
 	QStringList columns;
-	columns << tr("#");
 	columns << tr("Type");
 	columns << tr("Compare To");
 	columns << tr("Value");
@@ -740,8 +840,6 @@ void DialogSignalInfo::fillSetpoints()
 		const std::shared_ptr<Comparator>& c = m_comparators[i];
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
-
-		item->setText(static_cast<int>(SetpointsColumns::Index), QString::number(i + 1));
 
 		// CompareTo
 
@@ -812,13 +910,13 @@ void DialogSignalInfo::fillSetpoints()
 
 		item->setText(static_cast<int>(SetpointsColumns::SchemaId), c->schemaID());
 
-		item->setData(static_cast<int>(SetpointsColumns::Index), Qt::UserRole, i);
+		item->setData(static_cast<int>(SetpointsColumns::Type), Qt::UserRole, i);
 
 		ui->treeSetpoints->addTopLevelItem(item);
 	}
 
 	ui->treeSetpoints->setSortingEnabled(true);
-	ui->treeSetpoints->sortByColumn(static_cast<int>(SetpointsColumns::Index), Qt::AscendingOrder);
+	ui->treeSetpoints->sortByColumn(static_cast<int>(SetpointsColumns::CompareToValue), Qt::AscendingOrder);
 
 	ui->treeSetpoints->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->treeSetpoints, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSetpointsContextMenu);
@@ -831,7 +929,6 @@ void DialogSignalInfo::fillSetpoints()
 	}
 	else
 	{
-		ui->treeSetpoints->resizeColumnToContents(static_cast<int>(SetpointsColumns::Index));
 		ui->treeSetpoints->resizeColumnToContents(static_cast<int>(SetpointsColumns::CompareTo));
 		ui->treeSetpoints->resizeColumnToContents(static_cast<int>(SetpointsColumns::Output));
 		ui->treeSetpoints->resizeColumnToContents(static_cast<int>(SetpointsColumns::SchemaId));
@@ -1221,7 +1318,7 @@ void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item,
 		return;
 	}
 
-	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Index), Qt::UserRole).toInt();
+	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Type), Qt::UserRole).toInt();
 
 	showSetpointDetails();
 

@@ -297,7 +297,7 @@ namespace Builder
 			auto link = std::find_if(branch.links.cbegin(), branch.links.cend(),
 				[&pt](const std::pair<QUuid, Link>& link)
 				{
-					// Check that this link is not fake one, actually it does not matter, as if reak link and fake one connected, they must be joined,
+					// Check that this link is not fake one, actually it does not matter, as if real link and fake one connected, they must be joined,
 					// so this just precaution
 					//
 					QUuid linkUuid = link.first;
@@ -349,6 +349,7 @@ namespace Builder
 				return static_cast<int>(i);
 			}
 		}
+
 		return -1;
 	}
 
@@ -3784,7 +3785,7 @@ namespace Builder
 			return false;
 		}
 
-		QStringList equipmentIds = logicSchema->equipmentIdList();
+		const QStringList& equipmentIds = logicSchema->equipmentIdList();
 
 		// Check if all signal elements are from related Logic Module
 		// Check if all connection elements are from related Logic Module
@@ -4600,7 +4601,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (SchemaItemPtr item : layer->Items)
+		for (const SchemaItemPtr& item : layer->Items)
 		{
 			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{

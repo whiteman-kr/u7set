@@ -328,7 +328,7 @@ private:
 
 	Metrology::SignalLocation m_location;
 
-	E::CmpType		m_cmpType = E::CmpType::Equal;
+	E::CmpType		m_cmpType = E::CmpType::Greate;
 
 	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
 	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];

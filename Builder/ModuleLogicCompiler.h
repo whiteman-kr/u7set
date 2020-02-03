@@ -162,17 +162,17 @@ namespace Builder
 			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
 		};
 
-		class SignalsWithFlags : public QHash<QString, AppSignalStateFlagsMap*>
+/*		class SignalsWithFlags : public QHash<QString, AppSignalStateFlagsMap*>
 		{
 		public:
 			SignalsWithFlags(ModuleLogicCompiler& compiler);
 			~SignalsWithFlags();
 
-			bool append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID);
+			bool append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, const UalItem* setFlagsItem);
 
 		private:
 			ModuleLogicCompiler& m_compiler;
-		};
+		};*/
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
@@ -271,17 +271,22 @@ namespace Builder
 		bool processSimlockItems();
 		bool processMismatchItems();
 		bool processSetFlagsItems();
-		bool setPinFlagSignal(const UalItem* ualItem,
-							  const QString& pinCaption,
-							  bool pinShouldBeExist,
-							  E::AppSignalStateFlagType flagType,
-							  UalSignal* inSignal,
-							  bool* flagIsSet);
+
+		bool appendFlagToSignal(const QString& signalWithFlagID,
+								E::AppSignalStateFlagType flagType,
+								const QString& flagSignalID,
+								const UalItem* setFlagsItem);
+
+		bool appendFlagToSignalFromPin(const UalItem* ualItem,
+								const QString& pinCaption,
+								bool pinShouldBeExist,
+								E::AppSignalStateFlagType flagType,
+								const QString& signalWithFlagID,
+								bool* flagIsSet);
 
 		bool setAcquiredForFlagSignals();
 		bool checkSignalsWithFlags();
 		void writeSignalsWithFlagsReport();
-		void writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs);
 
 		bool sortUalSignals();
 
@@ -388,7 +393,14 @@ namespace Builder
 		bool processTransmitters();
 		bool processTransmitter(const UalItem* ualItem);
 		bool getConnectedSignals(const UalItem* transmitterItem, QVector<QPair<QString, UalSignal *>>* connectedSignals);
-		bool getNearestSignalID(const LogicPin& inPin, QString* nearestSignalID);
+
+		bool getDirectlyConnectedInSignalID(const LogicPin& inPin, QString* directlyConnectedInSignalID);
+		bool getNearestInSignalIDs(const LogicPin& inPin, QStringList* nearestSignalIDs);
+		bool getNearestInSignalID(const LogicPin& inPin, QString* nearestSignalID);
+		bool getNearestOutSignalIDs(const LogicPin& outPin, QStringList* nearestSignalIDs);
+		bool getNearestOutSignalID(const LogicPin& outPin, QString* nearestSignalID);
+		bool getNearestSignalID(const LogicPin& inOutPin, QString* nearestSignalID);
+
 
 		bool processSinglePortReceivers();
 		bool processSinglePortReceiver(const UalItem* item);
@@ -633,7 +645,7 @@ namespace Builder
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
-		SignalsWithFlags m_signalsWithFlags;
+		::std::set<QString> m_signalsWithFlagsIDs;
 
 		QHash<QString, Loopback*> m_loopbacks;
 		QHash<QString, Loopback*> m_signalsToLoopbacks;

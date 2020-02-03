@@ -7,6 +7,18 @@
 namespace Builder
 {
 
+	void MemoryArea::SignalAddress16::appendSignalID(const QString& signalID)
+	{
+		if (m_signalID.isEmpty() == true)
+		{
+			m_signalID = signalID;
+		}
+		else
+		{
+			m_signalID += ", " + signalID;
+		}
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	MemoryArea class implementation
@@ -20,7 +32,6 @@ namespace Builder
 		m_nextSignalAddress.set(startAddress, 0);
 	}
 
-
 	MemoryArea& MemoryArea::operator = (const MemoryArea& ma)
 	{
 		assert(m_locked == false);
@@ -30,7 +41,6 @@ namespace Builder
 
 		return *this;
 	}
-
 
 	Address16 MemoryArea::appendSignal(const UalSignal* ualSignal, bool appendAcquiredOnly)
 	{
@@ -79,6 +89,39 @@ namespace Builder
 		}
 
 		return signalAddress;
+	}
+
+	QVector<MemoryArea::SignalAddress16> MemoryArea::getSignalsJoined() const
+	{
+		QVector<SignalAddress16> array;
+
+		SignalAddress16 joined;
+
+		for(const SignalAddress16& sa : m_signals)
+		{
+			if (joined.address() != sa.address() || joined.isDiscrete() != sa.isDiscrete())
+			{
+				if (joined.address().isValid() == true)
+				{
+					array.append(joined);
+				}
+
+				joined.setSignalStrID(sa.signalStrID());
+				joined.setAddress(sa.address());
+				joined.setDiscrete(sa.isDiscrete());
+			}
+			else
+			{
+				joined.appendSignalID(sa.signalStrID());
+			}
+		}
+
+		if (joined.address().isValid())
+		{
+			array.append(joined);
+		}
+
+		return array;
 	}
 
 	void MemoryArea::appendUalRefSignals(const Address16& addr16, const UalSignal* ualSignal, bool appendAcquiredOnly)
@@ -441,7 +484,7 @@ namespace Builder
 			return;
 		}
 
-		QVector<MemoryArea::SignalAddress16>& signalsArray = memArea.getSignals();
+		QVector<MemoryArea::SignalAddress16> signalsArray = memArea.getSignalsJoined();
 
 		for(MemoryArea::SignalAddress16& signal : signalsArray)
 		{

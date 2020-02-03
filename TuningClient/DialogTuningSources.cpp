@@ -1,4 +1,26 @@
 #include "DialogTuningSources.h"
+#include "MainWindow.h"
+
+ClientTuningSourcesWidget::ClientTuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent):
+	TuningSourcesWidget(tcpClient, hasActivationControls, hasCloseButton, parent)
+{
+
+}
+
+ClientTuningSourcesWidget::~ClientTuningSourcesWidget()
+{
+
+}
+
+bool ClientTuningSourcesWidget::login()
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 //
 // ---
@@ -11,7 +33,7 @@ DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasAct
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	m_tuningSourcesWidget = new TuningSourcesWidget(tcpClient, hasActivationControls, true, this);
+	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClient, hasActivationControls, true, this);
 
 	connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogTuningSources::reject);
 
