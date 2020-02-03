@@ -1517,17 +1517,25 @@ void ComparatorPropertyDialog::createPropertyList()
 				if (m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
 					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + m_comparatorEx.inputSignal()->param().electricUnitStr());
-					item->setValue(conversion(m_comparatorEx.compare().constValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+					item->setValue(conversion(m_comparatorEx.compareConstValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
 					item->setAttribute(QLatin1String("decimals"), m_comparatorEx.inputSignal()->param().electricPrecision());
 					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE);
 					compareGroup->addSubProperty(item);
+					if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+					{
+						item->setAttribute(QLatin1String("readOnly"), true);
+					}
 				}
 
 				item = m_pManager->addProperty(QVariant::Double, tr("Engineering value, %1").arg(m_comparatorEx.inputSignal() == nullptr ? QString() : m_comparatorEx.inputSignal()->param().unit()));
-				item->setValue(m_comparatorEx.compare().constValue());
+				item->setValue(m_comparatorEx.compareConstValue());
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE);
 				compareGroup->addSubProperty(item);
+				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+				{
+					item->setAttribute(QLatin1String("readOnly"), true);
+				}
 			}
 			else
 			{
@@ -1592,17 +1600,21 @@ void ComparatorPropertyDialog::createPropertyList()
 //				if (m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true && m_comparatorEx.inputSignal()->param().isInput() == true)
 //				{
 //					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + m_comparatorEx.inputSignal()->param().electricUnitStr());
-//					item->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+//					item->setValue(conversion(m_comparator.hysteresisOnlineValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
 //					item->setAttribute(QLatin1String("decimals"), m_comparatorEx.inputSignal()->param().electricPrecision());
 //					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE);
 //					hysteresisGroup->addSubProperty(item);
 //				}
 
 				item = m_pManager->addProperty(QVariant::Double, tr("Engineering value, %1").arg(m_comparatorEx.inputSignal() == nullptr ? QString() : m_comparatorEx.inputSignal()->param().unit()));
-				item->setValue(m_comparatorEx.hysteresis().constValue());
+				item->setValue(m_comparatorEx.hysteresisOnlineValue());
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE);
 				hysteresisGroup->addSubProperty(item);
+				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+				{
+					item->setAttribute(QLatin1String("readOnly"), true);
+				}
 			}
 			else
 			{
@@ -1776,7 +1788,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
 				if (propertyEn != nullptr)
 				{
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 					propertyEn->setValue(m_comparatorEx.compare().constValue());
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1789,7 +1803,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE));
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 					propertyEl->setValue(conversion(m_comparatorEx.compare().constValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1810,7 +1826,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
 				if (propertyEn != nullptr)
 				{
-					propertyEn->setValue(m_comparatorEx.hysteresis().constValue());
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					propertyEn->setValue(m_comparatorEx.hysteresisOnlineValue());
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1823,7 +1841,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE));
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 					propertyEl->setValue(conversion(m_comparatorEx.hysteresis().constValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 				}
 			}
 			break;

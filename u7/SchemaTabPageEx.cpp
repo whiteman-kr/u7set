@@ -860,11 +860,12 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 
 		// Filter by text
 		//
-		if (file->fileName().contains(m_filterText, Qt::CaseInsensitive) == true)
+		if (file->fileName().contains(m_filterText, Qt::CaseInsensitive) == true ||
+			m_users[file->userId()].contains(m_filterText, Qt::CaseInsensitive) == true)
 		{
 			filteredFiles[fileId] = file;
-
 			schemaFilterCount++;
+
 			continue;
 		}
 
@@ -877,8 +878,8 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 				searchResult == true)
 			{
 				filteredFiles[fileId] = file;
-
 				schemaFilterCount++;
+
 				continue;
 			}
 

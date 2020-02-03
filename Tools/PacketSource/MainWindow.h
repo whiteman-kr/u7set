@@ -1,8 +1,27 @@
 #pragma once
 
+#include <QMainWindow>
+#include <QDesktopWidget>
+#include <QSettings>
+#include <QMessageBox>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QTabWidget>
+#include <QTableView>
+#include <QHeaderView>
+#include <QDockWidget>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QSortFilterProxyModel>
+#include <QClipboard>
+
+#include "UalTesterServer.h"
+#include "SignalBase.h"
 #include "SourceBase.h"
 #include "FrameDataPanel.h"
 #include "FindSignalPanel.h"
+#include "History.h"
 
 // ==============================================================================================
 
@@ -21,9 +40,10 @@ private:
 	//
 	QMenu*					m_sourceMenu = nullptr;
 	QMenu*					m_signalMenu = nullptr;
+	QMenu*					m_toolsMenu = nullptr;
+	QMenu*					m_infoMenu = nullptr;
 	QMenu*					m_sourceContextMenu = nullptr;
 	QMenu*					m_signalContextMenu = nullptr;
-	QMenu*					m_infoMenu = nullptr;
 
 	// Actions of main menu
 	//
@@ -31,12 +51,14 @@ private:
 							//
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
+	QAction*				m_sourceReloadAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_signalSetStateAction = nullptr;
 	QAction*				m_signalInitAction = nullptr;
-	QAction*				m_signalSelectAllAction = nullptr;
+	QAction*				m_signalHistoryAction = nullptr;
 	QAction*				m_signalSaveStatesAction = nullptr;
 	QAction*				m_signalRestoreStatesAction = nullptr;
+	QAction*				m_signalSelectAllAction = nullptr;
 	QAction*				m_optionAction = nullptr;
 	QAction*				m_sourceTextCopyAction = nullptr;
 	QAction*				m_signalTextCopyAction = nullptr;
@@ -57,7 +79,7 @@ private:
 	// Elements of interface - StatusBar
 	//
 	QLabel*					m_statusEmpty = nullptr;
-	QLabel*					m_statusServer = nullptr;
+	QLabel*					m_statusUalTesterClient = nullptr;
 
 private:
 
@@ -75,9 +97,17 @@ private:
 	void					createStatusBar();
 
 	//
+	//
+	UalTesterServer*		m_ualTesterSever = nullptr;
+	UalTesterServerThread*	m_ualTesterServerThread = nullptr;
+	void					runUalTesterServerThread();
+	void					stopUalTesterServerThread();
 
+	//
+	//
 	SignalBase				m_signalBase;
 	SourceBase				m_sourceBase;
+	SignalHistory			m_signalHistory;
 
 	// update lists
 	//
@@ -85,6 +115,7 @@ private:
 	SourceTable				m_sourceTable;
 	QAction*				m_pSourceColumnAction[SOURCE_LIST_COLUMN_COUNT];
 	QMenu*					m_sourceHeaderContextMenu = nullptr;
+	QModelIndex				m_selectedSourceIndex;
 
 	void					hideSourceColumn(int column, bool hide);
 
@@ -95,16 +126,29 @@ private:
 
 	void					hideSignalColumn(int column, bool hide);
 
-	// update timers
+	//
 	//
 	QTimer*					m_updateSourceListTimer = nullptr;
 	void					startUpdateSourceListTimer();
 	void					stopUpdateSourceListTimer();
 
 	//
-
+	//
 	void					updateSignalList(PS::Source* pSource);
 	void					updateFrameDataList(PS::Source* pSource);
+
+	//
+	//
+	QTimer*					m_updateBuildFilesTimer = nullptr;
+	void					startUpdateBuildFilesTimer();
+	void					stopUpdateBuildFilesTimer();
+
+	//
+	//
+	void					saveWindowState();
+	void					restoreWindowState();
+
+
 
 public:
 
@@ -125,12 +169,14 @@ private slots:
 							//
 	void					startSource();
 	void					stopSource();
+	void					reloadSource();
 	void					selectAllSources();
 	void					setSignalState();
 	void					initSignalsState();
-	void					selectAllSignals();
+	void					history();
 	void					saveSignalsState();
 	void					restoreSignalsState();
+	void					selectAllSignals();
 	void					onOptions();
 	void					copyText(QTableView* pView);
 	void					copySourceText();
@@ -155,7 +201,7 @@ private slots:
 	//
 	void					loadSources();
 	void					loadSignals();
-	void					initSignalsInSources();
+	void					loadSignalsInSources();
 
 	// slot of lists
 	//
@@ -163,4 +209,13 @@ private slots:
 
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
+
+	//
+	//
+	void					updateBuildFiles();
+
+	// slot of UalTesterServer
+	//
+	void					ualTesterSocketConnect(bool isConnect);
+	void					signalStateChanged(Hash hash, double prevState, double state);
 };

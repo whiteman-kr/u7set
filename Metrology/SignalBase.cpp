@@ -2431,12 +2431,79 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		QVector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
 		for(std::shared_ptr<Comparator> comparator : comparatorList)
 		{
-			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+			std::shared_ptr<Metrology::ComparatorEx> comparatorEx;
 
-			comparatorEx->setIndex(metrologyComparatorList.count());
-			initComparatorSignals(comparatorEx.get());
+			switch (comparator->cmpType())
+			{
+				case E::CmpType::Equal:
+					{
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-			metrologyComparatorList.append(comparatorEx);
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
+
+						metrologyComparatorList.append(comparatorEx);
+
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
+
+						metrologyComparatorList.append(comparatorEx);
+					}
+
+					break;
+
+				case E::CmpType::NotEqual:
+					{
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
+
+						metrologyComparatorList.append(comparatorEx);
+
+						//
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
+
+						metrologyComparatorList.append(comparatorEx);
+					}
+
+					break;
+
+				default:
+					{
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						comparatorEx->setIndex(metrologyComparatorList.count());
+						initComparatorSignals(comparatorEx.get());
+						metrologyComparatorList.append(comparatorEx);
+					}
+
+					break;
+			}
 
 			if (metrologyComparatorList.count() >= theOptions.module().maxComparatorCount())
 			{

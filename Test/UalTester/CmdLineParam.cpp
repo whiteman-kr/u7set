@@ -20,6 +20,7 @@ const char* const CmdLineParam::SETTING_TEST_FILE_NAME  = "TestFileName";
 
 // optional keys
 //
+const char* const CmdLineParam::SETTING_PACKET_SOURCE_IP = "PacketSourceIP";
 const char* const CmdLineParam::SETTING_ERROR_IGNORE = "ErrorIngnore";
 const char* const CmdLineParam::SETTING_TEST_ID = "TestID";
 const char* const CmdLineParam::SETTING_FROM_TEST_ID = "FromTestID";
@@ -56,6 +57,7 @@ void CmdLineParam::getParams(int& argc, char** argv)
 
 		// optional keys
 		//
+	m_cmdLineParser.addSingleValueOption("psip", SETTING_PACKET_SOURCE_IP, "IP-addres for PacketSource.", "IPv4");
 	m_cmdLineParser.addSingleValueOption("errignore", SETTING_ERROR_IGNORE, "Stop testing if errors was found.", "No");
 	m_cmdLineParser.addSingleValueOption("test", SETTING_TEST_ID, "Run a specific test.", "TEST_ID");
 	m_cmdLineParser.addSingleValueOption("from", SETTING_FROM_TEST_ID, "Run from the specific test.", "TEST_ID");
@@ -153,6 +155,7 @@ bool CmdLineParam::paramIsValid()
 
 		// optional keys
 		//
+	m_packetSourceIP = m_cmdLineParser.settingValue(SETTING_PACKET_SOURCE_IP);
 	m_errorIngnoreStr = m_cmdLineParser.settingValue(SETTING_ERROR_IGNORE);
 	m_testID = m_cmdLineParser.settingValue(SETTING_TEST_ID);
 	m_fromTestID = m_cmdLineParser.settingValue(SETTING_FROM_TEST_ID);
@@ -217,6 +220,15 @@ bool CmdLineParam::paramIsValid()
 
 	// optional settings
 	//
+	if (m_packetSourceIP.isEmpty() == false)
+	{
+		m_packetSourceAddress.setAddressPortStr(m_packetSourceIP, PORT_TUNING_SERVICE_CLIENT_REQUEST);
+		if (m_packetSourceAddress.isValidIPv4(m_packetSourceAddress.addressStr()) == false)
+		{
+			std::cout << "Error: IP-addres for PacketSource is not valid\n";
+			return false;
+		}
+	}
 
 	if (m_errorIngnoreStr.isEmpty() == false)
 	{

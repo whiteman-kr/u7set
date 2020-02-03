@@ -824,12 +824,12 @@ bool TestCmd::parseCmdSet()
 			continue;
 		}
 
-		if (signal.param().enableTuning() == false)
-		{
-			QString errorStr = QString("(line %1) Error : Signal %2 is not tuning signal").arg(m_lineIndex).arg(signalID);
-			m_errorList.append(errorStr);
-			continue;
-		}
+//		if (signal.param().enableTuning() == false)
+//		{
+//			QString errorStr = QString("(line %1) Error : Signal %2 is not tuning signal").arg(m_lineIndex).arg(signalID);
+//			m_errorList.append(errorStr);
+//			continue;
+//		}
 
 		// signal Value
 		//

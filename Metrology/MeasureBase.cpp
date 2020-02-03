@@ -1192,7 +1192,7 @@ void ComparatorMeasurement::clear()
 
 	m_location.clear();
 
-	m_cmpType = E::CmpType::Equal;
+	m_cmpType = E::CmpType::Greate;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 	{
@@ -1295,7 +1295,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	setCmpType(comparatorEx->cmpType());
 
-	double engineering = comparatorEx->compareValue();
+	double engineering = comparatorEx->compareOnlineValue();
 	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -1378,10 +1378,8 @@ QString ComparatorMeasurement::cmpTypeStr() const
 
 	switch (m_cmpType)
 	{
-		case E::CmpType::Equal:		typeStr = "= ";	break;
-		case E::CmpType::Greate:	typeStr = "> ";	break;
-		case E::CmpType::Less:		typeStr = "< ";	break;
-		case E::CmpType::NotEqual:	typeStr = "!=";	break;
+		case E::CmpType::Greate:	typeStr = ">";	break;
+		case E::CmpType::Less:		typeStr = "<";	break;
 	}
 
 	return typeStr;

@@ -61,12 +61,14 @@ namespace VFrame30
 
 		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);
 		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::appearanceCategory, true);
-		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick, PropertyNames::scriptsCategory, true);
 
 		addProperty<QString, SchemaItem, &SchemaItem::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
 		addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos, PropertyNames::functionalCategory, true);
 
-		auto clickScriptProp = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript, PropertyNames::scriptsCategory, true);
+		bool isSchemaItemControl = qobject_cast<SchemaItemControl*>(this) != nullptr;	// Some properties are hidden for SchemaItemControl
+
+		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick, PropertyNames::scriptsCategory, !isSchemaItemControl);
+		auto clickScriptProp = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript, PropertyNames::scriptsCategory, !isSchemaItemControl);
 		clickScriptProp->setIsScript(true);
 
 		addProperty<QString, QObject, &SchemaItem::objectName, &SchemaItem::setObjectName>(PropertyNames::objectName, PropertyNames::scriptsCategory, true);

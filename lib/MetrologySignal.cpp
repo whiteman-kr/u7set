@@ -862,10 +862,8 @@ namespace Metrology
 
 		switch (cmpType())
 		{
-			case E::CmpType::Equal:		typeStr = QChar('=');		break;
-			case E::CmpType::Greate:	typeStr = QChar('>');		break;
-			case E::CmpType::Less:		typeStr = QChar('<');		break;
-			case E::CmpType::NotEqual:	typeStr = QChar(0x2260);	break;
+			case E::CmpType::Greate:	typeStr = QString(">");	break;
+			case E::CmpType::Less:		typeStr = QString("<");	break;
 		}
 
 		return typeStr;
@@ -888,13 +886,44 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareValue() const
+	double ComparatorEx::compareOnlineValue() const
 	{
+		//
+		//
+		double hysteresisValue = 0;
+
+		if (hysteresis().isConst() == true)
+		{
+			hysteresisValue = hysteresis().constValue();
+		}
+		else
+		{
+			if (m_hysteresisSignal != nullptr)
+			{
+				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
+				{
+					hysteresisValue = m_hysteresisSignal->state().value();
+				}
+			}
+		}
+
+		//
+		//
+		double deviation = 0;
+
+		switch (m_deviationType)
+		{
+			case DeviationType::Down:	deviation = -hysteresisValue / 2;	break;
+			case DeviationType::Up:		deviation = hysteresisValue / 2;	break;
+		}
+
+		//
+		//
 		double value = 0;
 
 		if (compare().isConst() == true)
 		{
-			value = compare().constValue();
+			value = compare().constValue() + deviation;
 		}
 		else
 		{
@@ -902,7 +931,7 @@ namespace Metrology
 			{
 				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().valid() == true)
 				{
-					value =  m_compareSignal->state().value();
+					value = m_compareSignal->state().value() + deviation;
 				}
 			}
 		}
@@ -912,9 +941,27 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareValueStr() const
+	QString ComparatorEx::compareOnlineValueStr() const
 	{
-		return QString::number(compareValue(), 'f', valuePrecision());
+		return QString::number(compareOnlineValue(), 'f', valuePrecision());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	double ComparatorEx::compareConstValue() const
+	{
+		double value = 0;
+
+		// if compare value is const then hysteresis also always const
+		//
+		switch (m_deviationType)
+		{
+			case DeviationType::NoUsed:	value = compare().constValue();									break;
+			case DeviationType::Down:	value = compare().constValue() - hysteresis().constValue() / 2;	break;
+			case DeviationType::Up:		value= compare().constValue() + hysteresis().constValue() / 2;	break;
+		}
+
+		return value;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -927,19 +974,11 @@ namespace Metrology
 
 		if (compare().isConst() == true)
 		{
-			value += QString::number(compare().constValue(), 'f', valuePrecision());
+			value += QString::number(compareConstValue(), 'f', valuePrecision());			// if compare is const then hysteresis also const
 		}
 		else
 		{
 			value += compare().appSignalID();
-
-			if (m_compareSignal != nullptr && m_compareSignal->param().isValid() == true)
-			{
-				if (m_compareSignal->param().enableTuning() == true)
-				{
-					value += " - " + QString::number(m_compareSignal->param().tuningDefaultValue().toDouble(), 'f', valuePrecision());
-				}
-			}
 		}
 
 		return value;
@@ -947,7 +986,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::hysteresisValue() const
+	double ComparatorEx::hysteresisOnlineValue() const
 	{
 		double value = 0;
 
@@ -971,9 +1010,9 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisValueStr() const
+	QString ComparatorEx::hysteresisOnlineValueStr() const
 	{
-		return QString::number(hysteresisValue(), 'f', valuePrecision());
+		return QString::number(hysteresisOnlineValue(), 'f', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -989,14 +1028,11 @@ namespace Metrology
 		else
 		{
 			value = hysteresis().appSignalID();
+		}
 
-			if (m_hysteresisSignal != nullptr && m_hysteresisSignal->param().isValid() == true)
-			{
-				if (m_hysteresisSignal->param().enableTuning() == true)
-				{
-					value += " - " + QString::number(m_hysteresisSignal->param().tuningDefaultValue().toDouble(), 'f', valuePrecision());
-				}
-			}
+		if (m_deviationType != DeviationType::NoUsed)
+		{
+			value.insert(0, "Not used - ");
 		}
 
 		return value;

@@ -843,8 +843,8 @@ void MeasureThread::measureComprators()
 
 					//
 					//
-					double compareVal = comparatorEx->compareValue();			// get compare value
-					double hysteresisVal = comparatorEx->hysteresisValue();		// get hysteresis value
+					double compareVal = comparatorEx->compareOnlineValue();			// get compare value
+					double hysteresisVal = comparatorEx->hysteresisOnlineValue();	// get hysteresis value
 
 					// calc start value for comaprator
 					//
@@ -856,19 +856,35 @@ void MeasureThread::measureComprators()
 
 					switch (pr)
 					{
-						case MEASURE_THREAD_CMP_PREAPRE_1:	deltaVal = hysteresisVal * 2;		break;	// 1 - go below return zone to switch comparator to logical 0 state
-						case MEASURE_THREAD_CMP_PREAPRE_2:	deltaVal = startValueForComapre;	break;	// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
-						default:							continue;
+						case MEASURE_THREAD_CMP_PREAPRE_1:		// 1 - go below return zone to switch comparator to logical 0 state
+
+							if (comparatorEx->deviation() == Metrology::ComparatorEx::DeviationType::NoUsed)
+							{
+								deltaVal = hysteresisVal * 2;	// for comparators Less and Greate
+							}
+							else
+							{
+								deltaVal = hysteresisVal / 2;	// for comparators Equal and NotEqual
+							}
+
+							break;
+
+						case MEASURE_THREAD_CMP_PREAPRE_2:		// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
+
+							deltaVal = startValueForComapre;
+
+							break;
+
+						default:
+							continue;
 					}
 
 					double engineeringVal = 0;
 
 					switch (comparatorEx->cmpType())
 					{
-						case E::CmpType::Equal:		engineeringVal = compareVal - deltaVal;		break;
-						case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;		break;
-						case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;		break;
-						case E::CmpType::NotEqual:	engineeringVal = compareVal;				break;
+						case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
+						case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
 						default:					continue;
 					}
 
@@ -1084,10 +1100,8 @@ void MeasureThread::measureComprators()
 				{
 					switch (comparatorEx->cmpType())
 					{
-						case E::CmpType::Equal:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
 						case E::CmpType::Greate:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
 						case E::CmpType::Less:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown() :	pCalibratorManager->stepUp(); 	break;
-						case E::CmpType::NotEqual:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown()	:	pCalibratorManager->stepUp();	break;
 						default:					continue;
 					}
 				}

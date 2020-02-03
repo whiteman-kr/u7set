@@ -229,9 +229,23 @@ void MonitorMainWindow::showLogo()
 
 	QImage logo = QImage(":/Images/Images/Logo.png");
 
-	if (m_toolBar->frameSize().height() < logo.height())
+	// Get toolbar content height
+	//
+	int toolBarSpacing = 0;
+
+	if (QLayout* toolBarLayout = m_toolBar->layout();
+		toolBarLayout != nullptr)
 	{
-		logo = logo.scaledToHeight(m_toolBar->frameSize().height(), Qt::SmoothTransformation);
+		toolBarSpacing = toolBarLayout->spacing();
+	}
+
+	int logoMaxHeight = m_toolBar->size().height() - toolBarSpacing * 2;
+
+	// Scale the logo image
+	//
+	if (logo.height() > logoMaxHeight)
+	{
+		logo = logo.scaledToHeight(logoMaxHeight, Qt::SmoothTransformation);
 	}
 
 	// Show logo if it was enabled in settings

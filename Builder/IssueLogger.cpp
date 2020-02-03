@@ -6310,7 +6310,7 @@ namespace Builder
 
 	/// IssueCode: ALC5168
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
 	/// Title: Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 	///
@@ -6323,7 +6323,7 @@ namespace Builder
 	/// Description:
 	///		Duplicate assigning of signal to flag of specified signal
 	///
-	void IssueLogger::wrnALC5168(	QString flagSignalID,
+	void IssueLogger::errALC5168(	QString flagSignalID,
 									QString flagTypeStr,
 									QString signalWithFlagID,
 									QString alreadyAssignedFlagSignalID,
@@ -6332,13 +6332,20 @@ namespace Builder
 	{
 		if (schemaID.isEmpty() == false)
 		{
-			addItemsIssues(OutputMessageLevel::Warning0, 5168, itemUuid, schemaID);
-		}
+			addItemsIssues(OutputMessageLevel::Error, 5168, itemUuid, schemaID);
 
-		LOG_WARNING0(IssueType::AlCompiler,
-				  5168,
-				  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
-						arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
+			LOG_ERROR(IssueType::AlCompiler,
+					  5168,
+					  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag (Logic schema %5).")).
+							arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID).arg(schemaID));
+		}
+		else
+		{
+			LOG_ERROR(IssueType::AlCompiler,
+					  5168,
+					  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
+							arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
+		}
 	}
 
 	/// IssueCode: ALC5169
@@ -6544,6 +6551,28 @@ namespace Builder
 				  5177,
 				  QString(tr("Using value 0.0 for parameter %1.%2 is not recommend (Logic schema %3).")).
 				  arg(fbCaption).arg(paramCaption).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5178
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Setting of flags to a constant signal (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 logic schema ID
+	///
+	/// Description:
+	///		Setting of flags to a constant signal looks strange.
+	///
+	void IssueLogger::wrnALC5178(QUuid constSignalItemUuid, QUuid setFalgsItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Warning1, 5178, constSignalItemUuid);
+		addItemsIssues(OutputMessageLevel::Warning1, 5178, setFalgsItemUuid);
+
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5178,
+				  QString(tr("Setting of flags to a constant signal (Logic schema %1).")).arg(schemaID));
 	}
 
 	//

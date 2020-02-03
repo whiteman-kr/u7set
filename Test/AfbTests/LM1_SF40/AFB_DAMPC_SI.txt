@@ -40,11 +40,11 @@ endtest
 
 test AFB_DAMPC_SI_2, AFB tests for AFB_DAMP_SI element
 schema AFB_DAMP_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //dtime = 10ms
 set #TUN_IN_SI2 = 0
 check #OUT_DAMPC_SI2 == 0
-check #OUT_ZERO_DAMPC_SI2 == 1
+check #OUT_ZERO_DAMPC_SI2 == 0  //0 ?
 check #OUT_PARAM_ERR_DAMPC_SI2 == 0
 
 set #TUN_IN_SI2 = 1
@@ -80,7 +80,7 @@ endtest
 
 test AFB_DAMPC_SI_3, AFB tests for AFB_DAMP_SI element
 schema AFB_DAMP_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //dtime = 15ms
 set #TUN_IN_SI3 = 0
 check #OUT_DAMPC_SI3 == 0
@@ -107,13 +107,13 @@ check #OUT_DAMPC_SI3 == 99
 check #OUT_ZERO_DAMPC_SI3 == 0
 check #OUT_PARAM_ERR_DAMPC_SI3 == 0
 
-set #TUN_IN_SI3 = 65536
-check #OUT_DAMPC_SI3 == 65536
+set #TUN_IN_SI3 = 65535
+check #OUT_DAMPC_SI3 == 65535
 check #OUT_ZERO_DAMPC_SI3 == 0
 check #OUT_PARAM_ERR_DAMPC_SI3 == 0
 
-set #TUN_IN_SI3 =2147483647
-check #OUT_DAMPC_SI3 == 2147483647
+set #TUN_IN_SI3 =2147483646
+check #OUT_DAMPC_SI3 == 2147483646
 check #OUT_ZERO_DAMPC_SI3 == 0
 check #OUT_PARAM_ERR_DAMPC_SI3 == 0
 endtest

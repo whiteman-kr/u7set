@@ -548,10 +548,10 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
 
-					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]);
-					item->setValue(m_options.comparator().enableMeasureHysteresis());
-					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
-					permissionsGroup->addSubProperty(item);
+//					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]);
+//					item->setValue(m_options.comparator().enableMeasureHysteresis());
+//					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
+//					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);

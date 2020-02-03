@@ -223,15 +223,21 @@ void SchemaLayersDialog::on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item
 void SchemaLayersDialog::on_SchemaLayersDialog_accepted()
 {
 	int index = 0;
+
 	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
 	{
 		l->setShow(m_show[index]);
 		l->setPrint(m_print[index]);
-		if (index == m_activeIndex)
-		{
-			m_schemaView->setActiveLayer(l);
-		}
 
 		index++;
 	}
+
+	if (m_activeIndex >= 0  && m_activeIndex < m_schemaView->schema()->Layers.size() &&
+		m_schemaView->activeLayer() != m_schemaView->schema()->Layers[m_activeIndex])
+	{
+		m_schemaView->setActiveLayer(m_schemaView->schema()->Layers[m_activeIndex]);
+		m_schemaView->clearSelection();
+	}
+
+	return;
 }

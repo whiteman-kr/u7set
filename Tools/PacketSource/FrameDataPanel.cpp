@@ -484,13 +484,13 @@ void FrameDataPanel::setState()
 
 	for (int r = 0; r < rowCount; r++)
 	{
-		int byteIndex = rows[r].row();
-		if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
+		int byteIndx = rows[r].row();
+		if (byteIndx < 0 || byteIndx >= m_frameDataTable.dataSize())
 		{
 			continue;
 		}
 
-		m_frameDataTable.setByte(byteIndex, dialog.byte());
+		m_frameDataTable.setByte(byteIndx, dialog.byte());
 	}
 }
 

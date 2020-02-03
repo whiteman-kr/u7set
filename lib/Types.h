@@ -18,21 +18,48 @@ public:
 	// This enum type is used to describe alignment. It contains horizontal and vertical flags that can be
 	// combined to produce the required effect.
 	//
+
+	/** \brief This enum describes horizontal text alignment
+	 *
+	This enum describes horizontal text alignment.\n\n
+	<b>Example</b>
+	\code
+	var AlignLeft = 0x01;
+	var AlignRight = 0x02;
+	var AlignHCenter = 0x04;
+	var AlignJustify = 0x08;
+	...
+	schemaItem.AlignHorz = AlignRight;
+	\endcode
+	 */
 	enum HorzAlign
 	{
-		AlignLeft = Qt::AlignLeft,				// Aligns with the left edge.
-		AlignRight = Qt::AlignRight,			// Aligns with the right edge.
-		AlignHCenter = Qt::AlignHCenter,		// Centers horizontally in the available space.
-		AlignJustify = Qt::AlignJustify			// Justifies the text in the available space.
+		AlignLeft = Qt::AlignLeft,			/**< AlignLeft = 0x01*/
+		AlignRight = Qt::AlignRight,		/**< AlignRight = 0x02*/
+		AlignHCenter = Qt::AlignHCenter,	/**< AlignHCenter = 0x04*/
+		AlignJustify = Qt::AlignJustify		/**< AlignJustify = 0x08*/
 	};
 	Q_ENUM(HorzAlign)
 
+	/** \brief This enum describes vertical text alignment
+	 *
+	This enum describes vertical text alignment.\n\n
+	<b>Example</b>
+	\code
+	var AlignTop = 0x20;
+	var AlignBottom = 0x40;
+	var AlignVCenter = 0x80;
+	var AlignBaseline = 0x100;
+	...
+	schemaItem.AlignVert = AlignBottom;
+	\endcode
+	 */
 	enum VertAlign
 	{
-		AlignTop = Qt::AlignTop,				// Aligns with the top.
-		AlignBottom = Qt::AlignBottom,			// Aligns with the bottom.
-		AlignVCenter = Qt::AlignVCenter,		// Centers vertically in the available space.
-		AlignBaseline = Qt::AlignBaseline		// Aligns with the baseline.
+		AlignTop = Qt::AlignTop,				/**< AlignTop = 0x20*/
+		AlignBottom = Qt::AlignBottom,			/**< AlignBottom = 0x40*/
+		AlignVCenter = Qt::AlignVCenter,		/**< AlignVCenter = 0x80*/
+		AlignBaseline = Qt::AlignBaseline		/**< AlignBaseline = 0x100*/
 	};
 	Q_ENUM(VertAlign)
 

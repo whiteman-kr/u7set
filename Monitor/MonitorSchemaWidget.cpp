@@ -222,57 +222,6 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 	return;
 }
 
-//void MonitorSchemaWidget::slot_setSchema(QString schemaId)
-//{
-//	if (schemaManager() == nullptr)
-//	{
-//		Q_ASSERT(schemaManager());
-//		return;
-//	}
-
-//	// Save current state to the history
-//	//
-//	resetForwardHistory();
-
-//	if (canBackHistory() == false)
-//	{
-//		VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
-//		Q_ASSERT(currentHistoryItem.m_schemaId == this->schemaId());
-
-//		currentHistoryItem = currentHistoryState();
-//	}
-
-//	// --
-//	//
-//	std::shared_ptr<VFrame30::Schema> schema = schemaManager()->schema(schemaId);
-
-//	if (schema == nullptr)
-//	{
-//		// and there is no startSchemaId (((
-//		// Just create an empty schema
-//		//
-//		schema = std::make_shared<VFrame30::MonitorSchema>();
-//		schema->setSchemaId("EMPTYSCHEMA");
-//		schema->setCaption("Empty Schema");
-//	}
-
-//	// --
-//	//
-//	setSchema(schema, false);
-//	setZoom(100.0, true);
-
-//	// --
-//	//
-//	VFrame30::SchemaHistoryItem hi = currentHistoryState();
-//	m_backHistory.push_back(hi);
-
-//	// --
-//	//
-//	emitHistoryChanged();
-
-//	return;
-//}
-
 MonitorView* MonitorSchemaWidget::monitorSchemaView()
 {
 	MonitorView* result = dynamic_cast<MonitorView*>(schemaView());

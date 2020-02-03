@@ -390,7 +390,8 @@ namespace VFrame30
 		// --
 		//
 		BaseSchemaWidget::setSchema(schema, false);
-		setZoom(100.0, true);
+
+		setZoom(0, true);		// Zoom value 0 means adjust schema zoom to fit screen
 
 		// --
 		//

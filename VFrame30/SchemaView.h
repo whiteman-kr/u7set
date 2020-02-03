@@ -10,6 +10,8 @@ namespace VFrame30
 	class SchemaItem;
 	class CDrawParam;
 
+	static const double ZoomStep = 10;
+
 	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
 	{
 		Q_OBJECT
@@ -18,8 +20,9 @@ namespace VFrame30
 		explicit SchemaView(QWidget* parent = 0);
 		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget* parent = 0);
 
-	protected:
+	public:
 		void updateControlWidgets(bool editMode);
+		void deleteControlWidgets();
 		
 		// Painting
 		//
@@ -56,7 +59,7 @@ namespace VFrame30
 		//
 	public:
 		double zoom() const;
-		void setZoom(double value, bool repaint = true, int dpiX = 0, int dpiY = 0);
+		double setZoom(double value, bool repaint = true, int dpiX = 0, int dpiY = 0);
 
 		const Session& session() const;
 		Session& session();

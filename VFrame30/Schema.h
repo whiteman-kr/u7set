@@ -24,6 +24,53 @@ namespace VFrame30
 	class Bus;
 	class SchemaDetails;
 
+	class Schema;
+
+	// Proxy class for using in scripts
+	//
+	/*! \class ScriptSchema
+		\ingroup view
+		\brief Represents an class that contains schema. Can be get from global <b>view.Schema</b>.
+	*/
+	class ScriptSchema : public QObject
+	{
+		Q_OBJECT
+
+		/// \brief Schema unique identifier (SchemaID).
+		Q_PROPERTY(QString SchemaID READ schemaId)
+
+		/// \brief Schema caption.
+		Q_PROPERTY(QString Caption READ caption)
+
+	public:
+		explicit ScriptSchema(std::shared_ptr<Schema> schema);
+		~ScriptSchema();
+
+	public slots:
+		/// \brief Return true if is ApplicationLogic schema.
+		bool isLogicSchema() const;
+
+		/// \brief Return true if is UserFunctionalBlock schema.
+		bool isUfbSchema() const;
+
+		/// \brief Return true if is Monitor schema.
+		bool isMonitorSchema() const;
+
+		/// \brief Return true if is TuningClient schema.
+		bool isTuningSchema() const;
+
+		/// \brief Return true if is Diag schema.
+		bool isDiagSchema() const;
+
+	private:
+		QString schemaId() const;
+		QString caption() const;
+
+	private:
+		std::shared_ptr<Schema> m_schema;
+	};
+
+
 	class VFRAME30LIBSHARED_EXPORT Schema :
 		public PropertyObject,
 		public Proto::ObjectSerialization<Schema>,
@@ -275,6 +322,11 @@ namespace VFrame30
 		std::shared_ptr<SchemaDetails> schemaDetails(QString schemaId) const;
 
 		QStringList schemasByAppSignalId(const QString& appSignalId) const;
+
+		int schemaCount() const;
+		QString schemaCaptionById(const QString& schemaId) const;
+		QString schemaCaptionByIndex(int schemaIndex) const;
+		QString schemaIdByIndex(int schemaIndex) const;
 
 	private:
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;		// Key is schemaId

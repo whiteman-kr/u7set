@@ -2356,7 +2356,6 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaHistory.svg"), tr("History"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::viewSignalHistory);
-	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -3506,12 +3505,6 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	QDialogButtonBox* buttonBox = new QDialogButtonBox(this);
-	buttonBox->setOrientation(Qt::Horizontal);
-	buttonBox->setStandardButtons(QDialogButtonBox::Close);
-	connect(buttonBox, &QDialogButtonBox::clicked, this, &QDialog::accept);
-	vl->addWidget(buttonBox);
-
 	setLayout(vl);
 
 	m_historyModel = new QStandardItemModel(static_cast<int>(signalChanges.size()), changesetColumnCount, this);
@@ -3531,6 +3524,12 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	historyView->horizontalHeader()->setHighlightSections(false);
 	historyView->horizontalHeader()->setDefaultSectionSize(150);
 	historyView->horizontalHeader()->setStretchLastSection(true);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(this);
+	buttonBox->setOrientation(Qt::Horizontal);
+	buttonBox->setStandardButtons(QDialogButtonBox::Close);
+	connect(buttonBox, &QDialogButtonBox::clicked, this, &QDialog::accept);
+	vl->addWidget(buttonBox);
 
 	// Changeset details
 	//
