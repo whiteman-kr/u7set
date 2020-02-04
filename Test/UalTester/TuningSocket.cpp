@@ -133,7 +133,6 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		m_pTuningBase->Sources().append(TuningSource(dsi));
 
 		//std::cout << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubSystem:" << dsi.lmsubsystem().c_str() << ", EquipmentID:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str() << "\n";
-		std::cout << "TuningSource:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str() << "\n";
 	}
 
 	m_pTuningBase->Sources().sortByID();
