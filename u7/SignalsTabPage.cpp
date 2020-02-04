@@ -3695,6 +3695,12 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_findNextButton->setAutoDefault(false);
 
 	connect(m_findString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_replaceString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_searchInPropertyList, &QComboBox::currentTextChanged, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_caseSensitive, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_wholeWords, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_searchInSelected, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeeded);
+
 	connect(m_replaceString, &QLineEdit::textEdited, this, &FindSignalDialog::updateAllReplacement);
 
 	connect(m_foundList->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FindSignalDialog::selectCurrentSignalOnAppSignalsTab);
