@@ -157,7 +157,7 @@ private Q_SLOTS:
     void jobDestroyed( QObject* object );
 
 private:
-    static JobExecutor* s_instance;
+	static JobExecutor s_instance;
     QQueue<QPointer<Job> > m_queue;
     bool m_jobRunning;
 };

@@ -111,8 +111,6 @@ public:
 
 	QStringList schemasByAppSignalId(const QString& appSignalId) const;
 
-	QVector<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;
-
 	ConfigSettings configuration() const;
 	QString configurationStartSchemaId() const;
 
@@ -135,8 +133,6 @@ private:
 
 	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
 	ConfigSettings m_configuration;
-
-	ComparatorSet m_setPoints;					// ComparatorSet is thread safe in loading new file
 };
 
 #endif // MONITORCONFIGTHREAD_H

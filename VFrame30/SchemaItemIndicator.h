@@ -37,6 +37,7 @@ namespace VFrame30
 		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		std::optional<double> getSignalState(CDrawParam* drawParam, const QString& appSignalId) const;
 
 		// Properties and Data
 		//

@@ -4608,16 +4608,16 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   inline bool drawcustomsetpoints() const;
   inline void set_drawcustomsetpoints(bool value);
 
-  // repeated .Proto.IndicatorHistogramVert customSetPoints = 72;
+  // repeated .Proto.VFrameSetPoint customSetPoints = 72;
   inline int customsetpoints_size() const;
   inline void clear_customsetpoints();
   static const int kCustomSetPointsFieldNumber = 72;
-  inline const ::Proto::IndicatorHistogramVert& customsetpoints(int index) const;
-  inline ::Proto::IndicatorHistogramVert* mutable_customsetpoints(int index);
-  inline ::Proto::IndicatorHistogramVert* add_customsetpoints();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >&
+  inline const ::Proto::VFrameSetPoint& customsetpoints(int index) const;
+  inline ::Proto::VFrameSetPoint* mutable_customsetpoints(int index);
+  inline ::Proto::VFrameSetPoint* add_customsetpoints();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >&
       customsetpoints() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >*
       mutable_customsetpoints();
 
   // @@protoc_insertion_point(class_scope:Proto.IndicatorHistogramVert)
@@ -4676,7 +4676,7 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   bool drawcustomsetpoints_;
   double gridmainstep_;
   double gridsmallstep_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert > customsetpoints_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint > customsetpoints_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
@@ -20937,27 +20937,27 @@ inline void IndicatorHistogramVert::set_drawcustomsetpoints(bool value) {
   drawcustomsetpoints_ = value;
 }
 
-// repeated .Proto.IndicatorHistogramVert customSetPoints = 72;
+// repeated .Proto.VFrameSetPoint customSetPoints = 72;
 inline int IndicatorHistogramVert::customsetpoints_size() const {
   return customsetpoints_.size();
 }
 inline void IndicatorHistogramVert::clear_customsetpoints() {
   customsetpoints_.Clear();
 }
-inline const ::Proto::IndicatorHistogramVert& IndicatorHistogramVert::customsetpoints(int index) const {
+inline const ::Proto::VFrameSetPoint& IndicatorHistogramVert::customsetpoints(int index) const {
   return customsetpoints_.Get(index);
 }
-inline ::Proto::IndicatorHistogramVert* IndicatorHistogramVert::mutable_customsetpoints(int index) {
+inline ::Proto::VFrameSetPoint* IndicatorHistogramVert::mutable_customsetpoints(int index) {
   return customsetpoints_.Mutable(index);
 }
-inline ::Proto::IndicatorHistogramVert* IndicatorHistogramVert::add_customsetpoints() {
+inline ::Proto::VFrameSetPoint* IndicatorHistogramVert::add_customsetpoints() {
   return customsetpoints_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >&
 IndicatorHistogramVert::customsetpoints() const {
   return customsetpoints_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >*
 IndicatorHistogramVert::mutable_customsetpoints() {
   return &customsetpoints_;
 }

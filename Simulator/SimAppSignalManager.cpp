@@ -349,5 +349,11 @@ static const AppSignalParam dummy;
 		return signalState(appSignalHashes, result, found);
 	}
 
+	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& /*appSignalId*/) const
+	{
+		Q_ASSERT(false);		// TO DO
+		return {};
+	}
+
 
 }

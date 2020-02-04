@@ -271,6 +271,58 @@ namespace VFrame30
 		return ok;
 	}
 
+	std::optional<double> SchemaItemIndicator::getSignalState(CDrawParam* drawParam, const QString& appSignalId) const
+	{
+		if (drawParam->isMonitorMode() == false)
+		{
+			return {};
+		}
+
+		bool valid = false;
+		double value = -1;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+			}
+			else
+			{
+				AppSignalState state = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+
+				valid = state.isValid();
+				value = state.value();
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				TuningSignalState state = drawParam->tuningController()->signalState(appSignalId, nullptr);
+
+				valid = state.valid();
+				value = state.value().toDouble();
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		if (valid == false)
+		{
+			return {};
+		}
+		else
+		{
+			return {value};
+		}
+	}
+
 	// Properties and Data
 	//
 	// AppSignalIDs

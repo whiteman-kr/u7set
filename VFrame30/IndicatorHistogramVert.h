@@ -24,7 +24,7 @@ namespace VFrame30
 		bool save(Proto::VFrameSetPoint* message) const;
 		bool load(const Proto::VFrameSetPoint& message);
 
-	public:
+	public slots:
 		E::IndicatorSetpointType setpointType() const;
 		void setSetpointType(E::IndicatorSetpointType value);
 
@@ -85,18 +85,20 @@ namespace VFrame30
 		virtual bool save(Proto::SchemaItemIndicator* message) const override;
 		virtual bool load(const Proto::SchemaItemIndicator& message, SchemaUnit unit) override;
 
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* item) const override;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* schemaItem) const override;
 
 	private:
-		void drawBar(CDrawParam* drawParam, const QRectF& barRect, int signalIndex, const QString appSignalId, QColor barColor, const SchemaItemIndicator* item) const;
+		void drawBar(CDrawParam* drawParam, const QRectF& barRect, int signalIndex, const QString appSignalId, QColor barColor, const SchemaItemIndicator* schemaItem) const;
+
 		struct DrawGridStruct
 		{
 			double gridVertPos;
 			double gridWidth;
 			QString text;
 		};
-
 		void drawGrids(const std::vector<DrawGridStruct> grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const;
+
+		void drawSetpoints(CDrawParam* drawParam, const std::vector<QRectF>& barRects, const SchemaItemIndicator* schemaItem) const;
 
 
 	private:
@@ -122,7 +124,11 @@ namespace VFrame30
 
 		bool m_drawAutoSetpoints = true;					// Draw all auto generated setpoints
 		bool m_drawCustomSetpoints = true;					// Draw custom setpoints
+
 		PropertyVector<CustomSetPoint> m_customSetPoints;	// Custom setpoint list
 	};
 
 }
+
+Q_DECLARE_METATYPE(VFrame30::CustomSetPoint)
+Q_DECLARE_METATYPE(PropertyVector<VFrame30::CustomSetPoint>)

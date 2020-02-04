@@ -437,27 +437,29 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		m_configuration = readSettings;
 	}
 
-	// New set points
+	// New setpoints
 	//
 	{
 		QByteArray data;
 		QString errorString;
 
-		bool result = getFileBlockedById(CFG_FILE_ID_COMPARATOR_SET, &data, &errorString);
-
-		if (result == false)
+		if (bool result = getFileBlockedById(CFG_FILE_ID_COMPARATOR_SET, &data, &errorString);
+			result == false)
 		{
 			readSettings.errorMessage += errorString + QStringLiteral("\n");
 		}
 		else
 		{
-			m_setPoints.clear();
+			ComparatorSet setpoints;
 
-			bool readOk = m_setPoints.serializeFrom(data);
-
-			if (readOk == false)
+			if (bool readOk = setpoints.serializeFrom(data);
+				readOk == false)
 			{
 				readSettings.errorMessage += tr("Serialize set point list file error") + QStringLiteral("\n");
+			}
+			else
+			{
+				theSignals.setSetpoints(std::move(setpoints));
 			}
 		}
 	}
@@ -730,11 +732,6 @@ QStringList MonitorConfigController::schemasByAppSignalId(const QString& appSign
 {
 	QMutexLocker l(&m_mutex);
 	return m_schemaDetailsSet.schemasByAppSignalId(appSignalId);
-}
-
-QVector<std::shared_ptr<Comparator>> MonitorConfigController::getByInputSignalID(const QString& appSignalID) const
-{
-	return m_setPoints.getByInputSignalID(appSignalID);
 }
 
 ConfigSettings MonitorConfigController::configuration() const

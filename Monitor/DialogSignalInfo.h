@@ -144,7 +144,7 @@ private:
 
 	AppSignalParam m_signal;
 
-	QVector<std::shared_ptr<Comparator>> m_comparators;
+	std::vector<std::shared_ptr<Comparator>> m_setpoints;
 
 	int m_updateStateTimerId = -1;
 	int m_currentPrecision = 0;

@@ -555,9 +555,9 @@ message IndicatorHistogramVert
 	optional double gridMainStep = 50 [default = 50.0];
 	optional double gridSmallStep = 51 [default = 10.0];
 
-    optional bool drawAutoSetpoints = 70;
-	optional bool drawCustomSetpoints = 71;
-	repeated IndicatorHistogramVert customSetPoints = 72;
+    optional bool drawAutoSetpoints = 70 [default = true];
+	optional bool drawCustomSetpoints = 71 [default = false];
+	repeated VFrameSetPoint customSetPoints = 72;
 }
 
 message IndicatorArrowIndicator
