@@ -58,11 +58,17 @@ void SourceWorker::process()
 		return;
 	}
 
+	int frameCount = pSource->info().frameCount;
+	if (frameCount == 0)
+	{
+		frameCount = 1;
+	}
+
 	int currentFrameIndex = 0;
 
 	while(m_finishThread == false)
 	{
-		for (int frameNumber = 0; frameNumber < pSource->info().frameCount; frameNumber++)
+		for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
 		{
 			// header RupFrame
 			//
@@ -73,8 +79,8 @@ void SourceWorker::process()
 			header.dataId = static_cast<quint32>(pSource->info().dataID);
 			header.moduleType = static_cast<quint16>(pSource->info().moduleType);
 			header.numerator = static_cast<quint16>(m_numerator);
-			header.framesQuantity = static_cast<quint16>(pSource->info().frameCount);
-			header.frameNumber = static_cast<quint16>(frameNumber);
+			header.framesQuantity = static_cast<quint16>(frameCount);
+			header.frameNumber = static_cast<quint16>(frameIndex);
 
 			QDateTime&& time = QDateTime::currentDateTime();
 			Rup::TimeStamp& timeStamp = header.timeStamp;
@@ -123,6 +129,8 @@ void SourceWorker::process()
 
 			m_sentFrames++;
 
+			//
+			//
 			currentFrameIndex++;
 			if (currentFrameIndex >= pSource->info().frameCount)
 			{

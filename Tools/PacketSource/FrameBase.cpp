@@ -93,6 +93,11 @@ bool FrameBase::setFrameCount(int count)
 {
 	bool result = false;
 
+	if (count == 0)
+	{
+		count = 1;
+	}
+
 	m_frameMutex.lock();
 
 		m_frameList.clear();
