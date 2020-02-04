@@ -221,6 +221,28 @@ void MainWindow::createActions()
 	//m_pLogAction->setEnabled(false);
 	connect(m_logAction, &QAction::triggered, this, &MainWindow::showLog);
 
+
+
+	m_manualRpctAction = new QAction(tr("RPCT User Manual"), this);
+	m_manualRpctAction->setStatusTip(tr("Show RPCT User Manual"));
+	connect(m_manualRpctAction, &QAction::triggered, this, &MainWindow::showRpctUserManual);
+
+	m_manualRpctAppendixAAction = new QAction(tr("RPCT User Manual Errors and Warnings"), this);
+	m_manualRpctAppendixAAction->setStatusTip(tr("Show RPCT User Manual Errors and Warnings"));
+	connect(m_manualRpctAppendixAAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixA);
+
+	m_manualAfblAction = new QAction(tr("AFB Library Reference"), this);
+	m_manualAfblAction->setStatusTip(tr("Show AFB Library Reference"));
+	connect(m_manualAfblAction, &QAction::triggered, this, &MainWindow::showAfblReference);
+
+	m_manualMatsAction = new QAction(tr("MATS User Manual"), this);
+	m_manualMatsAction->setStatusTip(tr("Show MATS User Manual"));
+	connect(m_manualMatsAction, &QAction::triggered, this, &MainWindow::showMatsUserManual);
+
+	m_manualTuningAction = new QAction(tr("Tuning User Manual"), this);
+	m_manualTuningAction->setStatusTip(tr("Show Tuning User Manual"));
+	connect(m_manualTuningAction, &QAction::triggered, this, &MainWindow::showTuningUserManual);
+
 	m_shortcutsAction = new QAction(tr("Shortcuts..."), this);
 	m_shortcutsAction->setStatusTip(tr("Show shortcuts"));
 	connect(m_shortcutsAction, &QAction::triggered, this, &MainWindow::showShortcuts);
@@ -352,6 +374,14 @@ void MainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_manualRpctAction);
+	pHelpMenu->addAction(m_manualRpctAppendixAAction);
+	pHelpMenu->addAction(m_manualAfblAction);
+	pHelpMenu->addAction(m_manualMatsAction);
+	pHelpMenu->addAction(m_manualTuningAction);
+
+	pHelpMenu->addSeparator();
+
 	pHelpMenu->addAction(m_shortcutsAction);
 	pHelpMenu->addAction(m_aboutAction);
 
@@ -457,6 +487,32 @@ void MainWindow::showShortcuts()
 
 	UiTools::adjustDialogPlacement(m_dialogShortcuts);
 }
+
+void MainWindow::showRpctUserManual()
+{
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+}
+
+void MainWindow::showRpctUserManualAppendixA()
+{
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+}
+
+void MainWindow::showAfblReference()
+{
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+}
+
+void MainWindow::showMatsUserManual()
+{
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+}
+
+void MainWindow::showTuningUserManual()
+{
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+}
+
 
 void MainWindow::runConfigurator()
 {
@@ -1013,3 +1069,4 @@ DbController* MainWindow::db()
 	assert(m_dbController != nullptr);
 	return m_dbController;
 }
+
