@@ -190,6 +190,8 @@ windows build job:
       - bin/release/printsupport/*.dll
       - bin/release/scripthelp/*.*
       - bin/release/scripthelp/search/*.*
+      - bin/release/docs/*.*
+      - bin/release/docs/Appendixes/*.*
 
 #deploy job:
 #  stage: deploy
