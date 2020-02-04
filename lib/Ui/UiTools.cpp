@@ -3,6 +3,7 @@
 #include <QDialog>
 #include <QDesktopWidget>
 #include <QDateTime>
+#include <QDesktopServices>
 
 void UiTools::adjustDialogPlacement(QDialog* dialog)
 {
@@ -38,5 +39,19 @@ void UiTools::adjustDialogPlacement(QDialog* dialog)
 	{
 		windowRect.moveBottom(desktopRect.bottom());
 		dialog->move(windowRect.topLeft());
+	}
+}
+
+void UiTools::openPdf(const QString& file, QWidget* parent)
+{
+	QFile f(file);
+	if (f.exists() == true)
+	{
+		QUrl url = QUrl::fromLocalFile(file);
+		QDesktopServices::openUrl(url);
+	}
+	else
+	{
+		QMessageBox::critical(parent, qAppName(), QObject::tr("Help file '%1' does not exist!").arg(file));
 	}
 }

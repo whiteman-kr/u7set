@@ -568,7 +568,7 @@ namespace Builder
 
 		void setAcquired(bool acquired);
 
-		bool addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log);
+		bool addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, IssueLogger* log);
 
 	private:
 		const UalItem* m_ualItem = nullptr;

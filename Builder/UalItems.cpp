@@ -2095,7 +2095,7 @@ namespace Builder
 		}
 	}
 
-	bool UalSignal::addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log)
+	bool UalSignal::addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, IssueLogger* log)
 	{
 		bool result = true;
 
@@ -2112,20 +2112,18 @@ namespace Builder
 
 			signalWithFlagID_isFound = true;
 
-			bool res = s->addStateFlagSignal(flagType, flagSignal->appSignalID());
+			bool res = s->addFlagSignalID(flagType, flagSignalID);
 
 			if (res == false)
 			{
 				// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 				//
-				log->wrnALC5168(flagSignal->appSignalID(),
+				log->errALC5168(flagSignalID,
 								E::valueToString<E::AppSignalStateFlagType>(flagType),
 								s->appSignalID(),
-								s->stateFlagSignal(flagType),
+								s->getFlagSignalID(flagType),
 								QUuid(),
 								QString());
-
-				res = true;		// remove after wrnALC5168 transform to Error
 			}
 
 			result &= res;
@@ -2135,7 +2133,7 @@ namespace Builder
 		{
 			LOG_INTERNAL_ERROR_MSG(log,
 								   QString("UalSignal::addStateFlagSignal error. SignalWithFlagID %1 is not found in UalSignal %2 to assigninf flag signal %3").
-										arg(signalWithFlagID).arg(refSignalIDsJoined()).arg(flagSignal->appSignalID()));
+										arg(signalWithFlagID).arg(refSignalIDsJoined()).arg(flagSignalID));
 			result = false;
 		}
 

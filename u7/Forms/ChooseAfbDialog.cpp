@@ -1,4 +1,5 @@
 #include "ChooseAfbDialog.h"
+#include "../lib/Ui/UiTools.h"
 #include "ui_ChooseAfbDialog.h"
 #include "../VFrame30/SchemaItemAfb.h"
 
@@ -315,4 +316,9 @@ void AfbHelpWidget::setAfb(std::shared_ptr<Afb::AfbElement> afb)
 	update();
 
 	return;
+}
+
+void ChooseAfbDialog::on_btnAfbLibraryHelp_clicked()
+{
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
 }

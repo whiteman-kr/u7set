@@ -156,6 +156,15 @@ windows build job:
     - "call ScriptHelp.bat"
     - "popd ."
 
+#Request documents from SVN
+    - "rem ----------------------------------------------"
+    - "rem               Request documents from SVN"
+    - "rem ----------------------------------------------"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\doc"
+    - "call SvnGetDocs.bat"
+    - "popd ."
+
 #Build Installer
     - "rem ----------------------------------------------"
     - "rem               Build Installer"
