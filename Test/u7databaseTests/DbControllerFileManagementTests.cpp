@@ -1193,6 +1193,13 @@ void DbControllerFileTests::getFileHistoryTest()
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	DbFileInfo file;
 
 	QSqlQuery query, instanceQuery;
@@ -1241,7 +1248,7 @@ void DbControllerFileTests::getFileHistoryTest()
 	ok = m_db->checkIn(file, comment, 0);
 	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2);").arg(m_db->currentUser().userId()).arg(fileId));
+	ok = query.exec(QString("SELECT * FROM api.get_file_history('%1', %2);").arg(session_key).arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	std::vector<DbChangeset> result;
@@ -1265,7 +1272,16 @@ void DbControllerFileTests::getFileHistoryTest()
 		QVERIFY2 (exist == true, qPrintable ("Error: function getFileHistory of DbController has returned wrong result!"));
 	}
 
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
 	db.close();
+
+	return;
 }
 
 void DbControllerFileTests::getLatestFileVersionTest()

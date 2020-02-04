@@ -109,7 +109,7 @@ public:
 	static const char* PROP_LM_NUMBER;
 	static const char* PROP_LM_CHANNEL;
 	static const char* PROP_LM_SUBSYSTEM_KEY;
-	static const char* PROP_LM_SUBSYSTEM;
+	static const char* PROP_LM_SUBSYSTEM_ID;
 	static const char* PROP_LM_MODULE_TYPE;
 	static const char* PROP_LM_CAPTION;
 	static const char* PROP_LM_ADAPTER_ID;
@@ -159,8 +159,8 @@ public:
 	int lmModuleType() const { return m_lmModuleType; }
 	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
 
-	QString lmSubsystem() const { return m_lmSubsystem; }
-	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystem = lmSubsystem; }
+	QString lmSubsystem() const { return m_lmSubsystemID; }
+	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystemID = lmSubsystem; }
 
 	QString lmCaption() const { return m_lmCaption; }
 	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
@@ -232,7 +232,7 @@ private:
 	int m_lmModuleType = 0;
 	int m_lmSubsystemKey = 0;
 	QString m_lmSubsystemChannel;				// A, B, C...
-	QString m_lmSubsystem;
+	QString m_lmSubsystemID;
 	QString m_lmCaption;
 	QString m_lmAdapterID;
 	bool m_lmDataEnable = false;
@@ -266,6 +266,7 @@ private:
 	};
 
 	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
+	static const int DATA_RECEIVING_RATE_CALC_PERIOD = 2000;
 
 public:
 	DataSourceOnline();
@@ -283,6 +284,7 @@ public:
 
 	qint64 uptime() const { return m_uptime; }
 	void setUptime(qint64 uptime) { m_uptime = uptime; }
+	void updateUptime();
 
 	quint64 receivedDataID() const { return m_receivedDataID; }
 	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
@@ -374,6 +376,8 @@ private:
 	bool collect(const RupFrameTime& rupFrameTime);
 	bool reallocate(quint32 framesQuantity);
 
+	void calcDataReceivingRate();
+
 private:
 	// static information
 	//
@@ -382,7 +386,7 @@ private:
 	// dynamic state information
 	//
 	E::DataSourceState m_state = E::DataSourceState::NoData;
-	qint64 m_uptime = 0;
+	qint64 m_uptime = 0;										// in seconds!
 	quint64 m_receivedDataID = 0;
 
 	qint32 m_rupFramesQueueSize = 0;
@@ -415,6 +419,7 @@ private:
 
 	//
 
+	qint64 m_firstPacketSystemTime = 0;
 	qint64 m_lastPacketSystemTime = 0;
 	bool m_firstRupFrame = true;
 
@@ -431,8 +436,7 @@ private:
 	quint32 m_framesQuantityAllocated = 0;
 	Rup::Header* m_rupFramesHeaders = nullptr;
 	Rup::Data* m_rupFramesData = nullptr;
-
-	qint64 m_firstFrameServerTime = 0;
+	qint64 m_frame0ServerTime = 0;
 
 	// result variables
 
@@ -442,6 +446,13 @@ private:
 	Times m_lastRupDataTimes;
 	quint16 m_packetNo = 0;
 	int m_rupDataSize = 0;
+
+	// variables to calc data receiving rate
+	//
+	bool m_firstCalc = true;
+	int m_calcFramesCtr = 0;
+	qint64 m_prevCalcTime = -1;
+	qint64 m_prevReceivedSize = -1;
 };
 
 

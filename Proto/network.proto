@@ -104,8 +104,8 @@ message DataSourceInfo
     optional int32 lmDataType = 4 [default = 0];
     optional string lmIP = 5;
     optional int32 lmPort = 6 [default = 0];
-    optional int32 lmSubsystemID = 7 [default = 0];
-    optional string lmSubsystem = 8;
+	optional int32 lmSubsystemKey = 7 [default = 0];
+	optional string lmSubsystemID = 8;
     optional string lmSubsystemChannel = 9;
     optional int32 lmNumber = 10 [default = 0];
     optional int32 lmModuleType = 11 [default = 0];
@@ -178,6 +178,8 @@ message AppDataSourceState
 
 	optional int32 rupFramesQueueSize = 28 [default = 0];
 	optional int32 signalStatesQueueSize = 29 [default = 0];
+
+    optional int32 state = 30 [default = 0];		// == E::DataSourceState::NoData
 }
 
 

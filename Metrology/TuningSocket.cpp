@@ -155,7 +155,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		const ::Network::DataSourceInfo& dsi = m_tuningDataSourcesInfoReply.datasourceinfo(i);
 		theSignalBase.tuning().Sources().append(TuningSource(dsi));
 
-		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubSystem:" << dsi.lmsubsystem().c_str() << ", EquipmentID:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str();
+		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubsystemID:" << dsi.lmsubsystemid().c_str() << ", EquipmentID:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str();
 	}
 
 	theSignalBase.tuning().Sources().sortByID();

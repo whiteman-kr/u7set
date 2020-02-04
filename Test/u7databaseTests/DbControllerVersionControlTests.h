@@ -10,10 +10,15 @@ class DbControllerVersionControlTests : public QObject
 public:
 	DbControllerVersionControlTests();
 
+protected:
+	QString logIn(QString username, QString password);		// returns session_key
+	bool logOut();
+
 private slots:
 	void initTestCase();
 	void isAnyCheckedOutTest();
 	void lastChangesetIdTest();
+	void get_changeset_details();
 	void cleanupTestCase();
 
 private:
