@@ -81,6 +81,7 @@ protected slots:
 	void showStatistics();
 
 	void showAbout();
+	void showMatsUserManual();
 	void debug();
 
 	// slots
@@ -159,6 +160,7 @@ private:
 	QAction* m_pDebugAction = nullptr;
 	QAction* m_pLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
+	QAction* m_manualMatsAction = nullptr;
 
 	QAction* m_newTabAction = nullptr;
 	QAction* m_closeTabAction = nullptr;

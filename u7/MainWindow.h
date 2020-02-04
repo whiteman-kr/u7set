@@ -62,6 +62,12 @@ protected slots:
 	void showSettings();
 	void showShortcuts();
 
+	void showRpctUserManual();
+	void showRpctUserManualAppendixA();
+	void showAfblReference();
+	void showMatsUserManual();
+	void showTuningUserManual();
+
 	void runConfigurator();
 	void runSubsystemListEditor();
     void runConnectionsEditor();
@@ -84,6 +90,7 @@ private slots:
 protected:
 	DbController* dbController();
 	DbController* db();
+
     
 	// Data
 	//
@@ -94,6 +101,12 @@ private:
 	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
 	QAction* m_shortcutsAction = nullptr;
+
+	QAction* m_manualRpctAction = nullptr;
+	QAction* m_manualRpctAppendixAAction = nullptr;
+	QAction* m_manualAfblAction = nullptr;
+	QAction* m_manualMatsAction = nullptr;
+	QAction* m_manualTuningAction = nullptr;
 
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;

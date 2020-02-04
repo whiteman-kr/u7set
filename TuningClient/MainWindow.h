@@ -82,6 +82,7 @@ public slots:
 	void showAppLog();
 	void showSignalsLog();
 	void showAbout();
+	void showTuningUserManual();
 
 	void slot_userFiltersChanged();
 
@@ -111,6 +112,7 @@ private:
 	QAction* m_pAppLogAction = nullptr;
 	QAction* m_pSignalLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
+	QAction* m_manualTuningAction = nullptr;
 
 	QLabel* m_statusBarBuildInfo = nullptr;
 	QLabel* m_statusBarLmControlMode = nullptr;

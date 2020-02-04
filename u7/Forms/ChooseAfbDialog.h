@@ -41,6 +41,8 @@ private slots:
 
     void on_editQuickSearch_textEdited(const QString &arg1);
 
+	void on_btnAfbLibraryHelp_clicked();
+
 private:
 	Ui::ChooseAfbDialog *ui;
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_elements;

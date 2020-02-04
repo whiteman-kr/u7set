@@ -201,8 +201,8 @@ void TuningServiceWidget::reloadTuningSourcesList()
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lmip()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lmport());
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), QString::fromStdString(ts.info.lmsubsystemchannel()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.lmsubsystemid());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.lmsubsystem()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.lmsubsystemkey());
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.lmsubsystemid()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), ts.info.lmnumber());
 
 		for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)

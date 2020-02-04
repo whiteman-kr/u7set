@@ -7,4 +7,5 @@
     <Default>false</Default>
     <SortingPriority>30</SortingPriority>
     <Script>installscript.qs</Script>
+    <Dependencies>u7set.mats.tuningclient.docs</Dependencies>
 </Package>

@@ -7,4 +7,5 @@
     <Default>true</Default>
     <SortingPriority>100</SortingPriority>
     <Script>installscript.qs</Script>
+    <Dependencies>u7set.develop.rpct.docs, u7set.mats.monitor.docs, u7set.mats.tuningclient.docs</Dependencies>
 </Package>
