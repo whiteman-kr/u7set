@@ -6,7 +6,7 @@ IF NOT EXIST ..\bin\release\docs (
 
 FOR /F "delims=|" %%d  IN (SvnDocList.txt) DO (
 
-	svn checkout "https://delo:8443/svn//RadICS_Platform/trunk/Docs/FSC Documents/FSC Safety Manual/%%d" ..\bin\release\docs\%%d --depth empty --username=gitlab --password gitl@b
+	svn checkout "https://delo:8443/svn//RadICS_Platform/trunk/Docs/FSC Documents/FSC Safety Manual/%%d" ..\bin\release\docs\%%d --depth empty --non-interactive --trust-server-cert --username=gitlab --password gitl@b
 
 	PUSHD .
 	
@@ -34,9 +34,13 @@ IF NOT EXIST ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf  goto SvnError
 
 :SvnSuccess
 echo All files were successfully received from SVN.
+cmd /c exit 0
+echo Errorlevel = %errorlevel%
 goto Done
 
 :SvnError
 echo ERROR - some files were not received from SVN!
+cmd /c exit 1
+echo Errorlevel = %errorlevel%
 
 :Done
