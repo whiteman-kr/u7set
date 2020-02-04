@@ -25,8 +25,46 @@ bool TestCmdParam::isEmtpy()
 void TestCmdParam::clear()
 {
 	m_name.clear();
+	m_flag = TF_UNDEFINED_FLAG;
 	m_type = TestCmdParamType::Undefined;
 	m_value.clear();
+}
+
+bool TestCmdParam::getFlag(QString& signalID)
+{
+	m_flag = TF_UNDEFINED_FLAG;
+
+	if (signalID.indexOf(":") == -1)
+	{
+		return true;
+	}
+
+	QStringList signalFlags = signalID.split(":");
+
+	// update signalID
+	//
+	signalID = signalFlags[0].simplified();
+
+	// get name of flag
+	//
+	QString flagName = signalFlags[1].simplified();
+
+	QMetaEnum asf = QMetaEnum::fromType<E::AppSignalStateFlagType>();
+	for(int f = 0; f < asf.keyCount(); f++)
+	{
+		if (asf.key(f) == flagName)
+		{
+			m_flag = f;
+			break;
+		}
+	}
+
+	if (m_flag == TF_UNDEFINED_FLAG)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 QString TestCmdParam::valueStr(bool addParamName, int precise)
@@ -87,93 +125,126 @@ QString TestCmdParam::valueStr(bool addParamName, int precise)
 
 	if (addParamName == true)
 	{
-		str = m_name + "=" + str;
+		if (m_flag == TF_UNDEFINED_FLAG)
+		{
+			str = m_name + "=" + str;
+		}
+		else
+		{
+			QMetaEnum asf = QMetaEnum::fromType<E::AppSignalStateFlagType>();
+
+			str = m_name + ":" + asf.key(m_flag) + "=" + str;
+		}
+
 	}
 
 	return str;
 }
 
-bool TestCmdParam::compare(QVariant cmpValue)
+bool TestCmdParam::compare(const AppSignalState& state)
 {
 	bool result = false;
 
-	switch (m_type)
+	if (isFlag() == false)
 	{
-		case TestCmdParamType::Undefined:
+		QVariant cmpValue = state.value();
 
-			result = false;
-			break;
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:
 
-		case TestCmdParamType::Discrete:
-		case TestCmdParamType::SignedInt32:
-		case TestCmdParamType::SignedInt64:
+				result = false;
+				break;
 
-			result = m_value.toInt() == cmpValue.toInt();
-			break;
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:
 
-		case TestCmdParamType::Float:
+				result = m_value.toInt() == cmpValue.toInt();
+				break;
+
+			case TestCmdParamType::Float:
+				{
+					float lFloat = m_value.toFloat();
+					float rFloat = cmpValue.toFloat();
+
+					// nan
+					//
+					if (std::isnan(lFloat) == true && std::isnan(rFloat) == true)
+					{
+						result = true;
+						break;
+					}
+
+					// inf
+					//
+					if (std::isinf(lFloat) == true && std::isinf(rFloat) == true)
+					{
+						result = true;
+						break;
+					}
+
+					// simple float digit
+					//
+					result = std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
+				}
+				break;
+
+			case TestCmdParamType::Double:
+				{
+					double lDouble = m_value.toDouble();
+					double rDouble = cmpValue.toDouble();
+
+					// nan
+					//
+					if (std::isnan(lDouble) == true && std::isnan(rDouble) == true)
+					{
+						result = true;
+						break;
+					}
+
+					// inf
+					//
+					if (std::isinf(lDouble) == true && std::isinf(rDouble) == true)
+					{
+						result = true;
+						break;
+					}
+
+					// simple double digit
+					//
+					result = std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
+				}
+				break;
+
+			case TestCmdParamType::String:
+
+				result = m_value.toString() == cmpValue.toString();
+				break;
+
+			default:
+
+				assert(false);
+				break;
+		}
+	}
+	else
+	{
+		if (m_type == TestCmdParamType::SignedInt32)
+		{
+			switch (static_cast<E::AppSignalStateFlagType>(m_flag))
 			{
-				float lFloat = m_value.toFloat();
-				float rFloat = cmpValue.toFloat();
-
-				// nan
-				//
-				if (std::isnan(lFloat) == true && std::isnan(rFloat) == true)
-				{
-					result = true;
-					break;
-				}
-
-				// inf
-				//
-				if (std::isinf(lFloat) == true && std::isinf(rFloat) == true)
-				{
-					result = true;
-					break;
-				}
-
-				// simple float digit
-				//
-				result = std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
+				case E::AppSignalStateFlagType::Validity:		result = m_value.toBool() == state.isValid();			break;
+				case E::AppSignalStateFlagType::StateAvailable:	result = m_value.toBool() == state.isStateAvailable();	break;
+				case E::AppSignalStateFlagType::Simulated:		result = m_value.toBool() == state.isSimulated();		break;
+				case E::AppSignalStateFlagType::Blocked:		result = m_value.toBool() == state.isBlocked();			break;
+				case E::AppSignalStateFlagType::Mismatch:		result = m_value.toBool() == state.isMismatch();		break;
+				case E::AppSignalStateFlagType::AboveHighLimit:	result = m_value.toBool() == state.isAboveHighLimit();	break;
+				case E::AppSignalStateFlagType::BelowLowLimit:	result = m_value.toBool() == state.isBelowLowLimit();	break;
+				default:										assert(0); result = false;								break;
 			}
-			break;
 
-		case TestCmdParamType::Double:
-			{
-				double lDouble = m_value.toDouble();
-				double rDouble = cmpValue.toDouble();
-
-				// nan
-				//
-				if (std::isnan(lDouble) == true && std::isnan(rDouble) == true)
-				{
-					result = true;
-					break;
-				}
-
-				// inf
-				//
-				if (std::isinf(lDouble) == true && std::isinf(rDouble) == true)
-				{
-					result = true;
-					break;
-				}
-
-				// simple double digit
-				//
-				result = std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
-			}
-			break;
-
-		case TestCmdParamType::String:
-
-			result = m_value.toString() == cmpValue.toString();
-			break;
-
-		default:
-
-			assert(false);
-			break;
+		}
 	}
 
 	return result;
@@ -182,6 +253,7 @@ bool TestCmdParam::compare(QVariant cmpValue)
 TestCmdParam& TestCmdParam::operator=(const TestCmdParam& from)
 {
 	m_name = from.m_name;
+	m_flag = from.m_flag;
 	m_type = from.m_type;
 	m_value = from.m_value;
 
@@ -817,7 +889,7 @@ bool TestCmd::parseCmdSet()
 		}
 
 		TestSignal signal = m_pSignalBase->signal(signalID);
-		if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+		if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == UNDEFINED_HASH)
 		{
 			QString errorStr = QString("(line %1) Error : Signal %2 has not found in the signal base").arg(m_lineIndex).arg(signalID);
 			m_errorList.append(errorStr);
@@ -936,8 +1008,19 @@ bool TestCmd::parseCmdCheck()
 			continue;
 		}
 
+		// if signal ID has flags
+		//
+		if (param.getFlag(signalID) == false)
+		{
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		// find signal by signalID
+		//
 		TestSignal signal = m_pSignalBase->signal(signalID);
-		if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+		if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == UNDEFINED_HASH)
 		{
 			QString errorStr = QString("(line %1) Error : Signal %2 has not found in the signal base").arg(m_lineIndex).arg(signalID);
 			m_errorList.append(errorStr);
@@ -956,16 +1039,32 @@ bool TestCmd::parseCmdCheck()
 
 		//
 		//
-		bool signalValueIsDigit = false;
-		signalValue.toFloat(&signalValueIsDigit);
-
-		if (signalValueIsDigit == true)
+		if (param.isFlag() == false)
 		{
-			param = paramFromSignal(signalID, signalValue, signal.param());
+			bool signalValueIsDigit = false;
+			signalValue.toFloat(&signalValueIsDigit);
+
+			if (signalValueIsDigit == true)
+			{
+				param = paramFromSignal(signalID, signalValue, signal.param());
+			}
+			else
+			{
+				param = paramFromConstOrVar(signalID, signalValue, signal.param());
+			}
 		}
 		else
 		{
-			param = paramFromConstOrVar(signalID, signalValue, signal.param());
+			if (signalValue != "0" && signalValue != "1")
+			{
+				QString errorStr = QString("(line %1) Error : Signal %2 failed value of flag (0 or 1)").arg(m_lineIndex).arg(signal.param().appSignalID());
+				m_errorList.append(errorStr);
+				continue;
+			}
+
+			param.setName(signal.param().appSignalID());
+			param.setType(TestCmdParamType::SignedInt32);
+			param.setValue(signalValue.toInt());
 		}
 
 		if (param.isEmtpy() == true)

@@ -53,6 +53,14 @@ enum class TestCmdParamType
 
 // ==============================================================================================
 
+const int		TF_UNDEFINED_FLAG = -1;
+
+// ==============================================================================================
+
+#define			TF_SPACE			QString("    ")
+
+// ==============================================================================================
+
 class TestCmdParam
 {
 
@@ -65,6 +73,7 @@ public:
 private:
 
 	QString m_name;
+	int m_flag = TF_UNDEFINED_FLAG;
 	TestCmdParamType m_type = TestCmdParamType::Undefined;
 	QVariant m_value;
 
@@ -76,6 +85,10 @@ public:
 	QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
+	int flag() const { return m_flag; }
+	bool getFlag(QString& signalID);
+	bool isFlag() { return m_flag != TF_UNDEFINED_FLAG; }
+
 	TestCmdParamType type() const { return m_type; }
 	void setType(TestCmdParamType type) { m_type = type; }
 
@@ -83,7 +96,7 @@ public:
 	QString valueStr(bool addParamName, int precise);
 	void setValue(const QVariant& value) { m_value = value; }
 
-	bool compare(QVariant cmpValue);
+	bool compare(const AppSignalState& state);
 
 	TestCmdParam& operator=(const TestCmdParam& from);
 };
