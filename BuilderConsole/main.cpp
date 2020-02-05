@@ -81,91 +81,39 @@ void createTemplateFile(const QString& fileName)
 	return;
 }
 
-int main(int argc, char *argv[])
+void showHelp()
 {
-	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
-
-	QCoreApplication a(argc, argv);
-
-	// --
+	// Show help
 	//
-	a.setApplicationName("BuilderConsole");
-	a.setOrganizationName("Radiy");
-	a.setOrganizationDomain("radiy.com");
+	std::cout << "BuilderConsole is a command-line tool that builds RPCT projects." << std::endl;
+	std::cout << std::endl << "Command line parameters:" << std::endl;
+	std::cout << "\tBuilderConsole <FileName.xml> - run build task with arguments taken from <FileName.xml> file" << std::endl;
+	std::cout << "or" << std::endl;
+	std::cout << "\tBuilderConsole [/create <FileName.xml>] - create arguments template in <FileName.xml> file" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Example 1:" << std::endl;
+	std::cout << "\tBuilderConsole.exe MyProjectBuildArgs.xml" << std::endl;
+	std::cout << "Example 2:" << std::endl;
+	std::cout << "\tBuilderConsole.exe /create NewProjectBuildArgs.xml" << std::endl;
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
-#endif
+	return;
+}
 
-	QStringList args = a.arguments();
-
-	// Create a template file ?
-	//
-	if (args.size() == 3)
-	{
-		QString arg1 = args[1];
-		QString arg2 = args[2];
-
-		if (arg1.trimmed().compare(QLatin1String("/create"), Qt::CaseInsensitive) == 0)
-		{
-			if (arg2.endsWith(QLatin1String(".xml"), Qt::CaseInsensitive) == true)
-			{
-				createTemplateFile(arg2);
-				return 0;
-			}
-		}
-	}
-
-	// Run build task ?
-	//
-	QString buildArgsFileName;
-
-	if (args.size() == 2)
-	{
-		QString s = args[1];
-
-		if (s.endsWith(QLatin1String(".xml"), Qt::CaseInsensitive) == true)
-		{
-			buildArgsFileName = s;
-		}
-	}
-
-	if (buildArgsFileName.isEmpty() == true)
-	{
-		// Show help
-		//
-		if (args.size() > 1)
-		{
-			std::cout << "Wrong command line parameters." << std::endl << std::endl;
-		}
-
-		std::cout << "BuilderConsole is a command-line tool that builds RPCT projects." << std::endl;
-		std::cout << std::endl << "Command line parameters:" << std::endl;
-		std::cout << "\tBuilderConsole <FileName.xml> - run build task with arguments taken from <FileName.xml> file" << std::endl;
-		std::cout << "or" << std::endl;
-		std::cout << "\tBuilderConsole [/create <FileName.xml>] - create arguments template in <FileName.xml> file" << std::endl;
-		std::cout << std::endl;
-		std::cout << "Example 1:" << std::endl;
-		std::cout << "\tBuilderConsole.exe MyProjectBuildArgs.xml" << std::endl;
-		std::cout << "Example 2:" << std::endl;
-		std::cout << "\tBuilderConsole.exe /create NewProjectBuildArgs.xml" << std::endl;
-
-		return 1;
-	}
-
+int startBuild(QString buildArgsFileName)
+{
 	// Read arguments from XML document
 	//
 	QDomDocument doc("Document");
+
 	QFile file(buildArgsFileName);
-	if (!file.open(QIODevice::ReadOnly))
+	if (file.open(QIODevice::ReadOnly) == false)
 	{
 		QString errorMsg = QObject::tr("Failed to open file %1.").arg(buildArgsFileName);
 		std::cout << errorMsg.toStdString() << std::endl;
 		return 1;
 	}
-	if (!doc.setContent(&file))
+
+	if (doc.setContent(&file) == false)
 	{
 		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(buildArgsFileName);
 		std::cout << errorMsg.toStdString() << std::endl;
@@ -176,12 +124,13 @@ int main(int argc, char *argv[])
 
 	// print out the element names of all elements that are direct children
 	// of the outermost element.
+	//
 	std::map<QString, QString> argumentsMap;
 
 	QDomElement docElem = doc.documentElement();
 
 	QDomNode node = docElem.firstChild();
-	while(!node.isNull())
+	while(node.isNull() == false)
 	{
 		QDomElement e = node.toElement(); // try to convert the node to an element.
 		if(e.isNull() == false)
@@ -201,7 +150,7 @@ int main(int argc, char *argv[])
 	// Task parented to the application so that it
 	// will be deleted by the application.
 	//
-	BuildTask* buildTask = new BuildTask(&a);
+	BuildTask* buildTask = new BuildTask(QCoreApplication::instance());
 
 	// Set task arguments
 	//
@@ -242,7 +191,7 @@ int main(int argc, char *argv[])
 	// This will cause the application to exit when
 	// the buildTask signals finished.
 	//
-	QObject::connect(buildTask, &BuildTask::finished, &a, &QCoreApplication::exit);
+	QObject::connect(buildTask, &BuildTask::finished, QCoreApplication::instance(), &QCoreApplication::exit);
 
 	// Start build process
 	//
@@ -250,7 +199,7 @@ int main(int argc, char *argv[])
 
 	// Run message loop
 	//
-	int result = a.exec();
+	int result = QCoreApplication::instance()->exec();
 
 	// Shutting down
 	//
@@ -260,4 +209,52 @@ int main(int argc, char *argv[])
 	VFrame30::VFrame30Library::shutdown();
 
 	return result;
+}
+
+int main(int argc, char *argv[])
+{
+	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
+
+	QCoreApplication a(argc, argv);
+
+	// --
+	//
+	a.setApplicationName("BuilderConsole");
+	a.setOrganizationName("Radiy");
+	a.setOrganizationDomain("radiy.com");
+
+#ifdef GITLAB_CI_BUILD
+	a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
+#else
+	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
+#endif
+
+	QStringList args = a.arguments();
+
+	switch (args.size())
+	{
+		case 2:
+			{
+				int result = startBuild(args[1]);
+				return result;
+			}
+
+		case 3:
+			// Create a template file?
+			//
+			if (args[1].trimmed().compare(QLatin1String("/create"), Qt::CaseInsensitive) == 0)
+			{
+				createTemplateFile(args[2]);
+				return 0;
+			}
+			else
+			{
+				showHelp();
+				return 1;
+			}
+
+		default:
+			showHelp();
+			return 2;
+	}
 }

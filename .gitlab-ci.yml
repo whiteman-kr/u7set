@@ -114,7 +114,7 @@ windows build job:
     - "rem               Run BuilderConsole tests"
     - "rem ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
-    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v302 Administrator P2ssw0rd c:\\temp\\build\\ debug"
+    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe %CI_PROJECT_DIR%\\BuilderConsole\\BuilderConsoleArgs.xml"
 
 #Remove some files not requiered for releases
     - "rem ----------------------------------------------"
