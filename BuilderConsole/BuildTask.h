@@ -32,7 +32,7 @@ public:
 	void setProjectName(QString value);
 	void setProjectUserName(QString value);
 	void setProjectUserPassword(QString value);
-	void seBuildOutputPath(QString value);
+	void setBuildOutputPath(QString value);
 	void setBuildType(QString value);
 	void setBuildType(Builder::BuildType value);
 
