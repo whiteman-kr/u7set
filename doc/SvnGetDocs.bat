@@ -1,3 +1,5 @@
+@echo off
+
 IF NOT EXIST ..\bin\release\docs (
 	mkdir ..\bin\release\docs
 )
@@ -21,7 +23,7 @@ FOR /F "delims=|" %%d  IN (SvnDocList.txt) DO (
 
 	POPD
 
-	rem rmdir /S /Q ..\bin\release\docs\%%d
+	rmdir /S /Q ..\bin\release\docs\%%d
 )
 
 IF NOT EXIST ..\bin\release\docs\D11.5_AFBL_RM.pdf goto SvnError
