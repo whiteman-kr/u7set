@@ -1090,7 +1090,12 @@ namespace Tcp
 		m_serversAddressPort[0] = serverAddressPort;
 		m_serversAddressPort[1] = serverAddressPort;
 
-		selectServer1(reconnect);
+		selectFirstValidServer();
+
+		if (reconnect == true)
+		{
+			closeConnection();
+		}
 	}
 
 	void Client::setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect)
@@ -1100,7 +1105,12 @@ namespace Tcp
 		m_serversAddressPort[0] = serverAddressPort1;
 		m_serversAddressPort[1] = serverAddressPort2;
 
-		selectServer1(reconnect);
+		selectFirstValidServer();
+
+		if (reconnect == true)
+		{
+			closeConnection();
+		}
 	}
 
 	QString Client::equipmentID() const
@@ -1165,13 +1175,27 @@ namespace Tcp
 	{
 		if (objectName().isEmpty() == true)
 		{
-			qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
+			if (serverAddr.isSet() == true)
+			{
+				qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
+			}
+			else
+			{
+				qDebug() << qPrintable(QString("IP address of server is NOT SET! Connection is impossible!"));
+			}
 		}
 		else
 		{
-			qDebug() << qPrintable(QString("%1: Try connect to server %2")
-										.arg(objectName())
-										.arg(serverAddr.addressPortStr()));
+			if (serverAddr.isSet() == true)
+			{
+				qDebug() << qPrintable(QString("%1: Try connect to server %2")
+											.arg(objectName())
+											.arg(serverAddr.addressPortStr()));
+			}
+			else
+			{
+				qDebug() << qPrintable(QString("%1: IP address of server is NOT SET! Connection is impossible!"));
+			}
 		}
 	}
 
@@ -1306,6 +1330,26 @@ namespace Tcp
 
 		if (m_autoSwitchServer == true)
 		{
+			selectNextValidServer();
+		}
+	}
+
+	void Client::selectFirstValidServer()
+	{
+		m_selectedServerIndex = 1;		// to begin from server 0
+
+		selectNextValidServer();
+	}
+
+	void Client::selectNextValidServer()
+	{
+		bool server0IsSet = m_serversAddressPort[0].isSet();
+		bool server1IsSet = m_serversAddressPort[1].isSet();
+
+		if (server0IsSet == true && server1IsSet == true)
+		{
+			// both servers is valid
+			//
 			if (m_selectedServerIndex == 0)
 			{
 				m_selectedServerIndex = 1;
@@ -1314,28 +1358,29 @@ namespace Tcp
 			{
 				m_selectedServerIndex = 0;
 			}
-
-			m_selectedServer = m_serversAddressPort[m_selectedServerIndex];
 		}
-	}
-
-	void Client::selectServer(int serverIndex, bool reconnect)
-	{
-		AUTO_LOCK(m_mutex)
-
-		if (serverIndex < 0 || serverIndex > 1)
+		else
 		{
-			assert(false);
-			serverIndex = 0;
+			// one or both of servers is not valid
+			//
+			if (server0IsSet == true)
+			{
+				m_selectedServerIndex = 0;
+			}
+			else
+			{
+				if (server1IsSet == true)
+				{
+					m_selectedServerIndex = 1;
+				}
+				else
+				{
+					m_selectedServerIndex = 0;		// addresses of both servers isn't set
+				}
+			}
 		}
 
-		m_selectedServerIndex = serverIndex;
 		m_selectedServer = m_serversAddressPort[m_selectedServerIndex];
-
-		if (reconnect == true)
-		{
-			closeConnection();
-		}
 	}
 
 	void Client::connectToServer()
@@ -1350,7 +1395,10 @@ namespace Tcp
 
 		onTryConnectToServer(m_selectedServer);
 
-		m_tcpSocket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
+		if (m_selectedServer.isSet() == true)
+		{
+			m_tcpSocket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
+		}
 	}
 
 	void Client::onThreadStarted()

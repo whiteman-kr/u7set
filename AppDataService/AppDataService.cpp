@@ -16,6 +16,8 @@
 // -------------------------------------------------------------------------------
 
 const char* const AppDataServiceWorker::SETTING_PROCESSING_THREADS_COUNT = "ProcessingThreadsCount";
+const char* const AppDataServiceWorker::SETTING_OVERRIDE_APP_DATA_RECEIVING_IP = "OverrideAppDataReceivingIP";
+
 
 AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
@@ -91,22 +93,26 @@ void AppDataServiceWorker::initCmdLineParser()
 	CommandLineParser& cp = cmdLineParser();
 
 	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "IPv4");
-	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "IPv4");
+	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 	cp.addSingleValueOption("ptc", SETTING_PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
+	cp.addSingleValueOption("recvip", SETTING_OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
 }
 
 void AppDataServiceWorker::loadSettings()
 {
 	m_appDataProcessingThreadCount = QString(getStrSetting(SETTING_PROCESSING_THREADS_COUNT)).toInt();
 
+	m_strCmdLineAppDataReceivingIP = getStrSetting(SETTING_OVERRIDE_APP_DATA_RECEIVING_IP);
+	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
+
 	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_PROCESSING_THREADS_COUNT).arg(m_appDataProcessingThreadCount));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
 }
-
 
 void AppDataServiceWorker::runAppDataReceiverThread()
 {
@@ -325,6 +331,13 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	if (result == false)
 	{
 		return;
+	}
+
+	// replace some cfg settings by command line arguments
+	//
+	if (m_strCmdLineAppDataReceivingIP.isEmpty() == false)
+	{
+		m_cfgSettings.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
 	}
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
