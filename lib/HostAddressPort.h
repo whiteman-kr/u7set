@@ -42,10 +42,14 @@ public:
 	quint16 port() const;
 
 	QString addressPortStr() const;
+	QString addressPortStrIfSet() const;
+
 	QString addressStr() const;
+	QString addressStrIfSet() const;
 
 	void clear();
-	bool isEmpty();
+	bool isEmpty() const;
+	bool isSet() const;
 
 	static bool isValidIPv4(const QString& ipAddressStr);
 	static bool isValidPort(const QString& portStr);
@@ -61,5 +65,7 @@ public:
 private:
 	QHostAddress m_hostAddress;
 	quint16 m_port = 0;
+
+	static const char* const NOT_SET;
 };
 

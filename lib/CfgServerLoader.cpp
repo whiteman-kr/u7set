@@ -353,7 +353,14 @@ Builder::BuildInfo CfgLoader::buildInfo()
 
 void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("Try connect to server %1").arg(serverAddr.addressPortStr())));
+	if (serverAddr.isSet() == true)
+	{
+		DEBUG_LOG_MSG(m_logger, QString(tr("Try connect to CfgService on %1").arg(serverAddr.addressPortStr())));
+	}
+	else
+	{
+		DEBUG_LOG_MSG(m_logger, QString(tr("IP address of CfgService is NOT SET! Configuration loading is impossible!")));
+	}
 }
 
 void CfgLoader::onConnection()
