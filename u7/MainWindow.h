@@ -65,6 +65,7 @@ protected slots:
 	void showRpctUserManual();
 	void showRpctUserManualAppendixA();
 	void showAfblReference();
+	void showScriptHelp();
 	void showMatsUserManual();
 	void showTuningUserManual();
 
@@ -105,6 +106,7 @@ private:
 	QAction* m_manualRpctAction = nullptr;
 	QAction* m_manualRpctAppendixAAction = nullptr;
 	QAction* m_manualAfblAction = nullptr;
+	QAction* m_scriptHelpAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;
 	QAction* m_manualTuningAction = nullptr;
 

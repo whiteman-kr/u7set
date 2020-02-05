@@ -42,7 +42,7 @@ void UiTools::adjustDialogPlacement(QDialog* dialog)
 	}
 }
 
-void UiTools::openPdf(const QString& file, QWidget* parent)
+void UiTools::openHelp(const QString& file, QWidget* parent)
 {
 	QFile f(file);
 	if (f.exists() == true)

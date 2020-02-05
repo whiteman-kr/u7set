@@ -6,6 +6,9 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/DbController.h"
 #include "../VFrame30/VFrame30Library.h"
+#include <QFile>
+#include <QXmlStreamWriter>
+#include <QDomDocument>
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -18,6 +21,63 @@ void messageOutputHandler(QtMsgType /*type*/, const QMessageLogContext& /*contex
 	// Do nothing, build process has some debug messages (qDebug),
 	// but we want to show only build log items, which comes via std::cout
 	//
+	return;
+}
+
+void createTemplateFile(const QString& fileName)
+{
+	QByteArray data;
+
+	QXmlStreamWriter writer(&data);
+
+	writer.setCodec("UTF-8");
+	writer.setAutoFormatting(true);
+	writer.writeStartDocument();
+	writer.writeStartElement("BuilderArguments");
+
+	writer.writeComment("Postgresql IP-address");
+	writer.writeTextElement("DatabaseAddress", "127.0.0.1");
+
+	writer.writeComment("Postgresql access port");
+	writer.writeTextElement("DatabasePort", "5432");
+
+	writer.writeComment("Postgresql user name");
+	writer.writeTextElement("DatabaseUserName", "u7");
+
+	writer.writeComment("Postgresql user password");
+	writer.writeTextElement("DatabasePassword", "P2ssw0rd");
+
+	writer.writeComment("u7 project name");
+	writer.writeTextElement("ProjectName", "Simulator");
+
+	writer.writeComment("u7 project user name");
+	writer.writeTextElement("ProjectUserName", "Administrator");
+
+	writer.writeComment("u7 project user password");
+	writer.writeTextElement("ProjectUserPassword", "P2ssw0rd");
+
+	writer.writeComment("Build result path, default current directory");
+	writer.writeTextElement("BuildOutputPath", "");
+
+	writer.writeComment("Build type, debug or release, default is debug");
+	writer.writeTextElement("BuildType", "debug");
+
+	writer.writeEndElement();	// ConsoleBuilderArguments
+	writer.writeEndDocument();
+
+	QFile f(fileName);
+
+	if (f.open(QFile::WriteOnly) == false)
+	{
+		QString errorMsg = QObject::tr("Failed to save file %1.").arg(fileName);
+		std::cout << errorMsg.toStdString() << std::endl;
+		return;
+	}
+
+	f.write(data);
+
+	std::cout << "Arguments template has been written to: " << fileName.toStdString() << std::endl;
+
 	return;
 }
 
@@ -39,29 +99,96 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
 #endif
 
-	// Example:
-	//	BuilderConsole DatabaseAddress DatabaseUserName DatabasePassword ProjectName ProjectUserName ProjectUserPassword
-	//
 	QStringList args = a.arguments();
 
-	if (args.size() < 8 || args.size() > 10)
+	// Create a template file ?
+	//
+	if (args.size() == 3)
 	{
-		std::cout << "Wrong argument count." << std::endl;
-		std::cout << "Arguments:" << std::endl;
-		std::cout << "\tBuilderConsole DatabaseAddress DatabasePort DatabaseUserName DatabasePassword ProjectName ProjectUserName ProjectUserPassword [BuildOutputPath] [BuildType]" << std::endl;
-		std::cout << "\tDatabaseAddress: Postgresql IP-address\n" <<
-					 "\tDatabasePort: Postgresql access port\n" <<
-					 "\tDatabaseUserName: Postgresql user name\n" <<
-					 "\tDatabasePassword: Postgresql user password\n" <<
-					 "\tProjectName: u7 project name\n" <<
-					 "\tProjectUserName: u7 project user name\n" <<
-					 "\tProjectUserPassword: u7 project user password\n"
-					 "\tBuildOutputPath: Build result path, default current directory\n" <<
-					 "\tBuildType: Build type, debug or release, default debug" << std::endl;
-		std::cout << "Example:" << std::endl;
-		std::cout << "\tBuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd Simulator Administrator P2ssw0rd" << std::endl;
+		QString arg1 = args[1];
+		QString arg2 = args[2];
+
+		if (arg1.trimmed().compare(QLatin1String("/create"), Qt::CaseInsensitive) == 0)
+		{
+			if (arg2.endsWith(QLatin1String(".xml"), Qt::CaseInsensitive) == true)
+			{
+				createTemplateFile(arg2);
+				return 0;
+			}
+		}
+	}
+
+	// Run build task ?
+	//
+	QString buildArgsFileName;
+
+	if (args.size() == 2)
+	{
+		QString s = args[1];
+
+		if (s.endsWith(QLatin1String(".xml"), Qt::CaseInsensitive) == true)
+		{
+			buildArgsFileName = s;
+		}
+	}
+
+	if (buildArgsFileName.isEmpty() == true)
+	{
+		// Show help
+		//
+		if (args.size() > 1)
+		{
+			std::cout << "Wrong command line parameters." << std::endl << std::endl;
+		}
+
+		std::cout << "BuilderConsole is a command-line tool that builds RPCT projects." << std::endl;
+		std::cout << std::endl << "Command line parameters:" << std::endl;
+		std::cout << "\tBuilderConsole <FileName.xml> - run build task with arguments taken from <FileName.xml> file" << std::endl;
+		std::cout << "or" << std::endl;
+		std::cout << "\tBuilderConsole [/create <FileName.xml>] - create arguments template in <FileName.xml> file" << std::endl;
+		std::cout << std::endl;
+		std::cout << "Example 1:" << std::endl;
+		std::cout << "\tBuilderConsole.exe MyProjectBuildArgs.xml" << std::endl;
+		std::cout << "Example 2:" << std::endl;
+		std::cout << "\tBuilderConsole.exe /create NewProjectBuildArgs.xml" << std::endl;
 
 		return 1;
+	}
+
+	// Read arguments from XML document
+	//
+	QDomDocument doc("Document");
+	QFile file(buildArgsFileName);
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QString errorMsg = QObject::tr("Failed to open file %1.").arg(buildArgsFileName);
+		std::cout << errorMsg.toStdString() << std::endl;
+		return 1;
+	}
+	if (!doc.setContent(&file))
+	{
+		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(buildArgsFileName);
+		std::cout << errorMsg.toStdString() << std::endl;
+		file.close();
+		return 1;
+	}
+	file.close();
+
+	// print out the element names of all elements that are direct children
+	// of the outermost element.
+	std::map<QString, QString> argumentsMap;
+
+	QDomElement docElem = doc.documentElement();
+
+	QDomNode node = docElem.firstChild();
+	while(!node.isNull())
+	{
+		QDomElement e = node.toElement(); // try to convert the node to an element.
+		if(e.isNull() == false)
+		{
+			argumentsMap[e.tagName()] = e.text();
+		}
+		node = node.nextSibling();
 	}
 
 	// Some inititializations
@@ -76,34 +203,40 @@ int main(int argc, char *argv[])
 	//
 	BuildTask* buildTask = new BuildTask(&a);
 
-	buildTask->setDatabaseAddress(args[1]);
-	buildTask->setDatabasePort(args[2].toInt());
-	buildTask->setDatabaseUserName(args[3]);
-	buildTask->setDatabasePassword(args[4]);
-	buildTask->setProjectName(args[5]);
-	buildTask->setProjectUserName(args[6]);
-	buildTask->setProjectUserPassword(args[7]);
+	// Set task arguments
+	//
+	buildTask->setDatabaseAddress(argumentsMap[QLatin1String("DatabaseAddress")]);
 
-	if (args.size() >= 9)
+	bool ok = false;
+	int port = argumentsMap["DatabasePort"].toInt(&ok);
+	if (ok == true)
 	{
-		// Optional param
-		//
-		buildTask->seBuildOutputPath(args[8]);
+		buildTask->setDatabasePort(port);
+	}
+	buildTask->setDatabaseUserName(argumentsMap[QLatin1String("DatabaseUserName")]);
+	buildTask->setDatabasePassword(argumentsMap[QLatin1String("DatabasePassword")]);
+	buildTask->setProjectName(argumentsMap[QLatin1String("ProjectName")]);
+	buildTask->setProjectUserName(argumentsMap[QLatin1String("ProjectUserName")]);
+	buildTask->setProjectUserPassword(argumentsMap[QLatin1String("ProjectUserPassword")]);
+
+	QString buildOutputPath = argumentsMap[QLatin1String("BuildOutputPath")];
+	if (buildOutputPath.isEmpty() == false)
+	{
+		buildTask->setBuildOutputPath(buildOutputPath);
 	}
 	else
 	{
-		buildTask->seBuildOutputPath(".");
+		buildTask->setBuildType(QLatin1String("."));
 	}
 
-	if (args.size() >= 10)
+	QString buildType = argumentsMap[QLatin1String("BuildType")];
+	if (buildType.isEmpty() == false)
 	{
-		// Optional param
-		//
-		buildTask->setBuildType(args[9]);
+		buildTask->setBuildType(buildType);
 	}
 	else
 	{
-		buildTask->setBuildType("Debug");
+		buildTask->setBuildType(QLatin1String("debug"));
 	}
 
 	// This will cause the application to exit when
