@@ -6,5 +6,5 @@ public:
 	
 	static void adjustDialogPlacement(QDialog* dialog);
 
-	static void openPdf(const QString& file, QWidget* parent);
+	static void openHelp(const QString& file, QWidget* parent);
 };

@@ -227,13 +227,17 @@ void MainWindow::createActions()
 	m_manualRpctAction->setStatusTip(tr("Show RPCT User Manual"));
 	connect(m_manualRpctAction, &QAction::triggered, this, &MainWindow::showRpctUserManual);
 
-	m_manualRpctAppendixAAction = new QAction(tr("RPCT User Manual Errors and Warnings"), this);
-	m_manualRpctAppendixAAction->setStatusTip(tr("Show RPCT User Manual Errors and Warnings"));
+	m_manualRpctAppendixAAction = new QAction(tr("RPCT Errors and Warnings"), this);
+	m_manualRpctAppendixAAction->setStatusTip(tr("Show RPCT Errors and Warnings"));
 	connect(m_manualRpctAppendixAAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixA);
 
 	m_manualAfblAction = new QAction(tr("AFB Library Reference"), this);
 	m_manualAfblAction->setStatusTip(tr("Show AFB Library Reference"));
 	connect(m_manualAfblAction, &QAction::triggered, this, &MainWindow::showAfblReference);
+
+	m_scriptHelpAction = new QAction(tr("Schema Scripts Reference"), this);
+	m_scriptHelpAction->setStatusTip(tr("Show Schema Scripts Reference"));
+	connect(m_scriptHelpAction, &QAction::triggered, this, &MainWindow::showScriptHelp);
 
 	m_manualMatsAction = new QAction(tr("MATS User Manual"), this);
 	m_manualMatsAction->setStatusTip(tr("Show MATS User Manual"));
@@ -375,8 +379,18 @@ void MainWindow::createMenus()
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
 	pHelpMenu->addAction(m_manualRpctAction);
-	pHelpMenu->addAction(m_manualRpctAppendixAAction);
+
+	QMenu* rpctHelpMenu = pHelpMenu->addMenu(tr("RPCT User Manual Appendixes"));
+
+	rpctHelpMenu->addAction(m_manualRpctAppendixAAction);
+	rpctHelpMenu->addAction(m_scriptHelpAction);
+
+	pHelpMenu->addSeparator();
+
 	pHelpMenu->addAction(m_manualAfblAction);
+
+	pHelpMenu->addSeparator();
+
 	pHelpMenu->addAction(m_manualMatsAction);
 	pHelpMenu->addAction(m_manualTuningAction);
 
@@ -490,27 +504,32 @@ void MainWindow::showShortcuts()
 
 void MainWindow::showRpctUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixA()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
 }
 
 void MainWindow::showAfblReference()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+}
+
+void MainWindow::showScriptHelp()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
 }
 
 void MainWindow::showMatsUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 
