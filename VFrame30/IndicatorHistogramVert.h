@@ -10,7 +10,7 @@ namespace VFrame30
 
 	public:
 		CustomSetPoint() = default;
-		virtual ~CustomSetPoint() = default;
+		virtual ~CustomSetPoint() {};
 
 		CustomSetPoint(const CustomSetPoint&) noexcept = default;
 		CustomSetPoint(CustomSetPoint&&) noexcept = default;

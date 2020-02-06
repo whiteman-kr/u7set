@@ -497,7 +497,6 @@ namespace VFrame30
 		//
 		QString units;
 
-
 		// Draw valued bar
 		//
 		if (drawParam->isEditMode() == true)
@@ -762,6 +761,16 @@ namespace VFrame30
 
 	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam, const std::vector<QRectF>& barRects, const SchemaItemIndicator* schemaItem) const
 	{
+		// --
+		//
+		double valueDiff = m_endValue - m_startValue;	// if valueDiff is negative, then draw bar upside down
+		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
+		{
+			return;
+		}
+
+		// --
+		//
 		struct DrawSetpointStruct
 		{
 			DrawSetpointStruct(int signalIndex_, double value_, E::CmpType type_, QRgb color_) :
@@ -821,7 +830,7 @@ namespace VFrame30
 					if (value.has_value() == true)
 					{
 						int warning_to_do_color;
-						drawSetpoints.emplace_back(i, value.value(), sp->cmpType(), qRgb(0x80, 0x00, 0x00));
+						drawSetpoints.emplace_back(i, value.value(), sp->cmpType(), qRgb(0x00, 0x00, 0xC0));
 					}
 				}
 			}
@@ -835,9 +844,60 @@ namespace VFrame30
 
 		// Draw setpoints
 		//
+		QPainter* p = drawParam->painter();
+		Q_ASSERT(p);
+
+		double mainGridWidth = schemaItem->font().drawSize() / 1.8;
+		QString valueString;
+
+
+
 		for (const DrawSetpointStruct& ds : drawSetpoints)
 		{
+			const QRectF& barRect = barRects[ds.signalIndex];
 
+			const double factor = barRect.height() / valueDiff;
+			double y = barRect.bottom() - (ds.value - m_startValue) * factor;
+
+//			QColor color1 = ds.color;
+//			QColor color2{(~color1.red()) & 0xFF,
+//						(~color1.green()) & 0xFF,
+//						(~color1.blue()) & 0xFF};
+
+			//QBrush brush{drawParam->blinkPhase() ? color1 : color2};
+			QBrush brush{ds.color};
+
+			QPen pen(brush, schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
+			p->setPen(pen);
+
+			// Draw horz line
+			//
+			p->drawLine(QPointF{barRect.left() - mainGridWidth, drawParam->gridToDpiY(y)},
+						QPointF{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y)});
+
+			// Draw setpoint value
+			//
+			QChar cmpSymbol;
+			switch (ds.type)
+			{
+			case E::CmpType::Equal:		cmpSymbol = QChar('=');		break;
+			case E::CmpType::Greate:	cmpSymbol = QChar(0x25B2);	break;
+			case E::CmpType::Less:		cmpSymbol = QChar(0x25BC);	break;
+			case E::CmpType::NotEqual:	cmpSymbol = QChar(0x2260);	break;
+			default:
+				Q_ASSERT(false);
+			}
+
+			if (drawParam->blinkPhase() == true)
+			{
+				valueString = QString(" %1 %2")
+								.arg(ds.value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision())
+								.arg(cmpSymbol);
+
+				QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+
+				DrawHelper::drawText(p, schemaItem->font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+			}
 		}
 
 		return;
