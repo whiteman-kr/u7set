@@ -45,16 +45,16 @@ void createTemplateFile(const QString& fileName)
 	writer.writeTextElement("DatabaseUserName", "u7");
 
 	writer.writeComment("Postgresql user password");
-	writer.writeTextElement("DatabasePassword", "P2ssw0rd");
+	writer.writeTextElement("DatabasePassword", "Password");
 
 	writer.writeComment("u7 project name");
-	writer.writeTextElement("ProjectName", "Simulator");
+	writer.writeTextElement("ProjectName", "ProjectName");
 
 	writer.writeComment("u7 project user name");
 	writer.writeTextElement("ProjectUserName", "Administrator");
 
 	writer.writeComment("u7 project user password");
-	writer.writeTextElement("ProjectUserPassword", "P2ssw0rd");
+	writer.writeTextElement("ProjectUserPassword", "Password");
 
 	writer.writeComment("Build result path, default current directory");
 	writer.writeTextElement("BuildOutputPath", "");
@@ -99,6 +99,47 @@ void showHelp()
 	return;
 }
 
+bool getArgumentFromXml(QDomElement& docElem, QString name, QString* result)
+{
+	if (result == nullptr)
+	{
+		Q_ASSERT(result);
+		return false;
+	}
+
+	QDomNodeList softwareNodes = docElem.elementsByTagName(name);
+	if (softwareNodes.size() != 1)
+	{
+		return false;
+	}
+
+
+	QDomElement elem = softwareNodes.item(0).toElement();
+	*result = elem.text();
+
+	return true;
+}
+
+bool getArgumentFromXml(QDomElement& docElem, QString name, int* result)
+{
+	if (result == nullptr)
+	{
+		Q_ASSERT(result);
+		return false;
+	}
+
+	QString str;
+	if (getArgumentFromXml(docElem, name, &str) == false)
+	{
+		return false;
+	}
+
+	bool ok = false;
+	*result = str.toInt(&ok);
+
+	return ok;
+}
+
 int startBuild(QString buildArgsFileName)
 {
 	// Read arguments from XML document
@@ -122,24 +163,6 @@ int startBuild(QString buildArgsFileName)
 	}
 	file.close();
 
-	// print out the element names of all elements that are direct children
-	// of the outermost element.
-	//
-	std::map<QString, QString> argumentsMap;
-
-	QDomElement docElem = doc.documentElement();
-
-	QDomNode node = docElem.firstChild();
-	while(node.isNull() == false)
-	{
-		QDomElement e = node.toElement(); // try to convert the node to an element.
-		if(e.isNull() == false)
-		{
-			argumentsMap[e.tagName()] = e.text();
-		}
-		node = node.nextSibling();
-	}
-
 	// Some inititializations
 	//
 	VFrame30::VFrame30Library::init();
@@ -152,40 +175,145 @@ int startBuild(QString buildArgsFileName)
 	//
 	BuildTask* buildTask = new BuildTask(QCoreApplication::instance());
 
-	// Set task arguments
+	// Read and set task arguments
 	//
-	buildTask->setDatabaseAddress(argumentsMap[QLatin1String("DatabaseAddress")]);
+	QDomElement docElem = doc.documentElement();
 
-	bool ok = false;
-	int port = argumentsMap["DatabasePort"].toInt(&ok);
-	if (ok == true)
+	QString value;
+
+	// DatabaseAddress
+	//
+	bool ok = getArgumentFromXml(docElem, "DatabaseAddress", &value);
+	if (ok == false)
 	{
-		buildTask->setDatabasePort(port);
+		std::cout << "Failed to read DatabaseAddress argument from file!" << std::endl;
+		return 1;
 	}
-	buildTask->setDatabaseUserName(argumentsMap[QLatin1String("DatabaseUserName")]);
-	buildTask->setDatabasePassword(argumentsMap[QLatin1String("DatabasePassword")]);
-	buildTask->setProjectName(argumentsMap[QLatin1String("ProjectName")]);
-	buildTask->setProjectUserName(argumentsMap[QLatin1String("ProjectUserName")]);
-	buildTask->setProjectUserPassword(argumentsMap[QLatin1String("ProjectUserPassword")]);
-
-	QString buildOutputPath = argumentsMap[QLatin1String("BuildOutputPath")];
-	if (buildOutputPath.isEmpty() == false)
+	if (value.isEmpty() == true)
 	{
-		buildTask->setBuildOutputPath(buildOutputPath);
+		std::cout << "DatabaseAddress argument can't be empty!" << std::endl;
+		return 1;
+	}
+	buildTask->setDatabaseAddress(value);
+
+	// DatabasePort
+	//
+	int port = 0;
+	ok = getArgumentFromXml(docElem, "DatabasePort", &port);
+	if (ok == false)
+	{
+		std::cout << "Failed to read DatabasePort argument from file!" << std::endl;
+		return 1;
+	}
+	buildTask->setDatabasePort(port);
+
+	// DatabaseUserName
+	//
+	ok = getArgumentFromXml(docElem, "DatabaseUserName", &value);
+	if (ok == false)
+	{
+		std::cout << "Failed to read DatabaseUserName argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == true)
+	{
+		std::cout << "DatabaseUserName argument can't be empty!" << std::endl;
+		return 1;
+	}
+	buildTask->setDatabaseUserName(value);
+
+	// DatabasePassword
+	//
+	ok = getArgumentFromXml(docElem, "DatabasePassword", &value);
+	if (ok == false)
+	{
+		std::cout << "Failed to read DatabasePassword argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == true)
+	{
+		std::cout << "DatabasePassword argument can't be empty!" << std::endl;
+		return 1;
+	}
+	buildTask->setDatabasePassword(value);
+
+	// ProjectName
+	//
+	ok = getArgumentFromXml(docElem, "ProjectName", &value);
+	if (ok == false)
+	{
+		std::cout << "Failed to read ProjectName argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == true)
+	{
+		std::cout << "ProjectName argument can't be empty!" << std::endl;
+		return 1;
+	}
+	buildTask->setProjectName(value);
+
+	// ProjectUserName
+	//
+	ok = getArgumentFromXml(docElem, "ProjectUserName", &value);
+	if (ok == false)
+	{
+		std::cout << "Failed to read ProjectUserName argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == true)
+	{
+		std::cout << "ProjectUserName argument can't be empty!" << std::endl;
+		return 1;
+	}
+	buildTask->setProjectUserName(value);
+
+	// ProjectUserPassword
+	//
+	ok = getArgumentFromXml(docElem, "ProjectUserPassword", &value);
+	if (ok == false)
+	{
+		std::cout << "Failed to read ProjectUserPassword argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == true)
+	{
+		std::cout << "ProjectUserPassword argument can't be empty!" << std::endl;
+		return 1;
+	}
+	buildTask->setProjectUserPassword(value);
+
+	// BuildOutputPath
+	//
+	ok = getArgumentFromXml(docElem, "BuildOutputPath", &value);
+	if (ok == false)
+	{
+		std::cout << "Failed to read BuildOutputPath argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == false)
+	{
+		buildTask->setBuildOutputPath(value);
 	}
 	else
 	{
-		buildTask->setBuildType(QLatin1String("."));
+		buildTask->setBuildType(".");
 	}
 
-	QString buildType = argumentsMap[QLatin1String("BuildType")];
-	if (buildType.isEmpty() == false)
+	// BuildType
+	//
+	ok = getArgumentFromXml(docElem, "BuildType", &value);
+	if (ok == false)
 	{
-		buildTask->setBuildType(buildType);
+		std::cout << "Failed to read BuildType argument from file!" << std::endl;
+		return 1;
+	}
+	if (value.isEmpty() == false)
+	{
+		buildTask->setBuildType(value);
 	}
 	else
 	{
-		buildTask->setBuildType(QLatin1String("debug"));
+		buildTask->setBuildType("debug");
 	}
 
 	// This will cause the application to exit when
