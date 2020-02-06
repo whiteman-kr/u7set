@@ -717,7 +717,7 @@ void DataSourceOnline::calcDataReceivingRate()
 
 	m_firstCalc = false;
 
-	m_dataReceivingRate = ((m_receivedDataSize - m_prevReceivedSize) / 1024.0) / (dT / 1000.0);		// KBytes per second
+	m_dataReceivingRate = static_cast<double>(m_receivedDataSize - m_prevReceivedSize) / (dT / 1000.0);		// Bytes per second
 
 	m_prevCalcTime = now;
 	m_prevReceivedSize = m_receivedDataSize;

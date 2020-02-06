@@ -12,18 +12,18 @@ FOR /F "delims=|" %%d  IN (SvnDocList.txt) DO (
 	
 	cd ..\bin\release\docs\%%d
 
-	svn list --recursive "https://delo:8443/svn//RadICS_Platform/trunk/Docs/FSC Documents/FSC Safety Manual/%%d" | find /I ".pdf" > filelist.txt
+	svn list --non-interactive --trust-server-cert --recursive "https://delo:8443/svn//RadICS_Platform/trunk/Docs/FSC Documents/FSC Safety Manual/%%d" | find /I ".pdf" > filelist.txt
 
 	FOR /F "delims=|" %%i  IN (filelist.txt) DO (
 
-	 	svn update --parents "%%i"
+	 	svn update --non-interactive --trust-server-cert --parents "%%i"
 	)
 
 	xcopy *.pdf .. /sy
 
 	POPD
 
-	rem rmdir /S /Q ..\bin\release\docs\%%d
+	rmdir /S /Q ..\bin\release\docs\%%d
 )
 
 IF NOT EXIST ..\bin\release\docs\D11.5_AFBL_RM.pdf goto SvnError

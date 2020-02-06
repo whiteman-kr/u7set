@@ -123,6 +123,7 @@ protected:
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
 	QString getStrSetting(const QString& settingName);
+	QString getCmdLineSetting(const QString& settingName);
 
 private:
 	void onThreadStarted() final;

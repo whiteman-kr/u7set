@@ -9,7 +9,7 @@ QString ChooseAfbDialog::m_lastSelectedCategory = AllCategoryName;
 Qt::SortOrder ChooseAfbDialog::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
 ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements, QWidget* parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint),
 	ui(new Ui::ChooseAfbDialog)
 {
 	ui->setupUi(this);
@@ -26,6 +26,8 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 	ui->m_afbTree->setColumnWidth(0, 150);
 
     fillTree();
+
+	installEventFilter(this);
 
 	return;
 }
@@ -225,6 +227,20 @@ void ChooseAfbDialog::closeEvent(QCloseEvent* e)
 	m_lastSortOrder = ui->m_afbTree->header()->sortIndicatorOrder();
 }
 
+bool ChooseAfbDialog::eventFilter(QObject* object, QEvent* event)
+{
+	if(event->type() == QEvent::EnterWhatsThisMode )
+	{
+		QWhatsThis::leaveWhatsThisMode();
+
+		on_btnAfbLibraryHelp_clicked();
+
+		return true;
+	}
+
+	return QDialog::eventFilter(object, event);
+}
+
 void ChooseAfbDialog::on_btnCancel_clicked()
 {
 	m_lastSortOrder = ui->m_afbTree->header()->sortIndicatorOrder();
@@ -320,5 +336,5 @@ void AfbHelpWidget::setAfb(std::shared_ptr<Afb::AfbElement> afb)
 
 void ChooseAfbDialog::on_btnAfbLibraryHelp_clicked()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
 }

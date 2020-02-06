@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include "../lib/PropertyEditor.h"
+#include "../lib/Ui/UiTools.h"
 #include "TuningValue.h"
 
 #include <QToolButton>
@@ -2219,18 +2220,7 @@ namespace ExtWidgets
 
 			connect(helpButton, &QPushButton::clicked, [this] ()
 			{
-				QString scriptHelpFile = m_propertyEditorBase->scriptHelpFile();
-
-				QFile f(scriptHelpFile);
-				if (f.exists() == true)
-				{
-					QUrl url = QUrl::fromLocalFile(scriptHelpFile);
-					QDesktopServices::openUrl(url);
-				}
-				else
-				{
-					QMessageBox::critical(this, qAppName(), tr("Help file '%1' does not exist!").arg(scriptHelpFile));
-				}
+				UiTools::openHelp(m_propertyEditorBase->scriptHelpFile(), this);
 			});
 
 			connect(this, &QDialog::finished, [this] (int)

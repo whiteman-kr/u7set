@@ -107,6 +107,8 @@ private:
 
 	AppDataServiceSettings m_cfgSettings;
 	int m_appDataProcessingThreadCount = 0;
+	QString m_strCmdLineAppDataReceivingIP;
+	HostAddressPort m_cmdLineAppDataReceivingIP;
 
 	int m_autoArchivingGroupsCount = 0;
 
@@ -134,6 +136,7 @@ private:
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 
 	static const char* const SETTING_PROCESSING_THREADS_COUNT;
+	static const char* const SETTING_OVERRIDE_APP_DATA_RECEIVING_IP;
 
 	QTimer m_timer;
 };

@@ -10,6 +10,8 @@
 //
 // -------------------------------------------------------------------------------
 
+const char* const HostAddressPort::NOT_SET = "NotSet";
+
 HostAddressPort::HostAddressPort(const QHostAddress& addr, quint16 port)
 {
 	m_hostAddress = addr;
@@ -185,12 +187,30 @@ QString HostAddressPort::addressPortStr() const
 	return QString("%1:%2").arg(address().toString()).arg(port());
 }
 
+QString HostAddressPort::addressPortStrIfSet() const
+{
+	if (isSet() == true)
+	{
+		return addressPortStr();
+	}
+
+	return NOT_SET;
+}
 
 QString HostAddressPort::addressStr() const
 {
 	return address().toString();
 }
 
+QString HostAddressPort::addressStrIfSet() const
+{
+	if (isSet() == true)
+	{
+		return address().toString();
+	}
+
+	return NOT_SET;
+}
 
 void HostAddressPort::clear()
 {
@@ -198,11 +218,15 @@ void HostAddressPort::clear()
 	m_port = 0;
 }
 
-bool HostAddressPort::isEmpty()
+bool HostAddressPort::isEmpty() const
 {
 	return m_hostAddress.toIPv4Address() == 0;
 }
 
+bool HostAddressPort::isSet() const
+{
+	return isEmpty() == false;
+}
 
 bool HostAddressPort::isValidIPv4(const QString& ipAddressStr)
 {
