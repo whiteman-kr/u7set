@@ -495,7 +495,7 @@ public:
 
 	enum class IndicatorSetpointType
 	{
-		Static,					// Just show some value with CmpType and color, no real setpoint is involved
+		//Static,					// Just show some value with CmpType and color, no real setpoint is involved
 		AutoBySchemaItemLabel,	// Get setpoint by (Comparator) SchemaItem Label, all data (values, type) are taken from setpoint storage
 								// Color is taken from output AppSignal.AlertColor (UserSpecificProperties), or from m_color if property is not exists
 		AutoByOutAppSignalId	// Get setpoint by output AppSignalID (internal), all data are taken from setpoint storage
