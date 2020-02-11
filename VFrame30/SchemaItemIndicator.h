@@ -2,6 +2,7 @@
 
 #include "PosRectImpl.h"
 #include "FontParam.h"
+#include "Indicator.h"
 
 
 class AppSignalState;
@@ -23,7 +24,7 @@ namespace VFrame30
 	public:
 		SchemaItemIndicator(void);
 		explicit SchemaItemIndicator(SchemaUnit unit);
-		virtual ~SchemaItemIndicator(void);
+		virtual ~SchemaItemIndicator(void) = default;
 
 		// Serialization
 		//

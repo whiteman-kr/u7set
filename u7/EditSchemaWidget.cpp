@@ -2132,8 +2132,6 @@ void EditSchemaWidget::createActions()
 		addItem(item);
 	});
 
-	m_addIndicatorAction->setVisible(false);	// REMOVE IT LATER !!!!!!!!!!!!!!!!!!!!!!
-
 	//
 	// Edit
 	//

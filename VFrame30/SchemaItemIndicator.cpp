@@ -80,10 +80,6 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItemIndicator::~SchemaItemIndicator(void)
-	{
-	}
-
 	// Serialization
 	//
 	bool SchemaItemIndicator::SaveData(Proto::Envelope* message) const

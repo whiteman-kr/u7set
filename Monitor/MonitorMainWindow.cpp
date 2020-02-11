@@ -128,6 +128,18 @@ MonitorMainWindow::~MonitorMainWindow()
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
 
+	if (m_tcpRecentsThread)
+	{
+		m_tcpRecentsThread->quitAndWait(10000);
+		delete m_tcpRecentsThread;
+	}
+
+	if (m_sourcesStateClientThread != nullptr)
+	{
+		m_sourcesStateClientThread->quitAndWait(10000);
+		delete m_sourcesStateClientThread;
+	}
+
 	if (m_tuningTcpClientThread != nullptr)
 	{
 		m_tuningTcpClientThread->quitAndWait(10000);
