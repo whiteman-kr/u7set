@@ -30,6 +30,7 @@ namespace Builder
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
+		bool writeTuningClientBehaviour();
 
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 

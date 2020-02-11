@@ -150,6 +150,11 @@ public:
 	int m_busEditorSortColumn = 0;
 	Qt::SortOrder m_busEditorSortOrder = Qt::AscendingOrder;
 
+	// Behaviour Editor
+	//
+	int m_behaviourEditorSortColumn = 0;
+	Qt::SortOrder m_behaviourEditorSortOrder = Qt::AscendingOrder;
+
 	QByteArray m_afbLibratyCheckSplitterState;
 
 	QByteArray m_specificEditorSplitterState;

@@ -7568,6 +7568,26 @@ namespace Builder
 						arg(tuningServiceId));
 	}
 
+	/// IssueCode: EQP6210
+	///
+	/// IssueType: Error
+	///
+	/// Title: Client behaviour (%1) specified in %2.BehaviourID does not exist.
+	///
+	/// Parameters:
+	///		%1 Software EquipmentID
+	///		%2 Specified BehaviourID
+	///
+	/// Description:
+	///		Specified BehaviourID does not exist in client behaviour database.
+	///
+	void IssueLogger::errEQP6210(QString softwareObjectStrId, QString behaviourId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6210,
+				  tr("Client behaviour %2 specified in %1.BehaviourID does not exist. ").arg(softwareObjectStrId).arg(behaviourId));
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)

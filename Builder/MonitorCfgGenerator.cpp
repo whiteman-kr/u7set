@@ -3,6 +3,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
 #include "Context.h"
+#include "../lib/ClientBehaviour.h"
 
 namespace Builder
 {
@@ -55,6 +56,10 @@ namespace Builder
 		{
 			result &= writeTuningSignals();
 		}
+
+		// Generate behaviour
+		//
+		result &= writeMonitorBehaviour();
 
 		// Add link to FILE_COMPARATORS_SET (Common/Comparator.set)
 		//
@@ -762,6 +767,78 @@ namespace Builder
 		}
 
 		ok = m_cfgXml->addLinkToFile(buildFile);
+		return ok;
+	}
+
+	bool MonitorCfgGenerator::writeMonitorBehaviour()
+	{
+		if (m_dbController == nullptr)
+		{
+			Q_ASSERT(m_dbController);
+			return false;
+		}
+
+		bool ok = true;
+		QString behaviourId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviourID", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (behaviourId.isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Load all clients behaviour
+		//
+		ClientBehaviourStorage allBehaviourStorage;
+
+		QString errorCode;
+		if (allBehaviourStorage.load(m_dbController, &errorCode) == false)
+		{
+			m_log->errCMN0010("ClientBehaviour.xml");
+			return false;
+		}
+
+		// Find behaviour for current monitor
+		//
+		ClientBehaviourStorage monitorBehaviourStorage;
+
+		std::vector<std::shared_ptr<MonitorBehaviour>> behaviours = allBehaviourStorage.monitorBehavoiurs();
+
+		for (auto b : behaviours)
+		{
+			if (b->id() == behaviourId)
+			{
+				monitorBehaviourStorage.add(b);
+				break;
+			}
+		}
+
+		if (monitorBehaviourStorage.count() == 0)
+		{
+			m_log->errEQP6210(m_software->equipmentIdTemplate(), behaviourId);
+			return false;
+		}
+
+		// Save monitor behaviour to XML
+		//
+		QByteArray data;
+		monitorBehaviourStorage.saveToXml(data);
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehaviour.xml", CFG_FILE_ID_BEHAVIOUR, "", data);
+
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012("MonitorBehaviour.xml");
+			return false;
+		}
+
+		ok = m_cfgXml->addLinkToFile(buildFile);
+
 		return ok;
 	}
 }

@@ -16,6 +16,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/FblItemRect.h"
+#include "DialogClientBehaviour.h"
 
 //
 //
@@ -4479,7 +4480,8 @@ void SchemaControlTabPageEx::showFileProperties()
 
 void SchemaControlTabPageEx::showBehaviorEditor()
 {
-	QMessageBox::warning(this, qAppName(), "TO DO: Monitor/Tuning Behavior editor");
+	DialogClientBehaviour d(db(), this);
+	d.exec();
 }
 
 void SchemaControlTabPageEx::ctrlF()
