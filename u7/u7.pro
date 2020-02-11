@@ -389,10 +389,10 @@ OTHER_FILES += \
     ../Proto/proto_compile.bat \
     ../Proto/serialization.proto \
     Tools/afbschema.xsd \
-    ../Proto/proto_compile.sh \
-    DatabaseUpgrade/Upgrade0039.txt
+    ../Proto/proto_compile.sh
 
 DISTFILES += \
+    ../Etc/ClientBehaviour/ClientBehaviour.xml \
     LogicModuleConfiguration.js \
     Afbl/_convert_all.bat \
     Afbl/bcomp_great_v1.afb \

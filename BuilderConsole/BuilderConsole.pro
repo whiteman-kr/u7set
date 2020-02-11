@@ -93,5 +93,4 @@ unix {
     LIBS += -lBuilder
 }
 
-DISTFILES += \
-    BuilderConsoleArgs.xml
+DISTFILES +=
