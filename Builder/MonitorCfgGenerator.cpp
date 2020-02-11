@@ -798,7 +798,7 @@ namespace Builder
 
 		QByteArray dbData;
 
-		bool result = loadFileFromDatabase(m_dbController, allBehaviourStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviourStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
 			m_log->errCMN0010(allBehaviourStorage.dbFileName());
@@ -819,7 +819,7 @@ namespace Builder
 
 		for (auto b : behaviours)
 		{
-			if (b->id() == behaviourId)
+			if (b->behaviourId() == behaviourId)
 			{
 				monitorBehaviourStorage.add(b);
 				break;
@@ -828,7 +828,7 @@ namespace Builder
 
 		if (monitorBehaviourStorage.count() == 0)
 		{
-			m_log->errEQP6210(m_software->equipmentIdTemplate(), behaviourId);
+			m_log->errEQP6210(behaviourId, m_software->equipmentIdTemplate());
 			return false;
 		}
 

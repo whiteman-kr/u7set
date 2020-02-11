@@ -60,7 +60,7 @@ private:
 	bool m_modified = false;
 
 	DbController* db();
-	DbController* m_dbController;
+	DbController* m_dbController = nullptr;
 
 	QTreeWidget* m_behaviourTree = nullptr;
 

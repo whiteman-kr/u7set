@@ -5,7 +5,7 @@
 //
 ClientBehaviour::ClientBehaviour()
 {
-	ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, id, setId);
+	ADD_PROPERTY_GETTER_SETTER(QString, "BehaviourID", true, behaviourId, setBehaviourId);
 }
 
 ClientBehaviour::~ClientBehaviour()
@@ -15,30 +15,30 @@ ClientBehaviour::~ClientBehaviour()
 
 bool ClientBehaviour::isMonitorBehaviour() const
 {
-	return m_behaviourType == ClientBehaviourType::Monitor;
+	return dynamic_cast<const MonitorBehaviour*>(this) != nullptr;
 }
 
 bool ClientBehaviour::isTuningClientBehaviour() const
 {
-	return m_behaviourType == ClientBehaviourType::TuningClient;
+	return dynamic_cast<const TuningClientBehaviour*>(this) != nullptr;
 }
 
-QString ClientBehaviour::id() const
+QString ClientBehaviour::behaviourId() const
 {
-	return m_id;
+	return m_behaviourId;
 }
 
-void ClientBehaviour::setId(const QString& id)
+void ClientBehaviour::setBehaviourId(const QString& id)
 {
-	m_id = id;
+	m_behaviourId = id;
 
 }
 
 void ClientBehaviour::save(QXmlStreamWriter& writer)
 {
-	writer.writeAttribute("ID", id());
+	writer.writeAttribute("ID", behaviourId());
 
-	save(writer);
+	saveToXml(writer);
 
 	return;
 }
@@ -47,15 +47,15 @@ bool ClientBehaviour::load(QXmlStreamReader& reader)
 {
 	if (reader.attributes().hasAttribute("ID"))
 	{
-		setId(reader.attributes().value("ID").toString());
+		setBehaviourId(reader.attributes().value("ID").toString());
 	}
 
-	if (id().isEmpty())
+	if (behaviourId().isEmpty())
 	{
-		setId(("ID"));
+		setBehaviourId(("ID"));
 	}
 
-	return load(reader);
+	return loadFromXml(reader);
 }
 
 //
@@ -63,8 +63,6 @@ bool ClientBehaviour::load(QXmlStreamReader& reader)
 //
 MonitorBehaviour::MonitorBehaviour()
 {
-	m_behaviourType = ClientBehaviourType::Monitor;
-
 	m_signalTagToColor["critical"] = QColor("#FF5733");
 	m_signalTagToColor["attention"] = QColor("#FFBD33");
 	m_signalTagToColor["general"] = QColor("#2A05EB");
@@ -184,8 +182,6 @@ bool MonitorBehaviour::loadFromXml(QXmlStreamReader& reader)
 //
 TuningClientBehaviour::TuningClientBehaviour()
 {
-	m_behaviourType = ClientBehaviourType::TuningClient;
-
 	m_tagToColor["defaultMismatchBackColor"] = QColor(Qt::yellow);
 	m_tagToColor["defaultMismatchTextColor"] = QColor(Qt::black);
 	m_tagToColor["unappliedBackColor"] = QColor(Qt::gray);
@@ -362,7 +358,7 @@ std::shared_ptr<ClientBehaviour> ClientBehaviourStorage::get(const QString& id) 
 {
 	for (auto s : m_behavoiurs)
 	{
-		if (s->id() == id)
+		if (s->behaviourId() == id)
 		{
 			return s;
 		}

@@ -4,13 +4,6 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/DbController.h"
 
-enum class ClientBehaviourType
-{
-	Unknown,
-	Monitor,
-	TuningClient
-};
-
 //
 // ClientBehaviour
 //
@@ -23,8 +16,8 @@ public:
 
 	ClientBehaviour& operator=(const ClientBehaviour& That)
 	{
-		m_behaviourType = That.m_behaviourType;
-		m_id = That.m_id;
+		m_behaviourId = That.m_behaviourId;
+
 		return *this;
 	}
 
@@ -32,8 +25,8 @@ public:
 	bool isMonitorBehaviour() const;
 	bool isTuningClientBehaviour() const;
 
-	QString id() const;
-	void setId(const QString& id);
+	QString behaviourId() const;
+	void setBehaviourId(const QString& behaviourId);
 
 public:
 	virtual void save(QXmlStreamWriter& writer);
@@ -43,11 +36,8 @@ protected:
 	virtual void saveToXml(QXmlStreamWriter& writer) = 0;
 	virtual bool loadFromXml(QXmlStreamReader& reader) = 0;
 
-protected:
-	ClientBehaviourType m_behaviourType = ClientBehaviourType::Unknown;
-
 private:
-	QString m_id;
+	QString m_behaviourId;
 };
 
 //
@@ -62,6 +52,7 @@ public:
 	{
 		m_signalTagToColor = That.m_signalTagToColor;
 
+		ClientBehaviour::operator= (That);
 		return *this;
 	}
 
@@ -97,6 +88,7 @@ public:
 	{
 		m_tagToColor = That.m_tagToColor;
 
+		ClientBehaviour::operator= (That);
 		return *this;
 	}
 

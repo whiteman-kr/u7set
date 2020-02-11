@@ -7575,17 +7575,17 @@ namespace Builder
 	/// Title: Client behaviour (%1) specified in %2.BehaviourID does not exist.
 	///
 	/// Parameters:
-	///		%1 Software EquipmentID
-	///		%2 Specified BehaviourID
+	///		%1 Specified BehaviourID
+	///		%2 Software EquipmentID
 	///
 	/// Description:
 	///		Specified BehaviourID does not exist in client behaviour database.
 	///
-	void IssueLogger::errEQP6210(QString softwareObjectStrId, QString behaviourId)
+	void IssueLogger::errEQP6210(QString behaviourId, QString softwareObjectStrId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6210,
-				  tr("Client behaviour %2 specified in %1.BehaviourID does not exist. ").arg(softwareObjectStrId).arg(behaviourId));
+				  tr("Client behaviour %1 specified in %2.BehaviourID does not exist. ").arg(behaviourId).arg(softwareObjectStrId));
 	}
 
 	// --

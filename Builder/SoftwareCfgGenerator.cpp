@@ -1068,7 +1068,7 @@ namespace Builder
 		return true;
 	}
 
-	bool SoftwareCfgGenerator::loadFileFromDatabase(DbController* db, const QString& fileName, QString *errorCode, QByteArray* data)
+	bool SoftwareCfgGenerator::loadFileFromDatabase(DbController* db, int fileId, const QString& fileName, QString *errorCode, QByteArray* data)
 	{
 		if (db == nullptr || errorCode == nullptr || data == nullptr)
 		{
@@ -1082,14 +1082,14 @@ namespace Builder
 		//
 
 		std::vector<DbFileInfo> fileList;
-		bool ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+		bool ok = db->getFileList(&fileList, fileId, fileName, true, nullptr);
 		if (ok == false || fileList.size() != 1)
 		{
 			*errorCode = QObject::tr("File %1 is not found.").arg(fileName);
 			return false;
 		}
 
-		std::shared_ptr<DbFile> file = nullptr;
+		std::shared_ptr<DbFile> file;
 		ok = db->getLatestVersion(fileList[0], &file, nullptr);
 		if (ok == false || file == nullptr)
 		{

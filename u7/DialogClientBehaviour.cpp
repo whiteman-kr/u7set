@@ -77,7 +77,7 @@ DialogClientBehaviour::DialogClientBehaviour(DbController *pDbController, QWidge
 	setWindowTitle(tr("Client Behaviour Editor"));
 
 	QStringList l;
-	l << tr("ID");
+	l << tr("BehaviourID");
 	l << tr("Type");
 	m_behaviourTree->setColumnCount(static_cast<int>(l.size()));
 	m_behaviourTree->setHeaderLabels(l);
@@ -128,7 +128,7 @@ bool DialogClientBehaviour::askForSaveChanged()
 		return true;
 	}
 
-	QMessageBox::StandardButton result = QMessageBox::warning(this, "Client Behavour Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+	QMessageBox::StandardButton result = QMessageBox::warning(this, "Client Behaviour Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
 	if (result == QMessageBox::Yes)
 	{
@@ -155,7 +155,7 @@ bool DialogClientBehaviour::saveChanges()
 	}
 
 	bool ok = false;
-	QString comment = QInputDialog::getText(this, tr("Client Behavour Editor"),
+	QString comment = QInputDialog::getText(this, tr("Client Behaviour Editor"),
 											tr("Please enter comment:"), QLineEdit::Normal,
 											tr("comment"), &ok);
 
@@ -165,7 +165,7 @@ bool DialogClientBehaviour::saveChanges()
 	}
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, "Client Behavour Editor", "No comment supplied!");
+		QMessageBox::warning(this, "Client Behaviour Editor", "No comment supplied!");
 		return false;
 	}
 
@@ -357,7 +357,7 @@ void DialogClientBehaviour::updateBehaviuorItemText(QTreeWidgetItem* item, Clien
 		return;
 	}
 
-	item->setText(static_cast<int>(Columns::ID), behaviour->id());
+	item->setText(static_cast<int>(Columns::ID), behaviour->behaviourId());
 
 	if (behaviour->isMonitorBehaviour())
 	{
@@ -391,7 +391,7 @@ void DialogClientBehaviour::addBehaviour(const std::shared_ptr<ClientBehaviour> 
 
 	QString id = QInputDialog::getText(this, qAppName(),
 										 tr("Enter ID:"), QLineEdit::Normal,
-										 behaviour->id(), &ok);
+	                                     behaviour->behaviourId(), &ok);
 
 	if (ok == false || id.isEmpty() == true)
 	{
@@ -401,14 +401,14 @@ void DialogClientBehaviour::addBehaviour(const std::shared_ptr<ClientBehaviour> 
 	const std::vector<std::shared_ptr<ClientBehaviour>> behaviours = m_behaviourStorage.behavoiurs();
 	for (const auto existingBehaviour : behaviours)
 	{
-		if (existingBehaviour->id() == id)
+		if (existingBehaviour->behaviourId() == id)
 		{
 			QMessageBox::critical(this, qAppName(), tr("A client behaviour with specified ID already exists!"));
 			return;
 		}
 	}
 
-	behaviour->setId(id);
+	behaviour->setBehaviourId(id);
 
 	// Add bus, update UI
 	//
@@ -454,10 +454,10 @@ bool DialogClientBehaviour::continueWithDuplicateId()
 				continue;
 			}
 
-			if (e->id() == c->id())
+			if (e->behaviourId() == c->behaviourId())
 			{
 				duplicated = true;
-				duplicatedCaption = e->id();
+				duplicatedCaption = e->behaviourId();
 				break;
 			}
 		}
@@ -548,14 +548,14 @@ void DialogClientBehaviour::on_add_clicked()
 void DialogClientBehaviour::on_addMonitorBehaviour()
 {
 	std::shared_ptr<ClientBehaviour> behaviour = std::make_shared<MonitorBehaviour>();
-	behaviour->setId(tr("MONITOR_BEHAVIOURID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
+	behaviour->setBehaviourId(tr("MONITOR_BEHAVIOURID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
 	addBehaviour(behaviour);
 }
 
 void DialogClientBehaviour::on_addTuningClientBehaviour()
 {
 	std::shared_ptr<ClientBehaviour> behaviour = std::make_shared<TuningClientBehaviour>();
-	behaviour->setId(tr("TC_BEHAVIOURID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
+	behaviour->setBehaviourId(tr("TC_BEHAVIOURID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
 	addBehaviour(behaviour);
 }
 
@@ -670,7 +670,7 @@ void DialogClientBehaviour::on_clone_clicked()
 
 	}
 
-	clonedBehaviour->setId(sourceBehaviour->id() + "_CLONE");
+	clonedBehaviour->setBehaviourId(sourceBehaviour->behaviourId() + "_CLONE");
 
 	addBehaviour(clonedBehaviour);
 
