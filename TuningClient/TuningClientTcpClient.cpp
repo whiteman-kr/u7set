@@ -218,10 +218,12 @@ bool TuningClientTcpClient::takeClientControl(QWidget* parentWidget)
 
 bool TuningClientTcpClient::writingIsEnabled(const TuningSignalState& state) const
 {
-	if (theConfigSettings.useAccessFlag == false)
+	if (lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+	{
+		return state.writingIsEnabled();
+	}
+	else
 	{
 		return true;
 	}
-
-	return state.writingIsEnabled();
 }

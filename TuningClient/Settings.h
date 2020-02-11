@@ -3,6 +3,7 @@
 
 #include "../lib/HostAddressPort.h"
 #include "UserManager.h"
+#include "../lib/Tuning/TuningTcpClient.h"
 
 // Enable the next line to access the admin functions
 //#define USE_ADMIN_REGISTRY_AREA
@@ -90,9 +91,7 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
-	bool showSOR = true;
-
-	bool useAccessFlag = false;
+	LmStatusFlagMode lmStatusFlagMode = LmStatusFlagMode::SOR;
 
 	int loginSessionLength = 120;
 

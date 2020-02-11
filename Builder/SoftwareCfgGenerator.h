@@ -64,6 +64,8 @@ namespace Builder
 
 		static bool joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge);
 
+		static bool loadFileFromDatabase(DbController* db, int fileId, const QString& fileName, QString *errorCode, QByteArray* data);
+
 	protected:
 		Context* m_context = nullptr;
 		DbController* m_dbController = nullptr;

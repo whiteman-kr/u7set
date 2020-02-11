@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Behaviour>
+    <MonitorBehaviour ID="DEFAULT_MONITOR_BEHAVIOUR">
+        <SignalTagToColor>
+            <Item tag="general" color="#2a05eb"/>
+            <Item tag="critical" color="#ff5733"/>
+            <Item tag="attention" color="#ffbd33"/>
+        </SignalTagToColor>
+    </MonitorBehaviour>
+    <TuningClientBehaviour ID="DEFAULT_TC_BEHAVIOUR">
+        <TagToColor>
+            <Item tag="unappliedBackColor" color="#a0a0a4"/>
+            <Item tag="unappliedTextColor" color="#000000"/>
+            <Item tag="defaultMismatchBackColor" color="#ffff00"/>
+            <Item tag="defaultMismatchTextColor" color="#000000"/>
+        </TagToColor>
+    </TuningClientBehaviour>
+</Behaviour>

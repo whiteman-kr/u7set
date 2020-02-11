@@ -730,7 +730,7 @@ void MainWindow::updateStatusBar()
 
 		// Sor tool
 
-		if (theConfigSettings.showSOR == true)
+		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
 		{
 			QString sorStatus;
 

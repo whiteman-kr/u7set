@@ -40,7 +40,7 @@ public:
 	// signals
 	//
 signals:
-	void tcpClientConfigurationArrived(HostAddressPort address, bool autoApply);
+	void tcpClientConfigurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode);
 
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
