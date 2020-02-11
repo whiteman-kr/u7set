@@ -86,9 +86,18 @@ DialogClientBehaviour::DialogClientBehaviour(DbController *pDbController, QWidge
 
 	QString errorCode;
 
-	if (m_behaviourStorage.load(db(), &errorCode) == false)
+	QByteArray data;
+	bool result = loadFileFromDatabase(db(), m_behaviourStorage.dbFileName(), &errorCode, &data);
+	if (result == false)
 	{
-		QMessageBox::critical(this, QString("Error"), tr("Can't load subsystems, error code: \n\n'%1'").arg(errorCode));
+		QMessageBox::critical(this, QString("Error"), tr("Can't load behaviour file, error code: \n\n'%1'").arg(errorCode));
+		return;
+	}
+
+	result = m_behaviourStorage.load(data, &errorCode);
+	if (result == false)
+	{
+		QMessageBox::critical(this, QString("Error"), tr("Can't parse behaviour, error code: \n\n'%1'").arg(errorCode));
 		return;
 	}
 
@@ -160,15 +169,120 @@ bool DialogClientBehaviour::saveChanges()
 		return false;
 	}
 
+	// save data to XML
+	//
+	QByteArray data;
+	m_behaviourStorage.save(data);
+
 	// save to db
 	//
-	if (m_behaviourStorage.save(db(), comment) == false)
+	if (saveFileToDatabase(data, db(), m_behaviourStorage.dbFileName(), comment) == false)
 	{
 		QMessageBox::critical(this, QString("Error"), tr("Can't save client behavoiur file."));
 		return false;
 	}
 
 	m_modified = false;
+
+	return true;
+}
+
+
+bool DialogClientBehaviour::loadFileFromDatabase(DbController* db, const QString& fileName, QString *errorCode, QByteArray* data)
+{
+	if (db == nullptr || errorCode == nullptr || data == nullptr)
+	{
+		assert(errorCode);
+		assert(db);
+		assert(data);
+		return false;
+	}
+
+	// Load the file from the database
+	//
+
+	std::vector<DbFileInfo> fileList;
+	bool ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+	if (ok == false || fileList.size() != 1)
+	{
+		*errorCode = QObject::tr("File %1 is not found.").arg(fileName);
+		return false;
+	}
+
+	std::shared_ptr<DbFile> file = nullptr;
+	ok = db->getLatestVersion(fileList[0], &file, nullptr);
+	if (ok == false || file == nullptr)
+	{
+		*errorCode = QObject::tr("Get latest version of %1 failed.").arg(fileName);
+		return false;
+	}
+
+	file->swapData(*data);
+
+	return true;
+}
+
+bool DialogClientBehaviour::saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString &comment)
+{
+	if (db == nullptr)
+	{
+		assert(db);
+		return false;
+	}
+
+	// save to db
+	//
+	std::shared_ptr<DbFile> file = nullptr;
+
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+
+	if (ok == false || fileList.size() != 1)
+	{
+		// create a file, if it does not exists
+		//
+		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
+		pf->setFileName(fileName);
+
+		if (db->addFile(pf, db->etcFileId(), nullptr) == false)
+		{
+			return false;
+		}
+
+		ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+		if (ok == false || fileList.size() != 1)
+		{
+			return false;
+		}
+	}
+
+	ok = db->getLatestVersion(fileList[0], &file, nullptr);
+	if (ok == false || file == nullptr)
+	{
+		return false;
+	}
+
+	if (file->state() != VcsState::CheckedOut)
+	{
+		if (db->checkOut(fileList[0], nullptr) == false)
+		{
+			return false;
+		}
+	}
+
+	QByteArray fileData(data);
+	file->swapData(fileData);
+
+	if (db->setWorkcopy(file, nullptr) == false)
+	{
+		return false;
+	}
+
+	if (db->checkIn(fileList[0], comment, nullptr) == false)
+	{
+		return false;
+	}
 
 	return true;
 }

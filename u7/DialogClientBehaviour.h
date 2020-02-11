@@ -26,6 +26,9 @@ private:
 
 	bool continueWithDuplicateId();
 
+	bool loadFileFromDatabase(DbController* db, const QString& fileName, QString *errorCode, QByteArray* data);
+	bool saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString &comment);
+
 protected:
 	virtual void keyPressEvent(QKeyEvent *evt);
 	virtual void showEvent(QShowEvent* event) override;

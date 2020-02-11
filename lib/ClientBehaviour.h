@@ -129,13 +129,17 @@ class ClientBehaviourStorage
 public:
 	ClientBehaviourStorage();
 
-	QString fileName() const;
+	QString dbFileName() const;
 
 	void add(std::shared_ptr<ClientBehaviour> behavoiur);
+
 	bool remove(int index);
+
 	int count() const;
+
 	std::shared_ptr<ClientBehaviour> get(int index) const;
 	std::shared_ptr<ClientBehaviour> get(const QString& id) const;
+
 	void clear();
 
 	const std::vector<std::shared_ptr<ClientBehaviour>>& behavoiurs();
@@ -143,15 +147,12 @@ public:
 	std::vector<std::shared_ptr<MonitorBehaviour>> monitorBehavoiurs();
 	std::vector<std::shared_ptr<TuningClientBehaviour>> tuningClientBehavoiurs();
 
-	void saveToXml(QByteArray& data);
-	bool loadFromXml(const QByteArray& data, QString* errorCode);
-
-	bool load(DbController* db, QString* errorCode);
-	bool save(DbController* db, const QString &comment);
+	void save(QByteArray& data);
+	bool load(const QByteArray& data, QString* errorCode);
 
 private:
 	std::vector<std::shared_ptr<ClientBehaviour>> m_behavoiurs;
-	const QString m_fileName = "ClientBehaviour.xml";
+	QString m_fileName = "ClientBehaviour.xml";
 };
 
 #endif // CLIENTBEHAVIOUR_H

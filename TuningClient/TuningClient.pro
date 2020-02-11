@@ -91,6 +91,7 @@ CONFIG(release, debug|release) {
 
 
 SOURCES +=\
+    ../lib/ClientBehaviour.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -155,6 +156,7 @@ SOURCES +=\
     SwitchFiltersPageOptions.cpp
 
 HEADERS  += MainWindow.h \
+    ../lib/ClientBehaviour.h \
     Stable.h \
     TuningPage.h \
     Settings.h \

@@ -38,7 +38,7 @@ void ClientBehaviour::save(QXmlStreamWriter& writer)
 {
 	writer.writeAttribute("ID", id());
 
-	saveToXml(writer);
+	save(writer);
 
 	return;
 }
@@ -55,7 +55,7 @@ bool ClientBehaviour::load(QXmlStreamReader& reader)
 		setId(("ID"));
 	}
 
-	return loadFromXml(reader);
+	return load(reader);
 }
 
 //
@@ -321,6 +321,11 @@ ClientBehaviourStorage::ClientBehaviourStorage()
 
 }
 
+QString ClientBehaviourStorage::dbFileName() const
+{
+	return m_fileName;
+}
+
 void ClientBehaviourStorage::add(std::shared_ptr<ClientBehaviour> behavoiur)
 {
 	m_behavoiurs.push_back(behavoiur);
@@ -421,7 +426,7 @@ std::vector<std::shared_ptr<TuningClientBehaviour>> ClientBehaviourStorage::tuni
 	return result;
 }
 
-void ClientBehaviourStorage::saveToXml(QByteArray& data)
+void ClientBehaviourStorage::save(QByteArray& data)
 {
 	QXmlStreamWriter writer(&data);
 
@@ -458,7 +463,7 @@ void ClientBehaviourStorage::saveToXml(QByteArray& data)
 	writer.writeEndDocument();
 }
 
-bool ClientBehaviourStorage::loadFromXml(const QByteArray& data, QString* errorCode)
+bool ClientBehaviourStorage::load(const QByteArray& data, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -540,108 +545,3 @@ bool ClientBehaviourStorage::loadFromXml(const QByteArray& data, QString* errorC
 	return !reader.hasError();
 }
 
-bool ClientBehaviourStorage::load(DbController* db, QString *errorCode)
-{
-	if (db == nullptr || errorCode == nullptr)
-	{
-		assert(errorCode);
-		assert(db);
-		return false;
-	}
-
-	// Load the file from the database
-	//
-
-	std::vector<DbFileInfo> fileList;
-	bool ok = db->getFileList(&fileList, db->etcFileId(), m_fileName, true, nullptr);
-	if (ok == false || fileList.size() != 1)
-	{
-		*errorCode = QObject::tr("File %1 is not found.").arg(m_fileName);
-		return false;
-	}
-
-	std::shared_ptr<DbFile> file = nullptr;
-	ok = db->getLatestVersion(fileList[0], &file, nullptr);
-	if (ok == false || file == nullptr)
-	{
-		*errorCode = QObject::tr("Get latest version of %1 failed.").arg(m_fileName);
-		return false;
-	}
-
-	QByteArray data;
-	file->swapData(data);
-
-	bool result = loadFromXml(data, errorCode);
-
-	return result;
-}
-
-bool ClientBehaviourStorage::save(DbController* db, const QString &comment)
-{
-	if (db == nullptr)
-	{
-		assert(db);
-		return false;
-	}
-
-	// save data to XML
-	//
-	QByteArray data;
-
-	saveToXml(data);
-
-	// save to db
-	//
-	std::shared_ptr<DbFile> file = nullptr;
-
-	std::vector<DbFileInfo> fileList;
-
-	bool ok = db->getFileList(&fileList, db->etcFileId(), m_fileName, true, nullptr);
-
-	if (ok == false || fileList.size() != 1)
-	{
-		// create a file, if it does not exists
-		//
-		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
-		pf->setFileName(m_fileName);
-
-		if (db->addFile(pf, db->etcFileId(), nullptr) == false)
-		{
-			return false;
-		}
-
-		ok = db->getFileList(&fileList, db->etcFileId(), m_fileName, true, nullptr);
-		if (ok == false || fileList.size() != 1)
-		{
-			return false;
-		}
-	}
-
-	ok = db->getLatestVersion(fileList[0], &file, nullptr);
-	if (ok == false || file == nullptr)
-	{
-		return false;
-	}
-
-	if (file->state() != VcsState::CheckedOut)
-	{
-		if (db->checkOut(fileList[0], nullptr) == false)
-		{
-			return false;
-		}
-	}
-
-	file->swapData(data);
-
-	if (db->setWorkcopy(file, nullptr) == false)
-	{
-		return false;
-	}
-
-	if (db->checkIn(fileList[0], comment, nullptr) == false)
-	{
-		return false;
-	}
-
-	return true;
-}

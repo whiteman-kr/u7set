@@ -1,6 +1,7 @@
 #include "ConfigController.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
+#include "../lib/ClientBehaviour.h"
 
 //
 // ConfigController
@@ -385,6 +386,29 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+			}
+
+			if (f.ID == CFG_FILE_ID_BEHAVIOUR)
+			{
+				QByteArray behaviourData;
+
+				if (getFileBlockedById(f.ID, &behaviourData, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					ClientBehaviourStorage behaviourStorage;
+
+					QString errorCode;
+					bool ok = behaviourStorage.load(behaviourData, &errorCode);
+					if (ok == false)
+					{
+						Q_ASSERT(ok);
+					}
 				}
 			}
 		}

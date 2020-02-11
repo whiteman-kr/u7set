@@ -798,9 +798,19 @@ namespace Builder
 		ClientBehaviourStorage allBehaviourStorage;
 
 		QString errorCode;
-		if (allBehaviourStorage.load(m_dbController, &errorCode) == false)
+
+		QByteArray dbData;
+
+		bool result = loadFileFromDatabase(m_dbController, allBehaviourStorage.dbFileName(), &errorCode, &dbData);
+		if (result == false)
 		{
-			m_log->errCMN0010("ClientBehaviour.xml");
+			m_log->errCMN0010(allBehaviourStorage.dbFileName());
+			return false;
+		}
+
+		if (allBehaviourStorage.load(dbData, &errorCode) == false)
+		{
+			m_log->errCMN0010(allBehaviourStorage.dbFileName());
 			return false;
 		}
 
@@ -828,7 +838,7 @@ namespace Builder
 		// Save monitor behaviour to XML
 		//
 		QByteArray data;
-		tcBehaviourStorage.saveToXml(data);
+		tcBehaviourStorage.save(data);
 
 		// Write file
 		//
