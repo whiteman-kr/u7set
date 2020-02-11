@@ -411,8 +411,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.showSchemasTabs != readSettings.showSchemasTabs ||
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
 			theConfigSettings.showSignals != readSettings.showSignals ||
-			theConfigSettings.showSOR != readSettings.showSOR ||
-			theConfigSettings.useAccessFlag != readSettings.useAccessFlag ||
+	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode ||
 			theConfigSettings.logonMode != readSettings.logonMode ||
 			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
 			theConfigSettings.usersAccounts != readSettings.usersAccounts
@@ -421,11 +420,13 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		apperanceUpdated = true;
 	}
 
-	bool serversUpdated = true;
+	bool serversUpdated = false;
 
-	if (theConfigSettings.tuningServiceAddress.address().address() == readSettings.tuningServiceAddress.address().address())
+	if (theConfigSettings.tuningServiceAddress.address().address() != readSettings.tuningServiceAddress.address().address() ||
+	        theConfigSettings.autoApply != readSettings.autoApply ||
+	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode)
 	{
-		serversUpdated = false;
+		serversUpdated = true;
 	}
 
 	theConfigSettings = readSettings;
@@ -435,7 +436,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (serversUpdated == true)
 	{
-		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply);
+		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply, theConfigSettings.lmStatusFlagMode);
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
@@ -628,8 +629,22 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
-			outSetting->useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
+
+			bool showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
+			bool useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
+
+			outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
+			if (showSOR == true)
+			{
+				outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
+			}
+			else
+			{
+				if (useAccessFlag == true)
+				{
+					outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
+				}
+			}
 
 			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
 			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();

@@ -69,6 +69,12 @@ struct TuningWriteCommand
 	bool load(const Network::TuningWriteCommand& message);
 };
 
+enum class LmStatusFlagMode
+{
+	None,
+	SOR,
+	AccessKey
+};
 
 class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
 {
@@ -151,7 +157,7 @@ protected:
 
 public slots:
 	void slot_signalsUpdated();
-	void slot_configurationArrived(HostAddressPort address, bool autoApply);
+	void slot_configurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode);
 
 signals:
 	void tuningSourcesArrived();
@@ -186,6 +192,8 @@ public:
 
 	QString singleActiveTuningSource() const;
 
+	LmStatusFlagMode lmStatusFlagMode() const;
+
 	// Data
 	//
 private:
@@ -193,6 +201,8 @@ private:
 	Hash m_instanceIdHash;
 	int m_requestInterval = 100;
 	bool m_autoApply = true;
+
+	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
 
 	TuningSignalManager* m_signals = nullptr;
 
@@ -212,6 +222,7 @@ private:
 	int m_readTuningSignalIndex = 0;
 	int m_readTuningSignalCount = 0;
 
+	mutable QMutex m_signalHashesMutex;					// For access to m_signalHashes
 	std::vector<Hash> m_signalHashes;
 
 	bool m_singleLmControlMode = false;
