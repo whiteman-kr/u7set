@@ -4594,14 +4594,14 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   inline double gridsmallstep() const;
   inline void set_gridsmallstep(double value);
 
-  // optional bool drawAutoSetpoints = 70;
+  // optional bool drawAutoSetpoints = 70 [default = true];
   inline bool has_drawautosetpoints() const;
   inline void clear_drawautosetpoints();
   static const int kDrawAutoSetpointsFieldNumber = 70;
   inline bool drawautosetpoints() const;
   inline void set_drawautosetpoints(bool value);
 
-  // optional bool drawCustomSetpoints = 71;
+  // optional bool drawCustomSetpoints = 71 [default = false];
   inline bool has_drawcustomsetpoints() const;
   inline void clear_drawcustomsetpoints();
   static const int kDrawCustomSetpointsFieldNumber = 71;
@@ -12512,6 +12512,22 @@ class SchemaDetails : public ::google::protobuf::Message {
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& tags() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_tags();
 
+  // repeated string loopbacks = 25;
+  inline int loopbacks_size() const;
+  inline void clear_loopbacks();
+  static const int kLoopbacksFieldNumber = 25;
+  inline const ::std::string& loopbacks(int index) const;
+  inline ::std::string* mutable_loopbacks(int index);
+  inline void set_loopbacks(int index, const ::std::string& value);
+  inline void set_loopbacks(int index, const char* value);
+  inline void set_loopbacks(int index, const char* value, size_t size);
+  inline ::std::string* add_loopbacks();
+  inline void add_loopbacks(const ::std::string& value);
+  inline void add_loopbacks(const char* value);
+  inline void add_loopbacks(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& loopbacks() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_loopbacks();
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaDetails)
  private:
   inline void set_has_version();
@@ -12540,9 +12556,10 @@ class SchemaDetails : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::std::string> connections_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > guids_;
   ::google::protobuf::RepeatedPtrField< ::std::string> tags_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> loopbacks_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20893,7 +20910,7 @@ inline void IndicatorHistogramVert::set_gridsmallstep(double value) {
   gridsmallstep_ = value;
 }
 
-// optional bool drawAutoSetpoints = 70;
+// optional bool drawAutoSetpoints = 70 [default = true];
 inline bool IndicatorHistogramVert::has_drawautosetpoints() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
@@ -20904,7 +20921,7 @@ inline void IndicatorHistogramVert::clear_has_drawautosetpoints() {
   _has_bits_[0] &= ~0x00008000u;
 }
 inline void IndicatorHistogramVert::clear_drawautosetpoints() {
-  drawautosetpoints_ = false;
+  drawautosetpoints_ = true;
   clear_has_drawautosetpoints();
 }
 inline bool IndicatorHistogramVert::drawautosetpoints() const {
@@ -20915,7 +20932,7 @@ inline void IndicatorHistogramVert::set_drawautosetpoints(bool value) {
   drawautosetpoints_ = value;
 }
 
-// optional bool drawCustomSetpoints = 71;
+// optional bool drawCustomSetpoints = 71 [default = false];
 inline bool IndicatorHistogramVert::has_drawcustomsetpoints() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
@@ -32120,6 +32137,50 @@ SchemaDetails::tags() const {
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 SchemaDetails::mutable_tags() {
   return &tags_;
+}
+
+// repeated string loopbacks = 25;
+inline int SchemaDetails::loopbacks_size() const {
+  return loopbacks_.size();
+}
+inline void SchemaDetails::clear_loopbacks() {
+  loopbacks_.Clear();
+}
+inline const ::std::string& SchemaDetails::loopbacks(int index) const {
+  return loopbacks_.Get(index);
+}
+inline ::std::string* SchemaDetails::mutable_loopbacks(int index) {
+  return loopbacks_.Mutable(index);
+}
+inline void SchemaDetails::set_loopbacks(int index, const ::std::string& value) {
+  loopbacks_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_loopbacks(int index, const char* value) {
+  loopbacks_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_loopbacks(int index, const char* value, size_t size) {
+  loopbacks_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::add_loopbacks() {
+  return loopbacks_.Add();
+}
+inline void SchemaDetails::add_loopbacks(const ::std::string& value) {
+  loopbacks_.Add()->assign(value);
+}
+inline void SchemaDetails::add_loopbacks(const char* value) {
+  loopbacks_.Add()->assign(value);
+}
+inline void SchemaDetails::add_loopbacks(const char* value, size_t size) {
+  loopbacks_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaDetails::loopbacks() const {
+  return loopbacks_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaDetails::mutable_loopbacks() {
+  return &loopbacks_;
 }
 
 // -------------------------------------------------------------------

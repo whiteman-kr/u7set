@@ -11,6 +11,7 @@
 #include "SchemaItemBus.h"
 #include "SchemaItemLink.h"
 #include "SchemaItemConnection.h"
+#include "SchemaItemLoopback.h"
 #include "HorzVertLinks.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
@@ -1418,6 +1419,7 @@ namespace VFrame30
 		// Get list of receivers/transmitters
 		//
 		QSet<QString> connections;
+		QSet<QString> loopbacks;
 
 		if (schema->isLogicSchema() == true)
 		{
@@ -1444,6 +1446,14 @@ namespace VFrame30
 							{
 								signalIds << appSignalId;
 							}
+						}
+
+						if (item->isType<SchemaItemLoopback>() == true)
+						{
+							const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
+							Q_ASSERT(lb);
+
+							loopbacks << lb->loopbackId();
 						}
 					}
 
@@ -1478,6 +1488,7 @@ namespace VFrame30
 		QVariant signaListVariant(signalIds.toList());
 		QVariant labelsVariant(labels);
 		QVariant connectionsVariant(connections.toList());
+		QVariant loopbacksVariant(loopbacks.toList());
 		QVariant tagsVariant(tags);
 		QVariant guidsVariant(guidsStringList);
 
@@ -1509,6 +1520,7 @@ namespace VFrame30
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
 		jsonObject.insert("Labels", QJsonValue::fromVariant(labelsVariant));
 		jsonObject.insert("Connections", QJsonValue::fromVariant(connectionsVariant));
+		jsonObject.insert("Loopbacks", QJsonValue::fromVariant(loopbacksVariant));
 		jsonObject.insert("Tags", QJsonValue::fromVariant(tagsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
 
@@ -1640,6 +1652,16 @@ namespace VFrame30
 					m_connections.insert(str);
 				}
 
+				// Loopbacks
+				//
+				m_loopbacks.clear();
+				QStringList loopbackList = jsonObject.value(QLatin1String("Loopbacks")).toVariant().toStringList();
+
+				for (const QString& str : loopbackList)
+				{
+					m_loopbacks.insert(str);
+				}
+
 				// Tags
 				//
 				m_tags.clear();
@@ -1696,6 +1718,11 @@ namespace VFrame30
 			message->add_connections(c.toStdString());
 		}
 
+		for (const QString& l : m_loopbacks)
+		{
+			message->add_loopbacks(l.toStdString());
+		}
+
 		for (const QString& t : m_tags)
 		{
 			message->add_tags(t.toStdString());
@@ -1745,6 +1772,14 @@ namespace VFrame30
 			m_connections.insert(conn);
 		}
 
+		m_loopbacks.clear();
+		int loopbackCount = message.loopbacks_size();
+		for (int i = 0; i < loopbackCount; i++)
+		{
+			QString lb = QString::fromStdString(message.loopbacks(i));
+			m_loopbacks.insert(lb);
+		}
+
 		m_tags.clear();
 		int tagCount = message.tags_size();
 		for (int i = 0; i < tagCount; i++)
@@ -1792,6 +1827,11 @@ namespace VFrame30
 		}
 
 		if (m_connections.find(searchText) != m_connections.end())
+		{
+			return true;
+		}
+
+		if (m_loopbacks.find(searchText) != m_loopbacks.end())
 		{
 			return true;
 		}
