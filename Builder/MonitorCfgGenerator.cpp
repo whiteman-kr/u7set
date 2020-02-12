@@ -3,7 +3,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
 #include "Context.h"
-#include "../lib/ClientBehaviour.h"
+#include "../lib/ClientBehavior.h"
 
 namespace Builder
 {
@@ -57,9 +57,9 @@ namespace Builder
 			result &= writeTuningSignals();
 		}
 
-		// Generate behaviour
+		// Generate behavior
 		//
-		result &= writeMonitorBehaviour();
+		result &= writeMonitorBehavior();
 
 		// Add link to FILE_COMPARATORS_SET (Common/Comparator.set)
 		//
@@ -770,7 +770,7 @@ namespace Builder
 		return ok;
 	}
 
-	bool MonitorCfgGenerator::writeMonitorBehaviour()
+	bool MonitorCfgGenerator::writeMonitorBehavior()
 	{
 		if (m_dbController == nullptr)
 		{
@@ -779,71 +779,71 @@ namespace Builder
 		}
 
 		bool ok = true;
-		QString behaviourId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviourID", &ok).trimmed();
+		QString behaviorId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviorID", &ok).trimmed();
 		if (ok == false)
 		{
 			return false;
 		}
 
-		if (behaviourId.isEmpty() == true)
+		if (behaviorId.isEmpty() == true)
 		{
 			return true;
 		}
 
-		// Load all clients behaviour
+		// Load all clients behavior
 		//
-		ClientBehaviourStorage allBehaviourStorage;
+		ClientBehaviorStorage allBehaviorStorage;
 
 		QString errorCode;
 
 		QByteArray dbData;
 
-		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviourStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
-			m_log->errCMN0010(allBehaviourStorage.dbFileName());
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
 			return false;
 		}
 
-		if (allBehaviourStorage.load(dbData, &errorCode) == false)
+		if (allBehaviorStorage.load(dbData, &errorCode) == false)
 		{
-			m_log->errCMN0010(allBehaviourStorage.dbFileName());
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
 			return false;
 		}
 
-		// Find behaviour for current monitor
+		// Find behavior for current monitor
 		//
-		ClientBehaviourStorage monitorBehaviourStorage;
+		ClientBehaviorStorage monitorBehaviorStorage;
 
-		std::vector<std::shared_ptr<MonitorBehaviour>> behaviours = allBehaviourStorage.monitorBehavoiurs();
+		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehavoiurs();
 
-		for (auto b : behaviours)
+		for (auto b : behaviors)
 		{
-			if (b->behaviourId() == behaviourId)
+			if (b->behaviorId() == behaviorId)
 			{
-				monitorBehaviourStorage.add(b);
+				monitorBehaviorStorage.add(b);
 				break;
 			}
 		}
 
-		if (monitorBehaviourStorage.count() == 0)
+		if (monitorBehaviorStorage.count() == 0)
 		{
-			m_log->errEQP6210(behaviourId, m_software->equipmentIdTemplate());
+			m_log->errEQP6210(behaviorId, m_software->equipmentIdTemplate());
 			return false;
 		}
 
-		// Save monitor behaviour to XML
+		// Save monitor behavior to XML
 		//
 		QByteArray data;
-		monitorBehaviourStorage.save(data);
+		monitorBehaviorStorage.save(data);
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehaviour.xml", CFG_FILE_ID_BEHAVIOUR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
 
 		if (buildFile == nullptr)
 		{
-			m_log->errCMN0012("MonitorBehaviour.xml");
+			m_log->errCMN0012("MonitorBehavior.xml");
 			return false;
 		}
 

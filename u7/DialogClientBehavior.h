@@ -1,28 +1,28 @@
-#ifndef DIALOGCLIENTBEHAVIOUR_H
-#define DIALOGCLIENTBEHAVIOUR_H
+#ifndef DIALOGCLIENTBEHAVIOR_H
+#define DIALOGCLIENTBEHAVIOR_H
 
 #include "../lib/DbController.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/ClientBehaviour.h"
+#include "../lib/ClientBehavior.h"
 
 
-class DialogClientBehaviour : public QDialog
+class DialogClientBehavior : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit DialogClientBehaviour(DbController* pDbController, QWidget *parent = 0);
-	~DialogClientBehaviour();
+	explicit DialogClientBehavior(DbController* pDbController, QWidget *parent = 0);
+	~DialogClientBehavior();
 
 private:
 	bool askForSaveChanged();
 	bool saveChanges();
 
-	void fillBehaviourList();
-	void fillBehaviourProperties();
+	void fillBehaviorList();
+	void fillBehaviorProperties();
 
-	void updateBehaviuorItemText(QTreeWidgetItem* item, ClientBehaviour* behaviour);
+	void updateBehaviuorItemText(QTreeWidgetItem* item, ClientBehavior* behavior);
 
-	void addBehaviour(const std::shared_ptr<ClientBehaviour> behaviour);
+	void addBehavior(const std::shared_ptr<ClientBehavior> behavior);
 
 	bool continueWithDuplicateId();
 
@@ -36,16 +36,16 @@ protected:
 
 private slots:
 	void on_add_clicked();
-	void on_addMonitorBehaviour();
-	void on_addTuningClientBehaviour();
+	void on_addMonitorBehavior();
+	void on_addTuningClientBehavior();
 	void on_remove_clicked();
 	void on_clone_clicked();
 	void accept() override;
 	void reject() override;
-	void on_behaviourSelectionChanged();
-	void on_behaviourSortIndicatorChanged(int column, Qt::SortOrder order);
+	void on_behaviorSelectionChanged();
+	void on_behaviorSortIndicatorChanged(int column, Qt::SortOrder order);
 
-	void on_behaviourPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	void on_behaviorPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 public:
 	enum class Columns
@@ -55,16 +55,16 @@ public:
 	};
 
 private:
-	ClientBehaviourStorage m_behaviourStorage;
+	ClientBehaviorStorage m_behaviorStorage;
 
 	bool m_modified = false;
 
 	DbController* db();
 	DbController* m_dbController = nullptr;
 
-	QTreeWidget* m_behaviourTree = nullptr;
+	QTreeWidget* m_behaviorTree = nullptr;
 
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 };
 
-#endif // DIALOGCLIENTBEHAVIOUR_H
+#endif // DIALOGCLIENTBEHAVIOR_H

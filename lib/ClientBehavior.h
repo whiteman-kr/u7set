@@ -1,32 +1,32 @@
-#ifndef CLIENTBEHAVIOUR_H
-#define CLIENTBEHAVIOUR_H
+#ifndef CLIENTBEHAVIOR_H
+#define CLIENTBEHAVIOR_H
 
 #include "../lib/PropertyObject.h"
 #include "../lib/DbController.h"
 
 //
-// ClientBehaviour
+// ClientBehavior
 //
 
-class ClientBehaviour : public PropertyObject
+class ClientBehavior : public PropertyObject
 {
 public:
-	ClientBehaviour();
-	virtual ~ClientBehaviour();
+	ClientBehavior();
+	virtual ~ClientBehavior();
 
-	ClientBehaviour& operator=(const ClientBehaviour& That)
+	ClientBehavior& operator=(const ClientBehavior& That)
 	{
-		m_behaviourId = That.m_behaviourId;
+		m_behaviorId = That.m_behaviorId;
 
 		return *this;
 	}
 
 public:
-	bool isMonitorBehaviour() const;
-	bool isTuningClientBehaviour() const;
+	bool isMonitorBehavior() const;
+	bool isTuningClientBehavior() const;
 
-	QString behaviourId() const;
-	void setBehaviourId(const QString& behaviourId);
+	QString behaviorId() const;
+	void setBehaviorId(const QString& behaviorId);
 
 public:
 	virtual void save(QXmlStreamWriter& writer);
@@ -37,22 +37,22 @@ protected:
 	virtual bool loadFromXml(QXmlStreamReader& reader) = 0;
 
 private:
-	QString m_behaviourId;
+	QString m_behaviorId;
 };
 
 //
-// MonitorBehaviour
+// MonitorBehavior
 //
-class MonitorBehaviour : public ClientBehaviour
+class MonitorBehavior : public ClientBehavior
 {
 public:
-	MonitorBehaviour();
+	MonitorBehavior();
 
-	MonitorBehaviour& operator=(const MonitorBehaviour& That)
+	MonitorBehavior& operator=(const MonitorBehavior& That)
 	{
 		m_signalTagToColor = That.m_signalTagToColor;
 
-		ClientBehaviour::operator= (That);
+		ClientBehavior::operator= (That);
 		return *this;
 	}
 
@@ -77,18 +77,18 @@ private:
 };
 
 //
-// TuningClientBehaviour
+// TuningClientBehavior
 //
-class TuningClientBehaviour : public ClientBehaviour
+class TuningClientBehavior : public ClientBehavior
 {
 public:
-	TuningClientBehaviour();
+	TuningClientBehavior();
 
-	TuningClientBehaviour& operator=(const TuningClientBehaviour& That)
+	TuningClientBehavior& operator=(const TuningClientBehavior& That)
 	{
 		m_tagToColor = That.m_tagToColor;
 
-		ClientBehaviour::operator= (That);
+		ClientBehavior::operator= (That);
 		return *this;
 	}
 
@@ -114,37 +114,37 @@ private:
 };
 
 //
-// ClientBehaviourStorage
+// ClientBehaviorStorage
 //
-class ClientBehaviourStorage
+class ClientBehaviorStorage
 {
 public:
-	ClientBehaviourStorage();
+	ClientBehaviorStorage();
 
 	QString dbFileName() const;
 
-	void add(std::shared_ptr<ClientBehaviour> behavoiur);
+	void add(std::shared_ptr<ClientBehavior> behavoiur);
 
 	bool remove(int index);
 
 	int count() const;
 
-	std::shared_ptr<ClientBehaviour> get(int index) const;
-	std::shared_ptr<ClientBehaviour> get(const QString& id) const;
+	std::shared_ptr<ClientBehavior> get(int index) const;
+	std::shared_ptr<ClientBehavior> get(const QString& id) const;
 
 	void clear();
 
-	const std::vector<std::shared_ptr<ClientBehaviour>>& behavoiurs();
+	const std::vector<std::shared_ptr<ClientBehavior>>& behavoiurs();
 
-	std::vector<std::shared_ptr<MonitorBehaviour>> monitorBehavoiurs();
-	std::vector<std::shared_ptr<TuningClientBehaviour>> tuningClientBehavoiurs();
+	std::vector<std::shared_ptr<MonitorBehavior>> monitorBehavoiurs();
+	std::vector<std::shared_ptr<TuningClientBehavior>> tuningClientBehavoiurs();
 
 	void save(QByteArray& data);
 	bool load(const QByteArray& data, QString* errorCode);
 
 private:
-	std::vector<std::shared_ptr<ClientBehaviour>> m_behavoiurs;
-	QString m_fileName = "ClientBehaviour.xml";
+	std::vector<std::shared_ptr<ClientBehavior>> m_behavoiurs;
+	QString m_fileName = "ClientBehavior.xml";
 };
 
-#endif // CLIENTBEHAVIOUR_H
+#endif // CLIENTBEHAVIOR_H
