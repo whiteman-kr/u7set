@@ -68,7 +68,7 @@ unix {
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../lib/ClientBehaviour.cpp \
+    ../lib/ClientBehavior.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbController.cpp \
     ../lib/DbProgress.cpp \
@@ -149,7 +149,7 @@ SOURCES += \
     ../lib/ComparatorSet.cpp
 
 HEADERS += \
-    ../lib/ClientBehaviour.h \
+    ../lib/ClientBehavior.h \
     ../lib/OutputLog.h \
     ../lib/DbController.h \
     ../lib/DbProgress.h \

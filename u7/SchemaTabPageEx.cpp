@@ -16,7 +16,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/FblItemRect.h"
-#include "DialogClientBehaviour.h"
+#include "DialogClientBehavior.h"
 
 //
 //
@@ -4480,7 +4480,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 void SchemaControlTabPageEx::showBehaviorEditor()
 {
-	DialogClientBehaviour d(db(), this);
+	DialogClientBehavior d(db(), this);
 	d.exec();
 }
 

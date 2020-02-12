@@ -158,8 +158,8 @@ void Settings::writeUserScope() const
 	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
 	s.setValue("BusEditor/sortOrder", static_cast<int>(m_busEditorSortOrder));
 
-	s.setValue("BehaviourEditor/sortColumn", m_behaviourEditorSortColumn);
-	s.setValue("BehaviourEditor/sortOrder", static_cast<int>(m_behaviourEditorSortOrder));
+	s.setValue("BehaviorEditor/sortColumn", m_behaviorEditorSortColumn);
+	s.setValue("BehaviorEditor/sortOrder", static_cast<int>(m_behaviorEditorSortOrder));
 
 	s.setValue("AfbLibraryCheck/mainSplitter", m_afbLibratyCheckSplitterState);
 
@@ -261,8 +261,8 @@ void Settings::loadUserScope()
 	m_busEditorSortColumn = s.value("BusEditor/sortColumn").toInt();
 	m_busEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BusEditor/sortOrder").toInt());
 
-	m_behaviourEditorSortColumn = s.value("BehaviourEditor/sortColumn").toInt();
-	m_behaviourEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BehaviourEditor/sortOrder").toInt());
+	m_behaviorEditorSortColumn = s.value("BehaviorEditor/sortColumn").toInt();
+	m_behaviorEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BehaviorEditor/sortOrder").toInt());
 
 	//
 
