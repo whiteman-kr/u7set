@@ -295,9 +295,31 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			}
 		};
 
+	// Get image file
+	//
+	auto getImageFunc = [cfgLoaderThread = m_cfgLoaderThread](QString imageFileName) -> QImage
+		{
+			QString parsingError;
+			QByteArray ba;
+
+			if (bool ok = cfgLoaderThread->getFileBlocked(imageFileName, &ba, &parsingError);
+				ok == true)
+			{
+				return QImage::fromData(ba);
+			}
+			else
+			{
+				qDebug() << "ERROR: Cannot get file " <<  imageFileName << " ," << parsingError;
+				return {};
+			}
+		};
+
 	ConfigSettings readSettings;
 
 	readSettings.globalScript = getScriptFunc("/" + theSettings.instanceStrId() + "/GlobalScript.js");
+
+	readSettings.logoImage = getImageFunc("/" + theSettings.instanceStrId() + "/Logo.png");
+
 	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + theSettings.instanceStrId() + "/OnConfigurationArrived.js");
 
 	// Parse XML

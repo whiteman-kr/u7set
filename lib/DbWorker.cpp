@@ -324,6 +324,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0304.sql", "Upgrade to version 304, Validity signals linked to outputs in AOM_4PH, AFB ff_sr description fix (The Set signal has the priority)"},
 	{":/DatabaseUpgrade/Upgrade0305.sql", "Upgrade to version 305, fixing get_changeset_details"},	
 	{":/DatabaseUpgrade/Upgrade0306.sql", "Upgrade to version 306, Added behavior file and properties for Monitor and TuningClient"},
+	{":/DatabaseUpgrade/Upgrade0307.sql", "Upgrade to version 307, Custom logo can be displayed in Monitor"},
 };
 
 int DbWorker::counter = 0;

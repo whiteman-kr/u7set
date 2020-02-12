@@ -61,6 +61,10 @@ namespace Builder
 		//
 		result &= writeMonitorBehavior();
 
+		// Generate logo
+		//
+		result &= writeMonitorLogo();
+
 		// Add link to FILE_COMPARATORS_SET (Common/Comparator.set)
 		//
 		if (BuildFile* compBuildFile = m_buildResultWriter->getBuildFileByID(DIR_COMMON, CFG_FILE_ID_COMPARATOR_SET);
@@ -844,6 +848,54 @@ namespace Builder
 		if (buildFile == nullptr)
 		{
 			m_log->errCMN0012("MonitorBehavior.xml");
+			return false;
+		}
+
+		ok = m_cfgXml->addLinkToFile(buildFile);
+
+		return ok;
+	}
+
+	bool MonitorCfgGenerator::writeMonitorLogo()
+	{
+		if (m_dbController == nullptr)
+		{
+			Q_ASSERT(m_dbController);
+			return false;
+		}
+
+		bool ok = true;
+		QString logoFile = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Logo", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		DbFileInfo fi;
+		ok = m_dbController->getFileInfo(logoFile, &fi, nullptr);
+		if (ok == false || fi.isNull() == true)
+		{
+			m_log->errCMN0017(logoFile);
+			return false;
+		}
+
+		std::shared_ptr<DbFile> file;
+		ok = m_dbController->getLatestVersion(fi, &file, nullptr);
+		if (ok == false || file == nullptr)
+		{
+			m_log->errCMN0010(logoFile);
+			return false;
+		}
+
+		QByteArray data;
+		file->swapData(data);
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "Logo.png", data);
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012("Logo.png");
 			return false;
 		}
 

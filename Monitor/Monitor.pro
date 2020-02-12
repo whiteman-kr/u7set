@@ -267,6 +267,7 @@ RESOURCES += \
     Monitor.qrc
 
 DISTFILES += \
+    Images/Logo.png \
     Images/NewSchema.svg \
     Images/Backward.svg \
     Images/Forward.svg \
