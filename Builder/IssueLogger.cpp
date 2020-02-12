@@ -615,6 +615,26 @@ namespace Builder
 				  QString(tr("Opening project %1 error (%2).")).arg(projectName).arg(dbLastError));
 	}
 
+	/// IssueCode: PDB2007
+	///
+	/// IssueType: Error
+	///
+	/// Title: File %1 is not found in the project database
+	///
+	/// Parameters:
+	///			%1 File Name
+	///
+	/// Description:
+	///			May occur if requested file does not exist in the project database
+	///
+	void IssueLogger::errPDB2007(QString fileName)
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2007,
+				  tr("File %1 is not found in the project database.")
+				  .arg(fileName));
+	}
+
 	/// IssueCode: PDB2020
 	///
 	/// IssueType: Error

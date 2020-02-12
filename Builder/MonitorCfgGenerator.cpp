@@ -875,7 +875,7 @@ namespace Builder
 		ok = m_dbController->getFileInfo(logoFile, &fi, nullptr);
 		if (ok == false || fi.isNull() == true)
 		{
-			m_log->errCMN0017(logoFile);
+			m_log->errPDB2007(logoFile);
 			return false;
 		}
 
@@ -883,19 +883,20 @@ namespace Builder
 		ok = m_dbController->getLatestVersion(fi, &file, nullptr);
 		if (ok == false || file == nullptr)
 		{
-			m_log->errCMN0010(logoFile);
+			m_log->errPDB2002(fi.fileId(), fi.fileName(), m_dbController->lastError());
 			return false;
 		}
 
 		QByteArray data;
 		file->swapData(data);
 
+		QString buildFileName = tr("Logo.%1").arg(QFileInfo(fi.fileName()).completeSuffix());
+
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "Logo.png", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), buildFileName, CFG_FILE_ID_LOGO, "", data);
 		if (buildFile == nullptr)
 		{
-			m_log->errCMN0012("Logo.png");
 			return false;
 		}
 
