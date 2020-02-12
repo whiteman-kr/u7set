@@ -2667,6 +2667,34 @@ void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileIn
 	return;
 }
 
+void DbWorker::slot_getFullPathFilesInfo(const std::vector<QString>* fullPathFilenames, std::vector<DbFileInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (fullPathFilenames == nullptr ||
+		fullPathFilenames->empty() == true ||
+		out == nullptr)
+	{
+		assert(fullPathFilenames != nullptr);
+		assert(fullPathFilenames->empty() == false);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	worker_getFilesInfo(*fullPathFilenames, out);
+
+	return;
+}
+
 bool DbWorker::worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out)
 {
 	// Check parameters
