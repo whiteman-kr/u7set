@@ -875,7 +875,7 @@ namespace Builder
 		ok = m_dbController->getFileInfo(logoFile, &fi, nullptr);
 		if (ok == false || fi.isNull() == true)
 		{
-			m_log->errPDB2007(logoFile);
+			m_log->errPDB2007(logoFile, m_software->equipmentIdTemplate(), "Logo");
 			return false;
 		}
 

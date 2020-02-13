@@ -619,20 +619,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: File %1 is not found in the project database
+	/// Title: File %1 specified in equipment %2.%3 is not found in the project database.
 	///
 	/// Parameters:
 	///			%1 File Name
+	///			%2 EquipmentID
+	///			%3 Property Name
 	///
 	/// Description:
-	///			May occur if requested file does not exist in the project database
+	///			Occurs if file specified in an equipment property does not exist in the project database
 	///
-	void IssueLogger::errPDB2007(QString fileName)
+	void IssueLogger::errPDB2007(QString fileName, QString equipmentId, QString propertyName)
 	{
 		LOG_ERROR(IssueType::ProjectDatabase,
 				  2007,
-				  tr("File %1 is not found in the project database.")
-				  .arg(fileName));
+				  tr("File %1 specified in equipment %2.%3 is not found in the project database.")
+				  .arg(fileName)
+				  .arg(equipmentId)
+				  .arg(propertyName));
 	}
 
 	/// IssueCode: PDB2020
