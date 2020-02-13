@@ -98,11 +98,11 @@ windows build job:
     - "rem ----------------------------------------------"
     - "rem               Remove some files not requiered for releases"
     - "rem ----------------------------------------------"
-    - "del /F /Q bin\\release\\BuilderConsole.exe"
+#    - "del /F /Q bin\\release\\BuilderConsole.exe"
     - "del /F /Q bin\\release\\BaseSrv.exe"
     - "del /F /Q bin\\release\\CommView.exe"
     - "del /F /Q bin\\release\\DiagDataSrv.exe"
-    - "del /F /Q bin\\release\\SimulatorConsole.exe"
+#    - "del /F /Q bin\\release\\SimulatorConsole.exe"
     - "del /F /Q bin\\release\\TuningIPEN.exe"
 #    - "del /F /Q bin\\release\\u7databasetests.exe"
     
