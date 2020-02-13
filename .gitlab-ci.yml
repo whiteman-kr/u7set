@@ -104,7 +104,7 @@ windows build job:
     - "del /F /Q bin\\release\\DiagDataSrv.exe"
     - "del /F /Q bin\\release\\SimulatorConsole.exe"
     - "del /F /Q bin\\release\\TuningIPEN.exe"
-    - "del /F /Q bin\\release\\u7databasetests.exe"
+#    - "del /F /Q bin\\release\\u7databasetests.exe"
     
 #Signing Files
     - "rem ----------------------------------------------"
