@@ -121,7 +121,7 @@ namespace Builder
 		void errPDB2004();												// Load units from the project database error
 		void errPDB2005();												// Load UFB schemas from the project database error
 		void errPDB2006(QString projectName, QString dbLastError);		// Opening project %1 error (%2).
-		void errPDB2007(QString fileName, QString equipmentId, QString propertyName);								// File is not found in the project database
+		void errPDB2007(QString fileName, QString equipmentId, QString propertyName);	// File is not found in the project database
 
 
 		void errPDB2020();												// Getting project properties error.

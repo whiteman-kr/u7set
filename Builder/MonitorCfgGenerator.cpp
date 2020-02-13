@@ -890,10 +890,19 @@ namespace Builder
 		QByteArray data;
 		file->swapData(data);
 
-		QString buildFileName = tr("Logo.%1").arg(QFileInfo(fi.fileName()).completeSuffix());
+		// Try to parse image
+		//
+		QImage image = QImage::fromData(data);
+		if (image.isNull() == true)
+		{
+			m_log->errCMN0010(logoFile);
+			return false;
+		}
 
 		// Write file
 		//
+		QString buildFileName = tr("Logo.%1").arg(QFileInfo(fi.fileName()).completeSuffix());
+
 		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), buildFileName, CFG_FILE_ID_LOGO, "", data);
 		if (buildFile == nullptr)
 		{
