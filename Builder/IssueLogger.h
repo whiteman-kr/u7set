@@ -382,7 +382,7 @@ namespace Builder
 		void errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID);	// Value of parameter %1.%2 must be in range %3 (Logic schema %4).
 		void errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID);	// Duplicate loopback source ID %1 (Logic schema %2).
 		void errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID);		// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
-		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID);	// Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
+		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QString schemaID);	// Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
 		void errALC5145(QString signalID, QUuid signalGuid, QString schemaID);			// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5147(QString signalID, QString lbID1, QString lbID2);				// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)

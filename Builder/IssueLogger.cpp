@@ -5813,11 +5813,10 @@ namespace Builder
 	/// Description:
 	///		Non compatible signals are connected to same LoopbackTarget.
 	///
-	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID)
+	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5144, s1Guid, schemaID);
 		addItemsIssues(OutputMessageLevel::Error, 5144, s2Guid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, 5144, lbGuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5144,

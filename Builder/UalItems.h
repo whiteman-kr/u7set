@@ -397,6 +397,8 @@ namespace Builder
 		int m_fbNumber = 1;
 	};
 
+	class Loopback;
+
 	class UalSignal
 	{
 		// Application Signal
@@ -523,9 +525,10 @@ namespace Builder
 		bool isBusChild() const { return m_isBusChild; }
 		void setBusChild(bool busChild) { m_isBusChild = busChild; }
 
-		bool isLoopbackSource() const { return m_loopbackID.isEmpty() == false; }
+		bool isLoopbackSource() const { return m_loopback != nullptr; }
 
-		void setLoopbackID(const QString& loopbackID);
+		void setLoopback(std::shared_ptr<Loopback> loopback);
+		std::shared_ptr<Loopback> loopback() const;
 		QString loopbackID() const;
 
 		//
@@ -589,7 +592,7 @@ namespace Builder
 
 		//
 
-		QString m_loopbackID;
+		std::shared_ptr<Loopback> m_loopback;
 
 		//
 

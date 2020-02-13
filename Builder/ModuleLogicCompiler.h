@@ -13,6 +13,7 @@
 #include "../lib/ComparatorSet.h"
 #include "UalItems.h"
 #include "MemWriteMap.h"
+#include "Loopbacks.h"
 
 #include "../lib/Connection.h"
 #include "../lib/AppSignalStateFlags.h"
@@ -137,43 +138,6 @@ namespace Builder
 			int busContentAddress = BAD_ADDRESS;
 		};
 
-		struct Loopback
-		{
-			// initial loopback params
-			//
-			QString ID;
-			const UalItem* source = nullptr;
-			bool isAutoLoopback = false;
-
-			// params will be filled during loopbackPreprocessing
-			//
-			QVector<const UalItem*> targets;
-			QHash<QString, bool> linkedSignals;
-			QHash<const UalItem*, bool> linkedItems;
-			QHash<QUuid, const UalItem*> linkedPins;
-
-			//
-
-			UalSignal* ualSignal = nullptr;
-
-			bool isConnected(const LogicPin& pin) const;
-			bool isConnected(const QString& signalID) const;
-			
-			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
-		};
-
-/*		class SignalsWithFlags : public QHash<QString, AppSignalStateFlagsMap*>
-		{
-		public:
-			SignalsWithFlags(ModuleLogicCompiler& compiler);
-			~SignalsWithFlags();
-
-			bool append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, const UalItem* setFlagsItem);
-
-		private:
-			ModuleLogicCompiler& m_compiler;
-		};*/
-
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -197,6 +161,10 @@ namespace Builder
 
 		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
 
+		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
+										   QHash<QString, bool>* linkedSignals,
+										   QHash<const UalItem*, bool>* linkedItems,
+										   QHash<QUuid, const UalItem *>* linkedPins);
 	private:
 		// pass #1 compilation functions
 		//
@@ -223,17 +191,12 @@ namespace Builder
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
-		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
-										   QHash<QString, bool>* linkedSignals,
-										   QHash<const UalItem*, bool>* linkedItems,
-										   QHash<QUuid, const UalItem *>* linkedPins);
+
 		bool getSignalsAndPinsLinkedToOutPin(const UalItem* item,
 											 const LogicPin& outPin,
 											QHash<QString, bool>* linkedSignals,
 											QHash<const UalItem*, bool>* linkedItems,
 											QHash<QUuid, const UalItem*>* linkedPins);
-
-		bool isLoopbackSignal(const QString& appSignalID);
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
@@ -299,7 +262,7 @@ namespace Builder
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
-		bool isConnectedToLoopback(const LogicPin& inPin, Loopback** loopback);
+		bool isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);
@@ -647,9 +610,7 @@ namespace Builder
 
 		::std::set<QString> m_signalsWithFlagsIDs;
 
-		QHash<QString, Loopback*> m_loopbacks;
-		QHash<QString, Loopback*> m_signalsToLoopbacks;
-		QHash<QUuid, Loopback*> m_pinsToLoopbacks;
+		Loopbacks m_loopbacks;
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
@@ -711,5 +672,4 @@ namespace Builder
 
 		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
 	};
-
 }

@@ -105,6 +105,7 @@ SOURCES += \
     IssueLogger.cpp \
     BuildWorkerThread.cpp \
     BuildResultWriter.cpp \
+    Loopbacks.cpp \
     ModuleFirmwareWriter.cpp \
     Parser.cpp \
     SignalSet.cpp \
@@ -189,6 +190,7 @@ HEADERS += \
     ../lib/Tuning/TuningSignalManager.h \
     ../VFrame30/VFrame30Lib_global.h \
     Builder.h \
+    Loopbacks.h \
     Stable.h \
     IssueLogger.h \
     BuildWorkerThread.h \

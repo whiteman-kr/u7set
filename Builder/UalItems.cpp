@@ -1624,25 +1624,30 @@ namespace Builder
 		m_isOptoSignal = true;
 	}
 
-	void UalSignal::setLoopbackID(const QString& loopbackID)
+	void UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
-		if (m_loopbackID.isEmpty() == false)
+		if (m_loopback != nullptr)
 		{
-			assert(false);				// reassigning of m_loopbackSourceID, why?
+			assert(false);				// reassigning of loopback, why?
 		}
 
-		m_loopbackID = loopbackID;
+		m_loopback = loopback;
+	}
+
+	std::shared_ptr<Loopback> UalSignal::loopback() const
+	{
+		return m_loopback;
 	}
 
 	QString UalSignal::loopbackID() const
 	{
-		if (m_loopbackID.isEmpty() == true)
+		if (m_loopback == nullptr)
 		{
 			assert(false);
 			return QString();
 		}
 
-		return m_loopbackID;
+		return m_loopback->loopbackID();
 	}
 
 	E::SignalType UalSignal::constType() const
