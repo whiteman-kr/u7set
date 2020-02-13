@@ -93,6 +93,11 @@ public:
 	//
 	QString loginDialog_defaultUsername;
 
+	// Projects Tab Page
+	//
+	int m_projectsSortColumn = 0;
+	Qt::SortOrder m_projectsSortOrder = Qt::AscendingOrder;
+
 	// Configurations Tab Page
 	//
 	QByteArray m_configurationTabPageSplitterState;
@@ -134,8 +139,8 @@ public:
 	QByteArray m_connectionEditorWindowGeometry;
     QByteArray m_connectionEditorSplitterState;
     int m_connectionEditorPeSplitterPosition = 0;
-	int m_connectionEditorSortColumn;
-	Qt::SortOrder m_connectionEditorSortOrder;
+	int m_connectionEditorSortColumn = 0;
+	Qt::SortOrder m_connectionEditorSortOrder = Qt::AscendingOrder;
 	QStringList m_connectionEditorMasks;
 
 	// Bus Editor
