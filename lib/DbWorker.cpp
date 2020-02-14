@@ -323,7 +323,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0303.sql", "Upgrade to version 303, fixing misprint EngEneeringUnits -> EngIneeringUnits in presets"},
 	{":/DatabaseUpgrade/Upgrade0304.sql", "Upgrade to version 304, Validity signals linked to outputs in AOM_4PH, AFB ff_sr description fix (The Set signal has the priority)"},
 	{":/DatabaseUpgrade/Upgrade0305.sql", "Upgrade to version 305, fixing get_changeset_details"},	
-	{":/DatabaseUpgrade/Upgrade0306.sql", "Upgrade to version 306, Added behaviour file and properties for Monitor and TuningClient"},
+	{":/DatabaseUpgrade/Upgrade0306.sql", "Upgrade to version 306, Added behavior file and properties for Monitor and TuningClient"},
+	{":/DatabaseUpgrade/Upgrade0307.sql", "Upgrade to version 307, Custom logo can be displayed in Monitor"},
 };
 
 int DbWorker::counter = 0;
@@ -2663,6 +2664,34 @@ void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileIn
 
 		out->push_back(fileInfo);
 	}
+
+	return;
+}
+
+void DbWorker::slot_getFullPathFilesInfo(const std::vector<QString>* fullPathFilenames, std::vector<DbFileInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (fullPathFilenames == nullptr ||
+		fullPathFilenames->empty() == true ||
+		out == nullptr)
+	{
+		assert(fullPathFilenames != nullptr);
+		assert(fullPathFilenames->empty() == false);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	worker_getFilesInfo(*fullPathFilenames, out);
 
 	return;
 }

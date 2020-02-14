@@ -52,6 +52,7 @@ struct ConfigSettings
 
 	QString globalScript;
 	QString onConfigurationArrivedScript;
+	QImage logoImage;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };

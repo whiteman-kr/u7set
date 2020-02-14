@@ -2,7 +2,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/AppSignal.h"
-#include "../lib/ClientBehaviour.h"
+#include "../lib/ClientBehavior.h"
 
 namespace Builder
 {
@@ -106,7 +106,7 @@ namespace Builder
 
 		result &= writeGlobalScript();
 
-		result &= writeTuningClientBehaviour();
+		result &= writeTuningClientBehavior();
 
 		return result;
 	}
@@ -773,7 +773,7 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::writeTuningClientBehaviour()
+	bool TuningClientCfgGenerator::writeTuningClientBehavior()
 	{
 		if (m_dbController == nullptr)
 		{
@@ -782,71 +782,71 @@ namespace Builder
 		}
 
 		bool ok = true;
-		QString behaviourId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviourID", &ok).trimmed();
+		QString behaviorId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviorID", &ok).trimmed();
 		if (ok == false)
 		{
 			return false;
 		}
 
-		if (behaviourId.isEmpty() == true)
+		if (behaviorId.isEmpty() == true)
 		{
 			return true;
 		}
 
-		// Load all clients behaviour
+		// Load all clients behavior
 		//
-		ClientBehaviourStorage allBehaviourStorage;
+		ClientBehaviorStorage allBehaviorStorage;
 
 		QString errorCode;
 
 		QByteArray dbData;
 
-		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviourStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
-			m_log->errCMN0010(allBehaviourStorage.dbFileName());
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
 			return false;
 		}
 
-		if (allBehaviourStorage.load(dbData, &errorCode) == false)
+		if (allBehaviorStorage.load(dbData, &errorCode) == false)
 		{
-			m_log->errCMN0010(allBehaviourStorage.dbFileName());
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
 			return false;
 		}
 
-		// Find behaviour for current tuning client
+		// Find behavior for current tuning client
 		//
-		ClientBehaviourStorage tcBehaviourStorage;
+		ClientBehaviorStorage tcBehaviorStorage;
 
-		std::vector<std::shared_ptr<TuningClientBehaviour>> behaviours = allBehaviourStorage.tuningClientBehavoiurs();
+		std::vector<std::shared_ptr<TuningClientBehavior>> behaviors = allBehaviorStorage.tuningClientBehavoiurs();
 
-		for (auto b : behaviours)
+		for (auto b : behaviors)
 		{
-			if (b->behaviourId() == behaviourId)
+			if (b->behaviorId() == behaviorId)
 			{
-				tcBehaviourStorage.add(b);
+				tcBehaviorStorage.add(b);
 				break;
 			}
 		}
 
-		if (tcBehaviourStorage.count() == 0)
+		if (tcBehaviorStorage.count() == 0)
 		{
-			m_log->errEQP6210(behaviourId, m_software->equipmentIdTemplate());
+			m_log->errEQP6210(behaviorId, m_software->equipmentIdTemplate());
 			return false;
 		}
 
-		// Save monitor behaviour to XML
+		// Save monitor behavior to XML
 		//
 		QByteArray data;
-		tcBehaviourStorage.save(data);
+		tcBehaviorStorage.save(data);
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehaviour.xml", CFG_FILE_ID_BEHAVIOUR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
 
 		if (buildFile == nullptr)
 		{
-			m_log->errCMN0012("TuningClientBehaviour.xml");
+			m_log->errCMN0012("TuningClientBehavior.xml");
 			return false;
 		}
 

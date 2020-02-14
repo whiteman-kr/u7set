@@ -6,6 +6,7 @@ class ExportPrint : public QObject
 {
 public:
 	ExportPrint(QWidget* parent);
+	virtual ~ExportPrint() = default;
 
 	void printTable(QTableView* tableView);
 	void exportTable(QTableView* tableView, QString fileName, QString extension);

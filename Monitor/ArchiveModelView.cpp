@@ -510,7 +510,7 @@ ArchiveView::ArchiveView(QWidget* parent) :
 
 	// --
 	//
-	copyAction = new QAction(tr("Copy"), nullptr);
+	copyAction = new QAction(tr("Copy"), this);
 	copyAction->setShortcut(QKeySequence::Copy);
 	connect(copyAction, &QAction::triggered, this, &ArchiveView::copySelection);
 

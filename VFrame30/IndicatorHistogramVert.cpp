@@ -28,11 +28,11 @@ namespace VFrame30
 
 		// Type Static category
 		//
-		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::indicatorStaticValue, true, CustomSetPoint::staticValue, CustomSetPoint::setStaticValue)
-			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
+//		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::indicatorStaticValue, true, CustomSetPoint::staticValue, CustomSetPoint::setStaticValue)
+//			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
 
-		ADD_PROPERTY_GETTER_SETTER(E::CmpType, PropertyNames::indicatorStaticCompareType, true, CustomSetPoint::staticCompareType, CustomSetPoint::setStaticCompareType)
-			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
+//		ADD_PROPERTY_GETTER_SETTER(E::CmpType, PropertyNames::indicatorStaticCompareType, true, CustomSetPoint::staticCompareType, CustomSetPoint::setStaticCompareType)
+//			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
 
 		return;
 	}
@@ -52,8 +52,8 @@ namespace VFrame30
 
 		message->set_outputappsignalid(m_outputAppSignalId.toStdString());
 
-		message->set_staticvalue(m_staticValue);
-		message->set_staticcomparetype(static_cast<int32_t>(m_staticCompareType));
+//		message->set_staticvalue(m_staticValue);
+//		message->set_staticcomparetype(static_cast<int32_t>(m_staticCompareType));
 
 		return true;
 	}
@@ -67,8 +67,8 @@ namespace VFrame30
 
 		m_outputAppSignalId = QString::fromStdString(message.outputappsignalid());
 
-		m_staticValue = message.staticvalue();
-		m_staticCompareType = static_cast<E::CmpType>(message.staticcomparetype());
+//		m_staticValue = message.staticvalue();
+//		m_staticCompareType = static_cast<E::CmpType>(message.staticcomparetype());
 
 		return true;
 	}
@@ -113,25 +113,25 @@ namespace VFrame30
 		m_outputAppSignalId = value;
 	}
 
-	double CustomSetPoint::staticValue() const
-	{
-		return m_staticValue;
-	}
+//	double CustomSetPoint::staticValue() const
+//	{
+//		return m_staticValue;
+//	}
 
-	void CustomSetPoint::setStaticValue(double value)
-	{
-		m_staticValue = value;
-	}
+//	void CustomSetPoint::setStaticValue(double value)
+//	{
+//		m_staticValue = value;
+//	}
 
-	E::CmpType CustomSetPoint::staticCompareType() const
-	{
-		return m_staticCompareType;
-	}
+//	E::CmpType CustomSetPoint::staticCompareType() const
+//	{
+//		return m_staticCompareType;
+//	}
 
-	void CustomSetPoint::setStaticCompareType(E::CmpType value)
-	{
-		m_staticCompareType = value;
-	}
+//	void CustomSetPoint::setStaticCompareType(E::CmpType value)
+//	{
+//		m_staticCompareType = value;
+//	}
 
 	//
 	// Vertical histogram, the base view
@@ -761,33 +761,6 @@ namespace VFrame30
 
 	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam, const std::vector<QRectF>& barRects, const SchemaItemIndicator* schemaItem) const
 	{
-		// --
-		//
-		double valueDiff = m_endValue - m_startValue;	// if valueDiff is negative, then draw bar upside down
-		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
-		{
-			return;
-		}
-
-		// --
-		//
-		struct DrawSetpointStruct
-		{
-			DrawSetpointStruct(int signalIndex_, double value_, E::CmpType type_, QRgb color_) :
-				signalIndex(signalIndex_),
-				value(value_),
-				type(type_),
-				color(color_)
-			{
-			}
-
-			int signalIndex = 0;
-			double value = 0;
-			E::CmpType type = E::CmpType::Greate;
-			QRgb color = qRgb(0x80, 0x00, 0x00);
-			//AppSignalState outputState;
-		};
-
 		std::vector<DrawSetpointStruct> drawSetpoints;
 		drawSetpoints.reserve(16);
 
@@ -799,9 +772,9 @@ namespace VFrame30
 		{
 			const QStringList appSignalIds = schemaItem->signalIds();
 
-			for (int i = 0; i < appSignalIds.size(); i++)
+			for (int signalIndex = 0; signalIndex < appSignalIds.size(); signalIndex++)
 			{
-				const QString& appSignalId = appSignalIds[i];
+				const QString& appSignalId = appSignalIds[signalIndex];
 				std::vector<std::shared_ptr<Comparator>> setpoints = drawParam->appSignalController()->setpointsByInputSignalId(appSignalId);
 
 				for (const std::shared_ptr<Comparator>& sp : setpoints)
@@ -830,7 +803,7 @@ namespace VFrame30
 					if (value.has_value() == true)
 					{
 						int warning_to_do_color;
-						drawSetpoints.emplace_back(i, value.value(), sp->cmpType(), qRgb(0x00, 0x00, 0xC0));
+						drawSetpoints.emplace_back(signalIndex, value.value(), sp->cmpType(), qRgb(0x00, 0x00, 0xC0), barRects[signalIndex]);
 					}
 				}
 			}
@@ -840,21 +813,49 @@ namespace VFrame30
 		//
 		if (m_drawCustomSetpoints == true && m_customSetPoints.empty() == false)
 		{
+			// PropertyVector<CustomSetPoint> m_customSetPoints;	// Custom setpoint list
+
+			for (const std::shared_ptr<CustomSetPoint>& csp : m_customSetPoints)
+			{
+				switch (csp->setpointType())
+				{
+//					case E::IndicatorSetpointType::Static:
+//						// Ignore static
+//						break;
+					case E::IndicatorSetpointType::AutoByOutAppSignalId:
+						break;
+					case E::IndicatorSetpointType::AutoBySchemaItemLabel:
+						break;
+					default:
+						Q_ASSERT(false);
+				}
+			}
 		}
 
 		// Draw setpoints
 		//
+		drawSetpointItems(drawParam, drawSetpoints, schemaItem);
+
+		return;
+	}
+
+	void IndicatorHistogramVert::drawSetpointItems(CDrawParam* drawParam, const std::vector<DrawSetpointStruct>& setpoints, const SchemaItemIndicator* schemaItem) const
+	{
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
+
+		double valueDiff = m_endValue - m_startValue;	// if valueDiff is negative, then draw bar upside down
+		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
+		{
+			return;
+		}
 
 		double mainGridWidth = schemaItem->font().drawSize() / 1.8;
 		QString valueString;
 
-
-
-		for (const DrawSetpointStruct& ds : drawSetpoints)
+		for (const DrawSetpointStruct& ds : setpoints)
 		{
-			const QRectF& barRect = barRects[ds.signalIndex];
+			const QRectF& barRect = ds.barRect;
 
 			const double factor = barRect.height() / valueDiff;
 			double y = barRect.bottom() - (ds.value - m_startValue) * factor;
@@ -901,6 +902,7 @@ namespace VFrame30
 		}
 
 		return;
+
 	}
 
 }

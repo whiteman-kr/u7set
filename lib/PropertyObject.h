@@ -332,7 +332,7 @@ private:
 		uint16_t m_flags = 0;
 	};
 
-	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
+	E::PropertySpecificEditor m_specificEditor{E::PropertySpecificEditor::None};
 	qint16 m_precision = 2;
 	quint16 m_viewOrder = 0xFFFF;
 };

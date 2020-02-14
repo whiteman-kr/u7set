@@ -1,67 +1,67 @@
-#include "ClientBehaviour.h"
+#include "ClientBehavior.h"
 
 //
-// ClientBehaviour
+// ClientBehavior
 //
-ClientBehaviour::ClientBehaviour()
+ClientBehavior::ClientBehavior()
 {
-	ADD_PROPERTY_GETTER_SETTER(QString, "BehaviourID", true, behaviourId, setBehaviourId);
+	ADD_PROPERTY_GETTER_SETTER(QString, "BehaviorID", true, behaviorId, setBehaviorId);
 }
 
-ClientBehaviour::~ClientBehaviour()
+ClientBehavior::~ClientBehavior()
 {
-
-}
-
-bool ClientBehaviour::isMonitorBehaviour() const
-{
-	return dynamic_cast<const MonitorBehaviour*>(this) != nullptr;
-}
-
-bool ClientBehaviour::isTuningClientBehaviour() const
-{
-	return dynamic_cast<const TuningClientBehaviour*>(this) != nullptr;
-}
-
-QString ClientBehaviour::behaviourId() const
-{
-	return m_behaviourId;
-}
-
-void ClientBehaviour::setBehaviourId(const QString& id)
-{
-	m_behaviourId = id;
 
 }
 
-void ClientBehaviour::save(QXmlStreamWriter& writer)
+bool ClientBehavior::isMonitorBehavior() const
 {
-	writer.writeAttribute("ID", behaviourId());
+	return dynamic_cast<const MonitorBehavior*>(this) != nullptr;
+}
+
+bool ClientBehavior::isTuningClientBehavior() const
+{
+	return dynamic_cast<const TuningClientBehavior*>(this) != nullptr;
+}
+
+QString ClientBehavior::behaviorId() const
+{
+	return m_behaviorId;
+}
+
+void ClientBehavior::setBehaviorId(const QString& id)
+{
+	m_behaviorId = id;
+
+}
+
+void ClientBehavior::save(QXmlStreamWriter& writer)
+{
+	writer.writeAttribute("ID", behaviorId());
 
 	saveToXml(writer);
 
 	return;
 }
 
-bool ClientBehaviour::load(QXmlStreamReader& reader)
+bool ClientBehavior::load(QXmlStreamReader& reader)
 {
 	if (reader.attributes().hasAttribute("ID"))
 	{
-		setBehaviourId(reader.attributes().value("ID").toString());
+		setBehaviorId(reader.attributes().value("ID").toString());
 	}
 
-	if (behaviourId().isEmpty())
+	if (behaviorId().isEmpty())
 	{
-		setBehaviourId(("ID"));
+		setBehaviorId(("ID"));
 	}
 
 	return loadFromXml(reader);
 }
 
 //
-// MonitorBehaviour
+// MonitorBehavior
 //
-MonitorBehaviour::MonitorBehaviour()
+MonitorBehavior::MonitorBehavior()
 {
 	m_signalTagToColor["critical"] = QColor("#FF5733");
 	m_signalTagToColor["attention"] = QColor("#FFBD33");
@@ -78,37 +78,37 @@ MonitorBehaviour::MonitorBehaviour()
 
 }
 
-QColor MonitorBehaviour::signalToTagCriticalColor() const
+QColor MonitorBehavior::signalToTagCriticalColor() const
 {
 	return m_signalTagToColor.value("critical");
 }
 
-void MonitorBehaviour::setSignalToTagCriticalColor(const QColor& color)
+void MonitorBehavior::setSignalToTagCriticalColor(const QColor& color)
 {
 	m_signalTagToColor["critical"] = color;
 }
 
-QColor MonitorBehaviour::signalToTagAttentionColor() const
+QColor MonitorBehavior::signalToTagAttentionColor() const
 {
 	return m_signalTagToColor.value("attention");
 }
 
-void MonitorBehaviour::setSignalToTagAttentionColor(const QColor& color)
+void MonitorBehavior::setSignalToTagAttentionColor(const QColor& color)
 {
 	m_signalTagToColor["attention"] = color;
 }
 
-QColor MonitorBehaviour::signalToTagGeneralColor() const
+QColor MonitorBehavior::signalToTagGeneralColor() const
 {
 	return m_signalTagToColor.value("general");
 }
 
-void MonitorBehaviour::setSignalToTagGeneralColor(const QColor& color)
+void MonitorBehavior::setSignalToTagGeneralColor(const QColor& color)
 {
 	m_signalTagToColor["general"] = color;
 }
 
-void MonitorBehaviour::saveToXml(QXmlStreamWriter& writer)
+void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("SignalTagToColor");
 
@@ -127,7 +127,7 @@ void MonitorBehaviour::saveToXml(QXmlStreamWriter& writer)
 	return;
 }
 
-bool MonitorBehaviour::loadFromXml(QXmlStreamReader& reader)
+bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 {
 	m_signalTagToColor.clear();
 
@@ -178,9 +178,9 @@ bool MonitorBehaviour::loadFromXml(QXmlStreamReader& reader)
 }
 
 //
-// TuningClientBehaviour
+// TuningClientBehavior
 //
-TuningClientBehaviour::TuningClientBehaviour()
+TuningClientBehavior::TuningClientBehavior()
 {
 	m_tagToColor["defaultMismatchBackColor"] = QColor(Qt::yellow);
 	m_tagToColor["defaultMismatchTextColor"] = QColor(Qt::black);
@@ -200,47 +200,47 @@ TuningClientBehaviour::TuningClientBehaviour()
 	prop->setCategory("Appearance");
 }
 
-QColor TuningClientBehaviour::defaultMismatchBackColor() const
+QColor TuningClientBehavior::defaultMismatchBackColor() const
 {
 	return m_tagToColor.value("defaultMismatchBackColor");
 }
 
-void TuningClientBehaviour::setDefaultMismatchBackColor(const QColor& color)
+void TuningClientBehavior::setDefaultMismatchBackColor(const QColor& color)
 {
 	m_tagToColor["defaultMismatchBackColor"] = color;
 }
 
-QColor TuningClientBehaviour::defaultMismatchTextColor() const
+QColor TuningClientBehavior::defaultMismatchTextColor() const
 {
 	return m_tagToColor.value("defaultMismatchTextColor");
 }
 
-void TuningClientBehaviour::setDefaultMismatchTextColor(const QColor& color)
+void TuningClientBehavior::setDefaultMismatchTextColor(const QColor& color)
 {
 	m_tagToColor["defaultMismatchTextColor"] = color;
 }
 
-QColor TuningClientBehaviour::unappliedBackColor() const
+QColor TuningClientBehavior::unappliedBackColor() const
 {
 	return m_tagToColor.value("unappliedBackColor");
 }
 
-void TuningClientBehaviour::setUnappliedBackColor(const QColor& color)
+void TuningClientBehavior::setUnappliedBackColor(const QColor& color)
 {
 	m_tagToColor["unappliedBackColor"] = color;
 }
 
-QColor TuningClientBehaviour::defaultUnappliedTextColor() const
+QColor TuningClientBehavior::defaultUnappliedTextColor() const
 {
 	return m_tagToColor.value("unappliedTextColor");
 }
 
-void TuningClientBehaviour::setDefaultUnappliedTextColor(const QColor& color)
+void TuningClientBehavior::setDefaultUnappliedTextColor(const QColor& color)
 {
 	m_tagToColor["unappliedTextColor"] = color;
 }
 
-void TuningClientBehaviour::saveToXml(QXmlStreamWriter& writer)
+void TuningClientBehavior::saveToXml(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("TagToColor");
 
@@ -258,7 +258,7 @@ void TuningClientBehaviour::saveToXml(QXmlStreamWriter& writer)
 	writer.writeEndElement();
 }
 
-bool TuningClientBehaviour::loadFromXml(QXmlStreamReader& reader)
+bool TuningClientBehavior::loadFromXml(QXmlStreamReader& reader)
 {
 	m_tagToColor.clear();
 
@@ -310,24 +310,24 @@ bool TuningClientBehaviour::loadFromXml(QXmlStreamReader& reader)
 }
 
 //
-// ClientBehaviourStorage
+// ClientBehaviorStorage
 //
-ClientBehaviourStorage::ClientBehaviourStorage()
+ClientBehaviorStorage::ClientBehaviorStorage()
 {
 
 }
 
-QString ClientBehaviourStorage::dbFileName() const
+QString ClientBehaviorStorage::dbFileName() const
 {
 	return m_fileName;
 }
 
-void ClientBehaviourStorage::add(std::shared_ptr<ClientBehaviour> behavoiur)
+void ClientBehaviorStorage::add(std::shared_ptr<ClientBehavior> behavoiur)
 {
 	m_behavoiurs.push_back(behavoiur);
 }
 
-bool ClientBehaviourStorage::remove(int index)
+bool ClientBehaviorStorage::remove(int index)
 {
 	if (index < 0 || index >= count())
 	{
@@ -339,12 +339,12 @@ bool ClientBehaviourStorage::remove(int index)
 	return true;
 }
 
-int ClientBehaviourStorage::count() const
+int ClientBehaviorStorage::count() const
 {
 	return static_cast<int>(m_behavoiurs.size());
 }
 
-std::shared_ptr<ClientBehaviour> ClientBehaviourStorage::get(int index) const
+std::shared_ptr<ClientBehavior> ClientBehaviorStorage::get(int index) const
 {
 	if (index < 0 || index >= count())
 	{
@@ -354,11 +354,11 @@ std::shared_ptr<ClientBehaviour> ClientBehaviourStorage::get(int index) const
 	return m_behavoiurs[index];
 }
 
-std::shared_ptr<ClientBehaviour> ClientBehaviourStorage::get(const QString& id) const
+std::shared_ptr<ClientBehavior> ClientBehaviorStorage::get(const QString& id) const
 {
 	for (auto s : m_behavoiurs)
 	{
-		if (s->behaviourId() == id)
+		if (s->behaviorId() == id)
 		{
 			return s;
 		}
@@ -368,25 +368,25 @@ std::shared_ptr<ClientBehaviour> ClientBehaviourStorage::get(const QString& id) 
 	return nullptr;
 }
 
-void ClientBehaviourStorage::clear()
+void ClientBehaviorStorage::clear()
 {
 	m_behavoiurs.clear();
 }
 
-const std::vector<std::shared_ptr<ClientBehaviour>>& ClientBehaviourStorage::behavoiurs()
+const std::vector<std::shared_ptr<ClientBehavior>>& ClientBehaviorStorage::behavoiurs()
 {
 	return m_behavoiurs;
 }
 
-std::vector<std::shared_ptr<MonitorBehaviour>> ClientBehaviourStorage::monitorBehavoiurs()
+std::vector<std::shared_ptr<MonitorBehavior>> ClientBehaviorStorage::monitorBehavoiurs()
 {
-	std::vector<std::shared_ptr<MonitorBehaviour>> result;
+	std::vector<std::shared_ptr<MonitorBehavior>> result;
 
 	for (auto b : m_behavoiurs)
 	{
-		if (b->isMonitorBehaviour())
+		if (b->isMonitorBehavior())
 		{
-			std::shared_ptr<MonitorBehaviour> mb = std::dynamic_pointer_cast<MonitorBehaviour>(b);
+			std::shared_ptr<MonitorBehavior> mb = std::dynamic_pointer_cast<MonitorBehavior>(b);
 			if (mb == nullptr)
 			{
 				Q_ASSERT(mb);
@@ -400,15 +400,15 @@ std::vector<std::shared_ptr<MonitorBehaviour>> ClientBehaviourStorage::monitorBe
 	return result;
 }
 
-std::vector<std::shared_ptr<TuningClientBehaviour>> ClientBehaviourStorage::tuningClientBehavoiurs()
+std::vector<std::shared_ptr<TuningClientBehavior>> ClientBehaviorStorage::tuningClientBehavoiurs()
 {
-	std::vector<std::shared_ptr<TuningClientBehaviour>> result;
+	std::vector<std::shared_ptr<TuningClientBehavior>> result;
 
 	for (auto b : m_behavoiurs)
 	{
-		if (b->isTuningClientBehaviour())
+		if (b->isTuningClientBehavior())
 		{
-			std::shared_ptr<TuningClientBehaviour> cb = std::dynamic_pointer_cast<TuningClientBehaviour>(b);
+			std::shared_ptr<TuningClientBehavior> cb = std::dynamic_pointer_cast<TuningClientBehavior>(b);
 			if (cb == nullptr)
 			{
 				Q_ASSERT(cb);
@@ -422,26 +422,26 @@ std::vector<std::shared_ptr<TuningClientBehaviour>> ClientBehaviourStorage::tuni
 	return result;
 }
 
-void ClientBehaviourStorage::save(QByteArray& data)
+void ClientBehaviorStorage::save(QByteArray& data)
 {
 	QXmlStreamWriter writer(&data);
 
 	writer.setAutoFormatting(true);
 	writer.writeStartDocument();
 
-	writer.writeStartElement("Behaviour");
+	writer.writeStartElement("Behavior");
 	for (auto s : m_behavoiurs)
 	{
-		if (s->isMonitorBehaviour())
+		if (s->isMonitorBehavior())
 		{
-			writer.writeStartElement("MonitorBehaviour");
+			writer.writeStartElement("MonitorBehavior");
 		}
 		else
 		{
 
-			if (s->isTuningClientBehaviour())
+			if (s->isTuningClientBehavior())
 			{
-				writer.writeStartElement("TuningClientBehaviour");
+				writer.writeStartElement("TuningClientBehavior");
 			}
 			else
 			{
@@ -459,7 +459,7 @@ void ClientBehaviourStorage::save(QByteArray& data)
 	writer.writeEndDocument();
 }
 
-bool ClientBehaviourStorage::load(const QByteArray& data, QString* errorCode)
+bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -478,9 +478,9 @@ bool ClientBehaviourStorage::load(const QByteArray& data, QString* errorCode)
 		return !reader.hasError();
 	}
 
-	if (reader.name() != "Behaviour")
+	if (reader.name() != "Behavior")
 	{
-		reader.raiseError(QObject::tr("The file is not an Behaviour file."));
+		reader.raiseError(QObject::tr("The file is not an Behavior file."));
 		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
@@ -489,9 +489,9 @@ bool ClientBehaviourStorage::load(const QByteArray& data, QString* errorCode)
 	//
 	while (reader.readNextStartElement())
 	{
-		if(reader.name() == "MonitorBehaviour")
+		if(reader.name() == "MonitorBehavior")
 		{
-			std::shared_ptr<MonitorBehaviour> s = std::make_shared<MonitorBehaviour>();
+			std::shared_ptr<MonitorBehavior> s = std::make_shared<MonitorBehavior>();
 
 			if (s->load(reader) == true)
 			{
@@ -505,9 +505,9 @@ bool ClientBehaviourStorage::load(const QByteArray& data, QString* errorCode)
 		}
 		else
 		{
-			if(reader.name() == "TuningClientBehaviour")
+			if(reader.name() == "TuningClientBehavior")
 			{
-				std::shared_ptr<TuningClientBehaviour> s = std::make_shared<TuningClientBehaviour>();
+				std::shared_ptr<TuningClientBehavior> s = std::make_shared<TuningClientBehavior>();
 
 				if (s->load(reader) == true)
 				{

@@ -37,17 +37,17 @@ namespace VFrame30
 		const QString& outputAppSignalId() const;
 		void setOutputAppSignalId(const QString& value);
 
-		double staticValue() const;
-		void setStaticValue(double value);
+//		double staticValue() const;
+//		void setStaticValue(double value);
 
-		E::CmpType staticCompareType() const;
-		void setStaticCompareType(E::CmpType value);
+//		E::CmpType staticCompareType() const;
+//		void setStaticCompareType(E::CmpType value);
 
 	private:
-		E::IndicatorSetpointType m_setpointType = E::IndicatorSetpointType::Static;
+		E::IndicatorSetpointType m_setpointType = E::IndicatorSetpointType::AutoByOutAppSignalId;
 		QColor m_color{Qt::darkBlue};
 		/*
-				Static						Just show some value with CmpType and color, no real setpoint is involved
+				//Static						Just show some value with CmpType and color, no real setpoint is involved
 				AutoBySchemaItemLabel		Get setpoint by (Comparator) SchemaItem Label, all data (values, type) are taken from setpoint storage
 											Color is taken from output AppSignal.AlertColor (UserSpecificProperties), or from m_color if property is not exists
 				AutoByOutAppSignalId		Get setpoint by output AppSignalID (internal), all data are taken from setpoint storage
@@ -64,8 +64,8 @@ namespace VFrame30
 
 		// Values for E::IndicatorSetpointType::Static
 		//
-		double m_staticValue = 0;
-		E::CmpType m_staticCompareType = E::CmpType::Greate;
+//		double m_staticValue = 0;
+//		E::CmpType m_staticCompareType = E::CmpType::Greate;
 	};
 
 
@@ -98,7 +98,26 @@ namespace VFrame30
 		};
 		void drawGrids(const std::vector<DrawGridStruct> grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const;
 
+		struct DrawSetpointStruct
+		{
+			DrawSetpointStruct(int signalIndex_, double value_, E::CmpType type_, QRgb color_, const QRectF& barRect_) :
+				signalIndex(signalIndex_),
+				value(value_),
+				type(type_),
+				color(color_),
+				barRect(barRect_)
+			{
+			}
+
+			int signalIndex = 0;
+			double value = 0;
+			E::CmpType type = E::CmpType::Greate;
+			QRgb color = qRgb(0x80, 0x00, 0x00);
+			QRectF barRect;
+			//AppSignalState outputState;
+		};
 		void drawSetpoints(CDrawParam* drawParam, const std::vector<QRectF>& barRects, const SchemaItemIndicator* schemaItem) const;
+		void drawSetpointItems(CDrawParam* drawParam, const std::vector<DrawSetpointStruct>& setpoints, const SchemaItemIndicator* schemaItem) const;
 
 
 	private:

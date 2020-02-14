@@ -37,7 +37,9 @@ namespace Builder
 		//
 		bool writeTuningSignals();
 
-		bool writeMonitorBehaviour();
+		bool writeMonitorBehavior();
+
+		bool writeMonitorLogo();
 
 	private:
 		bool m_tuningEnabled = false;

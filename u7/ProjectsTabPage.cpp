@@ -23,6 +23,10 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_projectTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_projectTable->fontMetrics().height() * 1.4));
 	m_projectTable->horizontalHeader()->setHighlightSections(false);
 
+	m_projectTable->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_projectTable, &QWidget::customContextMenuRequested, this, &ProjectsTabPage::projectsContextMenuRequested);
+	connect(m_projectTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &ProjectsTabPage::projectsSortIndicatorChanged);
+
 	QStringList headers;
 	headers.push_back(tr("Project Name"));
 	headers.push_back(tr("Description"));
@@ -60,11 +64,30 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Actions
 	//
+	m_newProjectAction = new QAction(tr("New Project..."), this);
+	connect(m_newProjectAction, &QAction::triggered, this, &ProjectsTabPage::createProject);
+
+	m_openProjectAction = new QAction(tr("Open Project..."), this);
+	connect(m_openProjectAction, &QAction::triggered, this, &ProjectsTabPage::openProject);
+
+	m_closeProjectAction = new QAction(tr("Close Project"), this);
+	connect(m_closeProjectAction, &QAction::triggered, this, &ProjectsTabPage::closeProject);
+
+	m_cloneProjectAction = new QAction(tr("Clone Project"), this);
+	connect(m_cloneProjectAction, &QAction::triggered, this, &ProjectsTabPage::cloneProject);
+
+	m_deleteProjectAction = new QAction(tr("Delete Project"), this);
+	connect(m_deleteProjectAction, &QAction::triggered, this, &ProjectsTabPage::deleteProject);
+
+	m_openProjectAction->setEnabled(false);
+	m_closeProjectAction->setEnabled(false);
+	m_cloneProjectAction->setEnabled(false);
+	m_deleteProjectAction->setEnabled(false);
+
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, this, &ProjectsTabPage::refreshProjectList);
 	addAction(m_refreshAction);
-
 
 	//
 	// Layouts
@@ -133,9 +156,17 @@ void ProjectsTabPage::projectOpened(DbProject project)
 	m_closeProjectButton->setEnabled(true);
 	m_cloneProjectButton->setEnabled(false);
 	m_deleteProjectButton->setEnabled(false);
+
 	m_refreshProjectListButton->setEnabled(true);
 
+	m_newProjectAction->setEnabled(false);
+	m_openProjectAction->setEnabled(false);
+	m_closeProjectAction->setEnabled(true);
+	m_cloneProjectAction->setEnabled(false);
+	m_deleteProjectAction->setEnabled(false);
+
 	GlobalMessanger::instance().fireProjectOpened(project);
+	return;
 }
 
 void ProjectsTabPage::projectClosed()
@@ -147,9 +178,17 @@ void ProjectsTabPage::projectClosed()
 	m_closeProjectButton->setEnabled(false);
 	m_cloneProjectButton->setEnabled(true);
 	m_deleteProjectButton->setEnabled(true);
+
 	m_refreshProjectListButton->setEnabled(true);
 
+	m_newProjectAction->setEnabled(true);
+	m_openProjectAction->setEnabled(true);
+	m_closeProjectAction->setEnabled(false);
+	m_cloneProjectAction->setEnabled(true);
+	m_deleteProjectAction->setEnabled(true);
+
 	GlobalMessanger::instance().fireProjectClosed();
+	return;
 }
 
 void ProjectsTabPage::createProject()
@@ -493,15 +532,24 @@ void ProjectsTabPage::refreshProjectList()
 	//
 	m_projectTable->setRowCount(static_cast<int>(projects.size()));
 
+	m_projectTable->setSortingEnabled(false);
+
 	for (unsigned int i = 0; i < projects.size(); i++)
 	{
 		const DbProject& p = projects[i];
 
 		m_projectTable->setItem(i, 0, new QTableWidgetItem(p.projectName()));
 		m_projectTable->setItem(i, 1, new QTableWidgetItem(p.description()));
-		m_projectTable->setItem(i, 2, new QTableWidgetItem(QString::number(p.version())));
-		m_projectTable->item(i, 2)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+		QTableWidgetItem* itemVersion = new QTableWidgetItem(QString::number(p.version()));
+		itemVersion->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+		m_projectTable->setItem(i, 2, itemVersion);
 	}
+
+	// Sort projects
+	//
+	m_projectTable->setSortingEnabled(true);
+	m_projectTable->sortByColumn(theSettings.m_projectsSortColumn, theSettings.m_projectsSortOrder);
 
 	selectProject(selectedProject);
 
@@ -532,6 +580,31 @@ void ProjectsTabPage::selectProject(const QString& projectName)
 	return;
 }
 
+void ProjectsTabPage::projectsContextMenuRequested(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QMenu menu(this);
+
+	menu.addAction(m_newProjectAction);
+	menu.addAction(m_openProjectAction);
+	menu.addAction(m_closeProjectAction);
+	menu.addSeparator();
+	menu.addAction(m_cloneProjectAction);
+	menu.addAction(m_deleteProjectAction);
+	menu.addSeparator();
+	menu.addAction(m_refreshAction);
+
+	menu.exec(QCursor::pos());
+	return;
+}
+
+void ProjectsTabPage::projectsSortIndicatorChanged(int column, Qt::SortOrder order)
+{
+	theSettings.m_projectsSortColumn = column;
+	theSettings.m_projectsSortOrder = order;
+}
+
 void ProjectsTabPage::projectTableSelectionChanged()
 {
 	if (m_projectTable == nullptr)
@@ -556,12 +629,20 @@ void ProjectsTabPage::projectTableSelectionChanged()
 		m_openProjectButton->setEnabled(true);
 		m_cloneProjectButton->setEnabled(true);
 		m_deleteProjectButton->setEnabled(true);
+
+		m_openProjectAction->setEnabled(true);
+		m_cloneProjectAction->setEnabled(true);
+		m_deleteProjectAction->setEnabled(true);
 	}
 	else
 	{
 		m_openProjectButton->setEnabled(false);
 		m_cloneProjectButton->setEnabled(false);
 		m_deleteProjectButton->setEnabled(false);
+
+		m_openProjectAction->setEnabled(true);
+		m_cloneProjectAction->setEnabled(true);
+		m_deleteProjectAction->setEnabled(true);
 	}
 
 	return;

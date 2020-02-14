@@ -69,6 +69,9 @@ public:
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
+	bool getFileInfo(QString fullPathFileName, DbFileInfo* out, QWidget* parentWidget);
+	bool getFileInfo(const std::vector<QString>* fullPathFileNames, std::vector<DbFileInfo>* out, QWidget* parentWidget);
+
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId, QWidget* parentWidget);
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
@@ -197,6 +200,8 @@ signals:
 
 	void signal_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void signal_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
+	void signal_getFullPathFilesInfo(const std::vector<QString>* fullPathFilenames, std::vector<DbFileInfo>* out);
 
 	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);

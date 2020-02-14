@@ -239,7 +239,14 @@ void MonitorMainWindow::showLogo()
 {
 	Q_ASSERT(m_logoLabel);
 
-	QImage logo = QImage(":/Images/Images/Logo.png");
+	if (m_logoImage.isNull() == true)
+	{
+		m_logoLabel->clear();
+
+		return;
+	}
+
+	QImage logo = m_logoImage;
 
 	// Get toolbar content height
 	//
@@ -780,7 +787,7 @@ void MonitorMainWindow::showStatistics()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
 
 	return;
 }
@@ -1104,6 +1111,10 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	}
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
+
+	m_logoImage = configuration.logoImage;
+
+	showLogo();
 
 	return;
 }

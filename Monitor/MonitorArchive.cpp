@@ -163,25 +163,25 @@ static int no = 1;
 
 	// ToolBar
 	//
-	m_toolBar = new QToolBar(tr("ToolBar"));
+	m_toolBar = new QToolBar(tr("ToolBar"), this);
 	m_toolBar->setMovable(false);
 
-	m_exportButton = new QPushButton(tr("Export..."));
-	m_printButton = new QPushButton(tr("Print..."));
-	m_updateButton = new QPushButton(tr("Update"));
+	m_exportButton = new QPushButton(tr("Export..."), this);
+	m_printButton = new QPushButton(tr("Print..."), this);
+	m_updateButton = new QPushButton(tr("Update"), this);
 	m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
-	m_signalsButton = new QPushButton(tr("Signals..."));
+	m_signalsButton = new QPushButton(tr("Signals..."), this);
 
 	m_toolBar->addWidget(m_exportButton);
 	m_toolBar->addWidget(m_printButton);
 	m_toolBar->addSeparator();
 
-	m_startDateTimeEdit = new QDateTimeEdit(m_source.requestStartTime.toDateTime());
+	m_startDateTimeEdit = new QDateTimeEdit(m_source.requestStartTime.toDateTime(), this);
 	m_startDateTimeEdit->setTimeSpec(Qt::UTC);
 	m_startDateTimeEdit->setCalendarPopup(true);
 	m_startDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
 
-	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime());
+	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime(), this);
 	m_endDateTimeEdit->setTimeSpec(Qt::UTC);
 	m_endDateTimeEdit->setCalendarPopup(true);
 	m_endDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
@@ -194,7 +194,7 @@ static int no = 1;
 
 	// TimeType combo
 	//
-	m_timeType = new QComboBox;
+	m_timeType = new QComboBox(this);
 
 	m_timeType->addItem(tr("Server Time"), QVariant::fromValue(E::TimeType::Local));
 	m_timeType->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
@@ -215,7 +215,7 @@ static int no = 1;
 
 	// Add stretecher
 	//
-	QWidget* empty = new QWidget();
+	QWidget* empty = new QWidget(this);
 	empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 	m_toolBar->addWidget(empty);
 
@@ -226,7 +226,7 @@ static int no = 1;
 
 	// Status bar
 	//
-	m_statusBar = new QStatusBar;
+	m_statusBar = new QStatusBar(this);
 
 	m_statusBarTextLabel = new QLabel(m_statusBar);
 	m_statusBarStatesReceivedLabel = new QLabel(m_statusBar);
@@ -311,7 +311,12 @@ MonitorArchiveWidget::~MonitorArchiveWidget()
 	MonitorArchive::unregisterWindow(this->windowTitle());
 
 	Q_ASSERT(m_tcpClientThread);
-	m_tcpClientThread->quitAndWait(10000);
+
+	if (m_tcpClientThread != nullptr)
+	{
+		m_tcpClientThread->quitAndWait(10000);
+		delete m_tcpClientThread;
+	}
 
 	return;
 }
