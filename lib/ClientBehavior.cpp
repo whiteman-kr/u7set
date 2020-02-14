@@ -8,9 +8,19 @@ ClientBehavior::ClientBehavior()
 	ADD_PROPERTY_GETTER_SETTER(QString, "BehaviorID", true, behaviorId, setBehaviorId);
 }
 
+ClientBehavior::ClientBehavior(const ClientBehavior& src) noexcept :
+	m_behaviorId(src.behaviorId())
+{
+}
+
 ClientBehavior::~ClientBehavior()
 {
+}
 
+ClientBehavior& ClientBehavior::operator=(const ClientBehavior& src)
+{
+	m_behaviorId = src.m_behaviorId;
+	return *this;
 }
 
 bool ClientBehavior::isMonitorBehavior() const
@@ -23,7 +33,7 @@ bool ClientBehavior::isTuningClientBehavior() const
 	return dynamic_cast<const TuningClientBehavior*>(this) != nullptr;
 }
 
-QString ClientBehavior::behaviorId() const
+const QString& ClientBehavior::behaviorId() const
 {
 	return m_behaviorId;
 }
@@ -31,15 +41,12 @@ QString ClientBehavior::behaviorId() const
 void ClientBehavior::setBehaviorId(const QString& id)
 {
 	m_behaviorId = id;
-
 }
 
 void ClientBehavior::save(QXmlStreamWriter& writer)
 {
 	writer.writeAttribute("ID", behaviorId());
-
 	saveToXml(writer);
-
 	return;
 }
 
@@ -76,6 +83,20 @@ MonitorBehavior::MonitorBehavior()
 	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "SignalToTagGeneralColor", true, signalToTagGeneralColor, setSignalToTagGeneralColor);
 	prop->setCategory("Appearance");
 
+	return;
+}
+
+MonitorBehavior::MonitorBehavior(const MonitorBehavior& src) noexcept :
+	ClientBehavior(src),
+	m_signalTagToColor(src.m_signalTagToColor)
+{
+}
+
+MonitorBehavior& MonitorBehavior::operator=(const MonitorBehavior& src)
+{
+	ClientBehavior::operator= (src);
+	m_signalTagToColor = src.m_signalTagToColor;
+	return *this;
 }
 
 QColor MonitorBehavior::signalToTagCriticalColor() const
@@ -314,7 +335,39 @@ bool TuningClientBehavior::loadFromXml(QXmlStreamReader& reader)
 //
 ClientBehaviorStorage::ClientBehaviorStorage()
 {
+}
 
+ClientBehaviorStorage::ClientBehaviorStorage(const ClientBehaviorStorage& src)
+{
+	ClientBehaviorStorage::operator=(src);
+	return;
+}
+
+ClientBehaviorStorage::ClientBehaviorStorage(ClientBehaviorStorage&& src) noexcept :
+	m_behaviors(std::move(src.m_behaviors)),
+	m_fileName(std::move(src.m_fileName))
+{
+}
+
+ClientBehaviorStorage& ClientBehaviorStorage::operator=(const ClientBehaviorStorage& src)
+{
+	m_fileName = src.m_fileName;
+
+	QByteArray ba;
+	src.save(&ba);
+
+	QString errorCode;
+	this->load(ba, &errorCode);
+
+	return *this;
+}
+
+ClientBehaviorStorage& ClientBehaviorStorage::operator=(ClientBehaviorStorage&& src)
+{
+	m_fileName = std::move(src.m_fileName);
+	m_behaviors = std::move(src.m_behaviors);
+
+	return *this;
 }
 
 QString ClientBehaviorStorage::dbFileName() const
@@ -324,7 +377,7 @@ QString ClientBehaviorStorage::dbFileName() const
 
 void ClientBehaviorStorage::add(std::shared_ptr<ClientBehavior> behavoiur)
 {
-	m_behavoiurs.push_back(behavoiur);
+	m_behaviors.push_back(behavoiur);
 }
 
 bool ClientBehaviorStorage::remove(int index)
@@ -335,13 +388,13 @@ bool ClientBehaviorStorage::remove(int index)
 		return false;
 	}
 
-	m_behavoiurs.erase(m_behavoiurs.begin() + index);
+	m_behaviors.erase(m_behaviors.begin() + index);
 	return true;
 }
 
 int ClientBehaviorStorage::count() const
 {
-	return static_cast<int>(m_behavoiurs.size());
+	return static_cast<int>(m_behaviors.size());
 }
 
 std::shared_ptr<ClientBehavior> ClientBehaviorStorage::get(int index) const
@@ -351,12 +404,12 @@ std::shared_ptr<ClientBehavior> ClientBehaviorStorage::get(int index) const
 		Q_ASSERT(false);
 		return nullptr;
 	}
-	return m_behavoiurs[index];
+	return m_behaviors[index];
 }
 
 std::shared_ptr<ClientBehavior> ClientBehaviorStorage::get(const QString& id) const
 {
-	for (auto s : m_behavoiurs)
+	for (auto s : m_behaviors)
 	{
 		if (s->behaviorId() == id)
 		{
@@ -370,19 +423,19 @@ std::shared_ptr<ClientBehavior> ClientBehaviorStorage::get(const QString& id) co
 
 void ClientBehaviorStorage::clear()
 {
-	m_behavoiurs.clear();
+	m_behaviors.clear();
 }
 
-const std::vector<std::shared_ptr<ClientBehavior>>& ClientBehaviorStorage::behavoiurs()
+const std::vector<std::shared_ptr<ClientBehavior>>& ClientBehaviorStorage::behaviors()
 {
-	return m_behavoiurs;
+	return m_behaviors;
 }
 
-std::vector<std::shared_ptr<MonitorBehavior>> ClientBehaviorStorage::monitorBehavoiurs()
+std::vector<std::shared_ptr<MonitorBehavior>> ClientBehaviorStorage::monitorBehaviors()
 {
 	std::vector<std::shared_ptr<MonitorBehavior>> result;
 
-	for (auto b : m_behavoiurs)
+	for (auto b : m_behaviors)
 	{
 		if (b->isMonitorBehavior())
 		{
@@ -400,11 +453,11 @@ std::vector<std::shared_ptr<MonitorBehavior>> ClientBehaviorStorage::monitorBeha
 	return result;
 }
 
-std::vector<std::shared_ptr<TuningClientBehavior>> ClientBehaviorStorage::tuningClientBehavoiurs()
+std::vector<std::shared_ptr<TuningClientBehavior>> ClientBehaviorStorage::tuningClientBehaviors()
 {
 	std::vector<std::shared_ptr<TuningClientBehavior>> result;
 
-	for (auto b : m_behavoiurs)
+	for (auto b : m_behaviors)
 	{
 		if (b->isTuningClientBehavior())
 		{
@@ -422,15 +475,15 @@ std::vector<std::shared_ptr<TuningClientBehavior>> ClientBehaviorStorage::tuning
 	return result;
 }
 
-void ClientBehaviorStorage::save(QByteArray& data)
+void ClientBehaviorStorage::save(QByteArray* data) const
 {
-	QXmlStreamWriter writer(&data);
+	QXmlStreamWriter writer(data);
 
 	writer.setAutoFormatting(true);
 	writer.writeStartDocument();
 
 	writer.writeStartElement("Behavior");
-	for (auto s : m_behavoiurs)
+	for (auto s : m_behaviors)
 	{
 		if (s->isMonitorBehavior())
 		{
@@ -455,8 +508,9 @@ void ClientBehaviorStorage::save(QByteArray& data)
 	}
 
 	writer.writeEndElement();
-
 	writer.writeEndDocument();
+
+	return;
 }
 
 bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
@@ -495,7 +549,7 @@ bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
 
 			if (s->load(reader) == true)
 			{
-				m_behavoiurs.push_back(s);
+				m_behaviors.push_back(s);
 			}
 			else
 			{
@@ -511,7 +565,7 @@ bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
 
 				if (s->load(reader) == true)
 				{
-					m_behavoiurs.push_back(s);
+					m_behaviors.push_back(s);
 				}
 				else
 				{

@@ -818,7 +818,7 @@ namespace Builder
 		//
 		ClientBehaviorStorage tcBehaviorStorage;
 
-		std::vector<std::shared_ptr<TuningClientBehavior>> behaviors = allBehaviorStorage.tuningClientBehavoiurs();
+		std::vector<std::shared_ptr<TuningClientBehavior>> behaviors = allBehaviorStorage.tuningClientBehaviors();
 
 		for (auto b : behaviors)
 		{
@@ -838,7 +838,7 @@ namespace Builder
 		// Save monitor behavior to XML
 		//
 		QByteArray data;
-		tcBehaviorStorage.save(data);
+		tcBehaviorStorage.save(&data);
 
 		// Write file
 		//

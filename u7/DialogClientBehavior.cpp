@@ -172,7 +172,7 @@ bool DialogClientBehavior::saveChanges()
 	// save data to XML
 	//
 	QByteArray data;
-	m_behaviorStorage.save(data);
+	m_behaviorStorage.save(&data);
 
 	// save to db
 	//
@@ -398,7 +398,7 @@ void DialogClientBehavior::addBehavior(const std::shared_ptr<ClientBehavior> beh
 		return;
 	}
 
-	const std::vector<std::shared_ptr<ClientBehavior>> behaviors = m_behaviorStorage.behavoiurs();
+	const std::vector<std::shared_ptr<ClientBehavior>> behaviors = m_behaviorStorage.behaviors();
 	for (const auto existingBehavior : behaviors)
 	{
 		if (existingBehavior->behaviorId() == id)

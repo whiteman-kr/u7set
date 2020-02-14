@@ -12,20 +12,16 @@ class ClientBehavior : public PropertyObject
 {
 public:
 	ClientBehavior();
+	ClientBehavior(const ClientBehavior& src) noexcept;
 	virtual ~ClientBehavior();
 
-	ClientBehavior& operator=(const ClientBehavior& That)
-	{
-		m_behaviorId = That.m_behaviorId;
-
-		return *this;
-	}
+	ClientBehavior& operator=(const ClientBehavior& src);
 
 public:
 	bool isMonitorBehavior() const;
 	bool isTuningClientBehavior() const;
 
-	QString behaviorId() const;
+	const QString& behaviorId() const;
 	void setBehaviorId(const QString& behaviorId);
 
 public:
@@ -47,14 +43,10 @@ class MonitorBehavior : public ClientBehavior
 {
 public:
 	MonitorBehavior();
+	MonitorBehavior(const MonitorBehavior& src) noexcept;
+	virtual ~MonitorBehavior() = default;
 
-	MonitorBehavior& operator=(const MonitorBehavior& That)
-	{
-		m_signalTagToColor = That.m_signalTagToColor;
-
-		ClientBehavior::operator= (That);
-		return *this;
-	}
+	MonitorBehavior& operator=(const MonitorBehavior& That);
 
 public:
 	QColor signalToTagCriticalColor() const;
@@ -70,10 +62,8 @@ private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
 
-
 private:
 	QHash<QString, QColor> m_signalTagToColor;
-
 };
 
 //
@@ -120,11 +110,18 @@ class ClientBehaviorStorage
 {
 public:
 	ClientBehaviorStorage();
+	ClientBehaviorStorage(const ClientBehaviorStorage& src);
+	ClientBehaviorStorage(ClientBehaviorStorage&& src) noexcept;
 
+	~ClientBehaviorStorage() = default;
+
+	ClientBehaviorStorage& operator=(const ClientBehaviorStorage& scr);
+	ClientBehaviorStorage& operator=(ClientBehaviorStorage&& scr);
+
+public:
 	QString dbFileName() const;
 
 	void add(std::shared_ptr<ClientBehavior> behavoiur);
-
 	bool remove(int index);
 
 	int count() const;
@@ -134,16 +131,16 @@ public:
 
 	void clear();
 
-	const std::vector<std::shared_ptr<ClientBehavior>>& behavoiurs();
+	const std::vector<std::shared_ptr<ClientBehavior>>& behaviors();
 
-	std::vector<std::shared_ptr<MonitorBehavior>> monitorBehavoiurs();
-	std::vector<std::shared_ptr<TuningClientBehavior>> tuningClientBehavoiurs();
+	std::vector<std::shared_ptr<MonitorBehavior>> monitorBehaviors();
+	std::vector<std::shared_ptr<TuningClientBehavior>> tuningClientBehaviors();
 
-	void save(QByteArray& data);
+	void save(QByteArray* data) const;
 	bool load(const QByteArray& data, QString* errorCode);
 
 private:
-	std::vector<std::shared_ptr<ClientBehavior>> m_behavoiurs;
+	std::vector<std::shared_ptr<ClientBehavior>> m_behaviors;
 	QString m_fileName = "ClientBehavior.xml";
 };
 

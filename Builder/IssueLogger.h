@@ -3,21 +3,21 @@
 #include "../lib/OutputLog.h"
 #include <QUuid>
 
-#define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
 
 // Warning2 - the least important warning
 // Warning1 - just warning
 // Warning0 - the most important warning
 //
-#define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
+#define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
+#define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
 
-#define LOG_INTERNAL_ERROR(logObject)								logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_INTERNAL_ERROR_MSG(logObject, errorMsg)					logObject->errALC5996(errorMsg, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR(logObject)								logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO)
+#define LOG_INTERNAL_ERROR_MSG(logObject, errorMsg)					logObject->errALC5996(errorMsg, __FILE__, __LINE__, Q_FUNC_INFO)
 #define LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, logObject)	if (result == false) { logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO); return false; }
 
-#define LOG_NULLPTR_ERROR(logObject)							logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_NULLPTR_ERROR(logObject)							logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO)
 #define LOG_IF_NULLPTR_RETURN_FALSE(ptr, logObject)				if (ptr == nullptr) { logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO); return false; }
 
 

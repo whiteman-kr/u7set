@@ -287,6 +287,10 @@ namespace VFrame30
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);
 
+		// Client Behavior
+		//
+
+
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 

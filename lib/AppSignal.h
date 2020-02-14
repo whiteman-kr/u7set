@@ -3,6 +3,7 @@
 #include <QtGlobal>
 #include <QDateTime>
 #include <memory>
+#include <set>
 
 #include "Hash.h"
 #include "Queue.h"
@@ -386,6 +387,14 @@ public:
 	QVariant tuningHighBoundToVariant() const;
 	void setTuningHighBound(const TuningValue& value);
 
+	const std::set<QString>& tags() const;
+	std::set<QString>& tags();
+	void setTags(std::set<QString> tags);
+
+public slots:
+	/// \brief Check if signal has specified tag
+	bool hasTag(const QString& tag) const;
+
 public:
 	static const int NO_UNIT_ID = 1;
 
@@ -432,6 +441,8 @@ private:
 
 	QString m_specPropStruct;
 	QByteArray m_specPropValues;
+
+	std::set<QString> m_tags;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

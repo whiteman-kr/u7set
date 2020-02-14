@@ -247,7 +247,8 @@ public:
 	//
 
 	QStringList tags() const;
-	std::set<QString> tagsSet() const { return m_tags; }
+	const std::set<QString>& tagsSet() const { return m_tags; }
+	std::set<QString>& tagsSet() { return m_tags; }
 	QString tagsStr() const { return tags().join(QChar::LineFeed); }
 
 	void setTags(const QStringList& tags);

@@ -96,7 +96,7 @@ class PropertyObject;
 class Property
 {
 public:
-	Property() noexcept = default;
+	Property() noexcept {};
 	Property(const Property&) noexcept = default;
 	Property(Property&&) noexcept = default;
 	Property& operator=(const Property&) noexcept = default;
@@ -332,7 +332,7 @@ private:
 		uint16_t m_flags = 0;
 	};
 
-	E::PropertySpecificEditor m_specificEditor{E::PropertySpecificEditor::None};
+	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
 	qint16 m_precision = 2;
 	quint16 m_viewOrder = 0xFFFF;
 };
@@ -586,9 +586,9 @@ class PropertyValue : public Property
 {
 public:
 	PropertyValue() noexcept = default;
-	PropertyValue(const PropertyValue&) noexcept = default;
+	PropertyValue(const PropertyValue&) = default;
 	PropertyValue(PropertyValue&&) noexcept = default;
-	PropertyValue& operator=(const PropertyValue&) noexcept = default;
+	PropertyValue& operator=(const PropertyValue&) = default;
 	PropertyValue& operator=(PropertyValue&&) noexcept = default;
 
 public:
@@ -839,9 +839,9 @@ class PropertyValueNoGetterSetter : public Property
 {
 public:
 	PropertyValueNoGetterSetter() noexcept = default;
-	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) noexcept = default;
+	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) = default;
 	PropertyValueNoGetterSetter(PropertyValueNoGetterSetter&&) noexcept = default;
-	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) noexcept = default;
+	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) = default;
 	PropertyValueNoGetterSetter& operator=(PropertyValueNoGetterSetter&&) noexcept = default;
 	virtual ~PropertyValueNoGetterSetter() = default;
 
@@ -1542,6 +1542,24 @@ public:
 		QObject(src.parent()),
 		m_properties(std::move(src.m_properties))
 	{
+	}
+
+	PropertyObject& operator=(const PropertyObject& src) noexcept
+	{
+		// Shallow copy of properties
+		//
+		QObject::setParent(src.parent());
+		m_properties = src.m_properties;
+
+		return *this;
+	}
+
+	PropertyObject& operator=(PropertyObject&& src) noexcept
+	{
+		QObject::setParent(src.parent());
+		m_properties = std::move(src.m_properties);
+
+		return *this;
 	}
 
 	virtual ~PropertyObject() noexcept = default;

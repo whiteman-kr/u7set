@@ -369,7 +369,7 @@ namespace VFrame30
 		m_drawCustomSetpoints = m.drawcustomsetpoints();
 
 		m_customSetPoints.clear();
-		m_customSetPoints.reserve(m.customsetpoints_size());
+		m_customSetPoints.reserve(static_cast<size_t>(m.customsetpoints_size()));
 		for (int i = 0; i < m.customsetpoints_size(); i++)
 		{
 			auto csp = m_customSetPoints.createItem();
@@ -449,7 +449,7 @@ namespace VFrame30
 		}
 
 		std::vector<QRectF> barRects;
-		barRects.reserve(appSignalIds.size());
+		barRects.reserve(static_cast<size_t>(appSignalIds.size()));
 
 		for (int barIndex = 0; barIndex < appSignalIds.size(); barIndex++)
 		{
@@ -464,7 +464,7 @@ namespace VFrame30
 			else
 			{
 				barRect = drawParam->gridToDpi({insideRect.left() + barIndex * (barWidth + barSpace), insideRect.top(), barWidth, insideRect.height()});
-			};
+			}
 
 			barRects.push_back(barRect);
 
@@ -670,7 +670,7 @@ namespace VFrame30
 
 				const double factor = barRect.height() / valueDiff;
 
-				auto addGrid = [this, &grids, &barRect, &schemaItem, valueDiff, factor, signalIndex](double value, double gridWidth, bool drawValue) -> void
+				auto addGrid = [this, &grids, &barRect, &schemaItem, factor, signalIndex](double value, double gridWidth, bool drawValue) -> void
 				{
 					QString text;
 
@@ -802,8 +802,21 @@ namespace VFrame30
 
 					if (value.has_value() == true)
 					{
-						int warning_to_do_color;
-						drawSetpoints.emplace_back(signalIndex, value.value(), sp->cmpType(), qRgb(0x00, 0x00, 0xC0), barRects[signalIndex]);
+						QRgb foundColor{qRgb(0x00, 0x00, 0xC0)};
+
+
+
+//						for (auto tag : behaviorTags)
+//						{
+//							bool hasTag = drawParam->appSignalController()->signalHasTag(appSignalId, tagssssss??????);
+
+//							if (hasTag == true)
+//							{
+//								foundColor = ...;
+//							}
+//						}
+
+						drawSetpoints.emplace_back(signalIndex, value.value(), sp->cmpType(), foundColor, barRects[signalIndex]);
 					}
 				}
 			}

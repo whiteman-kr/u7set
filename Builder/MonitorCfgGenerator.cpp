@@ -819,7 +819,7 @@ namespace Builder
 		//
 		ClientBehaviorStorage monitorBehaviorStorage;
 
-		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehavoiurs();
+		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehaviors();
 
 		for (auto b : behaviors)
 		{
@@ -839,7 +839,7 @@ namespace Builder
 		// Save monitor behavior to XML
 		//
 		QByteArray data;
-		monitorBehaviorStorage.save(data);
+		monitorBehaviorStorage.save(&data);
 
 		// Write file
 		//

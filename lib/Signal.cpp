@@ -1149,6 +1149,14 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	{
 		assert(false);
 	}
+
+	// Tags
+	//
+	s->clear_tags();
+	for (const QString& t : m_tags)
+	{
+		s->add_tags(t.toStdString());
+	}
 }
 
 void Signal::serializeFrom(const Proto::AppSignal& s)
@@ -1259,6 +1267,14 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 		assert(m_stateFlagsSignals.contains(flagType) == false);
 
 		m_stateFlagsSignals.insert(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
+	}
+
+	// Tags
+	//
+	m_tags.clear();
+	for (const auto& t : s.tags())
+	{
+		m_tags.insert(QString::fromStdString(t));
 	}
 }
 

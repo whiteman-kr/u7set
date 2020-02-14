@@ -58,7 +58,7 @@ namespace VFrame30
 		int precision() const;
 		void setPrecision(int value);
 
-		DECLARE_FONT_PROPERTIES(Font);
+		DECLARE_FONT_PROPERTIES(Font)
 
 		FontParam& font();
 		const FontParam& font() const;
