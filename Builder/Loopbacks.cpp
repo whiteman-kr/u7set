@@ -262,7 +262,7 @@ namespace Builder
 				continue;
 			}
 
-			QList<QUuid> loopbackLinkedPins = linkedPins.keys();
+			QList<QUuid> loopbackLinkedPins = linkedPins.uniqueKeys();
 
 			for(const QUuid& linkedPin : loopbackLinkedPins)
 			{
@@ -294,17 +294,6 @@ namespace Builder
 				assert(m_signalsToLoopbacks.contains(signalID) == false);
 
 				m_signalsToLoopbacks.insert(signalID, loopback);
-			}
-
-//			loopback->setLinkedItems(linkedItems);
-
-			loopback->setLinkedPins(linkedPins);
-
-			for(const QUuid& pinGuid : linkedPins.uniqueKeys())
-			{
-				assert(m_pinsToLoopbacks.contains(pinGuid) == false);
-
-				m_pinsToLoopbacks.insert(pinGuid, loopback);
 			}
 		}
 

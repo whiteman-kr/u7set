@@ -800,28 +800,46 @@ namespace Builder
 					continue;
 				}
 
-				QString autoLoopbackID = Loopbacks::getAutoLoopbackID(ualItem, output);
+				QString autoLoopbackID = Loopbacks::getAutoLoopbackID(ualItem, output);;
+				QString autoLoopbackTargetLabel;
 
-				QString autoLoopbackSourceLabel = autoLoopbackID;
-				autoLoopbackSourceLabel.replace("AUTO_LOOPBACK", "AUTO_LOOPBACK_SOURCE");
+				QString connectedLoopbackSourceID = getConnectedLoopbackSourceID(output);
 
-				QString autoLoopbackTargetLabel = autoLoopbackID;
-				autoLoopbackTargetLabel.replace("AUTO_LOOPBACK", "AUTO_LOOPBACK_TARGET");
+				if (connectedLoopbackSourceID.isEmpty() == true)
+				{
+					// no LoopbackSources connected to output, create auto LoopbackSource
+					//
+					QString autoLoopbackSourceLabel = autoLoopbackID;
+					autoLoopbackSourceLabel.replace("AUTO_LOOPBACK", "AUTO_LOOPBACK_SOURCE");
 
-				// LoopbackSource creation
-				//
-				std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
-				loopbackSource->setLoopbackId(autoLoopbackID);
-				loopbackSource->setLabel(autoLoopbackSourceLabel);
+					autoLoopbackTargetLabel = autoLoopbackID;
+					autoLoopbackTargetLabel.replace("AUTO_LOOPBACK", "AUTO_LOOPBACK_TARGET");
 
-				UalItem* newSourceUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
-				createdItems.append(newSourceUalItem);
-				m_pinParent.insert(loopbackSource->inputs()[0].guid(), newSourceUalItem);
+					// LoopbackSource creation
+					//
+					std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
+					loopbackSource->setLoopbackId(autoLoopbackID);
+					loopbackSource->setLabel(autoLoopbackSourceLabel);
 
-				// link ualItem output and loopback source input to each other
-				//
-				output.AddAssociattedIOs(loopbackSource->inputs()[0].guid());
-				loopbackSource->inputs()[0].AddAssociattedIOs(output.guid());
+					UalItem* newSourceUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
+					createdItems.append(newSourceUalItem);
+					m_pinParent.insert(loopbackSource->inputs()[0].guid(), newSourceUalItem);
+
+					// link ualItem output and loopback source input to each other
+					//
+					output.AddAssociattedIOs(loopbackSource->inputs()[0].guid());
+					loopbackSource->inputs()[0].AddAssociattedIOs(output.guid());
+				}
+				else
+				{
+					// has LoopbackSource connected to ouput, auto LoopbackSource is not requred
+					// init variables for auto LoopbackTarget creation only
+					//
+					autoLoopbackTargetLabel = autoLoopbackID;
+					autoLoopbackTargetLabel.replace("AUTO_LOOPBACK", "AUTO_LOOPBACK_TARGET");
+
+					autoLoopbackID = connectedLoopbackSourceID;		// use existings LoopbackID
+				}
 
 				// LoopbackTargets creation
 				//
@@ -884,6 +902,36 @@ namespace Builder
 				connectedInputsGuids->append(pinGuid);
 			}
 		}
+	}
+
+	QString ModuleLogicCompiler::getConnectedLoopbackSourceID(const LogicPin& output)
+	{
+		const std::vector<QUuid>& associatedIOsGuids = output.associatedIOs();
+
+		for(const QUuid& pinGuid : associatedIOsGuids)
+		{
+			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+
+			if (pinParent == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (pinParent->isLoopbackSource() == true)
+			{
+				const UalLoopbackSource* src = pinParent->ualLoopbackSource();
+
+				if (src != nullptr)
+				{
+					return src->loopbackId();
+				}
+
+				assert(false);
+			}
+		}
+
+		return QString();
 	}
 
 	bool ModuleLogicCompiler::findLoopbackSources()
@@ -7099,7 +7147,7 @@ namespace Builder
 
 			if (firstCommand == true)
 			{
-				cmd.setComment(QString("loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->refSignalIDsJoined()));
+				cmd.setComment(QString("refreshing loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->refSignalIDsJoined()));
 				firstCommand = false;
 			}
 

@@ -188,6 +188,8 @@ namespace Builder
 		void getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
 										const LogicPin& output,
 										QVector<QUuid>* connectedInputsGuids);
+		QString getConnectedLoopbackSourceID(const LogicPin& output);
+
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
