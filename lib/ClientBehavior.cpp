@@ -70,17 +70,17 @@ bool ClientBehavior::load(QXmlStreamReader& reader)
 //
 MonitorBehavior::MonitorBehavior()
 {
-	m_signalTagToColor["critical"] = QColor("#FF5733");
-	m_signalTagToColor["attention"] = QColor("#FFBD33");
-	m_signalTagToColor["general"] = QColor("#2A05EB");
+	m_tagToColor["critical"] = QColor("#FF5733");
+	m_tagToColor["attention"] = QColor("#FFBD33");
+	m_tagToColor["general"] = QColor("#2A05EB");
 
-	auto prop = ADD_PROPERTY_GETTER_SETTER(QColor, "SignalToTagCriticalColor", true, signalToTagCriticalColor, setSignalToTagCriticalColor);
+	auto prop = ADD_PROPERTY_GETTER_SETTER(QColor, "TagCriticalColor", true, tagCriticalToColor, setTagCriticalToColor);
 	prop->setCategory("Appearance");
 
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "SignalToTagAttentionColor", true, signalToTagAttentionColor, setSignalToTagAttentionColor);
+	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "TagAttentionColor", true, tagAttentionToColor, setTagAttentionToColor);
 	prop->setCategory("Appearance");
 
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "SignalToTagGeneralColor", true, signalToTagGeneralColor, setSignalToTagGeneralColor);
+	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "TagGeneralColor", true, tagGeneralToColor, setTagGeneralToColor);
 	prop->setCategory("Appearance");
 
 	return;
@@ -88,52 +88,60 @@ MonitorBehavior::MonitorBehavior()
 
 MonitorBehavior::MonitorBehavior(const MonitorBehavior& src) noexcept :
 	ClientBehavior(src),
-	m_signalTagToColor(src.m_signalTagToColor)
+	m_tagToColor(src.m_tagToColor)
 {
 }
 
 MonitorBehavior& MonitorBehavior::operator=(const MonitorBehavior& src)
 {
 	ClientBehavior::operator= (src);
-	m_signalTagToColor = src.m_signalTagToColor;
+	m_tagToColor = src.m_tagToColor;
 	return *this;
 }
 
-QColor MonitorBehavior::signalToTagCriticalColor() const
+QColor MonitorBehavior::tagCriticalToColor() const
 {
-	return m_signalTagToColor.value("critical");
+	return m_tagToColor.value("critical");
 }
 
-void MonitorBehavior::setSignalToTagCriticalColor(const QColor& color)
+void MonitorBehavior::setTagCriticalToColor(const QColor& color)
 {
-	m_signalTagToColor["critical"] = color;
+	m_tagToColor["critical"] = color;
 }
 
-QColor MonitorBehavior::signalToTagAttentionColor() const
+QColor MonitorBehavior::tagAttentionToColor() const
 {
-	return m_signalTagToColor.value("attention");
+	return m_tagToColor.value("attention");
 }
 
-void MonitorBehavior::setSignalToTagAttentionColor(const QColor& color)
+void MonitorBehavior::setTagAttentionToColor(const QColor& color)
 {
-	m_signalTagToColor["attention"] = color;
+	m_tagToColor["attention"] = color;
 }
 
-QColor MonitorBehavior::signalToTagGeneralColor() const
+QColor MonitorBehavior::tagGeneralToColor() const
 {
-	return m_signalTagToColor.value("general");
+	return m_tagToColor.value("general");
 }
 
-void MonitorBehavior::setSignalToTagGeneralColor(const QColor& color)
+void MonitorBehavior::setTagGeneralToColor(const QColor& color)
 {
-	m_signalTagToColor["general"] = color;
+	m_tagToColor["general"] = color;
+}
+
+std::optional<QColor> MonitorBehavior::tagToColor(const QString& tag) const
+{
+	auto it = m_tagToColor.find(tag);
+	return it == m_tagToColor.end() ?
+				std::optional<QColor>{} :
+				std::optional<QColor>{it.value()};
 }
 
 void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("SignalTagToColor");
 
-	QHashIterator<QString, QColor> i(m_signalTagToColor);
+	QHashIterator<QString, QColor> i(m_tagToColor);
 	while (i.hasNext())
 	{
 		i.next();
@@ -150,7 +158,7 @@ void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 
 bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 {
-	m_signalTagToColor.clear();
+	m_tagToColor.clear();
 
 	while (reader.readNextStartElement())
 	{
@@ -180,7 +188,7 @@ bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 
 			if (tag.isEmpty() == false && color.isValid() == true)
 			{
-				m_signalTagToColor[tag] = color;
+				m_tagToColor[tag] = color;
 			}
 
 			reader.readNext();

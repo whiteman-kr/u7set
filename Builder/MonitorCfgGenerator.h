@@ -36,9 +36,7 @@ namespace Builder
 		// Generate tuning signals file
 		//
 		bool writeTuningSignals();
-
 		bool writeMonitorBehavior();
-
 		bool writeMonitorLogo();
 
 	private:

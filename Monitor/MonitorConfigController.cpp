@@ -317,9 +317,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	ConfigSettings readSettings;
 
 	readSettings.globalScript = getScriptFunc("/" + theSettings.instanceStrId() + "/GlobalScript.js");
-
 	readSettings.logoImage = getImageFunc(CFG_FILE_ID_LOGO);
-
 	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + theSettings.instanceStrId() + "/OnConfigurationArrived.js");
 
 	// Parse XML
@@ -485,6 +483,10 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			}
 		}
 	}
+
+	// Monitor Behavior
+	//
+
 
 	// Emit signal to inform everybody about new configuration
 	//

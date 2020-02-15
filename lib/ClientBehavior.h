@@ -1,6 +1,6 @@
-#ifndef CLIENTBEHAVIOR_H
-#define CLIENTBEHAVIOR_H
+#pragma once
 
+#include <optional>
 #include "../lib/PropertyObject.h"
 #include "../lib/DbController.h"
 
@@ -49,21 +49,23 @@ public:
 	MonitorBehavior& operator=(const MonitorBehavior& That);
 
 public:
-	QColor signalToTagCriticalColor() const;
-	void setSignalToTagCriticalColor(const QColor& color);
+	QColor tagCriticalToColor() const;
+	void setTagCriticalToColor(const QColor& color);
 
-	QColor signalToTagAttentionColor() const;
-	void setSignalToTagAttentionColor(const QColor& color);
+	QColor tagAttentionToColor() const;
+	void setTagAttentionToColor(const QColor& color);
 
-	QColor signalToTagGeneralColor() const;
-	void setSignalToTagGeneralColor(const QColor& color);
+	QColor tagGeneralToColor() const;
+	void setTagGeneralToColor(const QColor& color);
+
+	std::optional<QColor> tagToColor(const QString& tag) const;
 
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
 
 private:
-	QHash<QString, QColor> m_signalTagToColor;
+	QHash<QString, QColor> m_tagToColor;
 };
 
 //
@@ -144,4 +146,4 @@ private:
 	QString m_fileName = "ClientBehavior.xml";
 };
 
-#endif // CLIENTBEHAVIOR_H
+
