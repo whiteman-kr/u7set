@@ -9424,8 +9424,8 @@ namespace Builder
 
 		// set compare type of value
 		//
-		cmp->compare().setIsConst(appFb->isConstComaparator());
-		cmp->hysteresis().setIsConst(!appFb->caption().contains("_dh_"));
+		bool isConstComparator = appFb->isConstComaparator();
+		bool hysteresisIsConst = appFb->caption().contains("_dh_") == false;
 
 		//	set comparator type, compare-value, hysteresis-value
 		//
@@ -9446,7 +9446,7 @@ namespace Builder
 				}
 			}
 
-			if (pv.opName() == "i_sp_s" && cmp->compare().isConst() == true) // set compare-value
+			if (pv.opName() == "i_sp_s" && isConstComparator == true) // set compare-value
 			{
 				switch (pv.dataFormat())
 				{
@@ -9457,7 +9457,7 @@ namespace Builder
 				}
 			}
 
-			if (pv.opName() == "hysteresis" && cmp->hysteresis().isConst() == true) // set hysteresis-value
+			if (pv.opName() == "hysteresis" && hysteresisIsConst == true) // set hysteresis-value
 			{
 				switch (pv.dataFormat())
 				{
@@ -9491,44 +9491,33 @@ namespace Builder
 			if (pin.caption() == "in")
 			{
 				cmp->setInAnalogSignalFormat(ualSignal->analogSignalFormat());
-				cmp->input().setAppSignalID(ualSignal->appSignalID());
-				cmp->input().setIsAcquired(ualSignal->isAcquired());
+
+				cmp->input().setSignalParams(	ualSignal->appSignalID(),
+												ualSignal->isAcquired(),
+												ualSignal->isConst(),
+												ualSignal->constValueIfConst());
 			}
 
 			// compare Signal
 			//
-			if (pin.caption() == "set" && cmp->compare().isConst() == false) //
+			if (pin.caption() == "set" && isConstComparator == false) //
 			{
-				if (ualSignal->isConst() == true)
-				{
-					cmp->compare().setIsConst(true);
-					cmp->compare().setConstValue(ualSignal->constValue());
-					cmp->compare().setIsAcquired(false);
-				}
-				else
-				{
-					cmp->compare().setAppSignalID(ualSignal->appSignalID());
-					cmp->compare().setIsAcquired(ualSignal->isAcquired());
-				}
+				cmp->compare().setSignalParams(	ualSignal->appSignalID(),
+												ualSignal->isAcquired(),
+												ualSignal->isConst(),
+												ualSignal->constValueIfConst());
 			}
 
 			// hysteresis Signal
 			//
-			if ((pin.caption() == "hyst" || pin.caption() == "db") && cmp->hysteresis().isConst() == false)
+			if ((pin.caption() == "hyst" || pin.caption() == "db") && hysteresisIsConst == false)
 			{
 				cmp->setHysteresisPinCaption(pin.caption());
 
-				if (ualSignal->isConst() == true)
-				{
-					cmp->hysteresis().setIsConst(true);
-					cmp->hysteresis().setConstValue(ualSignal->constValue());
-					cmp->hysteresis().setIsAcquired(false);
-				}
-				else
-				{
-					cmp->hysteresis().setAppSignalID(ualSignal->appSignalID());
-					cmp->hysteresis().setIsAcquired(ualSignal->isAcquired());
-				}
+				cmp->hysteresis().setSignalParams(	ualSignal->appSignalID(),
+													ualSignal->isAcquired(),
+													ualSignal->isConst(),
+													ualSignal->constValueIfConst());
 
 				cmp->setHysteresisIsConstSignal(ualSignal->isConst());
 			}
@@ -9552,8 +9541,10 @@ namespace Builder
 			//
 			if (pin.caption() == "out")
 			{
-				cmp->output().setAppSignalID(ualSignal->appSignalID());
-				cmp->output().setIsAcquired(ualSignal->isAcquired());
+				cmp->output().setSignalParams(	ualSignal->appSignalID(),
+												ualSignal->isAcquired(),
+												ualSignal->isConst(),
+												ualSignal->constValueIfConst());
 			}
 		}
 
@@ -9583,7 +9574,7 @@ namespace Builder
 		//			return false;
 		//		}
 
-		if (cmp->compare().isConst() == false && cmp->compare().appSignalID().isEmpty() == true)
+		if (isConstComparator == false && cmp->compare().appSignalID().isEmpty() == true)
 		{
 			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(appFb->caption()).arg(appFb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
@@ -9591,7 +9582,7 @@ namespace Builder
 			return false;
 		}
 
-		if (cmp->hysteresis().isConst() == false && cmp->hysteresis().appSignalID().isEmpty() == true)
+		if (hysteresisIsConst == false && cmp->hysteresis().appSignalID().isEmpty() == true)
 		{
 			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(appFb->caption()).arg(appFb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);

@@ -1724,6 +1724,16 @@ namespace Builder
 		return constVal;
 	}
 
+	double UalSignal::constValueIfConst() const
+	{
+		if (m_isConst == false)
+		{
+			return 0;
+		}
+
+		return constValue();
+	}
+
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
 		if (m_isConst == true)
