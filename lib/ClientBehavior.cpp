@@ -13,6 +13,12 @@ ClientBehavior::ClientBehavior(const ClientBehavior& src) noexcept :
 {
 }
 
+ClientBehavior::ClientBehavior(ClientBehavior&& src) noexcept :
+	//PropertyObject(std::move(src)),		// PropertyObject cannot be moved
+	m_behaviorId(std::move(src.behaviorId()))
+{
+}
+
 ClientBehavior::~ClientBehavior()
 {
 }
@@ -20,6 +26,13 @@ ClientBehavior::~ClientBehavior()
 ClientBehavior& ClientBehavior::operator=(const ClientBehavior& src)
 {
 	m_behaviorId = src.m_behaviorId;
+	return *this;
+}
+
+ClientBehavior& ClientBehavior::operator=(ClientBehavior&& src)
+{
+	// PropertyObject::operator=(std::move(src)); // Property object class cannot be moved
+	m_behaviorId = std::move(src.m_behaviorId);
 	return *this;
 }
 
@@ -68,20 +81,25 @@ bool ClientBehavior::load(QXmlStreamReader& reader)
 //
 // MonitorBehavior
 //
+const QString MonitorBehavior::criticalTag{"critical"};
+const QString MonitorBehavior::attentionTag{"attention"};
+const QString MonitorBehavior::generalTag{"general"};
+
 MonitorBehavior::MonitorBehavior()
 {
-	m_tagToColor["critical"] = QColor("#FF5733");
-	m_tagToColor["attention"] = QColor("#FFBD33");
-	m_tagToColor["general"] = QColor("#2A05EB");
+	m_tagToColor.reserve(3);
+	m_tagToColor.push_back({criticalTag, QRgb(0xD00000)});
+	m_tagToColor.push_back({attentionTag, QRgb(0xF0F000)});
+	m_tagToColor.push_back({generalTag, QRgb(0x0F0FF0)});
 
-	auto prop = ADD_PROPERTY_GETTER_SETTER(QColor, "TagCriticalColor", true, tagCriticalToColor, setTagCriticalToColor);
-	prop->setCategory("Appearance");
+	auto prop = ADD_PROPERTY_GETTER_SETTER(QColor, criticalTag, true, tagCriticalToColor, setTagCriticalToColor);
+	prop->setCategory("Tag to Color");
 
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "TagAttentionColor", true, tagAttentionToColor, setTagAttentionToColor);
-	prop->setCategory("Appearance");
+	prop = ADD_PROPERTY_GETTER_SETTER(QColor, attentionTag, true, tagAttentionToColor, setTagAttentionToColor);
+	prop->setCategory("Tag to Color");
 
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "TagGeneralColor", true, tagGeneralToColor, setTagGeneralToColor);
-	prop->setCategory("Appearance");
+	prop = ADD_PROPERTY_GETTER_SETTER(QColor, generalTag, true, tagGeneralToColor, setTagGeneralToColor);
+	prop->setCategory("Tag to Color");
 
 	return;
 }
@@ -99,56 +117,119 @@ MonitorBehavior& MonitorBehavior::operator=(const MonitorBehavior& src)
 	return *this;
 }
 
+MonitorBehavior& MonitorBehavior::operator=(MonitorBehavior&& src)
+{
+	ClientBehavior::operator=(std::move(src));
+	m_tagToColor = std::move(src.m_tagToColor);
+	return *this;
+}
+
 QColor MonitorBehavior::tagCriticalToColor() const
 {
-	return m_tagToColor.value("critical");
+	auto result = tagToColor(criticalTag);
+	return result.has_value() ? result.value() : QColor{};
 }
 
 void MonitorBehavior::setTagCriticalToColor(const QColor& color)
 {
-	m_tagToColor["critical"] = color;
+	setTagToColor(criticalTag, color.rgb());
 }
 
 QColor MonitorBehavior::tagAttentionToColor() const
 {
-	return m_tagToColor.value("attention");
+	auto result = tagToColor(attentionTag);
+	return result.has_value() ? result.value() : QColor{};
 }
 
 void MonitorBehavior::setTagAttentionToColor(const QColor& color)
 {
-	m_tagToColor["attention"] = color;
+	setTagToColor(attentionTag, color.rgb());
 }
 
 QColor MonitorBehavior::tagGeneralToColor() const
 {
-	return m_tagToColor.value("general");
+	auto result = tagToColor(generalTag);
+	return result.has_value() ? result.value() : QColor{};
 }
 
 void MonitorBehavior::setTagGeneralToColor(const QColor& color)
 {
-	m_tagToColor["general"] = color;
+	setTagToColor(generalTag, color.rgb());
 }
 
-std::optional<QColor> MonitorBehavior::tagToColor(const QString& tag) const
+std::optional<QRgb> MonitorBehavior::tagToColor(const QString& tag) const
 {
-	auto it = m_tagToColor.find(tag);
-	return it == m_tagToColor.end() ?
-				std::optional<QColor>{} :
-				std::optional<QColor>{it.value()};
+	std::optional<QRgb> result;
+
+	for (const auto& ttc : m_tagToColor)
+	{
+		if (ttc.tag == tag)
+		{
+			result = ttc.color;
+			break;
+		}
+	}
+
+	return result;
+}
+
+void MonitorBehavior::setTagToColor(const QString& tag, QRgb color)
+{
+	for (auto& ttc : m_tagToColor)
+	{
+		if (ttc.tag == tag)
+		{
+			ttc.color = color;
+			return;
+		}
+	}
+
+	m_tagToColor.push_back({tag, color});
+	return;
+}
+
+std::optional<QRgb> MonitorBehavior::tagToColor(const std::set<QString>& tags) const
+{
+	// Tags in m_tagToColor have priorities from the highest to the lowest.
+	// So that is why regular loop is used here.
+	// For future implementation:
+	// for input param 'tag' if it has a lot of items and m_tagToColor quite big too,
+	// is possible to make optimization, via finding interset of two tags and m_tagToColor.
+	//
+	std::optional<QRgb> result;
+
+	for (const auto& ttc : m_tagToColor)	// Go through m_tagToColor as it is prioritized search
+	{
+		if (tags.find(ttc.tag) != tags.end())
+		{
+			result = ttc.color;				// The first met tag has the highest priority
+			break;
+		}
+	}
+
+	return result;
+}
+
+std::optional<QRgb> MonitorBehavior::tagToColor(const QStringList& tags) const
+{
+	std::set<QString> tagSet;
+	for (const auto& t : tags)
+	{
+		tagSet.insert(t);
+	}
+
+	return tagToColor(tagSet);
 }
 
 void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("SignalTagToColor");
 
-	QHashIterator<QString, QColor> i(m_tagToColor);
-	while (i.hasNext())
+	for (const auto& ttc : m_tagToColor)
 	{
-		i.next();
-
 		writer.writeStartElement("Item");
-		writer.writeAttribute("tag", i.key());
-		writer.writeAttribute("color", i.value().name());
+		writer.writeAttribute("tag", ttc.tag);
+		writer.writeAttribute("color", QColor::fromRgb(ttc.color).name());
 		writer.writeEndElement();
 	}
 
@@ -188,7 +269,7 @@ bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 
 			if (tag.isEmpty() == false && color.isValid() == true)
 			{
-				m_tagToColor[tag] = color;
+				m_tagToColor.push_back({tag, color.rgb()});
 			}
 
 			reader.readNext();

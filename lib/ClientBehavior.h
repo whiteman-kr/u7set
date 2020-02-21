@@ -2,20 +2,21 @@
 
 #include <optional>
 #include "../lib/PropertyObject.h"
-#include "../lib/DbController.h"
+
 
 //
 // ClientBehavior
 //
-
 class ClientBehavior : public PropertyObject
 {
 public:
 	ClientBehavior();
 	ClientBehavior(const ClientBehavior& src) noexcept;
+	ClientBehavior(ClientBehavior&& src) noexcept;
 	virtual ~ClientBehavior();
 
 	ClientBehavior& operator=(const ClientBehavior& src);
+	ClientBehavior& operator=(ClientBehavior&& src);
 
 public:
 	bool isMonitorBehavior() const;
@@ -46,7 +47,8 @@ public:
 	MonitorBehavior(const MonitorBehavior& src) noexcept;
 	virtual ~MonitorBehavior() = default;
 
-	MonitorBehavior& operator=(const MonitorBehavior& That);
+	MonitorBehavior& operator=(const MonitorBehavior& src);
+	MonitorBehavior& operator=(MonitorBehavior&& src);
 
 public:
 	QColor tagCriticalToColor() const;
@@ -58,15 +60,30 @@ public:
 	QColor tagGeneralToColor() const;
 	void setTagGeneralToColor(const QColor& color);
 
-	std::optional<QColor> tagToColor(const QString& tag) const;
+	std::optional<QRgb> tagToColor(const QString& tag) const;
+	void setTagToColor(const QString& tag, QRgb color);
+
+	std::optional<QRgb> tagToColor(const std::set<QString>& tags) const;	// Return the most periority color
+	std::optional<QRgb> tagToColor(const QStringList& tags) const;			// Return the most periority color
 
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
 
 private:
-	QHash<QString, QColor> m_tagToColor;
+	static const QString criticalTag;
+	static const QString attentionTag;
+	static const QString generalTag;
+
+	struct TagToColorType
+	{
+		QString tag;
+		QRgb color;
+	};
+
+	std::vector<TagToColorType> m_tagToColor;		// The lower position - the higher priority of the tag
 };
+
 
 //
 // TuningClientBehavior
@@ -104,6 +121,7 @@ private:
 private:
 	QHash<QString, QColor> m_tagToColor;
 };
+
 
 //
 // ClientBehaviorStorage

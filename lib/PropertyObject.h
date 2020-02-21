@@ -348,6 +348,7 @@ template <typename TYPE,
 		  void(CLASS::*set)(const TYPE&)>
 class PropertyTypedValue : public Property
 {
+
 public:
 	PropertyTypedValue() = delete;
 	PropertyTypedValue(CLASS* object) noexcept :
@@ -1538,11 +1539,7 @@ public:
 		//
 	}
 
-	PropertyObject(PropertyObject&& src) noexcept :
-		QObject(src.parent()),
-		m_properties(std::move(src.m_properties))
-	{
-	}
+	PropertyObject(PropertyObject&& src) = delete;		// Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
 
 	PropertyObject& operator=(const PropertyObject& src) noexcept
 	{
@@ -1554,13 +1551,7 @@ public:
 		return *this;
 	}
 
-	PropertyObject& operator=(PropertyObject&& src) noexcept
-	{
-		QObject::setParent(src.parent());
-		m_properties = std::move(src.m_properties);
-
-		return *this;
-	}
+	PropertyObject& operator=(PropertyObject&& src) = delete; // Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
 
 	virtual ~PropertyObject() noexcept = default;
 

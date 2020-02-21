@@ -450,13 +450,6 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	qDebug() << "ArchiveService1 (id, ip, port): " << readSettings.archiveService1.equipmentId() << ", " << readSettings.archiveService1.ip() << ", " << readSettings.archiveService1.port();
 	qDebug() << "ArchiveService2 (id, ip, port): " << readSettings.archiveService2.equipmentId() << ", " << readSettings.archiveService2.ip() << ", " << readSettings.archiveService2.port();
 
-	// --
-	//
-	{
-		QMutexLocker locker(&m_confugurationMutex);
-		m_configuration = readSettings;
-	}
-
 	// New setpoints
 	//
 	{
@@ -486,7 +479,44 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	// Monitor Behavior
 	//
+	{
+		QByteArray data;
+		QString errorString;
 
+		if (bool result = getFileBlockedById(CFG_FILE_ID_BEHAVIOR, &data, &errorString);
+			result == false)
+		{
+			readSettings.errorMessage += errorString + QStringLiteral("\n");
+		}
+		else
+		{
+			ClientBehaviorStorage behavior;
+			behavior.clear();
+
+			bool ok = behavior.load(data, &errorString);
+
+			if (ok == false)
+			{
+				readSettings.errorMessage += tr("Read/parse Behavior file errror: ") + errorString + QStringLiteral("\n");
+			}
+			else
+			{
+				std::vector<std::shared_ptr<MonitorBehavior>> mb = behavior.monitorBehaviors();
+
+				if (mb.empty() == false)
+				{
+					readSettings.monitorBeahvior = std::move(*mb[0]);
+				}
+			}
+		}
+	}
+
+	// --
+	//
+	{
+		QMutexLocker locker(&m_confugurationMutex);
+		m_configuration = readSettings;		// Cannot move readSettings here as it is used later for `emit configurationArrived(readSettings)`
+	}
 
 	// Emit signal to inform everybody about new configuration
 	//

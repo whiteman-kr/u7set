@@ -4,13 +4,21 @@
 #include "../lib/AppSignalManager.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/TuningController.h"
 
 
 // MonitorView
 //
-MonitorView::MonitorView(MonitorSchemaManager* schemaManager, QWidget *parent)
+MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
+						 VFrame30::AppSignalController* appSignalController,
+						 VFrame30::TuningController* tuningController,
+						 QWidget* parent)
 	: VFrame30::ClientSchemaView(schemaManager, parent)
 {
+	setAppSignalController(appSignalController);
+	setTuningController(tuningController);
+
 	qDebug() << Q_FUNC_INFO;
 
 	Q_ASSERT(schemaManager);
@@ -20,6 +28,7 @@ MonitorView::MonitorView(MonitorSchemaManager* schemaManager, QWidget *parent)
 
 	return;
 }
+
 
 MonitorView::~MonitorView()
 {
@@ -35,6 +44,12 @@ void MonitorView::paintEvent(QPaintEvent* event)
 
 void MonitorView::configurationArrived(ConfigSettings configuration)
 {
+	// --
+	//
+	setMonitorBehavior(std::move(configuration.monitorBeahvior));
+
+	// --
+	//
 	QJSEngine* engine = jsEngine();
 
 	if (engine == nullptr)

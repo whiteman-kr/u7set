@@ -21,13 +21,10 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::TuningController* tuningController) :
-	VFrame30::ClientSchemaWidget(new MonitorView(schemaManager), schema, schemaManager)
+	VFrame30::ClientSchemaWidget(new MonitorView(schemaManager, appSignalController, tuningController),
+								 schema,
+								 schemaManager)
 {
-	clientSchemaView()->setAppSignalController(appSignalController);
-	clientSchemaView()->setTuningController(tuningController);
-
-	// --
-	//
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
 

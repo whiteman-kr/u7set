@@ -306,7 +306,7 @@ namespace Builder
 		QString group{"Schema"};
 		bool schemaItemFrameWasProcessed = false;
 
-		auto findPannelSchemaFunc = [&schemaMap, log](QString pannelSchemaId)
+		auto findPannelSchemaFunc = [&schemaMap](QString pannelSchemaId)
 			{
 				if (auto pannelSchemaIt = schemaMap.find(pannelSchemaId);
 					pannelSchemaIt != schemaMap.end())

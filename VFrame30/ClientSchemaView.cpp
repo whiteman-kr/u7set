@@ -675,4 +675,34 @@ namespace VFrame30
 	{
 		m_variables = values;
 	}
+
+	const MonitorBehavior& ClientSchemaView::monitorBehavor() const
+	{
+		return m_monitorBehavior;
+	}
+
+	void ClientSchemaView::setMonitorBehavior(const MonitorBehavior& src)
+	{
+		m_monitorBehavior = src;
+	}
+
+	void ClientSchemaView::setMonitorBehavior(MonitorBehavior&& src)
+	{
+		m_monitorBehavior = std::move(src);
+	}
+
+	const TuningClientBehavior& ClientSchemaView::tuningClientBehavior() const
+	{
+		return m_tuningClientBehavior;
+	}
+
+	void ClientSchemaView::setTuningClientBehavior(const TuningClientBehavior& src)
+	{
+		m_tuningClientBehavior = src;
+	}
+
+	void ClientSchemaView::setTuningClientBehavior(TuningClientBehavior&& src)
+	{
+		m_tuningClientBehavior = std::move(src);
+	}
 }

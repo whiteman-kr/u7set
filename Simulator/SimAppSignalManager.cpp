@@ -349,6 +349,17 @@ static const AppSignalParam dummy;
 		return signalState(appSignalHashes, result, found);
 	}
 
+	QStringList AppSignalManager::signalTags(Hash /*signalHash*/) const
+	{
+		Q_ASSERT(false);		// TO DO
+		return {};
+	}
+
+	QStringList AppSignalManager::signalTags(const QString& appSignalId) const
+	{
+		return signalTags(::calcHash(appSignalId));
+	}
+
 	bool AppSignalManager::signalHasTag(Hash /*signalHash*/, const QString& /*tag*/) const
 	{
 		Q_ASSERT(false);		// TO DO

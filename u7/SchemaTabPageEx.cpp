@@ -1523,6 +1523,11 @@ void SchemaFileViewEx::createActions()
 	m_refreshFileAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileViewEx::slot_refreshFiles);
 
+	m_behaviorAction = new QAction(tr("Behavior..."), parent());
+	m_behaviorAction->setIcon(QIcon(":/Images/Images/SchemaBehavior.svg"));
+	m_behaviorAction->setStatusTip(tr("Edit Behavior..."));
+	m_behaviorAction->setEnabled(true);
+
 	m_propertiesAction = new QAction(tr("Properties..."), parent());
 	m_propertiesAction->setIcon(QIcon(":/Images/Images/SchemaProperties.svg"));
 	m_propertiesAction->setStatusTip(tr("Edit schema properties..."));
@@ -1530,10 +1535,7 @@ void SchemaFileViewEx::createActions()
 
 	// --
 	//
-	m_behaviorAction = new QAction(tr("Behavior..."), parent());
-	m_behaviorAction->setIcon(QIcon(":/Images/Images/SchemaBehavior.svg"));
-	m_behaviorAction->setStatusTip(tr("Edit Behavior..."));
-	m_behaviorAction->setEnabled(true);
+
 
 	return;
 }
@@ -1586,13 +1588,12 @@ void SchemaFileViewEx::createContextMenu()
 	addAction(separator);
 
 	addAction(m_refreshFileAction);
+	addAction(m_behaviorAction);
 	addAction(m_propertiesAction);
 
-	separator = new QAction(this);
-	separator->setSeparator(true);
-	addAction(separator);
-
-	addAction(m_behaviorAction);
+	//separator = new QAction(this);
+	//separator->setSeparator(true);
+	//addAction(separator);
 
 	return;
 }
@@ -2307,10 +2308,10 @@ void SchemaControlTabPageEx::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_filesView->m_refreshFileAction);
+	m_toolBar->addAction(m_filesView->m_behaviorAction);
 	m_toolBar->addAction(m_filesView->m_propertiesAction);
 
-	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_filesView->m_behaviorAction);
+	//m_toolBar->addSeparator();
 
 	return;
 }

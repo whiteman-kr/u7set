@@ -519,15 +519,10 @@ message SchemaItemFrame
 //
 message VFrameSetPoint
 {
-    optional int32 setpointType = 2 [default = 0];		// Is mapped to enum E::IndicatorSetpointType, 0 is IndicatorSetpointType::Static
 	optional uint32 color = 3;
-
-    optional string schemaItemLabel = 10;
+	optional int32 colorSource = 4 [default = 0];		// Is mapped to enum E::IndicatorColorSource, 0 is ClientBehaviorByOutputSignalTag
 
     optional string outputAppSignalId = 20;
-
-    optional double staticValue = 30;
-	optional int32 staticCompareType = 31;
 }
 
 //
@@ -555,8 +550,7 @@ message IndicatorHistogramVert
 	optional double gridMainStep = 50 [default = 50.0];
 	optional double gridSmallStep = 51 [default = 10.0];
 
-    optional bool drawAutoSetpoints = 70 [default = true];
-	optional bool drawCustomSetpoints = 71 [default = false];
+    optional int32 drawSetpoints = 70 [default = 0];
 	repeated VFrameSetPoint customSetPoints = 72;
 }
 
