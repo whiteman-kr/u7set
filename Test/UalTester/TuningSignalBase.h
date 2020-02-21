@@ -63,7 +63,7 @@ public:
 
 private:
 
-	quint64					m_sourceID = -1;
+	qint64					m_sourceID = -1;
 
 	QString					m_equipmentID;
 	QString					m_caption;
@@ -81,8 +81,8 @@ private:
 
 public:
 
-	quint64					sourceID() const { return m_sourceID; }
-	void					setSourceID(quint64 id) { m_sourceID = id; }
+	qint64					sourceID() const { return m_sourceID; }
+	void					setSourceID(qint64 id) { m_sourceID = id; }
 
 	QString					equipmentID() const { return m_equipmentID; }
 	void					setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
@@ -126,7 +126,7 @@ private:
 
 	mutable QMutex			m_sourceMutex;
 	QVector<TuningSource>	m_sourceList;
-	QMap<quint64, int>		m_sourceIdMap;
+	QMap<qint64, int>		m_sourceIdMap;
 
 public:
 

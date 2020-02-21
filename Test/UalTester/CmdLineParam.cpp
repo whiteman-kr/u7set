@@ -29,7 +29,7 @@ const char* const CmdLineParam::SETTING_REPORT_FILENAME = "ReportFileName";
 const char* const CmdLineParam::SETTING_PRESET_LM = "PresetLM";
 const char* const CmdLineParam::SETTING_OPTION_FILENAME = "OptionFileName";
 
-const char* const CmdLineParam::REQUIRED_OPTIONS =	"Options \"-cfgip1\", \"-cfgip2\", \"-id\" and \"-f\" must be filled\n" \
+const char* const CmdLineParam::REQUIRED_OPTIONS =	"Options: \"-cfgip1\", \"-cfgip2\", \"-id\" and \"-f\" - must be filled!\n" \
 													"For example: -cfgip1=127.0.0.1 -cfgip2=192.168.0.1 -id=EQUIPMENT_ID_UALTESTER -f=test.txt\n";
 
 
@@ -50,14 +50,14 @@ void CmdLineParam::getParams(int& argc, char** argv)
 	m_cmdLineParser.addSimpleOption("h", "Print this help.");
 		// main keys
 		//
-	m_cmdLineParser.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "IPv4");
-	m_cmdLineParser.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "IPv4");
+	m_cmdLineParser.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-address of first Configuration Service.", "IPv4");
+	m_cmdLineParser.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-address of second Configuration Service.", "IPv4");
 	m_cmdLineParser.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "EquipmentID of software \"TestClient\".", "EQUIPMENT_ID_UALTESTER");
 	m_cmdLineParser.addSingleValueOption("f", SETTING_TEST_FILE_NAME, "Test file name.", "TestFileName.txt");
 
 		// optional keys
 		//
-	m_cmdLineParser.addSingleValueOption("psip", SETTING_PACKET_SOURCE_IP, "IP-addres for PacketSource.", "IPv4");
+	m_cmdLineParser.addSingleValueOption("psip", SETTING_PACKET_SOURCE_IP, "IP-address for connection to PacketSource.", "IPv4");
 	m_cmdLineParser.addSingleValueOption("errignore", SETTING_ERROR_IGNORE, "Stop testing if errors was found.", "No");
 	m_cmdLineParser.addSingleValueOption("test", SETTING_TEST_ID, "Run a specific test.", "TEST_ID");
 	m_cmdLineParser.addSingleValueOption("from", SETTING_FROM_TEST_ID, "Run from the specific test.", "TEST_ID");
@@ -86,7 +86,7 @@ bool CmdLineParam::paramIsValid()
 	{
 		if (m_cmdLineParser.argCount() > 2)
 		{
-			std::cout << "Option \"-b\" is not compatible with other options\n";
+			std::cout << "Option \"-b\" is not compatible with other options" << std::endl;
 			return false;
 		}
 
@@ -100,14 +100,14 @@ bool CmdLineParam::paramIsValid()
 		{
 			if (QFileInfo::exists(m_optionFileName) == false)
 			{
-				std::cout << "Error: Options file " << m_optionFileName.toLocal8Bit().constData() << " is not exist\n";
+				std::cout << "Error: Options file " << m_optionFileName.toLocal8Bit().constData() << " is not exist" << std::endl;
 				return false;
 			}
 
 			QFile optionsFile(m_optionFileName);
 			if (optionsFile.open(QIODevice::ReadOnly) == false)
 			{
-				std::cout << "Error: Options file " << m_optionFileName.toLocal8Bit().constData() << " has not been read\n";
+				std::cout << "Error: Options file " << m_optionFileName.toLocal8Bit().constData() << " has not been read" << std::endl;
 				return false;
 			}
 
@@ -116,7 +116,7 @@ bool CmdLineParam::paramIsValid()
 
 			if (optionsStr.isEmpty() == true)
 			{
-				std::cout << "Error: Options file " << m_optionFileName.toLocal8Bit().constData() << " is empty\n";
+				std::cout << "Error: Options file " << m_optionFileName.toLocal8Bit().constData() << " is empty" << std::endl;
 				return false;
 			}
 
@@ -167,7 +167,7 @@ bool CmdLineParam::paramIsValid()
 	//
 	if (m_cfgServiceIP1.isEmpty() == true && m_cfgServiceIP2.isEmpty() == true )
 	{
-		std::cout << "Error: IP-addres of Configuration Service is empty\n";
+		std::cout << "Error: IP-addres of Configuration Service is empty" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
@@ -177,43 +177,43 @@ bool CmdLineParam::paramIsValid()
 
 	if (m_cfgSocketAddress1.isValidIPv4(m_cfgSocketAddress1.addressStr()) == false)
 	{
-		std::cout << "Error: IP-addres of first Configuration Service is not valid\n";
+		std::cout << "Error: IP-addres of first Configuration Service is not valid" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
 	if (m_cfgSocketAddress2.isValidIPv4(m_cfgSocketAddress2.addressStr()) == false)
 	{
-		std::cout << "Error: IP-addres of second Configuration Service is not valid\n";
+		std::cout << "Error: IP-addres of second Configuration Service is not valid" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
 	if (m_equipmentID.isEmpty() == true)
 	{
-		std::cout << "Error: EquipmentID is epmpty\n";
+		std::cout << "Error: EquipmentID is epmpty" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
 	if (testFileName.isEmpty() == true)
 	{
-		std::cout << "Error: Test file name is empty\n";
+		std::cout << "Error: Test file name is empty" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
 	m_testFileNameList = testFileName.split(',');
-	for(const QString& testFileName : m_testFileNameList)
+	for(const QString& fileName : m_testFileNameList)
 	{
-		if (testFileName.isEmpty() == true)
+		if (fileName.isEmpty() == true)
 		{
 			continue;
 		}
 
-		if (QFileInfo::exists(testFileName) == false)
+		if (QFileInfo::exists(fileName) == false)
 		{
-			std::cout << "Error: Tets file " << testFileName.toLocal8Bit().constData() << " is not exist\n";
+			std::cout << "Error: Tets file " << fileName.toLocal8Bit().constData() << " is not exist" << std::endl;
 			return false;
 		}
 	}
@@ -225,7 +225,7 @@ bool CmdLineParam::paramIsValid()
 		m_packetSourceAddress.setAddressPortStr(m_packetSourceIP, PORT_TUNING_SERVICE_CLIENT_REQUEST);
 		if (m_packetSourceAddress.isValidIPv4(m_packetSourceAddress.addressStr()) == false)
 		{
-			std::cout << "Error: IP-addres for PacketSource is not valid\n";
+			std::cout << "Error: IP-addres for PacketSource is not valid" << std::endl;
 			return false;
 		}
 	}
@@ -248,7 +248,7 @@ bool CmdLineParam::paramIsValid()
 
 		if (paramOk == false)
 		{
-			std::cout << "Error: Invalid value of the parameter \"errignore\", specify \"yes\" or \"no\"\n";
+			std::cout << "Error: Invalid value of the parameter \"errignore\", specify \"yes\" or \"no\"" << std::endl;
 			return false;
 		}
 	}
@@ -271,7 +271,7 @@ bool CmdLineParam::paramIsValid()
 
 		if (paramOk == false)
 		{
-			std::cout << "Error: Invalid value of the parameter \"trace\", specify \"yes\" or \"no\"\n";
+			std::cout << "Error: Invalid value of the parameter \"trace\", specify \"yes\" or \"no\"" << std::endl;
 			return false;
 		}
 	}
@@ -281,7 +281,7 @@ bool CmdLineParam::paramIsValid()
 		QFile reportFile(m_reportFileName);
 		if (reportFile.open(QIODevice::WriteOnly) == false)
 		{
-			std::cout << "Error: Report file " << m_reportFileName.toLocal8Bit().constData() << " has not been created\n";
+			std::cout << "Error: Report file " << m_reportFileName.toLocal8Bit().constData() << " has not been created" << std::endl;
 			return false;
 		}
 
@@ -362,9 +362,10 @@ bool CmdLineParam::enableExecuteTestForLM(TestItem test)
 
 void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 {
+	const QString key = "-f=";
 	QString params = cmdLine;
 
-	int posParam = params.indexOf("-f=");
+	int posParam = params.indexOf(key);
 	if (posParam == -1)
 	{
 		return;
@@ -388,9 +389,9 @@ void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 	params.replace(' ', ',');
 	params.replace(QRegExp("[,]{2,}"),",");
 
-	if (params[3] == ',')
+	if (params[key.length()] == ',')
 	{
-		params.remove(3, 1);
+		params.remove(key.length(), 1);
 	}
 
 	if (params.endsWith(',') == true)
@@ -398,7 +399,9 @@ void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 		params[params.length() - 1] = ' ';
 	}
 
-	if (params.length() < 4)
+	// if we have only word -f= without params
+	//
+	if (params.length() < key.length() + 1)
 	{
 		return;
 	}

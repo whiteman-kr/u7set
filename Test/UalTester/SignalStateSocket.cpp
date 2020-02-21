@@ -18,17 +18,17 @@ SignalStateSocket::~SignalStateSocket()
 
 void SignalStateSocket::onClientThreadStarted()
 {
-	 //std::cout << "SignalStateSocket::onClientThreadStarted()\n";
+	 //std::cout << "SignalStateSocket::onClientThreadStarted()" << std::endl;
 }
 
 void SignalStateSocket::onClientThreadFinished()
 {
-	 //std::cout << "SignalStateSocket::onClientThreadFinished()\n";
+	 //std::cout << "SignalStateSocket::onClientThreadFinished()" << std::endl;
 }
 
 void SignalStateSocket::onConnection()
 {
-	//std::cout << "SignalStateSocket::onConnection()\n";
+	//std::cout << "SignalStateSocket::onConnection()" << std::endl;
 
 	emit socketConnected();
 
@@ -39,7 +39,7 @@ void SignalStateSocket::onConnection()
 
 void SignalStateSocket::onDisconnection()
 {
-	//std::cout << "SignalStateSocket::onDisconnection\n";
+	//std::cout << "SignalStateSocket::onDisconnection" << std::endl;
 
 	emit socketDisconnected();
 }
@@ -77,7 +77,7 @@ void SignalStateSocket::requestSignalState()
 
 	int startIndex = m_signalStateRequestIndex;
 
-	for (int i = 0; SIGNAL_SOCKET_MAX_READ_SIGNAL; i++)
+	for (int i = 0; i < SIGNAL_SOCKET_MAX_READ_SIGNAL; i++)
 	{
 		if (m_signalStateRequestIndex >= hashCount)
 		{
@@ -118,7 +118,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
-		std::cout << "SignalStateSocket::replySignalState - error: ParseFromArray\n";
+		std::cout << "SignalStateSocket::replySignalState - error: ParseFromArray" << std::endl;
 		assert(result);
 		requestSignalState();
 		return;
@@ -126,7 +126,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 
 	if (m_getSignalStateReply.error() != 0)
 	{
-		std::cout << "SignalStateSocket::replySignalState - error: " << m_getSignalStateReply.error() << "\n";
+		std::cout << "SignalStateSocket::replySignalState - error: " << m_getSignalStateReply.error() << std::endl;
 		assert(m_getSignalStateReply.error() != 0);
 		requestSignalState();
 		return;
@@ -143,9 +143,6 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 
 		AppSignalState appState;
 		appState.load(m_getSignalStateReply.appsignalstates(i));
-
-		// appState.m_flags.valid = 1;
-		// appState.m_value = 1;
 
 		m_pSignalBase->setSignalState(hash, appState);
 	}

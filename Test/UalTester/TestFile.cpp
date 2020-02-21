@@ -1196,8 +1196,8 @@ bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdP
 			continue;
 		}
 
-		int paramCount = cmd.paramList().count();
-		for(int p = 0; p < paramCount; p++)
+		int prmCount = cmd.paramList().count();
+		for(int p = 0; p < prmCount; p++)
 		{
 			if (cmd.paramList().at(p).name() == name)
 			{
@@ -1481,7 +1481,7 @@ void TestItem::appendResult(const QString& str, bool printDebugMsg)
 
 	if (printDebugMsg == true)
 	{
-		std::cout << str.toLocal8Bit().constData() << "\n";
+		std::cout << str.toLocal8Bit().constData() << std::endl;
 	}
 }
 
@@ -1528,7 +1528,7 @@ void TestFile::printErrorlist()
 	int errorCount = m_errorList.count();
 	for(int i = 0; i < errorCount; i++)
 	{
-		std::cout << m_errorList[i].toLocal8Bit().constData() << "\n";
+		std::cout << m_errorList[i].toLocal8Bit().constData() << std::endl;
 	}
 }
 
@@ -1536,20 +1536,20 @@ bool TestFile::parse(const QString& fileName, SignalBase* pSignalBase)
 {
 	if (fileName.isEmpty() == true)
 	{
-		std::cout << "Error: Test file name is empty\n";
+		std::cout << "Error: Test file name is empty" << std::endl;
 		return false;
 	}
 
 	if (pSignalBase == nullptr)
 	{
-		std::cout << "Error: Failed SignalBase\n";
+		std::cout << "Error: Failed SignalBase" << std::endl;
 		return false;
 	}
 
 	m_file.setFileName(fileName);
 	if (m_file.open(QIODevice::ReadOnly) == false)
 	{
-		std::cout << "Error: Test file " << m_fileName.toLocal8Bit().constData() << " is not open\n";
+		std::cout << "Error: Test file " << m_fileName.toLocal8Bit().constData() << " is not open" << std::endl;
 		m_errorList.append("Error: Test file " + m_fileName + " is not open\n");
 		return false;
 	}
@@ -1651,8 +1651,8 @@ void TestFile::createTestList()
 
 				if (cmd.type() == TF_CMD_COMPATIBLE)
 				{
-					int paramCount = cmd.paramList().count();
-					for(int i = 0; i < paramCount; i++)
+					int prmCount = cmd.paramList().count();
+					for(int i = 0; i < prmCount; i++)
 					{
 						test.compatibleList().append(cmd.paramList().at(i).value().toString());
 					}

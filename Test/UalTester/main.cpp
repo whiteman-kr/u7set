@@ -13,10 +13,15 @@ int main(int argc, char *argv[])
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
-	UalTester ualTester(argc, argv);
-	ualTester.start();
+	int result = -1;
 
-	int result = a.exec();
+	UalTester ualTester(argc, argv);
+
+	bool started = ualTester.start();
+	if (started == true)
+	{
+		result = a.exec();
+	}
 
 	google::protobuf::ShutdownProtobufLibrary();
 
