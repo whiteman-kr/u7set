@@ -32,7 +32,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 		fileName.append(QChar('/'));
 	}
 
-	fileName += "LogicSchemas/SchemaDetails.pbuf";
+	fileName += "Schemas.als/SchemaDetails.pbuf";
 
 	writeMessage(tr("Load logic schema detais file: %1").arg(fileName));
 
