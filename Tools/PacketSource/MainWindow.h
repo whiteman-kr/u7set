@@ -16,12 +16,13 @@
 #include <QSortFilterProxyModel>
 #include <QClipboard>
 
-#include "UalTesterServer.h"
-#include "SignalBase.h"
-#include "SourceBase.h"
+#include "Options.h"
+#include "SourceList.h"
+#include "SignalList.h"
 #include "FrameDataPanel.h"
 #include "FindSignalPanel.h"
-#include "History.h"
+#include "HistoryList.h"
+#include "PacketSourceCore.h"
 
 // ==============================================================================================
 
@@ -31,10 +32,14 @@ class MainWindow : public QMainWindow
 
 public:
 
-	explicit MainWindow(QMainWindow* parent = nullptr);
+	explicit MainWindow(const Options& options, QMainWindow* parent = nullptr);
 	virtual ~MainWindow();
 
 private:
+
+	//
+	//
+	Options					m_options;
 
 	// Elements of interface - Menu
 	//
@@ -98,16 +103,7 @@ private:
 
 	//
 	//
-	UalTesterServer*		m_ualTesterSever = nullptr;
-	UalTesterServerThread*	m_ualTesterServerThread = nullptr;
-	void					runUalTesterServerThread();
-	void					stopUalTesterServerThread();
-
-	//
-	//
-	SignalBase				m_signalBase;
-	SourceBase				m_sourceBase;
-	SignalHistory			m_signalHistory;
+	PacketSourceCore		m_pscore;
 
 	// update lists
 	//
@@ -116,39 +112,24 @@ private:
 	QAction*				m_pSourceColumnAction[SOURCE_LIST_COLUMN_COUNT];
 	QMenu*					m_sourceHeaderContextMenu = nullptr;
 	QModelIndex				m_selectedSourceIndex;
-
 	void					hideSourceColumn(int column, bool hide);
 
 	QTableView*				m_pSignalView = nullptr;
 	SignalTable				m_signalTable;
 	QAction*				m_pSignalColumnAction[SIGNAL_LIST_COLUMN_COUNT];
 	QMenu*					m_signalHeaderContextMenu = nullptr;
-
 	void					hideSignalColumn(int column, bool hide);
 
 	//
 	//
-	QTimer*					m_updateSourceListTimer = nullptr;
-	void					startUpdateSourceListTimer();
-	void					stopUpdateSourceListTimer();
-
-	//
-	//
+	void					clearViews();
 	void					updateSignalList(PS::Source* pSource);
 	void					updateFrameDataList(PS::Source* pSource);
 
 	//
 	//
-	QTimer*					m_updateBuildFilesTimer = nullptr;
-	void					startUpdateBuildFilesTimer();
-	void					stopUpdateBuildFilesTimer();
-
-	//
-	//
 	void					saveWindowState();
 	void					restoreWindowState();
-
-
 
 public:
 
@@ -169,7 +150,6 @@ private slots:
 							//
 	void					startSource();
 	void					stopSource();
-	void					reloadSource();
 	void					selectAllSources();
 	void					setSignalState();
 	void					initSignalsState();
@@ -199,23 +179,17 @@ private slots:
 
 	// slot of data
 	//
-	void					loadSources();
-	void					loadSignals();
-	void					loadSignalsInSources();
+	void					sourcesLoaded();
+	void					signalsLoaded();
 
 	// slot of lists
 	//
-	void					updateSourceState();
-
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
-
-	//
-	//
-	void					updateBuildFiles();
 
 	// slot of UalTesterServer
 	//
 	void					ualTesterSocketConnect(bool isConnect);
-	void					signalStateChanged(Hash hash, double prevState, double state);
 };
+
+// ==============================================================================================

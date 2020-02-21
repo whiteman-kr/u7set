@@ -1,23 +1,21 @@
 #include "SourceWorker.h"
 
-#include <QApplication>
-#include <QDebug>
-#include <QThread>
 #include <QUdpSocket>
+#include <QThread>
 
-#include "Options.h"
 #include "SourceBase.h"
 
 #include "../../lib/WUtils.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceWorker::SourceWorker(QObject* pSource) :
+SourceWorker::SourceWorker(QObject* pSource, const HostAddressPort& appDataSrvIP) :
 	m_pSource(pSource),
+	m_appDataSrvIP(appDataSrvIP),
 	m_numerator(0),
 	m_sentFrames(0),
 	m_finishThread(false),
-	m_finished(false)
+	m_threadIsFinished(false)
 {
 }
 
@@ -45,14 +43,7 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (theOptions.build().appDataSrvIP().isEmpty() == true)
-	{
-		emit finished();
-		return;
-	}
-
-	QHostAddress appDataReceivingIP;
-	if (appDataReceivingIP.setAddress(theOptions.build().appDataSrvIP()) == false)
+	if (m_appDataSrvIP.isEmpty() == true)
 	{
 		emit finished();
 		return;
@@ -116,7 +107,7 @@ void SourceWorker::process()
 
 			// send udp to AppDataReceivingIP of AppDataSrv
 			//
-			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), appDataReceivingIP, pSource->info().serverAddress.port());
+			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), QHostAddress(m_appDataSrvIP.address().toString()), m_appDataSrvIP.port());
 
 			if (sentBytes != sizeof(m_simFrame))
 			{
@@ -146,7 +137,7 @@ void SourceWorker::process()
 	delete pSocket;
 	pSocket = nullptr;
 
-	m_finished = true;
+	m_threadIsFinished = true;
 	emit finished();
 }
 

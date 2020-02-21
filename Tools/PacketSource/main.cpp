@@ -26,16 +26,17 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("1.8.LOCALBUILD"));
 #endif
 
-	theOptions.load();
+	Options options;
+	options.load();
 
-	MainWindow* pMainWindow = new MainWindow;
+	MainWindow* pMainWindow = new MainWindow(options);
 	pMainWindow->show();
 
 	int result = a.exec();
 
 	delete pMainWindow;
 
-	theOptions.unload();
+	options.unload();
 
 	google::protobuf::ShutdownProtobufLibrary();
 

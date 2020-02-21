@@ -1,8 +1,6 @@
 #ifndef SOURCEWORKER_H
 #define SOURCEWORKER_H
 
-#include <QThread>
-
 #include "../../lib/DataProtocols.h"
 
 // ==============================================================================================
@@ -13,26 +11,29 @@ class SourceWorker : public QObject
 
 public:
 
-	explicit SourceWorker(QObject* pSource = nullptr);
+	explicit SourceWorker(QObject* pSource, const HostAddressPort& appDataSrvIP);
 	virtual ~SourceWorker();
 
 private:
 
 	QObject*			m_pSource = nullptr;
+	HostAddressPort		m_appDataSrvIP;				// this is AppDataReceivingIP of AppDataSrv
+
 	Rup::SimFrame		m_simFrame;
 
 	int					m_numerator = 0;
 	int					m_sentFrames = 0;
 
 	bool				m_finishThread = false;
-
+	bool				m_threadIsFinished = false;
 
 public:
 
-	bool				m_finished = false;
+	int					sentFrames() { return m_sentFrames; }
 
 	bool				isRunnig() { return !m_finishThread; }
-	int					sentFrames() { return m_sentFrames; }
+	void				wait() { while(m_threadIsFinished == false); }
+	void				finish() { m_finishThread = true; }
 
 signals:
 
@@ -41,9 +42,6 @@ signals:
 public slots:
 
 	void				process();
-	void				finish() { m_finishThread = true; }
-	void				wait() { while(m_finished == false); }
-
 };
 
 // ==============================================================================================

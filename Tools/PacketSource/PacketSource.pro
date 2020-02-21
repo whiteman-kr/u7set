@@ -13,6 +13,7 @@ QT       += qml
 QT       += xml
 
 TARGET = PacketSource
+CONFIG += gui
 TEMPLATE = app
 
 #c++17 support
@@ -36,21 +37,20 @@ unix {
 }
 
 SOURCES += \
-main.cpp \
-MainWindow.cpp \
-Options.cpp \
-SourceWorker.cpp \
-SourceBase.cpp \
-../../lib/XmlHelper.cpp \
-../../lib/SocketIO.cpp \
-../../lib/HostAddressPort.cpp \
-../../lib/SimpleThread.cpp \
-../../lib/Crc.cpp \
-../../lib/DataProtocols.cpp \
-../../lib/WUtils.cpp \
+    main.cpp \
+    ../../Proto/network.pb.cc \
+    ../../Proto/serialization.pb.cc \
+    ../../Builder/IssueLogger.cpp \
+    ../../lib/MemLeaksDetection.cpp \
+    ../../lib/CommandLineParser.cpp \
+    ../../lib/XmlHelper.cpp \
+    ../../lib/SocketIO.cpp \
+    ../../lib/HostAddressPort.cpp \
+    ../../lib/SimpleThread.cpp \
+    ../../lib/Crc.cpp \
+    ../../lib/DataProtocols.cpp \
+    ../../lib/WUtils.cpp \
     ../../lib/Ui/DialogAbout.cpp \
-    SignalBase.cpp \
-    FrameBase.cpp \
     ../../lib/Signal.cpp \
     ../../lib/Address16.cpp \
     ../../lib/AppSignalStateFlags.cpp \
@@ -59,44 +59,51 @@ SourceBase.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/Types.cpp \
     ../../lib/ProtoSerialization.cpp \
-	../../Proto/network.pb.cc \
-	../../Proto/serialization.pb.cc \
     ../../lib/ModuleFirmware.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/DataSource.cpp \
-    ../../Builder/IssueLogger.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
-    ../../lib/MemLeaksDetection.cpp \
-    FindSignalPanel.cpp \
-    FrameDataPanel.cpp \
     ../../lib/SoftwareInfo.cpp \
     ../../lib/CircularLogger.cpp \
     ../../lib/Tcp.cpp \
-    UalTesterServer.cpp \
+    ../../lib/BuildInfo.cpp \
+    CmdLineParam.cpp \
+    BuildOpt.cpp \
+    PacketSourceCore.cpp \
+    MainWindow.cpp \
+    Options.cpp \
     OptionsDialog.cpp \
+    SourceWorker.cpp \
+    SourceBase.cpp \
+    SourceList.cpp \
+    FindSignalPanel.cpp \
+    SignalList.cpp \
+    SignalBase.cpp \
     History.cpp \
-    ../../lib/BuildInfo.cpp
-
+    HistoryList.cpp \
+    FrameBase.cpp \
+    FrameDataPanel.cpp \
+    UalTesterServer.cpp
 
 HEADERS += \
-MainWindow.h \
-Options.h \
-SourceWorker.h \
-SourceBase.h \
-../../lib/XmlHelper.h \
-../../lib/SocketIO.h \
-../../lib/HostAddressPort.h \
-../../lib/SimpleThread.h \
-../../lib/Crc.h \
-../../lib/DataProtocols.h \
-../../lib/WUtils.h \
-../../Builder/CfgFiles.h \
+    Stable.h \
+    ../../Proto/network.pb.h \
+    ../../Proto/serialization.pb.h \
+    ../../Builder/CfgFiles.h \
+    ../../Builder/IssueLogger.h \
+    ../../lib/MemLeaksDetection.h \
+    ../../lib/CommandLineParser.h \
+    ../../lib/XmlHelper.h \
+    ../../lib/SocketIO.h \
+    ../../lib/HostAddressPort.h \
+    ../../lib/SimpleThread.h \
+    ../../lib/Crc.h \
+    ../../lib/DataProtocols.h \
+    ../../lib/WUtils.h \
     ../../lib/Ui/DialogAbout.h \
-    SignalBase.h \
-    FrameBase.h \
     ../../lib/Signal.h \
     ../../lib/Address16.h \
     ../../lib/AppSignalStateFlags.h \
@@ -106,8 +113,6 @@ SourceBase.h \
     ../../lib/TuningValue.h \
     ../../lib/Types.h \
     ../../lib/ProtoSerialization.h \
-	../../Proto/network.pb.h \
-	../../Proto/serialization.pb.h \
     ../../lib/PropertyObject.h \
     ../../lib/Factory.h \
     ../../lib/ModuleFirmware.h \
@@ -115,34 +120,38 @@ SourceBase.h \
     ../../lib/OrderedHash.h \
     ../../lib/SignalProperties.h \
     ../../lib/DataSource.h \
-    ../../Builder/IssueLogger.h \
     ../../lib/OutputLog.h \
     ../../lib/DeviceHelper.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
-    Stable.h \
-    ../../lib/MemLeaksDetection.h \
-    FindSignalPanel.h \
-    FrameDataPanel.h \
     ../../lib/SoftwareInfo.h \
     ../../lib/CircularLogger.h \
     ../../lib/Tcp.h \
-    UalTesterServer.h \
+    ../../lib/BuildInfo.h \
+    CmdLineParam.h \
+    BuildOpt.h \
+    PacketSourceCore.h \
+    MainWindow.h \
+    Options.h \
     OptionsDialog.h \
+    SourceWorker.h \
+    SourceBase.h \
+    SourceList.h \
+    FindSignalPanel.h \
+    SignalBase.h \
+    SignalList.h \
     History.h \
-    ../../lib/BuildInfo.h
+    HistoryList.h \
+    FrameBase.h \
+    FrameDataPanel.h \
+    UalTesterServer.h
+
 
 RESOURCES += \
     resources.qrc
 
-
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-
-#c++11 support for GCC
-#
-#unix:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Q_DEBUG define
@@ -153,20 +162,6 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 #
 CONFIG(debug, debug|release): DEFINES += _DEBUG
 
-# Visual Leak Detector
-#
-#win32 {
-#contains(QMAKE_TARGET.arch, x86_64) {
-#LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-#LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-#} else {
-#LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-#LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-#}
-
-#INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-#INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
-#}
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #

@@ -1,12 +1,17 @@
 #include "SourceBase.h"
 
 #include <assert.h>
-#include <QMessageBox>
 #include <QFile>
 
-#include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"
+#include "../../lib/XmlHelper.h"
 #include "../../lib/DataSource.h"
+
+#ifndef Q_CONSOLE_APP
+	#include <QMessageBox>
+#endif
+
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -82,14 +87,19 @@ void PS::Source::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PS::Source::run()
+bool PS::Source::run(const HostAddressPort& appDataSrvIP)
 {
 	if (m_pWorker != nullptr)
 	{
 		return false;
 	}
 
-	return createWorker();
+	if (appDataSrvIP.isEmpty() == true)
+	{
+		return false;
+	}
+
+	return createWorker(appDataSrvIP);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -134,14 +144,19 @@ int PS::Source::sentFrames()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PS::Source::createWorker()
+bool PS::Source::createWorker(const HostAddressPort& appDataSrvIP)
 {
 	if (m_pWorker != nullptr)
 	{
 		return false;
 	}
 
-	m_pWorker = new SourceWorker(this);
+	if (appDataSrvIP.isEmpty() == true)
+	{
+		return false;
+	}
+
+	m_pWorker = new SourceWorker(this, appDataSrvIP);
 	if (m_pWorker == nullptr)
 	{
 		return false;
@@ -162,8 +177,6 @@ bool PS::Source::createWorker()
 	m_pWorker->moveToThread(m_pThread);
 
 	connect(m_pThread, &QThread::started, m_pWorker, &SourceWorker::process);	// on start thread run method process()
-	//connect(m_pWorker, &SourceWorker::finished, m_pThread, &QThread::quit);	// on finish() run slot quit()
-	//connect(m_pWorker, &SourceWorker::finished, this, &Source::deleteWorker);
 
 	m_pThread->start();															// run thread that runs process()
 
@@ -307,6 +320,7 @@ void SourceBase::clear()
 	m_sourceMutex.lock();
 
 		m_sourceList.clear();
+		m_appDataSrvIP.clear();
 
 	m_sourceMutex.unlock();
 }
@@ -328,37 +342,71 @@ int SourceBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SourceBase::readFromFile()
+int SourceBase::readFromFile(const BuildInfo& buildInfo)
 {
 	clear();
 
+	//
+	//
+	m_appDataSrvIP = buildInfo.appDataSrvIP();
+
+	//
+	//
 	QString msgTitle = tr("Loading sources");
 
-	if (theOptions.build().buildDirPath().isEmpty() == true)
+	if (buildInfo.buildDirPath().isEmpty() == true)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to build directory!"));
+		QString strError = tr("Please, input path to build directory!");
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
 	// read Server IP and Server Port
 	//
-	QString fileCfg = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path();
+	QString fileCfg = buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path();
 	if (fileCfg.isEmpty() == true)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("Sources configuration file (%1) path is empty!").arg(Builder::FILE_CONFIGURATION_XML));
+		QString strError = tr("Sources configuration file %1 - path is empty!").arg(Builder::FILE_CONFIGURATION_XML);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
 	QFile cfgFileXml(fileCfg);
 	if (cfgFileXml.exists() == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not found!").arg(fileCfg));
+		QString strError = tr("File %1 is not found!").arg(fileCfg);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
 	if (cfgFileXml.open(QIODevice::ReadOnly) == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not opened!").arg(fileCfg));
+		QString strError = tr("File %1 is not opened!").arg(fileCfg);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
@@ -372,29 +420,57 @@ int SourceBase::readFromFile()
 
 	if (xmlCfg.readHostAddressPort("AppDataReceivingIP", "AppDataReceivingPort", &serverAddress) == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("IP-address of AppDataSrv is not found in file %1!").arg(Builder::FILE_CONFIGURATION_XML));
+		QString strError = tr("IP-address of AppDataSrv is not found in file %1!").arg(Builder::FILE_CONFIGURATION_XML);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
 	// read Data Sources
 	//
-	QString sourcesFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCES).path();
+	QString sourcesFile = buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path();
 	if (sourcesFile.isEmpty() == true)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("Sources file (%1) path is empty!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		QString strError =  tr("Sources file %1 - path is empty!").arg(Builder::FILE_APP_DATA_SOURCES_XML);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
 	QFile sourcesFileXml(sourcesFile);
 	if (sourcesFileXml.exists() == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not found!").arg(sourcesFile));
+		QString strError = tr("File %1 is not found!").arg(sourcesFile);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
 	if (sourcesFileXml.open(QIODevice::ReadOnly) == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not opened!").arg(sourcesFile));
+		QString strError = tr("File %1 is not opened!").arg(sourcesFile);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
@@ -409,7 +485,14 @@ int SourceBase::readFromFile()
 	bool result = DataSourcesXML<DataSource>::readFromXml(sourceData, &dataSources);
 	if (result == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("Error reading Sources from XML-file \"%1\".\nInvalid file format!").arg(sourcesFile));
+		QString strError = tr("Error reading sources from XML-file %1 - Invalid file format!").arg(sourcesFile);
+
+		#ifdef Q_CONSOLE_APP
+			qDebug() << strError;
+		#else
+			QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
 		return 0;
 	}
 
@@ -540,6 +623,7 @@ SourceBase& SourceBase::operator=(const SourceBase& from)
 	m_sourceMutex.lock();
 
 		m_sourceList = from.m_sourceList;
+		m_appDataSrvIP = from.m_appDataSrvIP;
 
 	m_sourceMutex.unlock();
 
@@ -554,7 +638,7 @@ void SourceBase::runSourece(int index)
 
 		if (index >= 0 && index < m_sourceList.count())
 		{
-			m_sourceList[index].run();
+			m_sourceList[index].run(m_appDataSrvIP);
 		}
 
 	m_sourceMutex.unlock();
@@ -583,7 +667,7 @@ void SourceBase::runAllSoureces()
 		int count = m_sourceList.count();
 		for(int i = 0; i < count; i++)
 		{
-			m_sourceList[i].run();
+			m_sourceList[i].run(m_appDataSrvIP);
 		}
 
 	m_sourceMutex.unlock();
@@ -606,283 +690,25 @@ void SourceBase::stopAllSoureces()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceBase::saveSourceState(PS::Source* pSource)
-{
-	if (pSource == nullptr)
-	{
-		return;
-	}
-
-	m_sourceIDForReload.append(pSource->info().equipmentID);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SourceBase::restoreSourcesState()
+void SourceBase::runSources(const QStringList& sourceIDList)
 {
 	m_sourceMutex.lock();
 
 		int count = m_sourceList.count();
 		for(int s = 0; s < count; s++)
 		{
-			foreach (QString sourceID, m_sourceIDForReload)
+			foreach (QString sourceID, sourceIDList)
 			{
 				if(sourceID == m_sourceList[s].info().equipmentID)
 				{
-					m_sourceList[s].run();
+					m_sourceList[s].run(m_appDataSrvIP);
+					qDebug() << "run source:" << m_sourceList[s].info().equipmentID << "-" << m_sourceList[s].info().lmAddress.addressStr();
 					break;
 				}
 			}
 		}
 
-		m_sourceIDForReload.clear();
-
 	m_sourceMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-SourceTable::SourceTable(QObject *)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SourceTable::~SourceTable()
-{
-	m_sourceMutex.lock();
-
-		m_sourceList.clear();
-
-	m_sourceMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SourceTable::columnCount(const QModelIndex&) const
-{
-	return SOURCE_LIST_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SourceTable::rowCount(const QModelIndex&) const
-{
-	return sourceCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant SourceTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < SOURCE_LIST_COLUMN_COUNT)
-		{
-			result = SourceListColumn[section];
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant SourceTable::data(const QModelIndex &index, int role) const
-{
-	if (index.isValid() == false)
-	{
-		return QVariant();
-	}
-
-	int row = index.row();
-	if (row < 0 || row >= sourceCount())
-	{
-		return QVariant();
-	}
-
-	int column = index.column();
-	if (column < 0 || column > SOURCE_LIST_COLUMN_COUNT)
-	{
-		return QVariant();
-	}
-
-	PS::Source* pSource = sourceAt(row);
-	if (pSource == nullptr)
-	{
-		return QVariant();
-	}
-
-	if (role == Qt::TextAlignmentRole)
-	{
-		return Qt::AlignCenter;
-	}
-
-	if (role == Qt::TextColorRole)
-	{
-		if (column == SOURCE_LIST_COLUMN_STATE)
-		{
-			if (pSource->isRunning() == false)
-			{
-				return QColor(0xFF, 0x00, 0x00);
-			}
-		}
-
-		return QVariant();
-	}
-
-	if (role == Qt::DisplayRole || role == Qt::EditRole)
-	{
-		return text(row, column, pSource);
-	}
-
-	return QVariant();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString SourceTable::text(int row, int column, PS::Source* pSource) const
-{
-	if (row < 0 || row >= sourceCount())
-	{
-		return QString();
-	}
-
-	if (column < 0 || column > SOURCE_LIST_COLUMN_COUNT)
-	{
-		return QString();
-	}
-
-	if (pSource == nullptr)
-	{
-		return QString();
-	}
-
-	QString result;
-
-	switch (column)
-	{
-		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
-		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
-		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->info().caption;												break;
-		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->info().equipmentID;											break;
-		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->info().moduleType);							break;
-		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->info().subSystem;												break;
-		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->info().frameCount);							break;
-		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");										break;
-		case SOURCE_LIST_COLUMN_SIGNAL_COUNT:	result = QString::number(pSource->info().signalCount);							break;
-		default:								assert(0);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SourceTable::updateColumn(int column)
-{
-	if (column < 0 || column >= SOURCE_LIST_COLUMN_COUNT)
-	{
-		return;
-	}
-
-	int count = rowCount();
-
-	for (int row = 0; row < count; row ++)
-	{
-		QModelIndex cellIndex = index(row, column);
-
-		emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SourceTable::sourceCount() const
-{
-	int count = 0;
-
-	m_sourceMutex.lock();
-
-		count = m_sourceList.count();
-
-	m_sourceMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-PS::Source* SourceTable::sourceAt(int index) const
-{
-	PS::Source* pSource = nullptr;
-
-	m_sourceMutex.lock();
-
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			 pSource = m_sourceList[index];
-		}
-
-	m_sourceMutex.unlock();
-
-	return pSource;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SourceTable::set(const QVector<PS::Source*> list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_sourceMutex.lock();
-
-			m_sourceList = list_add;
-
-		m_sourceMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SourceTable::clear()
-{
-	int count = m_sourceList.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_sourceMutex.lock();
-
-			m_sourceList.clear();
-
-		m_sourceMutex.unlock();
-
-	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

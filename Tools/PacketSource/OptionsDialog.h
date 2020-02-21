@@ -22,12 +22,12 @@ class OptionsDialog : public QDialog
 
 public:
 
-	explicit OptionsDialog(QWidget *parent = nullptr);
+	explicit OptionsDialog(const BuildInfo& buildInfo, QWidget *parent = nullptr);
 	virtual ~OptionsDialog();
 
 private:
 
-	BuildOption				m_pathOption;
+	BuildInfo				m_buildInfo;
 
 	QLineEdit*				m_buildDirPathEdit = nullptr;
 	QPushButton*			m_selectBuildPathBtn = nullptr;
@@ -52,7 +52,7 @@ private:
 
 public:
 
-	BuildOption&			option() { return m_pathOption; }
+	BuildInfo&				buildInfo() { return m_buildInfo; }
 
 protected:
 
@@ -66,6 +66,9 @@ private slots:
 	//
 	void					onSelectBuildDirPath();
 	void					onEnableReload();
+	void					onTimeoutReload(const QString &sec);
+	void					onAppDataSrvIP(const QString &ip);
+	void					onUalTesterIP(const QString &ip);
 
 	void					onOk();
 	void					onCancel();

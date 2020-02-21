@@ -1,15 +1,16 @@
 #include "OptionsDialog.h"
 
+#include <QDir>
 #include <QFile>
 #include <QFileDialog>
 
 #include "../../Builder/CfgFiles.h"
-#include "../../lib/XmlHelper.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsDialog::OptionsDialog(QWidget* parent) :
-	QDialog(parent)
+OptionsDialog::OptionsDialog(const BuildInfo& buildInfo, QWidget* parent) :
+	QDialog(parent) ,
+	m_buildInfo(buildInfo)
 {
 	createInterface();
 	restoreWindowState();
@@ -35,16 +36,17 @@ bool OptionsDialog::createInterface()
 	QVBoxLayout *buildFilesLayout = new QVBoxLayout;
 	QHBoxLayout *buildPathLayout = new QHBoxLayout;
 
-	m_buildDirPathEdit = new QLineEdit(theOptions.build().buildDirPath(), this);
+	m_buildDirPathEdit = new QLineEdit(m_buildInfo.buildDirPath(), this);
+	m_buildDirPathEdit->setReadOnly(true);
 	m_selectBuildPathBtn = new QPushButton(tr("Select ..."), this);
 
-	m_signalsFileEdit = new QLineEdit(theOptions.build().buildFile(BUILD_FILE_TYPE_SIGNALS).path(), this);
+	m_signalsFileEdit = new QLineEdit(m_buildInfo.buildFile(BUILD_FILE_TYPE_SIGNALS).path(), this);
 	m_signalsFileEdit->setReadOnly(true);
 	m_signalsFileEdit->setFrame(false);
-	m_sourceCfgFileEdit = new QLineEdit(theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path(), this);
+	m_sourceCfgFileEdit = new QLineEdit(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path(), this);
 	m_sourceCfgFileEdit->setReadOnly(true);
 	m_sourceCfgFileEdit->setFrame(false);
-	m_sourcesFileEdit = new QLineEdit(theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCES).path(), this);
+	m_sourcesFileEdit = new QLineEdit(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path(), this);
 	m_sourcesFileEdit->setReadOnly(true);
 	m_sourcesFileEdit->setFrame(false);
 
@@ -67,16 +69,18 @@ bool OptionsDialog::createInterface()
 	QHBoxLayout *timeoutReloadBuildLayout = new QHBoxLayout;
 
 	m_enableReloadCheck = new QCheckBox(tr("Enable reload build files automatically"), this);
-	m_enableReloadCheck->setCheckState(theOptions.build().enableReload() == true ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+	m_enableReloadCheck->setCheckState(m_buildInfo.enableReload() == true ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
 
 	connect(m_enableReloadCheck, &QCheckBox::clicked, this, &OptionsDialog::onEnableReload);
 
 	QLabel* timeoutReloadLabel = new QLabel(tr("Timeout for check new build files"), this);
-	m_timeoutReloadEdit = new QLineEdit(QString::number(theOptions.build().timeoutReload(), 10), this);
+	m_timeoutReloadEdit = new QLineEdit(QString::number(m_buildInfo.timeoutReload(), 10), this);
 	m_timeoutReloadEdit->setValidator( new QIntValidator(0, 1000, this) );
 	m_timeoutReloadEdit->setAlignment(Qt::AlignCenter);
 	m_timeoutReloadEdit->setEnabled(m_enableReloadCheck->checkState() == Qt::CheckState::Checked);
 	QLabel* timeoutSecLabel = new QLabel(tr("second(s)"), this);
+
+	connect(m_timeoutReloadEdit, &QLineEdit::textChanged, this, &OptionsDialog::onTimeoutReload);
 
 	timeoutReloadBuildLayout->addWidget(timeoutReloadLabel);
 	timeoutReloadBuildLayout->addWidget(m_timeoutReloadEdit);
@@ -98,7 +102,9 @@ bool OptionsDialog::createInterface()
 	QHBoxLayout *appDataSrvIPLayout = new QHBoxLayout;
 
 	QLabel* appDataSrvIPLabel = new QLabel(tr("AppDataReceivingIP for send packets to AppDataSrv"), this);
-	m_appDataSrvIPEdit = new QLineEdit(theOptions.build().appDataSrvIP(), this);
+	m_appDataSrvIPEdit = new QLineEdit(m_buildInfo.appDataSrvIP().addressStr(), this);
+
+	connect(m_appDataSrvIPEdit, &QLineEdit::textChanged, this, &OptionsDialog::onAppDataSrvIP);
 
 	appDataSrvIPLayout->addWidget(appDataSrvIPLabel);
 	appDataSrvIPLayout->addStretch();
@@ -109,7 +115,9 @@ bool OptionsDialog::createInterface()
 	QHBoxLayout *ualTesterIPLayout = new QHBoxLayout;
 
 	QLabel* ualTesterIPLabel = new QLabel(tr("IP for listening commands from UalTester"), this);
-	m_ualTesterIPEdit = new QLineEdit(theOptions.build().ualTesterIP(), this);
+	m_ualTesterIPEdit = new QLineEdit(m_buildInfo.ualTesterIP().addressStr(), this);
+
+	connect(m_ualTesterIPEdit, &QLineEdit::textChanged, this, &OptionsDialog::onUalTesterIP);
 
 	ualTesterIPLayout->addWidget(ualTesterIPLabel);
 	ualTesterIPLayout->addStretch();
@@ -136,6 +144,8 @@ bool OptionsDialog::createInterface()
 
 	setLayout(mainLayout);
 
+	setMinimumSize(200,200);
+
 	return true;
 }
 
@@ -145,19 +155,26 @@ void OptionsDialog::onSelectBuildDirPath()
 {
 	QString defaultDir = QDir::currentPath();
 
-	if (theOptions.build().buildDirPath().isEmpty() == false)
+	if (m_buildInfo.buildDirPath().isEmpty() == false)
 	{
-		if (QFile::exists(theOptions.build().buildDirPath()) == true)
+		if (QDir(m_buildInfo.buildDirPath()).exists() == true)
 		{
-			defaultDir = theOptions.build().buildDirPath();
+			defaultDir = m_buildInfo.buildDirPath();
 		}
 	}
 
 	QString buildDirPath = QFileDialog::getExistingDirectory(this, tr("Select build directory"), defaultDir);
-	if (loadBuildDirPath(buildDirPath) == true)
+	if (buildDirPath.isEmpty() == true)
 	{
+		QMessageBox::information(nullptr, windowTitle(), tr("Build directory path is empty!"));
 		return;
 	}
+
+	m_signalsFileEdit->setText(QString());
+	m_sourceCfgFileEdit->setText(QString());
+	m_sourcesFileEdit->setText(QString());
+
+	loadBuildDirPath(buildDirPath);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -165,6 +182,28 @@ void OptionsDialog::onSelectBuildDirPath()
 void OptionsDialog::onEnableReload()
 {
 	m_timeoutReloadEdit->setEnabled(m_enableReloadCheck->checkState() == Qt::CheckState::Checked);
+	m_buildInfo.setEnableReload(m_enableReloadCheck->checkState() == Qt::CheckState::Checked);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::onTimeoutReload(const QString &sec)
+{
+	m_buildInfo.setTimeoutReload(sec.toInt());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::onAppDataSrvIP(const QString &ip)
+{
+	m_buildInfo.setAppDataSrvIP(HostAddressPort(ip, m_buildInfo.appDataSrvIP().port()));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::onUalTesterIP(const QString &ip)
+{
+	m_buildInfo.setUalTesterIP(HostAddressPort(ip, m_buildInfo.ualTesterIP().port()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -177,78 +216,39 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 		return false;
 	}
 
-
-	QString signalsFile = buildDirPath + BUILD_FILE_SEPARATOR + Builder::DIR_COMMON + BUILD_FILE_SEPARATOR + Builder::FILE_APP_SIGNALS_ASGS;
-	if (QFile::exists(signalsFile) == false)
+	if (QDir(buildDirPath).exists() == false)
 	{
-		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(signalsFile));
-		return false;
-	}
-
-
-	// find path of AppDataSrv directory
-	//
-	QString appDataSrvDirPath;
-
-	QDir dir(buildDirPath);
-	QStringList listPathSubDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	foreach (QString pathSubDir, listPathSubDirs)
-	{
-		QString fileCfg = buildDirPath + BUILD_FILE_SEPARATOR + pathSubDir + BUILD_FILE_SEPARATOR + Builder::FILE_CONFIGURATION_XML;
-
-		QFile fileCfgXml(fileCfg);
-		if (fileCfgXml.open(QIODevice::ReadOnly) == false)
-		{
-			continue;
-		}
-
-		QByteArray&& cfgData = fileCfgXml.readAll();
-		XmlReadHelper xmlCfg(cfgData);
-
-		if (xmlCfg.findElement("Software") == false)
-		{
-			continue;
-		}
-
-		int softwareType = 0;
-		if (xmlCfg.readIntAttribute("Type", &softwareType) == false)
-		{
-			continue;
-		}
-
-		if (softwareType == E::SoftwareType::AppDataService)
-		{
-			appDataSrvDirPath = buildDirPath + BUILD_FILE_SEPARATOR + pathSubDir;
-			break;
-		}
-
-		fileCfgXml.close();
-	}
-
-	if (appDataSrvDirPath.isEmpty() == true)
-	{
-		QMessageBox::information(nullptr, windowTitle(), tr("AppDataSrv directory is not found!"));
-		return false;
-	}
-
-	QString sourceCfgFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + Builder::FILE_CONFIGURATION_XML;
-	if (QFile::exists(signalsFile) == false)
-	{
-		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourceCfgFile));
-		return false;
-	}
-
-	QString sourcesFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + Builder::FILE_APP_DATA_SOURCES_XML;
-	if (QFile::exists(signalsFile) == false)
-	{
-		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourcesFile));
+		QMessageBox::information(nullptr, windowTitle(), tr("Build directory is not exist!"));
 		return false;
 	}
 
 	m_buildDirPathEdit->setText(buildDirPath);
-	m_signalsFileEdit->setText(signalsFile);
-	m_sourceCfgFileEdit->setText(sourceCfgFile);
-	m_sourcesFileEdit->setText(sourcesFile);
+
+	m_buildInfo.setBuildDirPath(buildDirPath);
+
+	if (QFile::exists(m_buildInfo.buildFile(BUILD_FILE_TYPE_SIGNALS).path()) == false)
+	{
+		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		return false;
+	}
+
+	m_signalsFileEdit->setText(m_buildInfo.buildFile(BUILD_FILE_TYPE_SIGNALS).path());
+
+	if (QFile::exists(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path()) == false)
+	{
+		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(Builder::FILE_CONFIGURATION_XML));
+		return false;
+	}
+
+	m_sourceCfgFileEdit->setText(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path());
+
+	if (QFile::exists(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path()) == false)
+	{
+		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		return false;
+	}
+
+	m_sourcesFileEdit->setText(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path());
 
 	return true;
 }
@@ -257,10 +257,10 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 
 void OptionsDialog::saveWindowState()
 {
-	theOptions.windows().m_optionsWindowPos = pos();
-	theOptions.windows().m_optionsWindowGeometry = saveGeometry();
+//	theOptions.windows().m_optionsWindowPos = pos();
+//	theOptions.windows().m_optionsWindowGeometry = saveGeometry();
 
-	theOptions.windows().save();
+//	theOptions.windows().save();
 
 	return;
 }
@@ -269,12 +269,12 @@ void OptionsDialog::saveWindowState()
 
 void OptionsDialog::restoreWindowState()
 {
-	move(theOptions.windows().m_optionsWindowPos);
-	restoreGeometry(theOptions.windows().m_optionsWindowGeometry);
+//	move(theOptions.windows().m_optionsWindowPos);
+//	restoreGeometry(theOptions.windows().m_optionsWindowGeometry);
 
-	// Ensure widget is visible
-	//
-	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+//	// Ensure widget is visible
+//	//
+//	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
 	return;
 }
@@ -286,7 +286,7 @@ void OptionsDialog::onOk()
 	// build dir path
 	//
 	QString buildDirPath = m_buildDirPathEdit->text();
-	if (loadBuildDirPath(buildDirPath) == false)
+	if (QDir(buildDirPath).exists() == false)
 	{
 		return;
 	}
@@ -298,9 +298,6 @@ void OptionsDialog::onOk()
 		return;
 	}
 
-	BuildFile signalsBuildFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SIGNALS);
-	signalsBuildFile.setPath(signalsFile);
-
 	QString sourceCfgFile = m_sourceCfgFileEdit->text();
 	if (QFile::exists(sourceCfgFile) == false)
 	{
@@ -308,18 +305,12 @@ void OptionsDialog::onOk()
 		return;
 	}
 
-	BuildFile sourceCfgBuildFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCE_CFG);
-	sourceCfgBuildFile.setPath(sourceCfgFile);
-
 	QString sourcesFile = m_sourcesFileEdit->text();
 	if (QFile::exists(sourcesFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourcesFile));
 		return;
 	}
-
-	BuildFile sourcesBuildFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCES);
-	sourcesBuildFile.setPath(sourcesFile);
 
 	// reload build
 	//
@@ -349,22 +340,6 @@ void OptionsDialog::onOk()
 		QMessageBox::information(this, windowTitle(), tr("Please, input UalTester IP!"));
 		return;
 	}
-
-
-	// save
-	//
-	theOptions.build().setBuildDirPath(buildDirPath);
-	theOptions.build().setBuildFile(BUILD_FILE_TYPE_SIGNALS, signalsBuildFile);
-	theOptions.build().setBuildFile(BUILD_FILE_TYPE_SOURCE_CFG, sourceCfgBuildFile);
-	theOptions.build().setBuildFile(BUILD_FILE_TYPE_SOURCES, sourcesBuildFile);
-
-	theOptions.build().setEnableReload(enableReload);
-	theOptions.build().setTimeoutReload(timeoutReload.toInt());
-
-	theOptions.build().setAppDataSrvIP(appDataSrvIP);
-	theOptions.build().setUalTesterIP(ualTesterIP);
-
-	theOptions.build().save();
 
 	saveWindowState();
 

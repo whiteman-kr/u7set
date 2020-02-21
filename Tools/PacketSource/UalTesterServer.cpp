@@ -133,6 +133,7 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 		PS::Signal* pSignal = m_signalBase->signalPtr(static_cast<Hash>(wrCmd.signalhash()));
 		if (pSignal == nullptr)
 		{
+			qDebug() << "Error: Signal " << pSignal->appSignalID().toLocal8Bit().constData() << " - is not found";
 			continue;
 		}
 
@@ -141,7 +142,12 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 		result = pSignal->setState(value.toDouble());								// set new state of signal
 		if (result == true)
 		{
+			qDebug() << "Set state " << pSignal->appSignalID().toLocal8Bit().constData() << "=" << value.toDouble();
 			emit signalStateChanged(pSignal->hash(), prevState, pSignal->state());	// write to history log
+		}
+		else
+		{
+			qDebug() << "Error: Set state " << pSignal->appSignalID().toLocal8Bit().constData() << "=" << value.toDouble();
 		}
 	}
 
