@@ -1,5 +1,5 @@
 test UAL_FLAGS_SETFLAGS.01, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 compatible MODULE_LM1SF40 
 	set #IN_DSCR_001 =0 
 	set #IN_FL_001 = 12.66
@@ -13,13 +13,13 @@ endtest
 // требование UAL_FLAGS_SETFLAGS.03 релизовано в проверке требования UAL_FLAGS_SETFLAGS.04 
 //
 test UAL_FLAGS_SETFLAGS.04, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 	compatible MODULE_LM1SF40 
 	set #OUT_SET_FLAGS_004 = 1
 endtest
 
 test UAL_FLAGS_SETFLAGS.05, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 compatible MODULE_LM1SF40
 
 	set #VALIDITY_001 = 1 
@@ -42,7 +42,7 @@ compatible MODULE_LM1SF40
 endtest
 
 test UAL_FLAGS_SETFLAGS.06, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 compatible MODULE_LM1SF40 
 //
 	set #VALIDITY_001 = 1 
@@ -74,7 +74,7 @@ endtest
 // требование UAL_FLAGS_SETFLAGS.07 реализовано в проверке требования UAL_FLAGS_SETFLAGS.06
 //
 test UAL_FLAGS_SETFLAGS.07, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 compatible MODULE_LM1SF40 
 
 	set #VALIDITY_001 = 1 
@@ -93,7 +93,7 @@ compatible MODULE_LM1SF40
 endtest
 
 test UAL_FLAGS_SETFLAGS.08, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 compatible MODULE_LM1SF40
 
  
@@ -164,7 +164,7 @@ compatible MODULE_LM1SF40
 endtest
 
 test UAL_FLAGS_SETFLAGS.09, tests for SET_FLAGS element
-schema SET_FLAGS
+schema UAL_FLAG_SET_FLAGS
 compatible MODULE_LM1SF40
 	set #VALIDITY_002 = 1 
 	check #OUT_SET_FLAGS_007:Validity == 1
@@ -186,7 +186,7 @@ compatible MODULE_LM1SF40
 //    
     set #SIMULATED_002 = 0  //not aquired
 	check #OUT_SET_FLAGS_007:Simulated==0 
-//	
+//	 
 	set #BLOCKED_002 = 0 //not aquired
 	check #OUT_SET_FLAGS_007:Blocked==0
 
