@@ -75,11 +75,6 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 SimWidget::~SimWidget()
 {
-	if (m_slaveWindow == false)
-	{
-		theSettings.m_simWigetState = saveState();
-		theSettings.writeUserScope();
-	}
 }
 
 void SimWidget::createToolBar()
@@ -239,12 +234,26 @@ static bool firstEvent = true;
 		//
 		if (m_slaveWindow == false)
 		{
-			restoreState(theSettings.m_simWigetState);
+			QVariant v = QSettings().value("SimWidget/state");
+			if (v.isValid() == true)
+			{
+				restoreState(v.toByteArray());
+			}
 		}
 
 		firstEvent = false;
 	}
 	return;
+}
+
+void SimWidget::closeEvent(QCloseEvent* e)
+{
+	if (m_slaveWindow == false)
+	{
+		QSettings().setValue("SimWidget/state", saveState());
+	}
+
+	return QMainWindow::closeEvent(e);
 }
 
 void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
@@ -351,27 +360,30 @@ void SimWidget::runSimulation()
 
 	if (m_simulator->isLoaded() == false)
 	{
+		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
+		writeError("Cannot start simulation, project is not loaded.");
 		return;
 	}
 
 	if (m_simulator->isRunning() == true)
 	{
+		qDebug() << "SimWidget::runSimulation(): Simulation is already running";
 		return;
 	}
 
-	Sim::Control& control = m_simulator->control();
+	Sim::Control& mutableControl = m_simulator->control();
 
 	if (m_simulator->isPaused() == true)
 	{
 		// Continue running what was simualted before
 		//
-		control.startSimulation(control.duration());
+		mutableControl.startSimulation(mutableControl.duration());
 	}
 	else
 	{
 		// Star simulation for all project
 		//
-		control.reset();
+		mutableControl.reset();
 
 		// Get all modules to simulation
 		//
@@ -393,8 +405,8 @@ void SimWidget::runSimulation()
 
 		// Start simulation
 		//
-		control.addToRunList(equipmentIds);
-		control.startSimulation();
+		mutableControl.addToRunList(equipmentIds);
+		mutableControl.startSimulation();
 	}
 
 	return;

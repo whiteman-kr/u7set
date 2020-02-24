@@ -9,7 +9,7 @@ namespace Sim
 		Output("Controller"),
 		m_simulator(simualtor)
 	{
-		assert(m_simulator);
+		Q_ASSERT(m_simulator);
 
 		QThread::start();
 
@@ -40,7 +40,7 @@ namespace Sim
 		writeMessage(tr("Reset"));
 
 		QWriteLocker wl(&m_controlDataLock);
-		m_controlData = ControlData();
+		m_controlData = ControlData{};
 
 		return;
 	}
@@ -169,13 +169,14 @@ namespace Sim
 			break;
 
 		case SimControlState::Run:
-			assert(false);
+			Q_ASSERT(false);
 			break;
 
 		case SimControlState::Pause:
 			m_controlData.m_state = SimControlState::Run;
 			m_controlData.m_duration = duration;
-			if (m_controlData.m_currentTime >= m_controlData.m_startTime + m_controlData.m_duration)
+			if (duration != std::chrono::microseconds{-1} &&
+				m_controlData.m_currentTime >= m_controlData.m_startTime + m_controlData.m_duration)
 			{
 				m_controlData.m_state = SimControlState::Stop;
 			}
@@ -234,10 +235,24 @@ namespace Sim
 		return m_controlData;
 	}
 
-	void Control::updateControlDataTime(std::chrono::microseconds currentTime)
+	void Control::updateControlData(const ControlData& cd)
 	{
 		QWriteLocker wl(&m_controlDataLock);
-		m_controlData.m_currentTime = currentTime;
+
+		m_controlData.m_currentTime = cd.m_currentTime;
+
+		for (SimControlRunStruct& rs : m_controlData.m_lms)
+		{
+			for (const SimControlRunStruct& cdrs : cd.m_lms)
+			{
+				if (cdrs.equipmentId() == rs.equipmentId())
+				{
+					rs.m_lastStartTime = cdrs.m_lastStartTime;
+					break;
+				}
+			}
+		}
+
 		return;
 	}
 
@@ -269,7 +284,7 @@ namespace Sim
 	{
 		if (m_simulator == nullptr)
 		{
-			assert(m_simulator);
+			Q_ASSERT(m_simulator);
 			return;
 		}
 
@@ -280,16 +295,13 @@ namespace Sim
 			case SimControlState::Stop:
 				// Have some rest
 				//
-				{
-
-				}
 				msleep(200);
 				break;
 
 			case SimControlState::Run:
-				// processRun() blocks until state() is changed or time expired
+				// !!! processRun() blocks until state() is changed or time expired
 				//
-				if (bool ok = processRun();
+				if (bool ok = processRun();	// Blocks here
 					ok == false)
 				{
 					// Some error in simulation, stop the simulation
@@ -305,7 +317,7 @@ namespace Sim
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 				return;
 			}
 
@@ -435,7 +447,7 @@ namespace Sim
 
 			if (state() != SimControlState::Run)
 			{
-				break;
+				break;		// Usually exit point from do-while loop
 			}
 
 			// QThread::yieldCurrentThread();	// Give some time for tasks
@@ -471,9 +483,9 @@ namespace Sim
 			}
 		}
 
-		// Update time in m_controlData
+		// Update current time and last time in m_controlData
 		//
-		updateControlDataTime(cd.m_currentTime);
+		updateControlData(cd);
 
 		// Some debug info
 		//

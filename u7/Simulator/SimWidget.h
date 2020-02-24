@@ -32,7 +32,8 @@ protected:
 	void createDocks();
 	QDockWidget* createMemoryDock(QString caption);
 
-	virtual void showEvent(QShowEvent*) override;
+	virtual void showEvent(QShowEvent* e) override;
+	virtual void closeEvent(QCloseEvent* e) override;
 
 signals:
 	void needUpdateActions();
