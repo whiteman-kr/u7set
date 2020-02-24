@@ -210,7 +210,7 @@ namespace Sim
 		if (byteOffset < 0 ||
 			byteOffset >= m_data.size() - sizeof(TYPE))
 		{
-			assert(byteOffset >= 0 &&
+			Q_ASSERT(byteOffset >= 0 &&
 				   byteOffset - sizeof(TYPE) <= m_data.size());
 			return false;
 		}

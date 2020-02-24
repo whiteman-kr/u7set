@@ -599,6 +599,37 @@ namespace Sim
 		return;
 	}
 
+	// Command: pvom32
+	// Code: 26
+	// Description: .....
+	//
+	void CommandProcessor_LM1_SF00::parse_pmov32(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);			// destination address (ADR2)
+		command->m_word1 = m_device.getWord(command->m_offset + 2);			// source address (ADR1)
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strAddr(command->m_word1);
+
+		return;
+	}
+
+	void CommandProcessor_LM1_SF00::command_pmov32(const DeviceCommand& command)
+	{
+		const auto& src = command.m_word1;
+		const auto& dst = command.m_word0;
+
+		quint32 data = m_device.readRamDword(src);
+
+		m_device.writeRamDword(dst, data);
+		return;
+	}
+
 	//
 	// AFB's simultaion code
 	//

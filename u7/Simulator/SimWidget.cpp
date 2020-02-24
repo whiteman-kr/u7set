@@ -385,6 +385,7 @@ void SimWidget::runSimulation()
 
 		if (equipmentIds.isEmpty() == true)
 		{
+			writeWaning(tr("Nothing to simulate, no LogicModules are found."));
 			// Nothing to simulate
 			//
 			return;
@@ -531,7 +532,7 @@ void SimWidget::openLogicSchemaTabPage(QString schemaId)
 
 	// Load schema
 	//
-	QString fileName = buildPath + QLatin1String("LogicSchemas/") + schemaId + "." + Db::File::AlFileExtension;
+	QString fileName = buildPath + QLatin1String("Schemas.als/") + schemaId + "." + Db::File::AlFileExtension;
 
 	openSchemaTabPage(fileName);
 	return;

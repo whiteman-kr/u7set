@@ -16,7 +16,7 @@ class SimMemoryWidget;
 class SimToolBar;
 
 
-class SimWidget : public QMainWindow, HasDbController
+class SimWidget : public QMainWindow, HasDbController, protected Sim::Output
 {
 	Q_OBJECT
 public:

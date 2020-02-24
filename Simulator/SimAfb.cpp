@@ -644,18 +644,18 @@ namespace Sim
 	{
 		if (m_afbComp == nullptr)
 		{
-			assert(m_afbComp);
+			Q_ASSERT(m_afbComp);
 			return false;
 		}
 
 		if (m_afbComp->maxInstCount() > 2048)
 		{
-			assert(m_afbComp->maxInstCount() <= 2048);	// It seems something wrong here, the nyumber is too big?
+			Q_ASSERT(m_afbComp->maxInstCount() <= 2048);	// It seems something wrong here, the nyumber is too big?
 			return false;
 		}
 
 		m_instances.clear();
-		m_instances.reserve(m_afbComp->maxInstCount());
+		m_instances.reserve(std::max(0, m_afbComp->maxInstCount()));		// Can be negative. to avoid exception max is used here
 
 		for (int i = 0; i < m_afbComp->maxInstCount(); i++)
 		{
@@ -725,7 +725,7 @@ namespace Sim
 		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbs = lmDescription.afbComponents();
 		for (auto[key, afbComp] : afbs)
 		{
-			assert(key == afbComp->opCode());
+			Q_ASSERT(key == afbComp->opCode());
 
 			std::shared_ptr<ModelComponent> mc = std::make_shared<ModelComponent>(afbComp);
 

@@ -142,11 +142,10 @@ namespace Sim
 		Simulator* m_simulator = nullptr;
 
 		// Start of access only with mutex
-		//
+		// \/ \/ \/ \/ \/
 		mutable QReadWriteLock m_controlDataLock{QReadWriteLock::Recursive};
-
 		ControlData m_controlData;
-
+		// /\ /\ /\ /\ /\
 		// End of Access only with mutex
 		//
 	};

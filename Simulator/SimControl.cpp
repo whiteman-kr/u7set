@@ -283,7 +283,6 @@ namespace Sim
 				{
 
 				}
-
 				msleep(200);
 				break;
 
@@ -340,7 +339,7 @@ namespace Sim
 
 			if (simLm == nullptr)
 			{
-				assert(simLm);
+				Q_ASSERT(simLm);
 				writeError(tr("processRun, LogicModule %1 not found").arg(lm.equipmentId()));
 				result = false;
 				continue;
@@ -394,7 +393,7 @@ namespace Sim
 					//
 					if (lm.m_possibleToAdvanceTo <= cd.m_currentTime)
 					{
-						// Task can be START again
+						// Task can be STARTED again
 						//
 						lm.m_task = lm.start(cd.m_currentTime);
 					}

@@ -131,6 +131,13 @@ namespace Sim
 		void parse_wrfbc32(DeviceCommand* command) const;
 		void command_wrfbc32(const DeviceCommand& command);
 
+		// Command: pmov32
+		// Code: 26
+		// Description: Write 32bit constant to FunctionalBlock input
+		//
+		void parse_pmov32(DeviceCommand* command) const;
+		void command_pmov32(const DeviceCommand& command);
+
 		//
 		// AFB's simultaion code
 		//
@@ -219,7 +226,7 @@ namespace Sim
 			{"command_rdfbts32",	&CommandProcessor_LM1_SF00::command_not_implemented},	// 23 Not impemented
 			{"command_movcf",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 24 Not impemented
 			{"command_pmov",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 25 Not impemented
-			{"command_pmov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 26 Not impemented
+			{"command_pmov32",		&CommandProcessor_LM1_SF00::command_pmov32},			// 26
 			{"command_fillb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 27 Not impemented
 		};
 
