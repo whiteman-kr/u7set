@@ -87,85 +87,100 @@ const QString MonitorBehavior::generalTag{"general"};
 
 MonitorBehavior::MonitorBehavior()
 {
-	m_tagToColor.reserve(3);
-	m_tagToColor.push_back({criticalTag, QRgb(0xD00000)});
-	m_tagToColor.push_back({attentionTag, QRgb(0xF0F000)});
-	m_tagToColor.push_back({generalTag, QRgb(0x0F0FF0)});
-
-	auto prop = ADD_PROPERTY_GETTER_SETTER(QColor, criticalTag, true, tagCriticalToColor, setTagCriticalToColor);
-	prop->setCategory("Tag to Color");
-
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, attentionTag, true, tagAttentionToColor, setTagAttentionToColor);
-	prop->setCategory("Tag to Color");
-
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, generalTag, true, tagGeneralToColor, setTagGeneralToColor);
-	prop->setCategory("Tag to Color");
+	m_tagToColors.reserve(3);
+	m_tagToColors.push_back({criticalTag, std::make_pair(QRgb(0xD00000), QRgb(0xD00000))});
+	m_tagToColors.push_back({attentionTag, std::make_pair(QRgb(0xF0F000), QRgb(0xF0F000))});
+	m_tagToColors.push_back({generalTag, std::make_pair(QRgb(0x0F0FF0), QRgb(0x0F0FF0))});
 
 	return;
 }
 
 MonitorBehavior::MonitorBehavior(const MonitorBehavior& src) noexcept :
 	ClientBehavior(src),
-	m_tagToColor(src.m_tagToColor)
+	m_tagToColors(src.m_tagToColors)
 {
 }
 
 MonitorBehavior& MonitorBehavior::operator=(const MonitorBehavior& src)
 {
 	ClientBehavior::operator= (src);
-	m_tagToColor = src.m_tagToColor;
+	m_tagToColors = src.m_tagToColors;
 	return *this;
 }
 
 MonitorBehavior& MonitorBehavior::operator=(MonitorBehavior&& src)
 {
 	ClientBehavior::operator=(std::move(src));
-	m_tagToColor = std::move(src.m_tagToColor);
+	m_tagToColors = std::move(src.m_tagToColors);
 	return *this;
 }
 
-QColor MonitorBehavior::tagCriticalToColor() const
+QStringList MonitorBehavior::tags() const
 {
-	auto result = tagToColor(criticalTag);
-	return result.has_value() ? result.value() : QColor{};
+	QStringList result;
+
+	for (const auto& ttc : m_tagToColors)
+	{
+		result.push_back(ttc.tag);
+	}
+
+	return result;
 }
 
-void MonitorBehavior::setTagCriticalToColor(const QColor& color)
+void MonitorBehavior::setTag(int index, const QString& tag)
 {
-	setTagToColor(criticalTag, color.rgb());
+	if (index < 0 || index >= static_cast<int>(m_tagToColors.size()))
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_tagToColors[index].tag = tag;
+	return;
 }
 
-QColor MonitorBehavior::tagAttentionToColor() const
+bool MonitorBehavior::removeTagToColor(int index)
 {
-	auto result = tagToColor(attentionTag);
-	return result.has_value() ? result.value() : QColor{};
+	if (index < 0 || index >= static_cast<int>(m_tagToColors.size()))
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	m_tagToColors.erase(m_tagToColors.begin() + index);
+	return true;
 }
 
-void MonitorBehavior::setTagAttentionToColor(const QColor& color)
+bool MonitorBehavior::moveTagToColor(int index, int step)
 {
-	setTagToColor(attentionTag, color.rgb());
+	if (index < 0 || index >= static_cast<int>(m_tagToColors.size()))
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	int newIndex = index + step;
+
+	if (newIndex < 0 || newIndex >= static_cast<int>(m_tagToColors.size()))
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	std::swap(m_tagToColors[index], m_tagToColors[newIndex]);
+
+	return true;
 }
 
-QColor MonitorBehavior::tagGeneralToColor() const
+std::optional<std::pair<QRgb, QRgb>> MonitorBehavior::tagToColors(const QString& tag) const
 {
-	auto result = tagToColor(generalTag);
-	return result.has_value() ? result.value() : QColor{};
-}
+	std::optional<std::pair<QRgb, QRgb>> result;
 
-void MonitorBehavior::setTagGeneralToColor(const QColor& color)
-{
-	setTagToColor(generalTag, color.rgb());
-}
-
-std::optional<QRgb> MonitorBehavior::tagToColor(const QString& tag) const
-{
-	std::optional<QRgb> result;
-
-	for (const auto& ttc : m_tagToColor)
+	for (const auto& ttc : m_tagToColors)
 	{
 		if (ttc.tag == tag)
 		{
-			result = ttc.color;
+			result = ttc.colors;
 			break;
 		}
 	}
@@ -173,24 +188,59 @@ std::optional<QRgb> MonitorBehavior::tagToColor(const QString& tag) const
 	return result;
 }
 
-void MonitorBehavior::setTagToColor(const QString& tag, QRgb color)
+void MonitorBehavior::setTagToColors(const QString& tag, std::pair<QRgb, QRgb> colors)
 {
-	for (auto& ttc : m_tagToColor)
+	for (auto& ttc : m_tagToColors)
 	{
 		if (ttc.tag == tag)
 		{
-			ttc.color = color;
+			ttc.colors = colors;
 			return;
 		}
 	}
 
-	m_tagToColor.push_back({tag, color});
+	m_tagToColors.push_back({tag, colors});
 	return;
+}
+
+std::optional<std::pair<QRgb, QRgb> > MonitorBehavior::tagToColors(const std::set<QString>& tags) const
+{
+	// Tags in m_tagToColors have priorities from the highest to the lowest.
+	// So that is why regular loop is used here.
+	// For future implementation:
+	// for input param 'tag' if it has a lot of items and m_tagToColor quite big too,
+	// is possible to make optimization, via finding interset of two tags and m_tagToColor.
+	//
+	std::optional<std::pair<QRgb, QRgb>> result;
+
+	for (const auto& ttc : m_tagToColors)	// Go through m_tagToColors as it is prioritized search
+	{
+		if (tags.find(ttc.tag) != tags.end())
+		{
+			result = ttc.colors;				// The first met tag has the highest priority
+			break;
+		}
+	}
+
+	return result;
+}
+
+std::optional<std::pair<QRgb, QRgb> > MonitorBehavior::tagToColors(const QStringList& tags) const
+{
+	std::set<QString> tagSet;
+	for (const auto& t : tags)
+	{
+		tagSet.insert(t);
+	}
+
+	return tagToColors(tagSet);
 }
 
 std::optional<QRgb> MonitorBehavior::tagToColor(const std::set<QString>& tags) const
 {
-	// Tags in m_tagToColor have priorities from the highest to the lowest.
+	int remove_tagToColor_function = 1;
+
+	// Tags in m_tagToColors have priorities from the highest to the lowest.
 	// So that is why regular loop is used here.
 	// For future implementation:
 	// for input param 'tag' if it has a lot of items and m_tagToColor quite big too,
@@ -198,11 +248,11 @@ std::optional<QRgb> MonitorBehavior::tagToColor(const std::set<QString>& tags) c
 	//
 	std::optional<QRgb> result;
 
-	for (const auto& ttc : m_tagToColor)	// Go through m_tagToColor as it is prioritized search
+	for (const auto& ttc : m_tagToColors)	// Go through m_tagToColors as it is prioritized search
 	{
 		if (tags.find(ttc.tag) != tags.end())
 		{
-			result = ttc.color;				// The first met tag has the highest priority
+			result = ttc.colors.first;				// The first met tag has the highest priority
 			break;
 		}
 	}
@@ -212,6 +262,8 @@ std::optional<QRgb> MonitorBehavior::tagToColor(const std::set<QString>& tags) c
 
 std::optional<QRgb> MonitorBehavior::tagToColor(const QStringList& tags) const
 {
+	int remove_tagToColor_function = 1;
+
 	std::set<QString> tagSet;
 	for (const auto& t : tags)
 	{
@@ -225,11 +277,12 @@ void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("SignalTagToColor");
 
-	for (const auto& ttc : m_tagToColor)
+	for (const auto& ttc : m_tagToColors)
 	{
 		writer.writeStartElement("Item");
 		writer.writeAttribute("tag", ttc.tag);
-		writer.writeAttribute("color", QColor::fromRgb(ttc.color).name());
+		writer.writeAttribute("color1", QColor::fromRgb(ttc.colors.first).name());
+		writer.writeAttribute("color2", QColor::fromRgb(ttc.colors.second).name());
 		writer.writeEndElement();
 	}
 
@@ -239,7 +292,7 @@ void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 
 bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 {
-	m_tagToColor.clear();
+	m_tagToColors.clear();
 
 	while (reader.readNextStartElement())
 	{
@@ -247,7 +300,6 @@ bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 		//
 		if(reader.name() == "SignalTagToColor")
 		{
-			reader.readNext();
 			continue;
 		}
 
@@ -261,15 +313,30 @@ bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 				tag = reader.attributes().value("tag").toString();
 			}
 
-			QColor color;
+			QColor color1;
+			QColor color2;
+
 			if (reader.attributes().hasAttribute("color"))
 			{
-				color = QColor(reader.attributes().value("color").toString());
+				color1 = QColor(reader.attributes().value("color").toString());
+				color2 = color1;
+			}
+			else
+			{
+				if (reader.attributes().hasAttribute("color1"))
+				{
+					color1 = QColor(reader.attributes().value("color1").toString());
+				}
+
+				if (reader.attributes().hasAttribute("color2"))
+				{
+					color2 = QColor(reader.attributes().value("color2").toString());
+				}
 			}
 
-			if (tag.isEmpty() == false && color.isValid() == true)
+			if (tag.isEmpty() == false && color1.isValid() == true && color2.isValid() == true)
 			{
-				m_tagToColor.push_back({tag, color.rgb()});
+				m_tagToColors.push_back({tag, std::make_pair(color1.rgb(), color2.rgb())});
 			}
 
 			reader.readNext();
@@ -296,58 +363,6 @@ TuningClientBehavior::TuningClientBehavior()
 	m_tagToColor["defaultMismatchTextColor"] = QColor(Qt::black);
 	m_tagToColor["unappliedBackColor"] = QColor(Qt::gray);
 	m_tagToColor["unappliedTextColor"] = QColor(Qt::black);
-
-	auto prop = ADD_PROPERTY_GETTER_SETTER(QColor, "DefaultMismatchBackColor", true, defaultMismatchBackColor, setDefaultMismatchBackColor);
-	prop->setCategory("Appearance");
-
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "DefaultMismatchTextColor", true, defaultMismatchTextColor, setDefaultMismatchTextColor);
-	prop->setCategory("Appearance");
-
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "UnappliedBackColor", true, unappliedBackColor, setUnappliedBackColor);
-	prop->setCategory("Appearance");
-
-	prop = ADD_PROPERTY_GETTER_SETTER(QColor, "UnappliedTextColor", true, defaultUnappliedTextColor, setDefaultUnappliedTextColor);
-	prop->setCategory("Appearance");
-}
-
-QColor TuningClientBehavior::defaultMismatchBackColor() const
-{
-	return m_tagToColor.value("defaultMismatchBackColor");
-}
-
-void TuningClientBehavior::setDefaultMismatchBackColor(const QColor& color)
-{
-	m_tagToColor["defaultMismatchBackColor"] = color;
-}
-
-QColor TuningClientBehavior::defaultMismatchTextColor() const
-{
-	return m_tagToColor.value("defaultMismatchTextColor");
-}
-
-void TuningClientBehavior::setDefaultMismatchTextColor(const QColor& color)
-{
-	m_tagToColor["defaultMismatchTextColor"] = color;
-}
-
-QColor TuningClientBehavior::unappliedBackColor() const
-{
-	return m_tagToColor.value("unappliedBackColor");
-}
-
-void TuningClientBehavior::setUnappliedBackColor(const QColor& color)
-{
-	m_tagToColor["unappliedBackColor"] = color;
-}
-
-QColor TuningClientBehavior::defaultUnappliedTextColor() const
-{
-	return m_tagToColor.value("unappliedTextColor");
-}
-
-void TuningClientBehavior::setDefaultUnappliedTextColor(const QColor& color)
-{
-	m_tagToColor["unappliedTextColor"] = color;
 }
 
 void TuningClientBehavior::saveToXml(QXmlStreamWriter& writer)

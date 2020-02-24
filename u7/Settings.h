@@ -159,6 +159,8 @@ public:
 	//
 	int m_behaviorEditorSortColumn = 0;
 	Qt::SortOrder m_behaviorEditorSortOrder = Qt::AscendingOrder;
+	QByteArray m_behaviorEditorHSplitterState;
+	QByteArray m_behaviorEditorVSplitterState;
 
 	QByteArray m_afbLibratyCheckSplitterState;
 

@@ -1,5 +1,456 @@
 #include "DialogClientBehavior.h"
 #include "Settings.h"
+#include "../lib/Ui/UiTools.h"
+
+//
+//
+// TagsToColorDelegate
+//
+//
+TagsToColorDelegate::TagsToColorDelegate(QWidget* parent):
+	QItemDelegate(parent),
+	m_parentWidget(parent)
+{
+}
+
+QWidget* TagsToColorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+	Q_UNUSED(option);
+
+	QLineEdit* edit = new QLineEdit(parent);
+
+	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Tag))
+	{
+		QRegExp rx("[A-Za-z\\d]*$");
+		edit->setValidator(new QRegExpValidator(rx, edit));
+	}
+
+	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color1) ||
+			index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color2))
+	{
+
+		QRegExp rx("^[#][A-Fa-f\\d]*$");
+		edit->setValidator(new QRegExpValidator(rx, edit));
+	}
+
+	return edit;
+}
+
+void TagsToColorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Tag))
+	{
+		// Remember all tags except current row
+
+		m_existingTags.clear();
+
+		int rowCount = index.model()->rowCount();
+		for (int i = 0; i < rowCount; i++)
+		{
+			if (i == index.row())
+			{
+				continue;
+			}
+
+			QModelIndex mi = index.siblingAtRow(i);
+
+			QString s = index.model()->data(mi).toString();
+
+			m_existingTags.push_back(s);
+		}
+	}
+
+	QString s = index.model()->data(index, Qt::EditRole).toString();
+
+	QLineEdit *edit = qobject_cast<QLineEdit*>(editor);
+	if (edit == nullptr)
+	{
+		Q_ASSERT(edit);
+		return;
+	}
+
+	edit->setText(s);
+
+	return;
+}
+
+void TagsToColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Tag))
+	{
+		QLineEdit* edit = qobject_cast<QLineEdit*>(editor);
+		if (edit == nullptr)
+		{
+			Q_ASSERT(edit);
+			return;
+		}
+
+		QString editText = edit->text();
+
+		if (std::find(m_existingTags.begin(), m_existingTags.end(), editText) != m_existingTags.end())
+		{
+			QMessageBox::warning(m_parentWidget, "Client Behavior Editor", "This tag name already exists!");
+			return;
+		}
+	}
+
+	QItemDelegate::setModelData(editor, model, index);
+
+	emit editingFinished(index);
+
+	return;
+}
+
+//
+// MonitorBehaviorEditWidget
+//
+
+MonitorBehaviorEditWidget::MonitorBehaviorEditWidget(QWidget* parent):
+	QWidget(parent)
+{
+	QHBoxLayout* mainLayout = new QHBoxLayout(this);
+	mainLayout->setContentsMargins(0, 0, 0, 0);
+
+	// Tree
+
+	m_tagsTree = new QTreeWidget();
+	mainLayout->addWidget(m_tagsTree);
+
+	QStringList l;
+	l << tr("Tag");
+	l << tr("Color 1");
+	l << tr("Color 2");
+	m_tagsTree->setColumnCount(static_cast<int>(l.size()));
+	m_tagsTree->setHeaderLabels(l);
+	m_tagsTree->setColumnWidth(static_cast<int>(Columns::Tag), 120);
+	m_tagsTree->setColumnWidth(static_cast<int>(Columns::Color1), 120);
+	m_tagsTree->setColumnWidth(static_cast<int>(Columns::Color2), 120);
+	m_tagsTree->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+	m_tagsToColorDelegate = new TagsToColorDelegate(this);
+	connect(m_tagsToColorDelegate, &TagsToColorDelegate::editingFinished, this, &MonitorBehaviorEditWidget::onTagEditFinished);
+	m_tagsTree->setItemDelegate(m_tagsToColorDelegate);
+
+	// Buttons
+
+	QVBoxLayout* tagButtonsLayout = new QVBoxLayout();
+
+	QPushButton* b = new QPushButton(tr("Add Tag"));
+	tagButtonsLayout->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &MonitorBehaviorEditWidget::onAddTag);
+
+	b = new QPushButton(tr("Remove Tag"));
+	tagButtonsLayout->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &MonitorBehaviorEditWidget::onRemoveTag);
+
+	b = new QPushButton(tr("Move Up"));
+	tagButtonsLayout->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &MonitorBehaviorEditWidget::onTagUp);
+
+	b = new QPushButton(tr("Move Down"));
+	tagButtonsLayout->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &MonitorBehaviorEditWidget::onTagDown);
+
+	tagButtonsLayout->addStretch();
+
+	mainLayout->addLayout(tagButtonsLayout);
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::setBehavior(std::shared_ptr<MonitorBehavior> mb)
+{
+	if (mb == nullptr)
+	{
+		Q_ASSERT(mb);
+		return;
+	}
+
+	m_behavior = mb;
+
+	fillTagToColor();
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::onAddTag()
+{
+	if (m_behavior == nullptr)
+	{
+		Q_ASSERT(m_behavior);
+		return;
+	}
+
+	QStringList tags = m_behavior->tags();
+
+	QString tag;
+
+	do{
+		bool ok = false;
+		tag = QInputDialog::getText(this, tr("Client Behavior Editor"),
+												tr("Enter the new tag name:"), QLineEdit::Normal,
+											tr("tag"), &ok);
+
+		if (ok == false)
+		{
+			return;
+		}
+
+		if (std::find(tags.begin(), tags.end(), tag) == tags.end())
+		{
+			break;
+		}
+
+		QMessageBox::warning(this, "Client Behavior Editor", "This tag name already exists!");
+
+	}while(true);
+
+	// Add tag and display it
+
+	m_behavior->setTagToColors(tag, std::make_pair(QRgb(0xC00000), QRgb(0xFFFFFF)));
+
+	addTagTreeItem(tag);
+
+	// Select the created item
+
+	m_tagsTree->clearSelection();
+
+	QTreeWidgetItem* item = m_tagsTree->topLevelItem(m_tagsTree->topLevelItemCount() - 1);
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	item->setSelected(true);
+
+	emit behaviorModified();
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::onRemoveTag()
+{
+	if (m_behavior == nullptr)
+	{
+		Q_ASSERT(m_behavior);
+		return;
+	}
+
+	QModelIndexList selectedRows = m_tagsTree->selectionModel()->selectedRows();
+	if (selectedRows.size() != 1)
+	{
+		return;
+	}
+
+	int row = selectedRows[0].row();
+
+	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected tag?"), QMessageBox::Yes, QMessageBox::No);
+	if (mbResult == QMessageBox::No)
+	{
+		return;
+	}
+
+	if (m_behavior->removeTagToColor(row) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QTreeWidgetItem* item = m_tagsTree->takeTopLevelItem(row);
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+	delete item;
+
+	emit behaviorModified();
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::onTagUp()
+{
+	moveTag(-1);
+}
+
+void MonitorBehaviorEditWidget::onTagDown()
+{
+	moveTag(1);
+}
+
+void MonitorBehaviorEditWidget::onTagEditFinished(const QModelIndex& index)
+{
+	if (m_behavior == nullptr)
+	{
+		Q_ASSERT(m_behavior);
+		return;
+	}
+
+	if (index.row() < 0 || index.row() >= m_tagsTree->topLevelItemCount())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QTreeWidgetItem* item = m_tagsTree->topLevelItem(index.row());
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	switch (index.column())
+	{
+	case static_cast<int>(Columns::Tag):
+	{
+		m_behavior->setTag(index.row(), item->text(index.column()));
+		break;
+	}
+	case static_cast<int>(Columns::Color1):
+	case static_cast<int>(Columns::Color2):
+	{
+		QString tag = item->text(static_cast<int>(Columns::Tag));
+		QColor color1 = QColor(item->text(static_cast<int>(Columns::Color1)));
+		QColor color2 = QColor(item->text(static_cast<int>(Columns::Color2)));
+
+		m_behavior->setTagToColors(tag, std::make_pair(color1.rgb(), color2.rgb()));
+
+		item->setIcon(static_cast<int>(Columns::Color1), UiTools::drawColorBox(color1));
+		item->setIcon(static_cast<int>(Columns::Color2), UiTools::drawColorBox(color2));
+		break;
+	}
+	default:
+		Q_ASSERT(false);
+		return;
+
+	}
+
+	emit behaviorModified();
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::fillTagToColor()
+{
+	if (m_behavior == nullptr)
+	{
+		Q_ASSERT(m_behavior);
+		return;
+	}
+
+	m_tagsTree->clear();
+
+	QStringList tags = m_behavior->tags();
+	for (const QString& tag : tags)
+	{
+		addTagTreeItem(tag);
+	}
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::addTagTreeItem(const QString& tag)
+{
+	auto colors = m_behavior->tagToColors(tag);
+	if (colors.has_value() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	std::pair<QRgb, QRgb> colorPair = colors.value();
+
+	QColor color1(colorPair.first);
+	QColor color2(colorPair.second);
+
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText(static_cast<int>(Columns::Tag), tag);
+	item->setText(static_cast<int>(Columns::Color1), color1.name());
+	item->setText(static_cast<int>(Columns::Color2), color2.name());
+	item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+	item->setIcon(static_cast<int>(Columns::Color1), UiTools::drawColorBox(color1));
+	item->setIcon(static_cast<int>(Columns::Color2), UiTools::drawColorBox(color2));
+
+	m_tagsTree->addTopLevelItem(item);
+
+	return;
+}
+
+void MonitorBehaviorEditWidget::moveTag(int step)
+{
+	if (m_behavior == nullptr)
+	{
+		Q_ASSERT(m_behavior);
+		return;
+	}
+
+	if (step != -1 && step != 1)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QModelIndexList selectedRows = m_tagsTree->selectionModel()->selectedRows();
+	if (selectedRows.size() != 1)
+	{
+		return;
+	}
+
+	int row = selectedRows[0].row();
+
+	int newRow = row + step;
+	if (newRow < 0 || newRow >= m_tagsTree->topLevelItemCount())
+	{
+		return;
+	}
+
+	if (m_behavior->moveTagToColor(row, step) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	fillTagToColor();
+
+
+	// Select the new row
+
+	m_tagsTree->clearSelection();
+
+	QTreeWidgetItem* item = m_tagsTree->topLevelItem(newRow);
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	item->setSelected(true);
+
+	emit behaviorModified();
+
+	return;
+}
+
+//
+// TuningClientBehaviorEditWidget
+//
+
+TuningClientBehaviorEditWidget::TuningClientBehaviorEditWidget(QWidget* parent)
+	:QWidget(parent)
+{
+	QHBoxLayout* mainLayout = new QHBoxLayout(this);
+	mainLayout->setContentsMargins(0, 0, 0, 0);
+
+	QLabel* l = new QLabel("No special properties exist for TuningClient behavior");
+	l->setAlignment(Qt::AlignCenter);
+	l->setStyleSheet("border: 1px solid black");
+	mainLayout->addWidget(l);
+
+	return;
+}
 
 //
 //
@@ -15,14 +466,22 @@ DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget 
 
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
+	m_hSplitter = new QSplitter(Qt::Horizontal);
+
+	// Left side
+
+	QWidget* leftWidget = new QWidget(this);
+
+	QHBoxLayout* leftLayout = new QHBoxLayout(leftWidget);
+
+	leftLayout->setContentsMargins(0, 0, 0, 0);
+
 	// Behavour list
 
-	QHBoxLayout* topLayout = new QHBoxLayout();
-
 	m_behaviorTree = new QTreeWidget();
-	m_behaviorTree->setSelectionMode(QTreeWidget::ExtendedSelection);
-	connect(m_behaviorTree, &QTreeWidget::itemSelectionChanged, this, &DialogClientBehavior::on_behaviorSelectionChanged);
-	topLayout->addWidget(m_behaviorTree);
+	m_behaviorTree->setSelectionMode(QTreeWidget::SingleSelection);
+	connect(m_behaviorTree, &QTreeWidget::itemSelectionChanged, this, &DialogClientBehavior::onBehaviorSelectionChanged);
+	leftLayout->addWidget(m_behaviorTree);
 
 	// Add/Remove buttons
 
@@ -32,32 +491,68 @@ DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget 
 
 	QPushButton* b = new QPushButton(tr("Add"));
 	addRemoveLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogClientBehavior::on_add_clicked);
+	connect(b, &QPushButton::clicked, this, &DialogClientBehavior::onAddClicked);
 
 	b = new QPushButton(tr("Remove"));
 	addRemoveLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogClientBehavior::on_remove_clicked);
+	connect(b, &QPushButton::clicked, this, &DialogClientBehavior::onRemoveClicked);
 
 	b = new QPushButton(tr("Clone"));
 	addRemoveLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogClientBehavior::on_clone_clicked);
+	connect(b, &QPushButton::clicked, this, &DialogClientBehavior::onCloneClicked);
 
 	addRemoveLayout->addStretch(2);
 
-	topLayout->addLayout(addRemoveLayout);
+	leftLayout->addLayout(addRemoveLayout);
+
+	m_hSplitter->addWidget(leftWidget);
+
+	// Right side
+
+	m_vSplitter = new QSplitter(Qt::Vertical);
+	m_hSplitter->addWidget(m_vSplitter);
 
 	// Propertry Editor
 
 	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
-	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogClientBehavior::on_behaviorPropertiesChanged);
-	topLayout->addWidget(m_propertyEditor);
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogClientBehavior::onBehaviorPropertiesChanged);
+	m_vSplitter->addWidget(m_propertyEditor);
 
-	mainLayout->addLayout(topLayout);
+	// Editor widget
+
+	QWidget* editorWidget = new QWidget(this);
+	m_vSplitter->addWidget(editorWidget);
+
+	QHBoxLayout* editorLayout = new QHBoxLayout(editorWidget);
+	editorLayout->setContentsMargins(0, 0, 0, 0);
+
+	// MonitorBehaviorEditWidget
+
+	m_monitorBehaviorEditWidget = new MonitorBehaviorEditWidget(this);
+	m_monitorBehaviorEditWidget->setVisible(false);
+	connect(m_monitorBehaviorEditWidget, &MonitorBehaviorEditWidget::behaviorModified, this, &DialogClientBehavior::onBehaviorModified);
+	editorLayout->addWidget(m_monitorBehaviorEditWidget);
+
+	// TuningClientBehaviorEditWidget
+
+	m_tuningClientBehaviorEditWidget = new TuningClientBehaviorEditWidget(this);
+	m_tuningClientBehaviorEditWidget->setVisible(false);
+	connect(m_tuningClientBehaviorEditWidget, &TuningClientBehaviorEditWidget::behaviorModified, this, &DialogClientBehavior::onBehaviorModified);
+	editorLayout->addWidget(m_tuningClientBehaviorEditWidget);
+
+	m_emptyEditorWidget = new QLabel(tr("No client behavior selected"), this);
+	m_emptyEditorWidget->setStyleSheet("border: 1px solid black");
+	m_emptyEditorWidget->setAlignment(Qt::AlignCenter);
+	m_emptyEditorWidget->setVisible(true);
+	editorLayout->addWidget(m_emptyEditorWidget);
 
 	//
 
-	QHBoxLayout* bottomLayout = new QHBoxLayout();
+	mainLayout->addWidget(m_hSplitter);
 
+	// Bottom side
+
+	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	bottomLayout->addStretch();
 
 	b = new QPushButton(tr("OK"));
@@ -108,17 +603,38 @@ DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget 
 		m_behaviorTree->resizeColumnToContents(i);
 	}
 
+	// Sort
+
 	m_behaviorTree->sortByColumn(theSettings.m_behaviorEditorSortColumn, theSettings.m_behaviorEditorSortOrder);
 	m_behaviorTree->setSortingEnabled(true);
 
-	connect(m_behaviorTree->header(), &QHeaderView::sortIndicatorChanged, this, &DialogClientBehavior::on_behaviorSortIndicatorChanged);
+	connect(m_behaviorTree->header(), &QHeaderView::sortIndicatorChanged, this, &DialogClientBehavior::onBehaviorSortIndicatorChanged);
+
+	// Select first item
+
+	if (m_behaviorTree->topLevelItemCount() != 0)
+	{
+		QTreeWidgetItem* item = m_behaviorTree->topLevelItem(0);
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return;
+		}
+		item->setSelected(true);
+	}
+
+	// Restore splitters state
+
+	m_hSplitter->restoreState(theSettings.m_behaviorEditorHSplitterState);
+	m_vSplitter->restoreState(theSettings.m_behaviorEditorVSplitterState);
 
 	return;
 }
 
 DialogClientBehavior::~DialogClientBehavior()
 {
-
+	theSettings.m_behaviorEditorHSplitterState = m_hSplitter->saveState();
+	theSettings.m_behaviorEditorVSplitterState = m_vSplitter->saveState();
 }
 
 bool DialogClientBehavior::askForSaveChanged()
@@ -527,16 +1043,16 @@ void DialogClientBehavior::closeEvent(QCloseEvent* e)
 	return;
 }
 
-void DialogClientBehavior::on_add_clicked()
+void DialogClientBehavior::onAddClicked()
 {
 	QMenu menu;
 
 	QAction* addMonitorBehaviorAction = new QAction(tr("Add MonitorBehavior"), this);
-	connect(addMonitorBehaviorAction, &QAction::triggered, this, [this](){on_addMonitorBehavior();});
+	connect(addMonitorBehaviorAction, &QAction::triggered, this, [this](){onAddMonitorBehavior();});
 	menu.addAction(addMonitorBehaviorAction);
 
 	QAction* addTuningClientBehaviorAction = new QAction(tr("Add TuningClientBehavior"), this);
-	connect(addTuningClientBehaviorAction, &QAction::triggered, this, [this](){on_addTuningClientBehavior();});
+	connect(addTuningClientBehaviorAction, &QAction::triggered, this, [this](){onAddTuningClientBehavior();});
 	menu.addAction(addTuningClientBehaviorAction);
 
 	menu.exec(this->cursor().pos());
@@ -545,21 +1061,21 @@ void DialogClientBehavior::on_add_clicked()
 }
 
 
-void DialogClientBehavior::on_addMonitorBehavior()
+void DialogClientBehavior::onAddMonitorBehavior()
 {
 	std::shared_ptr<ClientBehavior> behavior = std::make_shared<MonitorBehavior>();
 	behavior->setBehaviorId(tr("MONITOR_BEHAVIORID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
 	addBehavior(behavior);
 }
 
-void DialogClientBehavior::on_addTuningClientBehavior()
+void DialogClientBehavior::onAddTuningClientBehavior()
 {
 	std::shared_ptr<ClientBehavior> behavior = std::make_shared<TuningClientBehavior>();
 	behavior->setBehaviorId(tr("TC_BEHAVIORID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
 	addBehavior(behavior);
 }
 
-void DialogClientBehavior::on_remove_clicked()
+void DialogClientBehavior::onRemoveClicked()
 {
 	QList<QTreeWidgetItem*> selectedItems = m_behaviorTree->selectedItems();
 
@@ -602,7 +1118,7 @@ void DialogClientBehavior::on_remove_clicked()
 	return;
 }
 
-void DialogClientBehavior::on_clone_clicked()
+void DialogClientBehavior::onCloneClicked()
 {
 	QList<QTreeWidgetItem*> selectedItems = m_behaviorTree->selectedItems();
 	if (selectedItems.size() != 1)
@@ -707,14 +1223,68 @@ void DialogClientBehavior::reject()
 	return;
 }
 
-void DialogClientBehavior::on_behaviorSelectionChanged()
+void DialogClientBehavior::onBehaviorSelectionChanged()
 {
 	fillBehaviorProperties();
+
+	// Show/hide behaviour editors
+
+	QList<QTreeWidgetItem*> selectedItems = m_behaviorTree->selectedItems();
+	if (selectedItems.isEmpty() == true)
+	{
+		m_emptyEditorWidget->setVisible(true);
+
+		m_monitorBehaviorEditWidget->setVisible(false);
+		m_tuningClientBehaviorEditWidget->setVisible(false);
+	}
+	else
+	{
+		QTreeWidgetItem* item = selectedItems[0];
+
+		int index = item->data(0, Qt::UserRole).toInt();
+
+		const std::shared_ptr<ClientBehavior> behavior = m_behaviorStorage.get(index);
+		if (behavior == nullptr)
+		{
+			Q_ASSERT(behavior);
+			return;
+		}
+
+		m_emptyEditorWidget->setVisible(false);
+
+		if (behavior->isMonitorBehavior() == true)
+		{
+			m_monitorBehaviorEditWidget->setVisible(true);
+			m_tuningClientBehaviorEditWidget->setVisible(false);
+
+			std::shared_ptr<MonitorBehavior> mb = std::dynamic_pointer_cast<MonitorBehavior>(behavior);
+			if (mb == nullptr)
+			{
+				Q_ASSERT(mb);
+				return;
+			}
+
+			m_monitorBehaviorEditWidget->setBehavior(mb);
+		}
+		else
+		{
+			if (behavior->isTuningClientBehavior() == true)
+			{
+				m_monitorBehaviorEditWidget->setVisible(false);
+				m_tuningClientBehaviorEditWidget->setVisible(true);
+			}
+			else
+			{
+				// Unknown behavior
+				Q_ASSERT(false);
+			}
+		}
+	}
 
 	return;
 }
 
-void DialogClientBehavior::on_behaviorSortIndicatorChanged(int column, Qt::SortOrder order)
+void DialogClientBehavior::onBehaviorSortIndicatorChanged(int column, Qt::SortOrder order)
 {
 	theSettings.m_behaviorEditorSortColumn = column;
 	theSettings.m_behaviorEditorSortOrder = order;
@@ -722,9 +1292,10 @@ void DialogClientBehavior::on_behaviorSortIndicatorChanged(int column, Qt::SortO
 	return;
 }
 
-void DialogClientBehavior::on_behaviorPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
+void DialogClientBehavior::onBehaviorPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	QList<QTreeWidgetItem*> selectedItems = m_behaviorTree->selectedItems();
+
 	for (QTreeWidgetItem* item : selectedItems)
 	{
 		int index = item->data(0, Qt::UserRole).toInt();
@@ -743,4 +1314,9 @@ void DialogClientBehavior::on_behaviorPropertiesChanged(QList<std::shared_ptr<Pr
 	m_modified = true;
 
 	return;
+}
+
+void DialogClientBehavior::onBehaviorModified()
+{
+	m_modified = true;
 }
