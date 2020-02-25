@@ -186,10 +186,31 @@ namespace Builder
 					return false;
 				}
 
+				if (lm->propertyExists("LMNumber") == false)
+				{
+					m_log->errCFG3000("LMNumber", lm->equipmentId());
+					return false;
+				}
+
 				QString subsystemID = lm->propertyValue("SubsystemID").toString();
 
 				if (subsystemID == subsystem->subsystemId())
 				{
+					// Check for unique LmNumber
+					//
+					int lmNumber = lm->propertyValue("LMNumber").toInt();
+
+					for (auto slm : subsystemModules)
+					{
+						int sLmNumber = slm->propertyValue("LMNumber").toInt();
+
+						if (sLmNumber == lmNumber)
+						{
+							m_log->errCFG3003(lmNumber, lm->equipmentId());
+							return false;
+						}
+					}
+
 					// Add a module for this subsystem
 					//
 					subsystemModules.push_back(lm);
