@@ -59,7 +59,7 @@ QVariant SourceTable::headerData(int section, Qt::Orientation orientation, int r
 
 	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg(section + 1);
+		//result = QString("%1").arg(section + 1);
 	}
 
 	return result;
@@ -142,7 +142,6 @@ QString SourceTable::text(int row, int column, PS::Source* pSource) const
 	switch (column)
 	{
 		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
-		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->info().caption;												break;
 		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->info().equipmentID;											break;
 		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->info().moduleType);							break;

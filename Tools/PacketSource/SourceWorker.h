@@ -11,13 +11,12 @@ class SourceWorker : public QObject
 
 public:
 
-	explicit SourceWorker(QObject* pSource, const HostAddressPort& appDataSrvIP);
+	explicit SourceWorker(QObject* pSource);
 	virtual ~SourceWorker();
 
 private:
 
 	QObject*			m_pSource = nullptr;
-	HostAddressPort		m_appDataSrvIP;				// this is AppDataReceivingIP of AppDataSrv
 
 	Rup::SimFrame		m_simFrame;
 

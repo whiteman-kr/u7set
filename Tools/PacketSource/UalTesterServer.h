@@ -1,8 +1,9 @@
 #pragma once
 
+#include "SourceBase.h"
 #include "SignalBase.h"
 
-#include "../../lib/Tcp.h"
+#include "../lib/Tcp.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -15,7 +16,7 @@ class UalTesterServer  : public Tcp::Server
 	Q_OBJECT
 
 public:
-	UalTesterServer(const SoftwareInfo& sotwareInfo, SignalBase* signalBase);
+	UalTesterServer(const SoftwareInfo& sotwareInfo, SourceBase* sourceBase, SignalBase* signalBase);
 
 private:
 	virtual void onServerThreadStarted() override;
@@ -32,10 +33,13 @@ private:
 	void onGetTuningSourcesInfoRequest(const char *requestData, quint32 requestDataSize);
 	void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
 	void onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize);
+	void onDataSourceWriteRequest(const char *requestData, quint32 requestDataSize);
+	void onPacketSourceExitRequest(const char *requestData, quint32 requestDataSize);
 
 private:
 
 	SoftwareInfo m_sotwareInfo;
+	SourceBase* m_sourceBase = nullptr;
 	SignalBase* m_signalBase = nullptr;
 
 	Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
@@ -47,15 +51,23 @@ private:
 	Network::TuningSignalsWrite m_tuningSignalsWriteRequest;
 	Network::TuningSignalsWriteReply m_tuningSignalsWriteReply;
 
+	Network::DataSourceWrite m_dataSourceWriteRequest;
+	Network::DataSourceWriteReply m_dataSourceWriteReply;
+
+	Network::PacketSourceExit m_packetSourceExitRequest;
+	Network::PacketSourceExitReply m_packetSourceExitReply;
+
 private	slots:
 
 	void clientConnectionChanged(bool isConnect);
 	void clientSignalStateChanged(Hash hash, double prevState, double state);
+	void clientExitApplication();
 
 signals:
 
 	void connectionChanged(bool isConnect);
 	void signalStateChanged(Hash hash, double prevState, double state);
+	void exitApplication();
 };
 
 

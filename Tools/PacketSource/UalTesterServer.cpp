@@ -8,9 +8,10 @@
 //
 // -------------------------------------------------------------------------------
 
-UalTesterServer::UalTesterServer(const SoftwareInfo& sotwareInfo, SignalBase* signalBase) :
+UalTesterServer::UalTesterServer(const SoftwareInfo& sotwareInfo, SourceBase* sourceBase, SignalBase* signalBase) :
 	Tcp::Server(sotwareInfo),
 	m_sotwareInfo(sotwareInfo),
+	m_sourceBase(sourceBase),
 	m_signalBase(signalBase)
 {
 }
@@ -43,12 +44,23 @@ void UalTesterServer::clientSignalStateChanged(Hash hash, double prevState, doub
 	emit signalStateChanged(hash, prevState, state);
 }
 
+void UalTesterServer::clientExitApplication()
+{
+	emit exitApplication();
+}
+
 Tcp::Server* UalTesterServer::getNewInstance()
 {
-	UalTesterServer* newServer = new UalTesterServer(m_sotwareInfo, m_signalBase);
+	if (m_sourceBase == nullptr || m_signalBase == nullptr)
+	{
+		return nullptr;
+	}
+
+	UalTesterServer* newServer = new UalTesterServer(m_sotwareInfo, m_sourceBase, m_signalBase);
 
 	connect(newServer, &UalTesterServer::connectionChanged, this, &UalTesterServer::clientConnectionChanged, Qt::QueuedConnection);
 	connect(newServer, &UalTesterServer::signalStateChanged, this, &UalTesterServer::clientSignalStateChanged, Qt::QueuedConnection);
+	connect(newServer, &UalTesterServer::exitApplication, this, &UalTesterServer::clientExitApplication, Qt::QueuedConnection);
 
 	return newServer;
 }
@@ -68,6 +80,14 @@ void UalTesterServer::processRequest(quint32 requestID, const char* requestData,
 		case TDS_TUNING_SIGNALS_WRITE:
 			onTuningSignalsWriteRequest(requestData, requestDataSize);
 			break;
+
+		case TDS_DATA_SOURCE_WRITE:
+			onDataSourceWriteRequest(requestData, requestDataSize);
+			break;
+
+		case TDS_PACKETSOURCE_EXIT:
+			onPacketSourceExitRequest(requestData, requestDataSize);
+			break;
 	}
 }
 
@@ -82,6 +102,25 @@ void UalTesterServer::onGetTuningSourcesInfoRequest(const char *requestData, qui
 		m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::ParseRequestError));
 		sendReply(m_getTuningSourcesInfoReply);
 		return;
+	}
+
+	if (m_sourceBase != nullptr)
+	{
+		int sourceCount = m_sourceBase->count();
+		for (int i = 0; i < sourceCount; i++)
+		{
+			PS::Source* pSource = m_sourceBase->sourcePtr(i);
+			if (pSource == nullptr)
+			{
+				continue;
+			}
+
+			Network::DataSourceInfo* protoInfo = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+
+			protoInfo->set_id(static_cast<quint64>(i));
+			protoInfo->set_lmequipmentid(pSource->info().equipmentID.toStdString());
+			protoInfo->set_lmcaption(pSource->info().caption.toStdString());
+		}
 	}
 
 	m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
@@ -133,27 +172,93 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 		PS::Signal* pSignal = m_signalBase->signalPtr(static_cast<Hash>(wrCmd.signalhash()));
 		if (pSignal == nullptr)
 		{
-			qDebug() << "Error: Signal " << pSignal->appSignalID().toLocal8Bit().constData() << " - is not found";
 			continue;
 		}
 
 		double prevState = pSignal->state();										// get prev state of signal
 
-		result = pSignal->setState(value.toDouble());								// set new state of signal
-		if (result == true)
+		bool res = pSignal->setState(value.toDouble());								// set new state of signal
+		if (res == true)
 		{
-			qDebug() << "Set state " << pSignal->appSignalID().toLocal8Bit().constData() << "=" << value.toDouble();
+			qDebug() << "Set state " << pSignal->appSignalID() << "=" << value.toDouble();
 			emit signalStateChanged(pSignal->hash(), prevState, pSignal->state());	// write to history log
 		}
 		else
 		{
-			qDebug() << "Error: Set state " << pSignal->appSignalID().toLocal8Bit().constData() << "=" << value.toDouble();
+			qDebug() << "Error: Set state " << pSignal->appSignalID() << "=" << value.toDouble();
 		}
 	}
 
 	m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::Success));
 
 	sendReply(m_tuningSignalsWriteReply);
+}
+
+void UalTesterServer::onDataSourceWriteRequest(const char *requestData, quint32 requestDataSize)
+{
+	m_dataSourceWriteReply.Clear();
+
+	bool result = m_dataSourceWriteRequest.ParseFromArray(requestData, static_cast<int>(requestDataSize));
+	if (result == false)
+	{
+		m_dataSourceWriteReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_dataSourceWriteReply);
+		return;
+	}
+
+	if (m_sourceBase != nullptr)
+	{
+		QString sourceID = QString::fromStdString(m_dataSourceWriteRequest.sourceequipmentid());
+		bool state = m_dataSourceWriteRequest.state();
+
+		PS::Source* pSource = m_sourceBase->sourcePtr(sourceID);
+		if (pSource == nullptr)
+		{
+			qDebug() << "Error: Source" << sourceID << "in not found";
+		}
+		else
+		{
+			if (state == true)
+			{
+				bool res = pSource->run();
+				if (res == false)
+				{
+					qDebug() << "Error: Run source" << sourceID;
+				}
+			}
+			else
+			{
+				bool res = pSource->stop();
+				if (res == false)
+				{
+					qDebug() << "Stop source" << sourceID << "- source is already stopped";
+				}
+			}
+		}
+	}
+
+	m_dataSourceWriteReply.set_error(TO_INT(NetworkError::Success));
+
+	sendReply(m_dataSourceWriteReply);
+}
+
+void UalTesterServer::onPacketSourceExitRequest(const char *requestData, quint32 requestDataSize)
+{
+	m_packetSourceExitReply.Clear();
+
+	bool result = m_packetSourceExitRequest.ParseFromArray(requestData, static_cast<int>(requestDataSize));
+	if (result == false)
+	{
+		m_packetSourceExitReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_packetSourceExitReply);
+		return;
+	}
+
+	emit exitApplication();
+
+	m_packetSourceExitReply.set_error(TO_INT(NetworkError::Success));
+
+	sendReply(m_packetSourceExitReply);
 }
 
 // -------------------------------------------------------------------------------

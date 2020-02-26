@@ -64,7 +64,7 @@ public:
 	const QStringList& sourcesForRunList() const { return m_sourcesForRunList; }
 
 	void getParams(int& argc, char** argv);
-	bool paramIsValid();
+	bool parse();
 
 signals:
 

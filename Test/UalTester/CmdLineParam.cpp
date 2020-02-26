@@ -67,7 +67,7 @@ void CmdLineParam::getParams(int& argc, char** argv)
 	m_cmdLineParser.addSingleValueOption("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
 }
 
-bool CmdLineParam::paramIsValid()
+bool CmdLineParam::parse()
 {
 	m_cmdLineParser.parse();
 
@@ -288,6 +288,37 @@ bool CmdLineParam::paramIsValid()
 		reportFile.write(QString("Report from: %1\r\n\r\n").arg(currentTimeStr()).toUtf8());
 
 		reportFile.close();
+	}
+
+	return true;
+}
+
+bool CmdLineParam::printToReportFile(const QStringList& msgList)
+{
+	if (m_reportFileName.isEmpty() == true)
+	{
+		return false;
+	}
+
+	QFile reportFile(m_reportFileName);
+	if (reportFile.open(QIODevice::Append) == false)
+	{
+		return false;
+	}
+
+	qint64 writtenBytes = 0;
+
+	int msgCount = msgList.count();
+	for(int i = 0; i < msgCount; i++)
+	{
+		writtenBytes = reportFile.write(msgList[i].toUtf8() + "\r\n");
+	}
+
+	reportFile.close();
+
+	if (writtenBytes == -1)
+	{
+		return false;
 	}
 
 	return true;

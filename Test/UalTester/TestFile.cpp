@@ -270,6 +270,7 @@ const char* const TestCmd::PARAM_TEST_ID = "TestID";
 const char* const TestCmd::PARAM_TEST_DESCRIPTION = "TestDescription";
 const char* const TestCmd::PARAM_SCHEMA_ID = "SchemaID";
 const char* const TestCmd::PARAM_COMPATIBLE = "Compatible";
+const char* const TestCmd::PARAM_SOURCE_ID = "SourceID";
 
 TestCmd::TestCmd()
 {
@@ -354,15 +355,18 @@ bool TestCmd::parse(const QString& line)
 
 	switch (m_type)
 	{
-		case TF_CMD_TEST:		resultCmd = parseCmdTest();			break;
-		case TF_CMD_ENDTEST:	resultCmd = parseCmdEndtest();		break;
-		case TF_CMD_SCHEMA:		resultCmd = parseCmdSchema();		break;
-		case TF_CMD_COMPATIBLE: resultCmd = parseCmdCompatible();	break;
-		case TF_CMD_CONST:		resultCmd = parseCmdConst();		break;
-		case TF_CMD_VAR:		resultCmd = parseCmdVar();			break;
-		case TF_CMD_SET:		resultCmd = parseCmdSet();			break;
-		case TF_CMD_CHECK:		resultCmd = parseCmdCheck();		break;
-		case TF_CMD_DELAY:		resultCmd = parseCmdDelay();		break;
+		case TF_CMD_TEST:			resultCmd = parseCmdTest();			break;
+		case TF_CMD_ENDTEST:		resultCmd = parseCmdEndtest();		break;
+		case TF_CMD_SCHEMA:			resultCmd = parseCmdSchema();		break;
+		case TF_CMD_COMPATIBLE:		resultCmd = parseCmdCompatible();	break;
+		case TF_CMD_CONST:			resultCmd = parseCmdConst();		break;
+		case TF_CMD_VAR:			resultCmd = parseCmdVar();			break;
+		case TF_CMD_SET:			resultCmd = parseCmdSet();			break;
+		case TF_CMD_CHECK:			resultCmd = parseCmdCheck();		break;
+		case TF_CMD_DELAY:			resultCmd = parseCmdDelay();		break;
+		case TF_CMD_RUN_SOURCE:		resultCmd = parseCmdRunSource();	break;
+		case TF_CMD_STOP_SOURCE:	resultCmd = parseCmdStopSource();	break;
+		case TF_CMD_EXIT_PS:		resultCmd = parseCmdExitPS();		break;
 	}
 
 	return resultCmd;
@@ -1110,6 +1114,72 @@ bool TestCmd::parseCmdDelay()
 	param.setValue(delay_ms);
 
 	m_paramList.append(param);
+
+	return true;
+}
+
+bool TestCmd::parseCmdRunSource()
+{
+	int spacePos = m_line.indexOf(' ');
+	if (spacePos == -1)
+	{
+		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString sourceID = m_line.right(m_line.length() - spacePos).simplified();
+	if(sourceID.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Failed sourceID").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	TestCmdParam param;
+	param.setName(PARAM_SOURCE_ID);
+	param.setType(TestCmdParamType::String);
+	param.setValue(sourceID);
+	m_paramList.append(param);
+
+	return true;
+}
+
+bool TestCmd::parseCmdStopSource()
+{
+	int spacePos = m_line.indexOf(' ');
+	if (spacePos == -1)
+	{
+		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString sourceID = m_line.right(m_line.length() - spacePos).simplified();
+	if(sourceID.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Failed sourceID").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	TestCmdParam param;
+	param.setName(PARAM_SOURCE_ID);
+	param.setType(TestCmdParamType::String);
+	param.setValue(sourceID);
+	m_paramList.append(param);
+
+	return true;
+}
+
+bool TestCmd::parseCmdExitPS()
+{
+	if (m_line.length() > static_cast<int>(strlen(TestFileCmd[TF_CMD_EXIT_PS])))
+	{
+		QString errorStr = QString("(line %1) Error : Failed params - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
 
 	return true;
 }

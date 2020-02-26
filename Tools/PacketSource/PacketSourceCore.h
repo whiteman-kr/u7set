@@ -107,6 +107,7 @@ public slots:
 	// slot of UalTesterServer
 	//
 	void signalStateChanged(Hash hash, double prevState, double state);
+	void exitApplication();
 };
 
 // ==============================================================================================

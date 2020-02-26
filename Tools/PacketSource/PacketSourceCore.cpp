@@ -174,7 +174,7 @@ bool PacketSourceCore::runUalTesterServerThread()
 	SoftwareInfo si;
 	si.init(E::SoftwareType::TestClient, "TEST_SERVER_ID", 1, 0);
 
-	m_ualTesterSever = new UalTesterServer(si, &m_signalBase);
+	m_ualTesterSever = new UalTesterServer(si, &m_sourceBase, &m_signalBase);
 	if (m_ualTesterSever == nullptr)
 	{
 		return false;
@@ -182,6 +182,7 @@ bool PacketSourceCore::runUalTesterServerThread()
 
 	connect(m_ualTesterSever, &UalTesterServer::connectionChanged, this, &PacketSourceCore::ualTesterSocketConnect, Qt::QueuedConnection);
 	connect(m_ualTesterSever, &UalTesterServer::signalStateChanged, this, &PacketSourceCore::signalStateChanged, Qt::QueuedConnection);
+	connect(m_ualTesterSever, &UalTesterServer::exitApplication, this, &PacketSourceCore::exitApplication, Qt::QueuedConnection);
 
 	m_ualTesterServerThread = new UalTesterServerThread(m_buildInfo.ualTesterIP(), m_ualTesterSever, nullptr);
 	if (m_ualTesterServerThread == nullptr)
@@ -207,6 +208,7 @@ void PacketSourceCore::stopUalTesterServerThread()
 
 	disconnect(m_ualTesterSever, &UalTesterServer::connectionChanged, this, &PacketSourceCore::ualTesterSocketConnect);
 	disconnect(m_ualTesterSever, &UalTesterServer::signalStateChanged, this, &PacketSourceCore::signalStateChanged);
+	disconnect(m_ualTesterSever, &UalTesterServer::exitApplication, this, &PacketSourceCore::exitApplication);
 
 	m_ualTesterServerThread->quitAndWait();
 	delete m_ualTesterServerThread;
@@ -455,6 +457,17 @@ void PacketSourceCore::signalStateChanged(Hash hash, double prevState, double st
 	}
 
 	m_signalHistory.append( SignalForLog(pSignal, prevState, state) );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PacketSourceCore::exitApplication()
+{
+	qDebug() << "Exit";
+
+	#ifdef Q_CONSOLE_APP
+		QCoreApplication::exit(0);
+	#endif
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -9,9 +9,8 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceWorker::SourceWorker(QObject* pSource, const HostAddressPort& appDataSrvIP) :
+SourceWorker::SourceWorker(QObject* pSource) :
 	m_pSource(pSource),
-	m_appDataSrvIP(appDataSrvIP),
 	m_numerator(0),
 	m_sentFrames(0),
 	m_finishThread(false),
@@ -36,14 +35,14 @@ void SourceWorker::process()
 		return;
 	}
 
-	QUdpSocket* pSocket = new QUdpSocket(this);
-	if (pSocket == nullptr)
+	if (pSource->info().serverAddress.isEmpty() == true)
 	{
 		emit finished();
 		return;
 	}
 
-	if (m_appDataSrvIP.isEmpty() == true)
+	QUdpSocket* pSocket = new QUdpSocket(this);
+	if (pSocket == nullptr)
 	{
 		emit finished();
 		return;
@@ -105,9 +104,10 @@ void SourceWorker::process()
 			//
 			m_simFrame.rupFrame.calcCRC64();
 
-			// send udp to AppDataReceivingIP of AppDataSrv
+			// send udp to AppDataReceivingIP of AppDataSrv - get from app options
 			//
-			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), QHostAddress(m_appDataSrvIP.address().toString()), m_appDataSrvIP.port());
+			QHostAddress appDataReceivingIP = QHostAddress(pSource->info().serverAddress.address().toString());
+			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), appDataReceivingIP, pSource->info().serverAddress.port());
 
 			if (sentBytes != sizeof(m_simFrame))
 			{

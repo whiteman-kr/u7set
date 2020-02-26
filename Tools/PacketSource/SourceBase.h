@@ -47,8 +47,8 @@ namespace PS
 		int					frameCount = 0;
 		quint32				dataID = 0;
 
-		HostAddressPort		lmAddress;
-		HostAddressPort		serverAddress;
+		HostAddressPort		lmAddress;				// get from xml file
+		HostAddressPort		serverAddress;			// get from options for send UDP (this is AppDataReceivingIP of AppDataSrv)
 
 		int					signalCount = 0;
 	};
@@ -92,7 +92,7 @@ namespace PS
 
 		//
 		//
-		bool					run(const HostAddressPort& appDataSrvIP);
+		bool					run();
 		bool					stop();
 
 		bool					isRunning();
@@ -103,7 +103,7 @@ namespace PS
 		void					loadSignals(const SignalBase& signalBase);
 		void					initSignalsState();
 
-		bool					createWorker(const HostAddressPort& appDataSrvIP);
+		bool					createWorker();
 		void					deleteWorker();
 
 		//
@@ -132,7 +132,6 @@ private:
 
 	mutable QMutex			m_sourceMutex;
 	QVector<PS::Source>		m_sourceList;
-	HostAddressPort			m_appDataSrvIP;
 
 public:
 
@@ -146,6 +145,8 @@ public:
 
 	PS::Source				source(int index) const;
 	PS::Source*				sourcePtr(int index);
+	PS::Source*				sourcePtr(const QString& equipmentID);
+
 	void					setSource(int index, const PS::Source& source);
 
 	SourceBase&				operator=(const SourceBase& from);

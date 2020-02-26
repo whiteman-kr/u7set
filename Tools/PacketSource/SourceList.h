@@ -11,7 +11,6 @@
 const char* const			SourceListColumn[] =
 {
 							QT_TRANSLATE_NOOP("SourceList.h", "IP (LM)"),
-							QT_TRANSLATE_NOOP("SourceList.h", "IP (AppDataSrv)"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Caption"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Equipment ID"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Module type"),
@@ -24,19 +23,17 @@ const char* const			SourceListColumn[] =
 const int					SOURCE_LIST_COLUMN_COUNT			= sizeof(SourceListColumn)/sizeof(SourceListColumn[0]);
 
 const int					SOURCE_LIST_COLUMN_LM_IP			= 0,
-							SOURCE_LIST_COLUMN_SERVER_IP		= 1,
-							SOURCE_LIST_COLUMN_CAPTION			= 2,
-							SOURCE_LIST_COLUMN_EQUIPMENT_ID		= 3,
-							SOURCE_LIST_COLUMN_MODULE_TYPE		= 4,
-							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 5,
-							SOURCE_LIST_COLUMN_FRAME_COUNT		= 6,
-							SOURCE_LIST_COLUMN_STATE			= 7,
-							SOURCE_LIST_COLUMN_SIGNAL_COUNT		= 8;
+							SOURCE_LIST_COLUMN_CAPTION			= 1,
+							SOURCE_LIST_COLUMN_EQUIPMENT_ID		= 2,
+							SOURCE_LIST_COLUMN_MODULE_TYPE		= 3,
+							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 4,
+							SOURCE_LIST_COLUMN_FRAME_COUNT		= 5,
+							SOURCE_LIST_COLUMN_STATE			= 6,
+							SOURCE_LIST_COLUMN_SIGNAL_COUNT		= 7;
 
 const int					SourceListColumnWidth[SOURCE_LIST_COLUMN_COUNT] =
 {
 							150, // SOURCE_LIST_COLUMN_LM_IP
-							150, // SOURCE_LIST_COLUMN_SERVER_IP
 							100, // SOURCE_LIST_COLUMN_CAPTION
 							150, // SOURCE_LIST_COLUMN_EQUIPMENT_ID
 							100, // SOURCE_LIST_COLUMN_MODULE_TYPE

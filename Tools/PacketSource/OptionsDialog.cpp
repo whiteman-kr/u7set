@@ -314,16 +314,12 @@ void OptionsDialog::onOk()
 
 	// reload build
 	//
-
-	bool enableReload = m_enableReloadCheck->checkState() == Qt::CheckState::Checked;
-
 	QString timeoutReload = m_timeoutReloadEdit->text();
 	if (timeoutReload.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("Timeout for reload is empty!"));
 		return;
 	}
-
 
 	// IP
 	//

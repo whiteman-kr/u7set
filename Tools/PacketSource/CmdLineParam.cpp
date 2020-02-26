@@ -59,7 +59,7 @@ void CmdLineParam::getParams(int& argc, char** argv)
 	m_cmdLineParser.addSingleValueOption("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
 }
 
-bool CmdLineParam::paramIsValid()
+bool CmdLineParam::parse()
 {
 	m_cmdLineParser.parse();
 

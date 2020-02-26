@@ -508,6 +508,30 @@ message TuningSignalsApplyReply
     optional int32 error = 1 [default = 0];
 }
 
+// Request to change PacketSource(Console) data source state - TDS_DATA_SOURCE_WTITE
+//
+message DataSourceWrite
+{
+    optional string sourceEquipmentID = 1;			// EquipmentID of data source
+	optional bool state = 2 [default = false];		// state of data source: run (true) or stop (false)
+}
+
+message DataSourceWriteReply
+{
+    optional int32 error = 1 [default = 0];
+}
+
+// Request to close application PacketSourceConsole  - TDS_PS_EXIT
+//
+message PacketSourceExit
+{
+}
+
+message PacketSourceExitReply
+{
+    optional int32 error = 1 [default = 0];
+}
+
 // ArchService requests and replies
 //
 

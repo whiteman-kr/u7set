@@ -26,7 +26,7 @@
 
 #include "CmdLineParam.h"
 #include "SignalBase.h"
-#include "TuningSignalBase.h"
+#include "TuningSourceBase.h"
 #include "TestFile.h"
 #include "SignalStateSocket.h"
 #include "TuningSocket.h"
@@ -42,29 +42,35 @@ public:
 
 private:
 
-	static UalTester* m_pUalTester;
-	static void exitApp(int sig);
-
 	CmdLineParam m_cmdLineParam;
 
 	SignalBase m_signalBase;
-	TuningBase m_tuningBase;
+	TuningSourceBase m_tuningSourceBase;
 
 	SoftwareInfo m_softwareInfo;
 
+	// loader to receive signals from CfgSrv
+	//
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-	bool runCfgLoaderThread();
+	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
-
-	void printToReportFile(const QStringList& msgList);
 
 	TestClientSettings m_cfgSettings;
 	bool readConfiguration(const QByteArray& cfgFileData);
 	bool readAppSignals(const QByteArray& cfgFileData);
 
+	// test file
+	//
 	TestFile m_testfile;
 	bool parseTestFile(const QString& testFileName);
 
+	// run SignalStateSocket and TuningSocket
+	//
+	bool runSockets();
+	QTimer m_waitSocketsConnectionTimer;
+
+	//
+	//
 	SignalStateSocket* m_pSignalStateSocket = nullptr;
 	SimpleThread* m_pSignalStateSocketThread = nullptr;
 	bool runSignalStateThread();
@@ -77,11 +83,9 @@ private:
 	void stopTuningThread();
 	bool tuningSocketIsConnected();
 
-	bool runSockets();
-	QTimer m_waitSocketsConnectionTimer;
-	void runWaitSocketsConnectionTimer();
-
-	void runTestFile();
+	// run commands from test file
+	//
+	int runTestFile();
 
 public:
 
@@ -90,16 +94,16 @@ public:
 
 signals:
 
-	void signal_configurationParsed();
+	void configurationLoaded();
 	void signal_socketsReady();
 
 private slots:
 
-	void slot_configurationReceived(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void slot_loadConfiguration(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 	void slot_parseTestFile();
 
-	void slot_waitSocketsConnection();
-	void slot_socketsReady();
+	void slot_waitSocketsReady();
+	void slot_runTestFile();
 
 public slots:
 

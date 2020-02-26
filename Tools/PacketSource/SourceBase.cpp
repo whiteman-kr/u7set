@@ -87,19 +87,20 @@ void PS::Source::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PS::Source::run(const HostAddressPort& appDataSrvIP)
+bool PS::Source::run()
 {
 	if (m_pWorker != nullptr)
 	{
 		return false;
 	}
 
-	if (appDataSrvIP.isEmpty() == true)
+	bool result = createWorker();
+	if (result == true)
 	{
-		return false;
+		qDebug() << "Run source" << m_si.equipmentID << "-" << m_si.lmAddress.addressStr();
 	}
 
-	return createWorker(appDataSrvIP);
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -114,6 +115,8 @@ bool PS::Source::stop()
 	m_pWorker->finish();
 
 	deleteWorker();
+
+	qDebug() << "Stop source" << m_si.equipmentID << "-" << m_si.lmAddress.addressStr();
 
 	return true;
 }
@@ -144,19 +147,19 @@ int PS::Source::sentFrames()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PS::Source::createWorker(const HostAddressPort& appDataSrvIP)
+bool PS::Source::createWorker()
 {
 	if (m_pWorker != nullptr)
 	{
 		return false;
 	}
 
-	if (appDataSrvIP.isEmpty() == true)
+	if (m_si.serverAddress.isEmpty() == true)
 	{
 		return false;
 	}
 
-	m_pWorker = new SourceWorker(this, appDataSrvIP);
+	m_pWorker = new SourceWorker(this);
 	if (m_pWorker == nullptr)
 	{
 		return false;
@@ -320,7 +323,6 @@ void SourceBase::clear()
 	m_sourceMutex.lock();
 
 		m_sourceList.clear();
-		m_appDataSrvIP.clear();
 
 	m_sourceMutex.unlock();
 }
@@ -345,10 +347,6 @@ int SourceBase::count() const
 int SourceBase::readFromFile(const BuildInfo& buildInfo)
 {
 	clear();
-
-	//
-	//
-	m_appDataSrvIP = buildInfo.appDataSrvIP();
 
 	//
 	//
@@ -516,7 +514,7 @@ int SourceBase::readFromFile(const BuildInfo& buildInfo)
 		si.dataID = ds.lmDataID();
 
 		si.lmAddress = ds.lmAddressPort();
-		si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
+		si.serverAddress = buildInfo.appDataSrvIP();
 
 		si.signalCount = ds.associatedSignals().count();
 
@@ -604,6 +602,29 @@ PS::Source* SourceBase::sourcePtr(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+PS::Source* SourceBase::sourcePtr(const QString& equipmentID)
+{
+	PS::Source* pSource = nullptr;
+
+	m_sourceMutex.lock();
+
+		int sourceCount = m_sourceList.count();
+		for (int index = 0; index < sourceCount; index++)
+		{
+			if (m_sourceList[index].info().equipmentID == equipmentID)
+			{
+				pSource = &m_sourceList[index];
+				break;
+			}
+		}
+
+	m_sourceMutex.unlock();
+
+	return pSource;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void SourceBase::setSource(int index, const PS::Source &source)
 {
 	m_sourceMutex.lock();
@@ -623,7 +644,6 @@ SourceBase& SourceBase::operator=(const SourceBase& from)
 	m_sourceMutex.lock();
 
 		m_sourceList = from.m_sourceList;
-		m_appDataSrvIP = from.m_appDataSrvIP;
 
 	m_sourceMutex.unlock();
 
@@ -638,7 +658,7 @@ void SourceBase::runSourece(int index)
 
 		if (index >= 0 && index < m_sourceList.count())
 		{
-			m_sourceList[index].run(m_appDataSrvIP);
+			m_sourceList[index].run();
 		}
 
 	m_sourceMutex.unlock();
@@ -667,7 +687,7 @@ void SourceBase::runAllSoureces()
 		int count = m_sourceList.count();
 		for(int i = 0; i < count; i++)
 		{
-			m_sourceList[i].run(m_appDataSrvIP);
+			m_sourceList[i].run();
 		}
 
 	m_sourceMutex.unlock();
@@ -697,12 +717,11 @@ void SourceBase::runSources(const QStringList& sourceIDList)
 		int count = m_sourceList.count();
 		for(int s = 0; s < count; s++)
 		{
-			foreach (QString sourceID, sourceIDList)
+			foreach (const QString& sourceID, sourceIDList)
 			{
 				if(sourceID == m_sourceList[s].info().equipmentID)
 				{
-					m_sourceList[s].run(m_appDataSrvIP);
-					qDebug() << "run source:" << m_sourceList[s].info().equipmentID << "-" << m_sourceList[s].info().lmAddress.addressStr();
+					m_sourceList[s].run();
 					break;
 				}
 			}

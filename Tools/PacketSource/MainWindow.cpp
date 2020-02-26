@@ -403,7 +403,6 @@ void MainWindow::createHeaderContexMenu()
 	hideSourceColumn(SOURCE_LIST_COLUMN_MODULE_TYPE, true);
 	hideSourceColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
 	hideSourceColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
-	hideSourceColumn(SOURCE_LIST_COLUMN_SERVER_IP, true);
 	hideSourceColumn(SOURCE_LIST_COLUMN_SIGNAL_COUNT, true);
 
 	// init header context menu for View of signals
