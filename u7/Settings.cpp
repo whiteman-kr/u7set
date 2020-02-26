@@ -121,6 +121,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("loginDialog_defaultUsername", loginDialog_defaultUsername);
 
+	s.setValue("ProjectsTabPage/sortColumn", m_projectsSortColumn);
+	s.setValue("ProjectsTabPage/sortOrder", static_cast<int>(m_projectsSortOrder));
+
 	s.setValue("ConfigurationTabPage/Splitter/state", m_configurationTabPageSplitterState);
 
 	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
@@ -158,6 +161,9 @@ void Settings::writeUserScope() const
 	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
 	s.setValue("BusEditor/sortOrder", static_cast<int>(m_busEditorSortOrder));
 
+	s.setValue("BehaviorEditor/sortColumn", m_behaviorEditorSortColumn);
+	s.setValue("BehaviorEditor/sortOrder", static_cast<int>(m_behaviorEditorSortOrder));
+
 	s.setValue("AfbLibraryCheck/mainSplitter", m_afbLibratyCheckSplitterState);
 
 	s.setValue("SpecificEditor/mainSplitter", m_specificEditorSplitterState);
@@ -193,6 +199,9 @@ void Settings::loadUserScope()
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
 	loginDialog_defaultUsername = s.value("loginDialog_defaultUsername").toString();
+
+	m_projectsSortColumn = s.value("ProjectsTabPage/sortColumn").toInt();
+	m_projectsSortOrder = static_cast<Qt::SortOrder>(s.value("ProjectsTabPage/sortOrder").toInt());
 
 	m_configurationTabPageSplitterState = s.value("ConfigurationTabPage/Splitter/state").toByteArray();
 
@@ -257,6 +266,9 @@ void Settings::loadUserScope()
 	}
 	m_busEditorSortColumn = s.value("BusEditor/sortColumn").toInt();
 	m_busEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BusEditor/sortOrder").toInt());
+
+	m_behaviorEditorSortColumn = s.value("BehaviorEditor/sortColumn").toInt();
+	m_behaviorEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BehaviorEditor/sortOrder").toInt());
 
 	//
 

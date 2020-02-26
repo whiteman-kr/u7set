@@ -8,10 +8,6 @@
 //
 // ------------------------------------------------------------------------------------------------
 
-ComparatorSignal::ComparatorSignal()
-{
-}
-
 bool ComparatorSignal::isConst() const
 {
 	return m_isConst;
@@ -85,11 +81,6 @@ bool ComparatorSignal::serializeFrom(const Proto::ComparatorSignal& s)
 //	Comparator class implementation
 //
 // ------------------------------------------------------------------------------------------------
-
-Comparator::Comparator()
-{
-}
-
 E::CmpType Comparator::cmpType() const
 {
 	return m_cmpType;
@@ -253,7 +244,6 @@ LmComparatorSet::LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator
 
 LmComparatorSet::~LmComparatorSet()
 {
-	clear();
 }
 
 void LmComparatorSet::clear()
@@ -298,9 +288,60 @@ ComparatorSet::ComparatorSet()
 {
 }
 
+ComparatorSet::ComparatorSet(const ComparatorSet& src)
+{
+	*this = src;
+	return;
+}
+
+ComparatorSet::ComparatorSet(ComparatorSet&& src)
+{
+	*this = std::move(src);
+	return;
+}
+
 ComparatorSet::~ComparatorSet()
 {
-	clear();
+}
+
+ComparatorSet& ComparatorSet::operator= (const ComparatorSet& src)
+{
+	decltype(m_bySignal) bySignal;
+	decltype(m_byLm) byLm;
+
+	{
+		QMutexLocker l(&src.m_mutex);
+		bySignal = src.m_bySignal;
+		byLm = src.m_byLm;
+	}
+
+	{
+		QMutexLocker l(&m_mutex);
+		m_bySignal = std::move(bySignal);
+		m_byLm = std::move(byLm);
+	}
+
+	return *this;
+}
+
+ComparatorSet& ComparatorSet::operator= (ComparatorSet&& src)
+{
+	decltype(m_bySignal) bySignal;
+	decltype(m_byLm) byLm;
+
+	{
+		QMutexLocker l(&src.m_mutex);
+		bySignal = std::move(src.m_bySignal);
+		byLm = std::move(src.m_byLm);
+	}
+
+	{
+		QMutexLocker l(&m_mutex);
+		m_bySignal = std::move(bySignal);
+		m_byLm = std::move(byLm);
+	}
+
+	return *this;
 }
 
 void ComparatorSet::clear()
@@ -400,6 +441,8 @@ void ComparatorSet::serializeTo(Proto::ComparatorSet* set) const
 		assert(false);
 		return;
 	}
+
+	QMutexLocker l(&m_mutex);
 
 	foreach (std::shared_ptr<LmComparatorSet> lmComparatorSet, m_byLm.values())
 	{

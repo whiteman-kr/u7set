@@ -619,6 +619,54 @@ void DbControllerFileTests::getFileInfo()
 	return;
 }
 
+void DbControllerFileTests::getFullPathFileInfo()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
+	QString fileOne = "full_path_file_1";
+
+	QSqlQuery query;
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileOnefileId = query.value("id").toInt();
+
+	DbFileInfo fileInfo;
+
+	ok = m_db->getFileInfo(QString("$root$/AFBL/") + fileOne, &fileInfo, nullptr);		// ParentID is 1, assune that is always AFBL
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+
+	QVERIFY(fileInfo.fileId() == fileOnefileId);
+	QVERIFY(fileInfo.fileName() == fileOne);
+	QVERIFY(fileInfo.deleted() == false);
+	QVERIFY(fileInfo.parentId() == 1);
+	QVERIFY(fileInfo.userId() == 1);
+	QVERIFY(fileInfo.action() == VcsItemAction::Added);
+
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
+	db.close();
+	return;
+}
+
 void DbControllerFileTests::checkInTest()
 {
 	QSqlDatabase db = QSqlDatabase::database();

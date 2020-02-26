@@ -1,6 +1,7 @@
 #include "ConfigController.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
+#include "../lib/ClientBehavior.h"
 
 //
 // ConfigController
@@ -387,6 +388,29 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
 			}
+
+			if (f.ID == CFG_FILE_ID_BEHAVIOR)
+			{
+				QByteArray behaviorData;
+
+				if (getFileBlockedById(f.ID, &behaviorData, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					ClientBehaviorStorage behaviorStorage;
+
+					QString errorCode;
+					bool ok = behaviorStorage.load(behaviorData, &errorCode);
+					if (ok == false)
+					{
+						Q_ASSERT(ok);
+					}
+				}
+			}
 		}
 
 		// If this file is schema details - place the information about it
@@ -411,8 +435,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.showSchemasTabs != readSettings.showSchemasTabs ||
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
 			theConfigSettings.showSignals != readSettings.showSignals ||
-			theConfigSettings.showSOR != readSettings.showSOR ||
-			theConfigSettings.useAccessFlag != readSettings.useAccessFlag ||
+	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode ||
 			theConfigSettings.logonMode != readSettings.logonMode ||
 			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
 			theConfigSettings.usersAccounts != readSettings.usersAccounts
@@ -421,11 +444,13 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		apperanceUpdated = true;
 	}
 
-	bool serversUpdated = true;
+	bool serversUpdated = false;
 
-	if (theConfigSettings.tuningServiceAddress.address().address() == readSettings.tuningServiceAddress.address().address())
+	if (theConfigSettings.tuningServiceAddress.address().address() != readSettings.tuningServiceAddress.address().address() ||
+	        theConfigSettings.autoApply != readSettings.autoApply ||
+	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode)
 	{
-		serversUpdated = false;
+		serversUpdated = true;
 	}
 
 	theConfigSettings = readSettings;
@@ -435,7 +460,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (serversUpdated == true)
 	{
-		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply);
+		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply, theConfigSettings.lmStatusFlagMode);
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
@@ -628,8 +653,22 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
-			outSetting->useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
+
+			bool showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
+			bool useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
+
+			outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
+			if (showSOR == true)
+			{
+				outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
+			}
+			else
+			{
+				if (useAccessFlag == true)
+				{
+					outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
+				}
+			}
 
 			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
 			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();

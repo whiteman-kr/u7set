@@ -833,11 +833,11 @@ void DialogSignalInfo::fillSetpoints()
 	columns << tr("Schema");
 	ui->treeSetpoints->setHeaderLabels(columns);
 
-	m_comparators = m_configController->getByInputSignalID(m_signal.appSignalId());
+	m_setpoints = theSignals.setpointsByInputSignalId(m_signal.appSignalId());
 
-	for (int i = 0; i < m_comparators.size(); i++)
+	for (int i = 0; i < m_setpoints.size(); i++)
 	{
-		const std::shared_ptr<Comparator>& c = m_comparators[i];
+		const std::shared_ptr<Comparator>& c = m_setpoints[i];
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 
@@ -1416,12 +1416,12 @@ void DialogSignalInfo::switchToSchema()
 
 void DialogSignalInfo::showSetpointDetails()
 {
-	if (m_contextMenuSetpointIndex < 0 || m_contextMenuSetpointIndex >= m_comparators.size())
+	if (m_contextMenuSetpointIndex < 0 || m_contextMenuSetpointIndex >= m_setpoints.size())
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_comparators[m_contextMenuSetpointIndex]);
+	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_setpoints[m_contextMenuSetpointIndex]);
 	d->exec();
 }

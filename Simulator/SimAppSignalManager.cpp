@@ -349,5 +349,22 @@ static const AppSignalParam dummy;
 		return signalState(appSignalHashes, result, found);
 	}
 
+	bool AppSignalManager::signalHasTag(Hash /*signalHash*/, const QString& /*tag*/) const
+	{
+		Q_ASSERT(false);		// TO DO
+		return {};
+	}
+
+	bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
+	{
+		return signalHasTag(::calcHash(appSignalId), tag);
+	}
+
+	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& /*appSignalId*/) const
+	{
+		Q_ASSERT(false);		// TO DO
+		return {};
+	}
+
 
 }

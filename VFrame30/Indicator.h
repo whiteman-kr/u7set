@@ -16,6 +16,7 @@ namespace VFrame30
 	public:
 		Indicator() = delete;
 		explicit Indicator(SchemaUnit itemUnit);
+		virtual ~Indicator() = default;
 
 	public:
 		virtual void createProperties(SchemaItemIndicator* propertyObject, int signalCount) = 0;

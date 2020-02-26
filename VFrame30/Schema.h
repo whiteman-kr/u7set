@@ -288,6 +288,7 @@ namespace VFrame30
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
+		std::set<QString> m_loopbacks;
 		std::set<QString> m_tags;		// All tags are kept in lowercase
 		std::set<QUuid> m_guids;
 	};

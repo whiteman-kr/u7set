@@ -3,21 +3,36 @@
 #include "PropertyNames.h"
 #include "DrawParam.h"
 #include "../lib/AppSignal.h"
+#include "../lib/ComparatorSet.h"
+#include "AppSignalController.h"
 
 
 namespace VFrame30
 {
 	void CustomSetPoint::propertyDemand(const QString&)
 	{
+		// Common category
+		//
 		ADD_PROPERTY_GETTER_SETTER(E::IndicatorSetpointType, PropertyNames::indicatorSetpointType, true, CustomSetPoint::setpointType, CustomSetPoint::setSetpointType);
 		ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, CustomSetPoint::color, CustomSetPoint::setColor);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorSchemaItemLabel, true, CustomSetPoint::schemaItemLabel, CustomSetPoint::setSchemaItemLabel);
+		// Type AutoByLabel category
+		//
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorSchemaItemLabel, true, CustomSetPoint::schemaItemLabel, CustomSetPoint::setSchemaItemLabel)
+				->setCategory(PropertyNames::indicatorSetpointTypeByLabelCategory);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorOutputAppSignalId, true, CustomSetPoint::outputAppSignalId, CustomSetPoint::setOutputAppSignalId);
+		// Type AutoBySignalID category
+		//
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorOutputAppSignalId, true, CustomSetPoint::outputAppSignalId, CustomSetPoint::setOutputAppSignalId)
+				->setCategory(PropertyNames::indicatorSetpointTypeBySignalIdCategory);
 
-		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::indicatorStartValue, true, CustomSetPoint::staticValue, CustomSetPoint::setStaticValue);
-		ADD_PROPERTY_GETTER_SETTER(E::CmpType, PropertyNames::indicatorStaticCompareType, true, CustomSetPoint::staticCompareType, CustomSetPoint::setStaticCompareType);
+		// Type Static category
+		//
+//		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::indicatorStaticValue, true, CustomSetPoint::staticValue, CustomSetPoint::setStaticValue)
+//			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
+
+//		ADD_PROPERTY_GETTER_SETTER(E::CmpType, PropertyNames::indicatorStaticCompareType, true, CustomSetPoint::staticCompareType, CustomSetPoint::setStaticCompareType)
+//			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
 
 		return;
 	}
@@ -37,8 +52,8 @@ namespace VFrame30
 
 		message->set_outputappsignalid(m_outputAppSignalId.toStdString());
 
-		message->set_staticvalue(m_staticValue);
-		message->set_staticcomparetype(static_cast<int32_t>(m_staticCompareType));
+//		message->set_staticvalue(m_staticValue);
+//		message->set_staticcomparetype(static_cast<int32_t>(m_staticCompareType));
 
 		return true;
 	}
@@ -52,8 +67,8 @@ namespace VFrame30
 
 		m_outputAppSignalId = QString::fromStdString(message.outputappsignalid());
 
-		m_staticValue = message.staticvalue();
-		m_staticCompareType = static_cast<E::CmpType>(message.staticcomparetype());
+//		m_staticValue = message.staticvalue();
+//		m_staticCompareType = static_cast<E::CmpType>(message.staticcomparetype());
 
 		return true;
 	}
@@ -98,25 +113,25 @@ namespace VFrame30
 		m_outputAppSignalId = value;
 	}
 
-	double CustomSetPoint::staticValue() const
-	{
-		return m_staticValue;
-	}
+//	double CustomSetPoint::staticValue() const
+//	{
+//		return m_staticValue;
+//	}
 
-	void CustomSetPoint::setStaticValue(double value)
-	{
-		m_staticValue = value;
-	}
+//	void CustomSetPoint::setStaticValue(double value)
+//	{
+//		m_staticValue = value;
+//	}
 
-	E::CmpType CustomSetPoint::staticCompareType() const
-	{
-		return m_staticCompareType;
-	}
+//	E::CmpType CustomSetPoint::staticCompareType() const
+//	{
+//		return m_staticCompareType;
+//	}
 
-	void CustomSetPoint::setStaticCompareType(E::CmpType value)
-	{
-		m_staticCompareType = value;
-	}
+//	void CustomSetPoint::setStaticCompareType(E::CmpType value)
+//	{
+//		m_staticCompareType = value;
+//	}
 
 	//
 	// Vertical histogram, the base view
@@ -171,16 +186,16 @@ namespace VFrame30
 		propertyObject->addProperty<double>(PropertyNames::indicatorMargingRight,				// 1
 											PropertyNames::indicatorSettings,
 											true,
-											[this](){ return regionalGetter(m_rightMargin);},		// 2
-		[this](const auto& value){ return regionalSetter(value, &m_rightMargin);})	// 3
-				->setViewOrder(12);		// 4
+											[this](){ return regionalGetter(m_rightMargin);},	// 2
+		[this](const auto& value){ return regionalSetter(value, &m_rightMargin);})				// 3
+				->setViewOrder(12);																// 4
 
 		propertyObject->addProperty<double>(PropertyNames::indicatorMargingBottom,				// 1
 											PropertyNames::indicatorSettings,
 											true,
-											[this](){ return regionalGetter(m_bottomMargin);},		// 2
-		[this](const auto& value){ return regionalSetter(value, &m_bottomMargin);})	// 3
-				->setViewOrder(13);		// 4
+											[this](){ return regionalGetter(m_bottomMargin);},	// 2
+		[this](const auto& value){ return regionalSetter(value, &m_bottomMargin);})				// 3
+				->setViewOrder(13);																// 4
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::indicatorDrawBarRect,
@@ -188,6 +203,14 @@ namespace VFrame30
 											 true,
 											 m_drawBarRect);
 
+		// bool m_drawGrid = true;					// Draw grids
+		// bool m_drawGridForAllBars = false;		// Draw grids for all bars
+		// bool m_drawGridValues = true;			// Draw values for grid (only if m_drawGrid == true, for next bars depends on DrawGridOnlyForFirstBar)
+		// bool m_drawGridValueForAllBars = false;	// Draw values for grid for all bars (true) or just for the first one (false) (only if drawGrid == true && drawGridValues == true)
+		// bool m_drawGridValueUnits = true;		// Draw units for limits values (only if DrawGrid == true && DrawGridValues == true)
+		// double m_gridMainStep = 50.0;			// Step for main grids (only if DrawGrid == true)
+		// double m_gridSmallStep = 10.0;			// Step for small grids (only if DrawGrid == true)
+		//
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::drawGrid,
 											 PropertyNames::indicatorSettings,
@@ -237,6 +260,31 @@ namespace VFrame30
 											 m_gridSmallStep)
 				->setDescription(QStringLiteral("Step for small grids (only if DrawGrid == true)"));
 
+		// bool m_drawAutoSetpoints = true;						// Draw all auto generated setpoints
+		// bool m_drawCustomSetpoints = true;					// Draw custom setpoints
+		// PropertyVector<CustomSetPoint> m_customSetPoints;	// Custom setpoint list
+		//
+		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
+											 PropertyNames::drawAutoSetpoints,
+											 PropertyNames::setpointsCategory,
+											 true,
+											 m_drawAutoSetpoints)
+				->setDescription(QStringLiteral("Draw all auto generated setpoints"));
+
+		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
+											 PropertyNames::drawCustomSetpoints,
+											 PropertyNames::setpointsCategory,
+											 true,
+											 m_drawCustomSetpoints)
+				->setDescription(QStringLiteral("Draw custom setpoints added to CustomSetPoints property"));
+
+		propertyObject->ADD_PROPERTY_CAT_VAR(PropertyVector<CustomSetPoint>,
+											 PropertyNames::customSetpoints,
+											 PropertyNames::setpointsCategory,
+											 true,
+											 m_customSetPoints)
+				->setDescription(QStringLiteral("CustomSetPoints"));
+
 		return;
 	}
 
@@ -270,6 +318,15 @@ namespace VFrame30
 
 		m->set_gridmainstep(m_gridMainStep);
 		m->set_gridsmallstep(m_gridSmallStep);
+
+		m->set_drawautosetpoints(m_drawAutoSetpoints);
+		m->set_drawcustomsetpoints(m_drawCustomSetpoints);
+
+		for (const auto& csp : m_customSetPoints)
+		{
+			::Proto::VFrameSetPoint* mcsp = m->add_customsetpoints();
+			csp->save(mcsp);
+		}
 
 		return true;
 	}
@@ -308,21 +365,32 @@ namespace VFrame30
 		m_gridMainStep = m.gridmainstep();
 		m_gridSmallStep = m.gridsmallstep();
 
+		m_drawAutoSetpoints = m.drawautosetpoints();
+		m_drawCustomSetpoints = m.drawcustomsetpoints();
+
+		m_customSetPoints.clear();
+		m_customSetPoints.reserve(static_cast<size_t>(m.customsetpoints_size()));
+		for (int i = 0; i < m.customsetpoints_size(); i++)
+		{
+			auto csp = m_customSetPoints.createItem();
+			csp->load(m.customsetpoints(i));
+			m_customSetPoints.push_back(csp);
+		}
+
 		return true;
 	}
 
-	void IndicatorHistogramVert::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* item) const
+	void IndicatorHistogramVert::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* schemaItem) const
 	{
 		if (drawParam == nullptr ||
 			schema == nullptr ||
 			layer == nullptr ||
-			item == nullptr)
+			schemaItem == nullptr)
 		{
 			Q_ASSERT(drawParam);
 			Q_ASSERT(schema);
 			Q_ASSERT(layer);
-			Q_ASSERT(item);
-
+			Q_ASSERT(schemaItem);
 			return;
 		}
 
@@ -331,12 +399,12 @@ namespace VFrame30
 
 		// --
 		//
-		const QRectF rect{item->boundingRectInDocPt(drawParam)};
-		const QStringList appSignalIds = item->signalIds();
+		const QRectF rect{schemaItem->boundingRectInDocPt(drawParam)};
+		const QStringList appSignalIds = schemaItem->signalIds();
 
 		// Bar Colors, if colors not enough then propagate the last one
 		//
-		QVector<QColor> signalColors = item->signalColors();
+		QVector<QColor> signalColors = schemaItem->signalColors();
 		if (signalColors.isEmpty() == true)
 		{
 			signalColors.push_back(Qt::darkBlue);
@@ -349,11 +417,11 @@ namespace VFrame30
 
 		// Draw background
 		//
-		p->fillRect(rect, item->backgroundColor());
+		p->fillRect(rect, schemaItem->backgroundColor());
 
-		if (item->drawRect() == true)
+		if (schemaItem->drawRect() == true)
 		{
-			QPen rectPen(item->lineColor(), item->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : item->lineWeightDraw());
+			QPen rectPen(schemaItem->lineColor(), schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
@@ -380,12 +448,15 @@ namespace VFrame30
 			barSpace = (insideRect.width() - barWidth * appSignalIds.size()) / static_cast<double>(appSignalIds.size() - 1);
 		}
 
+		std::vector<QRectF> barRects;
+		barRects.reserve(static_cast<size_t>(appSignalIds.size()));
+
 		for (int barIndex = 0; barIndex < appSignalIds.size(); barIndex++)
 		{
 			const QString& appSignalId = appSignalIds[barIndex];
 			QColor barColor = signalColors[barIndex];
 
-			QRectF barRect;
+			QRectF barRect{};
 			if (appSignalIds.size() == 1)
 			{
 				barRect = drawParam->gridToDpi({insideRect.left() + insideRect.width() / 2.0 - barWidth / 2, insideRect.top(), barWidth, insideRect.height()});
@@ -393,18 +464,24 @@ namespace VFrame30
 			else
 			{
 				barRect = drawParam->gridToDpi({insideRect.left() + barIndex * (barWidth + barSpace), insideRect.top(), barWidth, insideRect.height()});
-			};
+			}
 
-			drawBar(drawParam, barRect, barIndex, appSignalId, barColor, item);
+			barRects.push_back(barRect);
+
+			drawBar(drawParam, barRect, barIndex, appSignalId, barColor, schemaItem);
 		}
+
+		// Draw setpoints
+		//
+		drawSetpoints(drawParam, barRects, schemaItem);
 
 		return;
 	}
 
-	void IndicatorHistogramVert::drawBar(CDrawParam* drawParam, const QRectF& barRect, int signalIndex, const QString appSignalId, QColor barColor, const SchemaItemIndicator* item) const
+	void IndicatorHistogramVert::drawBar(CDrawParam* drawParam, const QRectF& barRect, int signalIndex, const QString appSignalId, QColor barColor, const SchemaItemIndicator* schemaItem) const
 	{
 		Q_ASSERT(drawParam);
-		Q_ASSERT(item);
+		Q_ASSERT(schemaItem);
 
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
@@ -419,7 +496,6 @@ namespace VFrame30
 		// --
 		//
 		QString units;
-
 
 		// Draw valued bar
 		//
@@ -451,13 +527,13 @@ namespace VFrame30
 			signalParam.setAppSignalId(appSignalId);
 			signalParam.setCustomSignalId(appSignalId);
 
-			item->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
+			schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
 
 			units = signalParam.unit();
 			bool valid = false;
 			double currentValue = 0;
 
-			switch (item->signalSource())
+			switch (schemaItem->signalSource())
 			{
 				case E::SignalSource::AppDataService:
 					valid = appSignalState.isValid();
@@ -529,7 +605,7 @@ namespace VFrame30
 		//
 		if (m_drawBarRect == true)
 		{
-			QPen rectPen(item->lineColor(), item->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : item->lineWeightDraw());
+			QPen rectPen(schemaItem->lineColor(), schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
@@ -542,7 +618,7 @@ namespace VFrame30
 			m_drawBarRect == true &&
 			(m_drawGridForAllBars == true || signalIndex == 0))
 		{
-			double mainGridWidth = item->font().drawSize() / 2.0;
+			double mainGridWidth = schemaItem->font().drawSize() / 2.0;
 			double smallGridWidth = mainGridWidth / 2.0;
 
 			// Draw top and bottom grids
@@ -559,13 +635,13 @@ namespace VFrame30
 				{
 					if (m_drawGridValueUnits == true && units.isEmpty() == false)
 					{
-						topValue = QString("%1 %2 ").arg(m_endValue, 0, static_cast<char>(item->analogFormat()), item->precision()).arg(units);
-						bottomValue = QString("%1 %2 ").arg(m_startValue, 0, static_cast<char>(item->analogFormat()), item->precision()).arg(units);
+						topValue = QString("%1 %2 ").arg(m_endValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision()).arg(units);
+						bottomValue = QString("%1 %2 ").arg(m_startValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision()).arg(units);
 					}
 					else
 					{
-						topValue = QString("%1 ").arg(m_endValue, 0, static_cast<char>(item->analogFormat()), item->precision());
-						bottomValue = QString("%1 ").arg(m_startValue, 0, static_cast<char>(item->analogFormat()), item->precision());
+						topValue = QString("%1 ").arg(m_endValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
+						bottomValue = QString("%1 ").arg(m_startValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
 					}
 				}
 
@@ -575,7 +651,7 @@ namespace VFrame30
 				grids.push_back(veryTopGrid);
 				grids.push_back(std::move(veryBottomGrid));
 
-				drawGrids(grids, drawParam, barRect, item);
+				drawGrids(grids, drawParam, barRect, schemaItem);
 			}
 
 			// Draw main and small grids
@@ -594,7 +670,7 @@ namespace VFrame30
 
 				const double factor = barRect.height() / valueDiff;
 
-				auto addGrid = [this, &grids, &barRect, &item, valueDiff, factor, signalIndex](double value, double gridWidth, bool drawValue) -> void
+				auto addGrid = [this, &grids, &barRect, &schemaItem, factor, signalIndex](double value, double gridWidth, bool drawValue) -> void
 				{
 					QString text;
 
@@ -602,7 +678,7 @@ namespace VFrame30
 						this->m_drawGridValues == true &&
 						(this->m_drawGridValueForAllBars == true || signalIndex == 0))
 					{
-						text = QString("%1 ").arg(value, 0, static_cast<char>(item->analogFormat()), item->precision());
+						text = QString("%1 ").arg(value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
 					}
 
 					double vertPos = barRect.bottom() - (value - this->m_startValue) * factor;
@@ -652,13 +728,9 @@ namespace VFrame30
 					}
 				}
 
-				drawGrids(grids, drawParam, barRect, item);
+				drawGrids(grids, drawParam, barRect, schemaItem);
 			}
 		} // Draw grid values
-
-		// Draw SetPoints
-		//
-
 
 		return;
 	}
@@ -685,6 +757,165 @@ namespace VFrame30
 		}
 
 		return;
+	}
+
+	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam, const std::vector<QRectF>& barRects, const SchemaItemIndicator* schemaItem) const
+	{
+		std::vector<DrawSetpointStruct> drawSetpoints;
+		drawSetpoints.reserve(16);
+
+		// Get all automaticaly generated (by u7) setpoints
+		//
+		if (m_drawAutoSetpoints == true &&
+			drawParam->isMonitorMode() == true &&
+			drawParam->appSignalController() != nullptr)
+		{
+			const QStringList appSignalIds = schemaItem->signalIds();
+
+			for (int signalIndex = 0; signalIndex < appSignalIds.size(); signalIndex++)
+			{
+				const QString& appSignalId = appSignalIds[signalIndex];
+				std::vector<std::shared_ptr<Comparator>> setpoints = drawParam->appSignalController()->setpointsByInputSignalId(appSignalId);
+
+				for (const std::shared_ptr<Comparator>& sp : setpoints)
+				{
+					Q_ASSERT(sp);
+
+					std::optional<double> value;
+
+					if (const ComparatorSignal& valueSignal = sp->compare();	// This signal contains value for setpoint
+						valueSignal.isConst() == true)
+					{
+						value = valueSignal.constValue();
+					}
+					else
+					{
+						if (valueSignal.isAcquired() == false)
+						{
+							continue;
+						}
+						else
+						{
+							value = schemaItem->getSignalState(drawParam, appSignalId);
+						}
+					}
+
+					if (value.has_value() == true)
+					{
+						QRgb foundColor{qRgb(0x00, 0x00, 0xC0)};
+
+
+
+//						for (auto tag : behaviorTags)
+//						{
+//							bool hasTag = drawParam->appSignalController()->signalHasTag(appSignalId, tagssssss??????);
+
+//							if (hasTag == true)
+//							{
+//								foundColor = ...;
+//							}
+//						}
+
+						drawSetpoints.emplace_back(signalIndex, value.value(), sp->cmpType(), foundColor, barRects[signalIndex]);
+					}
+				}
+			}
+		}
+
+		// Get all custom setpoints
+		//
+		if (m_drawCustomSetpoints == true && m_customSetPoints.empty() == false)
+		{
+			// PropertyVector<CustomSetPoint> m_customSetPoints;	// Custom setpoint list
+
+			for (const std::shared_ptr<CustomSetPoint>& csp : m_customSetPoints)
+			{
+				switch (csp->setpointType())
+				{
+//					case E::IndicatorSetpointType::Static:
+//						// Ignore static
+//						break;
+					case E::IndicatorSetpointType::AutoByOutAppSignalId:
+						break;
+					case E::IndicatorSetpointType::AutoBySchemaItemLabel:
+						break;
+					default:
+						Q_ASSERT(false);
+				}
+			}
+		}
+
+		// Draw setpoints
+		//
+		drawSetpointItems(drawParam, drawSetpoints, schemaItem);
+
+		return;
+	}
+
+	void IndicatorHistogramVert::drawSetpointItems(CDrawParam* drawParam, const std::vector<DrawSetpointStruct>& setpoints, const SchemaItemIndicator* schemaItem) const
+	{
+		QPainter* p = drawParam->painter();
+		Q_ASSERT(p);
+
+		double valueDiff = m_endValue - m_startValue;	// if valueDiff is negative, then draw bar upside down
+		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
+		{
+			return;
+		}
+
+		double mainGridWidth = schemaItem->font().drawSize() / 1.8;
+		QString valueString;
+
+		for (const DrawSetpointStruct& ds : setpoints)
+		{
+			const QRectF& barRect = ds.barRect;
+
+			const double factor = barRect.height() / valueDiff;
+			double y = barRect.bottom() - (ds.value - m_startValue) * factor;
+
+//			QColor color1 = ds.color;
+//			QColor color2{(~color1.red()) & 0xFF,
+//						(~color1.green()) & 0xFF,
+//						(~color1.blue()) & 0xFF};
+
+			//QBrush brush{drawParam->blinkPhase() ? color1 : color2};
+			QBrush brush{ds.color};
+
+			QPen pen(brush, schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
+			p->setPen(pen);
+
+			// Draw horz line
+			//
+			p->drawLine(QPointF{barRect.left() - mainGridWidth, drawParam->gridToDpiY(y)},
+						QPointF{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y)});
+
+			// Draw setpoint value
+			//
+			QChar cmpSymbol;
+			switch (ds.type)
+			{
+			case E::CmpType::Equal:		cmpSymbol = QChar('=');		break;
+			case E::CmpType::Greate:	cmpSymbol = QChar(0x25B2);	break;
+			case E::CmpType::Less:		cmpSymbol = QChar(0x25BC);	break;
+			case E::CmpType::NotEqual:	cmpSymbol = QChar(0x2260);	break;
+			default:
+				Q_ASSERT(false);
+			}
+
+			if (drawParam->blinkPhase() == true)
+			{
+				valueString = QString(" %1 %2")
+								.arg(ds.value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision())
+								.arg(cmpSymbol);
+
+				QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+
+				DrawHelper::drawText(p, schemaItem->font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+			}
+		}
+
+		return;
+
 	}
 
 }

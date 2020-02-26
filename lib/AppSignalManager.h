@@ -2,9 +2,13 @@
 #define APPSIGNALMANAGER_H
 
 #include <map>
+#include <memory>
+#include <vector>
 #include <unordered_map>
 #include <QMutex>
 #include "../lib/IAppSignalManager.h"
+#include "../lib/ComparatorSet.h"
+
 
 
 class AppSignalManager : public QObject, public IAppSignalManager
@@ -34,7 +38,12 @@ public:
 	void setState(Hash signalHash, const AppSignalState& state);
 	void setState(const std::vector<AppSignalState>& states);
 
-	// IAppSignalManager implememntation
+	// Setpoints/Comparators
+	//
+	void setSetpoints(ComparatorSet&& setpoints);
+	void setSetpoints(const ComparatorSet& setpoints);
+
+	// IAppSignalManager implememntation - AppSignals
 	//
 	virtual bool signalExists(Hash hash) const override;
 	virtual bool signalExists(const QString& appSignalId) const override;
@@ -47,6 +56,13 @@ public:
 
 	virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
 	virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
+
+	virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
+	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
+
+	// IAppSignalManager implememntation - Setpoints
+	//
+	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
 
 signals:
 	void addSignalToPriorityList(Hash signalHash) const;
@@ -61,6 +77,8 @@ private:
 
 	mutable QMutex m_statesMutex;
 	std::unordered_map<Hash, AppSignalState> m_signalStates;
+
+	ComparatorSet m_setpoints;			// ComparatorSet is threadsafe itself
 };
 
 

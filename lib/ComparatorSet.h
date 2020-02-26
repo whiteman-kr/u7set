@@ -16,8 +16,6 @@
 class ComparatorSignal
 {
 public:
-	ComparatorSignal();
-
 	bool isConst() const;
 	void setIsConst(bool isConst);
 
@@ -49,8 +47,6 @@ private:
 class Comparator
 {
 public:
-	Comparator();
-
 	E::CmpType cmpType() const;
 	void setCmpType(E::CmpType cmpType);
 
@@ -120,7 +116,7 @@ class LmComparatorSet
 public:
 	LmComparatorSet();
 	LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> omparator);
-	virtual ~LmComparatorSet();
+	~LmComparatorSet();
 
 	void clear();
 	void append(std::shared_ptr<Comparator> comparator);
@@ -145,8 +141,14 @@ class ComparatorSet
 {
 public:
 	ComparatorSet();
+	ComparatorSet(const ComparatorSet& src);
+	ComparatorSet(ComparatorSet&& src);
 	virtual ~ComparatorSet();
 
+	ComparatorSet& operator= (const ComparatorSet& src);
+	ComparatorSet& operator= (ComparatorSet&& src);
+
+public:
 	void clear();
 	void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);					// insert comparator
 

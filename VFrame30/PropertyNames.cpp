@@ -77,6 +77,10 @@ namespace VFrame30
 	const QString PropertyNames::indicatorStaticValue{"StaticValue"};
 	const QString PropertyNames::indicatorStaticCompareType{"StaticCompareType"};
 
+	const QString PropertyNames::indicatorSetpointTypeByLabelCategory{"Type By Label"};
+	const QString PropertyNames::indicatorSetpointTypeBySignalIdCategory{"Type By Output SignalID"};
+	const QString PropertyNames::indicatorSetpointTypeStaticCategory{"Type Static"};
+
 	const QString PropertyNames::indicatorStartValue{"StartValue"};
 	const QString PropertyNames::indicatorEndValue{"EndValue"};
 	const QString PropertyNames::indicatorBarWidth{"BarWidth"};
@@ -88,6 +92,10 @@ namespace VFrame30
 	const QString PropertyNames::indicatorMargingTop{"MarginTop"};
 	const QString PropertyNames::indicatorMargingRight{"MarginRight"};
 	const QString PropertyNames::indicatorMargingBottom{"MarginBottom"};
+
+	const QString PropertyNames::drawAutoSetpoints{"DrawAutoSetpoints"};
+	const QString PropertyNames::drawCustomSetpoints{"DrawCustomSetpoints"};
+	const QString PropertyNames::customSetpoints{"CustomSetpoints"};
 
 	// SchemaItemValue Colors
 	//
@@ -187,6 +195,7 @@ namespace VFrame30
 	const QString PropertyNames::constCategory{"Const"};
 	const QString PropertyNames::imageCategory{"Image"};
 	const QString PropertyNames::positionAndSizeCategory{"Position and Size"};
+	const QString PropertyNames::setpointsCategory{"Setpoints"};
 
 	const QString PropertyNames::widgetPropStyleSheet{"Property holds the widget's style sheet.\nThe style sheet contains a textual description of customizations to the widget's style."};
 	const QString PropertyNames::widgetPropToolTip{"Property holds the widget's tooltip."};

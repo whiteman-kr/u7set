@@ -1,0 +1,194 @@
+test UAL_FLAGS_SETFLAGS.01, tests for SET_FLAGS element
+schema SET_FLAGS
+compatible MODULE_LM1SF40 
+	set #IN_DSCR_001 =0 
+	set #IN_FL_001 = 12.66
+	set #IN_SI_001 = 10
+	set #IN_DSCR_001 =1 
+	set #IN_FL_001 = 99.99
+	set #IN_SI_001 = 25
+endtest
+//
+// требование UAL_FLAGS_SETFLAGS.02 проверяеся во время билда
+// требование UAL_FLAGS_SETFLAGS.03 релизовано в проверке требования UAL_FLAGS_SETFLAGS.04 
+//
+test UAL_FLAGS_SETFLAGS.04, tests for SET_FLAGS element
+schema SET_FLAGS
+	compatible MODULE_LM1SF40 
+	set #OUT_SET_FLAGS_004 = 1
+endtest
+
+test UAL_FLAGS_SETFLAGS.05, tests for SET_FLAGS element
+schema SET_FLAGS
+compatible MODULE_LM1SF40
+
+	set #VALIDITY_001 = 1 
+	check #OUT_SET_FLAGS_005:Validity == 1
+	set #SIMULATED_001 = 1 
+	check #OUT_SET_FLAGS_005:Simulated==1
+	set #BLOCKED_001 = 1
+	check #OUT_SET_FLAGS_005:Blocked==1
+	set #MISMATCH_001 = 1
+	check #OUT_SET_FLAGS_005:Mismatch==1
+	set #HIGH_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:AboveHighLimit==1
+	set #LOW_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:BelowLowLimit==1
+//обнуляю значения
+	set #SIMULATED_001 = 0
+	set #BLOCKED_001 = 0
+	set #MISMATCH_001 = 0
+	set #LOW_LIMIT_001 = 0
+endtest
+
+test UAL_FLAGS_SETFLAGS.06, tests for SET_FLAGS element
+schema SET_FLAGS
+compatible MODULE_LM1SF40 
+//
+	set #VALIDITY_001 = 1 
+	check #OUT_SET_FLAGS_006:Validity == 1
+	check #OUT_001:Validity == 1
+
+//
+	set #SIMULATED_001 = 1 
+	check #OUT_SET_FLAGS_006:Simulated==1
+	check #OUT_001:Simulated==0
+//	
+	set #BLOCKED_001 = 1
+	check #OUT_SET_FLAGS_006:Blocked==1
+	check #OUT_001:Blocked==0
+//	
+	set #MISMATCH_001 = 1
+	check #OUT_SET_FLAGS_006:Mismatch==1
+	check #OUT_001:Mismatch==0
+//
+	set #HIGH_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_006:AboveHighLimit==1
+	check #OUT_001:AboveHighLimit==0
+//	
+	set #LOW_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_006:BelowLowLimit==1
+	check #OUT_001:BelowLowLimit==0
+endtest
+//
+// требование UAL_FLAGS_SETFLAGS.07 реализовано в проверке требования UAL_FLAGS_SETFLAGS.06
+//
+test UAL_FLAGS_SETFLAGS.07, tests for SET_FLAGS element
+schema SET_FLAGS
+compatible MODULE_LM1SF40 
+
+	set #VALIDITY_001 = 1 
+	check #OUT_SET_FLAGS_005:Validity == 1
+	set #SIMULATED_001 = 1 
+	check #OUT_SET_FLAGS_005:Simulated==1
+	set #BLOCKED_001 = 1
+	check #OUT_SET_FLAGS_005:Blocked==1
+	set #MISMATCH_001 = 1
+	check #OUT_SET_FLAGS_005:Mismatch==1
+	set #HIGH_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:AboveHighLimit==1
+	set #LOW_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:BelowLowLimit==1
+
+endtest
+
+test UAL_FLAGS_SETFLAGS.08, tests for SET_FLAGS element
+schema SET_FLAGS
+compatible MODULE_LM1SF40
+
+ 
+	set #VALIDITY_001 = 0			
+	check #OUT_SET_FLAGS_005:Validity == 1
+	set #VALIDITY_001 = 0
+	check #OUT_SET_FLAGS_005:Validity == 0
+	set #VALIDITY_001 = 1
+	check #OUT_SET_FLAGS_005:Validity == 1
+	set #VALIDITY_001 = 0
+	check #OUT_SET_FLAGS_005:Validity == 0
+	set #VALIDITY_001 = 1 
+	check #OUT_SET_FLAGS_005:Validity == 1
+	set #VALIDITY_001 = 0
+	check #OUT_SET_FLAGS_005:Validity == 0
+	set #VALIDITY_001 = 1
+	check #OUT_SET_FLAGS_005:Validity == 1
+	set #VALIDITY_001 = 0
+	check #OUT_SET_FLAGS_005:Validity == 0
+	set #VALIDITY_001 = 1
+	check #OUT_SET_FLAGS_005:Validity == 1
+//
+	set #SIMULATED_001 = 1 
+	check #OUT_SET_FLAGS_005:Simulated==1
+	set #SIMULATED_001 = 0
+	check #OUT_SET_FLAGS_005:Simulated==0
+	set #SIMULATED_001 = 1 
+	check #OUT_SET_FLAGS_005:Simulated==1
+	set #SIMULATED_001 = 0 
+	check #OUT_SET_FLAGS_005:Simulated==0
+//
+	set #BLOCKED_001 = 1
+	check #OUT_SET_FLAGS_005:Blocked==1
+	set #BLOCKED_001 = 0
+	check #OUT_SET_FLAGS_005:Blocked==0
+	set #BLOCKED_001 = 1
+	check #OUT_SET_FLAGS_005:Blocked==1
+	set #BLOCKED_001 = 0
+	check #OUT_SET_FLAGS_005:Blocked==0
+//
+	set #MISMATCH_001 = 1
+	check #OUT_SET_FLAGS_005:Mismatch==1
+	set #MISMATCH_001 = 0
+	check #OUT_SET_FLAGS_005:Mismatch==0
+	set #MISMATCH_001 = 1
+	check #OUT_SET_FLAGS_005:Mismatch==1
+	set #MISMATCH_001 = 0
+	check #OUT_SET_FLAGS_005:Mismatch==0
+//
+	set #HIGH_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:AboveHighLimit==1
+	set #HIGH_LIMIT_001 = 0
+	check #OUT_SET_FLAGS_005:AboveHighLimit==0
+	set #HIGH_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:AboveHighLimit==1
+	set #HIGH_LIMIT_001 = 0
+	check #OUT_SET_FLAGS_005:AboveHighLimit==0
+//
+	set #LOW_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:BelowLowLimit==1
+	set #LOW_LIMIT_001 = 0
+	check #OUT_SET_FLAGS_005:BelowLowLimit==0
+	set #LOW_LIMIT_001 = 1
+	check #OUT_SET_FLAGS_005:BelowLowLimit==1
+	set #LOW_LIMIT_001 = 0
+	check #OUT_SET_FLAGS_005:BelowLowLimit==0	
+
+endtest
+
+test UAL_FLAGS_SETFLAGS.09, tests for SET_FLAGS element
+schema SET_FLAGS
+compatible MODULE_LM1SF40
+	set #VALIDITY_002 = 1 
+	check #OUT_SET_FLAGS_007:Validity == 1
+//
+	set #SIMULATED_002 = 1  //not aquired
+	check #OUT_SET_FLAGS_007:Simulated==1 
+//	
+	set #BLOCKED_002 = 1 //not aquired
+	check #OUT_SET_FLAGS_007:Blocked==1 
+//	
+	set #MISMATCH_002 = 1
+	check #OUT_SET_FLAGS_007:Mismatch==1
+//	
+	set #HIGH_LIMIT_002 = 1
+	check #OUT_SET_FLAGS_007:AboveHighLimit==1
+//	
+	set #LOW_LIMIT_002 = 1
+	check #OUT_SET_FLAGS_007:BelowLowLimit==1
+//    
+    set #SIMULATED_002 = 0  //not aquired
+	check #OUT_SET_FLAGS_007:Simulated==0 
+//	
+	set #BLOCKED_002 = 0 //not aquired
+	check #OUT_SET_FLAGS_007:Blocked==0
+
+endtest
+

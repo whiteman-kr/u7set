@@ -1,4 +1,5 @@
 #include "AppSignalController.h"
+#include "../lib/ComparatorSet.h"
 
 namespace VFrame30
 {
@@ -99,6 +100,33 @@ namespace VFrame30
 		}
 
 		return m_appSignalManager->signalState(appSignalIds, result, found);
+	}
+
+	bool AppSignalController::signalHasTag(Hash signalHash, const QString& tag) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return m_appSignalManager->signalHasTag(signalHash, tag);
+	}
+
+	bool AppSignalController::signalHasTag(const QString& appSignalId, const QString& tag) const
+	{
+		return signalHasTag(::calcHash(appSignalId), tag);
+	}
+
+	std::vector<std::shared_ptr<Comparator>> AppSignalController::setpointsByInputSignalId(const QString& appSignalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(false);
+			return {};
+		}
+
+		return m_appSignalManager->setpointsByInputSignalId(appSignalId);
 	}
 
 	IAppSignalManager* AppSignalController::appSignalManager()

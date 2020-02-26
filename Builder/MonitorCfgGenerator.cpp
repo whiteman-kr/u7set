@@ -3,6 +3,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
 #include "Context.h"
+#include "../lib/ClientBehavior.h"
 
 namespace Builder
 {
@@ -55,6 +56,14 @@ namespace Builder
 		{
 			result &= writeTuningSignals();
 		}
+
+		// Generate behavior
+		//
+		result &= writeMonitorBehavior();
+
+		// Generate logo
+		//
+		result &= writeMonitorLogo();
 
 		// Add link to FILE_COMPARATORS_SET (Common/Comparator.set)
 		//
@@ -762,6 +771,142 @@ namespace Builder
 		}
 
 		ok = m_cfgXml->addLinkToFile(buildFile);
+		return ok;
+	}
+
+	bool MonitorCfgGenerator::writeMonitorBehavior()
+	{
+		if (m_dbController == nullptr)
+		{
+			Q_ASSERT(m_dbController);
+			return false;
+		}
+
+		bool ok = true;
+		QString behaviorId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviorID", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (behaviorId.isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Load all clients behavior
+		//
+		ClientBehaviorStorage allBehaviorStorage;
+		QString errorCode;
+		QByteArray dbData;
+
+		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
+		if (result == false)
+		{
+			m_log->errPDB2002(-1, allBehaviorStorage.dbFileName(), errorCode);
+			return false;
+		}
+
+		if (allBehaviorStorage.load(dbData, &errorCode) == false)
+		{
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
+			return false;
+		}
+
+		// Find behavior for current Monitor
+		//
+		ClientBehaviorStorage monitorBehaviorStorage;
+
+		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehaviors();
+
+		for (auto b : behaviors)
+		{
+			if (b->behaviorId() == behaviorId)
+			{
+				monitorBehaviorStorage.add(b);
+				break;
+			}
+		}
+
+		if (monitorBehaviorStorage.count() == 0)
+		{
+			m_log->errEQP6210(behaviorId, m_software->equipmentIdTemplate());
+			return false;
+		}
+
+		// Save monitor behavior to XML
+		//
+		QByteArray data;
+		monitorBehaviorStorage.save(&data);
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		ok = m_cfgXml->addLinkToFile(buildFile);
+
+		return ok;
+	}
+
+	bool MonitorCfgGenerator::writeMonitorLogo()
+	{
+		if (m_dbController == nullptr)
+		{
+			Q_ASSERT(m_dbController);
+			return false;
+		}
+
+		bool ok = true;
+		QString logoFile = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Logo", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		DbFileInfo fi;
+		ok = m_dbController->getFileInfo(logoFile, &fi, nullptr);
+		if (ok == false || fi.isNull() == true)
+		{
+			m_log->errPDB2007(logoFile, m_software->equipmentIdTemplate(), "Logo");
+			return false;
+		}
+
+		std::shared_ptr<DbFile> file;
+		ok = m_dbController->getLatestVersion(fi, &file, nullptr);
+		if (ok == false || file == nullptr)
+		{
+			m_log->errPDB2002(fi.fileId(), fi.fileName(), m_dbController->lastError());
+			return false;
+		}
+
+		QByteArray data;
+		file->swapData(data);
+
+		// Try to parse image
+		//
+		QImage image = QImage::fromData(data);
+		if (image.isNull() == true)
+		{
+			m_log->errCMN0010(logoFile);
+			return false;
+		}
+
+		// Write file
+		//
+		QString buildFileName = tr("Logo.%1").arg(QFileInfo(fi.fileName()).completeSuffix());
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), buildFileName, CFG_FILE_ID_LOGO, "", data);
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		ok = m_cfgXml->addLinkToFile(buildFile);
+
 		return ok;
 	}
 }

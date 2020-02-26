@@ -129,16 +129,16 @@ private:
 	std::unique_ptr<VFrame30::TuningController> m_tuningController;
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
+	SimpleThread* m_tcpClientThread = nullptr;			// +
 
 	TcpSignalRecents* m_tcpSignalRecents = nullptr;
-	SimpleThread* m_tcpRecentsThread = nullptr;
+	SimpleThread* m_tcpRecentsThread = nullptr;			// +
 
 	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
-	SimpleThread* m_tuningTcpClientThread = nullptr;
+	SimpleThread* m_tuningTcpClientThread = nullptr;	// +
 
 	TcpAppSourcesState* m_tcpSourcesStateClient = nullptr;
-	SimpleThread* m_sourcesStateClientThread = nullptr;
+	SimpleThread* m_sourcesStateClientThread = nullptr;	// +
 
 	Log::LogFile m_LogFile;
 
@@ -181,6 +181,8 @@ private:
 	// Logo
 	//
 	QLabel* m_logoLabel = nullptr;
+	QImage m_logoImage;
+
 	QWidget* m_spacer = nullptr;
 
 	// Controls

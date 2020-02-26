@@ -16,6 +16,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/FblItemRect.h"
+#include "DialogClientBehavior.h"
 
 //
 //
@@ -1520,13 +1521,20 @@ void SchemaFileViewEx::createActions()
 	m_refreshFileAction->setStatusTip(tr("Refresh file list..."));
 	m_refreshFileAction->setEnabled(false);
 	m_refreshFileAction->setShortcut(QKeySequence::StandardKey::Refresh);
+	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileViewEx::slot_refreshFiles);
 
 	m_propertiesAction = new QAction(tr("Properties..."), parent());
 	m_propertiesAction->setIcon(QIcon(":/Images/Images/SchemaProperties.svg"));
 	m_propertiesAction->setStatusTip(tr("Edit schema properties..."));
 	m_propertiesAction->setEnabled(false);
 
-	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileViewEx::slot_refreshFiles);
+	// --
+	//
+	m_behaviorAction = new QAction(tr("Behavior..."), parent());
+	m_behaviorAction->setIcon(QIcon(":/Images/Images/SchemaBehavior.svg"));
+	m_behaviorAction->setStatusTip(tr("Edit Behavior..."));
+	m_behaviorAction->setEnabled(true);
+
 	return;
 }
 
@@ -1579,6 +1587,12 @@ void SchemaFileViewEx::createContextMenu()
 
 	addAction(m_refreshFileAction);
 	addAction(m_propertiesAction);
+
+	separator = new QAction(this);
+	separator->setSeparator(true);
+	addAction(separator);
+
+	addAction(m_behaviorAction);
 
 	return;
 }
@@ -2125,6 +2139,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_filesView->m_propertiesAction, &QAction::triggered, this, &SchemaControlTabPageEx::showFileProperties);
 
+	connect(m_filesView->m_behaviorAction, &QAction::triggered, this, &SchemaControlTabPageEx::showBehaviorEditor);
+
 	connect(&m_filesView->filesModel(), &SchemaListModelEx::tagsChanged, this, &SchemaControlTabPageEx::schemaTagsChanged);
 
 	// --
@@ -2294,6 +2310,7 @@ void SchemaControlTabPageEx::createToolBar()
 	m_toolBar->addAction(m_filesView->m_propertiesAction);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_filesView->m_behaviorAction);
 
 	return;
 }
@@ -4459,6 +4476,12 @@ void SchemaControlTabPageEx::showFileProperties()
 	}
 
 	return;
+}
+
+void SchemaControlTabPageEx::showBehaviorEditor()
+{
+	DialogClientBehavior d(db(), this);
+	d.exec();
 }
 
 void SchemaControlTabPageEx::ctrlF()

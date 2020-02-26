@@ -615,6 +615,30 @@ namespace Builder
 				  QString(tr("Opening project %1 error (%2).")).arg(projectName).arg(dbLastError));
 	}
 
+	/// IssueCode: PDB2007
+	///
+	/// IssueType: Error
+	///
+	/// Title: File %1 specified in equipment %2.%3 is not found in the project database.
+	///
+	/// Parameters:
+	///			%1 File Name
+	///			%2 EquipmentID
+	///			%3 Property Name
+	///
+	/// Description:
+	///			Occurs if file specified in an equipment property does not exist in the project database
+	///
+	void IssueLogger::errPDB2007(QString fileName, QString equipmentId, QString propertyName)
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2007,
+				  tr("File %1 specified in equipment %2.%3 is not found in the project database.")
+				  .arg(fileName)
+				  .arg(equipmentId)
+				  .arg(propertyName));
+	}
+
 	/// IssueCode: PDB2020
 	///
 	/// IssueType: Error
@@ -7531,19 +7555,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.
+	/// Title: Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.
 	///
 	/// Parameters:
 	///		%1 Monitor EquipmentID
 	///
 	/// Description:
-	///		Monitor cannot be used for tuning in Safety Project. To avoid error clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project set to false.
+	///		Monitor cannot be used for tuning in Safety Project. To avoid error clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project set to false.
 	///
 	void IssueLogger::errEQP6200(QString monotorId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6200,
-				  tr("Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.")
+				  tr("Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.")
 				  .arg(monotorId));
 	}
 
@@ -7551,21 +7575,41 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: uningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+	/// Title: uningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.
 	///
 	/// Parameters:
 	///		%1 TuningService EquipmentID
 	///
 	/// Description:
-	///		TuningService cannot be used for multi LM control in Safety Projects. To avoid error turn On option SingleLmControl of TuningService or override behaviour in menu Project->Project Properties...->Safety Project.
+	///		TuningService cannot be used for multi LM control in Safety Projects. To avoid error turn On option SingleLmControl of TuningService or override behavior in menu Project->Project Properties...->Safety Project.
 	///
 	void IssueLogger::errEQP6201(QString tuningServiceId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6201,
 				  tr("TuningService (%1) cannot be used for multi LM control in Safety Project. "
-					"Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.").
+					"Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.").
 						arg(tuningServiceId));
+	}
+
+	/// IssueCode: EQP6210
+	///
+	/// IssueType: Error
+	///
+	/// Title: Client behavior (%1) specified in %2.BehaviorID does not exist.
+	///
+	/// Parameters:
+	///		%1 Specified BehaviorID
+	///		%2 Software EquipmentID
+	///
+	/// Description:
+	///		Specified BehaviorID does not exist in client behavior database.
+	///
+	void IssueLogger::errEQP6210(QString behaviorId, QString softwareObjectStrId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6210,
+				  tr("Client behavior %1 specified in %2.BehaviorID does not exist. ").arg(behaviorId).arg(softwareObjectStrId));
 	}
 
 	// --

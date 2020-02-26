@@ -73,9 +73,11 @@ CONFIG(release, debug|release) {
 
 
 SOURCES +=\
+    ../lib/ClientBehavior.cpp \
     CentralWidget.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
+    DialogClientBehavior.cpp \
     DialogSettings.cpp \
     EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
@@ -208,10 +210,12 @@ SOURCES +=\
 
 
 HEADERS  += \
+    ../lib/ClientBehavior.h \
     ../lib/StandardColors.h \
     CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
+    DialogClientBehavior.h \
     DialogSettings.h \
     EditEngine/EditEngineNop.h \
     FilesTabPage.h \
@@ -385,10 +389,10 @@ OTHER_FILES += \
     ../Proto/proto_compile.bat \
     ../Proto/serialization.proto \
     Tools/afbschema.xsd \
-    ../Proto/proto_compile.sh \
-    DatabaseUpgrade/Upgrade0039.txt
+    ../Proto/proto_compile.sh
 
 DISTFILES += \
+    ../Etc/ClientBehavior/ClientBehavior.xml \
     LogicModuleConfiguration.js \
     Afbl/_convert_all.bat \
     Afbl/bcomp_great_v1.afb \

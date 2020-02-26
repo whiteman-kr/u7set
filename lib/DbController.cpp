@@ -47,6 +47,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
 	connect(this, &DbController::signal_getFilesInfo, m_worker, &DbWorker::slot_getFilesInfo);
 
+	connect(this, &DbController::signal_getFullPathFilesInfo, m_worker, &DbWorker::slot_getFullPathFilesInfo);
+
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
 	connect(this, &DbController::signal_moveFiles, m_worker, &DbWorker::slot_moveFiles);
@@ -730,6 +732,64 @@ bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo
 	// Emit signal end wait for complete
 	//
 	emit signal_getFilesInfo(fileIds, out);
+
+	bool result = waitForComplete(parentWidget, tr("Geting files info"));
+	return result;
+}
+
+bool DbController::getFileInfo(QString fullPathFileName, DbFileInfo* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	std::vector<QString> fullPathFileNames;
+	fullPathFileNames.push_back(fullPathFileName);
+
+	std::vector<DbFileInfo> outs;
+
+	bool ok = getFileInfo(&fullPathFileNames, &outs, parentWidget);
+
+	if (ok == true )
+	{
+		assert(outs.size() == 1);
+
+		if (outs.size() == 1)
+		{
+			*out = outs[0];
+		}
+	}
+
+	return ok;
+}
+
+bool DbController::getFileInfo(const std::vector<QString>* fullPathFileNames, std::vector<DbFileInfo>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (fullPathFileNames == nullptr ||
+		fullPathFileNames->empty() == true ||
+		out == nullptr)
+	{
+		assert(fullPathFileNames);
+		assert(fullPathFileNames->empty() == false);
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFullPathFilesInfo(fullPathFileNames, out);
 
 	bool result = waitForComplete(parentWidget, tr("Geting files info"));
 	return result;

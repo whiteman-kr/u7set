@@ -246,6 +246,8 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_specPropStruct = s.specPropStruct();
 	m_specPropValues = s.protoSpecPropValues();
 
+	m_tags = std::move(s.tagsSet());
+
 	return true;
 }
 
@@ -282,6 +284,16 @@ void AppSignalParam::save(::Proto::AppSignal* message) const
 
 	message->set_specpropstruct(m_specPropStruct.toStdString());
 	message->set_specpropvalues(m_specPropValues.constData(), m_specPropValues.size());
+
+	// Tags
+	//
+	message->clear_tags();
+	for (const QString& t : m_tags)
+	{
+		message->add_tags(t.toStdString());
+	}
+
+	return;
 }
 
 Hash AppSignalParam::hash() const
@@ -618,4 +630,24 @@ QVariant AppSignalParam::tuningHighBoundToVariant() const
 void AppSignalParam::setTuningHighBound(const TuningValue& value)
 {
 	m_tuningHighBound = value;
+}
+
+const std::set<QString>& AppSignalParam::tags() const
+{
+	return m_tags;
+}
+
+std::set<QString>& AppSignalParam::tags()
+{
+	return m_tags;
+}
+
+void AppSignalParam::setTags(const std::set<QString> tags)
+{
+	m_tags = std::move(tags);
+}
+
+bool AppSignalParam::hasTag(const QString& tag) const
+{
+	return m_tags.find(tag) != m_tags.end();
 }
