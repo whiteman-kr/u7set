@@ -855,11 +855,11 @@ namespace VFrame30
 
 					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavor();
 
-					std::optional<QRgb> color = monitorBehavior.tagToColor(setpointSignalTags);
+					std::optional<std::pair<QRgb, QRgb>> color = monitorBehavior.tagToColors(setpointSignalTags);
 
 					if (color.has_value() == true)
 					{
-						foundColor = color.value();
+						foundColor = drawParam->blinkPhase() ? color.value().first : color.value().second;
 					}
 				}
 				else
@@ -926,7 +926,14 @@ namespace VFrame30
 			}
 		}
 
-		return drawParam->monitorBehavor().tagToColor(alertedTags);
+		std::optional<std::pair<QRgb, QRgb>> result = drawParam->monitorBehavor().tagToColors(alertedTags);
+
+		if (result.has_value() == false)
+		{
+			return {};
+		}
+
+		return drawParam->blinkPhase() ? result.value().first : result.value().second;
 	}
 
 	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam,

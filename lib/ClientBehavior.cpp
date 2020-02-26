@@ -203,7 +203,7 @@ void MonitorBehavior::setTagToColors(const QString& tag, std::pair<QRgb, QRgb> c
 	return;
 }
 
-std::optional<std::pair<QRgb, QRgb> > MonitorBehavior::tagToColors(const std::set<QString>& tags) const
+std::optional<std::pair<QRgb, QRgb>> MonitorBehavior::tagToColors(const std::set<QString>& tags) const
 {
 	// Tags in m_tagToColors have priorities from the highest to the lowest.
 	// So that is why regular loop is used here.
@@ -225,7 +225,7 @@ std::optional<std::pair<QRgb, QRgb> > MonitorBehavior::tagToColors(const std::se
 	return result;
 }
 
-std::optional<std::pair<QRgb, QRgb> > MonitorBehavior::tagToColors(const QStringList& tags) const
+std::optional<std::pair<QRgb, QRgb>> MonitorBehavior::tagToColors(const QStringList& tags) const
 {
 	std::set<QString> tagSet;
 	for (const auto& t : tags)
@@ -236,42 +236,6 @@ std::optional<std::pair<QRgb, QRgb> > MonitorBehavior::tagToColors(const QString
 	return tagToColors(tagSet);
 }
 
-std::optional<QRgb> MonitorBehavior::tagToColor(const std::set<QString>& tags) const
-{
-	int remove_tagToColor_function = 1;
-
-	// Tags in m_tagToColors have priorities from the highest to the lowest.
-	// So that is why regular loop is used here.
-	// For future implementation:
-	// for input param 'tag' if it has a lot of items and m_tagToColor quite big too,
-	// is possible to make optimization, via finding interset of two tags and m_tagToColor.
-	//
-	std::optional<QRgb> result;
-
-	for (const auto& ttc : m_tagToColors)	// Go through m_tagToColors as it is prioritized search
-	{
-		if (tags.find(ttc.tag) != tags.end())
-		{
-			result = ttc.colors.first;				// The first met tag has the highest priority
-			break;
-		}
-	}
-
-	return result;
-}
-
-std::optional<QRgb> MonitorBehavior::tagToColor(const QStringList& tags) const
-{
-	int remove_tagToColor_function = 1;
-
-	std::set<QString> tagSet;
-	for (const auto& t : tags)
-	{
-		tagSet.insert(t);
-	}
-
-	return tagToColor(tagSet);
-}
 
 void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 {

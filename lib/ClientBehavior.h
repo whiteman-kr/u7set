@@ -64,9 +64,6 @@ public:
 	std::optional<std::pair<QRgb, QRgb>> tagToColors(const std::set<QString>& tags) const;	// Return the most periority color
 	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QStringList& tags) const;		// Return the most periority color
 
-	std::optional<QRgb> tagToColor(const std::set<QString>& tags) const;	// Return the most periority color
-	std::optional<QRgb> tagToColor(const QStringList& tags) const;			// Return the most periority color
-
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
