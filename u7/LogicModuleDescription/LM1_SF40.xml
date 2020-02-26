@@ -466,7 +466,7 @@
 			<Pin OpName="o_tconv_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="SET_FLAGS" OpCode="65535" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
+		<AFBComponent Caption="SET_FLAGS" OpCode="255" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>

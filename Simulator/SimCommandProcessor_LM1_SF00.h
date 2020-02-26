@@ -199,52 +199,53 @@ namespace Sim
 		using SimCommandFunc = void(CommandProcessor_LM1_SF00::*)(const DeviceCommand&);
 		using SimAfbFunc = void(CommandProcessor_LM1_SF00::*)(AfbComponentInstance*);
 
-		const QHash<QString, SimCommandFunc> m_nameToFuncCommand
+		const std::map<Hash, SimCommandFunc> m_nameToFuncCommand
 		{
-			{"command_nop",			&CommandProcessor_LM1_SF00::command_not_implemented},	// 1 Not impemented
-			{"command_startafb",	&CommandProcessor_LM1_SF00::command_startafb},			// 2
-			{"command_stop",		&CommandProcessor_LM1_SF00::command_stop},				// 3
-			{"command_mov",			&CommandProcessor_LM1_SF00::command_mov},				// 4
-			{"command_movmem",		&CommandProcessor_LM1_SF00::command_movmem},			// 5
-			{"command_movc",		&CommandProcessor_LM1_SF00::command_movc},				// 6
-			{"command_movbc",		&CommandProcessor_LM1_SF00::command_movbc},				// 7
-			{"command_wrfb",		&CommandProcessor_LM1_SF00::command_wrfb},				// 8
-			{"command_rdfb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 9 Not impemented
-			{"command_wrfbc",		&CommandProcessor_LM1_SF00::command_wrfbc},				// 10
-			{"command_wrfbb",		&CommandProcessor_LM1_SF00::command_wrfbb},				// 11
-			{"command_rdfbb",		&CommandProcessor_LM1_SF00::command_rdfbb},				// 12
-			{"command_rdfbts",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 13 Not impemented
-			{"command_setmem",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 14 Not impemented
-			{"command_movb",		&CommandProcessor_LM1_SF00::command_movb},				// 15
-			{"command_nstartafb",	&CommandProcessor_LM1_SF00::command_not_implemented},	// 16 Not supported?
-			{"command_appstart",	&CommandProcessor_LM1_SF00::command_appstart},			// 17
-			{"command_mov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 18 Not impemented
-			{"command_movc32",		&CommandProcessor_LM1_SF00::command_movc32},			// 19
-			{"command_wrfb32",		&CommandProcessor_LM1_SF00::command_wrfb32},			// 20
-			{"command_rdfb32",		&CommandProcessor_LM1_SF00::command_rdfb32},			// 21
-			{"command_wrfbc32",		&CommandProcessor_LM1_SF00::command_wrfbc32},			// 22
-			{"command_rdfbts32",	&CommandProcessor_LM1_SF00::command_not_implemented},	// 23 Not impemented
-			{"command_movcf",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 24 Not impemented
-			{"command_pmov",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 25 Not impemented
-			{"command_pmov32",		&CommandProcessor_LM1_SF00::command_pmov32},			// 26
-			{"command_fillb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 27 Not impemented
+			{::calcHash(QStringLiteral("command_nop")),			&CommandProcessor_LM1_SF00::command_not_implemented},	// 1 Not impemented
+			{::calcHash(QStringLiteral("command_startafb")),	&CommandProcessor_LM1_SF00::command_startafb},			// 2
+			{::calcHash(QStringLiteral("command_stop")),		&CommandProcessor_LM1_SF00::command_stop},				// 3
+			{::calcHash(QStringLiteral("command_mov")),			&CommandProcessor_LM1_SF00::command_mov},				// 4
+			{::calcHash(QStringLiteral("command_movmem")),		&CommandProcessor_LM1_SF00::command_movmem},			// 5
+			{::calcHash(QStringLiteral("command_movc")),		&CommandProcessor_LM1_SF00::command_movc},				// 6
+			{::calcHash(QStringLiteral("command_movbc")),		&CommandProcessor_LM1_SF00::command_movbc},				// 7
+			{::calcHash(QStringLiteral("command_wrfb")),		&CommandProcessor_LM1_SF00::command_wrfb},				// 8
+			{::calcHash(QStringLiteral("command_rdfb")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 9 Not impemented
+			{::calcHash(QStringLiteral("command_wrfbc")),		&CommandProcessor_LM1_SF00::command_wrfbc},				// 10
+			{::calcHash(QStringLiteral("command_wrfbb")),		&CommandProcessor_LM1_SF00::command_wrfbb},				// 11
+			{::calcHash(QStringLiteral("command_rdfbb")),		&CommandProcessor_LM1_SF00::command_rdfbb},				// 12
+			{::calcHash(QStringLiteral("command_rdfbts")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 13 Not impemented
+			{::calcHash(QStringLiteral("command_setmem")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 14 Not impemented
+			{::calcHash(QStringLiteral("command_movb")),		&CommandProcessor_LM1_SF00::command_movb},				// 15
+			{::calcHash(QStringLiteral("command_nstartafb")),	&CommandProcessor_LM1_SF00::command_not_implemented},	// 16 Not supported?
+			{::calcHash(QStringLiteral("command_appstart")),	&CommandProcessor_LM1_SF00::command_appstart},			// 17
+			{::calcHash(QStringLiteral("command_mov32")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 18 Not impemented
+			{::calcHash(QStringLiteral("command_movc32")),		&CommandProcessor_LM1_SF00::command_movc32},			// 19
+			{::calcHash(QStringLiteral("command_wrfb32")),		&CommandProcessor_LM1_SF00::command_wrfb32},			// 20
+			{::calcHash(QStringLiteral("command_rdfb32")),		&CommandProcessor_LM1_SF00::command_rdfb32},			// 21
+			{::calcHash(QStringLiteral("command_wrfbc32")),		&CommandProcessor_LM1_SF00::command_wrfbc32},			// 22
+			{::calcHash(QStringLiteral("command_rdfbts32")),	&CommandProcessor_LM1_SF00::command_not_implemented},	// 23 Not impemented
+			{::calcHash(QStringLiteral("command_movcf")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 24 Not impemented
+			{::calcHash(QStringLiteral("command_pmov")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 25 Not impemented
+			{::calcHash(QStringLiteral("command_pmov32")),		&CommandProcessor_LM1_SF00::command_pmov32},			// 26
+			{::calcHash(QStringLiteral("command_fillb")),		&CommandProcessor_LM1_SF00::command_not_implemented},	// 27 Not impemented
 		};
 
-		const QHash<QString, SimAfbFunc> m_nameToFuncAfb
+
+		const std::map<Hash, SimAfbFunc> m_nameToFuncAfb
 		{
-			{"afb_logic",		&CommandProcessor_LM1_SF00::afb_logic},			// 1
-			{"afb_not",			&CommandProcessor_LM1_SF00::afb_not},			// 2
-			{"afb_tct",			&CommandProcessor_LM1_SF00::afb_tct},			// 3
-			{"afb_ctud",		&CommandProcessor_LM1_SF00::afb_ctud},			// 5
-			{"afb_bcod",		&CommandProcessor_LM1_SF00::afb_bcod},			// 8
-			{"afb_bdec",		&CommandProcessor_LM1_SF00::afb_bdec},			// 9
-			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bcomp},			// 10
-			{"afb_damper",		&CommandProcessor_LM1_SF00::afb_damper},		// 11
-			{"afb_math",		&CommandProcessor_LM1_SF00::afb_math},			// 13
-			{"afb_scale",		&CommandProcessor_LM1_SF00::afb_scale},			// 14
-			{"afb_dpcomp",		&CommandProcessor_LM1_SF00::afb_dpcomp},		// 20
-			{"afb_mux",			&CommandProcessor_LM1_SF00::afb_mux},			// 21
-			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 23
+			{::calcHash(QStringLiteral("afb_logic")),			&CommandProcessor_LM1_SF00::afb_logic},					// 1
+			{::calcHash(QStringLiteral("afb_not")),				&CommandProcessor_LM1_SF00::afb_not},					// 2
+			{::calcHash(QStringLiteral("afb_tct")),				&CommandProcessor_LM1_SF00::afb_tct},					// 3
+			{::calcHash(QStringLiteral("afb_ctud")),			&CommandProcessor_LM1_SF00::afb_ctud},					// 5
+			{::calcHash(QStringLiteral("afb_bcod")),			&CommandProcessor_LM1_SF00::afb_bcod},					// 8
+			{::calcHash(QStringLiteral("afb_bdec")),			&CommandProcessor_LM1_SF00::afb_bdec},					// 9
+			{::calcHash(QStringLiteral("afb_bcomp")),			&CommandProcessor_LM1_SF00::afb_bcomp},					// 10
+			{::calcHash(QStringLiteral("afb_damper")),			&CommandProcessor_LM1_SF00::afb_damper},				// 11
+			{::calcHash(QStringLiteral("afb_math")),			&CommandProcessor_LM1_SF00::afb_math},					// 13
+			{::calcHash(QStringLiteral("afb_scale")),			&CommandProcessor_LM1_SF00::afb_scale},					// 14
+			{::calcHash(QStringLiteral("afb_dpcomp")),			&CommandProcessor_LM1_SF00::afb_dpcomp},				// 20
+			{::calcHash(QStringLiteral("afb_mux")),				&CommandProcessor_LM1_SF00::afb_mux},					// 21
+			{::calcHash(QStringLiteral("afb_lim")),				&CommandProcessor_LM1_SF00::afb_lim},					// 23
 		};
 
 		static const int m_cycleDurationMs = 5;

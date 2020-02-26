@@ -101,7 +101,7 @@ namespace Sim
 
 		int changesCounter() const;
 
-		std::vector<OverrideRamRecord> ramOverrideData(QString equipmentId, const RamAreaInfo& ramAreaInfo) const;
+		std::vector<OverrideRamRecord> ramOverrideData(const QString& equipmentId, const RamAreaInfo& ramAreaInfo) const;
 
 	private:
 		Sim::AppSignalManager* m_appSignalManager = nullptr;

@@ -124,8 +124,7 @@ namespace Sim
 
 	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode) const
 	{
-		auto afbc = m_device->m_lmDescription.component(opCode);
-		AfbComponent result(afbc);
+		AfbComponent result(m_device->m_lmDescription.component(opCode));
 		return result;
 	}
 
@@ -152,10 +151,9 @@ namespace Sim
 		if (ok == false)
 		{
 			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
-			return false;
 		}
 
-		return true;
+		return ok;
 	}
 
 	// RAM access

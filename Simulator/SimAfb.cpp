@@ -7,8 +7,14 @@
 namespace Sim
 {
 
-	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent) :
+	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent>& afbComponent) :
 		m_afbComponent(afbComponent)
+	{
+		// assert(m_afbComponent);	Actually m_afbComponent can be nullptr, script should call isNull to detect it
+	}
+
+	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent>&& afbComponent) :
+		m_afbComponent(std::move(afbComponent))
 	{
 		// assert(m_afbComponent);	Actually m_afbComponent can be nullptr, script should call isNull to detect it
 	}
@@ -56,6 +62,16 @@ namespace Sim
 		}
 
 		return m_afbComponent->simulationFunc();
+	}
+
+	Hash AfbComponent::simulationFuncHash() const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return UNDEFINED_HASH;
+		}
+
+		return m_afbComponent->simulationFuncHash();
 	}
 
 	bool AfbComponent::pinExists(int pinOpIndex) const
@@ -553,86 +569,93 @@ namespace Sim
 	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :
 		m_instanceNo(instanceNo)
 	{
-		m_params.reserve(32);
+		//m_params.reserve(32);
+		m_params_v.reserve(36);
 	}
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		m_params[param.opIndex()] = param;
+		if (param.opIndex() >= m_params_v.size())
+		{
+			m_params_v.resize(param.opIndex() + 1);
+		}
+
+		m_params_v[param.opIndex()] = param;
 		return true;
 	}
 
-	AfbComponentParam* AfbComponentInstance::param(int opIndex)
+	AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
 	{
-		auto it = m_params.find(opIndex);
-
-		if (it == m_params.end())
+		if (opIndex >= m_params_v.size() ||
+			m_params_v[opIndex].has_value() == false)
 		{
 			SimException::raise(QString("Param %1 is not found in AFB.").arg(opIndex));
 		}
 
-		return &it->second;
+		return &m_params_v[opIndex].value();
 	}
 
-	bool AfbComponentInstance::paramExists(int opIndex) const
+	bool AfbComponentInstance::paramExists(quint16 opIndex) const
 	{
-		return m_params.find(opIndex) != m_params.end();
+		if (opIndex > m_params_v.size())
+		{
+			return false;
+		}
+
+		return m_params_v[opIndex].has_value();
 	}
 
-	bool AfbComponentInstance::addParamWord(int opIndex, quint16 value)
+	bool AfbComponentInstance::addParamWord(quint16 opIndex, quint16 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setWordValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamDword(int opIndex, quint32 value)
+	bool AfbComponentInstance::addParamDword(quint16 opIndex, quint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setDwordValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamFloat(int opIndex, float value)
+	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamDouble(int opIndex, double value)
+	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setDoubleValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamSignedInt(int opIndex, qint32 value)
+	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamSignedInt64(int opIndex, qint64 value)
+	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedInt64Value(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
+	//
+	// ModelComponent
+	//
 	ModelComponent::ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp) :
 		m_afbComp(afbComp)
 	{
@@ -679,17 +702,22 @@ namespace Sim
 			return false;
 		}
 
-		// Check if instParam.implParamOpIndex really exists in AfbComponent
+		// !!!The next condidion is commented fro perfomance reason
+		// We check pinExists in all commands on parse stage, so it is nop need to checkit again
+		// This check took up to 8% of programm runtime
+		// !!!
 		//
-		if (m_afbComp->pinExists(instParam.opIndex()) == false)
-		{
-			// Can't find such pin in AfbComponent
-			//
-			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
-								.arg(instParam.opIndex())
-								.arg(m_afbComp->caption());
-			return false;
-		}
+//		// Check if instParam.implParamOpIndex really exists in AfbComponent
+//		//
+//		if (m_afbComp->pinExists(instParam.opIndex()) == false)
+//		{
+//			// Can't find such pin in AfbComponent
+//			//
+//			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
+//								.arg(instParam.opIndex())
+//								.arg(m_afbComp->caption());
+//			return false;
+//		}
 
 		// Get or add instance and set new param
 		//
@@ -711,6 +739,7 @@ namespace Sim
 
 	AfbComponentSet::AfbComponentSet()
 	{
+		m_components.reserve(32);
 	}
 
 	void AfbComponentSet::clear()
@@ -722,10 +751,17 @@ namespace Sim
 	{
 		m_components.clear();
 
-		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbs = lmDescription.afbComponents();
-		for (auto[key, afbComp] : afbs)
+		const auto& afbs = lmDescription.afbComponents();
+		m_components.resize(256);		// opcode is quint16, and there is opcode 256 for set_flags (((
+
+		for (const auto&[keyAfbOpCode, afbComp] : afbs)
 		{
-			Q_ASSERT(key == afbComp->opCode());
+			Q_ASSERT(keyAfbOpCode == afbComp->opCode());
+
+			if (keyAfbOpCode >= m_components.size())
+			{
+				m_components.resize(keyAfbOpCode + 1);
+			}
 
 			std::shared_ptr<ModelComponent> mc = std::make_shared<ModelComponent>(afbComp);
 
@@ -735,7 +771,7 @@ namespace Sim
 				return false;
 			}
 
-			m_components[key] = mc;
+			m_components[keyAfbOpCode] = std::move(mc);
 		}
 
 		return true;
@@ -743,37 +779,42 @@ namespace Sim
 
 	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
-		assert(errorMessage);
+		Q_ASSERT(errorMessage);
 
-		auto foundIt = m_components.find(afbOpCode);
-		if (foundIt == m_components.end())
+		if (afbOpCode >= m_components.size())
 		{
-			// Component should be created in init();
+			Q_ASSERT(afbOpCode < m_components.size());
+			*errorMessage = QString("AFB with opcode %1 is not forund").arg(afbOpCode);
+			return false;
+		}
+
+		std::shared_ptr<ModelComponent>& modelComponent = m_components[afbOpCode];
+		if (modelComponent == nullptr)
+		{
+			// Component must be created in init();
 			//
 			*errorMessage = QString("AFB with opcode %1 is not found in AfbComponentSet").arg(afbOpCode);
 			return false;
 		}
 
-		std::shared_ptr<ModelComponent>& modelComponent = foundIt->second;
-		assert(modelComponent);
-
-		bool ok = modelComponent->addParam(instanceNo, instParam, errorMessage);
-		return ok;
+		return modelComponent->addParam(instanceNo, instParam, errorMessage);
 	}
 
 	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance)
 	{
-		auto componentIt = m_components.find(componentOpCode);
-		if (componentIt == m_components.end())
+		if (componentOpCode < 0 || componentOpCode >= m_components.size())
+		{
+			Q_ASSERT(componentOpCode >= 0 && componentOpCode < m_components.size());
+			return nullptr;
+		}
+
+		auto& component = m_components[componentOpCode];
+		if (component == nullptr)
 		{
 			return nullptr;
 		}
 
-		std::shared_ptr<ModelComponent>	component = componentIt->second;
-
-		AfbComponentInstance* result = component->instance(instance);
-
-		return result;
+		return component->instance(instance);
 	}
 
 }

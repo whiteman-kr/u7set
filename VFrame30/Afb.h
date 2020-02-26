@@ -1,4 +1,5 @@
 #pragma once
+#include <QBitArray>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 
@@ -25,18 +26,18 @@ namespace Afb
 	public:
 		AfbComponentPin() = default;
 		AfbComponentPin(const AfbComponentPin&) = default;
-		AfbComponentPin(AfbComponentPin&&) = default;
-		AfbComponentPin(const QString caption, int opIndex, AfbComponentPinType type);
+		AfbComponentPin(AfbComponentPin&&) noexcept = default;
+		AfbComponentPin(const QString& caption, int opIndex, AfbComponentPinType type);
 
 		AfbComponentPin& operator=(const AfbComponentPin&) = default;
-		AfbComponentPin& operator=(AfbComponentPin&&) = default;
+		AfbComponentPin& operator=(AfbComponentPin&&) noexcept = default;
 
 	public:
 		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
 		bool saveToXml(QDomElement* xmlElement) const;
 
 	public:
-		QString caption() const;
+		const QString& caption() const;
 		void setCaption(const QString& value);
 
 		int opIndex() const;
@@ -74,7 +75,7 @@ namespace Afb
 		int opCode() const;
 		void setOpCode(int value);
 
-		QString caption() const;
+		const QString& caption() const;
 		void setCaption(const QString& value);
 
 		int impVersion() const;
@@ -86,10 +87,12 @@ namespace Afb
 		int maxInstCount() const;
 		void setMaxInstCount(int value);
 
-		QString simulationFunc() const;
+		const QString& simulationFunc() const;
 		void setSimulationFunc(const QString& value);
 
-		const std::map<int, AfbComponentPin>& pins() const;
+		Hash simulationFuncHash() const;
+
+		const std::unordered_map<int, AfbComponentPin>& pins() const;
 
 		bool pinExists(int pinOpIndex) const;
 		QString pinCaption(int pinOpIndex) const;
@@ -103,8 +106,10 @@ namespace Afb
         int m_versionOpIndex = -1;
 		int m_maxInstCount = 0;
 		QString m_simulationFunc;
+		Hash m_simulationFuncHash = UNDEFINED_HASH;
 
-		std::map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
+		std::unordered_map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
+		std::vector<bool> m_pinExists;									// For fast searching of pin, intensively used in simulator
 		// Operator= is present, don't forget to add new fields to it
 		//
 	};
@@ -175,7 +180,7 @@ namespace Afb
 		const QString& opName() const;
 		void setOpName(const QString& value);
 
-		Q_INVOKABLE QString caption() const;
+		Q_INVOKABLE const QString& caption() const;
 		Q_INVOKABLE QString jsCaption();
 		void setCaption(const QString& caption);
 
@@ -296,7 +301,7 @@ private:
 		QString changedScript() const;
 		void setChangedScript(const QString& value);
 
-		QString units() const;
+		const QString& units() const;
 		void setUnits(const QString& value);
 
 		// Data
@@ -362,16 +367,16 @@ private:
 		const QString& strID() const;
 		void setStrID(const QString& strID);
 
-		QString caption() const;
+		const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		QString description() const;
+		const QString& description() const;
 		void setDescription(const QString& value);
 
-		QString version() const;
+		const QString& version() const;
 		void setVersion(const QString& value);
 
-		QString category() const;
+		const QString& category() const;
 		void setCategory(const QString& value);
 
 		int opCode() const;

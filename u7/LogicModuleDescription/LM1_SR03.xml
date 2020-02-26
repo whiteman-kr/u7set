@@ -467,7 +467,7 @@
 			<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="17"	PinType = "Output"/>			
 		</AFBComponent>
-		<AFBComponent Caption="SET_FLAGS" OpCode="65535" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
+		<AFBComponent Caption="SET_FLAGS" OpCode="255" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>

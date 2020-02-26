@@ -64,6 +64,7 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 	else
 	{
 		simulationFunc = element.attribute(QLatin1String("SimulationFunc"));
+		simulationFuncHash = ::calcHash(simulationFunc);
 	}
 
 	// ParseFunc
@@ -132,7 +133,7 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 	m_checkAfbVersionsOffset = src.m_checkAfbVersionsOffset;
 
 	m_afbComponents.clear();
-	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
+	for (const auto& p : src.m_afbComponents)
 	{
 		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
 		m_afbComponents.insert({p.first, afbComponentCopy});
@@ -1009,7 +1010,6 @@ const std::vector<std::shared_ptr<Afb::AfbElement>>& LmDescription::afbs() const
 std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 {
 	auto it = m_afbComponents.find(opCode);
-
 	if (it == m_afbComponents.end())
 	{
 		return nullptr;

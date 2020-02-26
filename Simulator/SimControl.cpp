@@ -430,7 +430,7 @@ namespace Sim
 			if (minPossibleTime > cd.m_currentTime)
 			{
 				// If current simulation is ahead of physical time, pause it a little bit
-				//
+
 				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
 					ahead > 0us)
 				{

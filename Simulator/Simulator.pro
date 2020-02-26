@@ -100,6 +100,7 @@ SOURCES += \
     ../lib/OutputLog.cpp
 
 HEADERS += \
+    ../lib/Hash.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \

@@ -40,12 +40,12 @@ namespace Sim
 		// Check if data in specific range
 		// Raise SimException if fail
 		//
-		void checkParamRange(int paramValue, int minValue, int maxValue, QString param) const;
+		void checkParamRange(int paramValue, int minValue, int maxValue, const QString& param) const;
 
 		// Check if data in specific range
 		// Raise SimException if fail
 		//
-		void checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, QString paramName = QString()) const;
+		void checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, const QString& paramName) const;
 
 		// Generation command string functions (helpers)
 		//

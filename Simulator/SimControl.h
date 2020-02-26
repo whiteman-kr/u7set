@@ -57,7 +57,7 @@ namespace Sim
 		}
 
 
-		QString equipmentId() const
+		const QString& equipmentId() const
 		{
 			return m_lm->equipmentId();
 		}

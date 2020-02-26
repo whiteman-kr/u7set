@@ -3,6 +3,7 @@
 #include <map>
 #include <unordered_map>
 #include <memory>
+#include <optional>
 #include <QObject>
 #include "../lib/LmDescription.h"
 #include "../VFrame30/Afb.h"
@@ -15,7 +16,9 @@ namespace Sim
 	public:
 		AfbComponent() = delete;
 		AfbComponent(const AfbComponent&) = default;
-		AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent);
+		AfbComponent(AfbComponent&&) noexcept = default;
+		AfbComponent(std::shared_ptr<Afb::AfbComponent>& afbComponent);
+		AfbComponent(std::shared_ptr<Afb::AfbComponent>&& afbComponent);
 		~AfbComponent() = default;
 
 	public:
@@ -25,6 +28,7 @@ namespace Sim
 		QString caption() const;
 		int maxInstCount() const;
 		QString simulationFunc() const;
+		Hash simulationFuncHash() const;
 
 		bool pinExists(int pinOpIndex) const;
 		QString pinCaption(int pinOpIndex) const;
@@ -140,20 +144,21 @@ namespace Sim
 
 	public:
 		bool addParam(const AfbComponentParam& param);
-		AfbComponentParam* param(int opIndex);
+		AfbComponentParam* param(quint16 opIndex);
 
-		bool paramExists(int opIndex) const;
+		bool paramExists(quint16 opIndex) const;
 
-		bool addParamWord(int opIndex, quint16 value);
-		bool addParamDword(int opIndex, quint32 value);
-		bool addParamFloat(int opIndex, float value);
-		bool addParamDouble(int opIndex, double value);
-		bool addParamSignedInt(int opIndex, qint32 value);
-		bool addParamSignedInt64(int opIndex, qint64 value);
+		bool addParamWord(quint16 opIndex, quint16 value);
+		bool addParamDword(quint16 opIndex, quint32 value);
+		bool addParamFloat(quint16 opIndex, float value);
+		bool addParamDouble(quint16 opIndex, double value);
+		bool addParamSignedInt(quint16 opIndex, qint32 value);
+		bool addParamSignedInt64(quint16 opIndex, qint64 value);
 
 	private:
 		quint16 m_instanceNo = 0;
-		std::unordered_map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
+		//std::unordered_map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
+		std::vector<std::optional<AfbComponentParam>> m_params_v;		// Index is AfbComponentParam.opIndex()
 	};
 
 
@@ -190,7 +195,7 @@ namespace Sim
 		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
 
 	private:
-		std::unordered_map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode
+		std::vector<std::shared_ptr<ModelComponent>> m_components;		// Index is opcode of AFB
 	};
 }
 

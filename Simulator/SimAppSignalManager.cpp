@@ -100,11 +100,11 @@ namespace Sim
 		return ok;
 	}
 
-	void AppSignalManager::setData(QString equipmentId, const Sim::Ram& ram)
+	void AppSignalManager::setData(const QString& equipmentId, const Sim::Ram& ram)
 	{
 		QWriteLocker wl(&m_ramLock);
 
-		m_ram[equipmentId] = ram;
+		m_ram[equipmentId].updateFrom(ram);
 
 		return;
 	}

@@ -92,7 +92,7 @@ namespace Sim
 		return afb;
 	}
 
-	void CommandProcessor::checkParamRange(int paramValue, int minValue, int maxValue, QString param) const
+	void CommandProcessor::checkParamRange(int paramValue, int minValue, int maxValue, const QString& param) const
 	{
 		if (paramValue < minValue || paramValue > maxValue)
 		{
@@ -108,7 +108,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor::checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, QString paramName) const
+	void CommandProcessor::checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, const QString& paramName) const
 	{
 		if (afbInstance == nullptr)
 		{

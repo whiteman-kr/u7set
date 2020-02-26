@@ -70,6 +70,11 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	connect(this, &SimWidget::needUpdateActions, this, &SimWidget::updateActions);
 
+	if (m_slaveWindow == false)
+	{
+		connect(qApp, &QCoreApplication::aboutToQuit, this, &SimWidget::aboutToQuit);
+	}
+
 	return;
 }
 
@@ -246,14 +251,12 @@ static bool firstEvent = true;
 	return;
 }
 
-void SimWidget::closeEvent(QCloseEvent* e)
+void SimWidget::aboutToQuit()
 {
 	if (m_slaveWindow == false)
 	{
 		QSettings().setValue("SimWidget/state", saveState());
 	}
-
-	return QMainWindow::closeEvent(e);
 }
 
 void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)

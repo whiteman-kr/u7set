@@ -566,7 +566,7 @@ namespace Sim
 		return m_changesCounter;
 	}
 
-	std::vector<OverrideRamRecord> OverrideSignals::ramOverrideData(QString equipmentId, const RamAreaInfo& ramAreaInfo) const
+	std::vector<OverrideRamRecord> OverrideSignals::ramOverrideData(const QString& equipmentId, const RamAreaInfo& ramAreaInfo) const
 	{
 		std::vector<OverrideRamRecord> result;
 		E::LogicModuleRamAccess ramAccess = ramAreaInfo.access();

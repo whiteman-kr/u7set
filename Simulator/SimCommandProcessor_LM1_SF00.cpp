@@ -17,13 +17,13 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::runCommand(const DeviceCommand& command)
 	{
-		auto it = m_nameToFuncCommand.find(command.m_command.simulationFunc);
+		auto it = m_nameToFuncCommand.find(command.m_command.simulationFuncHash);
 		if (it == m_nameToFuncCommand.end())
 		{
 			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM1_SF00::runCommand");
 		}
 
-		auto& func = *it;
+		auto& func = it->second;
 
 		// Call the command
 		//
@@ -83,18 +83,15 @@ namespace Sim
 								"CommandProcessor_LM1_SF00::command_startafb");
 		}
 
-		QString afbSimFunc = afb.simulationFunc();
-		assert(afbSimFunc.isEmpty() == false);
-
 		// AFB
 		//
-		auto it = m_nameToFuncAfb.find(afbSimFunc);
+		auto it = m_nameToFuncAfb.find(afb.simulationFuncHash());
 		if (it == m_nameToFuncAfb.end())
 		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afbSimFunc), "CommandProcessor_LM1_SF00::command_startafb");
+			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFuncHash()), "CommandProcessor_LM1_SF00::command_startafb");
 		}
 
-		auto& func = *it;
+		auto& func = it->second;
 
 		// Call the command
 		//
@@ -271,7 +268,7 @@ namespace Sim
 
 		// Checks
 		//
-		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 
 		// String representation
 		//
@@ -502,7 +499,7 @@ namespace Sim
 
 		// Checks
 		//
-		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 
 		// String representation
 		//

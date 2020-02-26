@@ -286,7 +286,7 @@ void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
 	{
 		const std::shared_ptr<Afb::AfbComponent> afbComponent = it->second;
 
-		const std::map<int, Afb::AfbComponentPin>& pins = afbComponent->pins();
+		const auto& pins = afbComponent->pins();
 
 		assert(it->first == afbComponent->opCode());
 
@@ -314,9 +314,15 @@ void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
 		m_afbComponentTreeWidget->addTopLevelItem(item);
 
 		// Add components pins
+		//
+		std::map<int, Afb::AfbComponentPin> afbCombonentPins;
+		for (const auto&[k, v] : afbComponent->pins())
+		{
+			afbCombonentPins[k] = v;
+		}
 
-		const std::map<int, Afb::AfbComponentPin>& afbCombonentPins = afbComponent->pins();
-
+		// --
+		//
 		for (auto pit = afbCombonentPins.begin(); pit != afbCombonentPins.end(); pit++)
 		{
 			const Afb::AfbComponentPin& pin = pit->second;

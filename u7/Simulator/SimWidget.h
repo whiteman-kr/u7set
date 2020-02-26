@@ -19,6 +19,7 @@ class SimToolBar;
 class SimWidget : public QMainWindow, HasDbController, protected Sim::Output
 {
 	Q_OBJECT
+
 public:
 	SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 			  DbController* db,
@@ -33,12 +34,13 @@ protected:
 	QDockWidget* createMemoryDock(QString caption);
 
 	virtual void showEvent(QShowEvent* e) override;
-	virtual void closeEvent(QCloseEvent* e) override;
 
 signals:
 	void needUpdateActions();
 
 protected slots:
+	void aboutToQuit();
+
 	void controlStateChanged(Sim::SimControlState state);
 	void updateActions();
 
