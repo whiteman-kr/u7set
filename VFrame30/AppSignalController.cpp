@@ -102,6 +102,22 @@ namespace VFrame30
 		return m_appSignalManager->signalState(appSignalIds, result, found);
 	}
 
+	QStringList AppSignalController::signalTags(Hash signalHash) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(false);
+			return {};
+		}
+
+		return m_appSignalManager->signalTags(signalHash);
+	}
+
+	QStringList AppSignalController::signalTags(const QString& appSignalId) const
+	{
+		return signalTags(::calcHash(appSignalId));
+	}
+
 	bool AppSignalController::signalHasTag(Hash signalHash, const QString& tag) const
 	{
 		if (m_appSignalManager == nullptr)
@@ -122,7 +138,7 @@ namespace VFrame30
 	{
 		if (m_appSignalManager == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(m_appSignalManager);
 			return {};
 		}
 

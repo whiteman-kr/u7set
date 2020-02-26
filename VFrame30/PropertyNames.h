@@ -81,6 +81,7 @@ namespace VFrame30
 		static const QString indicator;
 
 		static const QString indicatorSetpointType;
+		static const QString indicatorColorSource;
 		static const QString indicatorSchemaItemLabel;
 		static const QString indicatorOutputAppSignalId;
 		static const QString indicatorStaticValue;
@@ -102,8 +103,7 @@ namespace VFrame30
 		static const QString indicatorMargingRight;
 		static const QString indicatorMargingBottom;
 
-		static const QString drawAutoSetpoints;
-		static const QString drawCustomSetpoints;
+		static const QString drawSetpoints;
 		static const QString customSetpoints;
 
 		// --

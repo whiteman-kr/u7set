@@ -16,17 +16,13 @@
 class ComparatorSignal
 {
 public:
-	bool isConst() const;
-	void setIsConst(bool isConst);
-
-	double constValue() const;
+	void setSignalParams(const QString& appSignalID, bool isAcquired, bool isConst, double constValue);
 	void setConstValue(double constValue);
 
+	bool isConst() const;
+	double constValue() const;
 	QString appSignalID() const;
-	void setAppSignalID(const QString& appSignalID);
-
 	bool isAcquired() const;
-	void setIsAcquired(bool isAcquired);
 
 	void serializeTo(Proto::ComparatorSignal* s) const;
 	bool serializeFrom(const Proto::ComparatorSignal& s);

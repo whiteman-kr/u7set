@@ -2,20 +2,21 @@
 
 #include <optional>
 #include "../lib/PropertyObject.h"
-#include "../lib/DbController.h"
+
 
 //
 // ClientBehavior
 //
-
 class ClientBehavior : public PropertyObject
 {
 public:
 	ClientBehavior();
 	ClientBehavior(const ClientBehavior& src) noexcept;
+	ClientBehavior(ClientBehavior&& src) noexcept;
 	virtual ~ClientBehavior();
 
 	ClientBehavior& operator=(const ClientBehavior& src);
+	ClientBehavior& operator=(ClientBehavior&& src);
 
 public:
 	bool isMonitorBehavior() const;
@@ -46,27 +47,41 @@ public:
 	MonitorBehavior(const MonitorBehavior& src) noexcept;
 	virtual ~MonitorBehavior() = default;
 
-	MonitorBehavior& operator=(const MonitorBehavior& That);
+	MonitorBehavior& operator=(const MonitorBehavior& src);
+	MonitorBehavior& operator=(MonitorBehavior&& src);
 
 public:
-	QColor tagCriticalToColor() const;
-	void setTagCriticalToColor(const QColor& color);
 
-	QColor tagAttentionToColor() const;
-	void setTagAttentionToColor(const QColor& color);
+	QStringList tags() const;
 
-	QColor tagGeneralToColor() const;
-	void setTagGeneralToColor(const QColor& color);
+	void setTag(int index, const QString& tag);
+	bool removeTagToColor(int index);
+	bool moveTagToColor(int index, int step);
 
-	std::optional<QColor> tagToColor(const QString& tag) const;
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QString& tag) const;
+	void setTagToColors(const QString& tag, std::pair<QRgb, QRgb> colors);
+
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const std::set<QString>& tags) const;	// Return the most periority color
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QStringList& tags) const;		// Return the most periority color
 
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
 
 private:
-	QHash<QString, QColor> m_tagToColor;
+	static const QString criticalTag;
+	static const QString attentionTag;
+	static const QString generalTag;
+
+	struct TagToColorsType
+	{
+		QString tag;
+		std::pair<QRgb, QRgb> colors;
+	};
+
+	std::vector<TagToColorsType> m_tagToColors;		// The lower position - the higher priority of the tag
 };
+
 
 //
 // TuningClientBehavior
@@ -84,19 +99,6 @@ public:
 		return *this;
 	}
 
-public:
-	QColor defaultMismatchBackColor() const;
-	void setDefaultMismatchBackColor(const QColor& color);
-
-	QColor defaultMismatchTextColor() const;
-	void setDefaultMismatchTextColor(const QColor& color);
-
-	QColor unappliedBackColor() const;
-	void setUnappliedBackColor(const QColor& color);
-
-	QColor defaultUnappliedTextColor() const;
-	void setDefaultUnappliedTextColor(const QColor& color);
-
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
@@ -104,6 +106,7 @@ private:
 private:
 	QHash<QString, QColor> m_tagToColor;
 };
+
 
 //
 // ClientBehaviorStorage

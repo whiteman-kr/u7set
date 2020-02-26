@@ -343,6 +343,18 @@ namespace VFrame30
 		return m_session;
 	}
 
+	const MonitorBehavior& CDrawParam::monitorBehavor() const
+	{
+		Q_ASSERT(m_schemaView);
+		return clientSchemaView()->monitorBehavor();
+	}
+
+	const TuningClientBehavior& CDrawParam::tuningClientBehavior() const
+	{
+		Q_ASSERT(m_schemaView);
+		return clientSchemaView()->tuningClientBehavior();
+	}
+
 	const QStringList& CDrawParam::hightlightIds() const
 	{
 		return m_highlightIds;

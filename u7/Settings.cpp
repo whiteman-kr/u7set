@@ -163,6 +163,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("BehaviorEditor/sortColumn", m_behaviorEditorSortColumn);
 	s.setValue("BehaviorEditor/sortOrder", static_cast<int>(m_behaviorEditorSortOrder));
+	s.setValue("BehaviorEditor/hSplitterState", m_behaviorEditorHSplitterState);
+	s.setValue("BehaviorEditor/vSplitterState", m_behaviorEditorVSplitterState);
+
 
 	s.setValue("AfbLibraryCheck/mainSplitter", m_afbLibratyCheckSplitterState);
 
@@ -269,6 +272,8 @@ void Settings::loadUserScope()
 
 	m_behaviorEditorSortColumn = s.value("BehaviorEditor/sortColumn").toInt();
 	m_behaviorEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BehaviorEditor/sortOrder").toInt());
+	m_behaviorEditorHSplitterState = s.value("BehaviorEditor/hSplitterState").toByteArray();
+	m_behaviorEditorVSplitterState = s.value("BehaviorEditor/vSplitterState").toByteArray();
 
 	//
 

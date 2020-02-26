@@ -45,11 +45,12 @@ const TimeStamp& AppSignalState::time(E::TimeType timeType) const
 		return m_time.system;
 	case E::TimeType::Local:
 		return m_time.local;
+	default:
+		{
+			static const TimeStamp dummy;
+			return dummy;
+		}
 	}
-
-	assert(false);
-static const TimeStamp dummy;
-	return dummy;
 }
 
 double AppSignalState::value() const  noexcept
@@ -640,6 +641,19 @@ const std::set<QString>& AppSignalParam::tags() const
 std::set<QString>& AppSignalParam::tags()
 {
 	return m_tags;
+}
+
+QStringList AppSignalParam::tagStringList() const
+{
+	QStringList result;
+	result.reserve(static_cast<int>(m_tags.size()));
+
+	for (const QString& tag : m_tags)
+	{
+		result << tag;
+	}
+
+	return result;
 }
 
 void AppSignalParam::setTags(const std::set<QString> tags)

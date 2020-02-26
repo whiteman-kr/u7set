@@ -72,6 +72,7 @@ namespace VFrame30
 	const QString PropertyNames::indicatorSettings{"IndicatorSettings"};
 
 	const QString PropertyNames::indicatorSetpointType{"SetpointType"};
+	const QString PropertyNames::indicatorColorSource{"ColorSource"};
 	const QString PropertyNames::indicatorSchemaItemLabel{"SchemaItemLabel"};
 	const QString PropertyNames::indicatorOutputAppSignalId{"OutputAppSignalId"};
 	const QString PropertyNames::indicatorStaticValue{"StaticValue"};
@@ -93,8 +94,7 @@ namespace VFrame30
 	const QString PropertyNames::indicatorMargingRight{"MarginRight"};
 	const QString PropertyNames::indicatorMargingBottom{"MarginBottom"};
 
-	const QString PropertyNames::drawAutoSetpoints{"DrawAutoSetpoints"};
-	const QString PropertyNames::drawCustomSetpoints{"DrawCustomSetpoints"};
+	const QString PropertyNames::drawSetpoints{"DrawSetpoints"};
 	const QString PropertyNames::customSetpoints{"CustomSetpoints"};
 
 	// SchemaItemValue Colors

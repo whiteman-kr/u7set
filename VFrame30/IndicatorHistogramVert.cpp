@@ -13,26 +13,9 @@ namespace VFrame30
 	{
 		// Common category
 		//
-		ADD_PROPERTY_GETTER_SETTER(E::IndicatorSetpointType, PropertyNames::indicatorSetpointType, true, CustomSetPoint::setpointType, CustomSetPoint::setSetpointType);
+		ADD_PROPERTY_GETTER_SETTER(E::IndicatorColorSource, PropertyNames::indicatorColorSource, true, CustomSetPoint::colorSource, CustomSetPoint::setColorSource);
 		ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, CustomSetPoint::color, CustomSetPoint::setColor);
-
-		// Type AutoByLabel category
-		//
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorSchemaItemLabel, true, CustomSetPoint::schemaItemLabel, CustomSetPoint::setSchemaItemLabel)
-				->setCategory(PropertyNames::indicatorSetpointTypeByLabelCategory);
-
-		// Type AutoBySignalID category
-		//
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorOutputAppSignalId, true, CustomSetPoint::outputAppSignalId, CustomSetPoint::setOutputAppSignalId)
-				->setCategory(PropertyNames::indicatorSetpointTypeBySignalIdCategory);
-
-		// Type Static category
-		//
-//		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::indicatorStaticValue, true, CustomSetPoint::staticValue, CustomSetPoint::setStaticValue)
-//			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
-
-//		ADD_PROPERTY_GETTER_SETTER(E::CmpType, PropertyNames::indicatorStaticCompareType, true, CustomSetPoint::staticCompareType, CustomSetPoint::setStaticCompareType)
-//			->setCategory(PropertyNames::indicatorSetpointTypeStaticCategory);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorOutputAppSignalId, true, CustomSetPoint::outputAppSignalId, CustomSetPoint::setOutputAppSignalId);
 
 		return;
 	}
@@ -45,42 +28,32 @@ namespace VFrame30
 			return false;
 		}
 
-		message->set_setpointtype(static_cast<int32_t>(m_setpointType));
+		message->set_colorsource(static_cast<int32_t>(m_colorSource));
 		message->set_color(m_color.rgba());
 
-		message->set_schemaitemlabel(m_schemaItemLabel.toStdString());
-
 		message->set_outputappsignalid(m_outputAppSignalId.toStdString());
-
-//		message->set_staticvalue(m_staticValue);
-//		message->set_staticcomparetype(static_cast<int32_t>(m_staticCompareType));
 
 		return true;
 	}
 
 	bool CustomSetPoint::load(const Proto::VFrameSetPoint& message)
 	{
-		m_setpointType = static_cast<E::IndicatorSetpointType>(message.setpointtype());
+		m_colorSource = static_cast<E::IndicatorColorSource>(message.colorsource());
 		m_color = message.color();
 
-		m_schemaItemLabel = QString::fromStdString(message.schemaitemlabel());
-
 		m_outputAppSignalId = QString::fromStdString(message.outputappsignalid());
-
-//		m_staticValue = message.staticvalue();
-//		m_staticCompareType = static_cast<E::CmpType>(message.staticcomparetype());
 
 		return true;
 	}
 
-	E::IndicatorSetpointType CustomSetPoint::setpointType() const
+	E::IndicatorColorSource CustomSetPoint::colorSource() const
 	{
-		return m_setpointType;
+		return m_colorSource;
 	}
 
-	void CustomSetPoint::setSetpointType(E::IndicatorSetpointType value)
+	void CustomSetPoint::setColorSource(E::IndicatorColorSource value)
 	{
-		m_setpointType = value;
+		m_colorSource = value;
 	}
 
 	QColor CustomSetPoint::color() const
@@ -93,16 +66,6 @@ namespace VFrame30
 		m_color = value;
 	}
 
-	const QString& CustomSetPoint::schemaItemLabel() const
-	{
-		return m_schemaItemLabel;
-	}
-
-	void CustomSetPoint::setSchemaItemLabel(const QString& value)
-	{
-		m_schemaItemLabel = value;
-	}
-
 	const QString& CustomSetPoint::outputAppSignalId() const
 	{
 		return m_outputAppSignalId;
@@ -113,25 +76,6 @@ namespace VFrame30
 		m_outputAppSignalId = value;
 	}
 
-//	double CustomSetPoint::staticValue() const
-//	{
-//		return m_staticValue;
-//	}
-
-//	void CustomSetPoint::setStaticValue(double value)
-//	{
-//		m_staticValue = value;
-//	}
-
-//	E::CmpType CustomSetPoint::staticCompareType() const
-//	{
-//		return m_staticCompareType;
-//	}
-
-//	void CustomSetPoint::setStaticCompareType(E::CmpType value)
-//	{
-//		m_staticCompareType = value;
-//	}
 
 	//
 	// Vertical histogram, the base view
@@ -264,26 +208,18 @@ namespace VFrame30
 		// bool m_drawCustomSetpoints = true;					// Draw custom setpoints
 		// PropertyVector<CustomSetPoint> m_customSetPoints;	// Custom setpoint list
 		//
-		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
-											 PropertyNames::drawAutoSetpoints,
+		propertyObject->ADD_PROPERTY_CAT_VAR(E::IndicatorDrawSetpoints,
+											 PropertyNames::drawSetpoints,
 											 PropertyNames::setpointsCategory,
 											 true,
-											 m_drawAutoSetpoints)
-				->setDescription(QStringLiteral("Draw all auto generated setpoints"));
-
-		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
-											 PropertyNames::drawCustomSetpoints,
-											 PropertyNames::setpointsCategory,
-											 true,
-											 m_drawCustomSetpoints)
-				->setDescription(QStringLiteral("Draw custom setpoints added to CustomSetPoints property"));
+											 m_drawSetpoints);
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(PropertyVector<CustomSetPoint>,
 											 PropertyNames::customSetpoints,
 											 PropertyNames::setpointsCategory,
 											 true,
 											 m_customSetPoints)
-				->setDescription(QStringLiteral("CustomSetPoints"));
+				->setDescription(QStringLiteral("CustomSetPoints if DrawSetpoints is set to CustomSetpoints"));
 
 		return;
 	}
@@ -319,8 +255,7 @@ namespace VFrame30
 		m->set_gridmainstep(m_gridMainStep);
 		m->set_gridsmallstep(m_gridSmallStep);
 
-		m->set_drawautosetpoints(m_drawAutoSetpoints);
-		m->set_drawcustomsetpoints(m_drawCustomSetpoints);
+		m->set_drawsetpoints(static_cast<int32_t>(m_drawSetpoints));
 
 		for (const auto& csp : m_customSetPoints)
 		{
@@ -365,8 +300,7 @@ namespace VFrame30
 		m_gridMainStep = m.gridmainstep();
 		m_gridSmallStep = m.gridsmallstep();
 
-		m_drawAutoSetpoints = m.drawautosetpoints();
-		m_drawCustomSetpoints = m.drawcustomsetpoints();
+		m_drawSetpoints = static_cast<E::IndicatorDrawSetpoints>(m.drawsetpoints());
 
 		m_customSetPoints.clear();
 		m_customSetPoints.reserve(static_cast<size_t>(m.customsetpoints_size()));
@@ -451,11 +385,14 @@ namespace VFrame30
 		std::vector<QRectF> barRects;
 		barRects.reserve(static_cast<size_t>(appSignalIds.size()));
 
+		std::map<QString, std::vector<IndicatorSetpoint>> setpoints;
+
 		for (int barIndex = 0; barIndex < appSignalIds.size(); barIndex++)
 		{
 			const QString& appSignalId = appSignalIds[barIndex];
-			QColor barColor = signalColors[barIndex];
 
+			// Calc bar rect
+			//
 			QRectF barRect{};
 			if (appSignalIds.size() == 1)
 			{
@@ -468,17 +405,35 @@ namespace VFrame30
 
 			barRects.push_back(barRect);
 
+			// Get bar color
+			// signalColors[barIndex] - is a base color
+			// if any setpoint is alerted and it has tag, try to fetch color for this tag from behavior
+			//
+			std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId, schemaItem);
+			std::optional<QRgb> alertedColor = getAlertColor(signalSetpoints, drawParam, schemaItem);
+
+			QColor barColor = alertedColor.value_or(signalColors[barIndex].rgb());
+
+			setpoints[appSignalId] = std::move(signalSetpoints);
+
+			// --
+			//
 			drawBar(drawParam, barRect, barIndex, appSignalId, barColor, schemaItem);
 		}
 
 		// Draw setpoints
 		//
-		drawSetpoints(drawParam, barRects, schemaItem);
+		drawSetpoints(drawParam, setpoints, barRects, schemaItem);
 
 		return;
 	}
 
-	void IndicatorHistogramVert::drawBar(CDrawParam* drawParam, const QRectF& barRect, int signalIndex, const QString appSignalId, QColor barColor, const SchemaItemIndicator* schemaItem) const
+	void IndicatorHistogramVert::drawBar(CDrawParam* drawParam,
+										 const QRectF& barRect,
+										 int signalIndex,
+										 const QString& appSignalId,
+										 const QColor& barColor,
+										 const SchemaItemIndicator* schemaItem) const
 	{
 		Q_ASSERT(drawParam);
 		Q_ASSERT(schemaItem);
@@ -585,7 +540,6 @@ namespace VFrame30
 						if (currentValue >= m_startValue)
 						{
 							signalValueRect = barRect;
-
 						}
 						else
 						{
@@ -759,89 +713,264 @@ namespace VFrame30
 		return;
 	}
 
-	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam, const std::vector<QRectF>& barRects, const SchemaItemIndicator* schemaItem) const
+	std::vector<IndicatorSetpoint> IndicatorHistogramVert::comparators(CDrawParam* drawParam,
+																	   const QString& appSignalId,
+																	   const SchemaItemIndicator* schemaItem) const
 	{
-		std::vector<DrawSetpointStruct> drawSetpoints;
-		drawSetpoints.reserve(16);
+		Q_ASSERT(drawParam);
 
-		// Get all automaticaly generated (by u7) setpoints
-		//
-		if (m_drawAutoSetpoints == true &&
-			drawParam->isMonitorMode() == true &&
-			drawParam->appSignalController() != nullptr)
+		std::vector<IndicatorSetpoint> result;
+		result.reserve(8);
+
+		if (drawParam->isMonitorMode() == false ||
+			drawParam->appSignalController() == nullptr)
 		{
-			const QStringList appSignalIds = schemaItem->signalIds();
+			return result;
+		}
 
-			for (int signalIndex = 0; signalIndex < appSignalIds.size(); signalIndex++)
+		switch (m_drawSetpoints)
+		{
+		case E::IndicatorDrawSetpoints::AutoGenerated:
 			{
-				const QString& appSignalId = appSignalIds[signalIndex];
 				std::vector<std::shared_ptr<Comparator>> setpoints = drawParam->appSignalController()->setpointsByInputSignalId(appSignalId);
 
 				for (const std::shared_ptr<Comparator>& sp : setpoints)
 				{
-					Q_ASSERT(sp);
-
-					std::optional<double> value;
-
-					if (const ComparatorSignal& valueSignal = sp->compare();	// This signal contains value for setpoint
-						valueSignal.isConst() == true)
+					if (sp == nullptr)
 					{
-						value = valueSignal.constValue();
+						Q_ASSERT(sp);
+						continue;
 					}
-					else
+
+					if (sp->compare().isAcquired() == false)
 					{
-						if (valueSignal.isAcquired() == false)
+						// skip this setpoint, the value compare with is unknown
+						//
+						continue;
+					}
+
+					result.push_back({sp, SetpointSource::AutoGenerated, {}, {}, {}, qRgb(0x00, 0x00, 0xC0)});
+				}
+			}
+			break;
+		case E::IndicatorDrawSetpoints::CustomSetpoints:
+			{
+				for (const std::shared_ptr<CustomSetPoint>& csp : m_customSetPoints)
+				{
+					std::vector<std::shared_ptr<Comparator>> setpoints = drawParam->appSignalController()->setpointsByInputSignalId(appSignalId);
+					for (const std::shared_ptr<Comparator>& sp : setpoints)
+					{
+						if (sp == nullptr)
 						{
+							Q_ASSERT(sp);
 							continue;
 						}
-						else
+
+						Q_ASSERT(appSignalId == sp->input().appSignalID());
+
+						if (sp->compare().isAcquired() == false)
 						{
-							value = schemaItem->getSignalState(drawParam, appSignalId);
+							// skip this setpoint, the value compare with is unknown
+							//
+							continue;
+						}
+
+						if (sp->output().appSignalID() == csp->outputAppSignalId())
+						{
+							// Setpoint is found
+							//
+							result.push_back({sp, SetpointSource::Custom, csp, {}, {}, qRgb(0x00, 0x00, 0xC0)});
+							break;
 						}
 					}
+				}
+			}
+			break;
+		case E::IndicatorDrawSetpoints::NoSetpoints:
+			break;
+		default:
+			Q_ASSERT(false);
+		}
 
-					if (value.has_value() == true)
+		// Get value and alerted for setpoints
+		//
+		for (IndicatorSetpoint& sp : result)
+		{
+			std::optional<double> value;
+			std::optional<bool> alerted;
+			QRgb foundColor{qRgb(0x00, 0x00, 0xC0)};
+
+			if (const ComparatorSignal& valueSignal = sp.comparator->compare();		// This signal contains value for setpoint
+				valueSignal.isConst() == true)
+			{
+				value = valueSignal.constValue();
+			}
+			else
+			{
+				value = schemaItem->getSignalState(drawParam, valueSignal.appSignalID());
+			}
+
+			if (value.has_value() == true)
+			{
+				// Getting setpoint state
+				//
+				const ComparatorSignal& stateSignal = sp.comparator->output();	// This signal contains value for setpoint result
+				//Q_ASSERT(stateSignal.isConst() == false);
+
+				if (stateSignal.isAcquired() == true)
+				{
+					alerted = schemaItem->getSignalState(drawParam, stateSignal.appSignalID());
+				}
+
+				// if setting outputs state is not valid it is also indicated as alerted
+				//
+				bool isAlerted = (alerted.has_value() == true && alerted.value() == true) ||
+								 alerted.has_value() == false;
+
+				alerted = isAlerted;
+
+				// Get color by output signal tags and behavior
+				//
+				std::optional<QRgb> overrideColor;
+
+				switch (sp.source)
+				{
+				case SetpointSource::AutoGenerated:
+					overrideColor = {};
+					break;
+				case SetpointSource::Custom:
+					Q_ASSERT(sp.customSetpointData);
+					if (sp.customSetpointData != nullptr)
 					{
-						QRgb foundColor{qRgb(0x00, 0x00, 0xC0)};
+						overrideColor = (sp.customSetpointData->colorSource() == E::IndicatorColorSource::StaticColorFromStruct)
+										? std::optional<QRgb>(sp.customSetpointData->color().rgb())
+										: std::optional<QRgb>();
+					}
+					break;
+				}
+
+				if (overrideColor.has_value() == false)
+				{
+					QStringList setpointSignalTags = drawParam->appSignalController()->signalTags(stateSignal.appSignalID());
+
+					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavor();
+
+					std::optional<std::pair<QRgb, QRgb>> color = monitorBehavior.tagToColors(setpointSignalTags);
+
+					if (color.has_value() == true)
+					{
+						foundColor = drawParam->blinkPhase() ? color.value().first : color.value().second;
+					}
+				}
+				else
+				{
+					foundColor = overrideColor.value();
+				}
+			}
+
+			// Assign results
+			//
+			sp.value = value;
+			sp.alerted = alerted;
+			sp.setpointColor = foundColor;
+		}
+
+		return result;
+	}
 
 
+	std::optional<QRgb> IndicatorHistogramVert::getAlertColor(const std::vector<IndicatorSetpoint>& setpoints, CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const
+	{
+		Q_ASSERT(drawParam);
+		Q_ASSERT(schemaItem);
 
-//						for (auto tag : behaviorTags)
-//						{
-//							bool hasTag = drawParam->appSignalController()->signalHasTag(appSignalId, tagssssss??????);
+		if (drawParam->isMonitorMode() == false)
+		{
+			return {};
+		}
 
-//							if (hasTag == true)
-//							{
-//								foundColor = ...;
-//							}
-//						}
+		// Custom alerted setpoints with m_colorSource == StaticColorFromStruct
+		// have the highest priority
+		//
+		for (const IndicatorSetpoint& isp : setpoints)
+		{
+			if (isp.source == SetpointSource::Custom &&
+				isp.alerted.has_value() == true &&
+				isp.alerted.value() == true &&
+				isp.customSetpointData->colorSource() == E::IndicatorColorSource::StaticColorFromStruct)
+			{
+				return {isp.customSetpointData->color().rgb()};
+			}
+		}
 
-						drawSetpoints.emplace_back(signalIndex, value.value(), sp->cmpType(), foundColor, barRects[signalIndex]);
+		// If there are any alerted setpoints with output signals' tags,
+		// then try to get color from MonitorBehavior by these tags
+		//
+		std::set<QString> alertedTags;
+
+		for (const IndicatorSetpoint& isp : setpoints)
+		{
+			if (isp.alerted.has_value() && isp.alerted.value() == true)
+			{
+				const ComparatorSignal& output = isp.comparator->output();
+
+				if (output.isAcquired() == true)
+				{
+					auto signalTags = schemaItem->getSignalTags(drawParam, output.appSignalID());
+
+					for (const QString& t : signalTags)
+					{
+						alertedTags.insert(t);
 					}
 				}
 			}
 		}
 
-		// Get all custom setpoints
-		//
-		if (m_drawCustomSetpoints == true && m_customSetPoints.empty() == false)
-		{
-			// PropertyVector<CustomSetPoint> m_customSetPoints;	// Custom setpoint list
+		std::optional<std::pair<QRgb, QRgb>> result = drawParam->monitorBehavor().tagToColors(alertedTags);
 
-			for (const std::shared_ptr<CustomSetPoint>& csp : m_customSetPoints)
+		if (result.has_value() == false)
+		{
+			return {};
+		}
+
+		return drawParam->blinkPhase() ? result.value().first : result.value().second;
+	}
+
+	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam,
+											   const std::map<QString, std::vector<IndicatorSetpoint>>& setpoints,
+											   const std::vector<QRectF>& barRects,
+											   const SchemaItemIndicator* schemaItem) const
+	{
+		if (drawParam->isMonitorMode() == false)
+		{
+			// No access to setpoints
+			//
+			return;
+		}
+
+		std::vector<DrawSetpointStruct> drawSetpoints;
+		drawSetpoints.reserve(16);
+
+		// Convert setpoints to DrawSetpointStruct whick is convinirnt for drawing
+		//
+		const QStringList appSignalIds = schemaItem->signalIds();
+
+		for (int signalIndex = 0; signalIndex < appSignalIds.size(); signalIndex++)
+		{
+			const QString& appSignalId = appSignalIds[signalIndex];
+
+			auto setpointsIt = setpoints.find(appSignalId);
+			if (setpointsIt == setpoints.end())
 			{
-				switch (csp->setpointType())
-				{
-//					case E::IndicatorSetpointType::Static:
-//						// Ignore static
-//						break;
-					case E::IndicatorSetpointType::AutoByOutAppSignalId:
-						break;
-					case E::IndicatorSetpointType::AutoBySchemaItemLabel:
-						break;
-					default:
-						Q_ASSERT(false);
-				}
+				Q_ASSERT(setpointsIt != setpoints.end());
+				return;
+			}
+
+			const std::vector<IndicatorSetpoint>& signalSetpoints = setpointsIt->second;
+
+			for (const IndicatorSetpoint& is : signalSetpoints)
+			{
+				drawSetpoints.push_back(DrawSetpointStruct{signalIndex, barRects[signalIndex], is});
 			}
 		}
 
@@ -869,17 +998,19 @@ namespace VFrame30
 		for (const DrawSetpointStruct& ds : setpoints)
 		{
 			const QRectF& barRect = ds.barRect;
+			bool alerted = ds.indicatorSetpoint.alerted.value_or(true);
 
 			const double factor = barRect.height() / valueDiff;
-			double y = barRect.bottom() - (ds.value - m_startValue) * factor;
+			double value = ds.indicatorSetpoint.value.value_or(m_startValue);
+			double y = barRect.bottom() - (value - m_startValue) * factor;
 
-//			QColor color1 = ds.color;
-//			QColor color2{(~color1.red()) & 0xFF,
-//						(~color1.green()) & 0xFF,
-//						(~color1.blue()) & 0xFF};
+			QRgb color{ds.indicatorSetpoint.setpointColor};
+//			if (alerted == true)
+//			{
+//				color = drawParam->blinkPhase() ? ds.color : 0xF0F0F0;	// What second color can be!?
+//			}
 
-			//QBrush brush{drawParam->blinkPhase() ? color1 : color2};
-			QBrush brush{ds.color};
+			QBrush brush{color};
 
 			QPen pen(brush, schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
 			p->setPen(pen);
@@ -892,7 +1023,7 @@ namespace VFrame30
 			// Draw setpoint value
 			//
 			QChar cmpSymbol;
-			switch (ds.type)
+			switch (ds.indicatorSetpoint.comparator->cmpType())
 			{
 			case E::CmpType::Equal:		cmpSymbol = QChar('=');		break;
 			case E::CmpType::Greate:	cmpSymbol = QChar(0x25B2);	break;
@@ -902,20 +1033,23 @@ namespace VFrame30
 				Q_ASSERT(false);
 			}
 
-			if (drawParam->blinkPhase() == true)
+			if (ds.indicatorSetpoint.value.has_value() == true)
 			{
-				valueString = QString(" %1 %2")
-								.arg(ds.value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision())
-								.arg(cmpSymbol);
+				if (alerted == false ||
+					(alerted == true && drawParam->blinkPhase() == true))
+				{
+					valueString = QString(" %1 %2")
+									.arg(value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision())
+									.arg(cmpSymbol);
 
-				QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+					QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
 
-				DrawHelper::drawText(p, schemaItem->font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+					DrawHelper::drawText(p, schemaItem->font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+				}
 			}
 		}
 
 		return;
-
 	}
 
 }

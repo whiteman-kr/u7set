@@ -76,7 +76,7 @@ void DbControllerProjectTests::getProjectListTest()
 	bool ok = m_db.createProject(m_projectName, m_projectAdministratorPassword, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
-	ok = m_db.upgradeProject(m_projectName, m_projectAdministratorPassword, false, 0);
+	ok = m_db.upgradeProject(m_projectName, m_projectAdministratorPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	// Get project list from db directly

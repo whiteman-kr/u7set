@@ -359,35 +359,6 @@ namespace ExtWidgets
 		return QIcon(pixmap);
 	}
 
-	QIcon PropertyEditorBase::drawColorBox(QColor color)
-	{
-		const QStyle* style = QApplication::style();
-		// Figure out size of an indicator and make sure it is not scaled down in a list view item
-		// by making the pixmap as big as a list view icon and centering the indicator in it.
-		// (if it is smaller, it can't be helped)
-		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
-		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
-		const int listViewIconSize = indicatorWidth;
-		const int pixmapWidth = indicatorWidth;
-		const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
-
-		QRect rect = QRect(0, 0, indicatorWidth - 1, indicatorHeight - 1);
-		QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
-		pixmap.fill(Qt::transparent);
-		{
-			// Center?
-			const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
-			const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
-			QPainter painter(&pixmap);
-			painter.translate(xoff, yoff);
-
-			painter.setPen(QColor(Qt::black));
-			painter.setBrush(QBrush(color));
-			painter.drawRect(rect);
-		}
-		return QIcon(pixmap);
-	}
-
 	QIcon PropertyEditorBase::drawImage(const QImage& image)
 	{
 		if (image.isNull() == false)
@@ -431,7 +402,7 @@ namespace ExtWidgets
 					if (sameValue == true)
 					{
 						QColor color = value.value<QColor>();
-						return drawColorBox(color);
+						return UiTools::drawColorBox(color);
 					}
 				}
 				break;
@@ -1468,7 +1439,7 @@ namespace ExtWidgets
 
 			m_treeWidget->blockSignals(true);
 			item->setText(0, PropertyEditorBase::colorToText(color));
-			item->setIcon(0, PropertyEditorBase::drawColorBox(color));
+			item->setIcon(0, UiTools::drawColorBox(color));
 			m_treeWidget->blockSignals(false);
 		}
 
@@ -1514,7 +1485,7 @@ namespace ExtWidgets
 				QColor color = m_colors[i];
 
 				twi->setText(0, PropertyEditorBase::colorToText(color));
-				twi->setIcon(0, PropertyEditorBase::drawColorBox(color));
+				twi->setIcon(0, UiTools::drawColorBox(color));
 			}
 		}
 

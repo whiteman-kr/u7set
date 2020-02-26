@@ -209,6 +209,105 @@ namespace VFrame30
 		return;
 	}
 
+	std::set<QString> SchemaItemIndicator::getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const
+	{
+		Q_ASSERT(drawParam);
+
+		std::set<QString> result;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+				Q_ASSERT(drawParam->appSignalController());
+			}
+			else
+			{
+				QStringList tags = drawParam->appSignalController()->signalTags(appSignalId);
+				for (const QString& t : tags)
+				{
+					result.insert(t);
+				}
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				AppSignalParam param;
+				param.setAppSignalId(appSignalId);
+
+				bool ok = getSignalParam(drawParam, &param);
+				if (ok == true)
+				{
+					for (const QString& t : param.tags())
+					{
+						result.insert(t);
+					}
+				}
+
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return result;
+	}
+
+	bool SchemaItemIndicator::getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const
+	{
+		if (drawParam == nullptr ||
+			signalParam == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			Q_ASSERT(signalParam);
+			return false;
+		}
+
+		if (drawParam->isMonitorMode() == false)
+		{
+			Q_ASSERT(drawParam->isMonitorMode());
+			return false;
+		}
+
+		bool ok = false;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			ok = false;
+		}
+
+		return ok;
+	}
+
 	bool SchemaItemIndicator::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
 	{
 		if (drawParam == nullptr ||

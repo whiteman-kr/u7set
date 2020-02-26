@@ -9,6 +9,7 @@
 
 #include "FontParam.h"
 #include "Session.h"
+#include "../lib/ClientBehavior.h"
 
 class QPainter;
 class QPaintDevice;
@@ -90,6 +91,9 @@ namespace VFrame30
 
 		const Session& session() const;
 		Session& session();
+
+		const MonitorBehavior& monitorBehavor() const;
+		const TuningClientBehavior& tuningClientBehavior() const;
 
 		const QStringList& hightlightIds() const;
 		void setHightlightIds(const QStringList& value);

@@ -124,9 +124,6 @@ public:
 	AppSignalState& operator= (const AppSignalState& state) = default;
 	AppSignalState& operator= (const SimpleAppSignalState& smState);
 
-	static const quint32 VALID = 1;
-	static const quint32 INVALID = 0;
-
 	Hash hash() const;
 	const Times& time() const;
 	const TimeStamp& time(E::TimeType timeType) const;
@@ -147,10 +144,13 @@ public:
 	static QString toString(double value, E::ValueViewType viewType, int precision);
 
 public:
-	Hash m_hash = 0;					// == calcHash(AppSignalID)
+	Hash m_hash = 0;					// == ::calcHash(AppSignalID)
 	Times m_time;
 	AppSignalStateFlags m_flags;
 	double m_value = 0;
+
+	static const quint32 VALID = 1;
+	static const quint32 INVALID = 0;
 };
 
 Q_DECLARE_METATYPE(AppSignalState)
@@ -389,6 +389,8 @@ public:
 
 	const std::set<QString>& tags() const;
 	std::set<QString>& tags();
+	QStringList tagStringList() const;
+
 	void setTags(std::set<QString> tags);
 
 public slots:

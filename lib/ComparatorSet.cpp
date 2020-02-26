@@ -1,6 +1,7 @@
 #include "ComparatorSet.h"
 
 #include "../lib/ProtoSerialization.h"
+#include "../lib/WUtils.h"
 
 // ------------------------------------------------------------------------------------------------
 //
@@ -8,14 +9,25 @@
 //
 // ------------------------------------------------------------------------------------------------
 
+void ComparatorSignal::setSignalParams(const QString& appSignalID, bool isAcquired, bool isConst, double constValue)
+{
+	m_appSignalID = appSignalID;
+	m_isAcquired = isAcquired;
+	m_isConst = isConst;
+	m_constValue = constValue;
+}
+
+void ComparatorSignal::setConstValue(double constValue)
+{
+	m_appSignalID.clear();
+	m_isAcquired = false;
+	m_isConst = true;
+	m_constValue = constValue;
+}
+
 bool ComparatorSignal::isConst() const
 {
 	return m_isConst;
-}
-
-void ComparatorSignal::setIsConst(bool isConst)
-{
-	m_isConst = isConst;
 }
 
 double ComparatorSignal::constValue() const
@@ -25,31 +37,14 @@ double ComparatorSignal::constValue() const
 	return m_constValue;
 }
 
-void ComparatorSignal::setConstValue(double constValue)
-{
-	assert(m_isConst == true);
-
-	m_constValue = constValue;
-}
-
 QString ComparatorSignal::appSignalID() const
 {
 	return m_appSignalID;
 }
 
-void ComparatorSignal::setAppSignalID(const QString& appSignalID)
-{
-	m_appSignalID = appSignalID;
-}
-
 bool ComparatorSignal::isAcquired() const
 {
 	return m_isAcquired;
-}
-
-void ComparatorSignal::setIsAcquired(bool isAcquired)
-{
-	m_isAcquired = isAcquired;
 }
 
 void ComparatorSignal::serializeTo(Proto::ComparatorSignal* s) const
