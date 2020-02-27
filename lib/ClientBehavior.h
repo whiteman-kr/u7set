@@ -51,20 +51,18 @@ public:
 	MonitorBehavior& operator=(MonitorBehavior&& src);
 
 public:
-	QColor tagCriticalToColor() const;
-	void setTagCriticalToColor(const QColor& color);
 
-	QColor tagAttentionToColor() const;
-	void setTagAttentionToColor(const QColor& color);
+	QStringList tags() const;
 
-	QColor tagGeneralToColor() const;
-	void setTagGeneralToColor(const QColor& color);
+	void setTag(int index, const QString& tag);
+	bool removeTagToColor(int index);
+	bool moveTagToColor(int index, int step);
 
-	std::optional<QRgb> tagToColor(const QString& tag) const;
-	void setTagToColor(const QString& tag, QRgb color);
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QString& tag) const;
+	void setTagToColors(const QString& tag, std::pair<QRgb, QRgb> colors);
 
-	std::optional<QRgb> tagToColor(const std::set<QString>& tags) const;	// Return the most periority color
-	std::optional<QRgb> tagToColor(const QStringList& tags) const;			// Return the most periority color
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const std::set<QString>& tags) const;	// Return the most periority color
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QStringList& tags) const;		// Return the most periority color
 
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
@@ -75,13 +73,13 @@ private:
 	static const QString attentionTag;
 	static const QString generalTag;
 
-	struct TagToColorType
+	struct TagToColorsType
 	{
 		QString tag;
-		QRgb color;
+		std::pair<QRgb, QRgb> colors;
 	};
 
-	std::vector<TagToColorType> m_tagToColor;		// The lower position - the higher priority of the tag
+	std::vector<TagToColorsType> m_tagToColors;		// The lower position - the higher priority of the tag
 };
 
 
@@ -100,19 +98,6 @@ public:
 		ClientBehavior::operator= (That);
 		return *this;
 	}
-
-public:
-	QColor defaultMismatchBackColor() const;
-	void setDefaultMismatchBackColor(const QColor& color);
-
-	QColor defaultMismatchTextColor() const;
-	void setDefaultMismatchTextColor(const QColor& color);
-
-	QColor unappliedBackColor() const;
-	void setUnappliedBackColor(const QColor& color);
-
-	QColor defaultUnappliedTextColor() const;
-	void setDefaultUnappliedTextColor(const QColor& color);
 
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
