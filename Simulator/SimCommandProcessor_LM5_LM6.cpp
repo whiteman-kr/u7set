@@ -1,26 +1,26 @@
 #include <array>
 #include <cfenv>
-#include "SimCommandProcessor_LM1_SF00.h"
+#include "SimCommandProcessor_LM5_LM6.h"
 #include "SimException.h"
 #include "SimAfb.h"
 
 namespace Sim
 {
-	CommandProcessor_LM1_SF00::CommandProcessor_LM1_SF00(DeviceEmulator* device) :
+	CommandProcessor_LM5_LM6::CommandProcessor_LM5_LM6(DeviceEmulator* device) :
 		CommandProcessor(device)
 	{
 	}
 
-	CommandProcessor_LM1_SF00::~CommandProcessor_LM1_SF00()
+	CommandProcessor_LM5_LM6::~CommandProcessor_LM5_LM6()
 	{
 	}
 
-	bool CommandProcessor_LM1_SF00::runCommand(const DeviceCommand& command)
+	bool CommandProcessor_LM5_LM6::runCommand(const DeviceCommand& command)
 	{
 		auto it = m_nameToFuncCommand.find(command.m_command.simulationFuncHash);
 		if (it == m_nameToFuncCommand.end())
 		{
-			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM1_SF00::runCommand");
+			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM5_LM6::runCommand");
 		}
 
 		auto& func = it->second;
@@ -32,7 +32,7 @@ namespace Sim
 		return true;
 	}
 
-	void CommandProcessor_LM1_SF00::command_not_implemented(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_not_implemented(const DeviceCommand& command)
 	{
 		SimException::raise(QString("Command %1 is not implemented yet").arg(command.caption()), __FUNCTION__);
 		return;
@@ -42,7 +42,7 @@ namespace Sim
 	// Code: 2
 	// Description: Execute AFB
 	//
-	void CommandProcessor_LM1_SF00::parse_startafb(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_startafb(DeviceCommand* command) const
 	{
 		command->m_size = 2;
 
@@ -64,14 +64,14 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_startafb(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_startafb(const DeviceCommand& command)
 	{
 		AfbComponent afb = m_device.afbComponent(command.m_afbOpCode);
 		if (afb.isNull() ==  true)
 		{
 			SimException::raise(QString("Cannot find AfbComponent with OpCode ")
 									.arg(command.m_afbOpCode),
-								"CommandProcessor_LM1_SF00::command_startafb");
+								"CommandProcessor_LM5_LM6::command_startafb");
 		}
 
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
@@ -80,7 +80,7 @@ namespace Sim
 			SimException::raise(QString("Cannot find afbInstance with OpCode %1, InstanceNo %2")
 									.arg(command.m_afbOpCode)
 									.arg(command.m_afbInstance),
-								"CommandProcessor_LM1_SF00::command_startafb");
+								"CommandProcessor_LM5_LM6::command_startafb");
 		}
 
 		// AFB
@@ -88,7 +88,7 @@ namespace Sim
 		auto it = m_nameToFuncAfb.find(afb.simulationFuncHash());
 		if (it == m_nameToFuncAfb.end())
 		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFuncHash()), "CommandProcessor_LM1_SF00::command_startafb");
+			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFuncHash()), "CommandProcessor_LM5_LM6::command_startafb");
 		}
 
 		auto& func = it->second;
@@ -104,14 +104,14 @@ namespace Sim
 	// Code: 3
 	// Description: Stop IDR phase and start ALP, if ALP is current phase then stop work cycle
 	//
-	void CommandProcessor_LM1_SF00::parse_stop(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_stop(DeviceCommand* command) const
 	{
 		command->m_size = 1;
 		command->m_string = command->m_command.caption;
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_stop([[maybe_unused]] const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_stop([[maybe_unused]] const DeviceCommand& command)
 	{
 		if (m_device.phase() == Sim::CyclePhase::IdrPhase)
 		{
@@ -136,7 +136,7 @@ namespace Sim
 	// Code: 4
 	// Description: Move word from RAM to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_mov(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_mov(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -152,7 +152,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_mov(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_mov(const DeviceCommand& command)
 	{
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
@@ -167,7 +167,7 @@ namespace Sim
 	// Code: 5
 	// Description: Move N words from RAM to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_movmem(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_movmem(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -185,7 +185,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_movmem(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_movmem(const DeviceCommand& command)
 	{
 		const auto& size = command.m_word2;
 		const auto& src = command.m_word1;
@@ -200,7 +200,7 @@ namespace Sim
 	// Code: 6
 	// Description: Write word const to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_movc(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_movc(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -216,7 +216,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_movc(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_movc(const DeviceCommand& command)
 	{
 		m_device.writeRamWord(command.m_word0, command.m_word1);
 		return;
@@ -226,7 +226,7 @@ namespace Sim
 	// Code: 7
 	// Description: Write constant bit to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_movbc(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_movbc(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -234,7 +234,7 @@ namespace Sim
 		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
 		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);	// bitNo0 - bitno
 
-		checkParamRange(command->m_bitNo0, 0, 15, "BitNo");
+		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
 		// MOVBC    0B402h[0], #0
 		//
@@ -246,7 +246,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_movbc(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_movbc(const DeviceCommand& command)
 	{
 		m_device.writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
 		return;
@@ -256,7 +256,7 @@ namespace Sim
 	// Code: 8
 	// Description: Read 16bit data from RAM and write to AFB input
 	//
-	void CommandProcessor_LM1_SF00::parse_wrfb(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_wrfb(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -278,7 +278,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_wrfb(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_wrfb(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setWordValue(m_device.readRamWord(command.m_word0));
@@ -292,7 +292,7 @@ namespace Sim
 	// Code: 10
 	// Description: Write constant word to AFB input
 	//
-	void CommandProcessor_LM1_SF00::parse_wrfbc(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_wrfbc(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -315,7 +315,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_wrfbc(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_wrfbc(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setWordValue(command.m_word0);
@@ -328,7 +328,7 @@ namespace Sim
 	// Code: 11
 	// Description: Read bit from RAM and write it to AFB
 	//
-	void CommandProcessor_LM1_SF00::parse_wrfbb(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_wrfbb(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -342,7 +342,7 @@ namespace Sim
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
-		checkParamRange(command->m_bitNo0, 0, 15, "BitNo");
+		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
 		// String representation
 		// wrfbb LOGIC.0[i_input], 46083h[0]
@@ -355,7 +355,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_wrfbb(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_wrfbb(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setWordValue(m_device.readRamBit(command.m_word0, command.m_bitNo0));
@@ -369,7 +369,7 @@ namespace Sim
 	// Code: 12
 	// Description: Read bit from AFB and write it to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_rdfbb(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_rdfbb(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -383,7 +383,7 @@ namespace Sim
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
-		checkParamRange(command->m_bitNo0, 0, 15, "BitNo");
+		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
 		// String representation
 		// rdfbb 46083h[0], LOGIC.0[o_result]
@@ -396,7 +396,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_rdfbb(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_rdfbb(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
@@ -406,11 +406,50 @@ namespace Sim
 		return;
 	}
 
+	// Command: rdfbcmp
+	// Code: 13
+	// Description: Read 16-bit data from AFB instance and compare it with constant, set compare bit if equal
+	//
+	void CommandProcessor_LM5_LM6::parse_rdfbcmp(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data to comapare with
+
+		// Checks
+		//
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAfbInstPin(command) + ", " +
+							strWordConst(command->m_word0);
+		return;
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_rdfbcmp(const DeviceCommand& command)
+	{
+		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+
+		bool result = param->wordValue() == command.m_word0;
+		m_device.setFlagCmp(result ? 1 : 0);
+
+		return;
+	}
+
 	// Command: movb
 	// Code: 15
 	// Description: Move bit from RAM to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_movb(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_movb(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -429,7 +468,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_movb(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_movb(const DeviceCommand& command)
 	{
 		quint16 data = m_device.readRamBit(command.m_word0, command.m_bitNo0);
 		m_device.writeRamBit(command.m_word1, command.m_bitNo1, data);
@@ -441,7 +480,7 @@ namespace Sim
 	// Code: 17
 	// Description: Save ALP phase start address
 	//
-	void CommandProcessor_LM1_SF00::parse_appstart(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_appstart(DeviceCommand* command) const
 	{
 		command->m_size = 2;
 		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 keeps ALP phase start address
@@ -454,7 +493,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_appstart(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_appstart(const DeviceCommand& command)
 	{
 		m_device.setAppStartAddress(command.m_word0);
 		return;
@@ -464,7 +503,7 @@ namespace Sim
 	// Code: 19
 	// Description: Move 32bit constant to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_movc32(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_movc32(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -478,7 +517,7 @@ namespace Sim
 							strDwordConst(command->m_dword0);
 	}
 
-	void CommandProcessor_LM1_SF00::command_movc32(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_movc32(const DeviceCommand& command)
 	{
 		m_device.writeRamDword(command.m_word0, command.m_dword0);
 	}
@@ -487,7 +526,7 @@ namespace Sim
 	// Code: 20
 	// Description: Read 32bit data from RAM and write to AFB input
 	//
-	void CommandProcessor_LM1_SF00::parse_wrfb32(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_wrfb32(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -509,7 +548,7 @@ namespace Sim
 
 	}
 
-	void CommandProcessor_LM1_SF00::command_wrfb32(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_wrfb32(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setDwordValue(m_device.readRamDword(command.m_word0));
@@ -522,7 +561,7 @@ namespace Sim
 	// Code: 21
 	// Description: Read 32bit data from AFB output and write it to RAM
 	//
-	void CommandProcessor_LM1_SF00::parse_rdfb32(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_rdfb32(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -547,7 +586,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_rdfb32(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_rdfb32(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
@@ -561,7 +600,7 @@ namespace Sim
 	// Code: 22
 	// Description: Write 32bit constant to FunctionalBlock input
 	//
-	void CommandProcessor_LM1_SF00::parse_wrfbc32(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_wrfbc32(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -586,7 +625,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_wrfbc32(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_wrfbc32(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setDwordValue(command.m_dword0);
@@ -596,11 +635,35 @@ namespace Sim
 		return;
 	}
 
+	// Command: movcmpf
+	// Code: 24
+	// Description: Write compare flag to memory [flag result from rdfbcmp(32)]
+	//
+	void CommandProcessor_LM5_LM6::parse_movcmpf(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);					// m_word0 - Destination address
+		command->m_bitNo0 = m_device.getWord(command->m_offset + 2) & 0x0F;			// m_bitNo0 - Destination bit no
+
+		command->m_string = strCommand(command->caption()) +
+							strBitAddr(command->m_word0, command->m_bitNo0);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_movcmpf(const DeviceCommand& command)
+	{
+		quint32 cmp = m_device.flagCmp();
+		m_device.writeRamBit(command.m_word0, command.m_bitNo0, cmp);
+		return;
+	}
+
 	// Command: pvom32
 	// Code: 26
 	// Description: .....
 	//
-	void CommandProcessor_LM1_SF00::parse_pmov32(DeviceCommand* command) const
+	void CommandProcessor_LM5_LM6::parse_pmov32(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -616,7 +679,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor_LM1_SF00::command_pmov32(const DeviceCommand& command)
+	void CommandProcessor_LM5_LM6::command_pmov32(const DeviceCommand& command)
 	{
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
@@ -633,9 +696,9 @@ namespace Sim
 
 	//	LOGIC, OpCode 1
 	//
-	void CommandProcessor_LM1_SF00::afb_logic(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_logic_v207(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -651,8 +714,8 @@ namespace Sim
 		quint16 busWidth = instance->param(i_bus_width)->wordValue();
 		quint16 conf = instance->param(i_conf)->wordValue();
 
-		checkParamRange(oprdQuant, 1, 16, "i_oprd_quant");
-		checkParamRange(busWidth, 1, 16, "i_bus_width");
+		checkParamRange(oprdQuant, 1, 16, QStringLiteral("i_oprd_quant"));
+		checkParamRange(busWidth, 1, 16, QStringLiteral("i_bus_width"));
 
 		// Logic
 		//
@@ -686,7 +749,7 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_logic");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_logic");
 		}
 
 		// Save result
@@ -697,9 +760,9 @@ namespace Sim
 
 	//	NOT, OpCode 2
 	//
-	void CommandProcessor_LM1_SF00::afb_not(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_not_v103(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -720,9 +783,9 @@ namespace Sim
 
 	//	TCT, OpCode 3
 	//
-	void CommandProcessor_LM1_SF00::afb_tct(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_tct_v208(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -753,7 +816,197 @@ namespace Sim
 
 		quint16 currentInputValue = instance->param(i_input)->wordValue();
 
-		checkParamRange(conf, 1, 6, "i_conf");
+		checkParamRange(conf, 1, 5, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		quint16 result = 0;
+		quint16 paramError = 0;
+
+		switch (conf)
+		{
+		case 1:
+			{
+				// On
+				//
+				if (currentInputValue == 0)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 1
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > time)
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 2:
+			{
+				// Off
+				//
+				if (currentInputValue == 1)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 0
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > time)
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 3:
+			{
+				// Univibrator (TCTC_VIBR)
+				//
+				if (counter == 0 &&
+					prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+		case 4:
+			{
+				// In AFBL RM shown another diagram, what is wrong
+				// De facto this RC filter is implemented
+
+				// FILTER (tctc_filter) - defacto is RC FILTER, on next AFBL version 209 it is fixed, and this implementation move to conf 6
+				//
+				if (currentInputValue == 0)
+				{
+					if (counter == 0)
+					{
+						result = 0;
+						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+					}
+					else
+					{
+						counter --;
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					if (counter >= time / m_cycleDurationMs)
+					{
+						result = 1;
+						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+					}
+					else
+					{
+						counter ++;
+						result = prevResultValue;
+					}
+				}
+			}
+			break;
+
+		case 5:
+			{
+				// Univibrator R (TCTC_RSV)
+				//
+				if (prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), "afb_tct");
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
+
+		instance->addParamDword(o_counter, counter);
+		instance->addParamDword(i_prev_counter, counter);
+
+		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+
+		instance->addParamWord(o_parem_err, paramError);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_tct_v209(AfbComponentInstance* instance)
+	{
+		Q_ASSERT(instance);
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;			// 1..5
+		const int i_counter = 1;		// Time, SI
+		const int i_prev_counter = 3;	// Previous counter value, SI
+		const int i_saved_data = 5;		// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int i_input = 6;			// 1/0
+
+		const int o_result = 8;			// 1/0
+		const int o_counter = 9;		// Counter value -> i_prev_counter
+		const int o_saved_data = 11;	// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int o_parem_err = 12;
+		//const int o_tct_edi = 13;
+		//const int o_version = 14;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		quint32 time = instance->param(i_counter)->dwordValue();
+		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
+
+		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
+									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
+
+		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
+									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+
+		quint16 currentInputValue = instance->param(i_input)->wordValue();
+
+		checkParamRange(conf, 1, 6, QStringLiteral("i_conf"));
 
 		// Logic
 		//
@@ -887,15 +1140,35 @@ namespace Sim
 
 		case 6:
 			{
-				// RC FILTER (TCTC_...)
-				// Not implemented in LM yet
+				// RC FILTER (tctc_rcfilter)
 				//
-				SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
-										.arg(conf), "afb_tct");
+				if (currentInputValue == 0)
+				{
+					if (counter == 0)
+					{
+						result = 0;
+					}
+					else
+					{
+						counter --;
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					if (counter >= time / m_cycleDurationMs)
+					{
+						result = 1;
+						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+					}
+					else
+					{
+						counter ++;
+						result = prevResultValue;
+					}
+				}
 			}
 			break;
-
-
 
 		default:
 			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
@@ -920,9 +1193,9 @@ namespace Sim
 	//	CTUD, OpCode 5
 	//  Counter Up/Down
 	//
-	void CommandProcessor_LM1_SF00::afb_ctud(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_ctud_v106(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -975,7 +1248,7 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_ctud");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_ctud");
 			}
 		}
 
@@ -990,9 +1263,9 @@ namespace Sim
 
 	//	BCOD, OpCode 8
 	//
-	void CommandProcessor_LM1_SF00::afb_bcod(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_bcod_v103(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -1008,8 +1281,8 @@ namespace Sim
 		quint16 oprdQuant = instance->param(i_oprd_quant)->wordValue();
 		quint16 conf = instance->param(i_conf)->wordValue();
 
-		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
-		checkParamRange(conf, 1, 2, "i_conf");
+		checkParamRange(oprdQuant, 1, 32, QStringLiteral("i_oprd_quant"));
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
 
 		// Logic
 		//
@@ -1037,7 +1310,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcod");
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod");
 		}
 
 		// Save result
@@ -1049,9 +1322,9 @@ namespace Sim
 
 	//	BDEC, OpCode 9
 	//
-	void CommandProcessor_LM1_SF00::afb_bdec(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_bdec_v103(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -1066,8 +1339,8 @@ namespace Sim
 		quint16 conf = instance->param(i_conf)->wordValue();
 		qint32 inputValue = instance->param(i_number)->signedIntValue();
 
-		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
-		checkParamRange(conf, 1, 2, "i_conf");
+		checkParamRange(oprdQuant, 1, 32, QStringLiteral("i_oprd_quant"));
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
 
 		// AFB Logic
 		//
@@ -1088,7 +1361,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcod");
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod");
 		}
 
 		return;
@@ -1096,9 +1369,9 @@ namespace Sim
 
 	//	BCOMP, OpCode 10
 	//
-	void CommandProcessor_LM1_SF00::afb_bcomp(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_bcomp_v111(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -1176,7 +1449,7 @@ namespace Sim
 					break;
 				}
 
-				assert(false);
+				Q_ASSERT(false);
 				break;
 
 			case 3:		// SignedInt32, <
@@ -1219,7 +1492,7 @@ namespace Sim
 					break;
 				}
 
-				assert(false);
+				Q_ASSERT(false);
 				break;
 
 			case 4:		// SignedInt32, <>
@@ -1234,7 +1507,7 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 			}
 
 			return;
@@ -1314,7 +1587,7 @@ namespace Sim
 						break;
 					}
 
-					assert(false);
+					Q_ASSERT(false);
 				}
 				break;
 			case 7:		// FloatingPoint32, <
@@ -1363,7 +1636,7 @@ namespace Sim
 					break;
 				}
 
-				assert(false);
+				Q_ASSERT(false);
 				break;
 			case 8:		// FloatingPoint32, <>
 				instance->addParamWord(o_nan, nan);
@@ -1382,21 +1655,21 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 		return;
 	}
 
 	//	DAMPER, OpCode 11
 	//
-	void CommandProcessor_LM1_SF00::afb_damper(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_damper_v112(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -1547,7 +1820,7 @@ namespace Sim
 
 	//	MATH, OpCode 13
 	//
-	void CommandProcessor_LM1_SF00::afb_math(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_math_v104(AfbComponentInstance* instance)
 	{
 		// Define input opIndexes
 		//
@@ -1599,7 +1872,7 @@ namespace Sim
 			default:
 				SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 										.arg(conf->wordValue()),
-									"CommandProcessor_LM1_SF00::afb_math");
+									"CommandProcessor_LM5_LM6::afb_math");
 		}
 
 		// Save result
@@ -1619,7 +1892,7 @@ namespace Sim
 
 	//	SCALE, OpCode 14
 	//
-	void CommandProcessor_LM1_SF00::afb_scale(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_scale_v108(AfbComponentInstance* instance)
 	{
 		// Define input opIndexes
 		//
@@ -1729,9 +2002,257 @@ namespace Sim
 
 	//	DPCOMP, OpCode 20
 	//
-	void CommandProcessor_LM1_SF00::afb_dpcomp(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_dpcomp_v3(AfbComponentInstance* instance)
 	{
-		assert(instance);
+		Q_ASSERT(instance);
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_hyst = 1;			// Hysteresis value
+		const int i_prev_result = 3;	// Prev result
+
+		const int i_data = 4;			// Input data
+		const int i_setting = 6;		// Setting value
+
+		const int o_result = 9;			// Result
+		const int o_overflow = 10;		// Result
+		const int o_underflow = 11;		// Result
+		const int o_nan = 13;			// Any input FP param NaN
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		// AFB Logic
+		//
+		if (conf >=1 && conf <= 4)
+		{
+			qint32 hystValue = instance->param(i_hyst)->signedIntValue();
+			qint32 settingValue = instance->param(i_setting)->signedIntValue();
+			qint32 inputValue = instance->param(i_data)->signedIntValue();
+			quint16 prevResult = 0;
+
+			switch (conf)
+			{
+			case 1:		// SignedInt32, ==
+				if (inputValue >= (settingValue - hystValue) &&
+					inputValue <= (settingValue + hystValue))
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				break;
+
+			case 2:		// SignedInt32, >
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue > settingValue ||
+					(prevResult == 1 && inputValue > settingValue - hystValue))
+				{
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+					instance->addParamWord(i_prev_result, 0);
+				}
+				break;
+
+			case 3:		// SignedInt32, <
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if ((inputValue < settingValue) ||
+					(prevResult == 1 && inputValue < settingValue + hystValue))
+				{
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+					instance->addParamWord(i_prev_result, 0);
+				}
+				break;
+
+			case 4:		// SignedInt32, <>
+				if (inputValue >= (settingValue - hystValue) &&
+					inputValue <= (settingValue + hystValue))
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				break;
+
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+			}
+
+			return;
+		}
+
+		if (conf >=5 && conf <= 8)
+		{
+			float hystValue = instance->param(i_hyst)->floatValue();
+			float settingValue = instance->param(i_setting)->floatValue();
+			float inputValue = instance->param(i_data)->floatValue();
+			quint16 prevResult = 0;
+
+			// NaN
+			//
+			quint16 nan = (settingValue != settingValue || hystValue != hystValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+
+			instance->addParamWord(o_nan, nan);
+
+			if (nan != 0)
+			{
+				instance->addParamWord(o_result, 0);
+				instance->addParamWord(i_prev_result, 0);
+				instance->addParamWord(o_overflow, 0);
+				instance->addParamWord(o_underflow, 0);
+				return;
+			}
+
+			// --
+			//
+			switch (conf)
+			{
+			case 5:		// FloatingPoint32, ==
+				{
+					AfbComponentParam setValLow;
+					AfbComponentParam setValHigh;
+
+					setValLow.setFloatValue(settingValue - hystValue);
+					setValHigh.setFloatValue(settingValue + hystValue);
+
+					if (inputValue >= setValLow.floatValue() &&
+						inputValue <= setValHigh.floatValue())
+					{
+						instance->addParamWord(o_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
+					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+				}
+				break;
+
+			case 6:		// FloatingPoint32, >
+				{
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					AfbComponentParam t;
+
+					t.setFloatValue(settingValue);
+					t.subFloatingPoint(hystValue);
+
+					if ((inputValue > settingValue) ||
+						(prevResult == 1 && inputValue > t.floatValue()))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, t.mathOverflow());
+					instance->addParamWord(o_underflow, t.mathUnderflow());
+				}
+				break;
+
+			case 7:		// FloatingPoint32, <
+				{
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					AfbComponentParam t;
+
+					t.setFloatValue(settingValue);
+					t.addFloatingPoint(hystValue);
+
+					if ((inputValue < settingValue) ||
+						(prevResult == 1 && inputValue < t.floatValue()))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, t.mathOverflow());
+					instance->addParamWord(o_underflow, t.mathUnderflow());
+				}
+				break;
+
+			case 8:		// FloatingPoint32, <>
+				{
+					AfbComponentParam setValLow;
+					AfbComponentParam setValHigh;
+
+					setValLow.setFloatValue(settingValue - hystValue);
+					setValHigh.setFloatValue(settingValue + hystValue);
+
+					if (inputValue >= setValLow.floatValue() &&
+						inputValue <= setValHigh.floatValue())
+					{
+						instance->addParamWord(o_result, 0);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 1);
+					}
+
+					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
+					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+				}
+				break;
+
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+			}
+
+			return;
+		}
+
+		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_dpcomp_v4(AfbComponentInstance* instance)
+	{
+		return afb_dpcomp_v5(instance);		// it has the same implementation, in LM's version 5 fixed error with forming o_nan
+	}
+
+	void CommandProcessor_LM5_LM6::afb_dpcomp_v5(AfbComponentInstance* instance)
+	{
+		Q_ASSERT(instance);
 
 		// Define input opIndexes
 		//
@@ -1825,7 +2346,7 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 			}
 
 			return;
@@ -1962,19 +2483,19 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 		return;
 	}
 
 	//	MUX, OpCode 21
 	//
-	void CommandProcessor_LM1_SF00::afb_mux(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_mux_v1(AfbComponentInstance* instance)
 	{
 		// Define input opIndexes
 		//
@@ -2001,7 +2522,7 @@ namespace Sim
 
 	//	LIM, OpCode 23
 	//
-	void CommandProcessor_LM1_SF00::afb_lim(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_lim_v7(AfbComponentInstance* instance)
 	{
 		// Define input opIndexes
 		//
@@ -2101,7 +2622,7 @@ namespace Sim
 		default:
 			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
-								"CommandProcessor_LM1_SF00::afb_lim");
+								"CommandProcessor_LM5_LM6::afb_lim");
 		}
 
 		// Save result

@@ -1,14 +1,17 @@
 #include <cassert>
 #include "SimCommandProcessor.h"
-#include "SimCommandProcessor_LM1_SF00.h"
+#include "SimCommandProcessor_LM5_LM6.h"
 
 namespace Sim
 {
 	const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> CommandProcessor::m_lmToFactory
 		{
-			{"LM1_SF00", [](DeviceEmulator* device){	return new CommandProcessor_LM1_SF00(device);	}},
-			//{"LM_SR02", [](auto device){	return new CommandProcessor_LM_SR02;	}},
-			//{"LM_SR01", [](auto device){	return new CommandProcessor_LM_SR01;	}},
+			{"LM1_SF00", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SF40_4PH", [](DeviceEmulator* device)		{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR01", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR02", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR03", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR04", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
 		};
 
 	CommandProcessor::CommandProcessor(DeviceEmulator* device) :
@@ -24,7 +27,7 @@ namespace Sim
 
 	CommandProcessor* CommandProcessor::createInstance(DeviceEmulator* device)
 	{
-		assert(device);
+		Q_ASSERT(device);
 
 		QString logicModuleName = device->lmDescription().name();
 		QString equipmentId = device->logicModuleInfo().equipmentId;
@@ -37,7 +40,7 @@ namespace Sim
 		else
 		{
 			CommandProcessor* result = it->second(device);
-			assert(result);
+			Q_ASSERT(result);
 
 			result->setOutputScope(equipmentId);
 

@@ -140,7 +140,8 @@ namespace Sim
 	class AfbComponentInstance
 	{
 	public:
-		AfbComponentInstance(quint16 instanceNo);
+		AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
+							 quint16 instanceNo);
 
 	public:
 		bool addParam(const AfbComponentParam& param);
@@ -156,8 +157,8 @@ namespace Sim
 		bool addParamSignedInt64(quint16 opIndex, qint64 value);
 
 	private:
+		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 		quint16 m_instanceNo = 0;
-		//std::unordered_map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
 		std::vector<std::optional<AfbComponentParam>> m_params_v;		// Index is AfbComponentParam.opIndex()
 	};
 

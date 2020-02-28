@@ -231,6 +231,8 @@ void SimWidget::showEvent(QShowEvent* e)
 	QMainWindow::showEvent(e);
 	e->ignore();
 
+	m_showEventFired = true;
+
 static bool firstEvent = true;
 
 	if (firstEvent == true)
@@ -253,7 +255,7 @@ static bool firstEvent = true;
 
 void SimWidget::aboutToQuit()
 {
-	if (m_slaveWindow == false)
+	if (m_slaveWindow == false && m_showEventFired == true)
 	{
 		QSettings().setValue("SimWidget/state", saveState());
 	}

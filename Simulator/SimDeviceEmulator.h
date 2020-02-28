@@ -56,6 +56,16 @@ namespace Sim
 		int programCounter = 0;					// current offeset of program memory, in words
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
+
+		union Flags
+		{
+			struct
+			{
+				quint32 cmp : 1;
+			};
+
+			quint32 value = 0;
+		} flags;
 	};
 
 
@@ -119,6 +129,9 @@ public:
 
 		quint32 programCounter() const;
 		void setProgramCounter(quint32 value);
+
+		quint32 flagCmp() const;
+		void setFlagCmp(quint32 value);
 
 		Sim::AfbComponent afbComponent(int opCode) const;
 		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);

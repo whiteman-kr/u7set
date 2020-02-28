@@ -68,6 +68,7 @@ protected slots:
 
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
+	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	QTabWidget* m_tabWidget = nullptr;
 	SimToolBar* m_toolBar = nullptr;
 	SimProjectWidget* m_projectWidget = nullptr;

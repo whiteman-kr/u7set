@@ -566,10 +566,12 @@ namespace Sim
 		return m_mathFlags.divByZero ? 0x0001 : 0x0000;
 	}
 
-	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :
+	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
+											   quint16 instanceNo) :
+		m_afbComp(afbComp),
 		m_instanceNo(instanceNo)
 	{
-		//m_params.reserve(32);
+		Q_ASSERT(m_afbComp);
 		m_params_v.reserve(36);
 	}
 
@@ -586,6 +588,18 @@ namespace Sim
 
 	AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
 	{
+		if (opIndex == m_afbComp->versionOpIndex())
+		{
+			// This is o_version output, which is constant always
+			// if it is not present, then create it in m_params_v with version value from m_afbComp
+			// and return it to caller
+			//
+			if (paramExists(opIndex) == false)
+			{
+				addParamWord(m_afbComp->versionOpIndex(), m_afbComp->impVersion());
+			}
+		}
+
 		if (opIndex >= m_params_v.size() ||
 			m_params_v[opIndex].has_value() == false)
 		{
@@ -682,7 +696,7 @@ namespace Sim
 
 		for (int i = 0; i < m_afbComp->maxInstCount(); i++)
 		{
-			m_instances.emplace_back(i);		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
+			m_instances.emplace_back(m_afbComp, i);		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
 		}
 
 		return true;
@@ -752,7 +766,7 @@ namespace Sim
 		m_components.clear();
 
 		const auto& afbs = lmDescription.afbComponents();
-		m_components.resize(256);		// opcode is quint16, and there is opcode 256 for set_flags (((
+		m_components.resize(256);		// opcode is quint16, and there is opcode 255 for set_flags (((
 
 		for (const auto&[keyAfbOpCode, afbComp] : afbs)
 		{

@@ -122,6 +122,16 @@ namespace Sim
 		m_device->m_logicUnit.programCounter = value;
 	}
 
+	quint32 ScriptDeviceEmulator::flagCmp() const
+	{
+		return m_device->m_logicUnit.flags.cmp;
+	}
+
+	void ScriptDeviceEmulator::setFlagCmp(quint32 value)
+	{
+		m_device->m_logicUnit.flags.cmp = value;
+	}
+
 	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode) const
 	{
 		AfbComponent result(m_device->m_lmDescription.component(opCode));
