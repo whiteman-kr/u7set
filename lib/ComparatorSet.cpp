@@ -71,6 +71,16 @@ bool ComparatorSignal::serializeFrom(const Proto::ComparatorSignal& s)
 	return true;
 }
 
+void ComparatorSignal::dump() const
+{
+	qDebug() << "\t\t IsConst: " << m_isConst;
+	qDebug() << "\t\t ConstValue: " << m_constValue;
+	qDebug() << "\t\t AppSignalID: " << m_appSignalID;
+	qDebug() << "\t\t IsAcquired: " << m_isAcquired;
+
+	return;
+}
+
 // ------------------------------------------------------------------------------------------------
 //
 //	Comparator class implementation
@@ -216,6 +226,26 @@ bool Comparator::serializeFrom(const Proto::Comparator& c)
 	return true;
 }
 
+void Comparator::dump() const
+{
+	qDebug() << "\t----------Comparator -------- ";
+	qDebug() << "\t m_cmpType: " << E::valueToString<E::CmpType>(m_cmpType);
+
+	qDebug() << "\t m_inputSignal: ";
+	m_inputSignal.dump();
+
+	qDebug() << "\t m_compareSignal: ";
+	m_compareSignal.dump();
+
+	qDebug() << "\t m_hysteresisSignal: ";
+	m_hysteresisSignal.dump();
+
+	qDebug() << "\t m_outputSignal: ";
+	m_outputSignal.dump();
+
+	return;
+}
+
 // ------------------------------------------------------------------------------------------------
 //
 //	LmComparatorSet class implementation
@@ -337,6 +367,25 @@ ComparatorSet& ComparatorSet::operator= (ComparatorSet&& src)
 	}
 
 	return *this;
+}
+
+void ComparatorSet::dump() const
+{
+	QMutexLocker l(&m_mutex);
+
+	qDebug() << "------------------ComparatorSet Dump---------------------";
+	qDebug() << "Comparators: " << m_bySignal.size();
+
+	for (const auto bs : m_bySignal)
+	{
+		qDebug() << "Comparators for signal: " << bs.size();
+		for (const std::shared_ptr<Comparator>& c : bs)
+		{
+			c->dump();
+		}
+	}
+
+	return;
 }
 
 void ComparatorSet::clear()
