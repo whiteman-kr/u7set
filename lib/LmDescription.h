@@ -36,6 +36,7 @@ class LmDescription : public QObject
 	Q_PROPERTY(quint32 FlashMemory_MaxConfigurationCount READ (m_flashMemory.maxConfigurationCount))
 	Q_PROPERTY(quint32 Memory_TxDiagDataSize READ (m_memory.txDiagDataSize))
 	Q_PROPERTY(quint32 OptoInterface_OptoPortCount READ (m_optoInterface.optoPortCount))
+	Q_PROPERTY(int Lan_ControllerCount READ (m_lan.lanControllerCount))
 
 public:
 	explicit LmDescription(QObject* parent = 0);
@@ -152,6 +153,27 @@ public:
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 
+	struct LanController
+	{
+		E::LanControllerType m_type = E::LanControllerType::Tuning;
+		int m_place = 0;
+		int m_readDataOffset = 0;
+		int m_readDataSize = 0;
+		int m_writeDataOffset = 0;
+		int m_writeDataSize = 0;
+	};
+
+	struct Lan
+	{
+		std::vector<LanController> m_lanControllers;
+
+		int lanControllerCount() const { return static_cast<int>(m_lanControllers.size()); }
+		E::LanControllerType lanControllerType(int index, bool* ok = nullptr) const;
+
+		bool load(const QDomDocument& document, QString* errorMessage);
+
+	};
+
 	// Properties
 	//
 public:
@@ -168,6 +190,8 @@ public:
 	const Memory& memory() const;
 	const LogicUnit& logicUnit() const;
 	const OptoInterface& optoInterface() const;
+
+	Q_INVOKABLE int jsLanControllerType(int index);
 
 	bool checkAfbVersions() const;
 	quint32 checkAfbVersionsOffset(bool absoluteValue) const;
@@ -195,6 +219,7 @@ private:
 	Memory m_memory;
 	LogicUnit m_logicUnit;
 	OptoInterface m_optoInterface;
+	Lan m_lan;
 
 	// Possible commands
 	//

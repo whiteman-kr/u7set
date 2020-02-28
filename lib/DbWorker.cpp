@@ -326,6 +326,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0306.sql", "Upgrade to version 306, Added behavior file and properties for Monitor and TuningClient"},
 	{":/DatabaseUpgrade/Upgrade0307.sql", "Upgrade to version 307, Custom logo can be displayed in Monitor"},
 	{":/DatabaseUpgrade/Upgrade0308.sql", "Upgrade to version 308, Behavior file update"},
+	{":/DatabaseUpgrade/Upgrade0309.sql", "Upgrade to version 309, Add LAN section to LM description files"},
 };
 
 int DbWorker::counter = 0;
