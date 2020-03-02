@@ -126,7 +126,7 @@
 			<Pin OpName="o_tct_edi"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FLIP_FLOP"	OpCode="4"  ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="256" SimulationFunc="afb_flipflop">
+		<AFBComponent Caption="FLIP_FLOP"	OpCode="4"  ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="256" SimulationFunc="afb_flipflop_v106">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_c_t_prev"	OpIndex ="2"	PinType = "Input"/>

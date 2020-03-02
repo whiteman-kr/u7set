@@ -190,14 +190,20 @@ namespace Sim
 		return readData<qint32>(offsetW, data, byteOrder);
 	}
 
-	const QByteArray& RamArea::rawData() const
+	const QByteArray& RamArea::data() const
 	{
 		return m_data;
 	}
 
-	void RamArea::setRawData(const QByteArray& value)
+	const std::vector<OverrideRamRecord>& RamArea::overrideData() const
+	{
+		return m_overrideData;
+	}
+
+	void RamArea::setRawData(const QByteArray& value, const std::vector<OverrideRamRecord>& overrideData)
 	{
 		m_data = value;
+		m_overrideData = overrideData;
 	}
 
 	template<typename TYPE>
@@ -393,14 +399,13 @@ namespace Sim
 				s.offset() == d.offset() &&
 				s.access() == d.access())
 			{
-				d.setRawData(s.rawData());
+				d.setRawData(s.data(), s.overrideData());
 			}
 			else
 			{
 				*this = source;		// Full deep copy
 				return;
 			}
-
 		}
 
 		return;

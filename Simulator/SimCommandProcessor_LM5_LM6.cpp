@@ -749,8 +749,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_logic_v207(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_oprd_quant = 0;
@@ -813,8 +811,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_not_v103(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_oprd = 0;
@@ -836,8 +832,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_tct_v208(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;			// 1..5
@@ -1026,8 +1020,6 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::afb_tct_v209(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;			// 1..5
@@ -1241,13 +1233,187 @@ namespace Sim
 		return;
 	}
 
+	//	FLIP FLOP, OpCode 4
+	//
+	void CommandProcessor_LM5_LM6::afb_flipflop_v106(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;					// 1 - 6
+		const int i_prev_val = 1;				// Previous result value
+		const int i_c_t_prev = 2;				// Previous state of input C-data/T-data signal
+		const int i_r_c_t = 3;					// reset/C -data signal/T-data signal
+		const int i_s_d = 4;					// Setting signal  S/D-data signal
+
+		const int o_result = 6;					//
+		const int o_c_t = 7;					// Input C-data/T-data signal
+		//const int o_edi = 8;
+		//const int o_version = 9;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		quint16 prevResult = instance->paramExists(i_prev_val) ? instance->param(i_prev_val)->dwordValue() : 0;
+
+		checkParamRange(conf, 1, 6, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		quint16 result = 0;
+
+		switch (conf)
+		{
+		case 1:
+			{
+				// Set/Reset trigger with set priority
+				//
+				quint16 set = instance->param(i_s_d)->wordValue();
+				quint16 reset = instance->param(i_r_c_t)->wordValue();
+
+				if (set == 0)
+				{
+					if (reset == 1)
+					{
+						result = 0;
+					}
+					else
+					{
+						result = prevResult;
+					}
+				}
+				else
+				{
+					result = 1;
+				}
+			}
+			break;
+		case 2:
+			{
+				// Set/Reset trigger with reset priority
+				//
+				quint16 set = instance->param(i_s_d)->wordValue() & 0x0001;
+				quint16 reset = instance->param(i_r_c_t)->wordValue() & 0x0001;
+
+				quint16 t = (set << 1) | reset;
+
+				switch (t)
+				{
+				case 0: // S:0 R:0
+					result = prevResult;
+					break;
+				case 1:	// S:0 R:1
+					result = 0;
+					break;
+				case 2: // S:1 R:0
+					result = 1;
+					break;
+				case 3: // S:1 R:1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+			}
+			break;
+		case 3:
+			{
+				// D on front
+				//
+				quint16 data = instance->param(i_s_d)->wordValue();
+				quint16 clock = instance->param(i_r_c_t)->wordValue();
+				quint16 prevClock = instance->paramExists(i_c_t_prev) ? instance->param(i_c_t_prev)->dwordValue() : 0;
+
+				if (prevClock == 0 && clock == 1)
+				{
+					result = data;
+				}
+				else
+				{
+					result = prevResult;
+				}
+
+				instance->addParamWord(i_c_t_prev, clock);
+				instance->addParamWord(o_c_t, clock);
+			}
+			break;
+		case 4:
+			{
+				// T on front
+				//
+				quint16 t = instance->param(i_r_c_t)->wordValue();
+				quint16 prevT = instance->paramExists(i_c_t_prev) ? instance->param(i_c_t_prev)->dwordValue() : 0;
+
+				if (prevT == 0 && t == 1)
+				{
+					result = prevResult ? 0x0000 : 0x0001;
+				}
+				else
+				{
+					result = prevResult;
+				}
+
+				instance->addParamWord(i_c_t_prev, t);
+				instance->addParamWord(o_c_t, t);
+			}
+			break;
+		case 5:
+			{
+				// D on decay
+				//
+				quint16 data = instance->param(i_s_d)->wordValue();
+				quint16 clock = instance->param(i_r_c_t)->wordValue();
+				quint16 prevClock = instance->paramExists(i_c_t_prev) ? instance->param(i_c_t_prev)->dwordValue() : 0;
+
+				if (prevClock == 1 && clock == 0)
+				{
+					result = data;
+				}
+				else
+				{
+					result = prevResult;
+				}
+
+				instance->addParamWord(i_c_t_prev, clock);
+				instance->addParamWord(o_c_t, clock);
+			}
+			break;
+		case 6:
+			{
+				// T on decay
+				//
+				quint16 t = instance->param(i_r_c_t)->wordValue();
+				quint16 prevT = instance->paramExists(i_c_t_prev) ? instance->param(i_c_t_prev)->dwordValue() : 0;
+
+				if (prevT == 1 && t == 0)
+				{
+					result = prevResult ? 0x0000 : 0x0001;
+				}
+				else
+				{
+					result = prevResult;
+				}
+
+				instance->addParamWord(i_c_t_prev, t);
+				instance->addParamWord(o_c_t, t);
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
+		instance->addParamWord(i_prev_val, result);
+
+		return;
+	}
+
 	//	CTUD, OpCode 5
 	//  Counter Up/Down
 	//
 	void CommandProcessor_LM5_LM6::afb_ctud_v106(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;			// 1, 2
@@ -1317,8 +1483,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_maj_v107(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf_x = 0;
@@ -1395,8 +1559,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_bcod_v103(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
@@ -1454,8 +1616,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_bdec_v103(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
@@ -1501,8 +1661,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_bcomp_v111(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
@@ -1799,8 +1957,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_damper_v112(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
@@ -2134,8 +2290,6 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_dpcomp_v3(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
@@ -2382,8 +2536,6 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::afb_dpcomp_v5(AfbComponentInstance* instance)
 	{
-		Q_ASSERT(instance);
-
 		// Define input opIndexes
 		//
 		const int i_conf = 0;

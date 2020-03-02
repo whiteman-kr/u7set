@@ -182,6 +182,10 @@ namespace Sim
 		void afb_tct_v208(AfbComponentInstance* instance);
 		void afb_tct_v209(AfbComponentInstance* instance);
 
+		//	FLIP FLOP, OpCode 4
+		//
+		void afb_flipflop_v106(AfbComponentInstance* instance);
+
 		//	CTUD, OpCode 5
 		//  Counter Up/Down
 		//
@@ -272,6 +276,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_not_v103")),		&CommandProcessor_LM5_LM6::afb_not_v103},				// 2
 			{::calcHash(QStringLiteral("afb_tct_v208")),		&CommandProcessor_LM5_LM6::afb_tct_v208},				// 3
 			{::calcHash(QStringLiteral("afb_tct_v209")),		&CommandProcessor_LM5_LM6::afb_tct_v209},				// 3
+			{::calcHash(QStringLiteral("afb_flipflop_v106")),	&CommandProcessor_LM5_LM6::afb_flipflop_v106},			// 4
 			{::calcHash(QStringLiteral("afb_ctud_v106")),		&CommandProcessor_LM5_LM6::afb_ctud_v106},				// 5
 			{::calcHash(QStringLiteral("afb_maj_v107")),		&CommandProcessor_LM5_LM6::afb_maj_v107},				// 6
 			{::calcHash(QStringLiteral("afb_bcod_v103")),		&CommandProcessor_LM5_LM6::afb_bcod_v103},				// 8

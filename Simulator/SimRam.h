@@ -63,8 +63,10 @@ namespace Sim
 		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder);
 		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const;
 
-		const QByteArray& rawData() const;
-		void setRawData(const QByteArray& value);
+		const QByteArray& data() const;
+		const std::vector<OverrideRamRecord>& overrideData() const;
+
+		void setRawData(const QByteArray& data, const std::vector<OverrideRamRecord>& overrideData);
 
 	private:
 		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder);
