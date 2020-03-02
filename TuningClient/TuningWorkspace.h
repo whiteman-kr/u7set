@@ -109,7 +109,7 @@ private:
 
 	QTreeWidget* m_filterTree = nullptr;
 
-	QLineEdit* m_treeMask = nullptr;
+	QComboBox* m_treeMaskCombo = nullptr;
 
 	QPushButton* m_treeMaskApply = nullptr;
 
