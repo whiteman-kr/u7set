@@ -1312,6 +1312,85 @@ namespace Sim
 		return;
 	}
 
+	//	MAJ, OpCode 6
+	//  Majority Block
+	//
+	void CommandProcessor_LM5_LM6::afb_maj_v107(AfbComponentInstance* instance)
+	{
+		Q_ASSERT(instance);
+
+		// Define input opIndexes
+		//
+		const int i_conf_x = 0;
+		const int i_conf_y = 1;
+		const int i_input_0 = 2;	// 16 consecutive
+		const int o_result = 19;
+		const int o_err_ms = 22;
+		const int o_err_st = 23;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 xCount = instance->param(i_conf_x)->wordValue();
+		quint16 yCount = instance->param(i_conf_y)->wordValue();
+
+		checkParamRange(xCount, 2, yCount - 1, QStringLiteral("i_conf_x"));
+		checkParamRange(yCount, 3, 16, QStringLiteral("i_conf_y"));
+
+		std::array<quint16, 16> inputs;
+		for (quint16 i = 0; i < yCount; i++)
+		{
+			inputs[i] = instance->param(i_input_0 + i)->wordValue();
+		}
+
+		// Logic
+		//
+		std::array<quint16, 16> alertedCount = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		quint16 mask = 0x0001;
+		for (size_t i = 0; i < 16; i++, mask <<= 1)
+		{
+			for (size_t inputIndex = 0; inputIndex < yCount; inputIndex++)
+			{
+				if ((inputs[inputIndex] & mask) == 1)
+				{
+					alertedCount[i] ++;
+				}
+			}
+		}
+
+		// Get result
+		//
+		quint16 result = 0;
+		quint16 err_ms = 0;
+		quint16 err_st = 0;
+
+		for (size_t i = 0, mask = 0x0001; i < 16; i++, mask <<= 1)
+		{
+			int ac = alertedCount[i];
+
+			if (ac >= xCount)
+			{
+				result |= mask;
+			}
+
+			if (ac != 0 && ac < xCount)
+			{
+				err_ms |= mask;
+			}
+
+			if (ac != 0 && ac != yCount)
+			{
+				err_st |= mask;
+			}
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
+		instance->addParamWord(o_err_ms, err_ms);
+		instance->addParamWord(o_err_st, err_st);
+		return;
+	}
+
 	//	BCOD, OpCode 8
 	//
 	void CommandProcessor_LM5_LM6::afb_bcod_v103(AfbComponentInstance* instance)

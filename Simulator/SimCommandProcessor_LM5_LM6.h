@@ -187,6 +187,11 @@ namespace Sim
 		//
 		void afb_ctud_v106(AfbComponentInstance* instance);
 
+		//	MAJ, OpCode 6
+		//  Majority Block
+		//
+		void afb_maj_v107(AfbComponentInstance* instance);
+
 		//	BCOD, OpCode 8
 		//
 		void afb_bcod_v103(AfbComponentInstance* instance);
@@ -265,9 +270,10 @@ namespace Sim
 		{
 			{::calcHash(QStringLiteral("afb_logic_v207")),		&CommandProcessor_LM5_LM6::afb_logic_v207},				// 1
 			{::calcHash(QStringLiteral("afb_not_v103")),		&CommandProcessor_LM5_LM6::afb_not_v103},				// 2
-			{::calcHash(QStringLiteral("afb_tct_v208")),		&CommandProcessor_LM5_LM6::afb_tct_v208},				// 3	TO DO
-			{::calcHash(QStringLiteral("afb_tct_v209")),		&CommandProcessor_LM5_LM6::afb_tct_v209},				// 3	To DO
+			{::calcHash(QStringLiteral("afb_tct_v208")),		&CommandProcessor_LM5_LM6::afb_tct_v208},				// 3
+			{::calcHash(QStringLiteral("afb_tct_v209")),		&CommandProcessor_LM5_LM6::afb_tct_v209},				// 3
 			{::calcHash(QStringLiteral("afb_ctud_v106")),		&CommandProcessor_LM5_LM6::afb_ctud_v106},				// 5
+			{::calcHash(QStringLiteral("afb_maj_v107")),		&CommandProcessor_LM5_LM6::afb_maj_v107},				// 6
 			{::calcHash(QStringLiteral("afb_bcod_v103")),		&CommandProcessor_LM5_LM6::afb_bcod_v103},				// 8
 			{::calcHash(QStringLiteral("afb_bdec_v103")),		&CommandProcessor_LM5_LM6::afb_bdec_v103},				// 9
 			{::calcHash(QStringLiteral("afb_bcomp_v111")),		&CommandProcessor_LM5_LM6::afb_bcomp_v111},				// 10

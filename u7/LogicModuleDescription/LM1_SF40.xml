@@ -148,7 +148,7 @@
 			<Pin OpName="o_ctud_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="107"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_maj">
+		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="107"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_maj_v107">
 			<Pin OpName="i_conf_x"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_y"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="2"	PinType = "Input"/>
