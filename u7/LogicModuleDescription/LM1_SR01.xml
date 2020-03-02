@@ -76,7 +76,7 @@
 		<Command Caption="wrfb32"		Code="0500"	CodeMask="07c0"	SimulationFunc="command_wrfb32"		ParseFunc="parse_wrfb32"	Description="Read 32-bit data from memory and write to AFB input"/>
 		<Command Caption="rdfb32"		Code="0540"	CodeMask="07c0"	SimulationFunc="command_rdfb32"		ParseFunc="parse_rdfb32"	Description="Read 32-bit data from AFB output and write to memory"/>
 		<Command Caption="wrfbc32"		Code="0580"	CodeMask="07c0"	SimulationFunc="command_wrfbc32"	ParseFunc="parse_wrfbc32"	Description="Write 32-bit constant to AFB input"/>
-		<Command Caption="rdfbcmp32"	Code="05C0"	CodeMask="07c0"	SimulationFunc="command_rdfbts32"	ParseFunc="parse_rdfbcmp32"	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"/>
+		<Command Caption="rdfbcmp32"	Code="05C0"	CodeMask="07c0"	SimulationFunc="command_rdfbcmp32"	ParseFunc="parse_rdfbcmp32"	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"/>
 		<Command Caption="movcmpf"		Code="0600"	CodeMask="07c0"	SimulationFunc="command_movcmpf"	ParseFunc="parse_movcmpf"	Description="Write compare flag to memory [flag result from rdfbcmp(32)]"/>
 		<Command Caption="pmov"			Code="0640"	CodeMask="07c0"	SimulationFunc="command_pmov"		ParseFunc="parse_pmov"		Description="Copy 16-bit word from memory to memory written in prior cycle"/>
 		<Command Caption="pmov32"		Code="0680"	CodeMask="07c0"	SimulationFunc="command_pmov32"		ParseFunc="parse_pmov32"	Description="Copy 32-bit data from memory to memory written in prior cycle"/>

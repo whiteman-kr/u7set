@@ -38,6 +38,22 @@ namespace Sim
 		return;
 	}
 
+	// Command: nop
+	// Code: 1
+	// Description: No operation
+	//
+	void CommandProcessor_LM5_LM6::parse_nop(DeviceCommand* command) const
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption());
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_nop(const DeviceCommand& /*command*/)
+	{
+	}
+
 	// Command: startafb
 	// Code: 2
 	// Description: Execute AFB
@@ -129,7 +145,6 @@ namespace Sim
 		SimException::raise(QString("Command stop is cannot be run in current phase: %1")
 								.arg(static_cast<int>(m_device.phase())));
 		return;
-
 	}
 
 	// Command: mov
@@ -430,8 +445,6 @@ namespace Sim
 							strAfbInstPin(command) + ", " +
 							strWordConst(command->m_word0);
 		return;
-
-		return;
 	}
 
 	void CommandProcessor_LM5_LM6::command_rdfbcmp(const DeviceCommand& command)
@@ -634,6 +647,44 @@ namespace Sim
 
 		return;
 	}
+
+	// Command: rdfbcmp32
+	// Code: 23
+	// Description: Read 32-bit data from AFB instance and compare it with constant, set compare bit if equal
+	//
+	void CommandProcessor_LM5_LM6::parse_rdfbcmp32(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+
+		command->m_dword0 = m_device.getDword(command->m_offset + 2);					// Dword0 - data to comapare with
+
+		// Checks
+		//
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAfbInstPin(command) + ", " +
+							strDwordConst(command->m_dword0);
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_rdfbcmp32(const DeviceCommand& command)
+	{
+		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+
+		bool result = param->dwordValue() == command.m_dword0;
+		m_device.setFlagCmp(result ? 1 : 0);
+
+		return;
+	}
+
 
 	// Command: movcmpf
 	// Code: 24

@@ -18,6 +18,13 @@ namespace Sim
 	public slots:
 		void command_not_implemented(const DeviceCommand& command);
 
+		// Command: nop
+		// Code: 1
+		// Description: No operation
+		//
+		void parse_nop(DeviceCommand* command) const;
+		void command_nop(const DeviceCommand& command);
+
 		// Command: startafb
 		// Code: 2
 		// Description: Execute AFB
@@ -137,6 +144,13 @@ namespace Sim
 		void parse_wrfbc32(DeviceCommand* command) const;
 		void command_wrfbc32(const DeviceCommand& command);
 
+		// Command: rdfbcmp32
+		// Code: 23
+		// Description: Read 32-bit data from AFB instance and compare it with constant, set compare bit if equal
+		//
+		void parse_rdfbcmp32(DeviceCommand* command) const;
+		void command_rdfbcmp32(const DeviceCommand& command);
+
 		// Command: movcmpf
 		// Code: 24
 		// Description: Write compare flag to memory [flag result from rdfbcmp(32)]
@@ -217,7 +231,7 @@ namespace Sim
 
 		const std::map<Hash, SimCommandFunc> m_nameToFuncCommand
 		{
-			{::calcHash(QStringLiteral("command_nop")),			&CommandProcessor_LM5_LM6::command_not_implemented},	// 1 Not impemented
+			{::calcHash(QStringLiteral("command_nop")),			&CommandProcessor_LM5_LM6::command_not_implemented},	// 1
 			{::calcHash(QStringLiteral("command_startafb")),	&CommandProcessor_LM5_LM6::command_startafb},			// 2
 			{::calcHash(QStringLiteral("command_stop")),		&CommandProcessor_LM5_LM6::command_stop},				// 3
 			{::calcHash(QStringLiteral("command_mov")),			&CommandProcessor_LM5_LM6::command_mov},				// 4
@@ -239,7 +253,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("command_wrfb32")),		&CommandProcessor_LM5_LM6::command_wrfb32},				// 20
 			{::calcHash(QStringLiteral("command_rdfb32")),		&CommandProcessor_LM5_LM6::command_rdfb32},				// 21
 			{::calcHash(QStringLiteral("command_wrfbc32")),		&CommandProcessor_LM5_LM6::command_wrfbc32},			// 22
-			{::calcHash(QStringLiteral("command_rdfbts32")),	&CommandProcessor_LM5_LM6::command_not_implemented},	// 23 Not impemented
+			{::calcHash(QStringLiteral("command_rdfbcmp32")),	&CommandProcessor_LM5_LM6::command_rdfbcmp32},			// 23
 			{::calcHash(QStringLiteral("command_movcmpf")),		&CommandProcessor_LM5_LM6::command_movcmpf},			// 24
 			{::calcHash(QStringLiteral("command_pmov")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 25 Not impemented
 			{::calcHash(QStringLiteral("command_pmov32")),		&CommandProcessor_LM5_LM6::command_pmov32},				// 26
