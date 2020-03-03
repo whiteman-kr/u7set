@@ -196,6 +196,11 @@ namespace Sim
 		//
 		void afb_maj_v107(AfbComponentInstance* instance);
 
+		//	SRSST, OpCode 7
+		//  SimLock
+		//
+		void afb_srsst_v104(AfbComponentInstance* instance);
+
 		//	BCOD, OpCode 8
 		//
 		void afb_bcod_v103(AfbComponentInstance* instance);
@@ -279,6 +284,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_flipflop_v106")),	&CommandProcessor_LM5_LM6::afb_flipflop_v106},			// 4
 			{::calcHash(QStringLiteral("afb_ctud_v106")),		&CommandProcessor_LM5_LM6::afb_ctud_v106},				// 5
 			{::calcHash(QStringLiteral("afb_maj_v107")),		&CommandProcessor_LM5_LM6::afb_maj_v107},				// 6
+			{::calcHash(QStringLiteral("afb_srsst_v104")),		&CommandProcessor_LM5_LM6::afb_srsst_v104},				// 7
 			{::calcHash(QStringLiteral("afb_bcod_v103")),		&CommandProcessor_LM5_LM6::afb_bcod_v103},				// 8
 			{::calcHash(QStringLiteral("afb_bdec_v103")),		&CommandProcessor_LM5_LM6::afb_bdec_v103},				// 9
 			{::calcHash(QStringLiteral("afb_bcomp_v111")),		&CommandProcessor_LM5_LM6::afb_bcomp_v111},				// 10

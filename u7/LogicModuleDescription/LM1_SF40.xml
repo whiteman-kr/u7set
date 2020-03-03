@@ -171,7 +171,7 @@
 			<Pin OpName="o_maj_edi"		OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>			
 		</AFBComponent>
-		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="256" SimulationFunc="afb_srsst">
+		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="256" SimulationFunc="afb_srsst_v104">
 			<Pin OpName="i_data"		OpIndex ="0"	PinType = "Input"/>
 			<Pin OpName="i_set"			OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_reset"		OpIndex ="2"	PinType = "Input"/>

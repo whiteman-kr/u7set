@@ -104,7 +104,7 @@ namespace Sim
 		auto it = m_nameToFuncAfb.find(afb.simulationFuncHash());
 		if (it == m_nameToFuncAfb.end())
 		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFuncHash()), "CommandProcessor_LM5_LM6::command_startafb");
+			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), "CommandProcessor_LM5_LM6::command_startafb");
 		}
 
 		auto& func = it->second;
@@ -1552,6 +1552,36 @@ namespace Sim
 		instance->addParamWord(o_result, result);
 		instance->addParamWord(o_err_ms, err_ms);
 		instance->addParamWord(o_err_st, err_st);
+		return;
+	}
+
+	//	SRSST, OpCode 7
+	//  SimLock
+	//
+	void CommandProcessor_LM5_LM6::afb_srsst_v104(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_data = 0;
+		const int i_set = 1;
+		const int i_reset = 2;
+
+		const int o_result = 4;
+		//const int o_version = 5;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 data = instance->param(i_data)->wordValue();
+		quint16 set = instance->param(i_set)->wordValue();
+		quint16 reset = instance->param(i_reset)->wordValue();
+
+		// Logic
+		//
+		quint16 result = (data | set) & (~reset);
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
 		return;
 	}
 
