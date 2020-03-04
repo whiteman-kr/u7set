@@ -235,6 +235,10 @@ namespace Sim
 		//
 		void afb_mux_v1(AfbComponentInstance* instance);
 
+		//	LATCH, OpCode 22
+		//
+		void afb_latch_v4(AfbComponentInstance* instance);
+
 		//	LIM, OpCode 23
 		//
 		void afb_lim_v7(AfbComponentInstance* instance);
@@ -295,6 +299,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_dpcomp_v4")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
 			{::calcHash(QStringLiteral("afb_dpcomp_v5")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20
 			{::calcHash(QStringLiteral("afb_mux_v1")),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
+			{::calcHash(QStringLiteral("afb_latch_v4")),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
 			{::calcHash(QStringLiteral("afb_lim_v7")),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
 		};
 
