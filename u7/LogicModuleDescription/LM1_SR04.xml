@@ -484,7 +484,7 @@
 			<Pin OpName="o_nan"			OpIndex ="27"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="28"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="3"		VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_mismatch">
+		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="3"		VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_mismatch_v3">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_n"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_ust"			OpIndex ="2"	PinType = "Param"/>

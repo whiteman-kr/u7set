@@ -92,6 +92,9 @@ namespace Sim
 		void mulFloatingPoint(float operand);
 		void divFloatingPoint(float operand);
 
+		void absFloatingPoint();
+		void absSignedInt();
+
 		void convertWordToFloat();
 		void convertWordToSignedInt();
 

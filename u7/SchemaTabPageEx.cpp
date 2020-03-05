@@ -3289,7 +3289,7 @@ void SchemaControlTabPageEx::cloneFile()
 	//
 	bool ok = false;
 	int globalCounter = db()->nextCounterValue();
-	QString newSchemaId = QInputDialog::getText(this, qAppName(), tr("New SchemaID <b>(cannot be changed later)</b>:"),
+	QString newSchemaId = QInputDialog::getText(this, qAppName(), tr("New SchemaID:"),
 												QLineEdit::Normal,
 												schema->schemaId() + QString::number(globalCounter), &ok,
 												Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);

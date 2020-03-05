@@ -516,6 +516,53 @@ namespace Sim
 		return divFloatingPoint(&cp);
 	}
 
+	void AfbComponentParam::absFloatingPoint()
+	{
+		resetMathFlags();
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		float fp = this->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = std::abs(fp);
+
+		// Setting math flags
+		//
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
+		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
+		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
+													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
+													// Some compilers can optimize it!
+
+		setFloatValue(result);
+
+	}
+
+	void AfbComponentParam::absSignedInt()
+	{
+		resetMathFlags();
+
+		qint32 result = this->signedIntValue();
+
+		if (result == std::numeric_limits<qint32>::min())
+		{
+			result = std::numeric_limits<qint32>::max();
+			m_mathFlags.overflow = true;
+		}
+		else
+		{
+			result = std::abs(result);
+			m_mathFlags.zero = (result == 0);
+		}
+
+		setSignedIntValue(result);
+
+		return;
+	}
+
 	void AfbComponentParam::convertWordToFloat()
 	{
 		resetMathFlags();
@@ -603,7 +650,7 @@ namespace Sim
 		if (opIndex >= m_params_v.size() ||
 			m_params_v[opIndex].has_value() == false)
 		{
-			SimException::raise(QString("Param %1 is not found in AFB.").arg(opIndex));
+			SimException::raise(QString("Param %1 is not found in AFB %2.").arg(opIndex).arg(m_afbComp->caption()));
 		}
 
 		return &m_params_v[opIndex].value();

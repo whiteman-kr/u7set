@@ -512,6 +512,37 @@ namespace Sim
 		return;
 	}
 
+	// Command: mov32
+	// Code: 18
+	// Description: Move 32-bit data from RAM to RAM
+	//
+	void CommandProcessor_LM5_LM6::parse_mov32(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - address2 - destionation
+		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - address1 - source
+
+		// --
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strAddr(command->m_word1);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_mov32(const DeviceCommand& command)
+	{
+		const quint16& src = command.m_word1;
+		const quint16& dst = command.m_word0;
+
+		quint32 data = m_device.readRamDword(src);
+		m_device.writeRamDword(dst, data);
+
+		return;
+	}
+
 	// Command: movc32
 	// Code: 19
 	// Description: Move 32bit constant to RAM
@@ -3174,6 +3205,364 @@ namespace Sim
 		instance->addParamWord(o_min, setToMin);
 		instance->addParamWord(o_param_err, setParamError);
 		instance->addParamWord(o_nan, setNan);
+
+		return;
+	}
+
+	// MISMATCH, OpCode 27
+	// Analog Mismatch
+	// v2 - base version
+	// v3 - removed o_zero
+	// v4 - no functional difference to v3, just different VHDL implementation
+	//
+	void CommandProcessor_LM5_LM6::afb_mismatch_v2(AfbComponentInstance* instance)
+	{
+		return afb_mismatch_impl(instance, 2);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mismatch_v3(AfbComponentInstance* instance)
+	{
+		return afb_mismatch_impl(instance, 3);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mismatch_v4(AfbComponentInstance* instance)
+	{
+		return afb_mismatch_impl(instance, 4);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mismatch_impl(AfbComponentInstance* instance, int version)
+	{
+		const int i_conf = 0;			// SI/FP
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		switch (conf)
+		{
+		case 1:
+			afb_mismatch_impl_si(instance, version);
+			break;
+		case 2:
+			afb_mismatch_impl_fp(instance, version);
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+								.arg(conf),
+								"CommandProcessor_LM5_LM6::afb_mismatch");
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mismatch_impl_si(AfbComponentInstance* instance, int version)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf_n = 1;			// Param count 2 - 4
+		const int i_ust = 2;			// Setpoint - diff val
+		const int i_data_1 = 4;
+		const int i_data_2 = 6;
+		const int i_data_3 = 8;
+		const int i_data_4 = 10;
+
+		const int o_mismatch_1 = 12;
+		const int o_mismatch_2 = 13;
+		const int o_mismatch_3 = 14;
+		const int o_mismatch_4 = 15;
+		const int o_param_err = 16;
+		const int o_zero = 19;			// for v2 only
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 paramCount = instance->param(i_conf_n)->wordValue();
+		checkParamRange(paramCount, 1, 4, QStringLiteral("i_conf_n"));
+
+		// Get setpoint
+		//
+		AfbComponentParam* setpoint = instance->param(i_ust);
+		qint64 sp = setpoint->signedIntValue();
+
+		if (sp < 0)
+		{
+			instance->addParamWord(o_param_err, 1);
+			sp = 0;
+		}
+		else
+		{
+			instance->addParamWord(o_param_err, 0);
+		}
+
+		// Logic
+		//
+		bool zero = false;
+
+		switch (paramCount)
+		{
+		case 2:
+			{
+				qint64 data1 = instance->param(i_data_1)->signedIntValue();
+				qint64 data2 = instance->param(i_data_2)->signedIntValue();
+
+				qint64 x1_x2 = std::abs(data1 - data2);
+				bool x1_x2_b = x1_x2 > sp;
+
+				bool out1 = x1_x2_b;
+				bool out2 = x1_x2_b;
+				zero = (x1_x2 == 0);
+
+				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
+				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
+			}
+			break;
+
+		case 3:
+			{
+				qint64 data1 = instance->param(i_data_1)->signedIntValue();
+				qint64 data2 = instance->param(i_data_2)->signedIntValue();
+				qint64 data3 = instance->param(i_data_3)->signedIntValue();
+
+				qint64 x1_x2 = std::abs(data1 - data2);
+				qint64 x1_x3 = std::abs(data1 - data3);
+				qint64 x2_x3 = std::abs(data2 - data3);
+
+				bool x1_x2_b = x1_x2 > sp;
+				bool x1_x3_b = x1_x3 > sp;
+				bool x2_x3_b = x2_x3 > sp;
+
+				bool out1 = x1_x2_b || x1_x3_b;
+				bool out2 = x1_x2_b || x2_x3_b;
+				bool out3 = x1_x3_b || x2_x3_b;
+				zero = (x1_x2 == 0) || (x1_x3 == 0) || (x2_x3 == 0);
+
+				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
+				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
+				instance->addParamWord(o_mismatch_3, out3 ? 1 : 0);
+			}
+			break;
+
+		case 4:
+			{
+				qint64 data1 = instance->param(i_data_1)->signedIntValue();
+				qint64 data2 = instance->param(i_data_2)->signedIntValue();
+				qint64 data3 = instance->param(i_data_3)->signedIntValue();
+				qint64 data4 = instance->param(i_data_4)->signedIntValue();
+
+				qint64 x1_x2 = std::abs(data1 - data2);
+				qint64 x1_x3 = std::abs(data1 - data3);
+				qint64 x1_x4 = std::abs(data1 - data4);
+				qint64 x2_x3 = std::abs(data2 - data3);
+				qint64 x2_x4 = std::abs(data2 - data4);
+				qint64 x3_x4 = std::abs(data3 - data4);
+
+				bool x1_x2_b = x1_x2 > sp;
+				bool x1_x3_b = x1_x3 > sp;
+				bool x1_x4_b = x1_x4 > sp;
+				bool x2_x3_b = x2_x3 > sp;
+				bool x2_x4_b = x2_x4 > sp;
+				bool x3_x4_b = x3_x4 > sp;
+
+				bool out1 = x1_x2_b || x1_x3_b || x1_x4_b;
+				bool out2 = x1_x2_b || x2_x3_b || x2_x4_b;
+				bool out3 = x1_x3_b || x2_x3_b || x3_x4_b;
+				bool out4 = x1_x4_b || x2_x4_b || x3_x4_b;
+				zero = (x1_x2 == 0) || (x1_x3 == 0) || (x1_x4 == 0) ||
+					   (x2_x3 == 0) || (x2_x4 == 0) || (x3_x4 == 0);
+
+				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
+				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
+				instance->addParamWord(o_mismatch_3, out3 ? 1 : 0);
+				instance->addParamWord(o_mismatch_4, out4 ? 1 : 0);
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		if (version == 2)
+		{
+			// o_zero present only in AFB MISMATCH version 2
+			//
+			instance->addParamWord(o_zero, zero ? 1 : 0);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mismatch_impl_fp(AfbComponentInstance* instance, int version)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf_n = 1;			// Param count 2 - 4
+		const int i_ust = 2;			// Setpoint - diff val
+		const int i_data_1 = 4;
+		const int i_data_2 = 6;
+		const int i_data_3 = 8;
+		const int i_data_4 = 10;
+
+		const int o_mismatch_1 = 12;
+		const int o_mismatch_2 = 13;
+		const int o_mismatch_3 = 14;
+		const int o_mismatch_4 = 15;
+		const int o_param_err = 16;
+		const int o_overflow = 17;
+		const int o_underflow = 18;
+		const int o_zero = 19;			// for v2 only
+		const int o_nan = 20;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 paramCount = instance->param(i_conf_n)->wordValue();
+		checkParamRange(paramCount, 1, 4, QStringLiteral("i_conf_n"));
+
+		// Get setpoint
+		//
+		AfbComponentParam* setpoint = instance->param(i_ust);
+		float sp = setpoint->floatValue();
+
+		if (sp < 0.0f)
+		{
+			instance->addParamWord(o_param_err, 1);
+			sp = 0;
+		}
+		else
+		{
+			instance->addParamWord(o_param_err, 0);
+		}
+
+		// Logic
+		//
+		quint16 zero = 0;
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 nan = 0;
+
+		switch (paramCount)
+		{
+		case 2:
+			{
+				AfbComponentParam x1_x2 = *instance->param(i_data_1);
+
+				x1_x2.subFloatingPoint(instance->param(i_data_2));
+
+				overflow = x1_x2.mathOverflow();
+				underflow = x1_x2.mathUnderflow();
+				zero = x1_x2.mathZero();
+				nan = x1_x2.mathNan();
+
+				x1_x2.absFloatingPoint();
+
+				bool x1_x2_b = x1_x2.floatValue() > sp;
+
+				bool out1 = x1_x2_b;
+				bool out2 = x1_x2_b;
+
+				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
+				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
+			}
+			break;
+
+		case 3:
+			{
+				AfbComponentParam x1_x2 = *instance->param(i_data_1);
+				AfbComponentParam x1_x3 = *instance->param(i_data_1);
+				AfbComponentParam x2_x3 = *instance->param(i_data_2);
+
+				x1_x2.subFloatingPoint(instance->param(i_data_2));
+				x1_x3.subFloatingPoint(instance->param(i_data_3));
+				x2_x3.subFloatingPoint(instance->param(i_data_3));
+
+				overflow = x1_x2.mathOverflow() | x1_x3.mathOverflow() | x2_x3.mathOverflow();
+				underflow = x1_x2.mathUnderflow() | x1_x3.mathUnderflow() | x2_x3.mathUnderflow();
+				zero = x1_x2.mathZero() | x1_x3.mathZero() | x2_x3.mathZero();
+				nan = x1_x2.mathNan() | x1_x3.mathNan() | x2_x3.mathNan();
+
+				x1_x2.absFloatingPoint();
+				x1_x3.absFloatingPoint();
+				x2_x3.absFloatingPoint();
+
+				bool x1_x2_b = x1_x2.floatValue() > sp;
+				bool x1_x3_b = x1_x3.floatValue() > sp;
+				bool x2_x3_b = x2_x3.floatValue() > sp;
+
+				bool out1 = x1_x2_b || x1_x3_b;
+				bool out2 = x1_x2_b || x2_x3_b;
+				bool out3 = x1_x3_b || x2_x3_b;
+
+				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
+				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
+				instance->addParamWord(o_mismatch_3, out3 ? 1 : 0);
+			}
+			break;
+
+		case 4:
+			{
+				AfbComponentParam x1_x2 = *instance->param(i_data_1);
+				AfbComponentParam x1_x3 = *instance->param(i_data_1);
+				AfbComponentParam x1_x4 = *instance->param(i_data_1);
+				AfbComponentParam x2_x3 = *instance->param(i_data_2);
+				AfbComponentParam x2_x4 = *instance->param(i_data_2);
+				AfbComponentParam x3_x4 = *instance->param(i_data_3);
+
+				x1_x2.subFloatingPoint(instance->param(i_data_2));
+				x1_x3.subFloatingPoint(instance->param(i_data_3));
+				x1_x4.subFloatingPoint(instance->param(i_data_4));
+				x2_x3.subFloatingPoint(instance->param(i_data_3));
+				x2_x4.subFloatingPoint(instance->param(i_data_4));
+				x3_x4.subFloatingPoint(instance->param(i_data_4));
+
+				overflow = x1_x2.mathOverflow() | x1_x3.mathOverflow() | x1_x4.mathOverflow() |
+						   x2_x3.mathOverflow() | x2_x4.mathOverflow() | x3_x4.mathOverflow();
+
+				underflow = x1_x2.mathUnderflow() | x1_x3.mathUnderflow() | x1_x4.mathUnderflow() |
+							x2_x3.mathUnderflow() | x2_x4.mathUnderflow() | x3_x4.mathUnderflow();
+
+				zero = x1_x2.mathZero() | x1_x3.mathZero() | x1_x4.mathZero() |
+					   x2_x3.mathZero() | x2_x4.mathZero() | x3_x4.mathZero();
+
+				nan = x1_x2.mathNan() | x1_x3.mathNan() | x1_x4.mathNan() |
+					  x2_x3.mathNan() | x2_x4.mathNan() | x3_x4.mathNan();
+
+				x1_x2.absFloatingPoint();
+				x1_x3.absFloatingPoint();
+				x1_x4.absFloatingPoint();
+				x2_x3.absFloatingPoint();
+				x2_x4.absFloatingPoint();
+				x3_x4.absFloatingPoint();
+
+				bool x1_x2_b = x1_x2.floatValue() > sp;
+				bool x1_x3_b = x1_x3.floatValue() > sp;
+				bool x1_x4_b = x1_x4.floatValue() > sp;
+				bool x2_x3_b = x2_x3.floatValue() > sp;
+				bool x2_x4_b = x2_x4.floatValue() > sp;
+				bool x3_x4_b = x3_x4.floatValue() > sp;
+
+				bool out1 = x1_x2_b || x1_x3_b || x1_x4_b;
+				bool out2 = x1_x2_b || x2_x3_b || x2_x4_b;
+				bool out3 = x1_x3_b || x2_x3_b || x3_x4_b;
+				bool out4 = x1_x4_b || x2_x4_b || x3_x4_b;
+
+				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
+				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
+				instance->addParamWord(o_mismatch_3, out3 ? 1 : 0);
+				instance->addParamWord(o_mismatch_4, out4 ? 1 : 0);
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_nan, nan);
+
+		if (version == 2)
+		{
+			// o_zero present only in AFB MISMATCH version 2
+			//
+			instance->addParamWord(o_zero, zero);
+		}
 
 		return;
 	}

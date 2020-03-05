@@ -116,6 +116,13 @@ namespace Sim
 		void parse_appstart(DeviceCommand* command) const;
 		void command_appstart(const DeviceCommand& command);
 
+		// Command: mov32
+		// Code: 18
+		// Description: Move 32-bit data from RAM to RAM
+		//
+		void parse_mov32(DeviceCommand* command) const;
+		void command_mov32(const DeviceCommand& command);
+
 		// Command: movc32
 		// Code: 19
 		// Description: Move 32bit constant to RAM
@@ -243,6 +250,19 @@ namespace Sim
 		//
 		void afb_lim_v7(AfbComponentInstance* instance);
 
+		// MISMATCH, OpCode 27
+		// Analog Mismatch
+		//
+		void afb_mismatch_v2(AfbComponentInstance* instance);
+		void afb_mismatch_v3(AfbComponentInstance* instance);
+		void afb_mismatch_v4(AfbComponentInstance* instance);
+
+		void afb_mismatch_impl(AfbComponentInstance* instance, int version);
+		void afb_mismatch_impl_si(AfbComponentInstance* instance, int version);
+		void afb_mismatch_impl_fp(AfbComponentInstance* instance, int version);
+
+		// --
+		//
 	private:
 		using SimCommandFunc = void(CommandProcessor_LM5_LM6::*)(const DeviceCommand&);
 		using SimAfbFunc = void(CommandProcessor_LM5_LM6::*)(AfbComponentInstance*);
@@ -266,7 +286,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("command_movb")),		&CommandProcessor_LM5_LM6::command_movb},				// 15
 			{::calcHash(QStringLiteral("command_nstartafb")),	&CommandProcessor_LM5_LM6::command_not_implemented},	// 16 Not supported?
 			{::calcHash(QStringLiteral("command_appstart")),	&CommandProcessor_LM5_LM6::command_appstart},			// 17
-			{::calcHash(QStringLiteral("command_mov32")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 18 Not impemented
+			{::calcHash(QStringLiteral("command_mov32")),		&CommandProcessor_LM5_LM6::command_mov32},				// 18
 			{::calcHash(QStringLiteral("command_movc32")),		&CommandProcessor_LM5_LM6::command_movc32},				// 19
 			{::calcHash(QStringLiteral("command_wrfb32")),		&CommandProcessor_LM5_LM6::command_wrfb32},				// 20
 			{::calcHash(QStringLiteral("command_rdfb32")),		&CommandProcessor_LM5_LM6::command_rdfb32},				// 21
@@ -301,6 +321,9 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mux_v1")),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
 			{::calcHash(QStringLiteral("afb_latch_v4")),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
 			{::calcHash(QStringLiteral("afb_lim_v7")),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
+			{::calcHash(QStringLiteral("afb_mismatch_v2")),		&CommandProcessor_LM5_LM6::afb_mismatch_v2},			// 27
+			{::calcHash(QStringLiteral("afb_mismatch_v3")),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
+			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27
 		};
 
 		static const int m_cycleDurationMs = 5;
