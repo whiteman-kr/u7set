@@ -34,6 +34,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	m_propertyEditor->setSplitterPosition(theSettings.m_schemaItemPropertiesSplitterPosition);
 	m_propertyTable->setPropertyMask(theSettings.m_schemaItemPropertiesPropertyMask);
 	m_propertyTable->setExpandValuesToAllRows(theSettings.m_schemaItemPropertiesExpandValuesToAllRows);
+	m_propertyTable->setColumnsWidth(theSettings.m_schemaItemPropertiesColumnsWidth);
 	restoreGeometry(theSettings.m_schemaItemPropertiesGeometry);
 
 	ensureVisible();
@@ -115,6 +116,7 @@ void SchemaItemPropertiesDialog::saveSettings()
 	theSettings.m_schemaItemPropertiesSplitterPosition = m_propertyEditor->splitterPosition();
 	theSettings.m_schemaItemPropertiesPropertyMask = m_propertyTable->propertyMask();
 	theSettings.m_schemaItemPropertiesExpandValuesToAllRows = m_propertyTable->expandValuesToAllRows();
+	theSettings.m_schemaItemPropertiesColumnsWidth = m_propertyTable->getColumnsWidth();
 	theSettings.m_schemaItemPropertiesGeometry = saveGeometry();
 
 	return;
