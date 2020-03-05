@@ -13,6 +13,13 @@ namespace Sim
 		explicit CommandProcessor_LM5_LM6(DeviceEmulator* device);
 		virtual ~CommandProcessor_LM5_LM6();
 
+	public:
+		// Update platform interface, this function is called before work cyle,
+		// to update such platform inteface signals as Blink.
+		// Update mustb be done directly in RAM
+		//
+		virtual bool updatePlatformInterfaceState() override;
+
 		virtual bool runCommand(const DeviceCommand& command) override;
 
 	public slots:
@@ -327,6 +334,7 @@ namespace Sim
 		};
 
 		static const int m_cycleDurationMs = 5;
+		qint64 m_blinkCounter = 0;
 	};
 
 }

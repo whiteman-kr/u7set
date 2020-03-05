@@ -467,6 +467,28 @@ namespace Sim
 		return area->readBit(offsetW, bitNo, data, byteOrder);
 	}
 
+	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeBit(offsetW, bitNo, data, byteOrder);
+	}
+
+	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
+	{
+		const RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readBit(offsetW, bitNo, data, byteOrder);
+	}
+
 	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);

@@ -15,6 +15,23 @@ namespace Sim
 	{
 	}
 
+	bool CommandProcessor_LM5_LM6::updatePlatformInterfaceState()
+	{
+		// Blink signal, addr 57682[2] = 0xE152[2] -- read memry
+		//
+		if ((m_blinkCounter % (1000 / m_cycleDurationMs / 2)) == 0)
+		{
+			quint16 b = m_device.readRamBit(57682, 2, E::LogicModuleRamAccess::Read);
+			m_device.writeRamBit(57682, 2, b == 0 ? 1 : 0, E::LogicModuleRamAccess::Read);
+		}
+		m_blinkCounter ++;
+
+		// --
+		//
+
+		return true;
+	}
+
 	bool CommandProcessor_LM5_LM6::runCommand(const DeviceCommand& command)
 	{
 		auto it = m_nameToFuncCommand.find(command.m_command.simulationFuncHash);
@@ -3329,9 +3346,10 @@ namespace Sim
 				bool x1_x3_b = x1_x3 > sp;
 				bool x2_x3_b = x2_x3 > sp;
 
-				bool out1 = x1_x2_b || x1_x3_b;
-				bool out2 = x1_x2_b || x2_x3_b;
-				bool out3 = x1_x3_b || x2_x3_b;
+				bool out1 = x1_x2_b && x1_x3_b;
+				bool out2 = x1_x2_b && x2_x3_b;
+				bool out3 = x1_x3_b && x2_x3_b;
+
 				zero = (x1_x2 == 0) || (x1_x3 == 0) || (x2_x3 == 0);
 
 				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
@@ -3361,10 +3379,11 @@ namespace Sim
 				bool x2_x4_b = x2_x4 > sp;
 				bool x3_x4_b = x3_x4 > sp;
 
-				bool out1 = x1_x2_b || x1_x3_b || x1_x4_b;
-				bool out2 = x1_x2_b || x2_x3_b || x2_x4_b;
-				bool out3 = x1_x3_b || x2_x3_b || x3_x4_b;
-				bool out4 = x1_x4_b || x2_x4_b || x3_x4_b;
+				bool out1 = (x1_x2_b && x1_x3_b) || (x1_x2_b && x1_x4_b) || (x1_x3_b && x1_x4_b);
+				bool out2 = (x1_x2_b && x2_x3_b) || (x1_x2_b && x2_x4_b) || (x2_x3_b && x2_x4_b);
+				bool out3 = (x1_x3_b && x2_x3_b) || (x1_x3_b && x3_x4_b) || (x2_x3_b && x3_x4_b);
+				bool out4 = (x1_x4_b && x2_x4_b) || (x1_x4_b && x3_x4_b) || (x2_x4_b && x3_x4_b);
+
 				zero = (x1_x2 == 0) || (x1_x3 == 0) || (x1_x4 == 0) ||
 					   (x2_x3 == 0) || (x2_x4 == 0) || (x3_x4 == 0);
 
@@ -3464,9 +3483,9 @@ namespace Sim
 
 		case 3:
 			{
-				AfbComponentParam x1_x2 = *instance->param(i_data_1);
-				AfbComponentParam x1_x3 = *instance->param(i_data_1);
-				AfbComponentParam x2_x3 = *instance->param(i_data_2);
+				AfbComponentParam x1_x2 = *instance->param(i_data_1);	// si_a_g_b1
+				AfbComponentParam x1_x3 = *instance->param(i_data_1);	// si_a_g_b2
+				AfbComponentParam x2_x3 = *instance->param(i_data_2);	// si_a_g_b3
 
 				x1_x2.subFloatingPoint(instance->param(i_data_2));
 				x1_x3.subFloatingPoint(instance->param(i_data_3));
@@ -3485,9 +3504,9 @@ namespace Sim
 				bool x1_x3_b = x1_x3.floatValue() > sp;
 				bool x2_x3_b = x2_x3.floatValue() > sp;
 
-				bool out1 = x1_x2_b || x1_x3_b;
-				bool out2 = x1_x2_b || x2_x3_b;
-				bool out3 = x1_x3_b || x2_x3_b;
+				bool out1 = x1_x2_b && x1_x3_b;
+				bool out2 = x1_x2_b && x2_x3_b;
+				bool out3 = x1_x3_b && x2_x3_b;
 
 				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
 				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);
@@ -3497,12 +3516,12 @@ namespace Sim
 
 		case 4:
 			{
-				AfbComponentParam x1_x2 = *instance->param(i_data_1);
-				AfbComponentParam x1_x3 = *instance->param(i_data_1);
-				AfbComponentParam x1_x4 = *instance->param(i_data_1);
-				AfbComponentParam x2_x3 = *instance->param(i_data_2);
-				AfbComponentParam x2_x4 = *instance->param(i_data_2);
-				AfbComponentParam x3_x4 = *instance->param(i_data_3);
+				AfbComponentParam x1_x2 = *instance->param(i_data_1);	// 1
+				AfbComponentParam x1_x3 = *instance->param(i_data_1);	// 2
+				AfbComponentParam x1_x4 = *instance->param(i_data_1);	// 3
+				AfbComponentParam x2_x3 = *instance->param(i_data_2);	// 4
+				AfbComponentParam x2_x4 = *instance->param(i_data_2);	// 5
+				AfbComponentParam x3_x4 = *instance->param(i_data_3);	// 6
 
 				x1_x2.subFloatingPoint(instance->param(i_data_2));
 				x1_x3.subFloatingPoint(instance->param(i_data_3));
@@ -3537,10 +3556,10 @@ namespace Sim
 				bool x2_x4_b = x2_x4.floatValue() > sp;
 				bool x3_x4_b = x3_x4.floatValue() > sp;
 
-				bool out1 = x1_x2_b || x1_x3_b || x1_x4_b;
-				bool out2 = x1_x2_b || x2_x3_b || x2_x4_b;
-				bool out3 = x1_x3_b || x2_x3_b || x3_x4_b;
-				bool out4 = x1_x4_b || x2_x4_b || x3_x4_b;
+				bool out1 = (x1_x2_b && x1_x3_b) || (x1_x2_b && x1_x4_b) || (x1_x3_b && x1_x4_b);
+				bool out2 = (x1_x2_b && x2_x3_b) || (x1_x2_b && x2_x4_b) || (x2_x3_b && x2_x4_b);
+				bool out3 = (x1_x3_b && x2_x3_b) || (x1_x3_b && x3_x4_b) || (x2_x3_b && x3_x4_b);
+				bool out4 = (x1_x4_b && x2_x4_b) || (x1_x4_b && x3_x4_b) || (x2_x4_b && x3_x4_b);
 
 				instance->addParamWord(o_mismatch_1, out1 ? 1 : 0);
 				instance->addParamWord(o_mismatch_2, out2 ? 1 : 0);

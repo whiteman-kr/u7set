@@ -27,6 +27,12 @@ namespace Sim
 		//
 		bool parseFunc(QString parseFunc, DeviceCommand* command);
 
+		// Update platform interface, this function is called before work cyle,
+		// to update such platform inteface signals as Blink.
+		// Update mustb be done directly in RAM
+		//
+		virtual bool updatePlatformInterfaceState();
+
 		// Run simulation LM command, can throw SimException
 		//
 		virtual bool runCommand(const DeviceCommand& command);

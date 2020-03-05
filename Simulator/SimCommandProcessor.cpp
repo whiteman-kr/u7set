@@ -48,6 +48,14 @@ namespace Sim
 		}
 	}
 
+	bool CommandProcessor::updatePlatformInterfaceState()
+	{
+		// Must be implemented in derived class
+		//
+		Q_ASSERT(false);
+		return false;
+	}
+
 	bool CommandProcessor::parseFunc(QString parseFunc, DeviceCommand* command)
 	{
 		if (command == nullptr)

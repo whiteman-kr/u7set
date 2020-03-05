@@ -145,6 +145,9 @@ public:
 		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
 		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
 
+		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data, E::LogicModuleRamAccess access);
+		quint16 readRamBit(quint32 offsetW, quint32 bitNo, E::LogicModuleRamAccess access);
+
 		bool writeRamWord(quint32 offsetW, quint16 data);
 		quint16 readRamWord(quint32 offsetW);
 
@@ -253,7 +256,7 @@ public:
 		// Current state
 		//
 		DeviceMode m_currentMode = DeviceMode::Start;
-		std::atomic<int> m_timerId = -1;
+		//std::atomic<int> m_timerId = -1;
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;

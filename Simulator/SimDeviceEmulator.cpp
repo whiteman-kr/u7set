@@ -205,6 +205,36 @@ namespace Sim
 		return data;
 	}
 
+	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data, E::LogicModuleRamAccess access)
+	{
+		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
+		if (ok == false)
+		{
+			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2, acess %3")
+								.arg(offsetW)
+								.arg(bitNo)
+								.arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return ok;
+	}
+
+	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo, E::LogicModuleRamAccess access)
+	{
+		quint16 data = 0;
+		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2, access %3")
+								.arg(offsetW)
+								.arg(bitNo)
+								.arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return data;
+	}
+
 	bool ScriptDeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
 	{
 		bool ok = m_device->m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
@@ -780,6 +810,7 @@ namespace Sim
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
+		m_commandProcessor->updatePlatformInterfaceState();
 
 		if (m_overrideSignals != nullptr)
 		{
