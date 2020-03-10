@@ -56,26 +56,14 @@
 		<LanController>
 			<Type>Tuning</Type>
 			<Place>1</Place>
-			<ReadDataOffset>46336</ReadDataOffset>
-			<ReadDataSize>7620</ReadDataSize>		
-			<WriteDataOffset>46336</WriteDataOffset>
-			<WriteDataSize>7620</WriteDataSize>		
 		</LanController>
 		<LanController>
 			<Type>AppAndDiagData</Type>
 			<Place>2</Place>
-			<ReadDataOffset>53956</ReadDataOffset>
-			<ReadDataSize>3570</ReadDataSize>		
-			<WriteDataOffset>53956</WriteDataOffset>
-			<WriteDataSize>3570</WriteDataSize>		
 		</LanController>
 		<LanController>
 			<Type>AppAndDiagData</Type>
 			<Place>3</Place>
-			<ReadDataOffset>53956</ReadDataOffset>
-			<ReadDataSize>3570</ReadDataSize>		
-			<WriteDataOffset>53956</WriteDataOffset>
-			<WriteDataSize>3570</WriteDataSize>		
 		</LanController>
 	</Lan>
 

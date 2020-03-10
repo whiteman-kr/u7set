@@ -56,10 +56,6 @@
 		<LanController>
 			<Type>AppAndDiagData</Type>
 			<Place>1</Place>
-			<ReadDataOffset>53956</ReadDataOffset>
-			<ReadDataSize>3570</ReadDataSize>		
-			<WriteDataOffset>53956</WriteDataOffset>
-			<WriteDataSize>3570</WriteDataSize>		
 		</LanController>
 	</Lan>
 
