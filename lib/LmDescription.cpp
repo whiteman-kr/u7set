@@ -1070,10 +1070,6 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 		}
 
 		li.m_place = getSectionUintValue(node.toElement(), QLatin1String("Place"), errorMessage);
-		li.m_readDataOffset = getSectionUintValue(node.toElement(), QLatin1String("ReadDataOffset"), errorMessage);
-		li.m_readDataSize = getSectionUintValue(node.toElement(), QLatin1String("ReadDataSize"), errorMessage);
-		li.m_writeDataOffset = getSectionUintValue(node.toElement(), QLatin1String("WriteDataOffset"), errorMessage);
-		li.m_writeDataSize = getSectionUintValue(node.toElement(), QLatin1String("WriteDataSize"), errorMessage);
 
 		m_lanControllers.push_back(li);
 	}

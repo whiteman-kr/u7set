@@ -157,10 +157,6 @@ public:
 	{
 		E::LanControllerType m_type = E::LanControllerType::Tuning;
 		int m_place = 0;
-		int m_readDataOffset = 0;
-		int m_readDataSize = 0;
-		int m_writeDataOffset = 0;
-		int m_writeDataSize = 0;
 	};
 
 	struct Lan
