@@ -2311,6 +2311,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	toolBar->addAction(action);
 
 	action = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("New signal"), this);
+	action->setShortcut(Qt::CTRL + Qt::Key_N);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
@@ -2350,6 +2351,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(toolBar->addSeparator());
 
 	action = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
+	action->setShortcut(Qt::Key_F5);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
