@@ -319,6 +319,45 @@ namespace Sim
 		return;
 	}
 
+	// Command: rdfb
+	// Code: 9
+	// Description: Read 16-bit word from AFB output and write to memory
+	//
+	void CommandProcessor_LM5_LM6::parse_rdfb(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+
+		// Checks
+		//
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		// String representation
+		// rdfb 0478h, LOGIC.0[i_2_oprd]
+		//
+		command->m_string = strCommand(command->caption()) +
+								strAddr(command->m_word0) +
+								", " +
+								strAfbInstPin(command);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_rdfb(const DeviceCommand& command)
+	{
+		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+
+		m_device.writeRamWord(command.m_word0, param->wordValue());
+
+		return;
+	}
+
 
 	// Command: wrfbc
 	// Code: 10

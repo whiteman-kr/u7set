@@ -81,6 +81,13 @@ namespace Sim
 		void parse_wrfb(DeviceCommand* command) const;
 		void command_wrfb(const DeviceCommand& command);
 
+		// Command: rdfb
+		// Code: 9
+		// Description: Read 16-bit word from AFB output and write to memory
+		//
+		void parse_rdfb(DeviceCommand* command) const;
+		void command_rdfb(const DeviceCommand& command);
+
 		// Command: wrfbc
 		// Code: 10
 		// Description: Write constant word to AFB input
@@ -284,7 +291,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("command_movc")),		&CommandProcessor_LM5_LM6::command_movc},				// 6
 			{::calcHash(QStringLiteral("command_movbc")),		&CommandProcessor_LM5_LM6::command_movbc},				// 7
 			{::calcHash(QStringLiteral("command_wrfb")),		&CommandProcessor_LM5_LM6::command_wrfb},				// 8
-			{::calcHash(QStringLiteral("command_rdfb")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 9 Not impemented
+			{::calcHash(QStringLiteral("command_rdfb")),		&CommandProcessor_LM5_LM6::command_rdfb},				// 9
 			{::calcHash(QStringLiteral("command_wrfbc")),		&CommandProcessor_LM5_LM6::command_wrfbc},				// 10
 			{::calcHash(QStringLiteral("command_wrfbb")),		&CommandProcessor_LM5_LM6::command_wrfbb},				// 11
 			{::calcHash(QStringLiteral("command_rdfbb")),		&CommandProcessor_LM5_LM6::command_rdfbb},				// 12
