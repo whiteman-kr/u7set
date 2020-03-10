@@ -797,9 +797,40 @@ namespace Sim
 		return;
 	}
 
-	// Command: pvom32
+	// Command: pmov
+	// Code: 25
+	// Description: Copy 16-bit word from memory to memory written in prior cycle
+	//
+	void CommandProcessor_LM5_LM6::parse_pmov(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);			// destination address (ADR2)
+		command->m_word1 = m_device.getWord(command->m_offset + 2);			// source address (ADR1)
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strAddr(command->m_word1);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_pmov(const DeviceCommand& command)
+	{
+		const auto& src = command.m_word1;
+		const auto& dst = command.m_word0;
+
+		quint16 data = m_device.readRamWord(src);
+
+		m_device.writeRamWord(dst, data);
+		return;
+	}
+
+	// Command: pmov32
 	// Code: 26
-	// Description: .....
+	// Description: Copy 32-bit word from memory to memory written in prior cycle
 	//
 	void CommandProcessor_LM5_LM6::parse_pmov32(DeviceCommand* command) const
 	{

@@ -179,9 +179,16 @@ namespace Sim
 		void parse_movcmpf(DeviceCommand* command) const;
 		void command_movcmpf(const DeviceCommand& command);
 
+		// Command: pmov
+		// Code: 25
+		// Description: Copy 16-bit word from memory to memory written in prior cycle
+		//
+		void parse_pmov(DeviceCommand* command) const;
+		void command_pmov(const DeviceCommand& command);
+
 		// Command: pmov32
 		// Code: 26
-		// Description: Write 32bit constant to FunctionalBlock input
+		// Description: Copy 32-bit data from memory to memory written in prior cycle
 		//
 		void parse_pmov32(DeviceCommand* command) const;
 		void command_pmov32(const DeviceCommand& command);
@@ -307,7 +314,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("command_wrfbc32")),		&CommandProcessor_LM5_LM6::command_wrfbc32},			// 22
 			{::calcHash(QStringLiteral("command_rdfbcmp32")),	&CommandProcessor_LM5_LM6::command_rdfbcmp32},			// 23
 			{::calcHash(QStringLiteral("command_movcmpf")),		&CommandProcessor_LM5_LM6::command_movcmpf},			// 24
-			{::calcHash(QStringLiteral("command_pmov")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 25 Not impemented
+			{::calcHash(QStringLiteral("command_pmov")),		&CommandProcessor_LM5_LM6::command_pmov},				// 25
 			{::calcHash(QStringLiteral("command_pmov32")),		&CommandProcessor_LM5_LM6::command_pmov32},				// 26
 			{::calcHash(QStringLiteral("command_fillb")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 27 Not impemented
 		};
