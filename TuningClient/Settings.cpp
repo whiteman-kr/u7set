@@ -179,6 +179,7 @@ void Settings::StoreUser()
 	s.setValue("SwitchPresetsPage/MainSplitterPosition", m_switchPresetsPageSplitterPosition);
 
 	//
+	s.setValue("TuningWorkspace/Masks", m_tuningWorkspaceMasks);
 
 	s.setValue("MainWindow/language", m_language);
 
@@ -234,6 +235,8 @@ void Settings::RestoreUser()
 	m_switchPresetsPageSplitterPosition = s.value("SwitchPresetsPage/MainSplitterPosition").toByteArray();
 
 	//
+
+	m_tuningWorkspaceMasks = s.value("TuningWorkspace/Masks").toStringList();
 
 	m_language = s.value("MainWindow/language", m_language).toString();
 

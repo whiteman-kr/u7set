@@ -15,15 +15,14 @@ class QTextDocument;
 class MonitorExportPrint : public ExportPrint
 {
 public:
-
 	MonitorExportPrint(ArchiveSource* source, ConfigSettings* configuration, QWidget* parent);
+	virtual ~MonitorExportPrint() = default;
 
 private:
 	virtual void generateHeader(QTextCursor& cursor) override;
 
 	ArchiveSource* m_source = nullptr;
 	ConfigSettings* m_configuration = nullptr;
-
 };
 
 

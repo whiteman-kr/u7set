@@ -67,7 +67,7 @@ private:
 
 	QString					m_channel;
 
-	QString					m_subSystem;
+	QString					m_subSystemID;
 
 	int						m_lmNumber = -1;
 
@@ -93,8 +93,8 @@ public:
 	QString					channel() const { return m_channel; }
 	void					setChannel(const QString& channel) { m_channel = channel; }
 
-	QString					subSystem() const { return m_subSystem; }
-	void					setSubSystem(const QString& subSystem) { m_subSystem = subSystem; }
+	QString					subSystem() const { return m_subSystemID; }
+	void					setSubSystem(const QString& subSystem) { m_subSystemID = subSystem; }
 
 	int						lmNumber() const { return m_lmNumber; }
 	void					setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }

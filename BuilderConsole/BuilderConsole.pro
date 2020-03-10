@@ -92,3 +92,5 @@ win32 {
 unix {
     LIBS += -lBuilder
 }
+
+DISTFILES +=

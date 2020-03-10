@@ -219,7 +219,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 		filterCounters.errorCounter += tcpClient->sourceErrorCount();
 
-		if (theConfigSettings.showSOR == true)
+		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
 		{
 			filterCounters.sorCounter += tcpClient->sourceSorCount(&filterCounters.sorActive, &filterCounters.sorValid);
 		}
@@ -237,7 +237,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 				filterCounters.errorCounter += tcpClient->sourceErrorCount(equipmentHash);
 
-				if (theConfigSettings.showSOR == true)
+				if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
 				{
 					bool sorIsActive = false;
 					bool sorIsValid = false;

@@ -7,4 +7,5 @@
     <Default>false</Default>
     <SortingPriority>40</SortingPriority>
     <Script>installscript.qs</Script>
+    <Dependencies>u7set.mats.monitor.docs</Dependencies>
 </Package>

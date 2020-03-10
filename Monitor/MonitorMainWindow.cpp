@@ -128,6 +128,18 @@ MonitorMainWindow::~MonitorMainWindow()
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
 
+	if (m_tcpRecentsThread)
+	{
+		m_tcpRecentsThread->quitAndWait(10000);
+		delete m_tcpRecentsThread;
+	}
+
+	if (m_sourcesStateClientThread != nullptr)
+	{
+		m_sourcesStateClientThread->quitAndWait(10000);
+		delete m_sourcesStateClientThread;
+	}
+
 	if (m_tuningTcpClientThread != nullptr)
 	{
 		m_tuningTcpClientThread->quitAndWait(10000);
@@ -227,7 +239,14 @@ void MonitorMainWindow::showLogo()
 {
 	Q_ASSERT(m_logoLabel);
 
-	QImage logo = QImage(":/Images/Images/Logo.png");
+	if (m_logoImage.isNull() == true)
+	{
+		m_logoLabel->clear();
+
+		return;
+	}
+
+	QImage logo = m_logoImage;
 
 	// Get toolbar content height
 	//
@@ -294,6 +313,10 @@ void MonitorMainWindow::createActions()
 	m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pSettingsAction->setEnabled(true);
 	connect(m_pSettingsAction, &QAction::triggered, this, &MonitorMainWindow::showSettings);
+
+	m_manualMatsAction = new QAction(tr("MATS User Manual"), this);
+	m_manualMatsAction->setStatusTip(tr("Show MATS User Manual"));
+	connect(m_manualMatsAction, &QAction::triggered, this, &MonitorMainWindow::showMatsUserManual);
 
 	m_pDebugAction = new QAction(tr("Debug..."), this);
 	m_pDebugAction->setStatusTip(tr("Perform some debug actions, don't run it!"));
@@ -441,14 +464,16 @@ void MonitorMainWindow::createMenus()
 	//helpMenu->addAction(m_pDebugAction);
 #endif	// Q_DEBUG
 
+
+	helpMenu->addAction(m_manualMatsAction);
+	helpMenu->addAction(m_pAboutAction);
+	helpMenu->addSeparator();
+
 	helpMenu->addAction(m_pDataSourcesAction);
 	helpMenu->addAction(m_pStatisticsAction);
 
 	helpMenu->addSeparator();
 	helpMenu->addAction(m_pLogAction);
-
-	helpMenu->addSeparator();
-	helpMenu->addAction(m_pAboutAction);
 
 	return;
 }
@@ -762,9 +787,14 @@ void MonitorMainWindow::showStatistics()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
 
 	return;
+}
+
+void MonitorMainWindow::showMatsUserManual()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MonitorMainWindow::debug()
@@ -1081,6 +1111,10 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	}
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
+
+	m_logoImage = configuration.logoImage;
+
+	showLogo();
 
 	return;
 }

@@ -96,13 +96,12 @@ class PropertyObject;
 class Property
 {
 public:
-	Property() noexcept = default;
+	Property() noexcept {};
 	Property(const Property&) noexcept = default;
 	Property(Property&&) noexcept = default;
 	Property& operator=(const Property&) noexcept = default;
 	Property& operator=(Property&&) noexcept = default;
 	virtual ~Property() = default;
-
 
 public:
 	virtual bool isEnum() const = 0;
@@ -112,7 +111,7 @@ public:
 												// cannot be get (dynamic enum properties)
 
 public:
-	QString caption() const noexcept
+	const QString& caption() const noexcept
 	{
 		return m_caption;
 	}
@@ -122,7 +121,7 @@ public:
 		return *this;
 	}
 
-	QString description() const noexcept
+	const QString& description() const noexcept
 	{
 		return m_description;
 	}
@@ -132,7 +131,7 @@ public:
 		return *this;
 	}
 
-	QString category() const noexcept
+	const QString& category() const noexcept
 	{
 		return m_category;
 	}
@@ -142,7 +141,7 @@ public:
 		return *this;
 	}
 
-	QString validator() const noexcept
+	const QString& validator() const noexcept
 	{
 		return m_validator;
 	}
@@ -226,7 +225,6 @@ public:
 	{
 		return m_specificEditor;
 	}
-
 	Property& setSpecificEditor(E::PropertySpecificEditor value) noexcept
 	{
 		m_specificEditor = value;
@@ -350,6 +348,7 @@ template <typename TYPE,
 		  void(CLASS::*set)(const TYPE&)>
 class PropertyTypedValue : public Property
 {
+
 public:
 	PropertyTypedValue() = delete;
 	PropertyTypedValue(CLASS* object) noexcept :
@@ -588,9 +587,9 @@ class PropertyValue : public Property
 {
 public:
 	PropertyValue() noexcept = default;
-	PropertyValue(const PropertyValue&) noexcept = default;
+	PropertyValue(const PropertyValue&) = default;
 	PropertyValue(PropertyValue&&) noexcept = default;
-	PropertyValue& operator=(const PropertyValue&) noexcept = default;
+	PropertyValue& operator=(const PropertyValue&) = default;
 	PropertyValue& operator=(PropertyValue&&) noexcept = default;
 
 public:
@@ -841,9 +840,9 @@ class PropertyValueNoGetterSetter : public Property
 {
 public:
 	PropertyValueNoGetterSetter() noexcept = default;
-	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) noexcept = default;
+	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) = default;
 	PropertyValueNoGetterSetter(PropertyValueNoGetterSetter&&) noexcept = default;
-	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) noexcept = default;
+	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) = default;
 	PropertyValueNoGetterSetter& operator=(PropertyValueNoGetterSetter&&) noexcept = default;
 	virtual ~PropertyValueNoGetterSetter() = default;
 
@@ -1526,23 +1525,35 @@ class PropertyObject : public QObject
 	Q_OBJECT
 
 public:
-	explicit PropertyObject(QObject* parent = nullptr)  :
+	explicit PropertyObject(QObject* parent = nullptr) noexcept :
 		QObject(parent)
 	{
 		m_properties.reserve(16);
 	}
 
-	PropertyObject(const PropertyObject& src) :
-		QObject(src.parent())
+	PropertyObject(const PropertyObject& src) noexcept :
+		QObject(src.parent()),
+		m_properties(src.m_properties)
 	{
 		// Shallow copy of properties
 		//
-		m_properties = src.m_properties;
 	}
 
-	virtual ~PropertyObject()
+	PropertyObject(PropertyObject&& src) = delete;		// Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
+
+	PropertyObject& operator=(const PropertyObject& src) noexcept
 	{
+		// Shallow copy of properties
+		//
+		QObject::setParent(src.parent());
+		m_properties = src.m_properties;
+
+		return *this;
 	}
+
+	PropertyObject& operator=(PropertyObject&& src) = delete; // Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
+
+	virtual ~PropertyObject() noexcept = default;
 
 protected:
 	// Override in child to postpone property creation
@@ -1857,9 +1868,9 @@ public:
 	// 2. It is posible to use addProperties with getter and setter properties
 	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
 	//
-	void addProperties(std::vector<std::shared_ptr<Property>> properties)
+	void addProperties(const std::vector<std::shared_ptr<Property>>& properties)
 	{
-		for (std::shared_ptr<Property> p : properties)
+		for (const std::shared_ptr<Property>& p : properties)
 		{
 			m_properties[p->caption()] = p;
 		}
@@ -1872,7 +1883,7 @@ public:
 		return;
 	}
 
-	void addProperty(std::shared_ptr<Property> property)
+	void addProperty(std::shared_ptr<Property>& property)
 	{
 		m_properties[property->caption()] = property;
 
@@ -3093,7 +3104,7 @@ inline PropertyVectorBase<PropertyObject>* variantToPropertyVector(QVariant& v)
 	// It is Undefined Behavior
 	// It' is better to create another vector and copy ther ptr's
 	// Now leave it as is
-	// Update: in c++20 coming something line reinterpret cast for shared pointers, it will not help, but...
+	// Update: in c++20 coming something like reinterpret cast for shared pointers, it will not help, but...
 	//
 	return reinterpret_cast<PropertyVectorBase<PropertyObject>*>(v.data());
 }

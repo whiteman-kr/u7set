@@ -303,8 +303,12 @@
         <file>Upgrade0301.sql</file>
         <file>Upgrade0302.sql</file>
         <file>Upgrade0303.sql</file>
-        <file>Upgrade0304.sql</file>        
+        <file>Upgrade0304.sql</file>
         <file>Upgrade0305.sql</file>
+        <file>Upgrade0306.sql</file>
+        <file>Upgrade0307.sql</file>
+        <file>Upgrade0308.sql</file>
+        <file>Upgrade0309.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

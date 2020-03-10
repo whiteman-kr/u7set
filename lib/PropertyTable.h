@@ -158,6 +158,9 @@ namespace ExtWidgets
 		bool expandValuesToAllRows() const;
 		void setExpandValuesToAllRows(bool value);
 
+		const QMap<QString, int>& getColumnsWidth();
+		void setColumnsWidth(const QMap<QString, int>& columnsWidth);
+
 	protected:
 		virtual void valueChanged(const ModifiedObjectsData& modifiedObjectsData);
 
@@ -202,6 +205,9 @@ namespace ExtWidgets
 		void addString(bool after);
 		void removeString();
 
+		void saveColumnsWidth();
+		void restoreColumnsWidth();
+
 	private:
 
 		PropertyTableView* m_tableView = nullptr;
@@ -211,6 +217,8 @@ namespace ExtWidgets
 		PropertyTableProxyModel m_proxyModel;
 
 		PropertyTableModel m_tableModel;
+
+		QMap<QString, int> m_columnsWidth;
 
 		PropertyTableItemDelegate* m_itemDelegate = nullptr;
 

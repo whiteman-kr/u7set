@@ -510,7 +510,7 @@ ArchiveView::ArchiveView(QWidget* parent) :
 
 	// --
 	//
-	copyAction = new QAction(tr("Copy"), nullptr);
+	copyAction = new QAction(tr("Copy"), this);
 	copyAction->setShortcut(QKeySequence::Copy);
 	connect(copyAction, &QAction::triggered, this, &ArchiveView::copySelection);
 
@@ -708,7 +708,7 @@ void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
 
 	for (std::pair<ArchiveColumns, QString> ad : actionsData)
 	{
-		QAction* action = new QAction(ad.second, nullptr);
+		QAction* action = new QAction(ad.second, this);
 		action->setData(QVariant::fromValue(ad.first));
 		action->setCheckable(true);
 		action->setChecked(!horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));

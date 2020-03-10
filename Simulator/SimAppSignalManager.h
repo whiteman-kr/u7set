@@ -30,9 +30,9 @@ namespace Sim
 
 		std::optional<Signal> signalParamExt(const QString& appSignalId) const;
 
-		// Implementing IAppSignalManager
-		//
 	public:
+		// Implementing IAppSignalManager - AppSignals
+		//
 		virtual bool signalExists(Hash hash) const override;
 		virtual bool signalExists(const QString& appSignalId) const override;
 
@@ -44,6 +44,16 @@ namespace Sim
 
 		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
 		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
+
+		virtual QStringList signalTags(Hash signalHash) const override;
+		virtual QStringList signalTags(const QString& appSignalId) const override;
+
+		virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
+		virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
+
+		// Implementing IAppSignalManager - Setpoints/Comparators
+		//
+		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
 
 		// Data
 		//

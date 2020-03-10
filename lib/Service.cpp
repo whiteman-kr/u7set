@@ -216,6 +216,11 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 	return cmdLineValue;
 }
 
+QString ServiceWorker::getCmdLineSetting(const QString& settingName)
+{
+	return  m_cmdLineParser.settingValue(settingName);
+}
+
 void ServiceWorker::onThreadStarted()
 {
 	// loading common settings of services

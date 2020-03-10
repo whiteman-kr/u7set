@@ -249,7 +249,10 @@ public:
 
 	// --
 	QAction* m_refreshFileAction = nullptr;
+	QAction* m_behaviorAction = nullptr;
 	QAction* m_propertiesAction = nullptr;
+
+	// --
 };
 
 
@@ -323,6 +326,7 @@ protected slots:
 	void importWorkcopy();
 
 	void showFileProperties();
+	void showBehaviorEditor();
 
 private slots:
 	void ctrlF();

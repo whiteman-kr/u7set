@@ -402,77 +402,50 @@ int SourceBase::readFromFile()
 
 	sourcesFileXml.close();
 
-	int indexSource = 0;
-	XmlReadHelper xmlSource(sourceData);
+	//
+	//
+	QVector<DataSource> dataSources;
 
-	while(xmlSource.atEnd() == false)
+	bool result = DataSourcesXML<DataSource>::readFromXml(sourceData, &dataSources);
+	if (result == false)
 	{
-		if (xmlSource.readNextStartElement() == false)
-		{
-			continue;
-		}
+		QMessageBox::information(nullptr, msgTitle, tr("Error reading Sources from XML-file \"%1\".\nInvalid file format!").arg(sourcesFile));
+		return 0;
+	}
 
-		if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE)
-		{
-			// Source Info
-			//
-			PS::SourceInfo si;
+	int dataSourcesCount = dataSources.count();
+	for(int i = 0; i < dataSourcesCount; i++)
+	{
+		const DataSource& ds = dataSources[i];
 
-			QString ip;
-			int port = 0;
-			QString dataID;
+		// Source Info
+		//
+		PS::SourceInfo si;
 
-			xmlSource.readStringAttribute("LmEquipmentID", &si.equipmentID);
-			xmlSource.readIntAttribute("LmModuleType", &si.moduleType);
-			xmlSource.readStringAttribute("LmSubsystem", &si.subSystem);
-			xmlSource.readStringAttribute("LmCaption", &si.caption);
-			xmlSource.readStringAttribute("LmDataIP", &ip);
-			xmlSource.readIntAttribute("LmDataPort", &port);
-			xmlSource.readIntAttribute("LmRupFramesQuantity", &si.frameCount);
-			xmlSource.readStringAttribute("LmDataID", &dataID);
+		si.index = i;
 
-			si.index = indexSource++;
+		si.caption = ds.lmCaption();
+		si.equipmentID = ds.lmEquipmentID();
 
-			si.dataID = dataID.toUInt(nullptr, 16);
+		si.moduleType = ds.lmModuleType();
+		si.subSystem = ds.lmSubsystem();
+		si.frameCount = ds.lmRupFramesQuantity();
+		si.dataID = ds.lmDataID();
 
-			si.lmAddress.setAddressPort(ip, port);
-			si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
+		si.lmAddress = ds.lmAddressPort();
+		si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
 
-			//
-			//
-			PS::Source source;
-			source.info() = si;
+		si.signalCount = ds.associatedSignals().count();
 
-			//
-			//
-			source.frameBase().setFrameCount(si.frameCount);
+		// Source
+		//
+		PS::Source source;
 
-			// Source Signals
-			//
-			if (xmlSource.readNextStartElement() == false)
-			{
-				continue;
-			}
+		source.info() = si;
+		source.associatedSignalList() = ds.associatedSignals();
+		source.frameBase().setFrameCount(si.frameCount);
 
-			if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS)
-			{
-				xmlSource.readIntAttribute(DataSource::PROP_COUNT , &source.info().signalCount);
-
-				qDebug() << "Loading source:" << source.info().lmAddress.addressPortStr() << ", signals:" << source.info().signalCount;
-
-				QString strAssociatedSignalIDs;
-				xmlSource.readStringElement(DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &strAssociatedSignalIDs);
-				source.associatedSignalList() = strAssociatedSignalIDs.split(",", QString::SkipEmptyParts);
-
-				if (source.associatedSignalList().count() != source.info().signalCount)
-				{
-					assert(0);
-					continue;
-				}
-			}
-
-			append(source);
-		}
+		append(source);
 	}
 
 	emit sourcesLoaded();

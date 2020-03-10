@@ -38,6 +38,20 @@ void AppSignalManager::reset()
 		m_signalStates.clear();
 	}
 
+	// Commented for reasone, it is not nice, but... ((((
+	// m_setpoints is filled in monitor on slot configuration arrived,
+	// after it the reconnection happens and AppSignalManager::reset() is called (theSignals.reset())
+	// what resets m_setpoints (which was already filled in slot).
+	// So, this reset is commented and it will not take place
+	//
+
+//	{
+//		if (m_setpoints != nullptr)
+//		{
+//			m_setpoints->clear();
+//		}
+//	}
+
 	return;
 }
 
@@ -175,6 +189,16 @@ void AppSignalManager::setState(const std::vector<AppSignalState>& states)
 	}
 
 	return;
+}
+
+void AppSignalManager::setSetpoints(ComparatorSet&& setpoints)
+{
+	m_setpoints = std::move(setpoints);
+}
+
+void AppSignalManager::setSetpoints(const ComparatorSet& setpoints)
+{
+	m_setpoints = setpoints;
 }
 
 bool AppSignalManager::signalExists(Hash hash) const
@@ -317,4 +341,53 @@ void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std
 
 	signalState(appSignalHashes, result, found);
 	return;
+}
+
+QStringList AppSignalManager::signalTags(Hash signalHash) const
+{
+	QStringList result;
+
+	QMutexLocker l(&m_paramsMutex);
+
+	if (auto it = m_signalParams.find(signalHash);
+		it != m_signalParams.end())
+	{
+		result = it->second.tagStringList();
+	}
+
+	return result;
+}
+
+QStringList AppSignalManager::signalTags(const QString& appSignalId) const
+{
+	return signalTags(::calcHash(appSignalId));
+}
+
+bool AppSignalManager::signalHasTag(Hash signalHash, const QString& tag) const
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	auto result = m_signalParams.find(signalHash);
+	return result == m_signalParams.end() ? false : result->second.hasTag(tag);
+}
+
+bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
+{
+	return signalHasTag(::calcHash(appSignalId), tag);
+}
+
+
+std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
+{
+	QVector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
+
+	std::vector<std::shared_ptr<Comparator>> result;
+	result.reserve(comparators.size());
+
+	for (const auto& c : comparators)
+	{
+		result.push_back(c);
+	}
+
+	return result;
 }

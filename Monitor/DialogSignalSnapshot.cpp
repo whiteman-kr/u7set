@@ -1017,7 +1017,7 @@ void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 
 	for (std::pair<SnapshotColumns, QString> ad : actionsData)
 	{
-		QAction* action = new QAction(ad.second, nullptr);
+		QAction* action = new QAction(ad.second, this);
 		action->setData(QVariant::fromValue(ad.first));
 		action->setCheckable(true);
 		action->setChecked(!ui->tableView->horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));

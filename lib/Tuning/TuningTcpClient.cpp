@@ -29,7 +29,10 @@ TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalM
 {
 	assert(m_signals);
 
+	QMutexLocker l(&m_signalHashesMutex);
     m_signalHashes = m_signals->signalHashes();
+
+	qRegisterMetaType<LmStatusFlagMode>("LmStatusFlagMode");
 
 	return;
 }
@@ -565,7 +568,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 				{
 					// Write SOR change to tuning log
 
-					if (ts.state.isreply() == true)
+					if (ts.state.isreply() == true && m_lmStatusFlagMode != LmStatusFlagMode::None)
 					{
 						TuningValue oldSor;
 						oldSor.setType(TuningValueType::Discrete);
@@ -579,7 +582,25 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 						{
 							AppSignalParam param;
 							param.setEquipmentId(QString::fromStdString(ts.info.lmequipmentid()));
-							param.setCustomSignalId(tr("SOR is set"));
+
+							switch (m_lmStatusFlagMode)
+							{
+							case LmStatusFlagMode::AccessKey:
+							{
+								param.setCustomSignalId(tr("Access Key"));
+								break;
+							}
+							case LmStatusFlagMode::SOR:
+							{
+								param.setCustomSignalId(tr("SOR is set"));
+								break;
+							}
+							default:
+								Q_ASSERT(false);
+								param.setCustomSignalId(tr("LM Status Flag"));
+								break;
+							}
+
 							param.setPrecision(0);
 
 							writeLogSignalChange(param, oldSor, newSor);
@@ -687,13 +708,18 @@ void TuningTcpClient::requestReadTuningSignals()
 		return;
 	}
 
+	QMutexLocker l(&m_signalHashesMutex);
+
 	int totalSignalCount = static_cast<int>(m_signalHashes.size());
 
 	// If no signals in the database, start the new request loop
 	//
 	if (totalSignalCount == 0)
 	{
+		l.unlock();
+
 		resetToGetTuningSourcesState();
+
 		return;
 	}
 
@@ -724,6 +750,8 @@ void TuningTcpClient::requestReadTuningSignals()
 
 		m_readTuningSignals.mutable_signalhash()->Add(hash);
 	}
+
+	l.unlock();
 
 	sendRequest(TDS_TUNING_SIGNALS_READ, m_readTuningSignals);
 
@@ -836,7 +864,12 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 	// Increase the requested signal index, wrap the request index if needed
 	//
+
+	QMutexLocker l(&m_signalHashesMutex);
+
 	int totalSignalCount = static_cast<int>(m_signalHashes.size());
+
+	l.unlock();
 
 	m_readTuningSignalIndex += m_readTuningSignalCount;
 
@@ -1000,13 +1033,18 @@ void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
 	return;
 }
 
-void TuningTcpClient::slot_configurationArrived(HostAddressPort address, bool autoApply)
+void TuningTcpClient::slot_configurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode)
 {
 	writeLogMessage(tr("TuningTcpClient::slot_configurationArrived"));
 
-	setServers(address, address, true);
+	if (serverAddressPort1() != address || serverAddressPort2() != address)
+	{
+		setServers(address, address, true);
+	}
 
 	setAutoApply(autoApply);
+
+	m_lmStatusFlagMode = lmStatusFlagMode;
 
 	return;
 }
@@ -1027,7 +1065,10 @@ void TuningTcpClient::slot_signalsUpdated()
 		}
 	}
 
-    m_signalHashes = m_signals->signalHashes();
+	{
+		QMutexLocker l(&m_signalHashesMutex);
+		m_signalHashes = m_signals->signalHashes();
+	}
 
 	// --
 	//
@@ -1185,4 +1226,9 @@ QString TuningTcpClient::singleActiveTuningSource() const
 	}
 
 	return QString();
+}
+
+LmStatusFlagMode TuningTcpClient::lmStatusFlagMode() const
+{
+	return m_lmStatusFlagMode;
 }

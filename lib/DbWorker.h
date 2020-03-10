@@ -108,6 +108,7 @@ public slots:
 	void slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
+	void slot_getFullPathFilesInfo(const std::vector<QString>* fullPathFilenames, std::vector<DbFileInfo>* out);
 	bool worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out);
 
 	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);

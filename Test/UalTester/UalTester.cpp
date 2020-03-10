@@ -488,7 +488,7 @@ void UalTester::runTestFile()
 
 			if (cmd.comment().isEmpty() == false)
 			{
-				test.appendResult("    " + cmd.comment(), m_cmdLineParam.enableTrace());
+				test.appendResult(TF_SPACE +  cmd.comment(), m_cmdLineParam.enableTrace());
 			}
 
 			switch (cmd.type())
@@ -568,28 +568,34 @@ void UalTester::runTestFile()
 							}
 
 							TestSignal signal = m_signalBase.signal(param.name());
-							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == UNDEFINED_HASH)
 							{
-								QString str = "    Signal " + param.name() + " not found in SignalBase";
+								QString str = TF_SPACE + "Signal " + param.name() + " not found in SignalBase";
 								test.appendResult(str, true);
 								continue;
 							}
 
 							if (signal.state().isValid() == true)
 							{
-								if (param.compare(signal.state().value()) == true)
+								if (param.compare(signal.state()) == true)
 								{
-									QString str = "    Set " + param.valueStr(true, signal.param().decimalPlaces());
+									QString str = TF_SPACE + "Set " + param.valueStr(true, signal.param().decimalPlaces());
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 								else
 								{
 									test.incErrorCount();
 
-									TestCmdParam realState = param;
-									realState.setValue(signal.state().value());
+									QString str = TF_SPACE + "Set " + param.valueStr(true, signal.param().decimalPlaces()) + " - Fail";;
 
-									QString str = "    Set " + param.valueStr(true, signal.param().decimalPlaces()) + " - Fail    [ received: " + realState.valueStr(false, signal.param().decimalPlaces()) + " ]";
+									if (param.isFlag() == false)
+									{
+										TestCmdParam realState = param;
+										realState.setValue(signal.state().value());
+
+										str += TF_SPACE + "[ received: " + realState.valueStr(false, signal.param().decimalPlaces()) + " ]";
+									}
+
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 							}
@@ -597,7 +603,7 @@ void UalTester::runTestFile()
 							{
 								test.incErrorCount();
 
-								QString str = "    Set signal " + param.name() + " - No valid";
+								QString str = TF_SPACE + "Set signal " + param.name() + " - No valid";
 								test.appendResult(str, m_cmdLineParam.enableTrace());
 							}
 						}
@@ -634,28 +640,34 @@ void UalTester::runTestFile()
 							}
 
 							TestSignal signal = m_signalBase.signal(param.name());
-							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == UNDEFINED_HASH)
 							{
-								QString str = "    Signal " + param.name() + " not found in SignalBase";
+								QString str = TF_SPACE + "Signal " + param.name() + " not found in SignalBase";
 								test.appendResult(str, true);
 								continue;
 							}
 
 							if (signal.state().isValid() == true)
 							{
-								if (param.compare(signal.state().value()) == true)
+								if (param.compare(signal.state()) == true)
 								{
-									QString str = "    Check " + param.valueStr(true, signal.param().decimalPlaces()) + " - Ok";
+									QString str = TF_SPACE + "Check " + param.valueStr(true, signal.param().decimalPlaces()) + " - Ok";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 								else
 								{
 									test.incErrorCount();
 
-									TestCmdParam realState = param;
-									realState.setValue(signal.state().value());
+									QString str = TF_SPACE + "Check " + param.valueStr(true, signal.param().decimalPlaces()) + " - Fail";
 
-									QString str = "    Check " + param.valueStr(true, signal.param().decimalPlaces()) + " - Fail    [ received: " + realState.valueStr(false, signal.param().decimalPlaces()) + " ]";
+									if (param.isFlag() == false)
+									{
+										TestCmdParam realState = param;
+										realState.setValue(signal.state().value());
+
+										str += TF_SPACE + "[ received: " + realState.valueStr(false, signal.param().decimalPlaces()) + " ]";
+									}
+
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 							}
@@ -663,7 +675,7 @@ void UalTester::runTestFile()
 							{
 								test.incErrorCount();
 
-								QString str = "    Check signal " + param.name() + " - No valid";
+								QString str = TF_SPACE + "Check signal " + param.name() + " - No valid";
 								test.appendResult(str, m_cmdLineParam.enableTrace());
 							}
 						}
@@ -688,7 +700,7 @@ void UalTester::runTestFile()
 
 						quint32 ms = param.value().toUInt();
 
-						QString str = "    Delay " + QString("%1").arg(ms) + " ms";
+						QString str = TF_SPACE + "Delay " + QString("%1").arg(ms) + " ms";
 						test.appendResult(str, m_cmdLineParam.enableTrace());
 
 						QThread::msleep(ms);

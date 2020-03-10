@@ -1,9 +1,9 @@
 variables:
-  GIT_DEPTH: "3"
+  GIT_DEPTH: "1"
   
 stages:
   - build
-#  - test
+  - test
 #  - deploy
 
 before_script:
@@ -94,39 +94,17 @@ windows build job:
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/printsupport\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
 
-#Run XML validation
-    - "rem ----------------------------------------------"
-    - "rem               Run XML validation"
-    - "rem ----------------------------------------------"
-    - "pushd ."	
-    - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
-    - "call validate_xmls.bat"
-    - "popd ."
-
-#Run unit tests
-    - "rem ----------------------------------------------"
-    - "rem               Run unit tests"
-    - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
-
-#Run Builder test
-    - "rem ----------------------------------------------"
-    - "rem               Run BuilderConsole tests"
-    - "rem ----------------------------------------------"
-    - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
-    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v302 Administrator P2ssw0rd c:\\temp\\build\\ debug"
-
 #Remove some files not requiered for releases
     - "rem ----------------------------------------------"
     - "rem               Remove some files not requiered for releases"
     - "rem ----------------------------------------------"
-    - "del /F /Q bin\\release\\BuilderConsole.exe"
+#    - "del /F /Q bin\\release\\BuilderConsole.exe"
     - "del /F /Q bin\\release\\BaseSrv.exe"
     - "del /F /Q bin\\release\\CommView.exe"
     - "del /F /Q bin\\release\\DiagDataSrv.exe"
-    - "del /F /Q bin\\release\\SimulatorConsole.exe"
+#    - "del /F /Q bin\\release\\SimulatorConsole.exe"
     - "del /F /Q bin\\release\\TuningIPEN.exe"
-    - "del /F /Q bin\\release\\u7databasetests.exe"
+#    - "del /F /Q bin\\release\\u7databasetests.exe"
     
 #Signing Files
     - "rem ----------------------------------------------"
@@ -156,6 +134,15 @@ windows build job:
     - "call ScriptHelp.bat"
     - "popd ."
 
+#Request documents from SVN
+    - "rem ----------------------------------------------"
+    - "rem               Request documents from SVN"
+    - "rem ----------------------------------------------"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\doc"
+    - "call SvnGetDocs.bat"
+    - "popd ."
+
 #Build Installer
     - "rem ----------------------------------------------"
     - "rem               Build Installer"
@@ -181,17 +168,40 @@ windows build job:
       - bin/release/printsupport/*.dll
       - bin/release/scripthelp/*.*
       - bin/release/scripthelp/search/*.*
+      - bin/release/docs/*.pdf
+      - bin/release/docs/Appendixes/*.pdf
 
-#deploy job:
-#  stage: deploy
-#  tags:
-#    - vs2017  
-#  only:
-#    - /^release.*$/
-#    - master
-#    - develop
-#  script:
-    # cannot create a tag as REPO is read only (((  
-    #- "git tag v0.8.%CI_BUILD_ID%"
-    #- "git push --tags"
+test job:
+  stage: test
+  tags:
+    - test
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - experimental
+  script:
+    - "echo %CI_COMMIT_SHA%"
+    - "git status"
+    - "git log -1"
+#Run XML validation
+    - "rem ----------------------------------------------"
+    - "rem               Run XML validation"
+    - "rem ----------------------------------------------"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
+    - "call validate_xmls.bat"
+    - "popd ."
 
+#Run unit tests
+    - "rem ----------------------------------------------"
+    - "rem               Run unit tests"
+    - "rem ----------------------------------------------"
+    - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
+
+#Run Builder test
+    - "rem ----------------------------------------------"
+    - "rem               Run BuilderConsole tests"
+    - "rem ----------------------------------------------"
+    - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
+    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe %CI_PROJECT_DIR%\\Test\\BuilderConsoleArgs.xml"

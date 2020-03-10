@@ -2,6 +2,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/AppSignal.h"
+#include "../lib/ClientBehavior.h"
 
 namespace Builder
 {
@@ -104,6 +105,8 @@ namespace Builder
 		}
 
 		result &= writeGlobalScript();
+
+		result &= writeTuningClientBehavior();
 
 		return result;
 	}
@@ -768,6 +771,88 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool TuningClientCfgGenerator::writeTuningClientBehavior()
+	{
+		if (m_dbController == nullptr)
+		{
+			Q_ASSERT(m_dbController);
+			return false;
+		}
+
+		bool ok = true;
+		QString behaviorId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "BehaviorID", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (behaviorId.isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Load all clients behavior
+		//
+		ClientBehaviorStorage allBehaviorStorage;
+
+		QString errorCode;
+
+		QByteArray dbData;
+
+		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
+		if (result == false)
+		{
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
+			return false;
+		}
+
+		if (allBehaviorStorage.load(dbData, &errorCode) == false)
+		{
+			m_log->errCMN0010(allBehaviorStorage.dbFileName());
+			return false;
+		}
+
+		// Find behavior for current tuning client
+		//
+		ClientBehaviorStorage tcBehaviorStorage;
+
+		std::vector<std::shared_ptr<TuningClientBehavior>> behaviors = allBehaviorStorage.tuningClientBehaviors();
+
+		for (auto b : behaviors)
+		{
+			if (b->behaviorId() == behaviorId)
+			{
+				tcBehaviorStorage.add(b);
+				break;
+			}
+		}
+
+		if (tcBehaviorStorage.count() == 0)
+		{
+			m_log->errEQP6210(behaviorId, m_software->equipmentIdTemplate());
+			return false;
+		}
+
+		// Save monitor behavior to XML
+		//
+		QByteArray data;
+		tcBehaviorStorage.save(&data);
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
+
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012("TuningClientBehavior.xml");
+			return false;
+		}
+
+		ok = m_cfgXml->addLinkToFile(buildFile);
+
+		return ok;
 	}
 
 	void TuningClientCfgGenerator::writeErrorSection(QXmlStreamWriter& xmlWriter, QString error)

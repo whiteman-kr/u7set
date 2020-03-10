@@ -60,6 +60,7 @@
         <file>Images/SchemaItemFrame.svg</file>
         <file>Images/SchemaItemIndicator.svg</file>
         <file>Images/Find.svg</file>
+        <file>Images/SchemaBehavior.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

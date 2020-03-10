@@ -4347,13 +4347,6 @@ class VFrameSetPoint : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 setpointType = 2 [default = 0];
-  inline bool has_setpointtype() const;
-  inline void clear_setpointtype();
-  static const int kSetpointTypeFieldNumber = 2;
-  inline ::google::protobuf::int32 setpointtype() const;
-  inline void set_setpointtype(::google::protobuf::int32 value);
-
   // optional uint32 color = 3;
   inline bool has_color() const;
   inline void clear_color();
@@ -4361,17 +4354,12 @@ class VFrameSetPoint : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 color() const;
   inline void set_color(::google::protobuf::uint32 value);
 
-  // optional string schemaItemLabel = 10;
-  inline bool has_schemaitemlabel() const;
-  inline void clear_schemaitemlabel();
-  static const int kSchemaItemLabelFieldNumber = 10;
-  inline const ::std::string& schemaitemlabel() const;
-  inline void set_schemaitemlabel(const ::std::string& value);
-  inline void set_schemaitemlabel(const char* value);
-  inline void set_schemaitemlabel(const char* value, size_t size);
-  inline ::std::string* mutable_schemaitemlabel();
-  inline ::std::string* release_schemaitemlabel();
-  inline void set_allocated_schemaitemlabel(::std::string* schemaitemlabel);
+  // optional int32 colorSource = 4 [default = 0];
+  inline bool has_colorsource() const;
+  inline void clear_colorsource();
+  static const int kColorSourceFieldNumber = 4;
+  inline ::google::protobuf::int32 colorsource() const;
+  inline void set_colorsource(::google::protobuf::int32 value);
 
   // optional string outputAppSignalId = 20;
   inline bool has_outputappsignalid() const;
@@ -4385,46 +4373,23 @@ class VFrameSetPoint : public ::google::protobuf::Message {
   inline ::std::string* release_outputappsignalid();
   inline void set_allocated_outputappsignalid(::std::string* outputappsignalid);
 
-  // optional double staticValue = 30;
-  inline bool has_staticvalue() const;
-  inline void clear_staticvalue();
-  static const int kStaticValueFieldNumber = 30;
-  inline double staticvalue() const;
-  inline void set_staticvalue(double value);
-
-  // optional int32 staticCompareType = 31;
-  inline bool has_staticcomparetype() const;
-  inline void clear_staticcomparetype();
-  static const int kStaticCompareTypeFieldNumber = 31;
-  inline ::google::protobuf::int32 staticcomparetype() const;
-  inline void set_staticcomparetype(::google::protobuf::int32 value);
-
   // @@protoc_insertion_point(class_scope:Proto.VFrameSetPoint)
  private:
-  inline void set_has_setpointtype();
-  inline void clear_has_setpointtype();
   inline void set_has_color();
   inline void clear_has_color();
-  inline void set_has_schemaitemlabel();
-  inline void clear_has_schemaitemlabel();
+  inline void set_has_colorsource();
+  inline void clear_has_colorsource();
   inline void set_has_outputappsignalid();
   inline void clear_has_outputappsignalid();
-  inline void set_has_staticvalue();
-  inline void clear_has_staticvalue();
-  inline void set_has_staticcomparetype();
-  inline void clear_has_staticcomparetype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 setpointtype_;
   ::google::protobuf::uint32 color_;
-  ::std::string* schemaitemlabel_;
+  ::google::protobuf::int32 colorsource_;
   ::std::string* outputappsignalid_;
-  double staticvalue_;
-  ::google::protobuf::int32 staticcomparetype_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4594,30 +4559,23 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   inline double gridsmallstep() const;
   inline void set_gridsmallstep(double value);
 
-  // optional bool drawAutoSetpoints = 70;
-  inline bool has_drawautosetpoints() const;
-  inline void clear_drawautosetpoints();
-  static const int kDrawAutoSetpointsFieldNumber = 70;
-  inline bool drawautosetpoints() const;
-  inline void set_drawautosetpoints(bool value);
+  // optional int32 drawSetpoints = 70 [default = 0];
+  inline bool has_drawsetpoints() const;
+  inline void clear_drawsetpoints();
+  static const int kDrawSetpointsFieldNumber = 70;
+  inline ::google::protobuf::int32 drawsetpoints() const;
+  inline void set_drawsetpoints(::google::protobuf::int32 value);
 
-  // optional bool drawCustomSetpoints = 71;
-  inline bool has_drawcustomsetpoints() const;
-  inline void clear_drawcustomsetpoints();
-  static const int kDrawCustomSetpointsFieldNumber = 71;
-  inline bool drawcustomsetpoints() const;
-  inline void set_drawcustomsetpoints(bool value);
-
-  // repeated .Proto.IndicatorHistogramVert customSetPoints = 72;
+  // repeated .Proto.VFrameSetPoint customSetPoints = 72;
   inline int customsetpoints_size() const;
   inline void clear_customsetpoints();
   static const int kCustomSetPointsFieldNumber = 72;
-  inline const ::Proto::IndicatorHistogramVert& customsetpoints(int index) const;
-  inline ::Proto::IndicatorHistogramVert* mutable_customsetpoints(int index);
-  inline ::Proto::IndicatorHistogramVert* add_customsetpoints();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >&
+  inline const ::Proto::VFrameSetPoint& customsetpoints(int index) const;
+  inline ::Proto::VFrameSetPoint* mutable_customsetpoints(int index);
+  inline ::Proto::VFrameSetPoint* add_customsetpoints();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >&
       customsetpoints() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >*
       mutable_customsetpoints();
 
   // @@protoc_insertion_point(class_scope:Proto.IndicatorHistogramVert)
@@ -4652,10 +4610,8 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   inline void clear_has_gridmainstep();
   inline void set_has_gridsmallstep();
   inline void clear_has_gridsmallstep();
-  inline void set_has_drawautosetpoints();
-  inline void clear_has_drawautosetpoints();
-  inline void set_has_drawcustomsetpoints();
-  inline void clear_has_drawcustomsetpoints();
+  inline void set_has_drawsetpoints();
+  inline void clear_has_drawsetpoints();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4672,14 +4628,13 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   bool drawgridvalues_;
   bool drawgridvalueforallbars_;
   bool drawgridvalueunits_;
-  bool drawautosetpoints_;
-  bool drawcustomsetpoints_;
   double gridmainstep_;
   double gridsmallstep_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert > customsetpoints_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint > customsetpoints_;
+  ::google::protobuf::int32 drawsetpoints_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -12512,6 +12467,22 @@ class SchemaDetails : public ::google::protobuf::Message {
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& tags() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_tags();
 
+  // repeated string loopbacks = 25;
+  inline int loopbacks_size() const;
+  inline void clear_loopbacks();
+  static const int kLoopbacksFieldNumber = 25;
+  inline const ::std::string& loopbacks(int index) const;
+  inline ::std::string* mutable_loopbacks(int index);
+  inline void set_loopbacks(int index, const ::std::string& value);
+  inline void set_loopbacks(int index, const char* value);
+  inline void set_loopbacks(int index, const char* value, size_t size);
+  inline ::std::string* add_loopbacks();
+  inline void add_loopbacks(const ::std::string& value);
+  inline void add_loopbacks(const char* value);
+  inline void add_loopbacks(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& loopbacks() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_loopbacks();
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaDetails)
  private:
   inline void set_has_version();
@@ -12540,9 +12511,10 @@ class SchemaDetails : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::std::string> connections_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > guids_;
   ::google::protobuf::RepeatedPtrField< ::std::string> tags_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> loopbacks_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20331,37 +20303,15 @@ inline void SchemaItemFrame::set_keepaspectratio(bool value) {
 
 // VFrameSetPoint
 
-// optional int32 setpointType = 2 [default = 0];
-inline bool VFrameSetPoint::has_setpointtype() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void VFrameSetPoint::set_has_setpointtype() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void VFrameSetPoint::clear_has_setpointtype() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void VFrameSetPoint::clear_setpointtype() {
-  setpointtype_ = 0;
-  clear_has_setpointtype();
-}
-inline ::google::protobuf::int32 VFrameSetPoint::setpointtype() const {
-  return setpointtype_;
-}
-inline void VFrameSetPoint::set_setpointtype(::google::protobuf::int32 value) {
-  set_has_setpointtype();
-  setpointtype_ = value;
-}
-
 // optional uint32 color = 3;
 inline bool VFrameSetPoint::has_color() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void VFrameSetPoint::set_has_color() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void VFrameSetPoint::clear_has_color() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void VFrameSetPoint::clear_color() {
   color_ = 0u;
@@ -20375,85 +20325,37 @@ inline void VFrameSetPoint::set_color(::google::protobuf::uint32 value) {
   color_ = value;
 }
 
-// optional string schemaItemLabel = 10;
-inline bool VFrameSetPoint::has_schemaitemlabel() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+// optional int32 colorSource = 4 [default = 0];
+inline bool VFrameSetPoint::has_colorsource() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VFrameSetPoint::set_has_schemaitemlabel() {
-  _has_bits_[0] |= 0x00000004u;
+inline void VFrameSetPoint::set_has_colorsource() {
+  _has_bits_[0] |= 0x00000002u;
 }
-inline void VFrameSetPoint::clear_has_schemaitemlabel() {
-  _has_bits_[0] &= ~0x00000004u;
+inline void VFrameSetPoint::clear_has_colorsource() {
+  _has_bits_[0] &= ~0x00000002u;
 }
-inline void VFrameSetPoint::clear_schemaitemlabel() {
-  if (schemaitemlabel_ != &::google::protobuf::internal::kEmptyString) {
-    schemaitemlabel_->clear();
-  }
-  clear_has_schemaitemlabel();
+inline void VFrameSetPoint::clear_colorsource() {
+  colorsource_ = 0;
+  clear_has_colorsource();
 }
-inline const ::std::string& VFrameSetPoint::schemaitemlabel() const {
-  return *schemaitemlabel_;
+inline ::google::protobuf::int32 VFrameSetPoint::colorsource() const {
+  return colorsource_;
 }
-inline void VFrameSetPoint::set_schemaitemlabel(const ::std::string& value) {
-  set_has_schemaitemlabel();
-  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
-    schemaitemlabel_ = new ::std::string;
-  }
-  schemaitemlabel_->assign(value);
-}
-inline void VFrameSetPoint::set_schemaitemlabel(const char* value) {
-  set_has_schemaitemlabel();
-  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
-    schemaitemlabel_ = new ::std::string;
-  }
-  schemaitemlabel_->assign(value);
-}
-inline void VFrameSetPoint::set_schemaitemlabel(const char* value, size_t size) {
-  set_has_schemaitemlabel();
-  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
-    schemaitemlabel_ = new ::std::string;
-  }
-  schemaitemlabel_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* VFrameSetPoint::mutable_schemaitemlabel() {
-  set_has_schemaitemlabel();
-  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
-    schemaitemlabel_ = new ::std::string;
-  }
-  return schemaitemlabel_;
-}
-inline ::std::string* VFrameSetPoint::release_schemaitemlabel() {
-  clear_has_schemaitemlabel();
-  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = schemaitemlabel_;
-    schemaitemlabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void VFrameSetPoint::set_allocated_schemaitemlabel(::std::string* schemaitemlabel) {
-  if (schemaitemlabel_ != &::google::protobuf::internal::kEmptyString) {
-    delete schemaitemlabel_;
-  }
-  if (schemaitemlabel) {
-    set_has_schemaitemlabel();
-    schemaitemlabel_ = schemaitemlabel;
-  } else {
-    clear_has_schemaitemlabel();
-    schemaitemlabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
+inline void VFrameSetPoint::set_colorsource(::google::protobuf::int32 value) {
+  set_has_colorsource();
+  colorsource_ = value;
 }
 
 // optional string outputAppSignalId = 20;
 inline bool VFrameSetPoint::has_outputappsignalid() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void VFrameSetPoint::set_has_outputappsignalid() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void VFrameSetPoint::clear_has_outputappsignalid() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void VFrameSetPoint::clear_outputappsignalid() {
   if (outputappsignalid_ != &::google::protobuf::internal::kEmptyString) {
@@ -20513,50 +20415,6 @@ inline void VFrameSetPoint::set_allocated_outputappsignalid(::std::string* outpu
     clear_has_outputappsignalid();
     outputappsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
-}
-
-// optional double staticValue = 30;
-inline bool VFrameSetPoint::has_staticvalue() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void VFrameSetPoint::set_has_staticvalue() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void VFrameSetPoint::clear_has_staticvalue() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void VFrameSetPoint::clear_staticvalue() {
-  staticvalue_ = 0;
-  clear_has_staticvalue();
-}
-inline double VFrameSetPoint::staticvalue() const {
-  return staticvalue_;
-}
-inline void VFrameSetPoint::set_staticvalue(double value) {
-  set_has_staticvalue();
-  staticvalue_ = value;
-}
-
-// optional int32 staticCompareType = 31;
-inline bool VFrameSetPoint::has_staticcomparetype() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void VFrameSetPoint::set_has_staticcomparetype() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void VFrameSetPoint::clear_has_staticcomparetype() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void VFrameSetPoint::clear_staticcomparetype() {
-  staticcomparetype_ = 0;
-  clear_has_staticcomparetype();
-}
-inline ::google::protobuf::int32 VFrameSetPoint::staticcomparetype() const {
-  return staticcomparetype_;
-}
-inline void VFrameSetPoint::set_staticcomparetype(::google::protobuf::int32 value) {
-  set_has_staticcomparetype();
-  staticcomparetype_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -20893,71 +20751,49 @@ inline void IndicatorHistogramVert::set_gridsmallstep(double value) {
   gridsmallstep_ = value;
 }
 
-// optional bool drawAutoSetpoints = 70;
-inline bool IndicatorHistogramVert::has_drawautosetpoints() const {
+// optional int32 drawSetpoints = 70 [default = 0];
+inline bool IndicatorHistogramVert::has_drawsetpoints() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void IndicatorHistogramVert::set_has_drawautosetpoints() {
+inline void IndicatorHistogramVert::set_has_drawsetpoints() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void IndicatorHistogramVert::clear_has_drawautosetpoints() {
+inline void IndicatorHistogramVert::clear_has_drawsetpoints() {
   _has_bits_[0] &= ~0x00008000u;
 }
-inline void IndicatorHistogramVert::clear_drawautosetpoints() {
-  drawautosetpoints_ = false;
-  clear_has_drawautosetpoints();
+inline void IndicatorHistogramVert::clear_drawsetpoints() {
+  drawsetpoints_ = 0;
+  clear_has_drawsetpoints();
 }
-inline bool IndicatorHistogramVert::drawautosetpoints() const {
-  return drawautosetpoints_;
+inline ::google::protobuf::int32 IndicatorHistogramVert::drawsetpoints() const {
+  return drawsetpoints_;
 }
-inline void IndicatorHistogramVert::set_drawautosetpoints(bool value) {
-  set_has_drawautosetpoints();
-  drawautosetpoints_ = value;
-}
-
-// optional bool drawCustomSetpoints = 71;
-inline bool IndicatorHistogramVert::has_drawcustomsetpoints() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
-}
-inline void IndicatorHistogramVert::set_has_drawcustomsetpoints() {
-  _has_bits_[0] |= 0x00010000u;
-}
-inline void IndicatorHistogramVert::clear_has_drawcustomsetpoints() {
-  _has_bits_[0] &= ~0x00010000u;
-}
-inline void IndicatorHistogramVert::clear_drawcustomsetpoints() {
-  drawcustomsetpoints_ = false;
-  clear_has_drawcustomsetpoints();
-}
-inline bool IndicatorHistogramVert::drawcustomsetpoints() const {
-  return drawcustomsetpoints_;
-}
-inline void IndicatorHistogramVert::set_drawcustomsetpoints(bool value) {
-  set_has_drawcustomsetpoints();
-  drawcustomsetpoints_ = value;
+inline void IndicatorHistogramVert::set_drawsetpoints(::google::protobuf::int32 value) {
+  set_has_drawsetpoints();
+  drawsetpoints_ = value;
 }
 
-// repeated .Proto.IndicatorHistogramVert customSetPoints = 72;
+// repeated .Proto.VFrameSetPoint customSetPoints = 72;
 inline int IndicatorHistogramVert::customsetpoints_size() const {
   return customsetpoints_.size();
 }
 inline void IndicatorHistogramVert::clear_customsetpoints() {
   customsetpoints_.Clear();
 }
-inline const ::Proto::IndicatorHistogramVert& IndicatorHistogramVert::customsetpoints(int index) const {
+inline const ::Proto::VFrameSetPoint& IndicatorHistogramVert::customsetpoints(int index) const {
   return customsetpoints_.Get(index);
 }
-inline ::Proto::IndicatorHistogramVert* IndicatorHistogramVert::mutable_customsetpoints(int index) {
+inline ::Proto::VFrameSetPoint* IndicatorHistogramVert::mutable_customsetpoints(int index) {
   return customsetpoints_.Mutable(index);
 }
-inline ::Proto::IndicatorHistogramVert* IndicatorHistogramVert::add_customsetpoints() {
+inline ::Proto::VFrameSetPoint* IndicatorHistogramVert::add_customsetpoints() {
   return customsetpoints_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >&
 IndicatorHistogramVert::customsetpoints() const {
   return customsetpoints_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >*
 IndicatorHistogramVert::mutable_customsetpoints() {
   return &customsetpoints_;
 }
@@ -32120,6 +31956,50 @@ SchemaDetails::tags() const {
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 SchemaDetails::mutable_tags() {
   return &tags_;
+}
+
+// repeated string loopbacks = 25;
+inline int SchemaDetails::loopbacks_size() const {
+  return loopbacks_.size();
+}
+inline void SchemaDetails::clear_loopbacks() {
+  loopbacks_.Clear();
+}
+inline const ::std::string& SchemaDetails::loopbacks(int index) const {
+  return loopbacks_.Get(index);
+}
+inline ::std::string* SchemaDetails::mutable_loopbacks(int index) {
+  return loopbacks_.Mutable(index);
+}
+inline void SchemaDetails::set_loopbacks(int index, const ::std::string& value) {
+  loopbacks_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_loopbacks(int index, const char* value) {
+  loopbacks_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_loopbacks(int index, const char* value, size_t size) {
+  loopbacks_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::add_loopbacks() {
+  return loopbacks_.Add();
+}
+inline void SchemaDetails::add_loopbacks(const ::std::string& value) {
+  loopbacks_.Add()->assign(value);
+}
+inline void SchemaDetails::add_loopbacks(const char* value) {
+  loopbacks_.Add()->assign(value);
+}
+inline void SchemaDetails::add_loopbacks(const char* value, size_t size) {
+  loopbacks_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaDetails::loopbacks() const {
+  return loopbacks_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaDetails::mutable_loopbacks() {
+  return &loopbacks_;
 }
 
 // -------------------------------------------------------------------

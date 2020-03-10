@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BuilderArguments>
+    <DatabaseAddress>127.0.0.1</DatabaseAddress>
+    <DatabasePort>5432</DatabasePort>
+    <DatabaseUserName>u7</DatabaseUserName>
+    <DatabasePassword>P2ssw0rd</DatabasePassword>
+	<ProjectName>test_simulator_v309</ProjectName>
+    <ProjectUserName>Administrator</ProjectUserName>
+    <ProjectUserPassword>P2ssw0rd</ProjectUserPassword>
+	<BuildOutputPath>c:\temp\build\</BuildOutputPath>
+    <BuildType>debug</BuildType>
+</BuilderArguments>

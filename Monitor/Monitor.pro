@@ -59,6 +59,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
+    ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
@@ -127,6 +128,7 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp
 
 HEADERS  += \
+    ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
@@ -267,6 +269,7 @@ RESOURCES += \
     Monitor.qrc
 
 DISTFILES += \
+    Images/Logo.png \
     Images/NewSchema.svg \
     Images/Backward.svg \
     Images/Forward.svg \

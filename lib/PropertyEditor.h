@@ -44,7 +44,6 @@ namespace ExtWidgets
 		static QColor colorFromText(const QString& t);
 
 		static QIcon drawCheckBox(int state, bool enabled);
-		static QIcon drawColorBox(QColor color);
 		static QIcon drawImage(const QImage& image);
 		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
 

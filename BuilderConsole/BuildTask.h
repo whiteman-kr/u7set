@@ -32,7 +32,7 @@ public:
 	void setProjectName(QString value);
 	void setProjectUserName(QString value);
 	void setProjectUserPassword(QString value);
-	void seBuildOutputPath(QString value);
+	void setBuildOutputPath(QString value);
 	void setBuildType(QString value);
 	void setBuildType(Builder::BuildType value);
 
@@ -44,10 +44,10 @@ private:
 	QString m_databaseAddress{"127.0.0.1"};
 	int m_databasePort{5432};
 	QString m_databaseUserName{"u7"};
-	QString m_databasePassword{"P2ssw0rd"};
+	QString m_databasePassword{"Password"};
 	QString m_projectName;
 	QString m_projectUserName{"Administrator"};
-	QString m_projectUserPassword{"P2ssw0rd"};
+	QString m_projectUserPassword{"Password"};
 	QString m_buildOutputPath{"."};
 	Builder::BuildType m_buildType = Builder::BuildType::Debug;
 };

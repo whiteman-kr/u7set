@@ -78,12 +78,18 @@ namespace VFrame30
 		static const QString indicatorSignalColors;
 		static const QString indicatorType;
 		static const QString indicatorSettings;
+		static const QString indicator;
 
 		static const QString indicatorSetpointType;
+		static const QString indicatorColorSource;
 		static const QString indicatorSchemaItemLabel;
 		static const QString indicatorOutputAppSignalId;
 		static const QString indicatorStaticValue;
 		static const QString indicatorStaticCompareType;
+
+		static const QString indicatorSetpointTypeByLabelCategory;
+		static const QString indicatorSetpointTypeBySignalIdCategory;
+		static const QString indicatorSetpointTypeStaticCategory;
 
 		static const QString indicatorStartValue;
 		static const QString indicatorEndValue;
@@ -96,6 +102,9 @@ namespace VFrame30
 		static const QString indicatorMargingTop;
 		static const QString indicatorMargingRight;
 		static const QString indicatorMargingBottom;
+
+		static const QString drawSetpoints;
+		static const QString customSetpoints;
 
 		// --
 		//
@@ -188,6 +197,7 @@ namespace VFrame30
 		static const QString constCategory;
 		static const QString imageCategory;
 		static const QString positionAndSizeCategory;
+		static const QString setpointsCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

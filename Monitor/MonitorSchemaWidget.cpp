@@ -6,6 +6,7 @@
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
+#include "../VFrame30/SchemaItemIndicator.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/MacrosExpander.h"
@@ -20,13 +21,10 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::TuningController* tuningController) :
-	VFrame30::ClientSchemaWidget(new MonitorView(schemaManager), schema, schemaManager)
+	VFrame30::ClientSchemaWidget(new MonitorView(schemaManager, appSignalController, tuningController),
+								 schema,
+								 schemaManager)
 {
-	clientSchemaView()->setAppSignalController(appSignalController);
-	clientSchemaView()->setTuningController(tuningController);
-
-	// --
-	//
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
 
@@ -106,6 +104,14 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			}
 
 			if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
+				schemaItem != nullptr)
+			{
+				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
+				signalContextMenu(signalList);
+				break;
+			}
+
+			if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);

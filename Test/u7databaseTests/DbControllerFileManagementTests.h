@@ -22,6 +22,7 @@ private slots:
 	void addFilesTest();
 	void deleteFileTest();
 	void getFileInfo();
+	void getFullPathFileInfo();
 	void checkInTest();
 	void checkOutTest();
 	void fileHasChildrenTest();

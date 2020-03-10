@@ -16,22 +16,18 @@
 class ComparatorSignal
 {
 public:
-	ComparatorSignal();
-
-	bool isConst() const;
-	void setIsConst(bool isConst);
-
-	double constValue() const;
+	void setSignalParams(const QString& appSignalID, bool isAcquired, bool isConst, double constValue);
 	void setConstValue(double constValue);
 
+	bool isConst() const;
+	double constValue() const;
 	QString appSignalID() const;
-	void setAppSignalID(const QString& appSignalID);
-
 	bool isAcquired() const;
-	void setIsAcquired(bool isAcquired);
 
 	void serializeTo(Proto::ComparatorSignal* s) const;
 	bool serializeFrom(const Proto::ComparatorSignal& s);
+
+	void dump() const;
 
 private:
 	bool m_isConst = true;
@@ -49,8 +45,6 @@ private:
 class Comparator
 {
 public:
-	Comparator();
-
 	E::CmpType cmpType() const;
 	void setCmpType(E::CmpType cmpType);
 
@@ -88,6 +82,8 @@ public:
 	void setHysteresisIsConstSignal(bool isConstSignal) { m_hysteresisIsConstSignal = isConstSignal; }
 	bool hysteresisIsConstSignal() const { return m_hysteresisIsConstSignal; }
 
+	void dump() const;
+
 private:
 	E::CmpType m_cmpType = E::CmpType::Equal;
 	E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
@@ -120,7 +116,7 @@ class LmComparatorSet
 public:
 	LmComparatorSet();
 	LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> omparator);
-	virtual ~LmComparatorSet();
+	~LmComparatorSet();
 
 	void clear();
 	void append(std::shared_ptr<Comparator> comparator);
@@ -145,7 +141,15 @@ class ComparatorSet
 {
 public:
 	ComparatorSet();
+	ComparatorSet(const ComparatorSet& src);
+	ComparatorSet(ComparatorSet&& src);
 	virtual ~ComparatorSet();
+
+	ComparatorSet& operator= (const ComparatorSet& src);
+	ComparatorSet& operator= (ComparatorSet&& src);
+
+public:
+	void dump() const;
 
 	void clear();
 	void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);					// insert comparator

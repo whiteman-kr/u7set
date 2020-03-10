@@ -36,7 +36,7 @@
           <bool>false</bool>
          </property>
          <attribute name="headerVisible">
-          <bool>true</bool>
+          <bool>false</bool>
          </attribute>
          <attribute name="headerShowSortIndicator" stdset="0">
           <bool>true</bool>
@@ -125,6 +125,13 @@
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QPushButton" name="btnAfbLibraryHelp">
+         <property name="text">
+          <string>AFBL Reference</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">

@@ -173,6 +173,11 @@ void MainWindow::createActions()
 	//m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
+
+	m_manualTuningAction = new QAction(tr("Tuning User Manual"), this);
+	m_manualTuningAction->setStatusTip(tr("Show Tuning User Manual"));
+	connect(m_manualTuningAction, &QAction::triggered, this, &MainWindow::showTuningUserManual);
+
 }
 
 void MainWindow::createMenu()
@@ -195,13 +200,14 @@ void MainWindow::createMenu()
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_manualTuningAction);
+	pHelpMenu->addAction(m_pAboutAction);
+	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pTuningSourcesAction);
 	pHelpMenu->addAction(m_pStatisticsAction);
 	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pAppLogAction);
 	pHelpMenu->addAction(m_pSignalLogAction);
-	pHelpMenu->addSeparator();
-	pHelpMenu->addAction(m_pAboutAction);
 }
 
 void MainWindow::createStatusBar()
@@ -724,7 +730,7 @@ void MainWindow::updateStatusBar()
 
 		// Sor tool
 
-		if (theConfigSettings.showSOR == true)
+		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
 		{
 			QString sorStatus;
 
@@ -972,6 +978,11 @@ void MainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
 	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+}
+
+void MainWindow::showTuningUserManual()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 void MainWindow::slot_userFiltersChanged()

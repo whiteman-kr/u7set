@@ -80,6 +80,9 @@ Component.prototype.developInstallToggled = function (checked) {
 		{
 			ComponentSelectionPage.deselectAll();
 			ComponentSelectionPage.selectComponent("u7set.develop.rpct");
+			ComponentSelectionPage.selectComponent("u7set.develop.rpct.docs");
+			ComponentSelectionPage.selectComponent("u7set.mats.monitor.docs");
+			ComponentSelectionPage.selectComponent("u7set.mats.tuningclient.docs");
 		}
         installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
     }
@@ -98,7 +101,9 @@ Component.prototype.serverInstallToggled = function (checked) {
 			ComponentSelectionPage.selectComponent("u7set.mats.tunsrv");
 			ComponentSelectionPage.selectComponent("u7set.mats.scm");
 			ComponentSelectionPage.selectComponent("u7set.mats.monitor");
+			ComponentSelectionPage.selectComponent("u7set.mats.monitor.docs");
 			ComponentSelectionPage.selectComponent("u7set.mats.tuningclient");
+			ComponentSelectionPage.selectComponent("u7set.mats.tuningclient.docs");
 		}
         installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
     }
@@ -112,7 +117,9 @@ Component.prototype.clientInstallToggled = function (checked) {
 		{
 			ComponentSelectionPage.deselectAll();
 			ComponentSelectionPage.selectComponent("u7set.mats.monitor");
+			ComponentSelectionPage.selectComponent("u7set.mats.monitor.docs");
 			ComponentSelectionPage.selectComponent("u7set.mats.tuningclient");
+			ComponentSelectionPage.selectComponent("u7set.mats.tuningclient.docs");
 		}
         installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
     }

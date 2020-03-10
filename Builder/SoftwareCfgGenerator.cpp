@@ -306,7 +306,7 @@ namespace Builder
 		QString group{"Schema"};
 		bool schemaItemFrameWasProcessed = false;
 
-		auto findPannelSchemaFunc = [&schemaMap, log](QString pannelSchemaId)
+		auto findPannelSchemaFunc = [&schemaMap](QString pannelSchemaId)
 			{
 				if (auto pannelSchemaIt = schemaMap.find(pannelSchemaId);
 					pannelSchemaIt != schemaMap.end())
@@ -1064,6 +1064,40 @@ namespace Builder
 				destLayer->Items.push_back(newItem);
 			}
 		}
+
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::loadFileFromDatabase(DbController* db, int parentId, const QString& fileName, QString *errorCode, QByteArray* data)
+	{
+		if (db == nullptr || errorCode == nullptr || data == nullptr)
+		{
+			assert(errorCode);
+			assert(db);
+			assert(data);
+			return false;
+		}
+
+		// Load the file from the database
+		//
+
+		std::vector<DbFileInfo> fileList;
+		bool ok = db->getFileList(&fileList, parentId, fileName, true, nullptr);
+		if (ok == false || fileList.size() != 1)
+		{
+			*errorCode = QObject::tr("File %1 is not found.").arg(fileName);
+			return false;
+		}
+
+		std::shared_ptr<DbFile> file;
+		ok = db->getLatestVersion(fileList[0], &file, nullptr);
+		if (ok == false || file == nullptr)
+		{
+			*errorCode = QObject::tr("Get latest version of %1 failed.").arg(fileName);
+			return false;
+		}
+
+		file->swapData(*data);
 
 		return true;
 	}

@@ -2,6 +2,7 @@
 
 #include "PosRectImpl.h"
 #include "FontParam.h"
+#include "Indicator.h"
 
 
 class AppSignalState;
@@ -23,7 +24,7 @@ namespace VFrame30
 	public:
 		SchemaItemIndicator(void);
 		explicit SchemaItemIndicator(SchemaUnit unit);
-		virtual ~SchemaItemIndicator(void);
+		virtual ~SchemaItemIndicator(void) = default;
 
 		// Serialization
 		//
@@ -36,7 +37,10 @@ namespace VFrame30
 	public:
 		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
+		std::set<QString> getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const;
+		bool getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const;
 		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		std::optional<double> getSignalState(CDrawParam* drawParam, const QString& appSignalId) const;
 
 		// Properties and Data
 		//
@@ -56,7 +60,7 @@ namespace VFrame30
 		int precision() const;
 		void setPrecision(int value);
 
-		DECLARE_FONT_PROPERTIES(Font);
+		DECLARE_FONT_PROPERTIES(Font)
 
 		FontParam& font();
 		const FontParam& font() const;

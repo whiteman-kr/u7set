@@ -1339,24 +1339,24 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 lmport() const;
   inline void set_lmport(::google::protobuf::int32 value);
 
-  // optional int32 lmSubsystemID = 7 [default = 0];
+  // optional int32 lmSubsystemKey = 7 [default = 0];
+  inline bool has_lmsubsystemkey() const;
+  inline void clear_lmsubsystemkey();
+  static const int kLmSubsystemKeyFieldNumber = 7;
+  inline ::google::protobuf::int32 lmsubsystemkey() const;
+  inline void set_lmsubsystemkey(::google::protobuf::int32 value);
+
+  // optional string lmSubsystemID = 8;
   inline bool has_lmsubsystemid() const;
   inline void clear_lmsubsystemid();
-  static const int kLmSubsystemIDFieldNumber = 7;
-  inline ::google::protobuf::int32 lmsubsystemid() const;
-  inline void set_lmsubsystemid(::google::protobuf::int32 value);
-
-  // optional string lmSubsystem = 8;
-  inline bool has_lmsubsystem() const;
-  inline void clear_lmsubsystem();
-  static const int kLmSubsystemFieldNumber = 8;
-  inline const ::std::string& lmsubsystem() const;
-  inline void set_lmsubsystem(const ::std::string& value);
-  inline void set_lmsubsystem(const char* value);
-  inline void set_lmsubsystem(const char* value, size_t size);
-  inline ::std::string* mutable_lmsubsystem();
-  inline ::std::string* release_lmsubsystem();
-  inline void set_allocated_lmsubsystem(::std::string* lmsubsystem);
+  static const int kLmSubsystemIDFieldNumber = 8;
+  inline const ::std::string& lmsubsystemid() const;
+  inline void set_lmsubsystemid(const ::std::string& value);
+  inline void set_lmsubsystemid(const char* value);
+  inline void set_lmsubsystemid(const char* value, size_t size);
+  inline ::std::string* mutable_lmsubsystemid();
+  inline ::std::string* release_lmsubsystemid();
+  inline void set_allocated_lmsubsystemid(::std::string* lmsubsystemid);
 
   // optional string lmSubsystemChannel = 9;
   inline bool has_lmsubsystemchannel() const;
@@ -1450,10 +1450,10 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline void clear_has_lmip();
   inline void set_has_lmport();
   inline void clear_has_lmport();
+  inline void set_has_lmsubsystemkey();
+  inline void clear_has_lmsubsystemkey();
   inline void set_has_lmsubsystemid();
   inline void clear_has_lmsubsystemid();
-  inline void set_has_lmsubsystem();
-  inline void clear_has_lmsubsystem();
   inline void set_has_lmsubsystemchannel();
   inline void clear_has_lmsubsystemchannel();
   inline void set_has_lmnumber();
@@ -1481,8 +1481,8 @@ class DataSourceInfo : public ::google::protobuf::Message {
   ::std::string* lmip_;
   ::google::protobuf::int32 lmdatatype_;
   ::google::protobuf::int32 lmport_;
-  ::std::string* lmsubsystem_;
-  ::google::protobuf::int32 lmsubsystemid_;
+  ::std::string* lmsubsystemid_;
+  ::google::protobuf::int32 lmsubsystemkey_;
   ::google::protobuf::int32 lmnumber_;
   ::std::string* lmsubsystemchannel_;
   ::std::string* lmadapterid_;
@@ -2096,6 +2096,13 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 signalstatesqueuesize() const;
   inline void set_signalstatesqueuesize(::google::protobuf::int32 value);
 
+  // optional int32 state = 30 [default = 0];
+  inline bool has_state() const;
+  inline void clear_state();
+  static const int kStateFieldNumber = 30;
+  inline ::google::protobuf::int32 state() const;
+  inline void set_state(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   inline void set_has_id();
@@ -2156,6 +2163,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_rupframesqueuesize();
   inline void set_has_signalstatesqueuesize();
   inline void clear_has_signalstatesqueuesize();
+  inline void set_has_state();
+  inline void clear_has_state();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2188,9 +2197,10 @@ class AppDataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errornonmonotonicplanttime_;
   ::std::string* lmequipmentid_;
   ::google::protobuf::int32 signalstatesqueuesize_;
+  ::google::protobuf::int32 state_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(29 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(30 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8167,95 +8177,95 @@ inline void DataSourceInfo::set_lmport(::google::protobuf::int32 value) {
   lmport_ = value;
 }
 
-// optional int32 lmSubsystemID = 7 [default = 0];
-inline bool DataSourceInfo::has_lmsubsystemid() const {
+// optional int32 lmSubsystemKey = 7 [default = 0];
+inline bool DataSourceInfo::has_lmsubsystemkey() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void DataSourceInfo::set_has_lmsubsystemid() {
+inline void DataSourceInfo::set_has_lmsubsystemkey() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void DataSourceInfo::clear_has_lmsubsystemid() {
+inline void DataSourceInfo::clear_has_lmsubsystemkey() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void DataSourceInfo::clear_lmsubsystemid() {
-  lmsubsystemid_ = 0;
-  clear_has_lmsubsystemid();
+inline void DataSourceInfo::clear_lmsubsystemkey() {
+  lmsubsystemkey_ = 0;
+  clear_has_lmsubsystemkey();
 }
-inline ::google::protobuf::int32 DataSourceInfo::lmsubsystemid() const {
-  return lmsubsystemid_;
+inline ::google::protobuf::int32 DataSourceInfo::lmsubsystemkey() const {
+  return lmsubsystemkey_;
 }
-inline void DataSourceInfo::set_lmsubsystemid(::google::protobuf::int32 value) {
-  set_has_lmsubsystemid();
-  lmsubsystemid_ = value;
+inline void DataSourceInfo::set_lmsubsystemkey(::google::protobuf::int32 value) {
+  set_has_lmsubsystemkey();
+  lmsubsystemkey_ = value;
 }
 
-// optional string lmSubsystem = 8;
-inline bool DataSourceInfo::has_lmsubsystem() const {
+// optional string lmSubsystemID = 8;
+inline bool DataSourceInfo::has_lmsubsystemid() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void DataSourceInfo::set_has_lmsubsystem() {
+inline void DataSourceInfo::set_has_lmsubsystemid() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void DataSourceInfo::clear_has_lmsubsystem() {
+inline void DataSourceInfo::clear_has_lmsubsystemid() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void DataSourceInfo::clear_lmsubsystem() {
-  if (lmsubsystem_ != &::google::protobuf::internal::kEmptyString) {
-    lmsubsystem_->clear();
+inline void DataSourceInfo::clear_lmsubsystemid() {
+  if (lmsubsystemid_ != &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemid_->clear();
   }
-  clear_has_lmsubsystem();
+  clear_has_lmsubsystemid();
 }
-inline const ::std::string& DataSourceInfo::lmsubsystem() const {
-  return *lmsubsystem_;
+inline const ::std::string& DataSourceInfo::lmsubsystemid() const {
+  return *lmsubsystemid_;
 }
-inline void DataSourceInfo::set_lmsubsystem(const ::std::string& value) {
-  set_has_lmsubsystem();
-  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
-    lmsubsystem_ = new ::std::string;
+inline void DataSourceInfo::set_lmsubsystemid(const ::std::string& value) {
+  set_has_lmsubsystemid();
+  if (lmsubsystemid_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemid_ = new ::std::string;
   }
-  lmsubsystem_->assign(value);
+  lmsubsystemid_->assign(value);
 }
-inline void DataSourceInfo::set_lmsubsystem(const char* value) {
-  set_has_lmsubsystem();
-  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
-    lmsubsystem_ = new ::std::string;
+inline void DataSourceInfo::set_lmsubsystemid(const char* value) {
+  set_has_lmsubsystemid();
+  if (lmsubsystemid_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemid_ = new ::std::string;
   }
-  lmsubsystem_->assign(value);
+  lmsubsystemid_->assign(value);
 }
-inline void DataSourceInfo::set_lmsubsystem(const char* value, size_t size) {
-  set_has_lmsubsystem();
-  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
-    lmsubsystem_ = new ::std::string;
+inline void DataSourceInfo::set_lmsubsystemid(const char* value, size_t size) {
+  set_has_lmsubsystemid();
+  if (lmsubsystemid_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemid_ = new ::std::string;
   }
-  lmsubsystem_->assign(reinterpret_cast<const char*>(value), size);
+  lmsubsystemid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DataSourceInfo::mutable_lmsubsystem() {
-  set_has_lmsubsystem();
-  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
-    lmsubsystem_ = new ::std::string;
+inline ::std::string* DataSourceInfo::mutable_lmsubsystemid() {
+  set_has_lmsubsystemid();
+  if (lmsubsystemid_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemid_ = new ::std::string;
   }
-  return lmsubsystem_;
+  return lmsubsystemid_;
 }
-inline ::std::string* DataSourceInfo::release_lmsubsystem() {
-  clear_has_lmsubsystem();
-  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DataSourceInfo::release_lmsubsystemid() {
+  clear_has_lmsubsystemid();
+  if (lmsubsystemid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = lmsubsystem_;
-    lmsubsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = lmsubsystemid_;
+    lmsubsystemid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DataSourceInfo::set_allocated_lmsubsystem(::std::string* lmsubsystem) {
-  if (lmsubsystem_ != &::google::protobuf::internal::kEmptyString) {
-    delete lmsubsystem_;
+inline void DataSourceInfo::set_allocated_lmsubsystemid(::std::string* lmsubsystemid) {
+  if (lmsubsystemid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmsubsystemid_;
   }
-  if (lmsubsystem) {
-    set_has_lmsubsystem();
-    lmsubsystem_ = lmsubsystem;
+  if (lmsubsystemid) {
+    set_has_lmsubsystemid();
+    lmsubsystemid_ = lmsubsystemid;
   } else {
-    clear_has_lmsubsystem();
-    lmsubsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_lmsubsystemid();
+    lmsubsystemid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -9546,6 +9556,28 @@ inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuesize() con
 inline void AppDataSourceState::set_signalstatesqueuesize(::google::protobuf::int32 value) {
   set_has_signalstatesqueuesize();
   signalstatesqueuesize_ = value;
+}
+
+// optional int32 state = 30 [default = 0];
+inline bool AppDataSourceState::has_state() const {
+  return (_has_bits_[0] & 0x20000000u) != 0;
+}
+inline void AppDataSourceState::set_has_state() {
+  _has_bits_[0] |= 0x20000000u;
+}
+inline void AppDataSourceState::clear_has_state() {
+  _has_bits_[0] &= ~0x20000000u;
+}
+inline void AppDataSourceState::clear_state() {
+  state_ = 0;
+  clear_has_state();
+}
+inline ::google::protobuf::int32 AppDataSourceState::state() const {
+  return state_;
+}
+inline void AppDataSourceState::set_state(::google::protobuf::int32 value) {
+  set_has_state();
+  state_ = value;
 }
 
 // -------------------------------------------------------------------

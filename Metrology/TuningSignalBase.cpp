@@ -19,7 +19,7 @@ TuningSource::TuningSource(const Network::DataSourceInfo& info) :
 	m_serverIP (QString::fromStdString(info.lmip())),
 	m_serverPort (info.lmport()),
 	m_channel (QString::fromStdString(info.lmsubsystemchannel())),
-	m_subSystem (QString::fromStdString(info.lmsubsystem())),
+    m_subSystemID (QString::fromStdString(info.lmsubsystemid())),
 	m_lmNumber (info.lmnumber())
 {
 }

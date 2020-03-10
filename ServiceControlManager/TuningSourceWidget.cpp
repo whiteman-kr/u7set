@@ -29,8 +29,8 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
 	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmip()); } },
 	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmport()); } },
 	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystemchannel()); } },
-	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmsubsystemid()); } },
-	{ QStringLiteral("Subsystem"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystem()); } },
+	{ QStringLiteral("SubsystemKey"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmsubsystemkey()); } },
+	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystemid()); } },
 
 	{ QStringLiteral("LmNumber"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmnumber()); } },
 	{ QStringLiteral("LmModuleType"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmmoduletype()); } },

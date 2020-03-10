@@ -27,7 +27,8 @@ private slots:
 	void deleteProject();
 	void refreshProjectList();
 	void selectProject(const QString &projectName);
-
+	void projectsContextMenuRequested(const QPoint&pos);
+	void projectsSortIndicatorChanged(int column, Qt::SortOrder order);
 	void projectTableSelectionChanged();
 
 	// Properties
@@ -46,6 +47,11 @@ private:
 	QPushButton* m_deleteProjectButton = nullptr;
 	QPushButton* m_refreshProjectListButton = nullptr;
 
+	QAction* m_newProjectAction = nullptr;
+	QAction* m_openProjectAction = nullptr;
+	QAction* m_closeProjectAction = nullptr;
+	QAction* m_cloneProjectAction = nullptr;
+	QAction* m_deleteProjectAction = nullptr;
 	QAction* m_refreshAction = nullptr;
 };
 

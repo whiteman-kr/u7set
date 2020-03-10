@@ -389,9 +389,6 @@ namespace Tcp
 		void setServer(const HostAddressPort& serverAddressPort, bool reconnect);
 		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect);
 
-		void selectServer1(bool reconnect) { selectServer(0, reconnect); }
-		void selectServer2(bool reconnect) { selectServer(1, reconnect); }
-
 		QString equipmentID() const;
 
 		HostAddressPort currentServerAddressPort() const;
@@ -430,7 +427,9 @@ namespace Tcp
 
 	private:
 		void autoSwitchServer();
-		void selectServer(int serverIndex, bool reconnect);
+
+		void selectFirstValidServer();
+		void selectNextValidServer();
 
 		void connectToServer();
 

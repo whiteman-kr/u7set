@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0024">
+<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0025">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -52,6 +52,32 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 		<SharedBuffer>false</SharedBuffer>
 	</OptoInterface>
+	<Lan>
+		<LanController>
+			<Type>Tuning</Type>
+			<Place>1</Place>
+			<ReadDataOffset>46336</ReadDataOffset>
+			<ReadDataSize>7620</ReadDataSize>		
+			<WriteDataOffset>46336</WriteDataOffset>
+			<WriteDataSize>7620</WriteDataSize>		
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>2</Place>
+			<ReadDataOffset>53956</ReadDataOffset>
+			<ReadDataSize>3570</ReadDataSize>		
+			<WriteDataOffset>53956</WriteDataOffset>
+			<WriteDataSize>3570</WriteDataSize>		
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>3</Place>
+			<ReadDataOffset>53956</ReadDataOffset>
+			<ReadDataSize>3570</ReadDataSize>		
+			<WriteDataOffset>53956</WriteDataOffset>
+			<WriteDataSize>3570</WriteDataSize>		
+		</LanController>
+	</Lan>
 
     <LogicUnitCommnads>
 	    <Command Caption="nop"			Code="0040"	CodeMask="07c0"	SimulationFunc="command_nop"		ParseFunc="parse_nop"		Description="No operation"/>
