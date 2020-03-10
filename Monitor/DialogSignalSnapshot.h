@@ -54,6 +54,7 @@ enum class SnapshotColumns
 	AppSignalID,
 	Caption,
 	Type,
+	Tags,
 
 	SystemTime,			// Signal State Columns
 	LocalTime,
@@ -122,6 +123,8 @@ public:
 
 	void setMasks(const QStringList& masks);
 
+	void setTags(const QStringList& tags);
+
 	void setSchemaAppSignals(std::set<QString> schemaAppSignals);
 
 	void fillSignals();
@@ -159,6 +162,8 @@ private:
 
 	QStringList m_masks;
 
+	QStringList m_tags;
+
 	std::set<QString> m_schemaAppSignals;
 };
 
@@ -186,11 +191,9 @@ private slots:
 
 	void on_typeCombo_currentIndexChanged(int index);
 
-	void on_buttonMaskApply_clicked();
-
 	void on_editMask_returnPressed();
 
-	void on_buttonMaskInfo_clicked();
+	void on_editTags_returnPressed();
 
 	void tcpSignalClient_signalParamAndUnitsArrived();
 
@@ -209,6 +212,8 @@ private:
 
 	void maskChanged();
 
+	void tagsChanged();
+
 	void fillSchemas();
 
 	void fillSignals();
@@ -218,7 +223,9 @@ private:
 
 	Ui::DialogSignalSnapshot *ui;
 
-	QCompleter* m_completer = nullptr;
+	QCompleter* m_maskCompleter = nullptr;
+
+	QCompleter* m_tagsCompleter = nullptr;
 
 	SignalSnapshotModel *m_model = nullptr;
 
@@ -227,6 +234,10 @@ private:
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 
 	int m_updateStateTimerId = -1;
+
+	static const QString m_maskHelp;
+
+	static const QString m_tagsHelp;
 };
 
 #endif // DIALOGSIGNALSNAPSHOT_H
