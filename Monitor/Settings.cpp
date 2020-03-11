@@ -77,6 +77,7 @@ void Settings::writeUserScope() const
 
     s.setValue("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType));
 	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
+	s.setValue("DialogSignalSnapshot/tags", m_signalSnapshotTagsList);
 
 	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType));
 	s.setValue("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn);
@@ -121,6 +122,7 @@ void Settings::loadUserScope()
     m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(s.value("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType)).toInt());
 	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
 	m_signalSnapshotMaskType = static_cast<SignalSnapshotModel::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType)).toInt());
+	m_signalSnapshotTagsList = s.value("DialogSignalSnapshot/tags").toStringList();
 	m_signalSnapshotSortColumn = s.value("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn).toInt();
 	m_signalSnapshotSortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", m_signalSnapshotSortOrder).toInt());
 	m_trendSignalsDialogFilterCompleter = s.value("DialogChooseTrendSignals/filter").toStringList();
