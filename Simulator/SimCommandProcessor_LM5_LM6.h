@@ -116,6 +116,13 @@ namespace Sim
 		void parse_rdfbcmp(DeviceCommand* command) const;
 		void command_rdfbcmp(const DeviceCommand& command);
 
+		// Command: setmem
+		// Code: 14
+		// Description: Set memory area to 16-bit word constant
+		//
+		void parse_setmem(DeviceCommand* command) const;
+		void command_setmem(const DeviceCommand& command);
+
 		// Command: movb
 		// Code: 15
 		// Description: Move bit from RAM to RAM
@@ -192,6 +199,13 @@ namespace Sim
 		//
 		void parse_pmov32(DeviceCommand* command) const;
 		void command_pmov32(const DeviceCommand& command);
+
+		// Command: fillb
+		// Code: 27
+		// Description: Fill 16-bit word with 1-bit constant and write it to memory
+		//
+		void parse_fillb(DeviceCommand* command) const;
+		void command_fillb(const DeviceCommand& command);
 
 		//
 		// AFB's simultaion code
@@ -290,7 +304,7 @@ namespace Sim
 
 		const std::map<Hash, SimCommandFunc> m_nameToFuncCommand
 		{
-			{::calcHash(QStringLiteral("command_nop")),			&CommandProcessor_LM5_LM6::command_not_implemented},	// 1
+			{::calcHash(QStringLiteral("command_nop")),			&CommandProcessor_LM5_LM6::command_nop},				// 1
 			{::calcHash(QStringLiteral("command_startafb")),	&CommandProcessor_LM5_LM6::command_startafb},			// 2
 			{::calcHash(QStringLiteral("command_stop")),		&CommandProcessor_LM5_LM6::command_stop},				// 3
 			{::calcHash(QStringLiteral("command_mov")),			&CommandProcessor_LM5_LM6::command_mov},				// 4
@@ -303,7 +317,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("command_wrfbb")),		&CommandProcessor_LM5_LM6::command_wrfbb},				// 11
 			{::calcHash(QStringLiteral("command_rdfbb")),		&CommandProcessor_LM5_LM6::command_rdfbb},				// 12
 			{::calcHash(QStringLiteral("command_rdfbcmp")),		&CommandProcessor_LM5_LM6::command_rdfbcmp},			// 13
-			{::calcHash(QStringLiteral("command_setmem")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 14 Not impemented
+			{::calcHash(QStringLiteral("command_setmem")),		&CommandProcessor_LM5_LM6::command_setmem},				// 14
 			{::calcHash(QStringLiteral("command_movb")),		&CommandProcessor_LM5_LM6::command_movb},				// 15
 			{::calcHash(QStringLiteral("command_nstartafb")),	&CommandProcessor_LM5_LM6::command_not_implemented},	// 16 Not supported?
 			{::calcHash(QStringLiteral("command_appstart")),	&CommandProcessor_LM5_LM6::command_appstart},			// 17
@@ -316,7 +330,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("command_movcmpf")),		&CommandProcessor_LM5_LM6::command_movcmpf},			// 24
 			{::calcHash(QStringLiteral("command_pmov")),		&CommandProcessor_LM5_LM6::command_pmov},				// 25
 			{::calcHash(QStringLiteral("command_pmov32")),		&CommandProcessor_LM5_LM6::command_pmov32},				// 26
-			{::calcHash(QStringLiteral("command_fillb")),		&CommandProcessor_LM5_LM6::command_not_implemented},	// 27 Not impemented
+			{::calcHash(QStringLiteral("command_fillb")),		&CommandProcessor_LM5_LM6::command_fillb},				// 27
 		};
 
 

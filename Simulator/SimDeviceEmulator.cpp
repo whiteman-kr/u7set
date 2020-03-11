@@ -181,6 +181,18 @@ namespace Sim
 		return true;
 	}
 
+	bool ScriptDeviceEmulator::setRamMem(quint32 address, quint16 data, quint16 size)
+	{
+		while (size-- > 0)
+		{
+			writeRamWord(address++, data);
+		}
+
+		// writeRamWord have checks and will set FAULT in case of error
+		//
+		return true;
+	}
+
 	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
 	{
 		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);

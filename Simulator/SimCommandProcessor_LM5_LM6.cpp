@@ -514,6 +514,40 @@ namespace Sim
 		return;
 	}
 
+	// Command: setmem
+	// Code: 14
+	// Description: Set memory area to 16-bit word constant
+	//
+	void CommandProcessor_LM5_LM6::parse_setmem(DeviceCommand* command) const
+	{
+		command->m_size = 4;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - adderess
+		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
+		command->m_word2 = m_device.getWord(command->m_offset + 3);		// word2 - words to move
+
+		// --
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strWordConst(command->m_word1) + ", " +
+							strWordConst(command->m_word2);
+
+		return;
+
+	}
+
+	void CommandProcessor_LM5_LM6::command_setmem(const DeviceCommand& command)
+	{
+		const auto& size = command.m_word2;
+		const auto& data = command.m_word1;
+		const auto& address = command.m_word0;
+
+		m_device.setRamMem(address, data, size);
+
+		return;
+	}
+
 	// Command: movb
 	// Code: 15
 	// Description: Move bit from RAM to RAM
@@ -858,6 +892,41 @@ namespace Sim
 		m_device.writeRamDword(dst, data);
 		return;
 	}
+
+	// Command: fillb
+	// Code: 27
+	// Description: Fill 16-bit word with 1-bit constant and write it to memory
+	//
+	void CommandProcessor_LM5_LM6::parse_fillb(DeviceCommand* command) const
+	{
+		command->m_size = 4;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);			// destination address (ADR2)
+		command->m_word1 = m_device.getWord(command->m_offset + 2);			// source address (ADR1)
+		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);		// bit no to read
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strBitAddr(command->m_word1, command->m_bitNo0);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_fillb(const DeviceCommand& command)
+	{
+		const auto& src = command.m_word1;
+		const auto& dst = command.m_word0;
+		const auto& bitNo = command.m_bitNo0;
+
+		quint16 bit = m_device.readRamBit(src, bitNo);
+		quint16 data = bit ? 0xFFFF : 0x0000;
+
+		m_device.writeRamWord(dst, data);
+		return;
+	}
+
 
 	//
 	// AFB's simultaion code

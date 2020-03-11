@@ -141,6 +141,7 @@ public:
 		// RAM access
 		//
 		bool movRamMem(quint32 src, quint32 dst, quint32 size);
+		bool setRamMem(quint32 address, quint16 data, quint16 size);
 
 		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
 		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
