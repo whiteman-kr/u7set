@@ -735,6 +735,8 @@ void DialogSignalInfo::fillProperties()
 		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.unit()));
 	}
 
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Tags") << m_signal.tagStringList().join(' ')));
+
 	ui->treeProperties->addTopLevelItem(itemGroup1);
 	itemGroup1->setExpanded(true);
 

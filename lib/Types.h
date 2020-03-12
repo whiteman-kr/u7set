@@ -196,6 +196,18 @@ public:
 	};
 	Q_ENUM(LogicModuleRamAccess)
 
+	// Lan Controller Type Identifiers
+	//
+	enum class LanControllerType
+	{
+		Unknown = 0,
+		Tuning = 1,
+		AppData = 2,
+		DiagData = 4,
+		AppAndDiagData = 6
+	};
+	Q_ENUM(LanControllerType)
+
 	// Software Module Type Identifiers
 	//
 	enum SoftwareType

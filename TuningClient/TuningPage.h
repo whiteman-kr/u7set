@@ -191,7 +191,7 @@ private:
 
 	QPushButton* m_filterButton = nullptr;
 
-	QLineEdit* m_filterEdit = nullptr;
+	QComboBox* m_filterTextCombo = nullptr;
 
 	QComboBox* m_filterTypeCombo = nullptr;
 

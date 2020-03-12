@@ -165,8 +165,10 @@ namespace Afb
 	public:
 		AfbSignal(void);
 		AfbSignal(const AfbSignal& that);
+		AfbSignal(AfbSignal&& that) noexcept;
 		virtual ~AfbSignal();
 		AfbSignal& operator=(const AfbSignal& that) noexcept;
+		AfbSignal& operator=(AfbSignal&& that) noexcept;
 
 		// Serialization
 		//
@@ -199,6 +201,11 @@ namespace Afb
 		Q_INVOKABLE int size() const;
 		void setSize(int value);
 
+		const std::vector<int>& additionalSizes() const;
+		void setAdditionalSizes(std::vector<int> value);
+
+		std::vector<int> allSizes() const;		// Returns size() and additionalSizes() as single vector
+
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
 		bool setByteOrder(const QString& value);
@@ -222,6 +229,7 @@ private:
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		int m_operandIndex = 0;
 		int m_size = 0;
+		std::vector<int> m_additionalSizes;
 		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
 

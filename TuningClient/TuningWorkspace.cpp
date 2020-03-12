@@ -253,6 +253,17 @@ TuningWorkspace::~TuningWorkspace()
 			int width = m_filterTree->columnWidth(m_columnSorIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnSor", width);
 		}
+
+		// Save masks
+		//
+		if (m_treeMaskCombo != nullptr)
+		{
+			theSettings.m_tuningWorkspaceMasks.clear();
+			for (int i = 0; i < m_treeMaskCombo->count(); i++)
+			{
+				theSettings.m_tuningWorkspaceMasks.push_back(m_treeMaskCombo->itemText(i));
+			}
+		}
 	}
 
 	if (m_hSplitter != nullptr)
@@ -358,9 +369,21 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 	}
 
 	QString mask;
-	if (m_treeMask != nullptr)
+	if (m_treeMaskCombo != nullptr)
 	{
-		mask = m_treeMask->text();
+		mask = m_treeMaskCombo->currentText();
+		if (mask.isEmpty() == false)
+		{
+			if (m_treeMaskCombo->findText(mask) == -1)
+			{
+				m_treeMaskCombo->addItem(mask);
+			}
+			while (m_treeMaskCombo->count() > 10)
+			{
+				m_treeMaskCombo->removeItem(0);
+			}
+			m_treeMaskCombo->setCurrentText(mask);
+		}
 	}
 
 	QStringList l;
@@ -522,15 +545,33 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		//
 
-		m_treeMask = new QLineEdit();
-		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
+		m_treeMaskCombo = new QComboBox();
+		m_treeMaskCombo->setEditable(true);
+		m_treeMaskCombo->setInsertPolicy(QComboBox::NoInsert);
+
+		// Load masks
+		//
+		m_treeMaskCombo->addItems(theSettings.m_tuningWorkspaceMasks);
+		m_treeMaskCombo->setEditText(QString());
+
+		QLineEdit* filterLineEdit = m_treeMaskCombo->lineEdit();
+		if (filterLineEdit == nullptr)
+		{
+			Q_ASSERT(filterLineEdit);
+		}
+		else
+		{
+			connect(filterLineEdit, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskApply);
+		}
+
+		// Mask Apply
 
 		m_treeMaskApply = new QPushButton(tr("Filter"));
 		connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
 
 		QHBoxLayout* searchLayout = new QHBoxLayout();
-		searchLayout->addWidget(m_treeMask);
-		searchLayout->addWidget(m_treeMaskApply);
+		searchLayout->addWidget(m_treeMaskCombo, 3);
+		searchLayout->addWidget(m_treeMaskApply, 1);
 
 		m_treeLayoutWidget = new QWidget();
 
@@ -571,19 +612,21 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		{
 			// Find a tree item for restored selected filter and select it
 
-			QTreeWidgetItem* treeFilterWidget = findFilterWidget(m_treeFilter->ID(), rootItem);
+			QTreeWidgetItem* treeFilterWidgetItem = findFilterWidget(m_treeFilter->ID(), rootItem);
 
-			if (treeFilterWidget == nullptr)
+			if (treeFilterWidgetItem == nullptr)
 			{
-				assert(treeFilterWidget);
+				// No such filter - select root
+
+				rootItem->setSelected(true);
 			}
 			else
 			{
-				treeFilterWidget->setSelected(true);
+				treeFilterWidgetItem->setSelected(true);
 
 				// Expand all parents
 
-				QTreeWidgetItem* parent = treeFilterWidget->parent();
+				QTreeWidgetItem* parent = treeFilterWidgetItem->parent();
 				while (parent != nullptr && parent != rootItem)
 				{
 					parent->setExpanded(true);
@@ -1723,14 +1766,14 @@ void TuningWorkspace::slot_maskApply()
 		return;
 	}
 
-	if (m_treeMask->text().isEmpty() == false)
+	if (m_treeMaskCombo->currentText().isEmpty() == false)
 	{
-		m_treeMask->setStyleSheet("QLineEdit { color: red }");
+		m_treeMaskCombo->setStyleSheet("QComboBox { color: red }");
 		m_treeMaskApply->setStyleSheet("QPushButton { color: red }");
 	}
 	else
 	{
-		m_treeMask->setStyleSheet(QString());
+		m_treeMaskCombo->setStyleSheet(QString());
 		m_treeMaskApply->setStyleSheet(QString());
 	}
 

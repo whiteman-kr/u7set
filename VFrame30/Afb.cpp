@@ -358,10 +358,25 @@ namespace Afb
 	{
 	}
 
-	AfbSignal::AfbSignal(const AfbSignal& that)
+	AfbSignal::AfbSignal(const AfbSignal& that) : QObject(that.parent())
 	{
 		*this = that;
 	}
+
+	AfbSignal::AfbSignal(AfbSignal&& that) noexcept :
+		QObject(that.parent()),
+		m_opName(std::move(that.m_opName)),
+		m_caption(std::move(that.m_caption)),
+		m_type(that.m_type),
+		m_dataFormat(that.m_dataFormat),
+		m_operandIndex(that.m_operandIndex),
+		m_size(that.m_size),
+		m_additionalSizes(std::move(that.m_additionalSizes)),
+		m_byteOrder(that.m_byteOrder),
+		m_busDataFormat(that.m_busDataFormat)
+	{
+	}
+
 
 	AfbSignal::~AfbSignal()
 	{
@@ -380,12 +395,32 @@ namespace Afb
 		m_dataFormat = that.m_dataFormat;
 		m_operandIndex = that.m_operandIndex;
 		m_size = that.m_size;
+		m_additionalSizes = that.m_additionalSizes;
 		m_byteOrder = that.m_byteOrder;
 		m_busDataFormat = that.m_busDataFormat;
 
 		return *this;
 	}
 
+	AfbSignal& AfbSignal::operator=(AfbSignal&& that) noexcept
+	{
+		if (this == &that)
+		{
+			return *this;
+		}
+
+		m_opName = std::move(that.m_opName);
+		m_caption = std::move(that.m_caption);
+		m_type = that.m_type;
+		m_dataFormat = that.m_dataFormat;
+		m_operandIndex = that.m_operandIndex;
+		m_size = that.m_size;
+		m_additionalSizes = std::move(that.m_additionalSizes);
+		m_byteOrder = that.m_byteOrder;
+		m_busDataFormat = that.m_busDataFormat;
+
+		return *this;
+	}
 
 	bool AfbSignal::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
@@ -478,7 +513,29 @@ namespace Afb
 			return false;
 		}
 
-		m_size= xmlElement.attribute(QLatin1String("Size")).toInt();
+		m_size = xmlElement.attribute(QLatin1String("Size")).toInt();
+
+		// AdditionalSizes
+		//
+		if (xmlElement.hasAttribute(QLatin1String("AdditionalSizes")) == true)
+		{
+			QStringList str = xmlElement.attribute(QLatin1String("AdditionalSizes"))
+						  .split(",", QString::SkipEmptyParts);
+
+			m_additionalSizes.clear();
+			m_additionalSizes.reserve(str.size());
+
+			for (auto& s : str)
+			{
+				bool ok = false;
+				uint as = s.trimmed().toUInt(&ok);
+
+				if (ok == true)
+				{
+					m_additionalSizes.push_back(as);
+				}
+			}
+		}
 
 		// ByteOrder
 		//
@@ -552,6 +609,28 @@ namespace Afb
 		// Size
 		//
 		element->setAttribute(QLatin1String("Size"), m_size);
+
+		// AdditionalSizes
+		//
+		if (m_additionalSizes.empty() == false)
+		{
+			QString str;
+			str.reserve(static_cast<int>(m_additionalSizes.size()) * 4);
+
+			for (size_t i = 0; i < m_additionalSizes.size(); i++)
+			{
+				if (i == m_additionalSizes.size() - 1)
+				{
+					str += QString::number(m_additionalSizes[i]);
+				}
+				else
+				{
+					str += QString("%d, ").arg(m_additionalSizes[i]);
+				}
+			}
+
+			element->setAttribute(QLatin1String("AdditionalSizes"), str);
+		}
 
 		// ByteOrder
 		//
@@ -646,6 +725,29 @@ namespace Afb
 	void AfbSignal::setSize(int value)
 	{
 		m_size = value;
+	}
+
+	const std::vector<int>& AfbSignal::additionalSizes() const
+	{
+		return m_additionalSizes;
+	}
+
+	void AfbSignal::setAdditionalSizes(std::vector<int> value)
+	{
+		m_additionalSizes = std::move(value);
+	}
+
+	std::vector<int> AfbSignal::allSizes() const
+	{
+		// Returns size() and additionalSizes() as single vector
+		//
+		std::vector<int> result;
+		result.reserve(m_additionalSizes.size() + 1);
+
+		result.push_back(m_size);
+		std::copy(m_additionalSizes.begin(), m_additionalSizes.end(), std::back_inserter(result));
+
+		return result;
 	}
 
 	E::ByteOrder AfbSignal::byteOrder() const
