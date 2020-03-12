@@ -72,20 +72,20 @@ namespace Sim
 
 		// --
 		//
-		void addSignedInteger(AfbComponentParam* operand);
-		void subSignedInteger(AfbComponentParam* operand);
-		void mulSignedInteger(AfbComponentParam* operand);
-		void divSignedInteger(AfbComponentParam* operand);
+		void addSignedInteger(const AfbComponentParam& operand);
+		void subSignedInteger(const AfbComponentParam& operand);
+		void mulSignedInteger(const AfbComponentParam& operand);
+		void divSignedInteger(const AfbComponentParam& operand);
 
 		void addSignedIntegerNumber(qint32 operand);
 		void subSignedIntegerNumber(qint32 operand);
 		void mulSignedIntegerNumber(qint32 operand);
 		void divSignedIntegerNumber(qint32 operand);
 
-		void addFloatingPoint(AfbComponentParam* operand);
-		void subFloatingPoint(AfbComponentParam* operand);
-		void mulFloatingPoint(AfbComponentParam* operand);
-		void divFloatingPoint(AfbComponentParam* operand);
+		void addFloatingPoint(const AfbComponentParam& operand);
+		void subFloatingPoint(const AfbComponentParam& operand);
+		void mulFloatingPoint(const AfbComponentParam& operand);
+		void divFloatingPoint(const AfbComponentParam& operand);
 
 		void addFloatingPoint(float operand);
 		void subFloatingPoint(float operand);
@@ -148,7 +148,7 @@ namespace Sim
 
 	public:
 		bool addParam(const AfbComponentParam& param);
-		AfbComponentParam* param(quint16 opIndex);
+		const AfbComponentParam* param(quint16 opIndex);
 
 		bool paramExists(quint16 opIndex) const;
 

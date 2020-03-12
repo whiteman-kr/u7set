@@ -441,7 +441,7 @@
 			<Pin OpName="o_param_err"	OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"	MaxInstCount="256" SimulationFunc="afb_pol">
+		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"	MaxInstCount="256" SimulationFunc="afb_pol_v3">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_2_oprd"		OpIndex ="3"	PinType = "Param"/>

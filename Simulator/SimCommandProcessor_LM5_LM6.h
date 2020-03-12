@@ -285,6 +285,10 @@ namespace Sim
 		//
 		void afb_lim_v7(AfbComponentInstance* instance);
 
+		//	POL, OpCode 25
+		//
+		void afb_pol_v3(AfbComponentInstance* instance);
+
 		// MISMATCH, OpCode 27
 		// Analog Mismatch
 		//
@@ -356,6 +360,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mux_v1")),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
 			{::calcHash(QStringLiteral("afb_latch_v4")),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
 			{::calcHash(QStringLiteral("afb_lim_v7")),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
+			{::calcHash(QStringLiteral("afb_pol_v3")),			&CommandProcessor_LM5_LM6::afb_pol_v3},					// 25
 			{::calcHash(QStringLiteral("afb_mismatch_v2")),		&CommandProcessor_LM5_LM6::afb_mismatch_v2},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v3")),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27

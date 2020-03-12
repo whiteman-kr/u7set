@@ -351,7 +351,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_rdfb(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		m_device.writeRamWord(command.m_word0, param->wordValue());
 
@@ -470,7 +470,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_rdfbb(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		m_device.writeRamBit(command.m_word0, command.m_bitNo0, param->wordValue() & 0x01);
 
@@ -506,7 +506,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_rdfbcmp(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		bool result = param->wordValue() == command.m_word0;
 		m_device.setFlagCmp(result ? 1 : 0);
@@ -723,7 +723,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_rdfb32(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		m_device.writeRamDword(command.m_word0, param->dwordValue());
 
@@ -798,7 +798,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_rdfbcmp32(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
+		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		bool result = param->dwordValue() == command.m_dword0;
 		m_device.setFlagCmp(result ? 1 : 0);
@@ -921,9 +921,8 @@ namespace Sim
 		const auto& bitNo = command.m_bitNo0;
 
 		quint16 bit = m_device.readRamBit(src, bitNo);
-		quint16 data = bit ? 0xFFFF : 0x0000;
 
-		m_device.writeRamWord(dst, data);
+		m_device.writeRamWord(dst, bit ? 0xFFFF : 0x0000);
 		return;
 	}
 
@@ -1005,7 +1004,7 @@ namespace Sim
 
 		// Logic
 		//
-		AfbComponentParam* input = instance->param(i_oprd);
+		const AfbComponentParam* input = instance->param(i_oprd);
 		quint16 result = ~input->wordValue();
 
 		// Save result
@@ -2196,8 +2195,8 @@ namespace Sim
 		quint16 conf = instance->param(i_conf)->wordValue();
 		qint64 time = instance->param(i_time)->dwordValue();
 
-		AfbComponentParam* prevValueParam = instance->paramExists(i_prev) ? instance->param(i_prev) : nullptr;
-		AfbComponentParam* dataParam = instance->param(i_data);
+		const AfbComponentParam* prevValueParam = instance->paramExists(i_prev) ? instance->param(i_prev) : nullptr;
+		const AfbComponentParam* dataParam = instance->param(i_data);
 
 		quint16 track = instance->param(i_track)->wordValue();
 
@@ -2340,37 +2339,37 @@ namespace Sim
 
 		// Get params,  check_param throws exception in case of error
 		//
-		AfbComponentParam* conf = instance->param(i_conf);
-		AfbComponentParam* operand1 = instance->param(i_1_oprd);
-		AfbComponentParam* operand2 = instance->param(i_2_oprd);
+		const AfbComponentParam* conf = instance->param(i_conf);
+		AfbComponentParam operand1 = *instance->param(i_1_oprd);
+		AfbComponentParam operand2 = *instance->param(i_2_oprd);
 
 		// Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)
 		//
 		switch (conf->wordValue())
 		{
 			case 1:
-				operand1->addSignedInteger(operand2);
+				operand1.addSignedInteger(operand2);
 				break;
 			case 2:
-				operand1->subSignedInteger(operand2);
+				operand1.subSignedInteger(operand2);
 				break;
 			case 3:
-				operand1->mulSignedInteger(operand2);
+				operand1.mulSignedInteger(operand2);
 				break;
 			case 4:
-				operand1->divSignedInteger(operand2);
+				operand1.divSignedInteger(operand2);
 				break;
 			case 5:
-				operand1->addFloatingPoint(operand2);
+				operand1.addFloatingPoint(operand2);
 				break;
 			case 6:
-				operand1->subFloatingPoint(operand2);
+				operand1.subFloatingPoint(operand2);
 				break;
 			case 7:
-				operand1->mulFloatingPoint(operand2);
+				operand1.mulFloatingPoint(operand2);
 				break;
 			case 8:
-				operand1->divFloatingPoint(operand2);
+				operand1.divFloatingPoint(operand2);
 				break;
 			default:
 				SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
@@ -2380,15 +2379,15 @@ namespace Sim
 
 		// Save result
 		//
-		AfbComponentParam result = *operand1;
+		AfbComponentParam result = operand1;
 		result.setOpIndex(o_result);
 
 		instance->addParam(result);
-		instance->addParamWord(o_overflow, operand1->mathOverflow());
-		instance->addParamWord(o_underflow, operand1->mathUnderflow());
-		instance->addParamWord(o_zero, operand1->mathZero());
-		instance->addParamWord(o_nan, operand1->mathNan());
-		instance->addParamWord(o_div_by_zero, operand1->mathDivByZero());
+		instance->addParamWord(o_overflow, operand1.mathOverflow());
+		instance->addParamWord(o_underflow, operand1.mathUnderflow());
+		instance->addParamWord(o_zero, operand1.mathZero());
+		instance->addParamWord(o_nan, operand1.mathNan());
+		instance->addParamWord(o_div_by_zero, operand1.mathDivByZero());
 
 		return;
 	}
@@ -2405,7 +2404,7 @@ namespace Sim
 		const int i_ui_data = 5;		// 16 bit data, unsigned integer input
 		const int i_si_fp_data = 6;		// 32 bit data, signed integer or float input
 
-		const int o_ui_result = 8;		// 16 bit data, unsigned integer output
+		//const int o_ui_result = 8;		// 16 bit data, unsigned integer output
 		const int o_si_fp_result = 9;	// 32 bit data, signed integer or float output
 		const int o_scal_edi = 11;		// error
 		const int o_overflow = 12;
@@ -2415,9 +2414,9 @@ namespace Sim
 
 		// Get params,  check_param throws exception in case of error
 		//
-		AfbComponentParam* conf = instance->param(i_conf);
-		AfbComponentParam* k1 = instance->param(i_scal_k1_coef);	// for  1, 2, 3, 4 -- k1/k2 SignedInteger
-		AfbComponentParam* k2 = instance->param(i_scal_k2_coef);	//      5, 6, 7, 8, 9 -- k1/k2 float
+		const AfbComponentParam* conf = instance->param(i_conf);
+		const AfbComponentParam* k1 = instance->param(i_scal_k1_coef);	// for  1, 2, 3, 4 -- k1/k2 SignedInteger
+		const AfbComponentParam* k2 = instance->param(i_scal_k2_coef);	//      5, 6, 7, 8, 9 -- k1/k2 float
 		AfbComponentParam result;
 
 		// Scale, conf:  1-16(UI)/16(UI); 2-16(UI)/32(SI); 3-32(SI)/16(UI); 4-32(SI)/32(SI); 5-32(SI)/32(FP); 6-32(FP)/32(FP); 7-32(FP)/16(UI); 8-32(FP)/32(SI); 9-16(UI)/32(FP);
@@ -2434,9 +2433,9 @@ namespace Sim
 
 					result.convertWordToSignedInt();
 
-					result.mulSignedInteger(k1);
+					result.mulSignedInteger(*k1);
 					result.divSignedIntegerNumber(32768);
-					result.addSignedInteger(k2);
+					result.addSignedInteger(*k2);
 
 					// Save result
 					//
@@ -2457,8 +2456,8 @@ namespace Sim
 					result = *instance->param(i_si_fp_data);
 					result.setOpIndex(o_si_fp_result);
 
-					result.mulFloatingPoint(k1);
-					result.addFloatingPoint(k2);
+					result.mulFloatingPoint(*k1);
+					result.addFloatingPoint(*k2);
 
 					// Save result
 					//
@@ -2478,8 +2477,8 @@ namespace Sim
 
 					result.convertWordToFloat();
 
-					result.mulFloatingPoint(k1);
-					result.addFloatingPoint(k2);
+					result.mulFloatingPoint(*k1);
+					result.addFloatingPoint(*k2);
 
 					// Save result
 					//
@@ -3008,8 +3007,8 @@ namespace Sim
 		// Get params,  check_param throws exception in case of error
 		//
 		quint16 selector = instance->param(i_sel)->wordValue();
-		AfbComponentParam* input1 = instance->param(i_input_1);
-		AfbComponentParam* input2 = instance->param(i_input_2);
+		const AfbComponentParam* input1 = instance->param(i_input_1);
+		const AfbComponentParam* input2 = instance->param(i_input_2);
 
 		AfbComponentParam result = {selector == 0 ? *input1 : *input2};
 		result.setOpIndex(o_result);
@@ -3270,9 +3269,9 @@ namespace Sim
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
 
-		AfbComponentParam* limMax = instance->param(i_lim_max);
-		AfbComponentParam* limMin = instance->param(i_lim_min);
-		AfbComponentParam* data = instance->param(i_data);
+		const AfbComponentParam* limMax = instance->param(i_lim_max);
+		const AfbComponentParam* limMin = instance->param(i_lim_min);
+		const AfbComponentParam* data = instance->param(i_data);
 
 		AfbComponentParam result = *data;
 
@@ -3365,6 +3364,83 @@ namespace Sim
 		return;
 	}
 
+	//	POL, OpCode 25
+	//
+	void CommandProcessor_LM5_LM6::afb_pol_v3(AfbComponentInstance* instance)
+	{
+		// Y=C0+C1*X**1+C2*X**2+..+Cm*X**m
+		// m=9
+
+		// Define opIndexes
+		//
+		const int i_conf = 0;
+		const int i_1_oprd = 1;
+//		const int i_2_oprd = 3;
+//		const int i_3_oprd = 5;
+//		const int i_4_oprd = 7;
+//		const int i_5_oprd = 9;
+//		const int i_6_oprd = 11;
+//		const int i_7_oprd = 13;
+//		const int i_8_oprd = 15;
+//		const int i_9_oprd = 17;
+//		const int i_10_oprd = 19;
+		const int i_data = 21;
+
+		const int o_result = 24;
+		//const int o_pol_edi = 26;
+		const int o_overflow = 27;
+		const int o_underflow = 28;
+		const int o_zero = 29;
+		const int o_nan = 30;
+		//const int o_version = 31;
+
+		// Get params, check_param throws exception in case of error
+		//
+		const size_t maxOperandCount = 10;
+
+		quint16 settings = instance->param(i_conf)->wordValue();
+		checkParamRange(settings, 2, maxOperandCount, QStringLiteral("i_conf"));
+
+		std::array<AfbComponentParam, maxOperandCount> operands;
+
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+
+		float x = instance->param(i_data)->floatValue();
+
+		for (int i = 0; i < settings; i++)
+		{
+			operands[i] = *(instance->param(i_1_oprd + i * 2));
+
+			float c = std::powf(x, static_cast<float>(i));
+			operands[i].mulFloatingPoint(c);
+
+			overflow |= operands[i].mathOverflow();
+			underflow |= operands[i].mathUnderflow();
+		}
+
+		AfbComponentParam result = operands[0];
+		for (int i = 1; i < settings; i++)
+		{
+			result.addFloatingPoint(operands[i]);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+		}
+
+		// Save result
+		//
+		result.setOpIndex(o_result);
+		instance->addParam(result);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, result.mathZero());
+		instance->addParamWord(o_nan, result.mathNan());
+
+		return;
+	}
+
 	// MISMATCH, OpCode 27
 	// Analog Mismatch
 	// v2 - base version
@@ -3435,7 +3511,7 @@ namespace Sim
 
 		// Get setpoint
 		//
-		AfbComponentParam* setpoint = instance->param(i_ust);
+		const AfbComponentParam* setpoint = instance->param(i_ust);
 		qint64 sp = setpoint->signedIntValue();
 
 		if (sp < 0)
@@ -3575,7 +3651,7 @@ namespace Sim
 
 		// Get setpoint
 		//
-		AfbComponentParam* setpoint = instance->param(i_ust);
+		const AfbComponentParam* setpoint = instance->param(i_ust);
 		float sp = setpoint->floatValue();
 
 		if (sp < 0.0f)
@@ -3601,7 +3677,7 @@ namespace Sim
 			{
 				AfbComponentParam x1_x2 = *instance->param(i_data_1);
 
-				x1_x2.subFloatingPoint(instance->param(i_data_2));
+				x1_x2.subFloatingPoint(*instance->param(i_data_2));
 
 				overflow = x1_x2.mathOverflow();
 				underflow = x1_x2.mathUnderflow();
@@ -3626,9 +3702,9 @@ namespace Sim
 				AfbComponentParam x1_x3 = *instance->param(i_data_1);	// si_a_g_b2
 				AfbComponentParam x2_x3 = *instance->param(i_data_2);	// si_a_g_b3
 
-				x1_x2.subFloatingPoint(instance->param(i_data_2));
-				x1_x3.subFloatingPoint(instance->param(i_data_3));
-				x2_x3.subFloatingPoint(instance->param(i_data_3));
+				x1_x2.subFloatingPoint(*instance->param(i_data_2));
+				x1_x3.subFloatingPoint(*instance->param(i_data_3));
+				x2_x3.subFloatingPoint(*instance->param(i_data_3));
 
 				overflow = x1_x2.mathOverflow() | x1_x3.mathOverflow() | x2_x3.mathOverflow();
 				underflow = x1_x2.mathUnderflow() | x1_x3.mathUnderflow() | x2_x3.mathUnderflow();
@@ -3662,12 +3738,12 @@ namespace Sim
 				AfbComponentParam x2_x4 = *instance->param(i_data_2);	// 5
 				AfbComponentParam x3_x4 = *instance->param(i_data_3);	// 6
 
-				x1_x2.subFloatingPoint(instance->param(i_data_2));
-				x1_x3.subFloatingPoint(instance->param(i_data_3));
-				x1_x4.subFloatingPoint(instance->param(i_data_4));
-				x2_x3.subFloatingPoint(instance->param(i_data_3));
-				x2_x4.subFloatingPoint(instance->param(i_data_4));
-				x3_x4.subFloatingPoint(instance->param(i_data_4));
+				x1_x2.subFloatingPoint(*instance->param(i_data_2));
+				x1_x3.subFloatingPoint(*instance->param(i_data_3));
+				x1_x4.subFloatingPoint(*instance->param(i_data_4));
+				x2_x3.subFloatingPoint(*instance->param(i_data_3));
+				x2_x4.subFloatingPoint(*instance->param(i_data_4));
+				x3_x4.subFloatingPoint(*instance->param(i_data_4));
 
 				overflow = x1_x2.mathOverflow() | x1_x3.mathOverflow() | x1_x4.mathOverflow() |
 						   x2_x3.mathOverflow() | x2_x4.mathOverflow() | x3_x4.mathOverflow();

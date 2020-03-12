@@ -176,18 +176,12 @@ namespace Sim
 		m_data.asSignedInt64 = value;
 	}
 
-	void AfbComponentParam::addSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::addSignedInteger(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
-		qint32 op2 = operand->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
 		qint32 result = op1 + op2;
 
 		qint64 wideResult = static_cast<qint64>(op1) + static_cast<qint64>(op2);
@@ -218,26 +212,20 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::subSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::subSignedInteger(const AfbComponentParam& operand)
 	{
-		AfbComponentParam negativeParam = *operand;
+		AfbComponentParam negativeParam = operand;
 		negativeParam.setSignedIntValue(negativeParam.signedIntValue() * (-1));
 
-		return addSignedInteger(&negativeParam);
+		return addSignedInteger(negativeParam);
 	}
 
-	void AfbComponentParam::mulSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::mulSignedInteger(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
-		qint32 op2 = operand->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
 		qint32 result = op1 * op2;
 		qint64 wideResult = static_cast<qint64>(op1) * static_cast<qint64>(op2);
 
@@ -267,18 +255,12 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::divSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::divSignedInteger(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
-		qint32 op2 = operand->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
 		qint32 result = 0;
 
 		if (op2 != 0)
@@ -332,44 +314,38 @@ namespace Sim
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return addSignedInteger(&cp);
+		return addSignedInteger(cp);
 	}
 
 	void AfbComponentParam::subSignedIntegerNumber(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return subSignedInteger(&cp);
+		return subSignedInteger(cp);
 	}
 
 	void AfbComponentParam::mulSignedIntegerNumber(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return mulSignedInteger(&cp);
+		return mulSignedInteger(cp);
 	}
 
 	void AfbComponentParam::divSignedIntegerNumber(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return divSignedInteger(&cp);
+		return divSignedInteger(cp);
 	}
 
-	void AfbComponentParam::addFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::addFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 + op2;
@@ -389,20 +365,14 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::subFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::subFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 - op2;
@@ -422,20 +392,14 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::mulFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::mulFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 * op2;
@@ -455,20 +419,14 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::divFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::divFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 / op2;
@@ -492,28 +450,28 @@ namespace Sim
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return addFloatingPoint(&cp);
+		return addFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::subFloatingPoint(float operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return subFloatingPoint(&cp);
+		return subFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::mulFloatingPoint(float operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return mulFloatingPoint(&cp);
+		return mulFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::divFloatingPoint(float operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return divFloatingPoint(&cp);
+		return divFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::absFloatingPoint()
@@ -633,7 +591,7 @@ namespace Sim
 		return true;
 	}
 
-	AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
+	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
 	{
 		if (opIndex == m_afbComp->versionOpIndex())
 		{

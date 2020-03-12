@@ -257,7 +257,7 @@ void SimWidget::aboutToQuit()
 {
 	if (m_slaveWindow == false && m_showEventFired == true)
 	{
-		QSettings().setValue("SimWidget/state", saveState());
+		//QSettings().setValue("SimWidget/state", saveState());
 	}
 }
 
