@@ -481,17 +481,12 @@ private:
 
 	QComboBox* m_searchInPropertyList = nullptr;
 
-	QCheckBox* m_searchInSelected = nullptr;
 	QCheckBox* m_caseSensitive = nullptr;
 	QCheckBox* m_wholeWords = nullptr;
+	QCheckBox* m_searchInSelected = nullptr;
 
 	QLabel* m_signalsQuantityLabel = nullptr;
 	QLabel* m_canBeReplacedQuantityLabel = nullptr;
-	int m_totalSignalQuantity = 0;
-	int m_replaceableSignalQuantity = 0;
-	bool m_checkCorrectnessOfId = false;
-	QTimer* m_replaceableSignalQuantityBlinkTimer = nullptr;
-	bool m_replaceableSignalQuantityBlinkIsOn = false;
 
 	QTableView* m_foundList = nullptr;
 	QStandardItemModel* m_foundListModel = nullptr;
@@ -500,6 +495,12 @@ private:
 	QPushButton* m_replaceAndFindNextButton = nullptr;
 	QPushButton* m_findPreviousButton = nullptr;
 	QPushButton* m_findNextButton = nullptr;
+
+	int m_totalSignalQuantity = 0;
+	int m_replaceableSignalQuantity = 0;
+	bool m_checkCorrectnessOfId = false;
+	QTimer* m_replaceableSignalQuantityBlinkTimer = nullptr;
+	bool m_replaceableSignalQuantityBlinkIsOn = false;
 
 	SearchOptions m_searchOptionsUsedLastTime;
 	bool m_isMatchToCurrentSignalSet = false;
