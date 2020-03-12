@@ -39,7 +39,7 @@ class LmDescription : public QObject
 	Q_PROPERTY(int Lan_ControllerCount READ (m_lan.lanControllerCount))
 
 public:
-	explicit LmDescription(QObject* parent = 0);
+	explicit LmDescription(QObject* parent = nullptr);
 	explicit LmDescription(const LmDescription& that);
 	LmDescription& operator=(const LmDescription& src);
 	virtual ~LmDescription();
