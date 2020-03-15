@@ -300,7 +300,7 @@
 			<Pin OpName="o_damp_edi"	OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>			
 		</AFBComponent>
-		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="7"		VersionOpIndex="44"	MaxInstCount="256" SimulationFunc="afb_mem">
+		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="7"		VersionOpIndex="44"	MaxInstCount="256" SimulationFunc="afb_mem_v7">
 			<Pin OpName="i_count"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_1_en"		OpIndex ="2"	PinType = "Input"/>
