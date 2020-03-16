@@ -424,6 +424,7 @@ namespace Builder
 		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
 		void wrnALC5177(QString fbCaption, QString paramCaption, QUuid itemUuid, QString schemaID);		// Using value 0.0 for parameter %1.%2 is not recommend.
 		void wrnALC5178(QUuid constSignalItemUuid, QUuid setFalgsItemUuid, QString schemaID);		// Setting of flags to a constant signal (Logic schema %1).
+		void errALC5179(QString itemCaption, QString signalCaption, QUuid itemUuid, QString schemaID);	// Format of AFB signal %1 is not compatible with any known application signals format
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
