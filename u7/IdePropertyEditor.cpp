@@ -118,21 +118,41 @@ ExtWidgets::PropertyTextEditor* IdePropertyTable::createPropertyTextEditor(std::
 //
 
 DialogFindReplace::DialogFindReplace(QWidget* parent)
-    :QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
-    QLabel* labelFind = new QLabel("Find What:");
-    QLabel* labelReplace = new QLabel("Replace Width:");
+	// Edit
 
-    m_findEdit = new QLineEdit();
-    m_replaceEdit = new QLineEdit();
+	QLabel* labelFind = new QLabel("Find What:", this);
+	QLabel* labelReplace = new QLabel("Replace Width:", this);
 
-    m_findButton = new QPushButton(tr("Find"));
-    m_replaceButton = new QPushButton(tr("Replace"));
-    m_replaceAllButton = new QPushButton(tr("Replace All"));
+	m_findEdit = new QLineEdit(this);
+	m_replaceEdit = new QLineEdit(this);
+
+	// Completers
+
+	m_findCompleter = new QCompleter(theSettings.m_findCompleter, this);
+	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_findEdit->setCompleter(m_findCompleter);
+	connect(m_findEdit, &QLineEdit::textEdited, [this](){m_findCompleter->complete();});
+	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findEdit, &QLineEdit::setText);
+
+	m_replaceCompleter = new QCompleter(theSettings.m_replaceCompleter, this);
+	m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_replaceEdit->setCompleter(m_replaceCompleter);
+	connect(m_replaceEdit, &QLineEdit::textEdited, [this](){m_replaceCompleter->complete();});
+	connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceEdit, &QLineEdit::setText);
+
+	// Buttons
+
+	m_findButton = new QPushButton(tr("Find"), this);
+	m_replaceButton = new QPushButton(tr("Replace"), this);
+	m_replaceAllButton = new QPushButton(tr("Replace All"), this);
 
     connect(m_findButton, &QPushButton::clicked, this, &DialogFindReplace::onFind);
     connect(m_replaceButton, &QPushButton::clicked, this, &DialogFindReplace::onReplace);
     connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAll);
+
+	// Layout
 
     QGridLayout* gridLayout = new QGridLayout();
     gridLayout->addWidget(labelFind, 0, 0);
@@ -157,6 +177,10 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
     setMinimumHeight(100);
 }
 
+DialogFindReplace::~DialogFindReplace()
+{
+}
+
 void DialogFindReplace::onFind()
 {
     QString text = m_findEdit->text();
@@ -164,6 +188,8 @@ void DialogFindReplace::onFind()
     {
         return;
     }
+
+	saveCompleters();
 
     emit findFirst(text);
 }
@@ -182,6 +208,8 @@ void DialogFindReplace::onReplace()
         return;
     }
 
+	saveCompleters();
+
     emit replace(textFind, textReplace);
 }
 
@@ -199,12 +227,57 @@ void DialogFindReplace::onReplaceAll()
         return;
     }
 
+	saveCompleters();
+
     emit replaceAll(textFind, textReplace);
+}
+
+void DialogFindReplace::saveCompleters()
+{
+	QString findText = m_findEdit->text();
+
+	if (findText.isEmpty() == false && theSettings.m_findCompleter.contains(findText) == false)
+	{
+		theSettings.m_findCompleter.append(findText);
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(theSettings.m_findCompleter);
+		}
+	}
+
+	while (theSettings.m_findCompleter.size() > 100)
+	{
+		theSettings.m_findCompleter.pop_front();
+	}
+
+	//
+
+	QString replaceText = m_replaceEdit->text();
+
+	if (replaceText.isEmpty() == false && theSettings.m_replaceCompleter.contains(replaceText) == false)
+	{
+		theSettings.m_replaceCompleter.append(replaceText);
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_replaceCompleter->model());
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(theSettings.m_replaceCompleter);
+		}
+	}
+
+	while (theSettings.m_replaceCompleter.size() > 100)
+	{
+		theSettings.m_replaceCompleter.pop_front();
+	}
 }
 
 //
 // IdeCodeEditor
 //
+
+QString IdeCodeEditor::m_findText;
 
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     PropertyTextEditor(parent),
@@ -275,42 +348,40 @@ IdeCodeEditor::~IdeCodeEditor()
 
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 {
-    if (obj == m_textEdit)
-    {
-        if (event->type() == QEvent::KeyPress)
-        {
-            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+	if (event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
 
-            if (keyEvent->key() == Qt::Key_Escape)
-            {
-                emit escapePressed();
-                return true;
-            }
+		if (keyEvent->key() == Qt::Key_Escape)
+		{
+			return true;
+		}
 
+		if (obj == m_textEdit)
+		{
+			if (keyEvent->key() == Qt::Key_F && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				if (m_findReplace == nullptr)
+				{
+					m_findReplace = new DialogFindReplace(this);
 
-            if (keyEvent->key() == Qt::Key_F && (keyEvent->modifiers() & Qt::ControlModifier))
-            {
-                if (m_findReplace == nullptr)
-                {
-                    m_findReplace = new DialogFindReplace(this);
+					connect(m_findReplace, &DialogFindReplace::findFirst, this, &IdeCodeEditor::findFirst);
+					connect(m_findReplace, &DialogFindReplace::replace, this, &IdeCodeEditor::replace);
+					connect(m_findReplace, &DialogFindReplace::replaceAll, this, &IdeCodeEditor::replaceAll);
+				}
 
-                    connect(m_findReplace, &DialogFindReplace::findFirst, this, &IdeCodeEditor::findFirst);
-                    connect(m_findReplace, &DialogFindReplace::replace, this, &IdeCodeEditor::replace);
-                    connect(m_findReplace, &DialogFindReplace::replaceAll, this, &IdeCodeEditor::replaceAll);
-                }
+				m_findReplace->show();
 
-                m_findReplace->show();
+				return true;
+			}
 
-                return true;
-            }
-
-            if (keyEvent->key() == Qt::Key_F3)
-            {
-                findNext();
-                return true;
-            }
-        }
-    }
+			if (keyEvent->key() == Qt::Key_F3)
+			{
+				findNext();
+				return true;
+			}
+		}
+	}
 
     // pass the event on to the parent class
     return PropertyTextEditor::eventFilter(obj, event);
@@ -338,7 +409,7 @@ void IdeCodeEditor::setReadOnly(bool value)
 
 void IdeCodeEditor::findFirst(QString findText)
 {
-    if (findText.isEmpty())
+	if (findText.isEmpty() == true)
     {
         return;
     }
@@ -364,7 +435,28 @@ void IdeCodeEditor::findFirst(QString findText)
 
 void IdeCodeEditor::findNext()
 {
-    m_textEdit->findNext();
+	if (m_findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (m_findFirst == true)
+	{
+		m_findFirst = false;
+
+		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+
+		if (result == false)
+		{
+			QMessageBox::information(this, qAppName(), tr("Text was not found."));
+		}
+	}
+	else
+	{
+		m_textEdit->findNext();
+	}
+
+	return;
 }
 
 void IdeCodeEditor::replace(QString findText, QString replaceText)

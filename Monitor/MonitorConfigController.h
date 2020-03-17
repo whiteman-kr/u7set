@@ -4,6 +4,7 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
 #include "../lib/ComparatorSet.h"
+#include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
 
 
@@ -53,6 +54,8 @@ struct ConfigSettings
 	QString globalScript;
 	QString onConfigurationArrivedScript;
 	QImage logoImage;
+
+	MonitorBehavior monitorBeahvior;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };

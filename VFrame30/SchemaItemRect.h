@@ -174,7 +174,7 @@ namespace VFrame30
 		E::VertAlign vertAlign() const;
 		void setVertAlign(E::VertAlign align);
 
-		DECLARE_FONT_PROPERTIES(Font);
+		DECLARE_FONT_PROPERTIES(Font)
 
 		bool fill() const;
 		void setFill(bool fill);

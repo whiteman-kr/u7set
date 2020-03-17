@@ -5,8 +5,9 @@
 #include "MonitorCentralWidget.h"
 #include "TcpSignalClient.h"
 
+
 //
-// MonitorExportPrint
+// SnapshotExportPrint
 //
 
 SnapshotExportPrint::SnapshotExportPrint(ConfigSettings* configuration, QWidget* parent)
@@ -92,157 +93,163 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 	switch (static_cast<SnapshotColumns>(m_column))
 	{
 	case SnapshotColumns::SignalID:
-		{
-			v1 = s1.customSignalId();
-			v2 = s2.customSignalId();
-		}
+	{
+		v1 = s1.customSignalId();
+		v2 = s2.customSignalId();
+	}
 		break;
 	case SnapshotColumns::EquipmentID:
-		{
-			v1 = s1.equipmentId();
-			v2 = s2.equipmentId();
-		}
+	{
+		v1 = s1.equipmentId();
+		v2 = s2.equipmentId();
+	}
 		break;
 	case SnapshotColumns::AppSignalID:
-		{
-			v1 = s1.appSignalId();
-			v2 = s2.appSignalId();
-		}
+	{
+		v1 = s1.appSignalId();
+		v2 = s2.appSignalId();
+	}
 		break;
 	case SnapshotColumns::Caption:
-		{
-			v1 = s1.caption();
-			v2 = s2.caption();
-		}
+	{
+		v1 = s1.caption();
+		v2 = s2.caption();
+	}
 		break;
 	case SnapshotColumns::Units:
-		{
-			v1 = s1.unit();
-			v2 = s2.unit();
-		}
+	{
+		v1 = s1.unit();
+		v2 = s2.unit();
+	}
 		break;
 	case SnapshotColumns::Type:
+	{
+		if (s1.isDiscrete() == true && s2.isDiscrete() == true)
 		{
-			if (s1.isDiscrete() == true && s2.isDiscrete() == true)
+			v1 = static_cast<int>(s1.inOutType());
+			v2 = static_cast<int>(s2.inOutType());
+			break;
+		}
+
+		if (s1.type() == s2.type())
+		{
+			if (s1.analogSignalFormat() == s2.analogSignalFormat())
 			{
 				v1 = static_cast<int>(s1.inOutType());
 				v2 = static_cast<int>(s2.inOutType());
-				break;
-			}
-
-			if (s1.type() == s2.type())
-			{
-				if (s1.analogSignalFormat() == s2.analogSignalFormat())
-				{
-					v1 = static_cast<int>(s1.inOutType());
-					v2 = static_cast<int>(s2.inOutType());
-				}
-				else
-				{
-					v1 = static_cast<int>(s1.analogSignalFormat());
-					v2 = static_cast<int>(s2.analogSignalFormat());
-				}
 			}
 			else
 			{
-				v1 = static_cast<int>(s1.type());
-				v2 = static_cast<int>(s2.type());
+				v1 = static_cast<int>(s1.analogSignalFormat());
+				v2 = static_cast<int>(s2.analogSignalFormat());
 			}
 		}
+		else
+		{
+			v1 = static_cast<int>(s1.type());
+			v2 = static_cast<int>(s2.type());
+		}
+	}
 		break;
 
+	case SnapshotColumns::Tags:
+	{
+		v1 = s1.tagStringList().join(' ');
+		v2 = s2.tagStringList().join(' ');
+	}
+		break;
 	case SnapshotColumns::SystemTime:
-		{
-			v1 = st1.m_time.system.timeStamp;
-			v2 = st2.m_time.system.timeStamp;
-		}
+	{
+		v1 = st1.m_time.system.timeStamp;
+		v2 = st2.m_time.system.timeStamp;
+	}
 		break;
 	case SnapshotColumns::LocalTime:
-		{
-			v1 = st1.m_time.local.timeStamp;
-			v2 = st2.m_time.local.timeStamp;
-		}
+	{
+		v1 = st1.m_time.local.timeStamp;
+		v2 = st2.m_time.local.timeStamp;
+	}
 		break;
 	case SnapshotColumns::PlantTime:
-		{
-			v1 = st1.m_time.plant.timeStamp;
-			v2 = st2.m_time.plant.timeStamp;
-		}
+	{
+		v1 = st1.m_time.plant.timeStamp;
+		v2 = st2.m_time.plant.timeStamp;
+	}
 		break;
 	case SnapshotColumns::Value:
-		{
-			if (st1.m_flags.valid != st2.m_flags.valid)
-			{
-				v1 = st1.m_flags.valid;
-				v2 = st2.m_flags.valid;
-			}
-			else
-			{
-				if (st1.m_flags.stateAvailable != st2.m_flags.stateAvailable)
-				{
-					v1 = st1.m_flags.stateAvailable;
-					v2 = st2.m_flags.stateAvailable;
-				}
-				else
-				{
-					if (s1.isAnalog() == s2.isAnalog())
-					{
-						v1 = st1.m_value;
-						v2 = st2.m_value;
-					}
-					else
-					{
-						v1 = s1.isAnalog();
-						v2 = s2.isAnalog();
-					}
-				}
-			}
-		}
-		break;
-	case SnapshotColumns::Valid:
+	{
+		if (st1.m_flags.valid != st2.m_flags.valid)
 		{
 			v1 = st1.m_flags.valid;
 			v2 = st2.m_flags.valid;
 		}
-		break;
-	case SnapshotColumns::StateAvailable:
+		else
 		{
-			v1 = st1.m_flags.stateAvailable;
-			v2 = st2.m_flags.stateAvailable;
-		}
-		break;
-	case SnapshotColumns::Simulated:
-		{
-			v1 = st1.m_flags.simulated;
-			v2 = st2.m_flags.simulated;
-		}
-		break;
-	case SnapshotColumns::Blocked:
-		{
-			v1 = st1.m_flags.blocked;
-			v2 = st2.m_flags.blocked;
-		}
-		break;
-	case SnapshotColumns::Mismatch:
-		{
-			v1 = st1.m_flags.mismatch;
-			v2 = st2.m_flags.mismatch;
-		}
-		break;
-	case SnapshotColumns::OutOfLimits:
-		{
-			if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
+			if (st1.m_flags.stateAvailable != st2.m_flags.stateAvailable)
 			{
-				v1 = st1.m_flags.aboveHighLimit;
-				v2 = st2.m_flags.aboveHighLimit;
+				v1 = st1.m_flags.stateAvailable;
+				v2 = st2.m_flags.stateAvailable;
 			}
 			else
 			{
-				v1 = st1.m_flags.belowLowLimit;
-				v2 = st2.m_flags.belowLowLimit;
+				if (s1.isAnalog() == s2.isAnalog())
+				{
+					v1 = st1.m_value;
+					v2 = st2.m_value;
+				}
+				else
+				{
+					v1 = s1.isAnalog();
+					v2 = s2.isAnalog();
+				}
 			}
-
 		}
+	}
+		break;
+	case SnapshotColumns::Valid:
+	{
+		v1 = st1.m_flags.valid;
+		v2 = st2.m_flags.valid;
+	}
+		break;
+	case SnapshotColumns::StateAvailable:
+	{
+		v1 = st1.m_flags.stateAvailable;
+		v2 = st2.m_flags.stateAvailable;
+	}
+		break;
+	case SnapshotColumns::Simulated:
+	{
+		v1 = st1.m_flags.simulated;
+		v2 = st2.m_flags.simulated;
+	}
+		break;
+	case SnapshotColumns::Blocked:
+	{
+		v1 = st1.m_flags.blocked;
+		v2 = st2.m_flags.blocked;
+	}
+		break;
+	case SnapshotColumns::Mismatch:
+	{
+		v1 = st1.m_flags.mismatch;
+		v2 = st2.m_flags.mismatch;
+	}
+		break;
+	case SnapshotColumns::OutOfLimits:
+	{
+		if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
+		{
+			v1 = st1.m_flags.aboveHighLimit;
+			v2 = st2.m_flags.aboveHighLimit;
+		}
+		else
+		{
+			v1 = st1.m_flags.belowLowLimit;
+			v2 = st2.m_flags.belowLowLimit;
+		}
+
+	}
 		break;
 	default:
 		Q_ASSERT(false);
@@ -266,6 +273,7 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	m_columnsNames << tr("App Signal ID");
 	m_columnsNames << tr("Caption");
 	m_columnsNames << tr("Type");
+	m_columnsNames << tr("Tags");
 
 	m_columnsNames << tr("Server Time UTC%100").arg(QChar(0x00B1));
 	m_columnsNames << tr("Server Time");
@@ -320,6 +328,11 @@ void SignalSnapshotModel::setSignalType(SignalType type)
 void SignalSnapshotModel::setMasks(const QStringList& masks)
 {
 	m_masks = masks;
+}
+
+void SignalSnapshotModel::setTags(const QStringList& tags)
+{
+	m_tags = tags;
 }
 
 void SignalSnapshotModel::setSchemaAppSignals(std::set<QString> schemaAppSignals)
@@ -394,26 +407,26 @@ void SignalSnapshotModel::fillSignals()
 			switch (theSettings.m_signalSnapshotMaskType)
 			{
 			case MaskType::All:
-				{
-					strIdList << s.appSignalId().trimmed();
-					strIdList << s.customSignalId().trimmed();
-					strIdList << s.equipmentId().trimmed();
-				}
+			{
+				strIdList << s.appSignalId().trimmed();
+				strIdList << s.customSignalId().trimmed();
+				strIdList << s.equipmentId().trimmed();
+			}
 				break;
 			case MaskType::AppSignalId:
-				{
-					strIdList << s.appSignalId().trimmed();
-				}
+			{
+				strIdList << s.appSignalId().trimmed();
+			}
 				break;
 			case MaskType::CustomAppSignalId:
-				{
-					strIdList << s.customSignalId().trimmed();
-				}
+			{
+				strIdList << s.customSignalId().trimmed();
+			}
 				break;
 			case MaskType::EquipmentId:
-				{
-					strIdList << s.equipmentId().trimmed();
-				}
+			{
+				strIdList << s.equipmentId().trimmed();
+			}
 				break;
 			}
 
@@ -433,6 +446,29 @@ void SignalSnapshotModel::fillSignals()
 
 				if (result == true)
 				{
+					break;
+				}
+			}
+
+			if (result == false)
+			{
+				continue;
+			}
+		}
+
+		// Filter by tags
+
+		if (m_tags.isEmpty() == false)
+		{
+			bool result = false;
+
+			const auto& signalTags = s.tags();
+
+			for (const QString& tag : m_tags)
+			{
+				if (std::find(signalTags.begin(), signalTags.end(), tag) != signalTags.end())
+				{
+					result = true;
 					break;
 				}
 			}
@@ -654,54 +690,54 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		switch (columnIndex)
 		{
 		case SnapshotColumns::SystemTime:
-			{
-				QDateTime time = state.m_time.systemToDateTime();
-				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-			}
+		{
+			QDateTime time = state.m_time.systemToDateTime();
+			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+		}
 		case SnapshotColumns::LocalTime:
-			{
-				QDateTime time = state.m_time.localToDateTime();
-				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-			}
+		{
+			QDateTime time = state.m_time.localToDateTime();
+			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+		}
 		case SnapshotColumns::PlantTime:
-			{
-				QDateTime time = state.m_time.plantToDateTime();
-				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-			}
+		{
+			QDateTime time = state.m_time.plantToDateTime();
+			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+		}
 		case SnapshotColumns::Valid:
-			{
-				return (state.m_flags.valid == true) ? tr("") : tr("no");
-			}
+		{
+			return (state.m_flags.valid == true) ? tr("") : tr("no");
+		}
 		case SnapshotColumns::StateAvailable:
-			{
-				return (state.m_flags.stateAvailable == true) ? tr("") : tr("no");
-			}
+		{
+			return (state.m_flags.stateAvailable == true) ? tr("") : tr("no");
+		}
 		case SnapshotColumns::Simulated:
-			{
-				return (state.m_flags.simulated == true) ? tr("yes") : tr("");
-			}
+		{
+			return (state.m_flags.simulated == true) ? tr("yes") : tr("");
+		}
 		case SnapshotColumns::Blocked:
-			{
-				return (state.m_flags.blocked == true) ? tr("yes") : tr("");
-			}
+		{
+			return (state.m_flags.blocked == true) ? tr("yes") : tr("");
+		}
 		case SnapshotColumns::Mismatch:
-			{
-				return (state.m_flags.mismatch == true) ? tr("yes") : tr("");
-			}
+		{
+			return (state.m_flags.mismatch == true) ? tr("yes") : tr("");
+		}
 		case SnapshotColumns::OutOfLimits:
-			{
-				QString resultString;
+		{
+			QString resultString;
 
-				if (state.m_flags.belowLowLimit == true)
-				{
-					resultString += QStringLiteral("LOW ");
-				}
-				if (state.m_flags.aboveHighLimit == true)
-				{
-					resultString += QStringLiteral("HIGH ");
-				}
-				return resultString.trimmed();
+			if (state.m_flags.belowLowLimit == true)
+			{
+				resultString += QStringLiteral("LOW ");
 			}
+			if (state.m_flags.aboveHighLimit == true)
+			{
+				resultString += QStringLiteral("HIGH ");
+			}
+			return resultString.trimmed();
+		}
 		}
 
 		//
@@ -713,92 +749,97 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		switch (columnIndex)
 		{
 		case SnapshotColumns::Value:
+		{
+			QString valueResult;
+
+			switch (s.type())
 			{
-				QString valueResult;
-
-				switch (s.type())
-				{
-				case E::SignalType::Analog:
-					valueResult = state.toString(state.m_value, E::ValueViewType::Dec, s.precision());
-					break;
-				case E::SignalType::Discrete:
-					valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
-					break;
-				case E::SignalType::Bus:
-					valueResult = tr("Bus Type");
-					break;
-				default:
-					Q_ASSERT(false);
-				}
-
-				if (state.m_flags.valid == false)
-				{
-					if (state.m_flags.stateAvailable == true)
-					{
-						valueResult = QString("? (%1)").arg(valueResult);
-					}
-					else
-					{
-						valueResult = QStringLiteral("?");
-					}
-				}
-
-				return valueResult;
+			case E::SignalType::Analog:
+				valueResult = state.toString(state.m_value, E::ValueViewType::Dec, s.precision());
+				break;
+			case E::SignalType::Discrete:
+				valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
+				break;
+			case E::SignalType::Bus:
+				valueResult = tr("Bus Type");
+				break;
+			default:
+				Q_ASSERT(false);
 			}
+
+			if (state.m_flags.valid == false)
+			{
+				if (state.m_flags.stateAvailable == true)
+				{
+					valueResult = QString("? (%1)").arg(valueResult);
+				}
+				else
+				{
+					valueResult = QStringLiteral("?");
+				}
+			}
+
+			return valueResult;
+		}
 
 		case SnapshotColumns::SignalID:
-			{
-				return s.customSignalId();
-			}
+		{
+			return s.customSignalId();
+		}
 
 		case SnapshotColumns::EquipmentID:
-			{
-				return s.equipmentId();
-			}
+		{
+			return s.equipmentId();
+		}
 
 		case SnapshotColumns::AppSignalID:
-			{
-				return s.appSignalId();
-			}
+		{
+			return s.appSignalId();
+		}
 
 		case SnapshotColumns::Caption:
-			{
-				return s.caption();
-			}
+		{
+			return s.caption();
+		}
 
 		case SnapshotColumns::Units:
-			{
-				return s.unit();
-			}
+		{
+			return s.unit();
+		}
 
 		case SnapshotColumns::Type:
+		{
+			QString str = E::valueToString<E::SignalType>(s.type());
+
+			if (s.isAnalog() == true)
 			{
-				QString str = E::valueToString<E::SignalType>(s.type());
-
-				if (s.isAnalog() == true)
-				{
-					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
-				}
-
-				str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutType()));
-
-				return str;
+				str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
 			}
 
+			str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutType()));
+
+			return str;
+		}
+
+		case SnapshotColumns::Tags:
+		{
+			return s.tagStringList().join(' ');
+		}
+
 		default:
-            return QString();
+			return QString();
 		}
 
 		// return QVariant();	Unreachable
 	} // End of if (role == Qt::DisplayRole)
 
 	if (role == Qt::TextAlignmentRole &&
-		 (columnIndex ==  SnapshotColumns::Value ||
-		 columnIndex ==  SnapshotColumns::Valid ||
-		 columnIndex ==  SnapshotColumns::StateAvailable ||
-		 columnIndex ==  SnapshotColumns::Simulated ||
-		 columnIndex ==  SnapshotColumns::Blocked ||
-		 columnIndex ==  SnapshotColumns::Mismatch))
+			(columnIndex ==  SnapshotColumns::Value ||
+			 columnIndex ==  SnapshotColumns::Valid ||
+			 columnIndex ==  SnapshotColumns::StateAvailable ||
+			 columnIndex ==  SnapshotColumns::Simulated ||
+			 columnIndex ==  SnapshotColumns::Blocked ||
+			 columnIndex ==  SnapshotColumns::Mismatch))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -817,9 +858,9 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 		}
 
 		if (section < 0 || section >= static_cast<int>(m_columnsNames.size()))
-        {
-            return "???";
-        }
+		{
+			return "???";
+		}
 
 		return m_columnsNames.at(section);
 	}
@@ -830,6 +871,8 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 //
 //DialogSignalSnapshot
 //
+
+
 
 DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, TcpSignalClient* tcpSignalClient, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -871,14 +914,14 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	// Table view setup
 	//
 
-    ui->tableView->setModel(m_model);
-    ui->tableView->verticalHeader()->hide();
+	ui->tableView->setModel(m_model);
+	ui->tableView->verticalHeader()->hide();
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	ui->tableView->horizontalHeader()->setStretchLastSection(false);
 	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
-    ui->tableView->setSortingEnabled(true);
+	ui->tableView->setSortingEnabled(true);
 	ui->tableView->setWordWrap(false);
 
 	int fontHeight = fontMetrics().height() + 4;
@@ -906,6 +949,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::EquipmentID));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::AppSignalID));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Type));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Tags));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::SystemTime));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::LocalTime));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::PlantTime));
@@ -927,14 +971,14 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->typeCombo->addItem(tr("Discrete Input signals"), static_cast<int>(SignalSnapshotModel::SignalType::DiscreteInput));
 	ui->typeCombo->addItem(tr("Discrete Output signals"), static_cast<int>(SignalSnapshotModel::SignalType::DiscreteOutput));
 
-    if (theSettings.m_signalSnapshotSignalType >= SignalSnapshotModel::SignalType::All && theSettings.m_signalSnapshotSignalType < SignalSnapshotModel::SignalType::DiscreteOutput)
-    {
-        ui->typeCombo->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotSignalType));
-    }
-    else
-    {
-        ui->typeCombo->setCurrentIndex(0);
-    }
+	if (theSettings.m_signalSnapshotSignalType >= SignalSnapshotModel::SignalType::All && theSettings.m_signalSnapshotSignalType < SignalSnapshotModel::SignalType::DiscreteOutput)
+	{
+		ui->typeCombo->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotSignalType));
+	}
+	else
+	{
+		ui->typeCombo->setCurrentIndex(0);
+	}
 
 	ui->typeCombo->blockSignals(false);
 
@@ -946,28 +990,39 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	// Masks setup
 	//
 
-	m_completer = new QCompleter(theSettings.m_signalSnapshotMaskList, this);
-	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+	m_maskCompleter = new QCompleter(theSettings.m_signalSnapshotMaskList, this);
+	m_maskCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
-	ui->editMask->setCompleter(m_completer);
+	m_tagsCompleter = new QCompleter(theSettings.m_signalSnapshotTagsList, this);
+	m_tagsCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+
+	ui->editMask->setCompleter(m_maskCompleter);
+
+	ui->editMask->setToolTip(m_maskHelp);
+
+	ui->editTags->setCompleter(m_tagsCompleter);
+	ui->editTags->setToolTip(m_tagsHelp);
 
 	ui->comboMaskType->blockSignals(true);
 	ui->comboMaskType->addItem("All");
 	ui->comboMaskType->addItem("AppSignalID");
 	ui->comboMaskType->addItem("CustomAppSignalID");
 	ui->comboMaskType->addItem("EquipmentID");
-    if (theSettings.m_signalSnapshotMaskType >= SignalSnapshotModel::MaskType::All && theSettings.m_signalSnapshotMaskType <= SignalSnapshotModel::MaskType::EquipmentId)
-    {
-        ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
-    }
-    else
-    {
-        ui->comboMaskType->setCurrentIndex(0);
-    }
+	if (theSettings.m_signalSnapshotMaskType >= SignalSnapshotModel::MaskType::All && theSettings.m_signalSnapshotMaskType <= SignalSnapshotModel::MaskType::EquipmentId)
+	{
+		ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
+	}
+	else
+	{
+		ui->comboMaskType->setCurrentIndex(0);
+	}
 	ui->comboMaskType->blockSignals(false);
 
-	connect(ui->editMask, &QLineEdit::textEdited, [this](){m_completer->complete();});
-	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->editMask, &QLineEdit::setText);
+	connect(ui->editMask, &QLineEdit::textEdited, [this](){m_maskCompleter->complete();});
+	connect(m_maskCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->editMask, &QLineEdit::setText);
+
+	connect(ui->editTags, &QLineEdit::textEdited, [this](){m_tagsCompleter->complete();});
+	connect(m_tagsCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->editTags, &QLineEdit::setText);
 
 	//
 
@@ -1017,13 +1072,13 @@ void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 
 	for (std::pair<SnapshotColumns, QString> ad : actionsData)
 	{
-		QAction* action = new QAction(ad.second, nullptr);
+		QAction* action = new QAction(ad.second, this);
 		action->setData(QVariant::fromValue(ad.first));
 		action->setCheckable(true);
 		action->setChecked(!ui->tableView->horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));
 
 		if (ui->tableView->horizontalHeader()->count() - ui->tableView->horizontalHeader()->hiddenSectionCount() == 1 &&
-			action->isChecked() == true)
+				action->isChecked() == true)
 		{
 			action->setEnabled(false);			// Impossible to uncheck the last column
 		}
@@ -1151,13 +1206,13 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 			//
 			for (int col = 0; col < m_model->columnCount(); col++)
 			{
-				 if (col >= static_cast<int>(SnapshotColumns::SystemTime))
-				 {
-					 for (int row = from; row <= to; row++)
-					 {
+				if (col >= static_cast<int>(SnapshotColumns::SystemTime))
+				{
+					for (int row = from; row <= to; row++)
+					{
 						ui->tableView->update(m_model->index(row, col));
-					 }
-				 }
+					}
+				}
 			}
 		}
 	}
@@ -1165,12 +1220,15 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 
 void DialogSignalSnapshot::maskChanged()
 {
-	QString maskText = ui->editMask->text();
+	QString maskText = ui->editMask->text().trimmed();
+
+	maskText.replace(' ', ';');
+
 	QStringList masks;
 
 	if (maskText.isEmpty() == false)
 	{
-		masks = maskText.split(';');
+		masks = maskText.split(';', QString::SkipEmptyParts);
 
 		for (auto mask : masks)
 		{
@@ -1180,19 +1238,53 @@ void DialogSignalSnapshot::maskChanged()
 			{
 				theSettings.m_signalSnapshotMaskList.append(mask);
 
-				QStringListModel* model = dynamic_cast<QStringListModel*>(m_completer->model());
-				if (model == nullptr)
+				QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_maskCompleter->model());
+				if (completerModel == nullptr)
 				{
-					Q_ASSERT(model);
+					Q_ASSERT(completerModel);
 					return;
 				}
 
-				model->setStringList(theSettings.m_signalSnapshotMaskList);
+				completerModel->setStringList(theSettings.m_signalSnapshotMaskList);
 			}
 		}
 	}
 
 	m_model->setMasks(masks);
+}
+
+void DialogSignalSnapshot::tagsChanged()
+{
+	QString tagsText = ui->editTags->text().trimmed();
+	tagsText.replace(' ', ';');
+
+	QStringList tags;
+
+	if (tagsText.isEmpty() == false)
+	{
+		tags = tagsText.split(';', QString::SkipEmptyParts);
+
+		for (auto tag : tags)
+		{
+			// Save filter history
+			//
+			if (theSettings.m_signalSnapshotTagsList.contains(tag) == false)
+			{
+				theSettings.m_signalSnapshotTagsList.append(tag);
+
+				QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_tagsCompleter->model());
+				if (completerModel == nullptr)
+				{
+					Q_ASSERT(completerModel);
+					return;
+				}
+
+				completerModel->setStringList(theSettings.m_signalSnapshotTagsList);
+			}
+		}
+	}
+
+	m_model->setTags(tags);
 }
 
 void DialogSignalSnapshot::fillSchemas()
@@ -1277,8 +1369,8 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 	}
 
 	QTimer::singleShot(10, [cw, s] {
-		  cw->currentTab()->signalInfo(s.appSignalId());
-	  });
+		cw->currentTab()->signalInfo(s.appSignalId());
+	});
 }
 
 void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)
@@ -1289,15 +1381,8 @@ void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)
 
 void DialogSignalSnapshot::on_typeCombo_currentIndexChanged(int index)
 {
-    m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(index));
-    theSettings.m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(index);
-
-	fillSignals();
-}
-
-void DialogSignalSnapshot::on_buttonMaskApply_clicked()
-{
-	maskChanged();
+	m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(index));
+	theSettings.m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(index);
 
 	fillSignals();
 }
@@ -1309,17 +1394,18 @@ void DialogSignalSnapshot::on_editMask_returnPressed()
 	fillSignals();
 }
 
-void DialogSignalSnapshot::on_buttonMaskInfo_clicked()
+void DialogSignalSnapshot::on_editTags_returnPressed()
 {
-	QMessageBox::information(this, tr("Signal Snapshot"), tr("A mask contains '*' and '?' symbols. '*' symbol means any set of symbols on its place, "
-															 "'?' symbol means one symbol on ist place. Several masks separated by ';' can be entered.\r\n\r\n"
-															 "Examples:\r\n\r\n#SF001P014* (mask for AppSignalId),\r\n"
-															 "T?30T01? (mask for CustomAppSignalId),\r\n"
-															 "#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment Id)."));
+	tagsChanged();
+
+	fillSignals();
 }
 
 void DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived()
 {
+
+	bool emptyModel = m_model->rowCount() == 0;
+
 	// Set new signals to the model
 	//
 	std::vector<AppSignalParam> allSignals = theSignals.signalList();
@@ -1329,6 +1415,12 @@ void DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived()
 	//
 
 	fillSignals();
+
+	if (emptyModel == true)
+	{
+
+		ui->tableView->resizeColumnsToContents();
+	}
 
 	return;
 }
@@ -1406,11 +1498,10 @@ void DialogSignalSnapshot::on_buttonExport_clicked()
 	QString extension = fileInfo.completeSuffix();
 
 	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0/* ||
-		extension.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0*/)
+			extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
 	{
 		SnapshotExportPrint ep(&m_configuration, this);
 		ep.exportTable(ui->tableView, fileName, extension);
@@ -1427,3 +1518,16 @@ void DialogSignalSnapshot::on_buttonPrint_clicked()
 	SnapshotExportPrint ep(&m_configuration, this);
 	ep.printTable(ui->tableView);
 }
+
+const QString DialogSignalSnapshot::m_maskHelp = QObject::tr("A mask contains '*' and '?' symbols.\n\
+'*' symbol means any set of symbols on its place, '?' symbol means one symbol on its place.\n\
+Several masks can be separated by semicolon or space.\n\n\
+Examples:\n\n\
+#SF001P014* (mask for AppSignalID),\n\
+T?30T01? (mask for CustomAppSignalID),\n\
+#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment ID).\n\n\
+To apply the filter, enter the mask and press Enter.");
+
+const QString DialogSignalSnapshot::m_tagsHelp = QObject::tr("Tags for filtering signals.\n\n\
+Several tags can be separated by semicolon or space: \"tag1; tag2\" or \"tag1 tag2\".\n\n\
+To apply the filter, enter tags and press Enter.");

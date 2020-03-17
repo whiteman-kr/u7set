@@ -33,6 +33,11 @@ namespace VFrame30
 		void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
 		void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
 
+		QStringList signalTags(Hash signalHash) const;
+		QStringList signalTags(const QString& appSignalId) const;
+		bool signalHasTag(Hash signalHash, const QString& tag) const;
+		bool signalHasTag(const QString& appSignalId, const QString& tag) const;
+
 		// Setpoints AKA Comparators
 		//
 		std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const;

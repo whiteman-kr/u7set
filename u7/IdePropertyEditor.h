@@ -67,6 +67,7 @@ class DialogFindReplace : public QDialog
     Q_OBJECT
 public:
     DialogFindReplace(QWidget* parent);
+	~DialogFindReplace();
 
 signals:
     void findFirst(QString findText);
@@ -79,12 +80,18 @@ private slots:
     void onReplaceAll();
 
 private:
+	void saveCompleters();
+
+private:
     QLineEdit* m_findEdit = nullptr;
     QLineEdit* m_replaceEdit = nullptr;
 
     QPushButton* m_findButton = nullptr;
     QPushButton* m_replaceButton = nullptr;
     QPushButton* m_replaceAllButton = nullptr;
+
+	QCompleter* m_findCompleter = nullptr;
+	QCompleter* m_replaceCompleter = nullptr;
 };
 
 //
@@ -106,7 +113,6 @@ public:
     ~IdeCodeEditor();
 
 	virtual void setText(const QString& text) override;
-
 	virtual QString text() override;
 
 	virtual void setReadOnly(bool value) override;
@@ -130,7 +136,9 @@ private:
 
     DialogFindReplace* m_findReplace = nullptr;
 
-    QString m_findText;
+	bool m_findFirst = true;
+
+	static QString m_findText;
 
 };
 

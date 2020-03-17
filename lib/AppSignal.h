@@ -3,6 +3,7 @@
 #include <QtGlobal>
 #include <QDateTime>
 #include <memory>
+#include <set>
 
 #include "Hash.h"
 #include "Queue.h"
@@ -123,9 +124,6 @@ public:
 	AppSignalState& operator= (const AppSignalState& state) = default;
 	AppSignalState& operator= (const SimpleAppSignalState& smState);
 
-	static const quint32 VALID = 1;
-	static const quint32 INVALID = 0;
-
 	Hash hash() const;
 	const Times& time() const;
 	const TimeStamp& time(E::TimeType timeType) const;
@@ -146,10 +144,13 @@ public:
 	static QString toString(double value, E::ValueViewType viewType, int precision);
 
 public:
-	Hash m_hash = 0;					// == calcHash(AppSignalID)
+	Hash m_hash = 0;					// == ::calcHash(AppSignalID)
 	Times m_time;
 	AppSignalStateFlags m_flags;
 	double m_value = 0;
+
+	static const quint32 VALID = 1;
+	static const quint32 INVALID = 0;
 };
 
 Q_DECLARE_METATYPE(AppSignalState)
@@ -386,6 +387,16 @@ public:
 	QVariant tuningHighBoundToVariant() const;
 	void setTuningHighBound(const TuningValue& value);
 
+	const std::set<QString>& tags() const;
+	std::set<QString>& tags();
+	QStringList tagStringList() const;
+
+	void setTags(std::set<QString> tags);
+
+public slots:
+	/// \brief Check if signal has specified tag
+	bool hasTag(const QString& tag) const;
+
 public:
 	static const int NO_UNIT_ID = 1;
 
@@ -432,6 +443,8 @@ private:
 
 	QString m_specPropStruct;
 	QByteArray m_specPropValues;
+
+	std::set<QString> m_tags;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

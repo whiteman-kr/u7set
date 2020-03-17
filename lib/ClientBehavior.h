@@ -1,31 +1,28 @@
-#ifndef CLIENTBEHAVIOR_H
-#define CLIENTBEHAVIOR_H
+#pragma once
 
+#include <optional>
 #include "../lib/PropertyObject.h"
-#include "../lib/DbController.h"
+
 
 //
 // ClientBehavior
 //
-
 class ClientBehavior : public PropertyObject
 {
 public:
 	ClientBehavior();
+	ClientBehavior(const ClientBehavior& src) noexcept;
+	ClientBehavior(ClientBehavior&& src) noexcept;
 	virtual ~ClientBehavior();
 
-	ClientBehavior& operator=(const ClientBehavior& That)
-	{
-		m_behaviorId = That.m_behaviorId;
-
-		return *this;
-	}
+	ClientBehavior& operator=(const ClientBehavior& src);
+	ClientBehavior& operator=(ClientBehavior&& src);
 
 public:
 	bool isMonitorBehavior() const;
 	bool isTuningClientBehavior() const;
 
-	QString behaviorId() const;
+	const QString& behaviorId() const;
 	void setBehaviorId(const QString& behaviorId);
 
 public:
@@ -47,34 +44,44 @@ class MonitorBehavior : public ClientBehavior
 {
 public:
 	MonitorBehavior();
+	MonitorBehavior(const MonitorBehavior& src) noexcept;
+	virtual ~MonitorBehavior() = default;
 
-	MonitorBehavior& operator=(const MonitorBehavior& That)
-	{
-		m_signalTagToColor = That.m_signalTagToColor;
-
-		ClientBehavior::operator= (That);
-		return *this;
-	}
+	MonitorBehavior& operator=(const MonitorBehavior& src);
+	MonitorBehavior& operator=(MonitorBehavior&& src);
 
 public:
-	QColor signalToTagCriticalColor() const;
-	void setSignalToTagCriticalColor(const QColor& color);
 
-	QColor signalToTagAttentionColor() const;
-	void setSignalToTagAttentionColor(const QColor& color);
+	QStringList tags() const;
 
-	QColor signalToTagGeneralColor() const;
-	void setSignalToTagGeneralColor(const QColor& color);
+	void setTag(int index, const QString& tag);
+	bool removeTagToColor(int index);
+	bool moveTagToColor(int index, int step);
+
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QString& tag) const;
+	void setTagToColors(const QString& tag, std::pair<QRgb, QRgb> colors);
+
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const std::set<QString>& tags) const;	// Return the most periority color
+	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QStringList& tags) const;		// Return the most periority color
 
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
 
-
 private:
-	QHash<QString, QColor> m_signalTagToColor;
+	static const QString criticalTag;
+	static const QString attentionTag;
+	static const QString generalTag;
 
+	struct TagToColorsType
+	{
+		QString tag;
+		std::pair<QRgb, QRgb> colors;
+	};
+
+	std::vector<TagToColorsType> m_tagToColors;		// The lower position - the higher priority of the tag
 };
+
 
 //
 // TuningClientBehavior
@@ -92,19 +99,6 @@ public:
 		return *this;
 	}
 
-public:
-	QColor defaultMismatchBackColor() const;
-	void setDefaultMismatchBackColor(const QColor& color);
-
-	QColor defaultMismatchTextColor() const;
-	void setDefaultMismatchTextColor(const QColor& color);
-
-	QColor unappliedBackColor() const;
-	void setUnappliedBackColor(const QColor& color);
-
-	QColor defaultUnappliedTextColor() const;
-	void setDefaultUnappliedTextColor(const QColor& color);
-
 private:
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
@@ -113,6 +107,7 @@ private:
 	QHash<QString, QColor> m_tagToColor;
 };
 
+
 //
 // ClientBehaviorStorage
 //
@@ -120,11 +115,18 @@ class ClientBehaviorStorage
 {
 public:
 	ClientBehaviorStorage();
+	ClientBehaviorStorage(const ClientBehaviorStorage& src);
+	ClientBehaviorStorage(ClientBehaviorStorage&& src) noexcept;
 
+	~ClientBehaviorStorage() = default;
+
+	ClientBehaviorStorage& operator=(const ClientBehaviorStorage& scr);
+	ClientBehaviorStorage& operator=(ClientBehaviorStorage&& scr);
+
+public:
 	QString dbFileName() const;
 
 	void add(std::shared_ptr<ClientBehavior> behavoiur);
-
 	bool remove(int index);
 
 	int count() const;
@@ -134,17 +136,17 @@ public:
 
 	void clear();
 
-	const std::vector<std::shared_ptr<ClientBehavior>>& behavoiurs();
+	const std::vector<std::shared_ptr<ClientBehavior>>& behaviors();
 
-	std::vector<std::shared_ptr<MonitorBehavior>> monitorBehavoiurs();
-	std::vector<std::shared_ptr<TuningClientBehavior>> tuningClientBehavoiurs();
+	std::vector<std::shared_ptr<MonitorBehavior>> monitorBehaviors();
+	std::vector<std::shared_ptr<TuningClientBehavior>> tuningClientBehaviors();
 
-	void save(QByteArray& data);
+	void save(QByteArray* data) const;
 	bool load(const QByteArray& data, QString* errorCode);
 
 private:
-	std::vector<std::shared_ptr<ClientBehavior>> m_behavoiurs;
+	std::vector<std::shared_ptr<ClientBehavior>> m_behaviors;
 	QString m_fileName = "ClientBehavior.xml";
 };
 
-#endif // CLIENTBEHAVIOR_H
+

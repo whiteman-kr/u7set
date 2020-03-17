@@ -1,0 +1,167 @@
+test UAL_FLAGS_MISMATCH.01, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+
+set #IN_MISMATCH_SI_001=0, #IN_MISMATCH_SI_002=0, #IN_MISMATCH_SI_003=0,#IN_MISMATCH_SI_004=0
+	check #IN_MISMATCH_SI_001:Validity==1
+	check #IN_MISMATCH_SI_001:StateAvailable ==1
+	check #IN_MISMATCH_SI_001:Simulated==0
+	check #IN_MISMATCH_SI_001:Blocked==0
+	check #IN_MISMATCH_SI_001:Mismatch==0
+	check #IN_MISMATCH_SI_001:AboveHighLimit==0
+	check #IN_MISMATCH_SI_001:BelowLowLimit==0
+endtest
+
+test UAL_FLAGS_MISMATCH.02, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+
+set #IN_MISMATCH_SI_001=101, #IN_MISMATCH_SI_002=99, #IN_MISMATCH_SI_003=-10,#IN_MISMATCH_SI_004=0
+//
+
+	check #IN_MISMATCH_SI_001:AboveHighLimit==1
+	check #IN_MISMATCH_SI_001:BelowLowLimit==0
+	check #IN_001:AboveHighLimit==1
+	//
+	check #IN_MISMATCH_SI_002:AboveHighLimit==0
+	check #IN_MISMATCH_SI_002:BelowLowLimit==0
+	//
+	check #IN_MISMATCH_SI_003:AboveHighLimit==0
+	check #IN_MISMATCH_SI_003:BelowLowLimit==1
+	//
+	check #IN_MISMATCH_SI_004:AboveHighLimit==0
+	check #IN_MISMATCH_SI_004:BelowLowLimit==0
+	//
+	check #OUT_MISMATCH_SI_001:Mismatch==0
+	check #OUT_MISMATCH_SI_001:AboveHighLimit==0
+	check #OUT_MISMATCH_SI_001:BelowLowLimit==0
+	//
+	check #OUT_MISMATCH_SI_002:Mismatch==0
+	check #OUT_MISMATCH_SI_002:AboveHighLimit==0
+	check #OUT_MISMATCH_SI_002:BelowLowLimit==0
+	//
+	check #OUT_MISMATCH_SI_003:Mismatch==0
+	check #OUT_MISMATCH_SI_003:AboveHighLimit==0
+	check #OUT_MISMATCH_SI_003:BelowLowLimit==0
+	//
+	check #OUT_MISMATCH_SI_004:Mismatch==0
+	check #OUT_MISMATCH_SI_004:AboveHighLimit==0
+	check #OUT_MISMATCH_SI_004:BelowLowLimit==0
+endtest
+
+test UAL_FLAGS_MISMATCH.03, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+
+set #OUT_MISMATCH_SI_001=0, #OUT_MISMATCH_SI_002=0, #OUT_MISMATCH_SI_003=0,#OUT_MISMATCH_SI_004=0
+//
+
+	check #IN_MISMATCH_SI_001:Mismatch==0
+	check #IN_MISMATCH_SI_002:Mismatch==0
+	check #IN_MISMATCH_SI_003:Mismatch==0
+	check #IN_MISMATCH_SI_004:Mismatch==0
+//
+	
+set #OUT_MISMATCH_SI_001=1, #OUT_MISMATCH_SI_002=1, #OUT_MISMATCH_SI_003=1,#OUT_MISMATCH_SI_004=1
+//
+
+	check #IN_MISMATCH_SI_001:Mismatch==1
+	check #IN_MISMATCH_SI_002:Mismatch==1
+	check #IN_MISMATCH_SI_003:Mismatch==1
+	check #IN_MISMATCH_SI_004:Mismatch==1
+		
+endtest
+
+test UAL_FLAGS_MISMATCH.04, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+
+set #IN_MISMATCH_SI_005=0, #IN_MISMATCH_SI_006=0, #IN_MISMATCH_SI_007=0,#IN_MISMATCH_SI_008=0
+	check #IN_MISMATCH_SI_005:Simulated==0
+	check #IN_MISMATCH_SI_005:Blocked==0
+	check #IN_MISMATCH_SI_005:Mismatch==0
+	check #IN_MISMATCH_SI_005:AboveHighLimit==0
+	check #IN_MISMATCH_SI_005:BelowLowLimit==0
+	//
+	check #IN_MISMATCH_SI_006:Simulated==0
+	check #IN_MISMATCH_SI_006:Blocked==0
+	check #IN_MISMATCH_SI_006:Mismatch==0
+	check #IN_MISMATCH_SI_006:AboveHighLimit==0
+	check #IN_MISMATCH_SI_006:BelowLowLimit==0
+	//
+	check #IN_MISMATCH_SI_007:Simulated==0
+	check #IN_MISMATCH_SI_007:Blocked==0
+	check #IN_MISMATCH_SI_007:Mismatch==0
+	check #IN_MISMATCH_SI_007:AboveHighLimit==0
+	check #IN_MISMATCH_SI_007:BelowLowLimit==0	
+	//
+	check #IN_MISMATCH_SI_008:Simulated==0
+	check #IN_MISMATCH_SI_008:Blocked==0
+	check #IN_MISMATCH_SI_008:Mismatch==0
+	check #IN_MISMATCH_SI_008:AboveHighLimit==0
+	check #IN_MISMATCH_SI_008:BelowLowLimit==0
+endtest
+
+test UAL_FLAGS_MISMATCH.05, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+set #OUT_MISMATCH_SI_001=0, #OUT_MISMATCH_SI_002=0, #OUT_MISMATCH_SI_003=0,#OUT_MISMATCH_SI_004=0
+//
+
+	check #IN_MISMATCH_SI_001:Mismatch==0
+	check #IN_MISMATCH_SI_002:Mismatch==0
+	check #IN_MISMATCH_SI_003:Mismatch==0
+	check #IN_MISMATCH_SI_004:Mismatch==0
+//
+	
+set #OUT_MISMATCH_SI_001=1, #OUT_MISMATCH_SI_002=1, #OUT_MISMATCH_SI_003=1,#OUT_MISMATCH_SI_004=1
+//
+
+	check #IN_MISMATCH_SI_001:Mismatch==1
+	check #IN_MISMATCH_SI_002:Mismatch==1
+	check #IN_MISMATCH_SI_003:Mismatch==1
+	check #IN_MISMATCH_SI_004:Mismatch==1
+	
+	
+set #OUT_MISMATCH_SI_001=1, #OUT_MISMATCH_SI_002=0, #OUT_MISMATCH_SI_003=1,#OUT_MISMATCH_SI_004=0
+//
+
+	check #IN_MISMATCH_SI_001:Mismatch==1
+	check #IN_MISMATCH_SI_002:Mismatch==0
+	check #IN_MISMATCH_SI_003:Mismatch==1
+	check #IN_MISMATCH_SI_004:Mismatch==0
+
+set #OUT_MISMATCH_SI_001=0, #OUT_MISMATCH_SI_002=0, #OUT_MISMATCH_SI_003=0,#OUT_MISMATCH_SI_004=1
+//
+
+	check #IN_MISMATCH_SI_001:Mismatch==0
+	check #IN_MISMATCH_SI_002:Mismatch==0
+	check #IN_MISMATCH_SI_003:Mismatch==0
+	check #IN_MISMATCH_SI_004:Mismatch==1	
+endtest
+
+test UAL_FLAGS_MISMATCH.06, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+set #OUT_MISMATCH_SI_005=0, #OUT_MISMATCH_SI_006=0, #OUT_MISMATCH_SI_007=0,#OUT_MISMATCH_SI_008=0
+//
+	check #IN_MISMATCH_SI_009:Mismatch==0
+	check #IN_MISMATCH_SI_010:Mismatch==0 // not aquired
+	check #IN_MISMATCH_SI_011:Mismatch==0 // not aquired
+	check #IN_MISMATCH_SI_012:Mismatch==0 // not aquired
+	
+set #OUT_MISMATCH_SI_005=1, #OUT_MISMATCH_SI_006=1, #OUT_MISMATCH_SI_007=1,#OUT_MISMATCH_SI_008=1
+//
+	check #IN_MISMATCH_SI_009:Mismatch==1
+	check #IN_MISMATCH_SI_010:Mismatch==1 // not aquired
+	check #IN_MISMATCH_SI_011:Mismatch==1 // not aquired
+	check #IN_MISMATCH_SI_012:Mismatch==1 // not aquired
+	
+set #OUT_MISMATCH_SI_005=1, #OUT_MISMATCH_SI_006=0, #OUT_MISMATCH_SI_007=1,#OUT_MISMATCH_SI_008=0
+//
+	check #IN_MISMATCH_SI_009:Mismatch==1
+	check #IN_MISMATCH_SI_010:Mismatch==0 // not aquired
+	check #IN_MISMATCH_SI_011:Mismatch==1 // not aquired
+	check #IN_MISMATCH_SI_012:Mismatch==0 // not aquired
+	
+endtest	

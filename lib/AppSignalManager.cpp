@@ -343,6 +343,40 @@ void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std
 	return;
 }
 
+QStringList AppSignalManager::signalTags(Hash signalHash) const
+{
+	QStringList result;
+
+	QMutexLocker l(&m_paramsMutex);
+
+	if (auto it = m_signalParams.find(signalHash);
+		it != m_signalParams.end())
+	{
+		result = it->second.tagStringList();
+	}
+
+	return result;
+}
+
+QStringList AppSignalManager::signalTags(const QString& appSignalId) const
+{
+	return signalTags(::calcHash(appSignalId));
+}
+
+bool AppSignalManager::signalHasTag(Hash signalHash, const QString& tag) const
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	auto result = m_signalParams.find(signalHash);
+	return result == m_signalParams.end() ? false : result->second.hasTag(tag);
+}
+
+bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
+{
+	return signalHasTag(::calcHash(appSignalId), tag);
+}
+
+
 std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
 {
 	QVector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);

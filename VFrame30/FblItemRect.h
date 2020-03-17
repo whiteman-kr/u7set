@@ -162,7 +162,7 @@ namespace VFrame30
 		QRgb textColor() const;
 		void setTextColor(QRgb color);
 
-		DECLARE_FONT_PROPERTIES(Font);
+		DECLARE_FONT_PROPERTIES(Font)
 
 		QString userText() const;
 		void setUserText(const QString& value);

@@ -6598,6 +6598,28 @@ namespace Builder
 				  QString(tr("Setting of flags to a constant signal (Logic schema %1).")).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5179
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Format of AFB signal %1 is not compatible with any known application signals format
+	///
+	/// Parameters:
+	///		%1 AFB signal caption
+	///
+	/// Description:
+	///		Format of specified AFB signal is not compatible with any known application signals format. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5179(QString itemCaption, QString signalCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5179, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5179,
+				  QString(tr("Format of AFB signal %1.%2 is not compatible with any known application signals format (Logic schema %3)")).
+							arg(itemCaption).arg(signalCaption).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

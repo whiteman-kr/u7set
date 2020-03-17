@@ -691,6 +691,18 @@ namespace ExtWidgets
 		m_expandValuesToAllRows = value;
 	}
 
+	const QMap<QString, int>& PropertyTable::getColumnsWidth()
+	{
+		saveColumnsWidth();
+
+		return m_columnsWidth;
+	}
+
+	void PropertyTable::setColumnsWidth(const QMap<QString, int>& columnsWidth)
+	{
+		m_columnsWidth = columnsWidth;
+	}
+
 	void PropertyTable::valueChanged(const ModifiedObjectsData& modifiedObjectsData)
 	{
 		// Set the new property value in all objects
@@ -1125,6 +1137,8 @@ namespace ExtWidgets
 
 	void PropertyTable::fillProperties()
 	{
+		saveColumnsWidth();
+
 		clear();
 
 		QStringList commonProperties;
@@ -1298,6 +1312,8 @@ namespace ExtWidgets
 		}
 
 		m_tableModel.setTableObjects(tableObjects);
+
+		restoreColumnsWidth();
 	}
 
 	// returns -1 if no type is selected or they are different
@@ -1555,4 +1571,29 @@ namespace ExtWidgets
 
 		return;
 	}
+
+	void PropertyTable::saveColumnsWidth()
+	{
+		int columnCount = m_tableView->model()->columnCount();
+		for (int i = 0; i < columnCount; i++)
+		{
+			QString colName = m_tableView->model()->headerData(i, Qt::Horizontal).toString();
+			m_columnsWidth[colName] = m_tableView->columnWidth(i);
+		}
+	}
+
+	void PropertyTable::restoreColumnsWidth()
+	{
+		for (int i = 0; i < m_tableView->model()->columnCount(); i++)
+		{
+			QString colName = m_tableView->model()->headerData(i, Qt::Horizontal).toString();
+
+			auto it = m_columnsWidth.find(colName);
+			if (it != m_columnsWidth.end())
+			{
+				m_tableView->setColumnWidth(i, it.value());
+			}
+		}
+	}
+
 }

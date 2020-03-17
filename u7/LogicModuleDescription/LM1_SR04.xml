@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0024">
+<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0025">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -52,6 +52,20 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 		<SharedBuffer>false</SharedBuffer>
 	</OptoInterface>
+	<Lan>
+		<LanController>
+			<Type>Tuning</Type>
+			<Place>1</Place>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>2</Place>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>3</Place>
+		</LanController>
+	</Lan>
 
     <LogicUnitCommnads>
 	    <Command Caption="nop"			Code="0040"	CodeMask="07c0"	SimulationFunc="command_nop"		ParseFunc="parse_nop"		Description="No operation"/>
@@ -541,7 +555,7 @@
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
-	    <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0003">
+	    <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0005">
 		    <Properties>
 			    <Description>Multiplexor Block selects one of two input bus signals and output result in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -552,11 +566,11 @@
 			</Properties>
 			<Inputs>
 			    <Pin OpName="i_sel" Caption="sel" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>
-				<Pin OpName="i_x1_data" Caption="in_1" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="32" BusDataFormat="Mixed"/>
-				<Pin OpName="i_x2_data" Caption="in_2" Type="Bus" ByteOrder="BigEndian" OpIndex="3" Size="32" BusDataFormat="Mixed"/>
+				<Pin OpName="i_x1_data" Caption="in_1" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="32" AdditionalSizes="16" BusDataFormat="Mixed"/>
+				<Pin OpName="i_x2_data" Caption="in_2" Type="Bus" ByteOrder="BigEndian" OpIndex="3" Size="32" AdditionalSizes="16" BusDataFormat="Mixed"/>
 			</Inputs>
 			<Outputs>
-			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="6" Size="32" BusDataFormat="Mixed"/>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="6" Size="32" AdditionalSizes="16" BusDataFormat="Mixed"/>
 			</Outputs>
 			<Params>
 			</Params>

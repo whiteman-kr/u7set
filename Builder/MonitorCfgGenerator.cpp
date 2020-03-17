@@ -797,15 +797,13 @@ namespace Builder
 		// Load all clients behavior
 		//
 		ClientBehaviorStorage allBehaviorStorage;
-
 		QString errorCode;
-
 		QByteArray dbData;
 
 		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
-			m_log->errCMN0010(allBehaviorStorage.dbFileName());
+			m_log->errPDB2002(-1, allBehaviorStorage.dbFileName(), errorCode);
 			return false;
 		}
 
@@ -815,11 +813,11 @@ namespace Builder
 			return false;
 		}
 
-		// Find behavior for current monitor
+		// Find behavior for current Monitor
 		//
 		ClientBehaviorStorage monitorBehaviorStorage;
 
-		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehavoiurs();
+		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehaviors();
 
 		for (auto b : behaviors)
 		{
@@ -839,15 +837,13 @@ namespace Builder
 		// Save monitor behavior to XML
 		//
 		QByteArray data;
-		monitorBehaviorStorage.save(data);
+		monitorBehaviorStorage.save(&data);
 
 		// Write file
 		//
 		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
-
 		if (buildFile == nullptr)
 		{
-			m_log->errCMN0012("MonitorBehavior.xml");
 			return false;
 		}
 

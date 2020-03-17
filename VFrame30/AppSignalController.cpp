@@ -102,11 +102,43 @@ namespace VFrame30
 		return m_appSignalManager->signalState(appSignalIds, result, found);
 	}
 
-	std::vector<std::shared_ptr<Comparator>> AppSignalController::setpointsByInputSignalId(const QString& appSignalId) const
+	QStringList AppSignalController::signalTags(Hash signalHash) const
 	{
 		if (m_appSignalManager == nullptr)
 		{
 			assert(false);
+			return {};
+		}
+
+		return m_appSignalManager->signalTags(signalHash);
+	}
+
+	QStringList AppSignalController::signalTags(const QString& appSignalId) const
+	{
+		return signalTags(::calcHash(appSignalId));
+	}
+
+	bool AppSignalController::signalHasTag(Hash signalHash, const QString& tag) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return m_appSignalManager->signalHasTag(signalHash, tag);
+	}
+
+	bool AppSignalController::signalHasTag(const QString& appSignalId, const QString& tag) const
+	{
+		return signalHasTag(::calcHash(appSignalId), tag);
+	}
+
+	std::vector<std::shared_ptr<Comparator>> AppSignalController::setpointsByInputSignalId(const QString& appSignalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			Q_ASSERT(m_appSignalManager);
 			return {};
 		}
 

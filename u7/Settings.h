@@ -20,7 +20,6 @@ struct DatabaseConnectionParam
 	void setPassword(QString str);
 };
 
-
 class Settings
 {
 public:
@@ -109,6 +108,7 @@ public:
     int m_equipmentTabPagePropertiesSplitterState = 0;
 
 	QString m_equipmentTabPagePropertiesMask;
+	QMap<QString, int> m_equipmentTabPagePropertiesColumnsWidth;
 
 	// Signals Tab Page
 	//
@@ -159,6 +159,8 @@ public:
 	//
 	int m_behaviorEditorSortColumn = 0;
 	Qt::SortOrder m_behaviorEditorSortOrder = Qt::AscendingOrder;
+	QByteArray m_behaviorEditorHSplitterState;
+	QByteArray m_behaviorEditorVSplitterState;
 
 	QByteArray m_afbLibratyCheckSplitterState;
 
@@ -176,11 +178,17 @@ public:
 	int m_schemaItemPropertiesSplitterPosition = 100;
 	QString m_schemaItemPropertiesPropertyMask;
 	bool m_schemaItemPropertiesExpandValuesToAllRows = true;
+	QMap<QString, int> m_schemaItemPropertiesColumnsWidth;
 	QByteArray m_schemaItemPropertiesGeometry;
 
 	// Find SchemaItem
 	//
 	bool m_findSchemaItemCaseSensitive = false;
+
+	// Find/Replace Dialog in IdeCodeEditor
+	//
+	QStringList m_findCompleter;
+	QStringList m_replaceCompleter;
 
 	// Configurator properties
 	//

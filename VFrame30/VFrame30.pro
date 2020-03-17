@@ -61,6 +61,7 @@ OTHER_FILES += \
     ../Proto/proto_compile.sh
 
 HEADERS += VFrame30Lib_global.h \
+    ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
@@ -147,6 +148,7 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/OutputLog.h
 
 SOURCES += \
+    ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \

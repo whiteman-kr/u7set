@@ -5,10 +5,12 @@
 #include "TuningController.h"
 #include "AppSignalController.h"
 #include "SchemaItem.h"
+#include "../lib/ClientBehavior.h"
 
 class QPaintEvent;
 class QTimerEvent;
 class QMouseEvent;
+
 
 namespace VFrame30
 {
@@ -287,6 +289,16 @@ namespace VFrame30
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);
 
+		// ClientBehavior
+		//
+		const MonitorBehavior& monitorBehavor() const;
+		void setMonitorBehavior(const MonitorBehavior& src);
+		void setMonitorBehavior(MonitorBehavior&& src);
+
+		const TuningClientBehavior& tuningClientBehavior() const;
+		void setTuningClientBehavior(const TuningClientBehavior& src);
+		void setTuningClientBehavior(TuningClientBehavior&& src);
+
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 
@@ -312,6 +324,11 @@ namespace VFrame30
 		// Variables
 		//
 		QVariantHash m_variables;		// Key is variable name
+
+		// Behaviors
+		//
+		MonitorBehavior m_monitorBehavior;
+		TuningClientBehavior m_tuningClientBehavior;
 	};
 }
 

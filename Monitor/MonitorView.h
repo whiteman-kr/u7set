@@ -3,13 +3,21 @@
 #include "../VFrame30/ClientSchemaView.h"
 #include "MonitorSchemaManager.h"
 
+namespace VFrame30
+{
+	class AppSignalController;
+	class TuningController;
+}
 
 class MonitorView : public VFrame30::ClientSchemaView
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorView(MonitorSchemaManager* schemaManager, QWidget* parent = nullptr);
+	explicit MonitorView(MonitorSchemaManager* schemaManager,
+						 VFrame30::AppSignalController* appSignalController,
+						 VFrame30::TuningController* tuningController,
+						 QWidget* parent = nullptr);
 	virtual ~MonitorView();
 
 protected:
@@ -28,7 +36,6 @@ public slots:
 	// Data
 	//
 private:
-
 };
 
 

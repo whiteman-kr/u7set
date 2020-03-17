@@ -16,20 +16,18 @@
 class ComparatorSignal
 {
 public:
-	bool isConst() const;
-	void setIsConst(bool isConst);
-
-	double constValue() const;
+	void setSignalParams(const QString& appSignalID, bool isAcquired, bool isConst, double constValue);
 	void setConstValue(double constValue);
 
+	bool isConst() const;
+	double constValue() const;
 	QString appSignalID() const;
-	void setAppSignalID(const QString& appSignalID);
-
 	bool isAcquired() const;
-	void setIsAcquired(bool isAcquired);
 
 	void serializeTo(Proto::ComparatorSignal* s) const;
 	bool serializeFrom(const Proto::ComparatorSignal& s);
+
+	void dump() const;
 
 private:
 	bool m_isConst = true;
@@ -83,6 +81,8 @@ public:
 
 	void setHysteresisIsConstSignal(bool isConstSignal) { m_hysteresisIsConstSignal = isConstSignal; }
 	bool hysteresisIsConstSignal() const { return m_hysteresisIsConstSignal; }
+
+	void dump() const;
 
 private:
 	E::CmpType m_cmpType = E::CmpType::Equal;
@@ -149,6 +149,8 @@ public:
 	ComparatorSet& operator= (ComparatorSet&& src);
 
 public:
+	void dump() const;
+
 	void clear();
 	void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);					// insert comparator
 

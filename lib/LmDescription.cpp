@@ -230,7 +230,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	if (logicModuleElement.isNull() == true ||
 		logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
-		errorMessage->append(tr("Cant't find root element <LogicModule>."));
+		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
 	}
 
@@ -313,6 +313,15 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 		return false;
 	}
 
+	// <LanInterfaces> -> m_lanInterface
+	//
+	ok = m_lan.load(doc, errorMessage);
+
+	if (ok == false)
+	{
+		return false;
+	}
+
 	// <LogicUnitCommnads> -- Loading Application Functional Components
 	//
 	{
@@ -320,7 +329,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 
 		if (commandElementList.size() != 1)
 		{
-			errorMessage->append(tr("Expected one element <LogicUnitCommnads>"));
+			errorMessage->append(tr("Expected one element LogicUnitCommnads"));
 			return false;
 		}
 
@@ -344,7 +353,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 
 		if (afbcElementList.size() != 1)
 		{
-			errorMessage->append(tr("Expected one element <AFBImplementation>"));
+			errorMessage->append(tr("Expected one element AFBImplementation"));
 			return false;
 		}
 
@@ -372,7 +381,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 		QDomNodeList afbsElementList = logicModuleElement.elementsByTagName(QLatin1String("AFBL"));
 		if (afbsElementList.size() != 1)
 		{
-			errorMessage->append(tr("Expected one element <AFBL>"));
+			errorMessage->append(tr("Expected one element AFBL"));
 			return false;
 		}
 
@@ -616,7 +625,7 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	if (logicModuleElement.isNull() == true ||
 		logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
-		errorMessage->append(tr("Cant't find root element <LogicModule>."));
+		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
 	}
 
@@ -625,7 +634,7 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 
 	if (elements.size() != 1)
 	{
-		*errorMessage = "Expected one <FlashMemory> section";
+		*errorMessage = "Expected one FlashMemory section";
 		return false;
 	}
 
@@ -725,7 +734,7 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 	if (logicModuleElement.isNull() == true ||
 		logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
-		errorMessage->append(tr("Cant't find root element <LogicModule>."));
+		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
 	}
 
@@ -735,7 +744,7 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	if (elements.size() != 1)
 	{
-		*errorMessage = "Expected one <Memory> section";
+		*errorMessage = "Expected one Memory section";
 		return false;
 	}
 
@@ -816,7 +825,7 @@ bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* error
 	if (logicModuleElement.isNull() == true ||
 		logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
-		errorMessage->append(tr("Cant't find root element <LogicModule>."));
+		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
 	}
 
@@ -826,7 +835,7 @@ bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* error
 
 	if (elements.size() != 1)
 	{
-		*errorMessage = "Expected one <LogicUnit> section";
+		*errorMessage = "Expected one LogicUnit section";
 		return false;
 	}
 
@@ -885,7 +894,7 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 	if (logicModuleElement.isNull() == true ||
 		logicModuleElement.tagName() != QLatin1String("LogicModule"))
 	{
-		errorMessage->append(tr("Cant't find root element <LogicModule>."));
+		errorMessage->append(tr("Cant't find root element LogicModule."));
 		return false;
 	}
 
@@ -895,7 +904,7 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 
 	if (elements.size() != 1)
 	{
-		*errorMessage = "Expected one <OptoInterface> section";
+		*errorMessage = "Expected one OptoInterface section";
 		return false;
 	}
 
@@ -946,6 +955,128 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 	return errorMessage->isEmpty();
 }
 
+E::LanControllerType LmDescription::Lan::lanControllerType(int index, bool* ok) const
+{
+	if (index < 0 || index >= lanControllerCount())
+	{
+		Q_ASSERT(false);
+		if (ok != nullptr)
+		{
+			*ok = false;
+		}
+		return E::LanControllerType::Unknown;
+	}
+
+	if (ok != nullptr)
+	{
+		*ok = true;
+	}
+	return m_lanControllers[index].m_type;
+}
+
+bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessage)
+{
+	if (errorMessage == nullptr)
+	{
+		assert(errorMessage);
+		return false;
+	}
+
+	if (document.isNull() == true)
+	{
+		assert(document.isNull() == false);
+		*errorMessage = "XML documnet is null";
+		return false;
+	}
+
+	// <LogicModule>
+	//
+	QDomElement logicModuleElement = document.documentElement();
+
+	if (logicModuleElement.isNull() == true ||
+		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	{
+		errorMessage->append(tr("Cant't find root element LogicModule."));
+		return false;
+	}
+
+	// <LanInterface>
+	//
+	QDomNodeList elements = logicModuleElement.elementsByTagName(QLatin1String("Lan"));
+
+	if (elements.size() != 1)
+	{
+		*errorMessage = "Expected one Lan section";
+		return false;
+	}
+
+	QDomElement element = elements.at(0).toElement();
+
+	*this = Lan();
+
+	// Func for gettiong data from some xml section
+	//
+	auto getSectionUintValue =
+		[](QDomElement element, QLatin1String section, QString* errorMessage) -> quint32
+		{
+			QDomNodeList nl = element.elementsByTagName(section);
+
+			if (nl.size() != 1)
+			{
+				*errorMessage = QString("Expected one %1 section.").arg(section);
+				return 0xFFFFFFFF;
+			}
+
+			QString nodeText = nl.at(0).toElement().text();
+			return nodeText.toUInt();
+		};
+	auto getSectionStringValue =
+			[](QDomElement element, QLatin1String section, QString* errorMessage) -> QString
+			{
+				QDomNodeList nl = element.elementsByTagName(section);
+
+				if (nl.size() != 1)
+				{
+					*errorMessage = QString("Expected one %1 section.").arg(section);
+					return 0xFFFFFFFF;
+				}
+
+				QString nodeText = nl.at(0).toElement().text();
+				return nodeText;
+			};
+
+	// Read LAN Controllers
+	//
+
+	errorMessage->clear();	// Just in case
+
+	QDomNodeList controllers = element.elementsByTagName(QLatin1String("LanController"));
+
+	int count = controllers.count();
+	for (int i = 0; i < count; i++)
+	{
+		QDomNode node = controllers.at(i);
+
+		LanController li;
+
+		QString typeStr = getSectionStringValue(node.toElement(), QLatin1String("Type"), errorMessage);
+
+		bool ok = false;
+		li.m_type = E::stringToValue<E::LanControllerType>(typeStr, &ok);
+		if (ok == false)
+		{
+			*errorMessage = QString("Unknown LAN controller type: '%1'.").arg(typeStr);
+			break;
+		}
+
+		li.m_place = getSectionUintValue(node.toElement(), QLatin1String("Place"), errorMessage);
+
+		m_lanControllers.push_back(li);
+	}
+
+	return errorMessage->isEmpty();
+}
+
 QString LmDescription::name() const
 {
 	return m_name;
@@ -989,6 +1120,11 @@ const LmDescription::LogicUnit& LmDescription::logicUnit() const
 const LmDescription::OptoInterface& LmDescription::optoInterface() const
 {
 	return m_optoInterface;
+}
+
+int LmDescription::jsLanControllerType(int index)
+{
+	return static_cast<int>(m_lan.lanControllerType(index));
 }
 
 bool LmDescription::checkAfbVersions() const
