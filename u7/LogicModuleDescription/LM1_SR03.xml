@@ -5250,7 +5250,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0007">
+        <AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0008">
 			<Properties>				
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
 				<Category>Logic</Category>
@@ -5282,9 +5282,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_med" Caption="med" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="28" Size="32"/>
 				<Pin OpName="o_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="30" Size="32"/>
 				<Pin OpName="o_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="32" Size="32"/>
-				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
+<!--				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
 				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="16"/>
-				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>
+				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>-->
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="37" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="38" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="39" Size="1"/>
@@ -5335,7 +5335,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+<!--				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -5370,7 +5370,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
+				</Param>-->
 				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
@@ -5505,9 +5505,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
-	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
+<!--	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
 	createOutput(videoItemFblElement, afbElement, "OutMaxIn", "max_in");
-	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");
+	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");-->
 
     createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
@@ -5530,7 +5530,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#median_si_v1"      Caption="median_si"      Version="1.0006">
+        <AFB id="#median_si_v1"      Caption="median_si"      Version="1.0008">
 			<Properties>
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
 				<Category>Logic</Category>
@@ -5561,9 +5561,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_med" Caption="med" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="28" Size="32"/>
 				<Pin OpName="o_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="30" Size="32"/>
 				<Pin OpName="o_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="32" Size="32"/>
-				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="5"/>
-				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="5"/>
-				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="5"/>
+<!--				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
+				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="16"/>
+				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>-->
 			</Outputs>
 			<Params>
 				<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -5610,7 +5610,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+<!--				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -5621,8 +5621,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
-				<Param OpName="OutMaxIn" Caption="OutMaxIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				</Param>-->
+<!--				<Param OpName="OutMaxIn" Caption="OutMaxIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -5633,8 +5633,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
-				<Param OpName="OutMinIn" Caption="OutMinIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				</Param>-->
+<!--				<Param OpName="OutMinIn" Caption="OutMinIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -5645,7 +5645,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
+				</Param>-->
 			</Params>
 			<CommonScript>
 				<Library>
@@ -5732,9 +5732,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
-	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
+<!--	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
 	createOutput(videoItemFblElement, afbElement, "OutMaxIn", "max_in");
-	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");
+	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");-->
 
 	videoItemFblElement.adjustHeight();
 
