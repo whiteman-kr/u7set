@@ -414,8 +414,10 @@ bool PtrOrderedHash<KEY, VALUE>::contains(const KEY& key) const
 template <typename KEY, typename VALUE>
 void PtrOrderedHash<KEY, VALUE>::append(const KEY& key, VALUE* value)
 {
-	if (m_hash.contains(key))
+	if (m_hash.contains(key) == true)
 	{
+		assert(false);
+
 		int valueIndex = m_hash[key];
 
 		m_valueVector[valueIndex] = value;
