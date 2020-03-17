@@ -4,6 +4,7 @@
 #include <memory>
 #include <QObject>
 #include <QDomDocument>
+#include "../lib/Hash.h"
 #include "../VFrame30/Afb.h"
 
 namespace Hardware
@@ -17,6 +18,7 @@ struct LmCommand
 	quint16 codeMask = 0;
 	QString caption;
 	QString simulationFunc;
+	Hash simulationFuncHash = 0;
 	QString parseFunc;
 	QString description;
 

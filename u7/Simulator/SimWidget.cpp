@@ -70,16 +70,16 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	connect(this, &SimWidget::needUpdateActions, this, &SimWidget::updateActions);
 
+	if (m_slaveWindow == false)
+	{
+		connect(qApp, &QCoreApplication::aboutToQuit, this, &SimWidget::aboutToQuit);
+	}
+
 	return;
 }
 
 SimWidget::~SimWidget()
 {
-	if (m_slaveWindow == false)
-	{
-		theSettings.m_simWigetState = saveState();
-		theSettings.writeUserScope();
-	}
 }
 
 void SimWidget::createToolBar()
@@ -231,6 +231,8 @@ void SimWidget::showEvent(QShowEvent* e)
 	QMainWindow::showEvent(e);
 	e->ignore();
 
+	m_showEventFired = true;
+
 static bool firstEvent = true;
 
 	if (firstEvent == true)
@@ -239,12 +241,24 @@ static bool firstEvent = true;
 		//
 		if (m_slaveWindow == false)
 		{
-			restoreState(theSettings.m_simWigetState);
+			QVariant v = QSettings().value("SimWidget/state");
+			if (v.isValid() == true)
+			{
+				restoreState(v.toByteArray());
+			}
 		}
 
 		firstEvent = false;
 	}
 	return;
+}
+
+void SimWidget::aboutToQuit()
+{
+	if (m_slaveWindow == false && m_showEventFired == true)
+	{
+		//QSettings().setValue("SimWidget/state", saveState());
+	}
 }
 
 void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
@@ -351,27 +365,30 @@ void SimWidget::runSimulation()
 
 	if (m_simulator->isLoaded() == false)
 	{
+		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
+		writeError("Cannot start simulation, project is not loaded.");
 		return;
 	}
 
 	if (m_simulator->isRunning() == true)
 	{
+		qDebug() << "SimWidget::runSimulation(): Simulation is already running";
 		return;
 	}
 
-	Sim::Control& control = m_simulator->control();
+	Sim::Control& mutableControl = m_simulator->control();
 
 	if (m_simulator->isPaused() == true)
 	{
 		// Continue running what was simualted before
 		//
-		control.startSimulation(control.duration());
+		mutableControl.startSimulation(mutableControl.duration());
 	}
 	else
 	{
 		// Star simulation for all project
 		//
-		control.reset();
+		mutableControl.reset();
 
 		// Get all modules to simulation
 		//
@@ -385,6 +402,7 @@ void SimWidget::runSimulation()
 
 		if (equipmentIds.isEmpty() == true)
 		{
+			writeWaning(tr("Nothing to simulate, no LogicModules are found."));
 			// Nothing to simulate
 			//
 			return;
@@ -392,8 +410,8 @@ void SimWidget::runSimulation()
 
 		// Start simulation
 		//
-		control.addToRunList(equipmentIds);
-		control.startSimulation();
+		mutableControl.addToRunList(equipmentIds);
+		mutableControl.startSimulation();
 	}
 
 	return;
@@ -531,7 +549,7 @@ void SimWidget::openLogicSchemaTabPage(QString schemaId)
 
 	// Load schema
 	//
-	QString fileName = buildPath + QLatin1String("LogicSchemas/") + schemaId + "." + Db::File::AlFileExtension;
+	QString fileName = buildPath + QLatin1String("Schemas.als/") + schemaId + "." + Db::File::AlFileExtension;
 
 	openSchemaTabPage(fileName);
 	return;

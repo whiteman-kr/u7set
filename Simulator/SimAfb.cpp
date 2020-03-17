@@ -7,8 +7,14 @@
 namespace Sim
 {
 
-	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent) :
+	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent>& afbComponent) :
 		m_afbComponent(afbComponent)
+	{
+		// assert(m_afbComponent);	Actually m_afbComponent can be nullptr, script should call isNull to detect it
+	}
+
+	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent>&& afbComponent) :
+		m_afbComponent(std::move(afbComponent))
 	{
 		// assert(m_afbComponent);	Actually m_afbComponent can be nullptr, script should call isNull to detect it
 	}
@@ -56,6 +62,16 @@ namespace Sim
 		}
 
 		return m_afbComponent->simulationFunc();
+	}
+
+	Hash AfbComponent::simulationFuncHash() const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return UNDEFINED_HASH;
+		}
+
+		return m_afbComponent->simulationFuncHash();
 	}
 
 	bool AfbComponent::pinExists(int pinOpIndex) const
@@ -160,18 +176,12 @@ namespace Sim
 		m_data.asSignedInt64 = value;
 	}
 
-	void AfbComponentParam::addSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::addSignedInteger(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
-		qint32 op2 = operand->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
 		qint32 result = op1 + op2;
 
 		qint64 wideResult = static_cast<qint64>(op1) + static_cast<qint64>(op2);
@@ -202,26 +212,20 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::subSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::subSignedInteger(const AfbComponentParam& operand)
 	{
-		AfbComponentParam negativeParam = *operand;
+		AfbComponentParam negativeParam = operand;
 		negativeParam.setSignedIntValue(negativeParam.signedIntValue() * (-1));
 
-		return addSignedInteger(&negativeParam);
+		return addSignedInteger(negativeParam);
 	}
 
-	void AfbComponentParam::mulSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::mulSignedInteger(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
-		qint32 op2 = operand->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
 		qint32 result = op1 * op2;
 		qint64 wideResult = static_cast<qint64>(op1) * static_cast<qint64>(op2);
 
@@ -251,18 +255,12 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::divSignedInteger(AfbComponentParam* operand)
+	void AfbComponentParam::divSignedInteger(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
-		qint32 op2 = operand->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
 		qint32 result = 0;
 
 		if (op2 != 0)
@@ -316,44 +314,38 @@ namespace Sim
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return addSignedInteger(&cp);
+		return addSignedInteger(cp);
 	}
 
 	void AfbComponentParam::subSignedIntegerNumber(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return subSignedInteger(&cp);
+		return subSignedInteger(cp);
 	}
 
 	void AfbComponentParam::mulSignedIntegerNumber(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return mulSignedInteger(&cp);
+		return mulSignedInteger(cp);
 	}
 
 	void AfbComponentParam::divSignedIntegerNumber(qint32 operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
-		return divSignedInteger(&cp);
+		return divSignedInteger(cp);
 	}
 
-	void AfbComponentParam::addFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::addFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 + op2;
@@ -373,20 +365,14 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::subFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::subFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 - op2;
@@ -406,20 +392,14 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::mulFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::mulFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 * op2;
@@ -439,20 +419,14 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::divFloatingPoint(AfbComponentParam* operand)
+	void AfbComponentParam::divFloatingPoint(const AfbComponentParam& operand)
 	{
-		if (operand == nullptr)
-		{
-			assert(operand);
-			return;
-		}
-
 		resetMathFlags();
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
 		float op1 = this->floatValue();
-		float op2 = operand->floatValue();
+		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
 		float result = op1 / op2;
@@ -476,28 +450,75 @@ namespace Sim
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return addFloatingPoint(&cp);
+		return addFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::subFloatingPoint(float operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return subFloatingPoint(&cp);
+		return subFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::mulFloatingPoint(float operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return mulFloatingPoint(&cp);
+		return mulFloatingPoint(cp);
 	}
 
 	void AfbComponentParam::divFloatingPoint(float operand)
 	{
 		AfbComponentParam cp(*this);
 		cp.setFloatValue(operand);
-		return divFloatingPoint(&cp);
+		return divFloatingPoint(cp);
+	}
+
+	void AfbComponentParam::absFloatingPoint()
+	{
+		resetMathFlags();
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		float fp = this->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = std::abs(fp);
+
+		// Setting math flags
+		//
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
+		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
+		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
+													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
+													// Some compilers can optimize it!
+
+		setFloatValue(result);
+
+	}
+
+	void AfbComponentParam::absSignedInt()
+	{
+		resetMathFlags();
+
+		qint32 result = this->signedIntValue();
+
+		if (result == std::numeric_limits<qint32>::min())
+		{
+			result = std::numeric_limits<qint32>::max();
+			m_mathFlags.overflow = true;
+		}
+		else
+		{
+			result = std::abs(result);
+			m_mathFlags.zero = (result == 0);
+		}
+
+		setSignedIntValue(result);
+
+		return;
 	}
 
 	void AfbComponentParam::convertWordToFloat()
@@ -550,89 +571,110 @@ namespace Sim
 		return m_mathFlags.divByZero ? 0x0001 : 0x0000;
 	}
 
-	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :
+	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
+											   quint16 instanceNo) :
+		m_afbComp(afbComp),
 		m_instanceNo(instanceNo)
 	{
-		m_params.reserve(32);
+		Q_ASSERT(m_afbComp);
+		m_params_v.reserve(36);
 	}
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		m_params[param.opIndex()] = param;
+		if (param.opIndex() >= m_params_v.size())
+		{
+			m_params_v.resize(param.opIndex() + 1);
+		}
+
+		m_params_v[param.opIndex()] = param;
 		return true;
 	}
 
-	AfbComponentParam* AfbComponentInstance::param(int opIndex)
+	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
 	{
-		auto it = m_params.find(opIndex);
-
-		if (it == m_params.end())
+		if (opIndex == m_afbComp->versionOpIndex())
 		{
-			SimException::raise(QString("Param %1 is not found in AFB.").arg(opIndex));
+			// This is o_version output, which is constant always
+			// if it is not present, then create it in m_params_v with version value from m_afbComp
+			// and return it to caller
+			//
+			if (paramExists(opIndex) == false)
+			{
+				addParamWord(m_afbComp->versionOpIndex(), m_afbComp->impVersion());
+			}
 		}
 
-		return &it->second;
+		if (opIndex >= m_params_v.size() ||
+			m_params_v[opIndex].has_value() == false)
+		{
+			SimException::raise(QString("Param %1 is not found in AFB %2.").arg(opIndex).arg(m_afbComp->caption()));
+		}
+
+		return &m_params_v[opIndex].value();
 	}
 
-	bool AfbComponentInstance::paramExists(int opIndex) const
+	bool AfbComponentInstance::paramExists(quint16 opIndex) const
 	{
-		return m_params.find(opIndex) != m_params.end();
+		if (opIndex > m_params_v.size())
+		{
+			return false;
+		}
+
+		return m_params_v[opIndex].has_value();
 	}
 
-	bool AfbComponentInstance::addParamWord(int opIndex, quint16 value)
+	bool AfbComponentInstance::addParamWord(quint16 opIndex, quint16 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setWordValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamDword(int opIndex, quint32 value)
+	bool AfbComponentInstance::addParamDword(quint16 opIndex, quint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setDwordValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamFloat(int opIndex, float value)
+	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamDouble(int opIndex, double value)
+	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setDoubleValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamSignedInt(int opIndex, qint32 value)
+	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
-	bool AfbComponentInstance::addParamSignedInt64(int opIndex, qint64 value)
+	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedInt64Value(value);
 
-		m_params[opIndex] = std::move(param);
-		return true;
+		return addParam(param);
 	}
 
+	//
+	// ModelComponent
+	//
 	ModelComponent::ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp) :
 		m_afbComp(afbComp)
 	{
@@ -644,22 +686,22 @@ namespace Sim
 	{
 		if (m_afbComp == nullptr)
 		{
-			assert(m_afbComp);
+			Q_ASSERT(m_afbComp);
 			return false;
 		}
 
 		if (m_afbComp->maxInstCount() > 2048)
 		{
-			assert(m_afbComp->maxInstCount() <= 2048);	// It seems something wrong here, the nyumber is too big?
+			Q_ASSERT(m_afbComp->maxInstCount() <= 2048);	// It seems something wrong here, the nyumber is too big?
 			return false;
 		}
 
 		m_instances.clear();
-		m_instances.reserve(m_afbComp->maxInstCount());
+		m_instances.reserve(std::max(0, m_afbComp->maxInstCount()));		// Can be negative. to avoid exception max is used here
 
 		for (int i = 0; i < m_afbComp->maxInstCount(); i++)
 		{
-			m_instances.emplace_back(i);		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
+			m_instances.emplace_back(m_afbComp, i);		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
 		}
 
 		return true;
@@ -679,17 +721,22 @@ namespace Sim
 			return false;
 		}
 
-		// Check if instParam.implParamOpIndex really exists in AfbComponent
+		// !!!The next condidion is commented fro perfomance reason
+		// We check pinExists in all commands on parse stage, so it is nop need to checkit again
+		// This check took up to 8% of programm runtime
+		// !!!
 		//
-		if (m_afbComp->pinExists(instParam.opIndex()) == false)
-		{
-			// Can't find such pin in AfbComponent
-			//
-			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
-								.arg(instParam.opIndex())
-								.arg(m_afbComp->caption());
-			return false;
-		}
+//		// Check if instParam.implParamOpIndex really exists in AfbComponent
+//		//
+//		if (m_afbComp->pinExists(instParam.opIndex()) == false)
+//		{
+//			// Can't find such pin in AfbComponent
+//			//
+//			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
+//								.arg(instParam.opIndex())
+//								.arg(m_afbComp->caption());
+//			return false;
+//		}
 
 		// Get or add instance and set new param
 		//
@@ -711,6 +758,7 @@ namespace Sim
 
 	AfbComponentSet::AfbComponentSet()
 	{
+		m_components.reserve(32);
 	}
 
 	void AfbComponentSet::clear()
@@ -722,10 +770,17 @@ namespace Sim
 	{
 		m_components.clear();
 
-		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbs = lmDescription.afbComponents();
-		for (auto[key, afbComp] : afbs)
+		const auto& afbs = lmDescription.afbComponents();
+		m_components.resize(256);		// opcode is quint16, and there is opcode 255 for set_flags (((
+
+		for (const auto&[keyAfbOpCode, afbComp] : afbs)
 		{
-			assert(key == afbComp->opCode());
+			Q_ASSERT(keyAfbOpCode == afbComp->opCode());
+
+			if (keyAfbOpCode >= m_components.size())
+			{
+				m_components.resize(keyAfbOpCode + 1);
+			}
 
 			std::shared_ptr<ModelComponent> mc = std::make_shared<ModelComponent>(afbComp);
 
@@ -735,7 +790,7 @@ namespace Sim
 				return false;
 			}
 
-			m_components[key] = mc;
+			m_components[keyAfbOpCode] = std::move(mc);
 		}
 
 		return true;
@@ -743,37 +798,42 @@ namespace Sim
 
 	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
-		assert(errorMessage);
+		Q_ASSERT(errorMessage);
 
-		auto foundIt = m_components.find(afbOpCode);
-		if (foundIt == m_components.end())
+		if (afbOpCode >= m_components.size())
 		{
-			// Component should be created in init();
+			Q_ASSERT(afbOpCode < m_components.size());
+			*errorMessage = QString("AFB with opcode %1 is not forund").arg(afbOpCode);
+			return false;
+		}
+
+		std::shared_ptr<ModelComponent>& modelComponent = m_components[afbOpCode];
+		if (modelComponent == nullptr)
+		{
+			// Component must be created in init();
 			//
 			*errorMessage = QString("AFB with opcode %1 is not found in AfbComponentSet").arg(afbOpCode);
 			return false;
 		}
 
-		std::shared_ptr<ModelComponent>& modelComponent = foundIt->second;
-		assert(modelComponent);
-
-		bool ok = modelComponent->addParam(instanceNo, instParam, errorMessage);
-		return ok;
+		return modelComponent->addParam(instanceNo, instParam, errorMessage);
 	}
 
 	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance)
 	{
-		auto componentIt = m_components.find(componentOpCode);
-		if (componentIt == m_components.end())
+		if (componentOpCode < 0 || componentOpCode >= m_components.size())
+		{
+			Q_ASSERT(componentOpCode >= 0 && componentOpCode < m_components.size());
+			return nullptr;
+		}
+
+		auto& component = m_components[componentOpCode];
+		if (component == nullptr)
 		{
 			return nullptr;
 		}
 
-		std::shared_ptr<ModelComponent>	component = componentIt->second;
-
-		AfbComponentInstance* result = component->instance(instance);
-
-		return result;
+		return component->instance(instance);
 	}
 
 }

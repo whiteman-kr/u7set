@@ -56,6 +56,16 @@ namespace Sim
 		int programCounter = 0;					// current offeset of program memory, in words
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
+
+		union Flags
+		{
+			struct
+			{
+				quint32 cmp : 1;
+			};
+
+			quint32 value = 0;
+		} flags;
 	};
 
 
@@ -120,6 +130,9 @@ public:
 		quint32 programCounter() const;
 		void setProgramCounter(quint32 value);
 
+		quint32 flagCmp() const;
+		void setFlagCmp(quint32 value);
+
 		Sim::AfbComponent afbComponent(int opCode) const;
 		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
 
@@ -128,9 +141,13 @@ public:
 		// RAM access
 		//
 		bool movRamMem(quint32 src, quint32 dst, quint32 size);
+		bool setRamMem(quint32 address, quint16 data, quint16 size);
 
 		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
 		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
+
+		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data, E::LogicModuleRamAccess access);
+		quint16 readRamBit(quint32 offsetW, quint32 bitNo, E::LogicModuleRamAccess access);
 
 		bool writeRamWord(quint32 offsetW, quint16 data);
 		quint16 readRamWord(quint32 offsetW);
@@ -240,7 +257,7 @@ public:
 		// Current state
 		//
 		DeviceMode m_currentMode = DeviceMode::Start;
-		std::atomic<int> m_timerId = -1;
+		//std::atomic<int> m_timerId = -1;
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;

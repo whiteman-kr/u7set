@@ -1945,6 +1945,12 @@ namespace VFrame30
 		m_details.clear();
 	}
 
+	void SchemaDetailsSet::add(const QString& details)
+	{
+		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(details);
+		return add(d);
+	}
+
 	void SchemaDetailsSet::add(const SchemaDetails& details)
 	{
 		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(details);

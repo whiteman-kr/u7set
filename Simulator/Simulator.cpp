@@ -92,6 +92,7 @@ namespace Sim
 
 	bool Simulator::loadFunc(QString buildPath)
 	{
+		qDebug() << "loadFunc(QString buildPath)";
 		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
 
 		//--

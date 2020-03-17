@@ -339,6 +339,8 @@ namespace Builder
 			return true;
 		};
 
+		std::map<QString, VFrame30::SchemaDetailsSet> schemaDetails;	//	Key is subDir for schema
+
 		for (auto& [schemaId, fileSchema] : schemaMap)
 		{
 			std::shared_ptr<DbFile>& file = fileSchema.file;
@@ -397,9 +399,13 @@ namespace Builder
 			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
 				ok == false)
 			{
-
 				continue;
 			}
+
+			// Write schema details for SchemaDetails by folder (Schemas.als/mvs/ufb...)
+			//
+			VFrame30::SchemaDetailsSet& sds = schemaDetails[subDir];
+			sds.add(schema->details());
 
 			// Write schema scripts
 			//
@@ -430,6 +436,24 @@ namespace Builder
 			{
 				m_schemaTagToFile.insert({t.toLower(), schemaFile});
 			}
+		}
+
+		// Save
+		//		Schemas.als/SchemaDetails.pbuf
+		//		Schemas.ufb/SchemaDetails.pbuf
+		//		...
+		//
+		for (const auto&[subDir, sds] : schemaDetails)
+		{
+			QByteArray fileData;
+
+			if (bool ok = sds.saveToByteArray(&fileData);
+				ok == false)
+			{
+				continue;
+			}
+
+			context->m_buildResultWriter->addFile(subDir, "SchemaDetails.pbuf", fileData);
 		}
 
 		return returnResult;

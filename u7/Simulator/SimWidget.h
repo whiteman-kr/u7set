@@ -16,9 +16,10 @@ class SimMemoryWidget;
 class SimToolBar;
 
 
-class SimWidget : public QMainWindow, HasDbController
+class SimWidget : public QMainWindow, HasDbController, protected Sim::Output
 {
 	Q_OBJECT
+
 public:
 	SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 			  DbController* db,
@@ -32,12 +33,14 @@ protected:
 	void createDocks();
 	QDockWidget* createMemoryDock(QString caption);
 
-	virtual void showEvent(QShowEvent*) override;
+	virtual void showEvent(QShowEvent* e) override;
 
 signals:
 	void needUpdateActions();
 
 protected slots:
+	void aboutToQuit();
+
 	void controlStateChanged(Sim::SimControlState state);
 	void updateActions();
 
@@ -65,6 +68,7 @@ protected slots:
 
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
+	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	QTabWidget* m_tabWidget = nullptr;
 	SimToolBar* m_toolBar = nullptr;
 	SimProjectWidget* m_projectWidget = nullptr;

@@ -1,14 +1,17 @@
 #include <cassert>
 #include "SimCommandProcessor.h"
-#include "SimCommandProcessor_LM1_SF00.h"
+#include "SimCommandProcessor_LM5_LM6.h"
 
 namespace Sim
 {
 	const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> CommandProcessor::m_lmToFactory
 		{
-			{"LM1_SF00", [](DeviceEmulator* device){	return new CommandProcessor_LM1_SF00(device);	}},
-			//{"LM_SR02", [](auto device){	return new CommandProcessor_LM_SR02;	}},
-			//{"LM_SR01", [](auto device){	return new CommandProcessor_LM_SR01;	}},
+			{"LM1_SF00", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SF40", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR01", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR02", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR03", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR04", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
 		};
 
 	CommandProcessor::CommandProcessor(DeviceEmulator* device) :
@@ -24,7 +27,7 @@ namespace Sim
 
 	CommandProcessor* CommandProcessor::createInstance(DeviceEmulator* device)
 	{
-		assert(device);
+		Q_ASSERT(device);
 
 		QString logicModuleName = device->lmDescription().name();
 		QString equipmentId = device->logicModuleInfo().equipmentId;
@@ -37,12 +40,20 @@ namespace Sim
 		else
 		{
 			CommandProcessor* result = it->second(device);
-			assert(result);
+			Q_ASSERT(result);
 
 			result->setOutputScope(equipmentId);
 
 			return result;
 		}
+	}
+
+	bool CommandProcessor::updatePlatformInterfaceState()
+	{
+		// Must be implemented in derived class
+		//
+		Q_ASSERT(false);
+		return false;
 	}
 
 	bool CommandProcessor::parseFunc(QString parseFunc, DeviceCommand* command)
@@ -92,7 +103,7 @@ namespace Sim
 		return afb;
 	}
 
-	void CommandProcessor::checkParamRange(int paramValue, int minValue, int maxValue, QString param) const
+	void CommandProcessor::checkParamRange(int paramValue, int minValue, int maxValue, const QString& param) const
 	{
 		if (paramValue < minValue || paramValue > maxValue)
 		{
@@ -108,7 +119,7 @@ namespace Sim
 		return;
 	}
 
-	void CommandProcessor::checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, QString paramName) const
+	void CommandProcessor::checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, const QString& paramName) const
 	{
 		if (afbInstance == nullptr)
 		{

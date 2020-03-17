@@ -3,6 +3,7 @@
 #include <map>
 #include <unordered_map>
 #include <memory>
+#include <optional>
 #include <QObject>
 #include "../lib/LmDescription.h"
 #include "../VFrame30/Afb.h"
@@ -15,7 +16,9 @@ namespace Sim
 	public:
 		AfbComponent() = delete;
 		AfbComponent(const AfbComponent&) = default;
-		AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent);
+		AfbComponent(AfbComponent&&) noexcept = default;
+		AfbComponent(std::shared_ptr<Afb::AfbComponent>& afbComponent);
+		AfbComponent(std::shared_ptr<Afb::AfbComponent>&& afbComponent);
 		~AfbComponent() = default;
 
 	public:
@@ -25,6 +28,7 @@ namespace Sim
 		QString caption() const;
 		int maxInstCount() const;
 		QString simulationFunc() const;
+		Hash simulationFuncHash() const;
 
 		bool pinExists(int pinOpIndex) const;
 		QString pinCaption(int pinOpIndex) const;
@@ -68,25 +72,28 @@ namespace Sim
 
 		// --
 		//
-		void addSignedInteger(AfbComponentParam* operand);
-		void subSignedInteger(AfbComponentParam* operand);
-		void mulSignedInteger(AfbComponentParam* operand);
-		void divSignedInteger(AfbComponentParam* operand);
+		void addSignedInteger(const AfbComponentParam& operand);
+		void subSignedInteger(const AfbComponentParam& operand);
+		void mulSignedInteger(const AfbComponentParam& operand);
+		void divSignedInteger(const AfbComponentParam& operand);
 
 		void addSignedIntegerNumber(qint32 operand);
 		void subSignedIntegerNumber(qint32 operand);
 		void mulSignedIntegerNumber(qint32 operand);
 		void divSignedIntegerNumber(qint32 operand);
 
-		void addFloatingPoint(AfbComponentParam* operand);
-		void subFloatingPoint(AfbComponentParam* operand);
-		void mulFloatingPoint(AfbComponentParam* operand);
-		void divFloatingPoint(AfbComponentParam* operand);
+		void addFloatingPoint(const AfbComponentParam& operand);
+		void subFloatingPoint(const AfbComponentParam& operand);
+		void mulFloatingPoint(const AfbComponentParam& operand);
+		void divFloatingPoint(const AfbComponentParam& operand);
 
 		void addFloatingPoint(float operand);
 		void subFloatingPoint(float operand);
 		void mulFloatingPoint(float operand);
 		void divFloatingPoint(float operand);
+
+		void absFloatingPoint();
+		void absSignedInt();
 
 		void convertWordToFloat();
 		void convertWordToSignedInt();
@@ -136,24 +143,26 @@ namespace Sim
 	class AfbComponentInstance
 	{
 	public:
-		AfbComponentInstance(quint16 instanceNo);
+		AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
+							 quint16 instanceNo);
 
 	public:
 		bool addParam(const AfbComponentParam& param);
-		AfbComponentParam* param(int opIndex);
+		const AfbComponentParam* param(quint16 opIndex);
 
-		bool paramExists(int opIndex) const;
+		bool paramExists(quint16 opIndex) const;
 
-		bool addParamWord(int opIndex, quint16 value);
-		bool addParamDword(int opIndex, quint32 value);
-		bool addParamFloat(int opIndex, float value);
-		bool addParamDouble(int opIndex, double value);
-		bool addParamSignedInt(int opIndex, qint32 value);
-		bool addParamSignedInt64(int opIndex, qint64 value);
+		bool addParamWord(quint16 opIndex, quint16 value);
+		bool addParamDword(quint16 opIndex, quint32 value);
+		bool addParamFloat(quint16 opIndex, float value);
+		bool addParamDouble(quint16 opIndex, double value);
+		bool addParamSignedInt(quint16 opIndex, qint32 value);
+		bool addParamSignedInt64(quint16 opIndex, qint64 value);
 
 	private:
+		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 		quint16 m_instanceNo = 0;
-		std::unordered_map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
+		std::vector<std::optional<AfbComponentParam>> m_params_v;		// Index is AfbComponentParam.opIndex()
 	};
 
 
@@ -190,7 +199,7 @@ namespace Sim
 		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
 
 	private:
-		std::unordered_map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode
+		std::vector<std::shared_ptr<ModelComponent>> m_components;		// Index is opcode of AFB
 	};
 }
 

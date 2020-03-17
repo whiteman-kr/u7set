@@ -118,11 +118,6 @@ public:
 	//
 	QByteArray m_buildTabPageSplitterState;
 
-	// SimulatorTabPage
-	//
-	QByteArray m_simWigetState;
-	QByteArray m_simBuildSplitter;
-
     // Text Editor options
     //
     QPoint m_DialogTextEditorWindowPos;

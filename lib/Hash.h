@@ -23,6 +23,21 @@ inline Hash calcHash(const QString& str)
 	return hash;
 }
 
+constexpr Hash calcHash(const QChar* str)
+{
+	Hash hash = 0;
+	const QChar* prt = str;
+
+	while (prt->unicode())
+	{
+		hash += (hash << 5) + prt->unicode();
+		prt++;
+	}
+
+	return hash;
+}
+
+
 inline Hash calcHash(const QByteArray& data)
 {
 	Hash hash = 0;
