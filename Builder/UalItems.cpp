@@ -1205,66 +1205,6 @@ namespace Builder
 		return true;
 	}
 
-/*	bool UalSignal::createOptoSignal(const UalItem* ualItem,
-									Signal* templateSignal,
-									const QString& lmEquipmentID,
-									BusShared bus,
-									bool isBusChildSignal,
-									IssueLogger* log)
-	{
-		if (ualItem == nullptr || templateSignal == nullptr || log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (templateSignal->lm() == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);
-			return false;
-		}
-
-		// Opto UalSignal creation from receiver
-		//
-		m_ualItem = ualItem;
-		m_bus = bus;
-
-		m_isOptoSignal = true;
-
-		Signal* refSignal = nullptr;
-
-		// native copy of templateSignal is created if:
-		//
-		// 1) templateSignal is not native for current LM
-		// 2) templateSignal is native but it is bus child signal
-		//
-
-		bool needToCreateNativeCopy = (lmEquipmentID != templateSignal->lm()->equipmentIdTemplate()) ||
-									  (lmEquipmentID == templateSignal->lm()->equipmentIdTemplate() && isBusChildSignal == true);
-
-		if (needToCreateNativeCopy == true)
-		{
-			refSignal = createNativeCopyOfSignal(templateSignal, lmEquipmentID);
-
-			TEST_PTR_RETURN_FALSE(refSignal);
-		}
-		else
-		{
-			refSignal = templateSignal;
-		}
-
-		// reset signal addresses to invalid state
-		// ualAddr of opto signal should be set later in setOptoUalSignalsAddresses()
-		//
-		refSignal->resetAddresses();
-
-		appendRefSignal(refSignal, true);
-
-		setComputed();
-
-		return true;
-	}*/
-
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
 											Signal* busSignal,
 											Builder::BusShared bus,
