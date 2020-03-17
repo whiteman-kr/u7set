@@ -1,0 +1,25 @@
+test UAL_FLAGS_MISMATCH.06, tests for FLAGS_MISMATCH element
+schema UAL_FLAGS_MISMATCH
+compatible MODULE_LM1SF40
+set #OUT_MISMATCH_SI_005=0, #OUT_MISMATCH_SI_006=0, #OUT_MISMATCH_SI_007=0,#OUT_MISMATCH_SI_008=0
+//
+	check #IN_MISMATCH_SI_009:Mismatch==0
+	check #IN_MISMATCH_SI_010:Mismatch==0 // not aquired
+	check #IN_MISMATCH_SI_011:Mismatch==0 // not aquired
+	check #IN_MISMATCH_SI_012:Mismatch==0 // not aquired
+	
+set #OUT_MISMATCH_SI_005=1, #OUT_MISMATCH_SI_006=1, #OUT_MISMATCH_SI_007=1,#OUT_MISMATCH_SI_008=1
+//
+	check #IN_MISMATCH_SI_009:Mismatch==1
+	check #IN_MISMATCH_SI_010:Mismatch==1 // not aquired
+	check #IN_MISMATCH_SI_011:Mismatch==1 // not aquired
+	check #IN_MISMATCH_SI_012:Mismatch==1 // not aquired
+	
+set #OUT_MISMATCH_SI_005=1, #OUT_MISMATCH_SI_006=0, #OUT_MISMATCH_SI_007=1,#OUT_MISMATCH_SI_008=0
+//
+	check #IN_MISMATCH_SI_009:Mismatch==1
+	check #IN_MISMATCH_SI_010:Mismatch==0 // not aquired
+	check #IN_MISMATCH_SI_011:Mismatch==1 // not aquired
+	check #IN_MISMATCH_SI_012:Mismatch==0 // not aquired
+	
+endtest	
