@@ -329,6 +329,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0309.sql", "Upgrade to version 309, Add LAN section to LM description files"},
 	{":/DatabaseUpgrade/Upgrade0310.sql", "Upgrade to version 310, LAN section is modified in LM description files"},
 	{":/DatabaseUpgrade/Upgrade0311.sql", "Upgrade to version 311, Added AdditionSizes section to AFB bus_switch in LM description files"},
+	{":/DatabaseUpgrade/Upgrade0312.sql", "Upgrade to version 312, Removed outs med_in, max_in, min_in for median AFBs, set sim functions for AFBs"},
 };
 
 int DbWorker::counter = 0;
