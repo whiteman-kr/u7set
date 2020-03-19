@@ -162,9 +162,9 @@ namespace Builder
 		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
 
 		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
-										   QHash<QString, bool>* linkedSignals,
-										   QHash<const UalItem*, bool>* linkedItems,
-										   QHash<QUuid, const UalItem *>* linkedPins);
+										   std::set<QString>* linkedSignals,
+										   std::set<const UalItem*>* linkedItems,
+										   std::map<QUuid, const UalItem*>* linkedPins);
 	private:
 		// pass #1 compilation functions
 		//
@@ -194,11 +194,11 @@ namespace Builder
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
 
-		bool getSignalsAndPinsLinkedToOutPin(const UalItem* item,
-											 const LogicPin& outPin,
-											QHash<QString, bool>* linkedSignals,
-											QHash<const UalItem*, bool>* linkedItems,
-											QHash<QUuid, const UalItem*>* linkedPins);
+		bool getSignalsAndPinsLinkedToOutPin(	const UalItem* item,
+												const LogicPin& outPin,
+												std::set<QString>* linkedSignals,
+												std::set<const UalItem*>* linkedItems,
+												std::map<QUuid, const UalItem*>* linkedPins);
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
@@ -483,11 +483,14 @@ namespace Builder
 		bool detectUnusedSignals();
 		bool calculateCodeRunTime();
 
+		QString lmSubsystemEquipmentIdPath() const;
+
 		bool writeResult();
 		bool writeBinCodeForLm();
 		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
 		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
+		bool writeLooopbacksReport();
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();

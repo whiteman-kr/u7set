@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_set>
-
 namespace VFrame30
 {
 	class AfbPin;
@@ -28,18 +26,17 @@ namespace Builder
 		void setUalSignal(UalSignal* ualSignal);
 		UalSignal* ualSignal() const { return m_ualSignal; }
 
-		const QVector<const UalItem*> targets() const { return m_targetItems; }
+		const std::vector<const UalItem*> targets() const { return m_targetItems; }
 
-		void setLinkedSignals(const QHash<QString, bool>& linkedSignals) { m_linkedSignals = linkedSignals; }
-		const QHash<QString, bool>& linkedSignals() const { return m_linkedSignals; }
+		void setLinkedSignals(const std::set<QString>& linkedSignals) { m_linkedSignals = linkedSignals; }
+		const std::set<QString>& linkedSignals() const { return m_linkedSignals; }
+		QStringList linkedSignalsIDs() const;
+		QString anyLinkedSignalID() const;
 
-		QStringList linkedSignalsIDs() const { return m_linkedSignals.uniqueKeys(); }
+		void setLinkedPins(const std::map<QUuid, const UalItem*>& linkedPins) { m_linkedPins = linkedPins; }
+		const std::map<QUuid, const UalItem*>& linkedPins() const { return m_linkedPins; }
 
-//		void setLinkedItems(const QHash<const UalItem*, bool>& linkedItems) { m_linkedItems = linkedItems; }
-//		const QHash<const UalItem*, bool>& linkedItems() const { return m_linkedItems; }
-
-		void setLinkedPins(const QHash<QUuid, const UalItem*>& linkedPins) { m_linkedPins = linkedPins; }
-		const QHash<QUuid, const UalItem*>& linkedPins() const { return m_linkedPins; }
+		bool getReportStr(QString* reportStr) const;
 
 	private:
 		const UalItem* m_sourceItem = nullptr;
@@ -49,11 +46,9 @@ namespace Builder
 		//
 		UalSignal* m_ualSignal = nullptr;
 
-		QVector<const UalItem*> m_targetItems;
-
-		QHash<QString, bool> m_linkedSignals;
-//		QHash<const UalItem*, bool> m_linkedItems;
-		QHash<QUuid, const UalItem*> m_linkedPins;
+		std::vector<const UalItem*> m_targetItems;
+		std::set<QString> m_linkedSignals;
+		std::map<QUuid, const UalItem*> m_linkedPins;
 	};
 
 	typedef std::shared_ptr<Loopback> LoopbackShared;
@@ -73,7 +68,7 @@ namespace Builder
 		bool setUalSignalForLoopback(const UalItem* loopbackSourceItem, UalSignal* ualSignal);
 		UalSignal* getLoopbackUalSignal(const QString& loopbackID);
 
-		QStringList getLoopbackConnectedSignals(const QString& loopbackID) const;
+		QStringList getLoopbackLinkedSignals(const QString& loopbackID) const;
 
 		QList<const UalSignal*> getLoopbacksUalSignals() const { return m_ualSignalsToLoopbacks.uniqueKeys(); }
 
@@ -84,6 +79,8 @@ namespace Builder
 
 		QList<LoopbackShared> getLoopbacksByUalSignal(const UalSignal* ualSignal) const;
 
+		bool writeReport(QStringList* file) const;
+
 		static QString getAutoLoopbackID(const UalItem* ualItem, const VFrame30::AfbPin& outputPin);
 		static QString joinedLoopbackIDs(const QList<LoopbackShared>& loopbacks);
 
@@ -92,11 +89,11 @@ namespace Builder
 	private:
 		ModuleLogicCompiler& m_compiler;
 
-		QHash<QString, LoopbackShared> m_loopbacks;					// LoopbackID -> Loopback
+		QHash<QString, LoopbackShared> m_loopbacks;							// LoopbackID -> Loopback
 
 		QHash<const UalSignal*, LoopbackShared> m_ualSignalsToLoopbacks;	// UalSignal -> Multi loopbacks
 
-		QHash<QString, LoopbackShared> m_signalsToLoopbacks;		// SignalID -> Loopback
-		QHash<QUuid, LoopbackShared> m_pinsToLoopbacks;				// Pin Guid -> Multi Loopbacks
+		QHash<QString, LoopbackShared> m_signalsToLoopbacks;				// SignalID -> Loopback
+		QHash<QUuid, LoopbackShared> m_pinsToLoopbacks;						// Pin Guid -> Multi Loopbacks
 	};
 }

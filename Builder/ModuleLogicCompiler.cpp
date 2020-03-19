@@ -215,9 +215,9 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToItem(const UalItem* item,
-															QHash<QString, bool>* linkedSignals,
-															QHash<const UalItem*, bool>* linkedItems,
-															QHash<QUuid, const UalItem*>* linkedPins)
+															std::set<QString>* linkedSignals,
+															std::set<const UalItem*>* linkedItems,
+															std::map<QUuid, const UalItem*>* linkedPins)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(item, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(linkedSignals, m_log);
@@ -1020,9 +1020,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToOutPin(const UalItem* ualItem,
 															const LogicPin& outPin,
-															QHash<QString, bool>* linkedSignals,
-															QHash<const UalItem*, bool>* linkedItems,
-															QHash<QUuid, const UalItem*>* linkedPins)
+															std::set<QString>* linkedSignals,
+															std::set<const UalItem*>* linkedItems,
+															std::map<QUuid, const UalItem*>* linkedPins)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(linkedSignals, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(linkedItems, m_log);
@@ -1035,7 +1035,7 @@ namespace Builder
 
 		if (linkedPins != nullptr)
 		{
-			linkedPins->insert(outPin.guid(), ualItem);
+			linkedPins->insert(std::pair<QUuid, const UalItem*>(outPin.guid(), ualItem));
 		}
 
 		for(QUuid inPin : associatedInPins)
@@ -1048,11 +1048,11 @@ namespace Builder
 				continue;
 			}
 
-			linkedItems->insert(linkedItem, true);
+			linkedItems->insert(linkedItem);
 
 			if (linkedPins != nullptr)
 			{
-				linkedPins->insert(inPin, linkedItem);
+				linkedPins->insert(std::pair<QUuid, const UalItem*>(inPin, linkedItem));
 			}
 
 			if (linkedItem->isSignal() == false)
@@ -1066,11 +1066,11 @@ namespace Builder
 			//
 			QString signalID = linkedItem->strID();
 
-			bool signalAlreadyLinked = linkedSignals->contains(signalID);
+			bool signalAlreadyLinked = linkedSignals->count(signalID) > 0;
 
 			if (signalAlreadyLinked == false)
 			{
-				linkedSignals->insert(signalID, linkedItem);
+				linkedSignals->insert(signalID);
 			}
 
 			if (linkedItem->outputs().size() > 0)
@@ -1083,7 +1083,7 @@ namespace Builder
 			if (signalAlreadyLinked == false)
 			{
 				// scan all ualItems (on all schemas!!!) and find SignalItems with signalID that is not in linkedItems
-				// (heavy operation)
+				// (heavy operation !!!)
 
 				for(const UalItem* item : m_ualItems)
 				{
@@ -1099,12 +1099,12 @@ namespace Builder
 						continue;
 					}
 
-					if (linkedItems->contains(item) == true)
+					if (linkedItems->count(item) > 0)
 					{
 						continue;
 					}
 
-					linkedItems->insert(item, true);
+					linkedItems->insert(item);
 
 					result &= getSignalsAndPinsLinkedToItem(item, linkedSignals, linkedItems, linkedPins);
 				}
@@ -3068,7 +3068,7 @@ namespace Builder
 			file.append(str);
 		}
 
-		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID()), "SignalsWithFlags.csv", file);
+		m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "SignalsWithFlags.csv", file);
 	}
 
 	bool ModuleLogicCompiler::sortUalSignals()
@@ -3218,7 +3218,7 @@ namespace Builder
 		//
 		for(const QString& loopbackID : connectedLoopbacks)
 		{
-			QStringList signalIDs = m_loopbacks.getLoopbackConnectedSignals(loopbackID);
+			QStringList signalIDs = m_loopbacks.getLoopbackLinkedSignals(loopbackID);
 
 			for(const QString& signalID : signalIDs)
 			{
@@ -3423,18 +3423,19 @@ namespace Builder
 
 			TEST_PTR_LOG_RETURN_FALSE(loopback, m_log);
 
-			QStringList loopbackSignals = loopback->linkedSignalsIDs();
+			// get any signal of loopback
+			// all signals should be a same type (otherwise error should be reported early)
+			//
 
-			if (loopbackSignals.isEmpty() == true)
+			QString anyLoopbackSignalID = loopback->anyLinkedSignalID();
+
+			if (anyLoopbackSignalID.isEmpty() == true)
 			{
 				continue;
 			}
 
 			// yes, input is connected to Loopback
-			// get any signal of loopback
-			// all signals should be a same type (otherwise error should be reported early)
-			//
-			Signal* s = m_signals->getSignal(loopbackSignals.first());
+			Signal* s = m_signals->getSignal(anyLoopbackSignalID);
 
 			if (s == nullptr)
 			{
@@ -3506,8 +3507,8 @@ namespace Builder
 				continue;
 			}
 
-			QHash<QString, bool> linkedSignals;
-			QHash<const UalItem*, bool> linkedItems;
+			std::set<QString> linkedSignals;
+			std::set<const UalItem*> linkedItems;
 
 			res = getSignalsAndPinsLinkedToOutPin(ualAfb, outPin, &linkedSignals, &linkedItems, nullptr);
 
@@ -3516,9 +3517,7 @@ namespace Builder
 				return false;
 			}
 
-			QStringList linkedSignalsIDs = linkedSignals.keys();
-
-			for(const QString& linkedSignalID : linkedSignalsIDs)
+			for(const QString& linkedSignalID : linkedSignals)
 			{
 				Signal* s = m_signals->getSignal(linkedSignalID);
 
@@ -11653,6 +11652,11 @@ namespace Builder
 		return result;
 	}
 
+	QString ModuleLogicCompiler::lmSubsystemEquipmentIdPath() const
+	{
+		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
+	}
+
 	bool ModuleLogicCompiler::writeResult()
 	{
 		bool result = true;
@@ -11720,6 +11724,8 @@ namespace Builder
 		result &= writeTuningInfoFile();
 
 		result &= writeOcmRsSignalsXml();
+
+		result &= writeLooopbacksReport();
 
 		//
 
@@ -12177,6 +12183,22 @@ namespace Builder
 		});*/
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::writeLooopbacksReport()
+	{
+		if (m_context->generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
+		QStringList file;
+
+		m_loopbacks.writeReport(&file);
+
+		BuildFile* bf = m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "Loopbacks.csv", file);
+
+		return bf != nullptr;
 	}
 
 	bool ModuleLogicCompiler::displayResourcesUsageInfo()

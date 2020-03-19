@@ -552,6 +552,7 @@ namespace Builder
 		void refSignalIDs(QStringList* appSignalIDs) const;
 
 		QString refSignalIDsJoined() const;
+		QString refSignalIDsJoined(const QString& separator) const;
 
 		QStringList acquiredRefSignalsIDs() const;
 

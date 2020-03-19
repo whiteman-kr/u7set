@@ -1926,6 +1926,15 @@ namespace Builder
 		return ids.join(", ");
 	}
 
+	QString UalSignal::refSignalIDsJoined(const QString& separator) const
+	{
+		QStringList ids;
+
+		refSignalIDs(&ids);
+
+		return ids.join(separator);
+	}
+
 	QStringList UalSignal::acquiredRefSignalsIDs() const
 	{
 		QStringList list;

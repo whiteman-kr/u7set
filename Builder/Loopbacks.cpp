@@ -26,12 +26,12 @@ namespace Builder
 
 	bool Loopback::isConnected(const VFrame30::AfbPin& pin) const
 	{
-		return m_linkedPins.contains(pin.guid());
+		return m_linkedPins.count(pin.guid()) > 0;
 	}
 
 	bool Loopback::isConnected(const QString& signalID) const
 	{
-		return m_linkedSignals.contains(signalID);
+		return m_linkedSignals.count(signalID) > 0;
 	}
 
 	void Loopback::addLoopbackTarget(const UalItem* targetItem)
@@ -40,14 +40,66 @@ namespace Builder
 
 		assert(targetItem->isLoopbackTarget());
 
-		m_targetItems.append(targetItem);
+		m_targetItems.push_back(targetItem);
 	}
 
 	void Loopback::setUalSignal(UalSignal* ualSignal)
 	{
-		assert(m_ualSignal == nullptr);
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return;
+		}
 
-		m_ualSignal = ualSignal;
+		if (m_ualSignal == nullptr)
+		{
+			m_ualSignal = ualSignal;
+		}
+		else
+		{
+			assert(m_ualSignal == ualSignal);
+		}
+	}
+
+	QStringList Loopback::linkedSignalsIDs() const
+	{
+		QStringList list;
+
+		for(const QString& signalID : m_linkedSignals)
+		{
+			list.append(signalID);
+		}
+
+		return list;
+	}
+
+	QString Loopback::anyLinkedSignalID() const
+	{
+		if (m_linkedSignals.empty() == true)
+		{
+			return QString();
+		}
+
+		return *m_linkedSignals.cbegin();
+	}
+
+	bool Loopback::getReportStr(QString* reportStr) const
+	{
+		TEST_PTR_RETURN_FALSE(reportStr);
+
+		if (m_sourceItem == nullptr ||
+			m_ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		*reportStr = QString("%1;%2;%3").
+				arg(m_loopbackID).
+				arg(m_sourceItem->label()).
+				arg(m_ualSignal->refSignalIDsJoined(";"));
+
+		return true;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -129,7 +181,18 @@ namespace Builder
 			return false;
 		}
 
-		loopback->setUalSignal(ualSignal);
+		if (loopback->ualSignal() == nullptr)
+		{
+			loopback->setUalSignal(ualSignal);
+		}
+		else
+		{
+			if (loopback->ualSignal() != ualSignal)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_compiler.log());
+			}
+		}
 
 		m_ualSignalsToLoopbacks.insertMulti(ualSignal, loopback);
 
@@ -149,7 +212,7 @@ namespace Builder
 		return loopback->ualSignal();
 	}
 
-	QStringList Loopbacks::getLoopbackConnectedSignals(const QString& loopbackID) const
+	QStringList Loopbacks::getLoopbackLinkedSignals(const QString& loopbackID) const
 	{
 		LoopbackShared loopback = m_loopbacks.value(loopbackID, nullptr);
 
@@ -159,7 +222,7 @@ namespace Builder
 			return QStringList();
 		}
 
-		return loopback->linkedSignals().uniqueKeys();
+		return loopback->linkedSignalsIDs();
 	}
 
 	bool Loopbacks::findSignalsAndPinsLinkedToLoopbacksTargets()
@@ -172,9 +235,9 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(loopback);
 
-			QHash<QString, bool> linkedSignals;
-			QHash<const UalItem*, bool> linkedItems;
-			QHash<QUuid, const UalItem*> linkedPins;
+			std::set<QString> linkedSignals;
+			std::set<const UalItem*> linkedItems;
+			std::map<QUuid, const UalItem*> linkedPins;
 
 			bool res = true;
 
@@ -198,9 +261,7 @@ namespace Builder
 			Signal* firstSignal = nullptr;
 			const UalItem* firstSignalItem = nullptr;
 
-			QList<const UalItem*> linkedItemsKeys = linkedItems.keys();
-
-			for(const UalItem* linkedItem : linkedItemsKeys)
+			for(const UalItem* linkedItem : linkedItems)
 			{
 				if (linkedItem->isSignal() == false)
 				{
@@ -262,10 +323,10 @@ namespace Builder
 				continue;
 			}
 
-			QList<QUuid> loopbackLinkedPins = linkedPins.uniqueKeys();
-
-			for(const QUuid& linkedPin : loopbackLinkedPins)
+			for(const std::pair<QUuid, const UalItem*>& pr : linkedPins)
 			{
+				QUuid linkedPin = pr.first;
+
 				LoopbackShared presentLoopback = m_pinsToLoopbacks.value(linkedPin, nullptr);
 
 				if (presentLoopback == nullptr)
@@ -288,13 +349,6 @@ namespace Builder
 			}
 
 			loopback->setLinkedSignals(linkedSignals);
-
-			for(const QString& signalID : linkedSignals.uniqueKeys())
-			{
-				assert(m_signalsToLoopbacks.contains(signalID) == false);
-
-				m_signalsToLoopbacks.insert(signalID, loopback);
-			}
 		}
 
 		return result;
@@ -313,6 +367,37 @@ namespace Builder
 	QList<LoopbackShared> Loopbacks::getLoopbacksByUalSignal(const UalSignal* ualSignal) const
 	{
 		return m_ualSignalsToLoopbacks.values(ualSignal);
+	}
+
+	bool Loopbacks::writeReport(QStringList* file) const
+	{
+		TEST_PTR_RETURN_FALSE(file);
+
+		QStringList loopbacksIDs = m_loopbacks.uniqueKeys();
+
+		loopbacksIDs.sort();
+
+		for(const QString& loopbackID : loopbacksIDs)
+		{
+			LoopbackShared loopback = m_loopbacks.value(loopbackID, nullptr);
+
+			TEST_PTR_CONTINUE(loopback);
+
+			QString str;
+
+			bool res = loopback->getReportStr(&str);
+
+			if (res == true)
+			{
+				file->append(str);
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		return true;
 	}
 
 	QString Loopbacks::getAutoLoopbackID(const UalItem* ualItem, const VFrame30::AfbPin& outputPin)
