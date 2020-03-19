@@ -361,7 +361,7 @@
 			<Pin OpName="o_nan"				OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"			OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func">
+		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func_v1">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
@@ -373,7 +373,7 @@
 			<Pin OpName="o_funct_edi"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int">
+		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v6">
 			<Pin OpName="i_ki"			OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_ti"			OpIndex ="2"	PinType = "Param"/>
 			<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>
@@ -442,7 +442,7 @@
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_deadzone">
+		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_deadzone_v5">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data_x"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="3"	PinType = "Input"/>
@@ -476,7 +476,7 @@
 			<Pin OpName="o_nan"			OpIndex ="30"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="31"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="5"		VersionOpIndex="28"	MaxInstCount="256" SimulationFunc="afb_der">
+		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="5"		VersionOpIndex="28"	MaxInstCount="256" SimulationFunc="afb_der_v5">
 			<Pin OpName="i_kd"			OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_td"			OpIndex ="2"	PinType = "Param"/>
 			<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>
@@ -517,7 +517,7 @@
 			<Pin OpName="o_amismatch_edi"	OpIndex ="21"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="22"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_tconv">
+		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_tconv_v0">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data_x"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="2"	PinType = "Input"/>
@@ -7072,7 +7072,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0007">
+        <AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0008">
 			<Properties>				
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
 				<Category>Logic</Category>
@@ -7104,9 +7104,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_med" Caption="med" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="28" Size="32"/>
 				<Pin OpName="o_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="30" Size="32"/>
 				<Pin OpName="o_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="32" Size="32"/>
-				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
+<!--				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
 				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="16"/>
-				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>
+				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>-->
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="37" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="38" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="39" Size="1"/>
@@ -7157,7 +7157,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+<!--				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -7192,7 +7192,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
+				</Param>-->
 				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
@@ -7327,9 +7327,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
-	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
+<!--	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
 	createOutput(videoItemFblElement, afbElement, "OutMaxIn", "max_in");
-	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");
+	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");-->
 
     createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
@@ -7352,7 +7352,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#median_si_v1"      Caption="median_si"      Version="1.0006">
+        <AFB id="#median_si_v1"      Caption="median_si"      Version="1.0008">
 			<Properties>
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
 				<Category>Logic</Category>
@@ -7383,9 +7383,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_med" Caption="med" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="28" Size="32"/>
 				<Pin OpName="o_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="30" Size="32"/>
 				<Pin OpName="o_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="32" Size="32"/>
-				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="5"/>
-				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="5"/>
-				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="5"/>
+<!--				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
+				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="16"/>
+				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>-->
 			</Outputs>
 			<Params>
 				<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -7432,7 +7432,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+<!--				<Param OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -7443,8 +7443,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
-				<Param OpName="OutMaxIn" Caption="OutMaxIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				</Param>-->
+<!--				<Param OpName="OutMaxIn" Caption="OutMaxIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -7455,8 +7455,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
-				<Param OpName="OutMinIn" Caption="OutMinIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				</Param>-->
+<!--				<Param OpName="OutMinIn" Caption="OutMinIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>0</Value>
 					<Default>0</Default>
 					<Script>
@@ -7467,7 +7467,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 })
 						</Changed>
 					</Script>
-				</Param>
+				</Param>-->
 			</Params>
 			<CommonScript>
 				<Library>
@@ -7554,9 +7554,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
-	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
+<!--	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
 	createOutput(videoItemFblElement, afbElement, "OutMaxIn", "max_in");
-	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");
+	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");-->
 
 	videoItemFblElement.adjustHeight();
 

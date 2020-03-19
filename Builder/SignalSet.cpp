@@ -62,11 +62,6 @@ namespace Builder
 		{
 			Signal& s = (*this)[i];
 
-			if (s.ID() > m_maxSignalID)
-			{
-				m_maxSignalID = s.ID();
-			}
-
 			// check AppSignalID
 			//
 			if (appSignalIDs.contains(s.appSignalID()) == true)
@@ -339,11 +334,9 @@ namespace Builder
 
 	Signal* SignalSet::appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
-		m_maxSignalID++;
-
 		Signal* newSignal = createBusChildSignal(s, bus, busSignal);
 
-		append(m_maxSignalID, newSignal);
+		append(newSignal);
 
 		return newSignal;
 	}
@@ -360,7 +353,6 @@ namespace Builder
 		newSignal->setCaption(caption);
 		newSignal->setEquipmentID(busParentSignal.equipmentID());
 		newSignal->setLm(busParentSignal.lm());
-//		newSignal->setBusTypeID(s.busTypeID());
 
 		newSignal->setSignalType(busSignal.signalType);
 		newSignal->setInOutType(E::SignalInOutType::Internal);

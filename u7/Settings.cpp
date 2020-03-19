@@ -219,6 +219,9 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItemPropertiesDialog/ColumnsWidth", QVariant::fromValue(m_schemaItemPropertiesColumnsWidth));
 	s.setValue("SchemaItemPropertiesDialog/Geometry", m_schemaItemPropertiesGeometry);
 
+	s.setValue("IdePropertyEditor/findCompleter", m_findCompleter);
+	s.setValue("IdePropertyEditor/replaceCompleter", m_replaceCompleter);
+
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	s.setValue("m_infoMode", m_infoMode);
@@ -339,6 +342,8 @@ void Settings::loadUserScope()
 	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
 
 	//
+	m_findCompleter = s.value("IdePropertyEditor/findCompleter").toStringList();
+	m_replaceCompleter = s.value("IdePropertyEditor/replaceCompleter").toStringList();
 
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
