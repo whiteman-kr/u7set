@@ -1245,24 +1245,36 @@ namespace Builder
 
 	bool UalAfb::calculate_INT_paramValues()
 	{
+		AppFbParamValue* i_max = nullptr;
+		AppFbParamValue* i_min = nullptr;
+
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
+
+		CHECK_FLOAT32(*i_max);
+		CHECK_FLOAT32(*i_min);
+
+		if (i_max->floatValue() <= i_min->floatValue())
+		{
+			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+			//
+			m_log->errALC5052(caption(), i_max->caption(), i_min->caption(), guid(), schemaID(), label());
+
+			return false;
+		}
+
 		bool isConstIntegrator = caption() == "integratorc";
 
 		if (isConstIntegrator == true)
 		{
 			AppFbParamValue* i_ti = nullptr;
 			AppFbParamValue* i_ki = nullptr;
-			AppFbParamValue* i_max = nullptr;
-			AppFbParamValue* i_min = nullptr;
 
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_ti", i_ti);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_ki", i_ki);
-			CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
-			CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
 
 			CHECK_SIGNED_INT32(*i_ti);
 			CHECK_FLOAT32(*i_ki);
-			CHECK_FLOAT32(*i_max);
-			CHECK_FLOAT32(*i_min);
 
 			if (i_ti->signedIntValue() < 0)
 			{
@@ -1272,16 +1284,6 @@ namespace Builder
 
 				return false;
 			}
-
-			if (i_max->floatValue() <= i_min->floatValue())
-			{
-				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
-				//
-				m_log->errALC5052(caption(), i_max->caption(), i_min->caption(), guid(), schemaID(), label());
-
-				return false;
-			}
-
 		}
 
 		m_runTime = 27 + 24;
