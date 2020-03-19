@@ -183,6 +183,23 @@ bool ServiceWorker::clearSettings()
 	return CommandLineParser::checkSettingWriteStatus(m_settings, "", nullptr);
 }
 
+QString ServiceWorker::getStrSetting(const QString& settingName)
+{
+	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
+
+	if (cmdLineValue.isEmpty() == true)
+	{
+		return m_settings.value(settingName).toString();
+	}
+
+	return cmdLineValue;
+}
+
+QString ServiceWorker::getCmdLineSetting(const QString& settingName)
+{
+	return  m_cmdLineParser.settingValue(settingName);
+}
+
 void ServiceWorker::init()
 {
 	m_cmdLineParser.addSimpleOption("h", "Print this help.");
@@ -202,23 +219,6 @@ void ServiceWorker::init()
 void ServiceWorker::processCmdLineSettings()
 {
 	m_cmdLineParser.processSettings(m_settings, m_logger);
-}
-
-QString ServiceWorker::getStrSetting(const QString& settingName)
-{
-	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
-
-	if (cmdLineValue.isEmpty() == true)
-	{
-		return m_settings.value(settingName).toString();
-	}
-
-	return cmdLineValue;
-}
-
-QString ServiceWorker::getCmdLineSetting(const QString& settingName)
-{
-	return  m_cmdLineParser.settingValue(settingName);
 }
 
 void ServiceWorker::onThreadStarted()
@@ -571,6 +571,13 @@ int ServiceStarter::privateRun()
 
 	if (startAsRegularApp == true)
 	{
+		if (m_serviceWorker.getStrSetting(ServiceWorker::SETTING_EQUIPMENT_ID).isEmpty() == true)
+		{
+			DEBUG_LOG_MSG(m_logger, "");
+			DEBUG_LOG_ERR(m_logger, QString(tr("EquipmentID of service has NOT SET !!!")));
+			return 7;
+		}
+
 		result = runAsRegularApplication();
 	}
 	else
