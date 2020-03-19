@@ -47,7 +47,7 @@ namespace Sim
 		void slot_appCodeParsed(bool ok);
 
 	public:
-		QString equipmentId() const;
+		const QString& equipmentId() const;
 		int lmNumber() const;
 		E::Channel channel() const;
 

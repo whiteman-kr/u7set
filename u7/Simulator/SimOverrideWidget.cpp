@@ -638,9 +638,8 @@ void SimOverrideWidget::setValue(QString appSignalId)
 		case E::SignalType::Discrete:
 			{
 				int value = edit->text().toInt();
-				assert(value == 0 || value == 1);
 
-				newValue = value;
+				newValue = std::clamp(value, 0, 1);
 			}
 			break;
 

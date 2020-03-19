@@ -1,5 +1,4 @@
 #include "SimRam.h"
-#include <cassert>
 #include <QtEndian>
 #include <SimOverrideSignals.h>
 
@@ -49,21 +48,6 @@ namespace Sim
 		return m_name;
 	}
 
-	E::LogicModuleRamAccess RamAreaInfo::access() const
-	{
-		return m_access;
-	}
-
-	quint32 RamAreaInfo::offset() const
-	{
-		return m_offset;
-	}
-
-	quint32 RamAreaInfo::size() const
-	{
-		return m_size;
-	}
-
 	RamArea::RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name) :
 		RamAreaInfo(access, offset, size, name)
 	{
@@ -74,18 +58,19 @@ namespace Sim
 
 	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data, E::ByteOrder byteOrder)
 	{
-		if (contains(E::LogicModuleRamAccess::Write, offsetW) == false ||
-			bitNo >= 16)
-		{
-			return false;
-		}
+//		if (contains(E::LogicModuleRamAccess::Write, offsetW) == false ||
+//			bitNo >= 16)
+//		{
+//			return false;
+//		}
 
+		bitNo &= 0x0F;
 		data &= 0x01;
 		int byteOffset = (offsetW - offset()) * 2;
 
 		if (byteOffset >= m_data.size())
 		{
-			assert(byteOffset < m_data.size());
+			Q_ASSERT(byteOffset < m_data.size());
 			return false;
 		}
 
@@ -124,12 +109,12 @@ namespace Sim
 
 	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
 	{
-		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
-			bitNo >= 16 ||
-			data == nullptr)
-		{
-			return false;
-		}
+//		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
+//			bitNo >= 16 ||
+//			data == nullptr)
+//		{
+//			return false;
+//		}
 
 		// Apply override
 		//
@@ -147,10 +132,12 @@ namespace Sim
 
 		//--
 		//
+		bitNo &= 0x0F;
+
 		int byteOffset = (offsetW - offset()) * 2;
 		if (byteOffset >= m_data.size())
 		{
-			assert(byteOffset < m_data.size());
+			Q_ASSERT(byteOffset < m_data.size());
 			return false;
 		}
 
@@ -203,6 +190,22 @@ namespace Sim
 		return readData<qint32>(offsetW, data, byteOrder);
 	}
 
+	const QByteArray& RamArea::data() const
+	{
+		return m_data;
+	}
+
+	const std::vector<OverrideRamRecord>& RamArea::overrideData() const
+	{
+		return m_overrideData;
+	}
+
+	void RamArea::setRawData(const QByteArray& value, const std::vector<OverrideRamRecord>& overrideData)
+	{
+		m_data = value;
+		m_overrideData = overrideData;
+	}
+
 	template<typename TYPE>
 	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder)
 	{
@@ -210,7 +213,7 @@ namespace Sim
 		if (byteOffset < 0 ||
 			byteOffset >= m_data.size() - sizeof(TYPE))
 		{
-			assert(byteOffset >= 0 &&
+			Q_ASSERT(byteOffset >= 0 &&
 				   byteOffset - sizeof(TYPE) <= m_data.size());
 			return false;
 		}
@@ -239,7 +242,7 @@ namespace Sim
 	{
 		if (data == nullptr)
 		{
-			assert(data);
+			Q_ASSERT(data);
 			return false;
 		}
 
@@ -247,8 +250,8 @@ namespace Sim
 		if (byteOffset < 0 ||
 			byteOffset >= m_data.size() - sizeof(TYPE))
 		{
-			assert(byteOffset >= 0 &&
-				   byteOffset - sizeof(TYPE) <= m_data.size());
+			Q_ASSERT(byteOffset >= 0 &&
+					byteOffset - sizeof(TYPE) <= m_data.size());
 			return false;
 		}
 
@@ -294,7 +297,7 @@ namespace Sim
 		if (zeroBasedOffsetW < 0 ||
 			zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -322,7 +325,7 @@ namespace Sim
 		return;
 	}
 
-	void RamArea::setOverrideData(std::vector<OverrideRamRecord> overrideData)
+	void RamArea::setOverrideData(std::vector<OverrideRamRecord>&& overrideData)
 	{
 		m_overrideData = std::move(overrideData);
 	}
@@ -343,10 +346,9 @@ namespace Sim
 		m_memoryAreas.clear();
 		m_memoryAreas.reserve(that.m_memoryAreas.size());
 
-		for (const std::shared_ptr<RamArea>& thatArea : that.m_memoryAreas)
+		for (const RamArea& thatArea : that.m_memoryAreas)
 		{
-			std::shared_ptr<RamArea> area = std::make_shared<RamArea>(*thatArea.get());
-			m_memoryAreas.push_back(area);
+			m_memoryAreas.emplace_back(thatArea);
 		}
 
 		return *this;
@@ -361,13 +363,13 @@ namespace Sim
 
 	bool Ram::addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, QString name)
 	{
-		std::shared_ptr<RamArea> ramArea = std::make_shared<RamArea>(access, offsetW, sizeW, name);
+		RamArea ramArea{access, offsetW, sizeW, name};
 
 		// Check that new memory area is not overlapped with existsings
 		//
 		for (const auto& area : m_memoryAreas)
 		{
-			if (area->overlapped(access, offsetW, sizeW) == true)
+			if (area.overlapped(access, offsetW, sizeW) == true)
 			{
 				// Area with this type of access and addresses already exists
 				//
@@ -375,31 +377,58 @@ namespace Sim
 			}
 		}
 
-		// --
-		//
-		m_memoryAreas.push_back(ramArea);
+		m_memoryAreas.emplace_back(std::move(ramArea));
 
 		return true;
+	}
+
+	void Ram::updateFrom(const Ram& source)
+	{
+		if (m_memoryAreas.size() != source.m_memoryAreas.size())
+		{
+			*this = source;		// Full deep copy
+			return;
+		}
+
+		for (size_t i = 0; i < m_memoryAreas.size(); i++)
+		{
+			const RamArea& s = source.m_memoryAreas[i];
+			RamArea& d = m_memoryAreas[i];
+
+			if (s.size() == d.size() &&
+				s.offset() == d.offset() &&
+				s.access() == d.access())
+			{
+				d.setRawData(s.data(), s.overrideData());
+			}
+			else
+			{
+				*this = source;		// Full deep copy
+				return;
+			}
+		}
+
+		return;
 	}
 
 	std::vector<RamAreaInfo> Ram::memoryAreasInfo() const
 	{
 		std::vector<RamAreaInfo> result;
-		for (const auto& area : m_memoryAreas)
+		for (const RamArea& area : m_memoryAreas)
 		{
-			result.emplace_back(*area.get());
+			result.emplace_back(area);
 		}
 
 		return result;
 	}
 
-	RamAreaInfo Ram::memoryAreaInfo(QString name) const
+	RamAreaInfo Ram::memoryAreaInfo(const QString& name) const
 	{
-		for (const auto& area : m_memoryAreas)
+		for (const RamArea& area : m_memoryAreas)
 		{
-			if (area->name() == name)
+			if (area.name() == name)
 			{
-				return *area.get();
+				return area;
 			}
 		}
 
@@ -413,7 +442,7 @@ namespace Sim
 			return RamAreaInfo();
 		}
 
-		return *(m_memoryAreas[index].get());
+		return m_memoryAreas[index];
 	}
 
 	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder)
@@ -424,8 +453,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeBit(offsetW, bitNo, data, byteOrder);
-		return ok;
+		return area->writeBit(offsetW, bitNo, data, byteOrder);
 	}
 
 	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
@@ -436,8 +464,29 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readBit(offsetW, bitNo, data, byteOrder);
-		return ok;
+		return area->readBit(offsetW, bitNo, data, byteOrder);
+	}
+
+	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeBit(offsetW, bitNo, data, byteOrder);
+	}
+
+	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
+	{
+		const RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readBit(offsetW, bitNo, data, byteOrder);
 	}
 
 	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
@@ -448,8 +497,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeWord(offsetW, data, byteOrder);
-		return ok;
+		return area->writeWord(offsetW, data, byteOrder);
 	}
 
 	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
@@ -460,8 +508,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readWord(offsetW, data, byteOrder);
-		return ok;
+		return area->readWord(offsetW, data, byteOrder);
 	}
 
 	bool Ram::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
@@ -472,8 +519,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeDword(offsetW, data, byteOrder);
-		return ok;
+		return area->writeDword(offsetW, data, byteOrder);
 	}
 
 	bool Ram::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
@@ -484,8 +530,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readDword(offsetW, data, byteOrder);
-		return ok;
+		return area->readDword(offsetW, data, byteOrder);
 	}
 
 	bool Ram::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder)
@@ -524,35 +569,75 @@ namespace Sim
 
 	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW)
 	{
-		for (std::shared_ptr<RamArea> area : m_memoryAreas)
+		RamArea* result = nullptr;
+
+		if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
 		{
-			if (area->contains(access, offsetW) == true)
+			for (RamArea& area : m_memoryAreas)
 			{
-				return area.get();
+				if (area.contains(access, offsetW) == true)
+				{
+					result = &area;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Look for the right area from back, most likely it will find area much faster.
+			// Tried it on project, it works really well
+			//
+			for (auto it = m_memoryAreas.rbegin(); it != m_memoryAreas.rend(); ++it)
+			{
+				if (it->contains(access, offsetW) == true)
+				{
+					result = &it.operator*();
+					break;
+				}
 			}
 		}
 
-		return nullptr;
+		return result;
 	}
 
 	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const
 	{
-		for (std::shared_ptr<RamArea> area : m_memoryAreas)
+		const RamArea* result = nullptr;
+
+		if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
 		{
-			if (area->contains(access, offsetW) == true)
+			for (const RamArea& area : m_memoryAreas)
 			{
-				return area.get();
+				if (area.contains(access, offsetW) == true)
+				{
+					result = &area;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Look for the right area from back, most likely it will find area much faster.
+			// Tried it on project, it works really well
+			//
+			for (auto it = m_memoryAreas.rbegin(); it != m_memoryAreas.rend(); ++it)
+			{
+				if (it->contains(access, offsetW) == true)
+				{
+					result = &it.operator*();
+					break;
+				}
 			}
 		}
 
-		return nullptr;
+		return result;
 	}
 
-	void Ram::updateOverrideData(QString equipmentId, const OverrideSignals* overrideSignals)
+	void Ram::updateOverrideData(const QString& equipmentId, const OverrideSignals* overrideSignals)
 	{
 		if (overrideSignals == nullptr)
 		{
-			assert(overrideSignals);
+			Q_ASSERT(overrideSignals);
 			return;
 		}
 
@@ -563,10 +648,10 @@ namespace Sim
 			return;
 		}
 
-		for (std::shared_ptr<RamArea>& ramArea : m_memoryAreas)
+		for (RamArea& ramArea : m_memoryAreas)
 		{
-			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(equipmentId, *ramArea.get());
-			ramArea->setOverrideData(std::move(ovData));
+			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(equipmentId, ramArea);
+			ramArea.setOverrideData(std::move(ovData));
 		}
 
 		m_overrideSignalsLastCounter = overrideSignals->changesCounter();

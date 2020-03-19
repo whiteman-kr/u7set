@@ -69,6 +69,7 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
+    SimCommandProcessor_LM5_LM6.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
     SimOutput.cpp \
@@ -93,13 +94,14 @@ SOURCES += \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
     SimException.cpp \
-    SimCommandProcessor_LM1_SF00.cpp \
     SimOverrideSignals.cpp \
     ../lib/SignalProperties.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp
 
 HEADERS += \
+    ../lib/Hash.h \
+    SimCommandProcessor_LM5_LM6.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
@@ -134,7 +136,6 @@ HEADERS += \
     SimLogicModule.h \
     SimCommandProcessor.h \
     SimException.h \
-    SimCommandProcessor_LM1_SF00.h \
     SimOverrideSignals.h \
     ../lib/SignalProperties.h \
     ../Builder/IssueLogger.h \

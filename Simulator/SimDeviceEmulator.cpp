@@ -122,10 +122,19 @@ namespace Sim
 		m_device->m_logicUnit.programCounter = value;
 	}
 
+	quint32 ScriptDeviceEmulator::flagCmp() const
+	{
+		return m_device->m_logicUnit.flags.cmp;
+	}
+
+	void ScriptDeviceEmulator::setFlagCmp(quint32 value)
+	{
+		m_device->m_logicUnit.flags.cmp = value;
+	}
+
 	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode) const
 	{
-		auto afbc = m_device->m_lmDescription.component(opCode);
-		AfbComponent result(afbc);
+		AfbComponent result(m_device->m_lmDescription.component(opCode));
 		return result;
 	}
 
@@ -152,10 +161,9 @@ namespace Sim
 		if (ok == false)
 		{
 			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
-			return false;
 		}
 
-		return true;
+		return ok;
 	}
 
 	// RAM access
@@ -169,6 +177,18 @@ namespace Sim
 		}
 
 		// readRamWord, writeRamWord have checks and will set FAULT in case of error
+		//
+		return true;
+	}
+
+	bool ScriptDeviceEmulator::setRamMem(quint32 address, quint16 data, quint16 size)
+	{
+		while (size-- > 0)
+		{
+			writeRamWord(address++, data);
+		}
+
+		// writeRamWord have checks and will set FAULT in case of error
 		//
 		return true;
 	}
@@ -192,6 +212,36 @@ namespace Sim
 		if (ok == false)
 		{
 			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return data;
+	}
+
+	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data, E::LogicModuleRamAccess access)
+	{
+		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
+		if (ok == false)
+		{
+			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2, acess %3")
+								.arg(offsetW)
+								.arg(bitNo)
+								.arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return ok;
+	}
+
+	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo, E::LogicModuleRamAccess access)
+	{
+		quint16 data = 0;
+		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2, access %3")
+								.arg(offsetW)
+								.arg(bitNo)
+								.arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return data;
@@ -772,6 +822,7 @@ namespace Sim
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
+		m_commandProcessor->updatePlatformInterfaceState();
 
 		if (m_overrideSignals != nullptr)
 		{

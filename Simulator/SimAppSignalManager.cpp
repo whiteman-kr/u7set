@@ -100,11 +100,11 @@ namespace Sim
 		return ok;
 	}
 
-	void AppSignalManager::setData(QString equipmentId, const Sim::Ram& ram)
+	void AppSignalManager::setData(const QString& equipmentId, const Sim::Ram& ram)
 	{
 		QWriteLocker wl(&m_ramLock);
 
-		m_ram[equipmentId] = ram;
+		m_ram[equipmentId].updateFrom(ram);
 
 		return;
 	}
@@ -192,7 +192,15 @@ static const AppSignalParam dummy;
 			}
 
 			const Signal& s = it->second;
-			assert(signalHash == s.hash());
+			Q_ASSERT(signalHash == s.hash());
+
+			if (s.signalType() == E::SignalType::Bus)
+			{
+				// s.dataFormat() will crash for Bus signal
+				// and it is not possible to return something reasonable for such signals
+				//
+				return state;
+			}
 
 			appSignalId = s.appSignalID();
 			logicModuleId = s.lmEquipmentID();

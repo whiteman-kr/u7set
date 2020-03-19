@@ -26,7 +26,7 @@ namespace Sim
 		void reset();
 		bool load(QString fileName);
 
-		void setData(QString equipmentId, const Sim::Ram& ram);
+		void setData(const QString& equipmentId, const Sim::Ram& ram);
 
 		std::optional<Signal> signalParamExt(const QString& appSignalId) const;
 

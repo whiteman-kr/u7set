@@ -2947,9 +2947,9 @@ R"DELIM({
 	Software::Software(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, "Type", true, Software::type, Software::setType);
-
-		typeProp->setUpdateFromPreset(true);
+		ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, "Type", true, Software::type, Software::setType)
+				->setExpert(true)
+				.setUpdateFromPreset(true);
 	}
 
 	Software::~Software()

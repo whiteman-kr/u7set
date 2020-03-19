@@ -126,7 +126,7 @@ namespace Sim
 		return;
 	}
 
-	QString LogicModule::equipmentId() const
+	const QString& LogicModule::equipmentId() const
 	{
 		return m_logicModuleInfo.equipmentId;
 	}
