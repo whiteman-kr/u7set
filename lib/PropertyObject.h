@@ -346,7 +346,7 @@ template <typename TYPE,
 		  typename CLASS,
 		  TYPE(CLASS::*get)() const,
 		  void(CLASS::*set)(const TYPE&)>
-class PropertyTypedValue : public Property
+class PropertyTypedValue final : public Property
 {
 
 public:
@@ -583,7 +583,7 @@ private:
 //
 //
 template <typename TYPE>
-class PropertyValue : public Property
+class PropertyValue final : public Property
 {
 public:
 	PropertyValue() noexcept = default;
@@ -671,7 +671,7 @@ public:
 		return {};
 	}
 
-	void setValueDirect(const TYPE& value)noexcept 			// Not virtual, is called from class ProprtyObject for direct access
+	void setValueDirect(const TYPE& value) noexcept 			// Not virtual, is called from class ProprtyObject for direct access
 	{
 		if (m_setter)
 		{
@@ -836,7 +836,7 @@ private:
 //			Class PropertyValueNoGetterSetter
 //
 //
-class PropertyValueNoGetterSetter : public Property
+class PropertyValueNoGetterSetter final : public Property
 {
 public:
 	PropertyValueNoGetterSetter() noexcept = default;
@@ -1004,7 +1004,7 @@ public:
 		checkLimits();
 	}
 
-	class QVariantEx : public QVariant
+	class QVariantEx final : public QVariant
 	{
 	public:
 		void setEnumHack(int value)
@@ -1149,7 +1149,7 @@ private:
 //			class behaves like enum
 //
 template <>
-class PropertyValue<OrderedHash<int, QString>> : public Property
+class PropertyValue<OrderedHash<int, QString>> final : public Property
 {
 public:
 	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
@@ -1313,7 +1313,7 @@ private:
 //			class behaves like enum
 //
 template <>
-class PropertyValue<std::vector<std::pair<QString, int>>> : public Property
+class PropertyValue<std::vector<std::pair<QString, int>>> final : public Property
 {
 public:
 	PropertyValue(const std::vector<std::pair<QString, int>>& enumValues) noexcept :
@@ -1517,7 +1517,7 @@ private:
 
 //
 //
-//			Class PropertyObject
+//			Class PropertyObject to dervice from
 //
 //
 class PropertyObject : public QObject
@@ -2245,7 +2245,7 @@ public:
 				break;
 			default:
 				result.first = false;
-				result.second += "SpecificProperties: Unsupported version: " + version;
+				result.second += "SpecificProperties: Unsupported version: " + QString::number(version);
 
 				Q_ASSERT(false);
 				qDebug() << "Object has spec prop with unsuported version: " << row;
@@ -2985,7 +2985,7 @@ public:
 
 
 template <typename OBJECT_TYPE>
-class PropertyVector : public PropertyVectorBase<OBJECT_TYPE>
+class PropertyVector final : public PropertyVectorBase<OBJECT_TYPE>
 {
 public:
 	PropertyVector()
@@ -3042,7 +3042,7 @@ public:
 };
 
 template <typename OBJECT_TYPE>
-class PropertyList : public PropertyListBase<OBJECT_TYPE>
+class PropertyList final : public PropertyListBase<OBJECT_TYPE>
 {
 public:
 	PropertyList()

@@ -2343,6 +2343,7 @@ namespace Sim
 		const int o_dev_by_zero = 41;
 		const int o_mem_edi = 43;
 		//const int o_version = 44;
+
 		const int maxInputCount = 8;
 
 		quint16 count = instance->param(i_count)->wordValue();
@@ -2350,6 +2351,14 @@ namespace Sim
 
 		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
 		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		// These outputs do not work really good in real AFB, so we taking them off the AFB items,
+		// they do not usable now
+		//
+		instance->addParamWord(o_med_index, 0);
+		instance->addParamWord(o_max_index, 0);
+		instance->addParamWord(o_min_index, 0);
+		instance->addParamWord(o_dev_by_zero, 0);	// There is impossible duv by zero
 
 		// --
 		//
@@ -2369,7 +2378,7 @@ namespace Sim
 
 			size_t operandCount = 0;
 
-			for (size_t i = 0; i < count; i++)
+			for (quint16 i = 0; i < count; i++)
 			{
 				const AfbComponentParam* enable = instance->param(i_enable_1 + i);
 				if (enable->wordValue() == 0)
@@ -2381,33 +2390,19 @@ namespace Sim
 
 				if (operandCount == 0 || value < minOperand.value)
 				{
-					minOperand = {value, static_cast<quint16>(i)};
+					minOperand = {value, i};
 				}
 
 				if (operandCount == 0 || value > maxOperand.value)
 				{
-					maxOperand = {value, static_cast<quint16>(i)};
+					maxOperand = {value, i};
 				}
 
-				operands[operandCount++] = {value, static_cast<quint16>(i)};
+				operands[operandCount++] = {value, i};
 			}
 
-			if (operandCount < 2)
-			{
-				instance->addParamWord(o_med_val, 0);
-				instance->addParamWord(o_max_val, 0);
-				instance->addParamWord(o_min_val, 0);
-				instance->addParamWord(o_med_index, 0);
-				instance->addParamWord(o_max_index, 0);
-				instance->addParamWord(o_min_index, 0);
-				instance->addParamWord(o_overflow, 0);
-				instance->addParamWord(o_underflow, 0);
-				instance->addParamWord(o_zero, 0);
-				instance->addParamWord(o_nan, 0);
-				instance->addParamWord(o_mem_edi, 1);	// <<< ERROR INDICATION
-
-				return;
-			}
+			// --
+			//
 
 			Operand median = {0, 0};
 			quint16 overflow = 0;
@@ -2416,18 +2411,33 @@ namespace Sim
 			quint16 nan = 0;
 			quint16 mem_edi = 0;
 
-			if (operandCount == 2)
+			switch (operandCount)
 			{
+			case 0:
+				median = {0, 0};
+				maxOperand = {0, 0};
+				maxOperand = {0, 0};
+				mem_edi = 1;			// <<<< Error indication
+				break;
+
+			case 1:
+				median = operands[0];
+				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				zero = median.value == 0 ? 0x0001 : 0x0000;
+				break;
+
+			case 2:
 				// Specific case, return medium
 				//
 				median.value = (operands[0].value + operands[1].value) / 2;
-				int warning_what_to_set;
 				median.operandIndex = 0;
+				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				zero = median.value == 0 ? 0x0001 : 0x0000;
+				break;
 
-				int to_do_set_flags_zero;
-			}
-			else
-			{
+			default:
 				std::sort(std::begin(operands), std::begin(operands) + operandCount,
 							[](const Operand& a, const Operand& b)
 							{
@@ -2435,16 +2445,16 @@ namespace Sim
 							});
 
 				median = operands[operandCount / 2];
-
-				int to_do_set_flags_zero;
+				zero = median.value == 0 ? 0x0001 : 0x0000;
+				break;
 			}
 
 			instance->addParamWord(o_med_val, median.value);
 			instance->addParamWord(o_max_val, maxOperand.value);
 			instance->addParamWord(o_min_val, minOperand.value);
-			instance->addParamWord(o_med_index, median.operandIndex);
-			instance->addParamWord(o_max_index, maxOperand.operandIndex);
-			instance->addParamWord(o_min_index, minOperand.operandIndex);
+//			instance->addParamWord(o_med_index, median.operandIndex);			// This output is not used in AFB
+//			instance->addParamWord(o_max_index, maxOperand.operandIndex);		// This output is not used in AFB
+//			instance->addParamWord(o_min_index, minOperand.operandIndex);		// This output is not used in AFB
 			instance->addParamWord(o_overflow, overflow);
 			instance->addParamWord(o_underflow, underflow);
 			instance->addParamWord(o_zero, zero);
@@ -2465,12 +2475,12 @@ namespace Sim
 			};
 
 			std::array<Operand, maxInputCount> operands;
-			Operand maxOperand{{o_max_val}, 0};
-			Operand minOperand{{o_min_val}, 0};
+			Operand maxOperand{AfbComponentParam{o_max_val}, 0};
+			Operand minOperand{AfbComponentParam{o_min_val}, 0};
 
 			size_t operandCount = 0;
 
-			for (size_t i = 0; i < count; i++)
+			for (quint16 i = 0; i < count; i++)
 			{
 				const AfbComponentParam* enable = instance->param(i_enable_1 + i);
 				if (enable->wordValue() == 0)
@@ -2478,39 +2488,24 @@ namespace Sim
 					continue;
 				}
 
-				AfbComponentParam value = *instance->param(i_in_1 + i * 2);
+				const AfbComponentParam* value = instance->param(i_in_1 + i * 2);
 
-				if (operandCount == 0 || value.floatValue() < minOperand.value.floatValue())
+				if (operandCount == 0 || value->floatValue() < minOperand.value.floatValue())
 				{
-					minOperand = {value, static_cast<quint16>(i)};
+					minOperand = {*value, i};
 				}
 
-				if (operandCount == 0 || value.floatValue() > maxOperand.value.floatValue())
+				if (operandCount == 0 || value->floatValue() > maxOperand.value.floatValue())
 				{
-					maxOperand = {value, static_cast<quint16>(i)};
+					maxOperand = {*value, i};
 				}
 
-				operands[operandCount++] = {value, static_cast<quint16>(i)};
+				operands[operandCount++] = {*value, i};
 			}
 
-			if (operandCount < 2)
-			{
-				instance->addParamWord(o_med_val, 0);
-				instance->addParamWord(o_max_val, 0);
-				instance->addParamWord(o_min_val, 0);
-				instance->addParamWord(o_med_index, 0);
-				instance->addParamWord(o_max_index, 0);
-				instance->addParamWord(o_min_index, 0);
-				instance->addParamWord(o_overflow, 0);
-				instance->addParamWord(o_underflow, 0);
-				instance->addParamWord(o_zero, 0);
-				instance->addParamWord(o_nan, 0);
-				instance->addParamWord(o_mem_edi, 1);	// <<< ERROR INDICATION
-
-				return;
-			}
-
-			Operand median = {{o_med_val}, 0};
+			// --
+			//
+			Operand median = {AfbComponentParam{o_med_val}, 0};
 
 			quint16 overflow = 0;
 			quint16 underflow = 0;
@@ -2518,10 +2513,28 @@ namespace Sim
 			quint16 nan = 0;
 			quint16 mem_edi = 0;
 
-			if (operandCount == 2)
+			switch (operandCount)
 			{
+			case 0:
+				median = {AfbComponentParam{0}, 0};
+				maxOperand = {AfbComponentParam{0}, 0};
+				maxOperand = {AfbComponentParam{0}, 0};
+				mem_edi = 1;			// <<<< Error indication
+				break;
+
+			case 1:
+				median = operands[0];
+				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
+				break;
+
+			case 2:
 				// Specific case, return medium
 				//
+				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+
 				median = operands[0];
 
 				median.value.addFloatingPoint(operands[1].value);
@@ -2533,13 +2546,13 @@ namespace Sim
 				overflow |= median.value.mathOverflow();
 				underflow |= median.value.mathUnderflow();
 				nan |= median.value.mathNan();
-				zero |= median.value.mathZero();
 
-				int warning_what_to_set_operand_for_2;
-				median.operandIndex = 0;
-			}
-			else
-			{
+				median.operandIndex = 0;		// Operand index set 0, subject to change in the next MEDIAN version
+
+				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
+				break;
+
+			default:
 				std::sort(std::begin(operands), std::begin(operands) + operandCount,
 							[](const Operand& a, const Operand& b)
 							{
@@ -2548,15 +2561,16 @@ namespace Sim
 
 				median = operands[operandCount / 2];
 
-				int to_do_set_flags_zero;
+				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
+				break;
 			}
 
 			instance->addParamFloat(o_med_val, median.value.floatValue());
 			instance->addParamFloat(o_max_val, maxOperand.value.floatValue());
 			instance->addParamFloat(o_min_val, minOperand.value.floatValue());
-			instance->addParamWord(o_med_index, median.operandIndex);
-			instance->addParamWord(o_max_index, maxOperand.operandIndex);
-			instance->addParamWord(o_min_index, minOperand.operandIndex);
+			//instance->addParamWord(o_med_index, median.operandIndex);
+			//instance->addParamWord(o_max_index, maxOperand.operandIndex);
+			//instance->addParamWord(o_min_index, minOperand.operandIndex);
 			instance->addParamWord(o_overflow, overflow);
 			instance->addParamWord(o_underflow, underflow);
 			instance->addParamWord(o_zero, zero);
