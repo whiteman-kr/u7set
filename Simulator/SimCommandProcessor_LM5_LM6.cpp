@@ -2362,7 +2362,7 @@ namespace Sim
 
 		// --
 		//
-		if (conf == 0)
+		if (conf == 1)
 		{
 			// SI - SignedInteger
 			//
@@ -2416,14 +2416,14 @@ namespace Sim
 			case 0:
 				median = {0, 0};
 				maxOperand = {0, 0};
-				maxOperand = {0, 0};
+				minOperand = {0, 0};
 				mem_edi = 1;			// <<<< Error indication
 				break;
 
 			case 1:
 				median = operands[0];
 				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				minOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
 				zero = median.value == 0 ? 0x0001 : 0x0000;
 				break;
 
@@ -2433,7 +2433,7 @@ namespace Sim
 				median.value = (operands[0].value + operands[1].value) / 2;
 				median.operandIndex = 0;
 				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				minOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
 				zero = median.value == 0 ? 0x0001 : 0x0000;
 				break;
 
@@ -2464,7 +2464,7 @@ namespace Sim
 			return;
 		}
 
-		if (conf == 1)
+		if (conf == 2)
 		{
 			// Floting Point
 			//
@@ -2518,14 +2518,14 @@ namespace Sim
 			case 0:
 				median = {AfbComponentParam{0}, 0};
 				maxOperand = {AfbComponentParam{0}, 0};
-				maxOperand = {AfbComponentParam{0}, 0};
+				minOperand = {AfbComponentParam{0}, 0};
 				mem_edi = 1;			// <<<< Error indication
 				break;
 
 			case 1:
 				median = operands[0];
 				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				minOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
 				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
 				break;
 
@@ -2533,7 +2533,7 @@ namespace Sim
 				// Specific case, return medium
 				//
 				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				minOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
 
 				median = operands[0];
 
