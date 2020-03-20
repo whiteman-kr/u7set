@@ -259,6 +259,10 @@ namespace Sim
 		//
 		void afb_damper_v112(AfbComponentInstance* instance);
 
+		//	MEM - Median and Extremum, OpCode 12
+		//
+		void afb_mem_v7(AfbComponentInstance* instance);
+
 		//	MATH, OpCode 13
 		//
 		void afb_math_v104(AfbComponentInstance* instance);
@@ -352,6 +356,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_bdec_v103")),		&CommandProcessor_LM5_LM6::afb_bdec_v103},				// 9
 			{::calcHash(QStringLiteral("afb_bcomp_v111")),		&CommandProcessor_LM5_LM6::afb_bcomp_v111},				// 10
 			{::calcHash(QStringLiteral("afb_damper_v112")),		&CommandProcessor_LM5_LM6::afb_damper_v112},			// 11
+			{::calcHash(QStringLiteral("afb_mem_v7")),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
 			{::calcHash(QStringLiteral("afb_math_v104")),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
 			{::calcHash(QStringLiteral("afb_scale_v108")),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14
 			{::calcHash(QStringLiteral("afb_dpcomp_v3")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20

@@ -44,7 +44,7 @@ namespace Sim
 		AfbComponentParam() = default;
 		AfbComponentParam(const AfbComponentParam& that) = default;
 		AfbComponentParam(AfbComponentParam&&) = default;
-		AfbComponentParam(quint16 paramOpIndex);
+		explicit AfbComponentParam(quint16 paramOpIndex);
 		AfbComponentParam& operator=(const AfbComponentParam& that) = default;
 		AfbComponentParam& operator=(AfbComponentParam&&) = default;
 
