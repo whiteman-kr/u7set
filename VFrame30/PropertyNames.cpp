@@ -32,6 +32,7 @@ namespace VFrame30
 	const QString PropertyNames::precision{"Precision"};
 	const QString PropertyNames::precisionPropText{"Number of decimals after period, -1: take value from the signal description"};
 	const QString PropertyNames::analogFormat{"AnalogFormat"};
+	const QString PropertyNames::customText{"CustomText"};
 	const QString PropertyNames::columnCount{"ColumnCount"};
 	const QString PropertyNames::pinCount{"PinCount"};
 	const QString PropertyNames::showValidityPin{"ValidityPin"};

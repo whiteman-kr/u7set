@@ -167,6 +167,9 @@ namespace VFrame30
 		E::AnalogFormat analogFormat() const;
 		void setAnalogFormat(E::AnalogFormat value);
 
+		QString customText() const;
+		void setCustomText(const QString& value);
+
 		// Data
 		//
 	private:
@@ -178,6 +181,7 @@ namespace VFrame30
 
 		int m_precision = 2;
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
+		QString m_customText;
 	};
 
 }
