@@ -103,14 +103,15 @@ public:
 	//
 	enum class ColumnData
 	{
-		AppSignalID,
-		CustomSignalID,
-		Caption,
-		State,
-		ImpactAppSignalID,
-		ImpactCustomSignalID,
-		ImpactCaption,
-		ImpactState,
+		AppSignalID = 0,
+		CustomSignalID = 1,
+		Caption = 2,
+		State = 3,
+		ImpactAppSignalID = 32,
+		ImpactCustomSignalID = 33,
+		ImpactCaption = 34,
+		ImpactState = 35,
+		CustomText = 64				// Add new
 	};
 	Q_ENUM(ColumnData)
 

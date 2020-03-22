@@ -658,6 +658,8 @@ message SchemaItemSignal
 	repeated SchemaItemSignalColumn columns = 4;
 	optional bool multiLine = 5 [default = true];
 	repeated string impactAppSignalIDs = 6;
+
+    optional string customText = 16;
 }
 
 //
@@ -738,6 +740,8 @@ message SchemaItemReceiver
 	optional int32 precision = 4 [default = 2];
 	optional int32 analogFormat = 5 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
 	//optional bool multiline = 6 [default = true];
+
+    optional string customText = 16;
 }
 
 //

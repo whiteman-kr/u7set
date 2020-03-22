@@ -38,6 +38,7 @@ namespace VFrame30
 		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
 		static QString getCoulumnText(CDrawParam* drawParam,
+									  const SchemaItem* schemaItem,
 									  const E::ColumnData& data,
 									  const AppSignalParam& signal,
 									  const AppSignalState& signalState,
@@ -101,6 +102,9 @@ namespace VFrame30
 		E::AnalogFormat analogFormat() const;
 		void setAnalogFormat(const E::AnalogFormat& value);
 
+		QString customText() const;
+		void setCustomText(const QString& value);
+
 		int columnCount() const;
 		void setColumnCount(const int& value);
 
@@ -125,6 +129,8 @@ namespace VFrame30
 
 		int m_precision = 2;
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
+
+		QString m_customText;
 
 		// Monitor mode settings
 		//

@@ -40,6 +40,7 @@ namespace VFrame30
 		static const QString precision;
 		static const QString precisionPropText;
 		static const QString analogFormat;
+		static const QString customText;
 		static const QString columnCount;
 		static const QString pinCount;
 		static const QString showValidityPin;
