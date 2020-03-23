@@ -140,14 +140,19 @@ namespace Sim
 				{
 					float val = m_value.value<float>();
 
+
 					if (precision == -1)
 					{
 						result = QString{"%1"}.arg(val, 0, (char)(analogFormat));
+
 					}
 					else
 					{
 						result = QString{"%1"}.arg(val, 0, (char)(analogFormat), precision);
 					}
+
+					QLocale c;
+					result.replace('.', c.decimalPoint());
 				}
 				break;
 			default:
