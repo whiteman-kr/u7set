@@ -6325,7 +6325,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0011">
+        <AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0012">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6430,6 +6430,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6534,7 +6541,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0003">
+        <AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0004">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6631,6 +6638,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6738,7 +6752,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-        <AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0008">
+        <AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0009">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -6871,6 +6885,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6975,7 +6996,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0008">
+		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0009">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -7069,6 +7090,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>  
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library>
@@ -7169,7 +7197,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0011">
+		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0012">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7235,6 +7263,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library>
@@ -7336,7 +7371,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0002">
+		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0003">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7394,6 +7429,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library>
@@ -9551,7 +9593,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0008">
+        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0009">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Logic</Category>
@@ -9569,6 +9611,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
 			</Outputs>
 			<Params>
+				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>           
 			</Params>
 			<CommonScript>
 				<Library></Library>
