@@ -332,6 +332,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0312.sql", "Upgrade to version 312, Removed outs med_in, max_in, min_in for median AFBs, set sim functions for AFBs"},
 	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags vesrion so it can be updated after new opcode 255"},
 	{":/DatabaseUpgrade/Upgrade0314.sql", "Upgrade to version 314, Added SetFlagsToInput property to simlock, mismatch_* AFB"},
+	{":/DatabaseUpgrade/Upgrade0315.sql", "Upgrade to version 315, SetFlagsToInput renamed to AssignFlags in simlock, mismatch_* AFB"},
 };
 
 int DbWorker::counter = 0;

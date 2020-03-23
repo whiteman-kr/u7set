@@ -44,7 +44,7 @@ namespace VFrame30
 		QVariant getAfbParam(const QString& name);
 		Afb::AfbParam afbParam(const QString& name);
 
-		std::optional<Afb::AfbParam> getAfbParamSetFlagsToInput();
+		std::optional<bool> getAssignFlagsValue();
 
 		// Set Afb element parameters
 		//
