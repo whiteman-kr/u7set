@@ -2475,8 +2475,8 @@ namespace Sim
 			};
 
 			std::array<Operand, maxInputCount> operands;
-			Operand maxOperand{AfbComponentParam{o_max_val}, 0};
-			Operand minOperand{AfbComponentParam{o_min_val}, 0};
+			Operand maxOperand{AfbComponentParam{static_cast<quint16>(o_max_val)}, 0};
+			Operand minOperand{AfbComponentParam{static_cast<quint16>(o_min_val)}, 0};
 
 			size_t operandCount = 0;
 
@@ -2505,7 +2505,7 @@ namespace Sim
 
 			// --
 			//
-			Operand median = {AfbComponentParam{o_med_val}, 0};
+			Operand median = {AfbComponentParam{static_cast<quint16>(o_med_val)}, 0};
 
 			quint16 overflow = 0;
 			quint16 underflow = 0;

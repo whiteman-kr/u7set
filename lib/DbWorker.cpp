@@ -331,6 +331,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0311.sql", "Upgrade to version 311, Added AdditionSizes section to AFB bus_switch in LM description files"},
 	{":/DatabaseUpgrade/Upgrade0312.sql", "Upgrade to version 312, Removed outs med_in, max_in, min_in for median AFBs, set sim functions for AFBs"},
 	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags vesrion so it can be updated after new opcode 255"},
+	{":/DatabaseUpgrade/Upgrade0314.sql", "Upgrade to version 314, Added SetFlagsToInput property to simlock, mismatch_* AFB"},
 };
 
 int DbWorker::counter = 0;
