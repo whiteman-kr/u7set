@@ -169,7 +169,7 @@ public slots:
 	void showLogicSchemaForLm();
 
 	void addOptoConnection();
-	void showModuleOptoConnections();
+	void showObjectConnections();
 
 	void copySelectedDevices();
 	void pasteDevices();
@@ -313,7 +313,9 @@ private:
 	//----------------------------------
 	QAction* m_separatorOptoConnection = nullptr;
 	QAction* m_addOptoConnection = nullptr;
-	QAction* m_showModuleOptoConnections = nullptr;
+	QAction* m_showObjectConnections = nullptr;
+	QAction* m_showConnections = nullptr;
+
 	//----------------------------------
 	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;
@@ -333,7 +335,6 @@ private:
 	QAction* m_separatorAction3 = nullptr;
 	QAction* m_updateFromPresetAction = nullptr;
 	QAction* m_switchModeAction = nullptr;
-    QAction* m_connectionsAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QAction* m_SeparatorAction4 = nullptr;
 
