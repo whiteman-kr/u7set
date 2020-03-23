@@ -4212,7 +4212,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0010">
+		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0011">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4227,6 +4227,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="i_pause" Caption="pause" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>
 				<Pin OpName="i_kd" Caption="kd" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="0" Size="32"/>
 				<Pin OpName="i_td" Caption="td" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+				<Pin OpName="i_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
+				<Pin OpName="i_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="19" Size="32"/>
@@ -4239,24 +4241,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="27" Size="1"/>
 			</Outputs>
 			<Params>				
-				<Param OpName="i_max" Caption="Max" Visible="true" OpIndex="4" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_min" Caption="Min" Visible="true" OpIndex="6" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>      
 				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
@@ -4944,7 +4928,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0009">
+		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0010">
 			<Properties>				
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4961,6 +4945,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="i_track" Caption="track" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
 				<Pin OpName="i_ki" Caption="ki" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="0" Size="32"/>
 				<Pin OpName="i_ti" Caption="ti" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+				<Pin OpName="i_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
+				<Pin OpName="i_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="20" Size="32"/>
@@ -4973,24 +4959,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="28" Size="1"/>
 			</Outputs>
 			<Params>				
-				<Param OpName="i_max" Caption="Max" Visible="true" OpIndex="4" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_min" Caption="Min" Visible="true" OpIndex="6" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 				<Param OpName="i_ri_const" Caption="RIConst" Visible="true" OpIndex="8" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
@@ -6326,7 +6294,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0011">
+		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0012">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6444,7 +6412,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -6556,7 +6524,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0003">
+		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0004">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6666,7 +6634,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -6781,7 +6749,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0008">
+		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0009">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -6927,7 +6895,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -7039,7 +7007,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0009">
+		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0010">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -7133,7 +7101,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>  
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -7240,7 +7208,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0012">
+		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0013">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7306,7 +7274,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -7414,7 +7382,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0003">
+		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0004">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7472,7 +7440,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -9636,7 +9604,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0009">
+        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0010">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Logic</Category>
@@ -9654,7 +9622,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="SetFlagsToInput" Caption="SetFlagsToInput" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>

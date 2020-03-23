@@ -691,13 +691,13 @@ namespace VFrame30
 		return Afb::AfbParam();
 	}
 
-	std::optional<Afb::AfbParam> SchemaItemAfb::getAfbParamSetFlagsToInput()
+	std::optional<bool> SchemaItemAfb::getAssignFlagsValue()
 	{
 		for (Afb::AfbParam& p : m_afbElement.params())
 		{
-			if (p.caption() == "SetFlagsToInput")
+			if (p.isDiscrete() == true && p.caption() == QStringLiteral("AssignFlags"))
 			{
-				return p;
+				return p.value().toBool();
 			}
 		}
 
