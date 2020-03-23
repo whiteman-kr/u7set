@@ -271,6 +271,10 @@ namespace Sim
 		//
 		void afb_scale_v108(AfbComponentInstance* instance);
 
+		//	INTEGRATOR, OpCode 17
+		//
+		void afb_int_v6(AfbComponentInstance* instance);
+
 		//	DPCOMP, OpCode 20
 		//
 		void afb_dpcomp_v3(AfbComponentInstance* instance);
@@ -359,6 +363,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mem_v7")),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
 			{::calcHash(QStringLiteral("afb_math_v104")),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
 			{::calcHash(QStringLiteral("afb_scale_v108")),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14
+			{::calcHash(QStringLiteral("afb_int_v6")),			&CommandProcessor_LM5_LM6::afb_int_v6},					// 17
 			{::calcHash(QStringLiteral("afb_dpcomp_v3")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20
 			{::calcHash(QStringLiteral("afb_dpcomp_v4")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
 			{::calcHash(QStringLiteral("afb_dpcomp_v5")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20

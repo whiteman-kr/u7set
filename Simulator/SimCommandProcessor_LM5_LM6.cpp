@@ -2766,6 +2766,178 @@ namespace Sim
 		return;
 	}
 
+	//	INTEGRATOR, OpCode 17
+	//
+	void CommandProcessor_LM5_LM6::afb_int_v6(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_ki = 0;				// [0, 1]	FP (32bit)	Int. Coef. of Gain
+		const int i_ti = 2;				// [2, 3]	SI (32bit)	The integration time Ti(ms) (0..((2^31) - 1)
+		const int i_max = 4;			// [4, 5]	FP (32bit)	Max output value
+		const int i_min = 6;			// [6, 7]	FP (32bit)	Min output value
+		const int i_ri_const = 8;		// [8, 9]	FP (32bit)	Integral constant for reset state
+		const int i_yi_prev = 10;		// [10, 11]	FP (32bit)	Previous integral value
+		const int i_x_tr = 12;			// [12, 13]	FP (32bit)	Tracking data
+		const int i_x = 14;				// [14, 15]	FP (32bit)	Input X
+		const int i_reset = 16;			// Discrete		Reset
+		const int i_pause = 17;			// Discrete		Pause
+		const int i_track = 18;			// Discrete		Tracking mode
+
+		const int o_result = 20;		// [20, 21]	FP (32bit)	Result - Output Y
+		const int o_max = 22;			// Discrete		Maximum value signal
+		const int o_min = 23;			// Discrete		Minimum value signal
+
+		const int o_param_err = 24;		// Discrete
+		const int o_overflow = 25;		// Discrete
+		const int o_underflow = 26;		// Discrete
+		const int o_zero = 27;			// Discrete
+		const int o_nan = 28;			// Discrete
+		//const int o_version = 29;		// Discrete
+
+		// Get input data
+		//
+		float ki = instance->param(i_ki)->floatValue();
+		qint32 ti = instance->param(i_ti)->signedIntValue();
+		float maxValue = instance->param(i_max)->floatValue();
+		float minValue = instance->param(i_min)->floatValue();
+		float ri_const = instance->param(i_ri_const)->floatValue();
+		float yi_prev = instance->paramExists(i_yi_prev) == true ?
+							instance->param(i_yi_prev)->floatValue() :
+							0.0f;
+		float x_tr = instance->param(i_x_tr)->floatValue();
+		float x = instance->param(i_x)->floatValue();
+		quint16 reset = instance->param(i_reset)->wordValue();
+		quint16 pause = instance->param(i_pause)->wordValue();
+		quint16 track = instance->param(i_track)->wordValue();
+
+		// Logic
+		// Y = F(Õ,Ki,Ti,)
+		// Yi = (X * Ki) / TI + (Yi - 1);
+		// *TI = Òi(ms) / 5(ms)
+		// i_ti = Ti(ms)
+		//
+		AfbComponentParam result{o_result};
+		result.setFloatValue(0);
+
+		quint16 maxOut = 0;
+		quint16 minOut = 0;
+
+		quint16 param_err = 0;
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+
+		do
+		{
+			if (maxValue <= minValue)
+			{
+				result.setFloatValue(yi_prev);
+				param_err = 0x0001;
+				break;
+			}
+
+			int to_do_distinct_safety_non_safety_constants;
+
+			//const qint32 maxValue = 350000;
+			const qint32 maxTiValue = std::numeric_limits<qint32>::max();
+
+			if (ti < m_cycleDurationMs ||
+				ti > maxTiValue)
+			{
+				param_err = 1;
+				ti = std::clamp(ti, m_cycleDurationMs, maxTiValue);
+
+				// Continue to work with correctd value
+				//
+			}
+
+			// Reset, Pause and Track are set in accordance to priority
+			//
+			if (reset == 1)
+			{
+				result.setFloatValue(ri_const);
+				break;
+			}
+
+			if (pause == 1)
+			{
+				result.setFloatValue(yi_prev);
+				break;
+			}
+
+			if (track == 1)
+			{
+				result.setFloatValue(x_tr);
+				break;
+			}
+
+			// Normal operating
+			// Yi = (X * Ki) / TI + (Yi - 1);
+			//
+			float ti_value = ti / static_cast<float>(m_cycleDurationMs);
+
+			// X * Ki
+			//
+			result.setFloatValue(x);
+			result.mulFloatingPoint(ki);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// div TI
+			//
+			result.divFloatingPoint(ti_value);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// + Y(i-1)
+			//
+			result.addFloatingPoint(yi_prev);
+
+			// Check max/min
+			//
+			if (result.floatValue() >= maxValue)
+			{
+				result.setFloatValue(maxValue);
+				maxOut = 0x0001;
+			}
+
+			if (result.floatValue() <= minValue)
+			{
+				result.setFloatValue(minValue);
+				minOut = 0x0001;
+			}
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+			zero = result.mathZero();
+
+		} while (false);
+
+
+		// Set outputs
+		//
+		instance->addParamFloat(o_result, result.floatValue());
+		instance->addParamFloat(i_yi_prev, result.floatValue());
+
+		instance->addParamWord(o_max, maxOut);
+		instance->addParamWord(o_min, minOut);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_param_err, param_err);
+
+		return;
+	}
+
 	//	DPCOMP, OpCode 20
 	//
 	void CommandProcessor_LM5_LM6::afb_dpcomp_v3(AfbComponentInstance* instance)
