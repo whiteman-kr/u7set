@@ -655,14 +655,16 @@ namespace Afb
 
 	// Caption
 	//
+	QString AfbSignal::caption() const
+	{
+		return m_caption;
+	}
+
 	QString AfbSignal::jsCaption()
 	{
 		return caption();
 	}
-	const QString& AfbSignal::caption() const
-	{
-		return m_caption;
-	}
+
 	void AfbSignal::setCaption(const QString& caption)
 	{
 		m_caption = caption;
@@ -2294,6 +2296,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		for (AfbSignal& s : m_outputSignals)
 		{
 			if (s.operandIndex() == opIndex)
@@ -2301,6 +2304,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		return nullptr;
 	}
 
@@ -2321,8 +2325,8 @@ namespace Afb
 				return &s;
 			}
 		}
-		return nullptr;
 
+		return nullptr;
 	}
 
 	void AfbElement::updateParams(const std::vector<AfbParam>& params)
@@ -2348,6 +2352,8 @@ namespace Afb
 				newParams.push_back(p);
 			}
 		}
+
+		return;
 	}
 
 	// Properties and Data
