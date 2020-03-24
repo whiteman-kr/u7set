@@ -348,7 +348,7 @@ namespace Builder
 		bool calculate_DEAD_ZONE_paramValues();
 		bool calculate_DEAD_ZONE_paramValues_ldn4();
 		bool calculate_POL_paramValues();
-		bool calculate_DER_paramValues();
+		bool calculate_DERIV_paramValues();
 		bool calculate_MISMATCH_paramValues();
 		bool calculate_TCONV_paramValues();
 		bool calculate_INDICATION_paramValues();
