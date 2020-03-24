@@ -143,6 +143,8 @@ namespace Builder
 		bool isSimLockItem() const;
 		bool isMismatchItem() const;
 
+		bool assignFlags() const;
+
 		E::UalItemType type() const;
 
 		bool hasRam() const { return afb().hasRam(); }
