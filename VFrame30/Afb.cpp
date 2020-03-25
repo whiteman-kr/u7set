@@ -655,14 +655,16 @@ namespace Afb
 
 	// Caption
 	//
+	QString AfbSignal::caption() const
+	{
+		return m_caption;
+	}
+
 	QString AfbSignal::jsCaption()
 	{
 		return caption();
 	}
-	const QString& AfbSignal::caption() const
-	{
-		return m_caption;
-	}
+
 	void AfbSignal::setCaption(const QString& caption)
 	{
 		m_caption = caption;
@@ -2321,8 +2323,8 @@ namespace Afb
 				return &s;
 			}
 		}
-		return nullptr;
 
+		return nullptr;
 	}
 
 	void AfbElement::updateParams(const std::vector<AfbParam>& params)

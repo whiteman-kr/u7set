@@ -271,6 +271,10 @@ namespace Sim
 		//
 		void afb_scale_v108(AfbComponentInstance* instance);
 
+		//	FUNC, OpCode 16
+		//
+		void afb_func_v3(AfbComponentInstance* instance);
+
 		//	INTEGRATOR, OpCode 17
 		//
 		void afb_int_v6(AfbComponentInstance* instance);
@@ -296,6 +300,10 @@ namespace Sim
 		//	POL, OpCode 25
 		//
 		void afb_pol_v3(AfbComponentInstance* instance);
+
+		//	DER, OpCode 26
+		//
+		void afb_der_v5(AfbComponentInstance* instance);
 
 		// MISMATCH, OpCode 27
 		// Analog Mismatch
@@ -363,6 +371,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mem_v7")),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
 			{::calcHash(QStringLiteral("afb_math_v104")),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
 			{::calcHash(QStringLiteral("afb_scale_v108")),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14
+			{::calcHash(QStringLiteral("afb_func_v3")),			&CommandProcessor_LM5_LM6::afb_func_v3},				// 16
 			{::calcHash(QStringLiteral("afb_int_v6")),			&CommandProcessor_LM5_LM6::afb_int_v6},					// 17
 			{::calcHash(QStringLiteral("afb_dpcomp_v3")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20
 			{::calcHash(QStringLiteral("afb_dpcomp_v4")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
@@ -371,6 +380,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_latch_v4")),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
 			{::calcHash(QStringLiteral("afb_lim_v7")),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
 			{::calcHash(QStringLiteral("afb_pol_v3")),			&CommandProcessor_LM5_LM6::afb_pol_v3},					// 25
+			{::calcHash(QStringLiteral("afb_der_v5")),			&CommandProcessor_LM5_LM6::afb_der_v5},					// 26
 			{::calcHash(QStringLiteral("afb_mismatch_v2")),		&CommandProcessor_LM5_LM6::afb_mismatch_v2},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v3")),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27

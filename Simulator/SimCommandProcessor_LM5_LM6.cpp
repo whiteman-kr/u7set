@@ -2023,7 +2023,9 @@ namespace Sim
 			float resetValue = instance->param(i_sp_r)->floatValue();
 			float inputValue = instance->param(i_data)->floatValue();
 			quint16 prevResult = 0;
-			quint16 nan = (settingValue != settingValue || resetValue != resetValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+			quint16 nan = (std::isnan(settingValue) ||
+						  std::isnan(resetValue) ||
+						  std::isnan(inputValue)) ? 0x0001 : 0x0000;
 
 			switch (conf)
 			{
@@ -2268,7 +2270,7 @@ namespace Sim
 				isOverflow = std::fetestexcept(FE_OVERFLOW);
 				isUnderflow = std::fetestexcept(FE_UNDERFLOW);
 				isZero = (result == .0f) || isUnderflow;
-				isNan = (result != result);
+				isNan = std::isnan(result);
 
 				instance->addParamFloat(o_result, result);
 				instance->addParamFloat(o_current, result);
@@ -2307,7 +2309,7 @@ namespace Sim
 				isOverflow = false;
 				isUnderflow = false;
 				isZero = (inputValue == .0f);
-				isNan = (inputValue != inputValue);
+				isNan = std::isnan(inputValue);
 			}
 		}
 
@@ -2766,6 +2768,161 @@ namespace Sim
 		return;
 	}
 
+	//	FUNC, OpCode 16
+	//
+	void CommandProcessor_LM5_LM6::afb_func_v3(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_data = 1;
+
+		const int o_result = 5;
+		const int o_overflow = 7;
+		const int o_underflow = 8;
+		const int o_zero = 9;
+		const int o_nan = 10;
+		const int o_div_by_zero = 11;
+		//const int o_func_edi = 12;
+		//const int o_version = 13;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		AfbComponentParam result{o_result};
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+		quint16 div_by_zero = 0;
+
+		switch (conf)
+		{
+		case 1:		// FP SQRT
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				if (std::isnormal(floatData) == true)
+				{
+					if (std::signbit(floatData) == true)
+					{
+						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+						nan = 1;
+						overflow  = 0;
+						zero = 0;
+					}
+					else
+					{
+						result.setFloatValue(std::sqrtf(floatData));
+						nan = 0;
+						overflow  = 0;
+						zero = 0;
+					}
+
+					break;
+				}
+
+				if (std::isinf(floatData) == true)
+				{
+					if (std::signbit(floatData) == false)
+					{
+						result.setFloatValue(std::numeric_limits<float>::infinity());
+						nan = 0;
+						overflow  = 1;
+						zero = 0;
+					}
+					else
+					{
+						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+						nan = 1;
+						overflow  = 0;
+						zero = 0;
+					}
+
+					break;
+				}
+
+				if (std::isnan(floatData) == true)
+				{
+					result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+					nan = 1;
+					overflow  = 0;
+					zero = 0;
+					break;
+				}
+
+				if (std::fpclassify(floatData) == FP_SUBNORMAL)
+				{
+					result.setFloatValue(.0f);
+					nan = 0;
+					overflow  = 0;
+					zero = 1;
+					break;
+				}
+
+				if (floatData == .0f || floatData == -.0f)
+				{
+					result.setFloatValue(.0f);
+					nan = 0;
+					overflow  = 0;
+					zero = 1;
+					break;
+				}
+
+				// what type og float is it ?
+				SimException::raise(QString("Specific type of float: %1, %2.")
+									.arg(floatData),
+									"CommandProcessor_LM5_LM6::afb_func_v3");
+			}
+			break;
+		case 2:		// FP ABS
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				result.setFloatValue(std::fabsf(floatData));
+			}
+			break;
+		case 7:		// FP INV is  = 1.0/data;
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				result.setFloatValue(1.0f);
+				result.divFloatingPoint(floatData);
+
+				underflow = result.mathUnderflow();
+				zero = result.mathZero();
+				nan = result.mathNan();
+				div_by_zero = result.mathDivByZero();
+			}
+			break;
+		case 8:		// SI ABS
+			{
+				qint32 intData = instance->param(i_data)->signedIntValue();
+
+				result.setSignedIntValue(std::abs(intData));
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+								.arg(conf),
+								"CommandProcessor_LM5_LM6::afb_func_v3");
+		}
+
+		// Save result
+		//
+		result.setOpIndex(o_result);
+		instance->addParam(result);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_div_by_zero, div_by_zero);
+
+		return;
+	}
+
 	//	INTEGRATOR, OpCode 17
 	//
 	void CommandProcessor_LM5_LM6::afb_int_v6(AfbComponentInstance* instance)
@@ -3049,7 +3206,9 @@ namespace Sim
 
 			// NaN
 			//
-			quint16 nan = (settingValue != settingValue || hystValue != hystValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+			quint16 nan = (std::isnan(settingValue) ||
+						  std::isnan(hystValue) ||
+						  std::isnan(inputValue)) ? 0x0001 : 0x0000;
 
 			instance->addParamWord(o_nan, nan);
 
@@ -3295,7 +3454,9 @@ namespace Sim
 
 			// NaN
 			//
-			quint16 nan = (settingValue != settingValue || hystValue != hystValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+			quint16 nan = (std::isnan(settingValue) ||
+						   std::isnan(hystValue) ||
+						   std::isnan(inputValue)) ? 0x0001 : 0x0000;
 
 			instance->addParamWord(o_nan, nan);
 
@@ -3752,9 +3913,9 @@ namespace Sim
 				float minFloat = limMin->floatValue();
 				float maxFloat = limMax->floatValue();
 
-				if (dataFloat != dataFloat ||
-					minFloat != minFloat ||
-					maxFloat != maxFloat)
+				if (std::isnan(dataFloat) ||
+					std::isnan(minFloat) ||
+					std::isnan(maxFloat))
 				{
 					result.setFloatValue(0);
 					setNan = true;
@@ -3875,6 +4036,210 @@ namespace Sim
 		instance->addParamWord(o_nan, result.mathNan());
 
 		return;
+	}
+
+	//	DER, OpCode 26
+	//
+	void CommandProcessor_LM5_LM6::afb_der_v5(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_kd = 0;				// [0, 1]	FP (32bit)	Dif. Coef. of Gain
+		const int i_td = 2;				// [2, 3]	SI (32bit)	The Dif. time td(ms) (0..((2^31) - 1)
+		const int i_max = 4;			// [4, 5]	FP (32bit)	Max output value
+		const int i_min = 6;			// [6, 7]	FP (32bit)	Min output value
+		const int i_x_prev = 8;			// [8, 9]	FP (32bit)	Previouse input value X
+		const int i_yd_prev = 10;		// [10, 11]	FP (32bit)	Previous result value
+		const int i_x = 12;				// [12, 13]	FP (32bit)	Input X
+		const int i_reset = 14;			// Discrete		Reset
+		const int i_pause = 15;			// Discrete		Pause mode
+
+		//const int o_x_prev = 17;		// [17, 18]	FP (32bit)	Previous (now is current) input value X
+		const int o_result = 19;		// [19, 20]	FP (32bit)	Result - Output Y
+		const int o_max = 21;			// Discrete		Maximum value signal
+		const int o_min = 22;			// Discrete		Minimum value signal
+
+		const int o_param_err = 23;		// Discrete
+		const int o_overflow = 24;		// Discrete
+		const int o_underflow = 25;		// Discrete
+		const int o_zero = 26;			// Discrete
+		const int o_nan = 27;			// Discrete
+		//const int o_version = 28;		// Discrete
+
+		// Get input data
+		//
+		float kd = instance->param(i_kd)->floatValue();
+		qint32 td = instance->param(i_td)->signedIntValue();
+		float maxValue = instance->param(i_max)->floatValue();
+		float minValue = instance->param(i_min)->floatValue();
+
+		float x_prev = instance->paramExists(i_x_prev) == true ?
+							instance->param(i_x_prev)->floatValue() :
+							0.0f;
+
+		float yd_prev = instance->paramExists(i_yd_prev) == true ?
+						   instance->param(i_yd_prev)->floatValue() :
+						   0.0f;
+
+		float x = instance->param(i_x)->floatValue();
+
+		quint16 reset = instance->param(i_reset)->wordValue();
+		quint16 pause = instance->param(i_pause)->wordValue();
+
+		if (std::isnan(yd_prev) == true)	// NaN
+		{
+			yd_prev = .0f;
+		}
+
+		// Logic
+		// Y= F(Õ,Kd,Td)
+		// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
+		// TD=Òd(ms) / 5(ms)
+		// i_td = Ti(ms)
+		//
+		AfbComponentParam result{o_result};
+		result.setFloatValue(0);
+
+		float newXPrev = x;
+
+		quint16 maxOut = 0;
+		quint16 minOut = 0;
+
+		quint16 param_err = 0;
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+
+		do
+		{
+			if (maxValue <= minValue)
+			{
+				result.setFloatValue(yd_prev);
+				param_err = 0x0001;
+				newXPrev = x_prev;
+				break;
+			}
+
+			int to_do_distinct_safety_non_safety_constants;
+
+			//const qint32 maxValue = 350000;
+			const qint32 maxTdValue = std::numeric_limits<qint32>::max();
+
+			if (td < m_cycleDurationMs ||
+				td > maxTdValue)
+			{
+				param_err = 1;
+				td = std::clamp(td, m_cycleDurationMs, maxTdValue);
+
+				// Continue to work with corrected value
+				//
+			}
+
+			// Reset, Pause and Track are set in accordance to priority
+			//
+			if (reset == 1)
+			{
+				result.setFloatValue(0);
+				newXPrev = .0f;
+				break;
+			}
+
+			if (pause == 1)
+			{
+				result.setFloatValue(yd_prev);
+				newXPrev = x_prev;
+				break;
+			}
+
+			// Normal operating
+			// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
+			//
+			float td_value = td / static_cast<float>(m_cycleDurationMs);
+
+			// (X - (Xi-1))
+			//
+			result.setFloatValue(x);
+			result.subFloatingPoint(x_prev);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// * Kd
+			//
+			result.mulFloatingPoint(kd);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// (Yi-1) / TD
+			//
+			AfbComponentParam yprev_div_td{0};
+
+			yprev_div_td.setFloatValue(yd_prev);
+			yprev_div_td.divFloatingPoint(td_value);
+
+			overflow |= yprev_div_td.mathOverflow();
+			underflow |= yprev_div_td.mathUnderflow();
+			nan |= yprev_div_td.mathNan();
+
+			// - (Yi-1) / TD
+			//
+			result.subFloatingPoint(yprev_div_td.floatValue());
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// + (Yi-1)
+			//
+			result.addFloatingPoint(yd_prev);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// Check max/min
+			//
+			if (result.floatValue() >= maxValue)
+			{
+				result.setFloatValue(maxValue);
+				maxOut = 0x0001;
+			}
+
+			if (result.floatValue() <= minValue)
+			{
+				result.setFloatValue(minValue);
+				minOut = 0x0001;
+			}
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+			zero = result.mathZero();
+
+		} while (false);
+
+
+		// Set outputs
+		//
+		instance->addParamFloat(o_result, result.floatValue());
+		instance->addParamFloat(i_yd_prev, result.floatValue());
+		instance->addParamFloat(i_x_prev, newXPrev);
+
+		instance->addParamWord(o_max, maxOut);
+		instance->addParamWord(o_min, minOut);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_param_err, param_err);
+
+		return;
+
 	}
 
 	// MISMATCH, OpCode 27
