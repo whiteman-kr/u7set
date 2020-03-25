@@ -458,6 +458,28 @@ namespace Builder
 		return m_appLogicItem.afbElement().caption().startsWith(MISMATCH_ITEM_CAPTION);
 	}
 
+	bool UalItem::assignFlags() const
+	{
+		const VFrame30::SchemaItemAfb* schemaItemAfb = dynamic_cast<const VFrame30::SchemaItemAfb*>(m_appLogicItem.m_fblItem.get());
+
+		if (schemaItemAfb == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		std::optional<bool> result = schemaItemAfb->getAssignFlagsValue();
+
+		if (result.has_value() == true)
+		{
+			return result.value();
+		}
+
+		assert(false);			// AssignFlags property isn't exist in schemaItemAfb
+								// Why assignFlags() has been called fot this schemaItemAfb ???
+		return false;
+	}
+
 	E::UalItemType UalItem::type() const
 	{
 		if (m_type != E::UalItemType::Unknown)

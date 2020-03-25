@@ -2635,6 +2635,11 @@ namespace Builder
 				continue;
 			}
 
+			if (ualItem->assignFlags() == false)
+			{
+				continue;
+			}
+
 			UalAfb* simLockItem = m_ualAfbs.value(ualItem->guid(), nullptr);
 
 			if (simLockItem == nullptr)
@@ -2699,6 +2704,11 @@ namespace Builder
 			TEST_PTR_CONTINUE(ualItem);
 
 			if (ualItem->isMismatchItem() == false)
+			{
+				continue;
+			}
+
+			if (ualItem->assignFlags() == false)
 			{
 				continue;
 			}
