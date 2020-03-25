@@ -334,6 +334,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0314.sql", "Upgrade to version 314, Added SetFlagsToInput property to simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0315.sql", "Upgrade to version 315, SetFlagsToInput renamed to AssignFlags in simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0316.sql", "Upgrade to version 316, AFB integrator and derive have min and max as inputs"},
+	{":/DatabaseUpgrade/Upgrade0317.sql", "Upgrade to version 317, Added MSO-4 preset and configuration script"},
 };
 
 int DbWorker::counter = 0;

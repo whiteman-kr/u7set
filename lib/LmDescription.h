@@ -167,6 +167,7 @@ public:
 
 		int lanControllerCount() const { return static_cast<int>(m_lanControllers.size()); }
 		E::LanControllerType lanControllerType(int index, bool* ok = nullptr) const;
+		int lanControllerPlace(int index, bool* ok = nullptr) const;
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 
@@ -190,6 +191,7 @@ public:
 	const OptoInterface& optoInterface() const;
 
 	Q_INVOKABLE int jsLanControllerType(int index);
+	Q_INVOKABLE int jsLanControllerPlace(int index);
 
 	bool checkAfbVersions() const;
 	quint32 checkAfbVersionsOffset(bool absoluteValue) const;
