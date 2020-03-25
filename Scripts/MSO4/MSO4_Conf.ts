@@ -25,6 +25,14 @@ enum SoftwareType {
 	ServiceControlManager = 9008,
 }
 
+enum LanControllerType {
+	Unknown = 0,
+	Tuning = 1,
+	AppData = 2,
+	DiagData = 4,
+	AppAndDiagData = 6
+}
+
 interface Builder {
 	jsIsInterruptRequested(): boolean;
 }
@@ -81,6 +89,7 @@ interface IssueLogger {
 	writeWarning(message: string): void;
 	writeError(message: string): void;
 
+	errINT1001(debugMessage: string): void;
 	errCFG3000(propertyName: string, equipmentID: string): void;
 	errCFG3001(subSysID: string, module: string): void;
 	errCFG3002(name: string, value: number, min: number, max: number, module: string): void;
@@ -123,17 +132,18 @@ interface OptoModuleStorage {
 
 interface LogicModule {
 	jsConfigurationStringFile(): string;
+	jsLanControllerType(index: number): number;
+	jsLanControllerPlace(index: number): number;
 
 	FlashMemory_ConfigFramePayload: number;
 	FlashMemory_ConfigFrameCount: number;
 	FlashMemory_ConfigUartId: number;
 	Memory_TxDiagDataSize: number;
 	OptoInterface_OptoPortCount: number;
+	Lan_ControllerCount: number;
 }
 
 function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioModule: DeviceObject, LMNumber: number, frame: number, log: IssueLogger, signalSet: SignalSet, opticModuleStorage: OptoModuleStorage): boolean {
-	//var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
-	//
 	var funcStr = "(" + configScript + ")";
 	var funcVar = eval(funcStr);
 	if (funcVar(confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) == false) {
@@ -148,14 +158,13 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 
 "use strict";
 
-//var FamilyMSO4: number = 0x1100;
-//var VersionMSO4: number = 0x00c0;
-var FamilyMSO4: number = 0x2200;
-var VersionMSO4: number = 0x0053;
+var FamilyMSO4: number = 0x1100;
+var VersionMSO4: number = 0x00c0;
 
 //var configScriptVersion: number = 1;
 //var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
-var configScriptVersion: number = 3;	//Added software type checking
+//var configScriptVersion: number = 3;	//Added software type checking
+var configScriptVersion: number = 4;	//Added Lan controller configuration parsing
 
 var LMDescriptionNumber: number = 0;
 
@@ -366,7 +375,6 @@ function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: Device
 
 	var uartId: number = logicModuleDescription.FlashMemory_ConfigUartId;
 
-	var appWordsCount: number = module.jsPropertyInt("AppLANDataSize");
 	var diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
 
 	var ssKeyValue: number = subsystemStorage.ssKey(subSysID);
@@ -486,12 +494,9 @@ function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: Device
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = " + uartId + "\r\n");
 	ptr += 2;
 
-	var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
-	if (hashString == "") {
-		return false;
-	}
-	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
-	//Hash (UniqueID) will be counted later
+	//Hash (UniqueID) will be counted later, write zero for future replacement
+
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] UniqueID = 0\r\n");
 	ptr += 8;
 
 	var chassis: DeviceObject = module.jsParent();
@@ -536,232 +541,47 @@ function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: Device
 
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
-	var lanFrame: number = lanConfigFrame;
+	var lanControllerCount: number = logicModuleDescription.Lan_ControllerCount;
 
-	// Tuning
-	//
-	{
+	for (var l: number = 0; l < lanControllerCount; l++) {
+		var lanType: number = logicModuleDescription.jsLanControllerType(l);
+		var lanPlace: number = logicModuleDescription.jsLanControllerPlace(l);
+		
+		var ethernetcontrollerID: string = "_ETHERNET0" + lanPlace;
 
-		var ethernetcontrollerID: string = "_ETHERNET01";
-		var ethernetController: DeviceObject = module.jsFindChildObjectByMask(equipmentID + ethernetcontrollerID);
-		if (ethernetController == null) {
-			log.errCFG3004(equipmentID + ethernetcontrollerID, equipmentID);
-			return false;
-		}
-		var checkTuningProperties: string[] = ["TuningServiceID", "TuningEnable", "TuningIP", "TuningPort", "OverrideTuningDataWordCount"];
-		for (var cp: number = 0; cp < checkTuningProperties.length; cp++) {
-			if (ethernetController.propertyValue(checkTuningProperties[cp]) == undefined) {
-				log.errCFG3000(checkTuningProperties[cp], ethernetController.jsPropertyString("EquipmentID"));
-				return false;
-			}
-		}
-		confFirmware.writeLog("    Ethernet Controller " + equipmentID + ethernetcontrollerID + "\r\n");
-
-		// Controller
-
-		var tuningWordsCount: number = 716;
-
-		var tuningIP: number = 0;
-		var tuningPort: number = 0;
-
-		// Service
-
-		var tuningServiceIP: number = 0;
-		var tuningServicePort: number = 0;
-
-		var serviceID: string = ethernetController.jsPropertyString("TuningServiceID");
-
-		if (ethernetController.jsPropertyBool("TuningEnable") == true) {
-
-			tuningIP = ethernetController.jsPropertyIP("TuningIP");
-			tuningPort = ethernetController.jsPropertyInt("TuningPort");
-
-			var service: DeviceObject = root.jsFindChildObjectByMask(serviceID);
-			if (service == null) {
-				log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
-			}
-			else {
-
-				// Check software type
-
-				if (service.propertyValue("Type") == undefined) {
-					log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
-					return false;
-				}
-
-				var softwareType: number = service.jsPropertyInt("Type");
-				if (softwareType != SoftwareType.TuningService) {
-					log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
-					return false;
-				}
-
-				//
-
-				var checkTuningProperties: string[] = ["TuningDataIP", "TuningDataPort"];
-				for (var cp: number = 0; cp < checkTuningProperties.length; cp++) {
-					if (service.propertyValue(checkTuningProperties[cp]) == undefined) {
-						log.errCFG3000(checkTuningProperties[cp], service.jsPropertyString("EquipmentID"));
-						return false;
-					}
-				}
-
-				tuningServiceIP = service.jsPropertyIP("TuningDataIP");
-				tuningServicePort = service.jsPropertyInt("TuningDataPort");
-			}
-		}
-
-		var controllerTuningWordsCount: number = tuningWordsCount;
-
-		var tuningDataID: number = module.propertyValue("TuningLANDataUID");
-
-		var overrideTuningWordsCount: number = ethernetController.jsPropertyInt("OverrideTuningDataWordCount");
-		if (overrideTuningWordsCount != -1) {
-			controllerTuningWordsCount = overrideTuningWordsCount;
-			tuningDataID = 0;
-		}
-
-		if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
-			controllerTuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, tuningDataID,
-			0, 0, 0, 0, 0, 0) == false)	//Subnet2 is not used
+		switch(lanType)
 		{
-			return false;
-		}
-		lanFrame++;
-	}
-
-	// REG / DIAG
-	//
-	{
-
-		var ip: number[] = [0, 0];
-		var port: number[] = [0, 0];
-
-		var serviceIP: number[] = [0, 0];
-		var servicePort: number[] = [0, 0];
-
-
-		var ethernetcontrollerID = "_ETHERNET02";
-		var ethernetController = module.jsFindChildObjectByMask(equipmentID + ethernetcontrollerID);
-		if (ethernetController == null) {
-			log.errCFG3004(equipmentID + ethernetcontrollerID, equipmentID);
-			return false;
-		}
-		var checkProperties: string[] = ["AppDataServiceID", "AppDataEnable", "AppDataIP", "AppDataPort",
-			"DiagDataServiceID", "DiagDataEnable", "DiagDataIP", "DiagDataPort",
-			"OverrideAppDataWordCount", "OverrideDiagDataWordCount"];
-
-		for (var cp: number = 0; cp < checkProperties.length; cp++) {
-			if (ethernetController.propertyValue(checkProperties[cp]) == undefined) {
-				log.errCFG3000(checkProperties[cp], ethernetController.jsPropertyString("EquipmentID"));
-				return false;
-			}
-		}
-		confFirmware.writeLog("    Ethernet Controller " + equipmentID + ethernetcontrollerID + "\r\n");
-
-		var servicesName: string[] = ["App", "Diag"];
-
-		for (var s: number = 0; s < 2; s++) {
-			// Controller
-
-			ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
-			port[s] = ethernetController.jsPropertyInt(servicesName[s] + "DataPort");
-
-			if (ip[s] == 0) {
-				log.errCFG3011(servicesName[s] + "DataIP", ip[s], ethernetController.jsPropertyString("EquipmentID"));
-				return false;
-			}
-			if (port[s] == 0) {
-				log.errCFG3012(servicesName[s] + "DataPort", port[s], ethernetController.jsPropertyString("EquipmentID"));
-				return false;
-			}
-
-			// Service
-			var serviceID: string = ethernetController.jsPropertyString(servicesName[s] + "DataServiceID");
-
-			if (ethernetController.jsPropertyBool(servicesName[s] + "DataEnable") == true) {
-				var service: DeviceObject = root.jsFindChildObjectByMask(serviceID);
-				if (service == null) {
-					log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
-
-					if (s == 0)	// this is App
-					{
-						serviceIP[s] = 0xc0a80bfe;	//	192.168.11.254
-						servicePort[s] = 13322;
-					}
-
-					if (s == 1)	// this is Diag
-					{
-						serviceIP[s] = 0xc0a815fe;	//	192.168.21.254
-						servicePort[s] = 13323;
-					}
-
-					if (serviceIP[s] != 0 && servicePort[s] != 0) {
-						log.wrnCFG3018(servicesName[s] + "DataService", ipToString(serviceIP[s]), servicePort[s], ethernetController.jsPropertyString("EquipmentID"));
-					}
-
-				}
-				else {
-					if (service.propertyValue("Type") == undefined) {
-						log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+			case LanControllerType.Tuning:
+				{
+					if (generateLanTuningController(ethernetcontrollerID, confFirmware, root, log, lanConfigFrame, module) == false) {
 						return false;
 					}
-
-					var softwareType: number = service.jsPropertyInt("Type");
-					if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
-						(s == 1 && softwareType != SoftwareType.DiagDataService)) {
-						log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+					lanConfigFrame++;
+				break;
+			}
+			case LanControllerType.AppAndDiagData:
+				{
+					if (generateLanAppDiagController(ethernetcontrollerID, confFirmware, root, log, lanConfigFrame, module, diagWordsCount) == false) {
 						return false;
 					}
+					lanConfigFrame++;
+				break;
+			}
 
-					//
-
-					var checkProperties: string[] = ["DataReceivingIP", "DataReceivingPort"];
-					for (var cp: number = 0; cp < checkProperties.length; cp++) {
-						if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
-							log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
-							return false;
-						}
-					}
-
-					serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-					servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
-				}
+			default:
+			{
+				log.errINT1001("Unknown LAN controller type (" + lanType + "): LM ID = " + equipmentID + ", index = " + l);
+				return false;
 			}
 		}
-
-		var regDataID: number = module.propertyValue("AppLANDataUID");
-		var diagDataID: number = module.propertyValue("DiagLANDataUID");
-
-		var controllerAppWordsCount: number = appWordsCount;
-
-		var overrideRegWordsCount: number = ethernetController.jsPropertyInt("OverrideAppDataWordCount");
-		if (overrideRegWordsCount != -1) {
-			controllerAppWordsCount = overrideRegWordsCount;
-			regDataID = 0;
-		}
-
-		var controllerDiagWordsCount: number = diagWordsCount;
-
-		var overrideDiagWordsCount: number = ethernetController.jsPropertyInt("OverrideDiagDataWordCount");
-		if (overrideDiagWordsCount != -1) {
-			controllerDiagWordsCount = overrideDiagWordsCount;
-			diagDataID = 0;
-		}
-
-		if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
-			controllerAppWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], regDataID,
-			controllerDiagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], diagDataID) == false) {
-			return false;
-		}
-		lanFrame++;
 	}
-	
+
 	// Create TX/RX configuration
 	//
 
 	confFirmware.writeLog("Writing TxRx(Opto) configuration.\r\n");
 
-	var txRxConfigFrame: number = lanConfigFrame + 2;
+	var txRxConfigFrame: number = lanConfigFrame;
 
 	if (generate_lmTxRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage, logicModuleDescription) == false) {
 		return false;
@@ -780,7 +600,7 @@ function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: Device
 
 	// create UniqueID
 	//
-	/*var startFrame: number = configStartFrames + configFrameCount * (LMNumber - 1);
+	var startFrame: number = configStartFrames + configFrameCount * (LMNumber - 1);
 
 	var uniqueID: number = 0;
 
@@ -790,7 +610,7 @@ function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: Device
 		uniqueID ^= crc;
 	}
 
-	confFirmware.jsSetUniqueID(LMNumber, uniqueID);*/
+	confFirmware.jsSetUniqueID(LMNumber, uniqueID);
 
 	return true;
 }
@@ -827,6 +647,228 @@ function generate_txRxIoConfig(confFirmware: ModuleFirmware, equipmentID: string
 	}
 	ptr += 2;
 
+	return true;
+}
+
+// Tuning Controller
+//
+function generateLanTuningController(ethernetcontrollerID: string, confFirmware: ModuleFirmware, root: DeviceObject, log: IssueLogger, frame: number, module: DeviceObject)
+{
+	var equipmentID: string = module.jsPropertyString("EquipmentID");
+
+	var ethernetController: DeviceObject = module.jsFindChildObjectByMask(equipmentID + ethernetcontrollerID);
+	if (ethernetController == null) {
+		log.errCFG3004(equipmentID + ethernetcontrollerID, equipmentID);
+		return false;
+	}
+	var checkTuningProperties: string[] = ["TuningServiceID", "TuningEnable", "TuningIP", "TuningPort", "OverrideTuningDataWordCount"];
+	for (var cp: number = 0; cp < checkTuningProperties.length; cp++) {
+		if (ethernetController.propertyValue(checkTuningProperties[cp]) == undefined) {
+			log.errCFG3000(checkTuningProperties[cp], ethernetController.jsPropertyString("EquipmentID"));
+			return false;
+		}
+	}
+	confFirmware.writeLog("    Ethernet Controller " + equipmentID + ethernetcontrollerID + "\r\n");
+
+	// Controller
+
+	var tuningWordsCount: number = 716;
+
+	var tuningIP: number = 0;
+	var tuningPort: number = 0;
+
+	// Service
+
+	var tuningServiceIP: number = 0;
+	var tuningServicePort: number = 0;
+
+	var serviceID: string = ethernetController.jsPropertyString("TuningServiceID");
+
+	if (ethernetController.jsPropertyBool("TuningEnable") == true) {
+
+		tuningIP = ethernetController.jsPropertyIP("TuningIP");
+		tuningPort = ethernetController.jsPropertyInt("TuningPort");
+
+		var service: DeviceObject = root.jsFindChildObjectByMask(serviceID);
+		if (service == null) {
+			log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
+		}
+		else {
+
+			// Check software type
+
+			if (service.propertyValue("Type") == undefined) {
+				log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+				return false;
+			}
+
+			var softwareType: number = service.jsPropertyInt("Type");
+			if (softwareType != SoftwareType.TuningService) {
+				log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+				return false;
+			}
+
+			//
+
+			var checkTuningProperties: string[] = ["TuningDataIP", "TuningDataPort"];
+			for (var cp: number = 0; cp < checkTuningProperties.length; cp++) {
+				if (service.propertyValue(checkTuningProperties[cp]) == undefined) {
+					log.errCFG3000(checkTuningProperties[cp], service.jsPropertyString("EquipmentID"));
+					return false;
+				}
+			}
+
+			tuningServiceIP = service.jsPropertyIP("TuningDataIP");
+			tuningServicePort = service.jsPropertyInt("TuningDataPort");
+		}
+	}
+
+	var controllerTuningWordsCount: number = tuningWordsCount;
+
+	var tuningDataID: number = module.propertyValue("TuningLANDataUID");
+
+	var overrideTuningWordsCount: number = ethernetController.jsPropertyInt("OverrideTuningDataWordCount");
+	if (overrideTuningWordsCount != -1) {
+		controllerTuningWordsCount = overrideTuningWordsCount;
+		tuningDataID = 0;
+	}
+
+	if (generate_LANConfiguration(confFirmware, log, frame, module, ethernetController,
+		controllerTuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, tuningDataID,
+		0, 0, 0, 0, 0, 0) == false)	//Subnet2 is not used
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// REG / DIAG Controller
+//
+function generateLanAppDiagController(ethernetcontrollerID: string, confFirmware: ModuleFirmware, root: DeviceObject, log: IssueLogger, frame: number, module: DeviceObject, diagWordsCount: number) {
+
+	var equipmentID: string = module.jsPropertyString("EquipmentID");
+	
+	var ip: number[] = [0, 0];
+	var port: number[] = [0, 0];
+
+	var serviceIP: number[] = [0, 0];
+	var servicePort: number[] = [0, 0];
+
+
+	var ethernetController = module.jsFindChildObjectByMask(equipmentID + ethernetcontrollerID);
+	if (ethernetController == null) {
+		log.errCFG3004(equipmentID + ethernetcontrollerID, equipmentID);
+		return false;
+	}
+	var checkProperties: string[] = ["AppDataServiceID", "AppDataEnable", "AppDataIP", "AppDataPort",
+		"DiagDataServiceID", "DiagDataEnable", "DiagDataIP", "DiagDataPort",
+		"OverrideAppDataWordCount", "OverrideDiagDataWordCount"];
+
+	for (var cp: number = 0; cp < checkProperties.length; cp++) {
+		if (ethernetController.propertyValue(checkProperties[cp]) == undefined) {
+			log.errCFG3000(checkProperties[cp], ethernetController.jsPropertyString("EquipmentID"));
+			return false;
+		}
+	}
+	confFirmware.writeLog("    Ethernet Controller " + equipmentID + ethernetcontrollerID + "\r\n");
+
+	var servicesName: string[] = ["App", "Diag"];
+
+	for (var s: number = 0; s < 2; s++) {
+		// Controller
+
+		ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
+		port[s] = ethernetController.jsPropertyInt(servicesName[s] + "DataPort");
+
+		if (ip[s] == 0) {
+			log.errCFG3011(servicesName[s] + "DataIP", ip[s], ethernetController.jsPropertyString("EquipmentID"));
+			return false;
+		}
+		if (port[s] == 0) {
+			log.errCFG3012(servicesName[s] + "DataPort", port[s], ethernetController.jsPropertyString("EquipmentID"));
+			return false;
+		}
+
+		// Service
+		var serviceID: string = ethernetController.jsPropertyString(servicesName[s] + "DataServiceID");
+
+		if (ethernetController.jsPropertyBool(servicesName[s] + "DataEnable") == true) {
+			var service: DeviceObject = root.jsFindChildObjectByMask(serviceID);
+			if (service == null) {
+				log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
+
+				if (s == 0)	// this is App
+				{
+					serviceIP[s] = 0xc0a80bfe;	//	192.168.11.254
+					servicePort[s] = 13322;
+				}
+
+				if (s == 1)	// this is Diag
+				{
+					serviceIP[s] = 0xc0a815fe;	//	192.168.21.254
+					servicePort[s] = 13323;
+				}
+
+				if (serviceIP[s] != 0 && servicePort[s] != 0) {
+					log.wrnCFG3018(servicesName[s] + "DataService", ipToString(serviceIP[s]), servicePort[s], ethernetController.jsPropertyString("EquipmentID"));
+				}
+
+			}
+			else {
+				if (service.propertyValue("Type") == undefined) {
+					log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+					return false;
+				}
+
+				var softwareType: number = service.jsPropertyInt("Type");
+				if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
+					(s == 1 && softwareType != SoftwareType.DiagDataService)) {
+					log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+					return false;
+				}
+
+				//
+
+				var checkProperties: string[] = ["DataReceivingIP", "DataReceivingPort"];
+				for (var cp: number = 0; cp < checkProperties.length; cp++) {
+					if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
+						log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
+						return false;
+					}
+				}
+
+				serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+				servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
+			}
+		}
+	}
+
+	var regDataID: number = module.propertyValue("AppLANDataUID");
+	var diagDataID: number = module.propertyValue("DiagLANDataUID");
+
+	var controllerAppWordsCount: number = module.jsPropertyInt("AppLANDataSize");
+
+	var overrideRegWordsCount: number = ethernetController.jsPropertyInt("OverrideAppDataWordCount");
+	if (overrideRegWordsCount != -1) {
+		controllerAppWordsCount = overrideRegWordsCount;
+		regDataID = 0;
+	}
+
+	var controllerDiagWordsCount: number = diagWordsCount;
+
+	var overrideDiagWordsCount: number = ethernetController.jsPropertyInt("OverrideDiagDataWordCount");
+	if (overrideDiagWordsCount != -1) {
+		controllerDiagWordsCount = overrideDiagWordsCount;
+		diagDataID = 0;
+	}
+
+	if (generate_LANConfiguration(confFirmware, log, frame, module, ethernetController,
+		controllerAppWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], regDataID,
+		controllerDiagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], diagDataID) == false) {
+		return false;
+	}
+	
 	return true;
 }
 
@@ -1151,7 +1193,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	ptr += 2;
 
-	// Checks
+	// Checks (RESERVED)
 
 	var Checks = 0;
 
@@ -1162,9 +1204,26 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	ptr += 2;
 
+	// QBlocks
+
+	var qBlocksPtr = ptr;
+
+	ptr += 2; // QBlocks is filled later
+
+	// StructSize
+
+	var structSize = 12;
+
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "StructSize", structSize) == false) {
+		return false;
+	}
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: StructSize = " + structSize + "\r\n");
+
+	ptr += 2;
+
 	// Blocks[]
 
-	var blocksPtr : number = ptr + 2 + 2;	// bptr is a pointer to Blocks [] array
+	var blocksPtr : number = ptr;	// bptr is a pointer to Blocks [] array
 
 	var blockPresent: boolean[] = [];
 	for (var i: number = 0; i < ioModulesMaxCount; i++) {
@@ -1173,6 +1232,12 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	var blocksCount: number = 0;
 	var blocksMask: number = 0;
+
+	var txAddr: number = 0;
+	var txDataSize: number = 16;
+
+	var rxAddr: number = 0;
+	var rxDataSize: number = 32;
 
 	for (var i: number = 0; i < chassis.childrenCount(); i++) {
 		var ioModule: DeviceObject = chassis.jsChild(i);
@@ -1213,8 +1278,8 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 		blocksCount++
 
 		blocksMask |= (1 << zeroIoPlace);
-
-		var blockPtr: number = blocksPtr + (zeroIoPlace * 4 * 2);
+	
+		var blockPtr: number = blocksPtr + (zeroIoPlace * structSize);
 
 		// Place
 
@@ -1236,9 +1301,46 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		blockPtr += 2;
 
-		blockPtr += 2;	// Reserved
+		// TxAddr
 
-		blockPtr += 2;	// Reserved
+		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxAddr", txAddr) == false) {
+			return false;
+		}
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxAddr = " + txAddr + "\r\n");
+
+		txAddr += 32;
+
+		blockPtr += 2;
+
+		// TxDataSize
+
+		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxDataSize", txDataSize) == false) {
+			return false;
+		}
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxDataSize = " + txDataSize + "\r\n");
+
+		blockPtr += 2;
+
+		// RxAddr
+
+		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxAddr", rxAddr) == false) {
+			return false;
+		}
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxAddr = " + rxAddr + "\r\n");
+
+		rxAddr += 32;
+
+		blockPtr += 2;
+
+		// RxDataSize
+
+		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxDataSize", rxDataSize) == false) {
+			return false;
+		}
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxDataSize = " + rxDataSize + "\r\n");
+
+		blockPtr += 2;
+
 	}
 
 	for (var i: number = 0; i < ioModulesMaxCount; i++) {
@@ -1246,7 +1348,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			continue;
 		}
 
-		var blockPtr: number = blocksPtr + (i * 4 * 2);
+		var blockPtr: number = blocksPtr + (i * structSize);
 
 		// Place
 
@@ -1261,21 +1363,14 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	// QBlocks
 
+	ptr = qBlocksPtr;
+
 	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "QBlocks", blocksCount) == false) {
 		return false;
 	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: QBlocks = " + blocksCount + "\r\n");
 
 	ptr += 2;
-
-	// StructSize
-
-	var structSize = 8;
-
-	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "StructSize", structSize) == false) {
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: StructSize = " + structSize + "\r\n");
 
 	return true;
 }

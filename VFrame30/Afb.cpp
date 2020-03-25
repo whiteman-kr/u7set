@@ -2296,6 +2296,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		for (AfbSignal& s : m_outputSignals)
 		{
 			if (s.operandIndex() == opIndex)
@@ -2303,6 +2304,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		return nullptr;
 	}
 
@@ -2350,6 +2352,8 @@ namespace Afb
 				newParams.push_back(p);
 			}
 		}
+
+		return;
 	}
 
 	// Properties and Data

@@ -975,6 +975,25 @@ E::LanControllerType LmDescription::Lan::lanControllerType(int index, bool* ok) 
 	return m_lanControllers[index].m_type;
 }
 
+int LmDescription::Lan::lanControllerPlace(int index, bool* ok) const
+{
+	if (index < 0 || index >= lanControllerCount())
+	{
+		Q_ASSERT(false);
+		if (ok != nullptr)
+		{
+			*ok = false;
+		}
+		return -1;
+	}
+
+	if (ok != nullptr)
+	{
+		*ok = true;
+	}
+	return m_lanControllers[index].m_place;
+}
+
 bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
@@ -1126,6 +1145,11 @@ const LmDescription::OptoInterface& LmDescription::optoInterface() const
 int LmDescription::jsLanControllerType(int index)
 {
 	return static_cast<int>(m_lan.lanControllerType(index));
+}
+
+int LmDescription::jsLanControllerPlace(int index)
+{
+	return static_cast<int>(m_lan.lanControllerPlace(index));
 }
 
 bool LmDescription::checkAfbVersions() const

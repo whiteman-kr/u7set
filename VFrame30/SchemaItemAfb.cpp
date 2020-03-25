@@ -691,9 +691,9 @@ namespace VFrame30
 		return Afb::AfbParam();
 	}
 
-	std::optional<bool> SchemaItemAfb::getAssignFlagsValue()
+	std::optional<bool> SchemaItemAfb::getAssignFlagsValue() const
 	{
-		for (Afb::AfbParam& p : m_afbElement.params())
+		for (const Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.isDiscrete() == true && p.caption() == QStringLiteral("AssignFlags"))
 			{
