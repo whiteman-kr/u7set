@@ -95,17 +95,29 @@ namespace Sim
 		void absFloatingPoint();
 		void absSignedInt();
 
+		void convertSignedIntToFloat();
 		void convertWordToFloat();
 		void convertWordToSignedInt();
 
 		// --
 		//
 		void resetMathFlags();
+
 		quint16 mathOverflow() const;
+		void setMathOverflow(quint16 value);
+
 		quint16 mathUnderflow() const;
+		void setMathUnderflow(quint16 value);
+
 		quint16 mathZero() const;
+		void setMathZero(quint16 value);
+
 		quint16 mathNan() const;
+		void setMathNan(quint16 value);
+
+
 		quint16 mathDivByZero() const;
+		void setMathDivByZero(quint16 value);
 
 	private:
 		quint16 m_paramOpIndex = 0;

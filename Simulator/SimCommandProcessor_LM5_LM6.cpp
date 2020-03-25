@@ -2670,7 +2670,7 @@ namespace Sim
 		const int i_ui_data = 5;		// 16 bit data, unsigned integer input
 		const int i_si_fp_data = 6;		// 32 bit data, signed integer or float input
 
-		//const int o_ui_result = 8;		// 16 bit data, unsigned integer output
+		const int o_ui_result = 8;		// 16 bit data, unsigned integer output
 		const int o_si_fp_result = 9;	// 32 bit data, signed integer or float output
 		const int o_scal_edi = 11;		// error
 		const int o_overflow = 12;
@@ -2689,72 +2689,167 @@ namespace Sim
 		//
 		switch (conf->wordValue())
 		{
-			case 1: // 16(UI)/16(UI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			 case 2: // 16(UI)/32(SI)
+		case 1: // 16(UI)/16(UI)
+			{
+				result = *instance->param(i_ui_data);
+				result.setOpIndex(o_ui_result);
+
+				result.convertWordToSignedInt();
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				if (result.signedIntValue() > std::numeric_limits<quint16>().max())
 				{
-					result = *instance->param(i_ui_data);
-					result.setOpIndex(o_si_fp_result);
-
-					result.convertWordToSignedInt();
-
-					result.mulSignedInteger(*k1);
-					result.divSignedIntegerNumber(32768);
-					result.addSignedInteger(*k2);
-
-					// Save result
+					// Overflow
 					//
-					instance->addParam(result);
+					result.setMathOverflow(1);
 				}
-				break;
-			case 3: // 32(SI)/16(UI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 4: // 32(SI)/32(SI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 5: // 32(SI)/32(FP)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 6: // 32(FP)/32(FP)
+
+				// Save result
+				//
+				instance->addParamWord(o_ui_result, result.wordValue());
+			}
+			break;
+		case 2: // 16(UI)/32(SI)
+			{
+				result = *instance->param(i_ui_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.convertWordToSignedInt();
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		case 3: // 32(SI)/16(UI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_ui_result);
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				if (result.signedIntValue() > std::numeric_limits<quint16>().max())
 				{
-					result = *instance->param(i_si_fp_data);
-					result.setOpIndex(o_si_fp_result);
-
-					result.mulFloatingPoint(*k1);
-					result.addFloatingPoint(*k2);
-
-					// Save result
+					// Overflow
 					//
-					instance->addParam(result);
+					result.setMathOverflow(1);
 				}
-				break;
-			case 7: // 32(FP)/16(UI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 8: // 32(FP)/32(SI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 9: // 16(UI)/32(FP)
+
+				// Save result
+				//
+				instance->addParamWord(o_ui_result, result.wordValue());
+			}
+			break;
+		case 4: // 32(SI)/32(SI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				// Save result
+				//
+				instance->addParamWord(o_si_fp_result, result.signedIntValue());
+			}
+			break;
+		case 5: // 32(SI)/32(FP)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.convertSignedIntToFloat();
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		case 6: // 32(FP)/32(FP)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		case 7: // 32(FP)/16(UI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				if (result.floatValue() > std::numeric_limits<quint16>().max())
 				{
-					result = *instance->param(i_ui_data);
-					result.setOpIndex(o_si_fp_result);
-
-					result.convertWordToFloat();
-
-					result.mulFloatingPoint(*k1);
-					result.addFloatingPoint(*k2);
-
-					// Save result
+					// Overflow
 					//
-					instance->addParam(result);
+					result.setMathOverflow(1);
 				}
-				break;
-			default:
-				instance->addParamWord(o_scal_edi, 0x0001);
-				SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.");
-				break;
+
+				// Save result
+				//
+				instance->addParamWord(o_ui_result, static_cast<quint16>(result.floatValue()));
+			}
+			break;
+		case 8: // 32(FP)/32(SI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				if (result.floatValue() > std::numeric_limits<qint32>().max())
+				{
+					// Overflow
+					//
+					result.setMathOverflow(1);
+				}
+
+				// Save result
+				//
+				instance->addParamSignedInt(o_si_fp_result, static_cast<qint32>(result.floatValue()));
+			}
+			break;
+		case 9: // 16(UI)/32(FP)
+			{
+				result = *instance->param(i_ui_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.convertWordToFloat();
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		default:
+			instance->addParamWord(o_scal_edi, 0x0001);
+			SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.");
+			break;
 		}
 
 		// Save result

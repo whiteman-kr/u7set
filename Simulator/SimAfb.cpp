@@ -513,6 +513,16 @@ namespace Sim
 		return;
 	}
 
+	void AfbComponentParam::convertSignedIntToFloat()
+	{
+		resetMathFlags();
+
+		float data = static_cast<float>(m_data.asSignedInt);
+		setFloatValue(data);
+
+		return;
+	}
+
 	void AfbComponentParam::convertWordToFloat()
 	{
 		resetMathFlags();
@@ -543,9 +553,19 @@ namespace Sim
 		return m_mathFlags.overflow ? 0x0001 : 0x0000;
 	}
 
+	void AfbComponentParam::setMathOverflow(quint16 value)
+	{
+		m_mathFlags.overflow = value ? 0x0001 : 0x0000;
+	}
+
 	quint16 AfbComponentParam::mathUnderflow() const
 	{
 		return m_mathFlags.underflow ? 0x0001 : 0x0000;
+	}
+
+	void AfbComponentParam::setMathUnderflow(quint16 value)
+	{
+		m_mathFlags.underflow = value ? 0x0001 : 0x0000;
 	}
 
 	quint16 AfbComponentParam::mathZero() const
@@ -553,14 +573,29 @@ namespace Sim
 		return m_mathFlags.zero ? 0x0001 : 0x0000;
 	}
 
+	void AfbComponentParam::setMathZero(quint16 value)
+	{
+		m_mathFlags.zero = value ? 0x0001 : 0x0000;
+	}
+
 	quint16 AfbComponentParam::mathNan() const
 	{
 		return m_mathFlags.nan ? 0x0001 : 0x0000;
 	}
 
+	void AfbComponentParam::setMathNan(quint16 value)
+	{
+		m_mathFlags.nan = value ? 0x0001 : 0x0000;
+	}
+
 	quint16 AfbComponentParam::mathDivByZero() const
 	{
 		return m_mathFlags.divByZero ? 0x0001 : 0x0000;
+	}
+
+	void AfbComponentParam::setMathDivByZero(quint16 value)
+	{
+		m_mathFlags.divByZero = value ? 0x0001 : 0x0000;
 	}
 
 	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
