@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="MSO-4" DescriptionNumber="1" ConfigurationScriptFile="MSO4_Conf.js" Version="1.0001">
+<LogicModule Name="MSO-4" DescriptionNumber="21" ConfigurationScriptFile="MSO4_SR21_Conf.js" Version="1.0001">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
