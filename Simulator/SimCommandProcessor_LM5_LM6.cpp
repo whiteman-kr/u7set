@@ -4056,6 +4056,18 @@ namespace Sim
 		return;
 	}
 
+	//	DEADZONE, OpCode 24
+	//
+	void CommandProcessor_LM5_LM6::fb_deadzone_v5(AfbComponentInstance* instance)
+	{
+		SimException::raise(QString("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v5");
+	}
+
+	void CommandProcessor_LM5_LM6::fb_deadzone_v6(AfbComponentInstance* instance)
+	{
+		SimException::raise(QString("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v6");
+	}
+
 	//	POL, OpCode 25
 	//
 	void CommandProcessor_LM5_LM6::afb_pol_v3(AfbComponentInstance* instance)
@@ -4697,5 +4709,123 @@ namespace Sim
 		return;
 	}
 
+	// TCONV, OpCode 28
+	// Analog Conversion
+	//
+	void CommandProcessor_LM5_LM6::afb_tconv_v0(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_data_16 = 1;
+		const int i_data_32 = 2;
+
+		const int o_data_16 = 4;
+		const int o_data_32 = 5;
+		const int o_overflow = 7;
+		const int o_underflow = 8;
+		const int o_nan = 9;
+		//const int o_tconv_edi = 10;
+		//const int o_version = 11;
+
+		// Get AFB configuration
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		// Logic with outputs
+		//
+		switch (conf)
+		{
+		case 1: // Swap Endians for 16 -> 16
+			{
+				qint16 input = instance->param(i_data_16)->wordValue();
+				qint16 result = (input >> 8) | (input << 8);
+				instance->addParamWord(o_data_16, result);
+			}
+			break;
+
+		case 2: // Swap Endians for 32 -> 32
+			{
+				quint32 input = instance->param(i_data_16)->dwordValue();
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+				quint32 result = qToLittleEndian<quint32>(input);
+#else
+				quint32 result = qToBigEndian<quint32>(input);
+#endif
+
+				instance->addParamDword(o_data_32, result);
+			}
+			break;
+
+		case 3: // SI32 -> FP32
+			{
+				qint32 input = instance->param(i_data_32)->signedIntValue();
+				float result = static_cast<float>(input);
+				instance->addParamFloat(o_data_32, result);
+			}
+			break;
+
+		case 4: // FP32 -> SI32
+			{
+				float input = instance->param(i_data_32)->floatValue();
+
+				qint32 result = static_cast<qint32>(input);
+
+				// Flags
+				//
+				quint16 overflow = 0x0000;
+				if (static_cast<qint64>(input) > std::numeric_limits<qint32>::max())
+				{
+					overflow = 0x0001;
+					result = std::numeric_limits<qint32>::max();
+				}
+
+				if (static_cast<qint64>(input) < std::numeric_limits<qint32>::lowest())
+				{
+					overflow = 0x0001;
+					result = std::numeric_limits<qint32>::lowest();
+				}
+
+				if (std::isinf(input) == true)
+				{
+					if (std::signbit(input) == true)
+					{
+						result = std::numeric_limits<qint32>::lowest();
+					}
+					else
+					{
+						result = std::numeric_limits<qint32>::max();
+					}
+				}
+
+				quint16 underflow = (std::fpclassify(input) == FP_SUBNORMAL) ? 0x0001 : 0x0000;
+				if (underflow == 0x0001)
+				{
+					result = 0;
+				}
+
+				quint16 nan = std::isnan(input);
+				if (nan == 0x0001)
+				{
+					result = 0;
+					overflow = 0;
+				}
+
+				// Set result
+				//
+				instance->addParamSignedInt(o_data_32, result);
+				instance->addParamWord(o_overflow, overflow);
+				instance->addParamWord(o_underflow, underflow);
+				instance->addParamWord(o_nan, nan);
+			}
+			break;
+
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_tconv_v0");
+		}
+
+		return;
+	}
 
 }

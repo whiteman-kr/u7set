@@ -297,6 +297,11 @@ namespace Sim
 		//
 		void afb_lim_v7(AfbComponentInstance* instance);
 
+		//	DEADZONE, OpCode 24
+		//
+		void fb_deadzone_v5(AfbComponentInstance* instance);
+		void fb_deadzone_v6(AfbComponentInstance* instance);
+
 		//	POL, OpCode 25
 		//
 		void afb_pol_v3(AfbComponentInstance* instance);
@@ -315,6 +320,11 @@ namespace Sim
 		void afb_mismatch_impl(AfbComponentInstance* instance, int version);
 		void afb_mismatch_impl_si(AfbComponentInstance* instance, int version);
 		void afb_mismatch_impl_fp(AfbComponentInstance* instance, int version);
+
+		// TCONV, OpCode 28
+		// Analog Conversion
+		//
+		void afb_tconv_v0(AfbComponentInstance* instance);
 
 		// --
 		//
@@ -379,11 +389,14 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mux_v1")),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
 			{::calcHash(QStringLiteral("afb_latch_v4")),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
 			{::calcHash(QStringLiteral("afb_lim_v7")),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
+			{::calcHash(QStringLiteral("fb_deadzone_v5")),		&CommandProcessor_LM5_LM6::fb_deadzone_v5},				// 24
+			{::calcHash(QStringLiteral("fb_deadzone_v6")),		&CommandProcessor_LM5_LM6::fb_deadzone_v6},				// 24
 			{::calcHash(QStringLiteral("afb_pol_v3")),			&CommandProcessor_LM5_LM6::afb_pol_v3},					// 25
 			{::calcHash(QStringLiteral("afb_der_v5")),			&CommandProcessor_LM5_LM6::afb_der_v5},					// 26
 			{::calcHash(QStringLiteral("afb_mismatch_v2")),		&CommandProcessor_LM5_LM6::afb_mismatch_v2},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v3")),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27
+			{::calcHash(QStringLiteral("afb_tconv_v0")),		&CommandProcessor_LM5_LM6::afb_tconv_v0},				// 28
 		};
 
 		static const int m_cycleDurationMs = 5;
