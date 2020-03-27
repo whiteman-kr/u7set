@@ -1,9 +1,3 @@
-SELECT * FROM public.delete_file_on_update(1, '$root$/AFBL/MSO4.xml', 'Delete file MSO4.xml');
-
-SELECT * FROM public.delete_file_on_update(1, '$root$/MC/MSO4_Conf.js', 'Delete file MSO4_Conf.js');
-
-SELECT * FROM public.delete_file_on_update(1, '$root$/HP/mso4.hmd', 'Delete file mso4.hmd');
-
 ---------------------------------------------------------------------------
 --
 -- Automaicaly generated file by file2pgsql, version 1.0

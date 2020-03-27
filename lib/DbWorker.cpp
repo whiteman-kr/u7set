@@ -336,6 +336,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0316.sql", "Upgrade to version 316, AFB integrator and derive have min and max as inputs"},
 	{":/DatabaseUpgrade/Upgrade0317.sql", "Upgrade to version 317, Added MSO-4 preset and configuration script"},
 	{":/DatabaseUpgrade/Upgrade0318.sql", "Upgrade to version 318, Renamed MSO-4 preset and configuration files"},
+	{":/DatabaseUpgrade/Upgrade0319.sql", "Upgrade to version 319, dead_band AFB is removed from LM1_SR04"},
 };
 
 int DbWorker::counter = 0;
