@@ -77,6 +77,8 @@ message TrendParam
 
     optional uint32 back_color_1st = 70;
 	optional uint32 back_color_2nd = 71;
+
+    optional int32 scale_type = 5 [default = 0];		// enum TrendScaleType::Generic, TrendScaleType::Logarithmic, TrendScaleType::Exponential 
 }
 
 message TrendWidget

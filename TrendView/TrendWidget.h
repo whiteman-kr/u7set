@@ -126,6 +126,11 @@ namespace TrendLib
 		TrendViewMode viewMode() const;
 		void setViewMode(TrendViewMode value);
 
+		TrendScaleType scaleType() const;
+		void setScaleType(TrendScaleType value);
+
+		void adjustViewLimitsForScaleType();
+
 		int laneCount() const;
 		void setLaneCount(int value);
 

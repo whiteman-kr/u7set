@@ -9,7 +9,7 @@
 
 DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal,
 														 TrendLib::TrendSignalSet* trendSignalSet,
-														 E::TimeType timeType,
+														 E::TimeType timeType, TrendLib::TrendScaleType scaleType,
 														 E::TrendMode trendMode,
 														 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -17,6 +17,7 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 	m_trendSignal(trendSignal),
 	m_trendSignalSet(trendSignalSet),
 	m_timeType(timeType),
+	m_scaleType(scaleType),
 	m_trendMode(trendMode)
 
 {
@@ -125,6 +126,15 @@ bool DialogTrendSignalProperties::applyProperties()
 	{
 		ui->viewLowEdit->setFocus();
 		return false;
+	}
+
+	if (m_scaleType == TrendLib::TrendScaleType::Logarithmic)
+	{
+		if (viewHighValue <= 0 || viewLowValue <= 0)
+		{
+			QMessageBox::critical(this, qAppName(), tr("View limits should be positive (> 0) for logarithmic scale!"));
+			return false;
+		}
 	}
 
 	m_trendSignal.setLineWeight(lineWeight);

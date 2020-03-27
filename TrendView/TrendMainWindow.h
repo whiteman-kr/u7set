@@ -73,6 +73,7 @@ namespace TrendLib
 
 		void timeComboCurrentIndexChanged(int index);
 		void viewComboCurrentIndexChanged(int index);
+		void scaleTypeComboCurrentIndexChanged(int index);
 		void laneCountComboCurrentIndexChanged(int index);
 		void timeTypeComboCurrentIndexChanged(int index);
 		void realtimeModeToggled(bool state);
@@ -105,6 +106,7 @@ namespace TrendLib
 		QToolBar* m_toolBar = nullptr;
 		QComboBox* m_timeCombo = nullptr;
 		QComboBox* m_viewCombo = nullptr;
+		QComboBox* m_scaleTypeCombo = nullptr;
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
 		QPushButton* m_realtimeModeButton = nullptr;

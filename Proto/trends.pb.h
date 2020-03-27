@@ -1075,6 +1075,13 @@ class TrendParam : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 back_color_2nd() const;
   inline void set_back_color_2nd(::google::protobuf::uint32 value);
 
+  // optional int32 scale_type = 5 [default = 0];
+  inline bool has_scale_type() const;
+  inline void clear_scale_type();
+  static const int kScaleTypeFieldNumber = 5;
+  inline ::google::protobuf::int32 scale_type() const;
+  inline void set_scale_type(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.TrendParam)
  private:
   inline void set_has_view_mode();
@@ -1091,6 +1098,8 @@ class TrendParam : public ::google::protobuf::Message {
   inline void clear_has_back_color_1st();
   inline void set_has_back_color_2nd();
   inline void clear_has_back_color_2nd();
+  inline void set_has_scale_type();
+  inline void clear_has_scale_type();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1101,9 +1110,10 @@ class TrendParam : public ::google::protobuf::Message {
   ::google::protobuf::uint32 back_color_1st_;
   ::google::protobuf::int64 duration_;
   ::google::protobuf::uint32 back_color_2nd_;
+  ::google::protobuf::int32 scale_type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_trends_2eproto();
   friend void protobuf_AssignDesc_trends_2eproto();
@@ -2426,6 +2436,28 @@ inline ::google::protobuf::uint32 TrendParam::back_color_2nd() const {
 inline void TrendParam::set_back_color_2nd(::google::protobuf::uint32 value) {
   set_has_back_color_2nd();
   back_color_2nd_ = value;
+}
+
+// optional int32 scale_type = 5 [default = 0];
+inline bool TrendParam::has_scale_type() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void TrendParam::set_has_scale_type() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void TrendParam::clear_has_scale_type() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void TrendParam::clear_scale_type() {
+  scale_type_ = 0;
+  clear_has_scale_type();
+}
+inline ::google::protobuf::int32 TrendParam::scale_type() const {
+  return scale_type_;
+}
+inline void TrendParam::set_scale_type(::google::protobuf::int32 value) {
+  set_has_scale_type();
+  scale_type_ = value;
 }
 
 // -------------------------------------------------------------------

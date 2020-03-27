@@ -1,6 +1,7 @@
 #include "Trend.h"
 #include "../lib/CUtils.h"
 #include "../Proto/trends.pb.h"
+#include "TrendScale.h"
 
 namespace TrendLib
 {
@@ -268,7 +269,7 @@ namespace TrendLib
 		{
 			TimeStamp ct = TimeStamp{startTimeStamp.timeStamp + possibleInterval};
 
-			double x = timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
+			double x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
 
 			if (x - insideRect.left() >= minTimeInterval)
 			{
@@ -305,7 +306,7 @@ namespace TrendLib
 		for (int i = 0; i < timeGridCount + 2; i++)
 		{
 			TimeStamp ct = TimeStamp{startGrid.timeStamp + i * timeGridInterval};
-			double x = timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
+			double x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
 
 			// Make sure that x is proper alligned for nice look of cosmetic pen
 			//
@@ -455,6 +456,8 @@ namespace TrendLib
 
 				painter->setPen(ts.color());
 
+				// Draw description text
+
 				QRectF testDesctriptionBoundRect;
 				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
 
@@ -512,9 +515,9 @@ namespace TrendLib
 	}
 
 	void Trend::drawAnalogSignalsGridSeparateMode(QPainter* painter,
-												  const QRectF& laneRect,
-												  const TrendParam& drawParam,
-												  const TrendSignalParam& signal) const
+										   const QRectF& laneRect,
+										   const TrendParam& drawParam,
+										   const TrendSignalParam& signal) const
 	{
 		Q_ASSERT(painter);
 		painter->setClipping(false);
@@ -528,76 +531,49 @@ namespace TrendLib
 			return;
 		}
 
-		double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
-		double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
+		bool highLimitOk = false;
+		double highLimit = TrendScale::limitToScalePoint(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
 
-		double delta = highLimit - lowLimit;
-		if (delta <= DBL_MIN)
+		bool lowLimitOk = false;
+		double lowLimit = TrendScale::limitToScalePoint(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+
+		// Check the scale view limits
+		//
+		if (highLimitOk == false || lowLimitOk == false)
 		{
-			// Divide by 0 possible
-			//
+			QString text = QObject::tr(" [can't render the trend, scale is not valid for current mode]");
+
+			painter->setPen(Qt::red);
+			drawText(painter, text, signalRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
+
 			return;
 		}
 
-		double dpiY = drawParam.dpiY();
-
-		// Calc vert grid
+		// Get grid values
 		//
-		static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5};
 
-		double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
-		double gridValue = 1.0;
-
-		double pow = 1e-100;
-		for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
+		auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(), lowLimit, highLimit, signalRect); // first: value, second: display value
+		if (scaleValues.has_value() == false)
 		{
-			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
-			{
-				gridValue = possibleGridIntervals[i] * pow;
-
-				double y = valueToScaledPixel(lowLimit + gridValue, signalRect, lowLimit, highLimit);
-				if (signalRect.bottom() - y >= minInchInterval)
-				{
-					// gridValue contains found suitable value for grid
-					//
-					mult = 1000000;		// To break outer loop
-					break;
-				}
-			}
-		}
-
-		// Align gridValue
-		//
-		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
-		int gridCount = static_cast<int>(delta / gridValue) + 2;
-
-		if (gridCount < 0)
-		{
-			Q_ASSERT(false);
-			gridCount = 0;
-		}
-
-		if (gridCount > 100)
-		{
-			// Something wrong
-			//
-			gridCount = 100;
 			return;
 		}
 
 		// Draw horz grids
 		//
+		double dpiY = drawParam.dpiY();
+
 		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(gridPen);
 
-		std::vector<std::pair<double, double>> grids;		// first: y pos, second: value
-		grids.reserve(gridCount);
+		std::vector<std::pair<double, double>> grids;		// first: y pos, second: display value
+		grids.reserve(scaleValues->size());
 
-		for (int i = 0; i < gridCount; i++)
+		for (const std::pair<double, double>& p : *scaleValues)
 		{
-			double value = lowGriddedValue + i * gridValue;
+			double value = p.first;
 
-			double y = valueToScaledPixel(value, signalRect, lowLimit, highLimit);
+			double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
+
 			y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
 
 			if (y < signalRect.top() ||
@@ -609,16 +585,18 @@ namespace TrendLib
 			painter->drawLine(QPointF(signalRect.left(), y),
 							  QPointF(signalRect.right(), y));
 
-			grids.emplace_back(y, value);
+			double scaleValue = p.second;
+
+			grids.emplace_back(y, scaleValue);
 		}
 
 		// Draw grid values
 		//
-		painter->setPen(signal.color());
-
 		QRectF boundTextRect;
 		drawText(painter, "0", QRectF(), drawParam, Qt::AlignCenter, &boundTextRect);
 		double textHeight = boundTextRect.height();
+
+		painter->setPen(signal.color());
 
 		painter->setClipRect(scaleAreaRect);
 
@@ -635,7 +613,8 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = QString(" %1 ").arg(QString::number(value, 'g'));
+			QString text = TrendScale::scalePointText(value, drawParam, signal.precision());
+
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
 
@@ -698,7 +677,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 			{
 				gridValue = possibleGridIntervals[i] * pow;
 
-				double y = valueToScaledPixel(lowLimit + gridValue, signalRect, lowLimit, highLimit);
+				double y = TrendScale::valueToScaledPixel(lowLimit + gridValue, signalRect, lowLimit, highLimit);
 				if (signalRect.bottom() - y >= minInchInterval)
 				{
 					// gridValue contains found suitable value for grid
@@ -740,7 +719,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		{
 			double value = lowGriddedValue + i * gridValue;
 
-			double y = valueToScaledPixel(value, signalRect, lowLimit, highLimit);
+			double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
 
 			if (y < signalRect.top() ||
 				y > signalRect.bottom())
@@ -976,7 +955,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 						continue;
 					}
 
-					double x = timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
+					double x = TrendScale::timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
 					double y = (state.value == 0) ? yPos0 : yPos1;
 
 					//painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
@@ -1066,11 +1045,21 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 		// Draw trend
 		//
-		double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
-		double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
+		bool ok = false;
 
-		double delta = highLimit - lowLimit;
-		if (delta <= DBL_MIN)
+		double highLimit = TrendScale::limitToScalePoint(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		if (ok == false)
+		{
+			return;
+		}
+
+		double lowLimit = TrendScale::limitToScalePoint(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		if (ok == false)
+		{
+			return;
+		}
+
+		if (fabs(highLimit - lowLimit) <= DBL_MIN)
 		{
 			// Divide by 0 possible
 			//
@@ -1107,9 +1096,11 @@ static const int recomendedSize = 8192;
 				{
 					const TimeStamp& ct = state.getTime(timeType);
 
-					// Break line if it is not valid point
+					double value = TrendScale::valueToScalePoint(state.value, drawParam.scaleType(), &ok);
+
+					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
 					//
-					if (state.isValid() == false)
+					if (state.isValid() == false || ok == false)
 					{
 						if (lines.isEmpty() == false)
 						{
@@ -1120,8 +1111,8 @@ static const int recomendedSize = 8192;
 						continue;
 					}
 
-					double x = timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
-					double y = valueToScaledPixel(state.value, signalRect, lowLimit, highLimit);
+					double x = TrendScale::timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
+					double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
 
 //					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
 //					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
@@ -1429,6 +1420,31 @@ static const int recomendedSize = 8192;
 
 						TrendStateItem state = rulerSignalState(ruler, trendSignal.appSignalId(), timeType);
 
+						bool ok = false;
+
+						double highLimit = TrendScale::limitToScalePoint(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						if (ok == false)
+						{
+							continue;
+						}
+
+						double lowLimit = TrendScale::limitToScalePoint(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						if (ok == false)
+						{
+							continue;
+						}
+
+						if (fabs(highLimit - lowLimit) <= DBL_MIN)
+						{
+							continue;
+						}
+
+						double value = TrendScale::valueToScalePoint(state.value, drawParam.scaleType(), &ok);
+						if (ok == false)
+						{
+							continue;
+						}
+
 						QString str;
 						if (state.isValid() == false)
 						{
@@ -1436,19 +1452,11 @@ static const int recomendedSize = 8192;
 						}
 						else
 						{
-							str = QString::number(state.value, 'g');
-						}
-
-						double highLimit = qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
-						double lowLimit = qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
-
-						if (fabs(highLimit - lowLimit) <= DBL_MIN)
-						{
-							continue;
+							str = TrendScale::scalePointText(state.value, drawParam, trendSignal.precision());
 						}
 
 						double vertCoef = (highLimit - lowLimit) / signalRect.height();
-						double y = (state.value - lowLimit) / vertCoef;
+						double y = (value - lowLimit) / vertCoef;
 
 						// Get text bounding rect
 						//
@@ -1492,7 +1500,7 @@ static const int recomendedSize = 8192;
 							{
 								drawRect.setLeft(x + 2.0 / dpiX);
 
-								if (state.value <= DBL_MIN)
+								if (value <= DBL_MIN)
 								{
 									// 0
 									//
@@ -2071,30 +2079,43 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return MouseOn::Outside;		// Can be frame beetween lanes
 	}
 
-	double Trend::timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
+	void Trend::adjustScaleViewLimits(const TrendParam& drawParam)
 	{
-		if (duration == 0)
+		if (drawParam.scaleType() == TrendScaleType::Logarithmic)
 		{
-			Q_ASSERT(duration != 0);
-			duration = 1;
+			// Log(x) is defined only for positive values, so adjust view scale if limit is negative
+			//
+			std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
+
+			for (TrendSignalParam& tsp : analogs)
+			{
+				double highLimit = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
+				double lowLimit = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
+
+				if (lowLimit <= 0)
+				{
+					if (highLimit <= 0)
+					{
+						// Both limits are less than zero, so limit will be 1..1000
+						//
+						highLimit = 1000.0;
+						lowLimit = 1.0;
+					}
+					else
+					{
+						lowLimit = highLimit / 1000.0;
+					}
+
+					tsp.setViewLowLimit(lowLimit);
+					tsp.setViewHighLimit(highLimit);
+
+					signalSet().setSignalParam(tsp);
+				}
+			}
 		}
 
-		return rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
+		return;
 	}
-
-	double Trend::valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit)
-	{
-		double delta = fabs(highLimit - lowLimit);
-
-		if (delta <= DBL_MIN)
-		{
-			Q_ASSERT(fabs(highLimit - lowLimit) > DBL_MIN);
-			return 0;
-		}
-
-		return rect.bottom() - (rect.height() / delta) * (value - lowLimit);
-	}
-
 
 	void Trend::drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect/* = nullptr*/)
 	{
@@ -2145,7 +2166,6 @@ static const TrendStateItem fakeState = TrendStateItem();
 		painter->restore();
 		return;
 	}
-
 
 	TrendLib::TrendSignalSet& Trend::signalSet()
 	{
