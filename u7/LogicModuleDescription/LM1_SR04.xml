@@ -373,7 +373,7 @@
 			<Pin OpName="o_funct_edi"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v6">
+		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v6_tiunlim">
 			<Pin OpName="i_ki"			OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_ti"			OpIndex ="2"	PinType = "Param"/>
 			<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>
@@ -477,7 +477,7 @@
 			<Pin OpName="o_nan"			OpIndex ="30"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="31"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="5"		VersionOpIndex="28"	MaxInstCount="256" SimulationFunc="afb_der_v5">
+		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="5"		VersionOpIndex="28"	MaxInstCount="256" SimulationFunc="afb_der_v5_tdunlim">
 			<Pin OpName="i_kd"			OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_td"			OpIndex ="2"	PinType = "Param"/>
 			<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>

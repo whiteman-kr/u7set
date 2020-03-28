@@ -277,7 +277,9 @@ namespace Sim
 
 		//	INTEGRATOR, OpCode 17
 		//
-		void afb_int_v6(AfbComponentInstance* instance);
+		void afb_int_v6_tiunlim(AfbComponentInstance* instance);
+		void afb_int_v6_ti350000(AfbComponentInstance* instance);
+		void afb_int_v6(AfbComponentInstance* instance, qint32 maxTiValue);
 
 		//	DPCOMP, OpCode 20
 		//
@@ -308,7 +310,9 @@ namespace Sim
 
 		//	DER, OpCode 26
 		//
-		void afb_der_v5(AfbComponentInstance* instance);
+		void afb_der_v5_tdunlim(AfbComponentInstance* instance);
+		void afb_der_v5_td350000(AfbComponentInstance* instance);
+		void afb_der_v5(AfbComponentInstance* instance, qint32 maxTdValue);
 
 		// MISMATCH, OpCode 27
 		// Analog Mismatch
@@ -382,7 +386,8 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_math_v104")),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
 			{::calcHash(QStringLiteral("afb_scale_v108")),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14
 			{::calcHash(QStringLiteral("afb_func_v3")),			&CommandProcessor_LM5_LM6::afb_func_v3},				// 16
-			{::calcHash(QStringLiteral("afb_int_v6")),			&CommandProcessor_LM5_LM6::afb_int_v6},					// 17
+			{::calcHash(QStringLiteral("afb_int_v6_tiunlim")),	&CommandProcessor_LM5_LM6::afb_int_v6_tiunlim},			// 17	ti is unlimited
+			{::calcHash(QStringLiteral("afb_int_v6_ti350000")),	&CommandProcessor_LM5_LM6::afb_int_v6_ti350000},		// 17	ti is limited to 350000ms
 			{::calcHash(QStringLiteral("afb_dpcomp_v3")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20
 			{::calcHash(QStringLiteral("afb_dpcomp_v4")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
 			{::calcHash(QStringLiteral("afb_dpcomp_v5")),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20
@@ -392,7 +397,8 @@ namespace Sim
 			{::calcHash(QStringLiteral("fb_deadzone_v5")),		&CommandProcessor_LM5_LM6::fb_deadzone_v5},				// 24
 			{::calcHash(QStringLiteral("fb_deadzone_v6")),		&CommandProcessor_LM5_LM6::fb_deadzone_v6},				// 24
 			{::calcHash(QStringLiteral("afb_pol_v3")),			&CommandProcessor_LM5_LM6::afb_pol_v3},					// 25
-			{::calcHash(QStringLiteral("afb_der_v5")),			&CommandProcessor_LM5_LM6::afb_der_v5},					// 26
+			{::calcHash(QStringLiteral("afb_der_v5_tdunlim")),	&CommandProcessor_LM5_LM6::afb_der_v5_tdunlim},			// 26	td is unlimited
+			{::calcHash(QStringLiteral("afb_der_v5_td350000")),	&CommandProcessor_LM5_LM6::afb_der_v5_td350000},		// 26	td is limited to 350000ms
 			{::calcHash(QStringLiteral("afb_mismatch_v2")),		&CommandProcessor_LM5_LM6::afb_mismatch_v2},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v3")),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27

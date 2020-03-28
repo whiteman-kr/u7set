@@ -3020,7 +3020,17 @@ namespace Sim
 
 	//	INTEGRATOR, OpCode 17
 	//
-	void CommandProcessor_LM5_LM6::afb_int_v6(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_int_v6_tiunlim(AfbComponentInstance* instance)
+	{
+		return afb_int_v6(instance, std::numeric_limits<qint32>::max());
+	}
+
+	void CommandProcessor_LM5_LM6::afb_int_v6_ti350000(AfbComponentInstance* instance)
+	{
+		return afb_int_v6(instance, 350000);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_int_v6(AfbComponentInstance* instance, qint32 maxTiValue)
 	{
 		// Define inputs/outputs opIndexes
 		//
@@ -3089,11 +3099,6 @@ namespace Sim
 				param_err = 0x0001;
 				break;
 			}
-
-			int to_do_distinct_safety_non_safety_constants;
-
-			//const qint32 maxValue = 350000;
-			const qint32 maxTiValue = std::numeric_limits<qint32>::max();
 
 			if (ti < m_cycleDurationMs ||
 				ti > maxTiValue)
@@ -4058,12 +4063,12 @@ namespace Sim
 
 	//	DEADZONE, OpCode 24
 	//
-	void CommandProcessor_LM5_LM6::fb_deadzone_v5(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::fb_deadzone_v5(AfbComponentInstance* /*instance*/)
 	{
 		SimException::raise(QString("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v5");
 	}
 
-	void CommandProcessor_LM5_LM6::fb_deadzone_v6(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::fb_deadzone_v6(AfbComponentInstance* /*instance*/)
 	{
 		SimException::raise(QString("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v6");
 	}
@@ -4147,7 +4152,17 @@ namespace Sim
 
 	//	DER, OpCode 26
 	//
-	void CommandProcessor_LM5_LM6::afb_der_v5(AfbComponentInstance* instance)
+	void CommandProcessor_LM5_LM6::afb_der_v5_tdunlim(AfbComponentInstance* instance)
+	{
+		return afb_der_v5(instance, std::numeric_limits<qint32>::max());
+	}
+
+	void CommandProcessor_LM5_LM6::afb_der_v5_td350000(AfbComponentInstance* instance)
+	{
+		return afb_der_v5(instance, 350000);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_der_v5(AfbComponentInstance* instance, qint32 maxTdValue)
 	{
 		// Define inputs/outputs opIndexes
 		//
@@ -4227,11 +4242,6 @@ namespace Sim
 				newXPrev = x_prev;
 				break;
 			}
-
-			int to_do_distinct_safety_non_safety_constants;
-
-			//const qint32 maxValue = 350000;
-			const qint32 maxTdValue = std::numeric_limits<qint32>::max();
 
 			if (td < m_cycleDurationMs ||
 				td > maxTdValue)
