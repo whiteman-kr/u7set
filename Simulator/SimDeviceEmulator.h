@@ -253,6 +253,7 @@ public:
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
 
 		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
+		QByteArray m_plainTuningData;		// Just Tuning data for specific m_logicModuleNumber and cleaned CRCs
 
 		// Current state
 		//

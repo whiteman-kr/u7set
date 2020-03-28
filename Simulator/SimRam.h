@@ -109,6 +109,9 @@ namespace Sim
 		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder);
 		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const;
 
+		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
+		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const;
+
 		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder);
 		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const;
 

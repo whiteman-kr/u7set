@@ -122,7 +122,7 @@ namespace Sim
 		{
 			// This is read only memory (like incoming data from i/o modules)
 			// Apply override mask for read operations
-			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
+			// Probably in future it's better to apply override mask to RESULT of reading?
 			//
 			if (m_overrideData.empty() == false)
 			{
@@ -218,13 +218,19 @@ namespace Sim
 			return false;
 		}
 
-		if (byteOrder == E::BigEndian)
+		switch (byteOrder)
 		{
+		case E::BigEndian:
 			qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
-		}
-		else
-		{
+			break;
+		case E::LittleEndian:
 			qToLittleEndian<TYPE>(data, m_data.data() + byteOffset);
+			break;
+		case E::NoEndian:
+			*reinterpret_cast<TYPE*>(m_data.data() + byteOffset) = data;
+			break;
+		default:
+			assert(false);
 		}
 
 		// Apply override
@@ -503,6 +509,28 @@ namespace Sim
 	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
 	{
 		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readWord(offsetW, data, byteOrder);
+	}
+
+	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeWord(offsetW, data, byteOrder);
+	}
+
+	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
+	{
+		const RamArea* area = memoryArea(access, offsetW);
 		if (area == nullptr)
 		{
 			return false;

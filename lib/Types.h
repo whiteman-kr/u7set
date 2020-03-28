@@ -153,7 +153,8 @@ public:
 	enum ByteOrder
 	{
 		LittleEndian,
-		BigEndian
+		BigEndian,
+		NoEndian				// Dirrect write byte order is not applicable
 	};
 	Q_ENUM(ByteOrder)
 

@@ -144,7 +144,6 @@ namespace Sim
 					if (precision == -1)
 					{
 						result = QString{"%1"}.arg(val, 0, (char)(analogFormat));
-
 					}
 					else
 					{

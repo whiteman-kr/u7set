@@ -513,6 +513,21 @@ namespace Sim
 								  memory.m_tuningDataSize,
 								  QLatin1String("Tuning Block"));
 
+		// Copyt EEPROM tuning data to memory
+		//
+		{
+			assert(m_plainTuningData.size() % 2 == 0);
+
+			const quint16* dataPtr = reinterpret_cast<const quint16*>(m_plainTuningData.constData());
+			quint32 tuningDataOffset = lmDescription().memory().m_tuningDataOffset;
+
+			for (int offsetW = 0; offsetW < m_plainTuningData.size() / 2; offsetW++)
+			{
+				quint16 data =  dataPtr[offsetW];
+				m_ram.writeWord(tuningDataOffset + offsetW, data, E::ByteOrder::NoEndian, E::LogicModuleRamAccess::Read);
+			}
+		}
+
 		// RAM - Diag Data
 		//
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
@@ -631,22 +646,57 @@ namespace Sim
 
 		// Get plain application logic data for specific LmNumber
 		//
-		m_plainAppLogic.clear();
-		m_plainAppLogic.reserve(m_appLogicEeprom.size());
-
-		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
-		if (startFrame == 0)
 		{
-			writeError(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
-			return false;
+			m_plainAppLogic.clear();
+			m_plainAppLogic.reserve(m_appLogicEeprom.size());
+
+			int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
+			if (startFrame == 0)
+			{
+				writeError(QString("Can't get start frame for logic number %1 in m_appLogicEeprom").arg(m_logicModuleInfo.lmNumber));
+				return false;
+			}
+
+			for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
+			{
+				for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
+				{
+					m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
+				}
+			}
+
+			qDebug() << "m_plainAppLogic.size() = " << m_plainAppLogic.size();
 		}
 
-		for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
+		// Get plain tuning data for specific LmNumber
+		//
 		{
-			for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
+			m_plainTuningData.clear();
+			m_plainTuningData.reserve(m_tuningEeprom.size());
+
+			int tuningStartFrame = m_tuningEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
+			if (tuningStartFrame == 0)
 			{
-				m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
+				writeError(QString("Can't get start frame for logic number %1 in m_tuningEeprom").arg(m_logicModuleInfo.lmNumber));
+				return false;
 			}
+
+			int tuningFrameCount = lmDescription().memory().m_tuningDataFrameCount;
+
+			for (int frameIndex = tuningStartFrame + 1;
+				 frameIndex < tuningStartFrame + 1 + tuningFrameCount &&
+				 frameIndex < m_tuningEeprom.frameCount();
+				 frameIndex++)
+			{
+				for (int byteNo = 0; byteNo < m_tuningEeprom.framePayloadSize(); byteNo++)
+				{
+					// 1st frame is service information  [D8.21.10, 3.1.1.3]
+					//
+					m_plainTuningData.push_back(m_tuningEeprom.getByte(frameIndex, byteNo));
+				}
+			}
+
+			qDebug() << "m_plainTuningData.size() = " << m_plainTuningData.size();
 		}
 
 		return result;
