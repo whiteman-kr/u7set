@@ -175,7 +175,10 @@ void SimWidget::createDocks()
 	{
 		outputDock = new QDockWidget("Output", this);
 		outputDock->setObjectName("SimOutputWidget");
-		outputDock->setWidget(new SimOutputWidget(outputDock));
+
+		m_outputWidget = new SimOutputWidget(outputDock);
+
+		outputDock->setWidget(m_outputWidget);
 		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
@@ -335,6 +338,7 @@ void SimWidget::closeBuild()
 	emit needUpdateActions();
 
 	SimBasePage::deleteAllPages();
+	m_outputWidget->clear();
 
 	return;
 }
@@ -342,6 +346,7 @@ void SimWidget::closeBuild()
 void SimWidget::refreshBuild()
 {
 	m_simulator->control().stop();
+	m_outputWidget->clear();
 
 	QString buildPath = m_simulator->buildPath();
 	if (buildPath.isEmpty() == true)

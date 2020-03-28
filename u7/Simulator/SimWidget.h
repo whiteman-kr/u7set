@@ -71,6 +71,7 @@ private:
 	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	QTabWidget* m_tabWidget = nullptr;
 	SimToolBar* m_toolBar = nullptr;
+	SimOutputWidget* m_outputWidget = nullptr;
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;
 

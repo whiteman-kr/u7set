@@ -377,7 +377,6 @@ namespace Afb
 	{
 	}
 
-
 	AfbSignal::~AfbSignal()
 	{
 	}
