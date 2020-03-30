@@ -330,6 +330,10 @@ namespace Sim
 		//
 		void afb_tconv_v0(AfbComponentInstance* instance);
 
+		// INDICATION, OpCode 29
+		//
+		void afb_indication_v1(AfbComponentInstance* instance);
+
 		// --
 		//
 	private:
@@ -403,6 +407,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mismatch_v3")),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
 			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27
 			{::calcHash(QStringLiteral("afb_tconv_v0")),		&CommandProcessor_LM5_LM6::afb_tconv_v0},				// 28
+			{::calcHash(QStringLiteral("afb_indication_v1")),	&CommandProcessor_LM5_LM6::afb_indication_v1},			// 29
 		};
 
 		static const int m_cycleDurationMs = 5;

@@ -4838,4 +4838,246 @@ namespace Sim
 		return;
 	}
 
+	// INDICATION, OpCode 29
+	//
+	void CommandProcessor_LM5_LM6::afb_indication_v1(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_x_prev = 1;
+		const int i_1_trigger = 2;
+		const int i_2_trigger = 3;
+		const int i_x = 4;
+		const int i_blink_off = 5;
+		const int i_test = 6;
+		const int i_blink = 7;
+
+		const int o_result = 8;
+		const int o_x_prev = i_x_prev;		// const int o_x_prev = 9
+		const int o_1_trigger = i_1_trigger;	// const int o_1_triger = 10
+		const int o_2_trigger = i_2_trigger;	// const int o_1_triger = 11
+		//const int o_indication_edi = 12;
+		//const int o_version = 13;
+		const int o_univibrator = 14;
+
+		// Get AFB configuration
+		//
+		const quint16 conf = instance->param(i_conf)->wordValue();
+
+		const quint16 x_prev_bus = instance->paramExists(i_x_prev)						// 16-bit bus
+								   ? instance->param(i_x_prev)->wordValue()
+								   : 0;
+
+		const quint16 trigger_1_bus = instance->paramExists(i_1_trigger)				// 16-bit bus
+									  ? instance->param(i_1_trigger)->wordValue()
+									  : 0;
+
+		const quint16 trigger_2_bus = instance->paramExists(i_2_trigger)				// 16-bit bus
+									  ? instance->param(i_2_trigger)->wordValue()
+									  : 0;
+
+		const quint16 x_in_bus = instance->param(i_x)->wordValue();						// 16-bit bus
+		const quint16 blink_off_bus = instance->param(i_blink_off)->wordValue();		// 16-bit bus
+		const quint16 test_bus = instance->param(i_test)->wordValue();					// 16-bit bus
+		const quint16 blink_bus = instance->param(i_blink)->wordValue();				// 16-bit bus
+
+		// Logic with outputs
+		//
+		switch (conf)
+		{
+		case 1:
+			{
+				quint16 result_bus = 0;
+				quint16 trigger_1_result_bus = 0;
+				//quint16 trigger_2_result_bus = 0;
+				quint16 x_prev_result_bus = 0;
+				quint16 univibrator_bus = 0;
+
+				for (int bitNo = 0; bitNo < 16; bitNo++)
+				{
+					quint16 blink_off = (blink_off_bus >> bitNo) & 0x0001;
+					quint16 x_in = (x_in_bus >> bitNo) & 0x0001;
+					quint16 x_prev = (x_prev_bus >> bitNo) & 0x0001;
+					quint16 blink = (blink_bus >> bitNo) & 0x0001;
+					quint16 trigger_1 = (trigger_1_bus >> bitNo) & 0x0001;
+
+					quint16 result = 0;
+					quint16 trigger_1_result = 0;
+					//quint16 trigger_2_result = 0;
+					//quint16 x_prev_result = 0;
+					quint16 univibrator_result = 0;
+
+					if (blink_off == 1 && x_in == 1)
+					{
+						result = 1;
+						trigger_1_result = 0;
+					}
+					else
+					{
+						if (x_in == 1)
+						{
+							if (x_prev == 0)
+							{
+								result = blink;
+								trigger_1_result = 1;
+							}
+							else
+							{
+								if (trigger_1 == 1)
+								{
+									result = blink;
+									trigger_1_result = 1;
+								}
+								else
+								{
+									result = 1;
+									trigger_1_result = 0;
+								}
+							}
+						}
+						else
+						{
+							result = 0;
+							trigger_1_result = 0;
+						}
+					}
+
+					if (x_prev == 0 && x_in == 1)
+					{
+						univibrator_result = 1;
+					}
+					else
+					{
+						univibrator_result = 0;
+					}
+
+					// --
+					//
+					result_bus |= result << bitNo;
+					x_prev_result_bus |= x_in << bitNo;
+					trigger_1_result_bus |= trigger_1_result << bitNo;
+					univibrator_bus |= univibrator_result << bitNo;
+				}
+
+				instance->addParamWord(o_result, result_bus | test_bus);
+				instance->addParamWord(o_x_prev, x_prev_result_bus);
+				instance->addParamWord(o_1_trigger, trigger_1_result_bus);
+				instance->addParamWord(o_univibrator, univibrator_bus);
+			}
+			break;
+		case 2:
+			{
+				quint16 result_bus = 0;
+				quint16 trigger_1_result_bus = 0;
+				quint16 trigger_2_result_bus = 0;
+				quint16 x_prev_result_bus = 0;
+				quint16 univibrator_bus = 0;
+
+				for (int bitNo = 0; bitNo < 16; bitNo++)
+				{
+					quint16 blink_off = (blink_off_bus >> bitNo) & 0x0001;
+					quint16 x_in = (x_in_bus >> bitNo) & 0x0001;
+					quint16 x_prev = (x_prev_bus >> bitNo) & 0x0001;
+					quint16 blink = (blink_bus >> bitNo) & 0x0001;
+					quint16 trigger_1 = (trigger_1_bus >> bitNo) & 0x0001;
+					quint16 trigger_2 = (trigger_2_bus >> bitNo) & 0x0001;
+
+					quint16 result = 0;
+					quint16 trigger_1_result = 0;
+					quint16 trigger_2_result = 0;
+					quint16 univibrator_result = 0;
+
+					// ---
+					//
+					if (blink_off == 1 && x_in == 1)
+					{
+						result = 1;
+						trigger_1_result = 0;
+						trigger_2_result = 0;
+					}
+					else
+					{
+						if (blink_off == 0 && x_in == 0)
+						{
+							if (trigger_2 == 0)
+							{
+								result = 0;
+								trigger_1_result = 0;
+								trigger_2_result = 0;
+							}
+							else
+							{
+								result = blink;
+								trigger_1_result = 1;
+								trigger_2_result = 1;
+							}
+						}
+						else
+						{
+							if (x_in == 1)
+							{
+								if (x_prev == 0)
+								{
+									result = blink;
+									trigger_1_result = 1;
+									trigger_2_result = 1;
+								}
+								else
+								{
+									if (trigger_1 == 1)
+									{
+										result = blink;
+										trigger_1_result = 1;
+										trigger_2_result = 1;
+									}
+									else
+									{
+										result	= 1;
+										trigger_1_result = 0;
+										trigger_2_result = 0;
+									}
+								}
+							}
+							else
+							{
+								result	= 0;
+								trigger_1_result = 0;
+								trigger_2_result = 0;
+							}
+						}
+					}
+
+					if (x_prev == 0 && x_in == 1)
+					{
+						univibrator_result = 1;
+					}
+					else
+					{
+						univibrator_result = 0;
+					}
+
+					// --
+					//
+					result_bus |= result << bitNo;
+					x_prev_result_bus |= x_in << bitNo;
+					trigger_1_result_bus |= trigger_1_result << bitNo;
+					trigger_2_result_bus |= trigger_2_result << bitNo;
+					univibrator_bus |= univibrator_result << bitNo;
+				}
+
+				instance->addParamWord(o_result, result_bus | test_bus);
+				instance->addParamWord(o_x_prev, x_prev_result_bus);
+				instance->addParamWord(o_1_trigger, trigger_1_result_bus);
+				instance->addParamWord(o_2_trigger, trigger_2_result_bus);
+				instance->addParamWord(o_univibrator, univibrator_bus);
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_indication_v1");
+		}
+
+		return;
+	}
+
 }
