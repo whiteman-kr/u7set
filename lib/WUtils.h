@@ -129,4 +129,7 @@ inline quint16 __checkAndCastToQuint16(int value)
 
 #define CHECK_AND_CAST_TO_QUINT16(value)  __checkAndCastToQuint16(value)
 
+bool partitionOfInteger(int number, const std::vector<int>& availableParts, std::vector<int>* resultPartition);
+bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
+
 
