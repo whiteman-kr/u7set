@@ -248,9 +248,9 @@ public:
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 
-		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
-		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
-		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
+		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
+		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
+		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
 
 		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
 		QByteArray m_plainTuningData;		// Just Tuning data for specific m_logicModuleNumber and cleaned CRCs

@@ -657,15 +657,18 @@ namespace Sim
 				return false;
 			}
 
-			for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
+			int frameCount = m_appLogicEeprom.configFramesCount(m_logicModuleInfo.lmNumber);
+			assert(startFrame + frameCount < m_appLogicEeprom.frameCount());
+
+			for (int frameIndex = startFrame;
+				 frameIndex < startFrame + frameCount && frameIndex < m_appLogicEeprom.frameCount();
+				 frameIndex++)
 			{
-				for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
+				for (int offset = 0; offset < m_appLogicEeprom.framePayloadSize(); offset++)
 				{
-					m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
+					m_plainAppLogic.push_back(m_appLogicEeprom.getByte(frameIndex, offset));
 				}
 			}
-
-			qDebug() << "m_plainAppLogic.size() = " << m_plainAppLogic.size();
 		}
 
 		// Get plain tuning data for specific LmNumber
@@ -681,11 +684,11 @@ namespace Sim
 				return false;
 			}
 
-			int tuningFrameCount = lmDescription().memory().m_tuningDataFrameCount;
+			int tuningFrameCount = m_tuningEeprom.configFramesCount(m_logicModuleInfo.lmNumber);
+			assert(tuningStartFrame + tuningFrameCount < m_tuningEeprom.frameCount());
 
-			for (int frameIndex = tuningStartFrame + 1;
-				 frameIndex < tuningStartFrame + 1 + tuningFrameCount &&
-				 frameIndex < m_tuningEeprom.frameCount();
+			for (int frameIndex = tuningStartFrame;
+				 frameIndex < tuningStartFrame + tuningFrameCount && frameIndex < m_tuningEeprom.frameCount();
 				 frameIndex++)
 			{
 				for (int byteNo = 0; byteNo < m_tuningEeprom.framePayloadSize(); byteNo++)
@@ -695,8 +698,6 @@ namespace Sim
 					m_plainTuningData.push_back(m_tuningEeprom.getByte(frameIndex, byteNo));
 				}
 			}
-
-			qDebug() << "m_plainTuningData.size() = " << m_plainTuningData.size();
 		}
 
 		return result;
