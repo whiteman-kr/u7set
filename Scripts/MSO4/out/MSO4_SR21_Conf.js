@@ -822,7 +822,7 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
     var qBlocksPtr = ptr;
     ptr += 2; // QBlocks is filled later
     // StructSize
-    var structSize = 12;
+    var structSize = 14;
     if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "StructSize", structSize) == false) {
         return false;
     }
@@ -853,7 +853,7 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             continue;
         }
         var ioEquipmentID = ioModule.jsPropertyString("EquipmentID");
-        var checkProperties = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize"];
+        var checkProperties = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize", "Configuration"];
         for (var cp = 0; cp < checkProperties.length; cp++) {
             if (ioModule.propertyValue(checkProperties[cp]) == undefined) {
                 log.errCFG3000(checkProperties[cp], ioEquipmentID);
@@ -878,10 +878,10 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
         blockPtr += 2;
         // Id
         value = ioModule.jsModuleFamily() | ioModule.moduleVersion();
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "ID", value) == false) {
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "Module ID", value) == false) {
             return false;
         }
-        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: ID = " + value + "\r\n");
+        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Module ID = " + value + "\r\n");
         blockPtr += 2;
         // TxAddr
         if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxAddr", txAddr) == false) {
@@ -908,6 +908,13 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             return false;
         }
         confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxDataSize = " + rxDataSize + "\r\n");
+        blockPtr += 2;
+        // Configuration
+        var configurationCode = ioModule.jsPropertyInt("Configuration");
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "Configuration", configurationCode) == false) {
+            return false;
+        }
+        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Configuration = " + configurationCode + "\r\n");
         blockPtr += 2;
     }
     for (var i = 0; i < ioModulesMaxCount; i++) {

@@ -138,6 +138,14 @@ namespace Builder
 			int busContentAddress = BAD_ADDRESS;
 		};
 
+		struct BusProcessingStepInfo
+		{
+			int stepsNumber = 0;
+			int currentStep = 0;
+			int currentStepSizeBits = 0;			// for now 32 or 16 only
+			int currentBusSignalOffsetW = 0;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -398,21 +406,40 @@ namespace Builder
 		bool generateAppLogicCode(CodeSnippet* code);
 
 		bool generateAfbCode(CodeSnippet* code, const UalItem* ualItem);
-		bool generateSignalsToAfbInputsCode(CodeSnippet* code, const UalAfb* ualAfb, int busProcessingStep);
-		bool generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
-		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
-		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
-		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
+		bool generateSignalsToAfbInputsCode(CodeSnippet* code, const UalAfb* ualAfb,
+											const BusProcessingStepInfo& bpStepInfo);
 
-		bool startAfb(CodeSnippet* code, const UalAfb* ualAfb, int processingStep, int processingStepsNumber);
+		bool generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+										  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+										  const BusProcessingStepInfo& bpStepInfo);
 
-		bool generateAfbOutputsToSignalsCode(CodeSnippet* code, const UalAfb* ualAfb, int busProcessingStep);
-		bool generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
-		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
+		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+											 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+											 const BusProcessingStepInfo& bpStepInfo);
 
-		bool calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber);
+		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+													 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
+
+		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+												const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+												const BusProcessingStepInfo& bpStepInfo);
+
+		bool startAfb(CodeSnippet* code, const UalAfb* ualAfb, const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbOutputsToSignalsCode(CodeSnippet* code, const UalAfb* ualAfb,
+											 const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
+										   const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+										   const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
+												 const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+												 const BusProcessingStepInfo& bpStepInfo);
+
+		bool calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes);
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
-									   int* pinsSize, int* signalsSize, bool isInputs,
+									   std::vector<std::vector<int>>* pinsSizes, int* signalsSize, bool isInputs,
 									   bool* allBusInputsConnectedToDiscretes);
 		bool isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing);
 

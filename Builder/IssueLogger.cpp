@@ -5340,34 +5340,35 @@ namespace Builder
 	/// Description:
 	///		Different busTypes on AFB output.
 	///
-	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID)
+	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID, QString itemLabel)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5122, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5122,
-				  QString(tr("Different busTypes on AFB output (Logic schema %1).")).arg(schemaID));
+				  QString(tr("Different busTypes on AFB output (Logic schema %1, item %2).")).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5123
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Different busTypes on AFB inputs (Logic schema %1).
+	/// Title:	   Different busTypes on AFB inputs (or outputs) (Logic schema %1, item %2).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
+	///		%2 AFB item label
 	///
 	/// Description:
-	///		Different busTypes on AFB inputs.
+	///		Different busTypes on AFB inputs (or outputs).
 	///
-	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID)
+	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID, QString itemLabel)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5123, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5123,
-				  QString(tr("Different busTypes on AFB inputs (Logic schema %1).")).arg(schemaID));
+				  QString(tr("Different busTypes on AFB inputs (or outputs) (Logic schema %1, item %2).")).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5124

@@ -1212,7 +1212,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	// StructSize
 
-	var structSize = 12;
+	var structSize = 14;
 
 	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "StructSize", structSize) == false) {
 		return false;
@@ -1257,7 +1257,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		var ioEquipmentID: string = ioModule.jsPropertyString("EquipmentID");
 
-		var checkProperties: string[] = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize"];
+		var checkProperties: string[] = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize", "Configuration"];
 		for (var cp: number = 0; cp < checkProperties.length; cp++) {
 			if (ioModule.propertyValue(checkProperties[cp]) == undefined) {
 				log.errCFG3000(checkProperties[cp], ioEquipmentID);
@@ -1294,10 +1294,10 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		value = ioModule.jsModuleFamily() | ioModule.moduleVersion();
 
-		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "ID", value) == false) {
+		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "Module ID", value) == false) {
 			return false;
 		}
-		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: ID = " + value + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Module ID = " + value + "\r\n");
 
 		blockPtr += 2;
 
@@ -1341,6 +1341,16 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		blockPtr += 2;
 
+		// Configuration
+
+		var configurationCode: number = ioModule.jsPropertyInt("Configuration");
+
+		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "Configuration", configurationCode) == false) {
+			return false;
+		}
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Configuration = " + configurationCode + "\r\n");
+
+		blockPtr += 2;
 	}
 
 	for (var i: number = 0; i < ioModulesMaxCount; i++) {
