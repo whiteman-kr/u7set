@@ -33,8 +33,8 @@ namespace TrendLib
 		static std::optional<std::vector<std::pair<double, double>>> scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect);
 		static std::optional<std::vector<std::pair<double, double>>> scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit);
 
-	private:
-		const static double expScaleInfinityValue; // = 999;	// Infinity value for exponential scale
+	public:
+		const static double periodScaleInfinity; // = 999;	// Infinity value for exponential scale
 	};
 }
 

@@ -861,20 +861,21 @@ namespace TrendLib
 					continue;
 				}
 
-				if (fabs(h - l) < DBL_MIN)
+				double delta = fabs(h - l);
+				if (delta < DBL_MIN)
 				{
 					continue;
 				}
 
 				if (numSteps > 0)
 				{
-					h = h - (h - l) * 0.1;
-					l = l + (h - l) * 0.1;
+					h = h - delta * 0.1;
+					l = l + delta * 0.1;
 				}
 				else
 				{
-					h = h + (h - l) * 0.1;
-					l = l - (h - l) * 0.1;
+					h = h + delta * 0.1;
+					l = l - delta * 0.1;
 				}
 
 				double newHighLimit = TrendScale::valueFromScalePoint(h, scaleType(), &ok);

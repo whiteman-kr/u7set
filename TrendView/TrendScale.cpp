@@ -2,7 +2,7 @@
 
 namespace TrendLib
 {
-	const double TrendScale::expScaleInfinityValue = 999; // Infinity value for exponential scale
+	const double TrendScale::periodScaleInfinity = 999; // Infinity value for period scale
 
 	TrendScale::TrendScale()
 	{
@@ -48,17 +48,17 @@ namespace TrendLib
 
 			if (scaleType == TrendScaleType::Period)
 			{
-				double infinityValueLog = log(expScaleInfinityValue);
+				double infinityLog = log(periodScaleInfinity);
 
-				result = qBound(-infinityValueLog, result, infinityValueLog);
+				result = qBound(-infinityLog, result, infinityLog);
 
 				if (result < 0)
 				{
-					result = -infinityValueLog - result;
+					result = -infinityLog - result;
 				}
 				else
 				{
-					result = infinityValueLog - result;
+					result = infinityLog - result;
 				}
 			}
 		}
@@ -94,6 +94,8 @@ namespace TrendLib
 				scaleValue = exp(scaleValue);
 			}
 
+			scaleValue = qBound(-periodScaleInfinity, scaleValue, periodScaleInfinity);
+
 			return scaleValue;
 		}
 
@@ -108,6 +110,8 @@ namespace TrendLib
 		return 0;
 	}
 
+	// Build scale points for a trend
+	//
 	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect)
 	{
 		switch (scaleType)
@@ -141,7 +145,7 @@ namespace TrendLib
 		}
 		case TrendScaleType::Period:
 		{
-			if (fabs(value) >= expScaleInfinityValue)
+			if (fabs(value) >= periodScaleInfinity)
 			{
 				return QString(QChar(0x221E));
 			}
@@ -184,7 +188,7 @@ namespace TrendLib
 		}
 		case TrendScaleType::Period:
 		{
-			value = qBound(-expScaleInfinityValue, value, expScaleInfinityValue);
+			value = qBound(-periodScaleInfinity, value, periodScaleInfinity);
 
 			if (fabs(value) <= 1.0)
 			{
@@ -221,6 +225,8 @@ namespace TrendLib
 		return 0;
 	}
 
+	// Build scale points for generic or logarithmic trend
+	//
 	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect)
 	{
 		if (scaleType != TrendScaleType::Generic && scaleType != TrendScaleType::Logarithmic)
@@ -304,6 +310,8 @@ namespace TrendLib
 		return result;
 	}
 
+	// Build scale points for periodic trend
+	//
 	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit)
 	{
 		if (scaleType != TrendScaleType::Period)
@@ -324,7 +332,7 @@ namespace TrendLib
 		//
 
 		static const std::array<double, 19> possibleGridPoints = {2, 5, 10, 20, 40, 80, 160, 320, 640,
-																  TrendScale::expScaleInfinityValue,
+																  TrendScale::periodScaleInfinity,
 																  -640, -320, -160, -80, -40, -20, -10, -5, -2};
 
 		std::vector<std::pair<double, double>> result;
