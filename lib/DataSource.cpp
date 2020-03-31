@@ -2,6 +2,7 @@
 #include "WUtils.h"
 #include "Crc.h"
 #include "DeviceHelper.h"
+#include "LmDescription.h"
 
 // ---------------------------------------------------------------------------------
 //
@@ -30,30 +31,16 @@ const char* DataSource::LmEthernetAdapterProperties::PROP_LM_DIAG_DATA_SIZE= "Di
 
 const char* DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR = "_ETHERNET0%1";
 
-bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm, int adptrNo, Builder::IssueLogger* log)
+bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm,
+																					int lanControllerNo,
+																					E::LanControllerType lanControllerType,
+																					Builder::IssueLogger* log)
 {
-	if (log == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(lm, log);
 
-	if (lm == nullptr)
-	{
-		LOG_INTERNAL_ERROR(log);
-		assert(false);
-		return false;
-	}
-
-	if (adptrNo < LM_ETHERNET_ADAPTER1 ||
-		adptrNo > LM_ETHERNET_ADAPTER3)
-	{
-		LOG_INTERNAL_ERROR(log);
-		assert(false);
-		return false;
-	}
-
-	adapterNo = adptrNo;
+	adapterNo = lanControllerNo;
+	adapterType = lanControllerType;
 
 	QString suffix = QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(adapterNo);
 
@@ -66,9 +53,19 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 
 	adapterID = adapter->equipmentIdTemplate();
 
-	bool result = true;
+	bool tuning = false;
+	bool appData = false;
+	bool diagData = false;
 
-	if (adptrNo == LM_ETHERNET_ADAPTER1)
+	bool result = DataSource::lanControllerFunctions(adapterType, &tuning, &appData, &diagData);
+
+	if (result == false)
+	{
+		LOG_INTERNAL_ERROR(log);
+		return false;
+	}
+
+	if (tuning == true)
 	{
 		// tunig adapter
 		//
@@ -76,11 +73,9 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 		result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_IP, &tuningIP, log);
 		result &= DeviceHelper::getIntProperty(adapter, PROP_TUNING_PORT, &tuningPort, log);
 		result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_SERVICE_ID, &tuningServiceID, log);
-		return result;
 	}
 
-	if (adptrNo == LM_ETHERNET_ADAPTER2 ||
-		adptrNo == LM_ETHERNET_ADAPTER3)
+	if (appData == true)
 	{
 		// application data adapter
 		//
@@ -98,6 +93,10 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 		appDataFramesQuantity = appDataSize / sizeof(Rup::Frame::data) +
 				((appDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
 
+	}
+
+	if (diagData == true)
+	{
 		// diagnostics data adapter
 		//
 		result &= DeviceHelper::getBoolProperty(adapter, PROP_DIAG_DATA_ENABLE, &diagDataEnable, log);
@@ -120,12 +119,9 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 		diagDataFramesQuantity = diagDataSize / sizeof(Rup::Frame::data) +
 				((diagDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
 */
-
-		return result;
 	}
 
-	assert(false);
-	return false;
+	return result;
 }
 
 
@@ -180,6 +176,7 @@ DataSource::~DataSource()
 bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 										   DataType dataType,
 										   int adapterNo,
+										   E::LanControllerType adapterType,
 										   const SubsystemKeyMap& subsystemKeyMap,
 										   const QHash<QString, quint64>& lmUniqueIdMap,
 										   Builder::IssueLogger* log)
@@ -212,13 +209,16 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 
 	LmEthernetAdapterProperties adapterProp;
 
-	result &= adapterProp.getLmEthernetAdapterNetworkProperties(lm, adapterNo, log);
+	result &= adapterProp.getLmEthernetAdapterNetworkProperties(lm, adapterNo, adapterType, log);
 
 	m_lmAdapterID = adapterProp.adapterID;
 
 	switch(m_lmDataType)
 	{
 	case DataType::App:
+
+		assert(adapterType == E::LanControllerType::AppData || adapterType == E::LanControllerType::AppAndDiagData);
+
 		m_lmDataEnable = adapterProp.appDataEnable;
 		m_lmAddressPort.setAddressPort(adapterProp.appDataIP, adapterProp.appDataPort);
 		m_lmDataID = adapterProp.appDataUID;
@@ -228,6 +228,9 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 		break;
 
 	case DataType::Diag:
+
+		assert(adapterType == E::LanControllerType::DiagData || adapterType == E::LanControllerType::AppAndDiagData);
+
 		m_lmDataEnable = adapterProp.diagDataEnable;
 		m_lmAddressPort.setAddressPort(adapterProp.diagDataIP, adapterProp.diagDataPort);
 		m_lmDataID = adapterProp.diagDataUID;
@@ -237,6 +240,9 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 		break;
 
 	case DataType::Tuning:
+
+		assert(adapterType == E::LanControllerType::Tuning);
+
 		m_lmDataEnable = adapterProp.tuningEnable;
 		m_lmAddressPort.setAddressPort(adapterProp.tuningIP, adapterProp.tuningPort);
 		m_lmDataID = 0;
@@ -443,7 +449,6 @@ bool DataSource::getInfo(Network::DataSourceInfo* proto) const
 	return true;
 }
 
-
 bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 {
 	m_id = proto.id();
@@ -466,6 +471,51 @@ bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 	return true;
 }
 
+bool DataSource::lanControllerFunctions(E::LanControllerType type, bool* tuning, bool* appData, bool* diagData)
+{
+	if (tuning == nullptr ||
+		appData == nullptr ||
+		diagData == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool result = true;
+
+	*tuning = *appData = *diagData = false;
+
+	switch(type)
+	{
+	case E::LanControllerType::Unknown:
+		assert(false);
+		result = false;
+		break;
+
+	case E::LanControllerType::Tuning:
+		*tuning = true;
+		break;
+
+	case E::LanControllerType::AppData:
+		*appData = true;
+		break;
+
+	case E::LanControllerType::DiagData:
+		*diagData = true;
+		break;
+
+	case E::LanControllerType::AppAndDiagData:
+		*appData = *diagData = true;
+		break;
+
+	default:
+		assert(false);
+		result = false;
+	}
+
+	return result;
+}
+
 quint64 DataSource::generateID() const
 {
 	if (m_lmAdapterID.isEmpty())
@@ -483,6 +533,9 @@ quint64 DataSource::generateID() const
 
 	return crc.result();
 }
+
+
+
 
 // -----------------------------------------------------------------------------
 //

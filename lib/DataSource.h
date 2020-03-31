@@ -56,7 +56,8 @@ public:
 
 		static const char* LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
 
-		int adapterNo;		// LM_ETHERNET_ADAPTER* values
+		int adapterNo = -1;		// LM_ETHERNET_ADAPTER* values
+		E::LanControllerType adapterType = E::LanControllerType::Unknown;
 		QString adapterID;
 
 		// only for adapterNo == LM_ETHERNET_ADAPTER1
@@ -84,7 +85,10 @@ public:
 		int diagDataSize = 0;
 		int diagDataFramesQuantity = 0;
 
-		bool getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm, int adapterNo, Builder::IssueLogger* log);
+		bool getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm,
+												   int lanControllerNo,
+												   E::LanControllerType lanControllerType,
+												   Builder::IssueLogger* log);
 	};
 
 	static const char* const ELEMENT_DATA_SOURCES;
@@ -124,6 +128,7 @@ public:
 	static const char* PROP_COUNT;
 
 private:
+
 public:
 	DataSource();
 	virtual ~DataSource();
@@ -131,6 +136,7 @@ public:
 	bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 								   DataType dataType,
 								   int adapterNo,
+								   E::LanControllerType adapterType,
 								   const SubsystemKeyMap& subsystemKeyMap,
 								   const QHash<QString, quint64>& lmUniqueIdMap,
 								   Builder::IssueLogger* log);
@@ -218,6 +224,8 @@ public:
 
 	int lmWorkcycle_mcs() const { return m_lmWorkcycle_mcs; }
 	int lmWorkcycle_ms() const { return m_lmWorkcycle_mcs / 1000; }
+
+	static bool lanControllerFunctions(E::LanControllerType type, bool* tuning, bool* appData, bool* diagData);
 
 private:
 	quint64 generateID() const;
