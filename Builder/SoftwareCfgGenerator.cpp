@@ -675,8 +675,6 @@ namespace Builder
 
 			const LmDescription::Lan& lan = lmDescription->lan();
 
-			int controllersCount = lan.lanControllerCount();
-
 			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
 				bool ok = false;
