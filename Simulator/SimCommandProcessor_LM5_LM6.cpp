@@ -5080,4 +5080,118 @@ namespace Sim
 		return;
 	}
 
+	// PULSE_GEN, OpCode 30
+	//
+	void CommandProcessor_LM5_LM6::afb_pulse_gen_v0(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_t_high = 1;
+		const int i_t_low = 3;
+		const int i_t_prev = 5;
+		const int i_result_i_en_prev = 7;
+		const int i_start_from = 8;
+		const int i_enable = 9;
+
+		const int o_t_prev = i_t_prev;
+		const int o_result_en_prev = 13;
+		const int o_param_err = 16;
+
+		// Get AFB configuration
+		//
+		const quint16 conf = instance->param(i_conf)->wordValue();
+		const qint32 t_high = instance->param(i_t_high)->signedIntValue();
+		const qint32 t_low = instance->param(i_t_low)->signedIntValue();
+
+		qint32 t_prev = instance->paramExists(i_t_prev)
+						? instance->param(i_t_prev)->signedIntValue()
+						: 0;
+
+		const qint16 result_i_en_prev = instance->paramExists(i_result_i_en_prev)
+							  ? instance->param(i_result_i_en_prev)->wordValue()
+							  : 0;
+
+		const qint16 prev_result = result_i_en_prev & 0x0001;
+		const qint16 prev_enable = (result_i_en_prev >> 1) & 0x0001;
+
+		const qint16 start_from = instance->param(i_start_from)->wordValue();
+		const qint16 enable = instance->param(i_enable)->wordValue();
+
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		// Logic -- translated VHDL code
+		//
+		quint16 result_param_err = 0;
+		quint16 result_result = 0;
+
+		do
+		{
+			if (t_high < m_cycleDurationMs || t_low < m_cycleDurationMs)
+			{
+				result_param_err = 1;
+				result_result = 0;
+				t_prev = 0;
+				break;
+			}
+
+			if (enable == 0)
+			{
+				result_result = 0;
+				t_prev = 0;
+				break;
+			}
+
+			// Detect front for enable 0 -> 1 and restart pulse gen is this case
+			//
+			if (prev_enable == 0 && enable == 1)
+			{
+				if (start_from == 1)
+				{
+					result_result = 1;
+					t_prev = t_high / m_cycleDurationMs;
+				}
+				else
+				{
+					result_result = 0;
+					t_prev = t_low / m_cycleDurationMs;
+				}
+
+				break;
+			}
+
+			// Decreasing counter
+			//
+			t_prev --;
+			result_result = prev_result;
+
+			// Check if it's time to swap out and restart timer
+			//
+			if (t_prev <= 0)
+			{
+				if (prev_result == 0)	// swap out
+				{
+					result_result = 1;
+					t_prev = t_high / m_cycleDurationMs;
+				}
+				else
+				{
+					result_result = 0;
+					t_prev = t_low / m_cycleDurationMs;
+				}
+
+				break;
+			}
+
+		}
+		while (false);
+
+		instance->addParamWord(o_param_err, result_param_err);
+		instance->addParamSignedInt(o_t_prev, t_prev);
+		instance->addParamWord(o_result_en_prev, result_result);
+		instance->addParamWord(i_result_i_en_prev, ((enable & 1) << 1) | (result_result & 1 ));
+
+		return;
+	}
+
 }

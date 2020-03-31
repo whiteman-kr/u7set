@@ -334,6 +334,10 @@ namespace Sim
 		//
 		void afb_indication_v1(AfbComponentInstance* instance);
 
+		// PULSE_GEN, OpCode 30
+		//
+		void afb_pulse_gen_v0(AfbComponentInstance* instance);
+
 		// --
 		//
 	private:
@@ -408,6 +412,7 @@ namespace Sim
 			{::calcHash(QStringLiteral("afb_mismatch_v4")),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27
 			{::calcHash(QStringLiteral("afb_tconv_v0")),		&CommandProcessor_LM5_LM6::afb_tconv_v0},				// 28
 			{::calcHash(QStringLiteral("afb_indication_v1")),	&CommandProcessor_LM5_LM6::afb_indication_v1},			// 29
+			{::calcHash(QStringLiteral("afb_pulse_gen_v0")),	&CommandProcessor_LM5_LM6::afb_pulse_gen_v0},			// 30
 		};
 
 		static const int m_cycleDurationMs = 5;

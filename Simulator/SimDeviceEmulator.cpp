@@ -996,10 +996,11 @@ namespace Sim
 		}
 		catch (SimException& e)
 		{
-			writeError(QString("Command run error: %1, %2. Offset = %3, SimFunction = %4")
+			writeError(QString("Command run error: %1, %2. Offset = %3 (%4), SimFunction = %5")
 						.arg(e.message())
 						.arg(e.where())
 						.arg(deviceCommand.m_offset)
+						.arg(deviceCommand.m_offset, 0, 16)
 						.arg(deviceCommand.m_command.simulationFunc));
 			return false;
 		}
