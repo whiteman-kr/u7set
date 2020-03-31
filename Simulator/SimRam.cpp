@@ -13,18 +13,6 @@ namespace Sim
 	{
 	}
 
-	bool RamAreaInfo::contains(E::LogicModuleRamAccess access, quint32 offsetW) const
-	{
-		if ((static_cast<int>(m_access) & static_cast<int>(access)) != 0 &&
-			offsetW >= m_offset &&
-			offsetW < (m_offset + m_size))
-		{
-			return true;
-		}
-
-		return false;
-	}
-
 	bool RamAreaInfo::overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const
 	{
 		quint32 startA = m_offset;
@@ -56,7 +44,7 @@ namespace Sim
 		return;
 	}
 
-	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data, E::ByteOrder byteOrder)
+	bool RamArea::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 //		if (contains(E::LogicModuleRamAccess::Write, offsetW) == false ||
 //			bitNo >= 16)
@@ -78,7 +66,15 @@ namespace Sim
 
 		if (byteOrder == E::ByteOrder::BigEndian)
 		{
-			word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+			// word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+			// Prev line is optimzed by the next block
+			//
+#ifdef Q_LITTLE_ENDIAN
+			quint16 w = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+			word = (w >> 8) | (w << 8);
+#else
+			word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+#endif
 		}
 		else
 		{
@@ -90,7 +86,14 @@ namespace Sim
 
 		if (byteOrder == E::ByteOrder::BigEndian)
 		{
-			qToBigEndian<quint16>(word, m_data.data() + byteOffset);
+			// qToBigEndian<quint16>(word, m_data.data() + byteOffset);
+			// Prev line is optimzed by the next block
+			//
+#ifdef Q_LITTLE_ENDIAN
+			*reinterpret_cast<quint16*>(m_data.data() + byteOffset) = (word >> 8) | (word << 8);
+#else
+			*reinterpret_cast<quint16*>(m_data.data() + byteOffset) = word;
+#endif
 		}
 		else
 		{
@@ -107,7 +110,7 @@ namespace Sim
 		return true;
 	}
 
-	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
+	bool RamArea::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 //		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
 //			bitNo >= 16 ||
@@ -145,7 +148,15 @@ namespace Sim
 
 		if (byteOrder == E::ByteOrder::BigEndian)
 		{
-			word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+			// word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+			// Prev line is optimzed by the next block
+			//
+#ifdef Q_LITTLE_ENDIAN
+			quint16 w = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+			word = (w >> 8) | (w << 8);
+#else
+			word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+#endif
 		}
 		else
 		{
@@ -160,54 +171,54 @@ namespace Sim
 		return true;
 	}
 
-	bool RamArea::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
+	bool RamArea::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<quint16>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
+	bool RamArea::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		return readData<quint16>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
+	bool RamArea::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<quint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
+	bool RamArea::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const noexcept
 	{
 		return readData<quint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder)
+	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<qint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const
+	bool RamArea::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const noexcept
 	{
 		return readData<qint32>(offsetW, data, byteOrder);
 	}
 
-	const QByteArray& RamArea::data() const
+	const QByteArray& RamArea::data() const noexcept
 	{
 		return m_data;
 	}
 
-	const std::vector<OverrideRamRecord>& RamArea::overrideData() const
+	const std::vector<OverrideRamRecord>& RamArea::overrideData() const noexcept
 	{
 		return m_overrideData;
 	}
 
-	void RamArea::setRawData(const QByteArray& value, const std::vector<OverrideRamRecord>& overrideData)
+	void RamArea::setRawData(const QByteArray& value, const std::vector<OverrideRamRecord>& overrideData) noexcept
 	{
 		m_data = value;
 		m_overrideData = overrideData;
 	}
 
 	template<typename TYPE>
-	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder)
+	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept
 	{
 		int byteOffset = (offsetW - offset()) * 2;
 		if (byteOffset < 0 ||
@@ -221,7 +232,18 @@ namespace Sim
 		switch (byteOrder)
 		{
 		case E::BigEndian:
-			qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
+			if constexpr (sizeof(TYPE) == 2)
+			{
+#ifdef Q_LITTLE_ENDIAN
+				*reinterpret_cast<quint16*>(m_data.data() + byteOffset) = (data >> 8) | (data << 8);
+#else
+				*reinterpret_cast<quint16*>(m_data.data() + byteOffset) = data;
+#endif
+			}
+			else
+			{
+				qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
+			}
 			break;
 		case E::LittleEndian:
 			qToLittleEndian<TYPE>(data, m_data.data() + byteOffset);
@@ -244,7 +266,7 @@ namespace Sim
 	}
 
 	template<typename TYPE>
-	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const
+	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const noexcept
 	{
 		if (data == nullptr)
 		{
@@ -277,7 +299,19 @@ namespace Sim
 
 		if (byteOrder == E::BigEndian)
 		{
-			*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
+			if constexpr (sizeof(TYPE) == 2)
+			{
+#ifdef Q_LITTLE_ENDIAN
+				quint16 w = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+				*data = (w >> 8) | (w << 8);
+#else
+				*data = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+#endif
+			}
+			else
+			{
+				*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
+			}
 		}
 		else
 		{
@@ -287,7 +321,7 @@ namespace Sim
 	}
 
 	template<typename TYPE>
-	void RamArea::applyOverride(quint32 offsetW)
+	void RamArea::applyOverride(quint32 offsetW) noexcept
 	{
 		static_assert(sizeof(TYPE) >= 2 && sizeof(TYPE) <= 8);
 
@@ -331,7 +365,7 @@ namespace Sim
 		return;
 	}
 
-	void RamArea::setOverrideData(std::vector<OverrideRamRecord>&& overrideData)
+	void RamArea::setOverrideData(std::vector<OverrideRamRecord>&& overrideData) noexcept
 	{
 		m_overrideData = std::move(overrideData);
 	}
@@ -451,7 +485,7 @@ namespace Sim
 		return m_memoryAreas[index];
 	}
 
-	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder)
+	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -462,7 +496,7 @@ namespace Sim
 		return area->writeBit(offsetW, bitNo, data, byteOrder);
 	}
 
-	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
+	bool Ram::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -473,7 +507,7 @@ namespace Sim
 		return area->readBit(offsetW, bitNo, data, byteOrder);
 	}
 
-	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
+	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
 	{
 		RamArea* area = memoryArea(access, offsetW);
 		if (area == nullptr)
@@ -484,7 +518,7 @@ namespace Sim
 		return area->writeBit(offsetW, bitNo, data, byteOrder);
 	}
 
-	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
+	bool Ram::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
 	{
 		const RamArea* area = memoryArea(access, offsetW);
 		if (area == nullptr)
@@ -495,7 +529,7 @@ namespace Sim
 		return area->readBit(offsetW, bitNo, data, byteOrder);
 	}
 
-	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
+	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -506,7 +540,7 @@ namespace Sim
 		return area->writeWord(offsetW, data, byteOrder);
 	}
 
-	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
+	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -595,67 +629,89 @@ namespace Sim
 		return ok;
 	}
 
-	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW)
+	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept
 	{
 		RamArea* result = nullptr;
 
-		if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
+		if (m_lastAccessedMemoryArea != nullptr &&
+			m_lastAccessedMemoryArea->contains(access, offsetW) == true)
 		{
-			for (RamArea& area : m_memoryAreas)
-			{
-				if (area.contains(access, offsetW) == true)
-				{
-					result = &area;
-					break;
-				}
-			}
+			result = m_lastAccessedMemoryArea;
 		}
 		else
 		{
-			// Look for the right area from back, most likely it will find area much faster.
-			// Tried it on project, it works really well
-			//
-			for (auto it = m_memoryAreas.rbegin(); it != m_memoryAreas.rend(); ++it)
+			if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
 			{
-				if (it->contains(access, offsetW) == true)
+				for (RamArea& area : m_memoryAreas)
 				{
-					result = &it.operator*();
-					break;
+					if (area.contains(access, offsetW) == true)
+					{
+						result = &area;
+						break;
+					}
 				}
 			}
+			else
+			{
+				// Look for the right area from back, most likely it will find area much faster.
+				// Tried it on project, it works really well
+				//
+				const size_t memoryAreaCount = m_memoryAreas.size();
+				for (size_t i = memoryAreaCount - 1; i >= 0; --i)
+				{
+					if (m_memoryAreas[i].contains(access, offsetW) == true)
+					{
+						result = &m_memoryAreas[i];
+						break;
+					}
+				}
+			}
+
+			m_lastAccessedMemoryArea = result;
 		}
 
 		return result;
 	}
 
-	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const
+	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
 	{
 		const RamArea* result = nullptr;
 
-		if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
+		if (m_lastAccessedMemoryArea != nullptr &&
+			m_lastAccessedMemoryArea->contains(access, offsetW) == true)
 		{
-			for (const RamArea& area : m_memoryAreas)
-			{
-				if (area.contains(access, offsetW) == true)
-				{
-					result = &area;
-					break;
-				}
-			}
+			result = m_lastAccessedMemoryArea;
 		}
 		else
 		{
-			// Look for the right area from back, most likely it will find area much faster.
-			// Tried it on project, it works really well
-			//
-			for (auto it = m_memoryAreas.rbegin(); it != m_memoryAreas.rend(); ++it)
+			if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
 			{
-				if (it->contains(access, offsetW) == true)
+				for (const RamArea& area : m_memoryAreas)
 				{
-					result = &it.operator*();
-					break;
+					if (area.contains(access, offsetW) == true)
+					{
+						result = &area;
+						break;
+					}
 				}
 			}
+			else
+			{
+				// Look for the right area from back, most likely it will find area much faster.
+				// Tried it on project, it works really well
+				//
+				const size_t memoryAreaCount = m_memoryAreas.size();
+				for (size_t i = memoryAreaCount - 1; i >= 0; --i)
+				{
+					if (m_memoryAreas[i].contains(access, offsetW) == true)
+					{
+						result = &m_memoryAreas[i];
+						break;
+					}
+				}
+			}
+
+			m_lastAccessedMemoryArea = const_cast<RamArea*>(result);
 		}
 
 		return result;

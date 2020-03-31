@@ -143,11 +143,11 @@ public:
 		bool movRamMem(quint32 src, quint32 dst, quint32 size);
 		bool setRamMem(quint32 address, quint16 data, quint16 size);
 
-		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
-		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data);
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo);
 
-		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data, E::LogicModuleRamAccess access);
-		quint16 readRamBit(quint32 offsetW, quint32 bitNo, E::LogicModuleRamAccess access);
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access);
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access);
 
 		bool writeRamWord(quint32 offsetW, quint16 data);
 		quint16 readRamWord(quint32 offsetW);

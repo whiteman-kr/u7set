@@ -772,17 +772,6 @@ namespace Sim
 		return ok;
 	}
 
-	AfbComponentInstance* ModelComponent::instance(quint16 instance)
-	{
-		if (instance > m_instances.size())
-		{
-			return nullptr;
-		}
-
-		AfbComponentInstance* result = &m_instances[instance];
-		return result;
-	}
-
 	AfbComponentSet::AfbComponentSet()
 	{
 		m_components.reserve(32);
@@ -846,7 +835,7 @@ namespace Sim
 		return modelComponent->addParam(instanceNo, instParam, errorMessage);
 	}
 
-	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance)
+	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance) noexcept
 	{
 		if (componentOpCode < 0 || componentOpCode >= m_components.size())
 		{

@@ -134,8 +134,7 @@ namespace Sim
 
 	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode) const
 	{
-		AfbComponent result(m_device->m_lmDescription.component(opCode));
-		return result;
+		return AfbComponent{m_device->m_lmDescription.component(opCode)};
 	}
 
 	Sim::AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
@@ -193,7 +192,7 @@ namespace Sim
 		return true;
 	}
 
-	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
+	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data)
 	{
 		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
 		if (ok == false)
@@ -204,7 +203,7 @@ namespace Sim
 		return ok;
 	}
 
-	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
+	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint16 bitNo)
 	{
 		quint16 data = 0;
 		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
@@ -217,7 +216,7 @@ namespace Sim
 		return data;
 	}
 
-	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data, E::LogicModuleRamAccess access)
+	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access)
 	{
 		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
 		if (ok == false)
@@ -231,7 +230,7 @@ namespace Sim
 		return ok;
 	}
 
-	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo, E::LogicModuleRamAccess access)
+	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access)
 	{
 		quint16 data = 0;
 		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian, access);
@@ -783,7 +782,7 @@ namespace Sim
 		}
 		while (programCounter < m_plainAppLogic.size());
 
-		// This block is related to Mutex, it;s nit about pre do-while loop
+		// This block is related to Mutex, it's not about pre do-while loop
 		//
 		{
 			m_cacheMutex.lock();
@@ -981,8 +980,6 @@ namespace Sim
 
 	bool DeviceEmulator::runCommand(DeviceCommand& deviceCommand)
 	{
-		//qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
-
 		// Run command
 		//
 		try

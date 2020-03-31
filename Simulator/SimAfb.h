@@ -17,8 +17,8 @@ namespace Sim
 		AfbComponent() = delete;
 		AfbComponent(const AfbComponent&) = default;
 		AfbComponent(AfbComponent&&) noexcept = default;
-		AfbComponent(std::shared_ptr<Afb::AfbComponent>& afbComponent);
-		AfbComponent(std::shared_ptr<Afb::AfbComponent>&& afbComponent);
+		explicit AfbComponent(std::shared_ptr<Afb::AfbComponent>& afbComponent);
+		explicit AfbComponent(std::shared_ptr<Afb::AfbComponent>&& afbComponent);
 		~AfbComponent() = default;
 
 	public:
@@ -190,7 +190,10 @@ namespace Sim
 		bool init();	// Create a number of instances
 
 		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
-		AfbComponentInstance* instance(quint16 instance);
+		AfbComponentInstance* instance(quint16 instance) noexcept
+		{
+			return instance > m_instances.size() ? nullptr : &m_instances[instance];
+		}
 
 	private:
 		std::vector<AfbComponentInstance> m_instances;			// Key is instNo
@@ -208,7 +211,7 @@ namespace Sim
 		bool init(const LmDescription& lmDescription);
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 
-		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
+		AfbComponentInstance* componentInstance(int componentOpCode, int instance) noexcept;
 
 	private:
 		std::vector<std::shared_ptr<ModelComponent>> m_components;		// Index is opcode of AFB
