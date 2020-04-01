@@ -28,11 +28,6 @@ public:
 		Tuning,
 	};
 
-	static const int LM_ETHERNET_ADAPTERS_COUNT = 3;
-	static const int LM_ETHERNET_ADAPTER1 = 1;
-	static const int LM_ETHERNET_ADAPTER2 = 2;
-	static const int LM_ETHERNET_ADAPTER3 = 3;
-
 	struct LmEthernetAdapterProperties
 	{
 		static const char* PROP_TUNING_ENABLE;
@@ -60,14 +55,14 @@ public:
 		E::LanControllerType adapterType = E::LanControllerType::Unknown;
 		QString adapterID;
 
-		// only for adapterNo == LM_ETHERNET_ADAPTER1
+		// only for adapterType == E::LanControllerType::Tuning
 		//
 		bool tuningEnable = true;
 		QString tuningIP;
 		int tuningPort = 0;
 		QString tuningServiceID;
 
-		// only for adapterNo == LM_ETHERNET_ADAPTER2 or adapterNo == LM_ETHERNET_ADAPTER3
+		// only for adapterType == E::LanControllerType::AppData or E::LanControllerType::AppAndDiagData
 		//
 		bool appDataEnable = true;
 		QString appDataIP;
@@ -77,6 +72,8 @@ public:
 		int appDataSize = 0;
 		int appDataFramesQuantity = 0;
 
+		// only for adapterType == E::LanControllerType::DiagData or E::LanControllerType::AppAndDiagData
+		//
 		bool diagDataEnable = true;
 		QString diagDataIP;
 		int diagDataPort = 0;
