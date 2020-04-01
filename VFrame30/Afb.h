@@ -90,8 +90,6 @@ namespace Afb
 		const QString& simulationFunc() const;
 		void setSimulationFunc(const QString& value);
 
-		Hash simulationFuncHash() const;
-
 		const std::unordered_map<int, AfbComponentPin>& pins() const;
 
 		bool pinExists(int pinOpIndex) const;
@@ -106,7 +104,6 @@ namespace Afb
         int m_versionOpIndex = -1;
 		int m_maxInstCount = 0;
 		QString m_simulationFunc;
-		Hash m_simulationFuncHash = UNDEFINED_HASH;
 
 		std::unordered_map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
 		std::vector<bool> m_pinExists;									// For fast searching of pin, intensively used in simulator

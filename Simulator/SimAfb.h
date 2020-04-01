@@ -28,7 +28,6 @@ namespace Sim
 		QString caption() const;
 		int maxInstCount() const;
 		QString simulationFunc() const;
-		Hash simulationFuncHash() const;
 
 		bool pinExists(int pinOpIndex) const;
 		QString pinCaption(int pinOpIndex) const;

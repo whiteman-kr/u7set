@@ -11,6 +11,16 @@ namespace Sim
 {
 	class DeviceCommand;
 
+	// Helper union to cast pointer to member
+	//
+	template<typename classT, typename memberT>
+	union u_ptm_cast
+	{
+		memberT classT::*pmember;
+		std::array<std::byte, 16> pvoid;
+	};
+
+
 	class CommandProcessor : public QObject, protected Output
 	{
 		Q_OBJECT
@@ -26,6 +36,8 @@ namespace Sim
 		// Parse LM command, result written to deviceCommand, can throw SimException
 		//
 		bool parseFunc(QString parseFunc, DeviceCommand* command);
+
+		virtual void cacheCommands(std::vector<DeviceCommand>* commands);
 
 		// Update platform interface, this function is called before work cyle,
 		// to update such platform inteface signals as Blink.

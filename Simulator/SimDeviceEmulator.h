@@ -104,6 +104,11 @@ namespace Sim
 
 		quint32 m_dword0 = 0;			// Set in parse script
 		quint32 m_dword1 = 0;			// Set in parse script
+
+		// Specific data for specific CommandController
+		//
+		std::array<std::byte, 16> m_commandFuncPtr;	// This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_afbFuncPtr;		// This function can be called ONLY in in class and instance where it was initialized
 	};
 
 	//

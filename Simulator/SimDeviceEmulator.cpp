@@ -782,6 +782,10 @@ namespace Sim
 		}
 		while (programCounter < m_plainAppLogic.size());
 
+		// Let command processor to make its' cache optimizations
+		//
+		m_commandProcessor->cacheCommands(&m_commands);
+
 		// This block is related to Mutex, it's not about pre do-while loop
 		//
 		{
@@ -839,10 +843,11 @@ namespace Sim
 		}
 		catch (SimException& e)
 		{
-			writeError(QString("Command parsing error: %1, %2. ProgrammCounter = %3, ParseFunction = %4")
+			writeError(QString("Command parsing error: %1, %2. ProgrammCounter = %3 (0x%4), ParseFunction = %5")
 						.arg(e.message())
 						.arg(e.where())
 						.arg(programCounter)
+						.arg(programCounter, 0, 16)
 						.arg(deviceCommand.m_command.parseFunc));
 			return false;
 		}

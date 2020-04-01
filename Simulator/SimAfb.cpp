@@ -64,16 +64,6 @@ namespace Sim
 		return m_afbComponent->simulationFunc();
 	}
 
-	Hash AfbComponent::simulationFuncHash() const
-	{
-		if (m_afbComponent == nullptr)
-		{
-			return UNDEFINED_HASH;
-		}
-
-		return m_afbComponent->simulationFuncHash();
-	}
-
 	bool AfbComponent::pinExists(int pinOpIndex) const
 	{
 		if (m_afbComponent == nullptr)

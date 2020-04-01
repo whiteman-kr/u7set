@@ -317,6 +317,7 @@ namespace Sim
 		{
 			*data = qFromLittleEndian<TYPE>(m_data.constData() + byteOffset);
 		}
+
 		return true;
 	}
 

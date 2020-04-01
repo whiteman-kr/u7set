@@ -72,6 +72,14 @@ namespace Sim
 		return ok;
 	}
 
+	void CommandProcessor::cacheCommands(std::vector<DeviceCommand>* /*commands*/)
+	{
+		// Implement in derived class
+		//
+		assert(false);
+		return;
+	}
+
 	bool CommandProcessor::runCommand([[maybe_unused]]const DeviceCommand& command)
 	{
 		// Must be implemented in derived class

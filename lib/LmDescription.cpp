@@ -64,7 +64,6 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 	else
 	{
 		simulationFunc = element.attribute(QLatin1String("SimulationFunc"));
-		simulationFuncHash = ::calcHash(simulationFunc);
 	}
 
 	// ParseFunc

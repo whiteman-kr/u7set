@@ -142,7 +142,6 @@ namespace Afb
 		m_versionOpIndex = that.m_versionOpIndex;
 		m_maxInstCount = that.m_maxInstCount;
 		m_simulationFunc = that.m_simulationFunc;
-		m_simulationFuncHash = ::calcHash(m_simulationFunc);
 
 		m_pins = that.m_pins;
 		m_pinExists = that.m_pinExists;
@@ -216,7 +215,6 @@ namespace Afb
 		// SimulationFunc
 		//
 		m_simulationFunc = xmlElement.attribute(QLatin1String("SimulationFunc"));
-		m_simulationFuncHash = ::calcHash(m_simulationFunc);
 
 		// Pins
 		//
@@ -321,12 +319,6 @@ namespace Afb
 	void AfbComponent::setSimulationFunc(const QString& value)
 	{
 		m_simulationFunc = value;
-		m_simulationFuncHash = ::calcHash(m_simulationFunc);
-	}
-
-	Hash AfbComponent::simulationFuncHash() const
-	{
-		return m_simulationFuncHash;
 	}
 
 	const std::unordered_map<int, AfbComponentPin>& AfbComponent::pins() const

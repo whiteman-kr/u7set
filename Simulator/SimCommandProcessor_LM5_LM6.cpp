@@ -15,6 +15,32 @@ namespace Sim
 	{
 	}
 
+	void CommandProcessor_LM5_LM6::cacheCommands(std::vector<DeviceCommand>* commands)
+	{
+		static_assert(sizeof(SimCommandFuncCast::pmember) <= sizeof(SimCommandFuncCast::pvoid));
+
+		for (DeviceCommand& command : *commands)
+		{
+			auto it = m_nameToFuncCommand.find(command.m_command.simulationFunc);
+			if (it == m_nameToFuncCommand.end())
+			{
+				SimCommandFuncCast pcast;
+				pcast.pmember = &CommandProcessor_LM5_LM6::command_not_implemented;
+
+				command.m_commandFuncPtr = pcast.pvoid;
+			}
+			else
+			{
+				SimCommandFuncCast pcast;
+				pcast.pmember = it->second;
+
+				command.m_commandFuncPtr = pcast.pvoid;
+			}
+		}
+
+		return;
+	}
+
 	bool CommandProcessor_LM5_LM6::updatePlatformInterfaceState()
 	{
 		// Blink signal, addr 57682[2] = 0xE152[2] -- read memry
@@ -34,13 +60,10 @@ namespace Sim
 
 	bool CommandProcessor_LM5_LM6::runCommand(const DeviceCommand& command)
 	{
-		auto it = m_nameToFuncCommand.find(command.m_command.simulationFuncHash);
-		if (it == m_nameToFuncCommand.end())
-		{
-			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM5_LM6::runCommand");
-		}
+		SimCommandFuncCast pcast;
+		pcast.pvoid = command.m_commandFuncPtr;
 
-		auto& func = it->second;
+		auto& func = pcast.pmember;
 
 		// Call the command
 		//
@@ -83,7 +106,6 @@ namespace Sim
 		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
 
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
-
 		if (afb.simulationFunc().isEmpty() == true)
 		{
 			SimException::raise(QString("Simultaion function for AFB %1 is not found").arg(afb.caption()));
@@ -93,6 +115,20 @@ namespace Sim
 		//
 		command->m_string = strCommand(command->caption()) +
 							strAfbInst(command);
+
+		//
+		// Save pointer to function
+		//
+		auto it = m_nameToFuncAfb.find(afb.simulationFunc());
+		if (it == m_nameToFuncAfb.end())
+		{
+			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), "CommandProcessor_LM5_LM6::command_startafb");
+		}
+
+		SimAfbFuncCast pcast;
+		pcast.pmember = it->second;
+
+		command->m_afbFuncPtr = pcast.pvoid;
 
 		return;
 	}
@@ -118,13 +154,10 @@ namespace Sim
 
 		// AFB
 		//
-		auto it = m_nameToFuncAfb.find(afb.simulationFuncHash());
-		if (it == m_nameToFuncAfb.end())
-		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), "CommandProcessor_LM5_LM6::command_startafb");
-		}
+		SimAfbFuncCast pcast;
+		pcast.pvoid = command.m_afbFuncPtr;
 
-		auto& func = it->second;
+		auto& func = pcast.pmember;
 
 		// Call the command
 		//
