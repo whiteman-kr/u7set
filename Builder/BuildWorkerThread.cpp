@@ -1500,14 +1500,21 @@ namespace Builder
 			{
 				int uartId = fi.first;
 
+				quint64 uniqueID = firmwareWriter->uniqueID(subsysID, uartId, lmNumber, &ok);
+				if (ok == false)
+				{
+					m_context->m_log->errINT1001(tr("UniqueID is not found for Subsystem='%1', UartID='%2', LmNumber='%3'. ").arg(subsysID).arg(uartId).arg(lmNumber) + Q_FUNC_INFO);
+					continue;
+				}
+
 				if (first == true)
 				{
 					first = false;
-					genericUniqueId = firmwareWriter->uniqueID(subsysID, uartId, lmNumber);
+					genericUniqueId = uniqueID;
 				}
 				else
 				{
-					genericUniqueId ^= firmwareWriter->uniqueID(subsysID, uartId, lmNumber);
+					genericUniqueId ^= uniqueID;
 				}
 			}
 

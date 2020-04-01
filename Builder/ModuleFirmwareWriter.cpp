@@ -1082,14 +1082,25 @@ static QByteArray err;
 		return l.join(QString()).toUtf8();
 	}
 
-	quint64 ModuleFirmwareWriter::uniqueID(const QString& subsysId, int uartId, int lmNumber)
+	quint64 ModuleFirmwareWriter::uniqueID(const QString& subsysId, int uartId, int lmNumber, bool* ok)
 	{
+		if (ok != nullptr)
+		{
+			*ok = true;
+		}
+
 		UartChannelData& channelData = uartChannelData(subsysId, uartId);
 
 		auto it = channelData.uniqueIdMap.find(lmNumber);
 		if (it == channelData.uniqueIdMap.end())
 		{
 			assert(false);
+
+			if (ok != nullptr)
+			{
+				*ok = false;
+			}
+
 			return 0;
 		}
 
