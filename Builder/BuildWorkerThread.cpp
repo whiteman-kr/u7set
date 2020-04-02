@@ -1109,10 +1109,7 @@ namespace Builder
 			}
 		}
 
-		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context->m_equipmentSet.get(),
-																						m_context->m_fscDescriptions.get(),
-																						m_context->m_connections.get(),
-																						m_context->m_log);
+		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context.get());
 		bool res = m_context->m_opticModuleStorage->init();
 
 		return res;

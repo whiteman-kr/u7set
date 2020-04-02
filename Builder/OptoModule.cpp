@@ -2,9 +2,11 @@
 #include <QQmlEngine>
 #include "../lib/LmDescription.h"
 #include "../lib/DeviceHelper.h"
+#include "../Builder/Context.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "UalItems.h"
 #include "LmDescriptionSet.h"
+
 
 namespace Hardware
 {
@@ -128,8 +130,14 @@ namespace Hardware
 	//
 	// --------------------------------------------------------------------------------------
 
-	OptoPort::OptoPort()
+	OptoPort::OptoPort(OptoModuleStorage& storage) :
+		m_storage(storage)
 	{
+	}
+
+	OptoPort::~OptoPort()
+	{
+
 	}
 
 	bool OptoPort::init(const DeviceController* controller, int portNo, LmDescription* lmDescription, Builder::IssueLogger* log)
@@ -786,7 +794,7 @@ namespace Hardware
 
 		assert(m_rxSignals.count() == 0);				// before this m_rxSignals must be clear!
 
-		OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(m_linkedPortID);
+		OptoPortShared linkedPort = m_storage.getOptoPort(m_linkedPortID);
 
 		//qDebug() << "This port " << m_equipmentID;
 
@@ -1383,7 +1391,7 @@ namespace Hardware
 			return BAD_ADDRESS;
 		}
 
-		OptoModuleShared module = OptoModuleStorage::getOptoModule(m_optoModuleID);
+		OptoModuleShared module = m_storage.getOptoModule(m_optoModuleID);
 
 		if (module == nullptr)
 		{
@@ -1409,7 +1417,7 @@ namespace Hardware
 			return BAD_ADDRESS;
 		}
 
-		OptoModuleShared module = OptoModuleStorage::getOptoModule(m_optoModuleID);
+		OptoModuleShared module = m_storage.getOptoModule(m_optoModuleID);
 
 		if (module == nullptr)
 		{
@@ -1951,7 +1959,8 @@ namespace Hardware
 	//
 	// --------------------------------------------------------------------------------------
 
-	OptoModule::OptoModule()
+	OptoModule::OptoModule(OptoModuleStorage& storage) :
+		m_storage(storage)
 	{
 	}
 
@@ -2038,7 +2047,7 @@ namespace Hardware
 						return false;
 					}
 
-					OptoPortShared optoPort = std::make_shared<OptoPort>();
+					OptoPortShared optoPort = std::make_shared<OptoPort>(m_storage);
 
 					result &= optoPort->init(optoPortController, i + 1, m_lmDescription, log);
 
@@ -2397,7 +2406,7 @@ namespace Hardware
 					continue;
 				}
 
-				std::shared_ptr<Connection> connection = OptoModuleStorage::getConnection(port->connectionID());
+				std::shared_ptr<Connection> connection = m_storage.getConnection(port->connectionID());
 
 				if (connection == nullptr)
 				{
@@ -2412,7 +2421,7 @@ namespace Hardware
 
 				assert(connection->isPortToPort() == true);
 
-				OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(port->linkedPortID());
+				OptoPortShared linkedPort = m_storage.getOptoPort(port->linkedPortID());
 
 				if (linkedPort != nullptr)
 				{
@@ -2462,7 +2471,7 @@ namespace Hardware
 					continue;			// port is not connected
 				}
 
-				std::shared_ptr<Connection> connection = OptoModuleStorage::getConnection(port->connectionID());
+				std::shared_ptr<Connection> connection = m_storage.getConnection(port->connectionID());
 
 				if (connection == nullptr)
 				{
@@ -2495,7 +2504,7 @@ namespace Hardware
 
 				port->setRxBufAddress(rxStartAddress);
 
-				OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(port->linkedPortID());
+				OptoPortShared linkedPort = m_storage.getOptoPort(port->linkedPortID());
 
 				if (linkedPort != nullptr)
 				{
@@ -2626,41 +2635,19 @@ namespace Hardware
 	//
 	// --------------------------------------------------------------------------------------
 
-	EquipmentSet* OptoModuleStorage::m_equipmentSet = nullptr;
-	Builder::LmDescriptionSet* OptoModuleStorage::m_lmDescriptionSet = nullptr;
-	ConnectionStorage* OptoModuleStorage::m_connectionStorage = nullptr;
-	Builder::IssueLogger* OptoModuleStorage::m_log = nullptr;
-
-	int OptoModuleStorage::m_instanceCount = 0;
-	HashedVector<QString, OptoModuleShared> OptoModuleStorage::m_modules;
-	HashedVector<QString, OptoPortShared> OptoModuleStorage::m_ports;
-	QHash<QString, OptoModuleShared> OptoModuleStorage::m_lmAssociatedModules;
-	QHash<QString, std::shared_ptr<Connection>> OptoModuleStorage::m_connections;
-	QHash<QString, QHash<QString, bool>> OptoModuleStorage::m_lmsAccessibleConnections;
-
-	QHash<QString, ModuleRawDataDescription*> OptoModuleStorage::m_modulesRawDataDescription;
-
-	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet,
-										 Builder::LmDescriptionSet* lmDescriptionSet,
-										 Hardware::ConnectionStorage* connectionStorage,
-										 Builder::IssueLogger *log)
+	OptoModuleStorage::OptoModuleStorage(Builder::Context* context)
 	{
-		assert(m_instanceCount == 0);			// OptoModuleStorage is singleton!
+		TEST_PTR_RETURN(context);
 
-		m_instanceCount++;
-
-		m_log = log;
-
-		m_equipmentSet = equipmentSet;
-		m_lmDescriptionSet = lmDescriptionSet;
-		m_connectionStorage = connectionStorage;
+		m_equipmentSet = context->m_equipmentSet;
+		m_lmDescriptionSet = context->m_lmDescriptions;
+		m_connectionStorage = context->m_connections;
+		m_log = context->m_log;
 	}
 
 	OptoModuleStorage::~OptoModuleStorage()
 	{
 		clear();
-
-		m_instanceCount--;
 	}
 
 	bool OptoModuleStorage::init()
@@ -3779,7 +3766,7 @@ namespace Hardware
 
 		// Create and add OptoModule
 		//
-		OptoModuleShared optoModule = std::make_shared<OptoModule>();
+		OptoModuleShared optoModule = std::make_shared<OptoModule>(*this);
 
 		if (optoModule->init(module, lmDescription.get(), m_log) == false)
 		{

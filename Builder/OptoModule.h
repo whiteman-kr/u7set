@@ -18,6 +18,7 @@ namespace Builder
 	class LmDescriptionSet;
 	class BuildResultWriter;
 	class UalSignal;
+	class Context;
 }
 
 namespace Hardware
@@ -105,7 +106,8 @@ namespace Hardware
 		static const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
 
 	public:
-		OptoPort();
+		OptoPort(OptoModuleStorage& storage);
+		virtual ~OptoPort();
 
 		bool init(const DeviceController* controller, int portNo, LmDescription *lmDescription, Builder::IssueLogger* log);
 
@@ -275,6 +277,8 @@ namespace Hardware
 		bool sortTxRxSignalList(QVector<TxRxSignalShared> &signalList);
 
 	private:
+		OptoModuleStorage& m_storage;
+
 		QString m_equipmentID;
 		int m_portNo = 0;
 
@@ -362,7 +366,7 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		OptoModule();
+		OptoModule(OptoModuleStorage& storage);
 		virtual ~OptoModule();
 
 		bool init(DeviceModule* module, LmDescription* lmDescription, Builder::IssueLogger* log);
@@ -403,6 +407,8 @@ namespace Hardware
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
 
 	private:
+		OptoModuleStorage& m_storage;
+
 		// device properties
 		//
 		QString m_equipmentID;
@@ -438,6 +444,8 @@ namespace Hardware
 	//
 	// --------------------------------------------------------------------------------------
 
+	//class Context;
+
 	class OptoModuleStorage : public QObject
 	{
 		Q_OBJECT
@@ -452,10 +460,7 @@ namespace Hardware
 		};
 
 	public:
-		OptoModuleStorage(EquipmentSet* equipmentSet,
-						  Builder::LmDescriptionSet* lmDescriptionSet,
-						  Hardware::ConnectionStorage* connections,
-						  Builder::IssueLogger* log);
+		OptoModuleStorage(Builder::Context* context);
 
 		~OptoModuleStorage();
 
@@ -502,21 +507,21 @@ namespace Hardware
 								   QUuid receiverUuid,
 								   SignalAddress16* addr);
 
-		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
+		std::shared_ptr<Connection> getConnection(const QString& connectionID);
 
-		static OptoModuleShared getOptoModule(const QString& optoModuleID);
-		static OptoModuleShared getOptoModule(const OptoPortShared optoPort);
+		OptoModuleShared getOptoModule(const QString& optoModuleID);
+		OptoModuleShared getOptoModule(const OptoPortShared optoPort);
 		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmID);
 		void getOptoModulesSorted(QVector<OptoModuleShared>& modules);
 
-		static OptoPortShared getOptoPort(const QString& optoPortID);
+		OptoPortShared getOptoPort(const QString& optoPortID);
 		bool getLmAssociatedOptoPorts(const QString& lmID, QList<OptoPortShared>& associatedPorts);
 
 		OptoPortShared getLmAssociatedOptoPort(const QString& lmID, const QString& connectionID);
 
-		static QString getOptoPortAssociatedLmID(OptoPortShared optoPort);
+		QString getOptoPortAssociatedLmID(OptoPortShared optoPort);
 
-		static bool getOptoPortValidityAbsAddr(const QString& lmID,
+		bool getOptoPortValidityAbsAddr(const QString& lmID,
 											   const QString& connectionID,
 											   const QString& schemaID,
 											   QUuid receiverUuid,
@@ -528,11 +533,11 @@ namespace Hardware
 
 		bool isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID);
 
-		static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
-		static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);
-		static int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
+		int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
+		int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);
+		int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
 
-		static ModuleRawDataDescription* getModuleRawDataDescription(const Hardware::DeviceModule* module);
+		ModuleRawDataDescription* getModuleRawDataDescription(const Hardware::DeviceModule* module);
 
 	private:
 		bool processConnection(ConnectionShared connection);
@@ -546,22 +551,20 @@ namespace Hardware
 		void clear();
 
 	private:
-		static EquipmentSet* m_equipmentSet;
-		static Builder::LmDescriptionSet* m_lmDescriptionSet;
-		static ConnectionStorage* m_connectionStorage;
-		static Builder::IssueLogger* m_log;
+		std::shared_ptr<EquipmentSet> m_equipmentSet;
+		std::shared_ptr<Builder::LmDescriptionSet> m_lmDescriptionSet;
+		std::shared_ptr<ConnectionStorage> m_connectionStorage;
+		Builder::IssueLogger* m_log = nullptr;
 
-		static int m_instanceCount;
+		HashedVector<QString, OptoModuleShared> m_modules;
+		HashedVector<QString, OptoPortShared> m_ports;
 
-		static HashedVector<QString, OptoModuleShared> m_modules;
-		static HashedVector<QString, OptoPortShared> m_ports;
+		QHash<QString, OptoModuleShared> m_lmAssociatedModules;
 
-		static QHash<QString, OptoModuleShared> m_lmAssociatedModules;
+		QHash<QString, ConnectionShared> m_connections;		// connectionID -> connection
 
-		static QHash<QString, ConnectionShared> m_connections;		// connectionID -> connection
+		QHash<QString, QHash<QString, bool>> m_lmsAccessibleConnections;
 
-		static QHash<QString, QHash<QString, bool>> m_lmsAccessibleConnections;
-
-		static QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
+		QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
 	};
 }
