@@ -9,6 +9,7 @@
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "../SimulatorTabPage.h"
+#include "./SimTrend/SimTrends.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -82,6 +83,11 @@ SimWidget::~SimWidget()
 {
 }
 
+void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
+{
+	SimTrends::startTrendApp(&m_simulator->appSignalManager(), appSignals, this);
+}
+
 void SimWidget::createToolBar()
 {
 	m_toolBar = new SimToolBar("ToolBar");
@@ -118,6 +124,11 @@ void SimWidget::createToolBar()
 	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
+	m_trendsAction = new QAction(QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this);
+	m_trendsAction->setEnabled(true);
+	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
+	connect(m_trendsAction, &QAction::triggered, this, &SimWidget::showTrends);
+
 	// --
 	//
 	m_toolBar->addAction(m_openProjectAction);
@@ -129,6 +140,16 @@ void SimWidget::createToolBar()
 	m_toolBar->addAction(m_runAction);
 	m_toolBar->addAction(m_pauseAction);
 	m_toolBar->addAction(m_stopAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_trendsAction);
+
+	// --
+	//
+	QWidget* trendsActionWidget = m_toolBar->widgetForAction(m_trendsAction);
+	assert(trendsActionWidget);
+
+	trendsActionWidget->setAcceptDrops(true);
 
 	return;
 }
@@ -463,6 +484,79 @@ void SimWidget::stopSimulation()
 	return;
 }
 
+void SimWidget::showTrends()
+{
+	// Get Trends list
+	//
+	std::vector<QString> trends = SimTrends::getTrendsList();
+
+	// Choose trend
+	//
+	QString trendToActivate;
+
+	if (trends.empty() == true)
+	{
+		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+	}
+	else
+	{
+		QMenu menu;
+
+		QAction* newTrendAction = menu.addAction("New Trend...");
+		newTrendAction->setData(QVariant::fromValue<int>(-1));		// Data -1 means, create new trend widget
+
+		menu.addSeparator();
+
+		for (size_t i = 0; i < trends.size(); i++)
+		{
+			QAction* a = menu.addAction(trends[i]);
+			Q_ASSERT(a);
+
+			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
+		}
+
+		QAction* triggeredAction = menu.exec(QCursor::pos());
+		if (triggeredAction == nullptr)
+		{
+			return;
+		}
+
+		QVariant data = triggeredAction->data();
+
+		bool ok = false;
+		int trendIndex = data.toInt(&ok);
+
+		if (trendIndex == -1)
+		{
+			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		}
+		else
+		{
+			if (ok == false || trendIndex < 0 || trendIndex >= static_cast<int>(trends.size()))
+			{
+				Q_ASSERT(ok == true);
+				Q_ASSERT(trendIndex >= 0 && trendIndex < static_cast<int>(trends.size()));
+				return;
+			}
+
+			trendToActivate = trends.at(trendIndex);
+		}	}
+
+	// Start new trend or activate chosen one
+	//
+	if (trendToActivate.isEmpty() == true)
+	{
+		std::vector<AppSignalParam> appSignals;
+		SimTrends::startTrendApp(&m_simulator->appSignalManager(), appSignals, this);
+	}
+	else
+	{
+		SimTrends::activateTrendWindow(trendToActivate);
+	}
+
+	return;
+}
+
 bool SimWidget::loadBuild(QString buildPath)
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -647,6 +741,8 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 	QToolBar(title, parent)
 {
 	setMovable(false);
+	setAcceptDrops(true);
+
 	setObjectName("SimulatorToolBar");
 
 	setIconSize(iconSize() * 0.9);
@@ -659,3 +755,114 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 SimToolBar::~SimToolBar()
 {
 }
+
+void SimToolBar::dragEnterEvent(QDragEnterEvent* event)
+{
+	// Find Trend action
+	//
+	QWidget* trendActionWidget = nullptr;
+
+	QList<QAction*> allActions = actions();
+	for (QAction* a : allActions)
+	{
+		QVariant d = a->data();
+
+		if (d.isValid() &&
+			d.type() == QVariant::String)
+		{
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendActionWidget = widgetForAction(a);
+				trendActionWidget->setAcceptDrops(true);
+			}
+		}
+	}
+
+	if (trendActionWidget != nullptr &&
+		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void SimToolBar::dropEvent(QDropEvent* event)
+{
+	// Find Trend action
+	//
+	QWidget* trendActionWidget = nullptr;
+	QAction* trendAction = nullptr;
+
+
+	QList<QAction*> allActions = actions();
+
+	for (QAction* a : allActions)
+	{
+		QVariant d = a->data();
+		if (d.isValid() &&
+			d.type() == QVariant::String)
+		{
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendAction = a;
+				trendActionWidget = widgetForAction(trendAction);
+			}
+		}
+	}
+
+	if (trendAction != nullptr &&
+		trendActionWidget != nullptr &&
+		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		// Lets assume parent isManitorMainWindow
+		//
+		SimWidget* sw = dynamic_cast<SimWidget*>(this->parent());
+		if (sw == nullptr)
+		{
+			Q_ASSERT(sw);
+			return;
+		}
+
+		// Load data from drag and drop
+		//
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		std::vector<AppSignalParam> appSignals;
+		appSignals.reserve(protoSetMessage.appsignal_size());
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+		{
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				appSignals.push_back(appSignalParam);
+			}
+		}
+
+		if (appSignals.empty() == false)
+		{
+			sw->startTrends(appSignals);
+		}
+	}
+
+	return;
+}
+

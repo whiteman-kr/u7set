@@ -28,6 +28,9 @@ public:
 			  bool slaveWindow = false);		// Cannot have output pane, do not stores its state
 	virtual ~SimWidget();
 
+public:
+	void startTrends(const std::vector<AppSignalParam>& appSignals);
+
 protected:
 	void createToolBar();
 	void createDocks();
@@ -52,6 +55,8 @@ protected slots:
 	void runSimulation();
 	void pauseSimulation();
 	void stopSimulation();
+
+	void showTrends();
 
 	bool loadBuild(QString buildPath);
 
@@ -97,6 +102,8 @@ private:
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_trendsAction = nullptr;
 };
 
 
@@ -107,7 +114,9 @@ public:
 	explicit SimToolBar(const QString& title, QWidget* parent = nullptr);
 	virtual ~SimToolBar();
 
-private:
+protected:
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 };
 
 #endif // SIMULATORWIDGET_H

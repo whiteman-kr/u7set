@@ -33,6 +33,8 @@ namespace Sim
 	public:
 		// Implementing IAppSignalManager - AppSignals
 		//
+		virtual std::vector<AppSignalParam> signalList() const override;
+
 		virtual bool signalExists(Hash hash) const override;
 		virtual bool signalExists(const QString& appSignalId) const override;
 

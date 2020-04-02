@@ -435,7 +435,7 @@ namespace Sim
 					ahead > 0us)
 				{
 					// !!!!!!!!!!!!!!
-					// COMMENT HERE FOR SPEED UP OR SLOW DOWN, DEPENDS ON YOUR HW
+					// COMMENT HERE FOR SPEED UP (IF POSSIBLE, DEPENDS ON HW)
 					//
 					QThread::usleep(ahead.count());
 					// !!!!!!!!!!!!!!

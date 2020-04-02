@@ -127,6 +127,27 @@ namespace Sim
 		}
 	}
 
+	std::vector<AppSignalParam> AppSignalManager::signalList() const
+	{
+		std::vector<AppSignalParam> result;
+
+		{
+			QReadLocker rl(&m_signalParamLock);
+
+			result.reserve(m_signalParams.size());
+
+			for (const auto&[hash, sp] : m_signalParams)
+			{
+				assert(hash == sp.hash());
+				Q_UNUSED(hash);
+
+				result.push_back(sp);
+			}
+		}
+
+		return result;
+	}
+
 	bool AppSignalManager::signalExists(Hash hash) const
 	{
 		QReadLocker rl(&m_signalParamLock);

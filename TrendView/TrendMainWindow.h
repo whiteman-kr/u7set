@@ -99,7 +99,7 @@ namespace TrendLib
 
 		bool isRealtimeAutoShift() const;
 
-	private:
+	protected:
 		Ui::TrendsMainWindow *ui;
 
 		QToolBar* m_toolBar = nullptr;

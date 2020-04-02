@@ -27,7 +27,6 @@ public:
 	void addSignal(const AppSignalParam& appSignal);
 	void addSignals(const std::vector<AppSignalParam>& appSignals);
 
-	std::vector<AppSignalParam> signalList() const;
 	std::vector<Hash> signalHashes() const;
 
 	// Signal States
@@ -45,6 +44,8 @@ public:
 
 	// IAppSignalManager implememntation - AppSignals
 	//
+	virtual std::vector<AppSignalParam> signalList() const override;
+
 	virtual bool signalExists(Hash hash) const override;
 	virtual bool signalExists(const QString& appSignalId) const override;
 
