@@ -194,7 +194,7 @@ namespace TrendLib
 
 static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
 								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
-static int stdColorIndex = 0;
+static size_t stdColorIndex = 0;
 
 		TrendLib::TrendSignalParam tsp(trendSignal);
 
@@ -313,7 +313,7 @@ static int stdColorIndex = 0;
 		//
 		m_realtimeModeButton = new QPushButton(tr("Realtime"));
 		m_realtimeModeButton->setCheckable(true);
-		m_toolBar->addWidget(m_realtimeModeButton);
+		m_realtimeActionForButton = m_toolBar->addWidget(m_realtimeModeButton);
 
 		m_realtimeAutoShiftButton = new QPushButton(tr(">>>"));
 		m_realtimeAutoShiftButton->setEnabled(false);
@@ -332,7 +332,7 @@ static int stdColorIndex = 0;
 		// Signals
 		//
 		m_refreshButton = new QPushButton("Refresh");
-		m_toolBar->addWidget(m_refreshButton);
+		m_refreshActionForButton = m_toolBar->addWidget(m_refreshButton);
 
 		// Signals
 		//
@@ -1185,7 +1185,10 @@ static int lastCopyCount = false;
 		connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
 
 		Q_ASSERT(m_refreshAction);
-		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
+		if (m_refreshAction->isVisible() == true)
+		{
+			menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
+		}
 
 		menu.addSeparator();
 

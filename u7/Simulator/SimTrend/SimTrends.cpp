@@ -81,10 +81,20 @@ static int no = 1;
 
 	// Hide Refresh button as it is not required for simulator, no archive here just "realtime" data
 	//
-	m_refreshButton->setVisible(false);
+	m_refreshButton->setEnabled(false);				// This is button Refresh
+	m_refreshActionForButton->setVisible(false);	// To hide button from toolbar the QAction for this button must be hidden
+
+	m_refreshAction->setVisible(false);
 
 	// TimeType, assume we have only simulated PlandTime
 	//
+
+	// Set realtime mode, and hide Realtime button
+	//
+	m_realtimeModeButton->setChecked(true);
+
+	m_realtimeActionForButton->setVisible(false);	// To hide button from toolbar the QAction for this button must be hidden
+	m_realtimeModeButton->setEnabled(false);
 
 	// Status bar
 	//
