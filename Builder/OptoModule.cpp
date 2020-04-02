@@ -105,7 +105,7 @@ namespace Hardware
 	}
 
 
-	bool TxRxSignal::hasSignalID(const QString& signalID)
+	bool TxRxSignal::hasSignalID(const QString& signalID) const
 	{
 		for(const QString& appSignalID : m_appSignalIDs)
 		{
@@ -835,7 +835,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::writeSerialDataXml(Builder::BuildResultWriter* resultWriter)
+	bool OptoPort::writeSerialDataXml(Builder::BuildResultWriter* resultWriter) const
 	{
 		TEST_PTR_RETURN_FALSE(resultWriter);
 
@@ -1001,12 +1001,12 @@ namespace Hardware
 		}
 	}
 
-	bool OptoPort::isTxSignalExists(const QString& appSignalID)
+	bool OptoPort::isTxSignalExists(const QString& appSignalID) const
 	{
 		return m_txSignalIDs.contains(appSignalID);
 	}
 
-	bool OptoPort::isTxSignalExists(const Builder::UalSignal* ualSignal)
+	bool OptoPort::isTxSignalExists(const Builder::UalSignal* ualSignal) const
 	{
 		if (ualSignal == nullptr)
 		{
@@ -1029,12 +1029,12 @@ namespace Hardware
 		return false;
 	}
 
-	bool OptoPort::isRxSignalExists(const QString& appSignalID)
+	bool OptoPort::isRxSignalExists(const QString& appSignalID) const
 	{
 		return m_rxSignalIDs.contains(appSignalID);
 	}
 
-	bool OptoPort::isRxSignalExists(const Builder::UalSignal* ualSignal)
+	bool OptoPort::isRxSignalExists(const Builder::UalSignal* ualSignal) const
 	{
 		if (ualSignal == nullptr)
 		{
@@ -1057,7 +1057,7 @@ namespace Hardware
 		return false;
 	}
 
-	bool OptoPort::isSerialRxSignalExists(const QString& appSignalID)
+	bool OptoPort::isSerialRxSignalExists(const QString& appSignalID) const
 	{
 		if (isSinglePortConnection() == false)
 		{
@@ -1205,15 +1205,11 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage)
+	bool OptoPort::calculatePortRawDataSize()
 	{
 		const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
 
-		if (optoStorage == nullptr || lm == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(lm);
 
 		QString msg;
 
@@ -1271,7 +1267,7 @@ namespace Hardware
 
 			case RawDataDescriptionItem::Type::TxAllModulesRawData:
 
-				partSizeW = optoStorage->getAllNativeRawDataSize(lm, m_log);;
+				partSizeW = m_storage.getAllNativeRawDataSize(lm, m_log);;
 
 				size += partSizeW;
 
@@ -1281,7 +1277,7 @@ namespace Hardware
 				{
 					bool moduleIsFound = false;
 
-					partSizeW = optoStorage->getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, m_log);
+					partSizeW = m_storage.getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, m_log);
 
 					size += partSizeW;
 
@@ -1297,7 +1293,7 @@ namespace Hardware
 
 			case RawDataDescriptionItem::Type::TxPortRawData:
 				{
-					OptoPortShared portRxRawData = optoStorage->getOptoPort(item.portEquipmentID);
+					OptoPortShared portRxRawData = m_storage.getOptoPort(item.portEquipmentID);
 
 					if (portRxRawData == nullptr)
 					{
@@ -1307,7 +1303,7 @@ namespace Hardware
 						break;
 					}
 
-					OptoPortShared portTxRawData = optoStorage->getOptoPort(portRxRawData->linkedPortID());
+					OptoPortShared portTxRawData = m_storage.getOptoPort(portRxRawData->linkedPortID());
 
 					if (portTxRawData == nullptr)
 					{
@@ -1320,7 +1316,7 @@ namespace Hardware
 						break;
 					}
 
-					bool res = portTxRawData->calculatePortRawDataSize(optoStorage);
+					bool res = portTxRawData->calculatePortRawDataSize();
 
 					if (res == true)
 					{
@@ -1832,7 +1828,7 @@ namespace Hardware
 		}
 	}
 
-	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count)
+	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count) const
 	{
 		bool result = true;
 
@@ -1850,9 +1846,9 @@ namespace Hardware
 			if ((s1StartBitAddress >= s2StartBitAddress && s1StartBitAddress <= s2EndBitAddress) ||
 				(s2StartBitAddress >= s1StartBitAddress && s2StartBitAddress <= s1EndBitAddress))
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString("Raw signals '%1' and '%2' is overlapped (port '%3').").
-								   arg(s1->appSignalID()).arg(s2->appSignalID()).arg(equipmentID()));
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Raw signals '%1' and '%2' is overlapped (port '%3').").
+												arg(s1->appSignalID()).arg(s2->appSignalID()).arg(equipmentID()));
+				result = false;
 			}
 		}
 
@@ -2099,7 +2095,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoModule::isLmOrBvb()
+	bool OptoModule::isLmOrBvb() const
 	{
 		if (m_deviceModule == nullptr)
 		{
@@ -2110,7 +2106,7 @@ namespace Hardware
 		return m_deviceModule->isLogicModule() || m_deviceModule->isBvb();
 	}
 
-	bool OptoModule::isOcm()
+	bool OptoModule::isOcm() const
 	{
 		if (m_deviceModule == nullptr)
 		{
@@ -2121,7 +2117,7 @@ namespace Hardware
 		return m_deviceModule->moduleFamily() == DeviceModule::FamilyType::OCM;
 	}
 
-	bool OptoModule::isBvb()
+	bool OptoModule::isBvb() const
 	{
 		if (m_deviceModule == nullptr)
 		{
@@ -2132,9 +2128,9 @@ namespace Hardware
 		return m_deviceModule->isBvb();
 	}
 
-	void OptoModule::getSerialPorts(QList<OptoPortShared>& serialPortsList)
+	void OptoModule::getSerialPorts(QList<OptoPortShared>& serialPortsList) const
 	{
-		for(OptoPortShared& port : m_ports)
+		for(const OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2149,9 +2145,9 @@ namespace Hardware
 		}
 	}
 
-	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList)
+	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList) const
 	{
-		for(OptoPortShared& port : m_ports)
+		for(const OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2310,7 +2306,7 @@ namespace Hardware
 		ASSERT_RETURN_FALSE;
 	}
 
-	bool OptoModule::checkPortsAddressesOverlapping()
+	bool OptoModule::checkPortsAddressesOverlapping() const
 	{
 		// checking ports addresses overlapping
 		// usefull for manual settings of ports
@@ -2555,9 +2551,9 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoModule::isSerialRxSignalExists(const QString& appSignalID)
+	bool OptoModule::isSerialRxSignalExists(const QString& appSignalID) const
 	{
-		for(OptoPortShared& port : m_ports)
+		for(const OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2759,7 +2755,7 @@ namespace Hardware
 		{
 			TEST_PTR_CONTINUE(port);
 
-			port->calculatePortRawDataSize(this);		// set m_txRawDataSizeW !
+			port->calculatePortRawDataSize();		// set m_txRawDataSizeW !
 		}
 
 		return result;
@@ -2820,7 +2816,7 @@ namespace Hardware
 		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::copyOpticalPortsTxInRxSignals);
 	}
 
-	bool OptoModuleStorage::writeSerialDataXml(Builder::BuildResultWriter* resultWriter)
+	bool OptoModuleStorage::writeSerialDataXml(Builder::BuildResultWriter* resultWriter) const
 	{
 		TEST_PTR_RETURN_FALSE(resultWriter);
 
@@ -3104,17 +3100,17 @@ namespace Hardware
 		return false;
 	}
 
-	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID)
+	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID) const
 	{
 		return m_connections.value(connectionID, nullptr);
 	}
 
-	OptoModuleShared OptoModuleStorage::getOptoModule(const QString& optoModuleID)
+	OptoModuleShared OptoModuleStorage::getOptoModule(const QString& optoModuleID) const
 	{
 		return m_modules.value(optoModuleID, nullptr);
 	}
 
-	OptoModuleShared OptoModuleStorage::getOptoModule(const OptoPortShared optoPort)
+	OptoModuleShared OptoModuleStorage::getOptoModule(const OptoPortShared optoPort) const
 	{
 		if (optoPort == nullptr)
 		{
@@ -3125,12 +3121,12 @@ namespace Hardware
 		return m_modules.value(optoPort->optoModuleID(), nullptr);
 	}
 
-	QList<OptoModuleShared> OptoModuleStorage::getLmAssociatedOptoModules(const QString& lmID)
+	QList<OptoModuleShared> OptoModuleStorage::getLmAssociatedOptoModules(const QString& lmID) const
 	{
 		return m_lmAssociatedModules.values(lmID);
 	}
 
-	void OptoModuleStorage::getOptoModulesSorted(QVector<OptoModuleShared>& modules)
+	void OptoModuleStorage::getOptoModulesSorted(QVector<OptoModuleShared>& modules) const
 	{
 		// return all opto modules sorted by equipmentID ascending alphabetical order
 		//
@@ -3163,12 +3159,12 @@ namespace Hardware
 		}
 	}
 
-	OptoPortShared OptoModuleStorage::getOptoPort(const QString& optoPortID)
+	OptoPortShared OptoModuleStorage::getOptoPort(const QString& optoPortID) const
 	{
 		return m_ports.value(optoPortID, nullptr);
 	}
 
-	bool OptoModuleStorage::getLmAssociatedOptoPorts(const QString& lmID, QList<OptoPortShared>& associatedPorts)
+	bool OptoModuleStorage::getLmAssociatedOptoPorts(const QString& lmID, QList<OptoPortShared>& associatedPorts) const
 	{
 		QList<OptoModuleShared> modules = m_lmAssociatedModules.values(lmID);
 
@@ -3191,7 +3187,7 @@ namespace Hardware
 		return true;
 	}
 
-	OptoPortShared OptoModuleStorage::getLmAssociatedOptoPort(const QString& lmID, const QString& connectionID)
+	OptoPortShared OptoModuleStorage::getLmAssociatedOptoPort(const QString& lmID, const QString& connectionID) const
 	{
 		std::shared_ptr<Hardware::Connection> connection = getConnection(connectionID);
 
@@ -3232,7 +3228,7 @@ namespace Hardware
 		return port;
 	}
 
-	QString OptoModuleStorage::getOptoPortAssociatedLmID(OptoPortShared optoPort)
+	QString OptoModuleStorage::getOptoPortAssociatedLmID(OptoPortShared optoPort) const
 	{
 		if (optoPort == nullptr)
 		{
@@ -3255,7 +3251,7 @@ namespace Hardware
 													   const QString& connectionID,
 													   const QString& schemaID,
 													   QUuid receiverUuid,
-													   Address16& validityAddr)
+													   Address16& validityAddr) const
 	{
 		ConnectionShared connection = getConnection(connectionID);
 
@@ -3317,7 +3313,7 @@ namespace Hardware
 		return nullptr;
 	}
 
-	bool OptoModuleStorage::isSerialRxSignalExists(const QString& lmID, const QString& appSignalID)
+	bool OptoModuleStorage::isSerialRxSignalExists(const QString& lmID, const QString& appSignalID) const
 	{
 		QList<OptoModuleShared> modules = getLmAssociatedOptoModules(lmID);
 
@@ -3337,7 +3333,7 @@ namespace Hardware
 		return false;
 	}
 
-	bool OptoModuleStorage::isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID)
+	bool OptoModuleStorage::isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID) const
 	{
 		if (m_lmsAccessibleConnections.contains(lmEquipmentID) == false)
 		{
@@ -3477,7 +3473,7 @@ namespace Hardware
 		return 0;
 	}
 
-	ModuleRawDataDescription* OptoModuleStorage::getModuleRawDataDescription(const Hardware::DeviceModule* module)
+	ModuleRawDataDescription* OptoModuleStorage::getModuleRawDataDescription(const Hardware::DeviceModule* module) const
 	{
 		if (module == nullptr)
 		{
