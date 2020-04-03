@@ -226,6 +226,7 @@ namespace Sim
 		//
 		void afb_tct_v208(AfbComponentInstance* instance);
 		void afb_tct_v209(AfbComponentInstance* instance);
+		void afb_tct_v210(AfbComponentInstance* instance);
 
 		//	FLIP FLOP, OpCode 4
 		//
@@ -388,6 +389,7 @@ namespace Sim
 			{QStringLiteral("afb_not_v103"),		&CommandProcessor_LM5_LM6::afb_not_v103},				// 2
 			{QStringLiteral("afb_tct_v208"),		&CommandProcessor_LM5_LM6::afb_tct_v208},				// 3
 			{QStringLiteral("afb_tct_v209"),		&CommandProcessor_LM5_LM6::afb_tct_v209},				// 3
+			{QStringLiteral("afb_tct_v210"),		&CommandProcessor_LM5_LM6::afb_tct_v210},				// 3
 			{QStringLiteral("afb_flipflop_v106"),	&CommandProcessor_LM5_LM6::afb_flipflop_v106},			// 4
 			{QStringLiteral("afb_ctud_v106"),		&CommandProcessor_LM5_LM6::afb_ctud_v106},				// 5
 			{QStringLiteral("afb_maj_v107"),		&CommandProcessor_LM5_LM6::afb_maj_v107},				// 6

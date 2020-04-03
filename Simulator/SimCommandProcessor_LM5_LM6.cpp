@@ -1069,7 +1069,7 @@ namespace Sim
 		// Get params, throws exception in case of error
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
-		quint32 time = instance->param(i_counter)->dwordValue();
+		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
 		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
@@ -1086,6 +1086,12 @@ namespace Sim
 		//
 		quint16 result = 0;
 		quint16 paramError = 0;
+
+		if (time < 0)
+		{
+			paramError = 1;
+			time = 0;
+		}
 
 		switch (conf)
 		{
@@ -1104,7 +1110,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1127,7 +1133,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1180,7 +1186,7 @@ namespace Sim
 				}
 				else
 				{
-					if (counter >= time / m_cycleDurationMs)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
 						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
@@ -1257,7 +1263,7 @@ namespace Sim
 		// Get params, throws exception in case of error
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
-		quint32 time = instance->param(i_counter)->dwordValue();
+		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
 		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
@@ -1274,6 +1280,12 @@ namespace Sim
 		//
 		quint16 result = 0;
 		quint16 paramError = 0;
+
+		if (time < 0)
+		{
+			paramError = 1;
+			time = 0;
+		}
 
 		switch (conf)
 		{
@@ -1292,7 +1304,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1315,7 +1327,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1418,7 +1430,228 @@ namespace Sim
 				}
 				else
 				{
-					if (counter >= time / m_cycleDurationMs)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
+					{
+						result = 1;
+						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+					}
+					else
+					{
+						counter ++;
+						result = prevResultValue;
+					}
+				}
+			}
+			break;
+
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), "afb_tct");
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
+
+		instance->addParamDword(o_counter, counter);
+		instance->addParamDword(i_prev_counter, counter);
+
+		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+
+		instance->addParamWord(o_parem_err, paramError);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_tct_v210(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;			// 1..5
+		const int i_counter = 1;		// Time, SI
+		const int i_prev_counter = 3;	// Previous counter value, SI
+		const int i_saved_data = 5;		// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int i_input = 6;			// 1/0
+
+		const int o_result = 8;			// 1/0
+		const int o_counter = 9;		// Counter value -> i_prev_counter
+		const int o_saved_data = 11;	// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int o_parem_err = 12;
+		//const int o_tct_edi = 13;
+		//const int o_version = 14;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		qint32 time = instance->param(i_counter)->signedIntValue();
+		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
+
+		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
+									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
+
+		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
+									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+
+		quint16 currentInputValue = instance->param(i_input)->wordValue();
+
+		checkParamRange(conf, 1, 6, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		quint16 result = 0;
+		quint16 paramError = 0;
+
+		if (time < m_cycleDurationMs)
+		{
+			paramError = 1;
+			time = 0;
+		}
+
+		switch (conf)
+		{
+		case 1:
+			{
+				// On
+				//
+				if (currentInputValue == 0)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 1
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > static_cast<quint32>(time))
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 2:
+			{
+				// Off
+				//
+				if (currentInputValue == 1)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 0
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > static_cast<quint32>(time))
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 3:
+			{
+				// Univibrator (TCTC_VIBR)
+				//
+				if (counter == 0 &&
+					prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+		case 4:
+			{
+				// Filter (TCTC_FILTER)
+				//
+				if (prevInputValue != currentInputValue)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+
+				if (counter != 0 )
+				{
+					counter --;
+
+					if (counter == 0)
+					{
+						result = currentInputValue;
+					}
+					else
+					{
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					result = prevResultValue;
+				}
+			}
+			break;
+
+		case 5:
+			{
+				// Univibrator R (TCTC_RSV)
+				//
+				if (prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+
+		case 6:
+			{
+				// RC FILTER (tctc_rcfilter)
+				//
+				if (currentInputValue == 0)
+				{
+					if (counter == 0)
+					{
+						result = 0;
+					}
+					else
+					{
+						counter --;
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
 						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
