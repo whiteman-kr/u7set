@@ -290,6 +290,9 @@ void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std
 		return;
 	}
 
+	result->clear();
+	result->reserve(appSignalHashes.size());
+
 	emit addSignalsToPriorityList(QVector<Hash>::fromStdVector(appSignalHashes));
 
 	QMutexLocker l(&m_statesMutex);

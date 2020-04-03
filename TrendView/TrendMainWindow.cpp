@@ -1006,7 +1006,7 @@ static int lastCopyCount = false;
 			newDateTime.setTime(timeEdit->time());
 
 			TimeStamp ts(newDateTime);
-			mutableRuler.setTimeStamp(ts);
+			mutableRuler.setTimeStamp(ts, trend().rulerSet().rulerStep());
 
 			update();
 		}

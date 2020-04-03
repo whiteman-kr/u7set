@@ -139,7 +139,8 @@ void SimDialogChooseTrendSignals::removeSelectedSignal()
 
 	if (currentIndex.isValid() == true)
 	{
-		ui->trendSignals->takeTopLevelItem(currentIndex.row());
+		QTreeWidgetItem* takenItem = ui->trendSignals->takeTopLevelItem(currentIndex.row());
+		delete takenItem;
 	}
 
 	disableControls();

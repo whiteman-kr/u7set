@@ -79,6 +79,15 @@ static int no = 1;
 
 	setWindowTitle(trendName);
 
+	// Set ruller step to 5ms, as in simulator cycle alway multiple to 5
+	//
+	trend().rulerSet().setRulerStep(5);
+
+	// Set deafult lane duration (1m), it differs from default value (1h)
+	//
+	m_timeCombo->setCurrentIndex(4);	// 4 is index in combo box
+	m_trendWidget->setLaneDuration(1_min);
+
 	// Hide Refresh button as it is not required for simulator, no archive here just "realtime" data
 	//
 	m_refreshButton->setEnabled(false);				// This is button Refresh
@@ -88,6 +97,9 @@ static int no = 1;
 
 	// TimeType, assume we have only simulated PlandTime
 	//
+	m_trendWidget->setTimeType(E::TimeType::Plant);
+	m_timeTypeCombo->setCurrentIndex(m_timeTypeCombo->findData(QVariant::fromValue(E::TimeType::Plant)));
+	m_timeTypeCombo->setEnabled(false);
 
 	// Set realtime mode, and hide Realtime button
 	//
@@ -113,16 +125,9 @@ static int no = 1;
 	sb->addWidget(m_statusBarServerLabel, 0);
 	sb->addWidget(m_statusBarConnectionStateLabel, 0);
 
-	// Communication thread
-	//
-	//createArchiveConnection();
-
 	// --
 	//
-	//connect(m_trendWidget, &TrendLib::TrendWidget::trendModeChanged, this, &SimTrendsWidget::slot_trendModeChanged);
-	// --
-	//
-	startTimer(100);
+	startTimer(50);
 
 	return;
 }
@@ -131,62 +136,61 @@ SimTrendsWidget::~SimTrendsWidget()
 {
 	SimTrends::unregisterTrendWindow(this->windowTitle());
 
-//	if (m_archiveTcpClientThread != nullptr)
-//	{
-//		m_archiveTcpClientThread->quitAndWait(10000);
-//		delete m_archiveTcpClientThread;
-//	}
-
-//	if (m_rtTcpClientThread != nullptr)
-//	{
-//		m_rtTcpClientThread->quitAndWait(10000);
-//		delete m_rtTcpClientThread;
-//	}
-
 	return;
 }
 
 void SimTrendsWidget::timerEvent(QTimerEvent*)
 {
+	m_timerCounter ++;
+	quint64 durationSec = m_trendWidget->duration() / 1000;
+
+	if (durationSec <= 30)
+	{
+		fetchTrendData();						// fetch every 50 ms
+	}
+	else
+	{
+		if (durationSec <= 1 * 60) 	// 1 min
+		{
+			if (m_timerCounter % 2 == 0)		// fetch every 100 ms
+			{
+				fetchTrendData();
+			}
+		}
+		else
+		{
+			if (durationSec <= 5 * 60) 	// 1 min
+			{
+				if (m_timerCounter % 4 == 0)	// fetch every 200 ms
+				{
+					fetchTrendData();
+				}
+			}
+			else
+			{
+				if (durationSec <= 30 * 60) 	// 1 min
+				{
+					if (m_timerCounter % 10 == 0)	// fetch every 500 ms
+					{
+						fetchTrendData();
+					}
+				}
+				else
+				{
+					if (m_timerCounter % 20 == 0)	// fetch every 1 second
+					{
+						fetchTrendData();
+					}
+				}
+			}
+		}
+	}
+
+
 	QStatusBar* sb = statusBar();
 	Q_ASSERT(sb);
 
-//	if (trendMode() == E::TrendMode::Archive)
 //	{
-//		Q_ASSERT(m_archiveTcpClient);
-
-//		ArchiveTrendTcpClient::Stat stat = m_archiveTcpClient->stat();
-
-//		m_statusBarTextLabel->setText(stat.text);
-//		m_statusBarQueueSizeLabel->setText(QString(" Queue size: %1 ").arg(stat.requestQueueSize));
-//		m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
-//												 .arg(stat.requestCount)
-//												 .arg(stat.replyCount));
-
-//		HostAddressPort server = m_archiveTcpClient->currentServerAddressPort();
-//		m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
-
-//		if (m_archiveTcpClient->isConnected() == true)
-//		{
-//			m_statusBarConnectionStateLabel->setText(" Connected ");
-//		}
-//		else
-//		{
-//			m_statusBarConnectionStateLabel->setText(" NoConnection ");
-//		}
-//	}
-//	else
-//	{
-//		Q_ASSERT(m_rtTcpClient);
-
-//		// --
-//		//
-//		setRealtimeParams();
-
-//		// --
-//		//
-//		RtTrendTcpClient::Stat stat = m_rtTcpClient->stat();
-
 //		m_statusBarTextLabel->setText(stat.text);
 //		m_statusBarQueueSizeLabel->setText("");
 //		m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
@@ -272,237 +276,66 @@ void SimTrendsWidget::signalsButton()
 	return;
 }
 
-//void SimTrendsWidget::createArchiveConnection()
-//{
-//	Q_ASSERT(m_configController);
-//	Q_ASSERT(m_archiveTcpClient == nullptr);
-//	Q_ASSERT(m_archiveTcpClientThread == nullptr);
+void SimTrendsWidget::fetchTrendData()
+{
+	// Fetch realtime trend data from Sim::AppSignalManager
+	//
+	Q_ASSERT(m_signalManager);
 
-//	m_archiveTcpClient = new ArchiveTrendTcpClient(m_configController);
+	TrendLib::TrendStateItem minState;
+	TrendLib::TrendStateItem maxState;
 
-//	m_archiveTcpClientThread = new SimpleThread(m_archiveTcpClient);	// Archive mode is default one
-//	m_archiveTcpClientThread->start();
+	minState.clear();
+	maxState.clear();
 
-//	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
+	std::shared_ptr<TrendLib::RealtimeData> data = m_signalManager->trendData(windowTitle(),
+																			  signalSet().trendSignalsHashes(),
+																			  &minState,
+																			  &maxState);
 
-//	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
-//	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
+	if (data != nullptr)
+	{
+		signalSet().slot_realtimeDataReceived(data, minState, maxState);
+		this->slot_realtimeDataReceived(data, minState, maxState);
+	}
 
-//	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived);	// Fpr updating widget
+	return;
+}
 
-//	return;
-//}
+void SimTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+{
+	Q_ASSERT(m_trendWidget);
+	Q_ASSERT(m_trendSlider);
+	Q_ASSERT(data);
 
-//void SimTrendsWidget::createRealtimeConnection()
-//{
-//	Q_ASSERT(m_configController);
-//	Q_ASSERT(m_rtTcpClient == nullptr);
-//	Q_ASSERT(m_rtTcpClientThread == nullptr);
+	if (data->signalData.empty() == true)
+	{
+		return;
+	}
 
-//	m_rtTcpClient = new RtTrendTcpClient(m_configController);
+	const TrendLib::RealtimeDataChunk& chunk = data->signalData.front();
+	if (chunk.states.empty() == true)
+	{
+		return;
+	}
 
-//	m_rtTcpClientThread = new SimpleThread(m_rtTcpClient);	// Archive mode is default one
-//	m_rtTcpClientThread->start();
+	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
+	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
 
-//	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
-//	connect(m_rtTcpClient, &RtTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
+	// Shift view area if autoshift mode is turned on
+	//
+	if (isRealtimeAutoShift() == true)
+	{
+		setRealtimeAutoShift(maxTime);
+	}
 
-//	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, this, &SimTrendsWidget::slot_realtimeDataReceived);
+	// Update widget if received data somewhere in view
+	//
+	if (minTime >= m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10 &&
+		maxTime <= m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10)
+	{
+		m_trendWidget->updateWidget();
+	}
 
-//	setRealtimeParams();
-
-//	return;
-//}
-
-//void SimTrendsWidget::setRealtimeParams()
-//{
-//	if (m_rtTcpClient == nullptr ||
-//		m_rtTcpClientThread == nullptr)
-//	{
-//		Q_ASSERT(m_rtTcpClient);
-//		Q_ASSERT(m_rtTcpClientThread);
-//		return;
-//	}
-
-//	//	enum class RtTrendsSamplePeriod
-//	//	{
-//	//		sp_5ms,
-//	//		sp_10ms,
-//	//		sp_20ms,
-//	//		sp_50ms,
-//	//		sp_100ms,
-//	//		sp_250ms,
-//	//		sp_500ms,
-//	//		sp_1s,
-//	//		sp_5s,
-//	//		sp_15s,
-//	//		sp_30s,
-//	//		sp_60s,
-//	//	};
-
-//	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
-//	qint64 duration = m_trendWidget->duration();
-
-//	if (duration <= 2_sec)
-//	{
-//		samplePeriod = E::RtTrendsSamplePeriod::sp_5ms;
-//	}
-//	else
-//	{
-//		if (duration <= 5_sec)
-//		{
-//			samplePeriod = E::RtTrendsSamplePeriod::sp_10ms;
-//		}
-//		else
-//		{
-//			if (duration <= 10_sec)
-//			{
-//				samplePeriod = E::RtTrendsSamplePeriod::sp_20ms;
-//			}
-//			else
-//			{
-//				if (duration <= 20_sec)
-//				{
-//					samplePeriod = E::RtTrendsSamplePeriod::sp_50ms;
-//				}
-//				else
-//				{
-//					if (duration <= 1_min)
-//					{
-//						samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
-//					}
-//					else
-//					{
-//						if (duration <= 1_min + 30_sec)
-//						{
-//							samplePeriod = E::RtTrendsSamplePeriod::sp_250ms;
-//						}
-//						else
-//						{
-//							if (duration <= 3_min)
-//							{
-//								samplePeriod = E::RtTrendsSamplePeriod::sp_500ms;
-//							}
-//							else
-//							{
-//								if (duration <= 15_min)
-//								{
-//									samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
-//								}
-//								else
-//								{
-//									if (duration <= 60_min)
-//									{
-//										samplePeriod = E::RtTrendsSamplePeriod::sp_5s;
-//									}
-//									else
-//									{
-//										samplePeriod = E::RtTrendsSamplePeriod::sp_10s;
-//									}
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-
-//	std::vector<TrendLib::TrendSignalParam> signalSetVector = trend().signalSet().trendSignals();
-
-//	m_rtTcpClient->setData(samplePeriod, signalSetVector);
-
-//	return;
-//}
-
-//void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
-//{
-//	Q_ASSERT(m_trendWidget);
-//	Q_ASSERT(m_trendSlider);
-
-//	TimeStamp plus1hour(requestedHour.timeStamp + 1_hour);
-//	TimeStamp minus1hour(requestedHour.timeStamp - 1_hour);
-
-//	if (timeType != m_trendWidget->timeType() ||
-//		(m_trendSlider->isTimeInRange(requestedHour) == false &&
-//		 m_trendSlider->isTimeInRange(plus1hour) == false &&
-//		 m_trendSlider->isTimeInRange(minus1hour) == false))
-//	{
-//		return;
-//	}
-
-//	m_trendWidget->updateWidget();
-//	return;
-//}
-
-//void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
-//{
-//	Q_ASSERT(m_trendWidget);
-//	Q_ASSERT(m_trendSlider);
-//	Q_ASSERT(data);
-
-//	if (data->signalData.empty() == true)
-//	{
-//		return;
-//	}
-
-//	const TrendLib::RealtimeDataChunk& chunk = data->signalData.front();
-//	if (chunk.states.empty() == true)
-//	{
-//		return;
-//	}
-
-//	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
-//	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
-
-//	// Shift view area if autoshift mode is turned on
-//	//
-//	if (isRealtimeAutoShift() == true)
-//	{
-//		setRealtimeAutoShift(maxTime);
-//	}
-
-//	// Update widget if received data somewhere in view
-//	//
-//	if (minTime >= m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10 &&
-//		maxTime <= m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10)
-//	{
-//		m_trendWidget->updateWidget();
-//	}
-
-//	return;
-//}
-
-//void MonitorTrendsWidget::slot_trendModeChanged()
-//{
-//	qDebug() << __FUNCTION__ << ", TrendMode = " << trendMode();
-
-//	if (m_archiveTcpClientThread != nullptr)
-//	{
-//		m_archiveTcpClientThread->quitAndWait(10000);
-//		delete m_archiveTcpClientThread;
-
-//		m_archiveTcpClient = nullptr;
-//		m_archiveTcpClientThread = nullptr;
-//	}
-
-//	if (m_rtTcpClientThread != nullptr)
-//	{
-//		m_rtTcpClientThread->quitAndWait(10000);
-//		delete m_rtTcpClientThread;
-
-//		m_rtTcpClient = nullptr;
-//		m_rtTcpClientThread = nullptr;
-//	}
-
-//	if (trendMode() == E::TrendMode::Archive)
-//	{
-//		createArchiveConnection();
-//	}
-//	else
-//	{
-//		createRealtimeConnection();
-//	}
-
-//	return;
-//}
+	return;
+}

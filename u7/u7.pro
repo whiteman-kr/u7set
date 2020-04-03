@@ -416,6 +416,7 @@ DISTFILES += \
     Afbl/tct_off_v1.afb \
     Afbl/tct_on_v1.afb \
     Afbl/tct_vibr_v1.afb \
+    LogicModuleDescription/MSO4_SR21.xml \
     Ufbl/UFB_A3_LANDSCAPE.templ_ufb \
     Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
     Ufbl/file2pgsql.exe \

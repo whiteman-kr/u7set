@@ -44,7 +44,9 @@ public:
 	//
 protected slots:
 	//void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-	//void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	//void slot_newRaltimeData(QString equipmentId, TimeStamp plantTime, TimeStamp systemTime, TimeStamp localTime, quint64 ms);
+	void fetchTrendData();
+	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 
 	//void slot_trendModeChanged();
 
@@ -59,7 +61,7 @@ private:
 	//ConfigConnection m_archiveService2;
 
 	//ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
-	//SimpleThread* m_archiveTcpClientThread = nullptr;
+	//SimpleThread* m_archiveTcpClientThread = nullptr¸¸¸;
 
 	//RtTrendTcpClient* m_rtTcpClient = nullptr;
 	//SimpleThread* m_rtTcpClientThread = nullptr;
@@ -77,5 +79,7 @@ private:
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
+
+	quint64 m_timerCounter = 0;
 };
 
