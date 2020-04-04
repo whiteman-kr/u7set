@@ -661,13 +661,13 @@ namespace TrendLib
 						{
 							bool ok = false;
 
-							double highLimit = TrendScale::limitToScalePoint(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
+							double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
 							if (ok == false)
 							{
 								continue;
 							}
 
-							double lowLimit = TrendScale::limitToScalePoint(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
+							double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
 							if (ok == false)
 							{
 								continue;
@@ -686,13 +686,13 @@ namespace TrendLib
 
 								TrendSignalParam tsp = trendSignal;
 
-								double newHighLimit = TrendScale::valueFromScalePoint(highLimit, scaleType(), &ok);
+								double newHighLimit = TrendScale::limitFromScaleValue(highLimit, scaleType(), &ok);
 								if (ok == false)
 								{
 									continue;
 								}
 
-								double newLowLimit = TrendScale::valueFromScalePoint(lowLimit, scaleType(), &ok);
+								double newLowLimit = TrendScale::limitFromScaleValue(lowLimit, scaleType(), &ok);
 								if (ok == false)
 								{
 									continue;
@@ -849,13 +849,13 @@ namespace TrendLib
 			{
 				bool ok = false;
 
-				double h = TrendScale::limitToScalePoint(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double h = TrendScale::limitToScaleValue(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				double l = TrendScale::limitToScalePoint(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double l = TrendScale::limitToScaleValue(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
@@ -878,13 +878,13 @@ namespace TrendLib
 					l = l - delta * 0.1;
 				}
 
-				double newHighLimit = TrendScale::valueFromScalePoint(h, scaleType(), &ok);
+				double newHighLimit = TrendScale::limitFromScaleValue(h, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				double newLowLimit = TrendScale::valueFromScalePoint(l, scaleType(), &ok);
+				double newLowLimit = TrendScale::limitFromScaleValue(l, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
@@ -1041,13 +1041,13 @@ namespace TrendLib
 
 				bool ok = false;
 
-				double highLimit = TrendScale::limitToScalePoint(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double highLimit = TrendScale::limitToScaleValue(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				double lowLimit = TrendScale::limitToScalePoint(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double lowLimit = TrendScale::limitToScaleValue(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
@@ -1068,13 +1068,13 @@ namespace TrendLib
 				double newHighLimit = lowLimit + (signalRectTsp.bottom() - top) * coefHeight;
 				double newLowLimit = lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight;
 
-				newHighLimit = TrendScale::valueFromScalePoint(newHighLimit, scaleType(), &ok);
+				newHighLimit = TrendScale::limitFromScaleValue(newHighLimit, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				newLowLimit = TrendScale::valueFromScalePoint(newLowLimit, scaleType(), &ok);
+				newLowLimit = TrendScale::limitFromScaleValue(newLowLimit, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;

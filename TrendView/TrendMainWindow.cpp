@@ -888,7 +888,7 @@ static int lastCopyCount = false;
 
 						bool ok = false;
 
-						double value = TrendScale::valueToScalePoint(state.value, m_trendWidget->scaleType(), &ok);
+						double value = TrendScale::valueToScaleValue(state.value, m_trendWidget->scaleType(), &ok);
 
 						if (ok == false)
 						{
@@ -925,13 +925,13 @@ static int lastCopyCount = false;
 
 				bool ok = false;
 
-				double newMinValue = TrendScale::valueFromScalePoint(minValue, m_trendWidget->scaleType(), &ok);
+				double newMinValue = TrendScale::limitFromScaleValue(minValue, m_trendWidget->scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				double newMaxValue = TrendScale::valueFromScalePoint(maxValue, m_trendWidget->scaleType(), &ok);
+				double newMaxValue = TrendScale::limitFromScaleValue(maxValue, m_trendWidget->scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;

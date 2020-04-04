@@ -2,361 +2,407 @@
 
 namespace TrendLib
 {
-	const double TrendScale::periodScaleInfinity = 999; // Infinity value for period scale
+const double TrendScale::periodScaleInfinity = 999; // Infinity value for period scale
 
-	TrendScale::TrendScale()
-	{
+TrendScale::TrendScale()
+{
 
-	}
+}
 
-	double TrendScale::timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
-	{
-		if (duration == 0)
-		{
-			Q_ASSERT(duration != 0);
-			duration = 1;
-		}
+double TrendScale::timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
+{
+    if (duration == 0)
+    {
+        Q_ASSERT(duration != 0);
+        duration = 1;
+    }
 
-		return rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
-	}
+    return rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
+}
 
-	double TrendScale::valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit)
-	{
-		double delta = fabs(highLimit - lowLimit);
+double TrendScale::valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit)
+{
+    double delta = fabs(highLimit - lowLimit);
 
-		if (delta <= DBL_MIN)
-		{
-			Q_ASSERT(fabs(highLimit - lowLimit) > DBL_MIN);
-			return 0;
-		}
+    if (delta <= DBL_MIN)
+    {
+        Q_ASSERT(fabs(highLimit - lowLimit) > DBL_MIN);
+        return 0;
+    }
 
-		return rect.bottom() - (rect.height() / delta) * (value - lowLimit);
-	}
+    return rect.bottom() - (rect.height() / delta) * (value - lowLimit);
+}
 
-	double TrendScale::limitToScalePoint(double value, TrendScaleType scaleType, bool* ok)
-	{
-		return pointToScalePoint(value, scaleType, ok);
-	}
+double TrendScale::scaledPixelToValue(double pixel, const QRectF& rect, double lowLimit, double highLimit)
+{
+    double delta = fabs(highLimit - lowLimit);
+    if (delta <= DBL_MIN)
+    {
+        Q_ASSERT(fabs(highLimit - lowLimit) > DBL_MIN);
+        return 0;
+    }
 
-	double TrendScale::valueToScalePoint(double value, TrendScaleType scaleType, bool* ok)
-	{
-		double result = pointToScalePoint(value, scaleType, ok);
+    if (rect.height() <= DBL_MIN)
+    {
+        Q_ASSERT(rect.height() > DBL_MIN);
+        return 0;
+    }
 
-		if (ok == nullptr || *ok == true)
-		{
-			// Period trend is drawn from infinity point
+    return lowLimit - (pixel - rect.bottom()) / (rect.height() / delta);
+}
 
-			if (scaleType == TrendScaleType::Period)
-			{
-				double infinityLog = log(periodScaleInfinity);
+double TrendScale::limitToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+{
+    return pointToScaleValue(value, scaleType, ok);
+}
 
-				result = qBound(-infinityLog, result, infinityLog);
+double TrendScale::valueToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+{
+    if (scaleType == TrendScaleType::Period)
+    {
+        if (fabs(value) < DBL_MIN)
+        {
+            // Divide by 0 is possible
+            //
+            if (ok != nullptr)
+            {
+                *ok = false;
+            }
 
-				if (result < 0)
-				{
-					result = -infinityLog - result;
-				}
-				else
-				{
-					result = infinityLog - result;
-				}
-			}
-		}
+            return 0;
+        }
 
-		return result;
-	}
+        value = periodScaleInfinity / value;
+    }
 
-	double TrendScale::valueFromScalePoint(double scaleValue, TrendScaleType scaleType, bool* ok)
-	{
-		if (ok != nullptr)
-		{
-			*ok = true;
-		}
+    return pointToScaleValue(value, scaleType, ok);
+}
 
-		switch (scaleType)
-		{
-		case TrendScaleType::Generic:
-		{
-			return scaleValue;
-		}
-		case TrendScaleType::Logarithmic:
-		{
-			return std::pow(10, scaleValue);
-		}
-		case TrendScaleType::Period:
-		{
-			if (scaleValue < 0)
-			{
-				scaleValue = -exp(-scaleValue);
-			}
-			else
-			{
-				scaleValue = exp(scaleValue);
-			}
+double TrendScale::limitFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+{
+    return pointFromScaleValue(scaleValue, scaleType, ok);
+}
 
-			scaleValue = qBound(-periodScaleInfinity, scaleValue, periodScaleInfinity);
+double TrendScale::valueFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+{
+    if (ok != nullptr)
+    {
+        *ok = true;
+    }
 
-			return scaleValue;
-		}
+    double result = pointFromScaleValue(scaleValue, scaleType, ok);
 
-		default:
-			Q_ASSERT(false);
-			if (ok != nullptr)
-			{
-				*ok = false;
-			}
-		}
+    if (scaleType == TrendScaleType::Period)
+    {
+        if (fabs(result) < DBL_MIN)
+        {
+            // Divide by 0 is possible
+            //
+            if (ok != nullptr)
+            {
+                *ok = false;
+            }
 
-		return 0;
-	}
+            return 0;
+        }
 
-	// Build scale points for a trend
-	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect)
-	{
-		switch (scaleType)
-		{
-		case TrendScaleType::Generic:
-		case TrendScaleType::Logarithmic:
-		{
-			return scaleValuesGeneric(scaleType, lowLimit, highLimit, signalRect);
-		}
-		case TrendScaleType::Period:
-		{
-			return scaleValuesPeriod(scaleType, lowLimit, highLimit);
-		}
-		default:
-			Q_ASSERT(false);
-		}
-		return {};
-	}
+        result = TrendScale::periodScaleInfinity / result;
+    }
 
-	QString TrendScale::scalePointText(double value, const TrendParam& drawParam, int precision)
-	{
-		switch (drawParam.scaleType())
-		{
-		case TrendScaleType::Generic:
-		{
-			return QString(" %1 ").arg(QString::number(value, 'f', precision));
-		}
-		case TrendScaleType::Logarithmic:
-		{
-			return QString(" %1 ").arg(QString::number(value, 'e', precision));
-		}
-		case TrendScaleType::Period:
-		{
-			if (fabs(value) >= periodScaleInfinity)
-			{
-				return QString(QChar(0x221E));
-			}
-			return QString(" %1 ").arg(QString::number(value, 'f', precision));
-		}
-		default:
-			Q_ASSERT(false);
-			return QString();
-		}
-	}
+    return result;
+}
 
-	double TrendScale::pointToScalePoint(double value, TrendScaleType scaleType, bool* ok)
-	{
-		if (ok != nullptr)
-		{
-			*ok = true;
-		}
+// Build scale points for a trend
+//
+std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+{
+    switch (scaleType)
+    {
+    case TrendScaleType::Generic:
+    case TrendScaleType::Logarithmic:
+    {
+        return scaleValuesGeneric(scaleType, lowLimit, highLimit, signalRect, minInchInterval);
+    }
+    case TrendScaleType::Period:
+    {
+        return scaleValuesPeriod(scaleType, lowLimit, highLimit);
+    }
+    default:
+        Q_ASSERT(false);
+    }
+    return {};
+}
 
-		switch (scaleType)
-		{
-		case TrendScaleType::Generic:
-		{
-			return value;
-		}
-		case TrendScaleType::Logarithmic:
-		{
-			if (value <= 0)
-			{
-				if (ok != nullptr)
-				{
-					*ok = false;
-				}
+QString TrendScale::scaleValueText(double value, const TrendParam& drawParam, int precision)
+{
+    switch (drawParam.scaleType())
+    {
+    case TrendScaleType::Generic:
+    {
+        return QString(" %1 ").arg(QString::number(value, 'f', precision));
+    }
+    case TrendScaleType::Logarithmic:
+    {
+        return QString(" %1 ").arg(QString::number(value, 'e', precision));
+    }
+    case TrendScaleType::Period:
+    {
+        if (fabs(round(value)) >= periodScaleInfinity)
+        {
+            return QString(QChar(0x221E));
+        }
+        return QString(" %1 ").arg(QString::number(value, 'f', precision));
+    }
+    default:
+        Q_ASSERT(false);
+        return QString();
+    }
+}
 
-				return 0;
-			}
-			else
-			{
-				return log10(value);
-			}
-		}
-		case TrendScaleType::Period:
-		{
-			value = qBound(-periodScaleInfinity, value, periodScaleInfinity);
+double TrendScale::pointToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+{
+    if (ok != nullptr)
+    {
+        *ok = true;
+    }
 
-			if (fabs(value) <= 1.0)
-			{
-				return value > 0 ? DBL_MIN : -DBL_MIN;
-			}
+    switch (scaleType)
+    {
+    case TrendScaleType::Generic:
+    {
+        return value;
+    }
+    case TrendScaleType::Logarithmic:
+    {
+        if (value <= 0)
+        {
+            if (ok != nullptr)
+            {
+                *ok = false;
+            }
 
-			if (value < 0)
-			{
-				value = -log(-value);
-			}
-			else
-			{
-				if (value > 0)
-				{
-					value = log(value);
-				}
-				else
-				{
-					Q_ASSERT(false);
-					return value > 0 ? DBL_MIN : -DBL_MIN;
-				}
-			}
+            return 0;
+        }
+        else
+        {
+            return log10(value);
+        }
+    }
+    case TrendScaleType::Period:
+    {
+        value = qBound(-periodScaleInfinity, value, periodScaleInfinity);
 
-			return value;
-		}
-		default:
-			Q_ASSERT(false);
-			if (ok != nullptr)
-			{
-				*ok = false;
-			}
-		}
+        if (fabs(value) <= 1.0)
+        {
+            return value > 0 ? DBL_MIN : -DBL_MIN;
+        }
 
-		return 0;
-	}
+        if (value < 0)
+        {
+            value = -log(-value);
+        }
+        else
+        {
+            if (value > 0)
+            {
+                value = log(value);
+            }
+            else
+            {
+                Q_ASSERT(false);
+                return value > 0 ? DBL_MIN : -DBL_MIN;
+            }
+        }
 
-	// Build scale points for generic or logarithmic trend
-	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect)
-	{
-		if (scaleType != TrendScaleType::Generic && scaleType != TrendScaleType::Logarithmic)
-		{
-			Q_ASSERT(scaleType == TrendScaleType::Generic || scaleType == TrendScaleType::Logarithmic);
-			return {};
-		}
+        return value;
+    }
+    default:
+        Q_ASSERT(false);
+        if (ok != nullptr)
+        {
+            *ok = false;
+        }
+    }
 
-		double delta = highLimit - lowLimit;
-		if (delta <= DBL_MIN)
-		{
-			// Divide by 0 possible
-			//
-			return {};
-		}
+    return 0;
+}
 
-		// Calc vert grid
-		//
-		static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5};
+double TrendScale::pointFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+{
+    if (ok != nullptr)
+    {
+        *ok = true;
+    }
 
-		double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
-		double gridValue = 1.0;
+    switch (scaleType)
+    {
+    case TrendScaleType::Generic:
+    {
+        return scaleValue;
+    }
+    case TrendScaleType::Logarithmic:
+    {
+        return std::pow(10, scaleValue);
+    }
+    case TrendScaleType::Period:
+    {
+        if (scaleValue < 0)
+        {
+            scaleValue = -exp(-scaleValue);
+        }
+        else
+        {
+            scaleValue = exp(scaleValue);
+        }
 
-		double pow = 1e-100;
-		for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
-		{
-			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
-			{
-				gridValue = possibleGridIntervals[i] * pow;
+        scaleValue = qBound(-periodScaleInfinity, scaleValue, periodScaleInfinity);
 
-				double y = valueToScaledPixel(lowLimit + gridValue, signalRect, lowLimit, highLimit);
-				if (signalRect.bottom() - y >= minInchInterval)
-				{
-					// gridValue contains found suitable value for grid
-					//
-					mult = 1000000;		// To break outer loop
-					break;
-				}
-			}
-		}
+        return scaleValue;
+    }
 
-		// Align gridValue
-		//
-		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
-		int gridCount = static_cast<int>(delta / gridValue) + 2;
+    default:
+        Q_ASSERT(false);
+        if (ok != nullptr)
+        {
+            *ok = false;
+        }
+    }
 
-		if (gridCount < 0)
-		{
-			Q_ASSERT(false);
-			gridCount = 0;
-		}
+    return 0;
+}
 
-		if (gridCount > 100)
-		{
-			// Something wrong
-			//
-			gridCount = 100;
-			return {};
-		}
+// Build scale points for generic or logarithmic trend
+//
+std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+{
+    if (scaleType != TrendScaleType::Generic && scaleType != TrendScaleType::Logarithmic)
+    {
+        Q_ASSERT(scaleType == TrendScaleType::Generic || scaleType == TrendScaleType::Logarithmic);
+        return {};
+    }
 
-		//
-		std::vector<std::pair<double, double>> result;
+    double delta = highLimit - lowLimit;
+    if (delta <= DBL_MIN)
+    {
+        // Divide by 0 possible
+        //
+        return {};
+    }
 
-		for (int i = 0; i < gridCount; i++)
-		{
+    // Calc vert grid
+    //
+    static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5};
 
-			double value = lowGriddedValue + i * gridValue;
+    double gridValue = 1.0;
 
-			bool ok = false;
+    double pow = 1e-100;
+    for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
+    {
+        for (size_t i = 0; i < possibleGridIntervals.size(); i++)
+        {
+            gridValue = possibleGridIntervals[i] * pow;
 
-			double scaleValue = valueFromScalePoint(value, scaleType, &ok);
+            double y = valueToScaledPixel(lowLimit + gridValue, signalRect, lowLimit, highLimit);
 
-			if (ok == false)
-			{
-				scaleValue = std::numeric_limits<double>::quiet_NaN();
-			}
+            if (signalRect.bottom() - y >= minInchInterval)
+            {
+                // gridValue contains found suitable value for grid
+                //
+                mult = 1000000;		// To break outer loop
+                break;
+            }
+        }
+    }
 
-			result.emplace_back(value, scaleValue);
-		}
+    // Align gridValue
+    //
+    double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
+    int gridCount = static_cast<int>(delta / gridValue) + 2;
 
-		return result;
-	}
+    if (gridCount < 0)
+    {
+        Q_ASSERT(false);
+        gridCount = 0;
+    }
 
-	// Build scale points for periodic trend
-	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit)
-	{
-		if (scaleType != TrendScaleType::Period)
-		{
-			Q_ASSERT(scaleType == TrendScaleType::Period);
-			return {};
-		}
+    if (gridCount > 100)
+    {
+        // Something wrong
+        //
+        gridCount = 100;
+        return {};
+    }
 
-		double delta = highLimit - lowLimit;
-		if (delta <= DBL_MIN)
-		{
-			// Divide by 0 possible
-			//
-			return {};
-		}
+    //
+    std::vector<std::pair<double, double>> result;
 
-		// Calc vert grid
-		//
+    for (int i = 0; i < gridCount; i++)
+    {
 
-		static const std::array<double, 19> possibleGridPoints = {2, 5, 10, 20, 40, 80, 160, 320, 640,
-																  TrendScale::periodScaleInfinity,
-																  -640, -320, -160, -80, -40, -20, -10, -5, -2};
+        double value = lowGriddedValue + i * gridValue;
 
-		std::vector<std::pair<double, double>> result;
+        bool ok = false;
 
-		for (double p : possibleGridPoints)
-		{
-			bool ok = false;
+        double scaleValue = limitFromScaleValue(value, scaleType, &ok);
 
-			double value = valueToScalePoint(p, scaleType, &ok);
+        if (ok == false)
+        {
+            scaleValue = std::numeric_limits<double>::quiet_NaN();
+        }
 
-			if (ok == false)
-			{
-				Q_ASSERT(false);
-				return result;
-			}
+        result.emplace_back(value, scaleValue);
+    }
 
-			if (value < lowLimit || value > highLimit)
-			{
-				continue;
-			}
+    return result;
+}
 
-			result.emplace_back(value, p);
-		}
+// Build scale points for periodic trend
+//
+std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit)
+{
+    if (scaleType != TrendScaleType::Period)
+    {
+        Q_ASSERT(false);
+        return {};
+    }
 
-		return result;
-	}
+    double delta = highLimit - lowLimit;
+    if (delta <= DBL_MIN)
+    {
+        // Divide by 0 possible
+        //
+        return {};
+    }
+
+    // Calc vert grid
+    //
+
+    static const std::array<double, 19> possibleGridPoints = {2, 5, 10, 20, 40, 80, 160, 320, 640,
+                                                              TrendScale::periodScaleInfinity,
+                                                              -640, -320, -160, -80, -40, -20, -10, -5, -2};
+
+    std::vector<std::pair<double, double>> result;
+
+    for (double p : possibleGridPoints)
+    {
+        bool ok = false;
+
+        double value = valueToScaleValue(p, scaleType, &ok);
+
+        if (ok == false)
+        {
+            Q_ASSERT(false);
+            return result;
+        }
+
+        if (value < lowLimit || value > highLimit)
+        {
+            continue;
+        }
+
+        result.emplace_back(value, p);
+    }
+
+    return result;
+}
 }

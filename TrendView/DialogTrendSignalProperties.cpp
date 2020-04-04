@@ -50,13 +50,16 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 		{
 			// Limit values are reversed in periodic scale
 			//
-			if (fabs(viewHighLimit) < 1 || fabs(viewLowLimit) < 1)
+            if (fabs(viewHighLimit) < 1)
+            {
+                viewHighLimit = 1;
+            }
+            if (fabs(viewLowLimit) < 1)
 			{
-				viewHighLimit = 1;
 				viewLowLimit = -1;
 			}
 
-			viewHighLimit = TrendLib::TrendScale::periodScaleInfinity / viewHighLimit;
+            viewHighLimit = TrendLib::TrendScale::periodScaleInfinity / viewHighLimit;
 			viewLowLimit = TrendLib::TrendScale::periodScaleInfinity / viewLowLimit;
 		}
 
