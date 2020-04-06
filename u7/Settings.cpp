@@ -226,7 +226,8 @@ void Settings::writeUserScope() const
 
 	s.setValue("m_infoMode", m_infoMode);
 
-	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
+	s.setValue("UploadTabPage/LeftSplitter/state", m_UploadTabPageLeftSplitterState);
+	s.setValue("UploadTabPage/RightSplitter/state", m_UploadTabPageRightSplitterState);
 
 	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
@@ -349,7 +350,8 @@ void Settings::loadUserScope()
 
 	m_infoMode = s.value("m_infoMode").toBool();
 
-	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
+	m_UploadTabPageLeftSplitterState = s.value("UploadTabPage/LeftSplitter/state").toByteArray();
+	m_UploadTabPageRightSplitterState = s.value("UploadTabPage/RightSplitter/state").toByteArray();
 
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();

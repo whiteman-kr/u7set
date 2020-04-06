@@ -4,7 +4,6 @@
 #include "DialogSettingsConfigurator.h"
 #include "../lib/DbController.h"
 
-
 //
 //
 // UploadTabPage
@@ -19,34 +18,55 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Controls
 	//
 
-	//Left layout
+	// Choose Configuration/Build Widget
 	//
-	QVBoxLayout* pLeftLayout = new QVBoxLayout();
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose Configuration:")));
+	QWidget* pConfigurationWidget = new QWidget();
+
+	QVBoxLayout *pConfigurationLayout = new QVBoxLayout(pConfigurationWidget);
+
+	pConfigurationLayout->addWidget(new QLabel(tr("Choose Configuration:")));
 	m_pConfigurationCombo = new QComboBox();
 	m_pConfigurationCombo->addItem(tr("Debug"), tr("debug"));
 	m_pConfigurationCombo->addItem(tr("Release"), tr("release"));
 	m_pConfigurationCombo->setCurrentIndex(0);
 	connect(m_pConfigurationCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::configurationTypeChanged);
-	pLeftLayout->addWidget(m_pConfigurationCombo);
+	pConfigurationLayout->addWidget(m_pConfigurationCombo);
 
 	// Create Build list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose the Build:")));
-	m_pBuildList = new QListWidget();
-	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::buildChanged);
-	pLeftLayout->addWidget(m_pBuildList);
+	pConfigurationLayout->addWidget(new QLabel(tr("Choose the Build:")));
+	m_pBuildTree = new QTreeWidget();
+
+	QStringList l;
+	l << tr("Build");
+	l << tr("Date");
+	l << tr("Result");
+
+	m_pBuildTree->setColumnCount(l.size());
+	m_pBuildTree->setHeaderLabels(l);
+	m_pBuildTree->setRootIsDecorated(false);
+	m_pBuildTree->header()->hide();
+
+	connect(m_pBuildTree, &QTreeWidget::itemSelectionChanged, this, &UploadTabPage::buildChanged);
+	pConfigurationLayout->addWidget(m_pBuildTree);
+
+	// Choose Subsystem and Uart Widget
+	//
+
+	QWidget* pSubsystemWidget = new QWidget();
+
+	QVBoxLayout *pSubsystemLayout = new QVBoxLayout(pSubsystemWidget);
 
 	// Create Subsystems list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
+	pSubsystemLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
 	m_pSubsystemsListWidget = new QTreeWidget();
 	m_pSubsystemsListWidget->setRootIsDecorated(false);
 	connect(m_pSubsystemsListWidget, &QTreeWidget::currentItemChanged, this, &UploadTabPage::subsystemChanged);
-	pLeftLayout->addWidget(m_pSubsystemsListWidget, 2);
+	pSubsystemLayout->addWidget(m_pSubsystemsListWidget, 2);
 
-	QStringList l;
+	l.clear();
 	l << tr("Subsystem");
 
 	m_pSubsystemsListWidget->setColumnCount(l.size());
@@ -55,12 +75,16 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	int il = 0;
 	m_pSubsystemsListWidget->setColumnWidth(il++, 100);
 
+	QWidget* pUartWidget = new QWidget();
+
+	QVBoxLayout *pUartLayout = new QVBoxLayout(pUartWidget);
+
 	// Create UART list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Firmware Types:")));
+	pUartLayout->addWidget(new QLabel(tr("Firmware Types:")));
 	m_pUartListWidget = new QTreeWidget();
 	m_pUartListWidget->setRootIsDecorated(false);
-	pLeftLayout->addWidget(m_pUartListWidget);
+	pUartLayout->addWidget(m_pUartListWidget);
 
 	l.clear();
 	l << tr("UartID");
@@ -86,12 +110,17 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	bl->addWidget(b);
 	connect(b, &QPushButton::clicked, this, &UploadTabPage::resetUartData);
 
-	pLeftLayout->addLayout(bl);
+	pUartLayout->addLayout(bl);
 
-	pLeftLayout->addStretch();
+	//pSubsystemUartLayout->addStretch();
 
-	QWidget* pLeftWidget = new QWidget();
-	pLeftWidget->setLayout(pLeftLayout);
+	//Left Splitter
+	//
+	m_pLeftSplitter = new QSplitter(Qt::Vertical);
+
+	m_pLeftSplitter->addWidget(pConfigurationWidget);
+	m_pLeftSplitter->addWidget(pSubsystemWidget);
+	m_pLeftSplitter->addWidget(pUartWidget);
 
 	// Log
 	//
@@ -145,19 +174,20 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	m_vsplitter = new QSplitter();
+	m_pRightSplitter = new QSplitter();
 
-	m_vsplitter->addWidget(pLeftWidget);
-	m_vsplitter->addWidget(pRightWidget);
+	m_pRightSplitter->addWidget(m_pLeftSplitter);
+	m_pRightSplitter->addWidget(pRightWidget);
 
-	m_vsplitter->setStretchFactor(0, 2);
-	m_vsplitter->setStretchFactor(1, 1);
+	m_pRightSplitter->setStretchFactor(0, 2);
+	m_pRightSplitter->setStretchFactor(1, 1);
 
-	m_vsplitter->restoreState(theSettings.m_UploadTabPageSplitterState);
+	m_pLeftSplitter->restoreState(theSettings.m_UploadTabPageLeftSplitterState);
+	m_pRightSplitter->restoreState(theSettings.m_UploadTabPageRightSplitterState);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout(this);
 
-	pMainLayout->addWidget(m_vsplitter);
+	pMainLayout->addWidget(m_pRightSplitter);
 
 	setLayout(pMainLayout);
 
@@ -237,7 +267,9 @@ UploadTabPage::~UploadTabPage()
 		m_pConfigurationThread->wait(10000);
 	}
 
-	theSettings.m_UploadTabPageSplitterState = m_vsplitter->saveState();
+	theSettings.m_UploadTabPageLeftSplitterState = m_pLeftSplitter->saveState();
+	theSettings.m_UploadTabPageRightSplitterState = m_pRightSplitter->saveState();
+
 	theSettings.writeUserScope();
 }
 
@@ -280,21 +312,74 @@ void UploadTabPage::refreshProjectBuilds()
 
 	m_buildSearchPath = QString("%1%2%3-%4").arg(theSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName).arg(configurationType);
 
-	QStringList builds = QDir(m_buildSearchPath).entryList(QStringList("build*"), QDir::Dirs|QDir::NoSymLinks);
+	// Get builds list
 
-	// Refresh builds list if it is changed
-	//
+	std::vector<std::pair<QString, QDateTime>> builds;
 
-	if (m_currentBuilds != builds)
+	QStringList buildList = QDir(m_buildSearchPath).entryList(QStringList("build*"), QDir::Dirs|QDir::NoSymLinks);
+
+	for (const QString& build : buildList)
 	{
-		m_currentBuilds = builds;
+		QFile buildXml(QString("%1/%2/build.xml").arg(m_buildSearchPath).arg(build));
 
-		m_pBuildList->clear();
-		m_pBuildList->addItems(m_currentBuilds);
+		QDateTime tm;
 
-		m_pBuildList->blockSignals(true);
+		if (buildXml.exists() == true)
+		{
+			tm = buildXml.fileTime(QFile::FileModificationTime);
+		}
+
+		builds.push_back(std::make_pair(build, tm));
+	}
+
+	// Compare builds list with current and refresh is required (number of builds, their names or modification time is changed)
+
+	if (m_builds != builds)
+	{
+		m_builds = builds;
+
+		m_pBuildTree->blockSignals(true);
+
+		m_pBuildTree->clear();
+
+		for (const QString& buildName : buildList)
+		{
+			Builder::BuildInfo buildInfo;
+			bool buildSuccess = false;
+
+			QString buildPath = QString("%1/%2").arg(m_buildSearchPath).arg(buildName);
+
+			bool result = readBuildInfo(buildPath, &buildInfo, &buildSuccess);
+
+			QStringList strings;
+			strings << buildName;
+
+			if (result == true)
+			{
+				strings << buildInfo.date.toString("dd.MM.yyyy hh:mm:ss");
+				strings << (buildSuccess == true ? tr("Success") : tr("Failed"));
+			}
+			else
+			{
+				strings << QString();
+				strings << tr("Failed");
+			}
+
+			QTreeWidgetItem* item = new QTreeWidgetItem(strings);
+			m_pBuildTree->addTopLevelItem(item);
+		}
+
 		selectBuild(m_currentBuild);
-		m_pBuildList->blockSignals(false);
+
+		m_pBuildTree->blockSignals(false);
+
+		for (int i = 0; i < m_pBuildTree->header()->count(); i++)
+		{
+			m_pBuildTree->resizeColumnToContents(i);
+		}
+		m_pBuildTree->setColumnWidth(static_cast<int>(BuildColumns::Name), m_pBuildTree->columnWidth(static_cast<int>(BuildColumns::Name)) + 20);
+		m_pBuildTree->setColumnWidth(static_cast<int>(BuildColumns::Date), m_pBuildTree->columnWidth(static_cast<int>(BuildColumns::Date)) + 20);
+
 	}
 
 	// Refresh binary file
@@ -314,22 +399,20 @@ void UploadTabPage::configurationTypeChanged(const QString& s)
 }
 
 
-void UploadTabPage::buildChanged(int index)
+void UploadTabPage::buildChanged()
 {
-	Q_UNUSED(index);
-
 	if (dbController()->isProjectOpened() == false)
 	{
 		return;
 	}
 
-	QListWidgetItem* item = m_pBuildList->currentItem();
+	QTreeWidgetItem* item = m_pBuildTree->currentItem();
 	if (item == nullptr)
 	{
 		return;
 	}
 
-	m_currentBuild = item->text();
+	m_currentBuild = item->text(static_cast<int>(BuildColumns::Name));
 
 	refreshBinaryFile();
 }
@@ -387,14 +470,22 @@ void UploadTabPage::closeEvent(QCloseEvent* e)
 void UploadTabPage::projectOpened()
 {
 	this->setEnabled(true);
+
+	clearLog();
+
 	return;
 }
 
 void UploadTabPage::projectClosed()
 {
-	m_pBuildList->clear();
+	m_pBuildTree->clear();
+
+	m_currentBuild.clear();
+
+	m_builds.clear();
 
 	this->setEnabled(false);
+
 	return;
 }
 
@@ -600,15 +691,25 @@ QString UploadTabPage::selectedSubsystem()
 
 void UploadTabPage::selectBuild(const QString& id)
 {
-	m_pBuildList->clearSelection();
+	m_pBuildTree->clearSelection();
 
-	int count = m_pBuildList->count();
+	int count = m_pBuildTree->topLevelItemCount();
 
 	for (int i = 0; i < count; i++)
 	{
-		if (m_pBuildList->item(i)->text() == id)
+		QTreeWidgetItem* item = m_pBuildTree->topLevelItem(i);
+		if (item == nullptr)
 		{
-			m_pBuildList->setCurrentRow(i);
+			Q_ASSERT(item);
+			continue;
+		}
+
+		if (item->text(static_cast<int>(BuildColumns::Name)) == id)
+		{
+			item->setSelected(true);
+
+			m_pBuildTree->scrollToItem(item);
+
 			return;
 		}
 	}
@@ -681,6 +782,97 @@ void UploadTabPage::refreshBinaryFile()
 	m_currentFileModifiedTime = QFileInfo(m_currentFilePath).lastModified();
 
 	emit loadBinaryFile(m_currentFilePath, &m_firmware);
+}
+
+bool UploadTabPage::readBuildInfo(const QString& buildPath, Builder::BuildInfo* buildInfo, bool* buildSuccess)
+{
+	if (buildInfo == nullptr || buildSuccess == nullptr)
+	{
+		Q_ASSERT(buildInfo);
+		Q_ASSERT(buildSuccess);
+		return false;
+	}
+
+	// Read build information from build.xml
+
+	QString buildXmlFileName = buildPath + "/build.xml";
+
+	QFile buildXml(buildXmlFileName);
+
+	if (buildXml.exists() == false)
+	{
+		return false;
+	}
+
+	if (buildXml.open(QIODevice::ReadOnly) == false)
+	{
+		return false;
+	}
+
+	QByteArray data = buildXml.readAll();
+
+	buildXml.close();
+
+	if (data.isEmpty())
+	{
+		return false;
+	}
+
+	bool buildInfoFound = false;
+	bool buildResultFound = false;
+
+	QXmlStreamReader xmlReader(data);
+
+	while(xmlReader.atEnd() == false)
+	{
+		if (xmlReader.readNextStartElement() == false)
+		{
+			continue;
+		}
+
+		if (xmlReader.name() == "BuildInfo")
+		{
+			buildInfo->readFromXml(xmlReader);
+			buildInfoFound = true;
+		}
+
+		if (xmlReader.name() == "BuildResult")
+		{
+			bool ok = false;
+
+			int errorCount = xmlReader.attributes().value("Errors").toInt(&ok);
+
+			if (ok == false || errorCount != 0)
+			{
+				*buildSuccess = false;
+			}
+			else
+			{
+				*buildSuccess = true;
+			}
+
+
+			buildResultFound = true;
+		}
+	}
+
+	if (buildInfoFound == false || buildResultFound == false)
+	{
+		return false;	// Required sections were not found in build.xml
+	}
+
+	// Check if .bts file exists
+
+	QString buildOutputFileName = QString("%1/%2-%3.bts").arg(buildPath).arg(buildInfo->project).arg(QString::number(buildInfo->id).rightJustified(6, '0'));
+
+	QFile buildOutput(buildOutputFileName);
+
+	if (buildOutput.exists() == false)
+	{
+		*buildSuccess = false;
+	}
+
+	return true;
 }
 
 void UploadTabPage::clearSubsystemsUartData()
