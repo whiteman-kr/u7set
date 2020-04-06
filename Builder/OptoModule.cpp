@@ -3121,6 +3121,19 @@ namespace Hardware
 		return m_modules.value(optoPort->optoModuleID(), nullptr);
 	}
 
+	QString OptoModuleStorage::getOptoModuleID(const QString& optoPortID) const
+	{
+		OptoPortShared optoPort = m_ports.value(optoPortID, nullptr);
+
+		if (optoPort == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return optoPort->optoModuleID();
+	}
+
 	QList<OptoModuleShared> OptoModuleStorage::getLmAssociatedOptoModules(const QString& lmID) const
 	{
 		return m_lmAssociatedModules.values(lmID);

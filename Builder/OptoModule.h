@@ -506,6 +506,7 @@ namespace Hardware
 
 		OptoModuleShared getOptoModule(const QString& optoModuleID) const;
 		OptoModuleShared getOptoModule(const OptoPortShared optoPort) const;
+		QString getOptoModuleID(const QString& optoPortID) const;
 		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmID) const;
 		void getOptoModulesSorted(QVector<OptoModuleShared>& modules) const;
 
@@ -562,4 +563,6 @@ namespace Hardware
 
 		QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
 	};
+
+	typedef std::shared_ptr<Hardware::Connection> SharedConnection;
 }

@@ -4,8 +4,7 @@
 #include <QXmlStreamReader>
 #include <QBuffer>
 
-#include "../lib/SocketIO.h"
-
+#include "../lib/HostAddressPort.h"
 
 class XmlWriteHelper
 {

@@ -146,7 +146,7 @@ void XmlWriteHelper::writeBoolElement(const QString& name, bool value)
 	m_xmlWriter->writeTextElement(name, value == true ? "true" : "false");
 }
 
-void XmlWriteHelper::writeHostAddressPort(const QString& nameIP, const QString& namePort,HostAddressPort& hostAddressPort)
+void XmlWriteHelper::writeHostAddressPort(const QString& nameIP, const QString& namePort, HostAddressPort& hostAddressPort)
 {
 	writeStringElement(nameIP, hostAddressPort.addressStr());
 	writeIntElement(namePort, hostAddressPort.port());

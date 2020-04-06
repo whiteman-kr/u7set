@@ -144,9 +144,11 @@ namespace Hardware
 		void setPort2EnableSerial(bool value);
 
 		SerialMode port1SerialMode() const;
+		QString port1SerialModeStr() const;
 		void setPort1SerialMode(const SerialMode value);
 
 		SerialMode port2SerialMode() const;
+		QString port2SerialModeStr() const;
 		void setPort2SerialMode(const SerialMode value);
 
 		bool port1EnableDuplex() const;
@@ -219,6 +221,8 @@ namespace Hardware
 		QStringList filterByMoudules(const QStringList& modules) const;
 
 		std::shared_ptr<Connection> getPortConnection(QString portEquipmentId) const;
+
+		std::vector<std::shared_ptr<Connection>> getConnections() const;
 
 		// --
 		//
