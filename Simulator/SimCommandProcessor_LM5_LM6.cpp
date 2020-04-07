@@ -3239,7 +3239,7 @@ namespace Sim
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
 
-		AfbComponentParam result{o_result};
+		AfbComponentParam result{static_cast<quint16>(o_result)};
 		quint16 overflow = 0;
 		quint16 underflow = 0;
 		quint16 zero = 0;
@@ -3433,7 +3433,7 @@ namespace Sim
 		// *TI = i(ms) / 5(ms)
 		// i_ti = Ti(ms)
 		//
-		AfbComponentParam result{o_result};
+		AfbComponentParam result{static_cast<quint16>(o_result)};
 		result.setFloatValue(0);
 
 		quint16 maxOut = 0;
@@ -4573,7 +4573,7 @@ namespace Sim
 		// TD=d(ms) / 5(ms)
 		// i_td = Ti(ms)
 		//
-		AfbComponentParam result{o_result};
+		AfbComponentParam result{static_cast<quint16>(o_result)};
 		result.setFloatValue(0);
 
 		float newXPrev = x;
