@@ -3261,7 +3261,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 		<AFB id="#cod_v1"          Caption="cod"          Version="1.0008">
 			<Properties>
-				<Description>Binary Coder Block analyses input signals state strictly inorder in 32 downto in 1 and detects the number of inputs that are equal to 1. First detected number will be outputted in accordance with control signal.</Description>
+				<Description>Binary Coder Block scans 32 Boolean inputs in sequence from in_32 to in_1, and sets the output, equal to the index of the last TRUE input. The output active is set TRUE if at least one input is TRUE.</Description>
 				<Category>Logic</Category>
 				<OpCode>8</OpCode>
 				<HasRam>false</HasRam>				
@@ -3379,7 +3379,128 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		
+
+		<AFB id="#cod_rev_v1"          Caption="cod_rev"          Version="1.0001">
+			<Properties>
+				<Description>Binary Coder Block scans 32 Boolean inputs in sequence from in_32 to in_1, and sets the output out equal to the index of the first TRUE input. The output active is set TRUE if at least one input is TRUE.</Description>
+				<Category>Logic</Category>
+				<OpCode>8</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>14</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_1_oprd" Caption="in_1" Type="Discrete" ByteOrder="BigEndian" OpIndex="2" Size="1"/>
+				<Pin OpName="i_2_oprd" Caption="in_2" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1"/>
+				<Pin OpName="i_3_oprd" Caption="in_3" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
+				<Pin OpName="i_4_oprd" Caption="in_4" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
+				<Pin OpName="i_5_oprd" Caption="in_5" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+				<Pin OpName="i_6_oprd" Caption="in_6" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
+				<Pin OpName="i_7_oprd" Caption="in_7" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+				<Pin OpName="i_8_oprd" Caption="in_8" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+				<Pin OpName="i_9_oprd" Caption="in_9" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+				<Pin OpName="i_10_oprd" Caption="in_10" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
+				<Pin OpName="i_11_oprd" Caption="in_11" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
+				<Pin OpName="i_12_oprd" Caption="in_12" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="i_13_oprd" Caption="in_13" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
+				<Pin OpName="i_14_oprd" Caption="in_14" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>
+				<Pin OpName="i_15_oprd" Caption="in_15" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>
+				<Pin OpName="i_16_oprd" Caption="in_16" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
+				<Pin OpName="i_17_oprd" Caption="in_17" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
+				<Pin OpName="i_18_oprd" Caption="in_18" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
+				<Pin OpName="i_19_oprd" Caption="in_19" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
+				<Pin OpName="i_20_oprd" Caption="in_20" Type="Discrete" ByteOrder="BigEndian" OpIndex="21" Size="1"/>
+				<Pin OpName="i_21_oprd" Caption="in_21" Type="Discrete" ByteOrder="BigEndian" OpIndex="22" Size="1"/>
+				<Pin OpName="i_22_oprd" Caption="in_22" Type="Discrete" ByteOrder="BigEndian" OpIndex="23" Size="1"/>
+				<Pin OpName="i_23_oprd" Caption="in_23" Type="Discrete" ByteOrder="BigEndian" OpIndex="24" Size="1"/>
+				<Pin OpName="i_24_oprd" Caption="in_24" Type="Discrete" ByteOrder="BigEndian" OpIndex="25" Size="1"/>
+				<Pin OpName="i_25_oprd" Caption="in_25" Type="Discrete" ByteOrder="BigEndian" OpIndex="26" Size="1"/>
+				<Pin OpName="i_26_oprd" Caption="in_26" Type="Discrete" ByteOrder="BigEndian" OpIndex="27" Size="1"/>
+				<Pin OpName="i_27_oprd" Caption="in_27" Type="Discrete" ByteOrder="BigEndian" OpIndex="28" Size="1"/>
+				<Pin OpName="i_28_oprd" Caption="in_28" Type="Discrete" ByteOrder="BigEndian" OpIndex="29" Size="1"/>
+				<Pin OpName="i_29_oprd" Caption="in_29" Type="Discrete" ByteOrder="BigEndian" OpIndex="30" Size="1"/>
+				<Pin OpName="i_30_oprd" Caption="in_30" Type="Discrete" ByteOrder="BigEndian" OpIndex="31" Size="1"/>
+				<Pin OpName="i_31_oprd" Caption="in_31" Type="Discrete" ByteOrder="BigEndian" OpIndex="32" Size="1"/>
+				<Pin OpName="i_32_oprd" Caption="in_32" Type="Discrete" ByteOrder="BigEndian" OpIndex="33" Size="1"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="34" Size="32"/>
+				<Pin OpName="o_in_activ" Caption="active" Type="Discrete" ByteOrder="BigEndian" OpIndex="36" Size="1"/>
+			</Outputs>
+			<Params>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+						<Value>1</Value>
+						<Default>1</Default>
+						<LowLimit>1</LowLimit>
+						<HighLimit>2</HighLimit>
+						<Script>
+							<Changed></Changed>
+						</Script>
+				</Param>
+				<Param OpName="i_conf_x" Caption="OperandCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>32</HighLimit>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+				function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OperandCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 1)
+	{
+		count = 1;
+	}
+	if (count &gt; 32)
+	{
+		count = 32;
+	}
+
+	var opIndex = 2;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+	
 		<AFB id="#cod_num_v1"          Caption="cod_num"          Version="1.0006">
 			<Properties>
 				<Description>Binary Coder Bus Block analyses input signals state strictly inorder in 32 downto in 1 and detects the bit mask of inputs that are equal to 1. A bit mask will be outputted in accordance with control signal.</Description>

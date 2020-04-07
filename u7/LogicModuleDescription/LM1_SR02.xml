@@ -3334,7 +3334,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 		<AFB id="#cod_v1"          Caption="cod"          Version="1.0008">
 			<Properties>
-				<Description>Binary Coder Block analyses input signals state strictly inorder in 32 downto in 1 and detects the number of inputs that are equal to 1. First detected number will be outputted in accordance with control signal.</Description>
+				<Description>Binary Coder Block scans 32 Boolean inputs in sequence from in_32 to in_1, and sets the output, equal to the index of the last TRUE input. The output active is set TRUE if at least one input is TRUE.</Description>
 				<Category>Logic</Category>
 				<OpCode>8</OpCode>
 				<HasRam>false</HasRam>				
