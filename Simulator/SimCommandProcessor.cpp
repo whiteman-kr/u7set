@@ -90,7 +90,7 @@ namespace Sim
 
 	AfbComponent CommandProcessor::checkAfb(int opCode, int instanceNo, int pinOpCode /*= -1*/) const
 	{
-		AfbComponent afb = m_device.afbComponent(opCode);
+		AfbComponent afb = m_device->afbComponent(opCode);
 		if (afb.isNull() == true)
 		{
 			SimException::raise(QString("Cannot find AfbComponent with OpCode %1").arg(opCode));
@@ -159,7 +159,7 @@ namespace Sim
 
 	QString CommandProcessor::strAfbInst(const DeviceCommand* command) const
 	{
-		AfbComponent afb = m_device.afbComponent(command->m_afbOpCode);
+		AfbComponent afb = m_device->afbComponent(command->m_afbOpCode);
 		if (afb.isNull() == true)
 		{
 			SimException::raise(QString("AFB with OpCode %1 does not exist.").arg(command->m_afbOpCode), "CommandProcessor::strAfbInst");
@@ -172,7 +172,7 @@ namespace Sim
 
 	QString CommandProcessor::strAfbInstPin(const DeviceCommand* command) const
 	{
-		AfbComponent afb = m_device.afbComponent(command->m_afbOpCode);
+		AfbComponent afb = m_device->afbComponent(command->m_afbOpCode);
 		if (afb.isNull() == true)
 		{
 			SimException::raise(QString("AFB with OpCode %1 does not exist.").arg(command->m_afbOpCode), "CommandProcessor::strAfbInstPin");

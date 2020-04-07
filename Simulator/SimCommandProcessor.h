@@ -9,9 +9,7 @@
 
 namespace Sim
 {
-	class DeviceCommand;
-
-	// Helper union to cast pointer to member
+	// Helper union to cast <pointer to member> to <raw data>
 	//
 	template<typename classT, typename memberT>
 	union u_ptm_cast
@@ -82,7 +80,7 @@ namespace Sim
 		static const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> m_lmToFactory;
 
 	protected:
-		ScriptDeviceEmulator m_device;
+		DeviceEmulator* m_device = nullptr;
 	};
 }
 

@@ -84,88 +84,6 @@ namespace Sim
 		return m_afbComponent->pinCaption(pinOpIndex);
 	}
 
-
-	AfbComponentParam::AfbComponentParam(quint16 paramOpIndex) :
-		m_paramOpIndex(paramOpIndex)
-	{
-	}
-
-	int AfbComponentParam::opIndex() const
-	{
-		return m_paramOpIndex;
-	}
-
-	void AfbComponentParam::setOpIndex(int index)
-	{
-		m_paramOpIndex = index;
-	}
-
-	quint16 AfbComponentParam::wordValue() const
-	{
-		return m_data.asWord;
-	}
-
-	void AfbComponentParam::setWordValue(quint16 value)
-	{
-		m_data.data = 0;
-		m_data.asWord = value;
-	}
-
-	quint32 AfbComponentParam::dwordValue() const
-	{
-		return m_data.asDword;
-	}
-
-	void AfbComponentParam::setDwordValue(quint32 value)
-	{
-		m_data.data = 0;
-		m_data.asDword = value;
-	}
-
-	float AfbComponentParam::floatValue() const
-	{
-		return m_data.asFloat;
-	}
-
-	void AfbComponentParam::setFloatValue(float value)
-	{
-		m_data.data = 0;
-		m_data.asFloat = value;
-	}
-
-	double AfbComponentParam::doubleValue() const
-	{
-		return m_data.asDouble;
-	}
-
-	void AfbComponentParam::setDoubleValue(double value)
-	{
-		m_data.data = 0;
-		m_data.asDouble = value;
-	}
-
-	qint32 AfbComponentParam::signedIntValue() const
-	{
-		return m_data.asSignedInt;
-	}
-
-	void AfbComponentParam::setSignedIntValue(qint32 value)
-	{
-		m_data.data = 0;
-		m_data.asSignedInt = value;
-	}
-
-	qint64 AfbComponentParam::signedInt64Value() const
-	{
-		return m_data.asSignedInt64;
-	}
-
-	void AfbComponentParam::setSignedInt64Value(qint64 value)
-	{
-		m_data.data = 0;
-		m_data.asSignedInt64 = value;
-	}
-
 	void AfbComponentParam::addSignedInteger(const AfbComponentParam& operand)
 	{
 		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
@@ -533,82 +451,39 @@ namespace Sim
 		return;
 	}
 
-	void AfbComponentParam::resetMathFlags()
-	{
-		m_mathFlags.data = 0;
-	}
-
-	quint16 AfbComponentParam::mathOverflow() const
-	{
-		return m_mathFlags.overflow ? 0x0001 : 0x0000;
-	}
-
-	void AfbComponentParam::setMathOverflow(quint16 value)
-	{
-		m_mathFlags.overflow = value ? 0x0001 : 0x0000;
-	}
-
-	quint16 AfbComponentParam::mathUnderflow() const
-	{
-		return m_mathFlags.underflow ? 0x0001 : 0x0000;
-	}
-
-	void AfbComponentParam::setMathUnderflow(quint16 value)
-	{
-		m_mathFlags.underflow = value ? 0x0001 : 0x0000;
-	}
-
-	quint16 AfbComponentParam::mathZero() const
-	{
-		return m_mathFlags.zero ? 0x0001 : 0x0000;
-	}
-
-	void AfbComponentParam::setMathZero(quint16 value)
-	{
-		m_mathFlags.zero = value ? 0x0001 : 0x0000;
-	}
-
-	quint16 AfbComponentParam::mathNan() const
-	{
-		return m_mathFlags.nan ? 0x0001 : 0x0000;
-	}
-
-	void AfbComponentParam::setMathNan(quint16 value)
-	{
-		m_mathFlags.nan = value ? 0x0001 : 0x0000;
-	}
-
-	quint16 AfbComponentParam::mathDivByZero() const
-	{
-		return m_mathFlags.divByZero ? 0x0001 : 0x0000;
-	}
-
-	void AfbComponentParam::setMathDivByZero(quint16 value)
-	{
-		m_mathFlags.divByZero = value ? 0x0001 : 0x0000;
-	}
-
 	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
 											   quint16 instanceNo) :
 		m_afbComp(afbComp),
 		m_instanceNo(instanceNo)
 	{
 		Q_ASSERT(m_afbComp);
-		m_params_v.reserve(36);
 	}
 
-	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
+	bool AfbComponentInstance::addParam(const AfbComponentParam& param) noexcept
 	{
-		if (param.opIndex() >= m_params_v.size())
+		if (param.opIndex() >= m_params_a.size())
 		{
-			m_params_v.resize(param.opIndex() + 1);
+			Q_ASSERT(param.opIndex() < m_params_a.size());
+			return false;
 		}
 
-		m_params_v[param.opIndex()] = param;
+		m_params_a[param.opIndex()] = param;
 		return true;
 	}
 
-	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
+	bool AfbComponentInstance::addParam(AfbComponentParam&& param) noexcept
+	{
+		if (param.opIndex() >= m_params_a.size())
+		{
+			Q_ASSERT(param.opIndex() < m_params_a.size());
+			return false;
+		}
+
+		m_params_a[param.opIndex()] = std::move(param);
+		return true;
+	}
+
+	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex) noexcept
 	{
 		if (opIndex == m_afbComp->versionOpIndex())
 		{
@@ -622,71 +497,68 @@ namespace Sim
 			}
 		}
 
-		if (opIndex >= m_params_v.size() ||
-			m_params_v[opIndex].has_value() == false)
+		if (opIndex >= m_params_a.size() ||
+			m_params_a[opIndex].opIndex() == 0xFFFF)
 		{
 			SimException::raise(QString("Param %1 is not found in AFB %2.").arg(opIndex).arg(m_afbComp->caption()));
 		}
 
-		return &m_params_v[opIndex].value();
+		return &m_params_a[opIndex];
 	}
 
-	bool AfbComponentInstance::paramExists(quint16 opIndex) const
+	bool AfbComponentInstance::paramExists(quint16 opIndex) const noexcept
 	{
-		if (opIndex > m_params_v.size())
+		if (opIndex > m_params_a.size())
 		{
 			return false;
 		}
 
-		return m_params_v[opIndex].has_value();
+		return m_params_a[opIndex].opIndex() != 0xFFFF;
 	}
 
-	bool AfbComponentInstance::addParamWord(quint16 opIndex, quint16 value)
+	bool AfbComponentInstance::addParamWord(quint16 opIndex, quint16 value) noexcept
 	{
-		AfbComponentParam param(opIndex);
-		param.setWordValue(value);
-
-		return addParam(param);
+		return addParam(AfbComponentParam{opIndex, value});
 	}
 
-	bool AfbComponentInstance::addParamDword(quint16 opIndex, quint32 value)
+	bool AfbComponentInstance::addParamDword(quint16 opIndex, quint32 value) noexcept
 	{
 		AfbComponentParam param(opIndex);
 		param.setDwordValue(value);
 
-		return addParam(param);
+		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value)
+	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value) noexcept
 	{
 		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
 
-		return addParam(param);
+		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value)
+	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value) noexcept
 	{
 		AfbComponentParam param(opIndex);
 		param.setDoubleValue(value);
 
-		return addParam(param);
+		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value)
+	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value) noexcept
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
-		return addParam(param);
+		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value)
+	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value) noexcept
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedInt64Value(value);
 
-		return addParam(param);
+		return addParam(std::move(param));
 	}
 
 	//
@@ -724,7 +596,12 @@ namespace Sim
 		return true;
 	}
 
-	bool ModelComponent::addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
+	bool ModelComponent::isNull() const
+	{
+		return m_afbComp == nullptr;
+	}
+
+	bool ModelComponent::addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept
 	{
 		if (instanceNo >= m_afbComp->maxInstCount() ||
 			instanceNo >= m_instances.size())
@@ -762,6 +639,44 @@ namespace Sim
 		return ok;
 	}
 
+	bool ModelComponent::addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept
+	{
+		if (instanceNo >= m_afbComp->maxInstCount() ||
+			instanceNo >= m_instances.size())
+		{
+			// Maximum of instatiator is reached
+			//
+			*errorMessage = QString("InstanceNo (%1) is higher then maximum (%2), Component %3")
+							.arg(instanceNo)
+							.arg(m_afbComp->maxInstCount())
+							.arg(m_afbComp->caption());
+			return false;
+		}
+
+		// !!!The next condidion is commented fro perfomance reason
+		// We check pinExists in all commands on parse stage, so it is nop need to checkit again
+		// This check took up to 8% of programm runtime
+		// !!!
+		//
+		//		// Check if instParam.implParamOpIndex really exists in AfbComponent
+		//		//
+		//		if (m_afbComp->pinExists(instParam.opIndex()) == false)
+		//		{
+		//			// Can't find such pin in AfbComponent
+		//			//
+		//			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
+		//								.arg(instParam.opIndex())
+		//								.arg(m_afbComp->caption());
+		//			return false;
+		//		}
+
+		// Get or add instance and set new param
+		//
+		bool ok = m_instances[instanceNo].addParam(std::move(instParam));
+
+		return ok;
+	}
+
 	AfbComponentSet::AfbComponentSet()
 	{
 		m_components.reserve(32);
@@ -788,9 +703,9 @@ namespace Sim
 				m_components.resize(keyAfbOpCode + 1);
 			}
 
-			std::shared_ptr<ModelComponent> mc = std::make_shared<ModelComponent>(afbComp);
+			ModelComponent mc{afbComp};
 
-			if (bool ok = mc->init();
+			if (bool ok = mc.init();
 				ok == false)
 			{
 				return false;
@@ -802,7 +717,7 @@ namespace Sim
 		return true;
 	}
 
-	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
+	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept
 	{
 		Q_ASSERT(errorMessage);
 
@@ -813,8 +728,8 @@ namespace Sim
 			return false;
 		}
 
-		std::shared_ptr<ModelComponent>& modelComponent = m_components[afbOpCode];
-		if (modelComponent == nullptr)
+		ModelComponent& modelComponent = m_components[afbOpCode];
+		if (modelComponent.isNull() == true)
 		{
 			// Component must be created in init();
 			//
@@ -822,7 +737,30 @@ namespace Sim
 			return false;
 		}
 
-		return modelComponent->addParam(instanceNo, instParam, errorMessage);
+		return modelComponent.addParam(instanceNo, instParam, errorMessage);
+	}
+
+	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept
+	{
+		Q_ASSERT(errorMessage);
+
+		if (afbOpCode >= m_components.size())
+		{
+			Q_ASSERT(afbOpCode < m_components.size());
+			*errorMessage = QString("AFB with opcode %1 is not forund").arg(afbOpCode);
+			return false;
+		}
+
+		ModelComponent& modelComponent = m_components[afbOpCode];
+		if (modelComponent.isNull() == true)
+		{
+			// Component must be created in init();
+			//
+			*errorMessage = QString("AFB with opcode %1 is not found in AfbComponentSet").arg(afbOpCode);
+			return false;
+		}
+
+		return modelComponent.addParam(instanceNo, std::move(instParam), errorMessage);
 	}
 
 	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance) noexcept
@@ -833,13 +771,13 @@ namespace Sim
 			return nullptr;
 		}
 
-		auto& component = m_components[componentOpCode];
-		if (component == nullptr)
+		ModelComponent& component = m_components[componentOpCode];
+		if (component.isNull() == true)
 		{
 			return nullptr;
 		}
 
-		return component->instance(instance);
+		return component.instance(instance);
 	}
 
 }

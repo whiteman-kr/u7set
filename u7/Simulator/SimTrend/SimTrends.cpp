@@ -83,10 +83,10 @@ static int no = 1;
 	//
 	trend().rulerSet().setRulerStep(5);
 
-	// Set deafult lane duration (1m), it differs from default value (1h)
+	// Set deafult lane duration (5m), it differs from default value (1h)
 	//
-	m_timeCombo->setCurrentIndex(4);	// 4 is index in combo box
-	m_trendWidget->setLaneDuration(1_min);
+	m_timeCombo->setCurrentIndex(5);	// 5 is index in combo box
+	m_trendWidget->setLaneDuration(5_min);
 
 	// Hide Refresh button as it is not required for simulator, no archive here just "realtime" data
 	//

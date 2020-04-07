@@ -1,5 +1,5 @@
-#ifndef LMRAM_H
-#define LMRAM_H
+#pragma once
+
 #include <map>
 #include <vector>
 #include <memory>
@@ -107,6 +107,12 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(const QString& name) const;
 		RamAreaInfo memoryAreaInfo(int index) const;
 
+	using Handle = size_t;	// Handle is just index in m_memoryAreas vector
+		Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;
+		RamArea* memoryArea(Handle handle);
+		const RamArea* memoryArea(Handle handle) const;
+
+	public:
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept;
 
@@ -145,4 +151,3 @@ namespace Sim
 	};
 }
 
-#endif // LMRAM_H

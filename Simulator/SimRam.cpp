@@ -1,6 +1,7 @@
 #include "SimRam.h"
 #include <QtEndian>
 #include <SimOverrideSignals.h>
+#include <SimException.h>
 
 namespace Sim
 {
@@ -46,15 +47,20 @@ namespace Sim
 
 	bool RamArea::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
-//		if (contains(E::LogicModuleRamAccess::Write, offsetW) == false ||
-//			bitNo >= 16)
-//		{
-//			return false;
-//		}
+		// Cannot use contains function, cause such signals like _pblink stored in memory for reading, but actually I write there manually
+		//
+		const quint32 areaOffset = offset();
 
-		bitNo &= 0x0F;
+		if (offsetW < areaOffset ||
+			offsetW > (areaOffset + size() - 2) ||
+			(bitNo & ~0x0F) != 0)
+		{
+			return false;
+		}
+
+		//bitNo &= 0x0F;	// This situaltion is excluded by prev condition (bitNo & ~0x0F) != 0
 		data &= 0x01;
-		int byteOffset = (offsetW - offset()) * 2;
+		int byteOffset = (offsetW - areaOffset) * 2;
 
 		if (byteOffset >= m_data.size())
 		{
@@ -112,12 +118,12 @@ namespace Sim
 
 	bool RamArea::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
-//		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
-//			bitNo >= 16 ||
-//			data == nullptr)
-//		{
-//			return false;
-//		}
+		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
+			bitNo >= 16 ||
+			data == nullptr)
+		{
+			return false;
+		}
 
 		// Apply override
 		//
@@ -484,6 +490,40 @@ namespace Sim
 		}
 
 		return m_memoryAreas[index];
+	}
+
+	Ram::Handle Ram::memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const
+	{
+		const size_t memoryAreaCount = m_memoryAreas.size();
+		for (size_t i = 0; i < memoryAreaCount; i++)
+		{
+			if (m_memoryAreas[i].contains(access, offsetW) == true)
+			{
+				return i;
+			}
+		}
+
+		return std::numeric_limits<size_t>::max();
+	}
+
+	RamArea* Ram::memoryArea(Ram::Handle handle)
+	{
+		if (handle >= m_memoryAreas.size())
+		{
+			return nullptr;
+		}
+
+		return &m_memoryAreas[handle];
+	}
+
+	const RamArea* Ram::memoryArea(Handle handle) const
+	{
+		if (handle >= m_memoryAreas.size())
+		{
+			return nullptr;
+		}
+
+		return &m_memoryAreas[handle];
 	}
 
 	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept

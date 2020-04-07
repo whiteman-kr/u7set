@@ -25,7 +25,11 @@
 	#endif
 #endif
 
-#define FAULT(message) fault(message, __FUNCTION_NAME__);
+// class DeviceEmulator has function DeviceEmulator::fault
+// this is convenient call of this func
+//
+#define SIM_FAULT(message) fault(message, __FUNCTION_NAME__);
+
 
 namespace Sim
 {
@@ -109,64 +113,12 @@ namespace Sim
 		//
 		std::array<std::byte, 16> m_commandFuncPtr;	// This function can be called ONLY in in class and instance where it was initialized
 		std::array<std::byte, 16> m_afbFuncPtr;		// This function can be called ONLY in in class and instance where it was initialized
-	};
 
-	//
-	// class DeviceEmulator script wrapper
-	//
-	class DeviceEmulator;
+		Ram::Handle m_memoryAreaFrom = std::numeric_limits<Ram::Handle>::max();
+		Ram::Handle m_memoryAreaTo = std::numeric_limits<Ram::Handle>::max();
 
-	class ScriptDeviceEmulator
-	{
-	public:
-		explicit ScriptDeviceEmulator(DeviceEmulator* device);
-
-		// Script functins for AFB instances
-		//
-public:
-		DeviceCommand* command(int index);
-
-		quint16 appStartAddress() const;
-		void setAppStartAddress(quint16 value);
-
-		Sim::CyclePhase phase() const;
-		void setPhase(Sim::CyclePhase value);
-
-		quint32 programCounter() const;
-		void setProgramCounter(quint32 value);
-
-		quint32 flagCmp() const;
-		void setFlagCmp(quint32 value);
-
-		Sim::AfbComponent afbComponent(int opCode) const;
-		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
-
-		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
-
-		// RAM access
-		//
-		bool movRamMem(quint32 src, quint32 dst, quint32 size);
-		bool setRamMem(quint32 address, quint16 data, quint16 size);
-
-		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data);
-		quint16 readRamBit(quint32 offsetW, quint16 bitNo);
-
-		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access);
-		quint16 readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access);
-
-		bool writeRamWord(quint32 offsetW, quint16 data);
-		quint16 readRamWord(quint32 offsetW);
-
-		bool writeRamDword(quint32 offsetW, quint32 data);
-		quint32 readRamDword(quint32 offsetW);
-
-		// Getting data from m_plainAppLogic
-		//
-		quint16 getWord(int wordOffset) const;
-		quint32 getDword(int wordOffset) const;
-
-	private:
-		DeviceEmulator* m_device = nullptr;
+		AfbComponentParam m_afbParam;
+		AfbComponentInstance* m_afbComponentInstance = nullptr;
 	};
 
 
@@ -191,6 +143,60 @@ public:
 		bool reset();
 		bool run(int cycles = -1);
 
+		//	Public methods to access from simulation commands
+		//
+	public:
+		DeviceCommand* command(int index);
+
+		quint16 appStartAddress() const;
+		void setAppStartAddress(quint16 value);
+
+		Sim::CyclePhase phase() const;
+		void setPhase(Sim::CyclePhase value);
+
+		quint32 programCounter() const;
+		void setProgramCounter(quint32 value);
+
+		quint32 flagCmp() const;
+		void setFlagCmp(quint32 value);
+
+		Sim::AfbComponent afbComponent(int opCode) const;
+		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
+
+		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
+		bool setAfbParam(int afbOpCode, int instanceNo, AfbComponentParam&& param);
+
+		// RAM access
+		//
+		bool movRamMem(quint32 src, quint32 dst, quint32 size);
+		bool setRamMem(quint32 address, quint16 data, quint16 size);
+
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data);
+		bool writeRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo, quint16 data);
+
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo);
+		quint16 readRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo);
+
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access);
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access);
+
+		bool writeRamWord(quint32 offsetW, quint16 data);
+		bool writeRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 data);
+
+		quint16 readRamWord(quint32 offsetW);
+		quint16 readRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW);
+
+		bool writeRamDword(quint32 offsetW, quint32 data);
+		quint32 readRamDword(quint32 offsetW);
+
+		// Getting data from m_plainAppLogic
+		//
+		quint16 getWord(int wordOffset) const;
+		quint32 getDword(int wordOffset) const;
+
+
+		// --
+		//
 	private:
 		bool initMemory();
 		bool initEeprom();
@@ -201,9 +207,10 @@ public:
 		//void pause();
 		//void start(int cycles);
 
-	private:
+	public:
 		void fault(QString reasone, QString func);
 
+	private:
 		//virtual void timerEvent(QTimerEvent* event) override;
 
 		bool processStartMode();
@@ -216,11 +223,8 @@ public:
 	private:
 		// Getting data from m_plainAppLogic
 		//
-		quint16 getWord(int wordOffset);
-		quint32 getDword(int wordOffset);
-
 		template <typename TYPE>
-		TYPE getData(int eepromOffset);
+		TYPE getData(int eepromOffset) const;
 
 	signals:
 		void appCodeParsed(bool ok);

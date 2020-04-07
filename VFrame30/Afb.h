@@ -37,17 +37,42 @@ namespace Afb
 		bool saveToXml(QDomElement* xmlElement) const;
 
 	public:
-		const QString& caption() const;
-		void setCaption(const QString& value);
+		const QString& caption() const noexcept
+		{
+			return m_caption;
+		}
+		void setCaption(const QString& value) noexcept
+		{
+			m_caption = value;
+		}
 
-		int opIndex() const;
-		void setOpIndex(int value);
+		int opIndex() const noexcept
+		{
+			return m_opIndex;
+		}
+		void setOpIndex(int value) noexcept
+		{
+			m_opIndex = value;
+		}
 
-		AfbComponentPinType type() const;
-		void setType(AfbComponentPinType value);
+		AfbComponentPinType type() const noexcept
+		{
+			return m_type;
+		}
+		void setType(AfbComponentPinType value) noexcept
+		{
+			m_type = value;
+		}
 
-		bool isInputOrParam() const;
-		bool isOutput() const;
+		bool isInputOrParam() const noexcept
+		{
+			return	m_type == AfbComponentPinType::Input ||
+					m_type == AfbComponentPinType::Param;
+		}
+		bool isOutput() const noexcept
+		{
+			return	m_type == AfbComponentPinType::Output;
+		}
 
 	private:
 		QString m_caption;
@@ -72,28 +97,80 @@ namespace Afb
 		// Properties
 		//
 	public:
-		int opCode() const;
-		void setOpCode(int value);
+		int opCode() const noexcept
+		{
+			return m_opCode;
+		}
+		void setOpCode(int value) noexcept
+		{
+			m_opCode = value;
+		}
 
-		const QString& caption() const;
-		void setCaption(const QString& value);
+		const QString& caption() const noexcept
+		{
+			return m_caption;
+		}
+		void setCaption(const QString& value) noexcept
+		{
+			m_caption = value;
+		}
 
-		int impVersion() const;
-		void setImpVersion(int value);
+		int impVersion() const noexcept
+		{
+			return m_impVersion;
+		}
+		void setImpVersion(int value) noexcept
+		{
+			m_impVersion = value;
+		}
 
-        int versionOpIndex() const;
-        void setVersionOpIndex(int value);
+		int versionOpIndex() const noexcept
+		{
+			return m_versionOpIndex;
+		}
+		void setVersionOpIndex(int value) noexcept
+		{
+			m_versionOpIndex = value;
+		}
 
-		int maxInstCount() const;
-		void setMaxInstCount(int value);
+		int maxInstCount() const noexcept
+		{
+			return m_maxInstCount;
+		}
+		void setMaxInstCount(int value) noexcept
+		{
+			m_maxInstCount = value;
+		}
 
-		const QString& simulationFunc() const;
-		void setSimulationFunc(const QString& value);
+		const QString& simulationFunc() const noexcept
+		{
+			return m_simulationFunc;
+		}
+		void setSimulationFunc(const QString& value) noexcept
+		{
+			m_simulationFunc = value;
+		}
 
-		const std::unordered_map<int, AfbComponentPin>& pins() const;
+		const std::unordered_map<int, AfbComponentPin>& pins() const noexcept
+		{
+			return m_pins;
+		}
 
-		bool pinExists(int pinOpIndex) const;
-		QString pinCaption(int pinOpIndex) const;
+		bool pinExists(int pinOpIndex) const noexcept
+		{
+			return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
+					? false: m_pinExists[pinOpIndex];
+		}
+		QString pinCaption(int pinOpIndex) const noexcept
+		{
+			auto it = m_pins.find(pinOpIndex);
+			if (it != m_pins.end())
+			{
+				return it->second.caption();
+			}
+
+			return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+		}
 
 	private:
 		// Operator= is present, don't forget to add new fields to it

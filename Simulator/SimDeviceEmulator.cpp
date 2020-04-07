@@ -72,241 +72,6 @@ namespace Sim
 		return m_command.caption;
 	}
 
-	//
-	// class DeviceEmulator script wrapper
-	//
-	ScriptDeviceEmulator::ScriptDeviceEmulator(DeviceEmulator* device) :
-		m_device(device)
-	{
-		assert(m_device);
-	}
-
-	DeviceCommand* ScriptDeviceEmulator::command(int index)
-	{
-		if (index >= m_device->m_commands.size())
-		{
-			m_device->fault(QString("Index of m_commands is out of range"), "ScriptDeviceEmulator::command(int index)");
-			return nullptr;
-		}
-
-		return &(m_device->m_commands[index]);
-	}
-
-	quint16 ScriptDeviceEmulator::appStartAddress() const
-	{
-		return m_device->m_logicUnit.appStartAddress;
-	}
-
-	void ScriptDeviceEmulator::setAppStartAddress(quint16 value)
-	{
-		m_device->m_logicUnit.appStartAddress = value;
-	}
-
-	Sim::CyclePhase ScriptDeviceEmulator::phase() const
-	{
-		return m_device->m_logicUnit.phase;
-	}
-
-	void ScriptDeviceEmulator::setPhase(Sim::CyclePhase value)
-	{
-		m_device->m_logicUnit.phase = value;
-	}
-
-	quint32 ScriptDeviceEmulator::programCounter() const
-	{
-		return m_device->m_logicUnit.programCounter;
-	}
-
-	void ScriptDeviceEmulator::setProgramCounter(quint32 value)
-	{
-		m_device->m_logicUnit.programCounter = value;
-	}
-
-	quint32 ScriptDeviceEmulator::flagCmp() const
-	{
-		return m_device->m_logicUnit.flags.cmp;
-	}
-
-	void ScriptDeviceEmulator::setFlagCmp(quint32 value)
-	{
-		m_device->m_logicUnit.flags.cmp = value;
-	}
-
-	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode) const
-	{
-		return AfbComponent{m_device->m_lmDescription.component(opCode)};
-	}
-
-	Sim::AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
-	{
-		Sim::AfbComponentInstance* result = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
-
-		if (result == nullptr)
-		{
-			m_device->fault(QString("Attempt to get not existing AFB (opcode %1) instance (%2)")
-								.arg(opCode)
-								.arg(instanceNo),
-							"ScriptDeviceEmulator::afbComponentInstance");
-		}
-
-		return result;
-	}
-
-	bool ScriptDeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param)
-	{
-		QString errorMessage;
-		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbOpCode, instanceNo, param, &errorMessage);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
-		}
-
-		return ok;
-	}
-
-	// RAM access
-	//
-	bool ScriptDeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 size)
-	{
-		while (size-- > 0)
-		{
-			quint16 w = readRamWord(src++);
-			writeRamWord(dst++, w);
-		}
-
-		// readRamWord, writeRamWord have checks and will set FAULT in case of error
-		//
-		return true;
-	}
-
-	bool ScriptDeviceEmulator::setRamMem(quint32 address, quint16 data, quint16 size)
-	{
-		while (size-- > 0)
-		{
-			writeRamWord(address++, data);
-		}
-
-		// writeRamWord have checks and will set FAULT in case of error
-		//
-		return true;
-	}
-
-	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data)
-	{
-		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
-		}
-
-		return ok;
-	}
-
-	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint16 bitNo)
-	{
-		quint16 data = 0;
-		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
-		}
-
-		return data;
-	}
-
-	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access)
-	{
-		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2, acess %3")
-								.arg(offsetW)
-								.arg(bitNo)
-								.arg(E::valueToString<E::LogicModuleRamAccess>(access)));
-		}
-
-		return ok;
-	}
-
-	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access)
-	{
-		quint16 data = 0;
-		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian, access);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2, access %3")
-								.arg(offsetW)
-								.arg(bitNo)
-								.arg(E::valueToString<E::LogicModuleRamAccess>(access)));
-		}
-
-		return data;
-	}
-
-	bool ScriptDeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
-	{
-		bool ok = m_device->m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return ok;
-	}
-
-	quint16 ScriptDeviceEmulator::readRamWord(quint32 offsetW)
-	{
-		quint16 data = 0;
-		bool ok = m_device->m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return data;
-	}
-
-	bool ScriptDeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
-	{
-		bool ok = m_device->m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return ok;
-	}
-
-	quint32 ScriptDeviceEmulator::readRamDword(quint32 offsetW)
-	{
-		quint32 data = 0;
-		bool ok = m_device->m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian);
-
-		if (ok == false)
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return data;
-	}
-
-	// Getting data from m_plainAppLogic
-	//
-	quint16 ScriptDeviceEmulator::getWord(int wordOffset) const
-	{
-		return m_device->getWord(wordOffset);
-	}
-
-	quint32 ScriptDeviceEmulator::getDword(int wordOffset) const
-	{
-		return m_device->getDword(wordOffset);
-	}
 
 	//
 	// DeviceEmulator
@@ -399,6 +164,11 @@ namespace Sim
 			return false;
 		}
 
+		// Init RAM
+		// Command processor needs initialized memory areas, so it can cache them to DeviceCommand
+		//
+		initMemory();
+
 		// --
 		//
 		if (bool ok = parseAppLogicCode();
@@ -451,6 +221,319 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	DeviceCommand* DeviceEmulator::command(int index)
+	{
+		if (index >= m_commands.size())
+		{
+			fault(QString("Index of m_commands is out of range"), "DeviceEmulator::command(int index)");
+			return nullptr;
+		}
+
+		return &(m_commands[index]);
+	}
+
+	quint16 DeviceEmulator::appStartAddress() const
+	{
+		return m_logicUnit.appStartAddress;
+	}
+
+	void DeviceEmulator::setAppStartAddress(quint16 value)
+	{
+		m_logicUnit.appStartAddress = value;
+	}
+
+	Sim::CyclePhase DeviceEmulator::phase() const
+	{
+		return m_logicUnit.phase;
+	}
+
+	void DeviceEmulator::setPhase(Sim::CyclePhase value)
+	{
+		m_logicUnit.phase = value;
+	}
+
+	quint32 DeviceEmulator::programCounter() const
+	{
+		return m_logicUnit.programCounter;
+	}
+
+	void DeviceEmulator::setProgramCounter(quint32 value)
+	{
+		m_logicUnit.programCounter = value;
+	}
+
+	quint32 DeviceEmulator::flagCmp() const
+	{
+		return m_logicUnit.flags.cmp;
+	}
+
+	void DeviceEmulator::setFlagCmp(quint32 value)
+	{
+		m_logicUnit.flags.cmp = value;
+	}
+
+	Sim::AfbComponent DeviceEmulator::afbComponent(int opCode) const
+	{
+		return AfbComponent{m_lmDescription.component(opCode)};
+	}
+
+	Sim::AfbComponentInstance* DeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
+	{
+		Sim::AfbComponentInstance* result = m_afbComponents.componentInstance(opCode, instanceNo);
+
+		if (result == nullptr)
+		{
+			fault(QString("Attempt to get not existing AFB (opcode %1) instance (%2)")
+							.arg(opCode)
+							.arg(instanceNo),
+							"ScriptDeviceEmulator::afbComponentInstance");
+		}
+
+		return result;
+	}
+
+	bool DeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param)
+	{
+		QString errorMessage;
+		bool ok = m_afbComponents.addInstantiatorParam(afbOpCode, instanceNo, param, &errorMessage);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
+		}
+
+		return ok;
+	}
+
+	bool DeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, AfbComponentParam&& param)
+	{
+		QString errorMessage;
+		bool ok = m_afbComponents.addInstantiatorParam(afbOpCode, instanceNo, std::move(param), &errorMessage);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
+		}
+
+		return ok;
+	}
+
+	// RAM access
+	//
+	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 size)
+	{
+		while (size-- > 0)
+		{
+			quint16 w = readRamWord(src++);
+			writeRamWord(dst++, w);
+		}
+
+		// readRamWord, writeRamWord have checks and will set FAULT in case of error
+		//
+		return true;
+	}
+
+	bool DeviceEmulator::setRamMem(quint32 address, quint16 data, quint16 size)
+	{
+		while (size-- > 0)
+		{
+			writeRamWord(address++, data);
+		}
+
+		// writeRamWord have checks and will set FAULT in case of error
+		//
+		return true;
+	}
+
+	bool DeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data)
+	{
+		bool ok = m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return ok;
+	}
+
+	bool DeviceEmulator::writeRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo, quint16 data)
+	{
+		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+		if (ramArea == nullptr)
+		{
+			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+		}
+
+		bool ok = ramArea->writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return ok;
+	}
+
+	quint16 DeviceEmulator::readRamBit(quint32 offsetW, quint16 bitNo)
+	{
+		quint16 data = 0;
+		bool ok = m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return data;
+	}
+
+	quint16 DeviceEmulator::readRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo)
+	{
+		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+		if (ramArea == nullptr)
+		{
+			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+		}
+
+		quint16 data = 0;
+		bool ok = ramArea->readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access)
+	{
+		bool ok = m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write access RAM error, offsetW %1, bitNo %2, acess %3")
+					  .arg(offsetW)
+					  .arg(bitNo)
+					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return ok;
+	}
+
+	quint16 DeviceEmulator::readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access)
+	{
+		quint16 data = 0;
+		bool ok = m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read access RAM error, offsetW %1, bitNo %2, access %3")
+					  .arg(offsetW)
+					  .arg(bitNo)
+					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
+	{
+		bool ok = m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	bool DeviceEmulator::writeRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 data)
+	{
+		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+		if (ramArea == nullptr)
+		{
+			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+		}
+
+		bool ok = ramArea->writeWord(offsetW, data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	quint16 DeviceEmulator::readRamWord(quint32 offsetW)
+	{
+		quint16 data = 0;
+		bool ok = m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	quint16 DeviceEmulator::readRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW)
+	{
+		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+		if (ramArea == nullptr)
+		{
+			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+		}
+
+		quint16 data = 0;
+		bool ok = ramArea->readWord(offsetW, &data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
+	{
+		bool ok = m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	quint32 DeviceEmulator::readRamDword(quint32 offsetW)
+	{
+		quint32 data = 0;
+		bool ok = m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	// Getting data from m_plainAppLogic
+	//
+	quint16 DeviceEmulator::getWord(int wordOffset) const
+	{
+		return getData<quint16>(wordOffset * 2);
+	}
+
+	quint32 DeviceEmulator::getDword(int wordOffset) const
+	{
+		return getData<quint32>(wordOffset * 2);
 	}
 
 	bool DeviceEmulator::initMemory()
@@ -512,7 +595,7 @@ namespace Sim
 								  memory.m_tuningDataSize,
 								  QLatin1String("Tuning Block"));
 
-		// Copyt EEPROM tuning data to memory
+		// Copy EEPROM tuning data to memory
 		//
 		{
 			assert(m_plainTuningData.size() % 2 == 0);
@@ -892,7 +975,7 @@ namespace Sim
 			if (m_logicUnit.programCounter >= m_offsetToCommand.size())
 			{
 				assert(false);
-				FAULT("Command not found in current ProgramCounter.");
+				SIM_FAULT("Command not found in current ProgramCounter.");
 				break;
 			}
 
@@ -900,7 +983,7 @@ namespace Sim
 
 			if (commandIndex == -1 || commandIndex > m_commands.size())
 			{
-				FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
+				SIM_FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
 				break;
 			}
 
@@ -910,7 +993,7 @@ namespace Sim
 			if (bool ok = runCommand(command);
 				ok == false && m_currentMode != DeviceMode::Fault)
 			{
-				FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
+				SIM_FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
 				result = false;
 				break;
 			}
@@ -1018,18 +1101,8 @@ namespace Sim
 
 	// Getting data from m_plainAppLogic
 	//
-	quint16 DeviceEmulator::getWord(int wordOffset)
-	{
-		return getData<quint16>(wordOffset * 2);
-	}
-
-	quint32 DeviceEmulator::getDword(int wordOffset)
-	{
-		return getData<quint32>(wordOffset * 2);
-	}
-
 	template <typename TYPE>
-	TYPE DeviceEmulator::getData(int eepromOffset)
+	TYPE DeviceEmulator::getData(int eepromOffset) const
 	{
 		// eepromOffset - in bytes
 		//

@@ -49,10 +49,10 @@ namespace Sim
 		// Init DeviceEmulator
 		//
 		ok &= m_device.init(m_logicModuleInfo,
-							m_lmDescription,
-							m_tuningEeprom,
-							m_confEeprom,
-							m_appLogicEeprom);
+		                    m_lmDescription,
+		                    m_tuningEeprom,
+		                    m_confEeprom,
+		                    m_appLogicEeprom);
 
 		return ok;
 	}

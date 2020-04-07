@@ -1599,8 +1599,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 				auto stateIt = std::lower_bound(states.begin(), states.end(), fakeState,
 								 [&rulerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
 								 {
-										TimeStamp ts = state.getTime(timeType);
-										return ts < rulerTime;
+										return state.getTime(timeType) < rulerTime;
 								 });
 
 				if (stateIt != states.end())
