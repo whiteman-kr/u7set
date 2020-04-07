@@ -1,9 +1,9 @@
-#include "SimDialogChooseTrendSignals.h"
-#include "ui_SimDialogChooseTrendSignals.h"
+#include "DialogChooseTrendSignals.h"
+#include "ui_DialogChooseTrendSignals.h"
 
-SimDialogChooseTrendSignals::SimDialogChooseTrendSignals(Sim::AppSignalManager* signalManager,
-														 std::vector<TrendLib::TrendSignalParam>& trendSignals,
-														 QWidget* parent) :
+DialogChooseTrendSignals::DialogChooseTrendSignals(IAppSignalManager* signalManager,
+												   std::vector<TrendLib::TrendSignalParam>& trendSignals,
+												   QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseTrendSignals)
 {
@@ -15,12 +15,20 @@ SimDialogChooseTrendSignals::SimDialogChooseTrendSignals(Sim::AppSignalManager* 
 
 	// Set filter completer
 	//
-	QSettings s;
-	QStringList trendSignalsDialogFilterCompleter = s.value("SimDialogChooseTrendSignals/trendSignalsDialogFilterCompleter").toStringList();
+	QSettings s{};
+	QStringList trendSignalsDialogFilterCompleter = s.value(qAppName() + m_filterCompleterSettingsName).toStringList();
+	QStringList trendSignalsDialogTagsCompleter = s.value(qAppName() + m_tagsCompleterSettingsName).toStringList();
+	QSize widgetSize = s.value(qAppName() + m_sizeSettingsName).toSize();
 
 	m_filterCompleter = new QCompleter(trendSignalsDialogFilterCompleter, this);
 	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_filterCompleter->setFilterMode(Qt::MatchContains);
+	m_filterCompleter->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
 	ui->filterEdit->setCompleter(m_filterCompleter);
+
+	m_tagsCompleter = new QCompleter(trendSignalsDialogTagsCompleter, this);
+	m_tagsCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	ui->tagsEdit->setCompleter(m_tagsCompleter);
 
 	// --
 	//
@@ -31,7 +39,7 @@ SimDialogChooseTrendSignals::SimDialogChooseTrendSignals(Sim::AppSignalManager* 
 
 	ui->trendSignals->setHeaderLabels(headerLabels);
 
-	SimFilteredTrendSignalsModel* model = new SimFilteredTrendSignalsModel(signalManager->signalList(), ui->filteredSignals);
+	FilteredTrendSignalsModel* model = new FilteredTrendSignalsModel(signalManager->signalList(), ui->filteredSignals);
 	ui->filteredSignals->setModel(model);
 
 	// --
@@ -40,8 +48,8 @@ SimDialogChooseTrendSignals::SimDialogChooseTrendSignals(Sim::AppSignalManager* 
 
 	// --
 	//
-	connect(ui->filteredSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SimDialogChooseTrendSignals::slot_filteredSignalsSelectionChanged);
-	connect(ui->trendSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SimDialogChooseTrendSignals::slot_trendSignalsSelectionChanged);
+	connect(ui->filteredSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseTrendSignals::slot_filteredSignalsSelectionChanged);
+	connect(ui->trendSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseTrendSignals::slot_trendSignalsSelectionChanged);
 
 	// --
 	// --
@@ -58,30 +66,40 @@ SimDialogChooseTrendSignals::SimDialogChooseTrendSignals(Sim::AppSignalManager* 
 		addSignal(appSignal);
 	}
 
+	if (widgetSize.isNull() == false)
+	{
+		resize(widgetSize);
+	}
+
 	return;
 }
 
-SimDialogChooseTrendSignals::~SimDialogChooseTrendSignals()
+DialogChooseTrendSignals::~DialogChooseTrendSignals()
 {
 	delete ui;
 }
 
-std::vector<AppSignalParam> SimDialogChooseTrendSignals::acceptedSignals() const
+std::vector<AppSignalParam> DialogChooseTrendSignals::acceptedSignals() const
 {
 	return m_acceptedSignals;
 }
 
-void SimDialogChooseTrendSignals::fillSignalList()
+void DialogChooseTrendSignals::resizeEvent(QResizeEvent* event)
 {
-	SimFilteredTrendSignalsModel* model = dynamic_cast<SimFilteredTrendSignalsModel*>(ui->filteredSignals->model());
+	QSettings{}.setValue(qAppName() + m_sizeSettingsName, event->size());
+}
+
+void DialogChooseTrendSignals::fillSignalList()
+{
+	FilteredTrendSignalsModel* model = dynamic_cast<FilteredTrendSignalsModel*>(ui->filteredSignals->model());
 	Q_ASSERT(model);
 
-	model->filterSignals(ui->filterEdit->text());
+	model->filterSignals(ui->filterEdit->text(), ui->tagsEdit->text());
 
 	return;
 }
 
-void SimDialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
+void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 {
 	if (trendSignalsHasSignalId(signal.customSignalId()) == true)
 	{
@@ -131,7 +149,7 @@ void SimDialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 	return;
 }
 
-void SimDialogChooseTrendSignals::removeSelectedSignal()
+void DialogChooseTrendSignals::removeSelectedSignal()
 {
 	Q_ASSERT(ui->trendSignals);
 
@@ -147,7 +165,7 @@ void SimDialogChooseTrendSignals::removeSelectedSignal()
 	return;
 }
 
-bool SimDialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
+bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
 {
 	int itemCount = ui->trendSignals->topLevelItemCount();
 
@@ -165,12 +183,12 @@ bool SimDialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
 	return false;
 }
 
-void SimDialogChooseTrendSignals::disableControls()
+void DialogChooseTrendSignals::disableControls()
 {
 	Q_ASSERT(ui->filteredSignals);
 	Q_ASSERT(ui->trendSignals);
 
-	const SimFilteredTrendSignalsModel* fileterModel = dynamic_cast<const SimFilteredTrendSignalsModel*>(ui->filteredSignals->model());
+	const FilteredTrendSignalsModel* fileterModel = dynamic_cast<const FilteredTrendSignalsModel*>(ui->filteredSignals->model());
 	if (fileterModel == nullptr)
 	{
 		Q_ASSERT(fileterModel != nullptr);
@@ -231,7 +249,7 @@ void SimDialogChooseTrendSignals::disableControls()
 	return;
 }
 
-void SimDialogChooseTrendSignals::on_addSignalButton_clicked()
+void DialogChooseTrendSignals::on_addSignalButton_clicked()
 {
 	QModelIndex index = ui->filteredSignals->currentIndex();
 	if (index.isValid() == false)
@@ -239,11 +257,11 @@ void SimDialogChooseTrendSignals::on_addSignalButton_clicked()
 		return;
 	}
 
-	const SimFilteredTrendSignalsModel* model = dynamic_cast<const SimFilteredTrendSignalsModel*>(index.model());
+	const FilteredTrendSignalsModel* model = dynamic_cast<const FilteredTrendSignalsModel*>(index.model());
 
 	if (model == nullptr)
 	{
-		Q_ASSERT(dynamic_cast<const SimFilteredTrendSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -253,12 +271,12 @@ void SimDialogChooseTrendSignals::on_addSignalButton_clicked()
 	return;
 }
 
-void SimDialogChooseTrendSignals::on_removeSignalButton_clicked()
+void DialogChooseTrendSignals::on_removeSignalButton_clicked()
 {
 	removeSelectedSignal();
 }
 
-void SimDialogChooseTrendSignals::on_removeAllSignalsButton_clicked()
+void DialogChooseTrendSignals::on_removeAllSignalsButton_clicked()
 {
 	ui->trendSignals->clear();
 
@@ -267,18 +285,18 @@ void SimDialogChooseTrendSignals::on_removeAllSignalsButton_clicked()
 	return;
 }
 
-void SimDialogChooseTrendSignals::on_filterEdit_textChanged(const QString& /*arg*/)
+void DialogChooseTrendSignals::on_filterEdit_textChanged(const QString& /*arg*/)
 {
 	fillSignalList();
 }
 
 
-void SimDialogChooseTrendSignals::on_filterEdit_editingFinished()
+void DialogChooseTrendSignals::on_filterEdit_editingFinished()
 {
 	QString arg = ui->filterEdit->text();
 
 	QSettings s;
-	QStringList trendSignalsDialogFilterCompleter = s.value("SimDialogChooseTrendSignals/trendSignalsDialogFilterCompleter").toStringList();
+	QStringList trendSignalsDialogFilterCompleter = s.value(qAppName() + m_filterCompleterSettingsName).toStringList();
 
 	if (trendSignalsDialogFilterCompleter.contains(arg) == false)
 	{
@@ -297,24 +315,59 @@ void SimDialogChooseTrendSignals::on_filterEdit_editingFinished()
 			completerModel->setStringList(trendSignalsDialogFilterCompleter);
 		}
 
-		s.setValue("SimDialogChooseTrendSignals/trendSignalsDialogFilterCompleter", trendSignalsDialogFilterCompleter);
+		s.setValue(qAppName() + m_filterCompleterSettingsName, trendSignalsDialogFilterCompleter);
 	}
 
 	return;
 }
 
-void SimDialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
+void DialogChooseTrendSignals::on_tagsEdit_textChanged(const QString& /*arg*/)
+{
+	fillSignalList();
+}
+
+void DialogChooseTrendSignals::on_tagsEdit_editingFinished()
+{
+	QString arg = ui->tagsEdit->text();
+
+	QSettings s;
+	QStringList trendSignalsDialogTagsCompleter = s.value(qAppName() + m_tagsCompleterSettingsName).toStringList();
+
+	if (trendSignalsDialogTagsCompleter.contains(arg) == false)
+	{
+		trendSignalsDialogTagsCompleter << arg;
+
+		while (trendSignalsDialogTagsCompleter.size() > 1000)
+		{
+			trendSignalsDialogTagsCompleter.pop_front();
+		}
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_tagsCompleter->model());
+		Q_ASSERT(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(trendSignalsDialogTagsCompleter);
+		}
+
+		s.setValue(qAppName() + m_tagsCompleterSettingsName, trendSignalsDialogTagsCompleter);
+	}
+
+	return;
+}
+
+void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
 {
 	if (index.isValid() == false)
 	{
 		return;
 	}
 
-	const SimFilteredTrendSignalsModel* model = dynamic_cast<const SimFilteredTrendSignalsModel*>(index.model());
+	const FilteredTrendSignalsModel* model = dynamic_cast<const FilteredTrendSignalsModel*>(index.model());
 
 	if (model == nullptr)
 	{
-		Q_ASSERT(dynamic_cast<const SimFilteredTrendSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -324,22 +377,22 @@ void SimDialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelI
 	return;
 }
 
-void SimDialogChooseTrendSignals::slot_filteredSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void DialogChooseTrendSignals::slot_filteredSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
 	disableControls();
 }
 
-void SimDialogChooseTrendSignals::on_trendSignals_doubleClicked(const QModelIndex& /*index*/)
+void DialogChooseTrendSignals::on_trendSignals_doubleClicked(const QModelIndex& /*index*/)
 {
 	removeSelectedSignal();
 }
 
-void SimDialogChooseTrendSignals::slot_trendSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void DialogChooseTrendSignals::slot_trendSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
 	disableControls();
 }
 
-void SimDialogChooseTrendSignals::on_buttonBox_accepted()
+void DialogChooseTrendSignals::on_buttonBox_accepted()
 {
 	m_acceptedSignals.reserve(ui->trendSignals->topLevelItemCount());
 
@@ -364,9 +417,9 @@ void SimDialogChooseTrendSignals::on_buttonBox_accepted()
 }
 
 //
-//		SimFilteredTrendSignalsModel
+//		FilteredTrendSignalsModel
 //
-SimFilteredTrendSignalsModel::SimFilteredTrendSignalsModel(const std::vector<AppSignalParam>& signalss, QObject* parent)
+FilteredTrendSignalsModel::FilteredTrendSignalsModel(const std::vector<AppSignalParam>& signalss, QObject* parent)
 	: QAbstractTableModel(parent),
 	m_signals(signalss)
 {
@@ -415,17 +468,17 @@ SimFilteredTrendSignalsModel::SimFilteredTrendSignalsModel(const std::vector<App
 
 }
 
-int SimFilteredTrendSignalsModel::rowCount(const QModelIndex& /*parent*/) const
+int FilteredTrendSignalsModel::rowCount(const QModelIndex& /*parent*/) const
 {
 	return static_cast<int>(m_signalIndexes.size());
 }
 
-int SimFilteredTrendSignalsModel::columnCount(const QModelIndex& /*parent*/) const
+int FilteredTrendSignalsModel::columnCount(const QModelIndex& /*parent*/) const
 {
 	return 3;	// Columns: SignalID, Typem Caption
 }
 
-QVariant SimFilteredTrendSignalsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant FilteredTrendSignalsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
 	if (role == Qt::DisplayRole)
 	{
@@ -446,7 +499,7 @@ QVariant SimFilteredTrendSignalsModel::headerData(int section, Qt::Orientation o
 	return QVariant();
 }
 
-QVariant SimFilteredTrendSignalsModel::data(const QModelIndex& index, int role) const
+QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
@@ -526,11 +579,12 @@ QVariant SimFilteredTrendSignalsModel::data(const QModelIndex& index, int role) 
 	}
 }
 
-void SimFilteredTrendSignalsModel::filterSignals(QString filter)
+void FilteredTrendSignalsModel::filterSignals(QString filter, QString tags)
 {
 	beginResetModel();
 
 	QString filterText = filter.trimmed().toLower();
+	QStringList tagList = tags.trimmed().toLower().split(' ', QString::SkipEmptyParts);
 
 	if (filterText.isEmpty() == true)
 	{
@@ -538,10 +592,28 @@ void SimFilteredTrendSignalsModel::filterSignals(QString filter)
 		//
 		m_signalIndexes.clear();
 
-		int signalCount = static_cast<int>(m_signals.size());
-		for (int i = 0; i < signalCount; i++)
+		if (tagList.isEmpty() == true)
 		{
-			m_signalIndexes.push_back(i);
+			int signalCount = static_cast<int>(m_signals.size());
+			for (int i = 0; i < signalCount; i++)
+			{
+				m_signalIndexes.push_back(i);
+			}
+		}
+		else
+		{
+			int signalCount = static_cast<int>(m_signals.size());
+			for (int i = 0; i < signalCount; i++)
+			{
+				for (const QString& t : tagList)
+				{
+					if (m_signals[i].hasTag(t) == true)
+					{
+						m_signalIndexes.push_back(i);
+						break;
+					}
+				}
+			}
 		}
 
 		endResetModel();
@@ -555,7 +627,7 @@ void SimFilteredTrendSignalsModel::filterSignals(QString filter)
 	}
 	else
 	{
-		std::vector<int>& signalIndexes = foundStartWithIt->second;
+		const std::vector<int>& signalIndexes = foundStartWithIt->second;
 
 		m_signalIndexes.clear();
 
@@ -574,8 +646,21 @@ void SimFilteredTrendSignalsModel::filterSignals(QString filter)
 			if (filterText.size() == 1 ||
 				signal.customSignalId().startsWith(filterText, Qt::CaseInsensitive) == true)
 			{
-
-				m_signalIndexes.push_back(index);
+				if (tagList.isEmpty() == true)
+				{
+					m_signalIndexes.push_back(index);
+				}
+				else
+				{
+					for (const QString& t : tagList)
+					{
+						if (signal.hasTag(t) == true)
+						{
+							m_signalIndexes.push_back(index);
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -585,7 +670,7 @@ void SimFilteredTrendSignalsModel::filterSignals(QString filter)
 	return;
 }
 
-AppSignalParam SimFilteredTrendSignalsModel::signalByRow(int row) const
+AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
 {
 	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 	{

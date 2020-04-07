@@ -1,5 +1,5 @@
 #include "SimTrends.h"
-#include "SimDialogChooseTrendSignals.h"
+#include "../../TrendView/Forms/DialogChooseTrendSignals.h"
 #include "../../TrendView/TrendWidget.h"
 
 std::map<QString, SimTrendsWidget*> SimTrends::m_trendsList;
@@ -219,7 +219,7 @@ void SimTrendsWidget::signalsButton()
 
 	// --
 	//
-	SimDialogChooseTrendSignals dialog(m_signalManager, trendSignals, this);
+	DialogChooseTrendSignals dialog(m_signalManager, trendSignals, this);
 	
 	int result = dialog.exec();
 	

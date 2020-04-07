@@ -87,7 +87,6 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
-    Simulator/SimTrend/SimDialogChooseTrendSignals.cpp \
     Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
@@ -226,7 +225,6 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
-    Simulator/SimTrend/SimDialogChooseTrendSignals.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
     UserManagementDialog.h \
@@ -365,7 +363,6 @@ FORMS    += \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
     LoginDialog.ui \
-    Simulator/SimTrend/SimDialogChooseTrendSignals.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
@@ -383,8 +380,7 @@ FORMS    += \
     Forms/ChangesetDetailsDialog.ui \
     Forms/CompareDialog.ui \
     Forms/ComparePropertyObjectDialog.ui \
-    DialogTuningClients.ui \
-    Simulator/SimulatorSelectBuildDialog.ui
+    DialogTuningClients.ui
 
 RESOURCES += \
     Resources.qrc \

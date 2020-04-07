@@ -20,12 +20,48 @@
    <string>Trend Signals</string>
   </property>
   <layout class="QGridLayout" name="gridLayout3">
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0" rowminimumheight="0,0,0,0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item row="3" column="2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="filterLabel">
+       <property name="text">
+        <string>Filter</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" rowspan="7" colspan="2">
+      <widget class="QTreeView" name="filteredSignals">
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="headerHidden">
+        <bool>false</bool>
+       </property>
+       <property name="expandsOnDoubleClick">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
       <widget class="QPushButton" name="removeSignalButton">
        <property name="text">
         <string>&lt;</string>
@@ -33,43 +69,6 @@
       </widget>
      </item>
      <item row="2" column="2">
-      <widget class="QPushButton" name="addSignalButton">
-       <property name="text">
-        <string>&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QPushButton" name="removeAllSignalsButton">
-       <property name="text">
-        <string>&lt;&lt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="filterEdit">
-       <property name="placeholderText">
-        <string>Start type SignalID</string>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="2">
-      <spacer name="verticalSpacer2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2">
       <spacer name="verticalSpacer1">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -82,14 +81,14 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="filterLabel">
+     <item row="3" column="2">
+      <widget class="QPushButton" name="addSignalButton">
        <property name="text">
-        <string>Filter</string>
+        <string>&gt;</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="3" rowspan="7">
+     <item row="2" column="3" rowspan="7">
       <widget class="QTreeWidget" name="trendSignals">
        <property name="rootIsDecorated">
         <bool>false</bool>
@@ -121,36 +120,57 @@
        </column>
       </widget>
      </item>
-     <item row="1" column="0" rowspan="7" colspan="2">
-      <widget class="QTreeView" name="filteredSignals">
-       <property name="rootIsDecorated">
-        <bool>false</bool>
+     <item row="5" column="2">
+      <widget class="QPushButton" name="removeAllSignalsButton">
+       <property name="text">
+        <string>&lt;&lt;</string>
        </property>
-       <property name="itemsExpandable">
-        <bool>false</bool>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <spacer name="verticalSpacer2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-       <property name="sortingEnabled">
-        <bool>false</bool>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
        </property>
-       <property name="headerHidden">
-        <bool>false</bool>
+      </spacer>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="filterEdit">
+       <property name="placeholderText">
+        <string>Start type SignalID</string>
        </property>
-       <property name="expandsOnDoubleClick">
-        <bool>false</bool>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="tagsLabel">
+       <property name="text">
+        <string>Signals Tags</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="tagsEdit">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Signal tags space separated</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
