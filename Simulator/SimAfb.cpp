@@ -459,6 +459,16 @@ namespace Sim
 		Q_ASSERT(m_afbComp);
 	}
 
+	void AfbComponentInstance::resetState()
+	{
+		for (AfbComponentParam& p : m_params_a)
+		{
+			p = AfbComponentParam{};
+		}
+
+		return;
+	}
+
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param) noexcept
 	{
 		if (param.opIndex() >= m_params_a.size())
@@ -596,6 +606,16 @@ namespace Sim
 		return true;
 	}
 
+	void ModelComponent::resetState()
+	{
+		for (AfbComponentInstance& inst : m_instances)
+		{
+			inst.resetState();
+		}
+
+		return;
+	}
+
 	bool ModelComponent::isNull() const
 	{
 		return m_afbComp == nullptr;
@@ -685,6 +705,16 @@ namespace Sim
 	void AfbComponentSet::clear()
 	{
 		m_components.clear();
+	}
+
+	void AfbComponentSet::resetState()
+	{
+		for (ModelComponent& mc : m_components)
+		{
+			mc.resetState();
+		}
+
+		return;
 	}
 
 	bool AfbComponentSet::init(const LmDescription& lmDescription)

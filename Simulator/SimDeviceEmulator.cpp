@@ -193,6 +193,8 @@ namespace Sim
 			return false;
 		}
 
+		m_afbComponents.resetState();	// It will clear all AFBs' params
+
 		return true;
 	}
 

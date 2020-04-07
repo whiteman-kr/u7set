@@ -253,6 +253,8 @@ namespace Sim
 							 quint16 instanceNo);
 
 	public:
+		void resetState();
+
 		bool addParam(const AfbComponentParam& param) noexcept;
 		bool addParam(AfbComponentParam&& param) noexcept;
 
@@ -285,6 +287,8 @@ namespace Sim
 
 	public:
 		bool init();	// Create a number of instances
+		void resetState();
+
 		bool isNull() const;
 
 		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept;
@@ -308,6 +312,8 @@ namespace Sim
 
 	public:
 		void clear();
+		void resetState();
+
 		bool init(const LmDescription& lmDescription);
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept;
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept;
