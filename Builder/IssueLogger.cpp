@@ -1356,7 +1356,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+	/// Title: Several ethernet adapters of LM %1 are connected to same AppDataService %2.
 	///
 	/// Parameters:
 	///			%1 LM equipmentID
@@ -1369,7 +1369,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3030,
-				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
+				  tr("Several ethernet adapters of LM %1 are connected to same AppDataService %2.").
 						arg(lmID).arg(appDataServiceID));
 	}
 

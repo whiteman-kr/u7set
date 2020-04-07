@@ -158,6 +158,10 @@ public:
 	{
 		E::LanControllerType m_type = E::LanControllerType::Tuning;
 		int m_place = 0;
+
+		bool isProvideTuning() const;
+		bool isProvideAppData() const;
+		bool isProvideDiagData() const;
 	};
 
 	struct Lan
@@ -187,6 +191,7 @@ public:
 	const Memory& memory() const;
 	const LogicUnit& logicUnit() const;
 	const OptoInterface& optoInterface() const;
+	const Lan& lan() const;
 
 	Q_INVOKABLE int jsLanControllerType(int index);
 	Q_INVOKABLE int jsLanControllerPlace(int index);

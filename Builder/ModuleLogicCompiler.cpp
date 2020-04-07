@@ -3888,8 +3888,33 @@ namespace Builder
 
 	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
 	{
+		TEST_PTR_LOG_RETURN_FALSE(m_lmDescription, m_log);
+
+		const LmDescription::Lan& lan = m_lmDescription->lan();
+
+		int tuningControllerNo = -1;
+
+		// search ethernet controller that provide tuning
+		//
+		for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+		{
+			if (lanController.isProvideTuning() == true)
+			{
+				tuningControllerNo = lanController.m_place;
+				break;
+			}
+		}
+
+		if (tuningControllerNo == -1)
+		{
+			// no tuning controllers found
+			//
+			*tuningPropertyExists = false;
+			return true;
+		}
+
 		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
-							arg(DataSource::LM_ETHERNET_ADAPTER1);
+							arg(tuningControllerNo);
 
 		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
 

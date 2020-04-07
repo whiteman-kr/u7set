@@ -190,7 +190,8 @@ public:
 	QString m_configuratorSerialPort;
 	bool m_configuratorShowDebugInfo = false;
 	bool m_configuratorVerify = true;
-	QByteArray m_UploadTabPageSplitterState;
+	QByteArray m_UploadTabPageLeftSplitterState;
+	QByteArray m_UploadTabPageRightSplitterState;
 
 private:
 	DatabaseConnectionParam m_databaseConnection;

@@ -955,6 +955,23 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 	return errorMessage->isEmpty();
 }
 
+bool LmDescription::LanController::isProvideTuning() const
+{
+	return m_type == E::LanControllerType::Tuning;
+}
+
+bool LmDescription::LanController::isProvideAppData() const
+{
+	return  m_type == E::LanControllerType::AppData ||
+			m_type == E::LanControllerType::AppAndDiagData;
+}
+
+bool LmDescription::LanController::isProvideDiagData() const
+{
+	return  m_type == E::LanControllerType::DiagData ||
+			m_type == E::LanControllerType::AppAndDiagData;
+}
+
 E::LanControllerType LmDescription::Lan::lanControllerType(int index, bool* ok) const
 {
 	if (index < 0 || index >= lanControllerCount())
@@ -1139,6 +1156,11 @@ const LmDescription::LogicUnit& LmDescription::logicUnit() const
 const LmDescription::OptoInterface& LmDescription::optoInterface() const
 {
 	return m_optoInterface;
+}
+
+const LmDescription::Lan& LmDescription::lan() const
+{
+	return m_lan;
 }
 
 int LmDescription::jsLanControllerType(int index)

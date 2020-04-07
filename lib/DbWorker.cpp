@@ -338,6 +338,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0318.sql", "Upgrade to version 318, Renamed MSO-4 preset and configuration files"},
 	{":/DatabaseUpgrade/Upgrade0319.sql", "Upgrade to version 319, dead_band AFB is removed from LM1_SR04"},
 	{":/DatabaseUpgrade/Upgrade0320.sql", "Upgrade to version 320, MSO-4 configuration script is modified"},
+	{":/DatabaseUpgrade/Upgrade0321.sql", "Upgrade to version 321, MSO-4 preset module family fix, pulse_gen_sync is removed from all LMs"},
 };
 
 int DbWorker::counter = 0;

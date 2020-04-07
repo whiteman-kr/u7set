@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core sql testlib network qml widgets
+QT       += core sql testlib network qml widgets xml
 QT       -= gui
 
 TARGET = u7databasetests
