@@ -250,6 +250,7 @@ namespace Sim
 		//	BCOD, OpCode 8
 		//
 		void afb_bcod_v103(AfbComponentInstance* instance);
+		void afb_bcod_v104(AfbComponentInstance* instance);
 
 		//	BDEC, OpCode 9
 		//
@@ -395,6 +396,7 @@ namespace Sim
 			{QStringLiteral("afb_maj_v107"),		&CommandProcessor_LM5_LM6::afb_maj_v107},				// 6
 			{QStringLiteral("afb_srsst_v104"),		&CommandProcessor_LM5_LM6::afb_srsst_v104},				// 7
 			{QStringLiteral("afb_bcod_v103"),		&CommandProcessor_LM5_LM6::afb_bcod_v103},				// 8
+			{QStringLiteral("afb_bcod_v104"),		&CommandProcessor_LM5_LM6::afb_bcod_v104},				// 8
 			{QStringLiteral("afb_bdec_v103"),		&CommandProcessor_LM5_LM6::afb_bdec_v103},				// 9
 			{QStringLiteral("afb_bcomp_v111"),		&CommandProcessor_LM5_LM6::afb_bcomp_v111},				// 10
 			{QStringLiteral("afb_damper_v112"),		&CommandProcessor_LM5_LM6::afb_damper_v112},			// 11

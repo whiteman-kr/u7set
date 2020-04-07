@@ -2102,6 +2102,25 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		afb_bcod_v104(instance);	// in 104 version added conf 3,
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_bcod_v104(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
 		const int i_oprd_quant = 1;		// Operand count
 		const int i_1_oprd = 2;			// Operand 1, 2...
 
@@ -2114,7 +2133,7 @@ namespace Sim
 		quint16 conf = instance->param(i_conf)->wordValue();
 
 		checkParamRange(oprdQuant, 1, 32, QStringLiteral("i_oprd_quant"));
-		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+		checkParamRange(conf, 1, 3, QStringLiteral("i_conf"));
 
 		// Logic
 		//
@@ -2130,7 +2149,7 @@ namespace Sim
 				{
 					result = static_cast<qint32>(i);
 					active = 1;
-					break;
+					break;	// Break, wee need just the first one
 				}
 			}
 			break;
@@ -2141,8 +2160,19 @@ namespace Sim
 				result |= inputValue << i;
 			}
 			break;
+		case 3:
+			for (quint16 i = 0; i < oprdQuant; i++)
+			{
+				if (instance->param(i_1_oprd + i)->wordValue() == 1)
+				{
+					result = static_cast<qint32>(i);
+					active = 1;
+					// no break, we need the last active input
+				}
+			}
+			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod");
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod_v103/104");
 		}
 
 		// Save result

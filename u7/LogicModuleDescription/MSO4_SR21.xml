@@ -190,7 +190,7 @@
 			<Pin OpName="o_result"		OpIndex ="4"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="5"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="38"	MaxInstCount="256" SimulationFunc="afb_bcod_v103">
+		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="104"	VersionOpIndex="38"	MaxInstCount="256" SimulationFunc="afb_bcod_v104">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_x"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="2"	PinType = "Input"/>
