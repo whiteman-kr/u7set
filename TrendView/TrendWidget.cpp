@@ -538,7 +538,6 @@ namespace TrendLib
 
 		if (m_mouseAction == MouseAction::MoveRuler)
 		{
-
 		}
 
 		if (m_mouseAction == MouseAction::MoveRuler)
