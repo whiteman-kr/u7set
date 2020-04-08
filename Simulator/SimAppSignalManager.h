@@ -37,6 +37,9 @@ namespace Sim
 														  TrendLib::TrendStateItem* maxState);
 
 		std::optional<Signal> signalParamExt(const QString& appSignalId) const;
+		std::optional<Signal> signalParamExt(Hash hash) const;
+
+		Hash customToAppSignal(Hash customSignalHash) const;
 
 	public:
 		// Implementing IAppSignalManager - AppSignals
@@ -73,6 +76,7 @@ namespace Sim
 		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;
 		std::unordered_map<Hash, Signal> m_signalParamsExt;			// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
+		std::unordered_map<Hash, Hash> m_customToAppSignalId;
 
 		// SimRuntime data
 		//

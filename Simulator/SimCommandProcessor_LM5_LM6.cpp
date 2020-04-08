@@ -3428,9 +3428,9 @@ namespace Sim
 		quint16 track = instance->param(i_track)->wordValue();
 
 		// Logic
-		// Y = F(,Ki,Ti,)
+		// Y = F(Õ,Ki,Ti)
 		// Yi = (X * Ki) / TI + (Yi - 1);
-		// *TI = i(ms) / 5(ms)
+		// *TI = Òi(ms) / 5(ms)
 		// i_ti = Ti(ms)
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};
@@ -4084,7 +4084,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input 
+		//const int o_y_prev = 10;				// output Y/input Õ
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -4568,9 +4568,9 @@ namespace Sim
 		}
 
 		// Logic
-		// Y= F(,Kd,Td)
+		// Y= F(Õ,Kd,Td)
 		// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
-		// TD=d(ms) / 5(ms)
+		// TD=Òd(ms) / 5(ms)
 		// i_td = Ti(ms)
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};

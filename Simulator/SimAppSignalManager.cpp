@@ -27,6 +27,7 @@ namespace Sim
 
 			m_signalParams.clear();
 			m_signalParamsExt.clear();
+			m_customToAppSignalId.clear();
 		}
 
 		{
@@ -68,9 +69,11 @@ namespace Sim
 
 		std::unordered_map<Hash, AppSignalParam> signalParams;
 		std::unordered_map<Hash, Signal> signalParamsExt;
+		std::unordered_map<Hash, Hash> customToAppSignalId;
 
 		signalParams.reserve(message.appsignal_size());
 		signalParamsExt.reserve(message.appsignal_size());
+		customToAppSignalId.reserve(message.appsignal_size());
 
 		for (int i = 0; i < message.appsignal_size(); ++i)
 		{
@@ -82,6 +85,8 @@ namespace Sim
 
 			ok &= signalParams[hash].load(signalMessage);
 			signalParamsExt[hash].serializeFrom(signalMessage);
+
+			customToAppSignalId[::calcHash(signalParams[hash].customSignalId())] = hash;
 		}
 
 		if (ok == false)
@@ -97,6 +102,7 @@ namespace Sim
 
 			std::swap(signalParams, m_signalParams);
 			std::swap(signalParamsExt, m_signalParamsExt);
+			std::swap(customToAppSignalId, m_customToAppSignalId);
 		}
 
 		return ok;
@@ -303,15 +309,32 @@ namespace Sim
 
 	std::optional<Signal> AppSignalManager::signalParamExt(const QString& appSignalId) const
 	{
+		return signalParamExt(::calcHash(appSignalId));
+	}
+
+	std::optional<Signal> AppSignalManager::signalParamExt(Hash hash) const
+	{
 		QReadLocker locker(&m_signalParamLock);
 
-		Hash signalHash = ::calcHash(appSignalId);
-
-		auto it = m_signalParamsExt.find(signalHash);
-
+		auto it = m_signalParamsExt.find(hash);
 		if (it == m_signalParamsExt.end())
 		{
 			return {};
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
+	Hash AppSignalManager::customToAppSignal(Hash customSignalHash) const
+	{
+		QReadLocker locker(&m_signalParamLock);
+
+		auto it = m_customToAppSignalId.find(customSignalHash);
+		if (it == m_customToAppSignalId.end())
+		{
+			return UNDEFINED_HASH;
 		}
 		else
 		{
