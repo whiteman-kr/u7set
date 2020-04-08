@@ -734,24 +734,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ApplicationLogicCompiler::writeOptoConnectionInfoToXml(XmlWriteHelper& xml, Hardware::SharedConnection connection)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(connection, log());
-
-		bool result = true;
-
-		xml.writeStartElement("Connection");
-
-		xml.writeStringAttribute("ID", connection->connectionID());
-		xml.writeStringAttribute("Type", connection->typeStr());
-		xml.writeStringAttribute("Port1", connection->port1EquipmentID());
-
-
-		xml.writeEndElement();				// </Connection>
-
-		return result;
-	}
-
 	bool ApplicationLogicCompiler::writeOptoVhdFiles()
 	{
 		int count = connectionStorage()->count();

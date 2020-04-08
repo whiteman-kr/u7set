@@ -1534,13 +1534,13 @@ namespace Builder
 			return false;
 		}
 
-		QString validitySignalID = port->validitySignalID();
+		QString validitySignalEquipmentID = port->validitySignalEquipmentID();
 
-		Signal* s = m_equipmentSignals.value(validitySignalID);
+		Signal* s = m_equipmentSignals.value(validitySignalEquipmentID);
 
 		if (s == nullptr)
 		{
-			m_log->errALC5133(validitySignalID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
+			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
 

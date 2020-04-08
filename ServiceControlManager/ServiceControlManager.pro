@@ -31,6 +31,8 @@ unix {
 
 
 SOURCES += MainWindow.cpp \
+    ../lib/Address16.cpp \
+    ../lib/ConnectionsInfo.cpp \
 	../lib/MemLeaksDetection.cpp \
     ScanOptionsWidget.cpp \
 	ScmMain.cpp \
@@ -85,6 +87,8 @@ SOURCES += MainWindow.cpp \
     ../AppDataService/DynamicAppSignalState.cpp
 
 HEADERS  += MainWindow.h \
+    ../lib/Address16.h \
+    ../lib/ConnectionsInfo.h \
     ../lib/MemLeaksDetection.h \
     ScanOptionsWidget.h \
     ScmTcpAppDataClient.h \
@@ -155,6 +159,8 @@ RESOURCES += \
 
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
+DEFINES += IS_SIMULATOR
 
 #protobuf
 #

@@ -203,7 +203,7 @@ namespace Hardware
 			return false;
 		}
 
-		m_validitySignalID = validitySignal->equipmentIdTemplate();
+		m_validitySignalEquipmentID = validitySignal->equipmentIdTemplate();
 
 		if (validitySignal->memoryArea() != E::MemoryArea::DiagnosticsData)
 		{
@@ -1612,7 +1612,7 @@ namespace Hardware
 
 		list.append(QString(tr("Rx validity signal:\t\t%1\t%2\n")).
 					arg(validitySignalAbsAddr().toString()).
-					arg(validitySignalID()));
+					arg(validitySignalEquipmentID()));
 
 		list.append(QString(tr("Port Rx data:\n")));
 

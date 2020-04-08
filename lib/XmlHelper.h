@@ -2,16 +2,12 @@
 
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
-#include <QBuffer>
 
-#include "../lib/HostAddressPort.h"
+#include "HostAddressPort.h"
+#include "Address16.h"
 
 class XmlWriteHelper
 {
-private:
-	QXmlStreamWriter* m_xmlWriter = nullptr;
-	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
-
 public:
 	XmlWriteHelper(QXmlStreamWriter& xmlWriter);
 	XmlWriteHelper(QByteArray* data);
@@ -34,23 +30,24 @@ public:
 	void writeDoubleAttribute(const QString& name, double value);
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
+	void writeAddress16Attribute(const QString& name, const Address16& addr16);
+
 	void writeString(const QString& str);
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);
 	void writeBoolElement(const QString& name, bool value);
 
-	void writeHostAddressPort(const QString& nameIP, const QString& namePort, HostAddressPort& hostAddressPort);
-	void writeHostAddress(const QString& nameIP, QHostAddress& hostAddress);
-};
+	void writeHostAddressPort(const QString& nameIP, const QString& namePort, const HostAddressPort& hostAddressPort);
+	void writeHostAddress(const QString& nameIP, const QHostAddress& hostAddress);
 
+private:
+	QXmlStreamWriter* m_xmlWriter = nullptr;
+	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
+};
 
 class XmlReadHelper
 {
-private:
-	QXmlStreamReader* m_xmlReader = nullptr;
-	QXmlStreamReader* m_xmlLocalReader = nullptr;
-
 public:
 	XmlReadHelper(QXmlStreamReader& xmlReader);
 	XmlReadHelper(const QByteArray& data);
@@ -65,11 +62,12 @@ public:
 
 	bool readStringAttribute(const QString& name, QString* value);
 	bool readIntAttribute(const QString& name, int* value);
-	bool readDoubleAttribute(const QString& name, double* value);
-	bool readFloatAttribute(const QString& name, float* value);
 	bool readBoolAttribute(const QString& name, bool* value);
 	bool readUInt64Attribute(const QString& name, qulonglong* value);
-	bool readUInt32Attribute(const QString& name, quint32 *value);
+	bool readUInt32Attribute(const QString& name, quint32* value);
+	bool readDoubleAttribute(const QString& name, double* value);
+	bool readFloatAttribute(const QString& name, float* value);
+	bool readAddress16Attribute(const QString& name, Address16* value);
 
 	bool readStringElement(const QString& elementName, QString* value, bool find = false);
 	bool readIntElement(const QString& elementName, int* value, bool find = false);
@@ -80,5 +78,8 @@ public:
 
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
-};
 
+private:
+	QXmlStreamReader* m_xmlReader = nullptr;
+	QXmlStreamReader* m_xmlLocalReader = nullptr;
+};
