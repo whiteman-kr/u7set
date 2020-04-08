@@ -363,6 +363,7 @@ FORMS    += \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
     LoginDialog.ui \
+    Simulator/SimSelectBuildDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
