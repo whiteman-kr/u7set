@@ -15,14 +15,40 @@ namespace Sim
 	{
 	}
 
+	void CommandProcessor_LM5_LM6::cacheCommands(std::vector<DeviceCommand>* commands)
+	{
+		static_assert(sizeof(SimCommandFuncCast::pmember) <= sizeof(SimCommandFuncCast::pvoid));
+
+		for (DeviceCommand& command : *commands)
+		{
+			auto it = m_nameToFuncCommand.find(command.m_command.simulationFunc);
+			if (it == m_nameToFuncCommand.end())
+			{
+				SimCommandFuncCast pcast;
+				pcast.pmember = &CommandProcessor_LM5_LM6::command_not_implemented;
+
+				command.m_commandFuncPtr = pcast.pvoid;
+			}
+			else
+			{
+				SimCommandFuncCast pcast;
+				pcast.pmember = it->second;
+
+				command.m_commandFuncPtr = pcast.pvoid;
+			}
+		}
+
+		return;
+	}
+
 	bool CommandProcessor_LM5_LM6::updatePlatformInterfaceState()
 	{
 		// Blink signal, addr 57682[2] = 0xE152[2] -- read memry
 		//
 		if ((m_blinkCounter % (1000 / m_cycleDurationMs / 2)) == 0)
 		{
-			quint16 b = m_device.readRamBit(57682, 2, E::LogicModuleRamAccess::Read);
-			m_device.writeRamBit(57682, 2, b == 0 ? 1 : 0, E::LogicModuleRamAccess::Read);
+			quint16 b = m_device->readRamBit(57682, 2, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(57682, 2, b == 0 ? 1 : 0, E::LogicModuleRamAccess::Read);
 		}
 		m_blinkCounter ++;
 
@@ -34,13 +60,10 @@ namespace Sim
 
 	bool CommandProcessor_LM5_LM6::runCommand(const DeviceCommand& command)
 	{
-		auto it = m_nameToFuncCommand.find(command.m_command.simulationFuncHash);
-		if (it == m_nameToFuncCommand.end())
-		{
-			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM5_LM6::runCommand");
-		}
+		SimCommandFuncCast pcast;
+		pcast.pvoid = command.m_commandFuncPtr;
 
-		auto& func = it->second;
+		auto& func = pcast.pmember;
 
 		// Call the command
 		//
@@ -79,35 +102,43 @@ namespace Sim
 	{
 		command->m_size = 2;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
 
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
-
 		if (afb.simulationFunc().isEmpty() == true)
 		{
 			SimException::raise(QString("Simultaion function for AFB %1 is not found").arg(afb.caption()));
 		}
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// startafb   LOGIC.0
 		//
 		command->m_string = strCommand(command->caption()) +
 							strAfbInst(command);
 
+		//
+		// Save pointer to function
+		//
+		auto it = m_nameToFuncAfb.find(afb.simulationFunc());
+		if (it == m_nameToFuncAfb.end())
+		{
+			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), "CommandProcessor_LM5_LM6::command_startafb");
+		}
+
+		SimAfbFuncCast pcast;
+		pcast.pmember = it->second;
+
+		command->m_afbFuncPtr = pcast.pvoid;
+
 		return;
 	}
 
 	void CommandProcessor_LM5_LM6::command_startafb(const DeviceCommand& command)
 	{
-		AfbComponent afb = m_device.afbComponent(command.m_afbOpCode);
-		if (afb.isNull() ==  true)
-		{
-			SimException::raise(QString("Cannot find AfbComponent with OpCode ")
-									.arg(command.m_afbOpCode),
-								"CommandProcessor_LM5_LM6::command_startafb");
-		}
+		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 
-		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		if (afbInstance == nullptr)
 		{
 			SimException::raise(QString("Cannot find afbInstance with OpCode %1, InstanceNo %2")
@@ -118,13 +149,10 @@ namespace Sim
 
 		// AFB
 		//
-		auto it = m_nameToFuncAfb.find(afb.simulationFuncHash());
-		if (it == m_nameToFuncAfb.end())
-		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), "CommandProcessor_LM5_LM6::command_startafb");
-		}
+		SimAfbFuncCast pcast;
+		pcast.pvoid = command.m_afbFuncPtr;
 
-		auto& func = it->second;
+		auto& func = pcast.pmember;
 
 		// Call the command
 		//
@@ -146,21 +174,21 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_stop([[maybe_unused]] const DeviceCommand& command)
 	{
-		if (m_device.phase() == Sim::CyclePhase::IdrPhase)
+		if (m_device->phase() == Sim::CyclePhase::IdrPhase)
 		{
-			m_device.setPhase(Sim::CyclePhase::AlpPhase);
-			m_device.setProgramCounter(m_device.appStartAddress());
+			m_device->setPhase(Sim::CyclePhase::AlpPhase);
+			m_device->setProgramCounter(m_device->appStartAddress());
 			return;
 		}
 
-		if (m_device.phase() == Sim::CyclePhase::AlpPhase)
+		if (m_device->phase() == Sim::CyclePhase::AlpPhase)
 		{
-			m_device.setPhase(Sim::CyclePhase::ODT);
+			m_device->setPhase(Sim::CyclePhase::ODT);
 			return;
 		}
 
 		SimException::raise(QString("Command stop is cannot be run in current phase: %1")
-								.arg(static_cast<int>(m_device.phase())));
+								.arg(static_cast<int>(m_device->phase())));
 		return;
 	}
 
@@ -172,8 +200,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - adderess2 - destionation
-		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - adderess1 - source
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2 - destionation
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1 - source
 
 		// --
 		//
@@ -189,8 +217,8 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint16 data = m_device.readRamWord(src);
-		m_device.writeRamWord(dst, data);
+		quint16 data = m_device->readRamWord(src);
+		m_device->writeRamWord(dst, data);
 
 		return;
 	}
@@ -203,9 +231,9 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - adderess2
-		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - adderess1
-		command->m_word2 = m_device.getWord(command->m_offset + 3);		// word2 - words to move
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1
+		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
 		// --
 		//
@@ -223,7 +251,7 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		m_device.movRamMem(src, dst, size);
+		m_device->movRamMem(src, dst, size);
 
 		return;
 	}
@@ -236,8 +264,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - address
-		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 
 		// movc     0b402h, #0
 		//
@@ -250,7 +278,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movc(const DeviceCommand& command)
 	{
-		m_device.writeRamWord(command.m_word0, command.m_word1);
+		m_device->writeRamWord(command.m_word0, command.m_word1);
 		return;
 	}
 
@@ -262,9 +290,9 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - data address
-		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
-		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);	// bitNo0 - bitno
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - data address
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);	// bitNo0 - bitno
 
 		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
@@ -280,7 +308,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movbc(const DeviceCommand& command)
 	{
-		m_device.writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
+		m_device->writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
 		return;
 	}
 
@@ -292,15 +320,19 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		//
@@ -312,10 +344,17 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_wrfb(const DeviceCommand& command)
 	{
-		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setWordValue(m_device.readRamWord(command.m_word0));
+		quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, command.m_word0);
 
-		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
+		if (ok == false)
+		{
+			m_device->SIM_FAULT(QString("Write param error"));
+		}
+
+//		m_device->setAfbParam(command.m_afbOpCode,
+//							  command.m_afbInstance,
+//							  AfbComponentParam{command.m_afbPinOpCode, data});
 		return;
 	}
 
@@ -327,11 +366,14 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// Checks
 		//
@@ -350,10 +392,11 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfb(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		//AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		m_device.writeRamWord(command.m_word0, param->wordValue());
+		m_device->writeRamWord(command.m_memoryAreaTo, command.m_word0, param->wordValue());
 
 		return;
 	}
@@ -367,13 +410,18 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;	// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;		// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);					// word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Data
+
+		command->m_afbParam.setOpIndex(command->m_afbPinOpCode);
+		command->m_afbParam.setWordValue(command->m_word0);
 
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		// wrfbc LOGIC.0[i_oprd_15], #0003h
@@ -388,10 +436,15 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_wrfbc(const DeviceCommand& command)
 	{
-		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setWordValue(command.m_word0);
+		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
+		if (ok == false)
+		{
+			m_device->SIM_FAULT(QString("Write param error"));
+		}
 
-		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+//		m_device->setAfbParam(command.m_afbOpCode,
+//							  command.m_afbInstance,
+//							  command.m_afbParam);
 		return;
 	}
 
@@ -403,17 +456,21 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
-		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);					// BitNo
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);					// BitNo
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		// wrfbb LOGIC.0[i_input], 46083h[0]
@@ -428,10 +485,16 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_wrfbb(const DeviceCommand& command)
 	{
-		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setWordValue(m_device.readRamBit(command.m_word0, command.m_bitNo0));
+		quint16 data = m_device->readRamBit(command.m_memoryAreaFrom, command.m_word0, command.m_bitNo0);
 
-		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
+		if (ok == false)
+		{
+			m_device->SIM_FAULT(QString("Write param error"));
+		}
+//		m_device->setAfbParam(command.m_afbOpCode,
+//							  command.m_afbInstance,
+//							  AfbComponentParam{command.m_afbPinOpCode, data});
 
 		return;
 	}
@@ -444,17 +507,21 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
-		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);					// BitNo
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);					// BitNo
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		// rdfbb 46083h[0], LOGIC.0[o_result]
@@ -469,10 +536,10 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfbb(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		m_device.writeRamBit(command.m_word0, command.m_bitNo0, param->wordValue() & 0x01);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, param->wordValue() & 0x01);
 
 		return;
 	}
@@ -485,11 +552,11 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data to comapare with
+		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data to comapare with
 
 		// Checks
 		//
@@ -505,11 +572,11 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfbcmp(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		bool result = param->wordValue() == command.m_word0;
-		m_device.setFlagCmp(result ? 1 : 0);
+		m_device->setFlagCmp(result ? 1 : 0);
 
 		return;
 	}
@@ -522,9 +589,9 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - adderess
-		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
-		command->m_word2 = m_device.getWord(command->m_offset + 3);		// word2 - words to move
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
+		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
 		// --
 		//
@@ -539,11 +606,11 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_setmem(const DeviceCommand& command)
 	{
-		const auto& size = command.m_word2;
-		const auto& data = command.m_word1;
-		const auto& address = command.m_word0;
+		const quint16& size = command.m_word2;
+		const quint16& data = command.m_word1;
+		const quint16& address = command.m_word0;
 
-		m_device.setRamMem(address, data, size);
+		m_device->setRamMem(address, data, size);
 
 		return;
 	}
@@ -556,11 +623,11 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// source address (ADR1)
-		command->m_bitNo0 = m_device.getWord(command->m_offset + 3) & 0b1111;			//
+		command->m_word0 = m_device->getWord(command->m_offset + 2);						// source address (ADR1)
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3) & 0b1111;			//
 
-		command->m_word1 = m_device.getWord(command->m_offset + 1);						// destionation address	(ADR2)
-		command->m_bitNo1 = (m_device.getWord(command->m_offset + 3) >> 8) & 0b1111;	//
+		command->m_word1 = m_device->getWord(command->m_offset + 1);						// destionation address	(ADR2)
+		command->m_bitNo1 = (m_device->getWord(command->m_offset + 3) >> 8) & 0b1111;	//
 
 		// String representation
 		//
@@ -573,8 +640,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movb(const DeviceCommand& command)
 	{
-		quint16 data = m_device.readRamBit(command.m_word0, command.m_bitNo0);
-		m_device.writeRamBit(command.m_word1, command.m_bitNo1, data);
+		quint16 data = m_device->readRamBit(command.m_word0, command.m_bitNo0);
+		m_device->writeRamBit(command.m_word1, command.m_bitNo1, data);
 
 		return;
 	}
@@ -586,7 +653,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::parse_appstart(DeviceCommand* command) const
 	{
 		command->m_size = 2;
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 keeps ALP phase start address
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 keeps ALP phase start address
 
 		// appstart  #000Ch
 		//
@@ -598,7 +665,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_appstart(const DeviceCommand& command)
 	{
-		m_device.setAppStartAddress(command.m_word0);
+		m_device->setAppStartAddress(command.m_word0);
 		return;
 	}
 
@@ -610,8 +677,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - address2 - destionation
-		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - address1 - source
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destionation
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - address1 - source
 
 		// --
 		//
@@ -627,8 +694,8 @@ namespace Sim
 		const quint16& src = command.m_word1;
 		const quint16& dst = command.m_word0;
 
-		quint32 data = m_device.readRamDword(src);
-		m_device.writeRamDword(dst, data);
+		quint32 data = m_device->readRamDword(src);
+		m_device->writeRamDword(dst, data);
 
 		return;
 	}
@@ -641,19 +708,21 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);					// word0 - RAM address
-		command->m_dword0 = m_device.getDword(command->m_offset + 2);				// Dword0 - data
+		command->m_word0 = m_device->getWord(command->m_offset + 1);					// word0 - RAM address
+		command->m_dword0 = m_device->getDword(command->m_offset + 2);				// Dword0 - data
 
 		// movc32     0b402h, #0
 		//
 		command->m_string = strCommand(command->caption()) +
 							strAddr(command->m_word0) + ", " +
 							strDwordConst(command->m_dword0);
+
+		return;
 	}
 
 	void CommandProcessor_LM5_LM6::command_movc32(const DeviceCommand& command)
 	{
-		m_device.writeRamDword(command.m_word0, command.m_dword0);
+		m_device->writeRamDword(command.m_word0, command.m_dword0);
 	}
 
 	// Command: wrfb32
@@ -664,15 +733,17 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data address
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		//
@@ -680,14 +751,23 @@ namespace Sim
 							strAfbInstPin(command) + ", " +
 							strAddr(command->m_word0);
 
+		return;
 	}
 
 	void CommandProcessor_LM5_LM6::command_wrfb32(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setDwordValue(m_device.readRamDword(command.m_word0));
+		param.setDwordValue(m_device->readRamDword(command.m_word0));
 
-		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		bool ok = command.m_afbComponentInstance->addParam(std::move(param));
+		if (ok == false)
+		{
+			m_device->SIM_FAULT(QString("Write param error"));
+		}
+
+//		m_device->setAfbParam(command.m_afbOpCode,
+//							  command.m_afbInstance,
+//							  std::move(param));
 		return;
 	}
 
@@ -699,15 +779,17 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data address
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		// rdfb32 0478h, LOGIC.0[i_2_oprd]
@@ -722,10 +804,11 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfb32(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		//AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		m_device.writeRamDword(command.m_word0, param->dwordValue());
+		m_device->writeRamDword(command.m_word0, param->dwordValue());
 
 		return;
 	}
@@ -738,15 +821,20 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_dword0 = m_device.getDword(command->m_offset + 2);					// Dword0 - data
+		command->m_dword0 = m_device->getDword(command->m_offset + 2);					// Data
+
+		command->m_afbParam.setOpIndex(command->m_afbPinOpCode);
+		command->m_afbParam.setDwordValue(command->m_dword0);
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
+
+		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
 		// wrfbc32 MATH.0[i_oprd_1], #0423445h
@@ -761,10 +849,13 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_wrfbc32(const DeviceCommand& command)
 	{
-		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setDwordValue(command.m_dword0);
+		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
+		if (ok == false)
+		{
+			m_device->SIM_FAULT(QString("Write param error"));
+		}
 
-		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		//m_device->setAfbParam(command.m_afbOpCode, command.m_afbInstance, command.m_afbParam);
 
 		return;
 	}
@@ -777,11 +868,11 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_dword0 = m_device.getDword(command->m_offset + 2);					// Dword0 - data to comapare with
+		command->m_dword0 = m_device->getDword(command->m_offset + 2);					// Dword0 - data to comapare with
 
 		// Checks
 		//
@@ -797,11 +888,11 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfbcmp32(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		bool result = param->dwordValue() == command.m_dword0;
-		m_device.setFlagCmp(result ? 1 : 0);
+		m_device->setFlagCmp(result ? 1 : 0);
 
 		return;
 	}
@@ -815,8 +906,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);					// m_word0 - Destination address
-		command->m_bitNo0 = m_device.getWord(command->m_offset + 2) & 0x0F;			// m_bitNo0 - Destination bit no
+		command->m_word0 = m_device->getWord(command->m_offset + 1);					// m_word0 - Destination address
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 2) & 0x0F;			// m_bitNo0 - Destination bit no
 
 		command->m_string = strCommand(command->caption()) +
 							strBitAddr(command->m_word0, command->m_bitNo0);
@@ -826,8 +917,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movcmpf(const DeviceCommand& command)
 	{
-		quint32 cmp = m_device.flagCmp();
-		m_device.writeRamBit(command.m_word0, command.m_bitNo0, cmp);
+		quint32 cmp = m_device->flagCmp();
+		m_device->writeRamBit(command.m_word0, command.m_bitNo0, cmp);
 		return;
 	}
 
@@ -839,8 +930,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);			// destination address (ADR2)
-		command->m_word1 = m_device.getWord(command->m_offset + 2);			// source address (ADR1)
+		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
+		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
 
 		// String representation
 		//
@@ -856,9 +947,9 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint16 data = m_device.readRamWord(src);
+		quint16 data = m_device->readRamWord(src);
 
-		m_device.writeRamWord(dst, data);
+		m_device->writeRamWord(dst, data);
 		return;
 	}
 
@@ -870,8 +961,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);			// destination address (ADR2)
-		command->m_word1 = m_device.getWord(command->m_offset + 2);			// source address (ADR1)
+		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
+		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
 
 		// String representation
 		//
@@ -887,9 +978,9 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint32 data = m_device.readRamDword(src);
+		quint32 data = m_device->readRamDword(src);
 
-		m_device.writeRamDword(dst, data);
+		m_device->writeRamDword(dst, data);
 		return;
 	}
 
@@ -901,9 +992,9 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device.getWord(command->m_offset + 1);			// destination address (ADR2)
-		command->m_word1 = m_device.getWord(command->m_offset + 2);			// source address (ADR1)
-		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);		// bit no to read
+		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
+		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);		// bit no to read
 
 		// String representation
 		//
@@ -920,9 +1011,9 @@ namespace Sim
 		const auto& dst = command.m_word0;
 		const auto& bitNo = command.m_bitNo0;
 
-		quint16 bit = m_device.readRamBit(src, bitNo);
+		quint16 bit = m_device->readRamBit(src, bitNo);
 
-		m_device.writeRamWord(dst, bit ? 0xFFFF : 0x0000);
+		m_device->writeRamWord(dst, bit ? 0xFFFF : 0x0000);
 		return;
 	}
 
@@ -1036,7 +1127,7 @@ namespace Sim
 		// Get params, throws exception in case of error
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
-		quint32 time = instance->param(i_counter)->dwordValue();
+		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
 		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
@@ -1053,6 +1144,12 @@ namespace Sim
 		//
 		quint16 result = 0;
 		quint16 paramError = 0;
+
+		if (time < 0)
+		{
+			paramError = 1;
+			time = 0;
+		}
 
 		switch (conf)
 		{
@@ -1071,7 +1168,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1094,7 +1191,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1147,7 +1244,7 @@ namespace Sim
 				}
 				else
 				{
-					if (counter >= time / m_cycleDurationMs)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
 						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
@@ -1224,7 +1321,7 @@ namespace Sim
 		// Get params, throws exception in case of error
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
-		quint32 time = instance->param(i_counter)->dwordValue();
+		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
 		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
@@ -1241,6 +1338,12 @@ namespace Sim
 		//
 		quint16 result = 0;
 		quint16 paramError = 0;
+
+		if (time < 0)
+		{
+			paramError = 1;
+			time = 0;
+		}
 
 		switch (conf)
 		{
@@ -1259,7 +1362,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1282,7 +1385,7 @@ namespace Sim
 					//
 					counter += m_cycleDurationMs;
 
-					if (counter > time)
+					if (counter > static_cast<quint32>(time))
 					{
 						result = 1;
 						counter = time;		// It keeps counter from overflow and getting to 0
@@ -1385,7 +1488,228 @@ namespace Sim
 				}
 				else
 				{
-					if (counter >= time / m_cycleDurationMs)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
+					{
+						result = 1;
+						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+					}
+					else
+					{
+						counter ++;
+						result = prevResultValue;
+					}
+				}
+			}
+			break;
+
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), "afb_tct");
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
+
+		instance->addParamDword(o_counter, counter);
+		instance->addParamDword(i_prev_counter, counter);
+
+		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+
+		instance->addParamWord(o_parem_err, paramError);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_tct_v210(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;			// 1..5
+		const int i_counter = 1;		// Time, SI
+		const int i_prev_counter = 3;	// Previous counter value, SI
+		const int i_saved_data = 5;		// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int i_input = 6;			// 1/0
+
+		const int o_result = 8;			// 1/0
+		const int o_counter = 9;		// Counter value -> i_prev_counter
+		const int o_saved_data = 11;	// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int o_parem_err = 12;
+		//const int o_tct_edi = 13;
+		//const int o_version = 14;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		qint32 time = instance->param(i_counter)->signedIntValue();
+		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
+
+		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
+									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
+
+		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
+									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+
+		quint16 currentInputValue = instance->param(i_input)->wordValue();
+
+		checkParamRange(conf, 1, 6, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		quint16 result = 0;
+		quint16 paramError = 0;
+
+		if (time < m_cycleDurationMs)
+		{
+			paramError = 1;
+			time = 0;
+		}
+
+		switch (conf)
+		{
+		case 1:
+			{
+				// On
+				//
+				if (currentInputValue == 0)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 1
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > static_cast<quint32>(time))
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 2:
+			{
+				// Off
+				//
+				if (currentInputValue == 1)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 0
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > static_cast<quint32>(time))
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 3:
+			{
+				// Univibrator (TCTC_VIBR)
+				//
+				if (counter == 0 &&
+					prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+		case 4:
+			{
+				// Filter (TCTC_FILTER)
+				//
+				if (prevInputValue != currentInputValue)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+
+				if (counter != 0 )
+				{
+					counter --;
+
+					if (counter == 0)
+					{
+						result = currentInputValue;
+					}
+					else
+					{
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					result = prevResultValue;
+				}
+			}
+			break;
+
+		case 5:
+			{
+				// Univibrator R (TCTC_RSV)
+				//
+				if (prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+
+		case 6:
+			{
+				// RC FILTER (tctc_rcfilter)
+				//
+				if (currentInputValue == 0)
+				{
+					if (counter == 0)
+					{
+						result = 0;
+					}
+					else
+					{
+						counter --;
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
 						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
@@ -1778,6 +2102,25 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		afb_bcod_v104(instance);	// in 104 version added conf 3,
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_bcod_v104(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
 		const int i_oprd_quant = 1;		// Operand count
 		const int i_1_oprd = 2;			// Operand 1, 2...
 
@@ -1790,7 +2133,7 @@ namespace Sim
 		quint16 conf = instance->param(i_conf)->wordValue();
 
 		checkParamRange(oprdQuant, 1, 32, QStringLiteral("i_oprd_quant"));
-		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+		checkParamRange(conf, 1, 3, QStringLiteral("i_conf"));
 
 		// Logic
 		//
@@ -1806,7 +2149,7 @@ namespace Sim
 				{
 					result = static_cast<qint32>(i);
 					active = 1;
-					break;
+					break;	// Break, wee need just the first one
 				}
 			}
 			break;
@@ -1817,8 +2160,19 @@ namespace Sim
 				result |= inputValue << i;
 			}
 			break;
+		case 3:
+			for (quint16 i = 0; i < oprdQuant; i++)
+			{
+				if (instance->param(i_1_oprd + i)->wordValue() == 1)
+				{
+					result = static_cast<qint32>(i);
+					active = 1;
+					// no break, we need the last active input
+				}
+			}
+			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod");
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod_v103/104");
 		}
 
 		// Save result
@@ -2023,7 +2377,9 @@ namespace Sim
 			float resetValue = instance->param(i_sp_r)->floatValue();
 			float inputValue = instance->param(i_data)->floatValue();
 			quint16 prevResult = 0;
-			quint16 nan = (settingValue != settingValue || resetValue != resetValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+			quint16 nan = (std::isnan(settingValue) ||
+						  std::isnan(resetValue) ||
+						  std::isnan(inputValue)) ? 0x0001 : 0x0000;
 
 			switch (conf)
 			{
@@ -2268,7 +2624,7 @@ namespace Sim
 				isOverflow = std::fetestexcept(FE_OVERFLOW);
 				isUnderflow = std::fetestexcept(FE_UNDERFLOW);
 				isZero = (result == .0f) || isUnderflow;
-				isNan = (result != result);
+				isNan = std::isnan(result);
 
 				instance->addParamFloat(o_result, result);
 				instance->addParamFloat(o_current, result);
@@ -2307,7 +2663,7 @@ namespace Sim
 				isOverflow = false;
 				isUnderflow = false;
 				isZero = (inputValue == .0f);
-				isNan = (inputValue != inputValue);
+				isNan = std::isnan(inputValue);
 			}
 		}
 
@@ -2668,7 +3024,7 @@ namespace Sim
 		const int i_ui_data = 5;		// 16 bit data, unsigned integer input
 		const int i_si_fp_data = 6;		// 32 bit data, signed integer or float input
 
-		//const int o_ui_result = 8;		// 16 bit data, unsigned integer output
+		const int o_ui_result = 8;		// 16 bit data, unsigned integer output
 		const int o_si_fp_result = 9;	// 32 bit data, signed integer or float output
 		const int o_scal_edi = 11;		// error
 		const int o_overflow = 12;
@@ -2687,72 +3043,167 @@ namespace Sim
 		//
 		switch (conf->wordValue())
 		{
-			case 1: // 16(UI)/16(UI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			 case 2: // 16(UI)/32(SI)
+		case 1: // 16(UI)/16(UI)
+			{
+				result = *instance->param(i_ui_data);
+				result.setOpIndex(o_ui_result);
+
+				result.convertWordToSignedInt();
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				if (result.signedIntValue() > std::numeric_limits<quint16>().max())
 				{
-					result = *instance->param(i_ui_data);
-					result.setOpIndex(o_si_fp_result);
-
-					result.convertWordToSignedInt();
-
-					result.mulSignedInteger(*k1);
-					result.divSignedIntegerNumber(32768);
-					result.addSignedInteger(*k2);
-
-					// Save result
+					// Overflow
 					//
-					instance->addParam(result);
+					result.setMathOverflow(1);
 				}
-				break;
-			case 3: // 32(SI)/16(UI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 4: // 32(SI)/32(SI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 5: // 32(SI)/32(FP)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 6: // 32(FP)/32(FP)
+
+				// Save result
+				//
+				instance->addParamWord(o_ui_result, result.wordValue());
+			}
+			break;
+		case 2: // 16(UI)/32(SI)
+			{
+				result = *instance->param(i_ui_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.convertWordToSignedInt();
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		case 3: // 32(SI)/16(UI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_ui_result);
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				if (result.signedIntValue() > std::numeric_limits<quint16>().max())
 				{
-					result = *instance->param(i_si_fp_data);
-					result.setOpIndex(o_si_fp_result);
-
-					result.mulFloatingPoint(*k1);
-					result.addFloatingPoint(*k2);
-
-					// Save result
+					// Overflow
 					//
-					instance->addParam(result);
+					result.setMathOverflow(1);
 				}
-				break;
-			case 7: // 32(FP)/16(UI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 8: // 32(FP)/32(SI)
-				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
-				break;
-			case 9: // 16(UI)/32(FP)
+
+				// Save result
+				//
+				instance->addParamWord(o_ui_result, result.wordValue());
+			}
+			break;
+		case 4: // 32(SI)/32(SI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulSignedInteger(*k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(*k2);
+
+				// Save result
+				//
+				instance->addParamWord(o_si_fp_result, result.signedIntValue());
+			}
+			break;
+		case 5: // 32(SI)/32(FP)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.convertSignedIntToFloat();
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		case 6: // 32(FP)/32(FP)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		case 7: // 32(FP)/16(UI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				if (result.floatValue() > std::numeric_limits<quint16>().max())
 				{
-					result = *instance->param(i_ui_data);
-					result.setOpIndex(o_si_fp_result);
-
-					result.convertWordToFloat();
-
-					result.mulFloatingPoint(*k1);
-					result.addFloatingPoint(*k2);
-
-					// Save result
+					// Overflow
 					//
-					instance->addParam(result);
+					result.setMathOverflow(1);
 				}
-				break;
-			default:
-				instance->addParamWord(o_scal_edi, 0x0001);
-				SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.");
-				break;
+
+				// Save result
+				//
+				instance->addParamWord(o_ui_result, static_cast<quint16>(result.floatValue()));
+			}
+			break;
+		case 8: // 32(FP)/32(SI)
+			{
+				result = *instance->param(i_si_fp_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				if (result.floatValue() > std::numeric_limits<qint32>().max())
+				{
+					// Overflow
+					//
+					result.setMathOverflow(1);
+				}
+
+				// Save result
+				//
+				instance->addParamSignedInt(o_si_fp_result, static_cast<qint32>(result.floatValue()));
+			}
+			break;
+		case 9: // 16(UI)/32(FP)
+			{
+				result = *instance->param(i_ui_data);
+				result.setOpIndex(o_si_fp_result);
+
+				result.convertWordToFloat();
+
+				result.mulFloatingPoint(*k1);
+				result.addFloatingPoint(*k2);
+
+				// Save result
+				//
+				instance->addParam(result);
+			}
+			break;
+		default:
+			instance->addParamWord(o_scal_edi, 0x0001);
+			SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.");
+			break;
 		}
 
 		// Save result
@@ -2762,6 +3213,338 @@ namespace Sim
 		instance->addParamWord(o_underflow, result.mathUnderflow());
 		instance->addParamWord(o_zero, result.mathZero());
 		instance->addParamWord(o_nan, result.mathNan());
+
+		return;
+	}
+
+	//	FUNC, OpCode 16
+	//
+	void CommandProcessor_LM5_LM6::afb_func_v3(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_data = 1;
+
+		const int o_result = 5;
+		const int o_overflow = 7;
+		const int o_underflow = 8;
+		const int o_zero = 9;
+		const int o_nan = 10;
+		const int o_div_by_zero = 11;
+		//const int o_func_edi = 12;
+		//const int o_version = 13;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		AfbComponentParam result{static_cast<quint16>(o_result)};
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+		quint16 div_by_zero = 0;
+
+		switch (conf)
+		{
+		case 1:		// FP SQRT
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				if (std::isnormal(floatData) == true)
+				{
+					if (std::signbit(floatData) == true)
+					{
+						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+						nan = 1;
+						overflow  = 0;
+						zero = 0;
+					}
+					else
+					{
+						result.setFloatValue(std::sqrtf(floatData));
+						nan = 0;
+						overflow  = 0;
+						zero = 0;
+					}
+
+					break;
+				}
+
+				if (std::isinf(floatData) == true)
+				{
+					if (std::signbit(floatData) == false)
+					{
+						result.setFloatValue(std::numeric_limits<float>::infinity());
+						nan = 0;
+						overflow  = 1;
+						zero = 0;
+					}
+					else
+					{
+						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+						nan = 1;
+						overflow  = 0;
+						zero = 0;
+					}
+
+					break;
+				}
+
+				if (std::isnan(floatData) == true)
+				{
+					result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
+					nan = 1;
+					overflow  = 0;
+					zero = 0;
+					break;
+				}
+
+				if (std::fpclassify(floatData) == FP_SUBNORMAL)
+				{
+					result.setFloatValue(.0f);
+					nan = 0;
+					overflow  = 0;
+					zero = 1;
+					break;
+				}
+
+				if (floatData == .0f || floatData == -.0f)
+				{
+					result.setFloatValue(.0f);
+					nan = 0;
+					overflow  = 0;
+					zero = 1;
+					break;
+				}
+
+				// what type og float is it ?
+				SimException::raise(QString("Specific type of float: %1, %2.")
+									.arg(floatData),
+									"CommandProcessor_LM5_LM6::afb_func_v3");
+			}
+			break;
+		case 2:		// FP ABS
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				result.setFloatValue(std::fabsf(floatData));
+			}
+			break;
+		case 7:		// FP INV is  = 1.0/data;
+			{
+				float floatData = instance->param(i_data)->floatValue();
+
+				result.setFloatValue(1.0f);
+				result.divFloatingPoint(floatData);
+
+				underflow = result.mathUnderflow();
+				zero = result.mathZero();
+				nan = result.mathNan();
+				div_by_zero = result.mathDivByZero();
+			}
+			break;
+		case 8:		// SI ABS
+			{
+				qint32 intData = instance->param(i_data)->signedIntValue();
+
+				result.setSignedIntValue(std::abs(intData));
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+								.arg(conf),
+								"CommandProcessor_LM5_LM6::afb_func_v3");
+		}
+
+		// Save result
+		//
+		result.setOpIndex(o_result);
+		instance->addParam(result);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_div_by_zero, div_by_zero);
+
+		return;
+	}
+
+	//	INTEGRATOR, OpCode 17
+	//
+	void CommandProcessor_LM5_LM6::afb_int_v6_tiunlim(AfbComponentInstance* instance)
+	{
+		return afb_int_v6(instance, std::numeric_limits<qint32>::max());
+	}
+
+	void CommandProcessor_LM5_LM6::afb_int_v6_ti350000(AfbComponentInstance* instance)
+	{
+		return afb_int_v6(instance, 350000);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_int_v6(AfbComponentInstance* instance, qint32 maxTiValue)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_ki = 0;				// [0, 1]	FP (32bit)	Int. Coef. of Gain
+		const int i_ti = 2;				// [2, 3]	SI (32bit)	The integration time Ti(ms) (0..((2^31) - 1)
+		const int i_max = 4;			// [4, 5]	FP (32bit)	Max output value
+		const int i_min = 6;			// [6, 7]	FP (32bit)	Min output value
+		const int i_ri_const = 8;		// [8, 9]	FP (32bit)	Integral constant for reset state
+		const int i_yi_prev = 10;		// [10, 11]	FP (32bit)	Previous integral value
+		const int i_x_tr = 12;			// [12, 13]	FP (32bit)	Tracking data
+		const int i_x = 14;				// [14, 15]	FP (32bit)	Input X
+		const int i_reset = 16;			// Discrete		Reset
+		const int i_pause = 17;			// Discrete		Pause
+		const int i_track = 18;			// Discrete		Tracking mode
+
+		const int o_result = 20;		// [20, 21]	FP (32bit)	Result - Output Y
+		const int o_max = 22;			// Discrete		Maximum value signal
+		const int o_min = 23;			// Discrete		Minimum value signal
+
+		const int o_param_err = 24;		// Discrete
+		const int o_overflow = 25;		// Discrete
+		const int o_underflow = 26;		// Discrete
+		const int o_zero = 27;			// Discrete
+		const int o_nan = 28;			// Discrete
+		//const int o_version = 29;		// Discrete
+
+		// Get input data
+		//
+		float ki = instance->param(i_ki)->floatValue();
+		qint32 ti = instance->param(i_ti)->signedIntValue();
+		float maxValue = instance->param(i_max)->floatValue();
+		float minValue = instance->param(i_min)->floatValue();
+		float ri_const = instance->param(i_ri_const)->floatValue();
+		float yi_prev = instance->paramExists(i_yi_prev) == true ?
+							instance->param(i_yi_prev)->floatValue() :
+							0.0f;
+		float x_tr = instance->param(i_x_tr)->floatValue();
+		float x = instance->param(i_x)->floatValue();
+		quint16 reset = instance->param(i_reset)->wordValue();
+		quint16 pause = instance->param(i_pause)->wordValue();
+		quint16 track = instance->param(i_track)->wordValue();
+
+		// Logic
+		// Y = F(,Ki,Ti,)
+		// Yi = (X * Ki) / TI + (Yi - 1);
+		// *TI = i(ms) / 5(ms)
+		// i_ti = Ti(ms)
+		//
+		AfbComponentParam result{static_cast<quint16>(o_result)};
+		result.setFloatValue(0);
+
+		quint16 maxOut = 0;
+		quint16 minOut = 0;
+
+		quint16 param_err = 0;
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+
+		do
+		{
+			if (maxValue <= minValue)
+			{
+				result.setFloatValue(yi_prev);
+				param_err = 0x0001;
+				break;
+			}
+
+			if (ti < m_cycleDurationMs ||
+				ti > maxTiValue)
+			{
+				param_err = 1;
+				ti = std::clamp(ti, m_cycleDurationMs, maxTiValue);
+
+				// Continue to work with correctd value
+				//
+			}
+
+			// Reset, Pause and Track are set in accordance to priority
+			//
+			if (reset == 1)
+			{
+				result.setFloatValue(ri_const);
+				break;
+			}
+
+			if (pause == 1)
+			{
+				result.setFloatValue(yi_prev);
+				break;
+			}
+
+			if (track == 1)
+			{
+				result.setFloatValue(x_tr);
+				break;
+			}
+
+			// Normal operating
+			// Yi = (X * Ki) / TI + (Yi - 1);
+			//
+			float ti_value = ti / static_cast<float>(m_cycleDurationMs);
+
+			// X * Ki
+			//
+			result.setFloatValue(x);
+			result.mulFloatingPoint(ki);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// div TI
+			//
+			result.divFloatingPoint(ti_value);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// + Y(i-1)
+			//
+			result.addFloatingPoint(yi_prev);
+
+			// Check max/min
+			//
+			if (result.floatValue() >= maxValue)
+			{
+				result.setFloatValue(maxValue);
+				maxOut = 0x0001;
+			}
+
+			if (result.floatValue() <= minValue)
+			{
+				result.setFloatValue(minValue);
+				minOut = 0x0001;
+			}
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+			zero = result.mathZero();
+
+		} while (false);
+
+
+		// Set outputs
+		//
+		instance->addParamFloat(o_result, result.floatValue());
+		instance->addParamFloat(i_yi_prev, result.floatValue());
+
+		instance->addParamWord(o_max, maxOut);
+		instance->addParamWord(o_min, minOut);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_param_err, param_err);
 
 		return;
 	}
@@ -2877,7 +3660,9 @@ namespace Sim
 
 			// NaN
 			//
-			quint16 nan = (settingValue != settingValue || hystValue != hystValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+			quint16 nan = (std::isnan(settingValue) ||
+						  std::isnan(hystValue) ||
+						  std::isnan(inputValue)) ? 0x0001 : 0x0000;
 
 			instance->addParamWord(o_nan, nan);
 
@@ -3123,7 +3908,9 @@ namespace Sim
 
 			// NaN
 			//
-			quint16 nan = (settingValue != settingValue || hystValue != hystValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+			quint16 nan = (std::isnan(settingValue) ||
+						   std::isnan(hystValue) ||
+						   std::isnan(inputValue)) ? 0x0001 : 0x0000;
 
 			instance->addParamWord(o_nan, nan);
 
@@ -3297,7 +4084,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input Õ
+		//const int o_y_prev = 10;				// output Y/input 
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -3580,9 +4367,9 @@ namespace Sim
 				float minFloat = limMin->floatValue();
 				float maxFloat = limMax->floatValue();
 
-				if (dataFloat != dataFloat ||
-					minFloat != minFloat ||
-					maxFloat != maxFloat)
+				if (std::isnan(dataFloat) ||
+					std::isnan(minFloat) ||
+					std::isnan(maxFloat))
 				{
 					result.setFloatValue(0);
 					setNan = true;
@@ -3626,6 +4413,18 @@ namespace Sim
 		instance->addParamWord(o_nan, setNan);
 
 		return;
+	}
+
+	//	DEADZONE, OpCode 24
+	//
+	void CommandProcessor_LM5_LM6::fb_deadzone_v5(AfbComponentInstance* /*instance*/)
+	{
+		SimException::raise(QString("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v5");
+	}
+
+	void CommandProcessor_LM5_LM6::fb_deadzone_v6(AfbComponentInstance* /*instance*/)
+	{
+		SimException::raise(QString("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v6");
 	}
 
 	//	POL, OpCode 25
@@ -3703,6 +4502,215 @@ namespace Sim
 		instance->addParamWord(o_nan, result.mathNan());
 
 		return;
+	}
+
+	//	DER, OpCode 26
+	//
+	void CommandProcessor_LM5_LM6::afb_der_v5_tdunlim(AfbComponentInstance* instance)
+	{
+		return afb_der_v5(instance, std::numeric_limits<qint32>::max());
+	}
+
+	void CommandProcessor_LM5_LM6::afb_der_v5_td350000(AfbComponentInstance* instance)
+	{
+		return afb_der_v5(instance, 350000);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_der_v5(AfbComponentInstance* instance, qint32 maxTdValue)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_kd = 0;				// [0, 1]	FP (32bit)	Dif. Coef. of Gain
+		const int i_td = 2;				// [2, 3]	SI (32bit)	The Dif. time td(ms) (0..((2^31) - 1)
+		const int i_max = 4;			// [4, 5]	FP (32bit)	Max output value
+		const int i_min = 6;			// [6, 7]	FP (32bit)	Min output value
+		const int i_x_prev = 8;			// [8, 9]	FP (32bit)	Previouse input value X
+		const int i_yd_prev = 10;		// [10, 11]	FP (32bit)	Previous result value
+		const int i_x = 12;				// [12, 13]	FP (32bit)	Input X
+		const int i_reset = 14;			// Discrete		Reset
+		const int i_pause = 15;			// Discrete		Pause mode
+
+		//const int o_x_prev = 17;		// [17, 18]	FP (32bit)	Previous (now is current) input value X
+		const int o_result = 19;		// [19, 20]	FP (32bit)	Result - Output Y
+		const int o_max = 21;			// Discrete		Maximum value signal
+		const int o_min = 22;			// Discrete		Minimum value signal
+
+		const int o_param_err = 23;		// Discrete
+		const int o_overflow = 24;		// Discrete
+		const int o_underflow = 25;		// Discrete
+		const int o_zero = 26;			// Discrete
+		const int o_nan = 27;			// Discrete
+		//const int o_version = 28;		// Discrete
+
+		// Get input data
+		//
+		float kd = instance->param(i_kd)->floatValue();
+		qint32 td = instance->param(i_td)->signedIntValue();
+		float maxValue = instance->param(i_max)->floatValue();
+		float minValue = instance->param(i_min)->floatValue();
+
+		float x_prev = instance->paramExists(i_x_prev) == true ?
+							instance->param(i_x_prev)->floatValue() :
+							0.0f;
+
+		float yd_prev = instance->paramExists(i_yd_prev) == true ?
+						   instance->param(i_yd_prev)->floatValue() :
+						   0.0f;
+
+		float x = instance->param(i_x)->floatValue();
+
+		quint16 reset = instance->param(i_reset)->wordValue();
+		quint16 pause = instance->param(i_pause)->wordValue();
+
+		if (std::isnan(yd_prev) == true)	// NaN
+		{
+			yd_prev = .0f;
+		}
+
+		// Logic
+		// Y= F(,Kd,Td)
+		// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
+		// TD=d(ms) / 5(ms)
+		// i_td = Ti(ms)
+		//
+		AfbComponentParam result{static_cast<quint16>(o_result)};
+		result.setFloatValue(0);
+
+		float newXPrev = x;
+
+		quint16 maxOut = 0;
+		quint16 minOut = 0;
+
+		quint16 param_err = 0;
+		quint16 overflow = 0;
+		quint16 underflow = 0;
+		quint16 zero = 0;
+		quint16 nan = 0;
+
+		do
+		{
+			if (maxValue <= minValue)
+			{
+				result.setFloatValue(yd_prev);
+				param_err = 0x0001;
+				newXPrev = x_prev;
+				break;
+			}
+
+			if (td < m_cycleDurationMs ||
+				td > maxTdValue)
+			{
+				param_err = 1;
+				td = std::clamp(td, m_cycleDurationMs, maxTdValue);
+
+				// Continue to work with corrected value
+				//
+			}
+
+			// Reset, Pause and Track are set in accordance to priority
+			//
+			if (reset == 1)
+			{
+				result.setFloatValue(0);
+				newXPrev = .0f;
+				break;
+			}
+
+			if (pause == 1)
+			{
+				result.setFloatValue(yd_prev);
+				newXPrev = x_prev;
+				break;
+			}
+
+			// Normal operating
+			// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
+			//
+			float td_value = td / static_cast<float>(m_cycleDurationMs);
+
+			// (X - (Xi-1))
+			//
+			result.setFloatValue(x);
+			result.subFloatingPoint(x_prev);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// * Kd
+			//
+			result.mulFloatingPoint(kd);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// (Yi-1) / TD
+			//
+			AfbComponentParam yprev_div_td{0};
+
+			yprev_div_td.setFloatValue(yd_prev);
+			yprev_div_td.divFloatingPoint(td_value);
+
+			overflow |= yprev_div_td.mathOverflow();
+			underflow |= yprev_div_td.mathUnderflow();
+			nan |= yprev_div_td.mathNan();
+
+			// - (Yi-1) / TD
+			//
+			result.subFloatingPoint(yprev_div_td.floatValue());
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// + (Yi-1)
+			//
+			result.addFloatingPoint(yd_prev);
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+
+			// Check max/min
+			//
+			if (result.floatValue() >= maxValue)
+			{
+				result.setFloatValue(maxValue);
+				maxOut = 0x0001;
+			}
+
+			if (result.floatValue() <= minValue)
+			{
+				result.setFloatValue(minValue);
+				minOut = 0x0001;
+			}
+
+			overflow |= result.mathOverflow();
+			underflow |= result.mathUnderflow();
+			nan |= result.mathNan();
+			zero = result.mathZero();
+
+		} while (false);
+
+
+		// Set outputs
+		//
+		instance->addParamFloat(o_result, result.floatValue());
+		instance->addParamFloat(i_yd_prev, result.floatValue());
+		instance->addParamFloat(i_x_prev, newXPrev);
+
+		instance->addParamWord(o_max, maxOut);
+		instance->addParamWord(o_min, minOut);
+
+		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_underflow, underflow);
+		instance->addParamWord(o_zero, zero);
+		instance->addParamWord(o_nan, nan);
+		instance->addParamWord(o_param_err, param_err);
+
+		return;
+
 	}
 
 	// MISMATCH, OpCode 27
@@ -4065,5 +5073,479 @@ namespace Sim
 		return;
 	}
 
+	// TCONV, OpCode 28
+	// Analog Conversion
+	//
+	void CommandProcessor_LM5_LM6::afb_tconv_v0(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_data_16 = 1;
+		const int i_data_32 = 2;
+
+		const int o_data_16 = 4;
+		const int o_data_32 = 5;
+		const int o_overflow = 7;
+		const int o_underflow = 8;
+		const int o_nan = 9;
+		//const int o_tconv_edi = 10;
+		//const int o_version = 11;
+
+		// Get AFB configuration
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		// Logic with outputs
+		//
+		switch (conf)
+		{
+		case 1: // Swap Endians for 16 -> 16
+			{
+				qint16 input = instance->param(i_data_16)->wordValue();
+				qint16 result = (input >> 8) | (input << 8);
+				instance->addParamWord(o_data_16, result);
+			}
+			break;
+
+		case 2: // Swap Endians for 32 -> 32
+			{
+				quint32 input = instance->param(i_data_16)->dwordValue();
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+				quint32 result = qToLittleEndian<quint32>(input);
+#else
+				quint32 result = qToBigEndian<quint32>(input);
+#endif
+
+				instance->addParamDword(o_data_32, result);
+			}
+			break;
+
+		case 3: // SI32 -> FP32
+			{
+				qint32 input = instance->param(i_data_32)->signedIntValue();
+				float result = static_cast<float>(input);
+				instance->addParamFloat(o_data_32, result);
+			}
+			break;
+
+		case 4: // FP32 -> SI32
+			{
+				float input = instance->param(i_data_32)->floatValue();
+
+				qint32 result = static_cast<qint32>(input);
+
+				// Flags
+				//
+				quint16 overflow = 0x0000;
+				if (static_cast<qint64>(input) > std::numeric_limits<qint32>::max())
+				{
+					overflow = 0x0001;
+					result = std::numeric_limits<qint32>::max();
+				}
+
+				if (static_cast<qint64>(input) < std::numeric_limits<qint32>::lowest())
+				{
+					overflow = 0x0001;
+					result = std::numeric_limits<qint32>::lowest();
+				}
+
+				if (std::isinf(input) == true)
+				{
+					if (std::signbit(input) == true)
+					{
+						result = std::numeric_limits<qint32>::lowest();
+					}
+					else
+					{
+						result = std::numeric_limits<qint32>::max();
+					}
+				}
+
+				quint16 underflow = (std::fpclassify(input) == FP_SUBNORMAL) ? 0x0001 : 0x0000;
+				if (underflow == 0x0001)
+				{
+					result = 0;
+				}
+
+				quint16 nan = std::isnan(input);
+				if (nan == 0x0001)
+				{
+					result = 0;
+					overflow = 0;
+				}
+
+				// Set result
+				//
+				instance->addParamSignedInt(o_data_32, result);
+				instance->addParamWord(o_overflow, overflow);
+				instance->addParamWord(o_underflow, underflow);
+				instance->addParamWord(o_nan, nan);
+			}
+			break;
+
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_tconv_v0");
+		}
+
+		return;
+	}
+
+	// INDICATION, OpCode 29
+	//
+	void CommandProcessor_LM5_LM6::afb_indication_v1(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_x_prev = 1;
+		const int i_1_trigger = 2;
+		const int i_2_trigger = 3;
+		const int i_x = 4;
+		const int i_blink_off = 5;
+		const int i_test = 6;
+		const int i_blink = 7;
+
+		const int o_result = 8;
+		const int o_x_prev = i_x_prev;		// const int o_x_prev = 9
+		const int o_1_trigger = i_1_trigger;	// const int o_1_triger = 10
+		const int o_2_trigger = i_2_trigger;	// const int o_1_triger = 11
+		//const int o_indication_edi = 12;
+		//const int o_version = 13;
+		const int o_univibrator = 14;
+
+		// Get AFB configuration
+		//
+		const quint16 conf = instance->param(i_conf)->wordValue();
+
+		const quint16 x_prev_bus = instance->paramExists(i_x_prev)						// 16-bit bus
+								   ? instance->param(i_x_prev)->wordValue()
+								   : 0;
+
+		const quint16 trigger_1_bus = instance->paramExists(i_1_trigger)				// 16-bit bus
+									  ? instance->param(i_1_trigger)->wordValue()
+									  : 0;
+
+		const quint16 trigger_2_bus = instance->paramExists(i_2_trigger)				// 16-bit bus
+									  ? instance->param(i_2_trigger)->wordValue()
+									  : 0;
+
+		const quint16 x_in_bus = instance->param(i_x)->wordValue();						// 16-bit bus
+		const quint16 blink_off_bus = instance->param(i_blink_off)->wordValue();		// 16-bit bus
+		const quint16 test_bus = instance->param(i_test)->wordValue();					// 16-bit bus
+		const quint16 blink_bus = instance->param(i_blink)->wordValue();				// 16-bit bus
+
+		// Logic with outputs
+		//
+		switch (conf)
+		{
+		case 1:
+			{
+				quint16 result_bus = 0;
+				quint16 trigger_1_result_bus = 0;
+				//quint16 trigger_2_result_bus = 0;
+				quint16 x_prev_result_bus = 0;
+				quint16 univibrator_bus = 0;
+
+				for (int bitNo = 0; bitNo < 16; bitNo++)
+				{
+					quint16 blink_off = (blink_off_bus >> bitNo) & 0x0001;
+					quint16 x_in = (x_in_bus >> bitNo) & 0x0001;
+					quint16 x_prev = (x_prev_bus >> bitNo) & 0x0001;
+					quint16 blink = (blink_bus >> bitNo) & 0x0001;
+					quint16 trigger_1 = (trigger_1_bus >> bitNo) & 0x0001;
+
+					quint16 result = 0;
+					quint16 trigger_1_result = 0;
+					//quint16 trigger_2_result = 0;
+					//quint16 x_prev_result = 0;
+					quint16 univibrator_result = 0;
+
+					if (blink_off == 1 && x_in == 1)
+					{
+						result = 1;
+						trigger_1_result = 0;
+					}
+					else
+					{
+						if (x_in == 1)
+						{
+							if (x_prev == 0)
+							{
+								result = blink;
+								trigger_1_result = 1;
+							}
+							else
+							{
+								if (trigger_1 == 1)
+								{
+									result = blink;
+									trigger_1_result = 1;
+								}
+								else
+								{
+									result = 1;
+									trigger_1_result = 0;
+								}
+							}
+						}
+						else
+						{
+							result = 0;
+							trigger_1_result = 0;
+						}
+					}
+
+					if (x_prev == 0 && x_in == 1)
+					{
+						univibrator_result = 1;
+					}
+					else
+					{
+						univibrator_result = 0;
+					}
+
+					// --
+					//
+					result_bus |= result << bitNo;
+					x_prev_result_bus |= x_in << bitNo;
+					trigger_1_result_bus |= trigger_1_result << bitNo;
+					univibrator_bus |= univibrator_result << bitNo;
+				}
+
+				instance->addParamWord(o_result, result_bus | test_bus);
+				instance->addParamWord(o_x_prev, x_prev_result_bus);
+				instance->addParamWord(o_1_trigger, trigger_1_result_bus);
+				instance->addParamWord(o_univibrator, univibrator_bus);
+			}
+			break;
+		case 2:
+			{
+				quint16 result_bus = 0;
+				quint16 trigger_1_result_bus = 0;
+				quint16 trigger_2_result_bus = 0;
+				quint16 x_prev_result_bus = 0;
+				quint16 univibrator_bus = 0;
+
+				for (int bitNo = 0; bitNo < 16; bitNo++)
+				{
+					quint16 blink_off = (blink_off_bus >> bitNo) & 0x0001;
+					quint16 x_in = (x_in_bus >> bitNo) & 0x0001;
+					quint16 x_prev = (x_prev_bus >> bitNo) & 0x0001;
+					quint16 blink = (blink_bus >> bitNo) & 0x0001;
+					quint16 trigger_1 = (trigger_1_bus >> bitNo) & 0x0001;
+					quint16 trigger_2 = (trigger_2_bus >> bitNo) & 0x0001;
+
+					quint16 result = 0;
+					quint16 trigger_1_result = 0;
+					quint16 trigger_2_result = 0;
+					quint16 univibrator_result = 0;
+
+					// ---
+					//
+					if (blink_off == 1 && x_in == 1)
+					{
+						result = 1;
+						trigger_1_result = 0;
+						trigger_2_result = 0;
+					}
+					else
+					{
+						if (blink_off == 0 && x_in == 0)
+						{
+							if (trigger_2 == 0)
+							{
+								result = 0;
+								trigger_1_result = 0;
+								trigger_2_result = 0;
+							}
+							else
+							{
+								result = blink;
+								trigger_1_result = 1;
+								trigger_2_result = 1;
+							}
+						}
+						else
+						{
+							if (x_in == 1)
+							{
+								if (x_prev == 0)
+								{
+									result = blink;
+									trigger_1_result = 1;
+									trigger_2_result = 1;
+								}
+								else
+								{
+									if (trigger_1 == 1)
+									{
+										result = blink;
+										trigger_1_result = 1;
+										trigger_2_result = 1;
+									}
+									else
+									{
+										result	= 1;
+										trigger_1_result = 0;
+										trigger_2_result = 0;
+									}
+								}
+							}
+							else
+							{
+								result	= 0;
+								trigger_1_result = 0;
+								trigger_2_result = 0;
+							}
+						}
+					}
+
+					if (x_prev == 0 && x_in == 1)
+					{
+						univibrator_result = 1;
+					}
+					else
+					{
+						univibrator_result = 0;
+					}
+
+					// --
+					//
+					result_bus |= result << bitNo;
+					x_prev_result_bus |= x_in << bitNo;
+					trigger_1_result_bus |= trigger_1_result << bitNo;
+					trigger_2_result_bus |= trigger_2_result << bitNo;
+					univibrator_bus |= univibrator_result << bitNo;
+				}
+
+				instance->addParamWord(o_result, result_bus | test_bus);
+				instance->addParamWord(o_x_prev, x_prev_result_bus);
+				instance->addParamWord(o_1_trigger, trigger_1_result_bus);
+				instance->addParamWord(o_2_trigger, trigger_2_result_bus);
+				instance->addParamWord(o_univibrator, univibrator_bus);
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_indication_v1");
+		}
+
+		return;
+	}
+
+	// PULSE_GEN, OpCode 30
+	//
+	void CommandProcessor_LM5_LM6::afb_pulse_gen_v0(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_t_high = 1;
+		const int i_t_low = 3;
+		const int i_t_prev = 5;
+		const int i_result_i_en_prev = 7;
+		const int i_start_from = 8;
+		const int i_enable = 9;
+
+		const int o_t_prev = i_t_prev;
+		const int o_result_en_prev = 13;
+		const int o_param_err = 16;
+
+		// Get AFB configuration
+		//
+		const quint16 conf = instance->param(i_conf)->wordValue();
+		const qint32 t_high = instance->param(i_t_high)->signedIntValue();
+		const qint32 t_low = instance->param(i_t_low)->signedIntValue();
+
+		qint32 t_prev = instance->paramExists(i_t_prev)
+						? instance->param(i_t_prev)->signedIntValue()
+						: 0;
+
+		const qint16 result_i_en_prev = instance->paramExists(i_result_i_en_prev)
+							  ? instance->param(i_result_i_en_prev)->wordValue()
+							  : 0;
+
+		const qint16 prev_result = result_i_en_prev & 0x0001;
+		const qint16 prev_enable = (result_i_en_prev >> 1) & 0x0001;
+
+		const qint16 start_from = instance->param(i_start_from)->wordValue();
+		const qint16 enable = instance->param(i_enable)->wordValue();
+
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		// Logic -- translated VHDL code
+		//
+		quint16 result_param_err = 0;
+		quint16 result_result = 0;
+
+		do
+		{
+			if (t_high < m_cycleDurationMs || t_low < m_cycleDurationMs)
+			{
+				result_param_err = 1;
+				result_result = 0;
+				t_prev = 0;
+				break;
+			}
+
+			if (enable == 0)
+			{
+				result_result = 0;
+				t_prev = 0;
+				break;
+			}
+
+			// Detect front for enable 0 -> 1 and restart pulse gen is this case
+			//
+			if (prev_enable == 0 && enable == 1)
+			{
+				if (start_from == 1)
+				{
+					result_result = 1;
+					t_prev = t_high / m_cycleDurationMs;
+				}
+				else
+				{
+					result_result = 0;
+					t_prev = t_low / m_cycleDurationMs;
+				}
+
+				break;
+			}
+
+			// Decreasing counter
+			//
+			t_prev --;
+			result_result = prev_result;
+
+			// Check if it's time to swap out and restart timer
+			//
+			if (t_prev <= 0)
+			{
+				if (prev_result == 0)	// swap out
+				{
+					result_result = 1;
+					t_prev = t_high / m_cycleDurationMs;
+				}
+				else
+				{
+					result_result = 0;
+					t_prev = t_low / m_cycleDurationMs;
+				}
+
+				break;
+			}
+
+		}
+		while (false);
+
+		instance->addParamWord(o_param_err, result_param_err);
+		instance->addParamSignedInt(o_t_prev, t_prev);
+		instance->addParamWord(o_result_en_prev, result_result);
+		instance->addParamWord(i_result_i_en_prev, ((enable & 1) << 1) | (result_result & 1 ));
+
+		return;
+	}
 
 }

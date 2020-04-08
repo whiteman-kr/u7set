@@ -47,11 +47,11 @@ namespace Sim
 			return m_lm->asyncRunCycle(time, reset);
 		}
 
-		bool afterWorkCycleTask(AppSignalManager& appSignalManager)
+		bool afterWorkCycleTask(AppSignalManager& appSignalManager, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime)
 		{
 			// Set LogicModule's RAM to Sim::AppSignalManager
 			//
-			appSignalManager.setData(equipmentId(), m_lm->ram());
+			appSignalManager.setData(equipmentId(), m_lm->ram(), plantTime, localTime, systemTime);
 
 			return true;
 		}

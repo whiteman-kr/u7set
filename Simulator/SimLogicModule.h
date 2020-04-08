@@ -73,9 +73,9 @@ namespace Sim
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 
-		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
-		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
-		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
+		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
+		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
+		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
 
 		// Running Emulation
 		//

@@ -18,7 +18,6 @@ struct LmCommand
 	quint16 codeMask = 0;
 	QString caption;
 	QString simulationFunc;
-	Hash simulationFuncHash = 0;
 	QString parseFunc;
 	QString description;
 

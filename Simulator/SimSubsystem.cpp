@@ -16,19 +16,19 @@ namespace Sim
 	{
 		m_lmDescription = lmDescription;
 
-		if (firmware.uartExists(UartID::ApplicationLogic) == false)
+		if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
 		{
 			writeError(QObject::tr("Application data is not found in firmware."));
 			return false;
 		}
 
-		if (firmware.uartExists(UartID::Configuration) == false)
+		if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
 		{
 			writeError(QObject::tr("Configuration data is not found in firmware."));
 			return false;
 		}
 
-		if (firmware.uartExists(UartID::Tuning) == false)
+		if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
 		{
 			writeError(QObject::tr("Tuning data is not found in firmware."));
 			return false;

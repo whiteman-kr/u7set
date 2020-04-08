@@ -183,7 +183,7 @@ namespace TrendLib
 		message->set_view_high_limit(m_viewHighLimit);
 		message->set_view_low_limit(m_viewLowLimit);
 
-		message->set_color(m_color.rgb());
+		message->set_color(m_color);
 
 		return true;
 	}
@@ -206,7 +206,7 @@ namespace TrendLib
 		m_viewHighLimit = message.view_high_limit();
 		m_viewLowLimit = message.view_low_limit();
 
-		m_color = QColor::fromRgb(message.color());
+		m_color = message.color();
 
 		return true;
 	}
@@ -346,12 +346,12 @@ namespace TrendLib
 		m_viewLowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
-	QColor TrendSignalParam::color() const
+	TrendColor TrendSignalParam::color() const
 	{
 		return m_color;
 	}
 
-	void TrendSignalParam::setColor(const QColor& value)
+	void TrendSignalParam::setColor(const TrendColor& value)
 	{
 		m_color = value;
 	}
@@ -594,8 +594,9 @@ namespace TrendLib
 		int index = 0;
 		for (const TrendSignalParam& s : m_signalParams)
 		{
-			result.push_back(s);
-			result.back().setTempSignalIndex(index);
+			auto& is = result.emplace_back(s);
+			is.setTempSignalIndex(index);
+
 			index++;
 		}
 
@@ -614,8 +615,9 @@ namespace TrendLib
 		{
 			if (s.isAnalog() == true)
 			{
-				result.push_back(s);
-				result.back().setTempSignalIndex(index);
+				auto& is = result.emplace_back(s);
+				is.setTempSignalIndex(index);
+
 				index++;
 			}
 		}
@@ -635,9 +637,28 @@ namespace TrendLib
 		{
 			if (s.isDiscrete() == true)
 			{
-				result.push_back(s);
-				result.back().setTempSignalIndex(index);
+				auto& is = result.emplace_back(s);
+				is.setTempSignalIndex(index);
+
 				index++;
+			}
+		}
+
+		return result;
+	}
+
+	std::vector<Hash> TrendSignalSet::trendSignalsHashes(const QString& equipmentId /*= QString()*/) const
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		std::vector<Hash> result;
+		result.reserve(m_signalParams.size());
+
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			if (equipmentId.isEmpty() == true || s.equipmnetId() == equipmentId)
+			{
+				result.emplace_back(s.appSignalHash());
 			}
 		}
 
@@ -1391,7 +1412,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendSignalSet::slot_realtimeRequestError(QString errorText)
+	void TrendSignalSet::slot_realtimeRequestError(QString /*errorText*/)
 	{
 	}
 

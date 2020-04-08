@@ -9,6 +9,7 @@ QStringList SimOutputWidget::m_data;
 SimOutputWidget::SimOutputWidget(QWidget* parent) :
 	QTextEdit(parent)
 {
+
 	if (simOriginalMessageHandler == nullptr)
 	{
 		simOriginalMessageHandler = qInstallMessageHandler(simulatorOutputHandler);

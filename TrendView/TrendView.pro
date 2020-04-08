@@ -42,6 +42,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Forms/DialogChooseTrendSignals.cpp \
     TrendWidget.cpp \
     TrendSignal.cpp \
     TrendSlider.cpp \
@@ -56,6 +57,7 @@ SOURCES += \
     DialogTrendSignalPoint.cpp
 
 HEADERS += \
+    Forms/DialogChooseTrendSignals.h \
     Stable.h \
     TrendWidget.h \
     TrendSignal.h \
@@ -81,6 +83,7 @@ RESOURCES += \
     TrendView.qrc
 
 FORMS += \
+    Forms/DialogChooseTrendSignals.ui \
     TrendsMainWindow.ui \
     DialogTrendSignalProperties.ui \
     DialogTrendSignalPoints.ui \

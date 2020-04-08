@@ -141,6 +141,8 @@ public:
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
 
+	bool hasSameValue(const AppSignalState& b) const;
+
 	static QString toString(double value, E::ValueViewType viewType, int precision);
 
 public:
@@ -152,6 +154,7 @@ public:
 	static const quint32 VALID = 1;
 	static const quint32 INVALID = 0;
 };
+
 
 Q_DECLARE_METATYPE(AppSignalState)
 

@@ -94,7 +94,6 @@ SOURCES += main.cpp \
     ../lib/CircularLogger.cpp \
     MonitorView.cpp \
     Trend/MonitorTrends.cpp \
-    Trend/DialogChooseTrendSignals.cpp \
     MonitorArchive.cpp \
     DialogChooseArchiveSignals.cpp \
     ArchiveTcpClient.cpp \
@@ -167,7 +166,6 @@ HEADERS  += \
     ../lib/CircularLogger.h \
     MonitorView.h \
     Trend/MonitorTrends.h \
-    Trend/DialogChooseTrendSignals.h \
     MonitorArchive.h \
     DialogChooseArchiveSignals.h \
     ArchiveTcpClient.h \
@@ -208,7 +206,6 @@ FORMS    += \
     DialogSignalSearch.ui \
     DialogSignalSnapshot.ui \
     DialogColumns.ui \
-    Trend/DialogChooseTrendSignals.ui \
     DialogChooseArchiveSignals.ui
 
 

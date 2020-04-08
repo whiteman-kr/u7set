@@ -2,6 +2,7 @@
 #include "Simulator.h"
 #include "../Proto/serialization.pb.h"
 
+
 namespace Sim
 {
 
@@ -32,6 +33,7 @@ namespace Sim
 			QWriteLocker wl(&m_ramLock);
 
 			m_ram.clear();
+			m_ramTimes.clear();
 		}
 
 		return;
@@ -100,13 +102,203 @@ namespace Sim
 		return ok;
 	}
 
-	void AppSignalManager::setData(const QString& equipmentId, const Sim::Ram& ram)
+	void AppSignalManager::setData(const QString& equipmentId,
+								   const Sim::Ram& ram,
+								   TimeStamp plantTime,
+								   TimeStamp localTime,
+								   TimeStamp systemTime)
 	{
-		QWriteLocker wl(&m_ramLock);
+		Hash lmHash = ::calcHash(equipmentId);
 
-		m_ram[equipmentId].updateFrom(ram);
+		{
+			QWriteLocker wl(&m_ramLock);
+
+			m_ram[lmHash].updateFrom(ram);
+
+			Times tm;
+			tm.system = systemTime;
+			tm.local = localTime;
+			tm.plant = plantTime;
+
+			m_ramTimes[lmHash] = tm;
+		}
+
+		// Fetch data for realtime trends now, while this memory was not updated yet
+		// Later trend will fetch it itself
+		//
+		{
+			QDateTime currentTime = QDateTime::currentDateTime();
+
+			QMutexLocker ml(&m_trendMutex);
+
+			for (auto it = m_trends.begin(); it != m_trends.end();)
+			{
+				Trend& trend = *it;
+
+				if (currentTime.toSecsSinceEpoch() - trend.lastAccess.toSecsSinceEpoch() >= 5)	// 5 seconds
+				{
+					// Remove this thend form obeserved, as it did not have fetched data for 5 seconds
+					//
+					it = m_trends.erase(it);
+					continue;
+				}
+
+				for (TrendSignal& ts : trend.trendSignals)
+				{
+					if (ts.equipmentIdHash == lmHash)
+					{
+						// Fetching appsignals states from ram is cause locking m_ramLock for read,
+						// so it is nested lock m_trendMutex -> m_trendMutex.
+						// Just keep it in mind and do not try to lock in other dirrection
+						//
+
+						AppSignalState& addedState = ts.states.emplace_back(this->signalState(ts.appSignalHash, nullptr));
+
+						if (ts.states.size() > 3 &&
+							addedState.hasSameValue(ts.states[ts.states.size() - 2]) == true &&
+							addedState.hasSameValue(ts.states[ts.states.size() - 3]) == true)
+						{
+							ts.states[ts.states.size() - 2] = addedState;
+							ts.states.resize(ts.states.size() - 1);		// If last 3 points have the same value, then extend 2nt to 3rd;
+						}
+					}
+				}
+
+				// Increment it here, as we erase some items in loop
+				//
+				++it;
+			}
+		}
 
 		return;
+	}
+
+	std::shared_ptr<TrendLib::RealtimeData> AppSignalManager::trendData(const QString& trendId,
+																		const std::vector<Hash>& trendSignals,
+																		TrendLib::TrendStateItem* minState,
+																		TrendLib::TrendStateItem* maxState)
+	{
+		Q_ASSERT(minState);
+		Q_ASSERT(maxState);
+
+		minState->clear();
+		maxState->clear();
+
+		std::shared_ptr<TrendLib::RealtimeData> result;
+
+		if (trendSignals.empty() == true)
+		{
+			return result;
+		}
+
+		auto createTrendSignal = [this](Hash signalHash) -> TrendSignal
+		{
+			AppSignalParam sp = this->signalParam(signalHash, nullptr);
+
+			TrendSignal ts;
+
+			ts.appSignalId = sp.appSignalId();
+			ts.appSignalHash = signalHash;
+			ts.equipmentId = sp.equipmentId();
+			ts.equipmentIdHash = ::calcHash(sp.equipmentId());
+			ts.states.reserve(100);
+
+			return ts;
+		};
+
+		QDateTime currentTime = QDateTime::currentDateTime();
+
+		QMutexLocker ml(&m_trendMutex);
+
+		bool trendIsPresent = false;
+		for (auto& smTrend : m_trends)
+		{
+			if (smTrend.trendId == trendId)
+			{
+				// Trend is found, fetch all data from buffers
+				//
+				if (result == nullptr)
+				{
+					result = std::make_shared<TrendLib::RealtimeData>();
+				}
+
+				smTrend.lastAccess = currentTime;		// Update time, so this trend will not be removed on access timeout
+
+				for (Hash hash : trendSignals)
+				{
+					TrendLib::RealtimeDataChunk& chunk = result->signalData.emplace_back();
+
+					chunk.appSignalHash = hash;
+
+					bool trendSignalFound = false;
+					for (TrendSignal& smTrendSignal : smTrend.trendSignals)
+					{
+						// It can happen that EquipmentId for signal has changed,
+						// then we must check EquipmentId every time here (call signalParam and compare equipmentid for smTrendSignal)
+						// I do not do it as very unlikely situation
+						// In such cases signal must be removed from trends and added again
+						//
+						if (smTrendSignal.appSignalHash == hash)
+						{
+							// found signal, copy all states
+							//
+							chunk.states.reserve(smTrendSignal.states.size());
+
+							for (const AppSignalState& s : smTrendSignal.states)
+							{
+								auto& addedState = chunk.states.emplace_back(TrendLib::TrendStateItem{s});
+
+								addedState.setRealtimePointFlag();
+
+								if (minState->system == 0 || minState->system > addedState.system)
+								{
+									*minState = addedState;
+								}
+
+								if (maxState->system == 0 || maxState->system < addedState.system)
+								{
+									*maxState = addedState;
+								}
+							}
+
+							smTrendSignal.states.clear();
+
+							trendSignalFound = true;
+							break;
+						}
+					}
+
+					// Signal not found, add it to observations
+					//
+					if (trendSignalFound == false)
+					{
+						smTrend.trendSignals.emplace_back(createTrendSignal(hash));
+					}
+				}
+
+				trendIsPresent = true;
+				break;
+			}
+		}
+
+		if (trendIsPresent == false)
+		{
+			// Add trend to realtime observe
+			//
+			Trend& trend = m_trends.emplace_back();
+
+			trend.trendId = trendId;
+			trend.lastAccess = QDateTime::currentDateTime();
+
+			trend.trendSignals.reserve(trendSignals.size());
+
+			for (Hash hash : trendSignals)
+			{
+				trend.trendSignals.emplace_back(createTrendSignal(hash));
+			}
+		}
+
+		return result;
 	}
 
 	std::optional<Signal> AppSignalManager::signalParamExt(const QString& appSignalId) const
@@ -125,6 +317,27 @@ namespace Sim
 		{
 			return it->second;
 		}
+	}
+
+	std::vector<AppSignalParam> AppSignalManager::signalList() const
+	{
+		std::vector<AppSignalParam> result;
+
+		{
+			QReadLocker rl(&m_signalParamLock);
+
+			result.reserve(m_signalParams.size());
+
+			for (const auto&[hash, sp] : m_signalParams)
+			{
+				assert(hash == sp.hash());
+				Q_UNUSED(hash);
+
+				result.push_back(sp);
+			}
+		}
+
+		return result;
 	}
 
 	bool AppSignalManager::signalExists(Hash hash) const
@@ -174,6 +387,7 @@ static const AppSignalParam dummy;
 		int dataSize{};
 
 		AppSignalState state;
+
 		state.m_hash = signalHash;
 
 		{
@@ -216,19 +430,27 @@ static const AppSignalParam dummy;
 		{
 			QReadLocker rl(&m_ramLock);
 
-			auto it = m_ram.find(logicModuleId);
+			auto ramIt = m_ram.find(::calcHash(logicModuleId));
 
 			if (found != nullptr)
 			{
-				*found = it != m_ram.end();
+				*found = (ramIt != m_ram.end());
 			}
 
-			if (it == m_ram.end())
+			if (ramIt == m_ram.end())
 			{
 				return state;
 			}
 
-			const Ram& ram = it->second;
+			const Ram& ram = ramIt->second;
+
+			// Get time for this ram
+			//
+			auto timeIt = m_ramTimes.find(::calcHash(logicModuleId));
+			if (timeIt != m_ramTimes.end())
+			{
+				state.m_time = timeIt->second;
+			}
 
 			switch (type)
 			{
@@ -256,7 +478,7 @@ static const AppSignalParam dummy;
 									}
 									else
 									{
-										state.m_flags.valid = true;
+										state.m_flags.valid = !m_simulator->isStopped();
 										state.m_value = data;
 									}
 								}
@@ -282,7 +504,7 @@ static const AppSignalParam dummy;
 									}
 									else
 									{
-										state.m_flags.valid = true;
+										state.m_flags.valid = !m_simulator->isStopped();;
 										state.m_value = data;
 									}
 								}
@@ -313,7 +535,7 @@ static const AppSignalParam dummy;
 					}
 					else
 					{
-						state.m_flags.valid = true;
+						state.m_flags.valid = !m_simulator->isStopped();
 						state.m_value = data;
 					}
 				}
@@ -334,13 +556,37 @@ static const AppSignalParam dummy;
 		return signalState(::calcHash(appSignalId), found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<Hash>& /*appSignalHashes*/, std::vector<AppSignalState>* /*result*/, int* /*found*/) const
+	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
-		//int to_do_signalState;
-
-		// To Do
+		// This function must be optimized, signalState every times locks/unlocks/locks/unlock...
 		//
-		assert(false);
+		if (result == nullptr)
+		{
+			Q_ASSERT(result);
+			return;
+		}
+
+		result->clear();
+		result->reserve(appSignalHashes.size());
+
+		int foundCount = 0;
+
+		for (Hash signalHash: appSignalHashes)
+		{
+			bool foundHash = false;
+			result->emplace_back(signalState(signalHash, &foundHash));
+
+			if (foundHash == true)
+			{
+				foundCount ++;
+			}
+		}
+
+		if (found != nullptr)
+		{
+			*found = foundCount;
+		}
+
 		return;
 	}
 

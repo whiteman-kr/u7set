@@ -7,7 +7,7 @@
 namespace Sim
 {
 
-	Eeprom::Eeprom(int uartId) :
+	Eeprom::Eeprom(UartId uartId) :
 		m_uartId(uartId)
 	{
 	}
@@ -18,7 +18,7 @@ namespace Sim
 
 	bool Eeprom::init(const Hardware::ModuleFirmwareData& data)
 	{
-		m_uartId = data.uartId;
+		m_uartId = static_cast<UartId>(data.uartId);
 		uartType = data.uartType;
 
 		m_frameSize = data.eepromFrameSize;
@@ -88,6 +88,9 @@ namespace Sim
 			return false;
 		}
 
+		m_channelServiceInfo.clear();
+		m_channelServiceInfo.reserve(maxConfigurationCount);
+
 		m_configFrameIndexes.reserve(maxConfigurationCount);
 
 		for (int i = 0; i < maxConfigurationCount; i++)
@@ -100,7 +103,30 @@ namespace Sim
 				return false;
 			}
 
-			m_configFrameIndexes.push_back(startFrameIndex);
+			// +1 to start frame index, to the payload
+			// +0
+			//
+			m_configFrameIndexes.push_back(startFrameIndex == 0 ? startFrameIndex : startFrameIndex + 1);
+
+			// --
+			//
+			ChannelServiceFrame csf;
+
+			if (i < configrationsCount)
+			{
+				csf.version = getWord(startFrameIndex, 0);
+				csf.dataType = static_cast<UartId>(getWord(startFrameIndex, 1));
+				csf.uniqueId = getUint64(startFrameIndex, 2);
+				csf.frameCount = getWord(startFrameIndex, 6);
+
+				if (csf.dataType != uartId())
+				{
+					assert(csf.dataType == uartId());
+					return false;
+				}
+			}
+
+			m_channelServiceInfo.push_back(csf);
 		}
 
 		return true;
@@ -141,6 +167,22 @@ namespace Sim
 		return 0;
 	}
 
+	quint64 Eeprom::getUint64(int frameIndex, int wordOffset)
+	{
+		if (wordOffset < 0 ||
+			wordOffset > frameSize() - 9 ||
+			frameIndex < 0  ||
+			frameIndex > frameCount())
+		{
+			assert(false);
+			return 0;
+		}
+
+		int eepromOffset = frameSize() * frameIndex + wordOffset * 2;
+
+		return getData<quint64>(eepromOffset);
+	}
+
 	float Eeprom::getFloat(int /*frameIndex*/, int /*wordOffset*/)
 	{
 		assert(false);	// To Do
@@ -169,7 +211,7 @@ namespace Sim
 		return result;
 	}
 
-	int Eeprom::uartId() const
+	UartId Eeprom::uartId() const
 	{
 		return m_uartId;
 	}
@@ -223,5 +265,21 @@ namespace Sim
 		}
 
 		return m_configFrameIndexes[LmNumber];
+	}
+
+	int Eeprom::configFramesCount(int LmNumber) const
+	{
+		// LmNumber is 1-based
+		//
+		LmNumber--;
+
+		if (LmNumber < 0 ||
+			LmNumber >= static_cast<int>(m_channelServiceInfo.size()))
+		{
+			assert(false);
+			return 0;		// Configuration cannot start form frame 0
+		}
+
+		return m_channelServiceInfo[LmNumber].frameCount;
 	}
 }

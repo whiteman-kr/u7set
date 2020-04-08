@@ -315,7 +315,7 @@ namespace VFrame30
 
 	void SchemaItemConst::setPrecision(int value)
 	{
-		m_precision = qBound(0, value, 24);
+		m_precision = qBound(-1, value, 24);
 
 		// Set precision to m_floatValue property
 		//

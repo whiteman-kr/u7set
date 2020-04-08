@@ -42,9 +42,9 @@ namespace TrendLib
 		return m_timeStamp;
 	}
 
-	void TrendRuler::setTimeStamp(const TimeStamp& value)
+	void TrendRuler::setTimeStamp(const TimeStamp& value, quint64 step)
 	{
-		m_timeStamp = value.timeStamp;
+		m_timeStamp = (value.timeStamp / step) * step;
 	}
 
 	bool TrendRuler::isShowRuler() const
@@ -122,7 +122,7 @@ namespace TrendLib
 	void TrendRulerSet::addRuler(const TrendLib::TrendRuler& ruler)
 	{
 		TrendLib::TrendRuler r = ruler;
-		r.setTimeStamp(ruler.timeStamp().timeStamp - ruler.timeStamp().timeStamp % 5);
+		r.setTimeStamp(ruler.timeStamp().timeStamp - ruler.timeStamp().timeStamp % 5, rulerStep());
 
 		m_rulers.push_back(r);
 	}
@@ -172,6 +172,16 @@ namespace TrendLib
 	const TrendLib::TrendRuler& TrendRulerSet::at(int index) const
 	{
 		return m_rulers.at(index);
+	}
+
+	quint64 TrendRulerSet::rulerStep() const
+	{
+		return m_rulerStep;
+	}
+
+	void TrendRulerSet::setRulerStep(quint64 value)
+	{
+		m_rulerStep = value;
 	}
 
 

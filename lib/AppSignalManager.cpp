@@ -74,21 +74,6 @@ void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 	return;
 }
 
-std::vector<AppSignalParam> AppSignalManager::signalList() const
-{
-	QMutexLocker l(&m_paramsMutex);
-
-	std::vector<AppSignalParam> result;
-	result.reserve(m_signalParams.size());
-
-	for (auto& s : m_signalParams)
-	{
-		result.push_back(s.second);
-	}
-
-	return result;
-}
-
 std::vector<Hash> AppSignalManager::signalHashes() const
 {
 	QMutexLocker l(&m_paramsMutex);
@@ -209,6 +194,21 @@ bool AppSignalManager::signalExists(Hash hash) const
 	return result != m_signalParams.end();
 }
 
+std::vector<AppSignalParam> AppSignalManager::signalList() const
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	std::vector<AppSignalParam> result;
+	result.reserve(m_signalParams.size());
+
+	for (auto& s : m_signalParams)
+	{
+		result.push_back(s.second);
+	}
+
+	return result;
+}
+
 bool AppSignalManager::signalExists(const QString& appSignalId) const
 {
 	Hash signalHash = ::calcHash(appSignalId);
@@ -289,6 +289,9 @@ void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std
 		assert(result);
 		return;
 	}
+
+	result->clear();
+	result->reserve(appSignalHashes.size());
 
 	emit addSignalsToPriorityList(QVector<Hash>::fromStdVector(appSignalHashes));
 

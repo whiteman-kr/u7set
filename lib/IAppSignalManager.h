@@ -11,6 +11,8 @@ class IAppSignalManager
 public:
 	// AppSignals
 	//
+	virtual std::vector<AppSignalParam> signalList() const = 0;
+
 	virtual bool signalExists(Hash hash) const = 0;
 	virtual bool signalExists(const QString& appSignalId) const = 0;
 

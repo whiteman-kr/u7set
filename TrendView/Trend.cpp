@@ -927,7 +927,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 		E::TimeType timeType = drawParam.timeType();
 
-		QPen linePen(signal.color(),
+		QPen linePen({signal.color()},
 					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.dpiY(),
 					 Qt::SolidLine);
 		painter->setPen(linePen);
@@ -1079,7 +1079,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 		E::TimeType timeType = drawParam.timeType();
 
-		QPen linePen(signal.color(),
+		QPen linePen({signal.color()},
 					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.dpiY());
 		painter->setPen(linePen);
 
@@ -1599,8 +1599,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 				auto stateIt = std::lower_bound(states.begin(), states.end(), fakeState,
 								 [&rulerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
 								 {
-										TimeStamp ts = state.getTime(timeType);
-										return ts < rulerTime;
+										return state.getTime(timeType) < rulerTime;
 								 });
 
 				if (stateIt != states.end())

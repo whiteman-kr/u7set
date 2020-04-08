@@ -506,7 +506,7 @@ void SimOverrideWidget::setValue(QString appSignalId)
 
 	QDialog d(this);
 
-	d.setWindowTitle(tr("Set value for %1 (%2)").arg(osp->m_customSignalId).arg(osp->m_appSignalId));
+	d.setWindowTitle(tr("Set Value %1 (%2)").arg(osp->m_customSignalId).arg(osp->m_appSignalId));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -644,13 +644,32 @@ void SimOverrideWidget::setValue(QString appSignalId)
 			break;
 
 		case E::SignalType::Analog:
-			switch (osp->m_dataFormat)
 			{
-			case E::AnalogAppSignalFormat::SignedInt32:			newValue = edit->text().toInt();		break;
-			case E::AnalogAppSignalFormat::Float32:				newValue = edit->text().toDouble();		break;
-			default:
-				assert(false);
-				return;
+				QLocale c;
+				bool ok = false;
+				QString editText = edit->text();
+
+				switch (osp->m_dataFormat)
+				{
+				case E::AnalogAppSignalFormat::SignedInt32:		newValue = c.toInt(editText, &ok);		break;
+				case E::AnalogAppSignalFormat::Float32:
+					newValue = c.toFloat(editText, &ok);
+					if (ok == false)
+					{
+						// Try another one case, divider can be different
+						//
+						newValue = editText.toFloat(&ok);
+					}
+					break;
+				default:
+					assert(false);
+					return;
+				}
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), tr("Cannot convert string (%1) to analog number.").arg(editText));
+				}
 			}
 			break;
 

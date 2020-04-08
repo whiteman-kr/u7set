@@ -1,5 +1,4 @@
-#ifndef SIMEXCEPTION_H
-#define SIMEXCEPTION_H
+#pragma once
 
 #include <QException>
 
@@ -27,4 +26,3 @@ namespace Sim
 	};
 }
 
-#endif // SIMEXCEPTION_H

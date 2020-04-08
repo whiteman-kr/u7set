@@ -25,7 +25,7 @@ namespace TrendLib
 		//
 	public:
 		const TimeStamp& timeStamp() const;
-		void setTimeStamp(const TimeStamp& value);
+		void setTimeStamp(const TimeStamp& value, quint64 step);
 
 		bool isShowRuler() const;
 		void setShowRuler(bool value);
@@ -60,8 +60,12 @@ namespace TrendLib
 		TrendLib::TrendRuler& at(int index);
 		const TrendLib::TrendRuler& at(int index) const;
 
+		quint64 rulerStep() const;
+		void setRulerStep(quint64 value);
+
 	private:
 		std::vector<TrendLib::TrendRuler> m_rulers;
+		quint64 m_rulerStep = 1;
 	};
 }
 

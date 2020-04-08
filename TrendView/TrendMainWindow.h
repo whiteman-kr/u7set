@@ -56,7 +56,6 @@ namespace TrendLib
 		virtual void signalsButton();
 		void updateWidget();
 
-	private slots:
 		void signalProperties(QString appSignalId);
 
 		void actionOpenTriggered();
@@ -99,7 +98,7 @@ namespace TrendLib
 
 		bool isRealtimeAutoShift() const;
 
-	private:
+	protected:
 		Ui::TrendsMainWindow *ui;
 
 		QToolBar* m_toolBar = nullptr;
@@ -107,10 +106,18 @@ namespace TrendLib
 		QComboBox* m_viewCombo = nullptr;
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
+
 		QPushButton* m_realtimeModeButton = nullptr;
 		QPushButton* m_realtimeAutoShiftButton = nullptr;
+		QAction* m_realtimeActionForButton = nullptr;	// Watch the following commnet for m_refreshActionForButton!
 
 		QPushButton* m_refreshButton = nullptr;
+		QAction* m_refreshActionForButton = nullptr;	// When m_refreshButton is added to ToolBar m_refreshActionForButton is returned value.
+														// Action is used for hiding Button from ToolBar, as hiding QWidged does not work
+														// Qt Help for QToolBar::addWidget says:
+														// Note: You should use QAction::setVisible() to change the visibility of the widget.
+														// Using QWidget::setVisible(), QWidget::show() and QWidget::hide() does not work.
+
 		QPushButton* m_signalsButton = nullptr;
 
 		QAction* m_refreshAction = nullptr;
