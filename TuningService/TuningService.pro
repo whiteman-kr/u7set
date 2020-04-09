@@ -30,6 +30,7 @@ unix {
 }
 
 SOURCES += \
+    ../lib/Address16.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/CircularLogger.cpp \
@@ -77,6 +78,7 @@ SOURCES += \
     ../lib/SimpleMutex.cpp
 
 HEADERS += \
+    ../lib/Address16.h \
     ../lib/BuildInfo.h \
     ../lib/CfgServerLoader.h \
     ../lib/CircularLogger.h \

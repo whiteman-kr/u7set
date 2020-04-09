@@ -256,7 +256,7 @@ namespace Hardware
 
 		QString lmID() const { return m_lmID; }
 
-		QString validitySignalID() const { return m_validitySignalID; }
+		QString validitySignalEquipmentID() const { return m_validitySignalEquipmentID; }
 		Address16 validitySignalAbsAddr() const { return m_validitySignalAbsAddr; }
 
 		void writeInfo(QStringList& list) const;
@@ -299,7 +299,7 @@ namespace Hardware
 		QString m_lmID;
 		const DeviceController* m_controller = nullptr;
 
-		QString m_validitySignalID;
+		QString m_validitySignalEquipmentID;
 		Address16 m_validitySignalAbsAddr;
 
 		QString m_optoModuleID;
@@ -506,6 +506,7 @@ namespace Hardware
 
 		OptoModuleShared getOptoModule(const QString& optoModuleID) const;
 		OptoModuleShared getOptoModule(const OptoPortShared optoPort) const;
+		QString getOptoModuleID(const QString& optoPortID) const;
 		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmID) const;
 		void getOptoModulesSorted(QVector<OptoModuleShared>& modules) const;
 
@@ -562,4 +563,6 @@ namespace Hardware
 
 		QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
 	};
+
+	typedef std::shared_ptr<Hardware::Connection> SharedConnection;
 }

@@ -28,6 +28,7 @@ unix {
 }
 
 SOURCES += main.cpp\
+    ../lib/Address16.cpp \
         SourceListWidget.cpp \
     PacketSourceModel.cpp \
     SourceStatusWidget.cpp \
@@ -57,6 +58,7 @@ SOURCES += main.cpp\
     ../lib/SimpleMutex.cpp
 
 HEADERS  += SourceListWidget.h \
+    ../lib/Address16.h \
     PacketSourceModel.h \
     SourceStatusWidget.h \
     ../lib/DataSource.h \

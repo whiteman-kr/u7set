@@ -203,7 +203,7 @@ namespace Hardware
 			return false;
 		}
 
-		m_validitySignalID = validitySignal->equipmentIdTemplate();
+		m_validitySignalEquipmentID = validitySignal->equipmentIdTemplate();
 
 		if (validitySignal->memoryArea() != E::MemoryArea::DiagnosticsData)
 		{
@@ -1612,7 +1612,7 @@ namespace Hardware
 
 		list.append(QString(tr("Rx validity signal:\t\t%1\t%2\n")).
 					arg(validitySignalAbsAddr().toString()).
-					arg(validitySignalID()));
+					arg(validitySignalEquipmentID()));
 
 		list.append(QString(tr("Port Rx data:\n")));
 
@@ -3119,6 +3119,19 @@ namespace Hardware
 		}
 
 		return m_modules.value(optoPort->optoModuleID(), nullptr);
+	}
+
+	QString OptoModuleStorage::getOptoModuleID(const QString& optoPortID) const
+	{
+		OptoPortShared optoPort = m_ports.value(optoPortID, nullptr);
+
+		if (optoPort == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return optoPort->optoModuleID();
 	}
 
 	QList<OptoModuleShared> OptoModuleStorage::getLmAssociatedOptoModules(const QString& lmID) const

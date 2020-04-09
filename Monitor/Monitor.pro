@@ -59,6 +59,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
+    ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     MonitorMainWindow.cpp \
@@ -127,6 +128,7 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp
 
 HEADERS  += \
+    ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     MonitorMainWindow.h \
