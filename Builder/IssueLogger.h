@@ -362,8 +362,8 @@ namespace Builder
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema %1).
 		void errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID);			// UalSignal is not found for pin %1 (Logic schema %2).
 		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
-		void errALC5122(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB output (Logic schema %1).
-		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
+		void errALC5122(QUuid ualItemUuid, QString schemaID, QString itemLabel);		// Different busTypes on AFB output (Logic schema %1, item %2).
+		void errALC5123(QUuid ualItemUuid, QString schemaID, QString itemLabel);		// Different busTypes on AFB inputs (Logic schema %1, item %2).
 		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 		void errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID);	// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
 		void errALC5126(QUuid ualItemUuid, QString schemaID);							// Signal and bus inputs sizes are not multiples  (Logic schema %1).

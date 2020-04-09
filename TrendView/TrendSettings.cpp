@@ -33,17 +33,16 @@ namespace TrendLib
 	{
 		QSettings s;
 
-		s.setValue("Trends/MainWindow/pos", m_mainWindowPos);
-		s.setValue("Trends/MainWindow/geometry", m_mainWindowGeometry);
-		s.setValue("Trends/MainWindow/state", m_mainWindowState);
+		s.setValue(qAppName() + "/Trends/MainWindow/pos", m_mainWindowPos);
+		s.setValue(qAppName() + "/Trends/MainWindow/geometry", m_mainWindowGeometry);
+		s.setValue(qAppName() + "/Trends/MainWindow/state", m_mainWindowState);
 
-		s.setValue("Trends/MainWindow/ToolBar/viewType", m_viewType);
-		s.setValue("Trends/MainWindow/ToolBar/scaleType", m_scaleType);
-		s.setValue("Trends/MainWindow/ToolBar/laneCount", m_laneCount);
-		s.setValue("Trends/MainWindow/ToolBar/timeTypeIndex", m_timeTypeIndex);
-		s.setValue("Trends/MainWindow/ToolBar/timeType", m_timeType);
-
-		s.setValue("Trends/DialogTrendSignalPoints/allowPointsEditing", m_allowPointsEditing);
+		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/viewType", m_viewType);
+		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/scaleType", m_scaleType);
+		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/laneCount", m_laneCount);
+		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/timeTypeIndex", m_timeTypeIndex);
+		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/timeType", m_timeType);
+		s.setValue(qAppName() + "/Trends/DialogTrendSignalPoints/allowPointsEditing", m_allowPointsEditing);
 
 		return;
 	}
@@ -52,17 +51,17 @@ namespace TrendLib
 	{
 		QSettings s;
 
-		m_mainWindowPos = s.value("Trends/MainWindow/pos", QPoint(200, 200)).toPoint();
-		m_mainWindowGeometry = s.value("Trends/MainWindow/geometry").toByteArray();
-		m_mainWindowState = s.value("Trends/MainWindow/state").toByteArray();
+		m_mainWindowPos = s.value(qAppName() + "/Trends/MainWindow/pos", QPoint(200, 200)).toPoint();
+		m_mainWindowGeometry = s.value(qAppName() + "/Trends/MainWindow/geometry").toByteArray();
+		m_mainWindowState = s.value(qAppName() + "/Trends/MainWindow/state").toByteArray();
 
-		m_viewType = s.value("Trends/MainWindow/ToolBar/viewType", 0).toInt();
-		m_scaleType = s.value("Trends/MainWindow/ToolBar/scaleType", 0).toInt();
-		m_laneCount = s.value("Trends/MainWindow/ToolBar/laneCount", 2).toInt();
-		m_timeTypeIndex = s.value("Trends/MainWindow/ToolBar/timeTypeIndex", 0).toInt();
-		m_timeType = s.value("Trends/MainWindow/ToolBar/timeType", 0).toInt();
+		m_viewType = s.value(qAppName() + "/Trends/MainWindow/ToolBar/viewType", 0).toInt();
+		m_scaleType = s.value(qAppName() + "/Trends/MainWindow/ToolBar/scaleType", 0).toInt();
+		m_laneCount = s.value(qAppName() + "/Trends/MainWindow/ToolBar/laneCount", 1).toInt();
+		m_timeTypeIndex = s.value(qAppName() + "/Trends/MainWindow/ToolBar/timeTypeIndex", 0).toInt();
+		m_timeType = s.value(qAppName() + "/Trends/MainWindow/ToolBar/timeType", 0).toInt();
 
-		m_allowPointsEditing = s.value("Trends/DialogTrendSignalPoints/allowPointsEditing", false).toBool();
+		m_allowPointsEditing = s.value(qAppName() + "/Trends/DialogTrendSignalPoints/allowPointsEditing", false).toBool();
 
 		return;
 	}

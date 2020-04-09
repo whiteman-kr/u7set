@@ -28,6 +28,9 @@ public:
 			  bool slaveWindow = false);		// Cannot have output pane, do not stores its state
 	virtual ~SimWidget();
 
+public:
+	void startTrends(const std::vector<AppSignalParam>& appSignals);
+
 protected:
 	void createToolBar();
 	void createDocks();
@@ -53,6 +56,8 @@ protected slots:
 	void pauseSimulation();
 	void stopSimulation();
 
+	void showTrends();
+
 	bool loadBuild(QString buildPath);
 
 	void addNewWindow();
@@ -71,6 +76,7 @@ private:
 	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	QTabWidget* m_tabWidget = nullptr;
 	SimToolBar* m_toolBar = nullptr;
+	SimOutputWidget* m_outputWidget = nullptr;
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;
 
@@ -96,6 +102,8 @@ private:
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_trendsAction = nullptr;
 };
 
 
@@ -106,7 +114,9 @@ public:
 	explicit SimToolBar(const QString& title, QWidget* parent = nullptr);
 	virtual ~SimToolBar();
 
-private:
+protected:
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 };
 
 #endif // SIMULATORWIDGET_H

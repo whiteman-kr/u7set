@@ -196,7 +196,7 @@ namespace TrendLib
 
 static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
 								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
-static int stdColorIndex = 0;
+static size_t stdColorIndex = 0;
 
 		TrendLib::TrendSignalParam tsp(trendSignal);
 
@@ -329,7 +329,7 @@ static int stdColorIndex = 0;
 		//
 		m_realtimeModeButton = new QPushButton(tr("Realtime"));
 		m_realtimeModeButton->setCheckable(true);
-		m_toolBar->addWidget(m_realtimeModeButton);
+		m_realtimeActionForButton = m_toolBar->addWidget(m_realtimeModeButton);
 
 		m_realtimeAutoShiftButton = new QPushButton(tr(">>>"));
 		m_realtimeAutoShiftButton->setEnabled(false);
@@ -348,7 +348,7 @@ static int stdColorIndex = 0;
 		// Signals
 		//
 		m_refreshButton = new QPushButton("Refresh");
-		m_toolBar->addWidget(m_refreshButton);
+		m_refreshActionForButton = m_toolBar->addWidget(m_refreshButton);
 
 		// Signals
 		//
@@ -1060,7 +1060,7 @@ static int lastCopyCount = false;
 			newDateTime.setTime(timeEdit->time());
 
 			TimeStamp ts(newDateTime);
-			mutableRuler.setTimeStamp(ts);
+			mutableRuler.setTimeStamp(ts, trend().rulerSet().rulerStep());
 
 			update();
 		}
@@ -1214,77 +1214,167 @@ static int lastCopyCount = false;
 
 		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rulerIndex, &outSignal);
 
-		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
-			mouseOn != Trend::MouseOn::OnRuler)
+		if (mouseOn == Trend::MouseOn::OnSignalDescription)
 		{
+			QMenu menu(this);
+
+			QAction* lineWeight1 = menu.addAction(tr("Line Weight 1"));
+			lineWeight1->setCheckable(true);
+			connect(lineWeight1, &QAction::triggered, this,
+					[this, &outSignal]()
+					{
+						outSignal.setLineWeight(1);
+						this->signalSet().setSignalParam(outSignal);
+						this->updateWidget();
+					});
+
+			QAction* lineWeight2 = menu.addAction(tr("Line Weight 2"));
+			lineWeight2->setCheckable(true);
+			connect(lineWeight2, &QAction::triggered, this,
+					[this, &outSignal]()
+					{
+						outSignal.setLineWeight(2);
+						this->signalSet().setSignalParam(outSignal);
+						this->updateWidget();
+					});
+
+			QAction* lineWeight3 = menu.addAction(tr("Line Weight 3"));
+			lineWeight3->setCheckable(true);
+			connect(lineWeight3, &QAction::triggered, this,
+					[this, &outSignal]()
+					{
+						outSignal.setLineWeight(3);
+						this->signalSet().setSignalParam(outSignal);
+						this->updateWidget();
+					});
+
+			QAction* autoscale = menu.addAction(tr("Scale to Fit"));
+			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+
+			QAction* remove = menu.addAction(tr("Remove"));
+			connect(remove, &QAction::triggered, this,
+					[this, &outSignal]()
+					{
+						this->signalSet().removeSignal(outSignal.appSignalId());
+						this->updateWidget();
+					});
+
+			QAction* properties = menu.addAction(tr("Properties..."));
+			connect(properties, &QAction::triggered, this,
+					[this, &outSignal]()
+					{
+						signalProperties(outSignal.appSignalId());
+					});
+
+			QAction* signalAction = menu.addAction(tr("Signals..."));
+			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
+
+			QActionGroup* lineWeightGroup = new QActionGroup(&menu);
+			lineWeightGroup->setExclusive(true);
+
+			lineWeightGroup->addAction(lineWeight1);
+			lineWeightGroup->addAction(lineWeight2);
+			lineWeightGroup->addAction(lineWeight3);
+
+			switch (static_cast<int>(outSignal.lineWeight()))
+			{
+			case 0:	lineWeight1->setChecked(true);	break;
+			case 1:	lineWeight1->setChecked(true);	break;
+			case 2:	lineWeight2->setChecked(true);	break;
+			case 3:	lineWeight3->setChecked(true);	break;
+			}
+
+			menu.addAction(lineWeight1);
+			menu.addAction(lineWeight2);
+			menu.addAction(lineWeight3);
+
+			menu.addSeparator();
+			menu.addAction(autoscale);
+
+			menu.addSeparator();
+			menu.addAction(remove);
+
+			menu.addSeparator();
+			menu.addAction(properties);
+			menu.addAction(signalAction);
+
+			menu.exec(QCursor::pos());
+
 			return;
 		}
 
-		QMenu menu(this);
-
-		QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
-		connect(addRulerAction, &QAction::triggered, this,
-				[&pos, this]()
-				{
-					this->TrendMainWindow::actionAddRuler(pos);
-				});
-
-		QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
-		deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
-		connect(deleteRulerAction, &QAction::triggered, this,
-				[rulerIndex, this]()
-				{
-					this->TrendMainWindow::actionDeleteRuler(rulerIndex);
-				});
-
-		QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
-		rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
-		connect(rulerPropertiesAction, &QAction::triggered, this,
-				[rulerIndex, this]()
-				{
-					this->TrendMainWindow::actionRulerProperties(rulerIndex);
-				});
-
-		menu.addSeparator();
-		QAction* chooseView = menu.addAction(tr("Select View..."));
-		chooseView->setEnabled(analogsCount + discretesCount > 0);
-		connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
-
-		Q_ASSERT(m_refreshAction);
-		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
-
-		menu.addSeparator();
-
-		std::vector<TrendLib::TrendSignalParam> discrets = signalSet().discreteSignals();
-		std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
-
-		QMenu* signalPropsMenu = menu.addMenu(tr("Signals Properties"));
-		signalPropsMenu->setEnabled(discrets.size() + analogs.size() > 0);
-
-		for (const TrendLib::TrendSignalParam& s : discrets)
+		if (mouseOn == Trend::MouseOn::InsideTrendArea ||
+			mouseOn == Trend::MouseOn::OnRuler)
 		{
-			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
-			connect(signalPropertiesAction, &QAction::triggered, this,
-					[this, s]()
+			QMenu menu(this);
+
+			QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
+			connect(addRulerAction, &QAction::triggered, this,
+					[&pos, this]()
 					{
-						signalProperties(s.appSignalId());
+						this->TrendMainWindow::actionAddRuler(pos);
 					});
-		}
 
-		for (const TrendLib::TrendSignalParam& s : analogs)
-		{
-			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
-			connect(signalPropertiesAction, &QAction::triggered, this,
-					[this, s]()
+			QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
+			deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+			connect(deleteRulerAction, &QAction::triggered, this,
+					[rulerIndex, this]()
 					{
-						signalProperties(s.appSignalId());
+						this->TrendMainWindow::actionDeleteRuler(rulerIndex);
 					});
+
+			QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
+			rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+			connect(rulerPropertiesAction, &QAction::triggered, this,
+					[rulerIndex, this]()
+					{
+						this->TrendMainWindow::actionRulerProperties(rulerIndex);
+					});
+
+			menu.addSeparator();
+			QAction* chooseView = menu.addAction(tr("Select View..."));
+			chooseView->setEnabled(analogsCount + discretesCount > 0);
+			connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
+
+			Q_ASSERT(m_refreshAction);
+			if (m_refreshAction->isVisible() == true)
+			{
+				menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
+			}
+
+			menu.addSeparator();
+
+			std::vector<TrendLib::TrendSignalParam> discrets = signalSet().discreteSignals();
+			std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
+
+			QMenu* signalPropsMenu = menu.addMenu(tr("Signals Properties"));
+			signalPropsMenu->setEnabled(discrets.size() + analogs.size() > 0);
+
+			for (const TrendLib::TrendSignalParam& s : discrets)
+			{
+				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+				connect(signalPropertiesAction, &QAction::triggered, this,
+						[this, s]()
+						{
+							signalProperties(s.appSignalId());
+						});
+			}
+
+			for (const TrendLib::TrendSignalParam& s : analogs)
+			{
+				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+				connect(signalPropertiesAction, &QAction::triggered, this,
+						[this, s]()
+						{
+							signalProperties(s.appSignalId());
+						});
+			}
+
+			QAction* signalAction = menu.addAction(tr("Signals..."));
+			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
+
+			menu.exec(QCursor::pos());
 		}
-
-		QAction* signalAction = menu.addAction(tr("Signals..."));
-		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
-
-		menu.exec(QCursor::pos());
 
 		return;
 	}

@@ -335,6 +335,11 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0315.sql", "Upgrade to version 315, SetFlagsToInput renamed to AssignFlags in simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0316.sql", "Upgrade to version 316, AFB integrator and derive have min and max as inputs"},
 	{":/DatabaseUpgrade/Upgrade0317.sql", "Upgrade to version 317, Added MSO-4 preset and configuration script"},
+	{":/DatabaseUpgrade/Upgrade0318.sql", "Upgrade to version 318, Renamed MSO-4 preset and configuration files"},
+	{":/DatabaseUpgrade/Upgrade0319.sql", "Upgrade to version 319, dead_band AFB is removed from LM1_SR04"},
+	{":/DatabaseUpgrade/Upgrade0320.sql", "Upgrade to version 320, MSO-4 configuration script is modified"},
+	{":/DatabaseUpgrade/Upgrade0321.sql", "Upgrade to version 321, MSO-4 preset module family fix, pulse_gen_sync is removed from all LMs"},
+	{":/DatabaseUpgrade/Upgrade0322.sql", "Upgrade to version 322, Added AFB cod_rev to MSO-4"},
 };
 
 int DbWorker::counter = 0;

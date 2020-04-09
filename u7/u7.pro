@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg serialport xml testlib
+QT       += core gui widgets sql network xmlpatterns qml svg serialport xml printsupport testlib
 
 # --
 # In Qt 5 using testlib module adds a console option via the MODULE_CONFIG mechanism.
@@ -87,6 +87,7 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
+    Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -224,6 +225,7 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
+    Simulator/SimTrend/SimTrends.h \
     Stable.h \
     UserManagementDialog.h \
     ../lib/DbStruct.h \
@@ -361,6 +363,7 @@ FORMS    += \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
     LoginDialog.ui \
+    Simulator/SimSelectBuildDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
@@ -378,8 +381,7 @@ FORMS    += \
     Forms/ChangesetDetailsDialog.ui \
     Forms/CompareDialog.ui \
     Forms/ComparePropertyObjectDialog.ui \
-    DialogTuningClients.ui \
-    Simulator/SimulatorSelectBuildDialog.ui
+    DialogTuningClients.ui
 
 RESOURCES += \
     Resources.qrc \
@@ -411,6 +413,7 @@ DISTFILES += \
     Afbl/tct_off_v1.afb \
     Afbl/tct_on_v1.afb \
     Afbl/tct_vibr_v1.afb \
+    LogicModuleDescription/MSO4_SR21.xml \
     Ufbl/UFB_A3_LANDSCAPE.templ_ufb \
     Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
     Ufbl/file2pgsql.exe \
@@ -545,3 +548,17 @@ unix {
     LIBS += -lSimulator
 }
 
+# TrendView library
+#
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../TrendView/release/ -lTrendView
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../TrendView/debug/ -lTrendView
+else:unix:!macx: LIBS += -L$$OUT_PWD/../TrendView/ -lTrendView
+
+INCLUDEPATH += $$PWD/../TrendView
+DEPENDPATH += $$PWD/../TrendView
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/libTrendView.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/libTrendView.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/TrendView.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/TrendView.lib
+else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../TrendView/libTrendView.a

@@ -75,13 +75,33 @@ namespace Builder
 				continue;
 			}
 
+			std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(lm);
+
+			if (lmDescription == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
+				result = false;
+				continue;
+			}
+
+			const LmDescription::Lan& lan = lmDescription->lan();
+
 			int connectedAdaptersCount = 0;
 
-			for(int adapter = DataSource::LM_ETHERNET_ADAPTER2; adapter <= DataSource::LM_ETHERNET_ADAPTER3; adapter++)
+			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
+				if (lanController.isProvideAppData() == false)
+				{
+					continue;
+				}
+
 				DataSource ds;
 
-				result &= ds.getLmPropertiesFromDevice(lm, DataSource::DataType::App, adapter, m_subsystemKeyMap, m_lmUniqueIdMap, m_log);
+				result &= ds.getLmPropertiesFromDevice(lm, DataSource::DataType::App,
+				                                       lanController.m_place,
+				                                       lanController.m_type,
+				                                       m_subsystemKeyMap,
+				                                       m_lmUniqueIdMap, m_log);
 
 				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
 				{
@@ -90,7 +110,7 @@ namespace Builder
 
 				if (connectedAdaptersCount > 0)
 				{
-					// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+					// Several ethernet adapters of LM %1 are connected to same AppDataService %2.
 					//
 					m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
 					result = false;

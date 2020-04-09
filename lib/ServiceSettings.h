@@ -2,6 +2,7 @@
 
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
+#include "../lib/SocketIO.h"
 #include "../Builder/IssueLogger.h"
 
 

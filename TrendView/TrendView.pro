@@ -43,6 +43,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     TrendScale.cpp \
+    Forms/DialogChooseTrendSignals.cpp \
     TrendWidget.cpp \
     TrendSignal.cpp \
     TrendSlider.cpp \
@@ -57,6 +58,7 @@ SOURCES += \
     DialogTrendSignalPoint.cpp
 
 HEADERS += \
+    Forms/DialogChooseTrendSignals.h \
     Stable.h \
     TrendScale.h \
     TrendWidget.h \
@@ -83,6 +85,7 @@ RESOURCES += \
     TrendView.qrc
 
 FORMS += \
+    Forms/DialogChooseTrendSignals.ui \
     TrendsMainWindow.ui \
     DialogTrendSignalProperties.ui \
     DialogTrendSignalPoints.ui \

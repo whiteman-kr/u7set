@@ -2,7 +2,7 @@
 #define SIMULATORSELECTBUILDDIALOG_H
 
 namespace Ui {
-	class SimulatorSelectBuildDialog;
+	class SimSelectBuildDialog;
 }
 
 class SimSelectBuildDialog : public QDialog
@@ -35,7 +35,7 @@ public:
 	QString resultBuildPath() const;
 
 private:
-	Ui::SimulatorSelectBuildDialog *ui;
+	Ui::SimSelectBuildDialog *ui;
 
 	QString m_projectName;
 };

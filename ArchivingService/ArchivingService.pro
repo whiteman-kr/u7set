@@ -37,6 +37,7 @@ unix {
 }
 
 SOURCES += \
+    ../lib/Address16.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/MemLeaksDetection.cpp \
     ArchivingService.cpp \
@@ -86,6 +87,7 @@ SOURCES += \
     ../lib/SimpleAppSignalState.cpp
 
 HEADERS += \
+    ../lib/Address16.h \
     ../lib/HostAddressPort.h \
     ../lib/MemLeaksDetection.h \
     ArchivingService.h \

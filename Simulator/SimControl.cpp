@@ -163,7 +163,10 @@ namespace Sim
 			}
 
 			m_controlData.m_state = SimControlState::Run;
+
 			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+			m_controlData.m_startTime = (m_controlData.m_startTime / 10000) * 10000;	// It will make start time on edge of 10ms, it will make nice timestamp
+
 			m_controlData.m_currentTime = m_controlData.m_startTime;
 			m_controlData.m_duration = duration;
 			break;
@@ -365,6 +368,8 @@ namespace Sim
 
 		// --
 		//
+		QDateTime utcOffset = QDateTime::currentDateTime();
+
 		QTime perfmanceTimer;
 		perfmanceTimer.start();
 
@@ -389,9 +394,20 @@ namespace Sim
 						lm.m_possibleToAdvanceTo = lm.m_lastStartTime + lm->cycleDuration();
 						lm.m_task.reset();
 
-						lm.afterWorkCycleTask(m_simulator->appSignalManager());
-
 						//qDebug() << "Finished LM " << lm.equipmentId() << " , count = " << lm.m_cylcesCounter;
+
+						// Perform post run cycle actions
+						//
+						auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
+
+						TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+						TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+						TimeStamp systemTime{ms.count()};
+
+						for (SimControlRunStruct& lm : lms)
+						{
+							lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
+						}
 					}
 					else
 					{
@@ -430,11 +446,16 @@ namespace Sim
 			if (minPossibleTime > cd.m_currentTime)
 			{
 				// If current simulation is ahead of physical time, pause it a little bit
-
+				//
 				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
 					ahead > 0us)
 				{
+					// !!!!!!!!!!!!!!
+					// COMMENT HERE FOR SPEED UP (IF POSSIBLE, DEPENDS ON HW)
+					//
 					QThread::usleep(ahead.count());
+					// !!!!!!!!!!!!!!
+					// !!!!!!!!!!!!!!
 				}
 
 				// Assign new currentTime
@@ -476,16 +497,30 @@ namespace Sim
 				QFuture<bool>& future = lm.m_task.value();
 
 				future.waitForFinished();
-
-				// Perform post run cycle actions
-				//
-				lm.afterWorkCycleTask(m_simulator->appSignalManager());
 			}
 		}
+
+		// Perform post run cycle actions
+		//
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
+
+		TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+		TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+		TimeStamp systemTime{ms.count()};
+
+		for (SimControlRunStruct& lm : lms)
+		{
+			lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
+		}
+
+		// Set nonvalid state for signal manager
+		//
+		//m_simulator->appSignalManager().setData();
 
 		// Update current time and last time in m_controlData
 		//
 		updateControlData(cd);
+
 
 		// Some debug info
 		//

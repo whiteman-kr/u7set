@@ -20,6 +20,7 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 include(../warnings.pri)
 
 SOURCES +=\
+    ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
 	TuningMainWindow.cpp \
 	../lib/ServiceSettings.cpp \
@@ -68,6 +69,7 @@ SOURCES +=\
     ../lib/SimpleMutex.cpp
 
 HEADERS  += TuningMainWindow.h \
+    ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
 	../lib/ServiceSettings.h \
 	../lib/DeviceHelper.h \

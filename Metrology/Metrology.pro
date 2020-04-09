@@ -42,6 +42,7 @@ unix {
 }
 
 SOURCES += \
+    ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
@@ -117,6 +118,7 @@ SOURCES += \
 #../lib/ExcelHelper.cpp
 
 HEADERS  += \
+    ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
     MainWindow.h \
     Calibrator.h \

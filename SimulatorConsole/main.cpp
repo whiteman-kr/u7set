@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	//
 	Sim::Simulator simulator;
 
-	if (bool ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
+	if (bool ok = simulator.load("D:/Develop/Build/test_simulator_v312-debug/build");
 		ok == false)
 	{
 		return 1;

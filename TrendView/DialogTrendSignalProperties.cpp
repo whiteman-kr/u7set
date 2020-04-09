@@ -177,9 +177,9 @@ bool DialogTrendSignalProperties::applyProperties()
 	}
 
 	m_trendSignal.setLineWeight(lineWeight);
-	m_trendSignal.setViewHighLimit(qMax(viewHighLimit, viewLowLimit));
-	m_trendSignal.setViewLowLimit(qMin(viewHighLimit, viewLowLimit));
-	m_trendSignal.setColor(ui->colorWidget->color());
+	m_trendSignal.setViewHighLimit(qMax(viewLowLimit, viewLowLimit));
+	m_trendSignal.setViewLowLimit(qMin(viewLowLimit, viewLowLimit));
+	m_trendSignal.setColor(ui->colorWidget->color().rgb());
 
 	emit signalPropertiesChanged();
 

@@ -11,13 +11,17 @@
 #include "../lib/AppSignalManager.h"
 #include "SimRam.h"
 #include "SimOutput.h"
+#include "../TrendView/TrendSignal.h"
+
 
 namespace Sim
 {
 	class Simulator;
 
-	class AppSignalManager : public IAppSignalManager, protected Sim::Output
+	class AppSignalManager : public QObject, public IAppSignalManager, protected Sim::Output
 	{
+		Q_OBJECT
+
 	public:
 		explicit AppSignalManager(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~AppSignalManager();
@@ -26,13 +30,19 @@ namespace Sim
 		void reset();
 		bool load(QString fileName);
 
-		void setData(const QString& equipmentId, const Sim::Ram& ram);
+		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp systemTime, TimeStamp localTime);
+		std::shared_ptr<TrendLib::RealtimeData> trendData(const QString& trendId,
+														  const std::vector<Hash>& trendSignals,
+														  TrendLib::TrendStateItem* minState,
+														  TrendLib::TrendStateItem* maxState);
 
 		std::optional<Signal> signalParamExt(const QString& appSignalId) const;
 
 	public:
 		// Implementing IAppSignalManager - AppSignals
 		//
+		virtual std::vector<AppSignalParam> signalList() const override;
+
 		virtual bool signalExists(Hash hash) const override;
 		virtual bool signalExists(const QString& appSignalId) const override;
 
@@ -60,14 +70,38 @@ namespace Sim
 	private:
 		Simulator* m_simulator = nullptr;
 
-		mutable QReadWriteLock m_signalParamLock;
+		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;
 		std::unordered_map<Hash, Signal> m_signalParamsExt;			// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
 
 		// SimRuntime data
 		//
 		mutable QReadWriteLock m_ramLock;
-		std::map<QString, Ram> m_ram;		// key is EquipmentID
+		std::map<Hash, Ram> m_ram;			// key is hash EquipmentID
+		std::map<Hash, Times> m_ramTimes;	// RAM memory update time - key is hash EquipmentID
+
+		// Realtime trends data
+		//
+		struct TrendSignal
+		{
+			QString appSignalId;
+			Hash appSignalHash;
+
+			QString equipmentId;
+			Hash equipmentIdHash;
+
+			std::vector<AppSignalState> states;
+		};
+
+		struct Trend
+		{
+			QString trendId;
+			QDateTime lastAccess;		// If data was not fetched for some time this trend will be removed
+			std::vector<TrendSignal> trendSignals;
+		};
+
+		mutable QMutex m_trendMutex;
+		std::list<Trend> m_trends;
 	};
 
 }

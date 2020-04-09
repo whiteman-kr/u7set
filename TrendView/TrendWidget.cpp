@@ -544,7 +544,6 @@ namespace TrendLib
 
 		if (m_mouseAction == MouseAction::MoveRuler)
 		{
-
 		}
 
 		if (m_mouseAction == MouseAction::MoveRuler)
@@ -733,7 +732,7 @@ namespace TrendLib
 					TimeStamp ts(laneStartTime + static_cast<qint64>(mouseOffset * coefx));
 
 					TrendRuler& mutableRuler = rulerSet().rulers().at(m_rulerMoveRulerIndex);
-					mutableRuler.setTimeStamp(ts);
+					mutableRuler.setTimeStamp(ts, trend().rulerSet().rulerStep());
 
 					update();
 				}

@@ -130,6 +130,10 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<ID_AppSignalID>();
 	qRegisterMetaType<QVector<ID_AppSignalID>>();
 
+	// Init TrendLib resources
+	//
+	Q_INIT_RESOURCE(TrendView);
+
     // Start database communication thread
 	//
 	DbController dbController;

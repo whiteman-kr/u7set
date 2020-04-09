@@ -2,6 +2,7 @@
 #include "../lib/LmDescription.h"
 #include "../lib/DataSource.h"
 #include "../lib/ServiceSettings.h"
+#include "../lib/ConnectionsInfo.h"
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
@@ -63,6 +64,7 @@ namespace Builder
 			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
+			&ApplicationLogicCompiler::writeOptoConnectionsXml,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
@@ -207,19 +209,38 @@ namespace Builder
 				continue;
 			}
 
-			for(int i = 0; i < DataSource::LM_ETHERNET_ADAPTERS_COUNT; i++)
+			std::shared_ptr<LmDescription> lmDescription = lmDescriptions()->get(lm);
+
+			if (lmDescription == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
+				result = false;
+				continue;
+			}
+
+			const LmDescription::Lan& lan = lmDescription->lan();
+
+			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
 				DataSource::LmEthernetAdapterProperties lmNetProperties;
 
-				int ethernetAdapterNo = DataSource::LM_ETHERNET_ADAPTER1 + i;
+				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, lanController.m_place, lanController.m_type, log());
 
-				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, log());
+				bool tuning = false;
+				bool appData = false;
+				bool diagData = false;
 
-				switch(ethernetAdapterNo)
+				bool res = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
+
+				if (res == false)
 				{
-				case DataSource::LM_ETHERNET_ADAPTER1:
-					// tuning data adapter
-					//
+					LOG_INTERNAL_ERROR(log());
+					result = false;
+					continue;
+				}
+
+				if (tuning == true)
+				{
 					if (lmNetProperties.tuningEnable == true)
 					{
 						lmNetProperties.tuningIP = lmNetProperties.tuningIP.trimmed();
@@ -237,12 +258,10 @@ namespace Builder
 							ip2Modules.insert(lmNetProperties.tuningIP, lm);
 						}
 					}
-					break;
+				}
 
-				case DataSource::LM_ETHERNET_ADAPTER2:
-				case DataSource::LM_ETHERNET_ADAPTER3:
-					// appllication and diagnostics data adapters
-					//
+				if (appData == true)
+				{
 					if (lmNetProperties.appDataEnable == true)
 					{
 						lmNetProperties.appDataIP = lmNetProperties.appDataIP.trimmed();
@@ -260,7 +279,10 @@ namespace Builder
 							ip2Modules.insert(lmNetProperties.appDataIP, lm);
 						}
 					}
+				}
 
+				if (diagData == true)
+				{
 					if (lmNetProperties.diagDataEnable == true)
 					{
 						lmNetProperties.diagDataIP = lmNetProperties.diagDataIP.trimmed();
@@ -278,11 +300,6 @@ namespace Builder
 							ip2Modules.insert(lmNetProperties.diagDataIP, lm);
 						}
 					}
-
-					break;
-
-				default:
-					assert(false);
 				}
 			}
 		}
@@ -682,9 +699,39 @@ namespace Builder
 			}
 		}
 
-		buildResultWriter()->addFile(Builder::DIR_REPORTS, "Connections.txt", "", "", list);
+		buildResultWriter()->addFile(Builder::DIR_REPORTS, Builder::FILE_CONNECTIONS_TXT, "", "", list);
 
 		return true;
+	}
+
+	bool ApplicationLogicCompiler::writeOptoConnectionsXml()
+	{
+		ConnectionsInfo connectionsInfo;
+
+		Hardware::ConnectionStorage* connStorage = connectionStorage();
+
+		TEST_PTR_LOG_RETURN_FALSE(connStorage, log());
+
+		Hardware::OptoModuleStorage* optoStorage = opticModuleStorage();
+
+		TEST_PTR_LOG_RETURN_FALSE(optoStorage, log());
+
+		connectionsInfo.fill(*connStorage, *optoStorage);
+
+		QByteArray xmlData;
+
+		connectionsInfo.save(&xmlData);
+
+		bool result = true;
+
+		BuildFile* file = buildResultWriter()->addFile(Builder::DIR_COMMON, Builder::FILE_CONNECTIONS_XML, "", "", xmlData);
+
+		if (file == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
 	}
 
 	bool ApplicationLogicCompiler::writeOptoVhdFiles()

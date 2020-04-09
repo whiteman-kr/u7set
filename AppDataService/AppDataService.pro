@@ -32,6 +32,7 @@ unix {
 
 
 SOURCES += \
+    ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
@@ -83,6 +84,7 @@ SOURCES += \
     DynamicAppSignalState.cpp
 
 HEADERS += \
+    ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
 	Stable.h \
     ../lib/SocketIO.h \

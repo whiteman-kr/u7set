@@ -107,7 +107,7 @@ namespace Hardware
 
 		// Functions that are used to calculate Unique ID
 		//
-		quint64 uniqueID(const QString& subsysId, int uartId, int lmNumber);
+		quint64 uniqueID(const QString& subsysId, int uartId, int lmNumber, bool* ok);
 		void setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId);
 
 	private:

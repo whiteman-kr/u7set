@@ -4,6 +4,7 @@
 #include "../lib/ModuleFirmware.h"
 #include "../lib/Configurator.h"
 #include "../lib/OutputLog.h"
+#include "../lib/BuildInfo.h"
 
 class DbController;
 class QCheckBox;
@@ -31,7 +32,7 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
-	void buildChanged(int index);
+	void buildChanged();
 	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
 signals:
@@ -77,6 +78,8 @@ private:
 
 	void refreshBinaryFile();
 
+	bool readBuildInfo(const QString& buildPath, Builder::BuildInfo* buildInfo, bool* success);
+
 private slots:
 
 	void clearSubsystemsUartData();
@@ -91,13 +94,21 @@ private slots:
 	//
 private:
 
+	enum class BuildColumns
+	{
+		Name,
+		Date,
+		Result
+	};
+
 	// Interface members
 
-	QSplitter* m_vsplitter = nullptr;
+	QSplitter* m_pLeftSplitter = nullptr;
+	QSplitter* m_pRightSplitter = nullptr;
 
 	QComboBox* m_pConfigurationCombo = nullptr;
 
-	QListWidget* m_pBuildList = nullptr;
+	QTreeWidget* m_pBuildTree = nullptr;
 
 	QTreeWidget* m_pSubsystemsListWidget = nullptr;
 	QTreeWidget* m_pUartListWidget = nullptr;
@@ -128,11 +139,13 @@ private:
 
 	QString m_buildSearchPath;
 
+	// Builds list
+
+	std::vector<std::pair<QString, QDateTime>> m_builds;
+
 	// Currently selected build and file info
 
-	QStringList m_currentBuilds;
 	QString m_currentBuild;
-
 	QString m_currentFilePath;
 	QDateTime m_currentFileModifiedTime;
 

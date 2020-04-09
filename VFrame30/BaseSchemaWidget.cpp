@@ -324,7 +324,7 @@ namespace VFrame30
 		if (schemaView() == nullptr)
 		{
 			assert(schemaView() != nullptr);
-			return 0;
+			return 1.0;							// if return value 0 then it is potential divide by 0
 		}
 
 		return schemaView()->zoom();

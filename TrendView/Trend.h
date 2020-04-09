@@ -100,7 +100,7 @@ namespace TrendLib
 			Outside,			// Outside any posible rect
 			OutsideTrendArea,	// Outside lane but in the rect
 			InsideTrendArea,	// Inside lane rectangle
-			OnSignalDescription,// Over Signal Description (id +  caption)
+			OnSignalDescription,// Over Signal Description (id + caption)
 			OnRuler,			// Over ruler
 		};
 

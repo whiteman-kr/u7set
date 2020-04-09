@@ -1341,7 +1341,7 @@ namespace Builder
 		int outPinIndex = -1;
 		int validityPinIndex = -1;
 
-		for(int i = 0; i < outputs.size(); i++)
+		for(int i = 0; i < static_cast<int>(outputs.size()); i++)
 		{
 			if (ualReceiver->isValidityPin(outputs[i].guid()) == true)
 			{
@@ -1534,13 +1534,13 @@ namespace Builder
 			return false;
 		}
 
-		QString validitySignalID = port->validitySignalID();
+		QString validitySignalEquipmentID = port->validitySignalEquipmentID();
 
-		Signal* s = m_equipmentSignals.value(validitySignalID);
+		Signal* s = m_equipmentSignals.value(validitySignalEquipmentID);
 
 		if (s == nullptr)
 		{
-			m_log->errALC5133(validitySignalID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
+			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
 
@@ -3472,7 +3472,7 @@ namespace Builder
 		{
 			// Different busTypes on AFB inputs (Logic schema %1).
 			//
-			m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID());
+			m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 
 			return false;			// bus type is not determined :(
 		}
@@ -3552,7 +3552,7 @@ namespace Builder
 		{
 			// Different busTypes on AFB output (Logic schema %1).
 			//
-			m_log->errALC5122(ualAfb->guid(), ualAfb->schemaID());
+			m_log->errALC5122(ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 
 			return false;			// bus type is not determined :(
 		}
@@ -3888,8 +3888,33 @@ namespace Builder
 
 	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
 	{
+		TEST_PTR_LOG_RETURN_FALSE(m_lmDescription, m_log);
+
+		const LmDescription::Lan& lan = m_lmDescription->lan();
+
+		int tuningControllerNo = -1;
+
+		// search ethernet controller that provide tuning
+		//
+		for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+		{
+			if (lanController.isProvideTuning() == true)
+			{
+				tuningControllerNo = lanController.m_place;
+				break;
+			}
+		}
+
+		if (tuningControllerNo == -1)
+		{
+			// no tuning controllers found
+			//
+			*tuningPropertyExists = false;
+			return true;
+		}
+
 		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
-							arg(DataSource::LM_ETHERNET_ADAPTER1);
+							arg(tuningControllerNo);
 
 		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
 
@@ -7437,14 +7462,26 @@ namespace Builder
 
 		bool result = true;
 
-		int busProcessingStepsNumber = 1;
+		bool isBusProcAfb = false;
 
-		result = calcBusProcessingStepsNumber(ualAfb, &busProcessingStepsNumber);
+		result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
 
-		if (result == false)
+		RETURN_IF_FALSE(result)
+
+		std::vector<int> busProcessingStepsSizes;
+
+		if (isBusProcAfb == true)
 		{
-			return false;
+			result = calcBusProcessingSteps(ualAfb, &busProcessingStepsSizes);
+
+			RETURN_IF_FALSE(result)
 		}
+		else
+		{
+			busProcessingStepsSizes.push_back(0);		// one dummy processing step for non-bus AFBs
+		}
+
+		int busProcessingStepsNumber = static_cast<int>(busProcessingStepsSizes.size());
 
 		if (busProcessingStepsNumber > 1 && ualAfb->hasRam() == true)
 		{
@@ -7453,13 +7490,30 @@ namespace Builder
 			return false;
 		}
 
-		for(int busProcessingStep = 0; busProcessingStep < busProcessingStepsNumber; busProcessingStep++)
+		int currentBusSignalOffsetBits = 0;
+
+		for(int stepNo = 0; stepNo < busProcessingStepsNumber; stepNo++)
 		{
-			result &= generateSignalsToAfbInputsCode(code, ualAfb, busProcessingStep);
+			BusProcessingStepInfo bpStepInfo;
 
-			result &= startAfb(code, ualAfb, busProcessingStep + 1, busProcessingStepsNumber);
+			bpStepInfo.stepsNumber = busProcessingStepsNumber;
+			bpStepInfo.currentStep = stepNo;
+			bpStepInfo.currentStepSizeBits = busProcessingStepsSizes[stepNo];
+			bpStepInfo.currentBusSignalOffsetW = currentBusSignalOffsetBits / SIZE_16BIT;
 
-			result &= generateAfbOutputsToSignalsCode(code, ualAfb, busProcessingStep);
+			//
+
+			result &= generateSignalsToAfbInputsCode(code, ualAfb, bpStepInfo);
+
+			result &= startAfb(code, ualAfb, bpStepInfo);
+
+			result &= generateAfbOutputsToSignalsCode(code, ualAfb, bpStepInfo);
+
+			//
+
+			currentBusSignalOffsetBits += bpStepInfo.currentStepSizeBits;
+
+			assert((currentBusSignalOffsetBits % SIZE_16BIT) == 0);
 		}
 
 		code->newLine();
@@ -7467,7 +7521,8 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateSignalsToAfbInputsCode(CodeSnippet* code, const UalAfb* ualAfb, int busProcessingStep)
+	bool ModuleLogicCompiler::generateSignalsToAfbInputsCode(CodeSnippet* code, const UalAfb* ualAfb,
+															 const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7502,13 +7557,15 @@ namespace Builder
 				continue;
 			}
 
-			result &= generateSignalToAfbInputCode(code, ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
+			result &= generateSignalToAfbInputCode(code, ualAfb, inAfbSignal, inUalSignal, bpStepInfo);
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
+	bool ModuleLogicCompiler::generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+														   const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+														   const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7591,7 +7648,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			result = generateSignalToAfbBusInputCode(code, ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
+			result = generateSignalToAfbBusInputCode(code, ualAfb, inAfbSignal, inUalSignal, bpStepInfo);
 			break;
 
 		default:
@@ -7602,14 +7659,15 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
+	bool ModuleLogicCompiler::generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+															  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+															  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inUalSignal, m_log);
 
 		assert(inAfbSignal.isBus() == true);
-		assert(busProcessingStep >= 0);
 
 		bool result = true;
 
@@ -7620,7 +7678,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			result =  generateBusSignalToAfbBusInputCode(code, ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
+			result =  generateBusSignalToAfbBusInputCode(code, ualAfb, inAfbSignal, inUalSignal, bpStepInfo);
 			break;
 
 		case E::SignalType::Analog:
@@ -7727,7 +7785,9 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
+	bool ModuleLogicCompiler::generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+																 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+																 const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7764,19 +7824,17 @@ namespace Builder
 
 		CodeItem cmd;
 
-		int inputSize = inAfbSignal.size();
-
-		switch(inputSize)
+		switch(bpStepInfo.currentStepSizeBits)
 		{
 		case SIZE_16BIT:
 
-			addrFrom += busProcessingStep * 1;			//	+1 word per busProcessingStep
+			addrFrom += bpStepInfo.currentBusSignalOffsetW;
 			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), addrFrom, ualAfb->caption());
 			break;
 
 		case SIZE_32BIT:
 
-			addrFrom += busProcessingStep * 2;			//	+2 words per busProcessingStep
+			addrFrom += bpStepInfo.currentBusSignalOffsetW;
 			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), addrFrom, ualAfb->caption());
 			break;
 
@@ -7788,14 +7846,14 @@ namespace Builder
 
 		cmd.setComment(QString("%1.%2 << %3 (part %4)").
 					   arg(ualAfb->caption()).arg(inAfbSignal.caption()).
-					   arg(inUalSignal->refSignalIDsJoined()).arg(busProcessingStep + 1));
+					   arg(inUalSignal->refSignalIDsJoined()).arg(bpStepInfo.currentStep + 1));
 
 		code->append(cmd);
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::startAfb(CodeSnippet* code, const UalAfb* ualAfb, int processingStep, int processingStepsNumber)
+	bool ModuleLogicCompiler::startAfb(CodeSnippet* code, const UalAfb* ualAfb, const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7804,14 +7862,16 @@ namespace Builder
 
 		cmd.start(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
 
-		if (processingStepsNumber == 1)
+		if (bpStepInfo.stepsNumber == 1)
 		{
 			cmd.setComment(QString(tr("compute %1 @%2")).arg(ualAfb->caption()).arg(ualAfb->label()));
 		}
 		else
 		{
 			cmd.setComment(QString(tr("compute %1 @%2 (step %3/%4)")).
-							arg(ualAfb->caption()).arg(ualAfb->label()).arg(processingStep).arg(processingStepsNumber));
+							arg(ualAfb->caption()).arg(ualAfb->label()).
+							arg(bpStepInfo.currentStep + 1).
+							arg(bpStepInfo.stepsNumber));
 		}
 
 		code->append(cmd);
@@ -7819,7 +7879,8 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateAfbOutputsToSignalsCode(CodeSnippet* code, const UalAfb* ualAfb, int busProcessingStep)
+	bool ModuleLogicCompiler::generateAfbOutputsToSignalsCode(CodeSnippet* code, const UalAfb* ualAfb,
+															  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7859,13 +7920,15 @@ namespace Builder
 				continue;
 			}
 
-			result &= generateAfbOutputToSignalCode(code, ualAfb, outAfbSignal, outUalSignal, busProcessingStep);
+			result &= generateAfbOutputToSignalCode(code, ualAfb, outAfbSignal, outUalSignal, bpStepInfo);
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep)
+	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
+															const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+															const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7927,7 +7990,7 @@ namespace Builder
 
 		case E::SignalType::Bus:
 
-			result = generateAfbBusOutputToBusSignalCode(code, ualAfb, outAfbSignal, outUalSignal, busProcessingStep);
+			result = generateAfbBusOutputToBusSignalCode(code, ualAfb, outAfbSignal, outUalSignal, bpStepInfo);
 			break;
 
 		default:
@@ -7939,7 +8002,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep)
+	bool ModuleLogicCompiler::generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
+																  const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+																  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7965,19 +8030,17 @@ namespace Builder
 
 		CodeItem cmd;
 
-		int outputSize = outAfbSignal.size();
-
-		switch(outputSize)
+		switch(bpStepInfo.currentStepSizeBits)
 		{
 		case SIZE_16BIT:
 
-			addrTo += busProcessingStep * 1;			//	+1 word per busProcessingStep
+			addrTo += bpStepInfo.currentBusSignalOffsetW;
 			cmd.readFuncBlock(addrTo, ualAfb->opcode(), ualAfb->instance(), outAfbSignal.operandIndex(), ualAfb->caption());
 			break;
 
 		case SIZE_32BIT:
 
-			addrTo += busProcessingStep * 2;			//	+2 words per busProcessingStep
+			addrTo += bpStepInfo.currentBusSignalOffsetW;
 			cmd.readFuncBlock32(addrTo, ualAfb->opcode(), ualAfb->instance(), outAfbSignal.operandIndex(), ualAfb->caption());
 			break;
 
@@ -7988,7 +8051,7 @@ namespace Builder
 		}
 
 		cmd.setComment(QString("%1 (part %2) << %3.%4").
-					   arg(outUalSignal->refSignalIDsJoined()).arg(busProcessingStep + 1).
+					   arg(outUalSignal->refSignalIDsJoined()).arg(bpStepInfo.currentStep + 1).
 					   arg(ualAfb->caption()).arg(outAfbSignal.caption()));
 
 		code->append(cmd);
@@ -7996,54 +8059,48 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber)
+	bool ModuleLogicCompiler::calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(busProcessingStepsNumber, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busProcessingStepsSizes, m_log);
 
-		*busProcessingStepsNumber = 0;
+		bool result = true;
 
-		bool isBusProcAfb = false;
+		busProcessingStepsSizes->clear();
 
-		bool result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (isBusProcAfb == false)
-		{
-			*busProcessingStepsNumber = 1;
-			return true;
-		}
-
-		int inputsBusSize = -1;
+		std::vector<std::vector<int>> inputPinsSizes;
 		int inputSignalSize = -1;
 		bool allBusInputsConnectedToDiscretes = false;
 
-		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->inputs(), &inputsBusSize, &inputSignalSize, true, &allBusInputsConnectedToDiscretes);
+		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->inputs(), &inputPinsSizes, &inputSignalSize, true, &allBusInputsConnectedToDiscretes);
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
-		int outputsBusSize = -1;
+		std::vector<std::vector<int>> outputPinsSizes;
 		int outputSignalSize = -1;
 		bool dummyBool = false;
 
-		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->outputs(), &outputsBusSize, &outputSignalSize, false, &dummyBool);
+		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->outputs(), &outputPinsSizes, &outputSignalSize, false, &dummyBool);
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		if (allBusInputsConnectedToDiscretes == true)
 		{
-			inputsBusSize = outputsBusSize;
-			inputSignalSize = outputSignalSize;
+			if (outputSignalSize != -1)
+			{
+				inputSignalSize = outputSignalSize;
+			}
+			else
+			{
+				// all inputs connected to discretes
+				// and all outputs connected to terminator
+				// bus signal size can't be determined!
+				// this error should be detected early
+				//
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't determine bus signal size on item %1 (Logic schema %2)").
+														arg(ualAfb->label()).arg(ualAfb->schemaID()));
+				return false;
+			}
 		}
 
 		if (outputSignalSize == -1)
@@ -8051,86 +8108,107 @@ namespace Builder
 			outputSignalSize = inputSignalSize;		// may be all bus outputs are connected to terminator
 		}
 
-		if (inputsBusSize != outputsBusSize)
-		{
-			assert(false);						// in and out busses has different sizes
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
 		if (inputSignalSize != outputSignalSize)
 		{
-			assert(false);						// input and output signals has different sizes
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if (((inputsBusSize % SIZE_16BIT) != 0) ||
-			((outputsBusSize % SIZE_16BIT) != 0) ||
-			((inputSignalSize % SIZE_16BIT) != 0) ||
-			((outputSignalSize % SIZE_16BIT) != 0))
-		{
-			assert(false);						// pins or signals size are not multiple 16
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if ((inputSignalSize % inputsBusSize) != 0 ||
-			(outputSignalSize % outputsBusSize) != 0)
-		{
-			// Signal and bus inputs sizes are not multiples (Logic schema %1).
+			// in and out busses has different sizes
+			// this error should be detected early
 			//
-			m_log->errALC5126(ualAfb->guid(), ualAfb->schemaID());
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Different bus types on input and output of item %1 (Logic schema %2)").
+													arg(ualAfb->label()).arg(ualAfb->schemaID()));
 			return false;
 		}
 
-		*busProcessingStepsNumber = inputSignalSize / inputsBusSize;
+		// find sizes common for all pins (intersection of all pins sizes)
+		//
+		std::set<int> allSizes;
 
-		return true;
+		for(const std::vector<int>& inPinSizes : inputPinsSizes)
+		{
+			allSizes.insert(inPinSizes.begin(), inPinSizes.end());
+		}
+
+		for(const std::vector<int>& outPinSizes : outputPinsSizes)
+		{
+			allSizes.insert(outPinSizes.begin(), outPinSizes.end());
+		}
+
+		std::vector<int> commonPinsSizes;
+
+		for(int size : allSizes)
+		{
+			bool sizeExistsInAllPins = true;
+
+			for(const std::vector<int>& inPinSizes : inputPinsSizes)
+			{
+				sizeExistsInAllPins &= std::find(inPinSizes.begin(), inPinSizes.end(), size) != inPinSizes.end();
+			}
+
+			for(const std::vector<int>& outPinSizes : outputPinsSizes)
+			{
+				sizeExistsInAllPins &= std::find(outPinSizes.begin(), outPinSizes.end(), size) != outPinSizes.end();
+			}
+
+			if (sizeExistsInAllPins == true)
+			{
+				commonPinsSizes.push_back(size);
+			}
+		}
+
+		result = partitionOfInteger(inputSignalSize, commonPinsSizes, busProcessingStepsSizes);
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't determine bus processing steps sizes on item %1. Bus signal size is not multiple to pins data sizes (Logic schema %2)").
+											arg(ualAfb->label()).arg(ualAfb->schemaID()));
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
-														int* pinsSize, int* signalsSize, bool isInputs,
+														std::vector<std::vector<int>>* pinsSizes, int* busSignalsSize, bool isInputs,
 														bool* allBusInputsConnectedToDiscretes)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(pinsSize, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(signalsSize, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(pinsSizes, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busSignalsSize, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(allBusInputsConnectedToDiscretes, m_log);
 
-		*pinsSize = -1;
-		*signalsSize = -1;
+		bool result = true;
+
+		*busSignalsSize = -1;
 		*allBusInputsConnectedToDiscretes = true;
 
 		for(const LogicPin& pin : pins)
 		{
 			LogicAfbSignal afbSignal;
 
-			bool result = ualAfb->getAfbSignalByPin(pin, &afbSignal);
+			bool res = ualAfb->getAfbSignalByPin(pin, &afbSignal);
 
-			if (result == false)
-			{
-				return false;
-			}
+			RETURN_IF_FALSE(res);
 
 			if (afbSignal.isBus() == false)
 			{
 				continue;
 			}
 
-			if (*pinsSize == -1)
+			std::vector<int> pinSizes = afbSignal.allSizes();
+
+			for(int size : pinSizes)
 			{
-				*pinsSize = afbSignal.size();
-			}
-			else
-			{
-				if (*pinsSize != afbSignal.size())
+				if ((size % SIZE_16BIT) != 0)
 				{
-					assert(false);				// different bus input sizes
-					LOG_INTERNAL_ERROR(m_log);
-					return false;
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Pin %1.%2 data size %3 is not multiple to 16 bit (Logic schema %4, item %5)").
+													arg(ualAfb->caption()).
+													arg(pin.caption()).
+													arg(size).
+													arg(ualAfb->schemaID()).
+													arg(ualAfb->label()));
+					result = false;
 				}
 			}
+
+			pinsSizes->push_back(pinSizes);
 
 			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
 
@@ -8161,29 +8239,36 @@ namespace Builder
 				return false;
 			}
 
-			if (*signalsSize == -1)
+			int signalSize = ualSignal->dataSize();			// signalSize should be equal on all bus inputs or outputs
+
+			if ((signalSize % SIZE_16BIT) != 0)
 			{
-				*signalsSize = ualSignal->dataSize();
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Bus signal %1 data size %2 is not multiple to 16 bit (Logic schema %3, item %4)").
+												arg(ualSignal->appSignalID()).
+												arg(signalSize).
+												arg(ualAfb->schemaID()).
+												arg(ualAfb->label()));
+				result = false;
+				continue;
+			}
+
+			if (*busSignalsSize == -1)
+			{
+				*busSignalsSize = signalSize;
 			}
 			else
 			{
-				if (*signalsSize != ualSignal->dataSize())
+				if (*busSignalsSize != signalSize)
 				{
-					// Different busTypes on AFB inputs (Logic schema %1).
-					m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID());
+					// Different busTypes on AFB inputs (or outputs) (Logic schema %1, item %2).
+					//
+					m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 					return false;
 				}
 			}
 		}
 
-		if (*pinsSize == -1)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing)
