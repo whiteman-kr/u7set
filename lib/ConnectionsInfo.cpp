@@ -74,6 +74,7 @@ bool ConnectionPortInfo::load(const QDomElement& connectionElement, int prtNo, Q
 
 	result &= ConnectionsInfo::getStringAttribute(portElem, ConnectionsInfo::ATTR_EQUIPMENT_ID, &equipmentID, errMsg);
 	result &= ConnectionsInfo::getStringAttribute(portElem, ConnectionsInfo::ATTR_MODULE_ID, &moduleID, errMsg);
+	result &= ConnectionsInfo::getStringAttribute(portElem, ConnectionsInfo::ATTR_LM_ID, &lmID, errMsg);
 
 	if (result == false)
 	{
@@ -216,7 +217,6 @@ bool ConnectionPortInfo::load(const QDomElement& connectionElement, int prtNo, Q
 		{
 		case 1:
 			equipmentID = connection->port1EquipmentID();
-			moduleID = optoModuleStorage.getOptoModuleID(connection->port1EquipmentID());
 
 			manualRxWordsQuantity = connection->port1ManualRxWordsQuantity();
 			manualTxStartAddr = connection->port1ManualTxStartAddress();
@@ -230,7 +230,6 @@ bool ConnectionPortInfo::load(const QDomElement& connectionElement, int prtNo, Q
 
 		case 2:
 			equipmentID = connection->port2EquipmentID();
-			moduleID = optoModuleStorage.getOptoModuleID(connection->port2EquipmentID());
 
 			manualRxWordsQuantity = connection->port2ManualRxWordsQuantity();
 			manualTxStartAddr = connection->port2ManualTxStartAddress();
@@ -246,6 +245,9 @@ bool ConnectionPortInfo::load(const QDomElement& connectionElement, int prtNo, Q
 			assert(false);
 			return false;
 		}
+
+		moduleID = optoModuleStorage.getOptoModuleID(equipmentID);
+		lmID = optoModuleStorage.getOptoPortAssociatedLmID(equipmentID);
 
 		Hardware::OptoPortShared optoPort = optoModuleStorage.getOptoPort(equipmentID);
 
@@ -319,6 +321,7 @@ bool ConnectionPortInfo::load(const QDomElement& connectionElement, int prtNo, Q
 
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_EQUIPMENT_ID, equipmentID);
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_MODULE_ID, moduleID);
+		xml.writeStringAttribute(ConnectionsInfo::ATTR_LM_ID, lmID);
 
 		{
 			xml.writeStartElement(ConnectionsInfo::ELEM_MANUAL_SETTINGS);
@@ -531,6 +534,7 @@ const QString ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL("DisableDataIDContro
 const QString ConnectionsInfo::ATTR_PORTS_COUNT("PortsCount");
 const QString ConnectionsInfo::ATTR_EQUIPMENT_ID("EquipmentID");
 const QString ConnectionsInfo::ATTR_MODULE_ID("ModuleID");
+const QString ConnectionsInfo::ATTR_LM_ID("LmID");
 const QString ConnectionsInfo::ATTR_RX_WORDS_QUANTITY("RxWordsQuantity");
 const QString ConnectionsInfo::ATTR_TX_START_ADDRESS("TxStartAddress");
 const QString ConnectionsInfo::ATTR_TX_WORDS_QUANTITY("TxWordsQuantity");
