@@ -212,7 +212,7 @@ function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet
     var maxLMNumber = 62; // Can be changed!
     var configStartFrames = 2;
     var configFrameCount = 4; // number of frames in each configuration
-    var ioModulesMaxCount = 14;
+    var ioModulesMaxCount = 12;
     if (LMNumber < 1 || LMNumber > maxLMNumber) {
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;

@@ -375,7 +375,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	var maxLMNumber: number = 62;               // Can be changed!
 	var configStartFrames: number = 2;
 	var configFrameCount: number = 4;          // number of frames in each configuration
-	var ioModulesMaxCount: number = 14;
+	var ioModulesMaxCount: number = 12;
 
 	if (LMNumber < 1 || LMNumber > maxLMNumber) {
 		log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
