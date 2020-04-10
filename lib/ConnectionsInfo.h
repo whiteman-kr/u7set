@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 #include "Connection.h"
 #include "../Builder/OptoModule.h"
@@ -24,7 +24,7 @@ public:
 private:
 	bool load(const QDomElement& txRxSignalElem, QString* errMsg);
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	void save(XmlWriteHelper& xml) const;
 
@@ -74,7 +74,7 @@ public:
 private:
 	bool load(const QDomElement& connectionElement, int prtNo, QString* errMsg);
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	bool fill(Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage);
 	void save(XmlWriteHelper& xml) const;
@@ -101,7 +101,7 @@ private:
 
 	bool load(const QDomNode& node, QString* errMsg);
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	bool fill(Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage);
 	void save(XmlWriteHelper& xml) const;
@@ -120,7 +120,7 @@ public:
 	bool load(const QString& fileName, QString* errMsg);
 	bool load(const QByteArray& xmlData, QString* errMsg);
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
 	void save(QByteArray* xmlFileData) const;

@@ -32,7 +32,7 @@ bool ConnectionTxRxSignal::load(const QDomElement& txRxSignalElem, QString* errM
 	return result;
 }
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	void ConnectionTxRxSignal::save(XmlWriteHelper& xml) const
 	{
@@ -200,7 +200,7 @@ bool ConnectionPortInfo::load(const QDomElement& connectionElement, int prtNo, Q
 	return result;
 }
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	bool ConnectionPortInfo::fill(Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage)
 	{
@@ -441,7 +441,7 @@ bool ConnectionInfo::load(const QDomNode& node, QString* errMsg)
 	return result;
 }
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	bool ConnectionInfo::fill(Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage)
 	{
@@ -640,7 +640,7 @@ bool ConnectionsInfo::load(const QByteArray& xmlData, QString* errMsg)
 	return true;
 }
 
-#ifndef IS_SIMULATOR
+#ifdef IS_BUILDER
 
 	bool ConnectionsInfo::fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage)
 	{

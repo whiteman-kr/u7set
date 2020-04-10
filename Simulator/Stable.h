@@ -3,6 +3,5 @@
 
 #include <QtCore>
 
-#define IS_SIMULATOR
 
 #endif // STABLE_H
