@@ -299,6 +299,7 @@ namespace Sim
 		//	LATCH, OpCode 22
 		//
 		void afb_latch_v4(AfbComponentInstance* instance);
+		void afb_latch_v5(AfbComponentInstance* instance);
 
 		//	LIM, OpCode 23
 		//
@@ -411,6 +412,7 @@ namespace Sim
 			{QStringLiteral("afb_dpcomp_v5"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20
 			{QStringLiteral("afb_mux_v1"),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
 			{QStringLiteral("afb_latch_v4"),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
+			{QStringLiteral("afb_latch_v5"),		&CommandProcessor_LM5_LM6::afb_latch_v5},				// 22
 			{QStringLiteral("afb_lim_v7"),			&CommandProcessor_LM5_LM6::afb_lim_v7},					// 23
 			{QStringLiteral("fb_deadzone_v5"),		&CommandProcessor_LM5_LM6::fb_deadzone_v5},				// 24
 			{QStringLiteral("fb_deadzone_v6"),		&CommandProcessor_LM5_LM6::fb_deadzone_v6},				// 24

@@ -4290,7 +4290,218 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_latch_v4");
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_latch_v5(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;					// 1 - 6
+		const int i_set_prev = 1;				// Previous set input state
+		const int i_y_prev = 2;					// Previous in state
+		const int i_data = 4;					// input
+		const int i_set = 6;					// Set input
+		const int i_reset = 7;					// Reset input
+
+
+		//const int o_set_prev = 9;				// Previous set -> i_set_prev
+		//const int o_y_prev = 10;				// output Y/input Õ
+		const int o_result = 12;				// output Y
+		//const int o_edi = 14;
+		//const int o_version = 15;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(conf, 1, 4, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		switch (conf)
+		{
+		case 1:
+			{
+				// Latch on Front
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevResult = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 set = instance->param(i_set)->wordValue() & 0x0001;
+				quint16 prevSet = instance->paramExists(i_set_prev) ? instance->param(i_set_prev)->wordValue() : 0;
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint16 state = (set << 1) | reset;
+				quint32 result = 0;	// for SI and FP it will 0
+
+				switch (state)
+				{
+				case 0:	// set 0, reset 0
+					result = prevResult;
+					break;
+				case 1:	// set 0, reset 1
+					result = 0;
+					break;
+				case 2:	// set 1, reset 0
+					if (prevSet == 0)
+					{
+						// Front catch
+						//
+						result = input;
+					}
+					else
+					{
+						result = prevResult;
+					}
+					break;
+				case 3:	// set 1, reset 1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+
+				instance->addParamDword(i_y_prev, result);
+				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+
+				instance->addParamWord(i_set_prev, set);
+				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
+			}
+			break;
+		case 2:
+			{
+				// Latch on Decay
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevResult = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 set = instance->param(i_set)->wordValue() & 0x0001;
+				quint16 prevSet = instance->paramExists(i_set_prev) ? instance->param(i_set_prev)->wordValue() : 0;
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint16 state = (set << 1) | reset;
+				quint32 result = 0;	// for SI and FP it will 0
+
+				switch (state)
+				{
+				case 0:	// set 0, reset 0
+					if (prevSet == 1)
+					{
+						// Decay catch
+						//
+						result = input;
+					}
+					else
+					{
+						result = prevResult;
+					}
+					break;
+				case 1:	// set 0, reset 1
+					result = 0;
+					break;
+				case 2:	// set 1, reset 0
+					result = prevResult;
+					break;
+				case 3:	// set 1, reset 1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+
+				instance->addParamDword(i_y_prev, result);
+				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+
+				instance->addParamWord(i_set_prev, set);
+				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
+			}
+			break;
+		case 3:
+			{
+				// Latch on State
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevResult = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 set = instance->param(i_set)->wordValue() & 0x0001;
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint16 state = (set << 1) | reset;
+				quint32 result = 0;	// for SI and FP it will 0
+
+				switch (state)
+				{
+				case 0:	// set 0, reset 0
+					result = prevResult;
+					break;
+				case 1:	// set 0, reset 1
+					result = 0;
+					break;
+				case 2:	// set 1, reset 0
+					result = input;
+					break;
+				case 3:	// set 1, reset 1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+				instance->addParamDword(i_y_prev, result);
+			}
+			break;
+		case 4:
+			{
+				// Latch on tm1 - delay for 1 cycle
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevInput = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint32 result = 0;	// for SI and FP it will 0
+
+				if (reset == 0)
+				{
+					result = prevInput;
+				}
+				else
+				{
+					result = 0;
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+				instance->addParamDword(i_y_prev, input);
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_latch_v5");
 		}
 
 		return;
