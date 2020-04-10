@@ -516,6 +516,7 @@ namespace Hardware
 		OptoPortShared getLmAssociatedOptoPort(const QString& lmID, const QString& connectionID) const;
 
 		QString getOptoPortAssociatedLmID(OptoPortShared optoPort) const;
+		QString getOptoPortAssociatedLmID(const QString& optoPortEquipmentID) const;
 
 		bool getOptoPortValidityAbsAddr(const QString& lmID,
 											   const QString& connectionID,

@@ -39,6 +39,7 @@ public:
 	int portNo = -1;
 	QString equipmentID;
 	QString moduleID;
+	QString lmID;
 
 	//
 
@@ -159,6 +160,7 @@ private:
 	static const QString ATTR_PORTS_COUNT;
 	static const QString ATTR_EQUIPMENT_ID;
 	static const QString ATTR_MODULE_ID;
+	static const QString ATTR_LM_ID;
 	static const QString ATTR_RX_WORDS_QUANTITY;
 	static const QString ATTR_TX_START_ADDRESS;
 	static const QString ATTR_TX_WORDS_QUANTITY;

@@ -3260,6 +3260,19 @@ namespace Hardware
 		return optoModule->lmID();
 	}
 
+	QString OptoModuleStorage::getOptoPortAssociatedLmID(const QString& optoPortEquipmentID) const
+	{
+		OptoPortShared optoPort = getOptoPort(optoPortEquipmentID);
+
+		if (optoPort == nullptr)
+		{
+			assert(false);		// unknown optoPortEquipmentID
+			return QString();
+		}
+
+		return getOptoPortAssociatedLmID(optoPort);
+	}
+
 	bool OptoModuleStorage::getOptoPortValidityAbsAddr(const QString& lmID,
 													   const QString& connectionID,
 													   const QString& schemaID,
