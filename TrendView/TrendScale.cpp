@@ -119,7 +119,7 @@ std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(Tr
     switch (scaleType)
     {
     case TrendScaleType::Generic:
-    case TrendScaleType::Logarithmic:
+    case TrendScaleType::Log10:
     {
         return scaleValuesGeneric(scaleType, lowLimit, highLimit, signalRect, minInchInterval);
     }
@@ -141,7 +141,7 @@ QString TrendScale::scaleValueText(double value, const TrendParam& drawParam, in
     {
         return QString(" %1 ").arg(QString::number(value, 'f', precision));
     }
-    case TrendScaleType::Logarithmic:
+    case TrendScaleType::Log10:
     {
         return QString(" %1 ").arg(QString::number(value, 'e', precision));
     }
@@ -172,7 +172,7 @@ double TrendScale::pointToScaleValue(double value, TrendScaleType scaleType, boo
     {
         return value;
     }
-    case TrendScaleType::Logarithmic:
+    case TrendScaleType::Log10:
     {
         if (value <= 0)
         {
@@ -240,7 +240,7 @@ double TrendScale::pointFromScaleValue(double scaleValue, TrendScaleType scaleTy
     {
         return scaleValue;
     }
-    case TrendScaleType::Logarithmic:
+    case TrendScaleType::Log10:
     {
         return std::pow(10, scaleValue);
     }
@@ -275,9 +275,9 @@ double TrendScale::pointFromScaleValue(double scaleValue, TrendScaleType scaleTy
 //
 std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
 {
-    if (scaleType != TrendScaleType::Generic && scaleType != TrendScaleType::Logarithmic)
+    if (scaleType != TrendScaleType::Generic && scaleType != TrendScaleType::Log10)
     {
-        Q_ASSERT(scaleType == TrendScaleType::Generic || scaleType == TrendScaleType::Logarithmic);
+        Q_ASSERT(scaleType == TrendScaleType::Generic || scaleType == TrendScaleType::Log10);
         return {};
     }
 

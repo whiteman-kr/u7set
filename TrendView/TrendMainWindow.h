@@ -42,6 +42,8 @@ namespace TrendLib
 
 		void setRealtimeAutoShift(const TimeStamp& ts);
 
+		void autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals);
+
 		// Events
 		//
 	protected:
@@ -131,6 +133,9 @@ namespace TrendLib
 		TrendSlider* m_trendSlider = nullptr;
 
 		static const int singleStepSliderDivider = 50;
+
+	private:
+		bool m_autoSelectedScaleType = false;
 	};
 
 }

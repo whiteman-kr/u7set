@@ -2106,7 +2106,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 
 	void Trend::validateViewLimits(const TrendParam& drawParam)
 	{
-		if (drawParam.scaleType() == TrendScaleType::Logarithmic)
+		if (drawParam.scaleType() == TrendScaleType::Log10)
 		{
 			// Log(x) is defined only for positive values, so adjust view scale if limit is negative
 			//

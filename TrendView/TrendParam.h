@@ -22,7 +22,7 @@ namespace TrendLib
 	enum class TrendScaleType
 	{
 		Generic,
-		Logarithmic,
+		Log10,
 		Period
 	};
 }

@@ -300,7 +300,7 @@ static size_t stdColorIndex = 0;
 
 		m_scaleTypeCombo = new QComboBox(m_toolBar);
 		m_scaleTypeCombo->addItem(tr("Generic"), QVariant::fromValue(TrendLib::TrendScaleType::Generic));
-		m_scaleTypeCombo->addItem(tr("Logarithmic"), QVariant::fromValue(TrendLib::TrendScaleType::Logarithmic));
+		m_scaleTypeCombo->addItem(tr("Logarithmic"), QVariant::fromValue(TrendLib::TrendScaleType::Log10));
 		m_scaleTypeCombo->addItem(tr("Period"), QVariant::fromValue(TrendLib::TrendScaleType::Period));
 		m_toolBar->addWidget(m_scaleTypeCombo);
 
@@ -374,7 +374,12 @@ static size_t stdColorIndex = 0;
 		theSettings.m_mainWindowState = saveState();
 
 		theSettings.m_viewType = m_viewCombo->currentIndex();
-		theSettings.m_scaleType = m_scaleTypeCombo->currentIndex();
+
+		if (m_autoSelectedScaleType == false)
+		{
+			theSettings.m_scaleType = m_scaleTypeCombo->currentIndex();
+		}
+
 		theSettings.m_laneCount = m_lanesCombo->currentIndex() + 1;
 		theSettings.m_timeTypeIndex = m_timeTypeCombo->currentIndex();
 
@@ -394,6 +399,7 @@ static size_t stdColorIndex = 0;
 		Q_ASSERT(m_scaleTypeCombo);
 		m_scaleTypeCombo->setCurrentIndex(theSettings.m_scaleType);
 
+		Q_ASSERT(m_timeTypeCombo);
 		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
 
 		// Ensure widget is visible
@@ -420,6 +426,63 @@ static size_t stdColorIndex = 0;
 		{
 			m_trendWidget->setStartTime(ts.timeStamp - m_trendWidget->duration() * m_trendWidget->laneCount());
 			return;
+		}
+
+		return;
+	}
+
+	void TrendMainWindow::autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals)
+	{
+		TrendScaleType defaultScaleType = TrendScaleType::Generic;
+
+		bool defaultScaleTypeFound = false;
+
+		for (const AppSignalParam& acceptedSignal : acceptedSignals)
+		{
+			if (acceptedSignal.isAnalog() == false)
+			{
+				continue;
+			}
+
+			for (const QString& tag : acceptedSignal.tags())
+			{
+				if (tag == QStringLiteral("scalegeneric"))
+				{
+					defaultScaleType = TrendLib::TrendScaleType::Generic;
+					defaultScaleTypeFound = true;	// break the outer loop
+					break;
+				}
+				if (tag == QStringLiteral("scalelog10"))
+				{
+					defaultScaleType = TrendLib::TrendScaleType::Log10;
+					defaultScaleTypeFound = true;	// break the outer loop
+					break;
+				}
+				if (tag == QStringLiteral("scaleperiod"))
+				{
+					defaultScaleType = TrendLib::TrendScaleType::Period;
+					defaultScaleTypeFound = true;	// break the outer loop
+					break;
+				}
+			}
+
+			if (defaultScaleTypeFound == true)
+			{
+				break;
+			}
+		}
+
+		if (defaultScaleTypeFound == true)
+		{
+			int index = m_scaleTypeCombo->findData(QVariant::fromValue(defaultScaleType));
+			if (index == -1)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+			m_scaleTypeCombo->setCurrentIndex(index);
+
+			m_autoSelectedScaleType = true;	// This means that combo was changed automatically. scaleTypeComboCurrentIndexChanged() slot had reset this flag
 		}
 
 		return;
@@ -1111,6 +1174,9 @@ static int lastCopyCount = false;
 		m_trendWidget->validateViewLimits();
 
 		m_trendWidget->updateWidget();
+
+		m_autoSelectedScaleType = false;	// This means that combo could be changed by user. autoSelectScaleType() function sets this flag again
+
 		return;
 	}
 

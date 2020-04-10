@@ -151,7 +151,7 @@ bool DialogTrendSignalProperties::applyProperties()
 
 	if (m_trendSignal.type() == E::SignalType::Analog)
 	{
-		if (m_scaleType == TrendLib::TrendScaleType::Logarithmic)
+		if (m_scaleType == TrendLib::TrendScaleType::Log10)
 		{
 			if (viewHighLimit <= 0 || viewLowLimit <= 0)
 			{
