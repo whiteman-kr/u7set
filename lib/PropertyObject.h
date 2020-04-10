@@ -2048,7 +2048,7 @@ public:
 		return property->enumValues();
 	}
 
-	static const int m_lastSpecificPropertiesVersion = 6;
+	static const int m_lastSpecificPropertiesVersion = 7;
 
 	static QString createSpecificPropertyStruct(const QString& name,
 										   const QString& category,
@@ -2063,9 +2063,10 @@ public:
 										   bool visible,
 										   const E::PropertySpecificEditor editor,
 										   quint16 viewOrder,
-										   bool essential)
+										   bool essential,
+										   bool readOnly)
 	{
-		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 6);	// Function must be reviewed if version is raised
+		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 7);	// Function must be reviewed if version is raised
 
 		QString result = QString("%1;").arg(m_lastSpecificPropertiesVersion);
 
@@ -2082,7 +2083,8 @@ public:
 		result += visible ? "true;" : "false;";
 		result += E::valueToString<E::PropertySpecificEditor>(editor) + ";";
 		result += QString("%1;").arg(viewOrder);
-		result += essential ? "true" : "false";
+		result += essential ? "true;" : "false;";
+		result += readOnly ? "true" : "false";
 
 		result = result.replace(QChar::CarriageReturn, "\\r");
 		result = result.replace(QChar::LineFeed, "\\n");
@@ -2130,6 +2132,9 @@ public:
 		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor	ViewOrder	Essential
 		6;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None	65535		false
 
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor	ViewOrder	Essential	ReadOnly
+		7;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None	65535		false		false
+
 		version:            record version
 		name:               property name
 		category:           category name
@@ -2159,6 +2164,7 @@ public:
 
 		ViewOrder			[Added in version 5] View order for displaying in PropertyEditor
 		Essential			[Added in version 6] Property is highlighted by color in PropertyEditor
+		ReadOnly			[Added in version 7] Property is read-only
 		*/
 		QString m_specificPropertiesStructTrimmed = specificProperties;
 
@@ -2238,6 +2244,14 @@ public:
 			case 6:
 				{
 					auto parseResult = parseSpecificPropertiesStructV6(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 7:
+				{
+					auto parseResult = parseSpecificPropertiesStructV7(columns);
 
 					result.first &= parseResult.first;
 					result.second += parseResult.second;
@@ -2327,6 +2341,7 @@ public:
 											   QStringLiteral("true"),
 											   QStringLiteral("None"),
 											   QStringLiteral("65535"),
+											   QStringLiteral("false"),
 											   QStringLiteral("false"));
 
 		return result;
@@ -2372,6 +2387,7 @@ public:
 											   QStringLiteral("true"),
 											   QStringLiteral("None"),
 											   QStringLiteral("65535"),
+											   QStringLiteral("false"),
 											   QStringLiteral("false"));
 
 		return result;
@@ -2418,6 +2434,7 @@ public:
 											   strVisible,
 											   QStringLiteral("None"),
 											   QStringLiteral("65535"),
+											   QStringLiteral("false"),
 											   QStringLiteral("false"));
 
 		return result;
@@ -2465,6 +2482,7 @@ public:
 											   strVisible,
 											   strEditor,
 											   QStringLiteral("65535"),
+											   QStringLiteral("false"),
 											   QStringLiteral("false"));
 
 		return result;
@@ -2513,6 +2531,7 @@ public:
 											   strVisible,
 											   strEditor,
 											   strViewOrder,
+											   QStringLiteral("false"),
 											   QStringLiteral("false"));
 
 		return result;
@@ -2562,7 +2581,59 @@ public:
 											   strVisible,
 											   strEditor,
 											   strViewOrder,
-											   strEssential);
+											   strEssential,
+											   QStringLiteral("false"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV7(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 16)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 6!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential;readOnly\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 6!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential;readOnly";
+			return result;
+		}
+
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
+		const QString& strExpert = columns.at(9);
+		const QString& description = columns.at(10);
+		const QString& strVisible = columns.at(11);
+		const QString& strEditor = columns.at(12);
+		const QString& strViewOrder = columns.at(13);
+		const QString& strEssential = columns.at(14);
+		const QString& strReadOnly = columns.at(15);
+
+		result = parseSpecificPropertiesCreate(6,
+											   name,
+											   category,
+											   description,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   strEditor,
+											   strViewOrder,
+											   strEssential,
+											   strReadOnly);
 
 		return result;
 	}
@@ -2581,7 +2652,8 @@ public:
 														   const QString& strVisible,
 														   const QString& strEditor,
 														   const QString& strViewOrder,
-														   const QString& strEssential)
+														   const QString& strEssential,
+														   const QString& strReadOnly)
 	{
 		std::pair<bool, QString> result = std::make_pair(true, "");
 
@@ -2599,6 +2671,7 @@ public:
 		bool expert = strExpert.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 		bool visible = strVisible.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 		bool essential = strEssential.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		bool readOnly = strReadOnly.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 		if (name.isEmpty() == true || name.size() > 1024)
 		{
@@ -2843,7 +2916,7 @@ public:
 		// Set command properties
 		//
 		addedProperty->setSpecific(true);
-		addedProperty->setReadOnly(false);
+		addedProperty->setReadOnly(readOnly);
 		addedProperty->setPrecision(precision);
 		addedProperty->setUpdateFromPreset(updateFromPreset);
 		addedProperty->setExpert(expert);
