@@ -1108,7 +1108,7 @@ static int lastCopyCount = false;
 
 		m_trendWidget->setScaleType(scale);
 
-		m_trendWidget->adjustViewLimitsForScaleType();
+		m_trendWidget->validateViewLimits();
 
 		m_trendWidget->updateWidget();
 		return;

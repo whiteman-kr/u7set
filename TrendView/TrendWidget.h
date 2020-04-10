@@ -129,7 +129,7 @@ namespace TrendLib
 		TrendScaleType scaleType() const;
 		void setScaleType(TrendScaleType value);
 
-		void adjustViewLimitsForScaleType();
+		void validateViewLimits();
 
 		int laneCount() const;
 		void setLaneCount(int value);

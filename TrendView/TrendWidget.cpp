@@ -247,7 +247,7 @@ namespace TrendLib
 
 		if (ok == true)
 		{
-			m_trend.adjustScaleViewLimits(m_trendParam);
+			m_trend.validateViewLimits(m_trendParam);
 		}
 
 		return ok;
@@ -1160,9 +1160,9 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendWidget::adjustViewLimitsForScaleType()
+	void TrendWidget::validateViewLimits()
 	{
-		m_trend.adjustScaleViewLimits(m_trendParam);
+		m_trend.validateViewLimits(m_trendParam);
 		return;
 	}
 

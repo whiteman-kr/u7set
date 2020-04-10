@@ -256,6 +256,8 @@ void MonitorTrendsWidget::signalsButton()
 		addSignal(tsp, false);
 	}
 
+	m_trendWidget->validateViewLimits();
+
 	updateWidget();
 
 	return;

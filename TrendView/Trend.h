@@ -107,7 +107,7 @@ namespace TrendLib
 		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const;
 
 	public:
-		void adjustScaleViewLimits(const TrendParam& drawParam);
+		void validateViewLimits(const TrendParam& drawParam);
 
 		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 

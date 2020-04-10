@@ -2104,7 +2104,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return MouseOn::Outside;		// Can be frame beetween lanes
 	}
 
-	void Trend::adjustScaleViewLimits(const TrendParam& drawParam)
+	void Trend::validateViewLimits(const TrendParam& drawParam)
 	{
 		if (drawParam.scaleType() == TrendScaleType::Logarithmic)
 		{
