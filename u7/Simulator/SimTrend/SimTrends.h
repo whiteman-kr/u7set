@@ -5,6 +5,7 @@
 //#include "ArchiveTrendTcpClient.h"
 //#include "RtTrendTcpClient.h"
 
+class SimIdeSimulator;
 class SimTrendsWidget;
 class QLabel;
 
@@ -13,7 +14,7 @@ class SimTrends
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(Sim::AppSignalManager* signalManager, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
+	static bool startTrendApp(std::shared_ptr<SimIdeSimulator> simulator, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
 
 	static void registerTrendWindow(QString name, SimTrendsWidget* window);
 	static void unregisterTrendWindow(QString name);
@@ -26,7 +27,7 @@ private:
 class SimTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
-	SimTrendsWidget(Sim::AppSignalManager* signalManager, QWidget* parent);
+	SimTrendsWidget(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent);
 	virtual ~SimTrendsWidget();
 
 protected:
@@ -54,7 +55,7 @@ protected slots:
 	// Data
 	//
 private:
-	Sim::AppSignalManager* m_signalManager = nullptr;
+	std::shared_ptr<SimIdeSimulator> m_simulator;
 	//SimConfigController* m_configController = nullptr;
 
 	//ConfigConnection m_archiveService1;

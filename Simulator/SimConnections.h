@@ -17,22 +17,13 @@ namespace Sim
 	//
 	// ConnectionData
 	//
-	class ConnectionData
+	struct ConnectionData
 	{
-	public:
-		//ConnectionData() = delete;
-		ConnectionData();
+		QByteArray m_data;							// Raw data from LM memory
+		std::chrono::microseconds m_sentTime{0};	// When packet was "sent". If 0 then buffer is not valid
 
-	public:
 		int sizeBytes() const;
 		int sizeWords() const;
-
-	private:
-		ConnectionPortPtr m_fromPort;
-		ConnectionPtr m_connection;
-
-		QByteArray m_data;			// Raw data from LM memory
-		qint64 m_sentTime;			// When packet was "sent". If 0 then buffer is not valid
 	};
 
 
@@ -42,10 +33,13 @@ namespace Sim
 	class ConnectionPort
 	{
 	public:
-		ConnectionPort(::ConnectionPortInfo port);
+		ConnectionPort(::ConnectionPortInfo portInfo);
+
+	public:
+		const ::ConnectionPortInfo& portInfo() const;
 
 	private:
-		::ConnectionPortInfo m_port;
+		::ConnectionPortInfo m_portInfo;
 	};
 
 
@@ -56,10 +50,23 @@ namespace Sim
 	{
 	public:
 		Connection(::ConnectionInfo buildConnection);
+		~Connection();
 
 	public:
-		bool sendData(int portNo, QByteArray* data);
-		bool getData(int portNo, QByteArray* data);
+		const QString& connectionId() const;
+
+		Sim::ConnectionPortPtr portForLm(const QString& lmEquipmnetId);
+
+		bool sendData(int portNo, QByteArray* data, std::chrono::microseconds time);
+		bool receiveData(int portNo, QByteArray* data, std::chrono::microseconds currentTime, std::chrono::microseconds timeout);
+
+		const std::vector<Sim::ConnectionPortPtr>& ports() const;
+
+		bool enabled() const;
+		void setEnabled(bool value);
+
+		QByteArray* getPortReceiveBuffer(int portNo);
+		QByteArray* getPortSendBuffer(int portNo);
 
 	private:
 		::ConnectionInfo m_buildConnection;
@@ -72,10 +79,16 @@ namespace Sim
 		QMutex m_dataMutexPort1;
 		ConnectionData m_port1sentData;
 
+		QByteArray m_port1receiveBuffer;	// Receive buffer for port 1, accessed only by DeviceEmulator, in single thread
+		QByteArray m_port1sendBuffer;		// Send buffer for port 1, accessed only by DeviceEmulator, in single thread
+
 		// Data sent by port 2, protected with a mutex
 		//
 		QMutex m_dataMutexPort2;
 		ConnectionData m_port2sentData;
+
+		QByteArray m_port2receiveBuffer;	// Receive buffer for port 2, accessed only by DeviceEmulator, in single thread
+		QByteArray m_port2sendBuffer;		// Send buffer for port 2, accessed only by DeviceEmulator, in single thread
 	};
 
 
@@ -86,8 +99,13 @@ namespace Sim
 	{
 	public:
 		Connections();
+		~Connections();
 
+	public:
+		void clear();
 		bool load(QString fileName, QString* errorMessage);
+
+		std::vector<ConnectionPtr> lmConnections(QString lmEquipmentId) const;
 
 	private:
 		::ConnectionsInfo m_buildConnections;
@@ -95,6 +113,7 @@ namespace Sim
 		std::vector<ConnectionPtr> m_connections;
 		std::multimap<Hash, ConnectionPtr> m_lmToConnection;		// LM to connections
 		std::map<Hash, ConnectionPtr> m_portToConnection;			// PortID to connection
+		std::map<Hash, ConnectionPortPtr> m_portMap;				// PortID to connection port
 	};
 
 }

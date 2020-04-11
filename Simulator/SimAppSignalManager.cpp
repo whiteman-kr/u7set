@@ -408,6 +408,8 @@ static const AppSignalParam dummy;
 		E::ByteOrder byteOrder{};
 		E::DataFormat analogDataFormat{};
 		int dataSize{};
+		bool isConst{};
+		double constValue{};
 
 		AppSignalState state;
 
@@ -446,6 +448,8 @@ static const AppSignalParam dummy;
 			byteOrder = s.byteOrder();
 			analogDataFormat = s.dataFormat();
 			dataSize = s.dataSize();
+			isConst = s.isConst();
+			constValue = s.constValue();
 		}
 
 		// Get data from memory
@@ -473,6 +477,13 @@ static const AppSignalParam dummy;
 			if (timeIt != m_ramTimes.end())
 			{
 				state.m_time = timeIt->second;
+			}
+
+			if (isConst == true)
+			{
+				state.m_flags.valid = !m_simulator->isStopped();
+				state.m_value = constValue;
+				return state;
 			}
 
 			switch (type)

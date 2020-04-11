@@ -13,6 +13,7 @@
 #include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
+#include "SimConnections.h"
 #include "SimAfb.h"
 #include "SimOverrideSignals.h"
 
@@ -133,15 +134,17 @@ namespace Sim
 		DeviceEmulator();
 		virtual ~DeviceEmulator();
 
+	public:
 		bool clear();
 		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
 				  const Eeprom& confEeprom,
-				  const Eeprom& appLogicEeprom);
+				  const Eeprom& appLogicEeprom,
+				  const Connections& connections);
 
 		bool reset();
-		bool run(int cycles = -1);
+		bool run(int cycles = -1, std::chrono::microseconds currentTime = std::chrono::microseconds{0});
 
 		//	Public methods to access from simulation commands
 		//
@@ -216,9 +219,12 @@ namespace Sim
 		bool processStartMode();
 		bool processFaultMode();
 
-		bool processOperate();
+		bool processOperate(std::chrono::microseconds currentTime);
 
 		bool runCommand(DeviceCommand& deviceCommand);
+
+		bool receiveConnectionsData(std::chrono::microseconds currentTime);
+		bool sendConnectionsData(std::chrono::microseconds currentTime);
 
 	private:
 		// Getting data from m_plainAppLogic
@@ -233,7 +239,7 @@ namespace Sim
 		// Props
 		//
 	public:
-		QString equpimnetId() const;
+		const QString& equipmentId() const;
 
 		Hardware::LogicModuleInfo logicModuleInfo() const;
 		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
@@ -247,9 +253,9 @@ namespace Sim
 
 		const Ram& ram() const;
 
+		// Data
+		//
 	private:
-		friend class ScriptDeviceEmulator;
-
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 
@@ -271,6 +277,7 @@ namespace Sim
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
+		std::vector<ConnectionPtr> m_connections;
 
 		std::vector<DeviceCommand> m_commands;
 		std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands

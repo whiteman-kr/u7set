@@ -18,6 +18,7 @@ namespace Sim
 
 	Control::~Control()
 	{
+		qDebug() << Q_FUNC_INFO;
 		stopThread();
 		return;
 	}

@@ -21,6 +21,7 @@ namespace Sim
 
 	Simulator::~Simulator()
 	{
+		qDebug() << "Simulator::~Simulator()";
 		return;
 	}
 
@@ -131,6 +132,15 @@ namespace Sim
 			return false;
 		}
 
+		// Load ConnectinsInfo
+		//
+		ok = loadConnectionsInfo(buildPath);
+		if (ok == false)
+		{
+			clearImpl();
+			return false;
+		}
+
 		// Load subsystems
 		//
 		for (QString subsystemId : subsystems)
@@ -174,7 +184,7 @@ namespace Sim
 
 			// Upload data to susbystem
 			//
-			ok = ss.load(firmware, lmDescription);
+			ok = ss.load(firmware, lmDescription, m_connections);
 			if (ok == false)
 			{
 				// Error must be reported in Subsystem::load
@@ -182,15 +192,6 @@ namespace Sim
 				clearImpl();
 				return false;
 			}
-		}
-
-		// Load ConnectinsInfo
-		//
-		ok = loadConnectionsInfo(buildPath);
-		if (ok == false)
-		{
-			clearImpl();
-			return false;
 		}
 
 		// Load appilcation signals

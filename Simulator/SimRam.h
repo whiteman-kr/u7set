@@ -52,12 +52,19 @@ namespace Sim
 		RamArea() = default;
 		RamArea(const RamArea&) = default;
 		RamArea(RamArea&&) noexcept = default;
+		virtual ~RamArea();
+
 		RamArea& operator=(const RamArea&) = default;
 		RamArea& operator=(RamArea&&) = default;
 
 		RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name);
 
 	public:
+		bool clear();
+
+		bool writeBuffer(quint32 offsetW, const QByteArray& data) noexcept;
+		bool readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data) noexcept;
+
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept;
 
@@ -95,7 +102,10 @@ namespace Sim
 	public:
 		Ram();
 		Ram(const Ram& that);
+		~Ram();
+
 		Ram& operator=(const Ram& that);
+
 
 	public:
 		void reset();
@@ -113,6 +123,11 @@ namespace Sim
 		const RamArea* memoryArea(Handle handle) const;
 
 	public:
+		bool clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access);
+
+		bool writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const QByteArray& data) noexcept;
+		bool readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, QByteArray* data) noexcept;
+
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept;
 

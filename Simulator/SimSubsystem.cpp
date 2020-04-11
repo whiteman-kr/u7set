@@ -1,5 +1,6 @@
 #include "SimSubsystem.h"
 #include "../lib/ModuleFirmware.h"
+#include "SimConnections.h"
 
 namespace Sim
 {
@@ -12,7 +13,7 @@ namespace Sim
 	{
 	}
 
-	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription)
+	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const Connections& connections)
 	{
 		m_lmDescription = lmDescription;
 
@@ -50,7 +51,7 @@ namespace Sim
 
 			writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			if (bool ok = logicModule->load(lmInfo, lmDescription, firmware);
+			if (bool ok = logicModule->load(lmInfo, lmDescription, firmware, connections);
 				ok == false)
 			{
 				// There is no simulation for this file, or it's loading had errors

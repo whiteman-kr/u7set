@@ -120,7 +120,8 @@ namespace Sim
 							  const LmDescription& lmDescription,
 							  const Eeprom& tuningEeprom,
 							  const Eeprom& confEeprom,
-							  const Eeprom& appLogicEeprom)
+							  const Eeprom& appLogicEeprom,
+							  const Connections& connections)
 	{
 		clear();
 
@@ -169,6 +170,10 @@ namespace Sim
 		//
 		initMemory();
 
+		// Get LMs connections
+		//
+		m_connections = connections.lmConnections(equipmentId());
+
 		// --
 		//
 		if (bool ok = parseAppLogicCode();
@@ -198,7 +203,7 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::run(int cycles)
+	bool DeviceEmulator::run(int cycles, std::chrono::microseconds currentTime)
 	{
 		if (m_currentMode == DeviceMode::Start)
 		{
@@ -219,7 +224,7 @@ namespace Sim
 				break;
 			}
 
-			ok &= processOperate();
+			ok &= processOperate(currentTime);
 		}
 
 		return ok;
@@ -953,7 +958,7 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::processOperate()
+	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime)
 	{
 		// One LogicModule Cycle
 		//
@@ -966,7 +971,15 @@ namespace Sim
 
 		if (m_overrideSignals != nullptr)
 		{
-			m_ram.updateOverrideData(equpimnetId(), m_overrideSignals);
+			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
+		}
+
+		// Get data from fiber optic channels (LM, OCM)
+		//
+		result = receiveConnectionsData(currentTime);
+		if (result == false)
+		{
+			return false;
 		}
 
 		// Run work cylce
@@ -1014,6 +1027,10 @@ namespace Sim
 				m_logicUnit.programCounter += command.m_size;
 			}
 		}
+
+		// Send data to fiber optic channels (LM, OCM)
+		//
+		result = sendConnectionsData(currentTime);
 
 		return result;
 	}
@@ -1101,6 +1118,193 @@ namespace Sim
 		return true;
 	}
 
+	bool DeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
+	{
+		for (ConnectionPtr& c : m_connections)
+		{
+			if (c->enabled() == false)
+			{
+				// Even though the connection is disabled we should procced it to zero
+				// memory and to set validity flag. If connection is disabled nothing will be send and
+				// then nothing can be received, it will cause timeout
+				//
+			}
+
+			// Get port for this connection for this LM
+			//
+			ConnectionPortPtr port = c->portForLm(equipmentId());
+			if (port == nullptr)
+			{
+				assert(port);
+				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.")
+						  .arg(c->connectionId())
+						  .arg(equipmentId()));
+				return false;
+			}
+
+			// Get receive buffer for port
+			//
+			const ::ConnectionPortInfo& portInfo = port->portInfo();
+
+			assert(portInfo.lmID == equipmentId());
+
+			QByteArray* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
+			if (receiveBuffer == nullptr)
+			{
+				SIM_FAULT(QString("Get port receive buffer error, connection %1, port %2 (%3).")
+						  .arg(c->connectionId())
+						  .arg(portInfo.portNo)
+						  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+			// Get data (actually swap) to receive buffer
+			//
+			bool ok = c->receiveData(portInfo.portNo,
+									 receiveBuffer,
+									 currentTime,
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2});
+
+			if (ok == false)
+			{
+				SIM_FAULT(QString("Receive data error, connection %1, port %2 (%3).")
+						  .arg(c->connectionId())
+						  .arg(portInfo.portNo)
+						  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+			if (receiveBuffer->isEmpty() == true)
+			{
+				// If receive buffer is empty then it is timeout
+				// Clear memory in dedicated memory area
+				//
+				m_ram.clearMemoryArea(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read);
+				//qDebug() << "DeviceEmulator::receiveConnectionsData: Connection timeout";
+			}
+			else
+			{
+				// Write data to memory
+				//
+				assert(receiveBuffer->size() % 2 == 0);
+
+				if (receiveBuffer->size() / 2 != portInfo.rxDataSizeW)
+				{
+					SIM_FAULT(QString("Receive data error, expected %1 words but received %2 words, connection %3, port %4 (%5).")
+							  .arg(portInfo.rxDataSizeW)
+							  .arg(receiveBuffer->size() / 2)
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
+					return false;
+				}
+
+				ok = m_ram.writeBuffer(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read, *receiveBuffer);
+				if (ok == false)
+				{
+					SIM_FAULT(QString("Received buffer write memory error, %1 words, connection %2, port %3 (%4).")
+							  .arg(portInfo.rxDataSizeW)
+							  .arg(c->connectionId())
+							  .arg(portInfo.portNo)
+							  .arg(portInfo.equipmentID));
+					return false;
+				}
+			}
+
+			// Set port receive validity flag to 0 or 1
+			//
+			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
+									  portInfo.rxValiditySignalAbsAddr.bit(),
+									  receiveBuffer->isEmpty() ? 0x0000 : 0x0001,
+									  E::ByteOrder::BigEndian,
+									  E::LogicModuleRamAccess::Read);
+			if (ok == false)
+			{
+				SIM_FAULT(QString("Write receive validity signal error, signal %1 (%2), connection %3, port %4 (%5).")
+						  .arg(portInfo.rxValiditySignalEquipmentID)
+						  .arg(portInfo.rxValiditySignalAbsAddr.toString())
+						  .arg(c->connectionId())
+						  .arg(portInfo.portNo)
+						  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+		}
+
+		return true;
+	}
+
+	bool DeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
+	{
+		for (ConnectionPtr& c : m_connections)
+		{
+			if (c->enabled() == false)
+			{
+				// Connection is disabled, just skip it
+				//
+				continue;
+			}
+
+			// Get port for this connection for this LM
+			//
+			ConnectionPortPtr port = c->portForLm(equipmentId());
+			if (port == nullptr)
+			{
+				assert(port);
+				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.")
+						  .arg(c->connectionId())
+						  .arg(equipmentId()));
+				return false;
+			}
+
+			// Get send buffer for port
+			//
+			const ::ConnectionPortInfo& portInfo = port->portInfo();
+
+			assert(portInfo.lmID == equipmentId());
+
+			QByteArray* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
+			if (sendBuffer == nullptr)
+			{
+				SIM_FAULT(QString("Get port send buffer error, connection %1, port %2 (%3).")
+						  .arg(c->connectionId())
+						  .arg(portInfo.portNo)
+						  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+			// Write data from RAM to send buffer
+			//
+			bool ok = m_ram.readToBuffer(portInfo.txBufferAbsAddr, E::LogicModuleRamAccess::Write, portInfo.txDataSizeW, sendBuffer);
+			if (ok == false)
+			{
+				SIM_FAULT(QString("Send data error, read data from memory (address %1, count %2) returned error, connection %3, port %4 (%5).")
+						  .arg(portInfo.txBufferAbsAddr)
+						  .arg(portInfo.txDataSizeW)
+						  .arg(c->connectionId())
+						  .arg(portInfo.portNo)
+						  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+			// Send data (actually swap) to send buffer
+			//
+			ok = c->sendData(portInfo.portNo, sendBuffer, currentTime);
+
+			if (ok == false)
+			{
+				SIM_FAULT(QString("Send data error, connection %1, port %2 (%3).")
+						  .arg(c->connectionId())
+						  .arg(portInfo.portNo)
+						  .arg(portInfo.equipmentID));
+				return false;
+			}
+
+		}
+
+		return true;
+	}
+
 	// Getting data from m_plainAppLogic
 	//
 	template <typename TYPE>
@@ -1119,9 +1323,9 @@ namespace Sim
 		return result;
 	}
 
-	QString DeviceEmulator::equpimnetId() const
+	const QString& DeviceEmulator::equipmentId() const
 	{
-		return logicModuleInfo().equipmentId;
+		return m_logicModuleInfo.equipmentId;
 	}
 
 	Hardware::LogicModuleInfo DeviceEmulator::logicModuleInfo() const

@@ -45,6 +45,87 @@ namespace Sim
 		return;
 	}
 
+	RamArea::~RamArea()
+	{
+		//qDebug() << "RamArea::~RamArea(), data ptr " << QString::number(reinterpret_cast<quint64>(m_data.data()), 16) << " name = " << name() << " offset = " << offset();
+	}
+
+	bool RamArea::clear()
+	{
+		m_data.fill(0x00);
+
+		// Apply override
+		//
+		if (m_overrideData.empty() == false)
+		{
+			for (quint32 i = 0; i < static_cast<quint32>(m_data.size() / 2); i++)
+			{
+				applyOverride<quint16>(i * 2);
+			}
+		}
+
+		return true;
+	}
+
+	bool RamArea::writeBuffer(quint32 offsetW, const QByteArray& data) noexcept
+	{
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			m_data.size() - byteOffset < data.size())
+		{
+			// Buffer must be completely inside area
+			//
+			Q_ASSERT(byteOffset >= 0 &&
+					 m_data.size() - byteOffset >= data.size());
+			return false;
+		}
+
+		m_data.replace(byteOffset, data.size(), data);
+
+		// Apply override
+		//
+		if (m_overrideData.empty() == false)
+		{
+			for (quint32 i = 0; i < static_cast<quint32>(data.size() / 2); i++)
+			{
+				applyOverride<quint16>(byteOffset / 2 + i);
+			}
+		}
+
+		return true;
+	}
+
+	bool RamArea::readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data) noexcept
+	{
+		if (data == nullptr)
+		{
+			assert(data);
+			return false;
+		}
+
+		int countBytes = countW * 2;
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			m_data.size() - byteOffset < countBytes)
+		{
+			// Buffer must be completely inside area
+			//
+			Q_ASSERT(byteOffset >= 0 &&
+					 m_data.size() - byteOffset >= countBytes);
+			return false;
+		}
+
+		if (data->size() != countBytes)
+		{
+			data->resize(countBytes);
+		}
+
+		memcpy_s(data->data(), data->size(), m_data.constData() + byteOffset, countBytes);
+
+		return true;
+	}
+
 	bool RamArea::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		// Cannot use contains function, cause such signals like _pblink stored in memory for reading, but actually I write there manually
@@ -386,6 +467,11 @@ namespace Sim
 		*this = that;
 	}
 
+	Ram::~Ram()
+	{
+		qDebug() << "Ram::~Ram()";
+	}
+
 	Ram& Ram::operator=(const Ram& that)
 	{
 		// Deep copy
@@ -524,6 +610,39 @@ namespace Sim
 		}
 
 		return &m_memoryAreas[handle];
+	}
+
+	bool Ram::clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->clear();	// Fill with 0's
+	}
+
+	bool Ram::writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const QByteArray& data) noexcept
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeBuffer(offsetW, data);
+	}
+
+	bool Ram::readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, QByteArray* data) noexcept
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readToBuffer(offsetW, countW, data);
 	}
 
 	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
@@ -697,12 +816,11 @@ namespace Sim
 				// Look for the right area from back, most likely it will find area much faster.
 				// Tried it on project, it works really well
 				//
-				const size_t memoryAreaCount = m_memoryAreas.size();
-				for (size_t i = memoryAreaCount - 1; i >= 0; --i)
+				for (auto rit = m_memoryAreas.rbegin(); rit != m_memoryAreas.rend(); ++rit)
 				{
-					if (m_memoryAreas[i].contains(access, offsetW) == true)
+					if (rit->contains(access, offsetW) == true)
 					{
-						result = &m_memoryAreas[i];
+						result = &(*rit);
 						break;
 					}
 				}
@@ -741,12 +859,11 @@ namespace Sim
 				// Look for the right area from back, most likely it will find area much faster.
 				// Tried it on project, it works really well
 				//
-				const size_t memoryAreaCount = m_memoryAreas.size();
-				for (size_t i = memoryAreaCount - 1; i >= 0; --i)
+				for (auto rit = m_memoryAreas.rbegin(); rit != m_memoryAreas.rend(); ++rit)
 				{
-					if (m_memoryAreas[i].contains(access, offsetW) == true)
+					if (rit->contains(access, offsetW) == true)
 					{
-						result = &m_memoryAreas[i];
+						result = &(*rit);
 						break;
 					}
 				}
