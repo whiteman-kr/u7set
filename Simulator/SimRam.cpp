@@ -37,11 +37,20 @@ namespace Sim
 		return m_name;
 	}
 
-	RamArea::RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name) :
-		RamAreaInfo(access, offset, size, name)
+	//
+	// RamArea
+	//
+	RamArea::RamArea(bool clearOnStartCycle) :
+		RamAreaInfo(),
+		m_clearOnStartCycle(clearOnStartCycle)
+	{
+	}
+
+	RamArea::RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, bool clearOnStartCycle, QString name) :
+		RamAreaInfo(access, offset, size, name),
+		m_clearOnStartCycle(clearOnStartCycle)
 	{
 		m_data.fill(0, size * 2);
-
 		return;
 	}
 
@@ -453,6 +462,11 @@ namespace Sim
 		return;
 	}
 
+	bool RamArea::clearOnStartCycle()
+	{
+		return m_clearOnStartCycle;
+	}
+
 	void RamArea::setOverrideData(std::vector<OverrideRamRecord>&& overrideData) noexcept
 	{
 		m_overrideData = std::move(overrideData);
@@ -493,9 +507,9 @@ namespace Sim
 		return;
 	}
 
-	bool Ram::addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, QString name)
+	bool Ram::addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name)
 	{
-		RamArea ramArea{access, offsetW, sizeW, name};
+		RamArea ramArea{access, offsetW, sizeW, clearOnStartCycle, name};
 
 		// Check that new memory area is not overlapped with existsings
 		//
@@ -609,6 +623,19 @@ namespace Sim
 		}
 
 		return &m_memoryAreas[handle];
+	}
+
+	bool Ram::clearMemoryAreasOnStartCycle()
+	{
+		for (RamArea& memoryArea : m_memoryAreas)
+		{
+			if (memoryArea.clearOnStartCycle() == true)
+			{
+				memoryArea.clear();
+			}
+		}
+
+		return true;
 	}
 
 	bool Ram::clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access)

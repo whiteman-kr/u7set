@@ -558,11 +558,13 @@ namespace Sim
 			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
 									  memory.m_moduleDataSize,
+									  false,
 									  QString("Input I/O Module %1").arg(i + 1));
 
 			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
 									  memory.m_moduleDataSize,
+									  true,
 									  QString("Output I/O Module %1").arg(i + 1));
 		}
 
@@ -575,11 +577,13 @@ namespace Sim
 			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
 									  optoInterface.m_optoPortDataSize,
+									  false,
 									  QString("Rx Opto Port  %1").arg(i + 1));
 
 			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
 									  optoInterface.m_optoPortDataSize,
+									  false,
 									  QString("Tx Opto Port  %1").arg(i + 1));
 		}
 
@@ -588,11 +592,13 @@ namespace Sim
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
 								  memory.m_appLogicBitDataOffset,
 								  memory.m_appLogicBitDataSize,
+								  false,
 								  QLatin1String("Application Logic Block (bit access)"));
 
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
 								  memory.m_appLogicWordDataOffset,
 								  memory.m_appLogicWordDataSize,
+								  false,
 								  QLatin1String("Application Logic Block (word access)"));
 
 		// RAM - Tuninng Block
@@ -600,6 +606,7 @@ namespace Sim
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 								  memory.m_tuningDataOffset,
 								  memory.m_tuningDataSize,
+								  false,
 								  QLatin1String("Tuning Block"));
 
 		// Copy EEPROM tuning data to memory
@@ -622,11 +629,13 @@ namespace Sim
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 								  memory.m_txDiagDataOffset,
 								  memory.m_txDiagDataSize,
+								  false,
 								  QLatin1String("Input Diag Data"));
 
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 								  memory.m_txDiagDataOffset,
 								  memory.m_txDiagDataSize,
+								  false,
 								  QLatin1String("Output Diag Data"));
 
 
@@ -635,11 +644,13 @@ namespace Sim
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 								  memory.m_appDataOffset,
 								  memory.m_appDataSize,
+								  false,
 								  QLatin1String("Input App Data"));
 
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 								  memory.m_appDataOffset,
 								  memory.m_appDataSize,
+								  false,
 								  QLatin1String("Output App Data"));
 
 		return ok;
@@ -973,6 +984,11 @@ namespace Sim
 		{
 			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
 		}
+
+		// COMMENTED as now there is no need to zero IO modules memory
+		// as there is no control of reading uinitialized memory.
+		//
+		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 som emeory areas before start work cylce (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
 		//

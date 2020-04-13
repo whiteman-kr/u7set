@@ -49,7 +49,7 @@ namespace Sim
 	class RamArea final : public RamAreaInfo
 	{
 	public:
-		RamArea() = default;
+		RamArea(bool clearOnStartCycle);
 		RamArea(const RamArea&) = default;
 		RamArea(RamArea&&) noexcept = default;
 		virtual ~RamArea();
@@ -57,7 +57,7 @@ namespace Sim
 		RamArea& operator=(const RamArea&) = default;
 		RamArea& operator=(RamArea&&) = default;
 
-		RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name);
+		RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, bool clearOnStartCycle, QString name);
 
 	public:
 		bool clear();
@@ -89,9 +89,12 @@ namespace Sim
 		template<typename TYPE> void applyOverride(quint32 offsetW) noexcept;
 
 	public:
+		bool clearOnStartCycle();
+
 		void setOverrideData(std::vector<OverrideRamRecord>&& overrideData) noexcept;
 
 	private:
+		bool m_clearOnStartCycle = false;					// Clear memory area on start of work cycle
 		QByteArray m_data;
 		std::vector<OverrideRamRecord> m_overrideData;
 	};
@@ -109,7 +112,7 @@ namespace Sim
 
 	public:
 		void reset();
-		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, QString name);			// offset and size in 16 bit words
+		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 
 		void updateFrom(const Ram& source);
 
@@ -123,6 +126,7 @@ namespace Sim
 		const RamArea* memoryArea(Handle handle) const;
 
 	public:
+		bool clearMemoryAreasOnStartCycle();
 		bool clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access);
 
 		bool writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const QByteArray& data) noexcept;
