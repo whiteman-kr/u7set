@@ -47,7 +47,7 @@ private:
 	TrendLib::TrendSignalSet* m_trendSignalSet = nullptr;
 	QString m_appSignalId;
 	E::TimeType m_timeType = E::TimeType::Plant;
-	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Generic;
+	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
 	E::TrendMode m_trendMode = E::TrendMode::Archive;
 
 	//

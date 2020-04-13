@@ -113,7 +113,7 @@ namespace TrendLib
 	{
 		switch (scaleType)
 		{
-		case TrendScaleType::Generic:
+		case TrendScaleType::Linear:
 		case TrendScaleType::Log10:
 			{
 				return scaleValuesGeneric(scaleType, lowLimit, highLimit, signalRect, minInchInterval);
@@ -132,7 +132,7 @@ namespace TrendLib
 	{
 		switch (drawParam.scaleType())
 		{
-		case TrendScaleType::Generic:
+		case TrendScaleType::Linear:
 			{
 				return QString(" %1 ").arg(QString::number(value, 'f', precision));
 			}
@@ -163,7 +163,7 @@ namespace TrendLib
 
 		switch (scaleType)
 		{
-		case TrendScaleType::Generic:
+		case TrendScaleType::Linear:
 			{
 				return value;
 			}
@@ -231,7 +231,7 @@ namespace TrendLib
 
 		switch (scaleType)
 		{
-		case TrendScaleType::Generic:
+		case TrendScaleType::Linear:
 			{
 				return scaleValue;
 			}
@@ -270,9 +270,9 @@ namespace TrendLib
 	//
 	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
 	{
-		if (scaleType != TrendScaleType::Generic && scaleType != TrendScaleType::Log10)
+		if (scaleType != TrendScaleType::Linear && scaleType != TrendScaleType::Log10)
 		{
-			Q_ASSERT(scaleType == TrendScaleType::Generic || scaleType == TrendScaleType::Log10);
+			Q_ASSERT(scaleType == TrendScaleType::Linear || scaleType == TrendScaleType::Log10);
 			return {};
 		}
 

@@ -299,7 +299,7 @@ namespace TrendLib
 		m_toolBar->addWidget(scaleTypeLabel);
 
 		m_scaleTypeCombo = new QComboBox(m_toolBar);
-		m_scaleTypeCombo->addItem(tr("Generic"), QVariant::fromValue(TrendLib::TrendScaleType::Generic));
+		m_scaleTypeCombo->addItem(tr("Linear"), QVariant::fromValue(TrendLib::TrendScaleType::Linear));
 		m_scaleTypeCombo->addItem(tr("Logarithmic"), QVariant::fromValue(TrendLib::TrendScaleType::Log10));
 		m_scaleTypeCombo->addItem(tr("Period"), QVariant::fromValue(TrendLib::TrendScaleType::Period));
 		m_toolBar->addWidget(m_scaleTypeCombo);
@@ -433,7 +433,7 @@ namespace TrendLib
 
 	void TrendMainWindow::autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals)
 	{
-		TrendScaleType defaultScaleType = TrendScaleType::Generic;
+		TrendScaleType defaultScaleType = TrendScaleType::Linear;
 
 		bool defaultScaleTypeFound = false;
 
@@ -448,19 +448,19 @@ namespace TrendLib
 
 			for (const QString& tag : tags)
 			{
-				if (tag == QStringLiteral("scalegeneric"))
+				if (tag == QStringLiteral("view_linear"))
 				{
-					defaultScaleType = TrendLib::TrendScaleType::Generic;
+					defaultScaleType = TrendLib::TrendScaleType::Linear;
 					defaultScaleTypeFound = true;	// break the outer loop
 					break;
 				}
-				if (tag == QStringLiteral("scalelog10"))
+				if (tag == QStringLiteral("view_log10"))
 				{
 					defaultScaleType = TrendLib::TrendScaleType::Log10;
 					defaultScaleTypeFound = true;	// break the outer loop
 					break;
 				}
-				if (tag == QStringLiteral("scaleperiod"))
+				if (tag == QStringLiteral("view_period"))
 				{
 					defaultScaleType = TrendLib::TrendScaleType::Period;
 					defaultScaleTypeFound = true;	// break the outer loop
