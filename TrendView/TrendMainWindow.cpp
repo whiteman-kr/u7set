@@ -177,16 +177,16 @@ namespace TrendLib
 		}
 
 		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
-						[&trendSignal](const TrendLib::TrendSignalParam& t)
-						{
-							return t.appSignalId() == trendSignal.appSignalId();
-						});
+								[&trendSignal](const TrendLib::TrendSignalParam& t)
+		{
+			return t.appSignalId() == trendSignal.appSignalId();
+		});
 
 		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
-						[&trendSignal](const TrendLib::TrendSignalParam& t)
-						{
-							return t.appSignalId() == trendSignal.appSignalId();
-						});
+								[&trendSignal](const TrendLib::TrendSignalParam& t)
+		{
+			return t.appSignalId() == trendSignal.appSignalId();
+		});
 
 		if (dit != discreteSignals.end() ||
 			ait != analogSignals.end())
@@ -194,9 +194,9 @@ namespace TrendLib
 			return false;
 		}
 
-static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
-								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
-static size_t stdColorIndex = 0;
+		static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
+										  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
+		static size_t stdColorIndex = 0;
 
 		TrendLib::TrendSignalParam tsp(trendSignal);
 
@@ -444,7 +444,9 @@ static size_t stdColorIndex = 0;
 				continue;
 			}
 
-			for (const QString& tag : acceptedSignal.tags())
+			const std::set<QString>& tags = acceptedSignal.tags();
+
+			for (const QString& tag : tags)
 			{
 				if (tag == QStringLiteral("scalegeneric"))
 				{
@@ -597,11 +599,11 @@ static size_t stdColorIndex = 0;
 #pragma warning (disable: 6326)
 		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this,
 				[&d, this]()
-				{
-					bool ok = signalSet().setSignalParam(d.trendSignal());
-					Q_ASSERT(ok);
-					this->updateWidget();
-				});
+		{
+			bool ok = signalSet().setSignalParam(d.trendSignal());
+			Q_ASSERT(ok);
+			this->updateWidget();
+		});
 #pragma warning( pop )
 
 		d.exec();
@@ -739,16 +741,16 @@ static size_t stdColorIndex = 0;
 		{
 			// Select paper size
 			//
-static QPageSize::PageSizeId m_defaultPageSize = QPageSize::A3;
-static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientation::Landscape;
+			static QPageSize::PageSizeId m_defaultPageSize = QPageSize::A3;
+			static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientation::Landscape;
 
 			QDialog d(this);
 
 			d.setWindowTitle(tr("Page Setup"));
 			d.setWindowFlags((d.windowFlags() &
-							~Qt::WindowMinimizeButtonHint &
-							~Qt::WindowMaximizeButtonHint &
-							~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+							  ~Qt::WindowMinimizeButtonHint &
+							  ~Qt::WindowMaximizeButtonHint &
+							  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 			QLabel* pageSizeLabel = new  QLabel(tr("Page Size"));
 
@@ -813,10 +815,10 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 
 	void TrendMainWindow::actionPrintTriggered()
 	{
-static QPageLayout lastPageLayout;
-static int lastResolution = -1;
-static bool lastFullPage = false;
-static int lastCopyCount = false;
+		static QPageLayout lastPageLayout;
+		static int lastResolution = -1;
+		static bool lastFullPage = false;
+		static int lastCopyCount = false;
 
 		QPrintDialog d(this);
 
@@ -975,7 +977,7 @@ static int lastCopyCount = false;
 
 			if (firstValue == false)
 			{
-				if (fabs(maxValue - minValue) <= DBL_MIN)
+				if (std::fabs(maxValue - minValue) <= DBL_MIN)
 				{
 					minValue = minValue - 1.0;
 					maxValue = maxValue + 1.0;
@@ -1082,9 +1084,9 @@ static int lastCopyCount = false;
 		QDialog d(this);
 		d.setWindowTitle(tr("Ruler Properties"));
 		d.setWindowFlags((d.windowFlags() &
-						~Qt::WindowMinimizeButtonHint &
-						~Qt::WindowMaximizeButtonHint &
-						~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+						  ~Qt::WindowMinimizeButtonHint &
+						  ~Qt::WindowMaximizeButtonHint &
+						  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 		QGridLayout* layout = new QGridLayout(&d);
 
@@ -1288,31 +1290,31 @@ static int lastCopyCount = false;
 			lineWeight1->setCheckable(true);
 			connect(lineWeight1, &QAction::triggered, this,
 					[this, &outSignal]()
-					{
-						outSignal.setLineWeight(1);
-						this->signalSet().setSignalParam(outSignal);
-						this->updateWidget();
-					});
+			{
+				outSignal.setLineWeight(1);
+				this->signalSet().setSignalParam(outSignal);
+				this->updateWidget();
+			});
 
 			QAction* lineWeight2 = menu.addAction(tr("Line Weight 2"));
 			lineWeight2->setCheckable(true);
 			connect(lineWeight2, &QAction::triggered, this,
 					[this, &outSignal]()
-					{
-						outSignal.setLineWeight(2);
-						this->signalSet().setSignalParam(outSignal);
-						this->updateWidget();
-					});
+			{
+				outSignal.setLineWeight(2);
+				this->signalSet().setSignalParam(outSignal);
+				this->updateWidget();
+			});
 
 			QAction* lineWeight3 = menu.addAction(tr("Line Weight 3"));
 			lineWeight3->setCheckable(true);
 			connect(lineWeight3, &QAction::triggered, this,
 					[this, &outSignal]()
-					{
-						outSignal.setLineWeight(3);
-						this->signalSet().setSignalParam(outSignal);
-						this->updateWidget();
-					});
+			{
+				outSignal.setLineWeight(3);
+				this->signalSet().setSignalParam(outSignal);
+				this->updateWidget();
+			});
 
 			QAction* autoscale = menu.addAction(tr("Scale to Fit"));
 			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
@@ -1320,17 +1322,17 @@ static int lastCopyCount = false;
 			QAction* remove = menu.addAction(tr("Remove"));
 			connect(remove, &QAction::triggered, this,
 					[this, &outSignal]()
-					{
-						this->signalSet().removeSignal(outSignal.appSignalId());
-						this->updateWidget();
-					});
+			{
+				this->signalSet().removeSignal(outSignal.appSignalId());
+				this->updateWidget();
+			});
 
 			QAction* properties = menu.addAction(tr("Properties..."));
 			connect(properties, &QAction::triggered, this,
 					[this, &outSignal]()
-					{
-						signalProperties(outSignal.appSignalId());
-					});
+			{
+				signalProperties(outSignal.appSignalId());
+			});
 
 			QAction* signalAction = menu.addAction(tr("Signals..."));
 			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
@@ -1377,25 +1379,25 @@ static int lastCopyCount = false;
 			QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
 			connect(addRulerAction, &QAction::triggered, this,
 					[&pos, this]()
-					{
-						this->TrendMainWindow::actionAddRuler(pos);
-					});
+			{
+				this->TrendMainWindow::actionAddRuler(pos);
+			});
 
 			QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
 			deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
 			connect(deleteRulerAction, &QAction::triggered, this,
 					[rulerIndex, this]()
-					{
-						this->TrendMainWindow::actionDeleteRuler(rulerIndex);
-					});
+			{
+				this->TrendMainWindow::actionDeleteRuler(rulerIndex);
+			});
 
 			QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
 			rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
 			connect(rulerPropertiesAction, &QAction::triggered, this,
 					[rulerIndex, this]()
-					{
-						this->TrendMainWindow::actionRulerProperties(rulerIndex);
-					});
+			{
+				this->TrendMainWindow::actionRulerProperties(rulerIndex);
+			});
 
 			menu.addSeparator();
 			QAction* chooseView = menu.addAction(tr("Select View..."));
@@ -1421,9 +1423,9 @@ static int lastCopyCount = false;
 				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
 				connect(signalPropertiesAction, &QAction::triggered, this,
 						[this, s]()
-						{
-							signalProperties(s.appSignalId());
-						});
+				{
+					signalProperties(s.appSignalId());
+				});
 			}
 
 			for (const TrendLib::TrendSignalParam& s : analogs)
@@ -1431,9 +1433,9 @@ static int lastCopyCount = false;
 				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
 				connect(signalPropertiesAction, &QAction::triggered, this,
 						[this, s]()
-						{
-							signalProperties(s.appSignalId());
-						});
+				{
+					signalProperties(s.appSignalId());
+				});
 			}
 
 			QAction* signalAction = menu.addAction(tr("Signals..."));

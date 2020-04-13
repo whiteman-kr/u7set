@@ -674,7 +674,7 @@ namespace TrendLib
 
 							QRectF signalRect = trendSignal.tempDrawRect();
 
-							if (fabs(highLimit - lowLimit) > DBL_MIN &&
+							if (std::fabs(highLimit - lowLimit) > DBL_MIN &&
 								signalRect.height() > DBL_MIN)
 							{
 								double dy = mouseOffset.y() / m_trendParam.dpiY();
@@ -860,7 +860,7 @@ namespace TrendLib
 					continue;
 				}
 
-				double delta = fabs(h - l);
+				double delta = std::fabs(h - l);
 				if (delta < DBL_MIN)
 				{
 					continue;
@@ -970,7 +970,7 @@ namespace TrendLib
 		double left = qMin(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 		double right = qMax(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 
-		if (fabs(right - left) * m_trendParam.dpiX() <= 1)
+		if (std::fabs(right - left) * m_trendParam.dpiX() <= 1)
 		{
 			// Value is way too small
 			//
@@ -1025,7 +1025,7 @@ namespace TrendLib
 			double top = qMin(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 			double bottom = qMax(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 
-			if (fabs(bottom - top) * m_trendParam.dpiY() <= 1)
+			if (std::fabs(bottom - top) * m_trendParam.dpiY() <= 1)
 			{
 				// Value is way too small
 				//
@@ -1052,7 +1052,7 @@ namespace TrendLib
 					continue;
 				}
 
-				if (fabs(highLimit - lowLimit) <= DBL_MIN ||
+				if (std::fabs(highLimit - lowLimit) <= DBL_MIN ||
 					signalRectTsp.height() <= DBL_EPSILON)
 				{
 					// Div by zero possible

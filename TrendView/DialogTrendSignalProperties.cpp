@@ -50,11 +50,11 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 		{
 			// Limit values are reversed in periodic scale
 			//
-            if (fabs(viewHighLimit) < 1)
+			if (std::fabs(viewHighLimit) < 1)
             {
                 viewHighLimit = 1;
             }
-            if (fabs(viewLowLimit) < 1)
+			if (std::fabs(viewLowLimit) < 1)
 			{
 				viewLowLimit = -1;
 			}
@@ -162,10 +162,10 @@ bool DialogTrendSignalProperties::applyProperties()
 
 		if (m_scaleType == TrendLib::TrendScaleType::Period)
 		{
-			if (fabs(viewHighLimit) < 1 ||
-					fabs(viewLowLimit) < 1 ||
-					fabs(viewHighLimit) > TrendLib::TrendScale::periodScaleInfinity ||
-					fabs(viewLowLimit) > TrendLib::TrendScale::periodScaleInfinity)
+			if (std::fabs(viewHighLimit) < 1 ||
+					std::fabs(viewLowLimit) < 1 ||
+					std::fabs(viewHighLimit) > TrendLib::TrendScale::periodScaleInfinity ||
+					std::fabs(viewLowLimit) > TrendLib::TrendScale::periodScaleInfinity)
 			{
 				QMessageBox::critical(this, qAppName(), tr("Absolute value of view limits should be in range [1..999] for period scale!"));
 				return false;

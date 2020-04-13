@@ -10,7 +10,7 @@ namespace TrendLib
 	class TrendScale
 	{
 	public:
-		TrendScale();
+		TrendScale() = delete;
 
 		// Scale-specific functions
 		//

@@ -188,7 +188,7 @@ namespace TrendLib
 		// Specific drawing for analog signals
 		//
 		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
-			   drawParam.viewMode() == TrendViewMode::Overlapped);
+				 drawParam.viewMode() == TrendViewMode::Overlapped);
 
 		if (analogs.empty() == true &&
 			lastDiscreteRect.isEmpty() == false)
@@ -431,7 +431,7 @@ namespace TrendLib
 		// Draw ANALOG signal id, caption and scale for TrendView::Separated mode
 		//
 		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
-			   drawParam.viewMode() == TrendViewMode::Overlapped);
+				 drawParam.viewMode() == TrendViewMode::Overlapped);
 
 		if (drawParam.viewMode() == TrendViewMode::Separated  &&
 			analogs.empty() == false)
@@ -454,21 +454,21 @@ namespace TrendLib
 					signalText = QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit());
 				}
 
-                // Check the scale view limits
-                //
-                bool highLimitOk = false;
-                bool lowLimitOk = false;
+				// Check the scale view limits
+				//
+				bool highLimitOk = false;
+				bool lowLimitOk = false;
 
-                double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
-                Q_UNUSED(highLimit);
+				double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
+				Q_UNUSED(highLimit);
 
-                double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
-                Q_UNUSED(lowLimit);
+				double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+				Q_UNUSED(lowLimit);
 
-                if (highLimitOk == false || lowLimitOk == false)
-                {
-                    signalText += QObject::tr(" [can't render the trend, scale is not valid for current mode]");
-                }
+				if (highLimitOk == false || lowLimitOk == false)
+				{
+					signalText += QObject::tr(" [can't render the trend, scale is not valid for current mode]");
+				}
 
 				painter->setPen(ts.color());
 
@@ -505,23 +505,23 @@ namespace TrendLib
 					signalText = QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit());
 				}
 
-                // Check the scale view limits
-                //
-                bool highLimitOk = false;
-                bool lowLimitOk = false;
+				// Check the scale view limits
+				//
+				bool highLimitOk = false;
+				bool lowLimitOk = false;
 
-                double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
-                Q_UNUSED(highLimit);
+				double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
+				Q_UNUSED(highLimit);
 
-                double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
-                Q_UNUSED(lowLimit);
+				double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+				Q_UNUSED(lowLimit);
 
-                if (highLimitOk == false || lowLimitOk == false)
-                {
-                    signalText += QObject::tr(" [can't render the trend, scale is not valid for current mode]");
-                }
+				if (highLimitOk == false || lowLimitOk == false)
+				{
+					signalText += QObject::tr(" [can't render the trend, scale is not valid for current mode]");
+				}
 
-                painter->setPen(ts.color());
+				painter->setPen(ts.color());
 
 				QRectF testDesctriptionBoundRect;
 				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
@@ -539,17 +539,17 @@ namespace TrendLib
 			drawAnalogSignalsGridOverlappedMode(painter, laneRect, drawParam, analogs);
 		}
 
-//		// --
-//		//
+		//		// --
+		//		//
 		painter->setClipping(false);
 
 		return;
 	}
 
 	void Trend::drawAnalogSignalsGridSeparateMode(QPainter* painter,
-										   const QRectF& laneRect,
-										   const TrendParam& drawParam,
-										   const TrendSignalParam& signal) const
+												  const QRectF& laneRect,
+												  const TrendParam& drawParam,
+												  const TrendSignalParam& signal) const
 	{
 		Q_ASSERT(painter);
 		painter->setClipping(false);
@@ -563,32 +563,32 @@ namespace TrendLib
 			return;
 		}
 
-        bool ok  = false;
+		bool ok  = false;
 
-        double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
-        if (ok == false)
-        {
-            return;
-        }
+		double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		if (ok == false)
+		{
+			return;
+		}
 
-        double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
-        if (ok == false)
-        {
-            return;
-        }
+		double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		if (ok == false)
+		{
+			return;
+		}
 
-        if (fabs(highLimit - lowLimit) <= DBL_MIN)
-        {
-            // Divide by 0 possible
-            //
-            return;
-        }
+		if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
+		{
+			// Divide by 0 possible
+			//
+			return;
+		}
 
 		// Get grid values
 		//
-        double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
+		double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
 
-        auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(), lowLimit, highLimit, signalRect, minInchInterval); // first: value, second: display value
+		auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(), lowLimit, highLimit, signalRect, minInchInterval); // first: value, second: display value
 		if (scaleValues.has_value() == false)
 		{
 			return;
@@ -610,16 +610,16 @@ namespace TrendLib
 
 			double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
 
-            double antiAliasedY = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
+			double antiAliasedY = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
 
-            if (antiAliasedY < signalRect.top() ||
-                antiAliasedY > signalRect.bottom())
+			if (antiAliasedY < signalRect.top() ||
+				antiAliasedY > signalRect.bottom())
 			{
 				continue;
 			}
 
-            painter->drawLine(QPointF(signalRect.left(), antiAliasedY),
-                              QPointF(signalRect.right(), antiAliasedY));
+			painter->drawLine(QPointF(signalRect.left(), antiAliasedY),
+							  QPointF(signalRect.right(), antiAliasedY));
 
 			double scaleValue = p.second;
 
@@ -649,7 +649,7 @@ namespace TrendLib
 				continue;
 			}
 
-            QString text = TrendScale::scaleValueText(value, drawParam, signal.precision());
+			QString text = TrendScale::scaleValueText(value, drawParam, signal.precision());
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -677,7 +677,7 @@ namespace TrendLib
 			return;
 		}
 
-        QRectF signalRect = analogs[0].tempDrawRect();
+		QRectF signalRect = analogs[0].tempDrawRect();
 		QRectF scaleAreaRect = calcScaleAreaRect(laneRect, signalRect);
 
 		if (signalRect.isEmpty() == true ||
@@ -686,68 +686,68 @@ namespace TrendLib
 			return;
 		}
 
-        bool ok  = false;
+		bool ok  = false;
 
-        double highLimit = TrendScale::limitToScaleValue(qMax(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
-        if (ok == false)
-        {
-            return;
-        }
+		double highLimit = TrendScale::limitToScaleValue(qMax(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
+		if (ok == false)
+		{
+			return;
+		}
 
-        double lowLimit = TrendScale::limitToScaleValue(qMin(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
-        if (ok == false)
-        {
-            return;
-        }
+		double lowLimit = TrendScale::limitToScaleValue(qMin(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
+		if (ok == false)
+		{
+			return;
+		}
 
-        if (fabs(highLimit - lowLimit) <= DBL_MIN)
-        {
-            // Divide by 0 possible
-            //
-            return;
-        }
+		if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
+		{
+			// Divide by 0 possible
+			//
+			return;
+		}
 
-        // Get grid values
-        //
-        double minInchInterval = 3.0/8.0;	// minimum inches interval
-
-        auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(), lowLimit, highLimit, signalRect, minInchInterval); // first: value, second: display value
-        if (scaleValues.has_value() == false)
-        {
-            return;
-        }
-
-        // Draw horz grids
+		// Get grid values
 		//
-        double dpiY = drawParam.dpiY();
+		double minInchInterval = 3.0/8.0;	// minimum inches interval
 
-        QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
-        painter->setPen(gridPen);
+		auto scaleValues = TrendScale::scaleValues(drawParam.scaleType(), lowLimit, highLimit, signalRect, minInchInterval); // first: value, second: display value
+		if (scaleValues.has_value() == false)
+		{
+			return;
+		}
 
-        std::vector<std::pair<double, double>> grids;		// first: y pos, second: display value
-        grids.reserve(scaleValues->size());
+		// Draw horz grids
+		//
+		double dpiY = drawParam.dpiY();
 
-        for (const std::pair<double, double>& p : *scaleValues)
-        {
-            double value = p.first;
+		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
+		painter->setPen(gridPen);
 
-            double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
+		std::vector<std::pair<double, double>> grids;		// first: y pos, second: display value
+		grids.reserve(scaleValues->size());
 
-            double antiAliasedY = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
+		for (const std::pair<double, double>& p : *scaleValues)
+		{
+			double value = p.first;
 
-            if (antiAliasedY < signalRect.top() ||
-                antiAliasedY > signalRect.bottom())
-            {
-                continue;
-            }
+			double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
 
-            painter->drawLine(QPointF(signalRect.left(), antiAliasedY),
-                              QPointF(signalRect.right(), antiAliasedY));
+			double antiAliasedY = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
 
-            double scaleValue = p.second;
+			if (antiAliasedY < signalRect.top() ||
+				antiAliasedY > signalRect.bottom())
+			{
+				continue;
+			}
 
-            grids.emplace_back(y, scaleValue);
-        }
+			painter->drawLine(QPointF(signalRect.left(), antiAliasedY),
+							  QPointF(signalRect.right(), antiAliasedY));
+
+			double scaleValue = p.second;
+
+			grids.emplace_back(y, scaleValue);
+		}
 
 		// Draw grid values for the FIRST signal
 		//
@@ -779,7 +779,7 @@ namespace TrendLib
 				continue;
 			}
 
-            QString text = TrendScale::scaleValueText(value, drawParam, analogs[0].precision());
+			QString text = TrendScale::scaleValueText(value, drawParam, analogs[0].precision());
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -791,39 +791,39 @@ namespace TrendLib
 			const TrendSignalParam& signal = analogs[i];
 			Q_ASSERT(signal.isAnalog() == true);
 
-            double signalHighLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
-            if (ok == false)
-            {
-                continue;
-            }
+			double signalHighLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+			if (ok == false)
+			{
+				continue;
+			}
 
-            double signalLowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
-            if (ok == false)
-            {
-                continue;
-            }
+			double signalLowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+			if (ok == false)
+			{
+				continue;
+			}
 
-            double signalDelta = signalHighLimit - signalLowLimit;
-            if (fabs(signalDelta) <= DBL_MIN)
-            {
-                // Divide by 0 possible
-                //
-                continue;
-            }
+			double signalDelta = signalHighLimit - signalLowLimit;
+			if (std::fabs(signalDelta) <= DBL_MIN)
+			{
+				// Divide by 0 possible
+				//
+				continue;
+			}
 
-            painter->setPen(signal.color());
+			painter->setPen(signal.color());
 
 			for (const std::pair<double, double>& p : grids)
 			{
 				double y = p.first;
 
-                double scaleValue = TrendScale::scaledPixelToValue(y, signalRect, signalLowLimit, signalHighLimit);
+				double scaleValue = TrendScale::scaledPixelToValue(y, signalRect, signalLowLimit, signalHighLimit);
 
-                double value = TrendScale::valueFromScaleValue(scaleValue, drawParam.scaleType(), &ok);
+				double value = TrendScale::valueFromScaleValue(scaleValue, drawParam.scaleType(), &ok);
 
 				// This signal is draw in 0 pos
 				//  2 | 0
-                // ---+---
+				// ---+---
 				//  3 | 1
 				QRectF textRect;
 
@@ -861,7 +861,7 @@ namespace TrendLib
 					continue;
 				}
 
-                QString text = ok == true ? TrendScale::scaleValueText(value, drawParam, signal.precision()) : "?";
+				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam, signal.precision()) : "?";
 
 				drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 			}
@@ -1073,19 +1073,19 @@ namespace TrendLib
 		//
 		bool ok = false;
 
-        double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-        double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		if (fabs(highLimit - lowLimit) <= DBL_MIN)
+		if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
 		{
 			// Divide by 0 possible
 			//
@@ -1098,7 +1098,7 @@ namespace TrendLib
 					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.dpiY());
 		painter->setPen(linePen);
 
-static const int recomendedSize = 8192;
+		static const int recomendedSize = 8192;
 		QVector<QPointF> lines;
 		lines.reserve(recomendedSize);
 
@@ -1110,7 +1110,7 @@ static const int recomendedSize = 8192;
 		double lastX = 0;
 		double lastY = 0;
 
-//		int pointIndex = 0;
+		//		int pointIndex = 0;
 
 		for (std::shared_ptr<OneHourData> hour : signalData)
 		{
@@ -1122,7 +1122,7 @@ static const int recomendedSize = 8192;
 				{
 					const TimeStamp& ct = state.getTime(timeType);
 
-                    double value = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
+					double value = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
 
 					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
 					//
@@ -1140,13 +1140,13 @@ static const int recomendedSize = 8192;
 					double x = TrendScale::timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
 					double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
 
-//					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
-//					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
-//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex
-//							 << ", Flags: " << state.flags
-//							 << ", value: " << state.value
-//							 << ", timestamp: " << ct.toDateTime().toString("HH:mm:ss.zzz");
-//					pointIndex ++;
+					//					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
+					//					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
+					//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex
+					//							 << ", Flags: " << state.flags
+					//							 << ", value: " << state.value
+					//							 << ", timestamp: " << ct.toDateTime().toString("HH:mm:ss.zzz");
+					//					pointIndex ++;
 
 					if (lines.isEmpty() == true)
 					{
@@ -1277,10 +1277,10 @@ static const int recomendedSize = 8192;
 
 			std::vector<TrendRuler> laneRulers = rulerSet().rulers();
 			std::sort(laneRulers.begin(), laneRulers.end(),
-				[](const TrendRuler& r1, const TrendRuler& r2)
-				{
-					return r1.timeStamp() < r2.timeStamp();
-				});
+					  [](const TrendRuler& r1, const TrendRuler& r2)
+			{
+				return r1.timeStamp() < r2.timeStamp();
+			});
 
 			// Calc ruler timestamp text width
 			//
@@ -1448,24 +1448,24 @@ static const int recomendedSize = 8192;
 
 						bool ok = false;
 
-                        double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;
 						}
 
-                        double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;
 						}
 
-						if (fabs(highLimit - lowLimit) <= DBL_MIN)
+						if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
 						{
 							continue;
 						}
 
-                        double value = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
+						double value = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;
@@ -1478,7 +1478,7 @@ static const int recomendedSize = 8192;
 						}
 						else
 						{
-                            str = TrendScale::scaleValueText(state.value, drawParam, trendSignal.precision());
+							str = TrendScale::scaleValueText(state.value, drawParam, trendSignal.precision());
 						}
 
 						double vertCoef = (highLimit - lowLimit) / signalRect.height();
@@ -1602,39 +1602,39 @@ static const int recomendedSize = 8192;
 					continue;	// to next record
 				}
 
-//				//for (const TrendStateItem& state : states)							// for by index is faster
-//				size_t stateCount = states.size();
-//				for (size_t stateIndex = 0; stateIndex < stateCount; ++stateIndex)
-//				{
-//					const TrendStateItem& state = states[stateIndex];
+				//				//for (const TrendStateItem& state : states)							// for by index is faster
+				//				size_t stateCount = states.size();
+				//				for (size_t stateIndex = 0; stateIndex < stateCount; ++stateIndex)
+				//				{
+				//					const TrendStateItem& state = states[stateIndex];
 
-//					TimeStamp ts = state.getTime(timeType);
-//					if (ts >= rulerTime)
-//					{
-//						// Got it, we need to return prev point.
-//						// if currnet state not valid, then we assume last state is not valid also
-//						//
-//						if (state.isValid() == false)
-//						{
-//							return state;
-//						}
-//						else
-//						{
-//							return lastState;
-//						}
-//					}
+				//					TimeStamp ts = state.getTime(timeType);
+				//					if (ts >= rulerTime)
+				//					{
+				//						// Got it, we need to return prev point.
+				//						// if currnet state not valid, then we assume last state is not valid also
+				//						//
+				//						if (state.isValid() == false)
+				//						{
+				//							return state;
+				//						}
+				//						else
+				//						{
+				//							return lastState;
+				//						}
+				//					}
 
-//					//lastState = state;
-//					static_assert(std::is_pod<TrendStateItem>::value, "TrendStateItem must be a POD type.");
-//					memcpy(&lastState, &state, sizeof(lastState));
-//				}
+				//					//lastState = state;
+				//					static_assert(std::is_pod<TrendStateItem>::value, "TrendStateItem must be a POD type.");
+				//					memcpy(&lastState, &state, sizeof(lastState));
+				//				}
 
-static const TrendStateItem fakeState = TrendStateItem();
+				static const TrendStateItem fakeState = TrendStateItem();
 				auto stateIt = std::lower_bound(states.begin(), states.end(), fakeState,
-								 [&rulerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
-								 {
-										return state.getTime(timeType) < rulerTime;
-								 });
+												[&rulerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
+				{
+					return state.getTime(timeType) < rulerTime;
+				});
 
 				if (stateIt != states.end())
 				{
@@ -1829,7 +1829,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 		}
 
 		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
-			   drawParam.viewMode() == TrendViewMode::Overlapped);
+				 drawParam.viewMode() == TrendViewMode::Overlapped);
 
 		return;
 	}
