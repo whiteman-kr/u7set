@@ -38,10 +38,10 @@ namespace TrendLib
 		s.setValue(qAppName() + "/Trends/MainWindow/state", m_mainWindowState);
 
 		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/viewType", m_viewType);
+		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/scaleType", m_scaleType);
 		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/laneCount", m_laneCount);
 		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/timeTypeIndex", m_timeTypeIndex);
 		s.setValue(qAppName() + "/Trends/MainWindow/ToolBar/timeType", m_timeType);
-
 		s.setValue(qAppName() + "/Trends/DialogTrendSignalPoints/allowPointsEditing", m_allowPointsEditing);
 
 		return;
@@ -56,6 +56,7 @@ namespace TrendLib
 		m_mainWindowState = s.value(qAppName() + "/Trends/MainWindow/state").toByteArray();
 
 		m_viewType = s.value(qAppName() + "/Trends/MainWindow/ToolBar/viewType", 0).toInt();
+		m_scaleType = s.value(qAppName() + "/Trends/MainWindow/ToolBar/scaleType", 0).toInt();
 		m_laneCount = s.value(qAppName() + "/Trends/MainWindow/ToolBar/laneCount", 1).toInt();
 		m_timeTypeIndex = s.value(qAppName() + "/Trends/MainWindow/ToolBar/timeTypeIndex", 0).toInt();
 		m_timeType = s.value(qAppName() + "/Trends/MainWindow/ToolBar/timeType", 0).toInt();

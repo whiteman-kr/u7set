@@ -1,6 +1,7 @@
 #include "DialogTrendSignalProperties.h"
 #include "ui_DialogTrendSignalProperties.h"
 #include "DialogTrendSignalPoints.h"
+#include "TrendScale.h"
 
 //
 // DialogTrendSignalProperties
@@ -9,7 +10,7 @@
 
 DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal,
 														 TrendLib::TrendSignalSet* trendSignalSet,
-														 E::TimeType timeType,
+														 E::TimeType timeType, TrendLib::TrendScaleType scaleType,
 														 E::TrendMode trendMode,
 														 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -17,6 +18,7 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 	m_trendSignal(trendSignal),
 	m_trendSignalSet(trendSignalSet),
 	m_timeType(timeType),
+	m_scaleType(scaleType),
 	m_trendMode(trendMode)
 
 {
@@ -29,6 +31,9 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 
 	ui->typeEdit->setText(E::valueToString<E::SignalType>(m_trendSignal.type()));
 
+	ui->viewLineWeightEdit->setValidator(new QIntValidator(0, 10,ui->viewLineWeightEdit));
+	ui->viewLineWeightEdit->setText(QString::number(static_cast<int>(m_trendSignal.lineWeight())));
+
 	if (m_trendSignal.type() == E::SignalType::Analog)
 	{
 		ui->unitsEdit->setText(m_trendSignal.unit());
@@ -37,13 +42,30 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 				.arg(QString::number(m_trendSignal.lowLimit(), 'f', trendSignal.precision()))
 				.arg(QString::number(m_trendSignal.highLimit(), 'f', trendSignal.precision())));
 
-		ui->viewHighEdit->setText(QString::number(m_trendSignal.viewHighLimit(), 'f', trendSignal.precision()));
-		ui->viewLowEdit->setText(QString::number(m_trendSignal.viewLowLimit(), 'f', trendSignal.precision()));
+
+		double viewHighLimit = m_trendSignal.viewHighLimit();
+		double viewLowLimit = m_trendSignal.viewLowLimit();
+
+		if (m_scaleType == TrendLib::TrendScaleType::Period)
+		{
+			// Limit values are reversed in periodic scale
+			//
+            if (fabs(viewHighLimit) < 1)
+            {
+                viewHighLimit = 1;
+            }
+            if (fabs(viewLowLimit) < 1)
+			{
+				viewLowLimit = -1;
+			}
+
+            viewHighLimit = TrendLib::TrendScale::periodScaleInfinity / viewHighLimit;
+			viewLowLimit = TrendLib::TrendScale::periodScaleInfinity / viewLowLimit;
+		}
+
+		ui->viewHighEdit->setText(QString::number(viewHighLimit, 'f', trendSignal.precision()));
+		ui->viewLowEdit->setText(QString::number(viewLowLimit, 'f', trendSignal.precision()));
 	}
-
-
-	ui->viewLineWeightEdit->setValidator(new QIntValidator(0, 10,ui->viewLineWeightEdit));
-	ui->viewLineWeightEdit->setText(QString::number(static_cast<int>(m_trendSignal.lineWeight())));
 
 	if (m_trendSignal.type() == E::SignalType::Discrete)
 	{
@@ -113,23 +135,50 @@ bool DialogTrendSignalProperties::applyProperties()
 		return false;
 	}
 
-	double viewHighValue = ui->viewHighEdit->text().toDouble(&ok);
+	double viewHighLimit = ui->viewHighEdit->text().toDouble(&ok);
 	if (ok == false)
 	{
 		ui->viewHighEdit->setFocus();
 		return false;
 	}
 
-	double viewLowValue = ui->viewLowEdit->text().toDouble(&ok);
+	double viewLowLimit = ui->viewLowEdit->text().toDouble(&ok);
 	if (ok == false)
 	{
 		ui->viewLowEdit->setFocus();
 		return false;
 	}
 
+	if (m_trendSignal.type() == E::SignalType::Analog)
+	{
+		if (m_scaleType == TrendLib::TrendScaleType::Log10)
+		{
+			if (viewHighLimit <= 0 || viewLowLimit <= 0)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Value of view limits should be positive (> 0) for logarithmic scale!"));
+				return false;
+			}
+		}
+
+		if (m_scaleType == TrendLib::TrendScaleType::Period)
+		{
+			if (fabs(viewHighLimit) < 1 ||
+					fabs(viewLowLimit) < 1 ||
+					fabs(viewHighLimit) > TrendLib::TrendScale::periodScaleInfinity ||
+					fabs(viewLowLimit) > TrendLib::TrendScale::periodScaleInfinity)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Absolute value of view limits should be in range [1..999] for period scale!"));
+				return false;
+			}
+
+			viewHighLimit = TrendLib::TrendScale::periodScaleInfinity / viewHighLimit;
+			viewLowLimit = TrendLib::TrendScale::periodScaleInfinity / viewLowLimit;
+		}
+	}
+
 	m_trendSignal.setLineWeight(lineWeight);
-	m_trendSignal.setViewHighLimit(qMax(viewHighValue, viewLowValue));
-	m_trendSignal.setViewLowLimit(qMin(viewHighValue, viewLowValue));
+	m_trendSignal.setViewHighLimit(qMax(viewLowLimit, viewLowLimit));
+	m_trendSignal.setViewLowLimit(qMin(viewLowLimit, viewLowLimit));
 	m_trendSignal.setColor(ui->colorWidget->color().rgb());
 
 	emit signalPropertiesChanged();

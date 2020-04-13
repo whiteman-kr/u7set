@@ -271,6 +271,18 @@ void SimTrendsWidget::signalsButton()
 		addSignal(tsp, false);
 	}
 
+	// Set default scale type if analog signals are empty and selected signals have special tags
+	//
+
+	if (analogSignals.empty() == true)
+	{
+		autoSelectScaleType(acceptedSignals);
+	}
+
+	// Validate view limits for scale
+	//
+	m_trendWidget->validateViewLimits();
+
 	updateWidget();
 
 	return;

@@ -42,6 +42,8 @@ namespace TrendLib
 
 		void setRealtimeAutoShift(const TimeStamp& ts);
 
+		void autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals);
+
 		// Events
 		//
 	protected:
@@ -72,6 +74,7 @@ namespace TrendLib
 
 		void timeComboCurrentIndexChanged(int index);
 		void viewComboCurrentIndexChanged(int index);
+		void scaleTypeComboCurrentIndexChanged(int index);
 		void laneCountComboCurrentIndexChanged(int index);
 		void timeTypeComboCurrentIndexChanged(int index);
 		void realtimeModeToggled(bool state);
@@ -104,6 +107,7 @@ namespace TrendLib
 		QToolBar* m_toolBar = nullptr;
 		QComboBox* m_timeCombo = nullptr;
 		QComboBox* m_viewCombo = nullptr;
+		QComboBox* m_scaleTypeCombo = nullptr;
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
 
@@ -129,6 +133,9 @@ namespace TrendLib
 		TrendSlider* m_trendSlider = nullptr;
 
 		static const int singleStepSliderDivider = 50;
+
+	private:
+		bool m_autoSelectedScaleType = false;
 	};
 
 }

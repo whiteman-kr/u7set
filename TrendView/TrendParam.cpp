@@ -16,6 +16,7 @@ namespace TrendLib
 		}
 
 		message->set_view_mode(static_cast<int>(m_viewMode));
+		message->set_scale_type(static_cast<int>(m_scaleType));
 		message->set_time_type(static_cast<int>(m_timeType));
 		message->set_lane_count(m_laneCount);
 
@@ -37,6 +38,7 @@ namespace TrendLib
 		}
 
 		m_viewMode = static_cast<TrendViewMode>(message.view_mode());
+		m_scaleType = static_cast<TrendScaleType>(message.scale_type());
 		m_timeType = static_cast<E::TimeType>(message.time_type());
 		m_laneCount = message.lane_count();
 
@@ -95,6 +97,16 @@ namespace TrendLib
 	void TrendParam::setViewMode(TrendViewMode value)
 	{
 		m_viewMode = value;
+	}
+
+	TrendScaleType TrendParam::scaleType() const
+	{
+		return m_scaleType;
+	}
+
+	void TrendParam::setScaleType(TrendScaleType value)
+	{
+		m_scaleType = value;
 	}
 
 	E::TimeType TrendParam::timeType() const
