@@ -469,7 +469,6 @@ namespace Sim
 
 	Ram::~Ram()
 	{
-		qDebug() << "Ram::~Ram()";
 	}
 
 	Ram& Ram::operator=(const Ram& that)

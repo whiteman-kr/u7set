@@ -18,7 +18,6 @@ namespace Sim
 
 	Control::~Control()
 	{
-		qDebug() << Q_FUNC_INFO;
 		stopThread();
 		return;
 	}
@@ -405,10 +404,7 @@ namespace Sim
 						TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
 						TimeStamp systemTime{ms.count()};
 
-						for (SimControlRunStruct& lm : lms)
-						{
-							lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
-						}
+						lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
 					}
 					else
 					{

@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	//
 	Q_INIT_RESOURCE(TrendView);
 
-    // Start database communication thread
+	// Start database communication thread
 	//
 	DbController dbController;
 

@@ -21,7 +21,6 @@ namespace Sim
 
 	Simulator::~Simulator()
 	{
-		qDebug() << "Simulator::~Simulator()";
 		return;
 	}
 
@@ -95,7 +94,6 @@ namespace Sim
 
 	bool Simulator::loadFunc(QString buildPath)
 	{
-		qDebug() << "loadFunc(QString buildPath)";
 		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
 
 		//--
