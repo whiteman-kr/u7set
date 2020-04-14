@@ -109,6 +109,7 @@ public:
 
 	QString m_equipmentTabPagePropertiesMask;
 	QMap<QString, int> m_equipmentTabPagePropertiesColumnsWidth;
+	bool m_equipmentTabPagePropertiesGroupByCategory = false;
 
 	// Signals Tab Page
 	//
@@ -174,6 +175,7 @@ public:
 	QString m_schemaItemPropertiesPropertyMask;
 	bool m_schemaItemPropertiesExpandValuesToAllRows = true;
 	QMap<QString, int> m_schemaItemPropertiesColumnsWidth;
+	bool m_schemaItemPropertiesGroupByCategory = false;
 	QByteArray m_schemaItemPropertiesGeometry;
 
 	// Find SchemaItem

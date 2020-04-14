@@ -14,6 +14,8 @@
 namespace ExtWidgets
 {
 
+	QString PropertyEditorBase::m_commonCategoryName = "Common";
+
 	//
 	// ------------ PropertyEditorBase ------------
 	//
@@ -3823,7 +3825,7 @@ namespace ExtWidgets
 			QString category = p->category();
 			if (category.isEmpty())
 			{
-				category = "Common";
+				category = m_commonCategoryName;
 			}
 
 			CreatePropertyStruct cs;
