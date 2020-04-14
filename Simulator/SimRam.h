@@ -63,7 +63,7 @@ namespace Sim
 		bool clear();
 
 		bool writeBuffer(quint32 offsetW, const QByteArray& data) noexcept;
-		bool readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data) noexcept;
+		bool readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data) const noexcept;
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept;
@@ -77,16 +77,19 @@ namespace Sim
 		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept;
 		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const noexcept;
 
-		const QByteArray& data() const noexcept;
-		const std::vector<OverrideRamRecord>& overrideData() const noexcept;
+		[[nodiscard]] const QByteArray& data() const noexcept;
+		[[nodiscard]] const std::vector<OverrideRamRecord>& overrideData() const noexcept;
 
 		void setRawData(const QByteArray& data, const std::vector<OverrideRamRecord>& overrideData) noexcept;
 
 	private:
-		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept;
-		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const noexcept;
+		template<typename TYPE>
+		bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept;
 
-		template<typename TYPE> void applyOverride(quint32 offsetW) noexcept;
+		template<typename TYPE>
+		bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const noexcept;
+
+		void applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept;
 
 	public:
 		bool clearOnStartCycle();
@@ -121,9 +124,10 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(int index) const;
 
 	using Handle = size_t;	// Handle is just index in m_memoryAreas vector
-		Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;
-		RamArea* memoryArea(Handle handle);
-		const RamArea* memoryArea(Handle handle) const;
+
+		[[nodiscard]] Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;
+		[[nodiscard]] RamArea* memoryArea(Handle handle);
+		[[nodiscard]] const RamArea* memoryArea(Handle handle) const;
 
 	public:
 		bool clearMemoryAreasOnStartCycle();
@@ -154,8 +158,8 @@ namespace Sim
 		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const;
 
 	private:
-		RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept;
-		const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept;
+		[[nodiscard]] RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept;
+		[[nodiscard]] const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept;
 
 	public:
 		void updateOverrideData(const QString& equipmentId, const Sim::OverrideSignals* overrideSignals);
@@ -165,8 +169,6 @@ namespace Sim
 		//
 		std::vector<RamArea> m_memoryAreas;
 		int m_overrideSignalsLastCounter = -1;
-
-		mutable RamArea* m_lastAccessedMemoryArea = nullptr;		// Cached value
 	};
 }
 

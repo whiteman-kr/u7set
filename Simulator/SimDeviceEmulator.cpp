@@ -359,7 +359,7 @@ namespace Sim
 		bool ok = m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
 		}
 
 		return ok;
@@ -370,13 +370,13 @@ namespace Sim
 		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
 		if (ramArea == nullptr)
 		{
-			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
 		}
 
 		bool ok = ramArea->writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
 		}
 
 		return ok;
@@ -389,7 +389,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+			SIM_FAULT(QString("Read RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
 		}
 
 		return data;
@@ -400,7 +400,7 @@ namespace Sim
 		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
 		if (ramArea == nullptr)
 		{
-			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
 		}
 
 		quint16 data = 0;
@@ -408,7 +408,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+			SIM_FAULT(QString("Read RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
 		}
 
 		return data;
@@ -419,7 +419,7 @@ namespace Sim
 		bool ok = m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write access RAM error, offsetW %1, bitNo %2, acess %3")
+			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2, acess %3")
 					  .arg(offsetW)
 					  .arg(bitNo)
 					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
@@ -435,7 +435,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read access RAM error, offsetW %1, bitNo %2, access %3")
+			SIM_FAULT(QString("Read RAM error, offsetW %1, bitNo %2, access %3")
 					  .arg(offsetW)
 					  .arg(bitNo)
 					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
@@ -450,7 +450,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+			SIM_FAULT(QString("Write RAM error, offsetW %1").arg(offsetW));
 		}
 
 		return ok;
@@ -461,14 +461,14 @@ namespace Sim
 		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
 		if (ramArea == nullptr)
 		{
-			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
 		}
 
 		bool ok = ramArea->writeWord(offsetW, data, E::ByteOrder::BigEndian);
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+			SIM_FAULT(QString("Write RAM error, offsetW %1").arg(offsetW));
 		}
 
 		return ok;
@@ -481,7 +481,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+			SIM_FAULT(QString("Read RAM error, offsetW %1").arg(offsetW));
 		}
 
 		return data;
@@ -492,7 +492,7 @@ namespace Sim
 		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
 		if (ramArea == nullptr)
 		{
-			SIM_FAULT(QString("Write access RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
 		}
 
 		quint16 data = 0;
@@ -500,7 +500,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+			SIM_FAULT(QString("Read RAM error, offsetW %1").arg(offsetW));
 		}
 
 		return data;
@@ -512,7 +512,25 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+			SIM_FAULT(QString("Write RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	bool DeviceEmulator::writeRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW, quint32 data)
+	{
+		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+		if (ramArea == nullptr)
+		{
+			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+		}
+
+		bool ok = ramArea->writeDword(offsetW, data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write RAM error, offsetW %1").arg(offsetW));
 		}
 
 		return ok;
@@ -525,7 +543,26 @@ namespace Sim
 
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+			SIM_FAULT(QString("Read RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	quint32 DeviceEmulator::readRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW)
+	{
+		RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+		if (ramArea == nullptr)
+		{
+			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+		}
+
+		quint32 data = 0;
+		bool ok = ramArea->readDword(offsetW, &data, E::ByteOrder::BigEndian);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read RAM error, offsetW %1").arg(offsetW));
 		}
 
 		return data;

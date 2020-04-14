@@ -92,6 +92,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_nop(const DeviceCommand& /*command*/)
 	{
+		// No operation
+		//
 	}
 
 	// Command: startafb
@@ -203,6 +205,9 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2 - destionation
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1 - source
 
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -217,8 +222,8 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint16 data = m_device->readRamWord(src);
-		m_device->writeRamWord(dst, data);
+		quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, src);
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, data);
 
 		return;
 	}
@@ -247,9 +252,9 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movmem(const DeviceCommand& command)
 	{
-		const auto& size = command.m_word2;
-		const auto& src = command.m_word1;
-		const auto& dst = command.m_word0;
+		const quint16 size = command.m_word2;
+		const quint16 src = command.m_word1;
+		const quint16 dst = command.m_word0;
 
 		m_device->movRamMem(src, dst, size);
 
@@ -267,6 +272,8 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// movc     0b402h, #0
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -278,7 +285,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movc(const DeviceCommand& command)
 	{
-		m_device->writeRamWord(command.m_word0, command.m_word1);
+		m_device->writeRamWord(command.m_memoryAreaTo, command.m_word0, command.m_word1);
 		return;
 	}
 
@@ -292,8 +299,11 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - data address
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
-		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);	// bitNo0 - bitno
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);		// bitNo0 - bitno
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
+		checkParamRange(command->m_word1, 0, 1, QStringLiteral("BitData"));
 		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
 		// MOVBC    0B402h[0], #0
@@ -308,7 +318,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movbc(const DeviceCommand& command)
 	{
-		m_device->writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, command.m_word1);
 		return;
 	}
 
@@ -349,12 +359,12 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
 
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  AfbComponentParam{command.m_afbPinOpCode, data});
 		return;
 	}
 
@@ -392,7 +402,6 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfb(const DeviceCommand& command)
 	{
-		//AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
@@ -439,12 +448,12 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
 
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  command.m_afbParam);
 		return;
 	}
 
@@ -490,11 +499,11 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  AfbComponentParam{command.m_afbPinOpCode, data});
 
 		return;
 	}
@@ -593,6 +602,9 @@ namespace Sim
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
+		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
+		//
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -610,7 +622,7 @@ namespace Sim
 		const quint16& data = command.m_word1;
 		const quint16& address = command.m_word0;
 
-		m_device->setRamMem(address, data, size);
+		m_device->setRamMem(address, data, size);		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
 
 		return;
 	}
@@ -623,11 +635,14 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// source address (ADR1)
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// source address (ADR1)
 		command->m_bitNo0 = m_device->getWord(command->m_offset + 3) & 0b1111;			//
 
-		command->m_word1 = m_device->getWord(command->m_offset + 1);						// destionation address	(ADR2)
+		command->m_word1 = m_device->getWord(command->m_offset + 1);					// destionation address	(ADR2)
 		command->m_bitNo1 = (m_device->getWord(command->m_offset + 3) >> 8) & 0b1111;	//
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word1);
 
 		// String representation
 		//
@@ -640,8 +655,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movb(const DeviceCommand& command)
 	{
-		quint16 data = m_device->readRamBit(command.m_word0, command.m_bitNo0);
-		m_device->writeRamBit(command.m_word1, command.m_bitNo1, data);
+		quint16 data = m_device->readRamBit(command.m_memoryAreaFrom, command.m_word0, command.m_bitNo0);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word1, command.m_bitNo1, data);
 
 		return;
 	}
@@ -680,6 +695,9 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destionation
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - address1 - source
 
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -694,8 +712,8 @@ namespace Sim
 		const quint16& src = command.m_word1;
 		const quint16& dst = command.m_word0;
 
-		quint32 data = m_device->readRamDword(src);
-		m_device->writeRamDword(dst, data);
+		quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, src);
+		m_device->writeRamDword(command.m_memoryAreaTo, dst, data);
 
 		return;
 	}
@@ -708,8 +726,10 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);					// word0 - RAM address
+		command->m_word0 = m_device->getWord(command->m_offset + 1);				// word0 - RAM address
 		command->m_dword0 = m_device->getDword(command->m_offset + 2);				// Dword0 - data
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// movc32     0b402h, #0
 		//
@@ -722,7 +742,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movc32(const DeviceCommand& command)
 	{
-		m_device->writeRamDword(command.m_word0, command.m_dword0);
+		m_device->writeRamDword(command.m_memoryAreaTo, command.m_word0, command.m_dword0);
 	}
 
 	// Command: wrfb32
@@ -735,9 +755,11 @@ namespace Sim
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
 
 		// Checks
 		//
@@ -756,18 +778,20 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_wrfb32(const DeviceCommand& command)
 	{
+		quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, command.m_word0);
+
 		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setDwordValue(m_device->readRamDword(command.m_word0));
+		param.setDwordValue(data);
 
 		bool ok = command.m_afbComponentInstance->addParam(std::move(param));
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
 
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  std::move(param));
 		return;
 	}
 
@@ -781,9 +805,11 @@ namespace Sim
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// Checks
 		//
@@ -804,11 +830,10 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfb32(const DeviceCommand& command)
 	{
-		//AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		m_device->writeRamDword(command.m_word0, param->dwordValue());
+		m_device->writeRamDword(command.m_memoryAreaTo, command.m_word0, param->dwordValue());
 
 		return;
 	}
@@ -852,10 +877,11 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance))
 		}
-
-		//m_device->setAfbParam(command.m_afbOpCode, command.m_afbInstance, command.m_afbParam);
 
 		return;
 	}
@@ -866,11 +892,11 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::parse_rdfbcmp32(DeviceCommand* command) const
 	{
-		command->m_size = 3;
+		command->m_size = 4;
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
 		command->m_dword0 = m_device->getDword(command->m_offset + 2);					// Dword0 - data to comapare with
 
@@ -909,6 +935,8 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);					// m_word0 - Destination address
 		command->m_bitNo0 = m_device->getWord(command->m_offset + 2) & 0x0F;			// m_bitNo0 - Destination bit no
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		command->m_string = strCommand(command->caption()) +
 							strBitAddr(command->m_word0, command->m_bitNo0);
 
@@ -918,7 +946,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_movcmpf(const DeviceCommand& command)
 	{
 		quint32 cmp = m_device->flagCmp();
-		m_device->writeRamBit(command.m_word0, command.m_bitNo0, cmp);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, cmp);
 		return;
 	}
 
@@ -932,6 +960,9 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
 		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// String representation
 		//
@@ -947,9 +978,9 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint16 data = m_device->readRamWord(src);
+		quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, src);
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, data);
 
-		m_device->writeRamWord(dst, data);
 		return;
 	}
 
@@ -963,6 +994,9 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
 		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// String representation
 		//
@@ -978,9 +1012,9 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint32 data = m_device->readRamDword(src);
+		quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, src);
+		m_device->writeRamDword(command.m_memoryAreaTo, dst, data);
 
-		m_device->writeRamDword(dst, data);
 		return;
 	}
 
@@ -994,7 +1028,10 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
 		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
-		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);		// bit no to read
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);			// bit no to read
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// String representation
 		//
@@ -1011,9 +1048,9 @@ namespace Sim
 		const auto& dst = command.m_word0;
 		const auto& bitNo = command.m_bitNo0;
 
-		quint16 bit = m_device->readRamBit(src, bitNo);
+		quint16 bit = m_device->readRamBit(command.m_memoryAreaFrom, src, bitNo);
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, bit ? 0xFFFF : 0x0000);
 
-		m_device->writeRamWord(dst, bit ? 0xFFFF : 0x0000);
 		return;
 	}
 

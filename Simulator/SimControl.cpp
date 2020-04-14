@@ -450,7 +450,7 @@ namespace Sim
 					// !!!!!!!!!!!!!!
 					// COMMENT HERE FOR SPEED UP (IF POSSIBLE, DEPENDS ON HW)
 					//
-					QThread::usleep(ahead.count());
+					//QThread::usleep(ahead.count());
 					// !!!!!!!!!!!!!!
 					// !!!!!!!!!!!!!!
 				}

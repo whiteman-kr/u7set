@@ -131,6 +131,27 @@ void SimOverrideWidget::dropEvent(QDropEvent* event)
 
 	if (signalIds.isEmpty() == false)
 	{
+		// Check that signals are not optimized constants
+		//
+		for (const QString& id : signalIds)
+		{
+			std::optional<Signal> sp = m_simulator->appSignalManager().signalParamExt(id);
+
+			if (sp.has_value() == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(id));
+				return;
+			}
+
+			if (sp->isConst() == true)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Value for signal %1 cannot be is overriden as it was optimized to const.").arg(id));
+				return;
+			}
+		}
+
+		// --
+		//
 		int actuallyAdded = m_simulator->overrideSignals().addSignals(signalIds);
 
 		if (actuallyAdded == 0)

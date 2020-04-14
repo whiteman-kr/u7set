@@ -190,7 +190,10 @@ namespace Sim
 		quint16 readRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW);
 
 		bool writeRamDword(quint32 offsetW, quint32 data);
+		bool writeRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW, quint32 data);
+
 		quint32 readRamDword(quint32 offsetW);
+		quint32 readRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW);
 
 		// Getting data from m_plainAppLogic
 		//
