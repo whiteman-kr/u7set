@@ -21,7 +21,7 @@ namespace TrendLib
 
 	enum class TrendScaleType
 	{
-		Generic,
+		Linear,
 		Log10,
 		Period
 	};
@@ -94,7 +94,7 @@ namespace TrendLib
 		int m_dpiY = 96;
 
 		TrendViewMode m_viewMode = TrendViewMode::Separated;
-		TrendScaleType m_scaleType = TrendScaleType::Generic;
+		TrendScaleType m_scaleType = TrendScaleType::Linear;
 		E::TimeType m_timeType = E::TimeType::Local;
 		int m_laneCount = 1;
 
