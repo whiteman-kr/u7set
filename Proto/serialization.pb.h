@@ -13130,6 +13130,20 @@ class Bus : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 manualbussize() const;
   inline void set_manualbussize(::google::protobuf::int32 value);
 
+  // optional bool enableManualBusSize = 12 [default = false];
+  inline bool has_enablemanualbussize() const;
+  inline void clear_enablemanualbussize();
+  static const int kEnableManualBusSizeFieldNumber = 12;
+  inline bool enablemanualbussize() const;
+  inline void set_enablemanualbussize(bool value);
+
+  // optional bool enableManualBusSizeIsNotInitialized = 13 [default = true];
+  inline bool has_enablemanualbussizeisnotinitialized() const;
+  inline void clear_enablemanualbussizeisnotinitialized();
+  static const int kEnableManualBusSizeIsNotInitializedFieldNumber = 13;
+  inline bool enablemanualbussizeisnotinitialized() const;
+  inline void set_enablemanualbussizeisnotinitialized(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.Bus)
  private:
   inline void set_has_uuid();
@@ -13140,17 +13154,23 @@ class Bus : public ::google::protobuf::Message {
   inline void clear_has_autosignalplacement();
   inline void set_has_manualbussize();
   inline void clear_has_manualbussize();
+  inline void set_has_enablemanualbussize();
+  inline void clear_has_enablemanualbussize();
+  inline void set_has_enablemanualbussizeisnotinitialized();
+  inline void clear_has_enablemanualbussizeisnotinitialized();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
   ::std::string* bustypeid_;
   ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal > bussignals_;
-  bool autosignalplacement_;
   ::google::protobuf::int32 manualbussize_;
+  bool autosignalplacement_;
+  bool enablemanualbussize_;
+  bool enablemanualbussizeisnotinitialized_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -33112,6 +33132,50 @@ inline ::google::protobuf::int32 Bus::manualbussize() const {
 inline void Bus::set_manualbussize(::google::protobuf::int32 value) {
   set_has_manualbussize();
   manualbussize_ = value;
+}
+
+// optional bool enableManualBusSize = 12 [default = false];
+inline bool Bus::has_enablemanualbussize() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Bus::set_has_enablemanualbussize() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Bus::clear_has_enablemanualbussize() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Bus::clear_enablemanualbussize() {
+  enablemanualbussize_ = false;
+  clear_has_enablemanualbussize();
+}
+inline bool Bus::enablemanualbussize() const {
+  return enablemanualbussize_;
+}
+inline void Bus::set_enablemanualbussize(bool value) {
+  set_has_enablemanualbussize();
+  enablemanualbussize_ = value;
+}
+
+// optional bool enableManualBusSizeIsNotInitialized = 13 [default = true];
+inline bool Bus::has_enablemanualbussizeisnotinitialized() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Bus::set_has_enablemanualbussizeisnotinitialized() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Bus::clear_has_enablemanualbussizeisnotinitialized() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Bus::clear_enablemanualbussizeisnotinitialized() {
+  enablemanualbussizeisnotinitialized_ = true;
+  clear_has_enablemanualbussizeisnotinitialized();
+}
+inline bool Bus::enablemanualbussizeisnotinitialized() const {
+  return enablemanualbussizeisnotinitialized_;
+}
+inline void Bus::set_enablemanualbussizeisnotinitialized(bool value) {
+  set_has_enablemanualbussizeisnotinitialized();
+  enablemanualbussizeisnotinitialized_ = value;
 }
 
 // -------------------------------------------------------------------

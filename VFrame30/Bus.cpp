@@ -335,7 +335,8 @@ namespace VFrame30
 		auto fileNameProp = ADD_PROPERTY_GETTER(QString, PropertyNames::busTypeFileName, true, Bus::fileName);
 		fileNameProp->setExpert(true);
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busAutoSignalPlacemanet, PropertyNames::busSettingCategory, true, Bus::autoSignalPlacement, Bus::setAutoSignalPlacement);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busAutoSignalPlacement, PropertyNames::busSettingCategory, true, Bus::autoSignalPlacement, Bus::setAutoSignalPlacement);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busEnableManualBusSize, PropertyNames::busSettingCategory, true, Bus::enableManualBusSize, Bus::setEnableManualBusSize);
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busManualBusSize, PropertyNames::busSettingCategory, true, Bus::manualBusSize, Bus::setManualBusSize);
 
 		return;
@@ -374,6 +375,8 @@ namespace VFrame30
 		message->set_bustypeid(m_busTypeId.toStdString());
 		message->set_autosignalplacement(m_autoSignalPlacement);
 		message->set_manualbussize(m_manualBusSize);
+		message->set_enablemanualbussize(m_enableManualBusSize);
+		message->set_enablemanualbussizeisnotinitialized(m_enableManualBusSizeIsNotIntialized);
 
 		for (const BusSignal& bs : m_busSignals)
 		{
@@ -392,6 +395,24 @@ namespace VFrame30
 		m_busTypeId = QString::fromStdString(message.bustypeid());
 		m_autoSignalPlacement = message.autosignalplacement();
 		m_manualBusSize = message.manualbussize();
+
+		//
+
+		m_enableManualBusSizeIsNotIntialized = message.enablemanualbussizeisnotinitialized();
+
+		if (m_enableManualBusSizeIsNotIntialized == true)
+		{
+			// first time m_enableManualBusSize initialization!
+			//
+			m_enableManualBusSize = !m_autoSignalPlacement;
+			m_enableManualBusSizeIsNotIntialized = false;
+		}
+		else
+		{
+			m_enableManualBusSize = message.enablemanualbussize();
+		}
+
+		//
 
 		int busSignalCount = message.bussignals_size();
 
@@ -545,6 +566,16 @@ namespace VFrame30
 	void Bus::setManualBusSize(int value)
 	{
 		m_manualBusSize = qBound(0, value, 256);
+	}
+
+	bool Bus::enableManualBusSize() const
+	{
+		return m_enableManualBusSize;
+	}
+
+	void Bus::setEnableManualBusSize(bool enable)
+	{
+		m_enableManualBusSize = enable;
 	}
 
 	//

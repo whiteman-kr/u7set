@@ -51,7 +51,7 @@ namespace Builder
 	class Bus
 	{
 	public:
-		static QString INVALUD_BUS_SIGNAL_ID;
+		static const QString INVALUD_BUS_SIGNAL_ID;
 
 	public:
 		Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log);
@@ -86,8 +86,9 @@ namespace Builder
 
 	private:
 		bool buildInBusSignalsMap();
-		bool placeSignals();
+		bool autoPlaceSignals();
 		bool buildSignalsOrder();
+		bool calcBusSizeW();
 		bool checkSignalsOffsets();
 		void buildSignalIndexesArrays();
 

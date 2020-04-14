@@ -162,11 +162,12 @@ namespace VFrame30
 
 	const QString PropertyNames::loopbackId{"LoopbackID"};
 
-	const QString PropertyNames::compareType{"ÑompareType"};
+	const QString PropertyNames::compareType{"CompareType"};
 
 	const QString PropertyNames::busTypeId{"BusTypeID"};
 	const QString PropertyNames::busTypeFileName{"FileName"};
-	const QString PropertyNames::busAutoSignalPlacemanet{"AutoSignalPlacement"};
+	const QString PropertyNames::busAutoSignalPlacement{"AutoSignalPlacement"};
+	const QString PropertyNames::busEnableManualBusSize{"EnableManualBusSize"};
 	const QString PropertyNames::busManualBusSize{"ManualBusSize"};
 	const QString PropertyNames::busSignalId{"SignalID"};
 
