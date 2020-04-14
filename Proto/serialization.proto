@@ -1355,6 +1355,17 @@ message Bus
 	repeated BusSignal busSignals = 3;
 	optional bool autoSignalPlacement = 10 [default = true];
 	optional int32 manualBusSize = 11 [default = 0];
+	optional bool enableManualBusSize = 12 [default = false];
+
+    // On Bus message reading:
+	//
+	// if enableManualBusSizeIsNotInitialized == TRUE then enableManualBusSize should be set to NOT autoSignalPlacement,
+	// and enableManualBusSizeIsNotInitialized should be set to FALSE
+	//
+	// if enableManualBusSizeIsNotInitialized == FALSE nothing to do required
+	//
+	optional bool enableManualBusSizeIsNotInitialized = 13 [default = true];
+
 }
 
 

@@ -178,6 +178,9 @@ namespace VFrame30
 		int manualBusSize() const;
 		void setManualBusSize(int value);
 
+		bool enableManualBusSize() const;
+		void setEnableManualBusSize(bool enable);
+
 	private:
 		QUuid m_uuid;
 		QString m_fileName;
@@ -187,6 +190,11 @@ namespace VFrame30
 
 		bool m_autoSignalPlacement = true;
 		int m_manualBusSize = 0;
+		bool m_enableManualBusSize = false;
+
+		bool m_enableManualBusSizeIsNotIntialized = false;		// This property is not shown for users in BusType editor!
+																// Required only for FIRST loading of Bus message after
+																// adding of enableManualBusSize field.
 	};
 
 	//

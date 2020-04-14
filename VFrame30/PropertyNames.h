@@ -169,7 +169,8 @@ namespace VFrame30
 
 		static const QString busTypeId;
 		static const QString busTypeFileName;
-		static const QString busAutoSignalPlacemanet;
+		static const QString busAutoSignalPlacement;
+		static const QString busEnableManualBusSize;
 		static const QString busManualBusSize;
 		static const QString busSignalId;
 		static const QString busInbusOffset;
