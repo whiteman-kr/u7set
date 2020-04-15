@@ -35,6 +35,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	m_propertyTable->setPropertyMask(theSettings.m_schemaItemPropertiesPropertyMask);
 	m_propertyTable->setExpandValuesToAllRows(theSettings.m_schemaItemPropertiesExpandValuesToAllRows);
 	m_propertyTable->setColumnsWidth(theSettings.m_schemaItemPropertiesColumnsWidth);
+	m_propertyTable->setGroupByCategory(theSettings.m_schemaItemPropertiesGroupByCategory);
 	restoreGeometry(theSettings.m_schemaItemPropertiesGeometry);
 
 	ensureVisible();
@@ -117,6 +118,7 @@ void SchemaItemPropertiesDialog::saveSettings()
 	theSettings.m_schemaItemPropertiesPropertyMask = m_propertyTable->propertyMask();
 	theSettings.m_schemaItemPropertiesExpandValuesToAllRows = m_propertyTable->expandValuesToAllRows();
 	theSettings.m_schemaItemPropertiesColumnsWidth = m_propertyTable->getColumnsWidth();
+	theSettings.m_schemaItemPropertiesGroupByCategory = m_propertyTable->groupByCategory();
 	theSettings.m_schemaItemPropertiesGeometry = saveGeometry();
 
 	return;

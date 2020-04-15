@@ -170,6 +170,7 @@ void Settings::writeUserScope() const
     s.setValue("EquipmentTabPage/PropertiesSplitter/state", m_equipmentTabPagePropertiesSplitterState);
 	s.setValue("EquipmentTabPage/PropertiesTable/PropertiesMask", m_equipmentTabPagePropertiesMask);
 	s.setValue("EquipmentTabPage/PropertiesTable/ColumnsWidth", QVariant::fromValue(m_equipmentTabPagePropertiesColumnsWidth));
+	s.setValue("EquipmentTabPage/PropertiesTable/GroupByCategory", m_equipmentTabPagePropertiesGroupByCategory);
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
@@ -217,6 +218,7 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_schemaItemPropertiesPropertyMask);
 	s.setValue("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows);
 	s.setValue("SchemaItemPropertiesDialog/ColumnsWidth", QVariant::fromValue(m_schemaItemPropertiesColumnsWidth));
+	s.setValue("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory);
 	s.setValue("SchemaItemPropertiesDialog/Geometry", m_schemaItemPropertiesGeometry);
 
 	s.setValue("IdePropertyEditor/findCompleter", m_findCompleter);
@@ -260,6 +262,7 @@ void Settings::loadUserScope()
 	}
 	m_equipmentTabPagePropertiesMask = s.value("EquipmentTabPage/PropertiesTable/PropertiesMask").toString();
 	m_equipmentTabPagePropertiesColumnsWidth = s.value("EquipmentTabPage/PropertiesTable/ColumnsWidth").value<QMap<QString,int>>();
+	m_equipmentTabPagePropertiesGroupByCategory = s.value("EquipmentTabPage/PropertiesTable/GroupByCategory", m_equipmentTabPagePropertiesGroupByCategory).toBool();
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 
@@ -340,6 +343,7 @@ void Settings::loadUserScope()
 	m_schemaItemPropertiesPropertyMask = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
 	m_schemaItemPropertiesExpandValuesToAllRows = s.value("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows).toBool();
 	m_schemaItemPropertiesColumnsWidth = s.value("SchemaItemPropertiesDialog/ColumnsWidth").value<QMap<QString,int>>();
+	m_schemaItemPropertiesGroupByCategory = s.value("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory).toBool();
 	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
 
 	//

@@ -254,7 +254,7 @@ namespace ExtWidgets
 		m_propertyNames.clear();
 	}
 
-	void PropertyTableModel::setTableObjects(std::vector<PropertyTableObject>& tableObjects)
+	void PropertyTableModel::setTableObjects(std::vector<PropertyTableObject>& tableObjects, bool showCategory)
 	{
 		clear();
 
@@ -269,7 +269,21 @@ namespace ExtWidgets
 
 			for (auto p : to.properties)
 			{
-				m_propertyNames.push_back(p->caption());
+				QString propertyName = p->caption();
+
+				if (showCategory == true)
+				{
+					QString propertyCategory = p->category();
+
+					if (propertyCategory.isEmpty() == true)
+					{
+						propertyCategory = PropertyEditorBase::m_commonCategoryName;
+					}
+
+					propertyName = p->caption() + QChar::LineFeed + propertyCategory;
+				}
+
+				m_propertyNames.push_back(propertyName);
 			}
 
 			beginInsertColumns(QModelIndex(), 0, static_cast<int>(m_propertyNames.size()) - 1);
@@ -557,6 +571,11 @@ namespace ExtWidgets
 		m_editPropertyMask = new QLineEdit();
 		connect(m_editPropertyMask, &QLineEdit::editingFinished, this, &PropertyTable::onPropertyMaskChanged);
 
+		// GroupByCategory
+		m_buttonGroupByCategory = new QPushButton(tr("Group by Category"));
+		m_buttonGroupByCategory->setCheckable(true);
+		connect(m_buttonGroupByCategory, &QPushButton::toggled, this, &PropertyTable::onGroupByCategoryToggled);
+
 		// Toolbar
 
 		QHBoxLayout* toolsLayout = new QHBoxLayout();
@@ -564,6 +583,8 @@ namespace ExtWidgets
 		toolsLayout->addWidget(new QLabel(tr("Search:")));
 		toolsLayout->addWidget(m_editPropertyMask);
 		toolsLayout->addStretch();
+
+		toolsLayout->addWidget(m_buttonGroupByCategory);
 
 		mainLayout->addLayout(toolsLayout);
 
@@ -701,6 +722,28 @@ namespace ExtWidgets
 	void PropertyTable::setColumnsWidth(const QMap<QString, int>& columnsWidth)
 	{
 		m_columnsWidth = columnsWidth;
+	}
+
+	bool PropertyTable::groupByCategory() const
+	{
+		if (m_buttonGroupByCategory == nullptr)
+		{
+			Q_ASSERT(m_buttonGroupByCategory);
+			return false;
+		}
+
+		return m_buttonGroupByCategory->isChecked() == true;
+	}
+
+	void PropertyTable::setGroupByCategory(bool value)
+	{
+		if (m_buttonGroupByCategory == nullptr)
+		{
+			Q_ASSERT(m_buttonGroupByCategory);
+			return;
+		}
+
+		m_buttonGroupByCategory->setChecked(value);
 	}
 
 	void PropertyTable::valueChanged(const ModifiedObjectsData& modifiedObjectsData)
@@ -903,6 +946,13 @@ namespace ExtWidgets
 		}
 
 		menu.exec(QCursor::pos());
+	}
+
+	void PropertyTable::onGroupByCategoryToggled(bool value)
+	{
+		Q_UNUSED(value);
+
+		fillProperties();
 	}
 
 	void PropertyTable::onInsertStringBefore()
@@ -1141,12 +1191,14 @@ namespace ExtWidgets
 
 		clear();
 
-		QStringList commonProperties;
+		std::map<QString, QString> commonPropertyNames;	// contains map [NameCategory, Name]
+
+		bool groupByCategory = m_buttonGroupByCategory->isChecked() == true;
 
 		{
-
 			QMap<QString, std::shared_ptr<Property>> propertyItems;
-			QList<QString> propertyNames;
+
+			std::map<QString, QString> propertyNames; // contains map [NameCategory, Name]
 
 			// Create a map with all properties
 			//
@@ -1157,6 +1209,8 @@ namespace ExtWidgets
 
 				for (std::shared_ptr<Property> p : object->properties())
 				{
+					// Filter the property
+
 					if (p->visible() == false)
 					{
 						continue;
@@ -1172,7 +1226,7 @@ namespace ExtWidgets
 						continue;
 					}
 
-					const QString& propertyName = p->caption();
+					const QString& propertyCaption = p->caption();
 
 					if (m_propertyMasks.empty() == false)
 					{
@@ -1180,7 +1234,7 @@ namespace ExtWidgets
 
 						for (const QString& mask : m_propertyMasks)
 						{
-							if (propertyName.contains(mask) == true)
+							if (propertyCaption.contains(mask) == true)
 							{
 								maskMatch = true;
 								break;
@@ -1193,22 +1247,43 @@ namespace ExtWidgets
 						}
 					}
 
+					QString propertyName = propertyCaption;
+
+					// Add category if required
+
+					if (groupByCategory == true)
+					{
+						QString propertyCategory = p->category();
+
+						if (propertyCategory.isEmpty() == true)
+						{
+							propertyCategory = m_commonCategoryName;
+						}
+
+						propertyName = propertyCategory + '\\' + propertyCaption;
+					}
+
+					//
+
 					propertyItems.insertMulti(propertyName, p);
 
-					if (propertyNames.indexOf(propertyName) == -1)
+					if (propertyNames.find(propertyName) == propertyNames.end())
 					{
-						propertyNames.append(propertyName);
+						propertyNames[propertyName] = propertyCaption;
 					}
 				}
 			}
 
 			// add only common properties with same type
 			//
-			for (auto name : propertyNames)
+			for (const auto& name : propertyNames)
 			{
+				const QString& propertyName = name.first;
+				const QString& propertyCaption = name.second;
+
 				// take all properties witn the same name
 				//
-				QList<std::shared_ptr<Property>> propsByName = propertyItems.values(name);
+				QList<std::shared_ptr<Property>> propsByName = propertyItems.values(propertyName);
 				if (propsByName.size() != m_objects.size() || propsByName.size() == 0)
 				{
 					continue;   // this property is not in all objects
@@ -1245,11 +1320,11 @@ namespace ExtWidgets
 					continue;   // properties are not the same type
 				}
 
-				commonProperties.push_back(name);
+				commonPropertyNames[propertyName] = propertyCaption;
 			}
 		}
 
-		std::sort(commonProperties.begin(), commonProperties.end());
+		//commonPropertyNames is sorted by key
 
 		std::vector<PropertyTableObject> tableObjects;
 
@@ -1260,9 +1335,11 @@ namespace ExtWidgets
 			PropertyTableObject pto;
 			pto.propertyObject = pobject;
 
-			for (const QString& propertyName : commonProperties)
+			for (const auto& commonProperty : commonPropertyNames)
 			{
-				std::shared_ptr<Property> p = object->propertyByCaption(propertyName);
+				const QString& propertyCaption = commonProperty.second;
+
+				std::shared_ptr<Property> p = object->propertyByCaption(propertyCaption);
 				if (p == nullptr)
 				{
 					Q_ASSERT(p);
@@ -1311,7 +1388,7 @@ namespace ExtWidgets
 			}
 		}
 
-		m_tableModel.setTableObjects(tableObjects);
+		m_tableModel.setTableObjects(tableObjects, groupByCategory);
 
 		restoreColumnsWidth();
 	}
@@ -1574,19 +1651,43 @@ namespace ExtWidgets
 
 	void PropertyTable::saveColumnsWidth()
 	{
+		if (m_tableView == nullptr)
+		{
+			Q_ASSERT(m_tableView);
+			return;
+		}
+
 		int columnCount = m_tableView->model()->columnCount();
 		for (int i = 0; i < columnCount; i++)
 		{
 			QString colName = m_tableView->model()->headerData(i, Qt::Horizontal).toString();
+
+			int nPos = colName.indexOf(QChar::LineFeed);
+			if (nPos != -1)
+			{
+				colName = colName.left(nPos);
+			}
+
 			m_columnsWidth[colName] = m_tableView->columnWidth(i);
 		}
 	}
 
 	void PropertyTable::restoreColumnsWidth()
 	{
+		if (m_tableView == nullptr)
+		{
+			Q_ASSERT(m_tableView);
+			return;
+		}
 		for (int i = 0; i < m_tableView->model()->columnCount(); i++)
 		{
 			QString colName = m_tableView->model()->headerData(i, Qt::Horizontal).toString();
+
+			int nPos = colName.indexOf(QChar::LineFeed);
+			if (nPos != -1)
+			{
+				colName = colName.left(nPos);
+			}
 
 			auto it = m_columnsWidth.find(colName);
 			if (it != m_columnsWidth.end())

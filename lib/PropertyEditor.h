@@ -62,6 +62,9 @@ namespace ExtWidgets
 		QString m_scriptHelpFile;
 		QPoint m_scriptHelpWindowPos = QPoint(-1, -1);
 		QByteArray m_scriptHelpWindowGeometry;
+
+	public:
+		static QString m_commonCategoryName;	// = "Common"
 	};
 
 	//

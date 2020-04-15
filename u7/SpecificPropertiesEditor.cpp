@@ -1112,7 +1112,7 @@ void SpecificPropertiesEditor::onAddProperty()
 	std::shared_ptr<SpecificPropertyDescription> spd = std::make_shared<SpecificPropertyDescription>();
 
 	spd->setCaption(tr("New Property"));
-	spd->setCategory(tr("Common"));
+	spd->setCategory(ExtWidgets::PropertyEditorBase::m_commonCategoryName);
 	spd->setType(E::SpecificPropertyType::pt_uint32);
 	spd->setVisible(true);
 

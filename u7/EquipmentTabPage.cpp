@@ -3893,6 +3893,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_propertyTable = new IdePropertyTable(this, dbcontroller);
 	m_propertyTable->setPropertyMask(theSettings.m_equipmentTabPagePropertiesMask);
 	m_propertyTable->setColumnsWidth(theSettings.m_equipmentTabPagePropertiesColumnsWidth);
+	m_propertyTable->setGroupByCategory(theSettings.m_equipmentTabPagePropertiesGroupByCategory);
 
 
 	QTabWidget* tabWidget = new QTabWidget();
@@ -3971,6 +3972,7 @@ EquipmentTabPage::~EquipmentTabPage()
     theSettings.m_equipmentTabPagePropertiesSplitterState = m_propertyEditor->splitterPosition();
 	theSettings.m_equipmentTabPagePropertiesMask = m_propertyTable->propertyMask();
 	theSettings.m_equipmentTabPagePropertiesColumnsWidth = m_propertyTable->getColumnsWidth();
+	theSettings.m_equipmentTabPagePropertiesGroupByCategory = m_propertyTable->groupByCategory();
 	theSettings.writeUserScope();
 }
 
