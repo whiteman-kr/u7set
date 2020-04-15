@@ -92,6 +92,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_nop(const DeviceCommand& /*command*/)
 	{
+		// No operation
+		//
 	}
 
 	// Command: startafb
@@ -203,6 +205,9 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2 - destionation
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1 - source
 
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -217,8 +222,8 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint16 data = m_device->readRamWord(src);
-		m_device->writeRamWord(dst, data);
+		quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, src);
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, data);
 
 		return;
 	}
@@ -247,9 +252,9 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movmem(const DeviceCommand& command)
 	{
-		const auto& size = command.m_word2;
-		const auto& src = command.m_word1;
-		const auto& dst = command.m_word0;
+		const quint16 size = command.m_word2;
+		const quint16 src = command.m_word1;
+		const quint16 dst = command.m_word0;
 
 		m_device->movRamMem(src, dst, size);
 
@@ -267,6 +272,8 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// movc     0b402h, #0
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -278,7 +285,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movc(const DeviceCommand& command)
 	{
-		m_device->writeRamWord(command.m_word0, command.m_word1);
+		m_device->writeRamWord(command.m_memoryAreaTo, command.m_word0, command.m_word1);
 		return;
 	}
 
@@ -292,8 +299,11 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - data address
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
-		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);	// bitNo0 - bitno
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);		// bitNo0 - bitno
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
+		checkParamRange(command->m_word1, 0, 1, QStringLiteral("BitData"));
 		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
 		// MOVBC    0B402h[0], #0
@@ -308,7 +318,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movbc(const DeviceCommand& command)
 	{
-		m_device->writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, command.m_word1);
 		return;
 	}
 
@@ -349,12 +359,12 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
 
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  AfbComponentParam{command.m_afbPinOpCode, data});
 		return;
 	}
 
@@ -392,7 +402,6 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfb(const DeviceCommand& command)
 	{
-		//AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
@@ -439,12 +448,12 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
 
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  command.m_afbParam);
 		return;
 	}
 
@@ -490,11 +499,11 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  AfbComponentParam{command.m_afbPinOpCode, data});
 
 		return;
 	}
@@ -593,6 +602,9 @@ namespace Sim
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
+		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
+		//
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -610,7 +622,7 @@ namespace Sim
 		const quint16& data = command.m_word1;
 		const quint16& address = command.m_word0;
 
-		m_device->setRamMem(address, data, size);
+		m_device->setRamMem(address, data, size);		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
 
 		return;
 	}
@@ -623,11 +635,14 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// source address (ADR1)
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// source address (ADR1)
 		command->m_bitNo0 = m_device->getWord(command->m_offset + 3) & 0b1111;			//
 
-		command->m_word1 = m_device->getWord(command->m_offset + 1);						// destionation address	(ADR2)
+		command->m_word1 = m_device->getWord(command->m_offset + 1);					// destionation address	(ADR2)
 		command->m_bitNo1 = (m_device->getWord(command->m_offset + 3) >> 8) & 0b1111;	//
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word1);
 
 		// String representation
 		//
@@ -640,8 +655,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movb(const DeviceCommand& command)
 	{
-		quint16 data = m_device->readRamBit(command.m_word0, command.m_bitNo0);
-		m_device->writeRamBit(command.m_word1, command.m_bitNo1, data);
+		quint16 data = m_device->readRamBit(command.m_memoryAreaFrom, command.m_word0, command.m_bitNo0);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word1, command.m_bitNo1, data);
 
 		return;
 	}
@@ -680,6 +695,9 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destionation
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - address1 - source
 
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
@@ -694,8 +712,8 @@ namespace Sim
 		const quint16& src = command.m_word1;
 		const quint16& dst = command.m_word0;
 
-		quint32 data = m_device->readRamDword(src);
-		m_device->writeRamDword(dst, data);
+		quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, src);
+		m_device->writeRamDword(command.m_memoryAreaTo, dst, data);
 
 		return;
 	}
@@ -708,8 +726,10 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);					// word0 - RAM address
+		command->m_word0 = m_device->getWord(command->m_offset + 1);				// word0 - RAM address
 		command->m_dword0 = m_device->getDword(command->m_offset + 2);				// Dword0 - data
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// movc32     0b402h, #0
 		//
@@ -722,7 +742,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_movc32(const DeviceCommand& command)
 	{
-		m_device->writeRamDword(command.m_word0, command.m_dword0);
+		m_device->writeRamDword(command.m_memoryAreaTo, command.m_word0, command.m_dword0);
 	}
 
 	// Command: wrfb32
@@ -735,9 +755,11 @@ namespace Sim
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
 
 		// Checks
 		//
@@ -756,18 +778,20 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_wrfb32(const DeviceCommand& command)
 	{
+		quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, command.m_word0);
+
 		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setDwordValue(m_device->readRamDword(command.m_word0));
+		param.setDwordValue(data);
 
 		bool ok = command.m_afbComponentInstance->addParam(std::move(param));
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance));
 		}
 
-//		m_device->setAfbParam(command.m_afbOpCode,
-//							  command.m_afbInstance,
-//							  std::move(param));
 		return;
 	}
 
@@ -781,9 +805,11 @@ namespace Sim
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// Checks
 		//
@@ -804,11 +830,10 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_rdfb32(const DeviceCommand& command)
 	{
-		//AfbComponentInstance* afbInstance = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentInstance* afbInstance = command.m_afbComponentInstance;
 		const AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		m_device->writeRamDword(command.m_word0, param->dwordValue());
+		m_device->writeRamDword(command.m_memoryAreaTo, command.m_word0, param->dwordValue());
 
 		return;
 	}
@@ -852,10 +877,11 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error"));
+			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+								.arg(command.m_afbPinOpCode)
+								.arg(command.m_afbOpCode)
+								.arg(command.m_afbInstance))
 		}
-
-		//m_device->setAfbParam(command.m_afbOpCode, command.m_afbInstance, command.m_afbParam);
 
 		return;
 	}
@@ -866,11 +892,11 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::parse_rdfbcmp32(DeviceCommand* command) const
 	{
-		command->m_size = 3;
+		command->m_size = 4;
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
 		command->m_dword0 = m_device->getDword(command->m_offset + 2);					// Dword0 - data to comapare with
 
@@ -909,6 +935,8 @@ namespace Sim
 		command->m_word0 = m_device->getWord(command->m_offset + 1);					// m_word0 - Destination address
 		command->m_bitNo0 = m_device->getWord(command->m_offset + 2) & 0x0F;			// m_bitNo0 - Destination bit no
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		command->m_string = strCommand(command->caption()) +
 							strBitAddr(command->m_word0, command->m_bitNo0);
 
@@ -918,7 +946,7 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_movcmpf(const DeviceCommand& command)
 	{
 		quint32 cmp = m_device->flagCmp();
-		m_device->writeRamBit(command.m_word0, command.m_bitNo0, cmp);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, cmp);
 		return;
 	}
 
@@ -932,6 +960,9 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
 		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// String representation
 		//
@@ -947,9 +978,9 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint16 data = m_device->readRamWord(src);
+		quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, src);
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, data);
 
-		m_device->writeRamWord(dst, data);
 		return;
 	}
 
@@ -963,6 +994,9 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
 		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// String representation
 		//
@@ -978,9 +1012,9 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		quint32 data = m_device->readRamDword(src);
+		quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, src);
+		m_device->writeRamDword(command.m_memoryAreaTo, dst, data);
 
-		m_device->writeRamDword(dst, data);
 		return;
 	}
 
@@ -994,7 +1028,10 @@ namespace Sim
 
 		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
 		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
-		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);		// bit no to read
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);			// bit no to read
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
 		// String representation
 		//
@@ -1011,9 +1048,9 @@ namespace Sim
 		const auto& dst = command.m_word0;
 		const auto& bitNo = command.m_bitNo0;
 
-		quint16 bit = m_device->readRamBit(src, bitNo);
+		quint16 bit = m_device->readRamBit(command.m_memoryAreaFrom, src, bitNo);
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, bit ? 0xFFFF : 0x0000);
 
-		m_device->writeRamWord(dst, bit ? 0xFFFF : 0x0000);
 		return;
 	}
 
@@ -3428,9 +3465,9 @@ namespace Sim
 		quint16 track = instance->param(i_track)->wordValue();
 
 		// Logic
-		// Y = F(,Ki,Ti,)
+		// Y = F(Õ,Ki,Ti)
 		// Yi = (X * Ki) / TI + (Yi - 1);
-		// *TI = i(ms) / 5(ms)
+		// *TI = Òi(ms) / 5(ms)
 		// i_ti = Ti(ms)
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};
@@ -4084,7 +4121,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input 
+		//const int o_y_prev = 10;				// output Y/input Õ
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -4290,7 +4327,218 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_latch_v4");
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_latch_v5(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;					// 1 - 6
+		const int i_set_prev = 1;				// Previous set input state
+		const int i_y_prev = 2;					// Previous in state
+		const int i_data = 4;					// input
+		const int i_set = 6;					// Set input
+		const int i_reset = 7;					// Reset input
+
+
+		//const int o_set_prev = 9;				// Previous set -> i_set_prev
+		//const int o_y_prev = 10;				// output Y/input Õ
+		const int o_result = 12;				// output Y
+		//const int o_edi = 14;
+		//const int o_version = 15;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(conf, 1, 4, QStringLiteral("i_conf"));
+
+		// Logic
+		//
+		switch (conf)
+		{
+		case 1:
+			{
+				// Latch on Front
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevResult = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 set = instance->param(i_set)->wordValue() & 0x0001;
+				quint16 prevSet = instance->paramExists(i_set_prev) ? instance->param(i_set_prev)->wordValue() : 0;
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint16 state = (set << 1) | reset;
+				quint32 result = 0;	// for SI and FP it will 0
+
+				switch (state)
+				{
+				case 0:	// set 0, reset 0
+					result = prevResult;
+					break;
+				case 1:	// set 0, reset 1
+					result = 0;
+					break;
+				case 2:	// set 1, reset 0
+					if (prevSet == 0)
+					{
+						// Front catch
+						//
+						result = input;
+					}
+					else
+					{
+						result = prevResult;
+					}
+					break;
+				case 3:	// set 1, reset 1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+
+				instance->addParamDword(i_y_prev, result);
+				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+
+				instance->addParamWord(i_set_prev, set);
+				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
+			}
+			break;
+		case 2:
+			{
+				// Latch on Decay
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevResult = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 set = instance->param(i_set)->wordValue() & 0x0001;
+				quint16 prevSet = instance->paramExists(i_set_prev) ? instance->param(i_set_prev)->wordValue() : 0;
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint16 state = (set << 1) | reset;
+				quint32 result = 0;	// for SI and FP it will 0
+
+				switch (state)
+				{
+				case 0:	// set 0, reset 0
+					if (prevSet == 1)
+					{
+						// Decay catch
+						//
+						result = input;
+					}
+					else
+					{
+						result = prevResult;
+					}
+					break;
+				case 1:	// set 0, reset 1
+					result = 0;
+					break;
+				case 2:	// set 1, reset 0
+					result = prevResult;
+					break;
+				case 3:	// set 1, reset 1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+
+				instance->addParamDword(i_y_prev, result);
+				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+
+				instance->addParamWord(i_set_prev, set);
+				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
+			}
+			break;
+		case 3:
+			{
+				// Latch on State
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevResult = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 set = instance->param(i_set)->wordValue() & 0x0001;
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint16 state = (set << 1) | reset;
+				quint32 result = 0;	// for SI and FP it will 0
+
+				switch (state)
+				{
+				case 0:	// set 0, reset 0
+					result = prevResult;
+					break;
+				case 1:	// set 0, reset 1
+					result = 0;
+					break;
+				case 2:	// set 1, reset 0
+					result = input;
+					break;
+				case 3:	// set 1, reset 1
+					result = 0;
+					break;
+				default:
+					Q_ASSERT(false);
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+				instance->addParamDword(i_y_prev, result);
+			}
+			break;
+		case 4:
+			{
+				// Latch on tm1 - delay for 1 cycle
+				//
+				quint32 input = instance->param(i_data)->dwordValue();
+				quint32 prevInput = instance->paramExists(i_y_prev) ? instance->param(i_y_prev)->dwordValue() : 0;
+
+				quint16 reset = instance->param(i_reset)->wordValue() & 0x0001;
+
+				// Logic
+				//
+				quint32 result = 0;	// for SI and FP it will 0
+
+				if (reset == 0)
+				{
+					result = prevInput;
+				}
+				else
+				{
+					result = 0;
+				}
+
+				// Result
+				//
+				instance->addParamDword(o_result, result);
+				instance->addParamDword(i_y_prev, input);
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_latch_v5");
 		}
 
 		return;
@@ -4568,9 +4816,9 @@ namespace Sim
 		}
 
 		// Logic
-		// Y= F(,Kd,Td)
+		// Y= F(Õ,Kd,Td)
 		// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
-		// TD=d(ms) / 5(ms)
+		// TD=Òd(ms) / 5(ms)
 		// i_td = Ti(ms)
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};

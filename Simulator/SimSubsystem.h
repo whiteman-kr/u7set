@@ -14,6 +14,9 @@ namespace Hardware
 
 namespace Sim
 {
+	class Connections;
+
+
 	class Subsystem : protected Output
 	{
 	public:
@@ -23,7 +26,9 @@ namespace Sim
 		Subsystem& operator=(const Subsystem&) = delete;
 
 	public:
-		bool load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription);
+		bool load(const Hardware::ModuleFirmware& firmware,
+				  const LmDescription& lmDescription,
+				  const Connections& connections);
 
 	private:
 		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;

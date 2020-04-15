@@ -16,6 +16,9 @@
 
 namespace Sim
 {
+	class Connections;
+
+
 	class LogicModule : public QObject, protected Output
 	{
 		Q_OBJECT
@@ -27,7 +30,8 @@ namespace Sim
 	public:
 		bool load(const Hardware::LogicModuleInfo& lmInfo,
 				  const LmDescription& lmDescription,
-				  const Hardware::ModuleFirmware& firmware);
+				  const Hardware::ModuleFirmware& firmware,
+				  const Connections& connections);
 
 		void clear();
 

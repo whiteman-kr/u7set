@@ -160,7 +160,6 @@ RESOURCES += \
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
-DEFINES += IS_SIMULATOR
 
 #protobuf
 #

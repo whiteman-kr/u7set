@@ -54,7 +54,7 @@ protected slots:
 
 	void runSimulation();
 	void pauseSimulation();
-	void stopSimulation();
+	void stopSimulation(bool stopSimulationThread = false);
 
 	void showTrends();
 
