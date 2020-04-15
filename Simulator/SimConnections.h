@@ -57,8 +57,12 @@ namespace Sim
 
 		Sim::ConnectionPortPtr portForLm(const QString& lmEquipmnetId);
 
-		bool sendData(int portNo, QByteArray* data, std::chrono::microseconds time);
-		bool receiveData(int portNo, QByteArray* data, std::chrono::microseconds currentTime, std::chrono::microseconds timeout);
+		bool sendData(int portNo, QByteArray* data, std::chrono::microseconds currentTime);
+		bool receiveData(int portNo,
+						 QByteArray* data,
+						 std::chrono::microseconds currentTime,
+						 std::chrono::microseconds timeout,
+						 bool* timeoutHappend);
 
 		const std::vector<Sim::ConnectionPortPtr>& ports() const;
 
@@ -105,7 +109,7 @@ namespace Sim
 		void clear();
 		bool load(QString fileName, QString* errorMessage);
 
-		std::vector<ConnectionPtr> lmConnections(QString lmEquipmentId) const;
+		std::vector<ConnectionPtr> lmConnections(const QString& lmEquipmentId) const;
 
 	private:
 		::ConnectionsInfo m_buildConnections;

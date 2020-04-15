@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	// Add modules to simulation
 	//
 	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
-	//simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
+	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
 
 	// Start simulation
 	//

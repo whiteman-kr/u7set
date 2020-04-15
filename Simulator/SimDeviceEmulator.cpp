@@ -1023,7 +1023,7 @@ namespace Sim
 		}
 
 		// COMMENTED as now there is no need to zero IO modules memory
-		// as there is no control of reading uinitialized memory.
+		// as there is no control of reading uninitialized memory.
 		//
 		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 som emeory areas before start work cylce (like memory area for write i/o modules)
 
@@ -1201,6 +1201,8 @@ namespace Sim
 
 			assert(portInfo.lmID == equipmentId());
 
+//			QByteArray rb;
+//			QByteArray* receiveBuffer = &rb;
 			QByteArray* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
 			if (receiveBuffer == nullptr)
 			{
@@ -1213,10 +1215,12 @@ namespace Sim
 
 			// Get data (actually swap) to receive buffer
 			//
+			bool timeout = false;
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
 									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2});
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},
+									 &timeout);
 
 			if (ok == false)
 			{
@@ -1227,50 +1231,61 @@ namespace Sim
 				return false;
 			}
 
-			if (receiveBuffer->isEmpty() == true)
+			if (timeout == true)
 			{
 				// If receive buffer is empty then it is timeout
 				// Clear memory in dedicated memory area
 				//
 				m_ram.clearMemoryArea(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read);
-				//qDebug() << "DeviceEmulator::receiveConnectionsData: Connection timeout";
+
+				//qDebug() << "DeviceEmulator::receiveConnectionsData: Connection timeout " << c->connectionId();
 			}
 			else
 			{
-				// Write data to memory
-				//
-				assert(receiveBuffer->size() % 2 == 0);
-
-				if (receiveBuffer->size() / 2 != portInfo.rxDataSizeW)
+				if (receiveBuffer->isEmpty() == true)
 				{
-					SIM_FAULT(QString("Receive data error, expected %1 words but received %2 words, connection %3, port %4 (%5).")
-							  .arg(portInfo.rxDataSizeW)
-							  .arg(receiveBuffer->size() / 2)
-							  .arg(c->connectionId())
-							  .arg(portInfo.portNo)
-							  .arg(portInfo.equipmentID));
-					return false;
+					// If timeout not happened yet, but receiveBuffer is empty, wait mor time
+					// do not exit from function here, lated validity bit vill be written
+					//
 				}
-
-				ok = m_ram.writeBuffer(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read, *receiveBuffer);
-				if (ok == false)
+				else
 				{
-					SIM_FAULT(QString("Received buffer write memory error, %1 words, connection %2, port %3 (%4).")
-							  .arg(portInfo.rxDataSizeW)
-							  .arg(c->connectionId())
-							  .arg(portInfo.portNo)
-							  .arg(portInfo.equipmentID));
-					return false;
+					// Payload is received
+					// Write data to memory
+					//
+					assert(receiveBuffer->size() % 2 == 0);
+
+					if (receiveBuffer->size() / 2 != portInfo.rxDataSizeW)
+					{
+						SIM_FAULT(QString("Receive data error, expected %1 words but received %2 words, connection %3, port %4 (%5).")
+								  .arg(portInfo.rxDataSizeW)
+								  .arg(receiveBuffer->size() / 2)
+								  .arg(c->connectionId())
+								  .arg(portInfo.portNo)
+								  .arg(portInfo.equipmentID));
+						return false;
+					}
+
+					ok = m_ram.writeBuffer(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read, *receiveBuffer);
+					if (ok == false)
+					{
+						SIM_FAULT(QString("Received buffer write memory error, %1 words, connection %2, port %3 (%4).")
+								  .arg(portInfo.rxDataSizeW)
+								  .arg(c->connectionId())
+								  .arg(portInfo.portNo)
+								  .arg(portInfo.equipmentID));
+						return false;
+					}
 				}
 			}
 
 			// Set port receive validity flag to 0 or 1
 			//
 			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
-									  portInfo.rxValiditySignalAbsAddr.bit(),
-									  receiveBuffer->isEmpty() ? 0x0000 : 0x0001,
-									  E::ByteOrder::BigEndian,
-									  E::LogicModuleRamAccess::Read);
+								portInfo.rxValiditySignalAbsAddr.bit(),
+								timeout ? 0x0000 : 0x0001,
+								E::ByteOrder::BigEndian,
+								E::LogicModuleRamAccess::Read);
 			if (ok == false)
 			{
 				SIM_FAULT(QString("Write receive validity signal error, signal %1 (%2), connection %3, port %4 (%5).")
@@ -1316,6 +1331,8 @@ namespace Sim
 
 			assert(portInfo.lmID == equipmentId());
 
+//			QByteArray sb;
+//			QByteArray* sendBuffer = &sb;
 			QByteArray* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{

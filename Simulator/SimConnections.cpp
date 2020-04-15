@@ -100,7 +100,7 @@ namespace Sim
 		return {};
 	}
 
-	bool Connection::sendData(int portNo, QByteArray* data, std::chrono::microseconds time)
+	bool Connection::sendData(int portNo, QByteArray* data, std::chrono::microseconds currentTime)
 	{
 		if (data == nullptr)
 		{
@@ -115,7 +115,7 @@ namespace Sim
 				QMutexLocker ml(&m_dataMutexPort1);
 
 				m_port1sentData.m_data.swap(*data);
-				m_port1sentData.m_sentTime = time;
+				m_port1sentData.m_sentTime = currentTime;
 			}
 			return true;
 		case 2:
@@ -123,7 +123,7 @@ namespace Sim
 				QMutexLocker ml(&m_dataMutexPort2);
 
 				m_port2sentData.m_data.swap(*data);
-				m_port2sentData.m_sentTime = time;
+				m_port2sentData.m_sentTime = currentTime;
 			}
 			return true;
 		default:
@@ -132,13 +132,21 @@ namespace Sim
 		}
 	}
 
-	bool Connection::receiveData(int portNo, QByteArray* data, std::chrono::microseconds currentTime, std::chrono::microseconds timeout)
+	bool Connection::receiveData(int portNo,
+								 QByteArray* data,
+								 std::chrono::microseconds currentTime,
+								 std::chrono::microseconds timeout,
+								 bool* timeoutHappend)
 	{
-		if (data == nullptr)
+		if (data == nullptr || timeoutHappend == nullptr)
 		{
 			assert(data);
+			assert(timeoutHappend);
 			return false;
 		}
+
+		data->clear();
+		*timeoutHappend = false;
 
 		switch (portNo)
 		{
@@ -150,12 +158,28 @@ namespace Sim
 
 				if (currentTime - m_port2sentData.m_sentTime > timeout)
 				{
+					//qDebug() << "Connection::receiveData: port2 from timeout " << (currentTime - m_port2sentData.m_sentTime).count() / 1000;
+
 					data->clear();
+					*timeoutHappend = true;
 				}
 				else
 				{
-					data->swap(m_port2sentData.m_data);
-					m_port2sentData.m_sentTime = {};
+					if (m_port2sentData.m_data.isEmpty() == false)
+					{
+						// Connection received something
+						//
+						data->swap(m_port2sentData.m_data);
+
+						m_port2sentData.m_data.clear();
+						m_port2sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
+					}
+					else
+					{
+						// No new data since last call
+						// just wait for timeout
+						//
+					}
 				}
 			}
 			return true;
@@ -167,12 +191,28 @@ namespace Sim
 
 				if (currentTime - m_port1sentData.m_sentTime > timeout)
 				{
+					//qDebug() << "Connection::receiveData: port1 from timeout " << (currentTime - m_port1sentData.m_sentTime).count() / 1000;
+
 					data->clear();
+					*timeoutHappend = true;
 				}
 				else
 				{
-					data->swap(m_port1sentData.m_data);
-					m_port1sentData.m_sentTime = {};
+					if (m_port1sentData.m_data.isEmpty() == false)
+					{
+						// Connection received something
+						//
+						data->swap(m_port1sentData.m_data);
+
+						m_port1sentData.m_data.clear();
+						m_port1sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
+					}
+					else
+					{
+						// No new data since last call
+						// just wait for timeout
+						//
+					}
 				}
 			}
 			return true;
@@ -280,7 +320,7 @@ namespace Sim
 		return ok;
 	}
 
-	std::vector<ConnectionPtr> Connections::lmConnections(QString lmEquipmentId) const
+	std::vector<ConnectionPtr> Connections::lmConnections(const QString& lmEquipmentId) const
 	{
 		Hash h = ::calcHash(lmEquipmentId);
 
