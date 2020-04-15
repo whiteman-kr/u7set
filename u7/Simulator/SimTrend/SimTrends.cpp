@@ -1,6 +1,8 @@
 #include "SimTrends.h"
+#include "../SimIdeSimulator.h"
 #include "../../TrendView/Forms/DialogChooseTrendSignals.h"
 #include "../../TrendView/TrendWidget.h"
+
 
 std::map<QString, SimTrendsWidget*> SimTrends::m_trendsList;
 
@@ -34,9 +36,9 @@ bool SimTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool SimTrends::startTrendApp(Sim::AppSignalManager* signalManager, const std::vector<AppSignalParam>& appSignals, QWidget* parent)
+bool SimTrends::startTrendApp(std::shared_ptr<SimIdeSimulator> simulator, const std::vector<AppSignalParam>& appSignals, QWidget* parent)
 {
-	SimTrendsWidget* window = new SimTrendsWidget(signalManager, parent);
+	SimTrendsWidget* window = new SimTrendsWidget(simulator, parent);
 
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
@@ -67,11 +69,11 @@ void SimTrends::unregisterTrendWindow(QString name)
 }
 
 
-SimTrendsWidget::SimTrendsWidget(Sim::AppSignalManager* signalManager, QWidget* parent) :
+SimTrendsWidget::SimTrendsWidget(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
-	m_signalManager(signalManager)
+	m_simulator(simulator)
 {
-	assert(m_signalManager);
+	assert(m_simulator);
 
 static int no = 1;
 	QString trendName = QString("Simulator Trends %1").arg(no++);
@@ -219,7 +221,7 @@ void SimTrendsWidget::signalsButton()
 
 	// --
 	//
-	DialogChooseTrendSignals dialog(m_signalManager, trendSignals, this);
+	DialogChooseTrendSignals dialog(&m_simulator->appSignalManager(), trendSignals, this);
 	
 	int result = dialog.exec();
 	
@@ -292,7 +294,7 @@ void SimTrendsWidget::fetchTrendData()
 {
 	// Fetch realtime trend data from Sim::AppSignalManager
 	//
-	Q_ASSERT(m_signalManager);
+	Q_ASSERT(m_simulator);
 
 	TrendLib::TrendStateItem minState;
 	TrendLib::TrendStateItem maxState;
@@ -300,10 +302,10 @@ void SimTrendsWidget::fetchTrendData()
 	minState.clear();
 	maxState.clear();
 
-	std::shared_ptr<TrendLib::RealtimeData> data = m_signalManager->trendData(windowTitle(),
-																			  signalSet().trendSignalsHashes(),
-																			  &minState,
-																			  &maxState);
+	std::shared_ptr<TrendLib::RealtimeData> data = m_simulator->appSignalManager().trendData(windowTitle(),
+																							 signalSet().trendSignalsHashes(),
+																							 &minState,
+																							 &maxState);
 
 	if (data != nullptr)
 	{

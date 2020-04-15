@@ -28,36 +28,47 @@ namespace VFrame30
 		switch (type)
 		{
 		case E::SignalType::Analog:
-			ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::analogFormat, true, BusSignal::analogFormat, BusSignal::setAnalogFormat);
-			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::units, true, BusSignal::units, BusSignal::setUnits);
-			ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, BusSignal::precision, BusSignal::setPrecision);
+			{
+				ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::analogFormat, true, BusSignal::analogFormat, BusSignal::setAnalogFormat);
+				ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::units, true, BusSignal::units, BusSignal::setUnits);
+				ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, BusSignal::precision, BusSignal::setPrecision);
 
-			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::apertureCategory, true, BusSignal::coarseAperture, BusSignal::setCoarseAperture);
-			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::apertureCategory, true, BusSignal::fineAperture, BusSignal::setFineAperture);
-			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::adaptiveAperture, PropertyNames::apertureCategory, true, BusSignal::adaptiveAperture, BusSignal::setAdaptiveAperture);
+				ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::apertureCategory, true, BusSignal::coarseAperture, BusSignal::setCoarseAperture);
+				ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::apertureCategory, true, BusSignal::fineAperture, BusSignal::setFineAperture);
+				ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::adaptiveAperture, PropertyNames::apertureCategory, true, BusSignal::adaptiveAperture, BusSignal::setAdaptiveAperture);
 
-			// Inbus settings (manual)
-			//
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusAnalogSize, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogSize, BusSignal::setInbusAnalogSize);
-			ADD_PROPERTY_GET_SET_CAT(E::DataFormat, PropertyNames::busInbusAnalogFormat, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogFormat, BusSignal::setInbusAnalogFormat);
-			ADD_PROPERTY_GET_SET_CAT(E::ByteOrder, PropertyNames::busInbusAnalogByteOrder, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogByteOrder, BusSignal::setInbusAnalogByteOrder);
-			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busAnalogLowLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::busAnalogLowLimit, BusSignal::setBusAnalogLowLimit);
-			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busAnalogHightLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::busAnalogHighLimit, BusSignal::setBusAnalogHightLimit);
-			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busInbusAnalogLowLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogLowLimit, BusSignal::setInbusAnalogLowLimit);
-			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busInbusAnalogHightLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogHighLimit, BusSignal::setInbusAnalogHightLimit);
+				// Inbus settings (manual)
+				//
+				auto propOffset = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+				propOffset->setDescription("Signal offset in bus in Bytes. Should be multiple to 2 Bytes.");
+
+				ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusAnalogSize, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogSize, BusSignal::setInbusAnalogSize);
+				ADD_PROPERTY_GET_SET_CAT(E::DataFormat, PropertyNames::busInbusAnalogFormat, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogFormat, BusSignal::setInbusAnalogFormat);
+				ADD_PROPERTY_GET_SET_CAT(E::ByteOrder, PropertyNames::busInbusAnalogByteOrder, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogByteOrder, BusSignal::setInbusAnalogByteOrder);
+				ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busAnalogLowLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::busAnalogLowLimit, BusSignal::setBusAnalogLowLimit);
+				ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busAnalogHightLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::busAnalogHighLimit, BusSignal::setBusAnalogHightLimit);
+				ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busInbusAnalogLowLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogLowLimit, BusSignal::setInbusAnalogLowLimit);
+				ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busInbusAnalogHightLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogHighLimit, BusSignal::setInbusAnalogHightLimit);
+			}
 			break;
 		case E::SignalType::Discrete:
-			// Inbus settings (manual)
-			//
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusDiscreteBitNo, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusDiscreteBitNo, BusSignal::setInbusDiscreteBitNo);
+			{
+				// Inbus settings (manual)
+				//
+				auto propOffset = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+				propOffset->setDescription("Signal offset in bus in Bytes.");
+
+				ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusDiscreteBitNo, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusDiscreteBitNo, BusSignal::setInbusDiscreteBitNo);
+			}
 			break;
 		case E::SignalType::Bus:
-			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, BusSignal::busTypeId, BusSignal::setBusTypeId);
-			// Inbus settings (manual)
-			//
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+			{
+				ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, BusSignal::busTypeId, BusSignal::setBusTypeId);
+				// Inbus settings (manual)
+				//
+				auto propOffset = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+				propOffset->setDescription("Signal offset in bus in Bytes. Should be multiple to 2 Bytes.");
+			}
 			break;
 		default:
 			assert(false);
@@ -335,13 +346,16 @@ namespace VFrame30
 		auto fileNameProp = ADD_PROPERTY_GETTER(QString, PropertyNames::busTypeFileName, true, Bus::fileName);
 		fileNameProp->setExpert(true);
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busAutoSignalPlacement, PropertyNames::busSettingCategory, true, Bus::autoSignalPlacement, Bus::setAutoSignalPlacement);
+		auto propAuto = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busAutoSignalPlacement, PropertyNames::busSettingCategory, true, Bus::autoSignalPlacement, Bus::setAutoSignalPlacement);
+		propAuto->setDescription("If True then signals in bus will be automatically placed in order Analogs, Busses, Discretes. Otherwise user define the placement of signals.");
+
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busEnableManualBusSize, PropertyNames::busSettingCategory, true, Bus::enableManualBusSize, Bus::setEnableManualBusSize);
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busManualBusSize, PropertyNames::busSettingCategory, true, Bus::manualBusSize, Bus::setManualBusSize);
+
+		auto propMan = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busManualBusSize, PropertyNames::busSettingCategory, true, Bus::manualBusSize, Bus::setManualBusSize);
+		propMan->setDescription("User defined size of bus in Bytes. Should be multiple to 2 Bytes.");
 
 		return;
 	}
-
 
 	Bus::Bus(const Bus& src):
 		Bus()	// Here properties will be created

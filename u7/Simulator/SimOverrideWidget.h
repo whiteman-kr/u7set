@@ -3,9 +3,6 @@
 
 #include "../../Simulator/Simulator.h"
 
-// TO DO:
-// 5. Indicate on SCHEMA overriden signals
-//
 
 class SimOverrideWidget : public QWidget
 {
@@ -19,6 +16,10 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event) override;
 	virtual void dropEvent(QDropEvent* event) override;
 
+	virtual bool eventFilter(QObject* obj, QEvent* event) override;
+
+	//virtual void keyPressEvent(QKeyEvent* event) override;
+	//virtual void keyReleaseEvent(QKeyEvent* event) override;
 	virtual void contextMenuEvent(QContextMenuEvent* event) override;
 
 protected slots:
@@ -33,9 +34,14 @@ protected slots:
 	void signalStateChanged(QString appSignalId);
 
 	void clear();
+
+	void removeSelectedSignals();
 	void removeSignal(QString appSignalId);
 
+	void addSignal();
+
 	void setValue(QString appSignalId);
+	void setValue(QString appSignalId, const QVariant& value);
 
 private:
 	Sim::Simulator* m_simulator = nullptr;

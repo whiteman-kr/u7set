@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	//
 	Q_INIT_RESOURCE(TrendView);
 
-    // Start database communication thread
+	// Start database communication thread
 	//
 	DbController dbController;
 
@@ -147,12 +147,14 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	MainWindow w(&dbController, nullptr);
-	w.show();
+	MainWindow* w = new MainWindow(&dbController, nullptr);
+	w->show();
 
 	dbController.enableProgress();
 
 	int result = a.exec();
+
+	delete w;	// Delete main windows before shutown procedures
 
 	// Shutting down
 	//

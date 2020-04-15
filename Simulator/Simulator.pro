@@ -64,6 +64,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../lib/Address16.cpp \
+    ../lib/ConnectionsInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
@@ -71,6 +72,7 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
+    SimConnections.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
     SimOutput.cpp \
@@ -101,9 +103,12 @@ SOURCES += \
     ../lib/OutputLog.cpp
 
 HEADERS += \
+    ../Builder/CfgFiles.h \
     ../lib/Address16.h \
+    ../lib/ConnectionsInfo.h \
     ../lib/Hash.h \
     SimCommandProcessor_LM5_LM6.h \
+    SimConnections.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
