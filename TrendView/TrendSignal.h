@@ -101,7 +101,7 @@ namespace TrendLib
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t RecomendedSize = 1024;
+		static const size_t RecomendedSize = 1600;			// TrendStateItem is about 36-40 bytes, 1600 is abou 64KB
 
 		// Serialization
 		//

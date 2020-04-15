@@ -85,7 +85,7 @@ SimWidget::~SimWidget()
 
 void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
 {
-	SimTrends::startTrendApp(&m_simulator->appSignalManager(), appSignals, this);
+	SimTrends::startTrendApp(m_simulator, appSignals, this);
 }
 
 void SimWidget::createToolBar()
@@ -279,6 +279,11 @@ static bool firstEvent = true;
 
 void SimWidget::aboutToQuit()
 {
+	if (m_slaveWindow == false)
+	{
+		stopSimulation(true);
+	}
+
 	if (m_slaveWindow == false && m_showEventFired == true)
 	{
 		//QSettings().setValue("SimWidget/state", saveState());
@@ -463,7 +468,7 @@ void SimWidget::pauseSimulation()
 	return;
 }
 
-void SimWidget::stopSimulation()
+void SimWidget::stopSimulation(bool stopSimulationThread)
 {
 	qDebug() << "SimWidget::stopSimulation()";
 
@@ -480,6 +485,11 @@ void SimWidget::stopSimulation()
 
 	Sim::Control& control = m_simulator->control();
 	control.stop();
+
+	if (stopSimulationThread == true)
+	{
+		control.stopThread();
+	}
 
 	return;
 }
@@ -547,7 +557,7 @@ void SimWidget::showTrends()
 	if (trendToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		SimTrends::startTrendApp(&m_simulator->appSignalManager(), appSignals, this);
+		SimTrends::startTrendApp(m_simulator, appSignals, this);
 	}
 	else
 	{
