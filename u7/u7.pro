@@ -87,6 +87,7 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
+    Simulator/SimOverrideValueWidget.cpp \
     Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
@@ -225,6 +226,7 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
+    Simulator/SimOverrideValueWidget.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
     UserManagementDialog.h \

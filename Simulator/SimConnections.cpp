@@ -73,7 +73,7 @@ namespace Sim
 
 	Connection::~Connection()
 	{
-		qDebug() << "Connection::~Connection()";
+//		qDebug() << "Connection::~Connection()";
 //		qDebug() << "\tm_port1receiveBuffer " << QString::number(reinterpret_cast<quint64>(m_port1receiveBuffer.data()), 16);
 //		qDebug() << "\tm_port1sendBuffer " << QString::number(reinterpret_cast<quint64>(m_port1sendBuffer.data()), 16);
 //		qDebug() << "\tm_port2receiveBuffer " << QString::number(reinterpret_cast<quint64>(m_port2receiveBuffer.data()), 16);

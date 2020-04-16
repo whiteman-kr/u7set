@@ -12,6 +12,7 @@
 namespace Sim
 {
 	class RamAreaInfo;
+	class Simulator;
 	class AppSignalManager;
 
 	struct OverrideRamRecord
@@ -61,6 +62,7 @@ namespace Sim
 		// --
 		//
 		bool m_enabled = true;
+		int m_index = 0;
 		QString m_appSignalId;
 		QString m_customSignalId;
 		QString m_caption;
@@ -85,7 +87,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		explicit OverrideSignals(Sim::AppSignalManager* appSignalManager, QObject* parent = nullptr);
+		explicit OverrideSignals(Sim::Simulator* simulator, QObject* parent = nullptr);
 		virtual ~OverrideSignals();
 
 	public:
@@ -103,6 +105,9 @@ namespace Sim
 		void stateChanged(QString appSignalId);				// Chenged value or enable state
 
 	public:
+		AppSignalManager& appSignalManager();
+		const AppSignalManager& appSignalManager() const;
+
 		std::optional<OverrideSignalParam> overrideSignal(QString appSignalId) const;
 		std::vector<OverrideSignalParam> overrideSignals() const;
 
@@ -111,7 +116,7 @@ namespace Sim
 		std::vector<OverrideRamRecord> ramOverrideData(const QString& equipmentId, const RamAreaInfo& ramAreaInfo) const;
 
 	private:
-		Sim::AppSignalManager* m_appSignalManager = nullptr;
+		Sim::Simulator* m_simulator = nullptr;
 
 		mutable QReadWriteLock m_lock;
 		std::map<QString, OverrideSignalParam> m_signals;	// Key is AppSignalID

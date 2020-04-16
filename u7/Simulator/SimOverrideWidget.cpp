@@ -1,5 +1,6 @@
 #include "SimOverrideWidget.h"
 #include "../../lib/AppSignal.h"
+#include "SimOverrideValueWidget.h"
 
 
 SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent) :
@@ -17,6 +18,7 @@ SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent)
 	m_treeWidget->setColumnCount(static_cast<int>(QOverrideTreeWidgetItem::Columns::ColumnCount));
 
 	QStringList headerLabels;
+	headerLabels << "No";
 	headerLabels << "SignalID";
 	headerLabels << "Caption";
 	headerLabels << "Type";
@@ -219,78 +221,6 @@ bool SimOverrideWidget::eventFilter(QObject* obj, QEvent* event)
 
 	return false;			// return false to process event
 }
-
-//void SimOverrideWidget::keyPressEvent(QKeyEvent* event)
-//{
-//	switch (event->key())
-//	{
-//	case Qt::Key::Key_Delete:
-//		{
-//			removeSelectedSignals();
-//		}
-//		return;
-//	case Qt::Key::Key_Insert:
-//		{
-//			addSignal();
-//		}
-//		return;
-////	case Qt::Key_0:
-////		{
-////			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-////			if (item != nullptr)
-////			{
-////				QString appSignalId = item->m_overrideSignal.m_appSignalId;
-////				setValue(appSignalId, QVariant::fromValue<qint32>(0));
-////			}
-////		}
-////		return;
-////	case Qt::Key_1:
-////		{
-////			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-////			if (item != nullptr)
-////			{
-////				QString appSignalId = item->m_overrideSignal.m_appSignalId;
-////				setValue(appSignalId, QVariant::fromValue<qint32>(1));
-////			}
-////		}
-////		return;
-//	}
-
-//	QWidget::keyPressEvent(event);
-//	return;
-//}
-
-//void SimOverrideWidget::keyReleaseEvent(QKeyEvent* event)
-//{
-//	switch (event->key())
-//	{
-//	case Qt::Key_0:
-//		{
-//			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-//			if (item != nullptr)
-//			{
-//				QString appSignalId = item->m_overrideSignal.m_appSignalId;
-//				setValue(appSignalId, QVariant::fromValue<qint32>(0));
-//			}
-//		}
-//		event->setAccepted(true);
-//		return;
-//	case Qt::Key_1:
-//		{
-//			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-//			if (item != nullptr)
-//			{
-//				QString appSignalId = item->m_overrideSignal.m_appSignalId;
-//				setValue(appSignalId, QVariant::fromValue<qint32>(1));
-//			}
-//		}
-//		event->setAccepted(true);
-//		return;
-//	}
-
-//	QWidget::keyReleaseEvent(event);
-//	return;
-//}
 
 void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
 {
@@ -758,6 +688,8 @@ void SimOverrideWidget::setValue(QString appSignalId)
 		return;
 	}
 
+//	SimOverrideValueWidget::showDialog(osp.value(), m_simulator, this);
+
 	QDialog d(this);
 
 	d.setWindowTitle(tr("Set Value %1 (%2)").arg(osp->m_customSignalId).arg(osp->m_appSignalId));
@@ -961,6 +893,7 @@ QOverrideTreeWidgetItem::QOverrideTreeWidgetItem(const Sim::OverrideSignalParam&
 		type = E::valueToString(overrideSignal.m_dataFormat);
 	}
 
+	this->setText(static_cast<int>(Columns::Index), QString::number(overrideSignal.m_index));
 	this->setText(static_cast<int>(Columns::CustomSignalId), overrideSignal.m_customSignalId);
 	this->setText(static_cast<int>(Columns::Caption), overrideSignal.m_caption);
 	this->setText(static_cast<int>(Columns::Type), type);

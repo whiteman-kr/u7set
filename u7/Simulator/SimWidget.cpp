@@ -156,13 +156,15 @@ void SimWidget::createToolBar()
 
 void SimWidget::createDocks()
 {
+	qDebug() << "SimWidget::createDocks()";
+
 	setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
 	setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
 	setCorner(Qt::Corner::TopRightCorner, Qt::DockWidgetArea::RightDockWidgetArea);
 
 	// Project dock
 	//
-	QDockWidget* projectDock = new QDockWidget("Project/Build", this);
+	QDockWidget* projectDock = new QDockWidget("SimProjectBuild", this);
 	projectDock->setObjectName(projectDock->windowTitle());
 	projectDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	projectDock->setTitleBarWidget(new QWidget());		// Hides title bar
@@ -224,8 +226,10 @@ void SimWidget::createDocks()
 	return;
 }
 
-QDockWidget* SimWidget::createMemoryDock(QString caption)
+QDockWidget* SimWidget::createMemoryDock(QString /*caption*/)
 {
+	return nullptr;
+
 	// -----------------
 //static Sim::Ram ram;
 //	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 0, 8192, "Input Module 1");
@@ -238,7 +242,7 @@ QDockWidget* SimWidget::createMemoryDock(QString caption)
 //	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 3 + 4, 224, "Not event");
 	//-----------------
 
-	QDockWidget* dock = new QDockWidget(caption, this, 0);
+//	QDockWidget* dock = new QDockWidget(caption, this, 0);
 //	dock->setObjectName("SimDock-" + caption);
 //	dock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
@@ -247,11 +251,13 @@ QDockWidget* SimWidget::createMemoryDock(QString caption)
 
 //	addDockWidget(Qt::BottomDockWidgetArea, dock);
 
-	return dock;
+//	return dock;
 }
 
 void SimWidget::showEvent(QShowEvent* e)
 {
+	qDebug() << "SimWidget::showEvent";
+
 	QMainWindow::showEvent(e);
 	e->ignore();
 
@@ -268,8 +274,22 @@ static bool firstEvent = true;
 			QVariant v = QSettings().value("SimWidget/state");
 			if (v.isValid() == true)
 			{
-				//restoreState(v.toByteArray());
+				bool restoreOk = restoreState(v.toByteArray());
+				qDebug() << "SimWidget::showEvent: restoreStateOk = " << restoreOk;
+
+				//if (restoreOk == false)
+				{
+					QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
+					for (QDockWidget* dw : dockWidgets)
+					{
+						qDebug() << "DockWidget objectname " << dw->objectName();
+						restoreDockWidget(dw);
+						dw->setVisible(true);
+					}
+				}
 			}
+
+			m_toolBar->setVisible(true);
 		}
 
 		firstEvent = false;
@@ -286,8 +306,11 @@ void SimWidget::aboutToQuit()
 
 	if (m_slaveWindow == false && m_showEventFired == true)
 	{
-		//QSettings().setValue("SimWidget/state", saveState());
+		QSettings().setValue("SimWidget/state", saveState());
+		qDebug() << "SimWidget::aboutToQuit(): saveState()";
 	}
+
+	return;
 }
 
 void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
@@ -734,11 +757,11 @@ void SimWidget::tabBarContextMenuRequest(const QPoint& pos)
 		return;
 	}
 
-	QMenu menu;
-	menu.addAction(tr("Detach"));
-	menu.addAction(tr("Close"));
+//	QMenu menu;
+//	menu.addAction(tr("Detach"));
+//	menu.addAction(tr("Close"));
 
-	menu.exec(m_tabWidget->tabBar()->mapToGlobal(pos));
+//	menu.exec(m_tabWidget->tabBar()->mapToGlobal(pos));
 
 	return;
 }
@@ -753,7 +776,7 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 	setMovable(false);
 	setAcceptDrops(true);
 
-	setObjectName("SimulatorToolBar");
+	setObjectName("SimToolBar");
 
 	setIconSize(iconSize() * 0.9);
 
