@@ -1,4 +1,5 @@
 #pragma once
+#include <QBitArray>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 
@@ -25,28 +26,53 @@ namespace Afb
 	public:
 		AfbComponentPin() = default;
 		AfbComponentPin(const AfbComponentPin&) = default;
-		AfbComponentPin(AfbComponentPin&&) = default;
-		AfbComponentPin(const QString caption, int opIndex, AfbComponentPinType type);
+		AfbComponentPin(AfbComponentPin&&) noexcept = default;
+		AfbComponentPin(const QString& caption, int opIndex, AfbComponentPinType type);
 
 		AfbComponentPin& operator=(const AfbComponentPin&) = default;
-		AfbComponentPin& operator=(AfbComponentPin&&) = default;
+		AfbComponentPin& operator=(AfbComponentPin&&) noexcept = default;
 
 	public:
 		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
 		bool saveToXml(QDomElement* xmlElement) const;
 
 	public:
-		QString caption() const;
-		void setCaption(const QString& value);
+		const QString& caption() const noexcept
+		{
+			return m_caption;
+		}
+		void setCaption(const QString& value) noexcept
+		{
+			m_caption = value;
+		}
 
-		int opIndex() const;
-		void setOpIndex(int value);
+		int opIndex() const noexcept
+		{
+			return m_opIndex;
+		}
+		void setOpIndex(int value) noexcept
+		{
+			m_opIndex = value;
+		}
 
-		AfbComponentPinType type() const;
-		void setType(AfbComponentPinType value);
+		AfbComponentPinType type() const noexcept
+		{
+			return m_type;
+		}
+		void setType(AfbComponentPinType value) noexcept
+		{
+			m_type = value;
+		}
 
-		bool isInputOrParam() const;
-		bool isOutput() const;
+		bool isInputOrParam() const noexcept
+		{
+			return	m_type == AfbComponentPinType::Input ||
+					m_type == AfbComponentPinType::Param;
+		}
+		bool isOutput() const noexcept
+		{
+			return	m_type == AfbComponentPinType::Output;
+		}
 
 	private:
 		QString m_caption;
@@ -71,28 +97,80 @@ namespace Afb
 		// Properties
 		//
 	public:
-		int opCode() const;
-		void setOpCode(int value);
+		int opCode() const noexcept
+		{
+			return m_opCode;
+		}
+		void setOpCode(int value) noexcept
+		{
+			m_opCode = value;
+		}
 
-		QString caption() const;
-		void setCaption(const QString& value);
+		const QString& caption() const noexcept
+		{
+			return m_caption;
+		}
+		void setCaption(const QString& value) noexcept
+		{
+			m_caption = value;
+		}
 
-		int impVersion() const;
-		void setImpVersion(int value);
+		int impVersion() const noexcept
+		{
+			return m_impVersion;
+		}
+		void setImpVersion(int value) noexcept
+		{
+			m_impVersion = value;
+		}
 
-        int versionOpIndex() const;
-        void setVersionOpIndex(int value);
+		int versionOpIndex() const noexcept
+		{
+			return m_versionOpIndex;
+		}
+		void setVersionOpIndex(int value) noexcept
+		{
+			m_versionOpIndex = value;
+		}
 
-		int maxInstCount() const;
-		void setMaxInstCount(int value);
+		int maxInstCount() const noexcept
+		{
+			return m_maxInstCount;
+		}
+		void setMaxInstCount(int value) noexcept
+		{
+			m_maxInstCount = value;
+		}
 
-		QString simulationFunc() const;
-		void setSimulationFunc(const QString& value);
+		const QString& simulationFunc() const noexcept
+		{
+			return m_simulationFunc;
+		}
+		void setSimulationFunc(const QString& value) noexcept
+		{
+			m_simulationFunc = value;
+		}
 
-		const std::map<int, AfbComponentPin>& pins() const;
+		const std::unordered_map<int, AfbComponentPin>& pins() const noexcept
+		{
+			return m_pins;
+		}
 
-		bool pinExists(int pinOpIndex) const;
-		QString pinCaption(int pinOpIndex) const;
+		bool pinExists(int pinOpIndex) const noexcept
+		{
+			return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
+					? false: m_pinExists[pinOpIndex];
+		}
+		QString pinCaption(int pinOpIndex) const noexcept
+		{
+			auto it = m_pins.find(pinOpIndex);
+			if (it != m_pins.end())
+			{
+				return it->second.caption();
+			}
+
+			return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+		}
 
 	private:
 		// Operator= is present, don't forget to add new fields to it
@@ -104,7 +182,8 @@ namespace Afb
 		int m_maxInstCount = 0;
 		QString m_simulationFunc;
 
-		std::map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
+		std::unordered_map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
+		std::vector<bool> m_pinExists;									// For fast searching of pin, intensively used in simulator
 		// Operator= is present, don't forget to add new fields to it
 		//
 	};
@@ -160,8 +239,10 @@ namespace Afb
 	public:
 		AfbSignal(void);
 		AfbSignal(const AfbSignal& that);
+		AfbSignal(AfbSignal&& that) noexcept;
 		virtual ~AfbSignal();
 		AfbSignal& operator=(const AfbSignal& that) noexcept;
+		AfbSignal& operator=(AfbSignal&& that) noexcept;
 
 		// Serialization
 		//
@@ -194,6 +275,11 @@ namespace Afb
 		Q_INVOKABLE int size() const;
 		void setSize(int value);
 
+		const std::vector<int>& additionalSizes() const;
+		void setAdditionalSizes(std::vector<int> value);
+
+		std::vector<int> allSizes() const;		// Returns size() and additionalSizes() as single vector
+
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
 		bool setByteOrder(const QString& value);
@@ -217,6 +303,7 @@ private:
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		int m_operandIndex = 0;
 		int m_size = 0;
+		std::vector<int> m_additionalSizes;
 		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
 
@@ -296,7 +383,7 @@ private:
 		QString changedScript() const;
 		void setChangedScript(const QString& value);
 
-		QString units() const;
+		const QString& units() const;
 		void setUnits(const QString& value);
 
 		// Data
@@ -362,16 +449,16 @@ private:
 		const QString& strID() const;
 		void setStrID(const QString& strID);
 
-		QString caption() const;
+		const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		QString description() const;
+		const QString& description() const;
 		void setDescription(const QString& value);
 
-		QString version() const;
+		const QString& version() const;
 		void setVersion(const QString& value);
 
-		QString category() const;
+		const QString& category() const;
 		void setCategory(const QString& value);
 
 		int opCode() const;

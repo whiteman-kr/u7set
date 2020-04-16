@@ -1,5 +1,6 @@
 #include "SimSubsystem.h"
 #include "../lib/ModuleFirmware.h"
+#include "SimConnections.h"
 
 namespace Sim
 {
@@ -12,23 +13,23 @@ namespace Sim
 	{
 	}
 
-	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription)
+	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const Connections& connections)
 	{
 		m_lmDescription = lmDescription;
 
-		if (firmware.uartExists(UartID::ApplicationLogic) == false)
+		if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
 		{
 			writeError(QObject::tr("Application data is not found in firmware."));
 			return false;
 		}
 
-		if (firmware.uartExists(UartID::Configuration) == false)
+		if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
 		{
 			writeError(QObject::tr("Configuration data is not found in firmware."));
 			return false;
 		}
 
-		if (firmware.uartExists(UartID::Tuning) == false)
+		if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
 		{
 			writeError(QObject::tr("Tuning data is not found in firmware."));
 			return false;
@@ -50,7 +51,7 @@ namespace Sim
 
 			writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			if (bool ok = logicModule->load(lmInfo, lmDescription, firmware);
+			if (bool ok = logicModule->load(lmInfo, lmDescription, firmware, connections);
 				ok == false)
 			{
 				// There is no simulation for this file, or it's loading had errors

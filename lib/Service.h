@@ -62,6 +62,11 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
+	static const char* const SETTING_EQUIPMENT_ID;
+	static const char* const SETTING_CFG_SERVICE_IP1;
+	static const char* const SETTING_CFG_SERVICE_IP2;
+
+public:
 	ServiceWorker(const SoftwareInfo& softwareInfo,
 				  const QString& serviceName,
 				  int& argc,
@@ -108,6 +113,9 @@ public:
 
 	CircularLoggerShared logger() const { return m_logger; }
 
+	QString getStrSetting(const QString& settingName);
+	QString getCmdLineSetting(const QString& settingName);
+
 signals:
 	void work();
 	void stopped();
@@ -122,17 +130,9 @@ protected:
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
-	QString getStrSetting(const QString& settingName);
-	QString getCmdLineSetting(const QString& settingName);
-
 private:
 	void onThreadStarted() final;
 	void onThreadFinished() final;
-
-protected:
-	static const char* const SETTING_EQUIPMENT_ID;
-	static const char* const SETTING_CFG_SERVICE_IP1;
-	static const char* const SETTING_CFG_SERVICE_IP2;
 
 private:
 	QString m_equipmentID;

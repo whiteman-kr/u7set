@@ -153,7 +153,7 @@ namespace VFrame30
 
 				case E::SignalType::Discrete:
 					{
-						QVariant d = property(param.caption().toStdString().c_str());
+						QVariant d = propertyValue(param.caption());
 						paramValue = d.toString();
 					}
 					break;
@@ -689,6 +689,19 @@ namespace VFrame30
 		}
 
 		return Afb::AfbParam();
+	}
+
+	std::optional<bool> SchemaItemAfb::getAssignFlagsValue() const
+	{
+		for (const Afb::AfbParam& p : m_afbElement.params())
+		{
+			if (p.isDiscrete() == true && p.caption() == QStringLiteral("AssignFlags"))
+			{
+				return p.value().toBool();
+			}
+		}
+
+		return {};
 	}
 
 	bool SchemaItemAfb::setAfbElementParams(Afb::AfbElement* afbElement) const

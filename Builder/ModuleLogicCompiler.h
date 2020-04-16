@@ -13,6 +13,7 @@
 #include "../lib/ComparatorSet.h"
 #include "UalItems.h"
 #include "MemWriteMap.h"
+#include "Loopbacks.h"
 
 #include "../lib/Connection.h"
 #include "../lib/AppSignalStateFlags.h"
@@ -137,42 +138,13 @@ namespace Builder
 			int busContentAddress = BAD_ADDRESS;
 		};
 
-		struct Loopback
+		struct BusProcessingStepInfo
 		{
-			// initial loopback params
-			//
-			QString ID;
-			const UalItem* source = nullptr;
-			bool isAutoLoopback = false;
-
-			// params will be filled during loopbackPreprocessing
-			//
-			QVector<const UalItem*> targets;
-			QHash<QString, bool> linkedSignals;
-			QHash<const UalItem*, bool> linkedItems;
-			QHash<QUuid, const UalItem*> linkedPins;
-
-			//
-
-			UalSignal* ualSignal = nullptr;
-
-			bool isConnected(const LogicPin& pin) const;
-			bool isConnected(const QString& signalID) const;
-			
-			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
+			int stepsNumber = 0;
+			int currentStep = 0;
+			int currentStepSizeBits = 0;			// for now 32 or 16 only
+			int currentBusSignalOffsetW = 0;
 		};
-
-/*		class SignalsWithFlags : public QHash<QString, AppSignalStateFlagsMap*>
-		{
-		public:
-			SignalsWithFlags(ModuleLogicCompiler& compiler);
-			~SignalsWithFlags();
-
-			bool append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, const UalItem* setFlagsItem);
-
-		private:
-			ModuleLogicCompiler& m_compiler;
-		};*/
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
@@ -197,6 +169,10 @@ namespace Builder
 
 		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
 
+		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
+										   std::set<QString>* linkedSignals,
+										   std::set<const UalItem*>* linkedItems,
+										   std::map<QUuid, const UalItem*>* linkedPins);
 	private:
 		// pass #1 compilation functions
 		//
@@ -220,20 +196,17 @@ namespace Builder
 		void getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
 										const LogicPin& output,
 										QVector<QUuid>* connectedInputsGuids);
+		QString getConnectedLoopbackSourceID(const LogicPin& output);
+
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
-		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
-										   QHash<QString, bool>* linkedSignals,
-										   QHash<const UalItem*, bool>* linkedItems,
-										   QHash<QUuid, const UalItem *>* linkedPins);
-		bool getSignalsAndPinsLinkedToOutPin(const UalItem* item,
-											 const LogicPin& outPin,
-											QHash<QString, bool>* linkedSignals,
-											QHash<const UalItem*, bool>* linkedItems,
-											QHash<QUuid, const UalItem*>* linkedPins);
 
-		bool isLoopbackSignal(const QString& appSignalID);
+		bool getSignalsAndPinsLinkedToOutPin(	const UalItem* item,
+												const LogicPin& outPin,
+												std::set<QString>* linkedSignals,
+												std::set<const UalItem*>* linkedItems,
+												std::map<QUuid, const UalItem*>* linkedPins);
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
@@ -299,7 +272,7 @@ namespace Builder
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
-		bool isConnectedToLoopback(const LogicPin& inPin, Loopback** loopback);
+		bool isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);
@@ -433,21 +406,40 @@ namespace Builder
 		bool generateAppLogicCode(CodeSnippet* code);
 
 		bool generateAfbCode(CodeSnippet* code, const UalItem* ualItem);
-		bool generateSignalsToAfbInputsCode(CodeSnippet* code, const UalAfb* ualAfb, int busProcessingStep);
-		bool generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
-		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
-		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
-		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
+		bool generateSignalsToAfbInputsCode(CodeSnippet* code, const UalAfb* ualAfb,
+											const BusProcessingStepInfo& bpStepInfo);
 
-		bool startAfb(CodeSnippet* code, const UalAfb* ualAfb, int processingStep, int processingStepsNumber);
+		bool generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+										  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+										  const BusProcessingStepInfo& bpStepInfo);
 
-		bool generateAfbOutputsToSignalsCode(CodeSnippet* code, const UalAfb* ualAfb, int busProcessingStep);
-		bool generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
-		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
+		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+											 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+											 const BusProcessingStepInfo& bpStepInfo);
 
-		bool calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber);
+		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+													 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
+
+		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+												const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+												const BusProcessingStepInfo& bpStepInfo);
+
+		bool startAfb(CodeSnippet* code, const UalAfb* ualAfb, const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbOutputsToSignalsCode(CodeSnippet* code, const UalAfb* ualAfb,
+											 const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
+										   const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+										   const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
+												 const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+												 const BusProcessingStepInfo& bpStepInfo);
+
+		bool calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes);
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
-									   int* pinsSize, int* signalsSize, bool isInputs,
+									   std::vector<std::vector<int>>* pinsSizes, int* signalsSize, bool isInputs,
 									   bool* allBusInputsConnectedToDiscretes);
 		bool isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing);
 
@@ -518,11 +510,14 @@ namespace Builder
 		bool detectUnusedSignals();
 		bool calculateCodeRunTime();
 
+		QString lmSubsystemEquipmentIdPath() const;
+
 		bool writeResult();
 		bool writeBinCodeForLm();
 		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
 		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
+		bool writeLooopbacksReport();
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();
@@ -647,9 +642,7 @@ namespace Builder
 
 		::std::set<QString> m_signalsWithFlagsIDs;
 
-		QHash<QString, Loopback*> m_loopbacks;
-		QHash<QString, Loopback*> m_signalsToLoopbacks;
-		QHash<QUuid, Loopback*> m_pinsToLoopbacks;
+		Loopbacks m_loopbacks;
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
@@ -711,5 +704,4 @@ namespace Builder
 
 		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
 	};
-
 }

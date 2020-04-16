@@ -2,6 +2,7 @@
 
 #include "FblItemRect.h"
 #include "Afb.h"
+#include <optional>
 
 namespace VFrame30
 {
@@ -42,6 +43,8 @@ namespace VFrame30
 
 		QVariant getAfbParam(const QString& name);
 		Afb::AfbParam afbParam(const QString& name);
+
+		std::optional<bool> getAssignFlagsValue() const;
 
 		// Set Afb element parameters
 		//

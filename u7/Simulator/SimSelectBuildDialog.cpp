@@ -1,5 +1,5 @@
 #include "SimSelectBuildDialog.h"
-#include "ui_SimulatorSelectBuildDialog.h"
+#include "ui_SimSelectBuildDialog.h"
 #include "../Settings.h"
 
 SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
@@ -7,7 +7,7 @@ SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
 													   QString buildPath,
 													   QWidget* parent) :
 	QDialog(parent),
-	ui(new Ui::SimulatorSelectBuildDialog),
+	ui(new Ui::SimSelectBuildDialog),
 	m_projectName(currentProject.toLower())
 {
 	ui->setupUi(this);

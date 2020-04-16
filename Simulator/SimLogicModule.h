@@ -16,6 +16,9 @@
 
 namespace Sim
 {
+	class Connections;
+
+
 	class LogicModule : public QObject, protected Output
 	{
 		Q_OBJECT
@@ -27,7 +30,8 @@ namespace Sim
 	public:
 		bool load(const Hardware::LogicModuleInfo& lmInfo,
 				  const LmDescription& lmDescription,
-				  const Hardware::ModuleFirmware& firmware);
+				  const Hardware::ModuleFirmware& firmware,
+				  const Connections& connections);
 
 		void clear();
 
@@ -47,7 +51,7 @@ namespace Sim
 		void slot_appCodeParsed(bool ok);
 
 	public:
-		QString equipmentId() const;
+		const QString& equipmentId() const;
 		int lmNumber() const;
 		E::Channel channel() const;
 
@@ -73,9 +77,9 @@ namespace Sim
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 
-		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
-		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
-		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
+		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
+		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
+		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
 
 		// Running Emulation
 		//

@@ -132,6 +132,13 @@ Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 	return m_hash;
 }
 
+bool AppSignalState::hasSameValue(const AppSignalState& b) const
+{
+	return m_flags.all == b.m_flags.all &&
+		   m_value == b.m_value &&
+		   m_hash == b.m_hash;
+}
+
 QString AppSignalState::toString(double value, E::ValueViewType viewType, int precision)
 {
 	QString result;

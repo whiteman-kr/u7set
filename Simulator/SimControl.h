@@ -32,7 +32,7 @@ namespace Sim
 	//
 	struct SimControlRunStruct
 	{
-		SimControlRunStruct(std::shared_ptr<LogicModule> lm) :
+		SimControlRunStruct(const std::shared_ptr<LogicModule>& lm) :
 			m_lm(lm)
 		{
 		}
@@ -47,17 +47,17 @@ namespace Sim
 			return m_lm->asyncRunCycle(time, reset);
 		}
 
-		bool afterWorkCycleTask(AppSignalManager& appSignalManager)
+		bool afterWorkCycleTask(AppSignalManager& appSignalManager, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime)
 		{
 			// Set LogicModule's RAM to Sim::AppSignalManager
 			//
-			appSignalManager.setData(equipmentId(), m_lm->ram());
+			appSignalManager.setData(equipmentId(), m_lm->ram(), plantTime, localTime, systemTime);
 
 			return true;
 		}
 
 
-		QString equipmentId() const
+		const QString& equipmentId() const
 		{
 			return m_lm->equipmentId();
 		}
@@ -122,7 +122,7 @@ namespace Sim
 		void stop();
 
 		ControlData controlData() const;
-		void updateControlDataTime(std::chrono::microseconds currentTime);
+		void updateControlData(const ControlData& cd);
 
 		SimControlState state() const;
 		bool isRunning() const;
@@ -142,11 +142,10 @@ namespace Sim
 		Simulator* m_simulator = nullptr;
 
 		// Start of access only with mutex
-		//
+		// \/ \/ \/ \/ \/
 		mutable QReadWriteLock m_controlDataLock{QReadWriteLock::Recursive};
-
 		ControlData m_controlData;
-
+		// /\ /\ /\ /\ /\
 		// End of Access only with mutex
 		//
 	};

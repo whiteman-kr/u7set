@@ -201,6 +201,8 @@ public:
 	QColor m_columnDefaultMismatchBackColor = Qt::yellow;
 	QColor m_columnDefaultMismatchTextColor = Qt::black;
 
+	QStringList m_tuningWorkspaceMasks;
+
 private:
 
 #ifdef USE_ADMIN_REGISTRY_AREA

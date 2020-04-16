@@ -1,5 +1,5 @@
 #include "MonitorTrends.h"
-#include "DialogChooseTrendSignals.h"
+#include "../TrendView/Forms/DialogChooseTrendSignals.h"
 #include "../TrendView/TrendWidget.h"
 
 std::map<QString, MonitorTrendsWidget*> MonitorTrends::m_trendsList;
@@ -34,9 +34,11 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent)
+bool MonitorTrends::startTrendApp(MonitorConfigController* configController,
+                                  const std::vector<AppSignalParam>& appSignals,
+                                  QWidget* parent)
 {
-	MonitorTrendsWidget* window = new MonitorTrendsWidget(configController, parent);
+	MonitorTrendsWidget* window = new MonitorTrendsWidget(&theSignals, configController, parent);
 
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
@@ -67,8 +69,11 @@ void MonitorTrends::unregisterTrendWindow(QString name)
 }
 
 
-MonitorTrendsWidget::MonitorTrendsWidget(MonitorConfigController* configController, QWidget* parent) :
+MonitorTrendsWidget::MonitorTrendsWidget(IAppSignalManager* appSignalManager,
+                                         MonitorConfigController* configController,
+                                         QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
+    m_appSignalManager(appSignalManager),
 	m_configController(configController),
 	m_archiveService1(configController->configuration().archiveService1),
 	m_archiveService2(configController->configuration().archiveService2)
@@ -199,7 +204,7 @@ void MonitorTrendsWidget::signalsButton()
 
 	// --
 	//
-	DialogChooseTrendSignals dialog(trendSignals, this);
+	DialogChooseTrendSignals dialog(m_appSignalManager, trendSignals, this);
 	
 	int result = dialog.exec();
 	
@@ -250,6 +255,18 @@ void MonitorTrendsWidget::signalsButton()
 		TrendLib::TrendSignalParam tsp(signal);
 		addSignal(tsp, false);
 	}
+
+	// Set default scale type if analog signals are empty and selected signals have special tags
+	//
+
+	if (analogSignals.empty() == true)
+	{
+		autoSelectScaleType(acceptedSignals);
+	}
+
+	// Validate view limits for scale
+	//
+	m_trendWidget->validateViewLimits();
 
 	updateWidget();
 

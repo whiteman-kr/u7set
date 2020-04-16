@@ -51,7 +51,6 @@ namespace Builder
 
 		//
 
-		int m_maxSignalID = -1;
 		QHash<int, QString> m_busSignals;
 
 		Busses m_busses;

@@ -3,6 +3,7 @@
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 #include "TrendSignal.h"
+#include "TrendScale.h"
 #include "DialogTrendSignalProperties.h"
 #include "../Proto/serialization.pb.h"
 #include "../lib/Types.h"
@@ -69,6 +70,7 @@ namespace TrendLib
 
 		connect(m_timeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeComboCurrentIndexChanged);
 		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
+		connect(m_scaleTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::scaleTypeComboCurrentIndexChanged);
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
 		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
 		connect(m_realtimeModeButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeModeToggled);
@@ -175,16 +177,16 @@ namespace TrendLib
 		}
 
 		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
-						[&trendSignal](const TrendLib::TrendSignalParam& t)
-						{
-							return t.appSignalId() == trendSignal.appSignalId();
-						});
+								[&trendSignal](const TrendLib::TrendSignalParam& t)
+		{
+			return t.appSignalId() == trendSignal.appSignalId();
+		});
 
 		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
-						[&trendSignal](const TrendLib::TrendSignalParam& t)
-						{
-							return t.appSignalId() == trendSignal.appSignalId();
-						});
+								[&trendSignal](const TrendLib::TrendSignalParam& t)
+		{
+			return t.appSignalId() == trendSignal.appSignalId();
+		});
 
 		if (dit != discreteSignals.end() ||
 			ait != analogSignals.end())
@@ -192,9 +194,9 @@ namespace TrendLib
 			return false;
 		}
 
-static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
-								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
-static int stdColorIndex = 0;
+		static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
+										  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
+		static size_t stdColorIndex = 0;
 
 		TrendLib::TrendSignalParam tsp(trendSignal);
 
@@ -290,6 +292,20 @@ static int stdColorIndex = 0;
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
+		// Scale Type
+		//
+		QLabel* scaleTypeLabel = new QLabel("  Scale: ");
+		scaleTypeLabel->setAlignment(Qt::AlignCenter);
+		m_toolBar->addWidget(scaleTypeLabel);
+
+		m_scaleTypeCombo = new QComboBox(m_toolBar);
+		m_scaleTypeCombo->addItem(tr("Linear"), QVariant::fromValue(TrendLib::TrendScaleType::Linear));
+		m_scaleTypeCombo->addItem(tr("Logarithmic"), QVariant::fromValue(TrendLib::TrendScaleType::Log10));
+		m_scaleTypeCombo->addItem(tr("Period"), QVariant::fromValue(TrendLib::TrendScaleType::Period));
+		m_toolBar->addWidget(m_scaleTypeCombo);
+
+		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+
 		// Time Type
 		//
 		QLabel* timeTypeLabel = new QLabel("  Time Type: ");
@@ -313,7 +329,7 @@ static int stdColorIndex = 0;
 		//
 		m_realtimeModeButton = new QPushButton(tr("Realtime"));
 		m_realtimeModeButton->setCheckable(true);
-		m_toolBar->addWidget(m_realtimeModeButton);
+		m_realtimeActionForButton = m_toolBar->addWidget(m_realtimeModeButton);
 
 		m_realtimeAutoShiftButton = new QPushButton(tr(">>>"));
 		m_realtimeAutoShiftButton->setEnabled(false);
@@ -332,7 +348,7 @@ static int stdColorIndex = 0;
 		// Signals
 		//
 		m_refreshButton = new QPushButton("Refresh");
-		m_toolBar->addWidget(m_refreshButton);
+		m_refreshActionForButton = m_toolBar->addWidget(m_refreshButton);
 
 		// Signals
 		//
@@ -358,6 +374,12 @@ static int stdColorIndex = 0;
 		theSettings.m_mainWindowState = saveState();
 
 		theSettings.m_viewType = m_viewCombo->currentIndex();
+
+		if (m_autoSelectedScaleType == false)
+		{
+			theSettings.m_scaleType = m_scaleTypeCombo->currentIndex();
+		}
+
 		theSettings.m_laneCount = m_lanesCombo->currentIndex() + 1;
 		theSettings.m_timeTypeIndex = m_timeTypeCombo->currentIndex();
 
@@ -374,6 +396,10 @@ static int stdColorIndex = 0;
 		Q_ASSERT(m_viewCombo);
 		m_viewCombo->setCurrentIndex(theSettings.m_viewType);
 
+		Q_ASSERT(m_scaleTypeCombo);
+		m_scaleTypeCombo->setCurrentIndex(theSettings.m_scaleType);
+
+		Q_ASSERT(m_timeTypeCombo);
 		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
 
 		// Ensure widget is visible
@@ -400,6 +426,65 @@ static int stdColorIndex = 0;
 		{
 			m_trendWidget->setStartTime(ts.timeStamp - m_trendWidget->duration() * m_trendWidget->laneCount());
 			return;
+		}
+
+		return;
+	}
+
+	void TrendMainWindow::autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals)
+	{
+		TrendScaleType defaultScaleType = TrendScaleType::Linear;
+
+		bool defaultScaleTypeFound = false;
+
+		for (const AppSignalParam& acceptedSignal : acceptedSignals)
+		{
+			if (acceptedSignal.isAnalog() == false)
+			{
+				continue;
+			}
+
+			const std::set<QString>& tags = acceptedSignal.tags();
+
+			for (const QString& tag : tags)
+			{
+				if (tag == QStringLiteral("view_linear"))
+				{
+					defaultScaleType = TrendLib::TrendScaleType::Linear;
+					defaultScaleTypeFound = true;	// break the outer loop
+					break;
+				}
+				if (tag == QStringLiteral("view_log10"))
+				{
+					defaultScaleType = TrendLib::TrendScaleType::Log10;
+					defaultScaleTypeFound = true;	// break the outer loop
+					break;
+				}
+				if (tag == QStringLiteral("view_period"))
+				{
+					defaultScaleType = TrendLib::TrendScaleType::Period;
+					defaultScaleTypeFound = true;	// break the outer loop
+					break;
+				}
+			}
+
+			if (defaultScaleTypeFound == true)
+			{
+				break;
+			}
+		}
+
+		if (defaultScaleTypeFound == true)
+		{
+			int index = m_scaleTypeCombo->findData(QVariant::fromValue(defaultScaleType));
+			if (index == -1)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+			m_scaleTypeCombo->setCurrentIndex(index);
+
+			m_autoSelectedScaleType = true;	// This means that combo was changed automatically. scaleTypeComboCurrentIndexChanged() slot had reset this flag
 		}
 
 		return;
@@ -506,6 +591,7 @@ static int stdColorIndex = 0;
 		DialogTrendSignalProperties d(signal,
 									  &signalSet(),
 									  m_trendWidget->timeType(),
+									  m_trendWidget->scaleType(),
 									  m_trendWidget->trendMode(),
 									  this);
 #pragma warning( push )
@@ -513,11 +599,11 @@ static int stdColorIndex = 0;
 #pragma warning (disable: 6326)
 		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this,
 				[&d, this]()
-				{
-					bool ok = signalSet().setSignalParam(d.trendSignal());
-					Q_ASSERT(ok);
-					this->updateWidget();
-				});
+		{
+			bool ok = signalSet().setSignalParam(d.trendSignal());
+			Q_ASSERT(ok);
+			this->updateWidget();
+		});
 #pragma warning( pop )
 
 		d.exec();
@@ -568,6 +654,12 @@ static int stdColorIndex = 0;
 		if (index != -1)
 		{
 			m_viewCombo->setCurrentIndex(index);
+		}
+
+		index = m_scaleTypeCombo->findData(QVariant::fromValue(m_trendWidget->scaleType()));
+		if (index != -1)
+		{
+			m_scaleTypeCombo->setCurrentIndex(index);
 		}
 
 		index = m_timeTypeCombo->findData(QVariant::fromValue(m_trendWidget->timeType()));
@@ -649,16 +741,16 @@ static int stdColorIndex = 0;
 		{
 			// Select paper size
 			//
-static QPageSize::PageSizeId m_defaultPageSize = QPageSize::A3;
-static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientation::Landscape;
+			static QPageSize::PageSizeId m_defaultPageSize = QPageSize::A3;
+			static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientation::Landscape;
 
 			QDialog d(this);
 
 			d.setWindowTitle(tr("Page Setup"));
 			d.setWindowFlags((d.windowFlags() &
-							~Qt::WindowMinimizeButtonHint &
-							~Qt::WindowMaximizeButtonHint &
-							~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+							  ~Qt::WindowMinimizeButtonHint &
+							  ~Qt::WindowMaximizeButtonHint &
+							  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 			QLabel* pageSizeLabel = new  QLabel(tr("Page Size"));
 
@@ -723,10 +815,10 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 
 	void TrendMainWindow::actionPrintTriggered()
 	{
-static QPageLayout lastPageLayout;
-static int lastResolution = -1;
-static bool lastFullPage = false;
-static int lastCopyCount = false;
+		static QPageLayout lastPageLayout;
+		static int lastResolution = -1;
+		static bool lastFullPage = false;
+		static int lastCopyCount = false;
 
 		QPrintDialog d(this);
 
@@ -859,34 +951,61 @@ static int lastCopyCount = false;
 							break;
 						}
 
-						if (firstValue == true)
+						bool ok = false;
+
+						double value = TrendScale::valueToScaleValue(state.value, m_trendWidget->scaleType(), &ok);
+
+						if (ok == false)
 						{
-							firstValue = false;
-							minValue = state.value;
-							maxValue = state.value;
 							continue;
 						}
 
-						minValue = qMin(minValue, state.value);
-						maxValue = qMax(maxValue, state.value);
+						if (firstValue == true)
+						{
+							minValue = value;
+							maxValue = value;
+
+							firstValue = false;
+							continue;
+						}
+
+						minValue = qMin(minValue, value);
+						maxValue = qMax(maxValue, value);
 					}	// for (const TrendStateItem& state : record.states)
 				}
 			}
 
 			if (firstValue == false)
 			{
-				// Set limits and update param
-				//
-				if (fabs(maxValue - minValue) <= DBL_MIN)
+				if (std::fabs(maxValue - minValue) <= DBL_MIN)
 				{
-					ts.setViewLowLimit(minValue - 1.0);
-					ts.setViewHighLimit(maxValue + 1.0);
+					minValue = minValue - 1.0;
+					maxValue = maxValue + 1.0;
 				}
 				else
 				{
-					ts.setViewLowLimit(minValue - (maxValue - minValue) * 0.10);
-					ts.setViewHighLimit(maxValue + (maxValue - minValue) * 0.10);
+					minValue = minValue - (maxValue - minValue) * 0.10;
+					maxValue = maxValue + (maxValue - minValue) * 0.10;
 				}
+
+				bool ok = false;
+
+				double newMinValue = TrendScale::limitFromScaleValue(minValue, m_trendWidget->scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				double newMaxValue = TrendScale::limitFromScaleValue(maxValue, m_trendWidget->scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				// Set limits and update param
+				//
+				ts.setViewLowLimit(newMinValue);
+				ts.setViewHighLimit(newMaxValue);
 
 				signalSet().setSignalParam(ts);
 			}
@@ -965,9 +1084,9 @@ static int lastCopyCount = false;
 		QDialog d(this);
 		d.setWindowTitle(tr("Ruler Properties"));
 		d.setWindowFlags((d.windowFlags() &
-						~Qt::WindowMinimizeButtonHint &
-						~Qt::WindowMaximizeButtonHint &
-						~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+						  ~Qt::WindowMinimizeButtonHint &
+						  ~Qt::WindowMaximizeButtonHint &
+						  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 		QGridLayout* layout = new QGridLayout(&d);
 
@@ -1006,7 +1125,7 @@ static int lastCopyCount = false;
 			newDateTime.setTime(timeEdit->time());
 
 			TimeStamp ts(newDateTime);
-			mutableRuler.setTimeStamp(ts);
+			mutableRuler.setTimeStamp(ts, trend().rulerSet().rulerStep());
 
 			update();
 		}
@@ -1045,6 +1164,21 @@ static int lastCopyCount = false;
 		m_trendWidget->setViewMode(view);
 
 		m_trendWidget->updateWidget();
+		return;
+	}
+
+	void TrendMainWindow::scaleTypeComboCurrentIndexChanged(int index)
+	{
+		TrendLib::TrendScaleType scale = m_scaleTypeCombo->itemData(index).value<TrendLib::TrendScaleType>();
+
+		m_trendWidget->setScaleType(scale);
+
+		m_trendWidget->validateViewLimits();
+
+		m_trendWidget->updateWidget();
+
+		m_autoSelectedScaleType = false;	// This means that combo could be changed by user. autoSelectScaleType() function sets this flag again
+
 		return;
 	}
 
@@ -1148,77 +1282,167 @@ static int lastCopyCount = false;
 
 		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rulerIndex, &outSignal);
 
-		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
-			mouseOn != Trend::MouseOn::OnRuler)
+		if (mouseOn == Trend::MouseOn::OnSignalDescription)
 		{
+			QMenu menu(this);
+
+			QAction* lineWeight1 = menu.addAction(tr("Line Weight 1"));
+			lineWeight1->setCheckable(true);
+			connect(lineWeight1, &QAction::triggered, this,
+					[this, &outSignal]()
+			{
+				outSignal.setLineWeight(1);
+				this->signalSet().setSignalParam(outSignal);
+				this->updateWidget();
+			});
+
+			QAction* lineWeight2 = menu.addAction(tr("Line Weight 2"));
+			lineWeight2->setCheckable(true);
+			connect(lineWeight2, &QAction::triggered, this,
+					[this, &outSignal]()
+			{
+				outSignal.setLineWeight(2);
+				this->signalSet().setSignalParam(outSignal);
+				this->updateWidget();
+			});
+
+			QAction* lineWeight3 = menu.addAction(tr("Line Weight 3"));
+			lineWeight3->setCheckable(true);
+			connect(lineWeight3, &QAction::triggered, this,
+					[this, &outSignal]()
+			{
+				outSignal.setLineWeight(3);
+				this->signalSet().setSignalParam(outSignal);
+				this->updateWidget();
+			});
+
+			QAction* autoscale = menu.addAction(tr("Scale to Fit"));
+			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+
+			QAction* remove = menu.addAction(tr("Remove"));
+			connect(remove, &QAction::triggered, this,
+					[this, &outSignal]()
+			{
+				this->signalSet().removeSignal(outSignal.appSignalId());
+				this->updateWidget();
+			});
+
+			QAction* properties = menu.addAction(tr("Properties..."));
+			connect(properties, &QAction::triggered, this,
+					[this, &outSignal]()
+			{
+				signalProperties(outSignal.appSignalId());
+			});
+
+			QAction* signalAction = menu.addAction(tr("Signals..."));
+			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
+
+			QActionGroup* lineWeightGroup = new QActionGroup(&menu);
+			lineWeightGroup->setExclusive(true);
+
+			lineWeightGroup->addAction(lineWeight1);
+			lineWeightGroup->addAction(lineWeight2);
+			lineWeightGroup->addAction(lineWeight3);
+
+			switch (static_cast<int>(outSignal.lineWeight()))
+			{
+			case 0:	lineWeight1->setChecked(true);	break;
+			case 1:	lineWeight1->setChecked(true);	break;
+			case 2:	lineWeight2->setChecked(true);	break;
+			case 3:	lineWeight3->setChecked(true);	break;
+			}
+
+			menu.addAction(lineWeight1);
+			menu.addAction(lineWeight2);
+			menu.addAction(lineWeight3);
+
+			menu.addSeparator();
+			menu.addAction(autoscale);
+
+			menu.addSeparator();
+			menu.addAction(remove);
+
+			menu.addSeparator();
+			menu.addAction(properties);
+			menu.addAction(signalAction);
+
+			menu.exec(QCursor::pos());
+
 			return;
 		}
 
-		QMenu menu(this);
-
-		QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
-		connect(addRulerAction, &QAction::triggered, this,
-				[&pos, this]()
-				{
-					this->TrendMainWindow::actionAddRuler(pos);
-				});
-
-		QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
-		deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
-		connect(deleteRulerAction, &QAction::triggered, this,
-				[rulerIndex, this]()
-				{
-					this->TrendMainWindow::actionDeleteRuler(rulerIndex);
-				});
-
-		QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
-		rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
-		connect(rulerPropertiesAction, &QAction::triggered, this,
-				[rulerIndex, this]()
-				{
-					this->TrendMainWindow::actionRulerProperties(rulerIndex);
-				});
-
-		menu.addSeparator();
-		QAction* chooseView = menu.addAction(tr("Select View..."));
-		chooseView->setEnabled(analogsCount + discretesCount > 0);
-		connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
-
-		Q_ASSERT(m_refreshAction);
-		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
-
-		menu.addSeparator();
-
-		std::vector<TrendLib::TrendSignalParam> discrets = signalSet().discreteSignals();
-		std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
-
-		QMenu* signalPropsMenu = menu.addMenu(tr("Signals Properties"));
-		signalPropsMenu->setEnabled(discrets.size() + analogs.size() > 0);
-
-		for (const TrendLib::TrendSignalParam& s : discrets)
+		if (mouseOn == Trend::MouseOn::InsideTrendArea ||
+			mouseOn == Trend::MouseOn::OnRuler)
 		{
-			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
-			connect(signalPropertiesAction, &QAction::triggered, this,
-					[this, s]()
-					{
-						signalProperties(s.appSignalId());
-					});
+			QMenu menu(this);
+
+			QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
+			connect(addRulerAction, &QAction::triggered, this,
+					[&pos, this]()
+			{
+				this->TrendMainWindow::actionAddRuler(pos);
+			});
+
+			QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
+			deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+			connect(deleteRulerAction, &QAction::triggered, this,
+					[rulerIndex, this]()
+			{
+				this->TrendMainWindow::actionDeleteRuler(rulerIndex);
+			});
+
+			QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
+			rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+			connect(rulerPropertiesAction, &QAction::triggered, this,
+					[rulerIndex, this]()
+			{
+				this->TrendMainWindow::actionRulerProperties(rulerIndex);
+			});
+
+			menu.addSeparator();
+			QAction* chooseView = menu.addAction(tr("Select View..."));
+			chooseView->setEnabled(analogsCount + discretesCount > 0);
+			connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
+
+			Q_ASSERT(m_refreshAction);
+			if (m_refreshAction->isVisible() == true)
+			{
+				menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
+			}
+
+			menu.addSeparator();
+
+			std::vector<TrendLib::TrendSignalParam> discrets = signalSet().discreteSignals();
+			std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
+
+			QMenu* signalPropsMenu = menu.addMenu(tr("Signals Properties"));
+			signalPropsMenu->setEnabled(discrets.size() + analogs.size() > 0);
+
+			for (const TrendLib::TrendSignalParam& s : discrets)
+			{
+				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+				connect(signalPropertiesAction, &QAction::triggered, this,
+						[this, s]()
+				{
+					signalProperties(s.appSignalId());
+				});
+			}
+
+			for (const TrendLib::TrendSignalParam& s : analogs)
+			{
+				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+				connect(signalPropertiesAction, &QAction::triggered, this,
+						[this, s]()
+				{
+					signalProperties(s.appSignalId());
+				});
+			}
+
+			QAction* signalAction = menu.addAction(tr("Signals..."));
+			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
+
+			menu.exec(QCursor::pos());
 		}
-
-		for (const TrendLib::TrendSignalParam& s : analogs)
-		{
-			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
-			connect(signalPropertiesAction, &QAction::triggered, this,
-					[this, s]()
-					{
-						signalProperties(s.appSignalId());
-					});
-		}
-
-		QAction* signalAction = menu.addAction(tr("Signals..."));
-		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
-
-		menu.exec(QCursor::pos());
 
 		return;
 	}

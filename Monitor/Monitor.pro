@@ -59,6 +59,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
+    ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     MonitorMainWindow.cpp \
@@ -93,7 +94,6 @@ SOURCES += main.cpp \
     ../lib/CircularLogger.cpp \
     MonitorView.cpp \
     Trend/MonitorTrends.cpp \
-    Trend/DialogChooseTrendSignals.cpp \
     MonitorArchive.cpp \
     DialogChooseArchiveSignals.cpp \
     ArchiveTcpClient.cpp \
@@ -128,6 +128,7 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp
 
 HEADERS  += \
+    ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     MonitorMainWindow.h \
@@ -165,7 +166,6 @@ HEADERS  += \
     ../lib/CircularLogger.h \
     MonitorView.h \
     Trend/MonitorTrends.h \
-    Trend/DialogChooseTrendSignals.h \
     MonitorArchive.h \
     DialogChooseArchiveSignals.h \
     ArchiveTcpClient.h \
@@ -206,7 +206,6 @@ FORMS    += \
     DialogSignalSearch.ui \
     DialogSignalSnapshot.ui \
     DialogColumns.ui \
-    Trend/DialogChooseTrendSignals.ui \
     DialogChooseArchiveSignals.ui
 
 

@@ -317,6 +317,7 @@ namespace VFrame30
 	void IndicatorHistogramVert::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* schemaItem) const
 	{
 		if (drawParam == nullptr ||
+
 			schema == nullptr ||
 			layer == nullptr ||
 			schemaItem == nullptr)
@@ -742,7 +743,8 @@ namespace VFrame30
 						continue;
 					}
 
-					if (sp->compare().isAcquired() == false)
+					if (sp->compare().isConst() == false &&
+						sp->compare().isAcquired() == false)
 					{
 						// skip this setpoint, the value compare with is unknown
 						//
@@ -768,7 +770,7 @@ namespace VFrame30
 
 						Q_ASSERT(appSignalId == sp->input().appSignalID());
 
-						if (sp->compare().isAcquired() == false)
+						if (sp->output().isAcquired() == false)
 						{
 							// skip this setpoint, the value compare with is unknown
 							//

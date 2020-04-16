@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "TrendSignal.h"
+#include "TrendParam.h"
 
 namespace Ui {
 	class DialogTrendSignalProperties;
@@ -16,6 +17,7 @@ public:
 	DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal,
 								TrendLib::TrendSignalSet* trendSignalSet,
 								E::TimeType timeType,
+								TrendLib::TrendScaleType scaleType,
 								E::TrendMode trendMode,
 								QWidget* parent);
 	virtual ~DialogTrendSignalProperties();
@@ -45,6 +47,7 @@ private:
 	TrendLib::TrendSignalSet* m_trendSignalSet = nullptr;
 	QString m_appSignalId;
 	E::TimeType m_timeType = E::TimeType::Plant;
+	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
 	E::TrendMode m_trendMode = E::TrendMode::Archive;
 
 	//

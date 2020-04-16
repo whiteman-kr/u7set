@@ -1,7 +1,7 @@
 #include "SimRam.h"
-#include <cassert>
 #include <QtEndian>
 #include <SimOverrideSignals.h>
+#include <SimException.h>
 
 namespace Sim
 {
@@ -12,18 +12,6 @@ namespace Sim
 		m_offset(offset),
 		m_size(size)
 	{
-	}
-
-	bool RamAreaInfo::contains(E::LogicModuleRamAccess access, quint32 offsetW) const
-	{
-		if ((static_cast<int>(m_access) & static_cast<int>(access)) != 0 &&
-			offsetW >= m_offset &&
-			offsetW < (m_offset + m_size))
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	bool RamAreaInfo::overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const
@@ -49,80 +37,196 @@ namespace Sim
 		return m_name;
 	}
 
-	E::LogicModuleRamAccess RamAreaInfo::access() const
+	//
+	// RamArea
+	//
+	RamArea::RamArea(bool clearOnStartCycle) :
+		RamAreaInfo(),
+		m_clearOnStartCycle(clearOnStartCycle)
 	{
-		return m_access;
 	}
 
-	quint32 RamAreaInfo::offset() const
-	{
-		return m_offset;
-	}
-
-	quint32 RamAreaInfo::size() const
-	{
-		return m_size;
-	}
-
-	RamArea::RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name) :
-		RamAreaInfo(access, offset, size, name)
+	RamArea::RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, bool clearOnStartCycle, QString name) :
+		RamAreaInfo(access, offset, size, name),
+		m_clearOnStartCycle(clearOnStartCycle)
 	{
 		m_data.fill(0, size * 2);
-
 		return;
 	}
 
-	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data, E::ByteOrder byteOrder)
+	RamArea::~RamArea()
 	{
-		if (contains(E::LogicModuleRamAccess::Write, offsetW) == false ||
-			bitNo >= 16)
-		{
-			return false;
-		}
+		//qDebug() << "RamArea::~RamArea(), data ptr " << QString::number(reinterpret_cast<quint64>(m_data.data()), 16) << " name = " << name() << " offset = " << offset();
+	}
 
-		data &= 0x01;
-		int byteOffset = (offsetW - offset()) * 2;
-
-		if (byteOffset >= m_data.size())
-		{
-			assert(byteOffset < m_data.size());
-			return false;
-		}
-
-		quint16 word = 0;
-
-		if (byteOrder == E::ByteOrder::BigEndian)
-		{
-			word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
-		}
-		else
-		{
-			word = qFromLittleEndian<quint16>(m_data.constData() + byteOffset);
-		}
-
-		word &= ~(0x01 << bitNo);
-		word |= (data << bitNo);
-
-		if (byteOrder == E::ByteOrder::BigEndian)
-		{
-			qToBigEndian<quint16>(word, m_data.data() + byteOffset);
-		}
-		else
-		{
-			qToLittleEndian<quint16>(word, m_data.data() + byteOffset);
-		}
+	bool RamArea::clear()
+	{
+		m_data.fill(0x00);
 
 		// Apply override
 		//
 		if (m_overrideData.empty() == false)
 		{
-			applyOverride<quint16>(offsetW);
+			int zeroBasedOffsetW = 0;
+
+			quint16* dataPtr = reinterpret_cast<quint16*>(m_data.data());
+			for (qint32 i = 0; i < m_data.size() / 2; i++)
+			{
+				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
+				dataPtr ++;
+			}
 		}
 
 		return true;
 	}
 
-	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
+	bool RamArea::writeBuffer(quint32 offsetW, const QByteArray& data) noexcept
+	{
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			m_data.size() - byteOffset < data.size())
+		{
+			// Buffer must be completely inside area
+			//
+			Q_ASSERT(byteOffset >= 0 &&
+					 m_data.size() - byteOffset >= data.size());
+			return false;
+		}
+
+		m_data.replace(byteOffset, data.size(), data);
+
+		// Apply override
+		//
+		if (m_overrideData.empty() == false)
+		{
+			int zeroBasedOffsetW = offsetW - offset();
+			assert(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < m_data.size() / 2);
+
+			quint16* dataPtr = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
+			for (qint32 i = 0; i < data.size() / 2; i++)
+			{
+				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
+				dataPtr ++;
+			}
+		}
+
+		return true;
+	}
+
+	bool RamArea::readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data) const noexcept
+	{
+		if (data == nullptr)
+		{
+			assert(data);
+			return false;
+		}
+
+		int countBytes = countW * 2;
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			m_data.size() - byteOffset < countBytes)
+		{
+			// Buffer must be completely inside area
+			//
+			Q_ASSERT(byteOffset >= 0 &&
+					 m_data.size() - byteOffset >= countBytes);
+			return false;
+		}
+
+		if (data->size() != countBytes)
+		{
+			data->resize(countBytes);
+		}
+
+		// Copy memory
+		//
+		memcpy_s(data->data(), data->size(), m_data.constData() + byteOffset, countBytes);
+
+		// Apply override to just copied memory
+		//
+		if (m_overrideData.empty() == false)
+		{
+			int zeroBasedOffsetW = offsetW - offset();
+
+			if (zeroBasedOffsetW < 0 ||
+				zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+			{
+				Q_ASSERT(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < m_overrideData.size());
+				return false;
+			}
+
+			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
+			for (quint32 i = 0; i < countW; i++)
+			{
+				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
+				dataPtr ++;
+			}
+		}
+
+		return true;
+	}
+
+	bool RamArea::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
+	{
+		// Cannot use contains function, cause such signals like _pblink stored in memory for reading, but actually I write there manually
+		//
+		const quint32 areaOffset = offset();
+
+		if (offsetW < areaOffset ||
+			offsetW > (areaOffset + size() - 2) ||
+			(bitNo & ~0x0F) != 0)
+		{
+			return false;
+		}
+
+		//bitNo &= 0x0F;	// This situaltion is excluded by prev condition (bitNo & ~0x0F) != 0
+		data &= 0x01;
+		int byteOffset = (offsetW - areaOffset) * 2;
+
+		if (byteOffset >= m_data.size())
+		{
+			Q_ASSERT(byteOffset < m_data.size());
+			return false;
+		}
+
+		quint16 word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+		applyOverride(offsetW, 1, &word);		// Apply override before converting data to target endian
+
+		if (byteOrder == E::ByteOrder::BigEndian)
+		{
+			word = qFromBigEndian<quint16>(word);
+		}
+		else
+		{
+			word = qFromLittleEndian<quint16>(word);
+		}
+
+		word &= ~(0x01 << bitNo);
+		word |= (data << bitNo);
+
+		quint16 targetWord;
+		if (byteOrder == E::ByteOrder::BigEndian)
+		{
+			qToBigEndian<quint16>(word, &targetWord);
+		}
+		else
+		{
+			qToLittleEndian<quint16>(word, &targetWord);
+		}
+
+		// Apply override
+		//
+		applyOverride(offsetW, 1, &targetWord);
+
+		// Write to memory
+		//
+		*reinterpret_cast<quint16*>(m_data.data() + byteOffset) = targetWord;
+
+		return true;
+	}
+
+	bool RamArea::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
 			bitNo >= 16 ||
@@ -131,38 +235,34 @@ namespace Sim
 			return false;
 		}
 
-		// Apply override
+		//--
 		//
+		bitNo &= 0x0F;
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset >= m_data.size())
+		{
+			Q_ASSERT(byteOffset < m_data.size());
+			return false;
+		}
+
+		quint16 word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+
 		if (access() == E::LogicModuleRamAccess::Read)
 		{
 			// This is read only memory (like incoming data from i/o modules)
 			// Apply override mask for read operations
-			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
 			//
-			if (m_overrideData.empty() == false)
-			{
-				const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
-			}
+			applyOverride(offsetW, 1, &word);	// Apply override to native endian, as it is storen in memory
 		}
-
-		//--
-		//
-		int byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset >= m_data.size())
-		{
-			assert(byteOffset < m_data.size());
-			return false;
-		}
-
-		quint16 word = 0;
 
 		if (byteOrder == E::ByteOrder::BigEndian)
 		{
-			word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+			word = qFromBigEndian<quint16>(word);
 		}
 		else
 		{
-			word = qFromLittleEndian<quint16>(m_data.constData() + byteOffset);
+			word = qFromLittleEndian<quint16>(word);
 		}
 
 		word >>=  bitNo;
@@ -173,73 +273,101 @@ namespace Sim
 		return true;
 	}
 
-	bool RamArea::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
+	bool RamArea::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<quint16>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
+	bool RamArea::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		return readData<quint16>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
+	bool RamArea::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<quint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
+	bool RamArea::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const noexcept
 	{
 		return readData<quint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder)
+	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<qint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const
+	bool RamArea::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const noexcept
 	{
 		return readData<qint32>(offsetW, data, byteOrder);
 	}
 
+	const QByteArray& RamArea::data() const noexcept
+	{
+		return m_data;
+	}
+
+	const std::vector<OverrideRamRecord>& RamArea::overrideData() const noexcept
+	{
+		return m_overrideData;
+	}
+
+	void RamArea::setRawData(const QByteArray& value, const std::vector<OverrideRamRecord>& overrideData) noexcept
+	{
+		m_data = value;
+		m_overrideData = overrideData;
+	}
+
 	template<typename TYPE>
-	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder)
+	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept
 	{
 		int byteOffset = (offsetW - offset()) * 2;
 		if (byteOffset < 0 ||
 			byteOffset >= m_data.size() - sizeof(TYPE))
 		{
-			assert(byteOffset >= 0 &&
+			Q_ASSERT(byteOffset >= 0 &&
 				   byteOffset - sizeof(TYPE) <= m_data.size());
 			return false;
 		}
 
-		if (byteOrder == E::BigEndian)
+		TYPE valueToWrite;
+
+		switch (byteOrder)
 		{
-			qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
-		}
-		else
-		{
-			qToLittleEndian<TYPE>(data, m_data.data() + byteOffset);
+		case E::BigEndian:
+			valueToWrite = qToBigEndian<TYPE>(data);
+			break;
+		case E::LittleEndian:
+			valueToWrite = qToLittleEndian<TYPE>(data);
+			break;
+		case E::NoEndian:
+			valueToWrite = data;
+			break;
+		default:
+			assert(false);
 		}
 
-		// Apply override
+		// Apply override to data
 		//
 		if (m_overrideData.empty() == false)
 		{
-			applyOverride<TYPE>(offsetW);
+			applyOverride(offsetW, sizeof(TYPE) / 2, reinterpret_cast<quint16*>(&valueToWrite));
 		}
+
+		// Write data to memory
+		//
+		*reinterpret_cast<TYPE*>(m_data.data() + byteOffset) = valueToWrite;
 
 		return true;
 	}
 
 	template<typename TYPE>
-	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const
+	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const noexcept
 	{
 		if (data == nullptr)
 		{
-			assert(data);
+			Q_ASSERT(data);
 			return false;
 		}
 
@@ -247,10 +375,12 @@ namespace Sim
 		if (byteOffset < 0 ||
 			byteOffset >= m_data.size() - sizeof(TYPE))
 		{
-			assert(byteOffset >= 0 &&
-				   byteOffset - sizeof(TYPE) <= m_data.size());
+			Q_ASSERT(byteOffset >= 0 &&
+					byteOffset - sizeof(TYPE) <= m_data.size());
 			return false;
 		}
+
+		TYPE rawValue = *reinterpret_cast<const TYPE*>(m_data.constData() + byteOffset);
 
 		// Apply override
 		//
@@ -258,29 +388,36 @@ namespace Sim
 		{
 			// This is read only memory (like incoming data from i/o modules)
 			// Apply override mask for read operations
-			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
 			//
-			if (m_overrideData.empty() == false)
-			{
-				const_cast<RamArea*>(this)->applyOverride<TYPE>(offsetW);
-			}
+			applyOverride(offsetW, sizeof(TYPE) / 2, reinterpret_cast<quint16*>(&rawValue));
 		}
 
-		if (byteOrder == E::BigEndian)
+		switch (byteOrder)
 		{
-			*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
+		case E::BigEndian:
+			*data = qFromBigEndian<TYPE>(rawValue);
+			break;
+		case E::LittleEndian:
+			*data = qFromLittleEndian<TYPE>(rawValue);
+			break;
+		case E::NoEndian:
+			*data = rawValue;
+			break;
+		default:
+			assert(false);
+			return false;
 		}
-		else
-		{
-			*data = qFromLittleEndian<TYPE>(m_data.constData() + byteOffset);
-		}
+
 		return true;
 	}
 
-	template<typename TYPE>
-	void RamArea::applyOverride(quint32 offsetW)
+	void RamArea::applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept
 	{
-		static_assert(sizeof(TYPE) >= 2 && sizeof(TYPE) <= 8);
+		if (dataPtr == nullptr)
+		{
+			assert(dataPtr);
+			return;
+		}
 
 		if (m_overrideData.empty() == true)
 		{
@@ -292,37 +429,32 @@ namespace Sim
 		int zeroBasedOffsetW = offsetW - offset();
 
 		if (zeroBasedOffsetW < 0 ||
-			zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+			zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()) ||
+			zeroBasedOffsetW + countW > size())
 		{
-			assert(false);
+			assert(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < static_cast<int>(m_overrideData.size()));
+			assert(zeroBasedOffsetW + countW <= size());
 			return;
 		}
 
-		quint16* ptrW = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
-
-		if constexpr (sizeof(TYPE) == 2)
+		for (; countW > 0; countW--)
 		{
-			m_overrideData[zeroBasedOffsetW].applyOverlapping(ptrW);
-		}
+			m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
 
-		if constexpr (sizeof(TYPE) == 4)
-		{
-			m_overrideData[zeroBasedOffsetW + 0].applyOverlapping(ptrW + 0);
-			m_overrideData[zeroBasedOffsetW + 1].applyOverlapping(ptrW + 1);
-		}
-
-		if constexpr (sizeof(TYPE) == 8)
-		{
-			m_overrideData[zeroBasedOffsetW + 0].applyOverlapping(ptrW + 0);
-			m_overrideData[zeroBasedOffsetW + 1].applyOverlapping(ptrW + 1);
-			m_overrideData[zeroBasedOffsetW + 2].applyOverlapping(ptrW + 2);
-			m_overrideData[zeroBasedOffsetW + 3].applyOverlapping(ptrW + 3);
+			zeroBasedOffsetW++;
+			dataPtr++;
 		}
 
 		return;
 	}
 
-	void RamArea::setOverrideData(std::vector<OverrideRamRecord> overrideData)
+
+	bool RamArea::clearOnStartCycle()
+	{
+		return m_clearOnStartCycle;
+	}
+
+	void RamArea::setOverrideData(std::vector<OverrideRamRecord>&& overrideData) noexcept
 	{
 		m_overrideData = std::move(overrideData);
 	}
@@ -336,6 +468,10 @@ namespace Sim
 		*this = that;
 	}
 
+	Ram::~Ram()
+	{
+	}
+
 	Ram& Ram::operator=(const Ram& that)
 	{
 		// Deep copy
@@ -343,10 +479,9 @@ namespace Sim
 		m_memoryAreas.clear();
 		m_memoryAreas.reserve(that.m_memoryAreas.size());
 
-		for (const std::shared_ptr<RamArea>& thatArea : that.m_memoryAreas)
+		for (const RamArea& thatArea : that.m_memoryAreas)
 		{
-			std::shared_ptr<RamArea> area = std::make_shared<RamArea>(*thatArea.get());
-			m_memoryAreas.push_back(area);
+			m_memoryAreas.emplace_back(thatArea);
 		}
 
 		return *this;
@@ -359,15 +494,15 @@ namespace Sim
 		return;
 	}
 
-	bool Ram::addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, QString name)
+	bool Ram::addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name)
 	{
-		std::shared_ptr<RamArea> ramArea = std::make_shared<RamArea>(access, offsetW, sizeW, name);
+		RamArea ramArea{access, offsetW, sizeW, clearOnStartCycle, name};
 
 		// Check that new memory area is not overlapped with existsings
 		//
 		for (const auto& area : m_memoryAreas)
 		{
-			if (area->overlapped(access, offsetW, sizeW) == true)
+			if (area.overlapped(access, offsetW, sizeW) == true)
 			{
 				// Area with this type of access and addresses already exists
 				//
@@ -375,31 +510,58 @@ namespace Sim
 			}
 		}
 
-		// --
-		//
-		m_memoryAreas.push_back(ramArea);
+		m_memoryAreas.emplace_back(std::move(ramArea));
 
 		return true;
+	}
+
+	void Ram::updateFrom(const Ram& source)
+	{
+		if (m_memoryAreas.size() != source.m_memoryAreas.size())
+		{
+			*this = source;		// Full deep copy
+			return;
+		}
+
+		for (size_t i = 0; i < m_memoryAreas.size(); i++)
+		{
+			const RamArea& s = source.m_memoryAreas[i];
+			RamArea& d = m_memoryAreas[i];
+
+			if (s.size() == d.size() &&
+				s.offset() == d.offset() &&
+				s.access() == d.access())
+			{
+				d.setRawData(s.data(), s.overrideData());
+			}
+			else
+			{
+				*this = source;		// Full deep copy
+				return;
+			}
+		}
+
+		return;
 	}
 
 	std::vector<RamAreaInfo> Ram::memoryAreasInfo() const
 	{
 		std::vector<RamAreaInfo> result;
-		for (const auto& area : m_memoryAreas)
+		for (const RamArea& area : m_memoryAreas)
 		{
-			result.emplace_back(*area.get());
+			result.emplace_back(area);
 		}
 
 		return result;
 	}
 
-	RamAreaInfo Ram::memoryAreaInfo(QString name) const
+	RamAreaInfo Ram::memoryAreaInfo(const QString& name) const
 	{
-		for (const auto& area : m_memoryAreas)
+		for (const RamArea& area : m_memoryAreas)
 		{
-			if (area->name() == name)
+			if (area.name() == name)
 			{
-				return *area.get();
+				return area;
 			}
 		}
 
@@ -413,10 +575,90 @@ namespace Sim
 			return RamAreaInfo();
 		}
 
-		return *(m_memoryAreas[index].get());
+		return m_memoryAreas[index];
 	}
 
-	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder)
+	Ram::Handle Ram::memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const
+	{
+		const size_t memoryAreaCount = m_memoryAreas.size();
+		for (size_t i = 0; i < memoryAreaCount; i++)
+		{
+			if (m_memoryAreas[i].contains(access, offsetW) == true)
+			{
+				return i;
+			}
+		}
+
+		return std::numeric_limits<size_t>::max();
+	}
+
+	RamArea* Ram::memoryArea(Ram::Handle handle)
+	{
+		if (handle >= m_memoryAreas.size())
+		{
+			return nullptr;
+		}
+
+		return &m_memoryAreas[handle];
+	}
+
+	const RamArea* Ram::memoryArea(Handle handle) const
+	{
+		if (handle >= m_memoryAreas.size())
+		{
+			return nullptr;
+		}
+
+		return &m_memoryAreas[handle];
+	}
+
+	bool Ram::clearMemoryAreasOnStartCycle()
+	{
+		for (RamArea& memoryArea : m_memoryAreas)
+		{
+			if (memoryArea.clearOnStartCycle() == true)
+			{
+				memoryArea.clear();
+			}
+		}
+
+		return true;
+	}
+
+	bool Ram::clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->clear();	// Fill with 0's
+	}
+
+	bool Ram::writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const QByteArray& data) noexcept
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeBuffer(offsetW, data);
+	}
+
+	bool Ram::readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, QByteArray* data) noexcept
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readToBuffer(offsetW, countW, data);
+	}
+
+	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -424,11 +666,10 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeBit(offsetW, bitNo, data, byteOrder);
-		return ok;
+		return area->writeBit(offsetW, bitNo, data, byteOrder);
 	}
 
-	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
+	bool Ram::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -436,11 +677,32 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readBit(offsetW, bitNo, data, byteOrder);
-		return ok;
+		return area->readBit(offsetW, bitNo, data, byteOrder);
 	}
 
-	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
+	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeBit(offsetW, bitNo, data, byteOrder);
+	}
+
+	bool Ram::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
+	{
+		const RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readBit(offsetW, bitNo, data, byteOrder);
+	}
+
+	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -448,11 +710,10 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeWord(offsetW, data, byteOrder);
-		return ok;
+		return area->writeWord(offsetW, data, byteOrder);
 	}
 
-	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
+	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const noexcept
 	{
 		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -460,8 +721,29 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readWord(offsetW, data, byteOrder);
-		return ok;
+		return area->readWord(offsetW, data, byteOrder);
+	}
+
+	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeWord(offsetW, data, byteOrder);
+	}
+
+	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const
+	{
+		const RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readWord(offsetW, data, byteOrder);
 	}
 
 	bool Ram::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
@@ -472,8 +754,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeDword(offsetW, data, byteOrder);
-		return ok;
+		return area->writeDword(offsetW, data, byteOrder);
 	}
 
 	bool Ram::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
@@ -484,8 +765,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readDword(offsetW, data, byteOrder);
-		return ok;
+		return area->readDword(offsetW, data, byteOrder);
 	}
 
 	bool Ram::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder)
@@ -522,37 +802,81 @@ namespace Sim
 		return ok;
 	}
 
-	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW)
+	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept
 	{
-		for (std::shared_ptr<RamArea> area : m_memoryAreas)
+		RamArea* result = nullptr;
+
+		if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
 		{
-			if (area->contains(access, offsetW) == true)
+			for (RamArea& area : m_memoryAreas)
 			{
-				return area.get();
+				if (area.contains(access, offsetW) == true)
+				{
+					result = &area;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Look for the right area from back, most likely it will find area much faster.
+			// Tried it on project, it works really well
+			//
+			for (auto rit = m_memoryAreas.rbegin(); rit != m_memoryAreas.rend(); ++rit)
+			{
+				if (rit->contains(access, offsetW) == true)
+				{
+					result = &(*rit);
+					break;
+				}
 			}
 		}
 
-		return nullptr;
+		assert(result);
+
+		return result;
 	}
 
-	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const
+	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
 	{
-		for (std::shared_ptr<RamArea> area : m_memoryAreas)
+		const RamArea* result = nullptr;
+
+		if (offsetW < static_cast<quint32>(std::numeric_limits<quint16>::max() / 2))
 		{
-			if (area->contains(access, offsetW) == true)
+			for (const RamArea& area : m_memoryAreas)
 			{
-				return area.get();
+				if (area.contains(access, offsetW) == true)
+				{
+					result = &area;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Look for the right area from back, most likely it will find area much faster.
+			// Tried it on project, it works really well
+			//
+			for (auto rit = m_memoryAreas.rbegin(); rit != m_memoryAreas.rend(); ++rit)
+			{
+				if (rit->contains(access, offsetW) == true)
+				{
+					result = &(*rit);
+					break;
+				}
 			}
 		}
 
-		return nullptr;
+		assert(result);
+
+		return result;
 	}
 
-	void Ram::updateOverrideData(QString equipmentId, const OverrideSignals* overrideSignals)
+	void Ram::updateOverrideData(const QString& equipmentId, const OverrideSignals* overrideSignals)
 	{
 		if (overrideSignals == nullptr)
 		{
-			assert(overrideSignals);
+			Q_ASSERT(overrideSignals);
 			return;
 		}
 
@@ -563,10 +887,10 @@ namespace Sim
 			return;
 		}
 
-		for (std::shared_ptr<RamArea>& ramArea : m_memoryAreas)
+		for (RamArea& ramArea : m_memoryAreas)
 		{
-			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(equipmentId, *ramArea.get());
-			ramArea->setOverrideData(std::move(ovData));
+			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(equipmentId, ramArea);
+			ramArea.setOverrideData(std::move(ovData));
 		}
 
 		m_overrideSignalsLastCounter = overrideSignals->changesCounter();

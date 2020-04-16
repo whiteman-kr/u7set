@@ -87,6 +87,7 @@ public:
 	int m_snapshotHorzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
     SignalSnapshotModel::SignalType m_signalSnapshotSignalType = SignalSnapshotModel::SignalType::All;
 	QStringList m_signalSnapshotMaskList;
+	QStringList m_signalSnapshotTagsList;
 	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
 	int m_signalSnapshotSortColumn = 0;
 	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;

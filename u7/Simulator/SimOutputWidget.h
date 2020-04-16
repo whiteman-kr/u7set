@@ -1,11 +1,13 @@
 #ifndef SIMULATOROUTPUTWIDGET_H
 #define SIMULATOROUTPUTWIDGET_H
 
+
 class SimOutputWidget : public QTextEdit
 {
 	Q_OBJECT
+
 public:
-	explicit SimOutputWidget(QWidget* parent = nullptr);
+	explicit SimOutputWidget(QWidget* parent);
 
 public:
 	static void simulatorOutputHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);

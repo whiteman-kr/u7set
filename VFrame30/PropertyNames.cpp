@@ -32,6 +32,7 @@ namespace VFrame30
 	const QString PropertyNames::precision{"Precision"};
 	const QString PropertyNames::precisionPropText{"Number of decimals after period, -1: take value from the signal description"};
 	const QString PropertyNames::analogFormat{"AnalogFormat"};
+	const QString PropertyNames::customText{"CustomText"};
 	const QString PropertyNames::columnCount{"ColumnCount"};
 	const QString PropertyNames::pinCount{"PinCount"};
 	const QString PropertyNames::showValidityPin{"ValidityPin"};
@@ -161,11 +162,12 @@ namespace VFrame30
 
 	const QString PropertyNames::loopbackId{"LoopbackID"};
 
-	const QString PropertyNames::compareType{"ÑompareType"};
+	const QString PropertyNames::compareType{"CompareType"};
 
 	const QString PropertyNames::busTypeId{"BusTypeID"};
 	const QString PropertyNames::busTypeFileName{"FileName"};
-	const QString PropertyNames::busAutoSignalPlacemanet{"AutoSignalPlacement"};
+	const QString PropertyNames::busAutoSignalPlacement{"AutoSignalPlacement"};
+	const QString PropertyNames::busEnableManualBusSize{"EnableManualBusSize"};
 	const QString PropertyNames::busManualBusSize{"ManualBusSize"};
 	const QString PropertyNames::busSignalId{"SignalID"};
 

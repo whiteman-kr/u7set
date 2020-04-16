@@ -2524,7 +2524,7 @@ void EquipmentView::addOptoConnection()
 	return;
 }
 
-void EquipmentView::showModuleOptoConnections()
+void EquipmentView::showObjectConnections()
 {
 	qDebug() << __FUNCTION__;
 
@@ -3850,7 +3850,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// -----------------
 	m_equipmentView->addAction(m_separatorOptoConnection);
 	m_equipmentView->addAction(m_addOptoConnection);
-	m_equipmentView->addAction(m_showModuleOptoConnections);
+	m_equipmentView->addAction(m_showObjectConnections);
+	m_equipmentView->addAction(m_showConnections);
 
 	// -----------------
 	m_equipmentView->addAction(m_separatorAction01);
@@ -3872,7 +3873,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_separatorAction3);
 	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
-	m_equipmentView->addAction(m_connectionsAction);
 
 	//m_equipmentView->addAction(m_pendingChangesAction);	// Not implemented, removed to be consistent with User Manual
 
@@ -3892,6 +3892,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_propertyTable = new IdePropertyTable(this, dbcontroller);
 	m_propertyTable->setPropertyMask(theSettings.m_equipmentTabPagePropertiesMask);
+	m_propertyTable->setColumnsWidth(theSettings.m_equipmentTabPagePropertiesColumnsWidth);
+	m_propertyTable->setGroupByCategory(theSettings.m_equipmentTabPagePropertiesGroupByCategory);
+
 
 	QTabWidget* tabWidget = new QTabWidget();
 	tabWidget->addTab(m_propertyEditor, "Tree view");
@@ -3925,7 +3928,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_switchModeAction);
-	m_toolBar->addAction(m_connectionsAction);
+	m_toolBar->addAction(m_showConnections);
 
 	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
@@ -3968,6 +3971,8 @@ EquipmentTabPage::~EquipmentTabPage()
 	theSettings.m_equipmentTabPageSplitterState = m_splitter->saveState();
     theSettings.m_equipmentTabPagePropertiesSplitterState = m_propertyEditor->splitterPosition();
 	theSettings.m_equipmentTabPagePropertiesMask = m_propertyTable->propertyMask();
+	theSettings.m_equipmentTabPagePropertiesColumnsWidth = m_propertyTable->getColumnsWidth();
+	theSettings.m_equipmentTabPagePropertiesGroupByCategory = m_propertyTable->groupByCategory();
 	theSettings.writeUserScope();
 }
 
@@ -4119,11 +4124,16 @@ void EquipmentTabPage::CreateActions()
 	connect(m_addOptoConnection, &QAction::triggered, m_equipmentView, &EquipmentView::addOptoConnection);
 
 
-	m_showModuleOptoConnections = new QAction(tr("Show Connections..."), this);
-	m_showModuleOptoConnections->setStatusTip(tr("Show module or opto port connections"));
-	m_showModuleOptoConnections->setEnabled(false);
-	//m_showModuleOptoConnections->setVisible(false);
-	connect(m_showModuleOptoConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showModuleOptoConnections);
+	m_showObjectConnections = new QAction(tr("Show Object Connections..."), this);
+	m_showObjectConnections->setStatusTip(tr("Show module or opto port connections"));
+	m_showObjectConnections->setEnabled(false);
+	//m_showObjectConnections->setVisible(false);
+	connect(m_showObjectConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showObjectConnections);
+
+	m_showConnections = new QAction(tr("Connections..."), this);
+	m_showConnections->setStatusTip(tr("Edit connections"));
+	m_showConnections->setEnabled(true);
+	connect(m_showConnections, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
 	//-----------------------------------
 	m_separatorAction01 = new QAction(this);
@@ -4203,11 +4213,6 @@ void EquipmentTabPage::CreateActions()
 	m_switchModeAction->setEnabled(true);
 	connect(m_switchModeAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
 	connect(m_switchModeAction, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
-
-    m_connectionsAction = new QAction(tr("Connections..."), this);
-    m_connectionsAction->setStatusTip(tr("Edit connections"));
-    m_connectionsAction->setEnabled(true);
-	connect(m_connectionsAction, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
     m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setStatusTip(tr("Show pending changes"));
@@ -4303,7 +4308,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_addLogicSchemaToLm);
 	assert(m_showLmsLogicSchemas);
 	assert(m_addOptoConnection);
-	assert(m_showModuleOptoConnections);
+	assert(m_showObjectConnections);
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	// about does parent have any checked out files
@@ -4371,7 +4376,7 @@ void EquipmentTabPage::setActionState()
 	m_addOptoConnection->setEnabled(false);
 	//m_addOptoConnection->setVisible(false);
 
-	m_showModuleOptoConnections->setEnabled(false);
+	m_showObjectConnections->setEnabled(false);
 	//m_showModuleOptoConnections->setVisible(false);
 
 	m_copyObjectAction->setEnabled(false);
@@ -4552,8 +4557,8 @@ void EquipmentTabPage::setActionState()
 	//
 	if (selectedIndexList.size() > 0)
 	{
-		m_showModuleOptoConnections->setEnabled(true);
-		m_showModuleOptoConnections->setVisible(true);
+		m_showObjectConnections->setEnabled(true);
+		m_showObjectConnections->setVisible(true);
 	}
 
 	// Show Application Logic Signal for current object

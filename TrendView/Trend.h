@@ -100,15 +100,14 @@ namespace TrendLib
 			Outside,			// Outside any posible rect
 			OutsideTrendArea,	// Outside lane but in the rect
 			InsideTrendArea,	// Inside lane rectangle
-			OnSignalDescription,// Over Signal Description (id +  caption)
+			OnSignalDescription,// Over Signal Description (id + caption)
 			OnRuler,			// Over ruler
 		};
 
 		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const;
 
 	public:
-		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
-		static double valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit);
+		void validateViewLimits(const TrendParam& drawParam);
 
 		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 

@@ -820,9 +820,32 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	m_filterTypeCombo->setCurrentIndex(0);
 
-	m_filterEdit = new QLineEdit();
-	m_bottomLayout->addWidget(m_filterEdit);
-	connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
+	// Masks combo
+
+	m_filterTextCombo = new QComboBox();
+	m_filterTextCombo->setEditable(true);
+	m_filterTextCombo->setMinimumWidth(150);
+	m_filterTextCombo->setInsertPolicy(QComboBox::NoInsert);
+	m_bottomLayout->addWidget(m_filterTextCombo);
+
+	// Load masks
+	//
+	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	QStringList masks = settings.value(QString("Masks/%1").arg(tabFilter->ID())).toStringList();
+	m_filterTextCombo->addItems(masks);
+	m_filterTextCombo->setEditText(QString());
+
+	QLineEdit* filterLineEdit = m_filterTextCombo->lineEdit();
+	if (filterLineEdit == nullptr)
+	{
+		Q_ASSERT(filterLineEdit);
+	}
+	else
+	{
+		connect(filterLineEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
+	}
+
+	// Filter button
 
 	m_filterButton = new QPushButton(tr("Filter"));
 	m_bottomLayout->addWidget(m_filterButton);
@@ -929,6 +952,8 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	}
 
+	//
+
 	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningPage::slot_timerTick500);
 
 }
@@ -942,6 +967,23 @@ TuningPage::~TuningPage()
 
 	m_columnWidthStorage.save();
 
+	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+
+	// Save masks
+	//
+	if (m_pageFilter == nullptr)
+	{
+		Q_ASSERT(m_pageFilter);
+	}
+	else
+	{
+		QStringList masks;
+		for (int i = 0; i < m_filterTextCombo->count(); i++)
+		{
+			masks.push_back(m_filterTextCombo->itemText(i));
+		}
+		settings.setValue(QString("Masks/%1").arg(m_pageFilter->ID()), masks);
+	}
 
 	m_instanceCounter--;
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
@@ -1008,7 +1050,19 @@ void TuningPage::fillObjectsList()
 
 	std::vector<std::pair<Hash, TuningValue>> defaultValues;
 
-	QString filter = m_filterEdit->text();
+	QString mask = m_filterTextCombo->currentText();
+	if (mask.isEmpty() == false)
+	{
+		if (m_filterTextCombo->findText(mask) == -1)
+		{
+			m_filterTextCombo->addItem(mask);
+		}
+		while (m_filterTextCombo->count() > 10)
+		{
+			m_filterTextCombo->removeItem(0);
+		}
+		m_filterTextCombo->setCurrentText(mask);
+	}
 
 	FilterType filterType = FilterType::All;
 	QVariant data = m_filterTypeCombo->currentData();
@@ -1130,41 +1184,41 @@ void TuningPage::fillObjectsList()
 		//
 
 
-		if (filter.length() != 0)
+		if (mask.isEmpty() == false)
 		{
 			bool filterMatch = false;
 
 			switch (filterType)
 			{
 			case FilterType::All:
-				if (asp.appSignalId().contains(filter, Qt::CaseInsensitive) == true
-						|| asp.customSignalId().contains(filter, Qt::CaseInsensitive) == true
-						|| asp.equipmentId().contains(filter, Qt::CaseInsensitive) == true
-						|| asp.caption().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.appSignalId().contains(mask, Qt::CaseInsensitive) == true
+						|| asp.customSignalId().contains(mask, Qt::CaseInsensitive) == true
+						|| asp.equipmentId().contains(mask, Qt::CaseInsensitive) == true
+						|| asp.caption().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::AppSignalID:
-				if (asp.appSignalId().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.appSignalId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::CustomAppSignalID:
-				if (asp.customSignalId().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.customSignalId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::EquipmentID:
-				if (asp.equipmentId().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.equipmentId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::Caption:
-				if (asp.caption().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.caption().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
@@ -1804,14 +1858,14 @@ void TuningPage::slot_restoreValuesFromExistingFilter()
 
 void TuningPage::slot_ApplyFilter()
 {
-	if (m_filterEdit->text().isEmpty() == false)
+	if (m_filterTextCombo->currentText().isEmpty() == false)
 	{
-		m_filterEdit->setStyleSheet("QLineEdit { color: red }");
+		m_filterTextCombo->setStyleSheet("QComboBox { color: red }");
 		m_filterButton->setStyleSheet("QPushButton { color: red }");
 	}
 	else
 	{
-		m_filterEdit->setStyleSheet(QString());
+		m_filterTextCombo->setStyleSheet(QString());
 		m_filterButton->setStyleSheet(QString());
 	}
 

@@ -1356,7 +1356,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+	/// Title: Several ethernet adapters of LM %1 are connected to same AppDataService %2.
 	///
 	/// Parameters:
 	///			%1 LM equipmentID
@@ -1369,7 +1369,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3030,
-				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
+				  tr("Several ethernet adapters of LM %1 are connected to same AppDataService %2.").
 						arg(lmID).arg(appDataServiceID));
 	}
 
@@ -5340,34 +5340,35 @@ namespace Builder
 	/// Description:
 	///		Different busTypes on AFB output.
 	///
-	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID)
+	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID, QString itemLabel)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5122, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5122,
-				  QString(tr("Different busTypes on AFB output (Logic schema %1).")).arg(schemaID));
+				  QString(tr("Different busTypes on AFB output (Logic schema %1, item %2).")).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5123
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Different busTypes on AFB inputs (Logic schema %1).
+	/// Title:	   Different busTypes on AFB inputs (or outputs) (Logic schema %1, item %2).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
+	///		%2 AFB item label
 	///
 	/// Description:
-	///		Different busTypes on AFB inputs.
+	///		Different busTypes on AFB inputs (or outputs).
 	///
-	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID)
+	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID, QString itemLabel)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5123, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5123,
-				  QString(tr("Different busTypes on AFB inputs (Logic schema %1).")).arg(schemaID));
+				  QString(tr("Different busTypes on AFB inputs (or outputs) (Logic schema %1, item %2).")).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5124
@@ -5837,11 +5838,10 @@ namespace Builder
 	/// Description:
 	///		Non compatible signals are connected to same LoopbackTarget.
 	///
-	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID)
+	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5144, s1Guid, schemaID);
 		addItemsIssues(OutputMessageLevel::Error, 5144, s2Guid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, 5144, lbGuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5144,
@@ -6376,14 +6376,14 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: No flags assiged on set_flags item %1 (Schema %2)
+	/// Title: No flags assigned on set_flags item %1 (Schema %2)
 	///
 	/// Parameters:
 	///		%1 set_flags item label
 	///		%2 app logic schema ID
 	///
 	/// Description:
-	///		No flags assiged on specified set_flags item.
+	///		No flags assigned on specified set_flags item.
 	///
 	void IssueLogger::wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID)
 	{
@@ -6391,7 +6391,7 @@ namespace Builder
 
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5169,
-				  QString(tr("No flags assiged on set_flags item %1 (Schema %2)")).
+				  QString(tr("No flags assigned on set_flags item %1 (Schema %2)")).
 					arg(setFlagsItemLabel).arg(schemaID));
 	}
 
@@ -6597,6 +6597,28 @@ namespace Builder
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5178,
 				  QString(tr("Setting of flags to a constant signal (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5179
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Format of AFB signal %1 is not compatible with any known application signals format
+	///
+	/// Parameters:
+	///		%1 AFB signal caption
+	///
+	/// Description:
+	///		Format of specified AFB signal is not compatible with any known application signals format. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5179(QString itemCaption, QString signalCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5179, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5179,
+				  QString(tr("Format of AFB signal %1.%2 is not compatible with any known application signals format (Logic schema %3)")).
+							arg(itemCaption).arg(signalCaption).arg(schemaID));
 	}
 
 	//

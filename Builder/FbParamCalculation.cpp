@@ -147,7 +147,7 @@ namespace Builder
 			break;
 
 		case Afb::AfbType::DER:				// opcode 26
-			result = calculate_DER_paramValues();
+			result = calculate_DERIV_paramValues();
 			break;
 
 		case Afb::AfbType::MISMATCH:		// opcode 27
@@ -1249,29 +1249,14 @@ namespace Builder
 
 		if (isConstIntegrator == true)
 		{
-			AppFbParamValue* i_ti = nullptr;
-			AppFbParamValue* i_ki = nullptr;
 			AppFbParamValue* i_max = nullptr;
 			AppFbParamValue* i_min = nullptr;
 
-			CHECK_AND_GET_REQUIRED_PARAMETER("i_ti", i_ti);
-			CHECK_AND_GET_REQUIRED_PARAMETER("i_ki", i_ki);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
 
-			CHECK_SIGNED_INT32(*i_ti);
-			CHECK_FLOAT32(*i_ki);
 			CHECK_FLOAT32(*i_max);
 			CHECK_FLOAT32(*i_min);
-
-			if (i_ti->signedIntValue() < 0)
-			{
-				// Value of parameter '%1.%2' must be greater or equal to 0.
-				//
-				m_log->errALC5043(caption(), i_ti->caption(), guid());
-
-				return false;
-			}
 
 			if (i_max->floatValue() <= i_min->floatValue())
 			{
@@ -1282,6 +1267,23 @@ namespace Builder
 				return false;
 			}
 
+			AppFbParamValue* i_ti = nullptr;
+			AppFbParamValue* i_ki = nullptr;
+
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_ti", i_ti);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_ki", i_ki);
+
+			CHECK_SIGNED_INT32(*i_ti);
+			CHECK_FLOAT32(*i_ki);
+
+			if (i_ti->signedIntValue() < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_ti->caption(), guid());
+
+				return false;
+			}
 		}
 
 		m_runTime = 27 + 24;
@@ -1738,61 +1740,49 @@ namespace Builder
 		return true;
 	}
 
-	bool UalAfb::calculate_DER_paramValues()
+	bool UalAfb::calculate_DERIV_paramValues()
 	{
 		m_runTime = 35 + 44;
-
-		QStringList requiredParams;
-
-		requiredParams.append("i_max");
-		requiredParams.append("i_min");
 
 		bool isConstDerivative = caption() == "derivc";
 
 		if (isConstDerivative == true)
 		{
-			requiredParams.append("i_kd");
-			requiredParams.append("i_td");
-		}
+			AppFbParamValue* i_max = nullptr;
+			AppFbParamValue* i_min = nullptr;
 
-		CHECK_REQUIRED_PARAMETERS(requiredParams);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
 
-		if (isConstDerivative == true)
-		{
-			AppFbParamValue& i_kd = m_paramValuesArray["i_kd"];
-			AppFbParamValue& i_td = m_paramValuesArray["i_td"];
+			CHECK_FLOAT32(*i_max);
+			CHECK_FLOAT32(*i_min);
 
-			CHECK_FLOAT32(i_kd);
-			CHECK_SIGNED_INT32(i_td);
-
-			int i_td_value = i_td.signedIntValue();
-
-			if (i_td_value < 0)
+			if (i_max->floatValue() <= i_min->floatValue())
 			{
-				// Value of parameter '%1.%2' must be greater or equal to 0.
+				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 				//
-				m_log->errALC5043(caption(), i_td.caption(), guid());
+				m_log->errALC5052(caption(), i_max->caption(), i_min->caption(), guid(), schemaID(), label());
 
 				return false;
 			}
-		}
 
-		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
-		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
+			AppFbParamValue* i_kd = nullptr;
+			AppFbParamValue* i_td = nullptr;
 
-		CHECK_FLOAT32(i_max);
-		CHECK_FLOAT32(i_min);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_kd", i_kd);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_td", i_td);
 
-		float i_max_value = i_max.floatValue();
-		float i_min_value = i_min.floatValue();
+			CHECK_FLOAT32(*i_kd);
+			CHECK_SIGNED_INT32(*i_td);
 
-		if (i_max_value <= i_min_value)
-		{
-			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
-			//
-			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid(), schemaID(), label());
+			if (i_td->signedIntValue() < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_td->caption(), guid());
 
-			return false;
+				return false;
+			}
 		}
 
 		return true;

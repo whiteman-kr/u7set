@@ -63,12 +63,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../lib/Address16.cpp \
+    ../lib/ConnectionsInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
+    SimCommandProcessor_LM5_LM6.cpp \
+    SimConnections.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
     SimOutput.cpp \
@@ -93,13 +97,18 @@ SOURCES += \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
     SimException.cpp \
-    SimCommandProcessor_LM1_SF00.cpp \
     SimOverrideSignals.cpp \
     ../lib/SignalProperties.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp
 
 HEADERS += \
+    ../Builder/CfgFiles.h \
+    ../lib/Address16.h \
+    ../lib/ConnectionsInfo.h \
+    ../lib/Hash.h \
+    SimCommandProcessor_LM5_LM6.h \
+    SimConnections.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
@@ -134,7 +143,6 @@ HEADERS += \
     SimLogicModule.h \
     SimCommandProcessor.h \
     SimException.h \
-    SimCommandProcessor_LM1_SF00.h \
     SimOverrideSignals.h \
     ../lib/SignalProperties.h \
     ../Builder/IssueLogger.h \

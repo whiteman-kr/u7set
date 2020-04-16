@@ -15,12 +15,14 @@ namespace Sim
 
 	LogicModule::~LogicModule()
 	{
+		//qDebug() << "LogicModule::~LogicModule() " << equipmentId();
 		return;
 	}
 
 	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo,
 						   const LmDescription& lmDescription,
-						   const Hardware::ModuleFirmware& firmware)
+						   const Hardware::ModuleFirmware& firmware,
+						   const Connections& connections)
 	{
 		setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
 
@@ -49,10 +51,11 @@ namespace Sim
 		// Init DeviceEmulator
 		//
 		ok &= m_device.init(m_logicModuleInfo,
-							m_lmDescription,
-							m_tuningEeprom,
-							m_confEeprom,
-							m_appLogicEeprom);
+		                    m_lmDescription,
+		                    m_tuningEeprom,
+		                    m_confEeprom,
+							m_appLogicEeprom,
+							connections);
 
 		return ok;
 	}
@@ -72,14 +75,14 @@ namespace Sim
 		return;
 	}
 
-	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds /*currentTime*/, bool reset)
+	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime, bool reset)
 	{
 		if (reset == true)
 		{
 			m_device.reset();
 		}
 
-		auto result = QtConcurrent::run<bool>(&m_device, &DeviceEmulator::run, 1);
+		auto result = QtConcurrent::run<bool>(&m_device, &DeviceEmulator::run, 1, currentTime);
 		return result;
 	}
 
@@ -126,7 +129,7 @@ namespace Sim
 		return;
 	}
 
-	QString LogicModule::equipmentId() const
+	const QString& LogicModule::equipmentId() const
 	{
 		return m_logicModuleInfo.equipmentId;
 	}

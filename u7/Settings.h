@@ -20,7 +20,6 @@ struct DatabaseConnectionParam
 	void setPassword(QString str);
 };
 
-
 class Settings
 {
 public:
@@ -109,6 +108,8 @@ public:
     int m_equipmentTabPagePropertiesSplitterState = 0;
 
 	QString m_equipmentTabPagePropertiesMask;
+	QMap<QString, int> m_equipmentTabPagePropertiesColumnsWidth;
+	bool m_equipmentTabPagePropertiesGroupByCategory = false;
 
 	// Signals Tab Page
 	//
@@ -117,11 +118,6 @@ public:
 	// Build Tab Page
 	//
 	QByteArray m_buildTabPageSplitterState;
-
-	// SimulatorTabPage
-	//
-	QByteArray m_simWigetState;
-	QByteArray m_simBuildSplitter;
 
     // Text Editor options
     //
@@ -178,18 +174,26 @@ public:
 	int m_schemaItemPropertiesSplitterPosition = 100;
 	QString m_schemaItemPropertiesPropertyMask;
 	bool m_schemaItemPropertiesExpandValuesToAllRows = true;
+	QMap<QString, int> m_schemaItemPropertiesColumnsWidth;
+	bool m_schemaItemPropertiesGroupByCategory = false;
 	QByteArray m_schemaItemPropertiesGeometry;
 
 	// Find SchemaItem
 	//
 	bool m_findSchemaItemCaseSensitive = false;
 
+	// Find/Replace Dialog in IdeCodeEditor
+	//
+	QStringList m_findCompleter;
+	QStringList m_replaceCompleter;
+
 	// Configurator properties
 	//
 	QString m_configuratorSerialPort;
 	bool m_configuratorShowDebugInfo = false;
 	bool m_configuratorVerify = true;
-	QByteArray m_UploadTabPageSplitterState;
+	QByteArray m_UploadTabPageLeftSplitterState;
+	QByteArray m_UploadTabPageRightSplitterState;
 
 private:
 	DatabaseConnectionParam m_databaseConnection;

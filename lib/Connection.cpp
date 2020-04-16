@@ -616,6 +616,11 @@ namespace Hardware
 		return m_port1SerialMode;
     }
 
+	QString Connection::port1SerialModeStr() const
+	{
+		return serialModeStr(m_port1SerialMode);
+	}
+
 	void Connection::setPort1SerialMode(const Connection::SerialMode value)
     {
 		m_port1SerialMode = value;
@@ -624,6 +629,11 @@ namespace Hardware
 	Connection::SerialMode Connection::port2SerialMode() const
 	{
 		return m_port2SerialMode;
+	}
+
+	QString Connection::port2SerialModeStr() const
+	{
+		return serialModeStr(m_port2SerialMode);
 	}
 
 	void Connection::setPort2SerialMode(const Connection::SerialMode value)
@@ -636,16 +646,16 @@ namespace Hardware
 		switch(value)
 		{
 		case SerialMode::RS232:
-			return "RS232";
+			return QString("RS232");
 
 		case SerialMode::RS485:
-			return "RS485";
+			return QString("RS485");
 
 		default:
 			assert(false);
 		}
 
-		return "RS???";
+		return QString("RS???");
 	}
 
 	Connection::Type Connection::type() const
@@ -855,6 +865,11 @@ namespace Hardware
 		}
 
 		return std::shared_ptr<Connection>();
+	}
+
+	std::vector<std::shared_ptr<Connection>> ConnectionStorage::getConnections() const
+	{
+		return m_objectsVector;
 	}
 
     bool ConnectionStorage::load(QString* errorMessage)

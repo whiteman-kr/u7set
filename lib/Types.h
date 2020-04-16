@@ -103,14 +103,15 @@ public:
 	//
 	enum class ColumnData
 	{
-		AppSignalID,
-		CustomSignalID,
-		Caption,
-		State,
-		ImpactAppSignalID,
-		ImpactCustomSignalID,
-		ImpactCaption,
-		ImpactState,
+		AppSignalID = 0,
+		CustomSignalID = 1,
+		Caption = 2,
+		State = 3,
+		ImpactAppSignalID = 32,
+		ImpactCustomSignalID = 33,
+		ImpactCaption = 34,
+		ImpactState = 35,
+		CustomText = 64				// Add new
 	};
 	Q_ENUM(ColumnData)
 
@@ -152,7 +153,8 @@ public:
 	enum ByteOrder
 	{
 		LittleEndian,
-		BigEndian
+		BigEndian,
+		NoEndian				// Dirrect write byte order is not applicable
 	};
 	Q_ENUM(ByteOrder)
 
@@ -195,6 +197,18 @@ public:
 		ReadWrite = 0x03
 	};
 	Q_ENUM(LogicModuleRamAccess)
+
+	// Lan Controller Type Identifiers
+	//
+	enum class LanControllerType
+	{
+		Unknown = 0,
+		Tuning = 1,
+		AppData = 2,
+		DiagData = 4,
+		AppAndDiagData = 6
+	};
+	Q_ENUM(LanControllerType)
 
 	// Software Module Type Identifiers
 	//

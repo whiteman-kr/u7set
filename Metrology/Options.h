@@ -11,6 +11,7 @@
 
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
+#include "../lib/SocketIO.h"
 
 // ==============================================================================================
 

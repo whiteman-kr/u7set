@@ -88,49 +88,69 @@ namespace Builder
 				continue;
 			}
 
-			Tuning::TuningSource ts;
+			std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(lm);
 
-			result &= ts.getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
-												   DataSource::LM_ETHERNET_ADAPTER1,
-												   m_subsystemKeyMap,
-												   m_lmsUniqueIdMap,
-												   m_log);
-			if (result == false)
+			if (lmDescription == nullptr)
 			{
-				continue;
-			}
-
-			if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
-			{
-				continue;
-			}
-
-			if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
-			{
-				// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
-				//
-				m_log->errCFG3043(ts.lmAddress().toString(),
-								  ts.lmAdapterID(),
-								  m_settings.tuningDataIP.addressStr(),
-								  equipmentID());
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
 				result = false;
 				continue;
 			}
 
-			Tuning::TuningData* tuningData = m_tuningDataStorage->value(lm->equipmentId(), nullptr);
+			const LmDescription::Lan& lan = lmDescription->lan();
 
-			if(tuningData != nullptr)
+			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
-				ts.setTuningData(tuningData);
-			}
-			else
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Tuning data for LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
-				result = false;
-			}
+				if (lanController.isProvideTuning() == false)
+				{
+					continue;
+				}
 
-			tuningSources.append(ts);
+				Tuning::TuningSource ts;
+
+				result &= ts.getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
+													   lanController.m_place,
+													   lanController.m_type,
+													   m_subsystemKeyMap,
+													   m_lmsUniqueIdMap,
+													   m_log);
+				if (result == false)
+				{
+					continue;
+				}
+
+				if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
+				{
+					continue;
+				}
+
+				if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+				{
+					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+					//
+					m_log->errCFG3043(ts.lmAddress().toString(),
+									  ts.lmAdapterID(),
+									  m_settings.tuningDataIP.addressStr(),
+									  equipmentID());
+					result = false;
+					continue;
+				}
+
+				Tuning::TuningData* tuningData = m_tuningDataStorage->value(lm->equipmentId(), nullptr);
+
+				if(tuningData != nullptr)
+				{
+					ts.setTuningData(tuningData);
+				}
+				else
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Tuning data for LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
+					result = false;
+				}
+
+				tuningSources.append(ts);
+			}
 		}
 
 		RETURN_IF_FALSE(result)

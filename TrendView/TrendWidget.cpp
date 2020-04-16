@@ -1,5 +1,6 @@
 #include "TrendWidget.h"
 #include "../Proto/trends.pb.h"
+#include "TrendScale.h"
 
 namespace TrendLib
 {
@@ -243,6 +244,11 @@ namespace TrendLib
 
 		ok &= m_trend.load(message.trend());
 		ok &= m_trendParam.load(message.trend_param());
+
+		if (ok == true)
+		{
+			m_trend.validateViewLimits(m_trendParam);
+		}
 
 		return ok;
 	}
@@ -538,7 +544,6 @@ namespace TrendLib
 
 		if (m_mouseAction == MouseAction::MoveRuler)
 		{
-
 		}
 
 		if (m_mouseAction == MouseAction::MoveRuler)
@@ -653,12 +658,23 @@ namespace TrendLib
 
 						for (const TrendSignalParam& trendSignal : analogsToShift)
 						{
-							double highLimit = qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
-							double lowLimit = qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
+							bool ok = false;
+
+							double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
+							if (ok == false)
+							{
+								continue;
+							}
+
+							double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
+							if (ok == false)
+							{
+								continue;
+							}
 
 							QRectF signalRect = trendSignal.tempDrawRect();
 
-							if (fabs(highLimit - lowLimit) > DBL_MIN &&
+							if (std::fabs(highLimit - lowLimit) > DBL_MIN &&
 								signalRect.height() > DBL_MIN)
 							{
 								double dy = mouseOffset.y() / m_trendParam.dpiY();
@@ -669,8 +685,20 @@ namespace TrendLib
 
 								TrendSignalParam tsp = trendSignal;
 
-								tsp.setViewHighLimit(highLimit);
-								tsp.setViewLowLimit(lowLimit);
+								double newHighLimit = TrendScale::limitFromScaleValue(highLimit, scaleType(), &ok);
+								if (ok == false)
+								{
+									continue;
+								}
+
+								double newLowLimit = TrendScale::limitFromScaleValue(lowLimit, scaleType(), &ok);
+								if (ok == false)
+								{
+									continue;
+								}
+
+								tsp.setViewHighLimit(newHighLimit);
+								tsp.setViewLowLimit(newLowLimit);
 
 								signalSet().setSignalParam(tsp);
 							}
@@ -704,7 +732,7 @@ namespace TrendLib
 					TimeStamp ts(laneStartTime + static_cast<qint64>(mouseOffset * coefx));
 
 					TrendRuler& mutableRuler = rulerSet().rulers().at(m_rulerMoveRulerIndex);
-					mutableRuler.setTimeStamp(ts);
+					mutableRuler.setTimeStamp(ts, trend().rulerSet().rulerStep());
 
 					update();
 				}
@@ -818,27 +846,51 @@ namespace TrendLib
 			//
 			for (TrendSignalParam tsp : signalsToScale)
 			{
-				double h = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
-				double l = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
+				bool ok = false;
 
-				if (fabs(h - l) < DBL_MIN)
+				double h = TrendScale::limitToScaleValue(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				double l = TrendScale::limitToScaleValue(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				double delta = std::fabs(h - l);
+				if (delta < DBL_MIN)
 				{
 					continue;
 				}
 
 				if (numSteps > 0)
 				{
-					h = h - (h - l) * 0.1;
-					l = l + (h - l) * 0.1;
+					h = h - delta * 0.1;
+					l = l + delta * 0.1;
 				}
 				else
 				{
-					h = h + (h - l) * 0.1;
-					l = l - (h - l) * 0.1;
+					h = h + delta * 0.1;
+					l = l - delta * 0.1;
 				}
 
-				tsp.setViewHighLimit(h);
-				tsp.setViewLowLimit(l);
+				double newHighLimit = TrendScale::limitFromScaleValue(h, scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				double newLowLimit = TrendScale::limitFromScaleValue(l, scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				tsp.setViewHighLimit(newHighLimit);
+				tsp.setViewLowLimit(newLowLimit);
 
 				signalSet().setSignalParam(tsp);
 				needUpdateWidget = true;
@@ -918,7 +970,7 @@ namespace TrendLib
 		double left = qMin(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 		double right = qMax(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 
-		if (fabs(right - left) * m_trendParam.dpiX() <= 1)
+		if (std::fabs(right - left) * m_trendParam.dpiX() <= 1)
 		{
 			// Value is way too small
 			//
@@ -973,7 +1025,7 @@ namespace TrendLib
 			double top = qMin(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 			double bottom = qMax(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 
-			if (fabs(bottom - top) * m_trendParam.dpiY() <= 1)
+			if (std::fabs(bottom - top) * m_trendParam.dpiY() <= 1)
 			{
 				// Value is way too small
 				//
@@ -986,10 +1038,21 @@ namespace TrendLib
 				//
 				QRectF signalRectTsp = tsp.tempDrawRect();
 
-				double highLimit = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
-				double lowLimit = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
+				bool ok = false;
 
-				if (fabs(highLimit - lowLimit) <= DBL_MIN ||
+				double highLimit = TrendScale::limitToScaleValue(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				double lowLimit = TrendScale::limitToScaleValue(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				if (std::fabs(highLimit - lowLimit) <= DBL_MIN ||
 					signalRectTsp.height() <= DBL_EPSILON)
 				{
 					// Div by zero possible
@@ -1003,6 +1066,18 @@ namespace TrendLib
 //				qint64 newLowLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight);
 				double newHighLimit = lowLimit + (signalRectTsp.bottom() - top) * coefHeight;
 				double newLowLimit = lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight;
+
+				newHighLimit = TrendScale::limitFromScaleValue(newHighLimit, scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
+
+				newLowLimit = TrendScale::limitFromScaleValue(newLowLimit, scaleType(), &ok);
+				if (ok == false)
+				{
+					continue;
+				}
 
 				tsp.setViewLowLimit(newLowLimit);
 				tsp.setViewHighLimit(newHighLimit);
@@ -1071,6 +1146,23 @@ namespace TrendLib
 	void TrendWidget::setViewMode(TrendViewMode value)
 	{
 		m_trendParam.setViewMode(value);
+		return;
+	}
+
+	TrendScaleType TrendWidget::scaleType() const
+	{
+		return m_trendParam.scaleType();
+	}
+
+	void TrendWidget::setScaleType(TrendScaleType value)
+	{
+		m_trendParam.setScaleType(value);
+		return;
+	}
+
+	void TrendWidget::validateViewLimits()
+	{
+		m_trend.validateViewLimits(m_trendParam);
 		return;
 	}
 

@@ -36,6 +36,7 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 include(../warnings.pri)
 
 SOURCES += \
+    ../lib/Address16.cpp \
     ../lib/CfgServerLoader.cpp \
 	../lib/MemLeaksDetection.cpp \
     ../lib/Tcp.cpp \
@@ -66,6 +67,7 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp
 
 HEADERS += \
+    ../lib/Address16.h \
     ../lib/CfgServerLoader.h \
 	../lib/MemLeaksDetection.h \
     ../lib/Tcp.h \

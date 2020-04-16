@@ -52,6 +52,12 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 		<SharedBuffer>false</SharedBuffer>
 	</OptoInterface>
+	<Lan>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>1</Place>
+		</LanController>
+	</Lan>
 
         <LogicUnitCommnads/>
 	

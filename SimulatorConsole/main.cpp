@@ -1,5 +1,18 @@
 #include <QCoreApplication>
 #include <QDebug>
+
+// For detecting memory leaks
+//
+#if defined (Q_OS_WIN) && defined (Q_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+   #ifndef DBG_NEW
+	  #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+	  #define new DBG_NEW
+   #endif
+#endif
+
+
 #include "../Simulator/Simulator.h"
 
 static QtMessageHandler originalMessageHandler = 0;
@@ -39,6 +52,12 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 
 int main(int argc, char *argv[])
 {
+#if defined (Q_OS_WIN) && defined(Q_DEBUG)
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	// To see all memory leaks, not only in the own code, comment the next line
+	prevHook = _CrtSetReportHook(reportingHook);
+#endif
+
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
 	QCoreApplication a(argc, argv);
@@ -47,7 +66,7 @@ int main(int argc, char *argv[])
 	//
 	Sim::Simulator simulator;
 
-	if (bool ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
+	if (bool ok = simulator.load("D:/Develop/Build/test_simulator_v312-debug/build");
 		ok == false)
 	{
 		return 1;
@@ -56,7 +75,7 @@ int main(int argc, char *argv[])
 	// Add modules to simulation
 	//
 	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
-	//simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
+	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
 
 	// Start simulation
 	//

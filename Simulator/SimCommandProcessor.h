@@ -9,7 +9,15 @@
 
 namespace Sim
 {
-	class DeviceCommand;
+	// Helper union to cast <pointer to member> to <raw data>
+	//
+	template<typename classT, typename memberT>
+	union u_ptm_cast
+	{
+		memberT classT::*pmember;
+		std::array<std::byte, 16> pvoid;
+	};
+
 
 	class CommandProcessor : public QObject, protected Output
 	{
@@ -27,6 +35,14 @@ namespace Sim
 		//
 		bool parseFunc(QString parseFunc, DeviceCommand* command);
 
+		virtual void cacheCommands(std::vector<DeviceCommand>* commands);
+
+		// Update platform interface, this function is called before work cyle,
+		// to update such platform inteface signals as Blink.
+		// Update mustb be done directly in RAM
+		//
+		virtual bool updatePlatformInterfaceState();
+
 		// Run simulation LM command, can throw SimException
 		//
 		virtual bool runCommand(const DeviceCommand& command);
@@ -40,12 +56,12 @@ namespace Sim
 		// Check if data in specific range
 		// Raise SimException if fail
 		//
-		void checkParamRange(int paramValue, int minValue, int maxValue, QString param) const;
+		void checkParamRange(int paramValue, int minValue, int maxValue, const QString& param) const;
 
 		// Check if data in specific range
 		// Raise SimException if fail
 		//
-		void checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, QString paramName = QString()) const;
+		void checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, const QString& paramName) const;
 
 		// Generation command string functions (helpers)
 		//
@@ -64,7 +80,7 @@ namespace Sim
 		static const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> m_lmToFactory;
 
 	protected:
-		ScriptDeviceEmulator m_device;
+		DeviceEmulator* m_device = nullptr;
 	};
 }
 

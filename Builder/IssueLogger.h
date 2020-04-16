@@ -362,8 +362,8 @@ namespace Builder
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema %1).
 		void errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID);			// UalSignal is not found for pin %1 (Logic schema %2).
 		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
-		void errALC5122(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB output (Logic schema %1).
-		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
+		void errALC5122(QUuid ualItemUuid, QString schemaID, QString itemLabel);		// Different busTypes on AFB output (Logic schema %1, item %2).
+		void errALC5123(QUuid ualItemUuid, QString schemaID, QString itemLabel);		// Different busTypes on AFB inputs (Logic schema %1, item %2).
 		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 		void errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID);	// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
 		void errALC5126(QUuid ualItemUuid, QString schemaID);							// Signal and bus inputs sizes are not multiples  (Logic schema %1).
@@ -384,7 +384,7 @@ namespace Builder
 		void errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID);	// Value of parameter %1.%2 must be in range %3 (Logic schema %4).
 		void errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID);	// Duplicate loopback source ID %1 (Logic schema %2).
 		void errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID);		// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
-		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID);	// Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
+		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QString schemaID);	// Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
 		void errALC5145(QString signalID, QUuid signalGuid, QString schemaID);			// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5147(QString signalID, QString lbID1, QString lbID2);				// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
@@ -414,7 +414,7 @@ namespace Builder
 						QString alreadyAssignedFlagSignalID,
 						QUuid itemUuid,
 						QString schemaID);					// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
-		void wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID);	// No flags assiged on set_flags item %1 (Schema %2)
+		void wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID);	// No flags assigned on set_flags item %1 (Schema %2)
 		void errALC5170(QString lmEquipmentID, QString appSignalID, QUuid itemUuid, QString schemaID);	// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 		void errALC5171(QString appSignalID, QString equipmentSignalID);				// Internal application signal %1 cannot be linked to equipment input/output signal %2.
 		void errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID);			// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
@@ -424,6 +424,7 @@ namespace Builder
 		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
 		void wrnALC5177(QString fbCaption, QString paramCaption, QUuid itemUuid, QString schemaID);		// Using value 0.0 for parameter %1.%2 is not recommend.
 		void wrnALC5178(QUuid constSignalItemUuid, QUuid setFalgsItemUuid, QString schemaID);		// Setting of flags to a constant signal (Logic schema %1).
+		void errALC5179(QString itemCaption, QString signalCaption, QUuid itemUuid, QString schemaID);	// Format of AFB signal %1 is not compatible with any known application signals format
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

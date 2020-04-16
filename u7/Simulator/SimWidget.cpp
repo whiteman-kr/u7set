@@ -9,6 +9,7 @@
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "../SimulatorTabPage.h"
+#include "./SimTrend/SimTrends.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -70,16 +71,21 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	connect(this, &SimWidget::needUpdateActions, this, &SimWidget::updateActions);
 
+	if (m_slaveWindow == false)
+	{
+		connect(qApp, &QCoreApplication::aboutToQuit, this, &SimWidget::aboutToQuit);
+	}
+
 	return;
 }
 
 SimWidget::~SimWidget()
 {
-	if (m_slaveWindow == false)
-	{
-		theSettings.m_simWigetState = saveState();
-		theSettings.writeUserScope();
-	}
+}
+
+void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
+{
+	SimTrends::startTrendApp(m_simulator, appSignals, this);
 }
 
 void SimWidget::createToolBar()
@@ -118,6 +124,11 @@ void SimWidget::createToolBar()
 	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
+	m_trendsAction = new QAction(QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this);
+	m_trendsAction->setEnabled(true);
+	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
+	connect(m_trendsAction, &QAction::triggered, this, &SimWidget::showTrends);
+
 	// --
 	//
 	m_toolBar->addAction(m_openProjectAction);
@@ -129,6 +140,16 @@ void SimWidget::createToolBar()
 	m_toolBar->addAction(m_runAction);
 	m_toolBar->addAction(m_pauseAction);
 	m_toolBar->addAction(m_stopAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_trendsAction);
+
+	// --
+	//
+	QWidget* trendsActionWidget = m_toolBar->widgetForAction(m_trendsAction);
+	assert(trendsActionWidget);
+
+	trendsActionWidget->setAcceptDrops(true);
 
 	return;
 }
@@ -175,7 +196,10 @@ void SimWidget::createDocks()
 	{
 		outputDock = new QDockWidget("Output", this);
 		outputDock->setObjectName("SimOutputWidget");
-		outputDock->setWidget(new SimOutputWidget(outputDock));
+
+		m_outputWidget = new SimOutputWidget(outputDock);
+
+		outputDock->setWidget(m_outputWidget);
 		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
@@ -231,6 +255,8 @@ void SimWidget::showEvent(QShowEvent* e)
 	QMainWindow::showEvent(e);
 	e->ignore();
 
+	m_showEventFired = true;
+
 static bool firstEvent = true;
 
 	if (firstEvent == true)
@@ -239,12 +265,29 @@ static bool firstEvent = true;
 		//
 		if (m_slaveWindow == false)
 		{
-			restoreState(theSettings.m_simWigetState);
+			QVariant v = QSettings().value("SimWidget/state");
+			if (v.isValid() == true)
+			{
+				restoreState(v.toByteArray());
+			}
 		}
 
 		firstEvent = false;
 	}
 	return;
+}
+
+void SimWidget::aboutToQuit()
+{
+	if (m_slaveWindow == false)
+	{
+		stopSimulation(true);
+	}
+
+	if (m_slaveWindow == false && m_showEventFired == true)
+	{
+		//QSettings().setValue("SimWidget/state", saveState());
+	}
 }
 
 void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
@@ -321,6 +364,7 @@ void SimWidget::closeBuild()
 	emit needUpdateActions();
 
 	SimBasePage::deleteAllPages();
+	m_outputWidget->clear();
 
 	return;
 }
@@ -328,6 +372,7 @@ void SimWidget::closeBuild()
 void SimWidget::refreshBuild()
 {
 	m_simulator->control().stop();
+	m_outputWidget->clear();
 
 	QString buildPath = m_simulator->buildPath();
 	if (buildPath.isEmpty() == true)
@@ -351,27 +396,30 @@ void SimWidget::runSimulation()
 
 	if (m_simulator->isLoaded() == false)
 	{
+		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
+		writeError("Cannot start simulation, project is not loaded.");
 		return;
 	}
 
 	if (m_simulator->isRunning() == true)
 	{
+		qDebug() << "SimWidget::runSimulation(): Simulation is already running";
 		return;
 	}
 
-	Sim::Control& control = m_simulator->control();
+	Sim::Control& mutableControl = m_simulator->control();
 
 	if (m_simulator->isPaused() == true)
 	{
 		// Continue running what was simualted before
 		//
-		control.startSimulation(control.duration());
+		mutableControl.startSimulation(mutableControl.duration());
 	}
 	else
 	{
 		// Star simulation for all project
 		//
-		control.reset();
+		mutableControl.reset();
 
 		// Get all modules to simulation
 		//
@@ -385,6 +433,7 @@ void SimWidget::runSimulation()
 
 		if (equipmentIds.isEmpty() == true)
 		{
+			writeWaning(tr("Nothing to simulate, no LogicModules are found."));
 			// Nothing to simulate
 			//
 			return;
@@ -392,8 +441,8 @@ void SimWidget::runSimulation()
 
 		// Start simulation
 		//
-		control.addToRunList(equipmentIds);
-		control.startSimulation();
+		mutableControl.addToRunList(equipmentIds);
+		mutableControl.startSimulation();
 	}
 
 	return;
@@ -419,7 +468,7 @@ void SimWidget::pauseSimulation()
 	return;
 }
 
-void SimWidget::stopSimulation()
+void SimWidget::stopSimulation(bool stopSimulationThread)
 {
 	qDebug() << "SimWidget::stopSimulation()";
 
@@ -436,6 +485,84 @@ void SimWidget::stopSimulation()
 
 	Sim::Control& control = m_simulator->control();
 	control.stop();
+
+	if (stopSimulationThread == true)
+	{
+		control.stopThread();
+	}
+
+	return;
+}
+
+void SimWidget::showTrends()
+{
+	// Get Trends list
+	//
+	std::vector<QString> trends = SimTrends::getTrendsList();
+
+	// Choose trend
+	//
+	QString trendToActivate;
+
+	if (trends.empty() == true)
+	{
+		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+	}
+	else
+	{
+		QMenu menu;
+
+		QAction* newTrendAction = menu.addAction("New Trend...");
+		newTrendAction->setData(QVariant::fromValue<int>(-1));		// Data -1 means, create new trend widget
+
+		menu.addSeparator();
+
+		for (size_t i = 0; i < trends.size(); i++)
+		{
+			QAction* a = menu.addAction(trends[i]);
+			Q_ASSERT(a);
+
+			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
+		}
+
+		QAction* triggeredAction = menu.exec(QCursor::pos());
+		if (triggeredAction == nullptr)
+		{
+			return;
+		}
+
+		QVariant data = triggeredAction->data();
+
+		bool ok = false;
+		int trendIndex = data.toInt(&ok);
+
+		if (trendIndex == -1)
+		{
+			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		}
+		else
+		{
+			if (ok == false || trendIndex < 0 || trendIndex >= static_cast<int>(trends.size()))
+			{
+				Q_ASSERT(ok == true);
+				Q_ASSERT(trendIndex >= 0 && trendIndex < static_cast<int>(trends.size()));
+				return;
+			}
+
+			trendToActivate = trends.at(trendIndex);
+		}	}
+
+	// Start new trend or activate chosen one
+	//
+	if (trendToActivate.isEmpty() == true)
+	{
+		std::vector<AppSignalParam> appSignals;
+		SimTrends::startTrendApp(m_simulator, appSignals, this);
+	}
+	else
+	{
+		SimTrends::activateTrendWindow(trendToActivate);
+	}
 
 	return;
 }
@@ -531,7 +658,7 @@ void SimWidget::openLogicSchemaTabPage(QString schemaId)
 
 	// Load schema
 	//
-	QString fileName = buildPath + QLatin1String("LogicSchemas/") + schemaId + "." + Db::File::AlFileExtension;
+	QString fileName = buildPath + QLatin1String("Schemas.als/") + schemaId + "." + Db::File::AlFileExtension;
 
 	openSchemaTabPage(fileName);
 	return;
@@ -624,6 +751,8 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 	QToolBar(title, parent)
 {
 	setMovable(false);
+	setAcceptDrops(true);
+
 	setObjectName("SimulatorToolBar");
 
 	setIconSize(iconSize() * 0.9);
@@ -636,3 +765,114 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 SimToolBar::~SimToolBar()
 {
 }
+
+void SimToolBar::dragEnterEvent(QDragEnterEvent* event)
+{
+	// Find Trend action
+	//
+	QWidget* trendActionWidget = nullptr;
+
+	QList<QAction*> allActions = actions();
+	for (QAction* a : allActions)
+	{
+		QVariant d = a->data();
+
+		if (d.isValid() &&
+			d.type() == QVariant::String)
+		{
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendActionWidget = widgetForAction(a);
+				trendActionWidget->setAcceptDrops(true);
+			}
+		}
+	}
+
+	if (trendActionWidget != nullptr &&
+		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void SimToolBar::dropEvent(QDropEvent* event)
+{
+	// Find Trend action
+	//
+	QWidget* trendActionWidget = nullptr;
+	QAction* trendAction = nullptr;
+
+
+	QList<QAction*> allActions = actions();
+
+	for (QAction* a : allActions)
+	{
+		QVariant d = a->data();
+		if (d.isValid() &&
+			d.type() == QVariant::String)
+		{
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendAction = a;
+				trendActionWidget = widgetForAction(trendAction);
+			}
+		}
+	}
+
+	if (trendAction != nullptr &&
+		trendActionWidget != nullptr &&
+		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		// Lets assume parent isManitorMainWindow
+		//
+		SimWidget* sw = dynamic_cast<SimWidget*>(this->parent());
+		if (sw == nullptr)
+		{
+			Q_ASSERT(sw);
+			return;
+		}
+
+		// Load data from drag and drop
+		//
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		std::vector<AppSignalParam> appSignals;
+		appSignals.reserve(protoSetMessage.appsignal_size());
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+		{
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				appSignals.push_back(appSignalParam);
+			}
+		}
+
+		if (appSignals.empty() == false)
+		{
+			sw->startTrends(appSignals);
+		}
+	}
+
+	return;
+}
+

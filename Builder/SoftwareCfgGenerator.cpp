@@ -23,7 +23,8 @@ namespace Builder
 		m_software(software),
 		m_signalSet(context->m_signalSet.get()),
 		m_equipment(context->m_equipmentSet.get()),
-		m_buildResultWriter(context->m_buildResultWriter.get())
+		m_buildResultWriter(context->m_buildResultWriter.get()),
+		m_log(context->m_log)
 	{
 		assert(context);
 	}
@@ -34,19 +35,12 @@ namespace Builder
 
 	bool SoftwareCfgGenerator::run()
 	{
-		if (m_dbController == nullptr ||
+		if (m_log == nullptr ||
+			m_dbController == nullptr ||
 			m_software == nullptr ||
 			m_signalSet == nullptr ||
 			m_equipment == nullptr ||
 			m_buildResultWriter == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		m_log = m_buildResultWriter->log();
-
-		if (m_log == nullptr)
 		{
 			assert(false);
 			return false;
@@ -129,7 +123,7 @@ namespace Builder
 
 		result &= buildSoftwareList(context->m_equipmentSet.get(), log);
 
-		result &= checkLmToSoftwareLinks(log);
+		result &= checkLmToSoftwareLinks(context);
 
 		// Add Schemas to Build result
 		//
@@ -339,6 +333,8 @@ namespace Builder
 			return true;
 		};
 
+		std::map<QString, VFrame30::SchemaDetailsSet> schemaDetails;	//	Key is subDir for schema
+
 		for (auto& [schemaId, fileSchema] : schemaMap)
 		{
 			std::shared_ptr<DbFile>& file = fileSchema.file;
@@ -397,9 +393,13 @@ namespace Builder
 			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
 				ok == false)
 			{
-
 				continue;
 			}
+
+			// Write schema details for SchemaDetails by folder (Schemas.als/mvs/ufb...)
+			//
+			VFrame30::SchemaDetailsSet& sds = schemaDetails[subDir];
+			sds.add(schema->details());
 
 			// Write schema scripts
 			//
@@ -430,6 +430,24 @@ namespace Builder
 			{
 				m_schemaTagToFile.insert({t.toLower(), schemaFile});
 			}
+		}
+
+		// Save
+		//		Schemas.als/SchemaDetails.pbuf
+		//		Schemas.ufb/SchemaDetails.pbuf
+		//		...
+		//
+		for (const auto&[subDir, sds] : schemaDetails)
+		{
+			QByteArray fileData;
+
+			if (bool ok = sds.saveToByteArray(&fileData);
+				ok == false)
+			{
+				continue;
+			}
+
+			context->m_buildResultWriter->addFile(subDir, "SchemaDetails.pbuf", fileData);
 		}
 
 		return returnResult;
@@ -634,28 +652,57 @@ namespace Builder
 	}
 
 
-	bool SoftwareCfgGenerator::checkLmToSoftwareLinks(IssueLogger* log)
+	bool SoftwareCfgGenerator::checkLmToSoftwareLinks(Context* context)
 	{
+		TEST_PTR_RETURN_FALSE(context);
+
+		IssueLogger* log = context->m_log;
+
+		TEST_PTR_RETURN_FALSE(log);
+
 		bool result = true;
 
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
-			for(int adapter = DataSource::LM_ETHERNET_ADAPTER1; adapter <= DataSource::LM_ETHERNET_ADAPTER3; adapter++)
+			std::shared_ptr<LmDescription> lmDescription = context->m_lmDescriptions->get(lm);
+
+			if (lmDescription == nullptr)
 			{
+				LOG_INTERNAL_ERROR_MSG(log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
+				result = false;
+				continue;
+			}
+
+			const LmDescription::Lan& lan = lmDescription->lan();
+
+			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+			{
+				bool ok = false;
+
 				DataSource::LmEthernetAdapterProperties adapterProperties;
 				Hardware::Software* software = nullptr;
 
-				result &= adapterProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, log);
+				result &= adapterProperties.getLmEthernetAdapterNetworkProperties(lm, lanController.m_place, lanController.m_type, log);
 
 				if (result == false)
 				{
-					break;
+					continue;
 				}
 
-				if (adapter ==  DataSource::LM_ETHERNET_ADAPTER1)
+				bool tuning = false;
+				bool appData = false;
+				bool diagData = false;
+
+				ok = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
+
+				if (ok == false)
 				{
-					// tuning adapter
-					//
+					assert(false);
+					continue;
+				}
+
+				if (tuning == true)
+				{
 					if (adapterProperties.tuningEnable == true)
 					{
 						if (adapterProperties.tuningServiceID.isEmpty() == true)
@@ -692,12 +739,9 @@ namespace Builder
 						}
 					}
 				}
-				else
-				{
-					// app and diag data adapter
 
-					// test appDataServiceID property
-					//
+				if (appData == true)
+				{
 					if (adapterProperties.appDataEnable == true)
 					{
 						if (adapterProperties.appDataServiceID.isEmpty() == true)
@@ -733,9 +777,10 @@ namespace Builder
 							}
 						}
 					}
+				}
 
-					// test diagDataServiceID property
-					//
+				if (diagData == true)
+				{
 					if (adapterProperties.diagDataEnable == true)
 					{
 						if (adapterProperties.diagDataServiceID.isEmpty() == true)

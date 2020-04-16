@@ -308,6 +308,21 @@
         <file>Upgrade0306.sql</file>
         <file>Upgrade0307.sql</file>
         <file>Upgrade0308.sql</file>
+        <file>Upgrade0309.sql</file>
+        <file>Upgrade0310.sql</file>
+        <file>Upgrade0311.sql</file>
+        <file>Upgrade0312.sql</file>
+        <file>Upgrade0313.sql</file>
+        <file>Upgrade0314.sql</file>
+        <file>Upgrade0315.sql</file>
+        <file>Upgrade0316.sql</file>
+        <file>Upgrade0317.sql</file>
+        <file>Upgrade0318.sql</file>
+        <file>Upgrade0319.sql</file>
+        <file>Upgrade0320.sql</file>
+        <file>Upgrade0321.sql</file>
+        <file>Upgrade0322.sql</file>
+        <file>Upgrade0323.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

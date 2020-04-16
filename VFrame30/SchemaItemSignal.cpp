@@ -43,6 +43,7 @@ namespace VFrame30
 		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
 		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(PropertyNames::analogFormat, PropertyNames::monitorCategory, true);
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::customText, &SchemaItemSignal::setCustomText>(PropertyNames::customText, PropertyNames::monitorCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::columnCount, &SchemaItemSignal::setColumnCount>(PropertyNames::columnCount, PropertyNames::monitorCategory, true);
 
 		createColumnProperties();
@@ -83,6 +84,7 @@ namespace VFrame30
 		signal->set_multiline(m_multiLine);
 		signal->set_precision(m_precision);
 		signal->set_analogformat(static_cast<int>(m_analogFormat));
+		signal->set_customtext(m_customText.toStdString());
 
 		for (const Column& c : m_columns)
 		{
@@ -149,6 +151,7 @@ namespace VFrame30
 		m_multiLine = signal.multiline();
 		m_precision = signal.precision();
 		m_analogFormat = static_cast<E::AnalogFormat>(signal.analogformat());
+		m_customText = QString::fromStdString(signal.customtext());
 
 		m_columns.resize(signal.columns_size());
 		for (int i = 0; i < signal.columns_size(); i++)
@@ -248,6 +251,7 @@ namespace VFrame30
 	}
 
 	QString SchemaItemSignal::getCoulumnText(CDrawParam* drawParam,
+											 const SchemaItem* schemaItem,
 											 const E::ColumnData& data,
 											 const AppSignalParam& signal,
 											 const AppSignalState& signalState,
@@ -381,6 +385,24 @@ namespace VFrame30
 				else
 				{
 					text = QLatin1String("0");
+				}
+			}
+			break;
+		case E::ColumnData::CustomText:
+			{
+				if (schemaItem != nullptr)
+				{
+					auto p = schemaItem->propertyByCaption(PropertyNames::customText);
+					Q_ASSERT(p);
+
+					if (p != nullptr)
+					{
+						text = p->value().toString();
+					}
+				}
+				else
+				{
+					Q_ASSERT(schemaItem);
 				}
 			}
 			break;
@@ -594,6 +616,7 @@ namespace VFrame30
 						for (int f = 0; f < signalIds.size(); f++)
 						{
 							QString text = getCoulumnText(drawParam,
+														  this,
 														  column.data,
 														  appSignals[f],
 														  appSignalStates[f],
@@ -623,6 +646,7 @@ namespace VFrame30
 						for (int f = 0; f < impactSignalIds.size(); f++)
 						{
 							QString text = getCoulumnText(drawParam,
+														  this,
 														  column.data,
 														  AppSignalParam{},
 														  AppSignalState{},
@@ -647,6 +671,7 @@ namespace VFrame30
 				else
 				{
 					QString text = getCoulumnText(drawParam,
+												  this,
 												  column.data,
 												  appSignals[i],
 												  appSignalStates[i],
@@ -844,6 +869,7 @@ namespace VFrame30
 			// Draw data
 			//
 			QString text = getCoulumnText(drawParam,
+										  this,
 										  c.data,
 										  signal,
 										  signalState,
@@ -1208,6 +1234,16 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	void SchemaItemSignal::setAnalogFormat(const E::AnalogFormat& value)
 	{
 		m_analogFormat = value;
+	}
+
+	QString SchemaItemSignal::customText() const
+	{
+		return m_customText;
+	}
+
+	void SchemaItemSignal::setCustomText(const QString& value)
+	{
+		m_customText = value;
 	}
 
 	int SchemaItemSignal::columnCount() const

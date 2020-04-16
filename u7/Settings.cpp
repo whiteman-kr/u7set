@@ -10,6 +10,45 @@
 Settings theSettings;
 
 //
+// QMap<QString,int> serialization stuff
+//
+
+#ifndef QT_NO_DATASTREAM
+QDataStream& operator<<(QDataStream &stream, const QMap<QString,int> &map)
+{
+	QMap<QString, int>::const_iterator i = map.constBegin();
+	while (i != map.constEnd())
+	{
+		if (i.key().isEmpty() == false)
+		{
+			stream << i.key() << i.value();
+		}
+		++i;
+	}
+	return stream;
+}
+
+QDataStream& operator>>(QDataStream &stream, QMap<QString,int> &map)
+{
+	QString key;
+	int value = 0;
+
+	map.clear();
+
+	while (!stream.atEnd())
+	{
+		stream >> key;
+		stream >> value;
+		if (key.isEmpty() == false)
+		{
+			map[key] = value;
+		}
+	}
+	return stream;
+}
+#endif
+
+//
 //	DatabaseConnectionParam
 //
 QString DatabaseConnectionParam::address() const
@@ -93,6 +132,7 @@ Settings::Settings() :
 	m_expertMode(false)
 {
     qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
+	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
 }
 
 Settings::~Settings()
@@ -129,11 +169,10 @@ void Settings::writeUserScope() const
 	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
     s.setValue("EquipmentTabPage/PropertiesSplitter/state", m_equipmentTabPagePropertiesSplitterState);
 	s.setValue("EquipmentTabPage/PropertiesTable/PropertiesMask", m_equipmentTabPagePropertiesMask);
+	s.setValue("EquipmentTabPage/PropertiesTable/ColumnsWidth", QVariant::fromValue(m_equipmentTabPagePropertiesColumnsWidth));
+	s.setValue("EquipmentTabPage/PropertiesTable/GroupByCategory", m_equipmentTabPagePropertiesGroupByCategory);
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
-
-	s.setValue("SimulatorTabPage/BuildDockSplitter", m_simBuildSplitter);
-	s.setValue("SimulatorTabPage/WidgetState", m_simWigetState);
 
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
@@ -178,13 +217,19 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItemPropertiesDialog/Splitter", m_schemaItemPropertiesSplitterPosition);
 	s.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_schemaItemPropertiesPropertyMask);
 	s.setValue("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows);
+	s.setValue("SchemaItemPropertiesDialog/ColumnsWidth", QVariant::fromValue(m_schemaItemPropertiesColumnsWidth));
+	s.setValue("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory);
 	s.setValue("SchemaItemPropertiesDialog/Geometry", m_schemaItemPropertiesGeometry);
+
+	s.setValue("IdePropertyEditor/findCompleter", m_findCompleter);
+	s.setValue("IdePropertyEditor/replaceCompleter", m_replaceCompleter);
 
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	s.setValue("m_infoMode", m_infoMode);
 
-	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
+	s.setValue("UploadTabPage/LeftSplitter/state", m_UploadTabPageLeftSplitterState);
+	s.setValue("UploadTabPage/RightSplitter/state", m_UploadTabPageRightSplitterState);
 
 	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
@@ -216,11 +261,10 @@ void Settings::loadUserScope()
         m_equipmentTabPagePropertiesSplitterState = 150;
 	}
 	m_equipmentTabPagePropertiesMask = s.value("EquipmentTabPage/PropertiesTable/PropertiesMask").toString();
+	m_equipmentTabPagePropertiesColumnsWidth = s.value("EquipmentTabPage/PropertiesTable/ColumnsWidth").value<QMap<QString,int>>();
+	m_equipmentTabPagePropertiesGroupByCategory = s.value("EquipmentTabPage/PropertiesTable/GroupByCategory", m_equipmentTabPagePropertiesGroupByCategory).toBool();
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
-
-	m_simBuildSplitter = s.value("SimulatorTabPage/BuildDockSplitter").toByteArray();
-	m_simWigetState = s.value("SimulatorTabPage/WidgetState").toByteArray();
 
     m_DialogTextEditorWindowPos = s.value("TextEditorProperties/pos", QPoint(-1, -1)).toPoint();
     m_DialogTextEditorWindowGeometry = s.value("TextEditorProperties/geometry").toByteArray();
@@ -298,15 +342,20 @@ void Settings::loadUserScope()
 
 	m_schemaItemPropertiesPropertyMask = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
 	m_schemaItemPropertiesExpandValuesToAllRows = s.value("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows).toBool();
+	m_schemaItemPropertiesColumnsWidth = s.value("SchemaItemPropertiesDialog/ColumnsWidth").value<QMap<QString,int>>();
+	m_schemaItemPropertiesGroupByCategory = s.value("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory).toBool();
 	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
 
 	//
+	m_findCompleter = s.value("IdePropertyEditor/findCompleter").toStringList();
+	m_replaceCompleter = s.value("IdePropertyEditor/replaceCompleter").toStringList();
 
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
 	m_infoMode = s.value("m_infoMode").toBool();
 
-	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
+	m_UploadTabPageLeftSplitterState = s.value("UploadTabPage/LeftSplitter/state").toByteArray();
+	m_UploadTabPageRightSplitterState = s.value("UploadTabPage/RightSplitter/state").toByteArray();
 
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();

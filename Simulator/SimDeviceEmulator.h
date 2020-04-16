@@ -13,6 +13,7 @@
 #include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
+#include "SimConnections.h"
 #include "SimAfb.h"
 #include "SimOverrideSignals.h"
 
@@ -25,7 +26,11 @@
 	#endif
 #endif
 
-#define FAULT(message) fault(message, __FUNCTION_NAME__);
+// class DeviceEmulator has function DeviceEmulator::fault
+// this is convenient call of this func
+//
+#define SIM_FAULT(message) fault(message, __FUNCTION_NAME__);
+
 
 namespace Sim
 {
@@ -56,6 +61,16 @@ namespace Sim
 		int programCounter = 0;					// current offeset of program memory, in words
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
+
+		union Flags
+		{
+			struct
+			{
+				quint32 cmp : 1;
+			};
+
+			quint32 value = 0;
+		} flags;
 	};
 
 
@@ -94,57 +109,17 @@ namespace Sim
 
 		quint32 m_dword0 = 0;			// Set in parse script
 		quint32 m_dword1 = 0;			// Set in parse script
-	};
 
-	//
-	// class DeviceEmulator script wrapper
-	//
-	class DeviceEmulator;
-
-	class ScriptDeviceEmulator
-	{
-	public:
-		explicit ScriptDeviceEmulator(DeviceEmulator* device);
-
-		// Script functins for AFB instances
+		// Specific data for specific CommandController
 		//
-public:
-		DeviceCommand* command(int index);
+		std::array<std::byte, 16> m_commandFuncPtr;	// This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_afbFuncPtr;		// This function can be called ONLY in in class and instance where it was initialized
 
-		quint16 appStartAddress() const;
-		void setAppStartAddress(quint16 value);
+		Ram::Handle m_memoryAreaFrom = std::numeric_limits<Ram::Handle>::max();
+		Ram::Handle m_memoryAreaTo = std::numeric_limits<Ram::Handle>::max();
 
-		Sim::CyclePhase phase() const;
-		void setPhase(Sim::CyclePhase value);
-
-		quint32 programCounter() const;
-		void setProgramCounter(quint32 value);
-
-		Sim::AfbComponent afbComponent(int opCode) const;
-		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
-
-		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
-
-		// RAM access
-		//
-		bool movRamMem(quint32 src, quint32 dst, quint32 size);
-
-		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
-		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
-
-		bool writeRamWord(quint32 offsetW, quint16 data);
-		quint16 readRamWord(quint32 offsetW);
-
-		bool writeRamDword(quint32 offsetW, quint32 data);
-		quint32 readRamDword(quint32 offsetW);
-
-		// Getting data from m_plainAppLogic
-		//
-		quint16 getWord(int wordOffset) const;
-		quint32 getDword(int wordOffset) const;
-
-	private:
-		DeviceEmulator* m_device = nullptr;
+		AfbComponentParam m_afbParam;
+		AfbComponentInstance* m_afbComponentInstance = nullptr;
 	};
 
 
@@ -159,16 +134,75 @@ public:
 		DeviceEmulator();
 		virtual ~DeviceEmulator();
 
+	public:
 		bool clear();
 		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
 				  const Eeprom& confEeprom,
-				  const Eeprom& appLogicEeprom);
+				  const Eeprom& appLogicEeprom,
+				  const Connections& connections);
 
 		bool reset();
-		bool run(int cycles = -1);
+		bool run(int cycles = -1, std::chrono::microseconds currentTime = std::chrono::microseconds{0});
 
+		//	Public methods to access from simulation commands
+		//
+	public:
+		DeviceCommand* command(int index);
+
+		quint16 appStartAddress() const;
+		void setAppStartAddress(quint16 value);
+
+		Sim::CyclePhase phase() const;
+		void setPhase(Sim::CyclePhase value);
+
+		quint32 programCounter() const;
+		void setProgramCounter(quint32 value);
+
+		quint32 flagCmp() const;
+		void setFlagCmp(quint32 value);
+
+		Sim::AfbComponent afbComponent(int opCode) const;
+		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
+
+		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
+		bool setAfbParam(int afbOpCode, int instanceNo, AfbComponentParam&& param);
+
+		// RAM access
+		//
+		bool movRamMem(quint32 src, quint32 dst, quint32 size);
+		bool setRamMem(quint32 address, quint16 data, quint16 size);
+
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data);
+		bool writeRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo, quint16 data);
+
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo);
+		quint16 readRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo);
+
+		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data, E::LogicModuleRamAccess access);
+		quint16 readRamBit(quint32 offsetW, quint16 bitNo, E::LogicModuleRamAccess access);
+
+		bool writeRamWord(quint32 offsetW, quint16 data);
+		bool writeRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 data);
+
+		quint16 readRamWord(quint32 offsetW);
+		quint16 readRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW);
+
+		bool writeRamDword(quint32 offsetW, quint32 data);
+		bool writeRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW, quint32 data);
+
+		quint32 readRamDword(quint32 offsetW);
+		quint32 readRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW);
+
+		// Getting data from m_plainAppLogic
+		//
+		quint16 getWord(int wordOffset) const;
+		quint32 getDword(int wordOffset) const;
+
+
+		// --
+		//
 	private:
 		bool initMemory();
 		bool initEeprom();
@@ -179,26 +213,27 @@ public:
 		//void pause();
 		//void start(int cycles);
 
-	private:
+	public:
 		void fault(QString reasone, QString func);
 
+	private:
 		//virtual void timerEvent(QTimerEvent* event) override;
 
 		bool processStartMode();
 		bool processFaultMode();
 
-		bool processOperate();
+		bool processOperate(std::chrono::microseconds currentTime);
 
 		bool runCommand(DeviceCommand& deviceCommand);
+
+		bool receiveConnectionsData(std::chrono::microseconds currentTime);
+		bool sendConnectionsData(std::chrono::microseconds currentTime);
 
 	private:
 		// Getting data from m_plainAppLogic
 		//
-		quint16 getWord(int wordOffset);
-		quint32 getDword(int wordOffset);
-
 		template <typename TYPE>
-		TYPE getData(int eepromOffset);
+		TYPE getData(int eepromOffset) const;
 
 	signals:
 		void appCodeParsed(bool ok);
@@ -207,7 +242,7 @@ public:
 		// Props
 		//
 	public:
-		QString equpimnetId() const;
+		const QString& equipmentId() const;
 
 		Hardware::LogicModuleInfo logicModuleInfo() const;
 		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
@@ -221,9 +256,9 @@ public:
 
 		const Ram& ram() const;
 
+		// Data
+		//
 	private:
-		friend class ScriptDeviceEmulator;
-
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 
@@ -231,19 +266,21 @@ public:
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 
-		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
-		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
-		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
+		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
+		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
+		Eeprom m_appLogicEeprom = Eeprom(UartId::ApplicationLogic);
 
 		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
+		QByteArray m_plainTuningData;		// Just Tuning data for specific m_logicModuleNumber and cleaned CRCs
 
 		// Current state
 		//
 		DeviceMode m_currentMode = DeviceMode::Start;
-		std::atomic<int> m_timerId = -1;
+		//std::atomic<int> m_timerId = -1;
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
+		std::vector<ConnectionPtr> m_connections;
 
 		std::vector<DeviceCommand> m_commands;
 		std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands

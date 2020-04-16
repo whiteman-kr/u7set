@@ -4,7 +4,6 @@
 #include <array>
 #include <bitset>
 #include <memory>
-#include <QColor>
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
@@ -17,6 +16,8 @@ namespace Proto
 	class TrendSignalParam;
 	class TrendSignalSet;
 }
+
+using TrendColor = quint32;		// This is QRgb, the problem is this header is used buy othe libs without GUI (simulator)
 
 namespace TrendLib
 {
@@ -100,7 +101,7 @@ namespace TrendLib
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t RecomendedSize = 1024;
+		static const size_t RecomendedSize = 1600;			// TrendStateItem is about 36-40 bytes, 1600 is abou 64KB
 
 		// Serialization
 		//
@@ -210,8 +211,8 @@ namespace TrendLib
 		double viewLowLimit() const;
 		void setViewLowLimit(double value);
 
-		QColor color() const;
-		void setColor(const QColor& value);
+		TrendColor color() const;
+		void setColor(const TrendColor& value);
 
 		// Temporary variables properties
 		//
@@ -241,7 +242,7 @@ namespace TrendLib
 		double m_viewHighLimit = 1.0;	// Current view limits for the signals
 		double m_viewLowLimit = 0;
 
-		QColor m_color = qRgb(0, 0, 0);
+		TrendColor m_color = 0xFF000000;	// Black color
 
 		// Temporary variables used in drawing
 		//
@@ -271,6 +272,8 @@ namespace TrendLib
 		std::vector<TrendLib::TrendSignalParam> trendSignals() const;
 		std::vector<TrendLib::TrendSignalParam> analogSignals() const;
 		std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
+
+		std::vector<Hash> trendSignalsHashes(const QString& equipmentId = QString()) const;
 
 		int discretesSignalsCount() const;
 		int analogSignalsCount() const;

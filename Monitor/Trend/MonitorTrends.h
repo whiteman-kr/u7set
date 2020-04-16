@@ -13,7 +13,9 @@ class MonitorTrends
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
+	static bool startTrendApp(MonitorConfigController* configController,
+							  const std::vector<AppSignalParam>& appSignals,
+							  QWidget* parent);
 
 	static void registerTrendWindow(QString name, MonitorTrendsWidget* window);
 	static void unregisterTrendWindow(QString name);
@@ -26,7 +28,9 @@ private:
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
-	MonitorTrendsWidget(MonitorConfigController* configController, QWidget* parent);
+	MonitorTrendsWidget(IAppSignalManager* appSignalManager,
+						MonitorConfigController* configController,
+						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
 protected:
@@ -52,6 +56,7 @@ protected slots:
 	// Data
 	//
 private:
+	IAppSignalManager* m_appSignalManager = nullptr;
 	MonitorConfigController* m_configController = nullptr;
 
 	ConfigConnection m_archiveService1;

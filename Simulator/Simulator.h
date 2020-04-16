@@ -11,6 +11,7 @@
 #include "SimAppSignalManager.h"
 #include "SimTuningSignalManager.h"
 #include "SimOverrideSignals.h"
+#include "SimConnections.h"
 
 class QTextStream;
 
@@ -39,6 +40,7 @@ namespace Sim
 		bool loadFunc(QString buildPath);
 		bool loadFirmwares(QString buildPath);
 		bool loadLmDescriptions(QString buildPath);
+		bool loadConnectionsInfo(QString buildPath);
 		bool loadAppSignals(QString buildPath);
 
 	signals:
@@ -67,6 +69,8 @@ namespace Sim
 	private:
 		QString m_buildPath;
 		Hardware::ModuleFirmwareStorage m_firmwares;	// Loaded bts file
+
+		Sim::Connections m_connections;
 
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID

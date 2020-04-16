@@ -121,7 +121,7 @@ namespace Builder
 		return signalID.isEmpty() == false && signalID != Bus::INVALUD_BUS_SIGNAL_ID;
 	}
 
-	QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
+	const QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
 	VFrame30::BusSignal Bus::m_invalidBusSignal;
 	BusSignal Bus::m_invalidSignal;
 
@@ -138,15 +138,11 @@ namespace Builder
 
 	bool Bus::init()
 	{
-		if (m_log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_log);
 
 		m_signals.clear();
 
-		if (m_srcBus.autoSignalPlacement() == false && (m_srcBus.manualBusSize() % WORD_SIZE_IN_BYTES) != 0)
+		if (m_srcBus.enableManualBusSize() == true && (m_srcBus.manualBusSize() % WORD_SIZE_IN_BYTES) != 0)
 		{
 			// The bus size must be a multiple of 2 bytes (1 word)
 			//
@@ -156,9 +152,9 @@ namespace Builder
 
 		if (m_srcBus.busSignals().size() == 0)
 		{
-			if (m_srcBus.autoSignalPlacement() == false)
+			if (m_srcBus.enableManualBusSize() == true)
 			{
-				m_sizeW = m_srcBus.manualBusSize();
+				m_sizeW = m_srcBus.manualBusSize() / WORD_SIZE_IN_BYTES;
 			}
 			else
 			{
@@ -172,31 +168,26 @@ namespace Builder
 
 		bool result = buildInBusSignalsMap();
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		if (m_srcBus.autoSignalPlacement() == true)
 		{
-			result = placeSignals();
+			result = autoPlaceSignals();
 		}
 		else
 		{
 			result = buildSignalsOrder();
 		}
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
+
+		result = calcBusSizeW();
+
+		RETURN_IF_FALSE(result);
 
 		result = checkSignalsOffsets();
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		buildSignalIndexesArrays();
 
@@ -227,10 +218,12 @@ namespace Builder
 		QString separator("-------------------------------------------------------------------");
 
 		list.append(separator);
-		list.append(QString("BusTypeID:\t\t%1").arg(m_srcBus.busTypeId()));
-		list.append(QString("AutoSignalPlacement:\t%1").arg(m_srcBus.autoSignalPlacement() == true ? "True" : "False"));
-		list.append(QString("BusSizeW:\t\t%1").arg(m_sizeW));
-		list.append(QString("Signals:\t\t%1").arg(m_signals.count()));
+		list.append(QString("BusTypeID:\t\t\t%1").arg(m_srcBus.busTypeId()));
+		list.append(QString("AutoSignalPlacement:\t\t%1").arg(m_srcBus.autoSignalPlacement() == true ? "True" : "False"));
+		list.append(QString("EnableManualBusSize:\t\t%1").arg(m_srcBus.enableManualBusSize() == true ? "True" : "False"));
+		list.append(QString("ManualBusSize (in bytes):\t%1").arg(m_srcBus.manualBusSize()));
+		list.append(QString("BusSizeW:\t\t\t%1").arg(m_sizeW));
+		list.append(QString("Signals:\t\t\t%1").arg(m_signals.count()));
 		list.append(separator);
 
 		if (m_signals.count() == 0)
@@ -332,7 +325,7 @@ namespace Builder
 		bool hasAnalogSignals = false;
 		bool hasDiscreteSignals = false;
 
-		for(int i = 0; i < busSignals.size(); i++)
+		for(int i = 0; i < static_cast<int>(busSignals.size()); i++)
 		{
 			const VFrame30::BusSignal& busSignal = busSignals[i];
 
@@ -406,16 +399,9 @@ namespace Builder
 		return true;
 	}
 
-	bool Bus::placeSignals()
+	bool Bus::autoPlaceSignals()
 	{
 		assert(m_srcBus.autoSignalPlacement() == true);
-
-		// calculate bus sizeW
-		//
-		int discreteSignalsCount = 0;
-
-		int analogSignalsSizeBit = 0;
-		int busSignalsSizeBit = 0;
 
 		QStringList analogSignals;
 		QStringList busSignals;
@@ -434,8 +420,6 @@ namespace Builder
 					m_log->errALC5094(busSignal.signalId(), m_srcBus.busTypeId());
 					return false;
 				}
-
-				analogSignalsSizeBit += (busSignal.inbusAnalogSize());
 
 				analogSignals.append(busSignal.signalId());
 
@@ -457,14 +441,12 @@ namespace Builder
 						return false;
 					}
 
-					busSignalsSizeBit += busSizeBits;
 					busSignals.append(busSignal.signalId());
 				}
 				break;
 
 			case E::SignalType::Discrete:
 
-				discreteSignalsCount++;
 				discreteSignals.append(busSignal.signalId());
 
 				break;
@@ -474,21 +456,6 @@ namespace Builder
 				LOG_INTERNAL_ERROR(m_log);
 				return false;
 			}
-		}
-
-		// bus size calculation
-		//
-		assert((analogSignalsSizeBit % SIZE_16BIT) == 0);
-
-		m_sizeW = analogSignalsSizeBit / SIZE_16BIT;
-
-		m_sizeW += busSignalsSizeBit / SIZE_16BIT;
-
-		m_sizeW += discreteSignalsCount / SIZE_16BIT;
-
-		if ((discreteSignalsCount % SIZE_16BIT) != 0)
-		{
-			m_sizeW++;
 		}
 
 		// signals ordering by alphabet
@@ -541,16 +508,6 @@ namespace Builder
 	bool Bus::buildSignalsOrder()
 	{
 		assert(m_srcBus.autoSignalPlacement() == false);
-
-		if ((m_srcBus.manualBusSize() % WORD_SIZE_IN_BYTES) != 0)
-		{
-			// Bus size must be multiple of 2 bytes (bus type %1).
-			//
-			m_log->errALC5099(m_srcBus.busTypeId());
-			return false;
-		}
-
-		m_sizeW = m_srcBus.manualBusSize() / WORD_SIZE_IN_BYTES;
 
 		QVector<QPair<QString, int>> inBusSignals;		// QPair<busSignalID, signalBitAddressInBus>
 
@@ -633,14 +590,6 @@ namespace Builder
 				return false;
 			}
 
-			if (inBusAddr.bitAddress() + signalSizeBits > m_sizeW * WORD_SIZE)
-			{
-				// Bus input signal %1 placement is out of bus size (bus type %2).
-				//
-				m_log->errALC5152(busSignal.signalId(), m_srcBus.busTypeId());
-				return false;
-			}
-
 			inBusSignals.append(QPair<QString, int>(busSignal.signalId(), inBusAddr.bitAddress()));
 		}
 
@@ -698,6 +647,23 @@ namespace Builder
 		return true;
 	}
 
+	bool Bus::calcBusSizeW()
+	{
+		if (m_srcBus.enableManualBusSize() == true)
+		{
+			m_sizeW = m_srcBus.manualBusSize() / WORD_SIZE_IN_BYTES;
+			return true;
+		}
+
+		const BusSignal& lastBusSignal = m_signals.last();
+
+		int busSizeBits = lastBusSignal.inbusAddr.bitAddress() + lastBusSignal.inbusSizeBits;
+
+		m_sizeW = busSizeBits / SIZE_16BIT + ((busSizeBits % SIZE_16BIT) == 0 ? 0 : 1);
+
+		return true;
+	}
+
 	bool Bus::checkSignalsOffsets()
 	{
 		bool result = true;
@@ -705,6 +671,22 @@ namespace Builder
 		int count = m_signals.count();
 
 		int maxBitAddress = m_sizeW * SIZE_16BIT;
+
+		// check signals overlapping
+		//
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if(m_signals[i].isOverlaped(m_signals[k]) == true)
+				{
+					// Bus signals '%1' and '%2' are overlapped (bus type '%3').
+					//
+					m_log->errALC5097(m_signals[i].signalID, m_signals[k].signalID, m_srcBus.busTypeId());
+					result = false;
+				}
+			}
+		}
 
 		// check signals offsets
 		//
@@ -721,21 +703,13 @@ namespace Builder
 				m_log->errALC5098(s.signalID, m_srcBus.busTypeId());
 				result = false;
 			}
-		}
 
-		// check signals overlapping
-		//
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
+			if (signalBitAddr + s.inbusSizeBits > maxBitAddress)
 			{
-				if(m_signals[i].isOverlaped(m_signals[k]) == true)
-				{
-					// Bus signals '%1' and '%2' are overlapped (bus type '%3').
-					//
-					m_log->errALC5097(m_signals[i].signalID, m_signals[k].signalID, m_srcBus.busTypeId());
-					result = false;
-				}
+				// Bus signal %1 placement is out of bus size (bus type %2).
+				//
+				m_log->errALC5152(s.signalID, m_srcBus.busTypeId());
+				result = false;
 			}
 		}
 
@@ -776,11 +750,11 @@ namespace Builder
 
 	VFrame30::BusSignal& Bus::getBusSignal(const QString& signalID)
 	{
-		assert(m_inBusSignalsMap.size() == m_srcBus.busSignals().size());
+		assert(m_inBusSignalsMap.size() == static_cast<int>(m_srcBus.busSignals().size()));
 
 		int index = m_inBusSignalsMap.value(signalID, -1);
 
-		if (index < 0 || index >= m_srcBus.busSignals().size())
+		if (index < 0 || index >= static_cast<int>(m_srcBus.busSignals().size()))
 		{
 			return m_invalidBusSignal;
 		}

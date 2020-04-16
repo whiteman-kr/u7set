@@ -630,16 +630,24 @@ namespace Builder
 		int errors = m_log->errorCount();
 		int warnings = m_log->warningCount();
 
-		msg = QString(tr("%1 building #%2 was finished. Errors - %3. Warnings - %4."))
+		msg = QString(tr("%1 build #%2 was finished. Errors - %3. Warnings - %4."))
 				.arg(m_buildInfo.release ? "RELEASE" : "DEBUG")
 				.arg(m_buildInfo.id).arg(errors).arg(warnings);
 
-		if (errors || warnings)
+		if (errors)
 		{
-			LOG_MESSAGE(m_log, msg);
+			m_log->writeError(msg, __FILE__, __LINE__, SHORT_FUNC_INFO);
 		}
 		else
 		{
+			if (warnings)
+			{
+				m_log->writeWarning0(QString("Compilation finished with warnings - %1").arg(warnings),
+									 __FILE__,
+									 __LINE__,
+									 SHORT_FUNC_INFO);
+			}
+
 			LOG_SUCCESS(m_log, msg);
 		}
 

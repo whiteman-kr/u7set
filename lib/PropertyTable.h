@@ -98,7 +98,7 @@ namespace ExtWidgets
 		~PropertyTableModel();
 
 		void clear();
-		void setTableObjects(std::vector<PropertyTableObject>& tableObjects);
+		void setTableObjects(std::vector<PropertyTableObject>& tableObjects, bool showCategory);
 
 		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
 		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
@@ -155,8 +155,16 @@ namespace ExtWidgets
 		QString propertyMask() const;
 		void setPropertyMask(const QString& propertyMask);
 
+		// Settings to store
+		//
 		bool expandValuesToAllRows() const;
 		void setExpandValuesToAllRows(bool value);
+
+		const QMap<QString, int>& getColumnsWidth();
+		void setColumnsWidth(const QMap<QString, int>& columnsWidth);
+
+		bool groupByCategory() const;
+		void setGroupByCategory(bool value);
 
 	protected:
 		virtual void valueChanged(const ModifiedObjectsData& modifiedObjectsData);
@@ -172,6 +180,7 @@ namespace ExtWidgets
 		void onShowErrorMessage (QString message);
 		void onPropertyMaskChanged();
 		void onTableContextMenuRequested(const QPoint &pos);
+		void onGroupByCategoryToggled(bool value);
 
 		// Context menu slots
 
@@ -202,15 +211,22 @@ namespace ExtWidgets
 		void addString(bool after);
 		void removeString();
 
+		void saveColumnsWidth();
+		void restoreColumnsWidth();
+
 	private:
 
 		PropertyTableView* m_tableView = nullptr;
 
 		QLineEdit* m_editPropertyMask = nullptr;
 
+		QPushButton* m_buttonGroupByCategory = nullptr;
+
 		PropertyTableProxyModel m_proxyModel;
 
 		PropertyTableModel m_tableModel;
+
+		QMap<QString, int> m_columnsWidth;
 
 		PropertyTableItemDelegate* m_itemDelegate = nullptr;
 

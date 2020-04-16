@@ -56,6 +56,8 @@ unix {
     INSTALLS += target
 }
 
+DEFINES += IS_BUILDER
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -101,10 +103,12 @@ SOURCES += \
     ../lib/LmDescription.cpp \
     ../lib/SocketIO.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/ConnectionsInfo.cpp \
     Builder.cpp \
     IssueLogger.cpp \
     BuildWorkerThread.cpp \
     BuildResultWriter.cpp \
+    Loopbacks.cpp \
     ModuleFirmwareWriter.cpp \
     Parser.cpp \
     SignalSet.cpp \
@@ -188,7 +192,9 @@ HEADERS += \
     ../lib/SocketIO.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../VFrame30/VFrame30Lib_global.h \
+    ../lib/ConnectionsInfo.h \
     Builder.h \
+    Loopbacks.h \
     Stable.h \
     IssueLogger.h \
     BuildWorkerThread.h \

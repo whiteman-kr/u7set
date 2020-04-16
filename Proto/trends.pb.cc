@@ -213,7 +213,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Trend));
   TrendParam_descriptor_ = file->message_type(8);
-  static const int TrendParam_offsets_[7] = {
+  static const int TrendParam_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, view_mode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, time_type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, lane_count_),
@@ -221,6 +221,7 @@ void protobuf_AssignDesc_trends_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, duration_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, back_color_1st_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, back_color_2nd_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, scale_type_),
   };
   TrendParam_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -339,13 +340,14 @@ void protobuf_AddDesc_trends_2eproto() {
     "Set\022!\n\006rulers\030\002 \003(\0132\021.Proto.TrendRuler\"["
     "\n\005Trend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.Tren"
     "dSignalSet\022\'\n\truler_set\030\003 \001(\0132\024.Proto.Tr"
-    "endRulerSet\"\245\001\n\nTrendParam\022\024\n\tview_mode\030"
+    "endRulerSet\"\274\001\n\nTrendParam\022\024\n\tview_mode\030"
     "\002 \001(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_c"
     "ount\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010dur"
     "ation\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016b"
-    "ack_color_2nd\030G \001(\r\"R\n\013TrendWidget\022\033\n\005tr"
-    "end\030\002 \001(\0132\014.Proto.Trend\022&\n\013trend_param\030\003"
-    " \001(\0132\021.Proto.TrendParam", 1223);
+    "ack_color_2nd\030G \001(\r\022\025\n\nscale_type\030\005 \001(\005:"
+    "\0010\"R\n\013TrendWidget\022\033\n\005trend\030\002 \001(\0132\014.Proto"
+    ".Trend\022&\n\013trend_param\030\003 \001(\0132\021.Proto.Tren"
+    "dParam", 1246);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "trends.proto", &protobuf_RegisterTypes);
   TrendStateRecord::default_instance_ = new TrendStateRecord();
@@ -2990,6 +2992,7 @@ const int TrendParam::kStartTimeFieldNumber;
 const int TrendParam::kDurationFieldNumber;
 const int TrendParam::kBackColor1StFieldNumber;
 const int TrendParam::kBackColor2NdFieldNumber;
+const int TrendParam::kScaleTypeFieldNumber;
 #endif  // !_MSC_VER
 
 TrendParam::TrendParam()
@@ -3015,6 +3018,7 @@ void TrendParam::SharedCtor() {
   duration_ = GOOGLE_LONGLONG(0);
   back_color_1st_ = 0u;
   back_color_2nd_ = 0u;
+  scale_type_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -3057,6 +3061,7 @@ void TrendParam::Clear() {
     duration_ = GOOGLE_LONGLONG(0);
     back_color_1st_ = 0u;
     back_color_2nd_ = 0u;
+    scale_type_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -3108,6 +3113,22 @@ bool TrendParam::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &lane_count_)));
           set_has_lane_count();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_scale_type;
+        break;
+      }
+
+      // optional int32 scale_type = 5 [default = 0];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_scale_type:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &scale_type_)));
+          set_has_scale_type();
         } else {
           goto handle_uninterpreted;
         }
@@ -3212,6 +3233,11 @@ void TrendParam::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->lane_count(), output);
   }
 
+  // optional int32 scale_type = 5 [default = 0];
+  if (has_scale_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->scale_type(), output);
+  }
+
   // optional fixed64 start_time = 50;
   if (has_start_time()) {
     ::google::protobuf::internal::WireFormatLite::WriteFixed64(50, this->start_time(), output);
@@ -3253,6 +3279,11 @@ void TrendParam::SerializeWithCachedSizes(
   // optional int32 lane_count = 4 [default = 1];
   if (has_lane_count()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->lane_count(), target);
+  }
+
+  // optional int32 scale_type = 5 [default = 0];
+  if (has_scale_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->scale_type(), target);
   }
 
   // optional fixed64 start_time = 50;
@@ -3333,6 +3364,13 @@ int TrendParam::ByteSize() const {
           this->back_color_2nd());
     }
 
+    // optional int32 scale_type = 5 [default = 0];
+    if (has_scale_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->scale_type());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -3381,6 +3419,9 @@ void TrendParam::MergeFrom(const TrendParam& from) {
     if (from.has_back_color_2nd()) {
       set_back_color_2nd(from.back_color_2nd());
     }
+    if (from.has_scale_type()) {
+      set_scale_type(from.scale_type());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3411,6 +3452,7 @@ void TrendParam::Swap(TrendParam* other) {
     std::swap(duration_, other->duration_);
     std::swap(back_color_1st_, other->back_color_1st_);
     std::swap(back_color_2nd_, other->back_color_2nd_);
+    std::swap(scale_type_, other->scale_type_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

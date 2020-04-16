@@ -458,6 +458,28 @@ namespace Builder
 		return m_appLogicItem.afbElement().caption().startsWith(MISMATCH_ITEM_CAPTION);
 	}
 
+	bool UalItem::assignFlags() const
+	{
+		const VFrame30::SchemaItemAfb* schemaItemAfb = dynamic_cast<const VFrame30::SchemaItemAfb*>(m_appLogicItem.m_fblItem.get());
+
+		if (schemaItemAfb == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		std::optional<bool> result = schemaItemAfb->getAssignFlagsValue();
+
+		if (result.has_value() == true)
+		{
+			return result.value();
+		}
+
+		assert(false);			// AssignFlags property isn't exist in schemaItemAfb
+								// Why assignFlags() has been called fot this schemaItemAfb ???
+		return false;
+	}
+
 	E::UalItemType UalItem::type() const
 	{
 		if (m_type != E::UalItemType::Unknown)
@@ -1205,66 +1227,6 @@ namespace Builder
 		return true;
 	}
 
-/*	bool UalSignal::createOptoSignal(const UalItem* ualItem,
-									Signal* templateSignal,
-									const QString& lmEquipmentID,
-									BusShared bus,
-									bool isBusChildSignal,
-									IssueLogger* log)
-	{
-		if (ualItem == nullptr || templateSignal == nullptr || log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (templateSignal->lm() == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);
-			return false;
-		}
-
-		// Opto UalSignal creation from receiver
-		//
-		m_ualItem = ualItem;
-		m_bus = bus;
-
-		m_isOptoSignal = true;
-
-		Signal* refSignal = nullptr;
-
-		// native copy of templateSignal is created if:
-		//
-		// 1) templateSignal is not native for current LM
-		// 2) templateSignal is native but it is bus child signal
-		//
-
-		bool needToCreateNativeCopy = (lmEquipmentID != templateSignal->lm()->equipmentIdTemplate()) ||
-									  (lmEquipmentID == templateSignal->lm()->equipmentIdTemplate() && isBusChildSignal == true);
-
-		if (needToCreateNativeCopy == true)
-		{
-			refSignal = createNativeCopyOfSignal(templateSignal, lmEquipmentID);
-
-			TEST_PTR_RETURN_FALSE(refSignal);
-		}
-		else
-		{
-			refSignal = templateSignal;
-		}
-
-		// reset signal addresses to invalid state
-		// ualAddr of opto signal should be set later in setOptoUalSignalsAddresses()
-		//
-		refSignal->resetAddresses();
-
-		appendRefSignal(refSignal, true);
-
-		setComputed();
-
-		return true;
-	}*/
-
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
 											Signal* busSignal,
 											Builder::BusShared bus,
@@ -1624,25 +1586,30 @@ namespace Builder
 		m_isOptoSignal = true;
 	}
 
-	void UalSignal::setLoopbackID(const QString& loopbackID)
+	void UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
-		if (m_loopbackID.isEmpty() == false)
+		if (m_loopback != nullptr)
 		{
-			assert(false);				// reassigning of m_loopbackSourceID, why?
+			assert(false);				// reassigning of loopback, why?
 		}
 
-		m_loopbackID = loopbackID;
+		m_loopback = loopback;
+	}
+
+	std::shared_ptr<Loopback> UalSignal::loopback() const
+	{
+		return m_loopback;
 	}
 
 	QString UalSignal::loopbackID() const
 	{
-		if (m_loopbackID.isEmpty() == true)
+		if (m_loopback == nullptr)
 		{
 			assert(false);
 			return QString();
 		}
 
-		return m_loopbackID;
+		return m_loopback->loopbackID();
 	}
 
 	E::SignalType UalSignal::constType() const
@@ -1981,6 +1948,15 @@ namespace Builder
 		return ids.join(", ");
 	}
 
+	QString UalSignal::refSignalIDsJoined(const QString& separator) const
+	{
+		QStringList ids;
+
+		refSignalIDs(&ids);
+
+		return ids.join(separator);
+	}
+
 	QStringList UalSignal::acquiredRefSignalsIDs() const
 	{
 		QStringList list;
@@ -2301,13 +2277,23 @@ namespace Builder
 
 	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal)
 	{
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
 		E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::SignedInt32;
 
 		bool result = getAnalogFormat(templateOutAfbSignal, &analogFormat);
 
 		if (result == false)
 		{
-			LOG_INTERNAL_ERROR(m_log);
+			// Format of AFB signal %1 is not compatible with any known application signals format
+			//
+			m_log->errALC5179(ualItem->caption(), templateOutAfbSignal.caption(), ualItem->guid(), ualItem->schemaID());
+
 			return nullptr;
 		}
 
@@ -2318,78 +2304,6 @@ namespace Builder
 	{
 		return privateCreateAutoSignal(ualItem, outPinUuid, templateSignal.signalType(), templateSignal.analogSignalFormat());
 	}
-
-/*	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem,
-											   Signal* s,
-											   const QString& lmEquipmentID,
-											   bool isBusChildSignal,
-											   QUuid outPinUuid)
-	{
-		// create opto signal
-		//
-		UalSignal* ualSignal = new UalSignal;
-
-		if (s == nullptr)
-		{
-			assert(false);
-			LOG_NULLPTR_ERROR(m_log);
-			return nullptr;
-		}
-
-		// opto signal can be Bus
-
-		BusShared bus;
-
-		if (s->isBus() == true)
-		{
-			bus = m_compiler.signalSet()->getBus(s->busTypeID());
-
-			if (bus == nullptr)
-			{
-				// Bus type ID '%1' of signal '%2' is undefined.
-				//
-				m_log->errALC5092(s->busTypeID(), s->appSignalID());
-				return nullptr;
-			}
-		}
-
-		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus, isBusChildSignal, m_log);
-
-		if (result == false)
-		{
-			delete ualSignal;
-			return nullptr;
-		}
-
-		result = insertNew(outPinUuid, ualSignal);
-
-		if (result == false)
-		{
-			delete ualSignal;
-			return nullptr;
-		}
-
-		if (ualSignal->isBus() == true)
-		{
-			const QVector<BusSignal>& busSignals = bus->busSignals();
-
-			for(const BusSignal& busSignal : busSignals)
-			{
-				Signal* templateSignal = m_compiler.signalSet()->createBusChildSignal(*ualSignal->signal(), bus, busSignal);
-
-				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, true, QUuid());
-
-				if (busChildSignal != nullptr)
-				{
-					ualSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
-				}
-
-				delete templateSignal;			// no longer nedded
-			}
-		}
-
-		return ualSignal;
-	}*/
 
 	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
 													Signal* s,
@@ -2899,28 +2813,33 @@ namespace Builder
 			return false;
 		}
 
-		if (afbSignal.isAnalog() == false)
+		switch(afbSignal.type())
 		{
-			return true;
-		}
+		case E::SignalType::Analog:
 
-		if (afbSignal.dataFormat() == E::DataFormat::Float && afbSignal.size() == SIZE_32BIT)
-		{
-			*analogFormat = E::AnalogAppSignalFormat::Float32;
-		}
-		else
-		{
+			if (afbSignal.dataFormat() == E::DataFormat::Float && afbSignal.size() == SIZE_32BIT)
+			{
+				*analogFormat = E::AnalogAppSignalFormat::Float32;
+				return true;
+			}
+
 			if (afbSignal.dataFormat() == E::DataFormat::SignedInt && afbSignal.size() == SIZE_32BIT)
 			{
 				*analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+				return true;
 			}
-			else
-			{
-				return false;
-			}
+
+			return false;
+
+		case E::SignalType::Discrete:
+		case E::SignalType::Bus:
+
+			return true;
+
+		default:
+			;
 		}
 
-		return true;
+		return false;
 	}
-
 }

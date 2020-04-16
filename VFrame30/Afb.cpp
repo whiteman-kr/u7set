@@ -4,7 +4,7 @@
 namespace Afb
 {
 
-	AfbComponentPin::AfbComponentPin(const QString caption, int opIndex, AfbComponentPinType type) :
+	AfbComponentPin::AfbComponentPin(const QString& caption, int opIndex, AfbComponentPinType type) :
 		m_caption(caption),
 		m_opIndex(opIndex),
 		m_type(type)
@@ -86,46 +86,6 @@ namespace Afb
 		return false;
 	}
 
-	QString AfbComponentPin::caption() const
-	{
-		return m_caption;
-	}
-
-	void AfbComponentPin::setCaption(const QString& value)
-	{
-		m_caption = value;
-	}
-
-	int AfbComponentPin::opIndex() const
-	{
-		return m_opIndex;
-	}
-
-	void AfbComponentPin::setOpIndex(int value)
-	{
-		m_opIndex = value;
-	}
-
-	AfbComponentPinType AfbComponentPin::type() const
-	{
-		return m_type;
-	}
-
-	void AfbComponentPin::setType(AfbComponentPinType value)
-	{
-		m_type = value;
-	}
-
-	bool AfbComponentPin::isInputOrParam() const
-	{
-		return	m_type == AfbComponentPinType::Input ||
-				m_type == AfbComponentPinType::Param;
-	}
-
-	bool AfbComponentPin::isOutput() const
-	{
-		return	m_type == AfbComponentPinType::Output;
-	}
 
 	//
 	//				AfbComponent
@@ -144,6 +104,7 @@ namespace Afb
 		m_simulationFunc = that.m_simulationFunc;
 
 		m_pins = that.m_pins;
+		m_pinExists = that.m_pinExists;
 
 		return;
 	}
@@ -220,6 +181,7 @@ namespace Afb
 		{
 			QDomElement p = xmlElement.firstChildElement(QLatin1String("Pin"));
 			m_pins.clear();
+			m_pinExists.clear();
 
 			while (p.isNull() == false)
 			{
@@ -235,6 +197,13 @@ namespace Afb
 				}
 
 				m_pins[pin.opIndex()] = pin;
+
+				if (static_cast<size_t>(pin.opIndex()) >= m_pinExists.size())
+				{
+					m_pinExists.resize(pin.opIndex() + 1);
+				}
+
+				m_pinExists[pin.opIndex()] = true;
 
 				p = p.nextSiblingElement(QLatin1String("Pin"));
 			}
@@ -252,87 +221,87 @@ namespace Afb
 		return false;
 	}
 
-	int AfbComponent::opCode() const
-	{
-		return m_opCode;
-	}
+//	int AfbComponent::opCode() const
+//	{
+//		return m_opCode;
+//	}
 
-	void AfbComponent::setOpCode(int value)
-	{
-		m_opCode = value;
-	}
+//	void AfbComponent::setOpCode(int value)
+//	{
+//		m_opCode = value;
+//	}
 
-	QString AfbComponent::caption() const
-	{
-		return m_caption;
-	}
+//	const QString& AfbComponent::caption() const
+//	{
+//		return m_caption;
+//	}
 
-	void AfbComponent::setCaption(const QString& value)
-	{
-		m_caption = value;
-	}
+//	void AfbComponent::setCaption(const QString& value)
+//	{
+//		m_caption = value;
+//	}
 
-	int AfbComponent::impVersion() const
-	{
-		return m_impVersion;
-	}
+//	int AfbComponent::impVersion() const
+//	{
+//		return m_impVersion;
+//	}
 
-	void AfbComponent::setImpVersion(int value)
-	{
-		m_impVersion = value;
-	}
+//	void AfbComponent::setImpVersion(int value)
+//	{
+//		m_impVersion = value;
+//	}
 
-	int AfbComponent::versionOpIndex() const
-	{
-		return m_versionOpIndex;
-	}
+//	int AfbComponent::versionOpIndex() const
+//	{
+//		return m_versionOpIndex;
+//	}
 
-	void AfbComponent::setVersionOpIndex(int value)
-	{
-		m_versionOpIndex = value;
-	}
+//	void AfbComponent::setVersionOpIndex(int value)
+//	{
+//		m_versionOpIndex = value;
+//	}
 
-	int AfbComponent::maxInstCount() const
-	{
-		return m_maxInstCount;
-	}
+//	int AfbComponent::maxInstCount() const
+//	{
+//		return m_maxInstCount;
+//	}
 
-	void AfbComponent::setMaxInstCount(int value)
-	{
-		m_maxInstCount = value;
-	}
+//	void AfbComponent::setMaxInstCount(int value)
+//	{
+//		m_maxInstCount = value;
+//	}
 
-	QString AfbComponent::simulationFunc() const
-	{
-		return m_simulationFunc;
-	}
+//	const QString& AfbComponent::simulationFunc() const
+//	{
+//		return m_simulationFunc;
+//	}
 
-	void AfbComponent::setSimulationFunc(const QString& value)
-	{
-		m_simulationFunc = value;
-	}
+//	void AfbComponent::setSimulationFunc(const QString& value)
+//	{
+//		m_simulationFunc = value;
+//	}
 
-	const std::map<int, AfbComponentPin>& AfbComponent::pins() const
-	{
-		return m_pins;
-	}
+//	const std::unordered_map<int, AfbComponentPin>& AfbComponent::pins() const
+//	{
+//		return m_pins;
+//	}
 
-	bool AfbComponent::pinExists(int pinOpIndex) const
-	{
-		bool result = m_pins.find(pinOpIndex) != m_pins.end();
-		return result;
-	}
+//	bool AfbComponent::pinExists(int pinOpIndex) const
+//	{
+//		return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
+//				? false: m_pinExists[pinOpIndex];
+//	}
 
-	QString AfbComponent::pinCaption(int pinOpIndex) const
-	{
-		auto it = m_pins.find(pinOpIndex);
-		if (it != m_pins.end())
-		{
-			return it->second.caption();
-		}
+//	QString AfbComponent::pinCaption(int pinOpIndex) const
+//	{
+//		auto it = m_pins.find(pinOpIndex);
+//		if (it != m_pins.end())
+//		{
+//			return it->second.caption();
+//		}
 
-		return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
-	}
+//		return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+//	}
 
 	//
 	//							AfbSignal
@@ -341,9 +310,23 @@ namespace Afb
 	{
 	}
 
-	AfbSignal::AfbSignal(const AfbSignal& that)
+	AfbSignal::AfbSignal(const AfbSignal& that) : QObject(that.parent())
 	{
 		*this = that;
+	}
+
+	AfbSignal::AfbSignal(AfbSignal&& that) noexcept :
+		QObject(that.parent()),
+		m_opName(std::move(that.m_opName)),
+		m_caption(std::move(that.m_caption)),
+		m_type(that.m_type),
+		m_dataFormat(that.m_dataFormat),
+		m_operandIndex(that.m_operandIndex),
+		m_size(that.m_size),
+		m_additionalSizes(std::move(that.m_additionalSizes)),
+		m_byteOrder(that.m_byteOrder),
+		m_busDataFormat(that.m_busDataFormat)
+	{
 	}
 
 	AfbSignal::~AfbSignal()
@@ -363,12 +346,32 @@ namespace Afb
 		m_dataFormat = that.m_dataFormat;
 		m_operandIndex = that.m_operandIndex;
 		m_size = that.m_size;
+		m_additionalSizes = that.m_additionalSizes;
 		m_byteOrder = that.m_byteOrder;
 		m_busDataFormat = that.m_busDataFormat;
 
 		return *this;
 	}
 
+	AfbSignal& AfbSignal::operator=(AfbSignal&& that) noexcept
+	{
+		if (this == &that)
+		{
+			return *this;
+		}
+
+		m_opName = std::move(that.m_opName);
+		m_caption = std::move(that.m_caption);
+		m_type = that.m_type;
+		m_dataFormat = that.m_dataFormat;
+		m_operandIndex = that.m_operandIndex;
+		m_size = that.m_size;
+		m_additionalSizes = std::move(that.m_additionalSizes);
+		m_byteOrder = that.m_byteOrder;
+		m_busDataFormat = that.m_busDataFormat;
+
+		return *this;
+	}
 
 	bool AfbSignal::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
@@ -461,7 +464,29 @@ namespace Afb
 			return false;
 		}
 
-		m_size= xmlElement.attribute(QLatin1String("Size")).toInt();
+		m_size = xmlElement.attribute(QLatin1String("Size")).toInt();
+
+		// AdditionalSizes
+		//
+		if (xmlElement.hasAttribute(QLatin1String("AdditionalSizes")) == true)
+		{
+			QStringList str = xmlElement.attribute(QLatin1String("AdditionalSizes"))
+						  .split(",", QString::SkipEmptyParts);
+
+			m_additionalSizes.clear();
+			m_additionalSizes.reserve(str.size());
+
+			for (auto& s : str)
+			{
+				bool ok = false;
+				uint as = s.trimmed().toUInt(&ok);
+
+				if (ok == true)
+				{
+					m_additionalSizes.push_back(as);
+				}
+			}
+		}
 
 		// ByteOrder
 		//
@@ -536,6 +561,28 @@ namespace Afb
 		//
 		element->setAttribute(QLatin1String("Size"), m_size);
 
+		// AdditionalSizes
+		//
+		if (m_additionalSizes.empty() == false)
+		{
+			QString str;
+			str.reserve(static_cast<int>(m_additionalSizes.size()) * 4);
+
+			for (size_t i = 0; i < m_additionalSizes.size(); i++)
+			{
+				if (i == m_additionalSizes.size() - 1)
+				{
+					str += QString::number(m_additionalSizes[i]);
+				}
+				else
+				{
+					str += QString("%d, ").arg(m_additionalSizes[i]);
+				}
+			}
+
+			element->setAttribute(QLatin1String("AdditionalSizes"), str);
+		}
+
 		// ByteOrder
 		//
 		element->setAttribute(QLatin1String("ByteOrder"), E::valueToString(m_byteOrder));
@@ -559,14 +606,16 @@ namespace Afb
 
 	// Caption
 	//
-	QString AfbSignal::jsCaption()
-	{
-		return caption();
-	}
 	QString AfbSignal::caption() const
 	{
 		return m_caption;
 	}
+
+	QString AfbSignal::jsCaption()
+	{
+		return caption();
+	}
+
 	void AfbSignal::setCaption(const QString& caption)
 	{
 		m_caption = caption;
@@ -629,6 +678,29 @@ namespace Afb
 	void AfbSignal::setSize(int value)
 	{
 		m_size = value;
+	}
+
+	const std::vector<int>& AfbSignal::additionalSizes() const
+	{
+		return m_additionalSizes;
+	}
+
+	void AfbSignal::setAdditionalSizes(std::vector<int> value)
+	{
+		m_additionalSizes = std::move(value);
+	}
+
+	std::vector<int> AfbSignal::allSizes() const
+	{
+		// Returns size() and additionalSizes() as single vector
+		//
+		std::vector<int> result;
+		result.reserve(m_additionalSizes.size() + 1);
+
+		result.push_back(m_size);
+		std::copy(m_additionalSizes.begin(), m_additionalSizes.end(), std::back_inserter(result));
+
+		return result;
 	}
 
 	E::ByteOrder AfbSignal::byteOrder() const
@@ -1496,12 +1568,12 @@ namespace Afb
 		return m_changedScript;
 	}
 
-	void AfbParam::setChangedScript(const QString &value)
+	void AfbParam::setChangedScript(const QString& value)
 	{
 		m_changedScript = value.trimmed();
 	}
 
-	QString AfbParam::units() const
+	const QString& AfbParam::units() const
 	{
 		return m_units;
 	}
@@ -2175,6 +2247,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		for (AfbSignal& s : m_outputSignals)
 		{
 			if (s.operandIndex() == opIndex)
@@ -2182,6 +2255,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		return nullptr;
 	}
 
@@ -2202,8 +2276,8 @@ namespace Afb
 				return &s;
 			}
 		}
-		return nullptr;
 
+		return nullptr;
 	}
 
 	void AfbElement::updateParams(const std::vector<AfbParam>& params)
@@ -2229,6 +2303,8 @@ namespace Afb
 				newParams.push_back(p);
 			}
 		}
+
+		return;
 	}
 
 	// Properties and Data
@@ -2242,7 +2318,7 @@ namespace Afb
 		m_strId = strID;
 	}
 
-	QString AfbElement::caption() const
+	const QString& AfbElement::caption() const
 	{
 		return m_caption;
 	}
@@ -2251,7 +2327,7 @@ namespace Afb
 		m_caption = caption;
 	}
 
-	QString AfbElement::description() const
+	const QString& AfbElement::description() const
 	{
 		return m_description;
 	}
@@ -2261,7 +2337,7 @@ namespace Afb
 		m_description = value;
 	}
 
-	QString AfbElement::version() const
+	const QString& AfbElement::version() const
 	{
 		return m_version;
 	}
@@ -2271,7 +2347,7 @@ namespace Afb
 		m_version = value;
 	}
 
-	QString AfbElement::category() const
+	const QString& AfbElement::category() const
 	{
 		return m_category;
 	}

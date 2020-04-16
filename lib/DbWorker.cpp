@@ -326,6 +326,21 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0306.sql", "Upgrade to version 306, Added behavior file and properties for Monitor and TuningClient"},
 	{":/DatabaseUpgrade/Upgrade0307.sql", "Upgrade to version 307, Custom logo can be displayed in Monitor"},
 	{":/DatabaseUpgrade/Upgrade0308.sql", "Upgrade to version 308, Behavior file update"},
+	{":/DatabaseUpgrade/Upgrade0309.sql", "Upgrade to version 309, Add LAN section to LM description files"},
+	{":/DatabaseUpgrade/Upgrade0310.sql", "Upgrade to version 310, LAN section is modified in LM description files"},
+	{":/DatabaseUpgrade/Upgrade0311.sql", "Upgrade to version 311, Added AdditionSizes section to AFB bus_switch in LM description files"},
+	{":/DatabaseUpgrade/Upgrade0312.sql", "Upgrade to version 312, Removed outs med_in, max_in, min_in for median AFBs, set sim functions for AFBs"},
+	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags vesrion so it can be updated after new opcode 255"},
+	{":/DatabaseUpgrade/Upgrade0314.sql", "Upgrade to version 314, Added SetFlagsToInput property to simlock, mismatch_* AFB"},
+	{":/DatabaseUpgrade/Upgrade0315.sql", "Upgrade to version 315, SetFlagsToInput renamed to AssignFlags in simlock, mismatch_* AFB"},
+	{":/DatabaseUpgrade/Upgrade0316.sql", "Upgrade to version 316, AFB integrator and derive have min and max as inputs"},
+	{":/DatabaseUpgrade/Upgrade0317.sql", "Upgrade to version 317, Added MSO-4 preset and configuration script"},
+	{":/DatabaseUpgrade/Upgrade0318.sql", "Upgrade to version 318, Renamed MSO-4 preset and configuration files"},
+	{":/DatabaseUpgrade/Upgrade0319.sql", "Upgrade to version 319, dead_band AFB is removed from LM1_SR04"},
+	{":/DatabaseUpgrade/Upgrade0320.sql", "Upgrade to version 320, MSO-4 configuration script is modified"},
+	{":/DatabaseUpgrade/Upgrade0321.sql", "Upgrade to version 321, MSO-4 preset module family fix, pulse_gen_sync is removed from all LMs"},
+	{":/DatabaseUpgrade/Upgrade0322.sql", "Upgrade to version 322, Added AFB cod_rev to MSO-4"},
+	{":/DatabaseUpgrade/Upgrade0323.sql", "Upgrade to version 323, Rload_Ohm added to signal specific properties of AIM-4PH"},
 };
 
 int DbWorker::counter = 0;

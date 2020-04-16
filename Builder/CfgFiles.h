@@ -16,4 +16,7 @@ namespace Builder
 
 	const char* const FILE_METROLOGY_ITEMS_XML = "MetrologyItems.xml";
 	const char* const FILE_METROLOGY_SIGNAL_SET = "MetrologySignal.set";
+
+	const char* const FILE_CONNECTIONS_TXT = "Connections.txt";
+	const char* const FILE_CONNECTIONS_XML = "Connections.xml";
 }

@@ -143,6 +143,8 @@ namespace Builder
 		bool isSimLockItem() const;
 		bool isMismatchItem() const;
 
+		bool assignFlags() const;
+
 		E::UalItemType type() const;
 
 		bool hasRam() const { return afb().hasRam(); }
@@ -348,7 +350,7 @@ namespace Builder
 		bool calculate_DEAD_ZONE_paramValues();
 		bool calculate_DEAD_ZONE_paramValues_ldn4();
 		bool calculate_POL_paramValues();
-		bool calculate_DER_paramValues();
+		bool calculate_DERIV_paramValues();
 		bool calculate_MISMATCH_paramValues();
 		bool calculate_TCONV_paramValues();
 		bool calculate_INDICATION_paramValues();
@@ -396,6 +398,8 @@ namespace Builder
 	private:
 		int m_fbNumber = 1;
 	};
+
+	class Loopback;
 
 	class UalSignal
 	{
@@ -523,9 +527,10 @@ namespace Builder
 		bool isBusChild() const { return m_isBusChild; }
 		void setBusChild(bool busChild) { m_isBusChild = busChild; }
 
-		bool isLoopbackSource() const { return m_loopbackID.isEmpty() == false; }
+		bool isLoopbackSource() const { return m_loopback != nullptr; }
 
-		void setLoopbackID(const QString& loopbackID);
+		void setLoopback(std::shared_ptr<Loopback> loopback);
+		std::shared_ptr<Loopback> loopback() const;
 		QString loopbackID() const;
 
 		//
@@ -549,6 +554,7 @@ namespace Builder
 		void refSignalIDs(QStringList* appSignalIDs) const;
 
 		QString refSignalIDsJoined() const;
+		QString refSignalIDsJoined(const QString& separator) const;
 
 		QStringList acquiredRefSignalsIDs() const;
 
@@ -590,7 +596,7 @@ namespace Builder
 
 		//
 
-		QString m_loopbackID;
+		std::shared_ptr<Loopback> m_loopback;
 
 		//
 

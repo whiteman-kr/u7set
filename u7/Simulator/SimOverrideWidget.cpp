@@ -9,6 +9,7 @@ SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent)
 	assert(m_simulator);
 
 	m_treeWidget = new QTreeWidget(this);
+	m_treeWidget->installEventFilter(this);
 
 	m_treeWidget->setRootIsDecorated(false);
 	m_treeWidget->setUniformRowHeights(true);
@@ -130,6 +131,27 @@ void SimOverrideWidget::dropEvent(QDropEvent* event)
 
 	if (signalIds.isEmpty() == false)
 	{
+		// Check that signals are not optimized constants
+		//
+		for (const QString& id : signalIds)
+		{
+			std::optional<Signal> sp = m_simulator->appSignalManager().signalParamExt(id);
+
+			if (sp.has_value() == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(id));
+				return;
+			}
+
+			if (sp->isConst() == true)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Value for signal %1 cannot be is overriden as it was optimized to const.").arg(id));
+				return;
+			}
+		}
+
+		// --
+		//
 		int actuallyAdded = m_simulator->overrideSignals().addSignals(signalIds);
 
 		if (actuallyAdded == 0)
@@ -142,6 +164,133 @@ void SimOverrideWidget::dropEvent(QDropEvent* event)
 
 	return;
 }
+
+bool SimOverrideWidget::eventFilter(QObject* obj, QEvent* event)
+{
+	if (obj == m_treeWidget && event->type() == QEvent::KeyPress)
+	{
+		switch (static_cast<QKeyEvent*>(event)->key())
+		{
+		case Qt::Key::Key_Delete:
+			{
+				removeSelectedSignals();
+			}
+			return true;
+		case Qt::Key::Key_Insert:
+			{
+				addSignal();
+			}
+			return true;
+		case Qt::Key::Key_Space:
+			{
+				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+				if (item != nullptr)
+				{
+					// It makes toggle state (check box) from any selected column (not only for column 0 as by default)
+					//
+					item->setCheckState(0, item->checkState(0) == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+				}
+			}
+			return true;
+		case Qt::Key_0:
+			{
+				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+				if (item != nullptr)
+				{
+					QString appSignalId = item->m_overrideSignal.m_appSignalId;
+					setValue(appSignalId, QVariant::fromValue<qint32>(0));
+				}
+			}
+			return true;
+		case Qt::Key_1:
+			{
+				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+				if (item != nullptr)
+				{
+					QString appSignalId = item->m_overrideSignal.m_appSignalId;
+					setValue(appSignalId, QVariant::fromValue<qint32>(1));
+				}
+			}
+			return true ;
+		}
+
+		return false;		// return false to process event
+	}
+
+	return false;			// return false to process event
+}
+
+//void SimOverrideWidget::keyPressEvent(QKeyEvent* event)
+//{
+//	switch (event->key())
+//	{
+//	case Qt::Key::Key_Delete:
+//		{
+//			removeSelectedSignals();
+//		}
+//		return;
+//	case Qt::Key::Key_Insert:
+//		{
+//			addSignal();
+//		}
+//		return;
+////	case Qt::Key_0:
+////		{
+////			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+////			if (item != nullptr)
+////			{
+////				QString appSignalId = item->m_overrideSignal.m_appSignalId;
+////				setValue(appSignalId, QVariant::fromValue<qint32>(0));
+////			}
+////		}
+////		return;
+////	case Qt::Key_1:
+////		{
+////			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+////			if (item != nullptr)
+////			{
+////				QString appSignalId = item->m_overrideSignal.m_appSignalId;
+////				setValue(appSignalId, QVariant::fromValue<qint32>(1));
+////			}
+////		}
+////		return;
+//	}
+
+//	QWidget::keyPressEvent(event);
+//	return;
+//}
+
+//void SimOverrideWidget::keyReleaseEvent(QKeyEvent* event)
+//{
+//	switch (event->key())
+//	{
+//	case Qt::Key_0:
+//		{
+//			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+//			if (item != nullptr)
+//			{
+//				QString appSignalId = item->m_overrideSignal.m_appSignalId;
+//				setValue(appSignalId, QVariant::fromValue<qint32>(0));
+//			}
+//		}
+//		event->setAccepted(true);
+//		return;
+//	case Qt::Key_1:
+//		{
+//			QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+//			if (item != nullptr)
+//			{
+//				QString appSignalId = item->m_overrideSignal.m_appSignalId;
+//				setValue(appSignalId, QVariant::fromValue<qint32>(1));
+//			}
+//		}
+//		event->setAccepted(true);
+//		return;
+//	}
+
+//	QWidget::keyReleaseEvent(event);
+//	return;
+//}
 
 void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
 {
@@ -170,6 +319,15 @@ void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
 
 	menu.setDefaultAction(setValueAction);
 
+	// Add Signal
+	//
+	QAction* addSignalAction = menu.addAction(tr("Add Signal..."),
+											[this]
+											{
+												addSignal();
+											});
+	addSignalAction->setShortcut(Qt::Key::Key_Insert);
+
 	// Remove Signal
 	//
 	QAction* removeSignalAction = menu.addAction(tr("Remove Signal"),
@@ -177,7 +335,7 @@ void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
 												{
 													removeSignal(appSignalId);
 												});
-
+	removeSignalAction->setShortcut(QKeySequence::Delete);
 	removeSignalAction->setEnabled(!appSignalId.isEmpty());
 
 	// Clear
@@ -479,7 +637,7 @@ void SimOverrideWidget::signalsChanged(QStringList addedAppSignalIds)
 	return;
 }
 
-void SimOverrideWidget::signalStateChanged(QString appSignalId)
+void SimOverrideWidget::signalStateChanged(QString /*appSignalId*/)
 {
 	updateValueColumn();
 }
@@ -489,9 +647,105 @@ void SimOverrideWidget::clear()
 	m_simulator->overrideSignals().clear();
 }
 
+void SimOverrideWidget::removeSelectedSignals()
+{
+	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
+
+	if (currentItem != nullptr)
+	{
+		int index = m_treeWidget->indexOfTopLevelItem(currentItem);
+
+		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(currentItem);
+		assert(item != nullptr);
+
+		QString appSignalId = item->m_overrideSignal.m_appSignalId;
+		removeSignal(appSignalId);
+
+		// Select next item
+		//
+		if (index < m_treeWidget->topLevelItemCount())
+		{
+			QTreeWidgetItem* nextItem = m_treeWidget->topLevelItem(index);
+			assert(nextItem);
+
+			if (nextItem != nullptr)
+			{
+				nextItem->setSelected(true);
+				m_treeWidget->setCurrentItem(nextItem);
+			}
+		}
+		else
+		{
+			if (m_treeWidget->topLevelItemCount() != 0)
+			{
+				QTreeWidgetItem* lastItem = m_treeWidget->topLevelItem(m_treeWidget->topLevelItemCount() - 1);
+				assert(lastItem);
+
+				if (lastItem != nullptr)
+				{
+					lastItem->setSelected(true);
+					m_treeWidget->setCurrentItem(lastItem);
+				}
+			}
+		}
+	}
+
+	return;
+}
+
 void SimOverrideWidget::removeSignal(QString appSignalId)
 {
 	m_simulator->overrideSignals().removeSignal(appSignalId);
+}
+
+void SimOverrideWidget::addSignal()
+{
+	QString defaultText;
+
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (mimeData->hasText() == true && mimeData->text().trimmed().isEmpty() == false)
+	{
+		defaultText = mimeData->text().trimmed();
+	}
+
+	do
+	{
+		bool ok = false;
+		QString signalId = QInputDialog::getText(this,
+													tr("Add Signal to Override"),
+													tr("SignalID:"),
+													QLineEdit::Normal,
+													defaultText,
+													&ok).trimmed();
+
+		if (ok == true && signalId.isEmpty() == false)
+		{
+			// To add signal to override, AppSignalId is required, so go and get it
+			//
+
+			Hash appSignalIdHash = m_simulator->appSignalManager().customToAppSignal(::calcHash(signalId));
+
+			AppSignalParam appSignalParam = m_simulator->appSignalManager().signalParam(appSignalIdHash, &ok);
+			if (ok == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(signalId));
+				defaultText = signalId;
+				continue;
+			}
+
+			// --
+			//
+			m_simulator->overrideSignals().addSignals(QStringList{} << appSignalParam.appSignalId());
+			selectSignal(appSignalParam.appSignalId());
+		}
+
+		break;
+	}
+	while (true);
+
+	return;
 }
 
 void SimOverrideWidget::setValue(QString appSignalId)
@@ -506,7 +760,7 @@ void SimOverrideWidget::setValue(QString appSignalId)
 
 	QDialog d(this);
 
-	d.setWindowTitle(tr("Set value for %1 (%2)").arg(osp->m_customSignalId).arg(osp->m_appSignalId));
+	d.setWindowTitle(tr("Set Value %1 (%2)").arg(osp->m_customSignalId).arg(osp->m_appSignalId));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -638,20 +892,38 @@ void SimOverrideWidget::setValue(QString appSignalId)
 		case E::SignalType::Discrete:
 			{
 				int value = edit->text().toInt();
-				assert(value == 0 || value == 1);
 
-				newValue = value;
+				newValue = std::clamp(value, 0, 1);
 			}
 			break;
 
 		case E::SignalType::Analog:
-			switch (osp->m_dataFormat)
 			{
-			case E::AnalogAppSignalFormat::SignedInt32:			newValue = edit->text().toInt();		break;
-			case E::AnalogAppSignalFormat::Float32:				newValue = edit->text().toDouble();		break;
-			default:
-				assert(false);
-				return;
+				QLocale c;
+				bool ok = false;
+				QString editText = edit->text();
+
+				switch (osp->m_dataFormat)
+				{
+				case E::AnalogAppSignalFormat::SignedInt32:		newValue = c.toInt(editText, &ok);		break;
+				case E::AnalogAppSignalFormat::Float32:
+					newValue = c.toFloat(editText, &ok);
+					if (ok == false)
+					{
+						// Try another one case, divider can be different
+						//
+						newValue = editText.toFloat(&ok);
+					}
+					break;
+				default:
+					assert(false);
+					return;
+				}
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), tr("Cannot convert string (%1) to analog number.").arg(editText));
+				}
 			}
 			break;
 
@@ -662,7 +934,7 @@ void SimOverrideWidget::setValue(QString appSignalId)
 
 		if (newValue.isValid() == true)
 		{
-			m_simulator->overrideSignals().setValue(osp->m_appSignalId, newValue);
+			setValue(osp->m_appSignalId, newValue);
 		}
 		else
 		{
@@ -671,6 +943,11 @@ void SimOverrideWidget::setValue(QString appSignalId)
 	}
 
 	return;
+}
+
+void SimOverrideWidget::setValue(QString appSignalId, const QVariant& value)
+{
+	m_simulator->overrideSignals().setValue(appSignalId, value);
 }
 
 

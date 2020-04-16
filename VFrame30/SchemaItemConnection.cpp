@@ -378,6 +378,13 @@ namespace VFrame30
 								 SchemaItemReceiver::analogFormat,
 								 SchemaItemReceiver::setAnalogFormat);
 
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::customText,
+								 PropertyNames::monitorCategory,
+								 true,
+								 SchemaItemReceiver::customText,
+								 SchemaItemReceiver::setCustomText);
+
 		setShowValidity(true);
 	}
 
@@ -407,6 +414,7 @@ namespace VFrame30
 		receiver->set_datatype(static_cast<int>(m_dataType));
 		receiver->set_precision(m_precision);
 		receiver->set_analogformat(static_cast<int>(m_analogFormat));
+		receiver->set_customtext(m_customText.toStdString());
 
 		return true;
 	}
@@ -435,6 +443,7 @@ namespace VFrame30
 		m_dataType = static_cast<E::ColumnData>(receiver.datatype());
 		m_precision = receiver.precision();
 		m_analogFormat = static_cast<E::AnalogFormat>(receiver.analogformat());
+		m_customText = QString::fromStdString(receiver.customtext());
 
 		return true;
 	}
@@ -516,6 +525,7 @@ namespace VFrame30
 			QRectF signalRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};
 
 			QString dataText = SchemaItemSignal::getCoulumnText(drawParam,
+																this,
 																m_dataType,
 																signal,
 																signalState,
@@ -748,5 +758,16 @@ namespace VFrame30
 	{
 		m_analogFormat = value;
 	}
+
+	QString SchemaItemReceiver::customText() const
+	{
+		return m_customText;
+	}
+
+	void SchemaItemReceiver::setCustomText(const QString& value)
+	{
+		m_customText = value;
+	}
+
 
 }

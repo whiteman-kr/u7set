@@ -970,9 +970,6 @@ void MonitorMainWindow::slot_archive()
 
 void MonitorMainWindow::slot_trends()
 {
-	qDebug() << "";
-	qDebug() << Q_FUNC_INFO;
-
 	// Get Trends list
 	//
 	std::vector<QString> trends = MonitorTrends::getTrendsList();
@@ -1011,7 +1008,7 @@ void MonitorMainWindow::slot_trends()
 		QVariant data = triggeredAction->data();
 
 		bool ok = false;
-		size_t trendIndex = data.toInt(&ok);
+		int trendIndex = data.toInt(&ok);
 
 		if (trendIndex == -1)
 		{
@@ -1019,10 +1016,10 @@ void MonitorMainWindow::slot_trends()
 		}
 		else
 		{
-			if (ok == false || trendIndex < 0 || trendIndex >= trends.size())
+			if (ok == false || trendIndex < 0 || trendIndex >= static_cast<int>(trends.size()))
 			{
 				Q_ASSERT(ok == true);
-				Q_ASSERT(trendIndex >= 0 && trendIndex < trends.size());
+				Q_ASSERT(trendIndex >= 0 && trendIndex < static_cast<int>(trends.size()));
 				return;
 			}
 

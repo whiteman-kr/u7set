@@ -30,6 +30,7 @@ unix {
 }
 
 SOURCES += \
+    ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
@@ -69,6 +70,7 @@ SOURCES += \
     ../lib/SimpleMutex.cpp
 
 HEADERS += \
+    ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
 	Stable.h \
 	../lib/SocketIO.h \

@@ -16,9 +16,10 @@ class SimMemoryWidget;
 class SimToolBar;
 
 
-class SimWidget : public QMainWindow, HasDbController
+class SimWidget : public QMainWindow, HasDbController, protected Sim::Output
 {
 	Q_OBJECT
+
 public:
 	SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 			  DbController* db,
@@ -27,17 +28,22 @@ public:
 			  bool slaveWindow = false);		// Cannot have output pane, do not stores its state
 	virtual ~SimWidget();
 
+public:
+	void startTrends(const std::vector<AppSignalParam>& appSignals);
+
 protected:
 	void createToolBar();
 	void createDocks();
 	QDockWidget* createMemoryDock(QString caption);
 
-	virtual void showEvent(QShowEvent*) override;
+	virtual void showEvent(QShowEvent* e) override;
 
 signals:
 	void needUpdateActions();
 
 protected slots:
+	void aboutToQuit();
+
 	void controlStateChanged(Sim::SimControlState state);
 	void updateActions();
 
@@ -48,7 +54,9 @@ protected slots:
 
 	void runSimulation();
 	void pauseSimulation();
-	void stopSimulation();
+	void stopSimulation(bool stopSimulationThread = false);
+
+	void showTrends();
 
 	bool loadBuild(QString buildPath);
 
@@ -65,8 +73,10 @@ protected slots:
 
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
+	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	QTabWidget* m_tabWidget = nullptr;
 	SimToolBar* m_toolBar = nullptr;
+	SimOutputWidget* m_outputWidget = nullptr;
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;
 
@@ -92,6 +102,8 @@ private:
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_trendsAction = nullptr;
 };
 
 
@@ -102,7 +114,9 @@ public:
 	explicit SimToolBar(const QString& title, QWidget* parent = nullptr);
 	virtual ~SimToolBar();
 
-private:
+protected:
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 };
 
 #endif // SIMULATORWIDGET_H

@@ -5695,6 +5695,18 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& impactappsignalids() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_impactappsignalids();
 
+  // optional string customText = 16;
+  inline bool has_customtext() const;
+  inline void clear_customtext();
+  static const int kCustomTextFieldNumber = 16;
+  inline const ::std::string& customtext() const;
+  inline void set_customtext(const ::std::string& value);
+  inline void set_customtext(const char* value);
+  inline void set_customtext(const char* value, size_t size);
+  inline ::std::string* mutable_customtext();
+  inline ::std::string* release_customtext();
+  inline void set_allocated_customtext(::std::string* customtext);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemSignal)
  private:
   inline void set_has_precision();
@@ -5703,6 +5715,8 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   inline void clear_has_analogformat();
   inline void set_has_multiline();
   inline void clear_has_multiline();
+  inline void set_has_customtext();
+  inline void clear_has_customtext();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -5711,10 +5725,11 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 analogformat_;
   ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn > columns_;
   ::google::protobuf::RepeatedPtrField< ::std::string> impactappsignalids_;
+  ::std::string* customtext_;
   bool multiline_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6564,6 +6579,18 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 analogformat() const;
   inline void set_analogformat(::google::protobuf::int32 value);
 
+  // optional string customText = 16;
+  inline bool has_customtext() const;
+  inline void clear_customtext();
+  static const int kCustomTextFieldNumber = 16;
+  inline const ::std::string& customtext() const;
+  inline void set_customtext(const ::std::string& value);
+  inline void set_customtext(const char* value);
+  inline void set_customtext(const char* value, size_t size);
+  inline ::std::string* mutable_customtext();
+  inline ::std::string* release_customtext();
+  inline void set_allocated_customtext(::std::string* customtext);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemReceiver)
  private:
   inline void set_has_showvalidity();
@@ -6576,6 +6603,8 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline void clear_has_precision();
   inline void set_has_analogformat();
   inline void clear_has_analogformat();
+  inline void set_has_customtext();
+  inline void clear_has_customtext();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -6584,9 +6613,10 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   ::google::protobuf::int32 datatype_;
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 analogformat_;
+  ::std::string* customtext_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -13100,6 +13130,20 @@ class Bus : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 manualbussize() const;
   inline void set_manualbussize(::google::protobuf::int32 value);
 
+  // optional bool enableManualBusSize = 12 [default = false];
+  inline bool has_enablemanualbussize() const;
+  inline void clear_enablemanualbussize();
+  static const int kEnableManualBusSizeFieldNumber = 12;
+  inline bool enablemanualbussize() const;
+  inline void set_enablemanualbussize(bool value);
+
+  // optional bool enableManualBusSizeIsNotInitialized = 13 [default = true];
+  inline bool has_enablemanualbussizeisnotinitialized() const;
+  inline void clear_enablemanualbussizeisnotinitialized();
+  static const int kEnableManualBusSizeIsNotInitializedFieldNumber = 13;
+  inline bool enablemanualbussizeisnotinitialized() const;
+  inline void set_enablemanualbussizeisnotinitialized(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.Bus)
  private:
   inline void set_has_uuid();
@@ -13110,17 +13154,23 @@ class Bus : public ::google::protobuf::Message {
   inline void clear_has_autosignalplacement();
   inline void set_has_manualbussize();
   inline void clear_has_manualbussize();
+  inline void set_has_enablemanualbussize();
+  inline void clear_has_enablemanualbussize();
+  inline void set_has_enablemanualbussizeisnotinitialized();
+  inline void clear_has_enablemanualbussizeisnotinitialized();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
   ::std::string* bustypeid_;
   ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal > bussignals_;
-  bool autosignalplacement_;
   ::google::protobuf::int32 manualbussize_;
+  bool autosignalplacement_;
+  bool enablemanualbussize_;
+  bool enablemanualbussizeisnotinitialized_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -22146,6 +22196,76 @@ SchemaItemSignal::mutable_impactappsignalids() {
   return &impactappsignalids_;
 }
 
+// optional string customText = 16;
+inline bool SchemaItemSignal::has_customtext() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemSignal::set_has_customtext() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemSignal::clear_has_customtext() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemSignal::clear_customtext() {
+  if (customtext_ != &::google::protobuf::internal::kEmptyString) {
+    customtext_->clear();
+  }
+  clear_has_customtext();
+}
+inline const ::std::string& SchemaItemSignal::customtext() const {
+  return *customtext_;
+}
+inline void SchemaItemSignal::set_customtext(const ::std::string& value) {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  customtext_->assign(value);
+}
+inline void SchemaItemSignal::set_customtext(const char* value) {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  customtext_->assign(value);
+}
+inline void SchemaItemSignal::set_customtext(const char* value, size_t size) {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  customtext_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemSignal::mutable_customtext() {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  return customtext_;
+}
+inline ::std::string* SchemaItemSignal::release_customtext() {
+  clear_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = customtext_;
+    customtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemSignal::set_allocated_customtext(::std::string* customtext) {
+  if (customtext_ != &::google::protobuf::internal::kEmptyString) {
+    delete customtext_;
+  }
+  if (customtext) {
+    set_has_customtext();
+    customtext_ = customtext;
+  } else {
+    clear_has_customtext();
+    customtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // SchemaItemInput
@@ -22815,6 +22935,76 @@ inline ::google::protobuf::int32 SchemaItemReceiver::analogformat() const {
 inline void SchemaItemReceiver::set_analogformat(::google::protobuf::int32 value) {
   set_has_analogformat();
   analogformat_ = value;
+}
+
+// optional string customText = 16;
+inline bool SchemaItemReceiver::has_customtext() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemReceiver::set_has_customtext() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemReceiver::clear_has_customtext() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemReceiver::clear_customtext() {
+  if (customtext_ != &::google::protobuf::internal::kEmptyString) {
+    customtext_->clear();
+  }
+  clear_has_customtext();
+}
+inline const ::std::string& SchemaItemReceiver::customtext() const {
+  return *customtext_;
+}
+inline void SchemaItemReceiver::set_customtext(const ::std::string& value) {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  customtext_->assign(value);
+}
+inline void SchemaItemReceiver::set_customtext(const char* value) {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  customtext_->assign(value);
+}
+inline void SchemaItemReceiver::set_customtext(const char* value, size_t size) {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  customtext_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemReceiver::mutable_customtext() {
+  set_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    customtext_ = new ::std::string;
+  }
+  return customtext_;
+}
+inline ::std::string* SchemaItemReceiver::release_customtext() {
+  clear_has_customtext();
+  if (customtext_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = customtext_;
+    customtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemReceiver::set_allocated_customtext(::std::string* customtext) {
+  if (customtext_ != &::google::protobuf::internal::kEmptyString) {
+    delete customtext_;
+  }
+  if (customtext) {
+    set_has_customtext();
+    customtext_ = customtext;
+  } else {
+    clear_has_customtext();
+    customtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
@@ -32942,6 +33132,50 @@ inline ::google::protobuf::int32 Bus::manualbussize() const {
 inline void Bus::set_manualbussize(::google::protobuf::int32 value) {
   set_has_manualbussize();
   manualbussize_ = value;
+}
+
+// optional bool enableManualBusSize = 12 [default = false];
+inline bool Bus::has_enablemanualbussize() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Bus::set_has_enablemanualbussize() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Bus::clear_has_enablemanualbussize() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Bus::clear_enablemanualbussize() {
+  enablemanualbussize_ = false;
+  clear_has_enablemanualbussize();
+}
+inline bool Bus::enablemanualbussize() const {
+  return enablemanualbussize_;
+}
+inline void Bus::set_enablemanualbussize(bool value) {
+  set_has_enablemanualbussize();
+  enablemanualbussize_ = value;
+}
+
+// optional bool enableManualBusSizeIsNotInitialized = 13 [default = true];
+inline bool Bus::has_enablemanualbussizeisnotinitialized() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Bus::set_has_enablemanualbussizeisnotinitialized() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Bus::clear_has_enablemanualbussizeisnotinitialized() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Bus::clear_enablemanualbussizeisnotinitialized() {
+  enablemanualbussizeisnotinitialized_ = true;
+  clear_has_enablemanualbussizeisnotinitialized();
+}
+inline bool Bus::enablemanualbussizeisnotinitialized() const {
+  return enablemanualbussizeisnotinitialized_;
+}
+inline void Bus::set_enablemanualbussizeisnotinitialized(bool value) {
+  set_has_enablemanualbussizeisnotinitialized();
+  enablemanualbussizeisnotinitialized_ = value;
 }
 
 // -------------------------------------------------------------------

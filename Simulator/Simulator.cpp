@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
+#include "../Builder/CfgFiles.h"
 #include "SimLogicModule.h"
 
 namespace Sim
@@ -86,6 +87,7 @@ namespace Sim
 		m_lmDescriptions.clear();
 		m_subsystems.clear();
 		m_appSignalManager.reset();
+		m_connections.clear();
 
 		return;
 	}
@@ -122,6 +124,15 @@ namespace Sim
 		// Load LogicModules Descriptions
 		//
 		ok = loadLmDescriptions(buildPath);
+		if (ok == false)
+		{
+			clearImpl();
+			return false;
+		}
+
+		// Load ConnectinsInfo
+		//
+		ok = loadConnectionsInfo(buildPath);
 		if (ok == false)
 		{
 			clearImpl();
@@ -171,7 +182,7 @@ namespace Sim
 
 			// Upload data to susbystem
 			//
-			ok = ss.load(firmware, lmDescription);
+			ok = ss.load(firmware, lmDescription, m_connections);
 			if (ok == false)
 			{
 				// Error must be reported in Subsystem::load
@@ -303,6 +314,28 @@ namespace Sim
 		return true;
 	}
 
+	bool Simulator::loadConnectionsInfo(QString buildPath)
+	{
+		QString fileName = QDir::fromNativeSeparators(buildPath);
+		if (fileName.endsWith(QChar('/')) == false)
+		{
+			fileName.append(QChar('/'));
+		}
+
+		fileName += QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_CONNECTIONS_XML);
+
+		writeMessage(tr("Loading %1").arg(fileName));
+
+		QString errorMessage;
+		bool ok = m_connections.load(fileName, &errorMessage);
+		if (ok == false)
+		{
+			writeError(tr("File loading error, file name %1, error:%2").arg(fileName).arg(errorMessage));
+		}
+
+		return ok;
+	}
+
 	bool Simulator::loadAppSignals(QString buildPath)
 	{
 		QString fileName = QDir::fromNativeSeparators(buildPath);
@@ -311,7 +344,7 @@ namespace Sim
 			fileName.append(QChar('/'));
 		}
 
-		fileName += "Common/AppSignals.asgs";
+		fileName += QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_APP_SIGNALS_ASGS);
 
 		writeMessage(tr("Loading %1").arg(fileName));
 
