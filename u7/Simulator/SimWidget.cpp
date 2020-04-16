@@ -268,7 +268,7 @@ static bool firstEvent = true;
 			QVariant v = QSettings().value("SimWidget/state");
 			if (v.isValid() == true)
 			{
-				restoreState(v.toByteArray());
+				//restoreState(v.toByteArray());
 			}
 		}
 
