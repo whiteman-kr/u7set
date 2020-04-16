@@ -172,6 +172,9 @@ public:
 	E::ElectricUnit electricUnit() const;
 	void setElectricUnit(E::ElectricUnit electricUnit);
 
+	double rload_Ohm() const;
+	void setRload_Ohm(double rload_Ohm);
+
 	E::SensorType sensorType() const;
 	void setSensorType(E::SensorType sensorType);
 

@@ -2283,13 +2283,14 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(MetrologySignalLocation));
   MetrologySignal_descriptor_ = file->message_type(98);
-  static const int MetrologySignal_offsets_[10] = {
+  static const int MetrologySignal_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, appsignal_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, location_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electriclowlimit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electrichighlimit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricunitid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricsensortype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricrload_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricr0_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricprecision_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, physicallowlimit_),
@@ -3189,22 +3190,22 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ID\030\001 \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003"
     " \001(\005:\002-1\022\020\n\010moduleID\030\004 \001(\t\022\022\n\006module\030\005 \001"
     "(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002-1\022\017\n\007contact\030\007 \001"
-    "(\t\"\315\002\n\017MetrologySignal\022#\n\tappSignal\030\001 \001("
+    "(\t\"\347\002\n\017MetrologySignal\022#\n\tappSignal\030\001 \001("
     "\0132\020.Proto.AppSignal\0220\n\010location\030\002 \001(\0132\036."
     "Proto.MetrologySignalLocation\022\033\n\020electri"
     "cLowLimit\030\003 \001(\001:\0010\022\034\n\021electricHighLimit\030"
     "\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001(\005:\0011\022\035\n\022e"
-    "lectricSensorType\030\006 \001(\005:\0011\022\025\n\nelectricR0"
-    "\030\007 \001(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022"
-    "\033\n\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021physical"
-    "HighLimit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet"
-    "\022/\n\017metrologySignal\030\001 \003(\0132\026.Proto.Metrol"
-    "ogySignal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\n"
-    "Millimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirr"
-    "ection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSign"
-    "alType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblD"
-    "ataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020"
-    "\001\022\t\n\005Float\020\002", 18012);
+    "lectricSensorType\030\006 \001(\005:\0011\022\030\n\relectricRl"
+    "oad\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001(\001:\0010\022\034\n\021e"
+    "lectricPrecision\030\010 \001(\005:\0014\022\033\n\020physicalLow"
+    "Limit\030\t \001(\001:\0010\022\034\n\021physicalHighLimit\030\n \001("
+    "\001:\0010\"E\n\022MetrologySignalSet\022/\n\017metrologyS"
+    "ignal\030\001 \003(\0132\026.Proto.MetrologySignal*3\n\nS"
+    "chemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010"
+    "\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005Inpu"
+    "t\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Anal"
+    "og\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013U"
+    "nsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 18038);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -45098,6 +45099,7 @@ const int MetrologySignal::kElectricLowLimitFieldNumber;
 const int MetrologySignal::kElectricHighLimitFieldNumber;
 const int MetrologySignal::kElectricUnitIDFieldNumber;
 const int MetrologySignal::kElectricSensorTypeFieldNumber;
+const int MetrologySignal::kElectricRloadFieldNumber;
 const int MetrologySignal::kElectricR0FieldNumber;
 const int MetrologySignal::kElectricPrecisionFieldNumber;
 const int MetrologySignal::kPhysicalLowLimitFieldNumber;
@@ -45128,6 +45130,7 @@ void MetrologySignal::SharedCtor() {
   electrichighlimit_ = 0;
   electricunitid_ = 1;
   electricsensortype_ = 1;
+  electricrload_ = 0;
   electricr0_ = 0;
   electricprecision_ = 4;
   physicallowlimit_ = 0;
@@ -45179,10 +45182,11 @@ void MetrologySignal::Clear() {
     electrichighlimit_ = 0;
     electricunitid_ = 1;
     electricsensortype_ = 1;
+    electricrload_ = 0;
     electricr0_ = 0;
-    electricprecision_ = 4;
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    electricprecision_ = 4;
     physicallowlimit_ = 0;
     physicalhighlimit_ = 0;
   }
@@ -45347,6 +45351,22 @@ bool MetrologySignal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(89)) goto parse_electricRload;
+        break;
+      }
+
+      // optional double electricRload = 11 [default = 0];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_electricRload:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &electricrload_)));
+          set_has_electricrload();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -45421,6 +45441,11 @@ void MetrologySignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(10, this->physicalhighlimit(), output);
   }
 
+  // optional double electricRload = 11 [default = 0];
+  if (has_electricrload()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(11, this->electricrload(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -45483,6 +45508,11 @@ void MetrologySignal::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(10, this->physicalhighlimit(), target);
   }
 
+  // optional double electricRload = 11 [default = 0];
+  if (has_electricrload()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(11, this->electricrload(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -45532,11 +45562,18 @@ int MetrologySignal::ByteSize() const {
           this->electricsensortype());
     }
 
+    // optional double electricRload = 11 [default = 0];
+    if (has_electricrload()) {
+      total_size += 1 + 8;
+    }
+
     // optional double electricR0 = 7 [default = 0];
     if (has_electricr0()) {
       total_size += 1 + 8;
     }
 
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional int32 electricPrecision = 8 [default = 4];
     if (has_electricprecision()) {
       total_size += 1 +
@@ -45544,8 +45581,6 @@ int MetrologySignal::ByteSize() const {
           this->electricprecision());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional double physicalLowLimit = 9 [default = 0];
     if (has_physicallowlimit()) {
       total_size += 1 + 8;
@@ -45601,14 +45636,17 @@ void MetrologySignal::MergeFrom(const MetrologySignal& from) {
     if (from.has_electricsensortype()) {
       set_electricsensortype(from.electricsensortype());
     }
+    if (from.has_electricrload()) {
+      set_electricrload(from.electricrload());
+    }
     if (from.has_electricr0()) {
       set_electricr0(from.electricr0());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_electricprecision()) {
       set_electricprecision(from.electricprecision());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_physicallowlimit()) {
       set_physicallowlimit(from.physicallowlimit());
     }
@@ -45647,6 +45685,7 @@ void MetrologySignal::Swap(MetrologySignal* other) {
     std::swap(electrichighlimit_, other->electrichighlimit_);
     std::swap(electricunitid_, other->electricunitid_);
     std::swap(electricsensortype_, other->electricsensortype_);
+    std::swap(electricrload_, other->electricrload_);
     std::swap(electricr0_, other->electricr0_);
     std::swap(electricprecision_, other->electricprecision_);
     std::swap(physicallowlimit_, other->physicallowlimit_);

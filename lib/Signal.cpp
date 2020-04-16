@@ -452,6 +452,16 @@ void Signal::setElectricUnit(E::ElectricUnit electricUnit)
 	setSpecPropEnum(SignalProperties::electricUnitCaption, static_cast<int>(electricUnit));
 }
 
+double Signal::rload_Ohm() const
+{
+	return getSpecPropDouble(SignalProperties::rload_OhmCaption);
+}
+
+void Signal::setRload_Ohm(double rload_Ohm)
+{
+	setSpecPropDouble(SignalProperties::rload_OhmCaption, rload_Ohm);
+}
+
 E::SensorType Signal::sensorType() const
 {
 	return static_cast<E::SensorType>(getSpecPropEnum(SignalProperties::sensorTypeCaption));

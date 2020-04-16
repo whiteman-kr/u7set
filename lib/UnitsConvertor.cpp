@@ -106,7 +106,7 @@ UnitsConvertor::~UnitsConvertor()
 {
 }
 
-UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType)
+UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -146,7 +146,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 					return UnitsConvertResult(elVal);
 
 				default:
-					// assert(false); commented by WhiteMan
+
 					return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for V"));
 			}
 
@@ -158,18 +158,21 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 			{
 				case E::SensorType::V_0_5:
 
-					return  UnitsConvertResult(elVal * RESISTOR_V_0_5);
+					if (rload < RLOAD_LOW_LIMIT || rload > RLOAD_HIGH_LIMIT)
+					{
+						return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Rload_Ohm argument is out of range"));
+					}
+
+					return  UnitsConvertResult(elVal * (rload / 1000.0));
 
 				default:
-					// assert(false); commented by WhiteMan
+
 					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mA"));
 			}
 
 			break;
 
 		default: ;
-			//	assert(false); commented by WhiteMan
-			//
 	}
 
 	return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown unitID"));
