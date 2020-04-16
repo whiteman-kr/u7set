@@ -2460,7 +2460,7 @@ void SignalsTabPage::onTabPageChanged()
 
 	if (m_findSignalDialog != nullptr)
 	{
-		if (tabWidget->currentWidget() == this)
+		if (tabWidget->currentWidget() == this && m_findSignalDialog->reopen() == true)
 		{
 			findAndReplaceSignal();
 		}
@@ -2595,6 +2595,7 @@ void SignalsTabPage::findAndReplaceSignal()
 
 		connect(m_findSignalDialog, &FindSignalDialog::signalSelected, this, &SignalsTabPage::restoreSelection);
 	}
+	m_findSignalDialog->setReopen();
 	m_findSignalDialog->show();
 	m_findSignalDialog->activateWindow();
 	m_findSignalDialog->raise();
@@ -3766,6 +3767,7 @@ void FindSignalDialog::notifyThatSignalSetHasChanged()
 void FindSignalDialog::closeEvent(QCloseEvent* event)
 {
 	saveDialogGeometry();
+	m_reopen = false;
 
 	QDialog::closeEvent(event);
 }
