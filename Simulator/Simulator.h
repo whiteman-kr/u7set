@@ -80,7 +80,7 @@ namespace Sim
 		Sim::AppSignalManager m_appSignalManager{this};
 		Sim::TuningSignalManager m_tuningSignalManager;
 
-		Sim::OverrideSignals m_overrideSignals{&m_appSignalManager};
+		Sim::OverrideSignals m_overrideSignals{this};
 
 		// Control thread
 		//

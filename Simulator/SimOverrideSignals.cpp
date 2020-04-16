@@ -1,4 +1,5 @@
 #include "SimOverrideSignals.h"
+#include "Simulator.h"
 #include "SimAppSignalManager.h"
 #include "SimRam.h"
 
@@ -363,12 +364,12 @@ namespace Sim
 	}
 
 
-	OverrideSignals::OverrideSignals(Sim::AppSignalManager* appSignalManager, QObject* parent /*= nullptr*/) :
+	OverrideSignals::OverrideSignals(Simulator* simulator, QObject* parent /*= nullptr*/) :
 		QObject(parent),
 		Output("OverrideSignals"),
-		m_appSignalManager(appSignalManager)
+		m_simulator(simulator)
 	{
-		assert(appSignalManager);
+		assert(simulator);
 		return;
 	}
 
@@ -391,9 +392,9 @@ namespace Sim
 
 	int OverrideSignals::addSignals(const QStringList& appSignalIds)
 	{
-		if (m_appSignalManager == nullptr)
+		if (m_simulator == nullptr)
 		{
-			assert(m_appSignalManager);
+			assert(m_simulator);
 			return 0;
 		}
 
@@ -401,7 +402,7 @@ namespace Sim
 
 		for (const QString& id : appSignalIds)
 		{
-			std::optional<Signal> sp = m_appSignalManager->signalParamExt(id);
+			std::optional<Signal> sp = appSignalManager().signalParamExt(id);
 
 			if (sp.has_value() == false)
 			{
@@ -422,6 +423,18 @@ namespace Sim
 				else
 				{
 					addedSignals << sp->appSignalID();
+
+					// Set index for new signal
+					//
+					int maxIndex = m_signals.begin()->second.m_index;
+
+					for (const auto&[id, s] : m_signals)
+					{
+						Q_UNUSED(id);
+						maxIndex = std::max(maxIndex, s.m_index);
+					}
+
+					it->second.m_index = maxIndex + 1;
 				}
 			}
 		}
@@ -502,7 +515,7 @@ namespace Sim
 
 		for (const OverrideSignalParam& osp : existingSignals)
 		{
-			std::optional<Signal> sp = m_appSignalManager->signalParamExt(osp.m_appSignalId);
+			std::optional<Signal> sp = appSignalManager().signalParamExt(osp.m_appSignalId);
 
 			if (sp.has_value() == false)
 			{
@@ -531,6 +544,16 @@ namespace Sim
 		emit signalsChanged({});
 
 		return;
+	}
+
+	Sim::AppSignalManager& OverrideSignals::appSignalManager()
+	{
+		return m_simulator->appSignalManager();
+	}
+
+	const Sim::AppSignalManager& OverrideSignals::appSignalManager() const
+	{
+		return m_simulator->appSignalManager();
 	}
 
 	std::optional<OverrideSignalParam> OverrideSignals::overrideSignal(QString appSignalId) const
