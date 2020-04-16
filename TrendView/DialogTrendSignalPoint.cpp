@@ -1,13 +1,15 @@
 #include "DialogTrendSignalPoint.h"
 #include "ui_DialogTrendSignalPoint.h"
 
-DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateItem>* stateItems, E::TimeType timeType, E::SignalType signalType, int precision, QWidget *parent) :
+DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateItem>* stateItems,
+											   E::TimeType timeType,
+											   TrendLib::TrendSignalParam trendSignal,
+											   QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTrendSignalPoint),
 	m_stateItems(stateItems),
-	m_precision(precision),
-	m_timeType(timeType),
-	m_signalType(signalType)
+	m_trendSignal(trendSignal),
+	m_timeType(timeType)
 {
 	ui->setupUi(this);
 	setWindowTitle(tr("Points"));
@@ -19,7 +21,7 @@ DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateI
 		if (firstItem == true)
 		{
 			ui->dateTimeEdit->setDateTime(stateItem.getTime(m_timeType).toDateTime());
-			ui->editValue->setText(QString::number(stateItem.value, 'f', m_precision));
+			ui->editValue->setText(TrendLib::TrendScale::scaleValueText(stateItem.value, m_scaleType, m_trendSignal));
 			ui->checkBoxValid->setChecked(stateItem.isValid());
 			ui->checkBoxRealtime->setChecked(stateItem.isRealtimePoint());
 			firstItem = false;
@@ -80,7 +82,7 @@ void DialogTrendSignalPoint::accept()
 			return;
 		}
 
-		if (m_signalType == E::SignalType::Discrete)
+		if (m_trendSignal.type() == E::SignalType::Discrete)
 		{
 			if (value != 0 && value != 1)
 			{

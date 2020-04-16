@@ -649,7 +649,7 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = TrendScale::scaleValueText(value, drawParam, signal.precision());
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), signal);
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -779,7 +779,7 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = TrendScale::scaleValueText(value, drawParam, analogs[0].precision());
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), analogs[0]);
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -861,7 +861,7 @@ namespace TrendLib
 					continue;
 				}
 
-				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam, signal.precision()) : "?";
+				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam.scaleType(), signal) : "?";
 
 				drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 			}
@@ -1478,7 +1478,7 @@ namespace TrendLib
 						}
 						else
 						{
-							str = TrendScale::scaleValueText(state.value, drawParam, trendSignal.precision());
+							str = TrendScale::scaleValueText(state.value, drawParam.scaleType(), trendSignal);
 						}
 
 						double vertCoef = (highLimit - lowLimit) / signalRect.height();

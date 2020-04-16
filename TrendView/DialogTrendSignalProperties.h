@@ -33,8 +33,10 @@ public slots:
 private slots:
 	void on_buttonPoints_clicked();
 	void on_buttonApply_clicked();
+	void on_viewFormatCombo_currentIndexChanged(const QString &text);
 
 private:
+	void fillProperties();
 	bool applyProperties();
 
 private:

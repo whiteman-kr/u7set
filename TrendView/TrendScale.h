@@ -2,6 +2,7 @@
 #define TRENDSCALE_H
 
 #include "TrendParam.h"
+#include "TrendSignal.h"
 #include <optional>
 
 
@@ -36,7 +37,7 @@ namespace TrendLib
 
         // Text formatting functions
         //
-        static QString scaleValueText(double value, const TrendParam& drawParam, int precision);
+		static QString scaleValueText(double value, TrendScaleType scaleType, const TrendSignalParam& signalParam);
 
 	private:
         static double pointToScaleValue(double value, TrendScaleType scaleType, bool* ok);
