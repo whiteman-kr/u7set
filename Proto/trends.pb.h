@@ -508,6 +508,18 @@ class TrendSignalParam : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 color() const;
   inline void set_color(::google::protobuf::uint32 value);
 
+  // optional string analog_format = 41 [default = "g_9_or_9e"];
+  inline bool has_analog_format() const;
+  inline void clear_analog_format();
+  static const int kAnalogFormatFieldNumber = 41;
+  inline const ::std::string& analog_format() const;
+  inline void set_analog_format(const ::std::string& value);
+  inline void set_analog_format(const char* value);
+  inline void set_analog_format(const char* value, size_t size);
+  inline ::std::string* mutable_analog_format();
+  inline ::std::string* release_analog_format();
+  inline void set_allocated_analog_format(::std::string* analog_format);
+
   // @@protoc_insertion_point(class_scope:Proto.TrendSignalParam)
  private:
   inline void set_has_signal_id();
@@ -536,6 +548,8 @@ class TrendSignalParam : public ::google::protobuf::Message {
   inline void clear_has_view_low_limit();
   inline void set_has_color();
   inline void clear_has_color();
+  inline void set_has_analog_format();
+  inline void clear_has_analog_format();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -551,10 +565,12 @@ class TrendSignalParam : public ::google::protobuf::Message {
   double low_limit_;
   double view_high_limit_;
   double view_low_limit_;
+  ::std::string* analog_format_;
+  static ::std::string* _default_analog_format_;
   ::google::protobuf::uint32 color_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
 
   friend void  protobuf_AddDesc_trends_2eproto();
   friend void protobuf_AssignDesc_trends_2eproto();
@@ -1995,6 +2011,76 @@ inline ::google::protobuf::uint32 TrendSignalParam::color() const {
 inline void TrendSignalParam::set_color(::google::protobuf::uint32 value) {
   set_has_color();
   color_ = value;
+}
+
+// optional string analog_format = 41 [default = "g_9_or_9e"];
+inline bool TrendSignalParam::has_analog_format() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void TrendSignalParam::set_has_analog_format() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void TrendSignalParam::clear_has_analog_format() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void TrendSignalParam::clear_analog_format() {
+  if (analog_format_ != _default_analog_format_) {
+    analog_format_->assign(*_default_analog_format_);
+  }
+  clear_has_analog_format();
+}
+inline const ::std::string& TrendSignalParam::analog_format() const {
+  return *analog_format_;
+}
+inline void TrendSignalParam::set_analog_format(const ::std::string& value) {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string;
+  }
+  analog_format_->assign(value);
+}
+inline void TrendSignalParam::set_analog_format(const char* value) {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string;
+  }
+  analog_format_->assign(value);
+}
+inline void TrendSignalParam::set_analog_format(const char* value, size_t size) {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string;
+  }
+  analog_format_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TrendSignalParam::mutable_analog_format() {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string(*_default_analog_format_);
+  }
+  return analog_format_;
+}
+inline ::std::string* TrendSignalParam::release_analog_format() {
+  clear_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    return NULL;
+  } else {
+    ::std::string* temp = analog_format_;
+    analog_format_ = const_cast< ::std::string*>(_default_analog_format_);
+    return temp;
+  }
+}
+inline void TrendSignalParam::set_allocated_analog_format(::std::string* analog_format) {
+  if (analog_format_ != _default_analog_format_) {
+    delete analog_format_;
+  }
+  if (analog_format) {
+    set_has_analog_format();
+    analog_format_ = analog_format;
+  } else {
+    clear_has_analog_format();
+    analog_format_ = const_cast< ::std::string*>(_default_analog_format_);
+  }
 }
 
 // -------------------------------------------------------------------

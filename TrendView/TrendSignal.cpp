@@ -174,6 +174,7 @@ namespace TrendLib
 
 		message->set_type(static_cast<int>(m_type));
 		message->set_unit(m_unit.toStdString());
+		message->set_analog_format(E::valueToString<E::AnalogFormat>(m_analogFormat).toStdString());
 		message->set_precision(m_precision);
 
 		message->set_line_weight(m_lineWeight);
@@ -198,6 +199,13 @@ namespace TrendLib
 		m_type = static_cast<E::SignalType>(message.type());
 		m_unit = QString::fromStdString(message.unit());
 		m_precision = message.precision();
+
+		QString analogFormatString = QString::fromStdString(message.analog_format());
+		std::pair<E::AnalogFormat, bool> loadedAnalogFormat = E::stringToValue<E::AnalogFormat>(analogFormatString);
+		if (loadedAnalogFormat.second == true)
+		{
+			m_analogFormat = loadedAnalogFormat.first;
+		}
 
 		m_lineWeight = message.line_weight();
 
@@ -284,6 +292,16 @@ namespace TrendLib
 	void TrendSignalParam::setUnit(const QString& value)
 	{
 		m_unit = value;
+	}
+
+	E::AnalogFormat TrendSignalParam::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void TrendSignalParam::setAnalogFormat(E::AnalogFormat format)
+	{
+		m_analogFormat = format;
 	}
 
 	int TrendSignalParam::precision() const

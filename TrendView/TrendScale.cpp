@@ -128,29 +128,25 @@ namespace TrendLib
 		return {};
 	}
 
-	QString TrendScale::scaleValueText(double value, const TrendParam& drawParam, int precision)
+	QString TrendScale::scaleValueText(double value, TrendScaleType scaleType, const TrendSignalParam& signalParam)
 	{
-		switch (drawParam.scaleType())
+		if (scaleType == TrendScaleType::Period)
 		{
-		case TrendScaleType::Linear:
+			if (std::fabs(round(value)) >= periodScaleInfinity)
 			{
-				return QString(" %1 ").arg(QString::number(value, 'f', precision));
+				return QString(QChar(0x221E));	// Infinity sign
 			}
-		case TrendScaleType::Log10:
-			{
-				return QString(" %1 ").arg(QString::number(value, 'e', precision));
-			}
-		case TrendScaleType::Period:
-			{
-				if (std::fabs(round(value)) >= periodScaleInfinity)
-				{
-					return QString(QChar(0x221E));
-				}
-				return QString(" %1 ").arg(QString::number(value, 'f', precision));
-			}
-		default:
-			Q_ASSERT(false);
-			return QString();
+		}
+
+		E::AnalogFormat format = signalParam.analogFormat();
+
+		if (format == E::AnalogFormat::G_9_or_9E || format == E::AnalogFormat::g_9_or_9e)
+		{
+			return QString::number(value, static_cast<char>(signalParam.analogFormat())); // Let Qt choose best format and precision
+		}
+		else
+		{
+			return QString::number(value, static_cast<char>(signalParam.analogFormat()), signalParam.precision());
 		}
 	}
 

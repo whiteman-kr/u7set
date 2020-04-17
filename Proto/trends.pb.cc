@@ -120,7 +120,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendArchive));
   TrendSignalParam_descriptor_ = file->message_type(3);
-  static const int TrendSignalParam_offsets_[13] = {
+  static const int TrendSignalParam_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, signal_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, app_signal_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, caption_),
@@ -134,6 +134,7 @@ void protobuf_AssignDesc_trends_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, view_high_limit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, view_low_limit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, color_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, analog_format_),
   };
   TrendSignalParam_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -295,6 +296,7 @@ void protobuf_ShutdownFile_trends_2eproto() {
   delete TrendArchive_reflection_;
   delete TrendSignalParam::default_instance_;
   delete TrendSignalParam_reflection_;
+  delete TrendSignalParam::_default_analog_format_;
   delete TrendSignalSet::default_instance_;
   delete TrendSignalSet_reflection_;
   delete TrendRuler::default_instance_;
@@ -322,37 +324,39 @@ void protobuf_AddDesc_trends_2eproto() {
     "\030\003 \001(\005\022(\n\007records\030\004 \003(\0132\027.Proto.TrendSta"
     "teRecord\"M\n\014TrendArchive\022\025\n\rapp_signal_i"
     "d\030\002 \001(\t\022&\n\005hours\030\n \003(\0132\027.Proto.TrendArch"
-    "iveHour\"\221\002\n\020TrendSignalParam\022\021\n\tsignal_i"
+    "iveHour\"\263\002\n\020TrendSignalParam\022\021\n\tsignal_i"
     "d\030\002 \001(\t\022\025\n\rapp_signal_id\030\003 \001(\t\022\017\n\007captio"
     "n\030\004 \001(\t\022\024\n\014equipment_id\030\005 \001(\t\022\014\n\004type\030\n "
     "\001(\005\022\014\n\004unit\030\013 \001(\t\022\021\n\tprecision\030\014 \001(\005\022\026\n\013"
     "line_weight\030\023 \001(\001:\0010\022\022\n\nhigh_limit\030\024 \001(\001"
     "\022\021\n\tlow_limit\030\025 \001(\001\022\027\n\017view_high_limit\030\037"
     " \001(\001\022\026\n\016view_low_limit\030  \001(\001\022\r\n\005color\030( "
-    "\001(\r\"\324\001\n\016TrendSignalSet\022.\n\rsignal_params\030"
-    "\002 \003(\0132\027.Proto.TrendSignalParam\022/\n\022archiv"
-    "e_local_time\030\n \003(\0132\023.Proto.TrendArchive\022"
-    "0\n\023archive_system_time\030\013 \003(\0132\023.Proto.Tre"
-    "ndArchive\022/\n\022archive_plant_time\030\014 \003(\0132\023."
-    "Proto.TrendArchive\"V\n\nTrendRuler\022\022\n\ntime"
-    "_stamp\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show"
-    "_signal_values\030\004 \001(\010:\004true\"2\n\rTrendRuler"
-    "Set\022!\n\006rulers\030\002 \003(\0132\021.Proto.TrendRuler\"["
-    "\n\005Trend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.Tren"
-    "dSignalSet\022\'\n\truler_set\030\003 \001(\0132\024.Proto.Tr"
-    "endRulerSet\"\274\001\n\nTrendParam\022\024\n\tview_mode\030"
-    "\002 \001(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_c"
-    "ount\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010dur"
-    "ation\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016b"
-    "ack_color_2nd\030G \001(\r\022\025\n\nscale_type\030\005 \001(\005:"
-    "\0010\"R\n\013TrendWidget\022\033\n\005trend\030\002 \001(\0132\014.Proto"
-    ".Trend\022&\n\013trend_param\030\003 \001(\0132\021.Proto.Tren"
-    "dParam", 1246);
+    "\001(\r\022 \n\ranalog_format\030) \001(\t:\tg_9_or_9e\"\324\001"
+    "\n\016TrendSignalSet\022.\n\rsignal_params\030\002 \003(\0132"
+    "\027.Proto.TrendSignalParam\022/\n\022archive_loca"
+    "l_time\030\n \003(\0132\023.Proto.TrendArchive\0220\n\023arc"
+    "hive_system_time\030\013 \003(\0132\023.Proto.TrendArch"
+    "ive\022/\n\022archive_plant_time\030\014 \003(\0132\023.Proto."
+    "TrendArchive\"V\n\nTrendRuler\022\022\n\ntime_stamp"
+    "\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_signa"
+    "l_values\030\004 \001(\010:\004true\"2\n\rTrendRulerSet\022!\n"
+    "\006rulers\030\002 \003(\0132\021.Proto.TrendRuler\"[\n\005Tren"
+    "d\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.TrendSigna"
+    "lSet\022\'\n\truler_set\030\003 \001(\0132\024.Proto.TrendRul"
+    "erSet\"\274\001\n\nTrendParam\022\024\n\tview_mode\030\002 \001(\005:"
+    "\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_count\030\004"
+    " \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010duration\030"
+    "3 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016back_co"
+    "lor_2nd\030G \001(\r\022\025\n\nscale_type\030\005 \001(\005:\0010\"R\n\013"
+    "TrendWidget\022\033\n\005trend\030\002 \001(\0132\014.Proto.Trend"
+    "\022&\n\013trend_param\030\003 \001(\0132\021.Proto.TrendParam", 1280);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "trends.proto", &protobuf_RegisterTypes);
   TrendStateRecord::default_instance_ = new TrendStateRecord();
   TrendArchiveHour::default_instance_ = new TrendArchiveHour();
   TrendArchive::default_instance_ = new TrendArchive();
+  TrendSignalParam::_default_analog_format_ =
+      new ::std::string("g_9_or_9e", 9);
   TrendSignalParam::default_instance_ = new TrendSignalParam();
   TrendSignalSet::default_instance_ = new TrendSignalSet();
   TrendRuler::default_instance_ = new TrendRuler();
@@ -1149,6 +1153,7 @@ void TrendArchive::Swap(TrendArchive* other) {
 
 // ===================================================================
 
+::std::string* TrendSignalParam::_default_analog_format_ = NULL;
 #ifndef _MSC_VER
 const int TrendSignalParam::kSignalIdFieldNumber;
 const int TrendSignalParam::kAppSignalIdFieldNumber;
@@ -1163,6 +1168,7 @@ const int TrendSignalParam::kLowLimitFieldNumber;
 const int TrendSignalParam::kViewHighLimitFieldNumber;
 const int TrendSignalParam::kViewLowLimitFieldNumber;
 const int TrendSignalParam::kColorFieldNumber;
+const int TrendSignalParam::kAnalogFormatFieldNumber;
 #endif  // !_MSC_VER
 
 TrendSignalParam::TrendSignalParam()
@@ -1194,6 +1200,7 @@ void TrendSignalParam::SharedCtor() {
   view_high_limit_ = 0;
   view_low_limit_ = 0;
   color_ = 0u;
+  analog_format_ = const_cast< ::std::string*>(_default_analog_format_);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1216,6 +1223,9 @@ void TrendSignalParam::SharedDtor() {
   }
   if (unit_ != &::google::protobuf::internal::kEmptyString) {
     delete unit_;
+  }
+  if (analog_format_ != _default_analog_format_) {
+    delete analog_format_;
   }
   if (this != default_instance_) {
   }
@@ -1279,6 +1289,11 @@ void TrendSignalParam::Clear() {
     view_high_limit_ = 0;
     view_low_limit_ = 0;
     color_ = 0u;
+    if (has_analog_format()) {
+      if (analog_format_ != _default_analog_format_) {
+        analog_format_->assign(*_default_analog_format_);
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -1498,6 +1513,23 @@ bool TrendSignalParam::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(330)) goto parse_analog_format;
+        break;
+      }
+
+      // optional string analog_format = 41 [default = "g_9_or_9e"];
+      case 41: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_analog_format:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_analog_format()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->analog_format().data(), this->analog_format().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1605,6 +1637,15 @@ void TrendSignalParam::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(40, this->color(), output);
   }
 
+  // optional string analog_format = 41 [default = "g_9_or_9e"];
+  if (has_analog_format()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->analog_format().data(), this->analog_format().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      41, this->analog_format(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1703,6 +1744,16 @@ void TrendSignalParam::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(40, this->color(), target);
   }
 
+  // optional string analog_format = 41 [default = "g_9_or_9e"];
+  if (has_analog_format()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->analog_format().data(), this->analog_format().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        41, this->analog_format(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1797,6 +1848,13 @@ int TrendSignalParam::ByteSize() const {
           this->color());
     }
 
+    // optional string analog_format = 41 [default = "g_9_or_9e"];
+    if (has_analog_format()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->analog_format());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -1865,6 +1923,9 @@ void TrendSignalParam::MergeFrom(const TrendSignalParam& from) {
     if (from.has_color()) {
       set_color(from.color());
     }
+    if (from.has_analog_format()) {
+      set_analog_format(from.analog_format());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1901,6 +1962,7 @@ void TrendSignalParam::Swap(TrendSignalParam* other) {
     std::swap(view_high_limit_, other->view_high_limit_);
     std::swap(view_low_limit_, other->view_low_limit_);
     std::swap(color_, other->color_);
+    std::swap(analog_format_, other->analog_format_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
