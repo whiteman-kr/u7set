@@ -245,11 +245,6 @@ namespace TrendLib
 		ok &= m_trend.load(message.trend());
 		ok &= m_trendParam.load(message.trend_param());
 
-		if (ok == true)
-		{
-			m_trend.validateViewLimits(m_trendParam);
-		}
-
 		return ok;
 	}
 
@@ -1157,12 +1152,6 @@ namespace TrendLib
 	void TrendWidget::setScaleType(TrendScaleType value)
 	{
 		m_trendParam.setScaleType(value);
-		return;
-	}
-
-	void TrendWidget::validateViewLimits()
-	{
-		m_trend.validateViewLimits(m_trendParam);
 		return;
 	}
 

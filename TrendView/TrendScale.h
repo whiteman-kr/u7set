@@ -40,6 +40,9 @@ namespace TrendLib
 		static QString scaleValueText(double value, TrendScaleType scaleType, const TrendSignalParam& signalParam);
 
 	private:
+		static double trendLog10(double value);
+		static double trendPow10(double value);
+
         static double pointToScaleValue(double value, TrendScaleType scaleType, bool* ok);
         static double pointFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok);
 

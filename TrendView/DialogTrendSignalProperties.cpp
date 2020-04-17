@@ -209,15 +209,6 @@ bool DialogTrendSignalProperties::applyProperties()
 			return false;
 		}
 
-		if (m_scaleType == TrendLib::TrendScaleType::Log10)
-		{
-			if (viewHighLimit <= 0 || viewLowLimit <= 0)
-			{
-				QMessageBox::critical(this, qAppName(), tr("Value of view limits should be positive (> 0) for logarithmic scale!"));
-				return false;
-			}
-		}
-
 		if (m_scaleType == TrendLib::TrendScaleType::Period)
 		{
 			if (std::fabs(viewHighLimit) < 1 ||

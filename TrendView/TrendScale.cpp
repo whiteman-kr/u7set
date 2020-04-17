@@ -138,6 +138,14 @@ namespace TrendLib
 			}
 		}
 
+		if (scaleType == TrendScaleType::Log10)
+		{
+			if (std::fabs(value) <= FLT_MIN)
+			{
+				return "0";
+			}
+		}
+
 		E::AnalogFormat format = signalParam.analogFormat();
 
 		if (format == E::AnalogFormat::G_9_or_9E || format == E::AnalogFormat::g_9_or_9e)
@@ -148,6 +156,51 @@ namespace TrendLib
 		{
 			return QString::number(value, static_cast<char>(signalParam.analogFormat()), signalParam.precision());
 		}
+	}
+
+	double TrendScale::trendLog10(double value)
+	{
+		// Logarithm is calculated in float type range (-38..38 exponent).
+		// The result is shifted up by 38 (FLT_MAX_10_EXP) to get the result in range 0 .. 76.
+		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
+		// This means that we take a "ghost" logarithm from negative value.
+
+		double result = std::fabs(value);
+
+		result = qBound(FLT_MIN, static_cast<float>(result), FLT_MAX);
+
+		result = std::log10(result);
+
+		result += FLT_MAX_10_EXP;
+
+		if (value < 0)
+		{
+			result = -result;
+		}
+
+		return result;
+	}
+
+	double TrendScale::trendPow10(double value)
+	{
+		// Power calculation, reverse function for trendLog10.
+		// Input value is shifted down by 38 (FLT_MAX_10_EXP) and power is calculated from its absoulte value.
+		// The sign of the result depened on input value sign.
+
+		double result = std::fabs(value);
+
+		result -= FLT_MAX_10_EXP;
+
+		result = std::pow(10, result);
+
+		result = qBound(FLT_MIN, static_cast<float>(result), FLT_MAX);
+
+		if (value < 0)
+		{
+			result = -result;
+		}
+
+		return result;
 	}
 
 	double TrendScale::pointToScaleValue(double value, TrendScaleType scaleType, bool* ok)
@@ -165,19 +218,7 @@ namespace TrendLib
 			}
 		case TrendScaleType::Log10:
 			{
-				if (value <= 0)
-				{
-					if (ok != nullptr)
-					{
-						*ok = false;
-					}
-
-					return 0;
-				}
-				else
-				{
-					return std::log10(value);
-				}
+				return trendLog10(value);
 			}
 		case TrendScaleType::Period:
 			{
@@ -233,7 +274,10 @@ namespace TrendLib
 			}
 		case TrendScaleType::Log10:
 			{
-				return std::pow(10, scaleValue);
+				scaleValue = trendPow10(scaleValue);
+
+				return scaleValue;
+
 			}
 		case TrendScaleType::Period:
 			{
