@@ -270,6 +270,7 @@ const char* const TestCmd::PARAM_TEST_ID = "TestID";
 const char* const TestCmd::PARAM_TEST_DESCRIPTION = "TestDescription";
 const char* const TestCmd::PARAM_SCHEMA_ID = "SchemaID";
 const char* const TestCmd::PARAM_COMPATIBLE = "Compatible";
+const char* const TestCmd::PARAM_SOURCE_ID = "SourceID";
 
 TestCmd::TestCmd()
 {
@@ -354,15 +355,18 @@ bool TestCmd::parse(const QString& line)
 
 	switch (m_type)
 	{
-		case TF_CMD_TEST:		resultCmd = parseCmdTest();			break;
-		case TF_CMD_ENDTEST:	resultCmd = parseCmdEndtest();		break;
-		case TF_CMD_SCHEMA:		resultCmd = parseCmdSchema();		break;
-		case TF_CMD_COMPATIBLE: resultCmd = parseCmdCompatible();	break;
-		case TF_CMD_CONST:		resultCmd = parseCmdConst();		break;
-		case TF_CMD_VAR:		resultCmd = parseCmdVar();			break;
-		case TF_CMD_SET:		resultCmd = parseCmdSet();			break;
-		case TF_CMD_CHECK:		resultCmd = parseCmdCheck();		break;
-		case TF_CMD_DELAY:		resultCmd = parseCmdDelay();		break;
+		case TF_CMD_TEST:			resultCmd = parseCmdTest();			break;
+		case TF_CMD_ENDTEST:		resultCmd = parseCmdEndtest();		break;
+		case TF_CMD_SCHEMA:			resultCmd = parseCmdSchema();		break;
+		case TF_CMD_COMPATIBLE:		resultCmd = parseCmdCompatible();	break;
+		case TF_CMD_CONST:			resultCmd = parseCmdConst();		break;
+		case TF_CMD_VAR:			resultCmd = parseCmdVar();			break;
+		case TF_CMD_SET:			resultCmd = parseCmdSet();			break;
+		case TF_CMD_CHECK:			resultCmd = parseCmdCheck();		break;
+		case TF_CMD_DELAY:			resultCmd = parseCmdDelay();		break;
+		case TF_CMD_RUN_SOURCE:		resultCmd = parseCmdRunSource();	break;
+		case TF_CMD_STOP_SOURCE:	resultCmd = parseCmdStopSource();	break;
+		case TF_CMD_EXIT_PS:		resultCmd = parseCmdExitPS();		break;
 	}
 
 	return resultCmd;
@@ -1114,6 +1118,72 @@ bool TestCmd::parseCmdDelay()
 	return true;
 }
 
+bool TestCmd::parseCmdRunSource()
+{
+	int spacePos = m_line.indexOf(' ');
+	if (spacePos == -1)
+	{
+		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString sourceID = m_line.right(m_line.length() - spacePos).simplified();
+	if(sourceID.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Failed sourceID").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	TestCmdParam param;
+	param.setName(PARAM_SOURCE_ID);
+	param.setType(TestCmdParamType::String);
+	param.setValue(sourceID);
+	m_paramList.append(param);
+
+	return true;
+}
+
+bool TestCmd::parseCmdStopSource()
+{
+	int spacePos = m_line.indexOf(' ');
+	if (spacePos == -1)
+	{
+		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString sourceID = m_line.right(m_line.length() - spacePos).simplified();
+	if(sourceID.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Failed sourceID").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	TestCmdParam param;
+	param.setName(PARAM_SOURCE_ID);
+	param.setType(TestCmdParamType::String);
+	param.setValue(sourceID);
+	m_paramList.append(param);
+
+	return true;
+}
+
+bool TestCmd::parseCmdExitPS()
+{
+	if (m_line.length() > static_cast<int>(strlen(TestFileCmd[TF_CMD_EXIT_PS])))
+	{
+		QString errorStr = QString("(line %1) Error : Failed params - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	return true;
+}
+
 bool TestCmd::isUniqueTestID(const QString& testID)
 {
 	if (testID.isEmpty() == true)
@@ -1196,8 +1266,8 @@ bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdP
 			continue;
 		}
 
-		int paramCount = cmd.paramList().count();
-		for(int p = 0; p < paramCount; p++)
+		int prmCount = cmd.paramList().count();
+		for(int p = 0; p < prmCount; p++)
 		{
 			if (cmd.paramList().at(p).name() == name)
 			{
@@ -1481,7 +1551,7 @@ void TestItem::appendResult(const QString& str, bool printDebugMsg)
 
 	if (printDebugMsg == true)
 	{
-		std::cout << str.toLocal8Bit().constData() << "\n";
+		std::cout << str.toLocal8Bit().constData() << std::endl;
 	}
 }
 
@@ -1528,7 +1598,7 @@ void TestFile::printErrorlist()
 	int errorCount = m_errorList.count();
 	for(int i = 0; i < errorCount; i++)
 	{
-		std::cout << m_errorList[i].toLocal8Bit().constData() << "\n";
+		std::cout << m_errorList[i].toLocal8Bit().constData() << std::endl;
 	}
 }
 
@@ -1536,20 +1606,20 @@ bool TestFile::parse(const QString& fileName, SignalBase* pSignalBase)
 {
 	if (fileName.isEmpty() == true)
 	{
-		std::cout << "Error: Test file name is empty\n";
+		std::cout << "Error: Test file name is empty" << std::endl;
 		return false;
 	}
 
 	if (pSignalBase == nullptr)
 	{
-		std::cout << "Error: Failed SignalBase\n";
+		std::cout << "Error: Failed SignalBase" << std::endl;
 		return false;
 	}
 
 	m_file.setFileName(fileName);
 	if (m_file.open(QIODevice::ReadOnly) == false)
 	{
-		std::cout << "Error: Test file " << m_fileName.toLocal8Bit().constData() << " is not open\n";
+		std::cout << "Error: Test file " << m_fileName.toLocal8Bit().constData() << " is not open" << std::endl;
 		m_errorList.append("Error: Test file " + m_fileName + " is not open\n");
 		return false;
 	}
@@ -1651,8 +1721,8 @@ void TestFile::createTestList()
 
 				if (cmd.type() == TF_CMD_COMPATIBLE)
 				{
-					int paramCount = cmd.paramList().count();
-					for(int i = 0; i < paramCount; i++)
+					int prmCount = cmd.paramList().count();
+					for(int i = 0; i < prmCount; i++)
 					{
 						test.compatibleList().append(cmd.paramList().at(i).value().toString());
 					}

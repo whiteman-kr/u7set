@@ -1,16 +1,7 @@
 #ifndef FRAMEBASE_H
 #define FRAMEBASE_H
 
-#include <QAbstractTableModel>
-#include <QColor>
 #include <QMutex>
-#include <QIcon>
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QIntValidator>
 
 #include "../../lib/DataProtocols.h"
 

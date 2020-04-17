@@ -193,6 +193,7 @@ namespace Metrology
 
 		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
 		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
+		double					m_electricRLoad = 0;
 
 		double					m_electricR0 = 0;
 		int						m_electricPrecision = 4;
@@ -233,6 +234,10 @@ namespace Metrology
 		E::SensorType			electricSensorType() const { return m_electricSensorType; }
 		void					setElectricSensorType(E::SensorType sensorType) { m_electricSensorType = sensorType; }
 		QString					electricSensorTypeStr() const;
+
+		double					electricRLoad() const { return m_electricRLoad; }
+		void					setElectricRLoad(double rload) { m_electricRLoad = rload; }
+		QString					electricRLoadStr() const;
 
 		double					electricR0() const { return m_electricR0; }
 		void					setElectricR0(double r0) { m_electricR0 = r0; }

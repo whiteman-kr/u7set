@@ -81,6 +81,10 @@ class TuningSignalWriteResult;
 class TuningSignalsWriteReply;
 class TuningSignalsApply;
 class TuningSignalsApplyReply;
+class DataSourceWrite;
+class DataSourceWriteReply;
+class PacketSourceExit;
+class PacketSourceExitReply;
 class SaveAppSignalsStatesToArchiveRequest;
 class SaveAppSignalsStatesToArchiveReply;
 class GetAppSignalStatesFromArchiveStartRequest;
@@ -5949,6 +5953,339 @@ class TuningSignalsApplyReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static TuningSignalsApplyReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DataSourceWrite : public ::google::protobuf::Message {
+ public:
+  DataSourceWrite();
+  virtual ~DataSourceWrite();
+
+  DataSourceWrite(const DataSourceWrite& from);
+
+  inline DataSourceWrite& operator=(const DataSourceWrite& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DataSourceWrite& default_instance();
+
+  void Swap(DataSourceWrite* other);
+
+  // implements Message ----------------------------------------------
+
+  DataSourceWrite* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DataSourceWrite& from);
+  void MergeFrom(const DataSourceWrite& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string sourceEquipmentID = 1;
+  inline bool has_sourceequipmentid() const;
+  inline void clear_sourceequipmentid();
+  static const int kSourceEquipmentIDFieldNumber = 1;
+  inline const ::std::string& sourceequipmentid() const;
+  inline void set_sourceequipmentid(const ::std::string& value);
+  inline void set_sourceequipmentid(const char* value);
+  inline void set_sourceequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_sourceequipmentid();
+  inline ::std::string* release_sourceequipmentid();
+  inline void set_allocated_sourceequipmentid(::std::string* sourceequipmentid);
+
+  // optional bool state = 2 [default = false];
+  inline bool has_state() const;
+  inline void clear_state();
+  static const int kStateFieldNumber = 2;
+  inline bool state() const;
+  inline void set_state(bool value);
+
+  // @@protoc_insertion_point(class_scope:Network.DataSourceWrite)
+ private:
+  inline void set_has_sourceequipmentid();
+  inline void clear_has_sourceequipmentid();
+  inline void set_has_state();
+  inline void clear_has_state();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* sourceequipmentid_;
+  bool state_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static DataSourceWrite* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DataSourceWriteReply : public ::google::protobuf::Message {
+ public:
+  DataSourceWriteReply();
+  virtual ~DataSourceWriteReply();
+
+  DataSourceWriteReply(const DataSourceWriteReply& from);
+
+  inline DataSourceWriteReply& operator=(const DataSourceWriteReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DataSourceWriteReply& default_instance();
+
+  void Swap(DataSourceWriteReply* other);
+
+  // implements Message ----------------------------------------------
+
+  DataSourceWriteReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DataSourceWriteReply& from);
+  void MergeFrom(const DataSourceWriteReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.DataSourceWriteReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static DataSourceWriteReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PacketSourceExit : public ::google::protobuf::Message {
+ public:
+  PacketSourceExit();
+  virtual ~PacketSourceExit();
+
+  PacketSourceExit(const PacketSourceExit& from);
+
+  inline PacketSourceExit& operator=(const PacketSourceExit& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PacketSourceExit& default_instance();
+
+  void Swap(PacketSourceExit* other);
+
+  // implements Message ----------------------------------------------
+
+  PacketSourceExit* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PacketSourceExit& from);
+  void MergeFrom(const PacketSourceExit& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.PacketSourceExit)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static PacketSourceExit* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PacketSourceExitReply : public ::google::protobuf::Message {
+ public:
+  PacketSourceExitReply();
+  virtual ~PacketSourceExitReply();
+
+  PacketSourceExitReply(const PacketSourceExitReply& from);
+
+  inline PacketSourceExitReply& operator=(const PacketSourceExitReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PacketSourceExitReply& default_instance();
+
+  void Swap(PacketSourceExitReply* other);
+
+  // implements Message ----------------------------------------------
+
+  PacketSourceExitReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PacketSourceExitReply& from);
+  void MergeFrom(const PacketSourceExitReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.PacketSourceExitReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static PacketSourceExitReply* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -14008,6 +14345,158 @@ inline ::google::protobuf::int32 TuningSignalsApplyReply::error() const {
   return error_;
 }
 inline void TuningSignalsApplyReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// DataSourceWrite
+
+// optional string sourceEquipmentID = 1;
+inline bool DataSourceWrite::has_sourceequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DataSourceWrite::set_has_sourceequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DataSourceWrite::clear_has_sourceequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DataSourceWrite::clear_sourceequipmentid() {
+  if (sourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    sourceequipmentid_->clear();
+  }
+  clear_has_sourceequipmentid();
+}
+inline const ::std::string& DataSourceWrite::sourceequipmentid() const {
+  return *sourceequipmentid_;
+}
+inline void DataSourceWrite::set_sourceequipmentid(const ::std::string& value) {
+  set_has_sourceequipmentid();
+  if (sourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    sourceequipmentid_ = new ::std::string;
+  }
+  sourceequipmentid_->assign(value);
+}
+inline void DataSourceWrite::set_sourceequipmentid(const char* value) {
+  set_has_sourceequipmentid();
+  if (sourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    sourceequipmentid_ = new ::std::string;
+  }
+  sourceequipmentid_->assign(value);
+}
+inline void DataSourceWrite::set_sourceequipmentid(const char* value, size_t size) {
+  set_has_sourceequipmentid();
+  if (sourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    sourceequipmentid_ = new ::std::string;
+  }
+  sourceequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceWrite::mutable_sourceequipmentid() {
+  set_has_sourceequipmentid();
+  if (sourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    sourceequipmentid_ = new ::std::string;
+  }
+  return sourceequipmentid_;
+}
+inline ::std::string* DataSourceWrite::release_sourceequipmentid() {
+  clear_has_sourceequipmentid();
+  if (sourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = sourceequipmentid_;
+    sourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceWrite::set_allocated_sourceequipmentid(::std::string* sourceequipmentid) {
+  if (sourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete sourceequipmentid_;
+  }
+  if (sourceequipmentid) {
+    set_has_sourceequipmentid();
+    sourceequipmentid_ = sourceequipmentid;
+  } else {
+    clear_has_sourceequipmentid();
+    sourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool state = 2 [default = false];
+inline bool DataSourceWrite::has_state() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DataSourceWrite::set_has_state() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DataSourceWrite::clear_has_state() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DataSourceWrite::clear_state() {
+  state_ = false;
+  clear_has_state();
+}
+inline bool DataSourceWrite::state() const {
+  return state_;
+}
+inline void DataSourceWrite::set_state(bool value) {
+  set_has_state();
+  state_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// DataSourceWriteReply
+
+// optional int32 error = 1 [default = 0];
+inline bool DataSourceWriteReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DataSourceWriteReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DataSourceWriteReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DataSourceWriteReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 DataSourceWriteReply::error() const {
+  return error_;
+}
+inline void DataSourceWriteReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// PacketSourceExit
+
+// -------------------------------------------------------------------
+
+// PacketSourceExitReply
+
+// optional int32 error = 1 [default = 0];
+inline bool PacketSourceExitReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PacketSourceExitReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PacketSourceExitReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PacketSourceExitReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 PacketSourceExitReply::error() const {
+  return error_;
+}
+inline void PacketSourceExitReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }

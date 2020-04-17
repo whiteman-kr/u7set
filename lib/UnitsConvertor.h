@@ -12,13 +12,17 @@
 // limits for input signals
 //
 
-const double RESISTOR_V_0_5 = 0.25;	 // 250 Ohm
-
 const double V_0_5_LOW_LIMIT = 0;
 const double V_0_5_HIGH_LIMIT = 5.1;
 
 const double V_m10_p10_LOW_LIMIT = -11;
 const double V_m10_p10_HIGH_LIMIT = 11;
+
+// limits for Rload_Ohm if AIM use units mA
+//
+
+const double RLOAD_LOW_LIMIT = 50;
+const double RLOAD_HIGH_LIMIT = 1000;
 
 // limits for otput signals
 //
@@ -179,7 +183,7 @@ public:
 
 public:
 
-	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);						// for blocks of input signals - AIM, WAIM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// for blocks of input signals - AIM, WAIM (V - AIM and WAIM, mA - only AIM)
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// for blocks of output signals - AOM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// for blocks of thermocouple signals - TIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// for blocks of thermoresistor signals - RIM

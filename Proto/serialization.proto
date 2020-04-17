@@ -1438,8 +1438,10 @@ message MetrologySignal
 	optional double electricHighLimit = 4 [default = 0.0];
 	optional int32 electricUnitID = 5 [default = 1];			// E::ElectricUnit::NoUnit;
 	optional int32 electricSensorType = 6 [default = 1];		// E::SensorType::NoSensor;
-	optional double electricR0 = 7 [default = 0];;
+        optional double electricRload = 11 [default = 0];
+	optional double electricR0 = 7 [default = 0];
 	optional int32 electricPrecision = 8 [default = 4];
+	
 
     optional double physicalLowLimit = 9 [default = 0.0];
 	optional double physicalHighLimit = 10 [default = 0.0];

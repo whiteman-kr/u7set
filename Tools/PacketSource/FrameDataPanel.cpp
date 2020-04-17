@@ -441,7 +441,6 @@ void FrameDataPanel::createContextMenu()
 void FrameDataPanel::clear()
 {
 	m_frameDataTable.clear();
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------

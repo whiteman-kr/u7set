@@ -92,7 +92,9 @@ public:
 	QString presetLM() const { return m_presetLM; }
 
 	void getParams(int& argc, char** argv);
-	bool paramIsValid();
+	bool parse();
+
+	bool printToReportFile(const QStringList& msgList);							// print results to report file
 
 	bool enableContinueTest() const { return m_enableContinueTest; }			// for cmd line param -errignore
 	void setEnableContinueTest(bool enable) { m_enableContinueTest = enable; }

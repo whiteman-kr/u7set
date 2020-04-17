@@ -307,6 +307,7 @@ namespace Metrology
 		m_electricHighLimit = 0;
 		m_electricUnitID = E::ElectricUnit::NoUnit;
 		m_electricSensorType = E::SensorType::NoSensor;
+		m_electricRLoad = 0;
 		m_electricR0 = 0;
 		m_electricPrecision = 0;
 
@@ -346,10 +347,23 @@ namespace Metrology
 					switch (signal.electricUnit())
 					{
 						case E::ElectricUnit::V:
+
+							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+
+							break;
+
 						case E::ElectricUnit::mA:
 
-							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
-							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
+							if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+							{
+								break;
+							}
+
+							m_electricRLoad = signal.rload_Ohm();
+
+							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID,m_electricSensorType, m_electricRLoad);
 
 							break;
 
@@ -440,6 +454,7 @@ namespace Metrology
 
 		ms->set_electricunitid(TO_INT(m_electricUnitID));
 		ms->set_electricsensortype(TO_INT(m_electricSensorType));
+		ms->set_electricrload(m_electricRLoad);
 
 		ms->set_electricr0(m_electricR0);
 		ms->set_electricprecision(m_electricPrecision);
@@ -470,6 +485,7 @@ namespace Metrology
 
 		m_electricUnitID = static_cast<E::ElectricUnit>(ms.electricunitid());
 		m_electricSensorType = static_cast<E::SensorType>(ms.electricsensortype());
+		m_electricRLoad = ms.electricrload();
 
 		m_electricR0 = ms.electricr0();
 		m_electricPrecision = ms.electricprecision();
@@ -511,12 +527,38 @@ namespace Metrology
 	{
 		QString typeStr = QMetaEnum::fromType<E::SensorType>().key(m_electricSensorType);
 
-		if (m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw)
+		switch(m_electricUnitID)
 		{
-			typeStr += " " + electricR0Str();
+			case E::ElectricUnit::mA:
+
+				if (m_electricSensorType == E::SensorType::V_0_5)
+				{
+					typeStr += " " + electricRLoadStr();
+				}
+
+				break;
+
+			case E::ElectricUnit::Ohm:
+
+				if (m_electricSensorType != E::SensorType::Ohm_Raw)
+				{
+					typeStr += " " + electricR0Str();
+				}
+
+				break;
 		}
 
+
 		return typeStr;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::electricRLoadStr() const
+	{
+		QString r0;
+		r0.sprintf("R=%0.0f", m_electricRLoad);
+		return r0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

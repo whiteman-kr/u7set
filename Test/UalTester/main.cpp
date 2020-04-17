@@ -14,9 +14,14 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain("radiy.com");
 
 	UalTester ualTester(argc, argv);
-	ualTester.start();
+	if (ualTester.start() == false)
+	{
+		return -1;
+	}
 
 	int result = a.exec();
+
+	ualTester.stop();
 
 	google::protobuf::ShutdownProtobufLibrary();
 

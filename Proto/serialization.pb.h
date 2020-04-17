@@ -13947,6 +13947,13 @@ class MetrologySignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 electricsensortype() const;
   inline void set_electricsensortype(::google::protobuf::int32 value);
 
+  // optional double electricRload = 11 [default = 0];
+  inline bool has_electricrload() const;
+  inline void clear_electricrload();
+  static const int kElectricRloadFieldNumber = 11;
+  inline double electricrload() const;
+  inline void set_electricrload(double value);
+
   // optional double electricR0 = 7 [default = 0];
   inline bool has_electricr0() const;
   inline void clear_electricr0();
@@ -13989,6 +13996,8 @@ class MetrologySignal : public ::google::protobuf::Message {
   inline void clear_has_electricunitid();
   inline void set_has_electricsensortype();
   inline void clear_has_electricsensortype();
+  inline void set_has_electricrload();
+  inline void clear_has_electricrload();
   inline void set_has_electricr0();
   inline void clear_has_electricr0();
   inline void set_has_electricprecision();
@@ -14006,13 +14015,14 @@ class MetrologySignal : public ::google::protobuf::Message {
   double electrichighlimit_;
   ::google::protobuf::int32 electricunitid_;
   ::google::protobuf::int32 electricsensortype_;
+  double electricrload_;
   double electricr0_;
   double physicallowlimit_;
   double physicalhighlimit_;
   ::google::protobuf::int32 electricprecision_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -34386,15 +34396,37 @@ inline void MetrologySignal::set_electricsensortype(::google::protobuf::int32 va
   electricsensortype_ = value;
 }
 
-// optional double electricR0 = 7 [default = 0];
-inline bool MetrologySignal::has_electricr0() const {
+// optional double electricRload = 11 [default = 0];
+inline bool MetrologySignal::has_electricrload() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void MetrologySignal::set_has_electricr0() {
+inline void MetrologySignal::set_has_electricrload() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void MetrologySignal::clear_has_electricr0() {
+inline void MetrologySignal::clear_has_electricrload() {
   _has_bits_[0] &= ~0x00000040u;
+}
+inline void MetrologySignal::clear_electricrload() {
+  electricrload_ = 0;
+  clear_has_electricrload();
+}
+inline double MetrologySignal::electricrload() const {
+  return electricrload_;
+}
+inline void MetrologySignal::set_electricrload(double value) {
+  set_has_electricrload();
+  electricrload_ = value;
+}
+
+// optional double electricR0 = 7 [default = 0];
+inline bool MetrologySignal::has_electricr0() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void MetrologySignal::set_has_electricr0() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void MetrologySignal::clear_has_electricr0() {
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void MetrologySignal::clear_electricr0() {
   electricr0_ = 0;
@@ -34410,13 +34442,13 @@ inline void MetrologySignal::set_electricr0(double value) {
 
 // optional int32 electricPrecision = 8 [default = 4];
 inline bool MetrologySignal::has_electricprecision() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void MetrologySignal::set_has_electricprecision() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void MetrologySignal::clear_has_electricprecision() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void MetrologySignal::clear_electricprecision() {
   electricprecision_ = 4;
@@ -34432,13 +34464,13 @@ inline void MetrologySignal::set_electricprecision(::google::protobuf::int32 val
 
 // optional double physicalLowLimit = 9 [default = 0];
 inline bool MetrologySignal::has_physicallowlimit() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void MetrologySignal::set_has_physicallowlimit() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void MetrologySignal::clear_has_physicallowlimit() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void MetrologySignal::clear_physicallowlimit() {
   physicallowlimit_ = 0;
@@ -34454,13 +34486,13 @@ inline void MetrologySignal::set_physicallowlimit(double value) {
 
 // optional double physicalHighLimit = 10 [default = 0];
 inline bool MetrologySignal::has_physicalhighlimit() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void MetrologySignal::set_has_physicalhighlimit() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void MetrologySignal::clear_has_physicalhighlimit() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void MetrologySignal::clear_physicalhighlimit() {
   physicalhighlimit_ = 0;

@@ -432,6 +432,9 @@ public:
 	FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent = nullptr);
 	void notifyThatSignalSetHasChanged();
 
+	bool reopen() { return m_reopen; }
+	void setReopen() { m_reopen = true; }
+
 signals:
 	void signalSelected(int signalId);
 
@@ -509,6 +512,7 @@ private:
 	QRegExp m_regExp4Id;
 	int m_currentUserId = -1;
 	bool m_currentUserIsAdmin = false;
+	bool m_reopen = true;
 };
 
 

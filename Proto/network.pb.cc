@@ -172,6 +172,18 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* TuningSignalsApplyReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   TuningSignalsApplyReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* DataSourceWrite_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  DataSourceWrite_reflection_ = NULL;
+const ::google::protobuf::Descriptor* DataSourceWriteReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  DataSourceWriteReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* PacketSourceExit_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  PacketSourceExit_reflection_ = NULL;
+const ::google::protobuf::Descriptor* PacketSourceExitReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  PacketSourceExitReply_reflection_ = NULL;
 const ::google::protobuf::Descriptor* SaveAppSignalsStatesToArchiveRequest_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SaveAppSignalsStatesToArchiveRequest_reflection_ = NULL;
@@ -1101,7 +1113,67 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsApplyReply));
-  SaveAppSignalsStatesToArchiveRequest_descriptor_ = file->message_type(47);
+  DataSourceWrite_descriptor_ = file->message_type(47);
+  static const int DataSourceWrite_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWrite, sourceequipmentid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWrite, state_),
+  };
+  DataSourceWrite_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      DataSourceWrite_descriptor_,
+      DataSourceWrite::default_instance_,
+      DataSourceWrite_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWrite, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWrite, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(DataSourceWrite));
+  DataSourceWriteReply_descriptor_ = file->message_type(48);
+  static const int DataSourceWriteReply_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWriteReply, error_),
+  };
+  DataSourceWriteReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      DataSourceWriteReply_descriptor_,
+      DataSourceWriteReply::default_instance_,
+      DataSourceWriteReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWriteReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWriteReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(DataSourceWriteReply));
+  PacketSourceExit_descriptor_ = file->message_type(49);
+  static const int PacketSourceExit_offsets_[1] = {
+  };
+  PacketSourceExit_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      PacketSourceExit_descriptor_,
+      PacketSourceExit::default_instance_,
+      PacketSourceExit_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PacketSourceExit, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PacketSourceExit, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(PacketSourceExit));
+  PacketSourceExitReply_descriptor_ = file->message_type(50);
+  static const int PacketSourceExitReply_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PacketSourceExitReply, error_),
+  };
+  PacketSourceExitReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      PacketSourceExitReply_descriptor_,
+      PacketSourceExitReply::default_instance_,
+      PacketSourceExitReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PacketSourceExitReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PacketSourceExitReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(PacketSourceExitReply));
+  SaveAppSignalsStatesToArchiveRequest_descriptor_ = file->message_type(51);
   static const int SaveAppSignalsStatesToArchiveRequest_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveRequest, appsignalstates_),
@@ -1117,7 +1189,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SaveAppSignalsStatesToArchiveRequest));
-  SaveAppSignalsStatesToArchiveReply_descriptor_ = file->message_type(48);
+  SaveAppSignalsStatesToArchiveReply_descriptor_ = file->message_type(52);
   static const int SaveAppSignalsStatesToArchiveReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveReply, archerror_),
@@ -1133,7 +1205,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SaveAppSignalsStatesToArchiveReply));
-  GetAppSignalStatesFromArchiveStartRequest_descriptor_ = file->message_type(49);
+  GetAppSignalStatesFromArchiveStartRequest_descriptor_ = file->message_type(53);
   static const int GetAppSignalStatesFromArchiveStartRequest_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, timetype_),
@@ -1153,7 +1225,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveStartRequest));
-  GetAppSignalStatesFromArchiveStartReply_descriptor_ = file->message_type(50);
+  GetAppSignalStatesFromArchiveStartReply_descriptor_ = file->message_type(54);
   static const int GetAppSignalStatesFromArchiveStartReply_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, archerror_),
@@ -1171,7 +1243,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveStartReply));
-  GetAppSignalStatesFromArchiveNextRequest_descriptor_ = file->message_type(51);
+  GetAppSignalStatesFromArchiveNextRequest_descriptor_ = file->message_type(55);
   static const int GetAppSignalStatesFromArchiveNextRequest_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextRequest, requestid_),
   };
@@ -1186,7 +1258,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveNextRequest));
-  GetAppSignalStatesFromArchiveNextReply_descriptor_ = file->message_type(52);
+  GetAppSignalStatesFromArchiveNextReply_descriptor_ = file->message_type(56);
   static const int GetAppSignalStatesFromArchiveNextReply_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, archerror_),
@@ -1210,7 +1282,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveNextReply));
-  GetAppSignalStatesFromArchiveCancelRequest_descriptor_ = file->message_type(53);
+  GetAppSignalStatesFromArchiveCancelRequest_descriptor_ = file->message_type(57);
   static const int GetAppSignalStatesFromArchiveCancelRequest_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelRequest, requestid_),
   };
@@ -1225,7 +1297,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveCancelRequest));
-  GetAppSignalStatesFromArchiveCancelReply_descriptor_ = file->message_type(54);
+  GetAppSignalStatesFromArchiveCancelReply_descriptor_ = file->message_type(58);
   static const int GetAppSignalStatesFromArchiveCancelReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelReply, archerror_),
@@ -1242,7 +1314,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveCancelReply));
-  RtTrendsManagementRequest_descriptor_ = file->message_type(55);
+  RtTrendsManagementRequest_descriptor_ = file->message_type(59);
   static const int RtTrendsManagementRequest_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, sampleperiod_),
@@ -1260,7 +1332,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsManagementRequest));
-  RtTrendsManagementReply_descriptor_ = file->message_type(56);
+  RtTrendsManagementReply_descriptor_ = file->message_type(60);
   static const int RtTrendsManagementReply_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, errorstring_),
@@ -1278,7 +1350,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsManagementReply));
-  RtTrendsGetStateChangesRequest_descriptor_ = file->message_type(57);
+  RtTrendsGetStateChangesRequest_descriptor_ = file->message_type(61);
   static const int RtTrendsGetStateChangesRequest_offsets_[1] = {
   };
   RtTrendsGetStateChangesRequest_reflection_ =
@@ -1292,7 +1364,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsGetStateChangesRequest));
-  RtTrendsGetStateChangesReply_descriptor_ = file->message_type(58);
+  RtTrendsGetStateChangesReply_descriptor_ = file->message_type(62);
   static const int RtTrendsGetStateChangesReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, errorstring_),
@@ -1416,6 +1488,14 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TuningSignalsApplyReply_descriptor_, &TuningSignalsApplyReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    DataSourceWrite_descriptor_, &DataSourceWrite::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    DataSourceWriteReply_descriptor_, &DataSourceWriteReply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    PacketSourceExit_descriptor_, &PacketSourceExit::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    PacketSourceExitReply_descriptor_, &PacketSourceExitReply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SaveAppSignalsStatesToArchiveRequest_descriptor_, &SaveAppSignalsStatesToArchiveRequest::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SaveAppSignalsStatesToArchiveReply_descriptor_, &SaveAppSignalsStatesToArchiveReply::default_instance());
@@ -1538,6 +1618,14 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete TuningSignalsApply_reflection_;
   delete TuningSignalsApplyReply::default_instance_;
   delete TuningSignalsApplyReply_reflection_;
+  delete DataSourceWrite::default_instance_;
+  delete DataSourceWrite_reflection_;
+  delete DataSourceWriteReply::default_instance_;
+  delete DataSourceWriteReply_reflection_;
+  delete PacketSourceExit::default_instance_;
+  delete PacketSourceExit_reflection_;
+  delete PacketSourceExitReply::default_instance_;
+  delete PacketSourceExitReply_reflection_;
   delete SaveAppSignalsStatesToArchiveRequest::default_instance_;
   delete SaveAppSignalsStatesToArchiveRequest_reflection_;
   delete SaveAppSignalsStatesToArchiveReply::default_instance_;
@@ -1762,43 +1850,48 @@ void protobuf_AddDesc_network_2eproto() {
     " \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .Network.T"
     "uningSignalWriteResult\"\024\n\022TuningSignalsA"
     "pply\"+\n\027TuningSignalsApplyReply\022\020\n\005error"
-    "\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStatesToArchi"
-    "veRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017"
-    "appSignalStates\030\002 \003(\0132\025.Proto.AppSignalS"
-    "tate\"N\n\"SaveAppSignalsStatesToArchiveRep"
+    "\030\001 \001(\005:\0010\"B\n\017DataSourceWrite\022\031\n\021sourceEq"
+    "uipmentID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005false\"(\n"
+    "\024DataSourceWriteReply\022\020\n\005error\030\001 \001(\005:\0010\""
+    "\022\n\020PacketSourceExit\")\n\025PacketSourceExitR"
+    "eply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignals"
+    "StatesToArchiveRequest\022\031\n\021clientEquipmen"
+    "tID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Pro"
+    "to.AppSignalState\"N\n\"SaveAppSignalsState"
+    "sToArchiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarc"
+    "hError\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStates"
+    "FromArchiveStartRequest\022\031\n\021clientEquipme"
+    "ntID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstart"
+    "Time\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014sig"
+    "nalHashes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:"
+    "\004true\"~\n\'GetAppSignalStatesFromArchiveSt"
+    "artReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030"
+    "\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\treque"
+    "stID\030\003 \001(\r:\0010\"@\n(GetAppSignalStatesFromA"
+    "rchiveNextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\""
+    "\271\002\n&GetAppSignalStatesFromArchiveNextRep"
     "ly\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:"
-    "\003100\"\271\001\n)GetAppSignalStatesFromArchiveSt"
-    "artRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n"
-    "\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010"
-    "\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003"
-    "(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\"~\n\'GetA"
-    "ppSignalStatesFromArchiveStartReply\022\020\n\005e"
-    "rror\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n"
-    "\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010"
-    "\"@\n(GetAppSignalStatesFromArchiveNextReq"
-    "uest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSig"
-    "nalStatesFromArchiveNextReply\022\020\n\005error\030\001"
-    " \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\treque"
-    "stID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tda"
-    "taReady\030\004 \001(\010:\005false\022\033\n\020totalStatesCount"
-    "\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n"
-    "\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPar"
-    "t\030\010 \001(\010:\005false\022.\n\017appSignalStates\030\t \003(\0132"
-    "\025.Proto.AppSignalState\"B\n*GetAppSignalSt"
-    "atesFromArchiveCancelRequest\022\024\n\trequestI"
-    "D\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesFromArch"
-    "iveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarch"
-    "Error\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t\"\204\001"
-    "\n\031RtTrendsManagementRequest\022\031\n\021clientEqu"
-    "ipmentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 \001(\005\022\032\n\022"
-    "appendSignalHashes\030\003 \003(\004\022\032\n\022deleteSignal"
-    "Hashes\030\004 \003(\004\"s\n\027RtTrendsManagementReply\022"
-    "\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022\024"
-    "\n\014samplePeriod\030\003 \001(\005\022\033\n\023trackedSignalHas"
-    "hes\030\004 \003(\004\" \n\036RtTrendsGetStateChangesRequ"
-    "est\"r\n\034RtTrendsGetStateChangesReply\022\020\n\005e"
-    "rror\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022+\n\014si"
-    "gnalStates\030\003 \003(\0132\025.Proto.AppSignalState", 9079);
+    "\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorStrin"
+    "g\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020tot"
+    "alStatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCoun"
+    "t\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010"
+    "\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSignal"
+    "States\030\t \003(\0132\025.Proto.AppSignalState\"B\n*G"
+    "etAppSignalStatesFromArchiveCancelReques"
+    "t\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSignalS"
+    "tatesFromArchiveCancelReply\022\020\n\005error\030\001 \001"
+    "(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorSt"
+    "ring\030\003 \001(\t\"\204\001\n\031RtTrendsManagementRequest"
+    "\022\031\n\021clientEquipmentID\030\001 \001(\t\022\024\n\014samplePer"
+    "iod\030\002 \001(\005\022\032\n\022appendSignalHashes\030\003 \003(\004\022\032\n"
+    "\022deleteSignalHashes\030\004 \003(\004\"s\n\027RtTrendsMan"
+    "agementReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorS"
+    "tring\030\002 \001(\t\022\024\n\014samplePeriod\030\003 \001(\005\022\033\n\023tra"
+    "ckedSignalHashes\030\004 \003(\004\" \n\036RtTrendsGetSta"
+    "teChangesRequest\"r\n\034RtTrendsGetStateChan"
+    "gesReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorStrin"
+    "g\030\002 \001(\t\022+\n\014signalStates\030\003 \003(\0132\025.Proto.Ap"
+    "pSignalState", 9252);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -1848,6 +1941,10 @@ void protobuf_AddDesc_network_2eproto() {
   TuningSignalsWriteReply::default_instance_ = new TuningSignalsWriteReply();
   TuningSignalsApply::default_instance_ = new TuningSignalsApply();
   TuningSignalsApplyReply::default_instance_ = new TuningSignalsApplyReply();
+  DataSourceWrite::default_instance_ = new DataSourceWrite();
+  DataSourceWriteReply::default_instance_ = new DataSourceWriteReply();
+  PacketSourceExit::default_instance_ = new PacketSourceExit();
+  PacketSourceExitReply::default_instance_ = new PacketSourceExitReply();
   SaveAppSignalsStatesToArchiveRequest::default_instance_ = new SaveAppSignalsStatesToArchiveRequest();
   SaveAppSignalsStatesToArchiveReply::default_instance_ = new SaveAppSignalsStatesToArchiveReply();
   GetAppSignalStatesFromArchiveStartRequest::default_instance_ = new GetAppSignalStatesFromArchiveStartRequest();
@@ -1907,6 +2004,10 @@ void protobuf_AddDesc_network_2eproto() {
   TuningSignalsWriteReply::default_instance_->InitAsDefaultInstance();
   TuningSignalsApply::default_instance_->InitAsDefaultInstance();
   TuningSignalsApplyReply::default_instance_->InitAsDefaultInstance();
+  DataSourceWrite::default_instance_->InitAsDefaultInstance();
+  DataSourceWriteReply::default_instance_->InitAsDefaultInstance();
+  PacketSourceExit::default_instance_->InitAsDefaultInstance();
+  PacketSourceExitReply::default_instance_->InitAsDefaultInstance();
   SaveAppSignalsStatesToArchiveRequest::default_instance_->InitAsDefaultInstance();
   SaveAppSignalsStatesToArchiveReply::default_instance_->InitAsDefaultInstance();
   GetAppSignalStatesFromArchiveStartRequest::default_instance_->InitAsDefaultInstance();
@@ -19346,6 +19447,841 @@ void TuningSignalsApplyReply::Swap(TuningSignalsApplyReply* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = TuningSignalsApplyReply_descriptor_;
   metadata.reflection = TuningSignalsApplyReply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int DataSourceWrite::kSourceEquipmentIDFieldNumber;
+const int DataSourceWrite::kStateFieldNumber;
+#endif  // !_MSC_VER
+
+DataSourceWrite::DataSourceWrite()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void DataSourceWrite::InitAsDefaultInstance() {
+}
+
+DataSourceWrite::DataSourceWrite(const DataSourceWrite& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void DataSourceWrite::SharedCtor() {
+  _cached_size_ = 0;
+  sourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  state_ = false;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+DataSourceWrite::~DataSourceWrite() {
+  SharedDtor();
+}
+
+void DataSourceWrite::SharedDtor() {
+  if (sourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete sourceequipmentid_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void DataSourceWrite::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* DataSourceWrite::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return DataSourceWrite_descriptor_;
+}
+
+const DataSourceWrite& DataSourceWrite::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+DataSourceWrite* DataSourceWrite::default_instance_ = NULL;
+
+DataSourceWrite* DataSourceWrite::New() const {
+  return new DataSourceWrite;
+}
+
+void DataSourceWrite::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_sourceequipmentid()) {
+      if (sourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+        sourceequipmentid_->clear();
+      }
+    }
+    state_ = false;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool DataSourceWrite::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string sourceEquipmentID = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sourceequipmentid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->sourceequipmentid().data(), this->sourceequipmentid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_state;
+        break;
+      }
+
+      // optional bool state = 2 [default = false];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_state:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &state_)));
+          set_has_state();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void DataSourceWrite::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string sourceEquipmentID = 1;
+  if (has_sourceequipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->sourceequipmentid().data(), this->sourceequipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->sourceequipmentid(), output);
+  }
+
+  // optional bool state = 2 [default = false];
+  if (has_state()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->state(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* DataSourceWrite::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional string sourceEquipmentID = 1;
+  if (has_sourceequipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->sourceequipmentid().data(), this->sourceequipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->sourceequipmentid(), target);
+  }
+
+  // optional bool state = 2 [default = false];
+  if (has_state()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->state(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int DataSourceWrite::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string sourceEquipmentID = 1;
+    if (has_sourceequipmentid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sourceequipmentid());
+    }
+
+    // optional bool state = 2 [default = false];
+    if (has_state()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void DataSourceWrite::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const DataSourceWrite* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const DataSourceWrite*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void DataSourceWrite::MergeFrom(const DataSourceWrite& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_sourceequipmentid()) {
+      set_sourceequipmentid(from.sourceequipmentid());
+    }
+    if (from.has_state()) {
+      set_state(from.state());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void DataSourceWrite::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DataSourceWrite::CopyFrom(const DataSourceWrite& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DataSourceWrite::IsInitialized() const {
+
+  return true;
+}
+
+void DataSourceWrite::Swap(DataSourceWrite* other) {
+  if (other != this) {
+    std::swap(sourceequipmentid_, other->sourceequipmentid_);
+    std::swap(state_, other->state_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata DataSourceWrite::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = DataSourceWrite_descriptor_;
+  metadata.reflection = DataSourceWrite_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int DataSourceWriteReply::kErrorFieldNumber;
+#endif  // !_MSC_VER
+
+DataSourceWriteReply::DataSourceWriteReply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void DataSourceWriteReply::InitAsDefaultInstance() {
+}
+
+DataSourceWriteReply::DataSourceWriteReply(const DataSourceWriteReply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void DataSourceWriteReply::SharedCtor() {
+  _cached_size_ = 0;
+  error_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+DataSourceWriteReply::~DataSourceWriteReply() {
+  SharedDtor();
+}
+
+void DataSourceWriteReply::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void DataSourceWriteReply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* DataSourceWriteReply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return DataSourceWriteReply_descriptor_;
+}
+
+const DataSourceWriteReply& DataSourceWriteReply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+DataSourceWriteReply* DataSourceWriteReply::default_instance_ = NULL;
+
+DataSourceWriteReply* DataSourceWriteReply::New() const {
+  return new DataSourceWriteReply;
+}
+
+void DataSourceWriteReply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    error_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool DataSourceWriteReply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 error = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_)));
+          set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void DataSourceWriteReply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* DataSourceWriteReply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int DataSourceWriteReply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 error = 1 [default = 0];
+    if (has_error()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->error());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void DataSourceWriteReply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const DataSourceWriteReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const DataSourceWriteReply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void DataSourceWriteReply::MergeFrom(const DataSourceWriteReply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_error()) {
+      set_error(from.error());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void DataSourceWriteReply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DataSourceWriteReply::CopyFrom(const DataSourceWriteReply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DataSourceWriteReply::IsInitialized() const {
+
+  return true;
+}
+
+void DataSourceWriteReply::Swap(DataSourceWriteReply* other) {
+  if (other != this) {
+    std::swap(error_, other->error_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata DataSourceWriteReply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = DataSourceWriteReply_descriptor_;
+  metadata.reflection = DataSourceWriteReply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+#endif  // !_MSC_VER
+
+PacketSourceExit::PacketSourceExit()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void PacketSourceExit::InitAsDefaultInstance() {
+}
+
+PacketSourceExit::PacketSourceExit(const PacketSourceExit& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void PacketSourceExit::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+PacketSourceExit::~PacketSourceExit() {
+  SharedDtor();
+}
+
+void PacketSourceExit::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void PacketSourceExit::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* PacketSourceExit::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return PacketSourceExit_descriptor_;
+}
+
+const PacketSourceExit& PacketSourceExit::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+PacketSourceExit* PacketSourceExit::default_instance_ = NULL;
+
+PacketSourceExit* PacketSourceExit::New() const {
+  return new PacketSourceExit;
+}
+
+void PacketSourceExit::Clear() {
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool PacketSourceExit::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      return true;
+    }
+    DO_(::google::protobuf::internal::WireFormat::SkipField(
+          input, tag, mutable_unknown_fields()));
+  }
+  return true;
+#undef DO_
+}
+
+void PacketSourceExit::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* PacketSourceExit::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int PacketSourceExit::ByteSize() const {
+  int total_size = 0;
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void PacketSourceExit::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const PacketSourceExit* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const PacketSourceExit*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void PacketSourceExit::MergeFrom(const PacketSourceExit& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void PacketSourceExit::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void PacketSourceExit::CopyFrom(const PacketSourceExit& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PacketSourceExit::IsInitialized() const {
+
+  return true;
+}
+
+void PacketSourceExit::Swap(PacketSourceExit* other) {
+  if (other != this) {
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata PacketSourceExit::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = PacketSourceExit_descriptor_;
+  metadata.reflection = PacketSourceExit_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int PacketSourceExitReply::kErrorFieldNumber;
+#endif  // !_MSC_VER
+
+PacketSourceExitReply::PacketSourceExitReply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void PacketSourceExitReply::InitAsDefaultInstance() {
+}
+
+PacketSourceExitReply::PacketSourceExitReply(const PacketSourceExitReply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void PacketSourceExitReply::SharedCtor() {
+  _cached_size_ = 0;
+  error_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+PacketSourceExitReply::~PacketSourceExitReply() {
+  SharedDtor();
+}
+
+void PacketSourceExitReply::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void PacketSourceExitReply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* PacketSourceExitReply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return PacketSourceExitReply_descriptor_;
+}
+
+const PacketSourceExitReply& PacketSourceExitReply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+PacketSourceExitReply* PacketSourceExitReply::default_instance_ = NULL;
+
+PacketSourceExitReply* PacketSourceExitReply::New() const {
+  return new PacketSourceExitReply;
+}
+
+void PacketSourceExitReply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    error_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool PacketSourceExitReply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 error = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_)));
+          set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void PacketSourceExitReply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* PacketSourceExitReply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int PacketSourceExitReply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 error = 1 [default = 0];
+    if (has_error()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->error());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void PacketSourceExitReply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const PacketSourceExitReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const PacketSourceExitReply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void PacketSourceExitReply::MergeFrom(const PacketSourceExitReply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_error()) {
+      set_error(from.error());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void PacketSourceExitReply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void PacketSourceExitReply::CopyFrom(const PacketSourceExitReply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PacketSourceExitReply::IsInitialized() const {
+
+  return true;
+}
+
+void PacketSourceExitReply::Swap(PacketSourceExitReply* other) {
+  if (other != this) {
+    std::swap(error_, other->error_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata PacketSourceExitReply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = PacketSourceExitReply_descriptor_;
+  metadata.reflection = PacketSourceExitReply_reflection_;
   return metadata;
 }
 

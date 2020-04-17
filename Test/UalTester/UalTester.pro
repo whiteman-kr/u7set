@@ -67,9 +67,9 @@ SOURCES += \
 	SignalBase.cpp \
 	TestFile.cpp \
 	TuningSocket.cpp \
-	TuningSignalBase.cpp \
 	CmdLineParam.cpp \
-	../../lib/MemLeaksDetection.cpp
+	../../lib/MemLeaksDetection.cpp \
+    TuningSourceBase.cpp
 
 
 HEADERS += \
@@ -109,10 +109,10 @@ HEADERS += \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \
-    TuningSignalBase.h \
 	CmdLineParam.h \
 	Stable.h \
-	../../lib/MemLeaksDetection.h
+	../../lib/MemLeaksDetection.h \
+    TuningSourceBase.h
 
 
 CONFIG += precompile_header

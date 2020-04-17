@@ -57,6 +57,7 @@ const QString SignalProperties::highValidRangeCaption("HighValidRange");
 const QString SignalProperties::electricLowLimitCaption("ElectricLowLimit");
 const QString SignalProperties::electricHighLimitCaption("ElectricHighLimit");
 const QString SignalProperties::electricUnitCaption("ElectricUnit");
+const QString SignalProperties::rload_OhmCaption("Rload_Ohm");
 const QString SignalProperties::sensorTypeCaption("SensorType");
 const QString SignalProperties::R0_OhmCaption("R0_Ohm");
 const QString SignalProperties::outputModeCaption("OutputMode");

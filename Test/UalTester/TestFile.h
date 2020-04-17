@@ -22,6 +22,9 @@ const char* const TestFileCmd[] =
 				"set",
 				"check",
 				"delay",
+				"runsource",
+				"stopsource",
+				"exitps",
 };
 
 const int		TF_CMD_COUNT		= sizeof(TestFileCmd)/sizeof(TestFileCmd[0]);
@@ -36,7 +39,10 @@ const int		TF_CMD_UNKNOWN		= -1,
 				TF_CMD_VAR			= 6,
 				TF_CMD_SET			= 7,
 				TF_CMD_CHECK		= 8,
-				TF_CMD_DELAY		= 9;
+				TF_CMD_DELAY		= 9,
+				TF_CMD_RUN_SOURCE	= 10,
+				TF_CMD_STOP_SOURCE	= 11,
+				TF_CMD_EXIT_PS		= 12;
 
 // ==============================================================================================
 
@@ -109,7 +115,7 @@ class TestCmd
 public:
 
 	TestCmd();
-	explicit TestCmd(TestFile* pTestFile, SignalBase* pSignalBase);
+	TestCmd(TestFile* pTestFile, SignalBase* pSignalBase);
 	virtual ~TestCmd();
 
 private:
@@ -118,6 +124,7 @@ private:
 	static const char* const PARAM_TEST_DESCRIPTION;
 	static const char* const PARAM_SCHEMA_ID;
 	static const char* const PARAM_COMPATIBLE;
+	static const char* const PARAM_SOURCE_ID;
 
 	TestFile* m_pTestFile = nullptr;
 	SignalBase* m_pSignalBase = nullptr;
@@ -155,6 +162,9 @@ public:
 	bool parseCmdSet();
 	bool parseCmdCheck();
 	bool parseCmdDelay();
+	bool parseCmdRunSource();
+	bool parseCmdStopSource();
+	bool parseCmdExitPS();
 
 	bool isUniqueTestID(const QString& testID);
 	bool isUniqueConstOrVarName(const QString& name, const QVector<TestCmdParam>& paramList);
@@ -175,7 +185,7 @@ public:
 
 	TestItem();
 	TestItem(const TestItem& from);
-	virtual ~TestItem();
+	virtual		~TestItem();
 
 private:
 

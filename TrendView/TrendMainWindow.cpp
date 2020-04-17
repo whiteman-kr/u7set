@@ -1173,8 +1173,6 @@ namespace TrendLib
 
 		m_trendWidget->setScaleType(scale);
 
-		m_trendWidget->validateViewLimits();
-
 		m_trendWidget->updateWidget();
 
 		m_autoSelectedScaleType = false;	// This means that combo could be changed by user. autoSelectScaleType() function sets this flag again
