@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "TrendSignal.h"
+#include "TrendScale.h"
 
 namespace Ui {
 	class DialogTrendSignalPoints;
@@ -31,10 +32,7 @@ public:
 public:
 	explicit TrendPointsModel(QObject* parent = nullptr);
 
-	int precision() const;
-	void setPrecision(int value);
-
-	void setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData> >& signalData, E::TimeType timeType);
+	void setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData> >& signalData, const TrendLib::TrendSignalParam& trendSignal, E::TimeType timeType);
 
 	int stateItemIndex(const TrendLib::TrendStateItem& stateItem) const;
 	TrendLib::TrendStateItem stateItemByIndex(int index, int* oneHourIndex, int* recordIndex, int* stateIndex, bool* ok) const;
@@ -50,7 +48,8 @@ private:
 private:
 	std::list<std::shared_ptr<TrendLib::OneHourData>> m_signalData;
 	E::TimeType m_timeType = E::TimeType::Local;
-	int m_precision = 0;
+	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
+	TrendLib::TrendSignalParam m_trendSignal;
 	int m_rowCount = 0;
 };
 

@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "TrendSignal.h"
+#include "TrendScale.h"
 
 namespace Ui {
 	class DialogTrendSignalPoint;
@@ -13,7 +14,10 @@ class DialogTrendSignalPoint : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTrendSignalPoint(std::vector<TrendLib::TrendStateItem>* stateItems, E::TimeType timeType, E::SignalType signalType, int precision, QWidget *parent = nullptr);
+	explicit DialogTrendSignalPoint(std::vector<TrendLib::TrendStateItem>* stateItems,
+									E::TimeType timeType,
+									TrendLib::TrendSignalParam trendSignal,
+									QWidget *parent = nullptr);
 
 	~DialogTrendSignalPoint();
 
@@ -28,7 +32,8 @@ private:
 
 	int m_precision = 0;
 	E::TimeType m_timeType;
-	E::SignalType m_signalType;
+	TrendLib::TrendSignalParam m_trendSignal;
+	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
 };
 
 #endif // DIALOGTRENDSIGNALPOINT_H

@@ -37,6 +37,7 @@ message TrendSignalParam
 	optional double view_low_limit = 32;
 
     optional uint32 color = 40;
+    optional string analog_format = 41 [default = "g_9_or_9e"];
 }
 
 message TrendSignalSet

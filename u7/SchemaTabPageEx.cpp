@@ -887,7 +887,10 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 		}
 		else
 		{
-			Q_ASSERT(dit != detailsMap.end());
+			// There is no info in detailsMap for this file
+			// It can be folder
+			//
+			continue;
 		}
 	}
 

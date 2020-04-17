@@ -153,6 +153,27 @@ namespace Sim
 				return false;
 			}
 
+			// There are cases when subsustem does not have some UARTs (like BVB), then we cannot simulate such
+			// subsystems, but still want to simulate other LM's
+			//
+			if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
+			{
+				writeWaning(QObject::tr("Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
+				continue;
+			}
+
+			if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
+			{
+				writeWaning(QObject::tr("Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
+				continue;
+			}
+
+			if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
+			{
+				writeWaning(QObject::tr("Subsystem %1 has no Congiguration, it will not be simulated.").arg(subsystemId));
+				continue;
+			}
+
 			// Create subsystem
 			//
 			if (m_subsystems.count(subsystemId) > 0)

@@ -193,6 +193,9 @@ namespace TrendLib
 		QString unit() const;
 		void setUnit(const QString& value);
 
+		E::AnalogFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogFormat analogFormat);
+
 		int precision() const;
 		void setPrecision(int value);
 
@@ -232,6 +235,8 @@ namespace TrendLib
 
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
+
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
 		int m_precision = 0;
 
 		double m_lineWeight = 0;		// 0 is cosmetic pen

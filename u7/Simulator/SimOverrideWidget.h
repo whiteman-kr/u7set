@@ -17,9 +17,6 @@ protected:
 	virtual void dropEvent(QDropEvent* event) override;
 
 	virtual bool eventFilter(QObject* obj, QEvent* event) override;
-
-	//virtual void keyPressEvent(QKeyEvent* event) override;
-	//virtual void keyReleaseEvent(QKeyEvent* event) override;
 	virtual void contextMenuEvent(QContextMenuEvent* event) override;
 
 protected slots:
@@ -65,6 +62,7 @@ public:
 public:
 	enum class Columns
 	{
+		Index,
 		CustomSignalId,
 		Caption,
 		Type,

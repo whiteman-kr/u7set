@@ -649,7 +649,7 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = TrendScale::scaleValueText(value, drawParam, signal.precision());
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), signal);
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -779,7 +779,7 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = TrendScale::scaleValueText(value, drawParam, analogs[0].precision());
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), analogs[0]);
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -861,7 +861,7 @@ namespace TrendLib
 					continue;
 				}
 
-				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam, signal.precision()) : "?";
+				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam.scaleType(), signal) : "?";
 
 				drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 			}
@@ -1478,7 +1478,7 @@ namespace TrendLib
 						}
 						else
 						{
-							str = TrendScale::scaleValueText(state.value, drawParam, trendSignal.precision());
+							str = TrendScale::scaleValueText(state.value, drawParam.scaleType(), trendSignal);
 						}
 
 						double vertCoef = (highLimit - lowLimit) / signalRect.height();
@@ -2102,44 +2102,6 @@ namespace TrendLib
 		//
 		*outLaneIndex = -1;
 		return MouseOn::Outside;		// Can be frame beetween lanes
-	}
-
-	void Trend::validateViewLimits(const TrendParam& drawParam)
-	{
-		if (drawParam.scaleType() == TrendScaleType::Log10)
-		{
-			// Log(x) is defined only for positive values, so adjust view scale if limit is negative
-			//
-			std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
-
-			for (TrendSignalParam& tsp : analogs)
-			{
-				double highLimit = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
-				double lowLimit = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
-
-				if (lowLimit <= 0)
-				{
-					if (highLimit <= 0)
-					{
-						// Both limits are less than zero, so limit will be 1..1000
-						//
-						highLimit = 1000.0;
-						lowLimit = 1.0;
-					}
-					else
-					{
-						lowLimit = highLimit / 1000.0;
-					}
-
-					tsp.setViewLowLimit(lowLimit);
-					tsp.setViewHighLimit(highLimit);
-
-					signalSet().setSignalParam(tsp);
-				}
-			}
-		}
-
-		return;
 	}
 
 	void Trend::drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect/* = nullptr*/)

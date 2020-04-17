@@ -341,6 +341,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0321.sql", "Upgrade to version 321, MSO-4 preset module family fix, pulse_gen_sync is removed from all LMs"},
 	{":/DatabaseUpgrade/Upgrade0322.sql", "Upgrade to version 322, Added AFB cod_rev to MSO-4"},
 	{":/DatabaseUpgrade/Upgrade0323.sql", "Upgrade to version 323, Rload_Ohm added to signal specific properties of AIM-4PH"},
+	{":/DatabaseUpgrade/Upgrade0324.sql", "Upgrade to version 324, Rload_Ohm is added to configuration script of AIM-4PH and WAIM"},
 };
 
 int DbWorker::counter = 0;
