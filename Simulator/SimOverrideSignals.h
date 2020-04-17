@@ -15,6 +15,12 @@ namespace Sim
 	class Simulator;
 	class AppSignalManager;
 
+	enum class OverrideSignalMethod
+	{
+		Value,			// Override signal with static value
+		Script,			// Script is used to define override value
+	};
+
 	struct OverrideRamRecord
 	{
 		quint16 mask = 0;
@@ -66,7 +72,7 @@ namespace Sim
 		QString m_appSignalId;
 		QString m_customSignalId;
 		QString m_caption;
-		QString m_equipmentId;							// LM where this signal lives
+		QString m_equipmentId;								// LM where this signal lives
 
 		E::SignalType m_signalType = E::SignalType::Discrete;
 		E::AnalogAppSignalFormat m_dataFormat = E::AnalogAppSignalFormat::SignedInt32;
@@ -74,7 +80,7 @@ namespace Sim
 
 		int m_dataSizeW = 0;								// DataSize in words, for discrete is 1 word and set OverrideRamRecord::mask
 		Address16 m_address;
-		E::LogicModuleRamAccess m_ramAccess;				// RAM typoe to verride signal data
+		E::LogicModuleRamAccess m_ramAccess;				// RAM type to verride signal data
 
 		std::array<OverrideRamRecord, 4> m_ramOverrides;	// Set of RAM offsets, masks and data to override, up to 4 words
 
