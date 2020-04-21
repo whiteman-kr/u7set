@@ -459,10 +459,10 @@ namespace TrendLib
 				bool highLimitOk = false;
 				bool lowLimitOk = false;
 
-				double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
+				double highLimit = TrendScale::scaleHighLimit(ts, drawParam.scaleType(), &highLimitOk);
 				Q_UNUSED(highLimit);
 
-				double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+				double lowLimit = TrendScale::scaleLowLimit(ts, drawParam.scaleType(), &lowLimitOk);
 				Q_UNUSED(lowLimit);
 
 				if (highLimitOk == false || lowLimitOk == false)
@@ -510,10 +510,10 @@ namespace TrendLib
 				bool highLimitOk = false;
 				bool lowLimitOk = false;
 
-				double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
+				double highLimit = TrendScale::scaleHighLimit(ts, drawParam.scaleType(), &highLimitOk);
 				Q_UNUSED(highLimit);
 
-				double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+				double lowLimit = TrendScale::scaleLowLimit(ts, drawParam.scaleType(), &lowLimitOk);
 				Q_UNUSED(lowLimit);
 
 				if (highLimitOk == false || lowLimitOk == false)
@@ -565,13 +565,13 @@ namespace TrendLib
 
 		bool ok  = false;
 
-		double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
@@ -649,7 +649,7 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = TrendScale::scaleValueText(value, drawParam, signal.precision());
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), signal);
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -688,13 +688,13 @@ namespace TrendLib
 
 		bool ok  = false;
 
-		double highLimit = TrendScale::limitToScaleValue(qMax(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::scaleHighLimit(analogs[0], drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		double lowLimit = TrendScale::limitToScaleValue(qMin(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::scaleLowLimit(analogs[0], drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
@@ -779,7 +779,7 @@ namespace TrendLib
 				continue;
 			}
 
-			QString text = TrendScale::scaleValueText(value, drawParam, analogs[0].precision());
+			QString text = TrendScale::scaleValueText(value, drawParam.scaleType(), analogs[0]);
 
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
@@ -791,13 +791,13 @@ namespace TrendLib
 			const TrendSignalParam& signal = analogs[i];
 			Q_ASSERT(signal.isAnalog() == true);
 
-			double signalHighLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+			double signalHighLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
 			if (ok == false)
 			{
 				continue;
 			}
 
-			double signalLowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+			double signalLowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
 			if (ok == false)
 			{
 				continue;
@@ -861,7 +861,7 @@ namespace TrendLib
 					continue;
 				}
 
-				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam, signal.precision()) : "?";
+				QString text = ok == true ? TrendScale::scaleValueText(value, drawParam.scaleType(), signal) : "?";
 
 				drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 			}
@@ -1073,13 +1073,13 @@ namespace TrendLib
 		//
 		bool ok = false;
 
-		double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
@@ -1448,13 +1448,13 @@ namespace TrendLib
 
 						bool ok = false;
 
-						double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						double highLimit = TrendScale::scaleHighLimit(trendSignal, drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;
 						}
 
-						double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						double lowLimit = TrendScale::scaleLowLimit(trendSignal, drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;
@@ -1478,7 +1478,7 @@ namespace TrendLib
 						}
 						else
 						{
-							str = TrendScale::scaleValueText(state.value, drawParam, trendSignal.precision());
+							str = TrendScale::scaleValueText(state.value, drawParam.scaleType(), trendSignal);
 						}
 
 						double vertCoef = (highLimit - lowLimit) / signalRect.height();
@@ -2102,44 +2102,6 @@ namespace TrendLib
 		//
 		*outLaneIndex = -1;
 		return MouseOn::Outside;		// Can be frame beetween lanes
-	}
-
-	void Trend::validateViewLimits(const TrendParam& drawParam)
-	{
-		if (drawParam.scaleType() == TrendScaleType::Log10)
-		{
-			// Log(x) is defined only for positive values, so adjust view scale if limit is negative
-			//
-			std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
-
-			for (TrendSignalParam& tsp : analogs)
-			{
-				double highLimit = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
-				double lowLimit = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
-
-				if (lowLimit <= 0)
-				{
-					if (highLimit <= 0)
-					{
-						// Both limits are less than zero, so limit will be 1..1000
-						//
-						highLimit = 1000.0;
-						lowLimit = 1.0;
-					}
-					else
-					{
-						lowLimit = highLimit / 1000.0;
-					}
-
-					tsp.setViewLowLimit(lowLimit);
-					tsp.setViewHighLimit(highLimit);
-
-					signalSet().setSignalParam(tsp);
-				}
-			}
-		}
-
-		return;
 	}
 
 	void Trend::drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect/* = nullptr*/)

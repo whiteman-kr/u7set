@@ -281,10 +281,6 @@ void SimTrendsWidget::signalsButton()
 		autoSelectScaleType(acceptedSignals);
 	}
 
-	// Validate view limits for scale
-	//
-	m_trendWidget->validateViewLimits();
-
 	updateWidget();
 
 	return;

@@ -245,11 +245,6 @@ namespace TrendLib
 		ok &= m_trend.load(message.trend());
 		ok &= m_trendParam.load(message.trend_param());
 
-		if (ok == true)
-		{
-			m_trend.validateViewLimits(m_trendParam);
-		}
-
 		return ok;
 	}
 
@@ -660,13 +655,13 @@ namespace TrendLib
 						{
 							bool ok = false;
 
-							double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
+							double highLimit = TrendScale::scaleHighLimit(trendSignal, scaleType(), &ok);
 							if (ok == false)
 							{
 								continue;
 							}
 
-							double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), scaleType(), &ok);
+							double lowLimit = TrendScale::scaleLowLimit(trendSignal, scaleType(), &ok);
 							if (ok == false)
 							{
 								continue;
@@ -697,8 +692,8 @@ namespace TrendLib
 									continue;
 								}
 
-								tsp.setViewHighLimit(newHighLimit);
-								tsp.setViewLowLimit(newLowLimit);
+								tsp.setViewHighLimit(scaleType(), newHighLimit);
+								tsp.setViewLowLimit(scaleType(), newLowLimit);
 
 								signalSet().setSignalParam(tsp);
 							}
@@ -848,13 +843,13 @@ namespace TrendLib
 			{
 				bool ok = false;
 
-				double h = TrendScale::limitToScaleValue(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double h = TrendScale::scaleHighLimit(tsp, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				double l = TrendScale::limitToScaleValue(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double l = TrendScale::scaleLowLimit(tsp, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
@@ -889,8 +884,8 @@ namespace TrendLib
 					continue;
 				}
 
-				tsp.setViewHighLimit(newHighLimit);
-				tsp.setViewLowLimit(newLowLimit);
+				tsp.setViewHighLimit(scaleType(), newHighLimit);
+				tsp.setViewLowLimit(scaleType(), newLowLimit);
 
 				signalSet().setSignalParam(tsp);
 				needUpdateWidget = true;
@@ -1040,13 +1035,13 @@ namespace TrendLib
 
 				bool ok = false;
 
-				double highLimit = TrendScale::limitToScaleValue(qMax(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double highLimit = TrendScale::scaleHighLimit(tsp, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
 				}
 
-				double lowLimit = TrendScale::limitToScaleValue(qMin(tsp.viewHighLimit(), tsp.viewLowLimit()), scaleType(), &ok);
+				double lowLimit = TrendScale::scaleLowLimit(tsp, scaleType(), &ok);
 				if (ok == false)
 				{
 					continue;
@@ -1079,8 +1074,8 @@ namespace TrendLib
 					continue;
 				}
 
-				tsp.setViewLowLimit(newLowLimit);
-				tsp.setViewHighLimit(newHighLimit);
+				tsp.setViewHighLimit(scaleType(), newHighLimit);
+				tsp.setViewLowLimit(scaleType(), newLowLimit);
 
 				signalSet().setSignalParam(tsp);
 			}
@@ -1149,20 +1144,14 @@ namespace TrendLib
 		return;
 	}
 
-	TrendScaleType TrendWidget::scaleType() const
+	E::TrendScaleType TrendWidget::scaleType() const
 	{
 		return m_trendParam.scaleType();
 	}
 
-	void TrendWidget::setScaleType(TrendScaleType value)
+	void TrendWidget::setScaleType(E::TrendScaleType value)
 	{
 		m_trendParam.setScaleType(value);
-		return;
-	}
-
-	void TrendWidget::validateViewLimits()
-	{
-		m_trend.validateViewLimits(m_trendParam);
 		return;
 	}
 

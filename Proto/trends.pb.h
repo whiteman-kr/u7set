@@ -36,6 +36,7 @@ void protobuf_ShutdownFile_trends_2eproto();
 class TrendStateRecord;
 class TrendArchiveHour;
 class TrendArchive;
+class TrendViewLimit;
 class TrendSignalParam;
 class TrendSignalSet;
 class TrendRuler;
@@ -338,6 +339,108 @@ class TrendArchive : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class TrendViewLimit : public ::google::protobuf::Message {
+ public:
+  TrendViewLimit();
+  virtual ~TrendViewLimit();
+
+  TrendViewLimit(const TrendViewLimit& from);
+
+  inline TrendViewLimit& operator=(const TrendViewLimit& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TrendViewLimit& default_instance();
+
+  void Swap(TrendViewLimit* other);
+
+  // implements Message ----------------------------------------------
+
+  TrendViewLimit* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TrendViewLimit& from);
+  void MergeFrom(const TrendViewLimit& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional double high_limit = 2;
+  inline bool has_high_limit() const;
+  inline void clear_high_limit();
+  static const int kHighLimitFieldNumber = 2;
+  inline double high_limit() const;
+  inline void set_high_limit(double value);
+
+  // optional double low_limit = 3;
+  inline bool has_low_limit() const;
+  inline void clear_low_limit();
+  static const int kLowLimitFieldNumber = 3;
+  inline double low_limit() const;
+  inline void set_low_limit(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.TrendViewLimit)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_high_limit();
+  inline void clear_has_high_limit();
+  inline void set_has_low_limit();
+  inline void clear_has_low_limit();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double high_limit_;
+  double low_limit_;
+  ::google::protobuf::int32 type_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_trends_2eproto();
+  friend void protobuf_AssignDesc_trends_2eproto();
+  friend void protobuf_ShutdownFile_trends_2eproto();
+
+  void InitAsDefaultInstance();
+  static TrendViewLimit* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class TrendSignalParam : public ::google::protobuf::Message {
  public:
   TrendSignalParam();
@@ -501,12 +604,36 @@ class TrendSignalParam : public ::google::protobuf::Message {
   inline double view_low_limit() const;
   inline void set_view_low_limit(double value);
 
+  // repeated .Proto.TrendViewLimit view_limits = 33;
+  inline int view_limits_size() const;
+  inline void clear_view_limits();
+  static const int kViewLimitsFieldNumber = 33;
+  inline const ::Proto::TrendViewLimit& view_limits(int index) const;
+  inline ::Proto::TrendViewLimit* mutable_view_limits(int index);
+  inline ::Proto::TrendViewLimit* add_view_limits();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendViewLimit >&
+      view_limits() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendViewLimit >*
+      mutable_view_limits();
+
   // optional uint32 color = 40;
   inline bool has_color() const;
   inline void clear_color();
   static const int kColorFieldNumber = 40;
   inline ::google::protobuf::uint32 color() const;
   inline void set_color(::google::protobuf::uint32 value);
+
+  // optional string analog_format = 41 [default = "g_9_or_9e"];
+  inline bool has_analog_format() const;
+  inline void clear_analog_format();
+  static const int kAnalogFormatFieldNumber = 41;
+  inline const ::std::string& analog_format() const;
+  inline void set_analog_format(const ::std::string& value);
+  inline void set_analog_format(const char* value);
+  inline void set_analog_format(const char* value, size_t size);
+  inline ::std::string* mutable_analog_format();
+  inline ::std::string* release_analog_format();
+  inline void set_allocated_analog_format(::std::string* analog_format);
 
   // @@protoc_insertion_point(class_scope:Proto.TrendSignalParam)
  private:
@@ -536,6 +663,8 @@ class TrendSignalParam : public ::google::protobuf::Message {
   inline void clear_has_view_low_limit();
   inline void set_has_color();
   inline void clear_has_color();
+  inline void set_has_analog_format();
+  inline void clear_has_analog_format();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -551,10 +680,13 @@ class TrendSignalParam : public ::google::protobuf::Message {
   double low_limit_;
   double view_high_limit_;
   double view_low_limit_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::TrendViewLimit > view_limits_;
+  ::std::string* analog_format_;
+  static ::std::string* _default_analog_format_;
   ::google::protobuf::uint32 color_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(15 + 31) / 32];
 
   friend void  protobuf_AddDesc_trends_2eproto();
   friend void protobuf_AssignDesc_trends_2eproto();
@@ -1469,6 +1601,76 @@ TrendArchive::mutable_hours() {
 
 // -------------------------------------------------------------------
 
+// TrendViewLimit
+
+// optional int32 type = 1;
+inline bool TrendViewLimit::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TrendViewLimit::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TrendViewLimit::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TrendViewLimit::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 TrendViewLimit::type() const {
+  return type_;
+}
+inline void TrendViewLimit::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional double high_limit = 2;
+inline bool TrendViewLimit::has_high_limit() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TrendViewLimit::set_has_high_limit() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TrendViewLimit::clear_has_high_limit() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TrendViewLimit::clear_high_limit() {
+  high_limit_ = 0;
+  clear_has_high_limit();
+}
+inline double TrendViewLimit::high_limit() const {
+  return high_limit_;
+}
+inline void TrendViewLimit::set_high_limit(double value) {
+  set_has_high_limit();
+  high_limit_ = value;
+}
+
+// optional double low_limit = 3;
+inline bool TrendViewLimit::has_low_limit() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TrendViewLimit::set_has_low_limit() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TrendViewLimit::clear_has_low_limit() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TrendViewLimit::clear_low_limit() {
+  low_limit_ = 0;
+  clear_has_low_limit();
+}
+inline double TrendViewLimit::low_limit() const {
+  return low_limit_;
+}
+inline void TrendViewLimit::set_low_limit(double value) {
+  set_has_low_limit();
+  low_limit_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // TrendSignalParam
 
 // optional string signal_id = 2;
@@ -1975,15 +2177,40 @@ inline void TrendSignalParam::set_view_low_limit(double value) {
   view_low_limit_ = value;
 }
 
+// repeated .Proto.TrendViewLimit view_limits = 33;
+inline int TrendSignalParam::view_limits_size() const {
+  return view_limits_.size();
+}
+inline void TrendSignalParam::clear_view_limits() {
+  view_limits_.Clear();
+}
+inline const ::Proto::TrendViewLimit& TrendSignalParam::view_limits(int index) const {
+  return view_limits_.Get(index);
+}
+inline ::Proto::TrendViewLimit* TrendSignalParam::mutable_view_limits(int index) {
+  return view_limits_.Mutable(index);
+}
+inline ::Proto::TrendViewLimit* TrendSignalParam::add_view_limits() {
+  return view_limits_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendViewLimit >&
+TrendSignalParam::view_limits() const {
+  return view_limits_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendViewLimit >*
+TrendSignalParam::mutable_view_limits() {
+  return &view_limits_;
+}
+
 // optional uint32 color = 40;
 inline bool TrendSignalParam::has_color() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void TrendSignalParam::set_has_color() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void TrendSignalParam::clear_has_color() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void TrendSignalParam::clear_color() {
   color_ = 0u;
@@ -1995,6 +2222,76 @@ inline ::google::protobuf::uint32 TrendSignalParam::color() const {
 inline void TrendSignalParam::set_color(::google::protobuf::uint32 value) {
   set_has_color();
   color_ = value;
+}
+
+// optional string analog_format = 41 [default = "g_9_or_9e"];
+inline bool TrendSignalParam::has_analog_format() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void TrendSignalParam::set_has_analog_format() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void TrendSignalParam::clear_has_analog_format() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void TrendSignalParam::clear_analog_format() {
+  if (analog_format_ != _default_analog_format_) {
+    analog_format_->assign(*_default_analog_format_);
+  }
+  clear_has_analog_format();
+}
+inline const ::std::string& TrendSignalParam::analog_format() const {
+  return *analog_format_;
+}
+inline void TrendSignalParam::set_analog_format(const ::std::string& value) {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string;
+  }
+  analog_format_->assign(value);
+}
+inline void TrendSignalParam::set_analog_format(const char* value) {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string;
+  }
+  analog_format_->assign(value);
+}
+inline void TrendSignalParam::set_analog_format(const char* value, size_t size) {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string;
+  }
+  analog_format_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TrendSignalParam::mutable_analog_format() {
+  set_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    analog_format_ = new ::std::string(*_default_analog_format_);
+  }
+  return analog_format_;
+}
+inline ::std::string* TrendSignalParam::release_analog_format() {
+  clear_has_analog_format();
+  if (analog_format_ == _default_analog_format_) {
+    return NULL;
+  } else {
+    ::std::string* temp = analog_format_;
+    analog_format_ = const_cast< ::std::string*>(_default_analog_format_);
+    return temp;
+  }
+}
+inline void TrendSignalParam::set_allocated_analog_format(::std::string* analog_format) {
+  if (analog_format_ != _default_analog_format_) {
+    delete analog_format_;
+  }
+  if (analog_format) {
+    set_has_analog_format();
+    analog_format_ = analog_format;
+  } else {
+    clear_has_analog_format();
+    analog_format_ = const_cast< ::std::string*>(_default_analog_format_);
+  }
 }
 
 // -------------------------------------------------------------------

@@ -299,9 +299,9 @@ namespace TrendLib
 		m_toolBar->addWidget(scaleTypeLabel);
 
 		m_scaleTypeCombo = new QComboBox(m_toolBar);
-		m_scaleTypeCombo->addItem(tr("Linear"), QVariant::fromValue(TrendLib::TrendScaleType::Linear));
-		m_scaleTypeCombo->addItem(tr("Logarithmic"), QVariant::fromValue(TrendLib::TrendScaleType::Log10));
-		m_scaleTypeCombo->addItem(tr("Period"), QVariant::fromValue(TrendLib::TrendScaleType::Period));
+		m_scaleTypeCombo->addItem(tr("Linear"), QVariant::fromValue(E::TrendScaleType::Linear));
+		m_scaleTypeCombo->addItem(tr("Logarithmic"), QVariant::fromValue(E::TrendScaleType::Log10));
+		m_scaleTypeCombo->addItem(tr("Period"), QVariant::fromValue(E::TrendScaleType::Period));
 		m_toolBar->addWidget(m_scaleTypeCombo);
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
@@ -433,7 +433,7 @@ namespace TrendLib
 
 	void TrendMainWindow::autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals)
 	{
-		TrendScaleType defaultScaleType = TrendScaleType::Linear;
+		E::TrendScaleType defaultScaleType = E::TrendScaleType::Linear;
 
 		bool defaultScaleTypeFound = false;
 
@@ -450,19 +450,19 @@ namespace TrendLib
 			{
 				if (tag == QStringLiteral("view_linear"))
 				{
-					defaultScaleType = TrendLib::TrendScaleType::Linear;
+					defaultScaleType = E::TrendScaleType::Linear;
 					defaultScaleTypeFound = true;	// break the outer loop
 					break;
 				}
 				if (tag == QStringLiteral("view_log10"))
 				{
-					defaultScaleType = TrendLib::TrendScaleType::Log10;
+					defaultScaleType = E::TrendScaleType::Log10;
 					defaultScaleTypeFound = true;	// break the outer loop
 					break;
 				}
 				if (tag == QStringLiteral("view_period"))
 				{
-					defaultScaleType = TrendLib::TrendScaleType::Period;
+					defaultScaleType = E::TrendScaleType::Period;
 					defaultScaleTypeFound = true;	// break the outer loop
 					break;
 				}
@@ -1004,8 +1004,8 @@ namespace TrendLib
 
 				// Set limits and update param
 				//
-				ts.setViewLowLimit(newMinValue);
-				ts.setViewHighLimit(newMaxValue);
+				ts.setViewHighLimit(m_trendWidget->scaleType(), newMaxValue);
+				ts.setViewLowLimit(m_trendWidget->scaleType(), newMinValue);
 
 				signalSet().setSignalParam(ts);
 			}
@@ -1169,11 +1169,9 @@ namespace TrendLib
 
 	void TrendMainWindow::scaleTypeComboCurrentIndexChanged(int index)
 	{
-		TrendLib::TrendScaleType scale = m_scaleTypeCombo->itemData(index).value<TrendLib::TrendScaleType>();
+		E::TrendScaleType scale = m_scaleTypeCombo->itemData(index).value<E::TrendScaleType>();
 
 		m_trendWidget->setScaleType(scale);
-
-		m_trendWidget->validateViewLimits();
 
 		m_trendWidget->updateWidget();
 

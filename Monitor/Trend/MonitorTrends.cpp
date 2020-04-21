@@ -264,10 +264,6 @@ void MonitorTrendsWidget::signalsButton()
 		autoSelectScaleType(acceptedSignals);
 	}
 
-	// Validate view limits for scale
-	//
-	m_trendWidget->validateViewLimits();
-
 	updateWidget();
 
 	return;

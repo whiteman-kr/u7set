@@ -475,13 +475,16 @@ namespace Builder
 					}
 
 
-					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
+					// get electric limit from EngineeringUnits and round to 4 digit after point
+					//
+					double lowElVal = floor(uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType()) * 10000 + 0.5) / 10000;
+
+					if ((std::nextafter(lowElVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() && std::nextafter(lowElVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
 					{
-						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+						QString nowElValStr, newElValStr;
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
+						newElValStr = newElValStr.sprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
 
 						// Signal %1 has wrong engineering low Limit
 						//
@@ -489,13 +492,17 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
+
+					// get electric limit from EngineeringUnits and round to 4 digit after point
+					//
+					double highElVal = floor(uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType()) * 10000 + 0.5) / 10000;
+
+					if ((std::nextafter(highElVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() && std::nextafter(highElVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
 					{
-						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+						QString nowElValStr, newElValStr;
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
+						newElValStr = newElValStr.sprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
 
 						// Signal %1 has wrong engineering high Limit
 						//
@@ -568,13 +575,16 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
+					// get electric limit from EngineeringUnits and round to 4 digit after point
+					//
+					double lowElVal = floor(uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm()) * 10000 + 0.5) / 10000;
+
+					if ((std::nextafter(lowElVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() && std::nextafter(lowElVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
 					{
-						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+						QString nowElValStr, newElValStr;
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
+						newElValStr = newElValStr.sprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
 
 						// Signal %1 - engineering low Limit mismatch electrical low Limit
 						//
@@ -582,13 +592,16 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
+					// get electric limit from EngineeringUnits and round to 4 digit after point
+					//
+					double highElVal = floor(uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm()) * 10000 + 0.5) / 10000;
+
+					if ((std::nextafter(highElVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() && std::nextafter(highElVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
 					{
-						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+						QString nowElValStr, newElValStr;
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
+						newElValStr = newElValStr.sprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
 
 						// SSignal %1 - engineering high Limit mismatch electrical high Limit
 						//

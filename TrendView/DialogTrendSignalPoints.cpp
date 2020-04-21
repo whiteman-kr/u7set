@@ -2,24 +2,17 @@
 #include "ui_DialogTrendSignalPoints.h"
 #include "DialogTrendSignalPoint.h"
 #include "TrendSettings.h"
+#include "TrendScale.h"
 
 TrendPointsModel::TrendPointsModel(QObject* parent)
 	: QAbstractTableModel(parent)
 {
 }
 
-int TrendPointsModel::precision() const
+void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData>>& signalData, const TrendLib::TrendSignalParam& trendSignal, E::TimeType timeType)
 {
-	return m_precision;
-}
+	m_trendSignal = trendSignal;
 
-void TrendPointsModel::setPrecision(int value)
-{
-	m_precision = value;
-}
-
-void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData>>& signalData, E::TimeType timeType)
-{
 	// Delete old data
 	//
 	if (rowCount() > 0)
@@ -173,7 +166,7 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 				{
 					return QString("???");
 				}
-				return QString::number(stateItem.value, 'f', m_precision);
+				return TrendLib::TrendScale::scaleValueText(stateItem.value, m_scaleType, m_trendSignal);
 
 		case static_cast<int>(Columns::Realtime):
 			if (stateItem.isRealtimePoint() == true)
@@ -279,13 +272,6 @@ DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalPara
 
 	ui->comboTimeType->blockSignals(false);
 
-	// Precision
-	//
-	if (m_trendSignal.type() == E::SignalType::Analog)
-	{
-		m_pointsModel.setPrecision(trendSignal.precision());
-	}
-
 	//
 	//
 	updatePoints();
@@ -311,7 +297,7 @@ void DialogTrendSignalPoints::updatePoints()
 
 	m_trendSignalSet->getFullExistingTrendData(m_trendSignal.appSignalId(), m_timeType, &signalData);
 
-	m_pointsModel.setSignalData(signalData, m_timeType);
+	m_pointsModel.setSignalData(signalData, m_trendSignal, m_timeType);
 }
 
 
@@ -322,7 +308,7 @@ void DialogTrendSignalPoints::on_buttonAdd_clicked()
 	std::vector<TrendLib::TrendStateItem> stateItems;
 	stateItems.push_back(m_editStateItem);
 
-	DialogTrendSignalPoint d(&stateItems, m_timeType, m_trendSignal.type(), m_pointsModel.precision(), this);
+	DialogTrendSignalPoint d(&stateItems, m_timeType, m_trendSignal, this);
 
 	if (d.exec() != QDialog::Accepted)
 	{
@@ -395,7 +381,7 @@ void DialogTrendSignalPoints::on_buttonEdit_clicked()
 		stateItems.push_back(item);
 	}
 
-	DialogTrendSignalPoint d(&stateItems, m_timeType, m_trendSignal.type(), m_pointsModel.precision(), this);
+	DialogTrendSignalPoint d(&stateItems, m_timeType, m_trendSignal, this);
 
 	if (d.exec() != QDialog::Accepted)
 	{

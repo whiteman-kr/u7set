@@ -17,7 +17,7 @@ public:
 	DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal,
 								TrendLib::TrendSignalSet* trendSignalSet,
 								E::TimeType timeType,
-								TrendLib::TrendScaleType scaleType,
+								E::TrendScaleType scaleType,
 								E::TrendMode trendMode,
 								QWidget* parent);
 	virtual ~DialogTrendSignalProperties();
@@ -33,8 +33,10 @@ public slots:
 private slots:
 	void on_buttonPoints_clicked();
 	void on_buttonApply_clicked();
+	void on_viewFormatCombo_currentIndexChanged(const QString &text);
 
 private:
+	void fillProperties();
 	bool applyProperties();
 
 private:
@@ -47,7 +49,7 @@ private:
 	TrendLib::TrendSignalSet* m_trendSignalSet = nullptr;
 	QString m_appSignalId;
 	E::TimeType m_timeType = E::TimeType::Plant;
-	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
+	E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 	E::TrendMode m_trendMode = E::TrendMode::Archive;
 
 	//
