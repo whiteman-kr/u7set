@@ -153,6 +153,12 @@ namespace TrendLib
 		bool load(const Proto::TrendArchive& message);
 	};
 
+	struct TrendViewLimits
+	{
+		double highLimit = 1;
+		double lowLimit = 0;
+	};
+
 	class TrendSignalParam
 	{
 	public:
@@ -208,11 +214,11 @@ namespace TrendLib
 		double lowLimit() const;
 		void setLowLimit(double value);
 
-		double viewHighLimit() const;
-		void setViewHighLimit(double value);
+		double viewHighLimit(E::TrendScaleType scaleType) const;
+		void setViewHighLimit(E::TrendScaleType scaleType, double value);
 
-		double viewLowLimit() const;
-		void setViewLowLimit(double value);
+		double viewLowLimit(E::TrendScaleType scaleType) const;
+		void setViewLowLimit(E::TrendScaleType scaleType, double value);
 
 		TrendColor color() const;
 		void setColor(const TrendColor& value);
@@ -244,8 +250,7 @@ namespace TrendLib
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
 
-		double m_viewHighLimit = 1.0;	// Current view limits for the signals
-		double m_viewLowLimit = 0;
+		std::map<E::TrendScaleType, TrendViewLimits> m_viewLimits; // Current view limits for signals for different scales
 
 		TrendColor m_color = 0xFF000000;	// Black color
 

@@ -136,9 +136,7 @@ namespace TrendLib
 		m_unit(appSignal.unit()),
 		m_precision(appSignal.precision()),
 		m_highLimit(appSignal.highEngineeringUnits()),
-		m_lowLimit(appSignal.lowEngineeringUnits()),
-		m_viewHighLimit(appSignal.highEngineeringUnits()),
-		m_viewLowLimit(appSignal.lowEngineeringUnits())
+		m_lowLimit(appSignal.lowEngineeringUnits())
 	{
 	}
 
@@ -181,10 +179,20 @@ namespace TrendLib
 
 		message->set_high_limit(m_highLimit);
 		message->set_low_limit(m_lowLimit);
-		message->set_view_high_limit(m_viewHighLimit);
-		message->set_view_low_limit(m_viewLowLimit);
 
 		message->set_color(m_color);
+
+		// View limits
+
+		for (const auto& it : m_viewLimits)
+		{
+		  ::Proto::TrendViewLimit* l = message->add_view_limits();
+			l->set_type(static_cast<int>(it.first));	// Type
+
+			const TrendViewLimits& limits = it.second;
+			l->set_high_limit(limits.highLimit);
+			l->set_low_limit(limits.lowLimit);
+		}
 
 		return true;
 	}
@@ -211,10 +219,31 @@ namespace TrendLib
 
 		m_highLimit = message.high_limit();
 		m_lowLimit = message.low_limit();
-		m_viewHighLimit = message.view_high_limit();
-		m_viewLowLimit = message.view_low_limit();
 
 		m_color = message.color();
+
+		// View limits
+
+		if (message.has_view_high_limit() == true && message.has_view_low_limit() == true)
+		{
+			// Legacy trends before 21.04.2020
+			//
+			std::vector<E::TrendScaleType> scaleTypes = E::values<E::TrendScaleType>();
+			for (auto scaleType : scaleTypes)
+			{
+				setViewHighLimit(scaleType, message.view_high_limit());
+				setViewLowLimit(scaleType, message.view_low_limit());
+			}
+		}
+		else
+		{
+			for (int i = 0; i < message.view_limits_size(); i++)
+			{
+				const ::Proto::TrendViewLimit& limit = message.view_limits(i);
+				setViewHighLimit(static_cast<E::TrendScaleType>(limit.type()), limit.high_limit());
+				setViewLowLimit(static_cast<E::TrendScaleType>(limit.type()), limit.low_limit());
+			}
+		}
 
 		return true;
 	}
@@ -344,24 +373,40 @@ namespace TrendLib
 		m_lowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
-	double TrendSignalParam::viewHighLimit() const
+	double TrendSignalParam::viewHighLimit(E::TrendScaleType scaleType) const
 	{
-		return m_viewHighLimit;
+		const auto& it = m_viewLimits.find(scaleType);
+		if (it == m_viewLimits.end())
+		{
+			return highLimit();
+		}
+
+		const TrendViewLimits& limits = it->second;
+		return limits.highLimit;
 	}
 
-	void TrendSignalParam::setViewHighLimit(double value)
+	void TrendSignalParam::setViewHighLimit(E::TrendScaleType scaleType, double value)
 	{
-		m_viewHighLimit = qBound(-1e+100, value, 1e+100);
+		TrendViewLimits& limits = m_viewLimits[scaleType];
+		limits.highLimit = qBound(-1e+100, value, 1e+100);
 	}
 
-	double TrendSignalParam::viewLowLimit() const
+	double TrendSignalParam::viewLowLimit(E::TrendScaleType scaleType) const
 	{
-		return m_viewLowLimit;
+		const auto& it = m_viewLimits.find(scaleType);
+		if (it == m_viewLimits.end())
+		{
+			return lowLimit();
+		}
+
+		const TrendViewLimits& limits = it->second;
+		return limits.lowLimit;
 	}
 
-	void TrendSignalParam::setViewLowLimit(double value)
+	void TrendSignalParam::setViewLowLimit(E::TrendScaleType scaleType, double value)
 	{
-		m_viewLowLimit = qBound(-1e+100, value, 1e+100);
+		TrendViewLimits& limits = m_viewLimits[scaleType];
+		limits.lowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	TrendColor TrendSignalParam::color() const

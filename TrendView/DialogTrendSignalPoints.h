@@ -48,7 +48,7 @@ private:
 private:
 	std::list<std::shared_ptr<TrendLib::OneHourData>> m_signalData;
 	E::TimeType m_timeType = E::TimeType::Local;
-	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
+	E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 	TrendLib::TrendSignalParam m_trendSignal;
 	int m_rowCount = 0;
 };
