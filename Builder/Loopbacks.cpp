@@ -369,6 +369,42 @@ namespace Builder
 		return m_ualSignalsToLoopbacks.values(ualSignal);
 	}
 
+	bool Loopbacks::checkLoopbacksUalSignals()
+	{
+		bool result = true;
+
+		for(LoopbackShared loopback : m_loopbacks)
+		{
+			TEST_PTR_CONTINUE(loopback);
+
+			const Builder::UalItem* srcItem = loopback->sourceItem();
+
+			TEST_PTR_CONTINUE(srcItem);
+
+			if (loopback->ualSignal() == nullptr)
+			{
+				// Loopback source %1 is not connected to any signal source (Item %2, logic schema %3).
+				//
+				m_compiler.log()->errALC5180(loopback->loopbackID(), srcItem->label(), srcItem->guid(), srcItem->schemaID());
+
+				result = false;
+
+				continue;
+			}
+
+			if (loopback->ualSignal()->isOptoSignal() == true ||
+				loopback->ualSignal()->isTunable() == true ||
+				loopback->ualSignal()->isInput() == true)
+			{
+				// Loopback source cannot be connected to opto/tunable/input signal (Item %1, logic schema %2).
+				//
+				m_compiler.log()->errALC5181(srcItem->label(), srcItem->guid(), srcItem->schemaID());
+			}
+		}
+
+		return result;
+	}
+
 	bool Loopbacks::writeReport(QStringList* file) const
 	{
 		TEST_PTR_RETURN_FALSE(file);
