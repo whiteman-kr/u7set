@@ -46,14 +46,23 @@ namespace TrendLib
 		return lowLimit - (pixel - rect.bottom()) / (rect.height() / delta);
 	}
 
-	double TrendScale::limitToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+	double TrendScale::scaleLowLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok)
 	{
+		double value = qMin(trendSignal.viewHighLimit(scaleType), trendSignal.viewLowLimit(scaleType));
+
 		return pointToScaleValue(value, scaleType, ok);
 	}
 
-	double TrendScale::valueToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+	double TrendScale::scaleHighLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok)
 	{
-		if (scaleType == TrendScaleType::Period)
+		double value = qMax(trendSignal.viewHighLimit(scaleType), trendSignal.viewLowLimit(scaleType));
+
+		return pointToScaleValue(value, scaleType, ok);
+	}
+
+	double TrendScale::valueToScaleValue(double value, E::TrendScaleType scaleType, bool* ok)
+	{
+		if (scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(value) < DBL_MIN)
 			{
@@ -73,12 +82,12 @@ namespace TrendLib
 		return pointToScaleValue(value, scaleType, ok);
 	}
 
-	double TrendScale::limitFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+	double TrendScale::limitFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
 		return pointFromScaleValue(scaleValue, scaleType, ok);
 	}
 
-	double TrendScale::valueFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+	double TrendScale::valueFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
 		{
@@ -87,7 +96,7 @@ namespace TrendLib
 
 		double result = pointFromScaleValue(scaleValue, scaleType, ok);
 
-		if (scaleType == TrendScaleType::Period)
+		if (scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(result) < DBL_MIN)
 			{
@@ -109,16 +118,16 @@ namespace TrendLib
 
 	// Build scale points for a trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
 	{
 		switch (scaleType)
 		{
-		case TrendScaleType::Linear:
-		case TrendScaleType::Log10:
+		case E::TrendScaleType::Linear:
+		case E::TrendScaleType::Log10:
 			{
 				return scaleValuesGeneric(scaleType, lowLimit, highLimit, signalRect, minInchInterval);
 			}
-		case TrendScaleType::Period:
+		case E::TrendScaleType::Period:
 			{
 				return scaleValuesPeriod(scaleType, lowLimit, highLimit);
 			}
@@ -128,9 +137,9 @@ namespace TrendLib
 		return {};
 	}
 
-	QString TrendScale::scaleValueText(double value, TrendScaleType scaleType, const TrendSignalParam& signalParam)
+	QString TrendScale::scaleValueText(double value, E::TrendScaleType scaleType, const TrendSignalParam& signalParam)
 	{
-		if (scaleType == TrendScaleType::Period)
+		if (scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(round(value)) >= periodScaleInfinity)
 			{
@@ -138,7 +147,7 @@ namespace TrendLib
 			}
 		}
 
-		if (scaleType == TrendScaleType::Log10)
+		if (scaleType == E::TrendScaleType::Log10)
 		{
 			if (std::fabs(value) <= FLT_MIN)
 			{
@@ -203,7 +212,7 @@ namespace TrendLib
 		return result;
 	}
 
-	double TrendScale::pointToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+	double TrendScale::pointToScaleValue(double value, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
 		{
@@ -212,15 +221,15 @@ namespace TrendLib
 
 		switch (scaleType)
 		{
-		case TrendScaleType::Linear:
+		case E::TrendScaleType::Linear:
 			{
 				return value;
 			}
-		case TrendScaleType::Log10:
+		case E::TrendScaleType::Log10:
 			{
 				return trendLog10(value);
 			}
-		case TrendScaleType::Period:
+		case E::TrendScaleType::Period:
 			{
 				value = qBound(-periodScaleInfinity, value, periodScaleInfinity);
 
@@ -259,7 +268,7 @@ namespace TrendLib
 		return 0;
 	}
 
-	double TrendScale::pointFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+	double TrendScale::pointFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
 		{
@@ -268,18 +277,18 @@ namespace TrendLib
 
 		switch (scaleType)
 		{
-		case TrendScaleType::Linear:
+		case E::TrendScaleType::Linear:
 			{
 				return scaleValue;
 			}
-		case TrendScaleType::Log10:
+		case E::TrendScaleType::Log10:
 			{
 				scaleValue = trendPow10(scaleValue);
 
 				return scaleValue;
 
 			}
-		case TrendScaleType::Period:
+		case E::TrendScaleType::Period:
 			{
 				if (scaleValue < 0)
 				{
@@ -308,11 +317,11 @@ namespace TrendLib
 
 	// Build scale points for generic or logarithmic trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
 	{
-		if (scaleType != TrendScaleType::Linear && scaleType != TrendScaleType::Log10)
+		if (scaleType != E::TrendScaleType::Linear && scaleType != E::TrendScaleType::Log10)
 		{
-			Q_ASSERT(scaleType == TrendScaleType::Linear || scaleType == TrendScaleType::Log10);
+			Q_ASSERT(scaleType == E::TrendScaleType::Linear || scaleType == E::TrendScaleType::Log10);
 			return {};
 		}
 
@@ -393,9 +402,9 @@ namespace TrendLib
 
 	// Build scale points for periodic trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(E::TrendScaleType scaleType, double lowLimit, double highLimit)
 	{
-		if (scaleType != TrendScaleType::Period)
+		if (scaleType != E::TrendScaleType::Period)
 		{
 			Q_ASSERT(false);
 			return {};

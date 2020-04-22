@@ -459,10 +459,10 @@ namespace TrendLib
 				bool highLimitOk = false;
 				bool lowLimitOk = false;
 
-				double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
+				double highLimit = TrendScale::scaleHighLimit(ts, drawParam.scaleType(), &highLimitOk);
 				Q_UNUSED(highLimit);
 
-				double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+				double lowLimit = TrendScale::scaleLowLimit(ts, drawParam.scaleType(), &lowLimitOk);
 				Q_UNUSED(lowLimit);
 
 				if (highLimitOk == false || lowLimitOk == false)
@@ -510,10 +510,10 @@ namespace TrendLib
 				bool highLimitOk = false;
 				bool lowLimitOk = false;
 
-				double highLimit = TrendScale::limitToScaleValue(qMax(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &highLimitOk);
+				double highLimit = TrendScale::scaleHighLimit(ts, drawParam.scaleType(), &highLimitOk);
 				Q_UNUSED(highLimit);
 
-				double lowLimit = TrendScale::limitToScaleValue(qMin(ts.viewHighLimit(), ts.viewLowLimit()), drawParam.scaleType(), &lowLimitOk);
+				double lowLimit = TrendScale::scaleLowLimit(ts, drawParam.scaleType(), &lowLimitOk);
 				Q_UNUSED(lowLimit);
 
 				if (highLimitOk == false || lowLimitOk == false)
@@ -565,13 +565,13 @@ namespace TrendLib
 
 		bool ok  = false;
 
-		double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
@@ -688,13 +688,13 @@ namespace TrendLib
 
 		bool ok  = false;
 
-		double highLimit = TrendScale::limitToScaleValue(qMax(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::scaleHighLimit(analogs[0], drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		double lowLimit = TrendScale::limitToScaleValue(qMin(analogs[0].viewHighLimit(), analogs[0].viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::scaleLowLimit(analogs[0], drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
@@ -791,13 +791,13 @@ namespace TrendLib
 			const TrendSignalParam& signal = analogs[i];
 			Q_ASSERT(signal.isAnalog() == true);
 
-			double signalHighLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+			double signalHighLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
 			if (ok == false)
 			{
 				continue;
 			}
 
-			double signalLowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+			double signalLowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
 			if (ok == false)
 			{
 				continue;
@@ -1073,13 +1073,13 @@ namespace TrendLib
 		//
 		bool ok = false;
 
-		double highLimit = TrendScale::limitToScaleValue(qMax(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double highLimit = TrendScale::scaleHighLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
 		}
 
-		double lowLimit = TrendScale::limitToScaleValue(qMin(signal.viewHighLimit(), signal.viewLowLimit()), drawParam.scaleType(), &ok);
+		double lowLimit = TrendScale::scaleLowLimit(signal, drawParam.scaleType(), &ok);
 		if (ok == false)
 		{
 			return;
@@ -1448,13 +1448,13 @@ namespace TrendLib
 
 						bool ok = false;
 
-						double highLimit = TrendScale::limitToScaleValue(qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						double highLimit = TrendScale::scaleHighLimit(trendSignal, drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;
 						}
 
-						double lowLimit = TrendScale::limitToScaleValue(qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit()), drawParam.scaleType(), &ok);
+						double lowLimit = TrendScale::scaleLowLimit(trendSignal, drawParam.scaleType(), &ok);
 						if (ok == false)
 						{
 							continue;

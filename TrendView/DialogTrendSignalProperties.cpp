@@ -11,7 +11,8 @@
 
 DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal,
 														 TrendLib::TrendSignalSet* trendSignalSet,
-														 E::TimeType timeType, TrendLib::TrendScaleType scaleType,
+														 E::TimeType timeType,
+														 E::TrendScaleType scaleType,
 														 E::TrendMode trendMode,
 														 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -128,10 +129,10 @@ void DialogTrendSignalProperties::fillProperties()
 
 	if (m_trendSignal.type() == E::SignalType::Analog)
 	{
-		double viewHighLimit = m_trendSignal.viewHighLimit();
-		double viewLowLimit = m_trendSignal.viewLowLimit();
+		double viewHighLimit = m_trendSignal.viewHighLimit(m_scaleType);
+		double viewLowLimit = m_trendSignal.viewLowLimit(m_scaleType);
 
-		if (m_scaleType == TrendLib::TrendScaleType::Period)
+		if (m_scaleType == E::TrendScaleType::Period)
 		{
 			// Limit values are reversed in periodic scale
 			//
@@ -209,7 +210,7 @@ bool DialogTrendSignalProperties::applyProperties()
 			return false;
 		}
 
-		if (m_scaleType == TrendLib::TrendScaleType::Period)
+		if (m_scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(viewHighLimit) < 1 ||
 				std::fabs(viewLowLimit) < 1 ||
@@ -231,8 +232,8 @@ bool DialogTrendSignalProperties::applyProperties()
 			return false;
 		}
 
-		m_trendSignal.setViewHighLimit(qMax(viewHighLimit, viewLowLimit));
-		m_trendSignal.setViewLowLimit(qMin(viewHighLimit, viewLowLimit));
+		m_trendSignal.setViewHighLimit(m_scaleType, qMax(viewHighLimit, viewLowLimit));
+		m_trendSignal.setViewLowLimit(m_scaleType, qMin(viewHighLimit, viewLowLimit));
 		m_trendSignal.setPrecision(precision);
 	}
 

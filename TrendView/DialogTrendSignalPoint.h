@@ -33,7 +33,7 @@ private:
 	int m_precision = 0;
 	E::TimeType m_timeType;
 	TrendLib::TrendSignalParam m_trendSignal;
-	TrendLib::TrendScaleType m_scaleType = TrendLib::TrendScaleType::Linear;
+	E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 };
 
 #endif // DIALOGTRENDSIGNALPOINT_H

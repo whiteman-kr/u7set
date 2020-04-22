@@ -690,6 +690,10 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
+		result &= checkLoopbacks();
+
+		RETURN_IF_FALSE(result);
+
 		result &= linkLoopbackTargets();
 
 		RETURN_IF_FALSE(result);
@@ -2450,6 +2454,11 @@ namespace Builder
 		m_ualSignals.appendRefPin(loopbackSourceItem, inPinUuid, ualSignal);
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::checkLoopbacks()
+	{
+		return m_loopbacks.checkLoopbacksUalSignals();
 	}
 
 	bool ModuleLogicCompiler::linkLoopbackTargets()
