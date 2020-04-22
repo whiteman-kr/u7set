@@ -85,12 +85,12 @@ namespace TrendLib
 		{
 			switch (timeType)
 			{
-			case E::TimeType::Local:	return this->local;
-			case E::TimeType::System:	return this->system;
-			case E::TimeType::Plant:	return this->plant;
+			case E::TimeType::Local:	return TimeStamp{this->local};
+			case E::TimeType::System:	return TimeStamp{this->system};
+			case E::TimeType::Plant:	return TimeStamp{this->plant};
 			default:
 				assert(false);
-				return this->local;
+				return TimeStamp{this->local};
 			}
 		}
 	};

@@ -189,17 +189,22 @@ namespace Sim
 		quint16 readRamWord(quint32 offsetW);
 		quint16 readRamWord(Ram::Handle memoryAreaHandle, quint32 offsetW);
 
+		bool writeRamWord(quint32 offsetW, quint16 data, E::LogicModuleRamAccess access);
+		quint16 readRamWord(quint32 offsetW, E::LogicModuleRamAccess access);
+
 		bool writeRamDword(quint32 offsetW, quint32 data);
 		bool writeRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW, quint32 data);
 
 		quint32 readRamDword(quint32 offsetW);
 		quint32 readRamDword(Ram::Handle memoryAreaHandle, quint32 offsetW);
 
+		bool writeRamDword(quint32 offsetW, quint32 data, E::LogicModuleRamAccess access);
+		quint32 readRamDword(quint32 offsetW, E::LogicModuleRamAccess access);
+
 		// Getting data from m_plainAppLogic
 		//
 		quint16 getWord(int wordOffset) const;
 		quint32 getDword(int wordOffset) const;
-
 
 		// --
 		//
@@ -243,6 +248,8 @@ namespace Sim
 		//
 	public:
 		const QString& equipmentId() const;
+
+		int buildNo() const;
 
 		Hardware::LogicModuleInfo logicModuleInfo() const;
 		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);

@@ -41,7 +41,7 @@ namespace Sim
 		// to update such platform inteface signals as Blink.
 		// Update mustb be done directly in RAM
 		//
-		virtual bool updatePlatformInterfaceState();
+		virtual bool updatePlatformInterfaceState(std::chrono::microseconds currentTime);
 
 		// Run simulation LM command, can throw SimException
 		//

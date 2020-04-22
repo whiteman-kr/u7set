@@ -70,7 +70,7 @@ namespace Sim
 		std::shared_ptr<LogicModule> m_lm;
 		std::chrono::microseconds m_lastStartTime{0};
 		std::chrono::microseconds m_possibleToAdvanceTo{0};
-		int m_cylcesCounter = 0;
+		qint64 m_cylcesCounter = 0;
 
 		std::optional<QFuture<bool>> m_task;
 	};

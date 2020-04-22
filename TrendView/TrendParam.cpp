@@ -180,7 +180,7 @@ namespace TrendLib
 		m_startTimeStamp = value;
 	}
 
-	quint64 TrendParam::duration() const
+	qint64 TrendParam::duration() const
 	{
 		return m_duration;
 	}

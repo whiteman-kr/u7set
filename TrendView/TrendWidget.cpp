@@ -793,11 +793,11 @@ namespace TrendLib
 			//
 			m_trendParam.setLaneDuration(newLaneDuration);		// This func can limit value
 
-			if (m_trendParam.duration() != static_cast<quint64>(oldDuration))
+			if (m_trendParam.duration() != oldDuration)
 			{
-				m_trendParam.setStartTimeStamp(startTime);
+				m_trendParam.setStartTimeStamp(TimeStamp{startTime});
 
-				emit startTimeChanged(startTime);
+				emit startTimeChanged(TimeStamp{startTime});
 				emit durationChanged(newLaneDuration);
 
 				needUpdateWidget = true;
@@ -984,10 +984,10 @@ namespace TrendLib
 
 		// Set new values to controls and draw param
 		//
-		m_trendParam.setStartTimeStamp(leftTime);
+		m_trendParam.setStartTimeStamp(TimeStamp{leftTime});
 		m_trendParam.setLaneDuration(rightTime - leftTime);
 
-		emit startTimeChanged(leftTime);
+		emit startTimeChanged(TimeStamp{leftTime});
 		emit durationChanged(rightTime - leftTime);
 
 		// Scale vertical area (only for analogs)
@@ -1188,7 +1188,7 @@ namespace TrendLib
 
 	TimeStamp TrendWidget::finishTime() const
 	{
-		return TimeStamp{m_trendParam.startTime()}.timeStamp + m_trendParam.duration() * m_trendParam.laneCount();
+		return TimeStamp{TimeStamp{m_trendParam.startTime()}.timeStamp + m_trendParam.duration() * m_trendParam.laneCount()};
 	}
 
 	qint64 TrendWidget::duration() const
