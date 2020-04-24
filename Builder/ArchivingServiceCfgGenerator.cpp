@@ -9,11 +9,9 @@ namespace Builder
 	{
 	}
 
-
 	ArchivingServiceCfgGenerator::~ArchivingServiceCfgGenerator()
 	{
 	}
-
 
 	bool ArchivingServiceCfgGenerator::generateConfiguration()
 	{
@@ -32,12 +30,14 @@ namespace Builder
 		return result;
 	}
 
-
 	bool ArchivingServiceCfgGenerator::writeSettings()
 	{
 		bool result = true;
 
 		result &= m_settings.readFromDevice(m_software, m_log);
+		result &= m_settings.checkSettings(m_software, m_log);
+
+		RETURN_IF_FALSE(result);
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
@@ -138,5 +138,4 @@ namespace Builder
 
 		return true;
 	}
-
 }
