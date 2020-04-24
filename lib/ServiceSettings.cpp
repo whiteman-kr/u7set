@@ -762,6 +762,9 @@ const char* ArchivingServiceSettings::PROP_ARCHIVE_LOCATION = "ArchiveLocation";
 
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
 	bool result = true;
 
 	QString clientRequestIPStr;
@@ -806,6 +809,16 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
 	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
 	result &= DeviceHelper::getStrProperty(software, PROP_ARCHIVE_LOCATION, &archiveLocation, log);
+
+	return result;
+}
+
+bool ArchivingServiceSettings::checkSettings(Hardware::Software *software, Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+	bool result = true;
 
 	if (archiveLocation.isEmpty() == true)
 	{
