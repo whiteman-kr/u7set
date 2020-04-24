@@ -1,11 +1,14 @@
 #include <array>
 #include <cfenv>
+#include <cmath>
 #include "SimCommandProcessor_LM5_LM6.h"
 #include "SimException.h"
 #include "SimAfb.h"
 
 namespace Sim
 {
+	const int CommandProcessor_LM5_LM6::m_cycleDurationMs;
+
 	CommandProcessor_LM5_LM6::CommandProcessor_LM5_LM6(DeviceEmulator* device) :
 		CommandProcessor(device)
 	{
@@ -3300,7 +3303,7 @@ namespace Sim
 					}
 					else
 					{
-						result.setFloatValue(std::sqrtf(floatData));
+						result.setFloatValue(std::sqrt(floatData));
 						nan = 0;
 						overflow  = 0;
 						zero = 0;
@@ -3366,7 +3369,7 @@ namespace Sim
 			{
 				float floatData = instance->param(i_data)->floatValue();
 
-				result.setFloatValue(std::fabsf(floatData));
+				result.setFloatValue(std::fabs(floatData));
 			}
 			break;
 		case 7:		// FP INV is  = 1.0/data;
@@ -4723,7 +4726,7 @@ namespace Sim
 		{
 			operands[i] = *(instance->param(i_1_oprd + i * 2));
 
-			float c = std::powf(x, static_cast<float>(i));
+			float c = std::pow(x, static_cast<float>(i));
 			operands[i].mulFloatingPoint(c);
 
 			overflow |= operands[i].mathOverflow();
