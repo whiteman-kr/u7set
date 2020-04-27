@@ -41,6 +41,9 @@ namespace Sim
 
 		Hash customToAppSignal(Hash customSignalHash) const;
 
+		AppSignalState signalState(const QString& appSignalId, bool* found, bool applyOverride) const;
+		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;
+
 	public:
 		// Implementing IAppSignalManager - AppSignals
 		//
@@ -91,8 +94,8 @@ namespace Sim
 			QString appSignalId;
 			Hash appSignalHash;
 
-			QString equipmentId;
-			Hash equipmentIdHash;
+			QString lmEquipmentId;
+			Hash lmEquipmentIdHash;
 
 			std::vector<AppSignalState> states;
 		};

@@ -203,7 +203,7 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::run(int cycles, std::chrono::microseconds currentTime)
+	bool DeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, qint64 workcycle)
 	{
 		if (m_currentMode == DeviceMode::Start)
 		{
@@ -214,17 +214,14 @@ namespace Sim
 			}
 		}
 
-		bool ok = true;
-
-		for (int i = 0; i < cycles; i++)
+		bool ok = false;
+		if (m_currentMode == DeviceMode::Fault)
 		{
-			if (m_currentMode == DeviceMode::Fault)
-			{
-				ok &= processFaultMode();
-				break;
-			}
-
-			ok &= processOperate(currentTime);
+			ok = processFaultMode();
+		}
+		else
+		{
+			ok = processOperate(currentTime, workcycle);
 		}
 
 		return ok;
@@ -404,7 +401,7 @@ namespace Sim
 		}
 
 		quint16 data = 0;
-		bool ok = ramArea->readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
+		bool ok = ramArea->readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian, true);
 
 		if (ok == false)
 		{
@@ -496,11 +493,39 @@ namespace Sim
 		}
 
 		quint16 data = 0;
-		bool ok = ramArea->readWord(offsetW, &data, E::ByteOrder::BigEndian);
+		bool ok = ramArea->readWord(offsetW, &data, E::ByteOrder::BigEndian, true);
 
 		if (ok == false)
 		{
 			SIM_FAULT(QString("Read RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamWord(quint32 offsetW, quint16 data, E::LogicModuleRamAccess access)
+	{
+		bool ok = m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write RAM error, offsetW %1, access %2")
+			          .arg(offsetW)
+			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return ok;
+	}
+	quint16 DeviceEmulator::readRamWord(quint32 offsetW, E::LogicModuleRamAccess access)
+	{
+		quint16 data = 0;
+		bool ok = m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read RAM error, offsetW %1, access %2")
+			          .arg(offsetW)
+			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return data;
@@ -558,11 +583,40 @@ namespace Sim
 		}
 
 		quint32 data = 0;
-		bool ok = ramArea->readDword(offsetW, &data, E::ByteOrder::BigEndian);
+		bool ok = ramArea->readDword(offsetW, &data, E::ByteOrder::BigEndian, true);
 
 		if (ok == false)
 		{
 			SIM_FAULT(QString("Read RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamDword(quint32 offsetW, quint32 data, E::LogicModuleRamAccess access)
+	{
+		bool ok = m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Write RAM error, offsetW %1, access %2")
+			          .arg(offsetW)
+			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
+		}
+
+		return ok;
+	}
+
+	quint32 DeviceEmulator::readRamDword(quint32 offsetW, E::LogicModuleRamAccess access)
+	{
+		quint32 data = 0;
+		bool ok = m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian, access);
+
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Read RAM error, offsetW %1, access %2")
+			          .arg(offsetW)
+			          .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
 		}
 
 		return data;
@@ -1006,8 +1060,10 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime)
+	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, qint64 workcycle)
 	{
+		Q_UNUSED(workcycle);
+
 		// One LogicModule Cycle
 		//
 		bool result = true;
@@ -1015,7 +1071,7 @@ namespace Sim
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
-		m_commandProcessor->updatePlatformInterfaceState();
+		m_commandProcessor->updatePlatformInterfaceState(currentTime);
 
 		if (m_overrideSignals != nullptr)
 		{
@@ -1396,6 +1452,13 @@ namespace Sim
 	const QString& DeviceEmulator::equipmentId() const
 	{
 		return m_logicModuleInfo.equipmentId;
+	}
+
+	int DeviceEmulator::buildNo() const
+	{
+		// On loading eeprom buildNo was checked, so it is guarantee to be the same across all the eeproms
+		//
+		return m_appLogicEeprom.buildNo();
 	}
 
 	Hardware::LogicModuleInfo DeviceEmulator::logicModuleInfo() const

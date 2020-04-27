@@ -37,7 +37,7 @@ namespace Sim
 
 		// Running LM
 		//
-		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, bool reset);				// Start running one cycle
+		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, qint64 workcycle,  bool reset);				// Start running one cycle
 
 	signals:
 		void faulted(QString message);		// Public signal, translated from DeviceEmulator

@@ -1503,13 +1503,13 @@ namespace TrendLib
 
 		TrendArchive& archive = archiveIt->second;		// archive is MUTABLE
 
-		TimeStamp lastHourTime = 0;
+		TimeStamp lastHourTime{0};
 		std::shared_ptr<OneHourData> hourData;
 
 		for (const TrendStateItem& state : states)
 		{
 			TimeStamp ts = state.getTime(timeType).roundedToHour();
-			if (ts == 0)
+			if (ts == TimeStamp{0})
 			{
 				qDebug() << "TrendSignalSet::appendRealtimeDataToArchive: Received wrong timestamp: " << ts.timeStamp << ", " << timeType;
 				continue;

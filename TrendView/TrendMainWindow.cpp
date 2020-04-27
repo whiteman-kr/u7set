@@ -424,7 +424,7 @@ namespace TrendLib
 
 		if (ts > m_trendWidget->finishTime())
 		{
-			m_trendWidget->setStartTime(ts.timeStamp - m_trendWidget->duration() * m_trendWidget->laneCount());
+			m_trendWidget->setStartTime(TimeStamp{ts.timeStamp - m_trendWidget->duration() * m_trendWidget->laneCount()});
 			return;
 		}
 

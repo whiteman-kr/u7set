@@ -254,7 +254,7 @@ namespace TrendLib
 																		 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours};
 
 		QRectF boundRect;
-		QString estimatedString = (drawParam.duration() < static_cast<quint64>(10_sec)) ? "HH:MM:SS.XXX" : "HH:MM:SS";
+		QString estimatedString = (drawParam.duration() < 10_sec) ? "HH:MM:SS.XXX" : "HH:MM:SS";
 		drawText(painter, estimatedString, QRectF(), drawParam, Qt::AlignCenter, &boundRect);
 
 		double minTimeInterval = boundRect.width() * 1.4;
@@ -1264,8 +1264,8 @@ namespace TrendLib
 
 		for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
 		{
-			TimeStamp startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
-			TimeStamp finishLaneTime = startLaneTime.timeStamp + drawParam.duration();
+			TimeStamp startLaneTime = TimeStamp{drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration()};
+			TimeStamp finishLaneTime = TimeStamp{startLaneTime.timeStamp + drawParam.duration()};
 
 			TrendParam laneDrawParam = drawParam;
 			laneDrawParam.setStartTimeStamp(startLaneTime);
@@ -2010,7 +2010,7 @@ namespace TrendLib
 					qint64 startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
 					double coef = drawParam.duration() / trendArea.width();
 					qint64 timeOffset = static_cast<qint64>((pos.x() - trendArea.left()) * coef);
-					TimeStamp posTime = startLaneTime + timeOffset;
+					TimeStamp posTime = TimeStamp{startLaneTime + timeOffset};
 
 					*outTime = posTime;
 					*outLaneIndex = laneIndex;

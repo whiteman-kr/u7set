@@ -1,10 +1,14 @@
 #include "SimOverrideSignals.h"
 #include "Simulator.h"
-#include "SimAppSignalManager.h"
 #include "SimRam.h"
 
 namespace Sim
 {
+
+	OverrideSignalParam::OverrideSignalParam(const OverrideSignalParam& src)
+	{
+		*this = src;
+	}
 
 	OverrideSignalParam::OverrideSignalParam(const Signal& signalParam)
 	{
@@ -12,12 +16,39 @@ namespace Sim
 		return;
 	}
 
+	OverrideSignalParam& OverrideSignalParam::operator=(const OverrideSignalParam& src)
+	{
+		this->m_enabled = src.m_enabled;
+		this->m_index = src.m_index;
+
+		this->m_appSignalId = src.m_appSignalId;
+		this->m_customSignalId = src.m_customSignalId;
+		this->m_caption = src.m_caption;
+		this->m_lmEquipmentId = src.m_lmEquipmentId;
+
+		this->m_signalType = src.m_signalType;
+		this->m_dataFormat = src.m_dataFormat;
+		this->m_byteOrder = src.m_byteOrder;
+
+		this->m_dataSizeW = src.m_dataSizeW;
+		this->m_address = src.m_address;
+		this->m_ramAccess = src.m_ramAccess;
+
+		this->m_ramOverrides = src.m_ramOverrides;
+
+		this->m_method = src.m_method;
+		this->m_value = src.m_value;
+		this->m_script = src.m_script;
+
+		return *this;
+	}
+
 	void OverrideSignalParam::updateSignalProperties(const Signal& signalParam, QVariant value /*= QVariant()*/)
 	{
 		m_appSignalId = signalParam.appSignalID();
 		m_customSignalId = signalParam.customAppSignalID();
 		m_caption = signalParam.caption();
-		m_equipmentId = signalParam.lmEquipmentID();
+		m_lmEquipmentId = signalParam.lmEquipmentID();
 
 		m_signalType = signalParam.signalType();
 		m_dataFormat = signalParam.analogSignalFormat();
@@ -76,8 +107,6 @@ namespace Sim
 					setFloatValue(m_value.value<float>());
 				}
 				break;
-//			case E::AnalogAppSignalFormat::Double:???
-//				break;
 			default:
 				assert(0);
 			}
@@ -88,7 +117,7 @@ namespace Sim
 				   m_signalType == E::SignalType::Discrete);
 		}
 
-
+		return;
 	}
 
 
@@ -114,7 +143,6 @@ namespace Sim
 			quint16 val = m_value.value<quint16>();
 
 			result = QString{"%1"}.arg(val);
-			return result;
 		}
 
 		if (m_signalType == E::SignalType::Analog)
@@ -158,69 +186,135 @@ namespace Sim
 			default:
 				assert(false);
 			}
-
-			return result;
 		}
 
-		assert(false);
+		if (m_method == OverrideSignalMethod::Script)
+		{
+			if (m_scriptError.isEmpty() == false)
+			{
+				result = QLatin1String("JS: ") + m_scriptError;
+			}
+			else
+			{
+				result.prepend(QLatin1String("JS: "));
+			}
+		}
+
+
 		return result;
 	}
 
-	void OverrideSignalParam::setValue(const QVariant& value)
+	void OverrideSignalParam::setValue(const QVariant& value, OverrideSignalMethod method, bool changeCurrentMethod)
 	{
-		switch (m_signalType)
+		if (changeCurrentMethod == true)
 		{
-		case E::SignalType::Discrete:
+			m_method = method;
+		}
+
+		switch (method)
+		{
+		case OverrideSignalMethod::Value:
 			{
-				if (value.canConvert<quint16>() == false)
+				switch (m_signalType)
 				{
-					assert(value.canConvert<quint16>());
+				case E::SignalType::Discrete:
+					{
+						if (value.canConvert<quint16>() == false)
+						{
+							assert(value.canConvert<quint16>());
+							break;
+						}
+
+						quint16 discrValue = value.value<quint16>();
+						setDiscreteValue(discrValue);
+					}
+					break;
+
+				case E::SignalType::Analog:
+					{
+						switch (m_dataFormat)
+						{
+						case E::AnalogAppSignalFormat::SignedInt32:
+							{
+								if (value.canConvert<qint32>() == false)
+								{
+									assert(value.canConvert<qint32>());
+									break;
+								}
+
+								qint32 sintValue = value.value<qint32>();
+								setSignedIntvalue(sintValue);
+							}
+							break;
+
+						case E::AnalogAppSignalFormat::Float32:
+							{
+								if (value.canConvert<float>() == false)
+								{
+									assert(value.canConvert<float>());
+									break;
+								}
+
+								float floatValue = value.value<float>();
+								setFloatValue(floatValue);
+							}
+							break;
+						default:
+							assert(false);
+						}
+					}
+					break;
+
+				default:
+					assert(false);
 					break;
 				}
-
-				quint16 discrValue = value.value<quint16>();
-				setDiscreteValue(discrValue);
 			}
 			break;
 
-		case E::SignalType::Analog:
+		case OverrideSignalMethod::Script:
 			{
-				switch (m_dataFormat)
+				m_scriptError.clear();
+				m_scriptValueRequiresReset = true;
+
+				if (value.type() == QMetaType::QString)
 				{
-				case E::AnalogAppSignalFormat::SignedInt32:
+					m_script = value.toString();
+
+					switch (m_signalType)
 					{
-						if (value.canConvert<qint32>() == false)
+					case E::SignalType::Discrete:
+						setDiscreteValue(0);
+						break;
+
+					case E::SignalType::Analog:
+						switch (m_dataFormat)
 						{
-							assert(value.canConvert<qint32>());
+						case E::AnalogAppSignalFormat::SignedInt32:
+							setSignedIntvalue(0);
 							break;
-						}
-
-						qint32 sintValue = value.value<qint32>();
-						setSignedIntvalue(sintValue);
-					}
-					break;
-
-				case E::AnalogAppSignalFormat::Float32:
-					{
-						if (value.canConvert<float>() == false)
-						{
-							assert(value.canConvert<float>());
+						case E::AnalogAppSignalFormat::Float32:
+							setFloatValue(0);
 							break;
+						default:
+							assert(false);
 						}
-
-						float floatValue = value.value<float>();
-						setFloatValue(floatValue);
+						break;
+					default:
+						assert(false);
+						break;
 					}
-					break;
-				default:
-					assert(false);
+				}
+				else
+				{
+					assert(value.type() == QMetaType::QString);
+					m_value = QString("");
 				}
 			}
 			break;
 
 		default:
 			assert(false);
-			break;
 		}
 
 		return;
@@ -363,6 +457,107 @@ namespace Sim
 		return;
 	}
 
+	bool OverrideSignalParam::enabled() const
+	{
+		return m_enabled;
+	}
+
+	void OverrideSignalParam::setEnabled(bool en)
+	{
+		m_enabled = en;
+	}
+
+	int OverrideSignalParam::index() const
+	{
+		return m_index;
+	}
+
+	void OverrideSignalParam::setIndex(int value)
+	{
+		m_index = value;
+	}
+
+	const QString& OverrideSignalParam::appSignalId() const
+	{
+		return m_appSignalId;
+	}
+
+	const QString& OverrideSignalParam::customSignalId() const
+	{
+		return m_customSignalId;
+	}
+
+	const QString& OverrideSignalParam::caption() const
+	{
+		return m_caption;
+	}
+
+	const QString& OverrideSignalParam::lmEquipmentId() const
+	{
+		return m_lmEquipmentId;
+	}
+
+	E::SignalType OverrideSignalParam::signalType() const
+	{
+		return m_signalType;
+	}
+
+	E::AnalogAppSignalFormat OverrideSignalParam::dataFormat() const
+	{
+		return m_dataFormat;
+	}
+
+	E::ByteOrder OverrideSignalParam::byteOrder() const
+	{
+		return m_byteOrder;
+	}
+
+	int OverrideSignalParam::dataSizeW() const
+	{
+		return m_dataSizeW;
+	}
+
+	const Address16& OverrideSignalParam::address() const
+	{
+		return m_address;
+	}
+
+	E::LogicModuleRamAccess OverrideSignalParam::ramAccess() const
+	{
+		return m_ramAccess;
+	}
+
+	const OverrideRamRecord& OverrideSignalParam::ramOverrides(size_t index) const
+	{
+		assert(index <= m_ramOverrides.size());
+		return m_ramOverrides[index];
+	}
+
+	OverrideSignalMethod OverrideSignalParam::method() const
+	{
+		return m_method;
+	}
+
+	const QVariant& OverrideSignalParam::value() const
+	{
+		return m_value;
+	}
+
+	const QString& OverrideSignalParam::script() const
+	{
+		return m_script;
+	}
+
+	const QString& OverrideSignalParam::scriptError() const
+	{
+		return m_scriptError;
+	}
+
+	void OverrideSignalParam::setScriptError(const QString& value)
+	{
+		m_scriptError = value;
+	}
+
 
 	OverrideSignals::OverrideSignals(Simulator* simulator, QObject* parent /*= nullptr*/) :
 		QObject(parent),
@@ -426,15 +621,15 @@ namespace Sim
 
 					// Set index for new signal
 					//
-					int maxIndex = m_signals.begin()->second.m_index;
+					int maxIndex = m_signals.begin()->second.index();
 
 					for (const auto&[id, s] : m_signals)
 					{
 						Q_UNUSED(id);
-						maxIndex = std::max(maxIndex, s.m_index);
+						maxIndex = std::max(maxIndex, s.index());
 					}
 
-					it->second.m_index = maxIndex + 1;
+					it->second.setIndex(maxIndex + 1);
 				}
 			}
 		}
@@ -469,22 +664,22 @@ namespace Sim
 			m_changesCounter ++;
 
 			if (auto it = m_signals.find(appSignalId);
-				it != m_signals.end() && it->second.m_enabled != enable)
+				it != m_signals.end() && it->second.enabled() != enable)
 			{
-				it->second.m_enabled = enable;
+				it->second.setEnabled(enable);
 				changed = true;
 			}
 		}
 
 		if (changed == true)
 		{
-			emit stateChanged(appSignalId);
+			emit stateChanged(QStringList{} << appSignalId);
 		}
 
 		return;
 	}
 
-	void OverrideSignals::setValue(QString appSignalId, const QVariant& value)
+	void OverrideSignals::setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value)
 	{
 		{
 			QWriteLocker locker(&m_lock);
@@ -499,10 +694,10 @@ namespace Sim
 			}
 
 			OverrideSignalParam& osp = it->second;
-			osp.setValue(value);
+			osp.setValue(value, method, true);
 		}
 
-		emit stateChanged(appSignalId);
+		emit stateChanged(QStringList{} << appSignalId);
 		return;
 	}
 
@@ -515,16 +710,16 @@ namespace Sim
 
 		for (const OverrideSignalParam& osp : existingSignals)
 		{
-			std::optional<Signal> sp = appSignalManager().signalParamExt(osp.m_appSignalId);
+			std::optional<Signal> sp = appSignalManager().signalParamExt(osp.appSignalId());
 
 			if (sp.has_value() == false)
 			{
-				writeWaning(tr("Signal %1 removed from overriden signals.").arg(osp.m_appSignalId));
+				writeWaning(tr("Signal %1 removed from overriden signals.").arg(osp.appSignalId()));
 				continue;
 			}
 
 			OverrideSignalParam& updateOsp = newSignals.emplace_back(osp);
-			updateOsp.updateSignalProperties(*sp, osp.m_value);
+			updateOsp.updateSignalProperties(*sp, osp.value());
 		}
 
 		// Set updated signals
@@ -537,13 +732,140 @@ namespace Sim
 
 			for (const OverrideSignalParam& osp : newSignals)
 			{
-				m_signals.emplace(osp.m_appSignalId, osp);
+				m_signals.emplace(osp.appSignalId(), osp);
 			}
 		}
 
 		emit signalsChanged({});
 
 		return;
+	}
+
+	bool OverrideSignals::runOverrideScripts(const QString& lmEquipmentId, qint64 workcycle)
+	{
+		QStringList appSignalIds;
+
+		{
+			QWriteLocker locker(&m_lock);
+
+			for (auto& [appSignalId, osp] : m_signals)
+			{
+				if (osp.method() != Sim::OverrideSignalMethod::Script ||
+					osp.lmEquipmentId() != lmEquipmentId)
+				{
+					continue;
+				}
+
+				bool expected = true;
+				if (osp.m_scriptValueRequiresReset.compare_exchange_strong(expected, false) == true ||
+				    osp.m_scriptValue == nullptr ||
+				    osp.m_scriptEngine == nullptr)
+				{
+					osp.m_scriptValue = std::make_unique<QJSValue>();
+					osp.m_scriptEngine = std::make_unique<QJSEngine>();
+					osp.m_scriptEngine->installExtensions(QJSEngine::ConsoleExtension);
+
+					*osp.m_scriptValue = osp.m_scriptEngine->evaluate(osp.script());
+
+					if (osp.m_scriptValue->isError() == true)
+					{
+						QString errorMessage = tr("Override script evaluate error, signal %1, line %2, message %3")
+											   .arg(appSignalId)
+						                       .arg(osp.m_scriptValue->property("lineNumber").toInt())
+						                       .arg(osp.m_scriptValue->toString());
+
+						writeError(errorMessage);
+
+						qDebug() << "Script evaluate error at line " << osp.m_scriptValue->property("lineNumber").toInt();
+						qDebug() << "\tSignal: " << appSignalId;
+						qDebug() << "\tClass: " << metaObject()->className();
+						qDebug() << "\tStack: " << osp.m_scriptValue->property("stack").toString();
+						qDebug() << "\tMessage: " << osp.m_scriptValue->toString();
+
+						continue;
+					}
+
+					if (osp.m_scriptValue->isUndefined() == true)
+					{
+						continue;
+					}
+				}
+
+				// Arguments: function(lastOverrideValue, workcycle)
+				//		lastOverrideValue - The last value returned from this function
+				//		workcycle - Workcycle counter
+				//
+				QJSValueList args;
+
+				args << QJSValue{osp.value().toDouble()};
+				args << QJSValue{static_cast<uint>(workcycle)};
+
+				QJSValue result = osp.m_scriptValue->call(args);
+
+				if (result.isError() == true)
+				{
+					osp.setScriptError(tr("Override script uncaught exception, signal %1, line %2")
+										.arg(appSignalId)
+										.arg(result.property("lineNumber").toInt()));
+
+					//writeWaning(osp.scriptError());
+
+					qDebug() << "Script running uncaught exception at line " << result.property("lineNumber").toInt();
+					qDebug() << "\tAppSignalID: " << appSignalId;
+					qDebug() << "\tStack: " << result.property("stack").toString();
+					qDebug() << "\tMessage: " << result.toString();
+
+					continue;
+				}
+
+				if (result.isNumber() == false)
+				{
+					osp.setScriptError(tr("Override script returned not floating point value, signal %1.")
+									   .arg(appSignalId));
+
+					//writeWaning(osp.scriptError());
+					continue;
+				}
+
+				// Set new value to signal
+				//
+				osp.setScriptError({});
+				double ov = result.toNumber();
+
+				if (ov != osp.value().toDouble())
+				{
+					osp.setValue(ov, OverrideSignalMethod::Value, false);
+
+					appSignalIds << appSignalId;
+				}
+			}
+
+			if (appSignalIds.isEmpty() == false)
+			{
+				m_changesCounter ++;
+			}
+		}
+
+
+		if (appSignalIds.isEmpty() == false)
+		{
+			emit stateChanged(appSignalIds);
+		}
+
+		return true;
+	}
+
+	void OverrideSignals::requestToResetOverrideScripts(const QString& lmEquipmentId)
+	{
+		QWriteLocker locker(&m_lock);
+
+		for (auto& [appSignalId, osp] : m_signals)
+		{
+			if (osp.lmEquipmentId() == lmEquipmentId)
+			{
+				osp.m_scriptValueRequiresReset = true;
+			}
+		}
 	}
 
 	Sim::AppSignalManager& OverrideSignals::appSignalManager()
@@ -593,7 +915,7 @@ namespace Sim
 		return m_changesCounter;
 	}
 
-	std::vector<OverrideRamRecord> OverrideSignals::ramOverrideData(const QString& equipmentId, const RamAreaInfo& ramAreaInfo) const
+	std::vector<OverrideRamRecord> OverrideSignals::ramOverrideData(const QString& lmEquipmentId, const RamAreaInfo& ramAreaInfo) const
 	{
 		std::vector<OverrideRamRecord> result;
 		E::LogicModuleRamAccess ramAccess = ramAreaInfo.access();
@@ -604,7 +926,7 @@ namespace Sim
 		{
 			writeError(tr("RamArea (offset %1) in LogicModule %2 seems too big (%3)")
 						.arg(ramAreaInfo.offset())
-						.arg(equipmentId)
+						.arg(lmEquipmentId)
 						.arg(ramAreaInfo.size()));
 			return result;
 		}
@@ -613,17 +935,17 @@ namespace Sim
 		//
 		QReadLocker locker(&m_lock);
 
-		for (auto[appSignalId, osp] : m_signals)
+		for (const auto&[appSignalId, osp] : m_signals)
 		{
-			if (osp.m_enabled == false ||				// Signal is not enabled to override
-				(static_cast<int>(osp.m_ramAccess) & static_cast<int>(ramAccess)) == 0 ||			// Signal is not in this RAM Area
-				osp.m_equipmentId != equipmentId)		// Signal is not in this LM
+			if (osp.enabled() == false ||				// Signal is not enabled to override
+				(static_cast<int>(osp.ramAccess()) & static_cast<int>(ramAccess)) == 0 ||			// Signal is not in this RAM Area
+				osp.lmEquipmentId() != lmEquipmentId)		// Signal is not in this LM
 			{
 				continue;
 			}
 
-			int dataSizeW = osp.m_dataSizeW;
-			int offsetW = osp.m_address.offset();
+			int dataSizeW = osp.dataSizeW();
+			int offsetW = osp.address().offset();
 
 			if (offsetW < static_cast<int>(ramAreaInfo.offset()) ||
 				offsetW >= static_cast<int>(ramAreaInfo.offset() + ramAreaInfo.size()))
@@ -649,7 +971,7 @@ namespace Sim
 
 			for (int i = 0; i < dataSizeW; i++)
 			{
-				result[offsetW].overlapRecord(osp.m_ramOverrides[i]);
+				result[offsetW].overlapRecord(osp.ramOverrides(i));
 				offsetW++;
 			}
 		}

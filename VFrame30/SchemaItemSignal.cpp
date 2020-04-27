@@ -172,6 +172,8 @@ namespace VFrame30
 	{
 		if (multiChannel() == true)
 		{
+			// Set pin captions
+			//
 			QString pinCaption = QString::number(m_appSignalIds.size());
 
 			std::vector<VFrame30::AfbPin>* ins = const_cast<SchemaItemSignal*>(this)->mutableInputs();
@@ -185,6 +187,23 @@ namespace VFrame30
 			for (VFrame30::AfbPin& pin : *outs)
 			{
 				pin.setCaption(pinCaption);
+			}
+		}
+		else
+		{
+			// Clear pin captions (they could be set if signal before was multichannel)
+			//
+			std::vector<VFrame30::AfbPin>* ins = const_cast<SchemaItemSignal*>(this)->mutableInputs();
+			std::vector<VFrame30::AfbPin>* outs = const_cast<SchemaItemSignal*>(this)->mutableOutputs();
+
+			for (VFrame30::AfbPin& pin : *ins)
+			{
+				pin.setCaption({});
+			}
+
+			for (VFrame30::AfbPin& pin : *outs)
+			{
+				pin.setCaption({});
 			}
 		}
 
@@ -212,7 +231,7 @@ namespace VFrame30
 		}
 
 		//
-		// Draw columns text and devider
+		// Draw columns text and divider
 		//
 
 		// If there is no column just draw identififers

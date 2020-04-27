@@ -103,30 +103,24 @@ namespace Sim
 				return false;
 			}
 
+			// If startFrameIndex is 0 then this configuration is not exists, it is ok, we can have gaps in LmNumber
+			//
+
 			// +1 to start frame index, to the payload
-			// +0
 			//
 			m_configFrameIndexes.push_back(startFrameIndex == 0 ? startFrameIndex : startFrameIndex + 1);
 
 			// --
 			//
-			ChannelServiceFrame csf;
+			ChannelServiceFrame& csf = m_channelServiceInfo.emplace_back();
 
-			if (i < configrationsCount)
+			if (startFrameIndex != 0)
 			{
 				csf.version = getWord(startFrameIndex, 0);
 				csf.dataType = static_cast<UartId>(getWord(startFrameIndex, 1));
 				csf.uniqueId = getUint64(startFrameIndex, 2);
 				csf.frameCount = getWord(startFrameIndex, 6);
-
-				if (csf.dataType != uartId())
-				{
-					assert(csf.dataType == uartId());
-					return false;
-				}
 			}
-
-			m_channelServiceInfo.push_back(csf);
 		}
 
 		return true;

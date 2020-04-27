@@ -6967,7 +6967,6 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
 	LexerJavaScript lexer;
-	preDrawScriptEdit->setLexer(&lexer);
 	preDrawScriptEdit->setText(preDrawScript);
 	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
 	preDrawScriptEdit->setMarginWidth(0, 40);
@@ -6977,9 +6976,10 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 #else
 	preDrawScriptEdit->setFont(QFont("Courier"));
 #endif
-
 	preDrawScriptEdit->setTabWidth(4);
 	preDrawScriptEdit->setAutoIndent(true);
+	lexer.setFont(preDrawScriptEdit->font());
+	preDrawScriptEdit->setLexer(&lexer);
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 
@@ -7117,20 +7117,23 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
 	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
-	LexerJavaScript lexer;
-	preDrawScriptEdit->setLexer(&lexer);
 	preDrawScriptEdit->setText(preDrawScript);
 	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
 	preDrawScriptEdit->setMarginWidth(0, 40);
 
 #if defined(Q_OS_WIN)
-	preDrawScriptEdit->setFont(QFont("Consolas"));
+	QFont f = QFont("Consolas");
 #else
-	preDrawScriptEdit->setFont(QFont("Courier"));
+	QFont f = QFont("Courier");
 #endif
 
+	preDrawScriptEdit->setFont(f);
 	preDrawScriptEdit->setTabWidth(4);
 	preDrawScriptEdit->setAutoIndent(true);
+
+	LexerJavaScript lexer;
+	lexer.setFont(f);
+	preDrawScriptEdit->setLexer(&lexer);
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 

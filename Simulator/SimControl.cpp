@@ -13,6 +13,8 @@ namespace Sim
 
 		QThread::start();
 
+		this->moveToThread(this);
+
 		return;
 	}
 
@@ -160,6 +162,7 @@ namespace Sim
 			for (SimControlRunStruct& cs : m_controlData.m_lms)
 			{
 				cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
+				m_simulator->overrideSignals().requestToResetOverrideScripts(cs.equipmentId());	// It will reset all scripts, clear global variables, etc
 			}
 
 			m_controlData.m_state = SimControlState::Run;
@@ -418,6 +421,10 @@ namespace Sim
 					//
 					if (lm.m_possibleToAdvanceTo <= cd.m_currentTime)
 					{
+						// Here is m_jsEngine and script must run in the same thread as m_jsEngine belongs
+						//
+						m_simulator->overrideSignals().runOverrideScripts(lm.equipmentId(), lm.m_cyclesCounter);
+
 						// Task can be STARTED again
 						//
 						lm.m_task = lm.start(cd.m_currentTime);

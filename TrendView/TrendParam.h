@@ -68,7 +68,7 @@ namespace TrendLib
 		TimeStamp startTimeStamp() const;
 		void setStartTimeStamp(const TimeStamp& value);
 
-		quint64 duration() const;
+		qint64 duration() const;
 		void setLaneDuration(qint64 value);
 
 		int hightlightRulerIndex() const;
