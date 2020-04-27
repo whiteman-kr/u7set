@@ -4,6 +4,7 @@
 #include <optional>
 #include <QObject>
 #include <QReadWriteLock>
+#include <QJSEngine>
 #include "SimOutput.h"
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
@@ -47,32 +48,73 @@ namespace Sim
 //		}
 	};
 
-	struct OverrideSignalParam
+	class OverrideSignalParam
 	{
-		OverrideSignalParam(const OverrideSignalParam&) = default;
+	public:
+		OverrideSignalParam(const OverrideSignalParam& src);
 		OverrideSignalParam(const Signal& signalParam);
 
+		OverrideSignalParam& operator=(const OverrideSignalParam& src);
+
+	public:
 		void updateSignalProperties(const Signal& signalParam, QVariant value = QVariant());
 
 		QString valueString(int base = 10,
 							E::AnalogFormat analogFormat = E::AnalogFormat::g_9_or_9e,
 							int precision = -1) const;
 
-		void setValue(const QVariant& value);
+		void setValue(const QVariant& value, OverrideSignalMethod method, bool changeCurrentMethod);
+
 		void setDiscreteValue(quint16 value);
 		void setWordValue(quint16 value);
 		void setSignedIntvalue(qint32 value);
 		void setFloatValue(float value);
 		void setDoubleValue(double value);
 
+		// Properties
+		//
+	public:
+		bool enabled() const;
+		void setEnabled(bool en);
+
+		int index() const;
+		void setIndex(int value);
+
+		const QString& appSignalId() const;
+		const QString& customSignalId() const;
+		const QString& caption() const;
+		const QString& lmEquipmentId() const;
+
+		E::SignalType signalType() const;
+		E::AnalogAppSignalFormat dataFormat() const;
+		E::ByteOrder byteOrder() const;
+
+		int dataSizeW() const;
+		const Address16& address() const;
+		E::LogicModuleRamAccess ramAccess() const;
+
+		const OverrideRamRecord& ramOverrides(size_t index) const;
+
+		OverrideSignalMethod method() const;
+
+		const QVariant& value() const;
+		const QString& script() const;
+
+		const QString& scriptError() const;
+		void setScriptError(const QString& value);
+
 		// --
+		//
+	private:
+		// Copy operator is present, pay attention to adding new members
 		//
 		bool m_enabled = true;
 		int m_index = 0;
+
 		QString m_appSignalId;
 		QString m_customSignalId;
 		QString m_caption;
-		QString m_equipmentId;								// LM where this signal lives
+		QString m_lmEquipmentId;								// LM where this signal lives
 
 		E::SignalType m_signalType = E::SignalType::Discrete;
 		E::AnalogAppSignalFormat m_dataFormat = E::AnalogAppSignalFormat::SignedInt32;
@@ -84,7 +126,33 @@ namespace Sim
 
 		std::array<OverrideRamRecord, 4> m_ramOverrides;	// Set of RAM offsets, masks and data to override, up to 4 words
 
-		QVariant m_value;									// value set with set* functions
+		OverrideSignalMethod m_method = OverrideSignalMethod::Value;
+		QVariant m_value;
+
+		QString m_script =
+R"+++((function(lastOverrideValue, workcycle)
+{
+	// lastOverrideValue - The last value returned from this function
+	// workcycle - Workcycle counter
+
+	var result = 0;
+
+	return result;	// Returns value for signal overriding
+}))+++";
+
+		// Copy operator is present, pay attention to adding new members
+		//
+
+//	public:
+//		// Not for copy
+//		//
+		QString m_scriptError;
+
+	public:
+		std::atomic<bool> m_scriptValueRequiresReset{true};	// Indicator that m_scriptValue, m_scriptEngine must be reset (deleted and created again)
+
+		std::unique_ptr<QJSValue> m_scriptValue;		// Must be created and worked with in thrread where it is used
+		std::unique_ptr<QJSEngine> m_scriptEngine;		// Must be created and worked with in thrread where it is used
 	};
 
 
@@ -98,17 +166,21 @@ namespace Sim
 
 	public:
 		void clear();
+
 		int addSignals(const QStringList& appSignalIds);
 		void removeSignal(QString appSignalId);
 
 		void setEnable(QString appSignalId, bool enable);
-		void setValue(QString appSignalId, const QVariant& value);
+		void setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value);
 
 		void updateSignals();								// Update signal descriptions, type, offsets, etc...
 
+		bool runOverrideScripts(const QString& lmEquipmentId, qint64 workcycle);	// Runs override scripts and sets value to override signals
+		void requestToResetOverrideScripts(const QString& lmEquipmentId);			// If module is reset, then script must be restarted, clear global variables, etc
+
 	signals:
 		void signalsChanged(QStringList addedAppSignalIds);	// Added or deleted signal
-		void stateChanged(QString appSignalId);				// Chenged value or enable state
+		void stateChanged(QStringList appSignalIds);		// Changed value or enable state
 
 	public:
 		AppSignalManager& appSignalManager();
@@ -119,7 +191,7 @@ namespace Sim
 
 		int changesCounter() const;
 
-		std::vector<OverrideRamRecord> ramOverrideData(const QString& equipmentId, const RamAreaInfo& ramAreaInfo) const;
+		std::vector<OverrideRamRecord> ramOverrideData(const QString& lmEquipmentId, const RamAreaInfo& ramAreaInfo) const;
 
 	private:
 		Sim::Simulator* m_simulator = nullptr;
@@ -127,7 +199,7 @@ namespace Sim
 		mutable QReadWriteLock m_lock;
 		std::map<QString, OverrideSignalParam> m_signals;	// Key is AppSignalID
 		int m_changesCounter = 0;							// This variable is inceremented every time m_signals has
-															// any cahnges, so if it is changeed then RAM requests update
+															// any changes, so if it is changeed then RAM requests update
 															//
 	};
 

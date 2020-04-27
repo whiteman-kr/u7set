@@ -1,5 +1,9 @@
 #pragma once
 #include "../../Simulator/Simulator.h"
+#include "../../Simulator/SimOverrideSignals.h"
+#include "../../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../../lib/QScintillaLexers/LexerJavaScript.h"
+
 
 
 namespace SimOverrideUI
@@ -43,7 +47,7 @@ namespace SimOverrideUI
 
 		virtual void setViewOptions(int base, E::AnalogFormat analogFormat, int precision);
 
-		void setValue(QVariant value);
+		void setValue(Sim::OverrideSignalMethod method, QVariant value);
 
 	protected:
 		Sim::OverrideSignalParam m_signal;
@@ -66,6 +70,9 @@ namespace SimOverrideUI
 
 		virtual void setViewOptions(int base, E::AnalogFormat analogFormat, int precision) override;
 
+	protected:
+		virtual void showEvent(QShowEvent* e) override;
+
 	protected slots:
 		void dialogBoxButtonClicked(QAbstractButton* button);
 		void valueEntered(double value);
@@ -74,8 +81,6 @@ namespace SimOverrideUI
 
 
 	private:
-		//QLineEdit* m_edit = nullptr;
-
 		QWidget* m_edit = nullptr;
 
 		QLineEdit* m_floatEdit = nullptr;
@@ -99,6 +104,35 @@ namespace SimOverrideUI
 	public:
 		ScriptMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent);
 
+	protected slots:
+		void dialogBoxButtonClicked(QAbstractButton* button);
+		void showTemplates();
+
+	private:
+		QPushButton* m_templateScriptButton = nullptr;
+		QPushButton* m_loadScriptButton = nullptr;
+		QPushButton* m_saveScriptButton = nullptr;
+
+		QLabel* m_scriptLabel = nullptr;
+		QsciScintilla* m_scriptEdit = nullptr;
+		LexerJavaScript m_lexer;
+
+		QDialogButtonBox* m_buttonBox = nullptr;
+
+		const std::map<QString, QString> m_templatesAnalog	// Key is template name, value is template filename to load
+		{
+			{QStringLiteral("Sine"), QStringLiteral(":/Simulator/Templates/Sine.js")},
+			{QStringLiteral("Square"), QStringLiteral(":/Simulator/Templates/Square.js")},
+			{QStringLiteral("Triangle"), QStringLiteral(":/Simulator/Templates/Triangle.js")},
+			{QStringLiteral("Sawtooth Front"), QStringLiteral(":/Simulator/Templates/SawtoothFront.js")},
+			{QStringLiteral("Sawtooth Back"), QStringLiteral(":/Simulator/Templates/SawtoothBack.js")},
+		};
+
+		const std::map<QString, QString> m_templatesDiscrete	// Key is template name, value is template filename to load
+		{
+			{QStringLiteral("Square"), QStringLiteral(":/Simulator/Templates/DiscreteSquare.js")},
+			{QStringLiteral("Series"), QStringLiteral(":/Simulator/Templates/DiscreteSeries.js")},
+		};
 	};
 
 

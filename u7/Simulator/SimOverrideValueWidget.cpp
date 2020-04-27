@@ -3,6 +3,7 @@
 
 namespace SimOverrideUI
 {
+
 	DiscreteSpinBox::DiscreteSpinBox(int value, QWidget* parent) :
 		QSpinBox(parent)
 	{
@@ -88,11 +89,11 @@ namespace SimOverrideUI
 		return;
 	}
 
-	void OverrideMethodWidget::setValue(QVariant value)
+	void OverrideMethodWidget::setValue(Sim::OverrideSignalMethod method, QVariant value)
 	{
 		assert(m_simulator);
 
-		m_simulator->overrideSignals().setValue(m_signal.m_appSignalId, value);
+		m_simulator->overrideSignals().setValue(m_signal.appSignalId(), method, value);
 
 		return;
 	}
@@ -104,15 +105,15 @@ namespace SimOverrideUI
 		OverrideMethodWidget(signal, simulator, parent)
 	{
 
-		switch (signal.m_signalType)
+		switch (signal.signalType())
 		{
 		case E::SignalType::Analog:
 			{
-				switch (signal.m_dataFormat)
+				switch (signal.dataFormat())
 				{
 				case E::AnalogAppSignalFormat::SignedInt32:
 					{
-						m_intSpinBox = new SInt32SpinBox{signal.m_value.toInt(), this};
+						m_intSpinBox = new SInt32SpinBox{signal.value().toInt(), this};
 						m_edit = m_intSpinBox;
 
 						m_intSpinBox->setDisplayIntegerBase(m_currentBase);
@@ -149,7 +150,7 @@ namespace SimOverrideUI
 										v = m_floatEdit->text().toFloat(&ok);
 									}
 
-									setValue(QVariant::fromValue<float>(v));
+									setValue(Sim::OverrideSignalMethod::Value, QVariant::fromValue<float>(v));
 								});
 					}
 					break;
@@ -162,7 +163,7 @@ namespace SimOverrideUI
 
 		case E::SignalType::Discrete:
 			{
-				m_discreteSpinBox = new DiscreteSpinBox{signal.m_value.toInt(), this};
+				m_discreteSpinBox = new DiscreteSpinBox{signal.value().toInt(), this};
 				m_edit = m_discreteSpinBox;
 
 				connect(m_discreteSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -182,7 +183,7 @@ namespace SimOverrideUI
 			assert(false);
 		}
 
-		// Ok/Cancel
+		// Apply button
 		//
 		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Apply, this);
 
@@ -228,6 +229,16 @@ namespace SimOverrideUI
 		return;
 	}
 
+	void ValueMethodWidget::showEvent(QShowEvent* e)
+	{
+		if (m_edit != nullptr)
+		{
+			m_edit->setFocus();
+		}
+
+		return OverrideMethodWidget::showEvent(e);
+	}
+
 	void ValueMethodWidget::dialogBoxButtonClicked(QAbstractButton* button)
 	{
 		if (button == m_buttonBox->button(QDialogButtonBox::Apply))
@@ -258,7 +269,7 @@ namespace SimOverrideUI
 		//
 		QVariant newValue;
 
-		switch (m_signal.m_signalType)
+		switch (m_signal.signalType())
 		{
 		case E::SignalType::Discrete:
 			{
@@ -280,7 +291,7 @@ namespace SimOverrideUI
 
 		if (newValue.isValid() == true)
 		{
-			setValue(newValue);
+			setValue(Sim::OverrideSignalMethod::Value, newValue);
 		}
 		else
 		{
@@ -297,6 +308,178 @@ namespace SimOverrideUI
 	ScriptMethodWidget::ScriptMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent) :
 		OverrideMethodWidget(signal, simulator, parent)
 	{
+		m_scriptLabel = new QLabel(tr("Override Value Script:"));
+
+		m_scriptEdit = new QsciScintilla(this);
+		m_scriptEdit->setUtf8(true);
+		m_scriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
+		m_scriptEdit->setMarginWidth(0, 40);
+		m_scriptEdit->setTabWidth(4);
+		m_scriptEdit->setAutoIndent(true);
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Consolas");
+#else
+		QFont f = QFont("Courier");
+#endif
+		m_scriptEdit->setFont(f);
+		m_lexer.setFont(f);
+		m_scriptEdit->setLexer(&m_lexer);
+
+		m_scriptEdit->setText(signal.script());
+		m_scriptEdit->setModified(false);
+
+		// Apply button
+		//
+		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Apply, this);
+
+		m_templateScriptButton = m_buttonBox->addButton(tr("Templates..."), QDialogButtonBox::ButtonRole::ResetRole);
+		m_loadScriptButton = m_buttonBox->addButton(tr("Load..."), QDialogButtonBox::ButtonRole::ResetRole);
+		m_saveScriptButton = m_buttonBox->addButton(tr("Save..."), QDialogButtonBox::ButtonRole::ResetRole);
+
+		// --
+		//
+		QGridLayout* gridLayout = new QGridLayout;
+
+		gridLayout->addWidget(m_scriptLabel, 0, 0);
+		gridLayout->addWidget(m_scriptEdit, 1, 0);
+
+		gridLayout->addWidget(m_buttonBox, 2, 0);
+
+		setLayout(gridLayout);
+
+		// --
+		//
+		connect(m_buttonBox, &QDialogButtonBox::clicked, this, &ScriptMethodWidget::dialogBoxButtonClicked);
+
+		return;
+	}
+
+	void ScriptMethodWidget::dialogBoxButtonClicked(QAbstractButton* button)
+	{
+		if (button == m_buttonBox->button(QDialogButtonBox::Apply))
+		{
+			// Validate script here
+			//
+			QString script = m_scriptEdit->text();
+
+			QJSEngine jsEngine;
+			QJSValue scriptValue =  jsEngine.evaluate(script);
+
+			if (scriptValue.isError() == true)
+			{
+				qDebug() << "Script evaluate error at line " << scriptValue.property("lineNumber").toInt();
+				qDebug() << "\tClass: " << metaObject()->className();
+				qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+				qDebug() << "\tMessage: " << scriptValue.toString();
+
+				QMessageBox::critical(this,
+									  QApplication::applicationDisplayName(),
+									  tr("Script evaluate error at line %1:\n%2")
+										  .arg(scriptValue.property("lineNumber").toInt())
+										  .arg(scriptValue.toString()));
+				return;
+			}
+
+			// Set script to signal
+			//
+			setValue(Sim::OverrideSignalMethod::Script, script);
+		}
+
+		if (button == m_templateScriptButton)
+		{
+			showTemplates();
+		}
+
+		return;
+	}
+
+	void ScriptMethodWidget::showTemplates()
+	{
+		QMenu m(tr("Script Templates:"));
+
+		const std::map<QString, QString>* templates = nullptr;
+
+		switch (m_signal.signalType())
+		{
+		case E::SignalType::Analog:
+			templates = &m_templatesAnalog;
+			break;
+		case E::SignalType::Discrete:
+			templates = &m_templatesDiscrete;
+			break;
+		default:
+			return;
+		}
+
+		assert(templates);
+		for (auto[name, fileName] : *templates)
+		{
+			QAction* a = m.addAction(name);
+			a->setData(name);
+		}
+
+		QAction* a = m.exec(m_templateScriptButton->mapToGlobal(m_templateScriptButton->geometry().bottomLeft()));
+
+		if (a != nullptr)
+		{
+			QString templateName = a->data().toString();
+
+
+			if (templates->find(templateName) == templates->end())
+			{
+				assert(templates->find(templateName) != templates->end());
+			}
+			else
+			{
+				QString templateFileName = templates->at(templateName);
+
+				auto loadTemplateFunc = [this](QString templateFileName)
+					{
+						QFile f(templateFileName);
+
+						if (f.open(QIODevice::ReadOnly) == false)
+						{
+							this->m_scriptEdit->setText(tr("Cannot open file %1").arg(templateFileName));
+						}
+						else
+						{
+							QString script = QString{f.readAll()};
+							this->m_scriptEdit->setText(script);
+
+							this->m_scriptEdit->setModified(false);
+						}
+					};
+
+
+				if (m_scriptEdit->isModified() == true)
+				{
+					QMessageBox mb(this);
+					mb.setText(tr("The document has been modified."));
+					mb.setInformativeText(tr("Do you want to overwrite it?"));
+					mb.setStandardButtons(QMessageBox::Discard | QMessageBox::Yes);
+					mb.setDefaultButton(QMessageBox::Discard);
+
+					int result = mb.exec();
+
+					switch (result)
+					{
+					case QMessageBox::Discard:
+						break;
+					case QMessageBox::Yes:
+						loadTemplateFunc(templateFileName);
+						return;
+					default:
+						Q_ASSERT(false);
+					}
+				}
+				else
+				{
+					loadTemplateFunc(templateFileName);
+				}
+			}
+		}
+
+		return;
 	}
 
 
@@ -314,7 +497,7 @@ namespace SimOverrideUI
 
 		// --
 		//
-		setWindowTitle(tr("Override %1").arg(m_signal.m_appSignalId));
+		setWindowTitle(tr("Override %1").arg(m_signal.appSignalId()));
 
 		setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 		setWindowFlag(Qt::WindowMinimizeButtonHint, false);
@@ -371,19 +554,20 @@ namespace SimOverrideUI
 
 		layout->addWidget(m_tabWidget, 4, 0, 1, 2);
 
+
 		// --
 		//
 		connect(m_simulator, &Sim::Simulator::projectUpdated, this, &OverrideValueWidget::projectUpdated);
 		connect(&m_simulator->overrideSignals(), &Sim::OverrideSignals::signalsChanged, this, &OverrideValueWidget::overrideSignalsChaged);
 
-		m_openedDialogs[m_signal.m_appSignalId] = this;
+		m_openedDialogs[m_signal.appSignalId()] = this;
 
 		return;
 	}
 
 	OverrideValueWidget::~OverrideValueWidget()
 	{
-		m_openedDialogs.erase(m_signal.m_appSignalId);
+		m_openedDialogs.erase(m_signal.appSignalId());
 	}
 
 
@@ -391,7 +575,7 @@ namespace SimOverrideUI
 	{
 		OverrideValueWidget* w = nullptr;
 
-		auto it = m_openedDialogs.find(signal.m_appSignalId);
+		auto it = m_openedDialogs.find(signal.appSignalId());
 		if (it == m_openedDialogs.end())
 		{
 			w = new OverrideValueWidget(signal, simulator, parent);
@@ -497,29 +681,29 @@ namespace SimOverrideUI
 
 	void OverrideValueWidget::updateSignalsUi()
 	{
-		m_customSiganIdLabel->setText(m_signal.m_customSignalId);
-		m_appSiganIdLabel->setText(m_signal.m_appSignalId);
-		m_captionLabel->setText(m_signal.m_caption);
+		m_customSiganIdLabel->setText(m_signal.customSignalId());
+		m_appSiganIdLabel->setText(m_signal.appSignalId());
+		m_captionLabel->setText(m_signal.caption());
 
 		// Type/Format
 		//
 		QString text;
-		if (m_signal.m_signalType == E::SignalType::Discrete)
+		if (m_signal.signalType() == E::SignalType::Discrete)
 		{
-			text = E::valueToString<E::SignalType>(m_signal.m_signalType);
+			text = E::valueToString<E::SignalType>(m_signal.signalType());
 		}
 
-		if (m_signal.m_signalType == E::SignalType::Analog)
+		if (m_signal.signalType() == E::SignalType::Analog)
 		{
 			text = QString("%1 (%2)")
-				   .arg(E::valueToString<E::SignalType>(m_signal.m_signalType))
-				   .arg(E::valueToString<E::AnalogAppSignalFormat>(m_signal.m_dataFormat));
+				   .arg(E::valueToString<E::SignalType>(m_signal.signalType()))
+				   .arg(E::valueToString<E::AnalogAppSignalFormat>(m_signal.dataFormat()));
 		}
 
-		if (m_signal.m_signalType == E::SignalType::Bus)
+		if (m_signal.signalType() == E::SignalType::Bus)
 		{
 			text = QString("%1")
-				   .arg(E::valueToString<E::SignalType>(m_signal.m_signalType));
+				   .arg(E::valueToString<E::SignalType>(m_signal.signalType()));
 		}
 
 		m_typeLabel->setText(text);
@@ -529,7 +713,7 @@ namespace SimOverrideUI
 
 	QString OverrideValueWidget::appSignalId() const
 	{
-		return m_signal.m_appSignalId;
+		return m_signal.appSignalId();
 	}
 
 	const Sim::OverrideSignalParam& OverrideValueWidget::signal() const

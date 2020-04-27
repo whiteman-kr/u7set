@@ -28,7 +28,7 @@ protected slots:
 	void itemChanged(QTreeWidgetItem *item, int column);
 
 	void signalsChanged(QStringList addedAppSignalIds);
-	void signalStateChanged(QString appSignalId);
+	void signalStateChanged(QStringList appSignalId);
 
 	void clear();
 
@@ -38,7 +38,7 @@ protected slots:
 	void addSignal();
 
 	void setValue(QString appSignalId);
-	void setValue(QString appSignalId, const QVariant& value);
+	void setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value);
 
 private:
 	Sim::Simulator* m_simulator = nullptr;

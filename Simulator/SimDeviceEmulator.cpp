@@ -203,7 +203,7 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::run(int cycles, std::chrono::microseconds currentTime)
+	bool DeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, qint64 workcycle)
 	{
 		if (m_currentMode == DeviceMode::Start)
 		{
@@ -214,17 +214,14 @@ namespace Sim
 			}
 		}
 
-		bool ok = true;
-
-		for (int i = 0; i < cycles; i++)
+		bool ok = false;
+		if (m_currentMode == DeviceMode::Fault)
 		{
-			if (m_currentMode == DeviceMode::Fault)
-			{
-				ok &= processFaultMode();
-				break;
-			}
-
-			ok &= processOperate(currentTime);
+			ok = processFaultMode();
+		}
+		else
+		{
+			ok = processOperate(currentTime, workcycle);
 		}
 
 		return ok;
@@ -1063,8 +1060,10 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime)
+	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, qint64 workcycle)
 	{
+		Q_UNUSED(workcycle);
+
 		// One LogicModule Cycle
 		//
 		bool result = true;
@@ -1076,15 +1075,8 @@ namespace Sim
 
 		if (m_overrideSignals != nullptr)
 		{
-			//m_overrideSignals->runOverrideScripts(equipmentId(), );
-			int to_here_override_1;
-			int to_here_override_2;
-			int to_here_override_3;
-			int to_here_override_4;
-
 			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
 		}
-
 
 		// COMMENTED as now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.

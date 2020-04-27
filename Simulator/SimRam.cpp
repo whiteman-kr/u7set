@@ -895,7 +895,7 @@ namespace Sim
 		return result;
 	}
 
-	void Ram::updateOverrideData(const QString& equipmentId, const OverrideSignals* overrideSignals)
+	void Ram::updateOverrideData(const QString& lmEquipmentId, const OverrideSignals* overrideSignals)
 	{
 		if (overrideSignals == nullptr)
 		{
@@ -912,7 +912,7 @@ namespace Sim
 
 		for (RamArea& ramArea : m_memoryAreas)
 		{
-			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(equipmentId, ramArea);
+			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(lmEquipmentId, ramArea);
 			ramArea.setOverrideData(std::move(ovData));
 		}
 

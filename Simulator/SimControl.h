@@ -43,8 +43,8 @@ namespace Sim
 
 			m_lastStartTime = time;
 			m_possibleToAdvanceTo = time;
-			m_cylcesCounter ++;
-			return m_lm->asyncRunCycle(time, reset);
+			m_cyclesCounter ++;
+			return m_lm->asyncRunCycle(time, m_cyclesCounter, reset);
 		}
 
 		bool afterWorkCycleTask(AppSignalManager& appSignalManager, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime)
@@ -70,7 +70,7 @@ namespace Sim
 		std::shared_ptr<LogicModule> m_lm;
 		std::chrono::microseconds m_lastStartTime{0};
 		std::chrono::microseconds m_possibleToAdvanceTo{0};
-		qint64 m_cylcesCounter = 0;
+		qint64 m_cyclesCounter = 0;
 
 		std::optional<QFuture<bool>> m_task;
 	};

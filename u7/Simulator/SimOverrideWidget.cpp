@@ -1,5 +1,6 @@
 #include "SimOverrideWidget.h"
 #include "../../lib/AppSignal.h"
+#include "../../Simulator/SimOverrideSignals.h"
 #include "SimOverrideValueWidget.h"
 
 
@@ -199,8 +200,8 @@ bool SimOverrideWidget::eventFilter(QObject* obj, QEvent* event)
 				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
 				if (item != nullptr)
 				{
-					QString appSignalId = item->m_overrideSignal.m_appSignalId;
-					setValue(appSignalId, QVariant::fromValue<qint32>(0));
+					QString appSignalId = item->m_overrideSignal.appSignalId();
+					setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(0));
 				}
 			}
 			return true;
@@ -209,8 +210,8 @@ bool SimOverrideWidget::eventFilter(QObject* obj, QEvent* event)
 				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
 				if (item != nullptr)
 				{
-					QString appSignalId = item->m_overrideSignal.m_appSignalId;
-					setValue(appSignalId, QVariant::fromValue<qint32>(1));
+					QString appSignalId = item->m_overrideSignal.appSignalId();
+					setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(1));
 				}
 			}
 			return true ;
@@ -232,7 +233,7 @@ void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
 		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItems.front());
 		assert(item != nullptr);
 
-		appSignalId = item->m_overrideSignal.m_appSignalId;
+		appSignalId = item->m_overrideSignal.appSignalId();
 	}
 
 	QMenu menu(this);
@@ -451,12 +452,12 @@ void SimOverrideWidget::updateValueColumn()
 			return;
 		}
 
-		QString appSignalId = treeItem->m_overrideSignal.m_appSignalId;
+		QString appSignalId = treeItem->m_overrideSignal.appSignalId();
 
 		auto it = std::find_if(currentSignals.begin(), currentSignals.end(),
 								[&appSignalId](const Sim::OverrideSignalParam& osp)
 								{
-									return osp.m_appSignalId == appSignalId;
+			                        return osp.appSignalId() == appSignalId;
 								});
 
 		if (it == currentSignals.end())
@@ -473,7 +474,7 @@ void SimOverrideWidget::updateValueColumn()
 		treeItem->setText(static_cast<int>(QOverrideTreeWidgetItem::Columns::Value),
 						  osp.valueString(m_currentBase, m_currentFormat, m_currentPrecision));
 
-		Qt::CheckState cs = osp.m_enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+		Qt::CheckState cs = osp.enabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
 
 		treeItem->setCheckState(0, cs);
 	}
@@ -516,7 +517,7 @@ void SimOverrideWidget::selectSignal(QString appSignalId)
 			return;
 		}
 
-		item->setSelected(item->m_overrideSignal.m_appSignalId == appSignalId);
+		item->setSelected(item->m_overrideSignal.appSignalId() == appSignalId);
 
 		if (item->isSelected() == true)
 		{
@@ -532,7 +533,7 @@ void SimOverrideWidget::itemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 	QOverrideTreeWidgetItem* toItem = dynamic_cast<QOverrideTreeWidgetItem*>(item);
 	assert(toItem);
 
-	setValue(toItem->m_overrideSignal.m_appSignalId);
+	setValue(toItem->m_overrideSignal.appSignalId());
 
 	return;
 }
@@ -568,7 +569,7 @@ void SimOverrideWidget::signalsChanged(QStringList addedAppSignalIds)
 	return;
 }
 
-void SimOverrideWidget::signalStateChanged(QString /*appSignalId*/)
+void SimOverrideWidget::signalStateChanged(QStringList /*appSignalId*/)
 {
 	updateValueColumn();
 }
@@ -589,7 +590,7 @@ void SimOverrideWidget::removeSelectedSignals()
 		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(currentItem);
 		assert(item != nullptr);
 
-		QString appSignalId = item->m_overrideSignal.m_appSignalId;
+		QString appSignalId = item->m_overrideSignal.appSignalId();
 		removeSignal(appSignalId);
 
 		// Select next item
@@ -690,14 +691,14 @@ void SimOverrideWidget::setValue(QString appSignalId)
 	}
 
 	SimOverrideUI::OverrideValueWidget::showDialog(osp.value(), m_simulator, this);
-	SimOverrideUI::OverrideValueWidget::setViewOptions(osp.value().m_appSignalId, m_currentBase, m_currentFormat, m_currentPrecision);
+	SimOverrideUI::OverrideValueWidget::setViewOptions(osp.value().appSignalId(), m_currentBase, m_currentFormat, m_currentPrecision);
 
 	return;
 }
 
-void SimOverrideWidget::setValue(QString appSignalId, const QVariant& value)
+void SimOverrideWidget::setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value)
 {
-	m_simulator->overrideSignals().setValue(appSignalId, value);
+	m_simulator->overrideSignals().setValue(appSignalId, method, value);
 }
 
 
@@ -705,19 +706,19 @@ QOverrideTreeWidgetItem::QOverrideTreeWidgetItem(const Sim::OverrideSignalParam&
 	QTreeWidgetItem(),
 	m_overrideSignal(overrideSignal)
 {
-	QString type = E::valueToString(overrideSignal.m_signalType);
-	if (overrideSignal.m_signalType == E::SignalType::Analog)
+	QString type = E::valueToString(overrideSignal.signalType());
+	if (overrideSignal.signalType() == E::SignalType::Analog)
 	{
-		type = E::valueToString(overrideSignal.m_dataFormat);
+		type = E::valueToString(overrideSignal.dataFormat());
 	}
 
-	this->setText(static_cast<int>(Columns::Index), QString::number(overrideSignal.m_index));
-	this->setText(static_cast<int>(Columns::CustomSignalId), overrideSignal.m_customSignalId);
-	this->setText(static_cast<int>(Columns::Caption), overrideSignal.m_caption);
+	this->setText(static_cast<int>(Columns::Index), QString::number(overrideSignal.index()));
+	this->setText(static_cast<int>(Columns::CustomSignalId), overrideSignal.customSignalId());
+	this->setText(static_cast<int>(Columns::Caption), overrideSignal.caption());
 	this->setText(static_cast<int>(Columns::Type), type);
 	this->setText(static_cast<int>(Columns::Value), overrideSignal.valueString());
 
-	this->setCheckState(0, overrideSignal.m_enabled ? Qt::Checked : Qt::Unchecked);
+	this->setCheckState(0, overrideSignal.enabled() ? Qt::Checked : Qt::Unchecked);
 
 	return;
 }
@@ -728,5 +729,5 @@ QOverrideTreeWidgetItem::~QOverrideTreeWidgetItem()
 
 QString QOverrideTreeWidgetItem::appSignalId() const
 {
-	return m_overrideSignal.m_appSignalId;
+	return m_overrideSignal.appSignalId();
 }

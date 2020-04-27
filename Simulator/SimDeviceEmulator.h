@@ -144,7 +144,7 @@ namespace Sim
 				  const Connections& connections);
 
 		bool reset();
-		bool run(int cycles = -1, std::chrono::microseconds currentTime = std::chrono::microseconds{0});
+		bool runWorkcycle(std::chrono::microseconds currentTime, qint64 workcycle);
 
 		//	Public methods to access from simulation commands
 		//
@@ -227,7 +227,7 @@ namespace Sim
 		bool processStartMode();
 		bool processFaultMode();
 
-		bool processOperate(std::chrono::microseconds currentTime);
+		bool processOperate(std::chrono::microseconds currentTime, qint64 workcycle);
 
 		bool runCommand(DeviceCommand& deviceCommand);
 

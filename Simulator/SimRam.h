@@ -165,7 +165,7 @@ namespace Sim
 		[[nodiscard]] const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept;
 
 	public:
-		void updateOverrideData(const QString& equipmentId, const Sim::OverrideSignals* overrideSignals);
+		void updateOverrideData(const QString& lmEquipmentId, const Sim::OverrideSignals* overrideSignals);
 
 	private:
 		// Pay attention to copy operator
