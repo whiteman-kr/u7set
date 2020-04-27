@@ -1,7 +1,7 @@
 #include "AppDataReceiver.h"
 #include "../lib/AppSignal.h"
 #include "../lib/WUtils.h"
-
+#include "../lib/Socket.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -88,17 +88,43 @@ bool AppDataReceiverThread::tryCreateAndBindSocket()
 
 		bool result = m_socket->bind(m_dataReceivingIP.address(), m_dataReceivingIP.port());
 
-		if (result == true)
+		if (result == false)
 		{
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created and bound to %1").arg(m_dataReceivingIP.addressPortStr()));
-			break;
+			qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error to %1").arg(m_dataReceivingIP.addressPortStr()));
+
+			closeSocket();
+
+			msleep(200);
+
+			continue;
 		}
 
-		qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error to %1").arg(m_dataReceivingIP.addressPortStr()));
+		// bind Ok
 
-		closeSocket();
+		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created and bound to %1").arg(m_dataReceivingIP.addressPortStr()));
 
-		msleep(200);
+		QVariant osRecvBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
+
+		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver: OS defined receive buffer size - %1 bytes").arg(osRecvBufSize.toInt()));
+
+		QVariant newRecvBufSize(static_cast<int>(2 * 1024 * 1024));
+
+		m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, newRecvBufSize);
+
+		QVariant currentBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
+
+		DEBUG_LOG_MSG(m_log, (QString("AppDataReceiver: new receive buffer size is set - %1 bytes").arg(currentBufSize.toInt())));
+
+		if (newRecvBufSize.toInt() != currentBufSize.toInt())
+		{
+			qDebug() << "";
+			DEBUG_LOG_WRN(m_log, QString("WARNING!!! Receive buffer size is not changed to required size."));
+			DEBUG_LOG_MSG(m_log, QString("Try change value of registry key (create if key is not exist)"));
+			DEBUG_LOG_MSG(m_log, QString("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\AFD\\Parameters\\DefaultReceiveWindow"));
+			qDebug() << "";
+		}
+
+		break;
 	}
 
 	return m_socket != nullptr;
