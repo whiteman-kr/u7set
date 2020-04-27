@@ -585,7 +585,7 @@ void DataSourceOnline::updateUptime()
 bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 {
 	// rupFrameTime.rupFrame.header already reverseByted !
-
+	//
 	const Rup::Header& rupFrameHeader = rupFrameTime.rupFrame.header;
 
 	quint32 framesQuantity = rupFrameHeader.framesQuantity;
@@ -837,6 +837,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 {
 	int count = 0;
 
+	m_dataReadyToParsing = false;
+
 	do
 	{
 		RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPop(thread);
@@ -873,9 +875,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 				}
 			}
 
-			break;	// has no frames to processing, exit from processRupFrameTimeQueue, return FALSE
-					//
-					// m_rupFrameTimeQueue.completePop is not required
+			break;			// has no frames to processing, exit from processRupFrameTimeQueue, return FALSE
+							// m_rupFrameTimeQueue.completePop is not required !!!
 		}
 
 		m_lastPacketSystemTime = rupFrameTime->serverTime;
@@ -917,7 +918,6 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 			// rupFrame's data ID checking
 			//
-
 			m_receivedDataID = rupFrameHeader.dataId;
 
 			if (m_receivedDataID != lmDataID())
