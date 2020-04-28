@@ -53,52 +53,88 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
 		return;
 	}
 
-	m_signalType = deviceSignal.type();
+	//
 
-	assert(m_signalType == E::SignalType::Analog || m_signalType == E::SignalType::Discrete);
+	QString deviceSignalEquipmentID = deviceSignal.equipmentIdTemplate();
 
-	if (m_signalType == E::SignalType::Analog)
-	{
-		m_analogSignalFormat = deviceSignal.appSignalDataFormat();
+	m_appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
+	m_customAppSignalID = deviceSignalEquipmentID;
+	m_equipmentID = deviceSignalEquipmentID;
 
-		assert(m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 || m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32);
-	}
-
-	updateTuningValuesType();
-
-	if (deviceSignal.isInputSignal() || deviceSignal.isValiditySignal())
-	{
-		m_inOutType = E::SignalInOutType::Input;
-	}
-	else
-    {
-
-		if (deviceSignal.isOutputSignal())
-		{
-			m_inOutType = E::SignalInOutType::Output;
-		}
-		else
-		{
-			m_inOutType = E::SignalInOutType::Internal;
-		}
-	}
-
-	m_appSignalID = QString("#%1").arg(deviceSignal.equipmentIdTemplate());
-	m_customAppSignalID = deviceSignal.equipmentIdTemplate();
-
-	QString deviceSignalStrID = deviceSignal.equipmentIdTemplate();
-
-	int pos = deviceSignalStrID.lastIndexOf(QChar('_'));
+	int pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
 
 	if (pos != -1)
 	{
-		deviceSignalStrID = deviceSignalStrID.mid(pos + 1);
+		deviceSignalEquipmentID = deviceSignalEquipmentID.mid(pos + 1);
 	}
 
-	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
-	m_equipmentID = deviceSignal.equipmentIdTemplate();
+	m_caption = QString("Signal #%1").arg(deviceSignalEquipmentID);
 
-	setDataSize(m_signalType, m_analogSignalFormat);
+	//
+
+	m_signalType = deviceSignal.type();
+
+	switch(m_signalType)
+	{
+	case E::SignalType::Analog:
+
+		m_analogSignalFormat = deviceSignal.appSignalDataFormat();
+		assert(m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 || m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32);
+
+		setDataSize(m_signalType, m_analogSignalFormat);
+		updateTuningValuesType();
+
+		break;
+
+	case E::SignalType::Discrete:
+
+		setDataSize(m_signalType, m_analogSignalFormat);
+		updateTuningValuesType();
+
+		break;
+
+	case E::SignalType::Bus:
+
+		m_busTypeID = deviceSignal.appSignalBusTypeId();
+
+		break;
+
+	default:
+
+		assert(false);
+		*errMsg = "Unknown device signal E::SignalType";
+
+		return;
+	}
+
+	switch(deviceSignal.function())
+	{
+	case E::SignalFunction::Input:
+	case E::SignalFunction::Validity:
+
+		m_inOutType = E::SignalInOutType::Input;
+
+		break;
+
+	case E::SignalFunction::Output:
+
+		m_inOutType = E::SignalInOutType::Output;
+
+		break;
+
+	case E::SignalFunction::Diagnostics:
+
+		assert(false);	// never will be here
+
+		break;
+
+	default:
+
+		assert(false);
+		*errMsg = "Unknown device signal E::SignalFunction";
+
+		return;
+	}
 
 	// specific properties processing
 	//
@@ -202,6 +238,12 @@ void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat data
 			assert(false);		// unknown data format
 		}
 
+		break;
+
+	case E::SignalType::Bus:
+
+		assert(false);						// function setDataSize should not be call for Bus signals
+											// data size of bus signals is defined by BusTypeID
 		break;
 
 	default:

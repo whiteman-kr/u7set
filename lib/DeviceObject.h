@@ -681,7 +681,7 @@ namespace Hardware
 
 		QString m_validitySignalId;
 
-		// Signals for creating Analog AppSignal
+		// Properties for creating Analog AppSignal
 		//
 		int m_appSignalLowAdc = 0;
 		int m_appSignalHighAdc = 65535;
@@ -689,7 +689,7 @@ namespace Hardware
 		double m_appSignalHighEngUnits = 100.0;
 		E::AnalogAppSignalFormat m_appSignalDataFormat = E::AnalogAppSignalFormat::Float32;
 
-		// Signals for creating Bus AppSignal
+		// Properties for creating Bus AppSignal
 		//
 		QString m_appSignalBusTypeId;
 
