@@ -2162,13 +2162,13 @@ void EquipmentView::addInOutsToSignals()
 
 	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
 
-	if (module == nullptr || (module->isIOModule() == false && module->isLogicModule() == false && module->isOptoModule() == false))
+	if (module == nullptr)
 	{
 		assert(module);
 		return;
 	}
 
-	// Check if the Place property coorect for the object and all it's parents
+	// Check if the Place property is correct for the object and all it's parents
 	//
 	Hardware::DeviceObject* checkPlaceObject = module;
 
@@ -4403,8 +4403,11 @@ void EquipmentTabPage::setActionState()
 
 		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
 
-		if (module != nullptr && (module->isIOModule() == true || module->isLogicModule() == true || module->isOptoModule() == true))
+		if (module != nullptr)
 		{
+			// Allow to add signals for any module
+			// it comes from MUM, it is not IO module, it is control
+			//
 			m_inOutsToSignals->setEnabled(true);
 			m_inOutsToSignals->setVisible(true);
 		}

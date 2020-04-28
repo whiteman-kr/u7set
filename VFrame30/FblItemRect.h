@@ -165,10 +165,10 @@ namespace VFrame30
 		DECLARE_FONT_PROPERTIES(Font)
 
 		QString userText() const;
-		void setUserText(const QString& value);
+		void setUserText(QString value);
 
 		E::TextPos userTextPos() const;
-		void setUserTextPos(const E::TextPos& value);
+		void setUserTextPos(E::TextPos value);
 
 	protected:
 		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.

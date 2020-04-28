@@ -121,7 +121,10 @@ namespace Hardware
 
 	const QString PropertyNames::appSignalDataFormat = "AppAnalogSignalFormat";
 
+	const QString PropertyNames::appSignalBusTypeId = "BusTypeID";
+
 	const QString PropertyNames::categoryAnalogAppSignal = "AnalogAppSignal";
+	const QString PropertyNames::categoryBusAppSignal = "BusAppSignal";
 
 	//
 	//
@@ -2311,8 +2314,13 @@ R"DELIM({
 		// These properties are used in setType()
 		// So they don take part in PropertyOnDemand
 		//
+		addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAnalogAppSignal, true)
+				->setUpdateFromPreset(true)
+				.setExpert(preset);
 
-		auto appSignalDataFormatProp = addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, QLatin1String(), true);
+		addProperty<QString, DeviceSignal, &DeviceSignal::appSignalBusTypeId, &DeviceSignal::setAppSignalBusTypeId>(PropertyNames::appSignalBusTypeId, PropertyNames::categoryBusAppSignal, true)
+				->setUpdateFromPreset(true)
+				.setExpert(preset);
 
 //		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, PropertyNames::type, true, DeviceSignal::type, DeviceSignal::setType)
 //		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, PropertyNames::function, true, DeviceSignal::function, DeviceSignal::setFunction)
@@ -2336,9 +2344,6 @@ R"DELIM({
 //		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
 
 //		auto signalSpecPropsStrucProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::signalSpecificProperties, true, DeviceSignal::signalSpecPropsStruc, DeviceSignal::setSignalSpecPropsStruc)
-
-		appSignalDataFormatProp->setUpdateFromPreset(true);
-		appSignalDataFormatProp->setExpert(preset);
 
 		// Show/Hide analog signal properties
 		//
@@ -2441,6 +2446,8 @@ R"DELIM({
 
 		signalMessage->set_appsignaldataformat(static_cast<int>(m_appSignalDataFormat));
 
+		signalMessage->set_appsignalbustypeid(m_appSignalBusTypeId.toStdString());
+
 		signalMessage->set_signalspecpropsstruct(m_signalSpecPropsStruct.toUtf8());
 		signalMessage->set_signalspecpropsstructwasfixed(true);		// m_signalSpecPropsStruct was fixed on loading
 
@@ -2532,6 +2539,8 @@ R"DELIM({
 		m_appSignalHighEngUnits =  signalMessage.appsignalhighengunits();
 
 		m_appSignalDataFormat = static_cast<E::AnalogAppSignalFormat>(signalMessage.appsignaldataformat());
+
+		m_appSignalBusTypeId = QString::fromStdString(signalMessage.appsignalbustypeid());
 
 		m_signalSpecPropsStruct = QString::fromStdString(signalMessage.signalspecpropsstruct());
 
@@ -2643,32 +2652,60 @@ R"DELIM({
 		return static_cast<int>(type());
 	}
 
-	void DeviceSignal::setType(const E::SignalType& value)
+	void DeviceSignal::setType(E::SignalType value)
 	{
 		m_type = value;
 
 		if (function() == E::SignalFunction::Input ||
 			function() == E::SignalFunction::Output)
 		{
-			bool appSignalProps = false;
+			bool analogSignalProps = false;
+			bool busSignalProps = false;
 
 			switch (m_type)
 			{
 			case E::SignalType::Analog:
-				appSignalProps = true;
+				analogSignalProps = true;
 				break;
 			case E::SignalType::Discrete:
-				appSignalProps = false;
+				break;
+			case E::SignalType::Bus:
+				busSignalProps = true;
 				break;
 			default:
 				assert(false);
 			}
 
-			auto pd = propertyByCaption(PropertyNames::appSignalDataFormat);
+			bool propertiesWereChanged = false;
 
-			assert(pd);
+			if (auto p = propertyByCaption(PropertyNames::appSignalDataFormat);
+				p != nullptr &&
+				p->visible() != analogSignalProps)
+			{
+				p->setVisible(analogSignalProps);
+				propertiesWereChanged = true;
+			}
+			else
+			{
+				assert(p);
+			}
 
-			pd->setVisible(appSignalProps);
+			if (auto p = propertyByCaption(PropertyNames::appSignalBusTypeId);
+				p != nullptr &&
+				p->visible() != busSignalProps)
+			{
+				p->setVisible(busSignalProps);
+				propertiesWereChanged = true;
+			}
+			else
+			{
+				assert(p);
+			}
+
+			if (propertiesWereChanged == true)
+			{
+				emit propertyListChanged();
+			}
 		}
 	}
 
@@ -2682,7 +2719,7 @@ R"DELIM({
 		return static_cast<int>(function());
 	}
 
-	void DeviceSignal::setFunction(const E::SignalFunction& value)
+	void DeviceSignal::setFunction(E::SignalFunction value)
 	{
 		m_function = value;
 	}
@@ -2692,7 +2729,7 @@ R"DELIM({
 		return m_byteOrder;
 	}
 
-	void DeviceSignal::setByteOrder(const E::ByteOrder& value)
+	void DeviceSignal::setByteOrder(E::ByteOrder value)
 	{
 		m_byteOrder = value;
 	}
@@ -2702,7 +2739,7 @@ R"DELIM({
 		return m_format;
 	}
 
-	void DeviceSignal::setFormat(const E::DataFormat& value)
+	void DeviceSignal::setFormat(E::DataFormat value)
 	{
 		m_format = value;
 	}
@@ -2712,7 +2749,7 @@ R"DELIM({
 		return m_memoryArea;
 	}
 
-	void DeviceSignal::setMemoryArea(const E::MemoryArea& value)
+	void DeviceSignal::setMemoryArea(E::MemoryArea value)
 	{
 		m_memoryArea = value;
 	}
@@ -2722,7 +2759,7 @@ R"DELIM({
 		return m_size;
 	}
 
-	void DeviceSignal::setSize(const int& value)
+	void DeviceSignal::setSize(int value)
 	{
 		m_size = value;
 	}
@@ -2732,7 +2769,7 @@ R"DELIM({
 		return m_valueOffset;
 	}
 
-	void DeviceSignal::setValueOffset(const int& value)
+	void DeviceSignal::setValueOffset(int value)
 	{
 		m_valueOffset = value;
 	}
@@ -2742,7 +2779,7 @@ R"DELIM({
 		return m_valueBit;
 	}
 
-	void DeviceSignal::setValueBit(const int& value)
+	void DeviceSignal::setValueBit(int value)
 	{
 		m_valueBit = value;
 	}
@@ -2752,7 +2789,7 @@ R"DELIM({
 		return m_validitySignalId;
 	}
 
-	void DeviceSignal::setValiditySignalId(const QString& value)
+	void DeviceSignal::setValiditySignalId(QString value)
 	{
 		m_validitySignalId = value.trimmed();
 	}
@@ -2792,7 +2829,7 @@ R"DELIM({
 		return m_appSignalLowAdc;
 	}
 
-	void DeviceSignal::setAppSignalLowAdc(const int& value)
+	void DeviceSignal::setAppSignalLowAdc(int value)
 	{
 		m_appSignalLowAdc = value;
 	}
@@ -2802,7 +2839,7 @@ R"DELIM({
 		return m_appSignalHighAdc;
 	}
 
-	void DeviceSignal::setAppSignalHighAdc(const int& value)
+	void DeviceSignal::setAppSignalHighAdc(int value)
 	{
 		m_appSignalHighAdc = value;
 	}
@@ -2812,7 +2849,7 @@ R"DELIM({
 		return m_appSignalLowEngUnits;
 	}
 
-	void DeviceSignal::setAppSignalLowEngUnits(const double& value)
+	void DeviceSignal::setAppSignalLowEngUnits(double value)
 	{
 		m_appSignalLowEngUnits = value;
 	}
@@ -2822,7 +2859,7 @@ R"DELIM({
 		return m_appSignalHighEngUnits;
 	}
 
-	void DeviceSignal::setAppSignalHighEngUnits(const double& value)
+	void DeviceSignal::setAppSignalHighEngUnits(double value)
 	{
 		m_appSignalHighEngUnits = value;
 	}
@@ -2832,9 +2869,19 @@ R"DELIM({
 		return m_appSignalDataFormat;
 	}
 
-	void DeviceSignal::setAppSignalDataFormat(const E::AnalogAppSignalFormat& value)
+	void DeviceSignal::setAppSignalDataFormat(E::AnalogAppSignalFormat value)
 	{
 		m_appSignalDataFormat = value;
+	}
+
+	QString DeviceSignal::appSignalBusTypeId() const
+	{
+		return m_appSignalBusTypeId;
+	}
+
+	void DeviceSignal::setAppSignalBusTypeId(QString value)
+	{
+		m_appSignalBusTypeId = value;
 	}
 
 	QString DeviceSignal::signalSpecPropsStruct() const
@@ -2842,7 +2889,7 @@ R"DELIM({
 		return m_signalSpecPropsStruct;
 	}
 
-	void DeviceSignal::setSignalSpecPropsStruct(const QString& value)
+	void DeviceSignal::setSignalSpecPropsStruct(QString value)
 	{
 		m_signalSpecPropsStruct = value;
 	}

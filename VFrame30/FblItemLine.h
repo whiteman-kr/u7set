@@ -27,10 +27,10 @@ namespace VFrame30
 		// Properties and Data
 	public:
 		double weight() const;
-		void setWeight(const double& weight);
+		void setWeight(double weight);
 
 		QColor lineColor() const;
-		void setLineColor(const QColor& color);
+		void setLineColor(QColor color);
 
 	protected:
 		double m_weight;					// Line weight, pixels/inchces depends on UnitDocPt

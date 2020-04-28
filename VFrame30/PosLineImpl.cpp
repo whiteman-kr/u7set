@@ -406,7 +406,7 @@ namespace VFrame30
 
 		return pt;
 	}
-	void PosLineImpl::setLeft(const double& value)
+	void PosLineImpl::setLeft(double value)
 	{
 		double left = std::min(m_startXDocPt, m_endXDocPt);
 
@@ -442,7 +442,7 @@ namespace VFrame30
 				
 		return pt;
 	}
-	void PosLineImpl::setTop(const double& value)
+	void PosLineImpl::setTop(double value)
 	{
 		double top = std::min(m_startYDocPt, m_endYDocPt);
 
@@ -478,7 +478,7 @@ namespace VFrame30
 
 		return pt;
 	}
-	void PosLineImpl::setWidth(const double& value)
+	void PosLineImpl::setWidth(double value)
 	{
 		double pt = value < 0 ? 0 : value;
 
@@ -516,7 +516,7 @@ namespace VFrame30
 
 		return pt;	
 	}
-	void PosLineImpl::setHeight(const double& value)
+	void PosLineImpl::setHeight(double value)
 	{
 		double pt = value < 0 ? 0 : value;
 

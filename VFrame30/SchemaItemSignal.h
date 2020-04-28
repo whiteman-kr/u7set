@@ -78,7 +78,7 @@ namespace VFrame30
 		QString appSignalIds() const;
 		QStringList appSignalIdList() const;
 
-		void setAppSignalIds(const QString& s);
+		void setAppSignalIds(QString s);
 		QStringList* mutable_appSignalIds();
 
 		// ImpactAppSignalIds
@@ -86,27 +86,27 @@ namespace VFrame30
 		QString impactAppSignalIds() const;
 		QStringList impactAppSignalIdList() const;
 
-		void setImpactAppSignalIds(const QString& s);
+		void setImpactAppSignalIds(QString s);
 		QStringList* mutable_impactAppSignalIds();
 
 		// --
 		//
 		bool multiLine() const;
-		void setMultiLine(const bool& value);
+		void setMultiLine(bool value);
 
 		bool multiChannel() const;
 
 		int precision() const;
-		void setPrecision(const int& value);
+		void setPrecision(int value);
 
 		E::AnalogFormat analogFormat() const;
-		void setAnalogFormat(const E::AnalogFormat& value);
+		void setAnalogFormat(E::AnalogFormat value);
 
 		QString customText() const;
-		void setCustomText(const QString& value);
+		void setCustomText(QString value);
 
 		int columnCount() const;
-		void setColumnCount(const int& value);
+		void setColumnCount(int value);
 
 		double columnWidth(int columnIndex) const;
 		void setColumnWidth(double value, int columnIndex);

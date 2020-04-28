@@ -582,7 +582,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
-	void PosRectImpl::setLeft(const double& value)
+	void PosRectImpl::setLeft(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -608,7 +608,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
-	void PosRectImpl::setTop(const double& value)
+	void PosRectImpl::setTop(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -635,7 +635,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
-	void PosRectImpl::setWidth(const double& value)
+	void PosRectImpl::setWidth(double value)
 	{
 		const double normalizedValue = value < 0 ? 0 : value;
 
@@ -663,7 +663,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
-	void PosRectImpl::setHeight(const double& value)
+	void PosRectImpl::setHeight(double value)
 	{
 		double normalizedValue = value < 0 ? 0 : value;
 

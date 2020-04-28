@@ -9212,6 +9212,18 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::std::string* release_validitysignalid();
   inline void set_allocated_validitysignalid(::std::string* validitysignalid);
 
+  // optional string appSignalBusTypeId = 26;
+  inline bool has_appsignalbustypeid() const;
+  inline void clear_appsignalbustypeid();
+  static const int kAppSignalBusTypeIdFieldNumber = 26;
+  inline const ::std::string& appsignalbustypeid() const;
+  inline void set_appsignalbustypeid(const ::std::string& value);
+  inline void set_appsignalbustypeid(const char* value);
+  inline void set_appsignalbustypeid(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalbustypeid();
+  inline ::std::string* release_appsignalbustypeid();
+  inline void set_allocated_appsignalbustypeid(::std::string* appsignalbustypeid);
+
   // optional string signalSpecPropsStruct = 40;
   inline bool has_signalspecpropsstruct() const;
   inline void clear_signalspecpropsstruct();
@@ -9263,6 +9275,8 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline void clear_has_appsignaldataformat();
   inline void set_has_validitysignalid();
   inline void clear_has_validitysignalid();
+  inline void set_has_appsignalbustypeid();
+  inline void clear_has_appsignalbustypeid();
   inline void set_has_signalspecpropsstruct();
   inline void clear_has_signalspecpropsstruct();
   inline void set_has_signalspecpropsstructwasfixed();
@@ -9285,11 +9299,12 @@ class DeviceSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 appsignaldataformat_;
   double appsignalhighengunits_;
   ::std::string* validitysignalid_;
+  ::std::string* appsignalbustypeid_;
   ::std::string* signalspecpropsstruct_;
   bool signalspecpropsstructwasfixed_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -26745,15 +26760,85 @@ inline void DeviceSignal::set_allocated_validitysignalid(::std::string* validity
   }
 }
 
-// optional string signalSpecPropsStruct = 40;
-inline bool DeviceSignal::has_signalspecpropsstruct() const {
+// optional string appSignalBusTypeId = 26;
+inline bool DeviceSignal::has_appsignalbustypeid() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void DeviceSignal::set_has_signalspecpropsstruct() {
+inline void DeviceSignal::set_has_appsignalbustypeid() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void DeviceSignal::clear_has_signalspecpropsstruct() {
+inline void DeviceSignal::clear_has_appsignalbustypeid() {
   _has_bits_[0] &= ~0x00008000u;
+}
+inline void DeviceSignal::clear_appsignalbustypeid() {
+  if (appsignalbustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalbustypeid_->clear();
+  }
+  clear_has_appsignalbustypeid();
+}
+inline const ::std::string& DeviceSignal::appsignalbustypeid() const {
+  return *appsignalbustypeid_;
+}
+inline void DeviceSignal::set_appsignalbustypeid(const ::std::string& value) {
+  set_has_appsignalbustypeid();
+  if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalbustypeid_ = new ::std::string;
+  }
+  appsignalbustypeid_->assign(value);
+}
+inline void DeviceSignal::set_appsignalbustypeid(const char* value) {
+  set_has_appsignalbustypeid();
+  if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalbustypeid_ = new ::std::string;
+  }
+  appsignalbustypeid_->assign(value);
+}
+inline void DeviceSignal::set_appsignalbustypeid(const char* value, size_t size) {
+  set_has_appsignalbustypeid();
+  if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalbustypeid_ = new ::std::string;
+  }
+  appsignalbustypeid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DeviceSignal::mutable_appsignalbustypeid() {
+  set_has_appsignalbustypeid();
+  if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalbustypeid_ = new ::std::string;
+  }
+  return appsignalbustypeid_;
+}
+inline ::std::string* DeviceSignal::release_appsignalbustypeid() {
+  clear_has_appsignalbustypeid();
+  if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = appsignalbustypeid_;
+    appsignalbustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DeviceSignal::set_allocated_appsignalbustypeid(::std::string* appsignalbustypeid) {
+  if (appsignalbustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalbustypeid_;
+  }
+  if (appsignalbustypeid) {
+    set_has_appsignalbustypeid();
+    appsignalbustypeid_ = appsignalbustypeid;
+  } else {
+    clear_has_appsignalbustypeid();
+    appsignalbustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string signalSpecPropsStruct = 40;
+inline bool DeviceSignal::has_signalspecpropsstruct() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void DeviceSignal::set_has_signalspecpropsstruct() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void DeviceSignal::clear_has_signalspecpropsstruct() {
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void DeviceSignal::clear_signalspecpropsstruct() {
   if (signalspecpropsstruct_ != &::google::protobuf::internal::kEmptyString) {
@@ -26817,13 +26902,13 @@ inline void DeviceSignal::set_allocated_signalspecpropsstruct(::std::string* sig
 
 // optional bool signalSpecPropsStructWasFixed = 41 [default = false];
 inline bool DeviceSignal::has_signalspecpropsstructwasfixed() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void DeviceSignal::set_has_signalspecpropsstructwasfixed() {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void DeviceSignal::clear_has_signalspecpropsstructwasfixed() {
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void DeviceSignal::clear_signalspecpropsstructwasfixed() {
   signalspecpropsstructwasfixed_ = false;
