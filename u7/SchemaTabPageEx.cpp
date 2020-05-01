@@ -2027,6 +2027,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	m_tabWidget = new QTabWidget{};
 	m_tabWidget->setMovable(true);
 
+	m_tabWidget->tabBar()->setElideMode(Qt::ElideRight);
+
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
 	sz.setHeight(static_cast<int>(sz.height() * 1.75));
 
@@ -2055,6 +2057,24 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	//
 	m_controlTabPage = new SchemaControlTabPageEx(dbc);
 	m_tabWidget->addTab(m_controlTabPage, tr("Schemas Control"));
+
+	m_tabWidget->setTabToolTip(0, tr("Schemas Control\n"
+									 "[CTRL + `]"));
+
+	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
+	m_showControlTabAccelerator->setShortcut(QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft});
+	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
+
+	addAction(m_showControlTabAccelerator);
+
+	connect(m_showControlTabAccelerator, &QAction::triggered,
+			[this]()
+			{
+				if	(m_tabWidget->currentIndex() != 0)
+				{
+					m_tabWidget->setCurrentIndex(0);
+				}
+			});
 
 	return;
 }

@@ -398,6 +398,8 @@ protected:
 
 	QString m_fileExtension;
 	QString m_templFileExtension;
+
+	QAction* m_showControlTabAccelerator = nullptr;
 };
 
 
