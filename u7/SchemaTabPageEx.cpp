@@ -2029,10 +2029,31 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 
 	m_tabWidget->tabBar()->setElideMode(Qt::ElideRight);
 
-	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
+	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
 	sz.setHeight(static_cast<int>(sz.height() * 1.75));
 
-	QString ss = QString("QTabBar::tab{ min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
+	const QPalette& tabBarPalette = m_tabWidget->tabBar()->palette();
+
+	QString ss = QString(R"(
+						 QTabBar::tab
+						 {
+							padding-right: %1px;
+							padding-left: %1px;
+							min-height: %2px;
+						 }
+
+						 QTabBar::tab:selected
+						 {
+							border-left: 1px solid %3;
+							border-right: 1px solid %3;
+							border-top: 3px solid #0050B0;
+							background-color: %4
+						 }
+						 )").arg(sz.width())
+							.arg(sz.height())
+							.arg(tabBarPalette.mid().color().name())
+							.arg(tabBarPalette.light().color().name());
+
 	m_tabWidget->tabBar()->setStyleSheet(ss);
 
 	// --
@@ -2062,7 +2083,10 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 									 "[CTRL + `]"));
 
 	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
-	m_showControlTabAccelerator->setShortcut(QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft});
+	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde}
+											  );
 	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
 
 	addAction(m_showControlTabAccelerator);
@@ -2070,9 +2094,19 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	connect(m_showControlTabAccelerator, &QAction::triggered,
 			[this]()
 			{
-				if	(m_tabWidget->currentIndex() != 0)
+				for (int i = 0; i < m_tabWidget->count(); i++)
 				{
-					m_tabWidget->setCurrentIndex(0);
+					SchemaControlTabPageEx* w = dynamic_cast<SchemaControlTabPageEx*>(m_tabWidget->widget(i));
+
+					if (w != nullptr)
+					{
+						if	(m_tabWidget->currentIndex() != i)
+						{
+							m_tabWidget->setCurrentIndex(i);
+						}
+
+						return;
+					}
 				}
 			});
 
