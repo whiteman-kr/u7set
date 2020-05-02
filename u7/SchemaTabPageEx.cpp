@@ -2028,6 +2028,7 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	m_tabWidget->setMovable(true);
 
 	m_tabWidget->tabBar()->setElideMode(Qt::ElideRight);
+	m_tabWidget->setTabsClosable(true);
 
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
 	sz.setHeight(static_cast<int>(sz.height() * 1.75));
@@ -2046,7 +2047,7 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 						 {
 							border-left: 1px solid %3;
 							border-right: 1px solid %3;
-							border-top: 3px solid #0050B0;
+							border-top: 2 solid #0030B0;
 							background-color: %4
 						 }
 						 )").arg(sz.width())
@@ -2082,6 +2083,13 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	m_tabWidget->setTabToolTip(0, tr("Schemas Control\n"
 									 "[CTRL + `]"));
 
+	// Hide close button for control tab page
+	//
+	QWidget* closeButton = m_tabWidget->tabBar()->tabButton(0, QTabBar::RightSide);
+	closeButton->setVisible(false);
+
+	// Add shortcut for switching to control tab page
+	//
 	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
 	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
 											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
@@ -2109,6 +2117,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 					}
 				}
 			});
+
+	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPageEx::tabCloseRequested);
 
 	return;
 }
@@ -2151,6 +2161,24 @@ void SchemasTabPageEx::projectClosed()
 	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
 	this->setEnabled(false);
+	return;
+}
+
+void SchemasTabPageEx::tabCloseRequested(int index)
+{
+	EditSchemaTabPageEx* w = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(index));
+	if (w == nullptr)
+	{
+		return;
+	}
+
+	if (w->modified() == true && m_tabWidget->currentIndex() != index)
+	{
+		m_tabWidget->setCurrentIndex(index);
+	}
+
+	w->closeTab();
+
 	return;
 }
 
@@ -5057,17 +5085,6 @@ void EditSchemaTabPageEx::detachOrAttachWindow()
 	emit pleaseDetachOrAttachWindow(this);
 }
 
-void EditSchemaTabPageEx::projectClosed()
-{
-	// Find current tab and close it
-	//
-	emit aboutToClose(this);
-
-	this->deleteLater();
-
-	return;
-}
-
 void EditSchemaTabPageEx::closeTab()
 {
 	if (m_schemaWidget->modified() == true)
@@ -5099,6 +5116,17 @@ void EditSchemaTabPageEx::closeTab()
 	emit aboutToClose(this);
 
 	this->deleteLater();
+	return;
+}
+
+void EditSchemaTabPageEx::projectClosed()
+{
+	// Find current tab and close it
+	//
+	emit aboutToClose(this);
+
+	this->deleteLater();
+
 	return;
 }
 

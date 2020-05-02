@@ -198,7 +198,7 @@ public slots:
 	void slot_doubleClicked(const QModelIndex& index);
 
 public slots:
-	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 
 	// Public properties
 	//
@@ -390,6 +390,9 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 
+protected slots:
+	void tabCloseRequested(int index);
+
 	// Data
 	//
 protected:
@@ -441,11 +444,11 @@ signals:
 
 public slots:
 	void detachOrAttachWindow();
+	void closeTab();
 
 protected slots:
 	void projectClosed();
 
-	void closeTab();
 	void modifiedChanged(bool modified);
 
 	void checkInFile();
