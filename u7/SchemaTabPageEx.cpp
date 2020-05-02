@@ -2031,14 +2031,14 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	m_tabWidget->setTabsClosable(true);
 
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
-	sz.setHeight(static_cast<int>(sz.height() * 1.75));
+	int h = static_cast<int>(sz.height() * 1.75);
 
 	const QPalette& tabBarPalette = m_tabWidget->tabBar()->palette();
 
 	QString ss = QString(R"(
 						 QTabBar::tab
 						 {
-							padding-right: %1px;
+							padding-right: %6px;
 							padding-left: %1px;
 							min-height: %2px;
 						 }
@@ -2050,10 +2050,24 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 							border-top: 2 solid #0030B0;
 							background-color: %4
 						 }
+
+						 QTabBar::close-button
+						 {
+							image: url(":/Images/Images/CloseButtonGray.svg");
+							padding: %5px;
+						 }
+						 QTabBar::close-button:hover
+						 {
+							image: url(":/Images/Images/CloseButtonBlack.svg");
+							padding: %5px;
+						 }
+
 						 )").arg(sz.width())
-							.arg(sz.height())
+							.arg(h)
 							.arg(tabBarPalette.mid().color().name())
-							.arg(tabBarPalette.light().color().name());
+							.arg(tabBarPalette.light().color().name())
+							.arg((h - sz.height()) / 2.5)
+							.arg(sz.width() / 2);
 
 	m_tabWidget->tabBar()->setStyleSheet(ss);
 
@@ -2120,6 +2134,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 
 	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPageEx::tabCloseRequested);
 
+	m_tabWidget->tabBar()->installEventFilter(this);
+
 	return;
 }
 
@@ -2148,6 +2164,44 @@ void SchemasTabPageEx::refreshControlTabPage()
 	m_controlTabPage->refresh();
 
 	return;
+}
+
+bool SchemasTabPageEx::eventFilter(QObject* object, QEvent* event)
+{
+	// Close SchemaTab on mouse middle button press on tab
+	//
+	if (event->type() == QEvent::MouseButtonRelease && object == m_tabWidget->tabBar())
+	{
+		QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+
+		if (mouseEvent->button() != Qt::MouseButton::MidButton)
+		{
+			return false;
+		}
+
+		int index = m_tabWidget->tabBar()->tabAt(mouseEvent->pos());
+		if (index == -1)
+		{
+			return false;
+		}
+
+		EditSchemaTabPageEx* schemaTab = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(index));
+		if (schemaTab == nullptr)
+		{
+			return false;
+		}
+
+		if (schemaTab->modified() == true && m_tabWidget->currentIndex() != index)
+		{
+			m_tabWidget->setCurrentIndex(index);
+		}
+
+		schemaTab->closeTab();
+
+		return true;
+	}
+
+	return QObject::eventFilter(object, event);
 }
 
 void SchemasTabPageEx::projectOpened()

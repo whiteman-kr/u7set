@@ -386,6 +386,9 @@ public:
 
 	void refreshControlTabPage();
 
+protected:
+	virtual bool eventFilter(QObject* object, QEvent* event) override;
+
 public slots:
 	void projectOpened();
 	void projectClosed();
