@@ -116,7 +116,7 @@ namespace VFrame30
 		}
 	}
 
-	void FblItemLine::setWeight(const double& weight)
+	void FblItemLine::setWeight(double weight)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -136,7 +136,7 @@ namespace VFrame30
 		return m_lineColor;
 	}
 
-	void FblItemLine::setLineColor(const QColor& color)
+	void FblItemLine::setLineColor(QColor color)
 	{
 		m_lineColor = color;
 	}

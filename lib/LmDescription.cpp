@@ -1074,7 +1074,7 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 				if (nl.size() != 1)
 				{
 					*errorMessage = QString("Expected one %1 section.").arg(section);
-					return 0xFFFFFFFF;
+					return "";
 				}
 
 				QString nodeText = nl.at(0).toElement().text();

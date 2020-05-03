@@ -1,4 +1,5 @@
 #include "SimRam.h"
+#include <cstring>
 #include <QtEndian>
 #include <SimOverrideSignals.h>
 #include <SimException.h>
@@ -141,7 +142,7 @@ namespace Sim
 
 		// Copy memory
 		//
-		memcpy_s(data->data(), data->size(), m_data.constData() + byteOffset, countBytes);
+		std::memcpy(data->data(), m_data.constData() + byteOffset, countBytes);
 
 		// Apply override to just copied memory
 		//

@@ -1176,7 +1176,7 @@ namespace VFrame30
 		return m_userText;
 	}
 
-	void FblItemRect::setUserText(const QString& value)
+	void FblItemRect::setUserText(QString value)
 	{
 		m_userText = value;
 	}
@@ -1186,7 +1186,7 @@ namespace VFrame30
 		return m_userTextPos;
 	}
 
-	void FblItemRect::setUserTextPos(const E::TextPos& value)
+	void FblItemRect::setUserTextPos(E::TextPos value)
 	{
 		m_userTextPos = value;
 	}

@@ -90,8 +90,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 				schemaItemSignal != nullptr)
 			{
-				QStringList signalList = schemaItemSignal->appSignalIdList() + schemaItemSignal->impactAppSignalIdList();
-				signalContextMenu(signalList);
+				signalContextMenu(schemaItemSignal->appSignalIdList(), schemaItemSignal->impactAppSignalIdList());
 				break;
 			}
 
@@ -99,7 +98,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList);
+				signalContextMenu(signalList, {});
 				break;
 			}
 
@@ -107,7 +106,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList);
+				signalContextMenu(signalList, {});
 				break;
 			}
 
@@ -115,14 +114,14 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList);
+				signalContextMenu(signalList, {});
 				break;
 			}
 
 			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 				schemaItemReceiver != nullptr)
 			{
-				signalContextMenu(schemaItemReceiver->appSignalIdsAsList());
+				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {});
 				break;
 			}
 
@@ -136,16 +135,20 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 	return;
 }
 
-void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
+void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals)
 {
-	qDebug() << "signalContextMenu: " << signalList;
-
 	// To set, it will sort list and exclude same ids
 	//
 	std::set<QString> signalListSet;
-	for (const QString& s : signalList)
+	for (const QString& s : appSignals)
 	{
 		signalListSet.insert(s);
+	}
+
+	std::set<QString> impactSignalListSet;
+	for (const QString& s : impactSignals)
+	{
+		impactSignalListSet.insert(s);
 	}
 
 	// Compose menu
@@ -167,7 +170,18 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 		}
 	}
 
-	if (signalsSchemasSet.empty() == true)
+	std::set<QString> impactSignalsSchemasSet;
+	for (const QString& s : impactSignalListSet)
+	{
+		QStringList schemaIds = schemaManager()->monitorConfigController()->schemasByAppSignalId(s);
+
+		for (const QString& schemaId : schemaIds)
+		{
+			impactSignalsSchemasSet.insert(schemaId);
+		}
+	}
+
+	if (signalsSchemasSet.empty() == true && impactSignalsSchemasSet.empty() == true)
 	{
 		schemasSubMenu->setDisabled(true);
 	}
@@ -175,11 +189,32 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 	{
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-			auto f = [this, schemaId, signalList]() -> void
+			auto f = [this, schemaId, &appSignals, &impactSignals]() -> void
 					 {
 						if (schemaId != this->schemaId())
 						{
-							setSchema(schemaId, signalList);
+							setSchema(schemaId, appSignals + impactSignals);
+						}
+					 };
+
+			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
+
+			QAction* a = schemasSubMenu->addAction(actionCaption);
+			connect(a, &QAction::triggered, this, f);
+		}
+
+		if (signalsSchemasSet.empty() == false && impactSignalsSchemasSet.empty() == false)
+		{
+			schemasSubMenu->addSeparator();
+		}
+
+		for (const QString& schemaId : impactSignalsSchemasSet)
+		{
+			auto f = [this, schemaId, &appSignals, &impactSignals]() -> void
+					 {
+						if (schemaId != this->schemaId())
+						{
+							setSchema(schemaId, appSignals + impactSignals);
 						}
 					 };
 
@@ -192,7 +227,8 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 
 	// SignalInfo list
 	//
-	menu.addSeparator();
+	QAction* appSignalSeparator = menu.addSeparator();
+	appSignalSeparator->setText(tr("Signals"));
 
 	for (const QString& s : signalListSet)
 	{
@@ -209,6 +245,32 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 				 };
 
 		connect(a, &QAction::triggered, this, f);
+	}
+
+	if (impactSignalListSet.empty() == false)
+	{
+		if (signalListSet.empty() == false)
+		{
+			QAction* impactSignalSeparator = menu.addSeparator();
+			impactSignalSeparator->setText(tr("Impact Signals"));
+		}
+
+		for (const QString& s : impactSignalListSet)
+		{
+			bool ok = false;
+			AppSignalParam signal =	theSignals.signalParam(s, &ok);
+
+			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+
+			QAction* a = menu.addAction(signalId);
+
+			auto f = [this, s]() -> void
+					 {
+						signalInfo(s);
+					 };
+
+			connect(a, &QAction::triggered, this, f);
+		}
 	}
 
 	// --

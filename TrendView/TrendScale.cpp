@@ -46,14 +46,23 @@ namespace TrendLib
 		return lowLimit - (pixel - rect.bottom()) / (rect.height() / delta);
 	}
 
-	double TrendScale::limitToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+	double TrendScale::scaleLowLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok)
 	{
+		double value = qMin(trendSignal.viewHighLimit(scaleType), trendSignal.viewLowLimit(scaleType));
+
 		return pointToScaleValue(value, scaleType, ok);
 	}
 
-	double TrendScale::valueToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+	double TrendScale::scaleHighLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok)
 	{
-		if (scaleType == TrendScaleType::Period)
+		double value = qMax(trendSignal.viewHighLimit(scaleType), trendSignal.viewLowLimit(scaleType));
+
+		return pointToScaleValue(value, scaleType, ok);
+	}
+
+	double TrendScale::valueToScaleValue(double value, E::TrendScaleType scaleType, bool* ok)
+	{
+		if (scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(value) < DBL_MIN)
 			{
@@ -73,12 +82,12 @@ namespace TrendLib
 		return pointToScaleValue(value, scaleType, ok);
 	}
 
-	double TrendScale::limitFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+	double TrendScale::limitFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
 		return pointFromScaleValue(scaleValue, scaleType, ok);
 	}
 
-	double TrendScale::valueFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+	double TrendScale::valueFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
 		{
@@ -87,7 +96,7 @@ namespace TrendLib
 
 		double result = pointFromScaleValue(scaleValue, scaleType, ok);
 
-		if (scaleType == TrendScaleType::Period)
+		if (scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(result) < DBL_MIN)
 			{
@@ -109,16 +118,16 @@ namespace TrendLib
 
 	// Build scale points for a trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValues(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
 	{
 		switch (scaleType)
 		{
-		case TrendScaleType::Linear:
-		case TrendScaleType::Log10:
+		case E::TrendScaleType::Linear:
+		case E::TrendScaleType::Log10:
 			{
 				return scaleValuesGeneric(scaleType, lowLimit, highLimit, signalRect, minInchInterval);
 			}
-		case TrendScaleType::Period:
+		case E::TrendScaleType::Period:
 			{
 				return scaleValuesPeriod(scaleType, lowLimit, highLimit);
 			}
@@ -128,9 +137,9 @@ namespace TrendLib
 		return {};
 	}
 
-	QString TrendScale::scaleValueText(double value, TrendScaleType scaleType, const TrendSignalParam& signalParam)
+	QString TrendScale::scaleValueText(double value, E::TrendScaleType scaleType, const TrendSignalParam& signalParam)
 	{
-		if (scaleType == TrendScaleType::Period)
+		if (scaleType == E::TrendScaleType::Period)
 		{
 			if (std::fabs(round(value)) >= periodScaleInfinity)
 			{
@@ -138,9 +147,9 @@ namespace TrendLib
 			}
 		}
 
-		if (scaleType == TrendScaleType::Log10)
+		if (scaleType == E::TrendScaleType::Log10)
 		{
-			if (std::fabs(value) <= FLT_MIN)
+			if (std::fabs(value) <= DBL_MIN)
 			{
 				return "0";
 			}
@@ -160,18 +169,21 @@ namespace TrendLib
 
 	double TrendScale::trendLog10(double value)
 	{
-		// Logarithm is calculated in float type range (-38..38 exponent).
-		// The result is shifted up by 38 (FLT_MAX_10_EXP) to get the result in range 0 .. 76.
+		// Logarithm calculation.
+		// The result is shifted up by DBL_MAX_10_EXP.
 		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
 		// This means that we take a "ghost" logarithm from negative value.
 
 		double result = std::fabs(value);
 
-		result = qBound(FLT_MIN, static_cast<float>(result), FLT_MAX);
+		if (result < DBL_MIN)
+		{
+			result = DBL_MIN;
+		}
 
 		result = std::log10(result);
 
-		result += FLT_MAX_10_EXP;
+		result += DBL_MAX_10_EXP;
 
 		if (value < 0)
 		{
@@ -184,16 +196,14 @@ namespace TrendLib
 	double TrendScale::trendPow10(double value)
 	{
 		// Power calculation, reverse function for trendLog10.
-		// Input value is shifted down by 38 (FLT_MAX_10_EXP) and power is calculated from its absoulte value.
+		// Input value is shifted down by DBL_MAX_10_EXP and power is calculated from its absoulte value.
 		// The sign of the result depened on input value sign.
 
 		double result = std::fabs(value);
 
-		result -= FLT_MAX_10_EXP;
+		result -= DBL_MAX_10_EXP;
 
 		result = std::pow(10, result);
-
-		result = qBound(FLT_MIN, static_cast<float>(result), FLT_MAX);
 
 		if (value < 0)
 		{
@@ -203,7 +213,7 @@ namespace TrendLib
 		return result;
 	}
 
-	double TrendScale::pointToScaleValue(double value, TrendScaleType scaleType, bool* ok)
+	double TrendScale::pointToScaleValue(double value, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
 		{
@@ -212,15 +222,15 @@ namespace TrendLib
 
 		switch (scaleType)
 		{
-		case TrendScaleType::Linear:
+		case E::TrendScaleType::Linear:
 			{
 				return value;
 			}
-		case TrendScaleType::Log10:
+		case E::TrendScaleType::Log10:
 			{
 				return trendLog10(value);
 			}
-		case TrendScaleType::Period:
+		case E::TrendScaleType::Period:
 			{
 				value = qBound(-periodScaleInfinity, value, periodScaleInfinity);
 
@@ -259,7 +269,7 @@ namespace TrendLib
 		return 0;
 	}
 
-	double TrendScale::pointFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok)
+	double TrendScale::pointFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok)
 	{
 		if (ok != nullptr)
 		{
@@ -268,18 +278,18 @@ namespace TrendLib
 
 		switch (scaleType)
 		{
-		case TrendScaleType::Linear:
+		case E::TrendScaleType::Linear:
 			{
 				return scaleValue;
 			}
-		case TrendScaleType::Log10:
+		case E::TrendScaleType::Log10:
 			{
 				scaleValue = trendPow10(scaleValue);
 
 				return scaleValue;
 
 			}
-		case TrendScaleType::Period:
+		case E::TrendScaleType::Period:
 			{
 				if (scaleValue < 0)
 				{
@@ -308,11 +318,11 @@ namespace TrendLib
 
 	// Build scale points for generic or logarithmic trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesGeneric(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval)
 	{
-		if (scaleType != TrendScaleType::Linear && scaleType != TrendScaleType::Log10)
+		if (scaleType != E::TrendScaleType::Linear && scaleType != E::TrendScaleType::Log10)
 		{
-			Q_ASSERT(scaleType == TrendScaleType::Linear || scaleType == TrendScaleType::Log10);
+			Q_ASSERT(scaleType == E::TrendScaleType::Linear || scaleType == E::TrendScaleType::Log10);
 			return {};
 		}
 
@@ -393,9 +403,9 @@ namespace TrendLib
 
 	// Build scale points for periodic trend
 	//
-	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit)
+	std::optional<std::vector<std::pair<double, double>>> TrendScale::scaleValuesPeriod(E::TrendScaleType scaleType, double lowLimit, double highLimit)
 	{
-		if (scaleType != TrendScaleType::Period)
+		if (scaleType != E::TrendScaleType::Period)
 		{
 			Q_ASSERT(false);
 			return {};

@@ -6621,6 +6621,51 @@ namespace Builder
 							arg(itemCaption).arg(signalCaption).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5180
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Loopback source %1 is not connected to any signal source.
+	///
+	/// Parameters:
+	///		%1 LoopbackID
+	///
+	/// Description:
+	///		Loopback source is not connected to any signal source. Check app logic schema.
+	///
+	void IssueLogger::errALC5180(QString loopbackID, QString itemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5180, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5180,
+				  QString(tr("Loopback source %1 is not connected to any signal source (Item %2, logic schema %1)")).
+							arg(loopbackID).arg(itemLabel).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5181
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Loopback source cannot be connected to opto/tunable/input signal (Item %1, logic schema %2).
+	///
+	/// Parameters:
+	///		%1 LoopbackID
+	///
+	/// Description:
+	///		Loopback source is not connected to any signal source. Check app logic schema.
+	///
+	void IssueLogger::errALC5181(QString itemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5180, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5181,
+				  QString(tr("Loopback source cannot be connected to opto/tunable/input signal (Item %1, logic schema %2).")).
+								arg(itemLabel).arg(schemaID));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186

@@ -26,6 +26,8 @@ namespace Builder
 		void setUalSignal(UalSignal* ualSignal);
 		UalSignal* ualSignal() const { return m_ualSignal; }
 
+		const Builder::UalItem* sourceItem() const { return m_sourceItem; }
+
 		const std::vector<const UalItem*> targets() const { return m_targetItems; }
 
 		void setLinkedSignals(const std::set<QString>& linkedSignals) { m_linkedSignals = linkedSignals; }
@@ -78,6 +80,8 @@ namespace Builder
 		LoopbackShared getLoopbackByPin(const VFrame30::AfbPin& pin) const;
 
 		QList<LoopbackShared> getLoopbacksByUalSignal(const UalSignal* ualSignal) const;
+
+		bool checkLoopbacksUalSignals();
 
 		bool writeReport(QStringList* file) const;
 

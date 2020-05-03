@@ -198,7 +198,7 @@ public slots:
 	void slot_doubleClicked(const QModelIndex& index);
 
 public slots:
-	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 
 	// Public properties
 	//
@@ -386,9 +386,15 @@ public:
 
 	void refreshControlTabPage();
 
+protected:
+	virtual bool eventFilter(QObject* object, QEvent* event) override;
+
 public slots:
 	void projectOpened();
 	void projectClosed();
+
+protected slots:
+	void tabCloseRequested(int index);
 
 	// Data
 	//
@@ -398,6 +404,8 @@ protected:
 
 	QString m_fileExtension;
 	QString m_templFileExtension;
+
+	QAction* m_showControlTabAccelerator = nullptr;
 };
 
 
@@ -439,11 +447,11 @@ signals:
 
 public slots:
 	void detachOrAttachWindow();
+	void closeTab();
 
 protected slots:
 	void projectClosed();
 
-	void closeTab();
 	void modifiedChanged(bool modified);
 
 	void checkInFile();

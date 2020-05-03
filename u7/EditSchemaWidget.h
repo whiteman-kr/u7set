@@ -341,6 +341,8 @@ signals:
 protected slots:
 	void contextMenu(const QPoint& pos);
 
+	void snapToGridToggled(bool state);
+
 	void exportToPdf();
 
 	void appSignalsSelectedProperties();

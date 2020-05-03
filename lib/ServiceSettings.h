@@ -211,6 +211,8 @@ public:
 	QString archiveLocation;
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
+	bool checkSettings(Hardware::Software *software, Builder::IssueLogger* log);
+
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 };

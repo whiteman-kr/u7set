@@ -408,6 +408,14 @@ public:
 	};
 	Q_ENUM(TrendMode)
 
+	enum class TrendScaleType
+	{
+		Linear,
+		Log10,
+		Period
+	};
+	Q_ENUM(TrendScaleType)
+
 	// Property editor type
 	//
 	enum class PropertySpecificEditor : qint16

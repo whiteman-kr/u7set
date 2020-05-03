@@ -143,6 +143,11 @@ private:
 
 	//
 
+	//quint32 m_prevValidity = false;
+	//double m_prevValue = 0;
+
+	//
+
 	SimpleAppSignalState m_current[2];
 	std::atomic<int> m_curStateIndex = {0};
 

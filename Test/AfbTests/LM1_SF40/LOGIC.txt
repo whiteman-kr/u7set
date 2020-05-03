@@ -1,0 +1,176 @@
+
+
+
+
+test Logic01,tests test1
+schema LOGIC_TEST
+compatible MODULE_LM1SF40
+
+set #DSCR001 = 0
+set #DSCR002 = 0
+check #OUT001 == 0
+set #DSCR001 = 1
+set #DSCR002 = 0
+check #OUT001 == 0
+
+set #DSCR001 = 0
+set #DSCR002 = 1
+check #OUT001 == 0
+
+set #DSCR001 = 1
+set #DSCR002 = 1
+check #OUT001 == 1
+
+endtest
+
+test Logic02,tests test2
+schema LOGIC_TEST
+compatible MODULE_LM1SF40
+
+
+set #DSCR006 = 0
+set #DSCR005 = 0
+check #OUT001 == 1
+
+set #DSCR006 = 1
+set #DSCR005 = 0
+check #OUT001 == 1
+
+set #DSCR006 = 1
+set #DSCR005 = 1
+check #OUT001 == 1
+
+set #DSCR006 = 0
+set #DSCR005 = 1
+check #OUT001 == 1
+
+endtest
+
+
+test Logic03,tests test3
+schema LOGIC_TEST
+compatible MODULE_LM1SF40
+
+set #DSCR007 = 0
+set #DSCR008 = 0
+set #DSCR009 = 0
+set #DSCR010 = 0
+set #DSCR011 = 0
+set #DSCR012 = 0
+check #OUT001 == 1
+
+
+set #DSCR007 = 1
+set #DSCR008 = 0
+set #DSCR009 = 0
+set #DSCR010 = 0
+set #DSCR011 = 0
+set #DSCR012 = 0
+check #OUT001 == 1
+
+set #DSCR007 = 1
+set #DSCR008 = 1
+set #DSCR009 = 0
+set #DSCR010 = 0
+set #DSCR011 = 0
+set #DSCR012 = 0
+check #OUT001 == 1
+
+set #DSCR007 = 1
+set #DSCR008 = 1
+set #DSCR009 = 1
+set #DSCR010 = 0
+set #DSCR011 = 0
+set #DSCR012 = 0
+check #OUT001 == 1
+
+set #DSCR007 = 1
+set #DSCR008 = 1
+set #DSCR009 = 1
+set #DSCR010 = 1
+set #DSCR011 = 0
+set #DSCR012 = 0
+check #OUT001 == 1
+
+set #DSCR007 = 1
+set #DSCR008 = 1
+set #DSCR009 = 1
+set #DSCR010 = 1
+set #DSCR011 = 1
+set #DSCR012 = 0
+check #OUT001 == 1
+
+set #DSCR007 = 1
+set #DSCR008 = 1
+set #DSCR009 = 1
+set #DSCR010 = 1
+set #DSCR011 = 1
+set #DSCR012 = 1
+check #OUT001 == 1
+
+endtest
+
+test Logic04,tests test4
+schema LOGIC_TEST
+compatible MODULE_LM1SF40
+
+set #DSCR013 = 0
+set #DSCR014 = 0
+set #DSCR015 = 0
+set #DSCR016 = 0
+check #OUT004 == 0
+check #OUT005 == 0
+check #OUT006 == 0
+check #OUT007 == 1
+check #OUT008 == 0
+check #OUT009 == 0
+
+set #DSCR013 = 1
+set #DSCR014 = 0
+set #DSCR015 = 0
+set #DSCR016 = 0
+check #OUT004 == 0
+check #OUT005 == 0
+check #OUT006 == 1
+check #OUT007 == 0
+check #OUT008 == 1
+check #OUT009 == 0
+
+
+set #DSCR013 = 1
+set #DSCR014 = 1
+set #DSCR015 = 0
+set #DSCR016 = 0
+check #OUT004 == 1
+check #OUT005 == 0
+check #OUT006 == 1
+check #OUT007 == 0
+check #OUT008 == 0
+check #OUT009 == 1
+
+
+set #DSCR013 = 1
+set #DSCR014 = 1
+set #DSCR015 = 1
+set #DSCR016 = 0
+check #OUT004 == 1
+check #OUT005 == 0
+check #OUT006 == 1
+check #OUT007 == 0
+check #OUT008 == 1
+check #OUT009 == 1
+
+set #DSCR013 = 1
+set #DSCR014 = 1
+set #DSCR015 = 1
+set #DSCR016 = 1
+check #OUT004 == 1
+check #OUT005 == 0
+check #OUT006 == 1
+check #OUT007 == 0
+check #OUT008 == 0
+check #OUT009 == 1
+
+
+endtest
+
