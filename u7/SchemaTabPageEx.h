@@ -526,7 +526,7 @@ protected:
 
 			p.setPen(QPen(QBrush{0x000080}, lineWeight));
 			p.drawLine(tabrect.left(), tabrect.top() + lineWeight / 2,
-					   tabrect.right() + 1, tabrect.top() + lineWeight / 2);
+					   tabrect.right(), tabrect.top() + lineWeight / 2);
 		}
 	}
 
