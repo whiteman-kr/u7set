@@ -395,6 +395,7 @@ public slots:
 
 protected slots:
 	void tabCloseRequested(int index);
+	void currentTabChanged(int index);
 
 	// Data
 	//
@@ -495,4 +496,51 @@ private:
 	EditSchemaWidget* m_schemaWidget = nullptr;
 	QToolBar* m_toolBar = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
+};
+
+
+
+class SchemaTabBar : public QTabBar
+{
+	Q_OBJECT
+
+public:
+	SchemaTabBar(QWidget* parent) : QTabBar(parent)
+	{
+	}
+
+protected:
+	void paintEvent(QPaintEvent* pe) override
+	{
+		QTabBar::paintEvent(pe);
+		QPainter p(this);
+
+		int dpiY = p.device()->logicalDpiY();
+		int lineWeight = (dpiY > 100) ? 2 : 1;
+
+		int index = currentIndex();
+
+		if (index != -1)
+		{
+			QRect tabrect = tabRect(index);
+
+			p.setPen(QPen(QBrush{0x000080}, lineWeight));
+			p.drawLine(tabrect.left(), tabrect.top() + lineWeight / 2,
+					   tabrect.right() + 1, tabrect.top() + lineWeight / 2);
+		}
+	}
+
+};
+
+
+class SchemaTabWidget : public QTabWidget
+{
+	Q_OBJECT
+
+public:
+	SchemaTabWidget(QWidget* parent) :
+		QTabWidget(parent)
+	{
+		setTabBar(new SchemaTabBar{this});
+	}
 };

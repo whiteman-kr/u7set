@@ -2024,7 +2024,7 @@ int SchemaFileViewEx::parentFileId() const
 SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	MainTabPage(dbc, parent)
 {
-	m_tabWidget = new QTabWidget{};
+	m_tabWidget = new SchemaTabWidget{this};
 	m_tabWidget->setMovable(true);
 
 	m_tabWidget->tabBar()->setElideMode(Qt::ElideRight);
@@ -2033,45 +2033,22 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
 	int h = static_cast<int>(sz.height() * 1.75);
 
-	const QPalette& tabBarPalette = m_tabWidget->tabBar()->palette();
-
 	QString ss = QString(R"(
-						 QTabBar::tab
-						 {
-							padding-right: 0;
-							padding-left: %1px;
-							min-height: %2px;
-						 }
+ QTabBar::tab:top
+ {
+	height: %1px;
+ }
+ QTabBar::close-button
+ {
+	image: url(":/Images/Images/CloseButtonGray.svg");
+ }
+ QTabBar::close-button:hover
+ {
+	image: url(":/Images/Images/CloseButtonBlack.svg");
+ })")
+				 .arg(h);
 
-						 QTabBar::tab:selected
-						 {
-							border-left: 1px solid %3;
-							border-right: 1px solid %3;
-							border-top: 2 solid #0030B0;
-							background-color: %4
-						 }
-
-						 QTabBar::close-button
-						 {
-							image: url(":/Images/Images/CloseButtonGray.svg");
-							margin-top: %5px;
-							margin-bottom: %5px;
-						 }
-						 QTabBar::close-button:hover
-						 {
-							image: url(":/Images/Images/CloseButtonBlack.svg");
-							margin-top: %5px;
-							margin-bottom: %5px;
-						 }
-
-						 )").arg(sz.width())
-							.arg(h)
-							.arg(tabBarPalette.mid().color().name())
-							.arg(tabBarPalette.light().color().name())
-							.arg((h - sz.height()) / 2.5)
-							.arg(sz.width() / 4);
-
-	m_tabWidget->tabBar()->setStyleSheet(ss);
+	m_tabWidget->setStyleSheet(ss);
 
 	// --
 	//
@@ -2101,8 +2078,11 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 
 	// Hide close button for control tab page
 	//
-	QWidget* closeButton = m_tabWidget->tabBar()->tabButton(0, QTabBar::RightSide);
-	closeButton->setVisible(false);
+	QToolButton* closeButton = static_cast<QToolButton*>(m_tabWidget->tabBar()->tabButton(0, QTabBar::RightSide));
+	if (closeButton != nullptr)
+	{
+		closeButton->setVisible(false);
+	}
 
 	// Add shortcut for switching to control tab page
 	//
@@ -2137,6 +2117,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPageEx::tabCloseRequested);
 
 	m_tabWidget->tabBar()->installEventFilter(this);
+
+	connect(m_tabWidget->tabBar(), &QTabBar::currentChanged, this, &SchemasTabPageEx::currentTabChanged);
 
 	return;
 }
@@ -2237,6 +2219,33 @@ void SchemasTabPageEx::tabCloseRequested(int index)
 
 	return;
 }
+
+void SchemasTabPageEx::currentTabChanged(int index)
+{
+	// Show/hide close burron for inactive tab bar
+	//
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		EditSchemaTabPageEx* w = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(i));
+
+		if (w != nullptr)
+		{
+			if (i == index)
+			{
+				m_tabWidget->tabBar()->tabButton(i, closeSide)->show();
+			}
+			else
+			{
+				m_tabWidget->tabBar()->tabButton(i, closeSide)->hide();
+			}
+		}
+	}
+
+	return;
+}
+
 
 //
 //
