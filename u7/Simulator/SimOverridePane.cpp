@@ -1,11 +1,12 @@
-#include "SimOverrideWidget.h"
+#include "SimOverridePane.h"
 #include "../../lib/AppSignal.h"
 #include "../../Simulator/SimOverrideSignals.h"
 #include "SimOverrideValueWidget.h"
 
 
-SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent) :
+SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, QWidget* parent) :
 	QWidget(parent),
+    HasDbController(dbc),
 	m_simulator(simulator)
 {
 	assert(m_simulator);
@@ -53,11 +54,11 @@ SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent)
 
 	// --
 	//
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &SimOverrideWidget::itemDoubleClicked);
-	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &SimOverrideWidget::itemChanged);
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &SimOverridePane::itemDoubleClicked);
+	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &SimOverridePane::itemChanged);
 
-	connect(&m_simulator->overrideSignals(), &Sim::OverrideSignals::signalsChanged, this, &SimOverrideWidget::signalsChanged);
-	connect(&m_simulator->overrideSignals(), &Sim::OverrideSignals::stateChanged, this, &SimOverrideWidget::signalStateChanged);
+	connect(&m_simulator->overrideSignals(), &Sim::OverrideSignals::signalsChanged, this, &SimOverridePane::signalsChanged);
+	connect(&m_simulator->overrideSignals(), &Sim::OverrideSignals::stateChanged, this, &SimOverridePane::signalStateChanged);
 
 	// --
 	//
@@ -70,7 +71,7 @@ SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent)
 	return;
 }
 
-SimOverrideWidget::~SimOverrideWidget()
+SimOverridePane::~SimOverridePane()
 {
 	QSettings settings;
 
@@ -84,7 +85,7 @@ SimOverrideWidget::~SimOverrideWidget()
 	return;
 }
 
-void SimOverrideWidget::dragEnterEvent(QDragEnterEvent* event)
+void SimOverridePane::dragEnterEvent(QDragEnterEvent* event)
 {
 	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
@@ -94,7 +95,7 @@ void SimOverrideWidget::dragEnterEvent(QDragEnterEvent* event)
 	return;
 }
 
-void SimOverrideWidget::dropEvent(QDropEvent* event)
+void SimOverridePane::dropEvent(QDropEvent* event)
 {
 	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
 	{
@@ -168,7 +169,7 @@ void SimOverrideWidget::dropEvent(QDropEvent* event)
 	return;
 }
 
-bool SimOverrideWidget::eventFilter(QObject* obj, QEvent* event)
+bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 {
 	if (obj == m_treeWidget && event->type() == QEvent::KeyPress)
 	{
@@ -223,7 +224,7 @@ bool SimOverrideWidget::eventFilter(QObject* obj, QEvent* event)
 	return false;			// return false to process event
 }
 
-void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
+void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 {
 	QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
 
@@ -437,7 +438,7 @@ void SimOverrideWidget::contextMenuEvent(QContextMenuEvent* event)
 	return;
 }
 
-void SimOverrideWidget::updateValueColumn()
+void SimOverridePane::updateValueColumn()
 {
 	auto currentSignals = m_simulator->overrideSignals().overrideSignals();
 
@@ -482,7 +483,7 @@ void SimOverrideWidget::updateValueColumn()
 	return;
 }
 
-void SimOverrideWidget::fillListWidget(const std::vector<Sim::OverrideSignalParam>& overrideSignals)
+void SimOverridePane::fillListWidget(const std::vector<Sim::OverrideSignalParam>& overrideSignals)
 {
 	assert(m_treeWidget);
 
@@ -503,7 +504,7 @@ void SimOverrideWidget::fillListWidget(const std::vector<Sim::OverrideSignalPara
 	return;
 }
 
-void SimOverrideWidget::selectSignal(QString appSignalId)
+void SimOverridePane::selectSignal(QString appSignalId)
 {
 	int count = m_treeWidget->topLevelItemCount();
 
@@ -528,7 +529,7 @@ void SimOverrideWidget::selectSignal(QString appSignalId)
 	return;
 }
 
-void SimOverrideWidget::itemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
+void SimOverridePane::itemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 {
 	QOverrideTreeWidgetItem* toItem = dynamic_cast<QOverrideTreeWidgetItem*>(item);
 	assert(toItem);
@@ -538,7 +539,7 @@ void SimOverrideWidget::itemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 	return;
 }
 
-void SimOverrideWidget::itemChanged(QTreeWidgetItem* item, int column)
+void SimOverridePane::itemChanged(QTreeWidgetItem* item, int column)
 {
 	assert(item);
 
@@ -555,7 +556,7 @@ void SimOverrideWidget::itemChanged(QTreeWidgetItem* item, int column)
 	return;
 }
 
-void SimOverrideWidget::signalsChanged(QStringList addedAppSignalIds)
+void SimOverridePane::signalsChanged(QStringList addedAppSignalIds)
 {
 	auto overrideSignals = m_simulator->overrideSignals().overrideSignals();
 
@@ -569,17 +570,17 @@ void SimOverrideWidget::signalsChanged(QStringList addedAppSignalIds)
 	return;
 }
 
-void SimOverrideWidget::signalStateChanged(QStringList /*appSignalId*/)
+void SimOverridePane::signalStateChanged(QStringList /*appSignalId*/)
 {
 	updateValueColumn();
 }
 
-void SimOverrideWidget::clear()
+void SimOverridePane::clear()
 {
 	m_simulator->overrideSignals().clear();
 }
 
-void SimOverrideWidget::removeSelectedSignals()
+void SimOverridePane::removeSelectedSignals()
 {
 	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
 
@@ -625,12 +626,12 @@ void SimOverrideWidget::removeSelectedSignals()
 	return;
 }
 
-void SimOverrideWidget::removeSignal(QString appSignalId)
+void SimOverridePane::removeSignal(QString appSignalId)
 {
 	m_simulator->overrideSignals().removeSignal(appSignalId);
 }
 
-void SimOverrideWidget::addSignal()
+void SimOverridePane::addSignal()
 {
 	QString defaultText;
 
@@ -656,7 +657,6 @@ void SimOverrideWidget::addSignal()
 		{
 			// To add signal to override, AppSignalId is required, so go and get it
 			//
-
 			Hash appSignalIdHash = m_simulator->appSignalManager().customToAppSignal(::calcHash(signalId));
 
 			AppSignalParam appSignalParam = m_simulator->appSignalManager().signalParam(appSignalIdHash, &ok);
@@ -680,7 +680,7 @@ void SimOverrideWidget::addSignal()
 	return;
 }
 
-void SimOverrideWidget::setValue(QString appSignalId)
+void SimOverridePane::setValue(QString appSignalId)
 {
 	std::optional<Sim::OverrideSignalParam> osp = m_simulator->overrideSignals().overrideSignal(appSignalId);
 
@@ -690,13 +690,13 @@ void SimOverrideWidget::setValue(QString appSignalId)
 		return;
 	}
 
-	SimOverrideUI::OverrideValueWidget::showDialog(osp.value(), m_simulator, this);
+	SimOverrideUI::OverrideValueWidget::showDialog(osp.value(), m_simulator, dbc(), this);
 	SimOverrideUI::OverrideValueWidget::setViewOptions(osp.value().appSignalId(), m_currentBase, m_currentFormat, m_currentPrecision);
 
 	return;
 }
 
-void SimOverrideWidget::setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value)
+void SimOverridePane::setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value)
 {
 	m_simulator->overrideSignals().setValue(appSignalId, method, value);
 }

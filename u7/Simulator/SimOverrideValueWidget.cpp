@@ -57,8 +57,12 @@ namespace SimOverrideUI
 	//
 	// OverrideMethodWidget
 	//
-	OverrideMethodWidget::OverrideMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent) :
+	OverrideMethodWidget::OverrideMethodWidget(const Sim::OverrideSignalParam& signal,
+											   Sim::Simulator* simulator,
+											   DbController* dbc,
+											   QWidget* parent) :
 		QWidget(parent),
+		HasDbController(dbc),
 		m_signal(signal),
 		m_simulator(simulator)
 	{
@@ -95,14 +99,30 @@ namespace SimOverrideUI
 
 		m_simulator->overrideSignals().setValue(m_signal.appSignalId(), method, value);
 
+		// Save script to user settings
+		//
+		switch (method)
+		{
+		case Sim::OverrideSignalMethod::Value:
+			db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Value", this);
+			break;
+		case Sim::OverrideSignalMethod::Script:
+			db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Script", this);
+			db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), value.toString(), this);
+			break;
+		}
+
 		return;
 	}
 
 	//
 	// ValueMethodWidget
 	//
-	ValueMethodWidget::ValueMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent) :
-		OverrideMethodWidget(signal, simulator, parent)
+	ValueMethodWidget::ValueMethodWidget(const Sim::OverrideSignalParam& signal,
+										 Sim::Simulator* simulator,
+										 DbController* dbc,
+										 QWidget* parent) :
+		OverrideMethodWidget(signal, simulator, dbc, parent)
 	{
 
 		switch (signal.signalType())
@@ -305,8 +325,11 @@ namespace SimOverrideUI
 	//
 	// ScriptMethodWidget
 	//
-	ScriptMethodWidget::ScriptMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent) :
-		OverrideMethodWidget(signal, simulator, parent)
+	ScriptMethodWidget::ScriptMethodWidget(const Sim::OverrideSignalParam& signal,
+										   Sim::Simulator* simulator,
+										   DbController* dbc,
+										   QWidget* parent) :
+		OverrideMethodWidget(signal, simulator, dbc, parent)
 	{
 		m_scriptLabel = new QLabel(tr("Override Value Script:"));
 
@@ -324,17 +347,27 @@ namespace SimOverrideUI
 		m_scriptEdit->setFont(f);
 		m_lexer.setFont(f);
 		m_scriptEdit->setLexer(&m_lexer);
-
-		m_scriptEdit->setText(signal.script());
 		m_scriptEdit->setModified(false);
+
+		QString lastScript;
+		db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), &lastScript, this);
+
+		if (lastScript.isEmpty() == false)
+		{
+			m_scriptEdit->setText(lastScript);
+		}
+		else
+		{
+			m_scriptEdit->setText(signal.script());
+		}
 
 		// Apply button
 		//
 		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Apply, this);
 
 		m_templateScriptButton = m_buttonBox->addButton(tr("Templates..."), QDialogButtonBox::ButtonRole::ResetRole);
-		m_loadScriptButton = m_buttonBox->addButton(tr("Load..."), QDialogButtonBox::ButtonRole::ResetRole);
-		m_saveScriptButton = m_buttonBox->addButton(tr("Save..."), QDialogButtonBox::ButtonRole::ResetRole);
+		//m_loadScriptButton = m_buttonBox->addButton(tr("Load..."), QDialogButtonBox::ButtonRole::ResetRole);
+		//m_saveScriptButton = m_buttonBox->addButton(tr("Save..."), QDialogButtonBox::ButtonRole::ResetRole);
 
 		// --
 		//
@@ -358,37 +391,44 @@ namespace SimOverrideUI
 	{
 		if (button == m_buttonBox->button(QDialogButtonBox::Apply))
 		{
-			// Validate script here
-			//
-			QString script = m_scriptEdit->text();
-
-			QJSEngine jsEngine;
-			QJSValue scriptValue =  jsEngine.evaluate(script);
-
-			if (scriptValue.isError() == true)
-			{
-				qDebug() << "Script evaluate error at line " << scriptValue.property("lineNumber").toInt();
-				qDebug() << "\tClass: " << metaObject()->className();
-				qDebug() << "\tStack: " << scriptValue.property("stack").toString();
-				qDebug() << "\tMessage: " << scriptValue.toString();
-
-				QMessageBox::critical(this,
-									  QApplication::applicationDisplayName(),
-									  tr("Script evaluate error at line %1:\n%2")
-										  .arg(scriptValue.property("lineNumber").toInt())
-										  .arg(scriptValue.toString()));
-				return;
-			}
-
-			// Set script to signal
-			//
-			setValue(Sim::OverrideSignalMethod::Script, script);
+			applyScript();
 		}
 
 		if (button == m_templateScriptButton)
 		{
 			showTemplates();
 		}
+
+		return;
+	}
+
+	void ScriptMethodWidget::applyScript()
+	{
+		// Validate script here
+		//
+		QString script = m_scriptEdit->text();
+
+		QJSEngine jsEngine;
+		QJSValue scriptValue =  jsEngine.evaluate(script);
+
+		if (scriptValue.isError() == true)
+		{
+			qDebug() << "Script evaluate error at line " << scriptValue.property("lineNumber").toInt();
+			qDebug() << "\tClass: " << metaObject()->className();
+			qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+			qDebug() << "\tMessage: " << scriptValue.toString();
+
+			QMessageBox::critical(this,
+								  QApplication::applicationDisplayName(),
+								  tr("Script evaluate error at line %1:\n%2")
+									  .arg(scriptValue.property("lineNumber").toInt())
+									  .arg(scriptValue.toString()));
+			return;
+		}
+
+		// Set script to signal
+		//
+		setValue(Sim::OverrideSignalMethod::Script, script);
 
 		return;
 	}
@@ -488,8 +528,12 @@ namespace SimOverrideUI
 	//
 	std::map<QString, OverrideValueWidget*> OverrideValueWidget::m_openedDialogs;
 
-	OverrideValueWidget::OverrideValueWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent) :
+	OverrideValueWidget::OverrideValueWidget(const Sim::OverrideSignalParam& signal,
+											 Sim::Simulator* simulator,
+											 DbController* dbc,
+											 QWidget* parent) :
 		QDialog(parent),
+		HasDbController(dbc),
 		m_signal(signal),
 		m_simulator(simulator)
 	{
@@ -502,7 +546,6 @@ namespace SimOverrideUI
 		setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 		setWindowFlag(Qt::WindowMinimizeButtonHint, false);
 		setWindowFlag(Qt::WindowMaximizeButtonHint, false);
-
 
 		// CustomSignalID/AppSignalID
 		//
@@ -530,10 +573,14 @@ namespace SimOverrideUI
 
 		// Tab Widget
 		//
+		m_valueTabWidget = new ValueMethodWidget{m_signal, m_simulator, dbc, nullptr};
+		m_scriptTabWidget = new ScriptMethodWidget{m_signal, m_simulator, dbc, nullptr};
+
+
 		m_tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-		m_tabWidget->addTab(m_valueWidget, tr("Value"));
-		m_tabWidget->addTab(m_scriptWidget, tr("Script"));
+		m_tabWidget->addTab(m_valueTabWidget, tr("Value"));
+		m_tabWidget->addTab(m_scriptTabWidget, tr("Script"));
 
 		// --
 		//
@@ -562,6 +609,21 @@ namespace SimOverrideUI
 
 		m_openedDialogs[m_signal.appSignalId()] = this;
 
+		// Select last selected method
+		//
+		QString lastMethod;
+		db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), &lastMethod, this);
+
+		if (lastMethod == "Value")
+		{
+			m_tabWidget->setCurrentIndex(0);
+		}
+
+		if (lastMethod == "Script")
+		{
+			m_tabWidget->setCurrentIndex(1);
+		}
+
 		return;
 	}
 
@@ -571,14 +633,17 @@ namespace SimOverrideUI
 	}
 
 
-	bool OverrideValueWidget::showDialog(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent)
+	bool OverrideValueWidget::showDialog(const Sim::OverrideSignalParam& signal,
+										 Sim::Simulator* simulator,
+										 DbController* dbc,
+										 QWidget* parent)
 	{
 		OverrideValueWidget* w = nullptr;
 
 		auto it = m_openedDialogs.find(signal.appSignalId());
 		if (it == m_openedDialogs.end())
 		{
-			w = new OverrideValueWidget(signal, simulator, parent);
+			w = new OverrideValueWidget{signal, simulator, dbc, parent};
 			w->show();	// show as modalless dialog
 			w->layout()->update();
 		}
@@ -610,11 +675,11 @@ namespace SimOverrideUI
 		{
 			OverrideValueWidget* w = it->second;
 
-			assert(w->m_valueWidget);
-			w->m_valueWidget->setViewOptions(base, analogFormat, precision);
+			assert(w->m_valueTabWidget);
+			w->m_valueTabWidget->setViewOptions(base, analogFormat, precision);
 
-			assert(w->m_scriptWidget);
-			w->m_scriptWidget->setViewOptions(base, analogFormat, precision);
+			assert(w->m_scriptTabWidget);
+			w->m_scriptTabWidget->setViewOptions(base, analogFormat, precision);
 		}
 
 		return;

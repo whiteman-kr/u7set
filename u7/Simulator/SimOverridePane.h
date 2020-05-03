@@ -1,16 +1,16 @@
-#ifndef SIMOVERRIDEWIDGET_H
-#define SIMOVERRIDEWIDGET_H
+#pragma once
 
 #include "../../Simulator/Simulator.h"
+#include "../../lib/DbController.h"
 
 
-class SimOverrideWidget : public QWidget
+class SimOverridePane : public QWidget, protected HasDbController
 {
 	Q_OBJECT
 
 public:
-	explicit SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent = nullptr);
-	virtual ~SimOverrideWidget();
+	explicit SimOverridePane(Sim::Simulator* simulator, DbController* dbc, QWidget* parent = nullptr);
+	virtual ~SimOverridePane();
 
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event) override;
@@ -73,5 +73,3 @@ public:
 	Sim::OverrideSignalParam m_overrideSignal;
 };
 
-
-#endif // SIMOVERRIDEWIDGET_H

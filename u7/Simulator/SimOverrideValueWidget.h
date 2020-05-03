@@ -3,6 +3,7 @@
 #include "../../Simulator/SimOverrideSignals.h"
 #include "../../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
 #include "../../lib/QScintillaLexers/LexerJavaScript.h"
+#include "../../lib/DbController.h"
 
 
 
@@ -33,12 +34,15 @@ namespace SimOverrideUI
 	//
 	// OverrideMethodWidget
 	//
-	class OverrideMethodWidget : public QWidget
+	class OverrideMethodWidget : public QWidget, protected HasDbController
 	{
 		Q_OBJECT
 
 	public:
-		explicit OverrideMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent);
+		explicit OverrideMethodWidget(const Sim::OverrideSignalParam& signal,
+									  Sim::Simulator* simulator,
+									  DbController* dbc,
+									  QWidget* parent);
 
 	public:
 		const Sim::OverrideSignalParam& signal() const;
@@ -66,7 +70,10 @@ namespace SimOverrideUI
 		Q_OBJECT
 
 	public:
-		ValueMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent);
+		ValueMethodWidget(const Sim::OverrideSignalParam& signal,
+						  Sim::Simulator* simulator,
+						  DbController* dbc,
+						  QWidget* parent);
 
 		virtual void setViewOptions(int base, E::AnalogFormat analogFormat, int precision) override;
 
@@ -102,16 +109,21 @@ namespace SimOverrideUI
 		Q_OBJECT
 
 	public:
-		ScriptMethodWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent);
+		ScriptMethodWidget(const Sim::OverrideSignalParam& signal,
+						   Sim::Simulator* simulator,
+						   DbController* dbc,
+						   QWidget* parent);
 
 	protected slots:
 		void dialogBoxButtonClicked(QAbstractButton* button);
+
+		void applyScript();
 		void showTemplates();
 
 	private:
 		QPushButton* m_templateScriptButton = nullptr;
-		QPushButton* m_loadScriptButton = nullptr;
-		QPushButton* m_saveScriptButton = nullptr;
+		//QPushButton* m_loadScriptButton = nullptr;
+		//QPushButton* m_saveScriptButton = nullptr;
 
 		QLabel* m_scriptLabel = nullptr;
 		QsciScintilla* m_scriptEdit = nullptr;
@@ -136,19 +148,22 @@ namespace SimOverrideUI
 	};
 
 
-	//
 	// OverrideValueWidget
+	// The Main Windows for override, has some signal info and tab control
 	//
-	class OverrideValueWidget : public QDialog
+	class OverrideValueWidget : public QDialog, protected HasDbController
 	{
 		Q_OBJECT
 
 	private:
-		explicit OverrideValueWidget(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent);
+		explicit OverrideValueWidget(const Sim::OverrideSignalParam& signal,
+									 Sim::Simulator* simulator,
+									 DbController* dbc,
+									 QWidget* parent);
 		virtual ~OverrideValueWidget();
 
 	public:
-		static bool showDialog(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, QWidget* parent);
+		static bool showDialog(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, DbController* dbc, QWidget* parent);
 		static void setViewOptions(QString appSignalId, int base, E::AnalogFormat analogFormat, int precision);
 
 	protected:
@@ -183,8 +198,8 @@ namespace SimOverrideUI
 
 		QTabWidget* m_tabWidget = new QTabWidget{this};
 
-		ValueMethodWidget* m_valueWidget = new ValueMethodWidget{m_signal, m_simulator, nullptr};
-		ScriptMethodWidget* m_scriptWidget = new ScriptMethodWidget{m_signal, m_simulator, nullptr};
+		ValueMethodWidget* m_valueTabWidget = nullptr;
+		ScriptMethodWidget* m_scriptTabWidget = nullptr;
 
 		// --
 		//

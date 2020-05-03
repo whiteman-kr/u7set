@@ -35,7 +35,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_setProjectProperty, m_worker, &DbWorker::slot_setProjectProperty);
 	connect(this, &DbController::signal_getProjectProperty, m_worker, &DbWorker::slot_getProjectProperty);
 
-	connect(this, &DbController::signal_setProjectProperty, m_worker, &DbWorker::slot_setProjectProperty);
+	connect(this, &DbController::signal_setUserProperty, m_worker, &DbWorker::slot_setUserProperty);
 	connect(this, &DbController::signal_getUserProperty, m_worker, &DbWorker::slot_getUserProperty);
 
 	connect(this, &DbController::signal_createUser, m_worker, &DbWorker::slot_createUser);
