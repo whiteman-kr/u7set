@@ -55,6 +55,12 @@ public:
 	bool updateUser(const DbUser& user, QWidget* parentWidget);
 	bool getUserList(std::vector<DbUser>* out, QWidget* parentWidget);
 
+	// User Properties
+	//
+	bool setUserProperty(const QString& property, const QString& value, QWidget* parentWidget);
+	bool getUserProperty(const QString& property, QString* value, QWidget* parentWidget);
+	bool getUserProperty(const QString& property, QString* value, const QString& defaultValue, QWidget* parentWidget);
+
 	// File management
 	//
 	bool isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget);
@@ -188,6 +194,9 @@ signals:
 
 	void signal_setProjectProperty(QString propertyName, QString propertyValue);
 	void signal_getProjectProperty(QString propertyName, QString* out);
+
+	void signal_setUserProperty(QString propertyName, QString propertyValue);
+	void signal_getUserProperty(QString propertyName, QString* out);
 
 	void signal_createUser(DbUser user);
 	void signal_updateUser(DbUser user);

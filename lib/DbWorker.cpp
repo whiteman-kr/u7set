@@ -343,6 +343,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0323.sql", "Upgrade to version 323, Rload_Ohm added to signal specific properties of AIM-4PH"},
 	{":/DatabaseUpgrade/Upgrade0324.sql", "Upgrade to version 324, Rload_Ohm is added to configuration script of AIM-4PH and WAIM"},
 	{":/DatabaseUpgrade/Upgrade0325.sql", "Upgrade to version 325, Fixed AFB MAJ description, added err_* pins (22, 23)"},
+	{":/DatabaseUpgrade/Upgrade0326.sql", "Upgrade to version 326, Added UserProperties"},
 };
 
 int DbWorker::counter = 0;
@@ -2051,7 +2052,7 @@ WHERE
 
 void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyValue)
 {
-	// Init automitic varaiables
+	// Init automatic variable
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2107,7 +2108,7 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 
 void DbWorker::slot_getProjectProperty(QString propertyName, QString* out)
 {
-	// Init automitic varaiables
+	// Init automatic variable
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2137,8 +2138,7 @@ void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
 		return;
 	}
 
-	// Check if such user already exists
-	// SELECT * FROM creat_user();
+	// --
 	//
 	QSqlQuery query(db);
 
@@ -2151,6 +2151,116 @@ void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
 	if (result == false)
 	{
 		emitError(db, tr("Cannot get project property value %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		return;
+	}
+
+	if (query.size() > 0)
+	{
+		result = query.next();
+		assert(result);
+
+		*out = query.value(0).toString();
+	}
+
+	return;
+}
+
+void DbWorker::slot_setUserProperty(QString propertyName, QString propertyValue)
+{
+	// Init automatic variable
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true)
+	{
+		assert(propertyName.isEmpty() == false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Log action
+	//
+	addLogRecord(db, tr("slot_setUserProperty: propertyName '%1', propertyValue '%2'").arg(propertyName).arg(propertyValue));
+
+	// --
+	//
+	QSqlQuery query(db);
+
+	query.prepare("SELECT * FROM api.set_user_property(:sessionkey, :propertyName, :propertyValue);");
+	query.bindValue(":sessionkey", sessionKey());
+	query.bindValue(":propertyName", propertyName);
+	query.bindValue(":propertyValue", propertyValue.isEmpty() ? "" : propertyValue);
+
+	bool result = query.exec();
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot set user property %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		return;
+	}
+
+	if (query.size() > 0)
+	{
+		result = query.next();
+		assert(result);
+	}
+
+	return;
+}
+
+void DbWorker::slot_getUserProperty(QString propertyName, QString* out)
+{
+	// Init automatic variable
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true || out == nullptr)
+	{
+		assert(propertyName.isEmpty() == false);
+		assert(out);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// --
+	//
+	QSqlQuery query(db);
+
+	query.prepare("SELECT * FROM api.get_user_property(:sessionkey, :propertyName);");
+	query.bindValue(":sessionkey", sessionKey());
+	query.bindValue(":propertyName", propertyName);
+
+	bool result = query.exec();
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot get user property value %1, error: %2").arg(propertyName).arg(db.lastError().text()));
 		return;
 	}
 

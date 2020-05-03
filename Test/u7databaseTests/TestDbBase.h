@@ -30,8 +30,10 @@ protected:
 	bool createProjectDb();
 	bool dropProjectDb(QString projectName = QString());
 
-	QString logIn(User user);								// returns session_key
-	QString logIn(QString username, QString password);		// returns session_key
+	int createUser(QString sessionKey, QString username, QString password);		// returns user_id
+
+	QString logIn(User user);									// returns session_key
+	QString logIn(QString username, QString password);			// returns session_key
 	bool logOut();
 
 public:

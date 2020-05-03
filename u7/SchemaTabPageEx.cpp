@@ -2038,7 +2038,7 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	QString ss = QString(R"(
 						 QTabBar::tab
 						 {
-							padding-right: %6px;
+							padding-right: 0;
 							padding-left: %1px;
 							min-height: %2px;
 						 }
@@ -2054,12 +2054,14 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 						 QTabBar::close-button
 						 {
 							image: url(":/Images/Images/CloseButtonGray.svg");
-							padding: %5px;
+							margin-top: %5px;
+							margin-bottom: %5px;
 						 }
 						 QTabBar::close-button:hover
 						 {
 							image: url(":/Images/Images/CloseButtonBlack.svg");
-							padding: %5px;
+							margin-top: %5px;
+							margin-bottom: %5px;
 						 }
 
 						 )").arg(sz.width())
@@ -2067,7 +2069,7 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 							.arg(tabBarPalette.mid().color().name())
 							.arg(tabBarPalette.light().color().name())
 							.arg((h - sz.height()) / 2.5)
-							.arg(sz.width() / 2);
+							.arg(sz.width() / 4);
 
 	m_tabWidget->tabBar()->setStyleSheet(ss);
 
