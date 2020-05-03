@@ -4,8 +4,9 @@
 #include "SimOverrideValueWidget.h"
 
 
-SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent) :
+SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, DbController* dbc, QWidget* parent) :
 	QWidget(parent),
+    HasDbController(dbc),
 	m_simulator(simulator)
 {
 	assert(m_simulator);
@@ -690,7 +691,7 @@ void SimOverrideWidget::setValue(QString appSignalId)
 		return;
 	}
 
-	SimOverrideUI::OverrideValueWidget::showDialog(osp.value(), m_simulator, this);
+	SimOverrideUI::OverrideValueWidget::showDialog(osp.value(), m_simulator, dbc(), this);
 	SimOverrideUI::OverrideValueWidget::setViewOptions(osp.value().appSignalId(), m_currentBase, m_currentFormat, m_currentPrecision);
 
 	return;

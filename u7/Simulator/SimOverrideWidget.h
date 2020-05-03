@@ -2,14 +2,15 @@
 #define SIMOVERRIDEWIDGET_H
 
 #include "../../Simulator/Simulator.h"
+#include "../../lib/DbController.h"
 
 
-class SimOverrideWidget : public QWidget
+class SimOverrideWidget : public QWidget, protected HasDbController
 {
 	Q_OBJECT
 
 public:
-	explicit SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent = nullptr);
+	explicit SimOverrideWidget(Sim::Simulator* simulator, DbController* dbc, QWidget* parent = nullptr);
 	virtual ~SimOverrideWidget();
 
 protected:

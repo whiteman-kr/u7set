@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SF00" DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0019">
+<LogicModule Name="LM1_SF00" DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0020">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -183,7 +183,9 @@
 			<Pin OpName="i_16_oprd"		OpIndex ="17"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="19"	PinType = "Output"/>
 			<Pin OpName="o_maj_edi"		OpIndex ="20"	PinType = "Output"/>
-			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>			
+			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>
+			<Pin OpName="o_maj_err_ms"	OpIndex ="22"	PinType = "Output"/>
+			<Pin OpName="o_maj_err_st"	OpIndex ="23"	PinType = "Output"/>
 		</AFBComponent>
 		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="256" SimulationFunc="afb_srsst_v104">
 			<Pin OpName="i_data"		OpIndex ="0"	PinType = "Input"/>

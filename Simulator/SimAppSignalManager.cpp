@@ -437,6 +437,13 @@ namespace Sim
 				return state;
 			}
 
+			if (ualAddress.isValid() == false)
+			{
+				// This is can be unused signal, in this case it has non valid addresses
+				//
+				return state;
+			}
+
 			switch (type)
 			{
 			case E::SignalType::Analog:

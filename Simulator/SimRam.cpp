@@ -890,7 +890,11 @@ namespace Sim
 			}
 		}
 
-		assert(result);
+		if (result == nullptr)
+		{
+			qDebug() << "ERROR in Ram::memoryArea, memory area is not found for offsetW " << offsetW << ", access " << access;
+			assert(result);
+		}
 
 		return result;
 	}
