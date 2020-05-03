@@ -122,8 +122,8 @@ namespace SimOverrideUI
 
 	private:
 		QPushButton* m_templateScriptButton = nullptr;
-		QPushButton* m_loadScriptButton = nullptr;
-		QPushButton* m_saveScriptButton = nullptr;
+		//QPushButton* m_loadScriptButton = nullptr;
+		//QPushButton* m_saveScriptButton = nullptr;
 
 		QLabel* m_scriptLabel = nullptr;
 		QsciScintilla* m_scriptEdit = nullptr;
@@ -148,8 +148,8 @@ namespace SimOverrideUI
 	};
 
 
-	//
 	// OverrideValueWidget
+	// The Main Windows for override, has some signal info and tab control
 	//
 	class OverrideValueWidget : public QDialog, protected HasDbController
 	{
@@ -198,8 +198,8 @@ namespace SimOverrideUI
 
 		QTabWidget* m_tabWidget = new QTabWidget{this};
 
-		ValueMethodWidget* m_valueWidget = nullptr;
-		ScriptMethodWidget* m_scriptWidget = nullptr;
+		ValueMethodWidget* m_valueTabWidget = nullptr;
+		ScriptMethodWidget* m_scriptTabWidget = nullptr;
 
 		// --
 		//

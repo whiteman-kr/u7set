@@ -3,7 +3,7 @@
 #include "SimProjectWidget.h"
 #include "SimMemoryWidget.h"
 #include "SimOutputWidget.h"
-#include "SimOverrideWidget.h"
+#include "SimOverridePane.h"
 #include "SimSelectBuildDialog.h"
 #include "SimControlPage.h"
 #include "SimSchemaPage.h"
@@ -186,7 +186,7 @@ void SimWidget::createDocks()
 	//
 	QDockWidget* overrideDock = new QDockWidget{"Override", this};
 	overrideDock->setObjectName("SimOverridenSignals");
-	overrideDock->setWidget(new SimOverrideWidget{m_simulator.get(), dbc(), overrideDock});
+	overrideDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), overrideDock});
 	overrideDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 	addDockWidget(Qt::BottomDockWidgetArea, overrideDock);
