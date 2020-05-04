@@ -788,9 +788,9 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 		case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(s.byteOrder());
 		case SC_ANALOG_SIGNAL_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(s.analogSignalFormat());
 		case SC_ENABLE_TUNING: return s.enableTuning() ? yes : no;
-		case SC_TUNING_DEFAULT_VALUE: return s.tuningDefaultValue().toString(s.decimalPlaces());
-		case SC_TUNING_LOW_BOUND: return s.tuningLowBound().toString(s.decimalPlaces());
-		case SC_TUNING_HIGH_BOUND: return s.tuningHighBound().toString(s.decimalPlaces());
+		case SC_TUNING_DEFAULT_VALUE: return s.tuningDefaultValue().toString();
+		case SC_TUNING_LOW_BOUND: return s.tuningLowBound().toString();
+		case SC_TUNING_HIGH_BOUND: return s.tuningHighBound().toString();
 		case SC_ACQUIRE: return s.acquire() ? yes : no;
 		case SC_ARCHIVE: return s.archive() ? yes : no;
 		case SC_DECIMAL_PLACES: return s.decimalPlaces();

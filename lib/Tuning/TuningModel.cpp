@@ -690,6 +690,16 @@ void TuningModel::sort(int column, Qt::SortOrder order)
 	return;
 }
 
+E::AnalogFormat TuningModel::analogFormat() const
+{
+	return m_analogFormat;
+}
+
+void TuningModel::setAnalogFormat(E::AnalogFormat format)
+{
+	m_analogFormat = format;
+}
+
 QVariant TuningModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::BackgroundRole)
@@ -824,7 +834,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			if (asp.isAnalog())
 			{
-				return defaultValue(asp).toString(asp.precision());
+				return defaultValue(asp).toString(m_analogFormat, asp.precision());
 			}
 			else
 			{
@@ -884,17 +894,17 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					}
 					else
 					{
-						QString valueString = tss.value().toString(asp.precision());
+						QString valueString = tss.value().toString(m_analogFormat, asp.precision());
 
 						if (m_tuningSignalManager->newValueIsUnapplied(tssHash) == true)
 						{
-							QString editValueString = newValue.toString(asp.precision());
+							QString editValueString = newValue.toString(m_analogFormat, asp.precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);
 						}
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = newValue.toString(asp.precision());
+							QString editValueString = newValue.toString(m_analogFormat, asp.precision());
 							return tr("Writing %1").arg(editValueString);
 						}
 
@@ -935,15 +945,15 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					if (tss.limitsUnbalance(asp) == true)
 					{
 						result = tr("Base %1, read %2")
-								.arg(asp.tuningLowBound().toString(asp.precision()))
-								.arg(tss.lowBound().toString(asp.precision()));
+								.arg(asp.tuningLowBound().toString(m_analogFormat, asp.precision()))
+								.arg(tss.lowBound().toString(m_analogFormat, asp.precision()));
 						break;
 					}
 					else
 					{
 						if (c == 0)
 						{
-							result = asp.tuningLowBound().toString(asp.precision());
+							result = asp.tuningLowBound().toString(m_analogFormat, asp.precision());
 						}
 					}
 				}
@@ -956,15 +966,15 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					if (tss.limitsUnbalance(asp) == true)
 					{
 						result = tr("Base %1, read %2")
-								.arg(asp.tuningHighBound().toString(asp.precision()))
-								.arg(tss.highBound().toString(asp.precision()));
+								.arg(asp.tuningHighBound().toString(m_analogFormat, asp.precision()))
+								.arg(tss.highBound().toString(m_analogFormat, asp.precision()));
 						break;
 					}
 					else
 					{
 						if (c == 0)
 						{
-							result = asp.tuningHighBound().toString(asp.precision());
+							result = asp.tuningHighBound().toString(m_analogFormat, asp.precision());
 						}
 					}
 				}
@@ -1035,13 +1045,14 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 // DialogInputTuningValue
 //
 
-DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, int decimalPlaces, QWidget* parent) :
+DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_value(value),
 	m_defaultValue(defaultValue),
 	m_lowLimit(lowLimit),
 	m_highLimit(highLimit),
-	m_decimalPlaces(decimalPlaces)
+	m_decimalPlaces(decimalPlaces),
+	m_analogFormat(analogFormat)
 {
 
 	m_discreteCheck = new QCheckBox();
@@ -1107,18 +1118,18 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 	else
 	{
 		QString str = tr("Enter the value (%1 - %2):")
-				.arg(m_lowLimit.toString(decimalPlaces))
-				.arg(m_highLimit.toString(decimalPlaces));
+				.arg(m_lowLimit.toString(analogFormat, decimalPlaces))
+				.arg(m_highLimit.toString(analogFormat, decimalPlaces));
 
 		setWindowTitle(str);
 
 		if (sameValue == true)
 		{
-			m_analogEdit->setText(value.toString(decimalPlaces));
+			m_analogEdit->setText(value.toString(analogFormat, decimalPlaces));
 			m_analogEdit->selectAll();
 		}
 
-		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(m_decimalPlaces));
+		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(analogFormat, m_decimalPlaces));
 	}
 }
 
@@ -1215,6 +1226,6 @@ void DialogInputTuningValue::on_m_buttonDefault_clicked()
 	}
 	else
 	{
-		m_analogEdit->setText(m_defaultValue.toString(m_decimalPlaces));
+		m_analogEdit->setText(m_defaultValue.toString(m_analogFormat, m_decimalPlaces));
 	}
 }

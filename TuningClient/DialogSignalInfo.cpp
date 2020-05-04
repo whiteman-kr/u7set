@@ -7,10 +7,11 @@
 #include "TuningClientTcpClient.h"
 #include "Settings.h"
 
-DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
+DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_appSignalHash(appSignalHash),
+    m_analogFormat(analogFormat),
 	m_instanceIdHash(instanceIdHash),
 	m_signalManager(signalManager)
 {
@@ -79,7 +80,7 @@ void DialogSignalInfo::updateInfo()
 		{
 			if (asp.isAnalog() == true)
 			{
-				text = state.value().toString(asp.precision()) + " " + asp.unit();
+				text = state.value().toString(m_analogFormat, asp.precision()) + " " + asp.unit();
 			}
 			else
 			{
@@ -109,7 +110,7 @@ void DialogSignalInfo::updateInfo()
 				precision = asp.precision();
 			}
 
-			text += tr("NewValue:\t\t%1\n").arg(m_signalManager->newValue(m_appSignalHash).toString(precision));
+			text += tr("NewValue:\t\t%1\n").arg(m_signalManager->newValue(m_appSignalHash).toString(m_analogFormat, precision));
 		}
 		else
 		{

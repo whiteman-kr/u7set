@@ -325,7 +325,12 @@ void TuningValue::fromFloat(float value)
 	}
 }
 
-QString TuningValue::toString(int precision) const
+QString TuningValue::toString() const
+{
+	return toString(E::AnalogFormat::g_9_or_9e, -1);
+}
+
+QString TuningValue::toString(E::AnalogFormat analogFormat, int precision) const
 {
 	switch (m_type)
 	{
@@ -339,19 +344,30 @@ QString TuningValue::toString(int precision) const
 		return QString::number(int64Value());
 
 	case TuningValueType::Float:
+		if (analogFormat == E::AnalogFormat::g_9_or_9e || analogFormat == E::AnalogFormat::G_9_or_9E)
+		{
+			return QString::number(floatValue(), static_cast<char>(analogFormat));
+		}
+
 		if (precision < 0)
 		{
 			precision = 7;
 		}
 
-		return QString::number(floatValue(), 'f', precision);
+		return QString::number(floatValue(), static_cast<char>(analogFormat), precision);
 
 	case TuningValueType::Double:
+		if (analogFormat == E::AnalogFormat::g_9_or_9e || analogFormat == E::AnalogFormat::G_9_or_9E)
+		{
+			return QString::number(doubleValue(), static_cast<char>(analogFormat));
+		}
+
 		if (precision < 0)
 		{
 			precision = 15;
 		}
-		return QString::number(doubleValue(), 'f', precision);
+
+		return QString::number(doubleValue(), static_cast<char>(analogFormat), precision);
 
 	default:
 		assert(false);

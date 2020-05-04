@@ -265,7 +265,7 @@ void TuningServiceWidget::reloadTuningSignalsList()
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 3), tsp.caption());
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 4), tsp.unit());
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 5), E::valueToString<E::SignalType>(tsp.signalType()));
-		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 6), tsp.tuningDefaultValue().toString(tsp.decimalPlaces()));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 6), tsp.tuningDefaultValue().toString());
 
 		for (int j = tuningSignalsStaticFieldsHeaderLabels.count(); j < m_tuningSignalsTabModel->columnCount(); j++)
 		{
@@ -295,11 +295,11 @@ void TuningServiceWidget::updateTuningSignalsState()
 
 	for (const TuningSignalState& tss : m_tcpClientSocket->tuningSignalStates())
 	{
-		int precision = m_tcpClientSocket->tuningSignalParams()[row].decimalPlaces();
+		//int precision = m_tcpClientSocket->tuningSignalParams()[row].decimalPlaces();
 
-		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 0), tss.value().toString(precision));
-		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 1), tss.lowBound().toString(precision));
-		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 2), tss.highBound().toString(precision));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 0), tss.value().toString());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 1), tss.lowBound().toString());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 2), tss.highBound().toString());
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 3), tss.valid() ? tr("Yes") : tr("No"));
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 4), (tss.outOfRange() && tss.value() < tss.lowBound())  ? tr("Yes") : tr("No"));
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 5), (tss.outOfRange() && tss.value() > tss.highBound())  ? tr("Yes") : tr("No"));

@@ -575,7 +575,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 		}
 	}
 
-	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, E::AnalogFormat::g_9_or_9e, precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -765,14 +765,7 @@ void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, co
 	l.push_back(asp.caption());
 	if (value.useValue() == true)
 	{
-		if (asp.isAnalog() == false)
-		{
-			l.push_back(value.value().toString());
-		}
-		else
-		{
-			l.push_back(value.value().toString(asp.precision()));
-		}
+		l.push_back(value.value().toString());
 	}
 	else
 	{

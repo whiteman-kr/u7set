@@ -39,8 +39,8 @@ namespace TuningLog
 
 		l << asp.equipmentId();
 		l << asp.customSignalId();
-		l << oldValue.toString(asp.precision());
-		l << newValue.toString(asp.precision());
+		l << oldValue.toString();
+		l << newValue.toString();
 
 		return LogFile::writeArray(l);
 	}
