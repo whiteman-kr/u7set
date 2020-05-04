@@ -93,7 +93,7 @@ windows build job:
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\sqldrivers\\qsqlpsql.dll \"%CI_PROJECT_DIR%/bin/release/sqldrivers/\""
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/printsupport\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
-    - "mkdir \"%CI_PROJECT_DIR%/bin/release/syles\""
+    - "mkdir \"%CI_PROJECT_DIR%/bin/release/styles\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\styles\\qwindowsvistastyle.dll \"%CI_PROJECT_DIR%/bin/release/styles/\""
 
 #Remove some files not requiered for releases
