@@ -1889,7 +1889,7 @@ namespace Builder
 			case E::SignalType::Discrete:
 				if (s == nullptr)
 				{
-					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal);
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, outPin.associatedIOs().size());
 				}
 				else
 				{

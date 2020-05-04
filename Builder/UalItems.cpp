@@ -2275,7 +2275,7 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal)
+	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal, int expectedReadCount)
 	{
 		if (ualItem == nullptr)
 		{
@@ -2297,12 +2297,12 @@ namespace Builder
 			return nullptr;
 		}
 
-		return privateCreateAutoSignal(ualItem, outPinUuid, templateOutAfbSignal.type(), analogFormat);
+		return privateCreateAutoSignal(ualItem, outPinUuid, templateOutAfbSignal.type(), analogFormat, expectedReadCount);
 	}
 
 	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal)
 	{
-		return privateCreateAutoSignal(ualItem, outPinUuid, templateSignal.signalType(), templateSignal.analogSignalFormat());
+		return privateCreateAutoSignal(ualItem, outPinUuid, templateSignal.signalType(), templateSignal.analogSignalFormat(), -1);
 	}
 
 	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
@@ -2546,76 +2546,6 @@ namespace Builder
 		m_signalToPinsMap.clear();
 	}
 
-	UalSignal* UalSignalsMap::privateCreateAutoSignal(const UalItem* ualItem,
-											   QUuid outPinUuid,
-											   E::SignalType signalType,
-											   E::AnalogAppSignalFormat analogFormat)
-	{
-		TEST_PTR_LOG_RETURN_NULLPTR(ualItem, m_log);
-
-		const LogicPin* outPin = ualItem->getPin(outPinUuid);
-
-		TEST_PTR_LOG_RETURN_NULLPTR(outPin, m_log);
-
-		QString signalID = QString("%1_%2_%3_%4").
-								arg(UalSignal::AUTO_SIGNAL_ID_PREFIX).
-								arg(m_compiler.lmEquipmentID()).
-								arg(ualItem->label()).
-								arg(outPin->caption());
-
-		signalID = signalID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
-
-		UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
-
-		if (ualSignal != nullptr)
-		{
-			// signal already in map
-			//
-			assert(false);
-			assert(m_pinToSignalMap.contains(outPinUuid) == false);
-
-			appendPinRefToSignal(outPinUuid, ualSignal);
-
-			return ualSignal;
-		}
-
-		// create new auto signal
-		//
-		ualSignal = new UalSignal;
-
-		Signal* autoSignalPtr = nullptr;
-
-		bool result = ualSignal->createAutoSignal(ualItem, signalID, signalType, analogFormat, &autoSignalPtr);
-
-		if (result == false)
-		{
-			DELETE_IF_NOT_NULL(autoSignalPtr);
-			delete ualSignal;
-			return nullptr;
-		}
-
-		result = insertNew(outPinUuid, ualSignal);
-
-		if (result == false)
-		{
-			DELETE_IF_NOT_NULL(autoSignalPtr);
-			delete ualSignal;
-			return nullptr;
-		}
-
-		if (autoSignalPtr != nullptr)
-		{
-			m_compiler.signalSet()->append(autoSignalPtr);
-		}
-		else
-		{
-			assert(false);
-		}
-
-		return ualSignal;
-	}
-
-
 	bool UalSignalsMap::getReport(QStringList& report) const
 	{
 		QStringList signalIDs;
@@ -2719,6 +2649,90 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	UalSignal* UalSignalsMap::privateCreateAutoSignal(const UalItem* ualItem,
+											   QUuid outPinUuid,
+											   E::SignalType signalType,
+											   E::AnalogAppSignalFormat analogFormat,
+											   int expectedReadCount)
+	{
+		TEST_PTR_LOG_RETURN_NULLPTR(ualItem, m_log);
+
+		const LogicPin* outPin = ualItem->getPin(outPinUuid);
+
+		TEST_PTR_LOG_RETURN_NULLPTR(outPin, m_log);
+
+		QString signalID = QString("%1_%2_%3_%4").
+								arg(UalSignal::AUTO_SIGNAL_ID_PREFIX).
+								arg(m_compiler.lmEquipmentID()).
+								arg(ualItem->label()).
+								arg(outPin->caption());
+
+		signalID = signalID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
+
+		UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
+
+		if (ualSignal != nullptr)
+		{
+			// signal already in map
+			//
+			assert(false);
+			assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+			appendPinRefToSignal(outPinUuid, ualSignal);
+
+			return ualSignal;
+		}
+
+		// create new auto signal
+		//
+		ualSignal = new UalSignal;
+
+		Signal* autoSignalPtr = nullptr;
+
+		bool result = ualSignal->createAutoSignal(ualItem, signalID, signalType, analogFormat, &autoSignalPtr);
+
+		if (result == false)
+		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
+			delete ualSignal;
+			return nullptr;
+		}
+
+		result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
+			delete ualSignal;
+			return nullptr;
+		}
+
+		if (autoSignalPtr != nullptr)
+		{
+			m_compiler.signalSet()->append(autoSignalPtr);
+		}
+		else
+		{
+			assert(false);
+		}
+
+		// signals heap support
+		//
+		if (expectedReadCount > 0)
+		{
+			if (ualSignal->isDiscrete() == true)
+			{
+				ualSignal->setHeapPlaced();
+
+				m_discreteSignalsHeap.appendItem(*ualSignal, expectedReadCount);
+			}
+		}
+		//
+		// signals heap support
+
+		return ualSignal;
 	}
 
 	bool UalSignalsMap::insertNew(QUuid pinUuid, UalSignal* newUalSignal)

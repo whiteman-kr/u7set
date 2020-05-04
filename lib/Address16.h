@@ -32,6 +32,7 @@ public:
 	void setBit(int bit);
 	int bit() const;
 
+	void setBitAddress(int bitAddress);
 	int bitAddress() const;
 
 	bool isValid() const;

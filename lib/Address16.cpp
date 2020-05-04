@@ -56,9 +56,15 @@ int Address16::bit() const
 	return m_bit;
 }
 
+void Address16::setBitAddress(int bitAddress)
+{
+	m_offset = bitAddress / SIZE_16BIT;
+	m_bit = bitAddress % SIZE_16BIT;
+}
+
 int Address16::bitAddress() const
 {
-	return m_offset * 16 + m_bit;
+	return m_offset * SIZE_16BIT + m_bit;
 }
 
 bool Address16::isValid() const
@@ -77,10 +83,7 @@ void Address16::addBit(int bitCount)
 {
 	assert(isValid() == true);
 
-	int totalBitCount = m_offset * 16 + m_bit + bitCount;
-
-	m_offset = totalBitCount / 16;
-	m_bit = totalBitCount % 16;
+	setBitAddress(bitAddress() + bitCount);
 }
 
 void Address16::add1Word()

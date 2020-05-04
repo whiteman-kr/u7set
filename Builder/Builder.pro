@@ -115,6 +115,7 @@ SOURCES += \
     Busses.cpp \
     OptoModule.cpp \
     RawDataDescription.cpp \
+    SignalsHeap.cpp \
     UalItems.cpp \
     ApplicationLogicCode.cpp \
     LmMemoryMap.cpp \
@@ -195,6 +196,7 @@ HEADERS += \
     ../lib/ConnectionsInfo.h \
     Builder.h \
     Loopbacks.h \
+    SignalsHeap.h \
     Stable.h \
     IssueLogger.h \
     BuildWorkerThread.h \

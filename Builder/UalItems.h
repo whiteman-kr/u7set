@@ -13,10 +13,10 @@
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/LogicSchema.h"
 
-
 #include "Parser.h"
 #include "ApplicationLogicCode.h"
 #include "Busses.h"
+#include "SignalsHeap.h"
 
 namespace Builder
 {
@@ -491,6 +491,9 @@ namespace Builder
 		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
 		bool isBus() const { return m_refSignals[0]->isBus(); }
 
+		void setHeapPlaced() { m_isHeapPlaced = true; }
+		bool isHeapPlaced() const { return m_isHeapPlaced; }
+
 		QString busTypeID() const { return m_refSignals[0]->busTypeID(); }
 
 		QString caption() const { return m_refSignals[0]->caption(); }
@@ -578,6 +581,7 @@ namespace Builder
 		bool addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, IssueLogger* log);
 
 	private:
+		bool m_isHeapPlaced = false;
 		const UalItem* m_ualItem = nullptr;
 
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
@@ -645,7 +649,7 @@ namespace Builder
 									 E::AnalogAppSignalFormat constAnalogFormat,
 									 QUuid outPinUuid);
 
-		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal);
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal, int expectedReadCount);
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal);
 
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
@@ -667,7 +671,8 @@ namespace Builder
 		UalSignal* privateCreateAutoSignal(const UalItem* ualItem,
 									QUuid outPinUuid,
 									E::SignalType signalType,
-									E::AnalogAppSignalFormat analogFormat);
+									E::AnalogAppSignalFormat analogFormat,
+									int expectedReadCount);
 
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
 		void appendPinRefToSignal(QUuid pinUuid, UalSignal* ualSignal);
@@ -688,6 +693,8 @@ namespace Builder
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
 		QHash<UalSignal*, QUuid> m_signalToPinsMap;
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
+
+		SignalsHeap m_discreteSignalsHeap;
 	};
 
 }
