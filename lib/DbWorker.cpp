@@ -344,6 +344,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0324.sql", "Upgrade to version 324, Rload_Ohm is added to configuration script of AIM-4PH and WAIM"},
 	{":/DatabaseUpgrade/Upgrade0325.sql", "Upgrade to version 325, Fixed AFB MAJ description, added err_* pins (22, 23)"},
 	{":/DatabaseUpgrade/Upgrade0326.sql", "Upgrade to version 326, Added UserProperties"},
+	{":/DatabaseUpgrade/Upgrade0327.sql", "Upgrade to version 327, Added function api.get_user_property_list"},
 };
 
 int DbWorker::counter = 0;
@@ -2270,6 +2271,64 @@ void DbWorker::slot_getUserProperty(QString propertyName, QString* out)
 		assert(result);
 
 		*out = query.value(0).toString();
+	}
+
+	return;
+}
+
+void DbWorker::slot_getUserPropertyList(QString propertyTemplate, QStringList* out)
+{
+	// Init automatic variable
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (propertyTemplate.isEmpty() == true)
+	{
+		propertyTemplate = QString("%");
+	}
+
+	if (out == nullptr)
+	{
+		assert(out);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// --
+	//
+	QSqlQuery query(db);
+
+	query.prepare("SELECT * FROM api.get_user_property_list(:sessionkey, :propertyName);");
+	query.bindValue(":sessionkey", sessionKey());
+	query.bindValue(":propertyName", propertyTemplate);
+
+	bool result = query.exec();
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot get user property list, template %1, error: %2").arg(propertyTemplate).arg(db.lastError().text()));
+		return;
+	}
+
+	out->clear();
+	out->reserve(query.size());
+
+	while (query.next())
+	{
+		*out << out->value(0);
 	}
 
 	return;

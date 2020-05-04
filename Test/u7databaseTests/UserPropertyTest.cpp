@@ -165,3 +165,52 @@ void UserPropertyTests::get_user_property()
 
 	return;
 }
+
+void UserPropertyTests::get_user_property_list()
+{
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_projectAdministratorName, m_projectAdministratorPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// Create a user
+	//
+	createUser(session_key, "user_test_list", "P2ssw0rd");
+
+	bool ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// login as user,
+	// create a set of properties,
+	// get list
+	//
+	session_key = logIn("user_test_list", "P2ssw0rd");
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	QSqlQuery query;
+	ok = query.exec(QString("SELECT api.set_user_property('%1', 'property11', 'p1');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT api.set_user_property('%1', 'prop20', 'p1');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT api.set_user_property('%1', 'property31', 'p1');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT api.get_user_property_list('%1', 'proper%');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY(query.size() == 2);
+	QVERIFY(query.value(0).toString() == "property11");
+
+	query.next();
+	QVERIFY(query.value(0).toString() == "property31");
+
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
+}

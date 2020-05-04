@@ -1,7 +1,4 @@
 
-
-
-
 test Logic01,tests test1
 schema LOGIC_TEST
 compatible MODULE_LM1SF40
@@ -171,6 +168,65 @@ check #OUT007 == 0
 check #OUT008 == 0
 check #OUT009 == 1
 
+endtest
+
+
+test Logic05,tests test5
+schema LOGIC_TEST
+compatible MODULE_LM1SF40
+
+set #DSCR017 = 0
+set #DSCR018 = 0
+set #DSCR019 = 0
+set #DSCR020 = 0
+check #OUT010 == 1
+check #OUT011 == 0
+
+
+set #DSCR017 = 1
+set #DSCR018 = 0
+set #DSCR019 = 0
+set #DSCR020 = 0
+check #OUT010 == 1
+check #OUT011 == 0
+
+
+set #DSCR017 = 1
+set #DSCR018 = 1
+set #DSCR019 = 0
+set #DSCR020 = 0
+check #OUT010 == 1
+check #OUT011 == 0
+
+set #DSCR017 = 1
+set #DSCR018 = 1
+set #DSCR019 = 1
+set #DSCR020 = 0
+check #OUT010 == 1
+check #OUT011 == 0
+
+set #DSCR017 = 1
+set #DSCR018 = 1
+set #DSCR019 = 1
+set #DSCR020 = 1
+check #OUT010 == 1
+check #OUT011 == 1
+
+set #DSCR017 = 0
+set #DSCR018 = 1
+set #DSCR019 = 0
+set #DSCR020 = 1
+check #OUT010 == 1
+check #OUT011 == 0
+
+set #DSCR017 = 0
+set #DSCR018 = 0
+set #DSCR019 = 0
+set #DSCR020 = 1
+check #OUT010 == 1
+check #OUT011 == 0
 
 endtest
+
+
 
