@@ -220,8 +220,7 @@ namespace Tuning
 		TuningSourceHandler(const TuningServiceSettings& settings,
 						   const TuningSource& source,
 						   CircularLoggerShared logger,
-						   CircularLoggerShared tuningLog,
-							QObject* parent);
+						   CircularLoggerShared tuningLog);
 		~TuningSourceHandler();
 
 		quint32 sourceIP() const;

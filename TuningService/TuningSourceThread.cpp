@@ -221,12 +221,11 @@ namespace Tuning
 	TuningSourceHandler::TuningSourceHandler(const TuningServiceSettings& settings,
 										   const TuningSource& source,
 										   CircularLoggerShared logger,
-										   CircularLoggerShared tuningLog,
-										   QObject* parent) :
+										   CircularLoggerShared tuningLog) :
 		m_logger(logger),
 		m_tuningLog(tuningLog),
-		m_socket(parent),
-		m_replyQueue(parent, 10)
+		m_socket(nullptr),
+		m_replyQueue(nullptr, 10)
 {
 		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
@@ -720,7 +719,7 @@ namespace Tuning
 
 		request.calcCRC64();
 
-		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
+		qint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
 											  sizeof(request),
 											  m_sourceIP.address(),
 											  m_sourceIP.port());
@@ -742,7 +741,7 @@ namespace Tuning
 			return;
 		}
 
-		if (sent < sizeof(m_request))
+		if (sent < static_cast<qint64>(sizeof(m_request)))
 		{
 			m_stat.errPartialSent++;
 		}
@@ -1655,7 +1654,7 @@ namespace Tuning
 	{
 		AUTO_LOCK(m_handlerMutex);
 
-		m_handler = new TuningSourceHandler(m_settings, m_source, m_logger, m_tuningLog, this);
+		m_handler = new TuningSourceHandler(m_settings, m_source, m_logger, m_tuningLog);
 
 		m_handler->startHandler();
 
