@@ -151,7 +151,7 @@ namespace Sim
 
 				for (TrendSignal& ts : trend.trendSignals)
 				{
-					if (ts.equipmentIdHash == lmHash)
+					if (ts.lmEquipmentIdHash == lmHash)
 					{
 						// Fetching appsignals states from ram is cause locking m_ramLock for read,
 						// so it is nested lock m_trendMutex -> m_trendMutex.
@@ -199,15 +199,18 @@ namespace Sim
 
 		auto createTrendSignal = [this](Hash signalHash) -> TrendSignal
 		{
-			AppSignalParam sp = this->signalParam(signalHash, nullptr);
+			std::optional<Signal> sp = this->signalParamExt(signalHash);
 
 			TrendSignal ts;
 
-			ts.appSignalId = sp.appSignalId();
-			ts.appSignalHash = signalHash;
-			ts.equipmentId = sp.equipmentId();
-			ts.equipmentIdHash = ::calcHash(sp.equipmentId());
-			ts.states.reserve(100);
+			if (sp.has_value() == true)
+			{
+				ts.appSignalId = sp->appSignalID();
+				ts.appSignalHash = signalHash;
+				ts.lmEquipmentId = sp->lmEquipmentID();
+				ts.lmEquipmentIdHash = ::calcHash(sp->lmEquipmentID());
+				ts.states.reserve(100);
+			}
 
 			return ts;
 		};
@@ -217,7 +220,7 @@ namespace Sim
 		QMutexLocker ml(&m_trendMutex);
 
 		bool trendIsPresent = false;
-		for (auto& smTrend : m_trends)
+		for (Trend& smTrend : m_trends)
 		{
 			if (smTrend.trendId == trendId)
 			{
@@ -342,64 +345,12 @@ namespace Sim
 		}
 	}
 
-	std::vector<AppSignalParam> AppSignalManager::signalList() const
+	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found, bool applyOverride) const
 	{
-		std::vector<AppSignalParam> result;
-
-		{
-			QReadLocker rl(&m_signalParamLock);
-
-			result.reserve(m_signalParams.size());
-
-			for (const auto&[hash, sp] : m_signalParams)
-			{
-				assert(hash == sp.hash());
-				Q_UNUSED(hash);
-
-				result.push_back(sp);
-			}
-		}
-
-		return result;
+		return signalState(::calcHash(appSignalId), found, applyOverride);
 	}
 
-	bool AppSignalManager::signalExists(Hash hash) const
-	{
-		QReadLocker rl(&m_signalParamLock);
-		return m_signalParams.find(hash) != m_signalParams.end();
-	}
-
-	bool AppSignalManager::signalExists(const QString& appSignalId) const
-	{
-		return signalExists(::calcHash(appSignalId));
-	}
-
-	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
-	{
-		QReadLocker rl(&m_signalParamLock);
-
-		auto it = m_signalParams.find(signalHash);
-
-		if (found != nullptr)
-		{
-			*found = it != m_signalParams.end();
-		}
-
-		if (it == m_signalParams.end())
-		{
-static const AppSignalParam dummy;
-			return dummy;
-		}
-
-		return it->second;
-	}
-
-	AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
-	{
-		return signalParam(::calcHash(appSignalId), found);
-	}
-
-	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
+	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found, bool applyOverride) const
 	{
 		QString appSignalId;
 		QString logicModuleId;
@@ -486,6 +437,13 @@ static const AppSignalParam dummy;
 				return state;
 			}
 
+			if (ualAddress.isValid() == false)
+			{
+				// This is can be unused signal, in this case it has non valid addresses
+				//
+				return state;
+			}
+
 			switch (type)
 			{
 			case E::SignalType::Analog:
@@ -503,7 +461,7 @@ static const AppSignalParam dummy;
 							case 32:
 								{
 									float data = 0;
-									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder);
+									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder, applyOverride);
 										ok == false)
 									{
 										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
@@ -529,7 +487,7 @@ static const AppSignalParam dummy;
 							case 32:
 								{
 									qint32 data = 0;
-									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder);
+									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder, applyOverride);
 										ok == false)
 									{
 										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
@@ -559,7 +517,7 @@ static const AppSignalParam dummy;
 			case E::SignalType::Discrete:
 				{
 					quint16 data = 0;
-					bool ok = ram.readBit(ualAddress.offset(), ualAddress.bit(), &data, byteOrder);
+					bool ok = ram.readBit(ualAddress.offset(), ualAddress.bit(), &data, byteOrder, applyOverride);
 
 					if (ok == false)
 					{
@@ -583,6 +541,68 @@ static const AppSignalParam dummy;
 		}
 
 		return state;
+	}
+
+	std::vector<AppSignalParam> AppSignalManager::signalList() const
+	{
+		std::vector<AppSignalParam> result;
+
+		{
+			QReadLocker rl(&m_signalParamLock);
+
+			result.reserve(m_signalParams.size());
+
+			for (const auto&[hash, sp] : m_signalParams)
+			{
+				assert(hash == sp.hash());
+				Q_UNUSED(hash);
+
+				result.push_back(sp);
+			}
+		}
+
+		return result;
+	}
+
+	bool AppSignalManager::signalExists(Hash hash) const
+	{
+		QReadLocker rl(&m_signalParamLock);
+		return m_signalParams.find(hash) != m_signalParams.end();
+	}
+
+	bool AppSignalManager::signalExists(const QString& appSignalId) const
+	{
+		return signalExists(::calcHash(appSignalId));
+	}
+
+	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
+	{
+		QReadLocker rl(&m_signalParamLock);
+
+		auto it = m_signalParams.find(signalHash);
+
+		if (found != nullptr)
+		{
+			*found = it != m_signalParams.end();
+		}
+
+		if (it == m_signalParams.end())
+		{
+static const AppSignalParam dummy;
+			return dummy;
+		}
+
+		return it->second;
+	}
+
+	AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
+	{
+		return signalParam(::calcHash(appSignalId), found);
+	}
+
+	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
+	{
+		return signalState(signalHash, found, true);
 	 }
 
 	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const

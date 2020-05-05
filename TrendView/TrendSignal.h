@@ -85,12 +85,12 @@ namespace TrendLib
 		{
 			switch (timeType)
 			{
-			case E::TimeType::Local:	return this->local;
-			case E::TimeType::System:	return this->system;
-			case E::TimeType::Plant:	return this->plant;
+			case E::TimeType::Local:	return TimeStamp{this->local};
+			case E::TimeType::System:	return TimeStamp{this->system};
+			case E::TimeType::Plant:	return TimeStamp{this->plant};
 			default:
 				assert(false);
-				return this->local;
+				return TimeStamp{this->local};
 			}
 		}
 	};
@@ -153,6 +153,12 @@ namespace TrendLib
 		bool load(const Proto::TrendArchive& message);
 	};
 
+	struct TrendViewLimits
+	{
+		double highLimit = 1;
+		double lowLimit = 0;
+	};
+
 	class TrendSignalParam
 	{
 	public:
@@ -193,6 +199,9 @@ namespace TrendLib
 		QString unit() const;
 		void setUnit(const QString& value);
 
+		E::AnalogFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogFormat analogFormat);
+
 		int precision() const;
 		void setPrecision(int value);
 
@@ -205,11 +214,11 @@ namespace TrendLib
 		double lowLimit() const;
 		void setLowLimit(double value);
 
-		double viewHighLimit() const;
-		void setViewHighLimit(double value);
+		double viewHighLimit(E::TrendScaleType scaleType) const;
+		void setViewHighLimit(E::TrendScaleType scaleType, double value);
 
-		double viewLowLimit() const;
-		void setViewLowLimit(double value);
+		double viewLowLimit(E::TrendScaleType scaleType) const;
+		void setViewLowLimit(E::TrendScaleType scaleType, double value);
 
 		TrendColor color() const;
 		void setColor(const TrendColor& value);
@@ -232,6 +241,8 @@ namespace TrendLib
 
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
+
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
 		int m_precision = 0;
 
 		double m_lineWeight = 0;		// 0 is cosmetic pen
@@ -239,8 +250,7 @@ namespace TrendLib
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
 
-		double m_viewHighLimit = 1.0;	// Current view limits for the signals
-		double m_viewLowLimit = 0;
+		std::map<E::TrendScaleType, TrendViewLimits> m_viewLimits; // Current view limits for signals for different scales
 
 		TrendColor m_color = 0xFF000000;	// Black color
 

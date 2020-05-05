@@ -40,16 +40,16 @@ namespace VFrame30
 	{
 	public:
 		virtual double left() const = 0;
-		virtual void setLeft(const double& value) = 0;
+		virtual void setLeft(double value) = 0;
 
 		virtual double top() const = 0;
-		virtual void setTop(const double& value) = 0;
+		virtual void setTop(double value) = 0;
 
 		virtual double width() const = 0;
-		virtual void setWidth(const double& value) = 0;
+		virtual void setWidth(double value) = 0;
 
 		virtual double height() const = 0;
-		virtual void setHeight(const double& value) = 0;
+		virtual void setHeight(double value) = 0;
 	};
 
 	// Interface IPointList, for storing and restoring point list
@@ -214,16 +214,16 @@ namespace VFrame30
 		//
 	public:
 		virtual double left() const override;
-		virtual void setLeft(const double& value) override;
+		virtual void setLeft(double value) override;
 
 		virtual double top() const override;
-		virtual void setTop(const double& value) override;
+		virtual void setTop(double value) override;
 
 		virtual double width() const override;
-		virtual void setWidth(const double& value) override;
+		virtual void setWidth(double value) override;
 
 		virtual double height() const override;
-		virtual void setHeight(const double& value) override;
+		virtual void setHeight(double value) override;
 
 		// IPointList implementation
 		//
@@ -270,11 +270,11 @@ namespace VFrame30
 		bool isControl() const;
 
 		bool isLocked() const;
-		void setLocked(const bool& locked);
+		void setLocked(bool locked);
 
 		bool isCommented() const;
 		bool commented() const;
-		void setCommented(const bool& value);
+		void setCommented(bool value);
 
 		QUuid guid() const;
 		void setGuid(const QUuid& guid);
@@ -289,16 +289,16 @@ namespace VFrame30
 		void setLabel(const QString& value);
 
 		E::TextPos labelPos() const;
-		void setLabelPos(const E::TextPos& value);
+		void setLabelPos(E::TextPos value);
 
 		bool acceptClick() const;
-		void setAcceptClick(const bool& value);
+		void setAcceptClick(bool value);
 
 		QString clickScript() const;
-		void setClickScript(const QString& value);
+		void setClickScript(QString value);
 
 		QString preDrawScript() const;
-		void setPreDrawScript(const QString& value);
+		void setPreDrawScript(QString value);
 
 		bool blinkPhase() const;
 

@@ -562,7 +562,7 @@ namespace VFrame30
 		return val;
 	}
 	
-	void PosConnectionImpl::setLeft(const double&)
+	void PosConnectionImpl::setLeft(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
@@ -595,7 +595,7 @@ namespace VFrame30
 		return val;
 	}
 	
-	void PosConnectionImpl::setTop(const double&)
+	void PosConnectionImpl::setTop(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
@@ -632,7 +632,7 @@ namespace VFrame30
 		return val;
 	}
 	
-	void PosConnectionImpl::setWidth(const double&)
+	void PosConnectionImpl::setWidth(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
@@ -669,7 +669,7 @@ namespace VFrame30
 		return val;
 	}
 
-	void PosConnectionImpl::setHeight(const double&)
+	void PosConnectionImpl::setHeight(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//

@@ -63,19 +63,19 @@ namespace Sim
 		bool clear();
 
 		bool writeBuffer(quint32 offsetW, const QByteArray& data) noexcept;
-		bool readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data) const noexcept;
+		bool readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data, bool applyOverride) const noexcept;
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
-		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept;
+		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
 		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder) noexcept;
-		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const noexcept;
+		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
 		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder) noexcept;
-		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const noexcept;
+		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
 		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept;
-		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const noexcept;
+		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
 		[[nodiscard]] const QByteArray& data() const noexcept;
 		[[nodiscard]] const std::vector<OverrideRamRecord>& overrideData() const noexcept;
@@ -87,7 +87,7 @@ namespace Sim
 		bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept;
 
 		template<typename TYPE>
-		bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const noexcept;
+		bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
 		void applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept;
 
@@ -134,35 +134,38 @@ namespace Sim
 		bool clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access);
 
 		bool writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const QByteArray& data) noexcept;
-		bool readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, QByteArray* data) noexcept;
+		bool readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, QByteArray* data, bool applyOverride = true) noexcept;
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
-		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder) const noexcept;
+		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride = true) const noexcept;
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
-		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const;
+		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride = true) const;
 
 		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder) noexcept;
-		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const noexcept;
+		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, bool applyOverride = true) const noexcept;
 
 		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
-		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access) const;
+		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride = true) const;
 
 		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder);
-		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const;
+		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder, bool applyOverride = true) const;
+
+		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
+		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride = true) const;
 
 		bool writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder);
-		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder) const;
+		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride = true) const;
 
 		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder);
-		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const;
+		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, bool applyOverride = true) const;
 
 	private:
 		[[nodiscard]] RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept;
 		[[nodiscard]] const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept;
 
 	public:
-		void updateOverrideData(const QString& equipmentId, const Sim::OverrideSignals* overrideSignals);
+		void updateOverrideData(const QString& lmEquipmentId, const Sim::OverrideSignals* overrideSignals);
 
 	private:
 		// Pay attention to copy operator

@@ -837,7 +837,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 						}
 
 						writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-									  .arg(m_signals->newValue(arrivedState.hash()).toString(param.precision()))
+									  .arg(m_signals->newValue(arrivedState.hash()).toString())
 									  .arg(param.customSignalId())
 									  .arg(param.caption())
 									  .arg(param.equipmentId())

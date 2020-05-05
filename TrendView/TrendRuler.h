@@ -25,7 +25,7 @@ namespace TrendLib
 		//
 	public:
 		const TimeStamp& timeStamp() const;
-		void setTimeStamp(const TimeStamp& value, quint64 step);
+		void setTimeStamp(const TimeStamp& value, qint64 step);
 
 		bool isShowRuler() const;
 		void setShowRuler(bool value);

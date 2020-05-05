@@ -345,7 +345,7 @@ private:
 template <typename TYPE,
 		  typename CLASS,
 		  TYPE(CLASS::*get)() const,
-		  void(CLASS::*set)(const TYPE&)>
+		  void(CLASS::*set)(TYPE)>
 class PropertyTypedValue final : public Property
 {
 
@@ -1592,7 +1592,7 @@ public:
 	template <typename TYPE,
 			  typename CLASS,
 			  TYPE(CLASS::*get)() const,
-			  void(CLASS::*set)(const TYPE&)>
+			  void(CLASS::*set)(TYPE)>
 	auto addProperty(const QString& caption, const QString& category, bool visible)
 	{
 		static_assert(get != nullptr);

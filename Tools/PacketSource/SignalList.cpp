@@ -92,7 +92,25 @@ QVariant SignalTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::TextAlignmentRole)
 	{
-		return Qt::AlignCenter;
+		QVariant result = Qt::AlignCenter;
+
+		switch (column)
+		{
+			case SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_STATE:			result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_ADB:			result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_INOUT:			result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_FORMAT:			result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_STATE_OFFSET:	result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_STATE_BIT:		result = Qt::AlignCenter;	break;
+			default:								assert(0);
+		}
+
+		return result;
 	}
 
 	if (role == Qt::TextColorRole)

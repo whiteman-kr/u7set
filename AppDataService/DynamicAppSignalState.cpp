@@ -119,7 +119,6 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 	curState.flags.stateAvailable = 1;
 
-
 	// update validity flag
 
 	bool result = false;
@@ -143,6 +142,11 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 	RETURN_IF_FALSE(result);
 
+/*	if (m_prevValidity == validity && m_prevValue == value)
+	{
+		return false;
+	}*/
+
 	curState.value = value;
 
 	//
@@ -160,7 +164,10 @@ bool DynamicAppSignalState::setState(const Times& time,
 					statesQueue.pushAutoPoint(prevState, m_archive, thread);
 				}
 
-				rtSessionsProcessing(prevState, true, thread);
+				if (m_hasRtSessions == true)
+				{
+					rtSessionsProcessing(prevState, true, thread);
+				}
 
 				m_prevStateIsStored = true;
 			}
@@ -188,7 +195,10 @@ bool DynamicAppSignalState::setState(const Times& time,
 				statesQueue.pushAutoPoint(tmpState, m_archive, thread);
 			}
 
-			rtSessionsProcessing(tmpState, true, thread);
+			if (m_hasRtSessions == true)
+			{
+				rtSessionsProcessing(tmpState, true, thread);
+			}
 		}
 		else
 		{
@@ -374,7 +384,10 @@ void DynamicAppSignalState::setUnavailable(const Times& time,
 
 		statesQueue.pushAutoPoint(prevState, m_archive, thread);
 
-		rtSessionsProcessing(prevState, true, thread);
+		if (m_hasRtSessions == true)
+		{
+			rtSessionsProcessing(prevState, true, thread);
+		}
 
 		m_prevStateIsStored = true;
 	}
@@ -519,12 +532,7 @@ void DynamicAppSignalState::setRtSessionSamplePeriodCounter(Hash signalHash,
 
 void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread)
 {
-	if (m_hasRtSessions == false)
-	{
-		return;
-	}
-
-//	QThread* thread = QThread::currentThread();
+	Q_ASSERT(m_hasRtSessions == true);
 
 	takeRtProcessingOwnership(thread);
 

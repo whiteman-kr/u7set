@@ -50,8 +50,8 @@ signals:
 	// Slots
 	//
 public slots:
-	void contextMenuRequested(const QPoint &pos);
-	void signalContextMenu(const QStringList& signalList);
+	void contextMenuRequested(const QPoint& pos);
+	void signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals);
 	void signalInfo(QString appSignalId);
 
 	// Properties

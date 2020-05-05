@@ -48,8 +48,10 @@ namespace Sim
 		}
 	}
 
-	bool CommandProcessor::updatePlatformInterfaceState()
+	bool CommandProcessor::updatePlatformInterfaceState(std::chrono::microseconds currentTime)
 	{
+		Q_UNUSED(currentTime);
+
 		// Must be implemented in derived class
 		//
 		Q_ASSERT(false);
@@ -105,7 +107,9 @@ namespace Sim
 
 		if (pinOpCode != -1 && afb.pinExists(pinOpCode) == false)
 		{
-			 SimException::raise(QString("AfbComponent does not have pin %1").arg(pinOpCode));
+			 SimException::raise(QString("AfbComponent %1 does not have pin %2")
+									.arg(opCode)
+									.arg(pinOpCode));
 		}
 
 		return afb;

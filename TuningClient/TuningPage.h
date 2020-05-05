@@ -126,6 +126,8 @@ private slots:
 
 	void slot_restoreValuesFromExistingFilter();
 
+	void slot_setAnalogFormat(E::AnalogFormat analogFormat);
+
 public slots:
 
 	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
@@ -214,7 +216,6 @@ private:
 	TuningPageColumnsWidth m_columnWidthStorage;
 
 	const QString m_autoFilterCaption = tr("Auto-Created Filters");
-
 };
 
 #endif // TUNINGPAGE_H

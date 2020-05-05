@@ -47,7 +47,7 @@ TrendSlider::TrendSlider(TrendLib::TrendRulerSet* rulerSet) :
 
 bool TrendSlider::isTimeInRange(const TimeStamp& value) const
 {
-	return value >= m_min && value <= m_max;
+	return value.timeStamp >= m_min && value.timeStamp <= m_max;
 }
 
 void TrendSlider::setTimeClicked()

@@ -117,6 +117,30 @@ bool TestDbBase::createProjectDb()
 	return true;
 }
 
+int TestDbBase::createUser(QString sessionKey, QString username, QString password)
+{
+	QSqlQuery query;
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.create_user('%1', '%2', '', '', '%3', false, false)")
+							.arg(sessionKey)
+							.arg(username)
+							.arg(password));
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	ok = query.next();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	int user_id = query.value(0).toInt();
+	return user_id;
+}
+
 QString TestDbBase::logIn(User user)
 {
 	return logIn(user.username, user.password);

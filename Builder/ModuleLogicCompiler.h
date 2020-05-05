@@ -234,6 +234,7 @@ namespace Builder
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
 
+		bool checkLoopbacks();
 		bool linkLoopbackTargets();
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 

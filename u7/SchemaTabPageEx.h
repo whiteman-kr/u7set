@@ -198,7 +198,7 @@ public slots:
 	void slot_doubleClicked(const QModelIndex& index);
 
 public slots:
-	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 
 	// Public properties
 	//
@@ -386,9 +386,16 @@ public:
 
 	void refreshControlTabPage();
 
+protected:
+	virtual bool eventFilter(QObject* object, QEvent* event) override;
+
 public slots:
 	void projectOpened();
 	void projectClosed();
+
+protected slots:
+	void tabCloseRequested(int index);
+	void currentTabChanged(int index);
 
 	// Data
 	//
@@ -398,6 +405,8 @@ protected:
 
 	QString m_fileExtension;
 	QString m_templFileExtension;
+
+	QAction* m_showControlTabAccelerator = nullptr;
 };
 
 
@@ -439,11 +448,11 @@ signals:
 
 public slots:
 	void detachOrAttachWindow();
+	void closeTab();
 
 protected slots:
 	void projectClosed();
 
-	void closeTab();
 	void modifiedChanged(bool modified);
 
 	void checkInFile();
@@ -487,4 +496,51 @@ private:
 	EditSchemaWidget* m_schemaWidget = nullptr;
 	QToolBar* m_toolBar = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
+};
+
+
+
+class SchemaTabBar : public QTabBar
+{
+	Q_OBJECT
+
+public:
+	SchemaTabBar(QWidget* parent) : QTabBar(parent)
+	{
+	}
+
+protected:
+	void paintEvent(QPaintEvent* pe) override
+	{
+		QTabBar::paintEvent(pe);
+		QPainter p(this);
+
+		int dpiY = p.device()->logicalDpiY();
+		int lineWeight = (dpiY > 100) ? 2 : 1;
+
+		int index = currentIndex();
+
+		if (index != -1)
+		{
+			QRect tabrect = tabRect(index);
+
+			p.setPen(QPen(QBrush{0x000080}, lineWeight));
+			p.drawLine(tabrect.left(), tabrect.top() + lineWeight / 2,
+					   tabrect.right(), tabrect.top() + lineWeight / 2);
+		}
+	}
+
+};
+
+
+class SchemaTabWidget : public QTabWidget
+{
+	Q_OBJECT
+
+public:
+	SchemaTabWidget(QWidget* parent) :
+		QTabWidget(parent)
+	{
+		setTabBar(new SchemaTabBar{this});
+	}
 };

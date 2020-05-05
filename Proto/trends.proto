@@ -18,25 +18,36 @@ message TrendArchive
 	repeated TrendArchiveHour hours = 10;
 }
 
+message TrendViewLimit
+{
+	optional int32 type = 1;  		// enum TrendLib::TrendScaleType
+	optional double high_limit = 2;
+	optional double low_limit = 3;
+}
+
 message TrendSignalParam
 {
-    optional string signal_id = 2;
+	optional string signal_id = 2;
 	optional string app_signal_id = 3;
 	optional string caption = 4;
 	optional string equipment_id = 5;
 
-    optional int32 type = 10;				// enum E::SignalType
+	optional int32 type = 10;				// enum E::SignalType
 	optional string unit = 11;
 	optional int32 precision = 12;
 
-    optional double line_weight = 19 [default = 0];
+	optional double line_weight = 19 [default = 0];
 
-    optional double high_limit = 20;
+	optional double high_limit = 20;
 	optional double low_limit = 21;
-	optional double view_high_limit = 31;
-	optional double view_low_limit = 32;
 
-    optional uint32 color = 40;
+	optional double view_high_limit = 31;	// Left for compatibility
+	optional double view_low_limit = 32;    // Left for compatibility
+
+	repeated TrendViewLimit view_limits = 33;	// Replaces 31 and 32
+
+	optional uint32 color = 40;
+	optional string analog_format = 41 [default = "g_9_or_9e"];
 }
 
 message TrendSignalSet

@@ -90,6 +90,10 @@ public slots:
     void slot_getProjectProperty(QString propertyName, QString* out);
     void getProjectProperty_worker(QString propertyName, QString* out);
 
+	void slot_setUserProperty(QString propertyName, QString propertyValue);
+	void slot_getUserProperty(QString propertyName, QString* out);
+	void slot_getUserPropertyList(QString propertyTemplate, QStringList* out);
+
     // User management
     //
     void slot_createUser(DbUser user);

@@ -821,7 +821,7 @@ namespace VFrame30
 
 				if (stateSignal.isAcquired() == true)
 				{
-					alerted = schemaItem->getSignalState(drawParam, stateSignal.appSignalID());
+					value = schemaItem->getSignalState(drawParam, stateSignal.appSignalID());
 				}
 
 				// if setting outputs state is not valid it is also indicated as alerted

@@ -2404,7 +2404,9 @@ void EditSchemaWidget::createActions()
 	//
 	m_snapToGridAction = new QAction(tr("Snap To Grid"), this);
 	m_snapToGridAction->setEnabled(true);
-	//connect(m_snapToGridAction, &QAction::triggered, this, &EditSchemaWidget::zoom100);
+	m_snapToGridAction->setCheckable(true);
+	m_snapToGridAction->setChecked(snapToGrid());
+	connect(m_snapToGridAction, &QAction::toggled, this, &EditSchemaWidget::snapToGridToggled);
 
 
 	// High Level Menu
@@ -2631,8 +2633,12 @@ void EditSchemaWidget::createActions()
 		m_viewMenu->addAction(m_zoomInAction);
 		m_viewMenu->addAction(m_zoomOutAction);
 		m_viewMenu->addAction(m_zoom100Action);
+
+	if (schema()->unit() == VFrame30::SchemaUnit::Display)
+	{
 		m_viewMenu->addAction(m_viewSeparatorAction0);
 		m_viewMenu->addAction(m_snapToGridAction);
+	}
 
 	return;
 }
@@ -5636,6 +5642,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	QList<QAction*> actions;
 
 	actions << m_fileAction;
+	actions << m_viewAction;
 	actions << m_addAction;
 	actions << m_editAction;
 	actions << m_orderAction;
@@ -5794,6 +5801,12 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	actions << m_propertiesAction;
 
 	menu.exec(actions, mapToGlobal(pos), 0, this);
+	return;
+}
+
+void EditSchemaWidget::snapToGridToggled(bool state)
+{
+	setSnapToGrid(state);
 	return;
 }
 
@@ -6967,7 +6980,6 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
 	LexerJavaScript lexer;
-	preDrawScriptEdit->setLexer(&lexer);
 	preDrawScriptEdit->setText(preDrawScript);
 	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
 	preDrawScriptEdit->setMarginWidth(0, 40);
@@ -6977,9 +6989,10 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 #else
 	preDrawScriptEdit->setFont(QFont("Courier"));
 #endif
-
 	preDrawScriptEdit->setTabWidth(4);
 	preDrawScriptEdit->setAutoIndent(true);
+	lexer.setFont(preDrawScriptEdit->font());
+	preDrawScriptEdit->setLexer(&lexer);
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 
@@ -7117,20 +7130,23 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
 	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
-	LexerJavaScript lexer;
-	preDrawScriptEdit->setLexer(&lexer);
 	preDrawScriptEdit->setText(preDrawScript);
 	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
 	preDrawScriptEdit->setMarginWidth(0, 40);
 
 #if defined(Q_OS_WIN)
-	preDrawScriptEdit->setFont(QFont("Consolas"));
+	QFont f = QFont("Consolas");
 #else
-	preDrawScriptEdit->setFont(QFont("Courier"));
+	QFont f = QFont("Courier");
 #endif
 
+	preDrawScriptEdit->setFont(f);
 	preDrawScriptEdit->setTabWidth(4);
 	preDrawScriptEdit->setAutoIndent(true);
+
+	LexerJavaScript lexer;
+	lexer.setFont(f);
+	preDrawScriptEdit->setLexer(&lexer);
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 
@@ -8669,7 +8685,7 @@ void EditSchemaWidget::onLeftKey(QKeyEvent* e)
 
 	if (itemsForMove.empty() == false)
 	{
-		double dif = -schemaView()->schema()->gridSize();
+		double dif = snapToGrid() ? -schemaView()->schema()->gridSize() : -1;
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
@@ -8718,7 +8734,7 @@ void EditSchemaWidget::onRightKey(QKeyEvent* e)
 
 	if (itemsForMove.empty() == false)
 	{
-		double dif = schemaView()->schema()->gridSize();
+		double dif = snapToGrid() ? schemaView()->schema()->gridSize() : 1;
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
@@ -8766,7 +8782,7 @@ void EditSchemaWidget::onUpKey(QKeyEvent* e)
 
 	if (itemsForMove.empty() == false)
 	{
-		double dif = -schemaView()->schema()->gridSize();
+		double dif = snapToGrid() ? -schemaView()->schema()->gridSize() : -1;
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
@@ -8814,7 +8830,7 @@ void EditSchemaWidget::onDownKey(QKeyEvent* e)
 
 	if (itemsForMove.empty() == false)
 	{
-		double dif = schemaView()->schema()->gridSize();
+		double dif = snapToGrid() ? schemaView()->schema()->gridSize() : 1;
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);

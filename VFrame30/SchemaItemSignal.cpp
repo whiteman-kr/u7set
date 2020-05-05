@@ -172,6 +172,8 @@ namespace VFrame30
 	{
 		if (multiChannel() == true)
 		{
+			// Set pin captions
+			//
 			QString pinCaption = QString::number(m_appSignalIds.size());
 
 			std::vector<VFrame30::AfbPin>* ins = const_cast<SchemaItemSignal*>(this)->mutableInputs();
@@ -185,6 +187,23 @@ namespace VFrame30
 			for (VFrame30::AfbPin& pin : *outs)
 			{
 				pin.setCaption(pinCaption);
+			}
+		}
+		else
+		{
+			// Clear pin captions (they could be set if signal before was multichannel)
+			//
+			std::vector<VFrame30::AfbPin>* ins = const_cast<SchemaItemSignal*>(this)->mutableInputs();
+			std::vector<VFrame30::AfbPin>* outs = const_cast<SchemaItemSignal*>(this)->mutableOutputs();
+
+			for (VFrame30::AfbPin& pin : *ins)
+			{
+				pin.setCaption({});
+			}
+
+			for (VFrame30::AfbPin& pin : *outs)
+			{
+				pin.setCaption({});
 			}
 		}
 
@@ -212,7 +231,7 @@ namespace VFrame30
 		}
 
 		//
-		// Draw columns text and devider
+		// Draw columns text and divider
 		//
 
 		// If there is no column just draw identififers
@@ -1108,7 +1127,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return result;
 	}
 
-	void SchemaItemSignal::setAppSignalIds(const QString& s)
+	void SchemaItemSignal::setAppSignalIds(QString s)
 	{
 		if (s.contains(';') == true)
 		{
@@ -1171,7 +1190,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return result;
 	}
 
-	void SchemaItemSignal::setImpactAppSignalIds(const QString& s)
+	void SchemaItemSignal::setImpactAppSignalIds(QString s)
 	{
 		if (s.contains(';') == true)
 		{
@@ -1206,7 +1225,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_multiLine;
 	}
 
-	void SchemaItemSignal::setMultiLine(const bool& value)
+	void SchemaItemSignal::setMultiLine(bool value)
 	{
 		m_multiLine = value;
 	}
@@ -1221,7 +1240,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_precision;
 	}
 
-	void SchemaItemSignal::setPrecision(const int& value)
+	void SchemaItemSignal::setPrecision(int value)
 	{
 		m_precision = qBound(0, value, 12);
 	}
@@ -1231,7 +1250,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_analogFormat;
 	}
 
-	void SchemaItemSignal::setAnalogFormat(const E::AnalogFormat& value)
+	void SchemaItemSignal::setAnalogFormat(E::AnalogFormat value)
 	{
 		m_analogFormat = value;
 	}
@@ -1241,7 +1260,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_customText;
 	}
 
-	void SchemaItemSignal::setCustomText(const QString& value)
+	void SchemaItemSignal::setCustomText(QString value)
 	{
 		m_customText = value;
 	}
@@ -1251,11 +1270,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return static_cast<int>(m_columns.size());
 	}
 
-	void SchemaItemSignal::setColumnCount(const int& value)
+	void SchemaItemSignal::setColumnCount(int value)
 	{
 		int c = qBound(1, value, 8);
 
-		if (m_columns.size() != c)
+		if (m_columns.size() != static_cast<size_t>(c))
 		{
 			m_columns.resize(c);
 			createColumnProperties();
@@ -1267,10 +1286,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	double SchemaItemSignal::columnWidth(int columnIndex) const
 	{
 		if (columnIndex < 0 ||
-			columnIndex >= m_columns.size())
+		    columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
-			assert(columnIndex < m_columns.size());
+			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return 0.0;
 		}
 
@@ -1280,10 +1299,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	void SchemaItemSignal::setColumnWidth(double value, int columnIndex)
 	{
 		if (columnIndex < 0 ||
-			columnIndex >= m_columns.size())
+		    columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
-			assert(columnIndex < m_columns.size());
+			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return;
 		}
 
@@ -1304,10 +1323,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	E::ColumnData SchemaItemSignal::columnData(int columnIndex) const
 	{
 		if (columnIndex < 0 ||
-			columnIndex >= m_columns.size())
+		    columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
-			assert(columnIndex < m_columns.size());
+			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return E::ColumnData::AppSignalID;
 		}
 
@@ -1317,10 +1336,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	void SchemaItemSignal::setColumnData(E::ColumnData value, int columnIndex)
 	{
 		if (columnIndex < 0 ||
-			columnIndex >= m_columns.size())
+		    columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
-			assert(columnIndex < m_columns.size());
+			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return;
 		}
 
@@ -1331,10 +1350,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	E::HorzAlign SchemaItemSignal::columnHorzAlign(int columnIndex) const
 	{
 		if (columnIndex < 0 ||
-			columnIndex >= m_columns.size())
+		    columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
-			assert(columnIndex < m_columns.size());
+			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return E::HorzAlign::AlignLeft;
 		}
 
@@ -1344,10 +1363,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	void SchemaItemSignal::setColumnHorzAlign(E::HorzAlign value, int columnIndex)
 	{
 		if (columnIndex < 0 ||
-			columnIndex >= m_columns.size())
+		    columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
-			assert(columnIndex < m_columns.size());
+			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return;
 		}
 

@@ -71,7 +71,10 @@ namespace VFrame30
 		auto clickScriptProp = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript, PropertyNames::scriptsCategory, !isSchemaItemControl);
 		clickScriptProp->setIsScript(true);
 
-		addProperty<QString, QObject, &SchemaItem::objectName, &SchemaItem::setObjectName>(PropertyNames::objectName, PropertyNames::scriptsCategory, true);
+		addProperty<QString>(PropertyNames::objectName, PropertyNames::scriptsCategory, true,
+		                     [this](){return this->objectName(); },
+		                     [this](QString value){this->setObjectName(value); });
+
 		addProperty<QString, SchemaItem, &SchemaItem::preDrawScript, &SchemaItem::setPreDrawScript>(PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true);
 
 		return;
@@ -645,7 +648,7 @@ namespace VFrame30
 		assert(true);
 		return 0;
 	}
-	void SchemaItem::setLeft(const double& /*value*/)
+	void SchemaItem::setLeft(double /*value*/)
 	{
 		assert(true);
 	}
@@ -655,7 +658,7 @@ namespace VFrame30
 		assert(false);
 		return 0;
 	}
-	void SchemaItem::setTop(const double& /*value*/)
+	void SchemaItem::setTop(double /*value*/)
 	{
 		assert(false);
 	}
@@ -665,7 +668,7 @@ namespace VFrame30
 		assert(false);
 		return 0;
 	}
-	void SchemaItem::setWidth(const double& /*value*/)
+	void SchemaItem::setWidth(double /*value*/)
 	{
 		assert(false);
 	}
@@ -675,7 +678,7 @@ namespace VFrame30
 		assert(false);
 		return 0;
 	}
-	void SchemaItem::setHeight(const double& /*value*/)
+	void SchemaItem::setHeight(double /*value*/)
 	{
 		assert(false);
 	}
@@ -759,7 +762,7 @@ namespace VFrame30
 		return m_locked;
 	}
 
-	void SchemaItem::setLocked(const bool& lock)
+	void SchemaItem::setLocked(bool lock)
 	{
 		m_locked = lock;
 		return;
@@ -775,7 +778,7 @@ namespace VFrame30
 		return m_commented;
 	}
 
-	void SchemaItem::setCommented(const bool& value)
+	void SchemaItem::setCommented(bool value)
 	{
 		m_commented = value;
 	}
@@ -833,7 +836,7 @@ namespace VFrame30
 		return m_labelPos;
 	}
 
-	void SchemaItem::setLabelPos(const E::TextPos& value)
+	void SchemaItem::setLabelPos(E::TextPos value)
 	{
 		m_labelPos = value;
 	}
@@ -845,7 +848,7 @@ namespace VFrame30
 		return m_acceptClick;
 	}
 
-	void SchemaItem::setAcceptClick(const bool& value)
+	void SchemaItem::setAcceptClick(bool value)
 	{
 		m_acceptClick = value;
 	}
@@ -857,7 +860,7 @@ namespace VFrame30
 		return m_clickScript;
 	}
 
-	void SchemaItem::setClickScript(const QString& value)
+	void SchemaItem::setClickScript(QString value)
 	{
 		m_clickScript = value;
 	}
@@ -867,7 +870,7 @@ namespace VFrame30
 		return m_preDrawScript;
 	}
 
-	void SchemaItem::setPreDrawScript(const QString& value)
+	void SchemaItem::setPreDrawScript(QString value)
 	{
 		m_preDrawScript = value;
 	}

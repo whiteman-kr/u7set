@@ -2,6 +2,7 @@
 #define TRENDSCALE_H
 
 #include "TrendParam.h"
+#include "TrendSignal.h"
 #include <optional>
 
 
@@ -24,26 +25,31 @@ namespace TrendLib
 
         // Scale convertion functions
         //
-        static double limitToScaleValue(double value, TrendScaleType scaleType, bool* ok);
-        static double valueToScaleValue(double value, TrendScaleType scaleType, bool* ok);  // Reverses period value from infinity point
+		static double scaleLowLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok);
+		static double scaleHighLimit(const TrendSignalParam& trendSignal, E::TrendScaleType scaleType, bool* ok);
 
-        static double limitFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok);
-        static double valueFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok);  // Reverses period value from infinity point
+		static double valueToScaleValue(double value, E::TrendScaleType scaleType, bool* ok);  // Reverses period value from infinity point
+
+		static double limitFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok);
+		static double valueFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok);  // Reverses period value from infinity point
 
         // Scale building functions
         //
-        static std::optional<std::vector<std::pair<double, double>>> scaleValues(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval);
+		static std::optional<std::vector<std::pair<double, double>>> scaleValues(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval);
 
         // Text formatting functions
         //
-        static QString scaleValueText(double value, const TrendParam& drawParam, int precision);
+		static QString scaleValueText(double value, E::TrendScaleType scaleType, const TrendSignalParam& signalParam);
 
 	private:
-        static double pointToScaleValue(double value, TrendScaleType scaleType, bool* ok);
-        static double pointFromScaleValue(double scaleValue, TrendScaleType scaleType, bool* ok);
+		static double trendLog10(double value);
+		static double trendPow10(double value);
 
-        static std::optional<std::vector<std::pair<double, double>>> scaleValuesGeneric(TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval);
-		static std::optional<std::vector<std::pair<double, double>>> scaleValuesPeriod(TrendScaleType scaleType, double lowLimit, double highLimit);
+		static double pointToScaleValue(double value, E::TrendScaleType scaleType, bool* ok);
+		static double pointFromScaleValue(double scaleValue, E::TrendScaleType scaleType, bool* ok);
+
+		static std::optional<std::vector<std::pair<double, double>>> scaleValuesGeneric(E::TrendScaleType scaleType, double lowLimit, double highLimit, const QRectF& signalRect, double minInchInterval);
+		static std::optional<std::vector<std::pair<double, double>>> scaleValuesPeriod(E::TrendScaleType scaleType, double lowLimit, double highLimit);
 
 	public:
 		const static double periodScaleInfinity; // = 999;	// Infinity value for exponential scale

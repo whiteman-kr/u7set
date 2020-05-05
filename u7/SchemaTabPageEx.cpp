@@ -2024,14 +2024,31 @@ int SchemaFileViewEx::parentFileId() const
 SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	MainTabPage(dbc, parent)
 {
-	m_tabWidget = new QTabWidget{};
+	m_tabWidget = new SchemaTabWidget{this};
 	m_tabWidget->setMovable(true);
 
-	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
-	sz.setHeight(static_cast<int>(sz.height() * 1.75));
+	m_tabWidget->tabBar()->setElideMode(Qt::ElideRight);
+	m_tabWidget->setTabsClosable(true);
 
-	QString ss = QString("QTabBar::tab{ min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
-	m_tabWidget->tabBar()->setStyleSheet(ss);
+	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
+	int h = static_cast<int>(sz.height() * 1.75);
+
+	QString ss = QString(R"(
+ QTabBar::tab:top
+ {
+	height: %1px;
+ }
+ QTabBar::close-button
+ {
+	image: url(":/Images/Images/CloseButtonGray.svg");
+ }
+ QTabBar::close-button:hover
+ {
+	image: url(":/Images/Images/CloseButtonBlack.svg");
+ })")
+				 .arg(h);
+
+	m_tabWidget->setStyleSheet(ss);
 
 	// --
 	//
@@ -2055,6 +2072,53 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	//
 	m_controlTabPage = new SchemaControlTabPageEx(dbc);
 	m_tabWidget->addTab(m_controlTabPage, tr("Schemas Control"));
+
+	m_tabWidget->setTabToolTip(0, tr("Schemas Control\n"
+									 "[CTRL + `]"));
+
+	// Hide close button for control tab page
+	//
+	QToolButton* closeButton = static_cast<QToolButton*>(m_tabWidget->tabBar()->tabButton(0, QTabBar::RightSide));
+	if (closeButton != nullptr)
+	{
+		closeButton->setVisible(false);
+	}
+
+	// Add shortcut for switching to control tab page
+	//
+	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
+	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde}
+											  );
+	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
+
+	addAction(m_showControlTabAccelerator);
+
+	connect(m_showControlTabAccelerator, &QAction::triggered,
+			[this]()
+			{
+				for (int i = 0; i < m_tabWidget->count(); i++)
+				{
+					SchemaControlTabPageEx* w = dynamic_cast<SchemaControlTabPageEx*>(m_tabWidget->widget(i));
+
+					if (w != nullptr)
+					{
+						if	(m_tabWidget->currentIndex() != i)
+						{
+							m_tabWidget->setCurrentIndex(i);
+						}
+
+						return;
+					}
+				}
+			});
+
+	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPageEx::tabCloseRequested);
+
+	m_tabWidget->tabBar()->installEventFilter(this);
+
+	connect(m_tabWidget->tabBar(), &QTabBar::currentChanged, this, &SchemasTabPageEx::currentTabChanged);
 
 	return;
 }
@@ -2086,6 +2150,44 @@ void SchemasTabPageEx::refreshControlTabPage()
 	return;
 }
 
+bool SchemasTabPageEx::eventFilter(QObject* object, QEvent* event)
+{
+	// Close SchemaTab on mouse middle button press on tab
+	//
+	if (event->type() == QEvent::MouseButtonRelease && object == m_tabWidget->tabBar())
+	{
+		QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+
+		if (mouseEvent->button() != Qt::MouseButton::MidButton)
+		{
+			return false;
+		}
+
+		int index = m_tabWidget->tabBar()->tabAt(mouseEvent->pos());
+		if (index == -1)
+		{
+			return false;
+		}
+
+		EditSchemaTabPageEx* schemaTab = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(index));
+		if (schemaTab == nullptr)
+		{
+			return false;
+		}
+
+		if (schemaTab->modified() == true && m_tabWidget->currentIndex() != index)
+		{
+			m_tabWidget->setCurrentIndex(index);
+		}
+
+		schemaTab->closeTab();
+
+		return true;
+	}
+
+	return QObject::eventFilter(object, event);
+}
+
 void SchemasTabPageEx::projectOpened()
 {
 	this->setEnabled(true);
@@ -2099,6 +2201,51 @@ void SchemasTabPageEx::projectClosed()
 	this->setEnabled(false);
 	return;
 }
+
+void SchemasTabPageEx::tabCloseRequested(int index)
+{
+	EditSchemaTabPageEx* w = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(index));
+	if (w == nullptr)
+	{
+		return;
+	}
+
+	if (w->modified() == true && m_tabWidget->currentIndex() != index)
+	{
+		m_tabWidget->setCurrentIndex(index);
+	}
+
+	w->closeTab();
+
+	return;
+}
+
+void SchemasTabPageEx::currentTabChanged(int index)
+{
+	// Show/hide close burron for inactive tab bar
+	//
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		EditSchemaTabPageEx* w = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(i));
+
+		if (w != nullptr)
+		{
+			if (i == index)
+			{
+				m_tabWidget->tabBar()->tabButton(i, closeSide)->show();
+			}
+			else
+			{
+				m_tabWidget->tabBar()->tabButton(i, closeSide)->hide();
+			}
+		}
+	}
+
+	return;
+}
+
 
 //
 //
@@ -5003,17 +5150,6 @@ void EditSchemaTabPageEx::detachOrAttachWindow()
 	emit pleaseDetachOrAttachWindow(this);
 }
 
-void EditSchemaTabPageEx::projectClosed()
-{
-	// Find current tab and close it
-	//
-	emit aboutToClose(this);
-
-	this->deleteLater();
-
-	return;
-}
-
 void EditSchemaTabPageEx::closeTab()
 {
 	if (m_schemaWidget->modified() == true)
@@ -5045,6 +5181,17 @@ void EditSchemaTabPageEx::closeTab()
 	emit aboutToClose(this);
 
 	this->deleteLater();
+	return;
+}
+
+void EditSchemaTabPageEx::projectClosed()
+{
+	// Find current tab and close it
+	//
+	emit aboutToClose(this);
+
+	this->deleteLater();
+
 	return;
 }
 

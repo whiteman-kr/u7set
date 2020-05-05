@@ -5,37 +5,37 @@
 
 #define DECLARE_FONT_PROPERTIES(propname) \
 		QString get##propname##Name() const; \
-		void set##propname##Name(const QString& value); \
+		void set##propname##Name(QString value); \
 		\
 		double get##propname##Size() const; \
-		void set##propname##Size(const double& value); \
+		void set##propname##Size(double value); \
 		\
 		bool get##propname##Bold() const; \
-		void set##propname##Bold(const bool& value); \
+		void set##propname##Bold(bool value); \
 		\
 		bool get##propname##Italic() const; \
-		void set##propname##Italic(const bool& value);
+		void set##propname##Italic(bool value);
 
 
 #define IMPLEMENT_FONT_PROPERTIES(classname, propname, varname) \
 	\
 	QString classname::get##propname##Name() const				{ 	return varname.name();	} \
-	void classname::set##propname##Name(const QString& value)	{	varname.setName(value); } \
+	void classname::set##propname##Name(QString value)			{	varname.setName(value); } \
 	\
 	double classname::get##propname##Size() const \
 	{	\
 		return (itemUnit() == SchemaUnit::Display) ? varname.size(SchemaUnit::Display) : varname.size(Settings::regionalUnit());\
 	}\
-	void classname::set##propname##Size(const double& value) \
+	void classname::set##propname##Size(double value) \
 	{\
 		varname.setSize(value, (itemUnit() == SchemaUnit::Display) ? SchemaUnit::Display : Settings::regionalUnit());\
 	} \
 	\
 	bool classname::get##propname##Bold() const					{	return varname.bold();	} \
-	void classname::set##propname##Bold(const bool& value)		{	varname.setBold(value); } \
+	void classname::set##propname##Bold(bool value)				{	varname.setBold(value); } \
 	\
 	bool classname::get##propname##Italic() const				{ return varname.italic();	} \
-	void classname::set##propname##Italic(const bool& value)	{ varname.setItalic(value); }
+	void classname::set##propname##Italic(bool value)			{ varname.setItalic(value); }
 
 namespace Proto
 {

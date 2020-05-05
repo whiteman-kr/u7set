@@ -160,7 +160,7 @@ namespace ExtWidgets
 		if (type == TuningValue::tuningValueTypeId())
 		{
 			TuningValue t = value.value<TuningValue>();
-			return t.toString(p->precision());
+			return t.toString();
 		}
 
 		if (type == qMetaTypeId<QVector<QColor>>())
@@ -2599,7 +2599,7 @@ namespace ExtWidgets
 			{
 				TuningValue t = property->value().value<TuningValue>();
 				m_oldValue = QVariant::fromValue(t);
-				m_lineEdit->setText(t.toString(property->precision()));
+				m_lineEdit->setText(t.toString());
 			}
 			else
 			{

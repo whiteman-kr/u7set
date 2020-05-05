@@ -7,7 +7,7 @@
         <file>Images/update.png</file>
         <file>Images/undo.png</file>
         <file>Images/changes.png</file>
-		<file>Images/checkin.png</file>
+        <file>Images/checkin.png</file>
         <file>Images/copy.png</file>
         <file>Images/SchemaLine.svg</file>
         <file>Images/SchemaIconDevelop.html</file>
@@ -34,7 +34,7 @@
         <file>Images/SchemaLoopbackTarget.svg</file>
         <file>Images/SimOpen.svg</file>
         <file>Images/SimClose.svg</file>
-		<file>Images/SimRefresh.svg</file>
+        <file>Images/SimRefresh.svg</file>
         <file>Images/SimAddWindow.svg</file>
         <file>Images/SimPause.svg</file>
         <file>Images/SimRun.svg</file>
@@ -62,8 +62,18 @@
         <file>Images/Find.svg</file>
         <file>Images/SchemaBehavior.svg</file>
         <file>Images/SimTrends.svg</file>
+        <file>Images/CloseButtonBlack.svg</file>
+        <file>Images/CloseButtonGray.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
-		</qresource>
+        <file>Simulator/Templates/Sine.js</file>
+        <file>Simulator/Templates/Square.js</file>
+        <file>Simulator/Templates/Triangle.js</file>
+        <file>Simulator/Templates/SawtoothFront.js</file>
+        <file>Simulator/Templates/SawtoothBack.js</file>
+        <file>Simulator/Templates/DiscreteSquare.js</file>
+        <file>Simulator/Templates/DiscreteSeries.js</file>
+    </qresource>
 </RCC>
+ 

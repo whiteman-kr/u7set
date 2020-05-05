@@ -264,10 +264,6 @@ void MonitorTrendsWidget::signalsButton()
 		autoSelectScaleType(acceptedSignals);
 	}
 
-	// Validate view limits for scale
-	//
-	m_trendWidget->validateViewLimits();
-
 	updateWidget();
 
 	return;
@@ -465,8 +461,8 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::Re
 
 	// Update widget if received data somewhere in view
 	//
-	if (minTime >= m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10 &&
-		maxTime <= m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10)
+	if (minTime >= TimeStamp{m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10} &&
+	    maxTime <= TimeStamp{m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10})
 	{
 		m_trendWidget->updateWidget();
 	}

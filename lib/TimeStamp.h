@@ -43,7 +43,7 @@ constexpr int64_t operator "" _day(unsigned long long int value)
 //
 struct TimeStamp
 {
-	qint64 timeStamp = 0;
+	qint64 timeStamp = 0;	// ms
 
 	// --
 	//
@@ -75,7 +75,7 @@ struct TimeStamp
 
 	TimeStamp roundedToHour() const
 	{
-		return (timeStamp / 1_hour) * 1_hour;
+		return TimeStamp{(timeStamp / 1_hour) * 1_hour};
 	}
 
 	bool operator> (const TimeStamp& value) const

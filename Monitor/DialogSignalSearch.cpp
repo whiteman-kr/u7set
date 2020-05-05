@@ -493,7 +493,7 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 	}
 
 	const AppSignalParam& signal = m_model.getSignal(index);
-	cw->currentTab()->signalContextMenu(QStringList() << signal.appSignalId());
+	cw->currentTab()->signalContextMenu(QStringList() << signal.appSignalId(), {});
 
 	return;
 }

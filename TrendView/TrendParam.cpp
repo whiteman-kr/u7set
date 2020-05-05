@@ -38,7 +38,7 @@ namespace TrendLib
 		}
 
 		m_viewMode = static_cast<TrendViewMode>(message.view_mode());
-		m_scaleType = static_cast<TrendScaleType>(message.scale_type());
+		m_scaleType = static_cast<E::TrendScaleType>(message.scale_type());
 		m_timeType = static_cast<E::TimeType>(message.time_type());
 		m_laneCount = message.lane_count();
 
@@ -99,12 +99,12 @@ namespace TrendLib
 		m_viewMode = value;
 	}
 
-	TrendScaleType TrendParam::scaleType() const
+	E::TrendScaleType TrendParam::scaleType() const
 	{
 		return m_scaleType;
 	}
 
-	void TrendParam::setScaleType(TrendScaleType value)
+	void TrendParam::setScaleType(E::TrendScaleType value)
 	{
 		m_scaleType = value;
 	}
@@ -180,7 +180,7 @@ namespace TrendLib
 		m_startTimeStamp = value;
 	}
 
-	quint64 TrendParam::duration() const
+	qint64 TrendParam::duration() const
 	{
 		return m_duration;
 	}

@@ -156,8 +156,8 @@ static int no = 1;
 
 	QDateTime currentTime = QDateTime::currentDateTime();
 
-	m_source.requestEndTime = TimeStamp(currentTime).timeStamp / 1_min * 1_min;		// reset seconds and ms
-	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
+	m_source.requestEndTime = TimeStamp{TimeStamp(currentTime).timeStamp / 1_min * 1_min};		// reset seconds and ms
+	m_source.requestStartTime = TimeStamp{m_source.requestEndTime.timeStamp - 1_hour};
 
 	m_source.removePeriodicRecords = true;			// By defaut it's true, don't store it in theSettings as users often forget to set this option back
 

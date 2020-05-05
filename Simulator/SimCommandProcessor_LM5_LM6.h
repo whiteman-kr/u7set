@@ -21,7 +21,7 @@ namespace Sim
 		// to update such platform inteface signals as Blink.
 		// Update mustb be done directly in RAM
 		//
-		virtual bool updatePlatformInterfaceState() override;
+		virtual bool updatePlatformInterfaceState(std::chrono::microseconds currentTime) override;
 
 		virtual bool runCommand(const DeviceCommand& command) override;
 

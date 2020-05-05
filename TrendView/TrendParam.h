@@ -18,17 +18,9 @@ namespace TrendLib
 		Separated,
 		Overlapped
 	};
-
-	enum class TrendScaleType
-	{
-		Linear,
-		Log10,
-		Period
-	};
 }
 
 Q_DECLARE_METATYPE(TrendLib::TrendViewMode)
-Q_DECLARE_METATYPE(TrendLib::TrendScaleType)
 
 namespace TrendLib
 {
@@ -52,8 +44,8 @@ namespace TrendLib
 		TrendViewMode viewMode() const;
 		void setViewMode(TrendViewMode value);
 
-		TrendScaleType scaleType() const;
-		void setScaleType(TrendScaleType value);
+		E::TrendScaleType scaleType() const;
+		void setScaleType(E::TrendScaleType value);
 
 		E::TimeType timeType() const;
 		void setTimeType(E::TimeType value);
@@ -76,7 +68,7 @@ namespace TrendLib
 		TimeStamp startTimeStamp() const;
 		void setStartTimeStamp(const TimeStamp& value);
 
-		quint64 duration() const;
+		qint64 duration() const;
 		void setLaneDuration(qint64 value);
 
 		int hightlightRulerIndex() const;
@@ -94,7 +86,7 @@ namespace TrendLib
 		int m_dpiY = 96;
 
 		TrendViewMode m_viewMode = TrendViewMode::Separated;
-		TrendScaleType m_scaleType = TrendScaleType::Linear;
+		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 		E::TimeType m_timeType = E::TimeType::Local;
 		int m_laneCount = 1;
 
