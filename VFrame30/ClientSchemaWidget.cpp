@@ -166,9 +166,6 @@ namespace VFrame30
 			drag->setMimeData(mimeData);
 
 			drag->exec(Qt::CopyAction);
-
-			qDebug() << "Start drag for " << appSignalIds;
-			qDebug() << "Drag and drop data buffer size " << data.size();
 		}
 
 		return;
