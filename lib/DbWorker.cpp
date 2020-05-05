@@ -2328,7 +2328,7 @@ void DbWorker::slot_getUserPropertyList(QString propertyTemplate, QStringList* o
 
 	while (query.next())
 	{
-		*out << out->value(0);
+		*out << query.value(0).toString();
 	}
 
 	return;

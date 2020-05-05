@@ -366,8 +366,8 @@ namespace SimOverrideUI
 		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Apply, this);
 
 		m_templateScriptButton = m_buttonBox->addButton(tr("Templates..."), QDialogButtonBox::ButtonRole::ResetRole);
-		//m_loadScriptButton = m_buttonBox->addButton(tr("Load..."), QDialogButtonBox::ButtonRole::ResetRole);
-		//m_saveScriptButton = m_buttonBox->addButton(tr("Save..."), QDialogButtonBox::ButtonRole::ResetRole);
+		m_loadScriptButton = m_buttonBox->addButton(tr("Load..."), QDialogButtonBox::ButtonRole::ResetRole);
+		m_saveScriptButton = m_buttonBox->addButton(tr("Save..."), QDialogButtonBox::ButtonRole::ResetRole);
 
 		// --
 		//
@@ -397,6 +397,16 @@ namespace SimOverrideUI
 		if (button == m_templateScriptButton)
 		{
 			showTemplates();
+		}
+
+		if (button == m_loadScriptButton)
+		{
+			loadScript();
+		}
+
+		if (button == m_saveScriptButton)
+		{
+			saveScript();
 		}
 
 		return;
@@ -518,6 +528,161 @@ namespace SimOverrideUI
 				}
 			}
 		}
+
+		return;
+	}
+
+	void ScriptMethodWidget::loadScript()
+	{
+		QStringList savedProperties;
+		dbc()->getUserPropertyList(saveProperty + "%", &savedProperties, this);
+
+		QMenu m;
+
+		for (const QString& s : savedProperties)
+		{
+			m.addAction(s,
+						[s, this]()
+						{
+							int r = QMessageBox::question(this,
+														  qAppName(),
+														  tr("All current changes will be lost."),
+														  QMessageBox::StandardButton::Ok,
+														  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+
+							if (r != QMessageBox::StandardButton::Ok)
+							{
+								return;
+							}
+
+							QString script;
+							bool ok = this->dbc()->getUserProperty(s, &script, this);
+
+							if (ok == true)
+							{
+								m_scriptEdit->setText(script);
+							}
+						});
+		}
+
+		if (savedProperties.isEmpty() == false)
+		{
+			m.addSeparator();
+		}
+
+		m.addAction(tr("Load from File..."),
+					[this]()
+					{
+						QString fileName = QFileDialog::getOpenFileName(this, "", "", tr("Scripts (*.js *.script);;All Files(*.*)"));
+						if (fileName.isEmpty() == true)
+						{
+							return;
+						}
+
+						QFile file(fileName);
+						if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+						{
+							return;
+						}
+
+						QString script = file.readAll();
+						m_scriptEdit->setText(script);
+
+						int r = QMessageBox::question(this,
+													  qAppName(),
+													  tr("All current changes will be lost."),
+													  QMessageBox::StandardButton::Ok,
+													  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+
+						if (r != QMessageBox::StandardButton::Ok)
+						{
+							return;
+						}
+					});
+
+		m.exec(QCursor::pos());
+
+		return;
+	}
+
+	void ScriptMethodWidget::saveScript()
+	{
+		QStringList savesProperties;
+		bool ok = dbc()->getUserPropertyList(saveProperty + "%", &savesProperties, this);
+
+		QMenu m;
+
+		if (ok == true && savesProperties.isEmpty() == false)
+		{
+			for (const QString& s : savesProperties)
+			{
+				m.addAction(s,
+					[savePropertyName = s, this]()
+					{
+						int r = QMessageBox::question(this,
+													  qAppName(),
+													  tr("Record %1 already exists. Do you want to overwite it?").arg(savePropertyName),
+													  QMessageBox::StandardButton::Yes,
+													  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
+
+						if (r == QMessageBox::StandardButton::No)
+						{
+							return;
+						}
+
+						dbc()->setUserProperty(savePropertyName, this->m_scriptEdit->text(), this);
+					});
+			}
+		}
+
+		m.addAction(tr("Save as..."),
+					[this, &savesProperties]()
+					{
+						static int rn = 1;
+						bool ok = false;
+						QString text = QInputDialog::getText(this, qAppName(), tr("Name:"), QLineEdit::EchoMode::Normal, QString("New Record %1").arg(savesProperties.size() + (rn++)), &ok);
+
+						if (ok == false || text.isEmpty() == true)
+						{
+							return;
+						}
+
+						if (savesProperties.contains(text) == true)
+						{
+							int r = QMessageBox::question(this,
+														  qAppName(),
+														  tr("Record %1 already exists. Do you want to overwite it?").arg(text),
+														  QMessageBox::StandardButton::Yes,
+														  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
+
+							if (r == QMessageBox::StandardButton::No)
+							{
+								return;
+							}
+						}
+
+						dbc()->setUserProperty(saveProperty + text, this->m_scriptEdit->text(), this);
+					});
+
+		m.addSeparator();
+		m.addAction(tr("Save to File..."),
+					[this]()
+					{
+						QString fileName = QFileDialog::getSaveFileName(this, "", "", tr("Scripts (*.js *.script);;All Files(*.*)"));
+						if (fileName.isEmpty() == false)
+						{
+							QFile file(fileName);
+							if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
+							{
+								return;
+							}
+
+							QTextStream out(&file);
+							out << this->m_scriptEdit->text();
+						}
+					});
+
+		m.exec(QCursor::pos());
 
 		return;
 	}
