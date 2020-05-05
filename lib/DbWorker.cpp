@@ -345,6 +345,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0325.sql", "Upgrade to version 325, Fixed AFB MAJ description, added err_* pins (22, 23)"},
 	{":/DatabaseUpgrade/Upgrade0326.sql", "Upgrade to version 326, Added UserProperties"},
 	{":/DatabaseUpgrade/Upgrade0327.sql", "Upgrade to version 327, Added function api.get_user_property_list"},
+	{":/DatabaseUpgrade/Upgrade0328.sql", "Upgrade to version 328, Added function api.remove_user_property"},
 };
 
 int DbWorker::counter = 0;
@@ -2329,6 +2330,50 @@ void DbWorker::slot_getUserPropertyList(QString propertyTemplate, QStringList* o
 	while (query.next())
 	{
 		*out << out->value(0);
+	}
+
+	return;
+}
+
+void DbWorker::slot_removeUserProperty(QString propertyName)
+{
+	// Init automatic variable
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true)
+	{
+		assert(propertyName.isEmpty() == false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// --
+	//
+	QSqlQuery query(db);
+
+	query.prepare("SELECT * FROM api.remove_user_property(:sessionkey, :propertyName);");
+	query.bindValue(":sessionkey", sessionKey());
+	query.bindValue(":propertyName", propertyName);
+
+	bool result = query.exec();
+	if (result == false)
+	{
+		emitError(db, tr("Cannot remove user property %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		return;
 	}
 
 	return;
