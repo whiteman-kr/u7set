@@ -537,6 +537,8 @@ namespace SimOverrideUI
 		QStringList savedProperties;
 		dbc()->getUserPropertyList(saveProperty + "%", &savedProperties, this);
 
+		savedProperties.replaceInStrings(saveProperty, "");
+
 		QMenu m;
 
 		for (const QString& s : savedProperties)
@@ -556,7 +558,7 @@ namespace SimOverrideUI
 							}
 
 							QString script;
-							bool ok = this->dbc()->getUserProperty(s, &script, this);
+							bool ok = this->dbc()->getUserProperty(saveProperty + s, &script, this);
 
 							if (ok == true)
 							{
@@ -579,15 +581,6 @@ namespace SimOverrideUI
 							return;
 						}
 
-						QFile file(fileName);
-						if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
-						{
-							return;
-						}
-
-						QString script = file.readAll();
-						m_scriptEdit->setText(script);
-
 						int r = QMessageBox::question(this,
 													  qAppName(),
 													  tr("All current changes will be lost."),
@@ -598,6 +591,15 @@ namespace SimOverrideUI
 						{
 							return;
 						}
+
+						QFile file(fileName);
+						if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+						{
+							return;
+						}
+
+						QString script = file.readAll();
+						m_scriptEdit->setText(script);
 					});
 
 		m.exec(QCursor::pos());
@@ -609,6 +611,8 @@ namespace SimOverrideUI
 	{
 		QStringList savesProperties;
 		bool ok = dbc()->getUserPropertyList(saveProperty + "%", &savesProperties, this);
+
+		savesProperties.replaceInStrings(saveProperty, "");
 
 		QMenu m;
 
@@ -630,7 +634,7 @@ namespace SimOverrideUI
 							return;
 						}
 
-						dbc()->setUserProperty(savePropertyName, this->m_scriptEdit->text(), this);
+						dbc()->setUserProperty(saveProperty + savePropertyName, this->m_scriptEdit->text(), this);
 					});
 			}
 		}
@@ -663,6 +667,34 @@ namespace SimOverrideUI
 
 						dbc()->setUserProperty(saveProperty + text, this->m_scriptEdit->text(), this);
 					});
+
+		if (savesProperties.isEmpty() == false)
+		{
+			m.addSeparator();
+			QMenu* removeMenu = m.addMenu(tr("Remove Saves"));
+
+			for (const QString&s : savesProperties)
+			{
+				removeMenu->addAction(tr("Remove %1").arg(s),
+									  [this, s]()
+									  {
+										int r = QMessageBox::question(this,
+																	  qAppName(),
+																	  tr("Record %1 will be removed.").arg(s),
+																	  QMessageBox::StandardButton::Ok,
+																	  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+
+										if (r != QMessageBox::StandardButton::Ok)
+										{
+											return;
+										}
+
+										this->dbc()->removeUserProperty(saveProperty + s, this);
+									  });
+
+			}
+
+		}
 
 		m.addSeparator();
 		m.addAction(tr("Save to File..."),
