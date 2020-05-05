@@ -61,6 +61,7 @@ public:
 	bool getUserProperty(const QString& property, QString* value, QWidget* parentWidget);
 	bool getUserProperty(const QString& property, QString* value, const QString& defaultValue, QWidget* parentWidget);
 	bool getUserPropertyList(QString propertyTemplate, QStringList* out, QWidget* parentWidget);
+	bool removeUserProperty(const QString& property, QWidget* parentWidget);
 
 	// File management
 	//
@@ -199,6 +200,7 @@ signals:
 	void signal_setUserProperty(QString propertyName, QString propertyValue);
 	void signal_getUserProperty(QString propertyName, QString* out);
 	void signal_getUserPropertyList(QString propertyTemplate, QStringList* out);
+	void signal_removeUserProperty(QString propertyName);
 
 	void signal_createUser(DbUser user);
 	void signal_updateUser(DbUser user);
