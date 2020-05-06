@@ -122,7 +122,7 @@ private:
 
 inline quint16 __checkAndCastToQuint16(int value)
 {
-	assert(value >= std::numeric_limits<quint16>::lowest() && value <= std::numeric_limits<quint16>::max());
+	Q_ASSERT(value >= std::numeric_limits<quint16>::lowest() && value <= std::numeric_limits<quint16>::max());
 
 	return static_cast<quint16>(value);
 }

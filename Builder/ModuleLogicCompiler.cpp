@@ -1889,7 +1889,8 @@ namespace Builder
 			case E::SignalType::Discrete:
 				if (s == nullptr)
 				{
-					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, outPin.associatedIOs().size());
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal,
+															  static_cast<int>(outPin.associatedIOs().size()));
 				}
 				else
 				{
@@ -4279,7 +4280,8 @@ namespace Builder
 				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
-				s->isTunable() == false)
+				s->isTunable() == false &&
+				s->isHeapPlaced() == false)
 			{
 				m_nonAcquiredDiscreteInternalSignals.append(s);
 			}
@@ -4943,8 +4945,6 @@ namespace Builder
 
 			if (disposeNonAcquiredBuses() == false) break;
 
-//			if (setSignalsFlagsAddresses() == false) break;
-
 			result = true;
 		}
 		while(false);
@@ -5164,6 +5164,16 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredDiscreteInternalSignals(m_acquiredDiscreteInternalSignals);
 		result &= m_memoryMap.appendNonAcquiredDiscreteStrictOutputSignals(m_nonAcquiredDiscreteStrictOutputSignals);
 		result &= m_memoryMap.appendNonAcquiredDiscreteInternalSignals(m_nonAcquiredDiscreteInternalSignals);
+
+		int bitMemoryStartAddrW = m_memoryMap.appBitMemoryStart();
+
+		Q_ASSERT(m_lmDescription->memory().m_appLogicBitDataOffset == static_cast<quint32>(bitMemoryStartAddrW));
+
+		int discreteSignalsHeapStartAddrW = m_memoryMap.appBitMemoryDiscreteSignalsHeapStart();
+		int discreteSignalsHeapSizeW = m_lmDescription->memory().m_appLogicBitDataSize -
+											(discreteSignalsHeapStartAddrW - bitMemoryStartAddrW);
+
+		m_ualSignals.initDiscreteSignalsHeap(discreteSignalsHeapStartAddrW, discreteSignalsHeapSizeW);
 
 		return result;
 	}
@@ -7445,6 +7455,8 @@ namespace Builder
 			}
 		}
 
+		m_memoryMap.setAppBitMemoryDiscreteSignalsHeapSizeW(m_ualSignals.getDiscreteSignalsHeapSizeW());
+
 //		m_alpCode_calculate(&m_resourcesUsageInfo.appLogicCode);
 
 		return result;
@@ -7589,8 +7601,9 @@ namespace Builder
 		}
 
 		// inUalSignal and inAfbSignal are compatible
-
-		if (inUalSignal->isConst() == false && inUalSignal->ualAddr().isValid() == false)
+		//
+		if ((inUalSignal->isConst() == false && inUalSignal->isHeapPlaced() == false) &&
+				inUalSignal->ualAddr().isValid() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -7619,7 +7632,9 @@ namespace Builder
 			}
 			else
 			{
-				cmd.writeFuncBlockBit(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->ualAddr(), afbCaption);
+				cmd.writeFuncBlockBit(afbOpcode, afbInstance, afbSignalIndex,
+									  m_ualSignals.getSignalReadAddress(*inUalSignal, true),
+									  afbCaption);
 				cmd.setComment(QString("%1.%2 <= %3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->appSignalID()));
 			}
 
@@ -7683,7 +7698,7 @@ namespace Builder
 		switch(inUalSignal->signalType())
 		{
 		case E::SignalType::Discrete:
-			result =  generateDiscreteSignalToAfbBusInputCode(code, ualAfb, inAfbSignal, inUalSignal);
+			result =  generateDiscreteSignalToAfbBusInputCode(code, ualAfb, inAfbSignal, inUalSignal, bpStepInfo);
 			break;
 
 		case E::SignalType::Bus:
@@ -7701,7 +7716,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal)
+	bool ModuleLogicCompiler::generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
+																	  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+																	  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
@@ -7714,7 +7731,8 @@ namespace Builder
 			return false;
 		}
 
-		if (inUalSignal->isConst() == false && inUalSignal->ualAddr().isValid() == false)
+		if ((inUalSignal->isConst() == false && inUalSignal->isHeapPlaced() == false) &&
+				inUalSignal->ualAddr().isValid() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -7733,6 +7751,8 @@ namespace Builder
 		}
 
 		int inputSize = inAfbSignal.size();
+
+		Q_ASSERT(inputSize == bpStepInfo.currentStepSizeBits);
 
 		if (inputSize != SIZE_16BIT && inputSize != SIZE_32BIT)
 		{
@@ -7769,7 +7789,9 @@ namespace Builder
 		{
 			int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
 
-			cmd.fill(Address16(wordAccAddr, 0), inUalSignal->ualAddr());
+			bool decrementReadCount = bpStepInfo.isLastStep();
+
+			cmd.fill(Address16(wordAccAddr, 0), m_ualSignals.getSignalReadAddress(*inUalSignal, decrementReadCount));
 
 			code->append(cmd);
 
@@ -7958,7 +7980,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->ualAddr().isValid() == false)
+		if (outUalSignal->isHeapPlaced() == false && outUalSignal->ualAddr().isValid() == false)
 		{
 			LOG_UNDEFINED_UAL_ADDRESS(m_log, outUalSignal);
 			return false;
@@ -7981,7 +8003,7 @@ namespace Builder
 		{
 		case E::SignalType::Discrete:
 
-			cmd.readFuncBlockBit(outUalSignal->ualAddr(), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
+			cmd.readFuncBlockBit(m_ualSignals.getSignalWriteAddress(*outUalSignal), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
 			cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
 
 			code->append(cmd);
@@ -8365,7 +8387,8 @@ namespace Builder
 				continue;
 			}
 
-			if (inputSignal->isConst() == false && inputSignal->ualAddr().isValid() == false)
+			if ((inputSignal->isConst() == false && inputSignal->isHeapPlaced() == false) &&
+					inputSignal->ualAddr().isValid() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -8600,9 +8623,7 @@ namespace Builder
 		}
 		else
 		{
-			assert(inputSignal->ualAddr().isValid() == true);
-
-			cmd.movBit(busChildSignal->ualAddr(), inputSignal->ualAddr());
+			cmd.movBit(busChildSignal->ualAddr(), m_ualSignals.getSignalReadAddress(*inputSignal, true));
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
 			code->append(cmd);
 		}
@@ -11831,6 +11852,8 @@ namespace Builder
 
 		result &= writeLooopbacksReport();
 
+		result &= writeHeapsLog();
+
 		//
 
 		return result;
@@ -12301,6 +12324,22 @@ namespace Builder
 		m_loopbacks.writeReport(&file);
 
 		BuildFile* bf = m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "Loopbacks.csv", file);
+
+		return bf != nullptr;
+	}
+
+	bool ModuleLogicCompiler::writeHeapsLog()
+	{
+		if (m_context->generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
+		QStringList file;
+
+		m_ualSignals.getHeapsLog(&file);
+
+		BuildFile* bf = m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "HeapsLog.txt", file);
 
 		return bf != nullptr;
 	}

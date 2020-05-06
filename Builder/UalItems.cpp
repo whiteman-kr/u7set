@@ -1391,25 +1391,6 @@ namespace Builder
 		return childSignal->appendRefSignal(s, false);
 	}
 
-/*	Signal* UalSignal::createNativeCopyOfSignal(const Signal* templateSignal, const QString &lmEquipmentID)
-	{
-		if (templateSignal == nullptr)
-		{
-			assert(false);
-			return nullptr;
-		}
-
-		Q_ASSERT(m_optoSignalNativeCopy == nullptr);
-
-		m_optoSignalNativeCopy = new Signal(*templateSignal);
-
-		m_optoSignalNativeCopy->setAcquire(false);								// reset Acquired flag
-		m_optoSignalNativeCopy->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
-		m_optoSignalNativeCopy->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
-
-		return m_optoSignalNativeCopy;
-	}*/
-
 	Address16 UalSignal::ioBufAddr()
 	{
 		if (m_isInput == true)
@@ -2134,7 +2115,9 @@ namespace Builder
 
 	UalSignalsMap::UalSignalsMap(ModuleLogicCompiler& compiler, IssueLogger* log) :
 		m_compiler(compiler),
-		m_log(log)
+		m_log(log),
+		m_discreteSignalsHeap(SIZE_1BIT),
+		m_otherSignalsHeap(SIZE_16BIT)
 	{
 	}
 
@@ -2649,6 +2632,63 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	void UalSignalsMap::initDiscreteSignalsHeap(int startAddrW, int sizeW)
+	{
+		m_discreteSignalsHeap.init(startAddrW, sizeW);
+	}
+
+	int UalSignalsMap::getDiscreteSignalsHeapSizeW() const
+	{
+		return m_discreteSignalsHeap.getHeapUsedSizeW();
+	}
+
+	Address16 UalSignalsMap::getSignalWriteAddress(const UalSignal& ualSignal)
+	{
+		if (ualSignal.isHeapPlaced() == false)
+		{
+			return ualSignal.ualAddr();
+		}
+
+		Q_ASSERT(ualSignal.ualAddr().isValid() == false);		// for heap placed signals ualAddr should not be set
+
+		if (ualSignal.isDiscrete() == true)
+		{
+			return m_discreteSignalsHeap.getAddressForWrite(ualSignal);
+		}
+
+		return m_otherSignalsHeap.getAddressForWrite(ualSignal);
+	}
+
+	Address16 UalSignalsMap::getSignalReadAddress(const UalSignal& ualSignal, bool decrementReadCount)
+	{
+		if (ualSignal.isHeapPlaced() == false)
+		{
+			return ualSignal.ualAddr();
+		}
+
+		Q_ASSERT(ualSignal.ualAddr().isValid() == false);		// for heap placed signals ualAddr should not be set
+
+		if (ualSignal.isDiscrete() == true)
+		{
+			return m_discreteSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
+		}
+
+		return m_otherSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
+	}
+
+	void UalSignalsMap::getHeapsLog(QStringList* log) const
+	{
+		TEST_PTR_RETURN(log);
+
+		log->append(QString("Discrete signals heap log:"));
+		log->append(QString());
+		log->append(m_discreteSignalsHeap.getHeapLog());
+		log->append(QString());
+		log->append(QString("Other signals heap log:"));
+		log->append(QString());
+		log->append(m_otherSignalsHeap.getHeapLog());
 	}
 
 	UalSignal* UalSignalsMap::privateCreateAutoSignal(const UalItem* ualItem,

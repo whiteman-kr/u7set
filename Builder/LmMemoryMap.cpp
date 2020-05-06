@@ -289,8 +289,9 @@ namespace Builder
 
 		m_appBitAdressed.nonAcquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteInternalSignals.nextAddress());
 		m_appBitAdressed.nonAcquiredDiscreteInternalSignals.setStartAddress(m_appBitAdressed.nonAcquiredDiscreteOutputSignals.nextAddress());
+		m_appBitAdressed.discreteSignalsHeap.setStartAddress(m_appBitAdressed.nonAcquiredDiscreteInternalSignals.nextAddress());
 
-		if (m_appBitAdressed.nonAcquiredDiscreteInternalSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
+		if (m_appBitAdressed.discreteSignalsHeap.nextAddress() > m_appBitAdressed.memory.nextAddress())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of bit-addressed memory range!"));
 
@@ -389,6 +390,7 @@ namespace Builder
 		addRecordSignals(memFile, m_appBitAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals");
 		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteOutputSignals, "non acquired discrete output signals");
 		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteInternalSignals, "non acquired discrete internal signals");
+		addRecordSignals(memFile, m_appBitAdressed.discreteSignalsHeap, "discrete signals heap");
 
 		//
 
@@ -446,11 +448,6 @@ namespace Builder
 
 	void LmMemoryMap::addRecordSignals(QStringList& memFile, MemoryArea& memArea, const QString& title)
 	{
-		if (memArea.sizeW() == 0)
-		{
-			return;
-		}
-
 		addRecord(memFile, memArea, title);
 		memFile.append("");
 		addSignals(memFile, memArea);
@@ -915,7 +912,7 @@ namespace Builder
 
 	double LmMemoryMap::bitAddressedMemoryUsed()
 	{
-		return double((m_appBitAdressed.nonAcquiredDiscreteInternalSignals.nextAddress() -
+		return double((m_appBitAdressed.discreteSignalsHeap.nextAddress() -
 					   m_appBitAdressed.memory.startAddress()) * 100) /
 					   double(m_appBitAdressed.memory.sizeW());
 	}

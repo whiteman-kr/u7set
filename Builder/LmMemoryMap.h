@@ -131,6 +131,8 @@ namespace Builder
 			MemoryArea nonAcquiredDiscreteOutputSignals;
 			MemoryArea nonAcquiredDiscreteInternalSignals;
 
+			MemoryArea discreteSignalsHeap;
+
 		} m_appBitAdressed;
 
 		struct
@@ -214,6 +216,8 @@ namespace Builder
 
 		int appBitMemoryStart() const { return m_appBitAdressed.memory.startAddress(); }
 		int appBitMemorySizeW() const { return m_appBitAdressed.memory.sizeW(); }
+		int appBitMemoryDiscreteSignalsHeapStart() const { return m_appBitAdressed.discreteSignalsHeap.startAddress(); }
+		void setAppBitMemoryDiscreteSignalsHeapSizeW(int sizeW) { m_appBitAdressed.discreteSignalsHeap.setSizeW(sizeW); }
 
 		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
 		int wordAccumulatorAddress() const { return m_appWordAdressed.wordAccumulator.startAddress(); }

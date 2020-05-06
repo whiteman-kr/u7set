@@ -330,61 +330,6 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-/*	CodeItem::CodeItem()
-	{
-	}
-
-
-	CodeItem::CodeItem(const CodeItem& codeItem)
-	{
-		m_comment = codeItem.m_comment;
-		m_binCode = codeItem.m_binCode;
-	}*
-
-
-	// ---------------------------------------------------------------------------------------
-	//
-	// Comment class implementation
-	//
-	// ---------------------------------------------------------------------------------------
-
-/*	Comment::Comment()
-	{
-	}
-
-
-	Comment::Comment(const Comment& comment) :
-		CodeItem(comment)
-	{
-	}
-
-
-	Comment::Comment(const QString& comment)
-	{
-		setComment(comment);
-	}
-
-
-	QString Comment::toString()
-	{
-		QString comment = getComment();
-
-		if (comment.isEmpty())
-		{
-			return "";
-		}
-
-		return QString("\t-- %1").arg(getComment());
-	}*/
-
-
-	// ---------------------------------------------------------------------------------------
-	//
-	// CodeItem class implementation
-	//
-	// ---------------------------------------------------------------------------------------
-
-//	QHash<int, const LmCommand*> CodeItem::m_lmCommands;
 	QHash<int, int> CodeItem::m_executedFb;
 
 	qint32 CodeItem::m_codeItemsNumerator = 0;
@@ -435,6 +380,9 @@ namespace Builder
 
 	void CodeItem::mov(int addrTo, int addrFrom)
 	{
+		Q_ASSERT(addrTo >= 0);
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -446,8 +394,11 @@ namespace Builder
 
 	void CodeItem::mov(Address16 addrTo, Address16 addrFrom)
 	{
-		assert(addrTo.bit() == 0);
-		assert(addrFrom.bit() == 0);
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
+
+		Q_ASSERT(addrFrom.isValid() == true);
+		Q_ASSERT(addrFrom.bit() == 0);
 
 		mov(addrTo.offset(), addrFrom.offset());
 	}
@@ -458,7 +409,7 @@ namespace Builder
 
 		m_result = true;
 
-		assert(sizeW > 0);
+		Q_ASSERT(sizeW > 0);
 
 		m_code.setOpCode(LmCommand::Code::MOVMEM);
 		m_code.setWord2(addrTo);
@@ -468,14 +419,19 @@ namespace Builder
 
 	void CodeItem::movMem(Address16 addrTo, Address16 addrFrom, int sizeW)
 	{
-		assert(addrTo.bit() == 0);
-		assert(addrFrom.bit() == 0);
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
+
+		Q_ASSERT(addrFrom.isValid() == true);
+		Q_ASSERT(addrFrom.bit() == 0);
 
 		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
 	}
 
 	void CodeItem::movConst(int addrTo, int constVal)
 	{
+		Q_ASSERT(addrTo >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -487,6 +443,8 @@ namespace Builder
 
 	void CodeItem::movBitConst(int addrTo, int bitNo, int constBit)
 	{
+		Q_ASSERT(addrTo >=0);
+
 		initCommand();
 
 		m_result = true;
@@ -506,6 +464,8 @@ namespace Builder
 
 	void CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption)
 	{
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -520,6 +480,8 @@ namespace Builder
 
 	void CodeItem::readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
 	{
+		Q_ASSERT(addrTo >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -548,6 +510,8 @@ namespace Builder
 
 	void CodeItem::writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, int addrFrom, int bitNo, const QString& fbCaption)
 	{
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -563,11 +527,15 @@ namespace Builder
 
 	void CodeItem::writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption)
 	{
+		Q_ASSERT(addrFrom.isValid() == true);
+
 		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
 	}
 
 	void CodeItem::readFuncBlockBit(int addrTo, int bitNo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
 	{
+		Q_ASSERT(addrTo >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -583,6 +551,8 @@ namespace Builder
 
 	void CodeItem::readFuncBlockBit(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
 	{
+		Q_ASSERT(addrTo.isValid() == true);
+
 		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
 	}
 
@@ -602,6 +572,8 @@ namespace Builder
 
 	void CodeItem::setMem(int addr, int constValue, int sizeW)
 	{
+		Q_ASSERT(addr >=0);
+
 		initCommand();
 
 		m_result = true;
@@ -614,9 +586,11 @@ namespace Builder
 		m_code.setWord4(sizeW);
 	}
 
-
 	void CodeItem::movBit(int addrTo, int bitTo, int addrFrom, int bitFrom)
 	{
+		Q_ASSERT(addrTo >=0);
+		Q_ASSERT(addrFrom >=0);
+
 		initCommand();
 
 		m_result = true;
@@ -630,8 +604,8 @@ namespace Builder
 
 	void CodeItem::movBit(Address16 addrTo, Address16 addrFrom)
 	{
-		assert(addrTo.isValid() == true);
-		assert(addrFrom.isValid() == true);
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrFrom.isValid() == true);
 
 		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
 	}
@@ -660,6 +634,8 @@ namespace Builder
 
 	void CodeItem::appStart(int appStartAddr)
 	{
+		Q_ASSERT(appStartAddr >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -670,6 +646,9 @@ namespace Builder
 
 	void CodeItem::mov32(int addrTo, int addrFrom)
 	{
+		Q_ASSERT(addrTo >= 0);
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -681,14 +660,19 @@ namespace Builder
 
 	void CodeItem::mov32(Address16 addrTo, Address16 addrFrom)
 	{
-		assert(addrTo.bit() == 0);
-		assert(addrFrom.bit() == 0);
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
+
+		Q_ASSERT(addrFrom.isValid() == true);
+		Q_ASSERT(addrFrom.bit() == 0);
 
 		mov32(addrTo.offset(), addrFrom.offset());
 	}
 
 	void CodeItem::movConstInt32(int addrTo, qint32 constInt32)
 	{
+		Q_ASSERT(addrTo >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -702,6 +686,8 @@ namespace Builder
 
 	void CodeItem::movConstUInt32(int addrTo, quint32 constUInt32)
 	{
+		Q_ASSERT(addrTo >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -715,6 +701,8 @@ namespace Builder
 
 	void CodeItem::movConstFloat(int addrTo, float constFloat)
 	{
+		Q_ASSERT(addrTo >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -730,6 +718,8 @@ namespace Builder
 
 	void CodeItem::writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption)
 	{
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -744,13 +734,16 @@ namespace Builder
 
 	void CodeItem::writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption)
 	{
-		assert(addrFrom.bit() == 0);
+		Q_ASSERT(addrFrom.isValid() == true);
+		Q_ASSERT(addrFrom.bit() == 0);
 
 		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
 	}
 
 	void CodeItem::readFuncBlock32(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
 	{
+		Q_ASSERT(addrTo >=0 );
+
 		initCommand();
 
 		m_result = true;
@@ -765,7 +758,8 @@ namespace Builder
 
 	void CodeItem::readFuncBlock32(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
 	{
-		assert(addrTo.bit() == 0);
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
 
 		readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
 	}
@@ -840,6 +834,9 @@ namespace Builder
 
 	void CodeItem::movCompareFlag(int addrTo, int bitNo)
 	{
+		Q_ASSERT(addrTo >= 0);
+		Q_ASSERT(bitNo >= 0 && bitNo <= LmCommand::MAX_BIT_NO_16);
+
 		initCommand();
 
 		m_result = true;
@@ -851,6 +848,9 @@ namespace Builder
 
 	void CodeItem::prevMov(int addrTo, int addrFrom)
 	{
+		Q_ASSERT(addrTo >= 0);
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -862,6 +862,9 @@ namespace Builder
 
 	void CodeItem::prevMov32(int addrTo, int addrFrom)
 	{
+		Q_ASSERT(addrTo >= 0);
+		Q_ASSERT(addrFrom >= 0);
+
 		initCommand();
 
 		m_result = true;
@@ -871,8 +874,13 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
-	void CodeItem::fill(int addrTo, int addrFrom, int addrBit)
+	void CodeItem::fill(int addrTo, int addrFrom, int addrFromBit)
 	{
+		Q_ASSERT(addrTo >= 0);
+
+		Q_ASSERT(addrFrom >= 0);
+		Q_ASSERT(addrFromBit >= 0 && addrFromBit <= LmCommand::MAX_BIT_NO_16);
+
 		initCommand();
 
 		m_result = true;
@@ -880,14 +888,15 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::FILL);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
-		m_code.setWord4(addrBit);
+		m_code.setWord4(addrFromBit);
 	}
 
 	void CodeItem::fill(Address16 addrTo, Address16 addrFrom)
 	{
-		assert(addrTo.isValid() == true);
-		assert(addrFrom.isValid() == true);
-		assert(addrTo.bit() == 0);
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
+
+		Q_ASSERT(addrFrom.isValid() == true);
 
 		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
 	}

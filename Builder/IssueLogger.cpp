@@ -4954,7 +4954,7 @@ namespace Builder
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Bus composer is connected to non-bus signal.
+	///		Undefined UAL address of signal. Contact to RPCT developers.
 	///
 	void IssueLogger::errALC5105(QString signalID, QUuid signalUuid, QString schemaID)
 	{

@@ -144,6 +144,8 @@ namespace Builder
 			int currentStep = 0;
 			int currentStepSizeBits = 0;			// for now 32 or 16 only
 			int currentBusSignalOffsetW = 0;
+
+			bool isLastStep() const { return currentStep == (stepsNumber - 1); }
 		};
 
 	public:
@@ -419,7 +421,8 @@ namespace Builder
 											 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-													 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
+													 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+													 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
 												const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
@@ -519,6 +522,7 @@ namespace Builder
 		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
 		bool writeLooopbacksReport();
+		bool writeHeapsLog();
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();

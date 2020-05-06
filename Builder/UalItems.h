@@ -434,13 +434,6 @@ namespace Builder
 								E::AnalogAppSignalFormat analogFormat,
 								Signal** autoSignalPtr);
 
-/*		bool createOptoSignal(const UalItem* ualItem,
-								Signal* s,
-								const QString &lmEquipmentID,
-								BusShared bus,
-								bool isBusChildSignal,
-								IssueLogger* log);*/
-
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
 									BusShared bus,
@@ -453,8 +446,6 @@ namespace Builder
 	public:
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
 		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
-
-		//Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -472,8 +463,6 @@ namespace Builder
 
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
-
-//		bool setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal);
 
 		Address16 ioBufAddr();
 
@@ -508,8 +497,6 @@ namespace Builder
 		bool isCompatible(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;
 		bool isCompatible(const BusSignal& busSignal, IssueLogger* log) const;
 		bool isCompatible(const UalSignal* ualSignal, IssueLogger *log) const;
-
-//		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 
 		bool isInput() const { return m_isInput; }
 		bool isTunable() const { return m_isTunable; }
@@ -667,6 +654,16 @@ namespace Builder
 
 		bool getReport(QStringList& report) const;
 
+		//
+
+		void initDiscreteSignalsHeap(int startAddrW, int sizeW);
+		int getDiscreteSignalsHeapSizeW() const;
+
+		Address16 getSignalWriteAddress(const UalSignal& ualSignal);
+		Address16 getSignalReadAddress(const UalSignal& ualSignal, bool decrementReadCount);
+
+		void getHeapsLog(QStringList* log) const;
+
 	private:
 		UalSignal* privateCreateAutoSignal(const UalItem* ualItem,
 									QUuid outPinUuid,
@@ -695,6 +692,7 @@ namespace Builder
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
 
 		SignalsHeap m_discreteSignalsHeap;
+		SignalsHeap m_otherSignalsHeap;				// for now: Analog and Bus signals
 	};
 
 }
