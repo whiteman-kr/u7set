@@ -4545,19 +4545,33 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   inline bool drawgridvalueunits() const;
   inline void set_drawgridvalueunits(bool value);
 
-  // optional double gridMainStep = 50 [default = 50];
-  inline bool has_gridmainstep() const;
-  inline void clear_gridmainstep();
-  static const int kGridMainStepFieldNumber = 50;
-  inline double gridmainstep() const;
-  inline void set_gridmainstep(double value);
+  // optional double linearGridMainStep = 50 [default = 50];
+  inline bool has_lineargridmainstep() const;
+  inline void clear_lineargridmainstep();
+  static const int kLinearGridMainStepFieldNumber = 50;
+  inline double lineargridmainstep() const;
+  inline void set_lineargridmainstep(double value);
 
-  // optional double gridSmallStep = 51 [default = 10];
-  inline bool has_gridsmallstep() const;
-  inline void clear_gridsmallstep();
-  static const int kGridSmallStepFieldNumber = 51;
-  inline double gridsmallstep() const;
-  inline void set_gridsmallstep(double value);
+  // optional double linearGridSmallStep = 51 [default = 10];
+  inline bool has_lineargridsmallstep() const;
+  inline void clear_lineargridsmallstep();
+  static const int kLinearGridSmallStepFieldNumber = 51;
+  inline double lineargridsmallstep() const;
+  inline void set_lineargridsmallstep(double value);
+
+  // optional double logarithmicGridMainStep = 52 [default = 1];
+  inline bool has_logarithmicgridmainstep() const;
+  inline void clear_logarithmicgridmainstep();
+  static const int kLogarithmicGridMainStepFieldNumber = 52;
+  inline double logarithmicgridmainstep() const;
+  inline void set_logarithmicgridmainstep(double value);
+
+  // optional double logarithmicGridSmallStep = 53 [default = 0.5];
+  inline bool has_logarithmicgridsmallstep() const;
+  inline void clear_logarithmicgridsmallstep();
+  static const int kLogarithmicGridSmallStepFieldNumber = 53;
+  inline double logarithmicgridsmallstep() const;
+  inline void set_logarithmicgridsmallstep(double value);
 
   // optional int32 drawSetpoints = 70 [default = 0];
   inline bool has_drawsetpoints() const;
@@ -4577,6 +4591,13 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
       customsetpoints() const;
   inline ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >*
       mutable_customsetpoints();
+
+  // optional int32 scaleType = 75 [default = 0];
+  inline bool has_scaletype() const;
+  inline void clear_scaletype();
+  static const int kScaleTypeFieldNumber = 75;
+  inline ::google::protobuf::int32 scaletype() const;
+  inline void set_scaletype(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:Proto.IndicatorHistogramVert)
  private:
@@ -4606,12 +4627,18 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   inline void clear_has_drawgridvalueforallbars();
   inline void set_has_drawgridvalueunits();
   inline void clear_has_drawgridvalueunits();
-  inline void set_has_gridmainstep();
-  inline void clear_has_gridmainstep();
-  inline void set_has_gridsmallstep();
-  inline void clear_has_gridsmallstep();
+  inline void set_has_lineargridmainstep();
+  inline void clear_has_lineargridmainstep();
+  inline void set_has_lineargridsmallstep();
+  inline void clear_has_lineargridsmallstep();
+  inline void set_has_logarithmicgridmainstep();
+  inline void clear_has_logarithmicgridmainstep();
+  inline void set_has_logarithmicgridsmallstep();
+  inline void clear_has_logarithmicgridsmallstep();
   inline void set_has_drawsetpoints();
   inline void clear_has_drawsetpoints();
+  inline void set_has_scaletype();
+  inline void clear_has_scaletype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4628,13 +4655,16 @@ class IndicatorHistogramVert : public ::google::protobuf::Message {
   bool drawgridvalues_;
   bool drawgridvalueforallbars_;
   bool drawgridvalueunits_;
-  double gridmainstep_;
-  double gridsmallstep_;
+  double lineargridmainstep_;
+  double lineargridsmallstep_;
+  double logarithmicgridmainstep_;
+  double logarithmicgridsmallstep_;
   ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint > customsetpoints_;
   ::google::protobuf::int32 drawsetpoints_;
+  ::google::protobuf::int32 scaletype_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(20 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20782,59 +20812,103 @@ inline void IndicatorHistogramVert::set_drawgridvalueunits(bool value) {
   drawgridvalueunits_ = value;
 }
 
-// optional double gridMainStep = 50 [default = 50];
-inline bool IndicatorHistogramVert::has_gridmainstep() const {
+// optional double linearGridMainStep = 50 [default = 50];
+inline bool IndicatorHistogramVert::has_lineargridmainstep() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
-inline void IndicatorHistogramVert::set_has_gridmainstep() {
+inline void IndicatorHistogramVert::set_has_lineargridmainstep() {
   _has_bits_[0] |= 0x00002000u;
 }
-inline void IndicatorHistogramVert::clear_has_gridmainstep() {
+inline void IndicatorHistogramVert::clear_has_lineargridmainstep() {
   _has_bits_[0] &= ~0x00002000u;
 }
-inline void IndicatorHistogramVert::clear_gridmainstep() {
-  gridmainstep_ = 50;
-  clear_has_gridmainstep();
+inline void IndicatorHistogramVert::clear_lineargridmainstep() {
+  lineargridmainstep_ = 50;
+  clear_has_lineargridmainstep();
 }
-inline double IndicatorHistogramVert::gridmainstep() const {
-  return gridmainstep_;
+inline double IndicatorHistogramVert::lineargridmainstep() const {
+  return lineargridmainstep_;
 }
-inline void IndicatorHistogramVert::set_gridmainstep(double value) {
-  set_has_gridmainstep();
-  gridmainstep_ = value;
+inline void IndicatorHistogramVert::set_lineargridmainstep(double value) {
+  set_has_lineargridmainstep();
+  lineargridmainstep_ = value;
 }
 
-// optional double gridSmallStep = 51 [default = 10];
-inline bool IndicatorHistogramVert::has_gridsmallstep() const {
+// optional double linearGridSmallStep = 51 [default = 10];
+inline bool IndicatorHistogramVert::has_lineargridsmallstep() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
-inline void IndicatorHistogramVert::set_has_gridsmallstep() {
+inline void IndicatorHistogramVert::set_has_lineargridsmallstep() {
   _has_bits_[0] |= 0x00004000u;
 }
-inline void IndicatorHistogramVert::clear_has_gridsmallstep() {
+inline void IndicatorHistogramVert::clear_has_lineargridsmallstep() {
   _has_bits_[0] &= ~0x00004000u;
 }
-inline void IndicatorHistogramVert::clear_gridsmallstep() {
-  gridsmallstep_ = 10;
-  clear_has_gridsmallstep();
+inline void IndicatorHistogramVert::clear_lineargridsmallstep() {
+  lineargridsmallstep_ = 10;
+  clear_has_lineargridsmallstep();
 }
-inline double IndicatorHistogramVert::gridsmallstep() const {
-  return gridsmallstep_;
+inline double IndicatorHistogramVert::lineargridsmallstep() const {
+  return lineargridsmallstep_;
 }
-inline void IndicatorHistogramVert::set_gridsmallstep(double value) {
-  set_has_gridsmallstep();
-  gridsmallstep_ = value;
+inline void IndicatorHistogramVert::set_lineargridsmallstep(double value) {
+  set_has_lineargridsmallstep();
+  lineargridsmallstep_ = value;
+}
+
+// optional double logarithmicGridMainStep = 52 [default = 1];
+inline bool IndicatorHistogramVert::has_logarithmicgridmainstep() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_logarithmicgridmainstep() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void IndicatorHistogramVert::clear_has_logarithmicgridmainstep() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void IndicatorHistogramVert::clear_logarithmicgridmainstep() {
+  logarithmicgridmainstep_ = 1;
+  clear_has_logarithmicgridmainstep();
+}
+inline double IndicatorHistogramVert::logarithmicgridmainstep() const {
+  return logarithmicgridmainstep_;
+}
+inline void IndicatorHistogramVert::set_logarithmicgridmainstep(double value) {
+  set_has_logarithmicgridmainstep();
+  logarithmicgridmainstep_ = value;
+}
+
+// optional double logarithmicGridSmallStep = 53 [default = 0.5];
+inline bool IndicatorHistogramVert::has_logarithmicgridsmallstep() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_logarithmicgridsmallstep() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void IndicatorHistogramVert::clear_has_logarithmicgridsmallstep() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void IndicatorHistogramVert::clear_logarithmicgridsmallstep() {
+  logarithmicgridsmallstep_ = 0.5;
+  clear_has_logarithmicgridsmallstep();
+}
+inline double IndicatorHistogramVert::logarithmicgridsmallstep() const {
+  return logarithmicgridsmallstep_;
+}
+inline void IndicatorHistogramVert::set_logarithmicgridsmallstep(double value) {
+  set_has_logarithmicgridsmallstep();
+  logarithmicgridsmallstep_ = value;
 }
 
 // optional int32 drawSetpoints = 70 [default = 0];
 inline bool IndicatorHistogramVert::has_drawsetpoints() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void IndicatorHistogramVert::set_has_drawsetpoints() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void IndicatorHistogramVert::clear_has_drawsetpoints() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void IndicatorHistogramVert::clear_drawsetpoints() {
   drawsetpoints_ = 0;
@@ -20871,6 +20945,28 @@ IndicatorHistogramVert::customsetpoints() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::VFrameSetPoint >*
 IndicatorHistogramVert::mutable_customsetpoints() {
   return &customsetpoints_;
+}
+
+// optional int32 scaleType = 75 [default = 0];
+inline bool IndicatorHistogramVert::has_scaletype() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_scaletype() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void IndicatorHistogramVert::clear_has_scaletype() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void IndicatorHistogramVert::clear_scaletype() {
+  scaletype_ = 0;
+  clear_has_scaletype();
+}
+inline ::google::protobuf::int32 IndicatorHistogramVert::scaletype() const {
+  return scaletype_;
+}
+inline void IndicatorHistogramVert::set_scaletype(::google::protobuf::int32 value) {
+  set_has_scaletype();
+  scaletype_ = value;
 }
 
 // -------------------------------------------------------------------

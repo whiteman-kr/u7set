@@ -529,6 +529,13 @@ public:
 	};
 	Q_ENUM(IndicatorColorSource)
 
+	enum class IndicatorScaleType
+	{
+		Linear,
+		Logarithmic
+	};
+	Q_ENUM(IndicatorScaleType)
+
 public:
 	template <typename ENUM_TYPE>
 	static QMetaEnum metaEnum()
