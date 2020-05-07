@@ -2116,8 +2116,8 @@ namespace Builder
 	UalSignalsMap::UalSignalsMap(ModuleLogicCompiler& compiler, IssueLogger* log) :
 		m_compiler(compiler),
 		m_log(log),
-		m_discreteSignalsHeap(SIZE_1BIT),
-		m_analogAndBusSignalsHeap(SIZE_16BIT)
+		m_discreteSignalsHeap(SIZE_1BIT, compiler.generateExtraDebugInfo(), log),
+		m_analogAndBusSignalsHeap(SIZE_16BIT, compiler.generateExtraDebugInfo(), log)
 	{
 	}
 
@@ -2727,6 +2727,12 @@ namespace Builder
 		}
 	}
 
+	void UalSignalsMap::finalizeHeaps()
+	{
+		m_discreteSignalsHeap.finalize();
+		m_analogAndBusSignalsHeap.finalize();
+	}
+
 	void UalSignalsMap::getHeapsLog(QStringList* log) const
 	{
 		TEST_PTR_RETURN(log);
@@ -2735,7 +2741,7 @@ namespace Builder
 		log->append(QString());
 		log->append(m_discreteSignalsHeap.getHeapLog());
 		log->append(QString());
-		log->append(QString().fill('-', 80));
+		log->append(QString().fill('=', 120));
 		log->append(QString());
 		log->append(QString("Analog and Bus signals heap log:"));
 		log->append(QString());

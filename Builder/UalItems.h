@@ -671,6 +671,8 @@ namespace Builder
 
 		void removeSignalFromHeap(const UalSignal& ualSignal);
 
+		void finalizeHeaps();
+
 		void getHeapsLog(QStringList* log) const;
 
 	private:

@@ -14,19 +14,18 @@ namespace Builder
 
 	//
 
-	SignalsHeap::SignalsHeap(int memCellSizeBits)
+	SignalsHeap::SignalsHeap(int memCellSizeBits, bool generateLog, IssueLogger* log) :
+		m_memCellSizeBits(memCellSizeBits),
+		m_generateLog(generateLog),
+		m_log(log)
 	{
 		// memCellSizeBits should be == 1 or 16
 		//
-		Q_ASSERT(memCellSizeBits == SIZE_1BIT || memCellSizeBits == SIZE_16BIT);
-
-		m_memCellSizeBits = memCellSizeBits;
+		Q_ASSERT(m_memCellSizeBits == SIZE_1BIT || m_memCellSizeBits == SIZE_16BIT);
 	}
 
 	SignalsHeap::~SignalsHeap()
 	{
-		Q_ASSERT(m_itemsInHeap.size() == 0);
-
 		for(const std::pair<QString, HeapItem*>& p : m_items)
 		{
 			delete p.second;
@@ -39,6 +38,20 @@ namespace Builder
 		m_heapSizeW = heapSizeW;
 
 		m_heapHighBoundBits = m_heapStartAddrW * SIZE_16BIT;
+
+		logInit();
+	}
+
+	void SignalsHeap::finalize()
+	{
+		if (m_itemsInHeap.size() != 0)
+		{
+			Q_ASSERT(false);
+
+			LOG_INTERNAL_ERROR_MSG(m_log, "Heap is not clear on destruction!");
+		}
+
+		logFinalize();
 	}
 
 	void SignalsHeap::appendItem(const UalSignal& ualSignal, std::optional<int> expectedReadCount)
@@ -56,19 +69,22 @@ namespace Builder
 
 		if (m_items.find(appSignalID) != m_items.end())
 		{
-			Q_ASSERT(false);		// duplicate appSignalID
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Duplicate appSignalID - %1").arg(appSignalID));
 			return;
 		}
 
 		if (m_memCellSizeBits == SIZE_1BIT &&  signalDataSize != SIZE_1BIT)
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Data size of signal %1 is not equal 1 bit").arg(appSignalID));
 			return;
 		}
 
 		if (m_memCellSizeBits == SIZE_16BIT && (signalDataSize % SIZE_16BIT) != 0)
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Data size of signal %1 is not multiple to 16 bit").arg(appSignalID));
 			return;
 		}
 
@@ -92,7 +108,8 @@ namespace Builder
 
 		if (m_items.find(appSignalID) == m_items.end())
 		{
-			Q_ASSERT(false);		// appSignalID is not found, why?
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Heap item %1 is not exists").arg(appSignalID));
 			return;
 		}
 
@@ -101,13 +118,22 @@ namespace Builder
 
 	Address16 SignalsHeap::getAddressForWrite(const UalSignal& ualSignal)
 	{
+		if (m_firstGetWriteAddr == true)
+		{
+			logHeapItems();
+			m_firstGetWriteAddr = false;
+		}
+
 		Address16 addrForWrite;
 
-		std::map<QString, HeapItem*>::iterator p = m_items.find(ualSignal.appSignalID());
+		QString appSignalID = ualSignal.appSignalID();
+
+		std::map<QString, HeapItem*>::iterator p = m_items.find(appSignalID);
 
 		if (p == m_items.end())
 		{
-			Q_ASSERT(false);				// appSignalID is not found
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Heap item %1 is not exists").arg(appSignalID));
 			return addrForWrite;
 		}
 
@@ -116,12 +142,14 @@ namespace Builder
 		if (heapItem == nullptr)
 		{
 			Q_ASSERT(false);
+			LOG_NULLPTR_ERROR(m_log);
 			return addrForWrite;
 		}
 
 		if (heapItem->address != BAD_ADDRESS)
 		{
-			Q_ASSERT(false);				// repeated call of getAddressForWrite for appSignalID
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Repeated call of getAddressForWrite for %1").arg(appSignalID));
 			return addrForWrite;
 		}
 
@@ -159,8 +187,8 @@ namespace Builder
 
 		if (plainBitAddr + heapItem->sizeBits > (m_heapStartAddrW + m_heapSizeW) * SIZE_16BIT)
 		{
-			// out of heap size
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Out of heap size"));
 			return addrForWrite;
 		}
 
@@ -184,11 +212,14 @@ namespace Builder
 	{
 		Address16 addrForRead;
 
-		std::map<QString, HeapItem*>::iterator p = m_items.find(ualSignal.appSignalID());
+		QString appSignalID = ualSignal.appSignalID();
+
+		std::map<QString, HeapItem*>::iterator p = m_items.find(appSignalID);
 
 		if (p == m_items.end())
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Heap item %1 is not exists").arg(appSignalID));
 			return addrForRead;
 		}
 
@@ -197,12 +228,14 @@ namespace Builder
 		if (heapItem == nullptr)
 		{
 			Q_ASSERT(false);
+			LOG_NULLPTR_ERROR(m_log);
 			return addrForRead;
 		}
 
 		if (heapItem->address == BAD_ADDRESS)
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined heap item %1 address").arg(appSignalID));
 			return addrForRead;
 		}
 
@@ -211,18 +244,21 @@ namespace Builder
 		if (heapItem->sizeBits != ualSignal.dataSize())
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Heap item data size and signal %1 data size are not equal").arg(appSignalID));
 			return addrForRead;
 		}
 
 		if (heapItem->readCount <= 0)
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Extra read of heap item %1").arg(appSignalID));
 			return addrForRead;
 		}
 
 		if (m_itemsInHeap.find(plainBitAddr) == m_itemsInHeap.end())
 		{
 			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Heap item %1 is not in m_itemsInHeap").arg(appSignalID));
 			return addrForRead;
 		}
 
@@ -271,8 +307,106 @@ namespace Builder
 
 	const QStringList& SignalsHeap::getHeapLog() const
 	{
+		return m_heapLog;
+	}
+
+	void SignalsHeap::logInit()
+	{
+		if (m_generateLog == false)
+		{
+			return;
+		}
+
+		m_heapLog.append(QString("Heap mem cell size:\t%1 bit(s)").arg(m_memCellSizeBits));
+		m_heapLog.append(QString("Heap start addrW:\t%1").arg(m_heapStartAddrW));
+		m_heapLog.append(QString("Max heap sizeW:\t\t%1").arg(m_heapSizeW));
+	}
+
+	void SignalsHeap::logHeapItems()
+	{
+		if (m_generateLog == false)
+		{
+			return;
+		}
+
+		m_heapLog.append(QString("Heap items count:\t%1").arg(m_items.size()));
+
 		if (m_items.size() > 0)
 		{
+			m_heapLog.append(QString());
+			m_heapLog.append(QString().fill('-', 80));
+			m_heapLog.append(QString("Size\tExpRead"));
+			m_heapLog.append(QString().fill('-', 80));
+
+			for(const std::pair<QString, HeapItem*>& p : m_items)
+			{
+				 HeapItem* heapItem = p.second;
+
+				 TEST_PTR_CONTINUE(heapItem);
+
+				 m_heapLog.append(QString("%1\t%2\t%3").
+									arg(heapItem->sizeBits).
+									arg(heapItem->readCount).
+									arg(heapItem->appSignalID));
+			}
+
+			m_heapLog.append(QString().fill('-', 80));
+			m_heapLog.append(QString());
+		}
+	}
+
+	void SignalsHeap::logAppendToHeap(const HeapItem& heapItem)
+	{
+		if (m_generateLog == false)
+		{
+			return;
+		}
+
+		m_heapLog.append(QString("%1 append %2 (expRead = %3)").
+							arg(heapItem.address16().toString()).
+							arg(heapItem.appSignalID).
+							arg(heapItem.readCount));
+	}
+
+	void SignalsHeap::logReadFromHeap(const HeapItem& heapItem, bool decrementReadCount)
+	{
+		if (m_generateLog == false)
+		{
+			return;
+		}
+
+		m_heapLog.append(QString("%1 read %2 (decReadCount = %3, expRead = %4)").
+							arg(heapItem.address16().toString()).
+							arg(heapItem.appSignalID).
+							arg(decrementReadCount == true ? "TRUE" : "FALSE").
+							arg(heapItem.readCount));
+	}
+
+	void SignalsHeap::logRemoveFromHeap(const HeapItem& heapItem)
+	{
+		if (m_generateLog == false)
+		{
+			return;
+		}
+
+		m_heapLog.append(QString("%1 remove %2").
+							arg(heapItem.address16().toString()).
+							arg(heapItem.appSignalID));
+	}
+
+	void SignalsHeap::logFinalize()
+	{
+		if (m_generateLog == false)
+		{
+			return;
+		}
+
+		if (m_items.size() > 0)
+		{
+			m_heapLog.insert(3, QString("Used heap sizeW:\t%1 (%2%)").
+								arg(getHeapUsedSizeW()).
+								arg(static_cast<double>((getHeapUsedSizeW() * 100.0) / m_heapSizeW), 0, 'g', 1));
+
 			m_heapLog.append("");
 
 			if (m_itemsInHeap.size() == 0)
@@ -284,36 +418,6 @@ namespace Builder
 				m_heapLog.append(QString("ERROR! Heap contains %1 item(s) on destruction.").arg(m_itemsInHeap.size()));
 			}
 		}
-		else
-		{
-			m_heapLog.append("No signals placed in heap.");
-		}
-
-		return m_heapLog;
-	}
-
-	void SignalsHeap::logAppendToHeap(const HeapItem& heapItem)
-	{
-		m_heapLog.append(QString("%1 append %2 (expected read count = %3)").
-							arg(heapItem.address16().toString()).
-							arg(heapItem.appSignalID).
-							arg(heapItem.readCount));
-	}
-
-	void SignalsHeap::logReadFromHeap(const HeapItem& heapItem, bool decrementReadCount)
-	{
-		m_heapLog.append(QString("%1 read %2 (decrementReadCount = %3, expected read count = %4)").
-							arg(heapItem.address16().toString()).
-							arg(heapItem.appSignalID).
-							arg(decrementReadCount == true ? "TRUE" : "FALSE").
-							arg(heapItem.readCount));
-	}
-
-	void SignalsHeap::logRemoveFromHeap(const HeapItem& heapItem)
-	{
-		m_heapLog.append(QString("%1 remove %2").
-							arg(heapItem.address16().toString()).
-							arg(heapItem.appSignalID));
 	}
 }
 

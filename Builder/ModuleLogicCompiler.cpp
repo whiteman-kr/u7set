@@ -148,6 +148,8 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::generateAlpPhaseCode),
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
 
+			PROC_TO_CALL(ModuleLogicCompiler::finalizeAppLogicCodeGeneration),
+
 			//
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
@@ -205,6 +207,11 @@ namespace Builder
 	bool ModuleLogicCompiler::expertMode() const
 	{
 		return m_context->m_expertMode;
+	}
+
+	bool ModuleLogicCompiler::generateExtraDebugInfo() const
+	{
+		return m_context->generateExtraDebugInfo();
 	}
 
 	void ModuleLogicCompiler::setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers)
@@ -6831,6 +6838,13 @@ namespace Builder
 		stopCmd.setComment("end of ALP phase code");
 
 		m_code.append(stopCmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::finalizeAppLogicCodeGeneration()
+	{
+		m_ualSignals.finalizeHeaps();
 
 		return true;
 	}

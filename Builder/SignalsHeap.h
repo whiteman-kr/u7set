@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "../lib/Address16.h"
+#include "IssueLogger.h"
 
 namespace Builder
 {
@@ -23,10 +24,11 @@ namespace Builder
 		};
 
 	public:
-		SignalsHeap(int memCellSizeBits);
+		SignalsHeap(int memCellSizeBits, bool generateLog, IssueLogger* log);
 		virtual ~SignalsHeap();
 
 		void init(int heapStartAddrW, int heapSizeW);
+		void finalize();
 
 		void appendItem(const UalSignal &ualSignal, std::optional<int> expectedReadCount);
 		void removeItem(const UalSignal &ualSignal);
@@ -40,12 +42,17 @@ namespace Builder
 
 	private:
 
+		void logInit();
+		void logHeapItems();
 		void logAppendToHeap(const HeapItem& heapItem);
 		void logReadFromHeap(const HeapItem& heapItem, bool decrementReadCount);
 		void logRemoveFromHeap(const HeapItem& heapItem);
+		void logFinalize();
 
 	private:
 		int m_memCellSizeBits = -1;
+		bool m_generateLog = false;
+		IssueLogger* m_log = nullptr;
 
 		int m_heapStartAddrW = -1;
 		int m_heapSizeW = -1;
@@ -56,7 +63,8 @@ namespace Builder
 
 		int m_heapHighBoundBits = 0;
 
-		mutable QStringList m_heapLog;
+		bool m_firstGetWriteAddr = true;
+		QStringList m_heapLog;
 	};
 }
 

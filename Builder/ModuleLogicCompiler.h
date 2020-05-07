@@ -166,6 +166,7 @@ namespace Builder
 		int lmDescriptionNumber() const;
 
 		bool expertMode() const;
+		bool generateExtraDebugInfo() const;
 
 		const ResourcesUsageInfo& resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
@@ -399,6 +400,7 @@ namespace Builder
 		bool generateIdrPhaseCode();
 		bool generateAlpPhaseCode();
 		bool makeAppLogicCode();
+		bool finalizeAppLogicCodeGeneration();
 
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
