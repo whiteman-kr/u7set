@@ -58,6 +58,11 @@ namespace VFrame30
 
 		setIndicatorType(E::IndicatorType::HistogramVert);
 
+		for (IndicatorObjectPtr& indicator : m_indicatorObjects)
+		{
+			connect(indicator.get(), &Indicator::updatePropertiesList, this, &SchemaItemIndicator::updateIndicatorProperties);
+		}
+
 		// Set font
 		//
 		m_font.setName("Arial");
@@ -606,6 +611,13 @@ namespace VFrame30
 
 		m_indicatorType = value;		// Getter will other object with different properties
 
+		updateIndicatorProperties();
+
+		return;
+	}
+
+	void SchemaItemIndicator::updateIndicatorProperties()
+	{
 		// Update specific properties for current indiocator type
 		//
 		removeCategoryProperties(PropertyNames::indicatorSettings);

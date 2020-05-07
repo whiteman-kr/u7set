@@ -108,6 +108,9 @@ public:
 
 	void sort(int column, Qt::SortOrder order) override;
 
+	E::AnalogFormat analogFormat() const;
+	void setAnalogFormat(E::AnalogFormat format);
+
 protected:
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -140,6 +143,7 @@ protected:
 
 	std::vector<QStringList> m_valueColumnAppSignalIdSuffixes;
 
+	E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
 };
 
 class DialogInputTuningValue : public QDialog
@@ -147,7 +151,7 @@ class DialogInputTuningValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, int decimalPlaces, QWidget* parent);
+	explicit DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent);
 	~DialogInputTuningValue();
 
 private:
@@ -157,6 +161,7 @@ private:
 	TuningValue m_lowLimit;
 	TuningValue m_highLimit;
 
+	E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 	int m_decimalPlaces = 0;
 
 	virtual void accept();

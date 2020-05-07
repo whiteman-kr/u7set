@@ -3,7 +3,7 @@
 #include "SimProjectWidget.h"
 #include "SimMemoryWidget.h"
 #include "SimOutputWidget.h"
-#include "SimOverrideWidget.h"
+#include "SimOverridePane.h"
 #include "SimSelectBuildDialog.h"
 #include "SimControlPage.h"
 #include "SimSchemaPage.h"
@@ -29,8 +29,8 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	// --
 	//
-	m_appSignalController = new VFrame30::AppSignalController(&m_simulator->appSignalManager(), this);
-	m_tuningController = new VFrame30::TuningController(&m_simulator->tuningSignalManager(), &m_tuningTcpClient, this);
+	m_appSignalController = new VFrame30::AppSignalController{&m_simulator->appSignalManager(), this};
+	m_tuningController = new VFrame30::TuningController{&m_simulator->tuningSignalManager(), &m_tuningTcpClient, this};
 
 	// --
 	//
@@ -90,41 +90,41 @@ void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
 
 void SimWidget::createToolBar()
 {
-	m_toolBar = new SimToolBar("ToolBar");
+	m_toolBar = new SimToolBar{"ToolBar"};
 	addToolBar(m_toolBar);
 
-	m_openProjectAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this);
+	m_openProjectAction = new QAction{QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this};
 	m_openProjectAction->setShortcut(QKeySequence::Open);
 	connect(m_openProjectAction, &QAction::triggered, this, &SimWidget::openBuild);
 
-	m_closeProjectAction = new QAction(QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this);
+	m_closeProjectAction = new QAction{QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this};
 	m_closeProjectAction->setShortcut(QKeySequence::Close);
 	connect(m_closeProjectAction, &QAction::triggered, this, &SimWidget::closeBuild);
 
-	m_refreshProjectAction = new QAction(QIcon(":/Images/Images/SimRefresh.svg"), tr("Refresh"), this);
+	m_refreshProjectAction = new QAction{QIcon(":/Images/Images/SimRefresh.svg"), tr("Refresh"), this};
 	m_refreshProjectAction->setShortcut(QKeySequence::Refresh);
 	connect(m_refreshProjectAction, &QAction::triggered, this, &SimWidget::refreshBuild);
 
-	m_addWindowAction = new QAction(QIcon(":/Images/Images/SimAddWindow.svg"), tr("Add Window"), this);
+	m_addWindowAction = new QAction{QIcon(":/Images/Images/SimAddWindow.svg"), tr("Add Window"), this};
 	m_addWindowAction->setShortcut(QKeySequence::New);
 	connect(m_addWindowAction, &QAction::triggered, this, &SimWidget::addNewWindow);
 	m_toolBar->addAction(m_addWindowAction);
 
-	m_runAction = new QAction(QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this);
+	m_runAction = new QAction{QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this};
 	QList<QKeySequence> runsKeys;
 	runsKeys << Qt::CTRL + Qt::Key_R;
 	runsKeys << Qt::CTRL + Qt::Key_F5;
 	m_runAction->setShortcuts(runsKeys);
 	connect(m_runAction, &QAction::triggered, this, &SimWidget::runSimulation);
 
-	m_pauseAction = new QAction(QIcon(":/Images/Images/SimPause.svg"), tr("Pause current simulation"), this);
+	m_pauseAction = new QAction{QIcon(":/Images/Images/SimPause.svg"), tr("Pause current simulation"), this};
 	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
 
-	m_stopAction = new QAction(QIcon(":/Images/Images/SimStop.svg"), tr("Stop current simulation"), this);
+	m_stopAction = new QAction{QIcon(":/Images/Images/SimStop.svg"), tr("Stop current simulation"), this};
 	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
-	m_trendsAction = new QAction(QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this);
+	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
 	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
 	connect(m_trendsAction, &QAction::triggered, this, &SimWidget::showTrends);
@@ -164,12 +164,12 @@ void SimWidget::createDocks()
 
 	// Project dock
 	//
-	QDockWidget* projectDock = new QDockWidget("SimProjectBuild", this);
+	QDockWidget* projectDock = new QDockWidget{"SimProjectBuild", this};
 	projectDock->setObjectName(projectDock->windowTitle());
 	projectDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-	projectDock->setTitleBarWidget(new QWidget());		// Hides title bar
+	projectDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	m_projectWidget = new SimProjectWidget(m_simulator.get());
+	m_projectWidget = new SimProjectWidget{m_simulator.get()};
 	projectDock->setWidget(m_projectWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, projectDock);
@@ -184,9 +184,9 @@ void SimWidget::createDocks()
 
 	// Overriden Signals dock
 	//
-	QDockWidget* overrideDock = new QDockWidget("Override", this);
+	QDockWidget* overrideDock = new QDockWidget{"Override", this};
 	overrideDock->setObjectName("SimOverridenSignals");
-	overrideDock->setWidget(new SimOverrideWidget(m_simulator.get(), overrideDock));
+	overrideDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), overrideDock});
 	overrideDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 	addDockWidget(Qt::BottomDockWidgetArea, overrideDock);
@@ -196,10 +196,10 @@ void SimWidget::createDocks()
 	QDockWidget* outputDock = nullptr;
 	if (m_slaveWindow == false)
 	{
-		outputDock = new QDockWidget("Output", this);
+		outputDock = new QDockWidget{"Output", this};
 		outputDock->setObjectName("SimOutputWidget");
 
-		m_outputWidget = new SimOutputWidget(outputDock);
+		m_outputWidget = new SimOutputWidget{outputDock};
 
 		outputDock->setWidget(m_outputWidget);
 		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
@@ -610,7 +610,7 @@ void SimWidget::addNewWindow()
 {
 	qDebug() << "SimulatorWidget::addNewWindow()";
 
-	SimWidget* widget = new SimWidget(m_simulator, db(), this->parentWidget(), Qt::Window, true);
+	SimWidget* widget = new SimWidget{m_simulator, db(), this->parentWidget(), Qt::Window, true};
 	widget->setWindowTitle(tr("u7 Simulator"));
 
 	widget->show();
@@ -655,7 +655,7 @@ void SimWidget::openControlTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimControlPage* controlPage = new SimControlPage(m_simulator.get(), lmEquipmentId, m_tabWidget);
+	SimControlPage* controlPage = new SimControlPage{m_simulator.get(), lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setCurrentIndex(tabIndex);
@@ -696,12 +696,12 @@ void SimWidget::openSchemaTabPage(QString fileName)
 		return;
 	}
 
-	SimSchemaPage* page = new SimSchemaPage(schema,
+	SimSchemaPage* page = new SimSchemaPage{schema,
 											m_simulator.get(),
 											&m_schemaManager,
 											m_appSignalController,
 											m_tuningController,
-											m_tabWidget);
+	                                        m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
@@ -718,7 +718,7 @@ void SimWidget::openCodeTabPage(QString lmEquipmentId)
 		return;
 	}
 
-	SimCodePage* page = new SimCodePage(m_simulator.get(), lmEquipmentId, m_tabWidget);
+	SimCodePage* page = new SimCodePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(page, lmEquipmentId);
 	m_tabWidget->setCurrentIndex(tabIndex);

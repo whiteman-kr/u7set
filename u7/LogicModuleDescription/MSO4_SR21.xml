@@ -180,8 +180,8 @@
 			<Pin OpName="o_result"		OpIndex ="19"	PinType = "Output"/>
 			<Pin OpName="o_maj_edi"		OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>
-			<Pin OpName="o_maj_1err"	OpIndex ="22"	PinType = "Output"/>
-			<Pin OpName="o_maj_2err"	OpIndex ="23"	PinType = "Output"/>
+			<Pin OpName="o_maj_err_ms"	OpIndex ="22"	PinType = "Output"/>
+			<Pin OpName="o_maj_err_st"	OpIndex ="23"	PinType = "Output"/>
 		</AFBComponent>
 		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="256" SimulationFunc="afb_srsst_v104">
 			<Pin OpName="i_data"		OpIndex ="0"	PinType = "Input"/>

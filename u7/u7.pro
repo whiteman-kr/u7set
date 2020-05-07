@@ -87,6 +87,7 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
+    Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
     Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
@@ -188,7 +189,6 @@ SOURCES +=\
     Simulator/SimControlPage.cpp \
     Simulator/SimBasePage.cpp \
     ../lib/Times.cpp \
-    Simulator/SimOverrideWidget.cpp \
     SpecificPropertiesEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Subsystem.cpp \
@@ -226,6 +226,7 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
+    Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
@@ -338,7 +339,6 @@ HEADERS  += \
     SpecificPropertiesEditor.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h \
-    Simulator/SimOverrideWidget.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Subsystem.h \
     ../lib/DbObjectStorage.h \

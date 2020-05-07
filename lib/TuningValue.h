@@ -57,7 +57,9 @@ public:
 	float toFloat() const;
 	void fromFloat(float value);
 
-	QString toString(int precision = -1) const;
+	QString toString() const;
+	QString toString(E::AnalogFormat analogFormat, int precision) const;
+
 	void fromString(QString value, bool* ok = nullptr);
 
 	bool save(Proto::TuningValue* message) const;

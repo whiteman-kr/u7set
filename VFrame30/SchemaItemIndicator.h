@@ -89,6 +89,9 @@ namespace VFrame30
 		using IndicatorObjectPtr = std::unique_ptr<Indicator>;
 		static const int MaxSignalsCound = 12;
 
+	private slots:
+		void updateIndicatorProperties();
+
 	private:
 		Indicator* indicatorObject();
 		const Indicator* indicatorObject() const;

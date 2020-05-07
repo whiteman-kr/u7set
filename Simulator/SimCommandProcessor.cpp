@@ -107,7 +107,9 @@ namespace Sim
 
 		if (pinOpCode != -1 && afb.pinExists(pinOpCode) == false)
 		{
-			 SimException::raise(QString("AfbComponent does not have pin %1").arg(pinOpCode));
+			 SimException::raise(QString("AfbComponent %1 does not have pin %2")
+									.arg(opCode)
+									.arg(pinOpCode));
 		}
 
 		return afb;

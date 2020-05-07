@@ -457,13 +457,14 @@ private:
 	void replace(int row);
 	void reloadCurrentIdsMap();
 	void markFistInstancesIfItTheyNotUnique();
+	void generateListIfNeeded(bool throwWarning = true);
 
 	void updateCounters();
 
 	void saveDialogGeometry();
 
 private slots:
-	void generateListIfNeeded();
+	void generateListIfNeededWithWarning();
 	void updateAllReplacement();
 	void updateReplacement(int row);
 	void updateReplacement(const Signal& signal, int row);

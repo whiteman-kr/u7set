@@ -1169,7 +1169,7 @@ void DialogSignalSnapshot::contextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	cw->currentTab()->signalContextMenu(QStringList() << s.appSignalId());
+	cw->currentTab()->signalContextMenu(QStringList() << s.appSignalId(), {});
 }
 
 

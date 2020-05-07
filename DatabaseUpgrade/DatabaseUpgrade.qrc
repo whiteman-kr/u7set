@@ -324,6 +324,10 @@
         <file>Upgrade0322.sql</file>
         <file>Upgrade0323.sql</file>
         <file>Upgrade0324.sql</file>
+        <file>Upgrade0325.sql</file>
+        <file>Upgrade0326.sql</file>
+        <file>Upgrade0327.sql</file>
+        <file>Upgrade0328.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

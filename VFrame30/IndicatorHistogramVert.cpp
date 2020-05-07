@@ -90,6 +90,27 @@ namespace VFrame30
 	{
 	}
 
+	E::IndicatorScaleType IndicatorHistogramVert::scaleType() const
+	{
+		return m_scaleType;
+	}
+
+	void IndicatorHistogramVert::setScaleType(E::IndicatorScaleType value)
+	{
+		m_scaleType = value;
+
+		// If user changes scale type with default range - set start value to 1 to make logarithmic scale correct
+		//
+		if (m_scaleType == E::IndicatorScaleType::Logarithmic && m_startValue == 0 && m_endValue == 100)
+		{
+			m_startValue = 1;
+		}
+
+		emit updatePropertiesList();
+
+		return;
+	}
+
 	void IndicatorHistogramVert::createProperties(SchemaItemIndicator* propertyObject, int /*signalCount*/)
 	{
 		propertyObject->ADD_PROPERTY_CAT_VAR(double,
@@ -190,19 +211,46 @@ namespace VFrame30
 											 m_drawGridValueUnits)
 				->setDescription(QStringLiteral("Draw units for limits values (only if DrawGrid == true && DrawGridValues == true)"));
 
-		propertyObject->ADD_PROPERTY_CAT_VAR(double,
-											 PropertyNames::gridMainStep,
-											 PropertyNames::indicatorSettings,
-											 true,
-											 m_gridMainStep)
-				->setDescription(QStringLiteral("Step for main grids (only if DrawGrid == true)"));
+		if (m_scaleType == E::IndicatorScaleType::Linear)
+		{
+			propertyObject->ADD_PROPERTY_CAT_VAR(double,
+												 PropertyNames::linearGridMainStep,
+												 PropertyNames::indicatorSettings,
+												 true,
+												 m_linearGridMainStep)
+					->setDescription(QStringLiteral("Step for main linear grids (only if DrawGrid == true)"));
 
-		propertyObject->ADD_PROPERTY_CAT_VAR(double,
-											 PropertyNames::gridSmallStep,
-											 PropertyNames::indicatorSettings,
-											 true,
-											 m_gridSmallStep)
-				->setDescription(QStringLiteral("Step for small grids (only if DrawGrid == true)"));
+			propertyObject->ADD_PROPERTY_CAT_VAR(double,
+												 PropertyNames::linearGridSmallStep,
+												 PropertyNames::indicatorSettings,
+												 true,
+												 m_linearGridSmallStep)
+					->setDescription(QStringLiteral("Step for small linear grids (only if DrawGrid == true)"));
+		}
+
+		if (m_scaleType == E::IndicatorScaleType::Logarithmic)
+		{
+			propertyObject->ADD_PROPERTY_CAT_VAR(double,
+												 PropertyNames::logarithmicGridMainStep,
+												 PropertyNames::indicatorSettings,
+												 true,
+												 m_logarithmicGridMainStep)
+					->setDescription(QStringLiteral("Step for main logarighmic grids (only if DrawGrid == true)"));
+
+			propertyObject->ADD_PROPERTY_CAT_VAR(double,
+												 PropertyNames::logarithmicGridSmallStep,
+												 PropertyNames::indicatorSettings,
+												 true,
+												 m_logarithmicGridSmallStep)
+					->setDescription(QStringLiteral("Step for small logarighmic grids (only if DrawGrid == true)"));
+		}
+
+		propertyObject->ADD_PROPERTY_GETTER_SETTER(E::IndicatorScaleType,
+												   PropertyNames::indicatorScaleType,
+												   true,
+												   IndicatorHistogramVert::scaleType,
+												   IndicatorHistogramVert::setScaleType)
+				->setCategory(PropertyNames::indicatorSettings);
 
 		// bool m_drawAutoSetpoints = true;						// Draw all auto generated setpoints
 		// bool m_drawCustomSetpoints = true;					// Draw custom setpoints
@@ -252,8 +300,13 @@ namespace VFrame30
 		m->set_drawgridvalueforallbars(m_drawGridValueForAllBars);
 		m->set_drawgridvalueunits(m_drawGridValueUnits);
 
-		m->set_gridmainstep(m_gridMainStep);
-		m->set_gridsmallstep(m_gridSmallStep);
+		m->set_lineargridmainstep(m_linearGridMainStep);
+		m->set_lineargridsmallstep(m_linearGridSmallStep);
+
+		m->set_logarithmicgridmainstep(m_logarithmicGridMainStep);
+		m->set_logarithmicgridsmallstep(m_logarithmicGridSmallStep);
+
+		m->set_scaletype(static_cast<int32_t>(m_scaleType));
 
 		m->set_drawsetpoints(static_cast<int32_t>(m_drawSetpoints));
 
@@ -297,8 +350,13 @@ namespace VFrame30
 		m_drawGridValueForAllBars = m.drawgridvalueforallbars();
 		m_drawGridValueUnits = m.drawgridvalueunits();
 
-		m_gridMainStep = m.gridmainstep();
-		m_gridSmallStep = m.gridsmallstep();
+		m_linearGridMainStep = m.lineargridmainstep();
+		m_linearGridSmallStep = m.lineargridsmallstep();
+
+		m_logarithmicGridMainStep = m.logarithmicgridmainstep();
+		m_logarithmicGridSmallStep = m.logarithmicgridsmallstep();
+
+		m_scaleType = static_cast<E::IndicatorScaleType>(m.scaletype());
 
 		m_drawSetpoints = static_cast<E::IndicatorDrawSetpoints>(m.drawsetpoints());
 
@@ -442,7 +500,10 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
 
-		double valueDiff = m_endValue - m_startValue;	// if valueDiff is negative, then draw bar upside down
+		double lowLimit = pointToScaleValue(m_startValue);
+		double highLimit = pointToScaleValue(m_endValue);
+
+		double valueDiff = highLimit - lowLimit;	// if valueDiff is negative, then draw bar upside down
 
 		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
 		{
@@ -493,12 +554,12 @@ namespace VFrame30
 			{
 				case E::SignalSource::AppDataService:
 					valid = appSignalState.isValid();
-					currentValue = appSignalState.value();
+					currentValue = pointToScaleValue(appSignalState.value());
 					break;
 
 				case E::SignalSource::TuningService:
 					valid = tuningSignalState.valid();
-					currentValue = tuningSignalState.toDouble();
+					currentValue = pointToScaleValue(tuningSignalState.toDouble());
 					break;
 
 				default:
@@ -511,20 +572,20 @@ namespace VFrame30
 
 				if (valueDiff > 0)
 				{
-					if (currentValue >= m_endValue)
+					if (currentValue >= highLimit)
 					{
 						signalValueRect = barRect;
 					}
 					else
 					{
-						if (currentValue <= m_startValue)
+						if (currentValue <= lowLimit)
 						{
 							signalValueRect.setTop(barRect.bottom());
 						}
 						else
 						{
 							const double factor = barRect.height() / valueDiff;
-							double top = barRect.bottom() - (currentValue - this->m_startValue) * factor;
+							double top = barRect.bottom() - (currentValue - lowLimit) * factor;
 
 							signalValueRect.setTop(top);
 						}
@@ -532,20 +593,20 @@ namespace VFrame30
 				}
 				else
 				{
-					if (currentValue <= m_endValue)
+					if (currentValue <= highLimit)
 					{
 						signalValueRect.setBottom(barRect.top());
 					}
 					else
 					{
-						if (currentValue >= m_startValue)
+						if (currentValue >= lowLimit)
 						{
 							signalValueRect = barRect;
 						}
 						else
 						{
 							const double factor = barRect.height() / valueDiff;
-							double bottom = barRect.bottom() - (currentValue - this->m_startValue) * factor;
+							double bottom = barRect.bottom() - (currentValue - lowLimit) * factor;
 
 							signalValueRect.setBottom(bottom);
 						}
@@ -611,21 +672,26 @@ namespace VFrame30
 
 			// Draw main and small grids
 			//
+			double gridMainStep = m_scaleType == E::IndicatorScaleType::Linear ? m_linearGridMainStep : m_logarithmicGridMainStep;
+			double gridSmallStep = m_scaleType == E::IndicatorScaleType::Linear ? m_linearGridSmallStep : m_logarithmicGridSmallStep;
+
 			if ((m_drawGridForAllBars == true || signalIndex == 0) &&
-				m_gridMainStep > std::numeric_limits<double>::epsilon() &&
-				m_gridSmallStep > std::numeric_limits<double>::epsilon() &&
-				std::abs(valueDiff) / m_gridMainStep < 100 &&
-				std::abs(valueDiff) / m_gridSmallStep < 500)
+				gridMainStep > std::numeric_limits<double>::epsilon() &&
+				gridSmallStep > std::numeric_limits<double>::epsilon() &&
+				std::abs(valueDiff) / gridMainStep < 100 &&
+				std::abs(valueDiff) / gridSmallStep < 500)
 			{
-				int gridsCount = static_cast<int>(std::abs(valueDiff) / m_gridMainStep) +
-								 static_cast<int>(std::abs(valueDiff) / m_gridSmallStep) + 2;
+				int gridsCount = static_cast<int>(std::abs(valueDiff) / gridMainStep) +
+								 static_cast<int>(std::abs(valueDiff) / gridSmallStep) + 2;
 
 				std::vector<DrawGridStruct> grids;
 				grids.reserve(gridsCount);
 
 				const double factor = barRect.height() / valueDiff;
 
-				auto addGrid = [this, &grids, &barRect, &schemaItem, factor, signalIndex](double value, double gridWidth, bool drawValue) -> void
+				// Add a grid point
+				//
+				auto addGridPoint = [this, &grids, &barRect, &schemaItem, factor, signalIndex, lowLimit](double value, double gridWidth, bool drawValue) -> void
 				{
 					QString text;
 
@@ -633,55 +699,69 @@ namespace VFrame30
 						this->m_drawGridValues == true &&
 						(this->m_drawGridValueForAllBars == true || signalIndex == 0))
 					{
-						text = QString("%1 ").arg(value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
+						double gridValue = pointFromScaleValue(value);
+
+						if (std::fabs(gridValue) <= DBL_MIN)
+						{
+							gridValue = 0;
+						}
+
+						text = QString("%1 ").arg(gridValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
 					}
 
-					double vertPos = barRect.bottom() - (value - this->m_startValue) * factor;
+					double vertPos = barRect.bottom() - (value -  lowLimit) * factor;
 
 					grids.emplace_back(DrawGridStruct{vertPos, gridWidth, text});
 				};
 
+				// Create a grid with specified step
+				//
+				auto createGrid = [this, valueDiff, lowLimit, highLimit, addGridPoint](double step, double gridWidth, bool drawValue) -> void
+				{
+					double prevCurrentValue = 0;
+					double currentValue = lowLimit;
+
+					for (int i = 0; i < 1000; i++)	// Loop is for safety
+					{
+						if (valueDiff > 0)
+						{
+							currentValue += step;
+						}
+						else
+						{
+							currentValue -= step;
+						}
+
+						if ((valueDiff > 0 && currentValue >= highLimit) ||
+							(valueDiff < 0 && currentValue <= highLimit))
+						{
+							break;
+						}
+
+						if ((prevCurrentValue < 0 && currentValue > 0) ||
+							(prevCurrentValue > 0 && currentValue < 0))
+						{
+							// Zero was crossed - next point should be mirrored to previous point
+
+							if (step > std::fabs(currentValue * 2))
+							{
+								addGridPoint(0, gridWidth, drawValue);	// Draw zero point if necessary
+							}
+
+							currentValue = -prevCurrentValue;
+						}
+
+						addGridPoint(currentValue, gridWidth, drawValue);
+
+						prevCurrentValue = currentValue;
+					}
+				};
+
 				// Draw main grids
 				//
-				if (valueDiff > 0)
-				{
-					for (double currentValue = m_startValue + m_gridMainStep;
-						 currentValue < m_endValue;
-						 currentValue += m_gridMainStep)
-					{
-						addGrid(currentValue, mainGridWidth, true);
-					}
-				}
-				else
-				{
-					for (double currentValue = m_startValue - m_gridMainStep;
-						 currentValue > m_endValue;
-						 currentValue -= m_gridMainStep)
-					{
-						addGrid(currentValue, mainGridWidth, true);
-					}
-				}
+				createGrid(gridMainStep, mainGridWidth, true);
 
-				// draw small grids
-				//
-				if (valueDiff > 0)
-				{
-					for (double currentValue = m_startValue + m_gridSmallStep;
-						 currentValue < m_endValue;
-						 currentValue += m_gridSmallStep)
-					{
-						addGrid(currentValue, smallGridWidth, false);
-					}
-				}
-				else
-				{
-					for (double currentValue = m_startValue - m_gridSmallStep;
-						 currentValue > m_endValue;
-						 currentValue -= m_gridSmallStep)
-					{
-						addGrid(currentValue, smallGridWidth, false);
-					}
-				}
+				createGrid(gridSmallStep, smallGridWidth, false);
 
 				drawGrids(grids, drawParam, barRect, schemaItem);
 			}
@@ -798,21 +878,22 @@ namespace VFrame30
 		//
 		for (IndicatorSetpoint& sp : result)
 		{
-			std::optional<double> value;
+			std::optional<double> comparatorValue;
+			std::optional<double> alertedValue;
 			std::optional<bool> alerted;
 			QRgb foundColor{qRgb(0x00, 0x00, 0xC0)};
 
 			if (const ComparatorSignal& valueSignal = sp.comparator->compare();		// This signal contains value for setpoint
 				valueSignal.isConst() == true)
 			{
-				value = valueSignal.constValue();
+				comparatorValue = valueSignal.constValue();
 			}
 			else
 			{
-				value = schemaItem->getSignalState(drawParam, valueSignal.appSignalID());
+				comparatorValue = schemaItem->getSignalState(drawParam, valueSignal.appSignalID());
 			}
 
-			if (value.has_value() == true)
+			if (comparatorValue.has_value() == true)
 			{
 				// Getting setpoint state
 				//
@@ -821,15 +902,13 @@ namespace VFrame30
 
 				if (stateSignal.isAcquired() == true)
 				{
-					value = schemaItem->getSignalState(drawParam, stateSignal.appSignalID());
+					alertedValue = schemaItem->getSignalState(drawParam, stateSignal.appSignalID());
 				}
 
 				// if setting outputs state is not valid it is also indicated as alerted
 				//
-				bool isAlerted = (alerted.has_value() == true && alerted.value() == true) ||
-								 alerted.has_value() == false;
-
-				alerted = isAlerted;
+				alerted = (alertedValue.has_value() == true && alertedValue.value() != 0) ||
+								 alertedValue.has_value() == false;
 
 				// Get color by output signal tags and behavior
 				//
@@ -872,7 +951,7 @@ namespace VFrame30
 
 			// Assign results
 			//
-			sp.value = value;
+			sp.value = comparatorValue;
 			sp.alerted = alerted;
 			sp.setpointColor = foundColor;
 		}
@@ -988,7 +1067,10 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
 
-		double valueDiff = m_endValue - m_startValue;	// if valueDiff is negative, then draw bar upside down
+		double lowLimit = pointToScaleValue(m_startValue);
+		double highLimit = pointToScaleValue(m_endValue);
+
+		double valueDiff = highLimit - lowLimit;	// if valueDiff is negative, then draw bar upside down
 		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
 		{
 			return;
@@ -1003,8 +1085,9 @@ namespace VFrame30
 			bool alerted = ds.indicatorSetpoint.alerted.value_or(true);
 
 			const double factor = barRect.height() / valueDiff;
-			double value = ds.indicatorSetpoint.value.value_or(m_startValue);
-			double y = barRect.bottom() - (value - m_startValue) * factor;
+			double value = ds.indicatorSetpoint.value.value_or(lowLimit);
+			double scaleValue = pointToScaleValue(value);
+			double y = barRect.bottom() - (scaleValue - lowLimit) * factor;
 
 			QRgb color{ds.indicatorSetpoint.setpointColor};
 //			if (alerted == true)
@@ -1052,6 +1135,92 @@ namespace VFrame30
 		}
 
 		return;
+	}
+
+	double IndicatorHistogramVert::indicatorLog10(double value) const
+	{
+		// Logarithm calculation.
+		// The result is shifted up by DBL_MAX_10_EXP.
+		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
+		// This means that we take a "ghost" logarithm from negative value.
+
+		double result = std::fabs(value);
+
+		if (result < DBL_MIN)
+		{
+			result = DBL_MIN;
+		}
+
+		result = std::log10(result);
+
+		result += DBL_MAX_10_EXP;
+
+		if (value < 0)
+		{
+			result = -result;
+		}
+
+		return result;
+	}
+
+	double IndicatorHistogramVert::indicatorPow10(double value) const
+	{
+		// Power calculation, reverse function for trendLog10.
+		// Input value is shifted down by DBL_MAX_10_EXP and power is calculated from its absoulte value.
+		// The sign of the result depened on input value sign.
+
+		double result = std::fabs(value);
+
+		result -= DBL_MAX_10_EXP;
+
+		result = std::pow(10, result);
+
+		if (value < 0)
+		{
+			result = -result;
+		}
+
+		return result;
+	}
+
+	double IndicatorHistogramVert::pointToScaleValue(double value) const
+	{
+		switch (m_scaleType)
+		{
+		case E::IndicatorScaleType::Linear:
+			{
+				return value;
+			}
+		case E::IndicatorScaleType::Logarithmic:
+			{
+				return indicatorLog10(value);
+			}
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	double IndicatorHistogramVert::pointFromScaleValue(double scaleValue) const
+	{
+		switch (m_scaleType)
+		{
+		case E::IndicatorScaleType::Linear:
+			{
+				return scaleValue;
+			}
+		case E::IndicatorScaleType::Logarithmic:
+			{
+				scaleValue = indicatorPow10(scaleValue);
+
+				return scaleValue;
+			}
+
+		default:
+			Q_ASSERT(false);
+		}
+		return 0;
 	}
 
 }

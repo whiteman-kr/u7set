@@ -1352,7 +1352,7 @@ bool TuningPage::write()
 
 		if (asp.isAnalog() == true)
 		{
-			strValue = m_tuningSignalManager->newValue(hash).toString(asp.precision());
+			strValue = m_tuningSignalManager->newValue(hash).toString(m_model->analogFormat(), asp.precision());
 		}
 		else
 		{
@@ -1578,7 +1578,7 @@ void TuningPage::slot_setValue()
 		return;
 	}
 
-	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, m_model->analogFormat(), precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -1668,7 +1668,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			auto f = [this, hash]() -> void
 			{
-				DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
+				DialogSignalInfo* d = new DialogSignalInfo(hash, m_model->analogFormat(), m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
 				d->show();
 			};
 
@@ -1702,9 +1702,33 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 	menu.addSeparator();
 
+	// View
+
+	QMenu* submenuV = menu.addMenu(tr("Format"));
+
+	QAction* a = new QAction(tr("Auto-select"), &menu);
+	a->setCheckable(true);
+	a->setChecked(m_model->analogFormat() == E::AnalogFormat::g_9_or_9e || m_model->analogFormat() == E::AnalogFormat::G_9_or_9E);
+	connect(a, &QAction::triggered, this, [this]() { slot_setAnalogFormat(E::AnalogFormat::g_9_or_9e); });
+	submenuV->addAction(a);
+
+	a = new QAction(tr("Decimal (as [-]9.9)"), &menu);
+	a->setCheckable(true);
+	a->setChecked(m_model->analogFormat() == E::AnalogFormat::f_9);
+	connect(a, &QAction::triggered, this, [this]() { slot_setAnalogFormat(E::AnalogFormat::f_9); });
+	submenuV->addAction(a);
+
+	a = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), &menu);
+	a->setCheckable(true);
+	a->setChecked(m_model->analogFormat() == E::AnalogFormat::e_9e || m_model->analogFormat() == E::AnalogFormat::E_9E);
+	connect(a, &QAction::triggered, this, [this]() { slot_setAnalogFormat(E::AnalogFormat::e_9e); });
+	submenuV->addAction(a);
+
+	// More
+
 	QMenu* submenuA = menu.addMenu(tr("More"));
 
-	QAction* a = new QAction(tr("Add To New Filter..."), &menu);
+	a = new QAction(tr("Add To New Filter..."), &menu);
 	connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToNewFilter);
 	submenuA->addAction(a);
 
@@ -1854,6 +1878,13 @@ void TuningPage::slot_restoreValuesFromExistingFilter()
 	}
 
 	restoreSignalsFromFilter(d->chosenFilter());
+}
+
+void TuningPage::slot_setAnalogFormat(E::AnalogFormat analogFormat)
+{
+	m_model->setAnalogFormat(analogFormat);
+
+	m_objectList->update();
 }
 
 void TuningPage::slot_ApplyFilter()
@@ -2284,7 +2315,10 @@ void TuningPage::slot_setAll()
 			{
 				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
 				{
-					QString message = tr("Invalid default value '%1' in signal %2 [%3]").arg(tvDefault.toString(asp.precision())).arg(asp.appSignalId()).arg(asp.caption());
+					QString message = tr("Invalid default value '%1' in signal %2 [%3]")
+									  .arg(tvDefault.toString(m_model->analogFormat(), asp.precision()))
+									  .arg(asp.appSignalId())
+									  .arg(asp.caption());
 					QMessageBox::critical(this, qAppName(), message);
 				}
 				else

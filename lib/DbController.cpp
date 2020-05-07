@@ -35,6 +35,11 @@ DbController::DbController() :
 	connect(this, &DbController::signal_setProjectProperty, m_worker, &DbWorker::slot_setProjectProperty);
 	connect(this, &DbController::signal_getProjectProperty, m_worker, &DbWorker::slot_getProjectProperty);
 
+	connect(this, &DbController::signal_setUserProperty, m_worker, &DbWorker::slot_setUserProperty);
+	connect(this, &DbController::signal_getUserProperty, m_worker, &DbWorker::slot_getUserProperty);
+	connect(this, &DbController::signal_getUserPropertyList, m_worker, &DbWorker::slot_getUserPropertyList);
+	connect(this, &DbController::signal_removeUserProperty, m_worker, &DbWorker::slot_removeUserProperty);
+
 	connect(this, &DbController::signal_createUser, m_worker, &DbWorker::slot_createUser);
 	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
@@ -564,6 +569,118 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	emit signal_updateUser(user);
 
 	bool result = waitForComplete(parentWidget, tr("Updating user profile"));
+	return result;
+}
+
+bool DbController::setUserProperty(const QString& property, const QString& value, QWidget* parentWidget)
+{
+	if (property.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_setUserProperty(property, value);
+
+	bool result = waitForComplete(parentWidget, tr("Setting user property"));
+	return result;
+}
+
+bool DbController::getUserProperty(const QString& property, QString* value, QWidget* parentWidget)
+{
+	if (property.isEmpty() == true || value == nullptr)
+	{
+		assert(value);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getUserProperty(property, value);
+
+	bool result = waitForComplete(parentWidget, tr("Getting user property"));
+	return result;
+}
+
+bool DbController::getUserProperty(const QString& property, QString* value, const QString& defaultValue, QWidget* parentWidget)
+{
+	bool ok = getUserProperty(property, value, parentWidget);
+	if (ok == false)
+	{
+		*value = defaultValue;
+	}
+
+	// Return false even in case of setting default value
+	//
+	return ok;
+}
+
+bool DbController::getUserPropertyList(QString propertyTemplate, QStringList* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	if (propertyTemplate.isEmpty() == true)
+	{
+		propertyTemplate = "%";
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getUserPropertyList(propertyTemplate, out);
+
+	bool result = waitForComplete(parentWidget, tr("Getting user property list"));
+	return result;
+}
+
+bool DbController::removeUserProperty(const QString& property, QWidget* parentWidget)
+{
+	if (property.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_removeUserProperty(property);
+
+	bool result = waitForComplete(parentWidget, tr("Removing user property"));
 	return result;
 }
 

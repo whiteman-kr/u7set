@@ -8,6 +8,7 @@
 #include "SignalTests.h"
 #include "PropertyObjectTests.h"
 #include "ProjectPropertyTests.h"
+#include "UserPropertyTest.h"
 #include "DbControllerProjectTests.h"
 #include "DbControllerUserTests.h"
 #include "DbControllerFileManagementTests.h"
@@ -16,7 +17,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 304;
+const int DatabaseProjectVersion = 326;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -62,6 +63,11 @@ int main(int argc, char *argv[])
 	//
 	ProjectPropertyTests projectPropertyTests;
 	returnCode |= QTest::qExec(&projectPropertyTests, argc, argv);
+
+	// Database User Property functions
+	//
+	UserPropertyTests userPropertyTests;
+	returnCode |= QTest::qExec(&userPropertyTests, argc, argv);
 
 	// Property Obejct functions
 	//
