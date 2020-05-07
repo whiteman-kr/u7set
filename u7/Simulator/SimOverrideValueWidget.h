@@ -119,11 +119,13 @@ namespace SimOverrideUI
 
 		void applyScript();
 		void showTemplates();
+		void loadScript();
+		void saveScript();
 
 	private:
 		QPushButton* m_templateScriptButton = nullptr;
-		//QPushButton* m_loadScriptButton = nullptr;
-		//QPushButton* m_saveScriptButton = nullptr;
+		QPushButton* m_loadScriptButton = nullptr;
+		QPushButton* m_saveScriptButton = nullptr;
 
 		QLabel* m_scriptLabel = nullptr;
 		QsciScintilla* m_scriptEdit = nullptr;
@@ -145,6 +147,8 @@ namespace SimOverrideUI
 			{QStringLiteral("Square"), QStringLiteral(":/Simulator/Templates/DiscreteSquare.js")},
 			{QStringLiteral("Series"), QStringLiteral(":/Simulator/Templates/DiscreteSeries.js")},
 		};
+
+		const QString saveProperty = {"Sim::OverrideScript::Saves::"};
 	};
 
 
