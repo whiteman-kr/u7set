@@ -3697,12 +3697,12 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_findPreviousButton->setAutoDefault(false);
 	m_findNextButton->setAutoDefault(false);
 
-	connect(m_findString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeeded);
-	connect(m_replaceString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeeded);
-	connect(m_searchInPropertyList, &QComboBox::currentTextChanged, this, &FindSignalDialog::generateListIfNeeded);
-	connect(m_caseSensitive, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeeded);
-	connect(m_wholeWords, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeeded);
-	connect(m_searchInSelected, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_findString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_replaceString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_searchInPropertyList, &QComboBox::currentTextChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_caseSensitive, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_wholeWords, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_searchInSelected, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
 
 	connect(m_replaceString, &QLineEdit::textEdited, this, &FindSignalDialog::updateAllReplacement);
 
@@ -3761,7 +3761,7 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 void FindSignalDialog::notifyThatSignalSetHasChanged()
 {
 	m_isMatchToCurrentSignalSet = false;
-	generateListIfNeeded();
+	generateListIfNeeded(false);
 }
 
 void FindSignalDialog::closeEvent(QCloseEvent* event)
@@ -3772,7 +3772,7 @@ void FindSignalDialog::closeEvent(QCloseEvent* event)
 	QDialog::closeEvent(event);
 }
 
-void FindSignalDialog::generateListIfNeeded()
+void FindSignalDialog::generateListIfNeeded(bool throwWarning)
 {
 	SearchOptions currentOptions = getCurrentSearchOptions();
 	if (m_searchOptionsUsedLastTime == currentOptions && m_isMatchToCurrentSignalSet == true)
@@ -3810,7 +3810,7 @@ void FindSignalDialog::generateListIfNeeded()
 	else
 	{
 		QModelIndexList selection = m_signalTable->selectionModel()->selectedRows(0);
-		if (selection.count() == 0)
+		if (selection.count() == 0 && throwWarning)
 		{
 			QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 		}
@@ -4203,6 +4203,11 @@ void FindSignalDialog::updateCounters()
 void FindSignalDialog::saveDialogGeometry()
 {
 	saveWindowPosition(this, "FindSignalDialog");
+}
+
+void FindSignalDialog::generateListIfNeededWithWarning()
+{
+	generateListIfNeeded(true);
 }
 
 void FindSignalDialog::replaceAll()
