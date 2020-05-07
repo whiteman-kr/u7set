@@ -93,6 +93,7 @@ public slots:
 	void slot_setUserProperty(QString propertyName, QString propertyValue);
 	void slot_getUserProperty(QString propertyName, QString* out);
 	void slot_getUserPropertyList(QString propertyTemplate, QStringList* out);
+	void slot_removeUserProperty(QString propertyName);
 
     // User management
     //

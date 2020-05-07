@@ -38,6 +38,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_setUserProperty, m_worker, &DbWorker::slot_setUserProperty);
 	connect(this, &DbController::signal_getUserProperty, m_worker, &DbWorker::slot_getUserProperty);
 	connect(this, &DbController::signal_getUserPropertyList, m_worker, &DbWorker::slot_getUserPropertyList);
+	connect(this, &DbController::signal_removeUserProperty, m_worker, &DbWorker::slot_removeUserProperty);
 
 	connect(this, &DbController::signal_createUser, m_worker, &DbWorker::slot_createUser);
 	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
@@ -657,6 +658,29 @@ bool DbController::getUserPropertyList(QString propertyTemplate, QStringList* ou
 	emit signal_getUserPropertyList(propertyTemplate, out);
 
 	bool result = waitForComplete(parentWidget, tr("Getting user property list"));
+	return result;
+}
+
+bool DbController::removeUserProperty(const QString& property, QWidget* parentWidget)
+{
+	if (property.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_removeUserProperty(property);
+
+	bool result = waitForComplete(parentWidget, tr("Removing user property"));
 	return result;
 }
 

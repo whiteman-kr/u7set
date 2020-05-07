@@ -17,6 +17,7 @@ private slots:
 	void set_user_property_check_user_influence();
 	void get_user_property();
 	void get_user_property_list();
+	void remove_user_property();
 
 public:
 };

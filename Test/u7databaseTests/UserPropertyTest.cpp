@@ -214,3 +214,88 @@ void UserPropertyTests::get_user_property_list()
 
 	return;
 }
+
+void UserPropertyTests::remove_user_property()
+{
+	QSqlQuery query;
+
+	// Admin: property1, property2
+	// user_test_remove: property1, property2
+	//
+	// delete Admin's property1
+	// delete user_test_remove's property2
+	//
+	// Must left:
+	// Admin: property2
+	// user_test_remove: property1
+
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_projectAdministratorName, m_projectAdministratorPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// Create a user
+	//
+	int userId = createUser(session_key, "user_test_remove", "P2ssw0rd");
+
+	bool ok = query.exec(QString("SELECT api.set_user_property('%1', 'tr_property1', 'ap1');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT api.set_user_property('%1', 'tr_property2', 'ap2');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// login as user_test_remove
+	//
+	session_key = logIn("user_test_remove", "P2ssw0rd");
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	ok = query.exec(QString("SELECT api.set_user_property('%1', 'tr_property1', 'up1');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT api.set_user_property('%1', 'tr_property2', 'up2');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// delete user_test_remove's property2
+	//
+	ok = query.exec(QString("SELECT api.remove_user_property('%1', 'tr_property2');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// LogOut user_test_remove
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// LogIn as Admin
+	//
+	session_key = logIn(m_projectAdministratorName, m_projectAdministratorPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// delete Admin's property1
+	//
+	ok = query.exec(QString("SELECT api.remove_user_property('%1', 'tr_property1');").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Tests
+	//
+	ok = query.exec(QString("SELECT userid, name, value FROM public.userproperties WHERE name LIKE 'tr_%' ORDER BY Name; "));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY(query.size() == 2);
+
+	QVERIFY(query.next());
+	QVERIFY(query.value(0).toInt() == userId);
+	QVERIFY(query.value(1).toString() == "tr_property1");
+	QVERIFY(query.value(2).toString() == "up1");
+
+	QVERIFY(query.next());
+	QVERIFY(query.value(0).toInt() == 1);
+	QVERIFY(query.value(1).toString() == "tr_property2");
+	QVERIFY(query.value(2).toString() == "ap2");
+
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+}

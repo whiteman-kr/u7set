@@ -73,8 +73,10 @@ namespace VFrame30
 		static const QString drawGridValues;
 		static const QString drawGridValueForAllBars;
 		static const QString drawGridValueUnits;
-		static const QString gridMainStep;
-		static const QString gridSmallStep;
+		static const QString linearGridMainStep;
+		static const QString linearGridSmallStep;
+		static const QString logarithmicGridMainStep;
+		static const QString logarithmicGridSmallStep;
 
 		static const QString indicatorSignalColors;
 		static const QString indicatorType;
@@ -103,6 +105,7 @@ namespace VFrame30
 		static const QString indicatorMargingTop;
 		static const QString indicatorMargingRight;
 		static const QString indicatorMargingBottom;
+		static const QString indicatorScaleType;
 
 		static const QString drawSetpoints;
 		static const QString customSetpoints;

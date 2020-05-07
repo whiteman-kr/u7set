@@ -65,8 +65,10 @@ namespace VFrame30
 	const QString PropertyNames::drawGridValues{"DrawGridValues"};
 	const QString PropertyNames::drawGridValueForAllBars{"DrawGridValueForAllBars"};
 	const QString PropertyNames::drawGridValueUnits{"DrawGridValueUnits"};
-	const QString PropertyNames::gridMainStep{"GridMainStep"};
-	const QString PropertyNames::gridSmallStep{"GridSmallStep"};
+	const QString PropertyNames::linearGridMainStep{"LinearGridMainStep"};
+	const QString PropertyNames::linearGridSmallStep{"LinearGridSmallStep"};
+	const QString PropertyNames::logarithmicGridMainStep{"LogarithmicGridMainStep"};
+	const QString PropertyNames::logarithmicGridSmallStep{"LogarithmicGridSmallStep"};
 
 	const QString PropertyNames::indicatorSignalColors{"SignalColors"};
 	const QString PropertyNames::indicatorType{"IndicatorType"};
@@ -94,6 +96,8 @@ namespace VFrame30
 	const QString PropertyNames::indicatorMargingTop{"MarginTop"};
 	const QString PropertyNames::indicatorMargingRight{"MarginRight"};
 	const QString PropertyNames::indicatorMargingBottom{"MarginBottom"};
+	const QString PropertyNames::indicatorScaleType{"ScaleType"};
+
 
 	const QString PropertyNames::drawSetpoints{"DrawSetpoints"};
 	const QString PropertyNames::customSetpoints{"CustomSetpoints"};

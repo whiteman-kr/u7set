@@ -11,8 +11,9 @@ namespace VFrame30
 	//
 	// IndicatorComponent base class
 	//
-	class Indicator
+	class Indicator : public QObject
 	{
+		Q_OBJECT
 	public:
 		Indicator() = delete;
 		explicit Indicator(SchemaUnit itemUnit);
@@ -25,6 +26,9 @@ namespace VFrame30
 		virtual bool save(Proto::SchemaItemIndicator* message) const = 0;
 
 		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* item) const = 0;
+
+	signals:
+		void updatePropertiesList();
 
 	public:
 		// Get/set are working in regional units, for drawing use variables

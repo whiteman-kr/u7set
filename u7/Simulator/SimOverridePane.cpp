@@ -11,7 +11,7 @@ SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, Q
 {
 	assert(m_simulator);
 
-	m_treeWidget = new QTreeWidget(this);
+	m_treeWidget = new QOverrideListWidget(m_simulator, this);
 	m_treeWidget->installEventFilter(this);
 
 	m_treeWidget->setRootIsDecorated(false);
@@ -168,6 +168,7 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 
 	return;
 }
+
 
 bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 {
@@ -699,6 +700,86 @@ void SimOverridePane::setValue(QString appSignalId)
 void SimOverridePane::setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value)
 {
 	m_simulator->overrideSignals().setValue(appSignalId, method, value);
+}
+
+
+QOverrideListWidget::QOverrideListWidget(Sim::Simulator* simulator, QWidget* parent) :
+	QTreeWidget(parent),
+	m_simulator(simulator)
+{
+	assert(m_simulator);
+}
+
+void QOverrideListWidget::mousePressEvent(QMouseEvent* event)
+{
+	if (QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(this->itemAt(event->pos()));
+		event->buttons().testFlag(Qt::LeftButton) == true &&
+		item != nullptr)
+	{
+		m_dragStartPos = event->pos();
+		m_dragAppSignalId = item->appSignalId();
+	}
+	else
+	{
+		m_dragStartPos = {};
+		m_dragAppSignalId.clear();
+	}
+
+	if (state() == DragSelectingState ||
+		state() == DraggingState)
+	{
+		// This fixes problem of lost click after starting drag
+		// This code is just taken from inet
+		//
+		setState(NoState);
+	}
+
+	return QTreeWidget::mousePressEvent(event);
+}
+
+void QOverrideListWidget::mouseMoveEvent(QMouseEvent* event)
+{
+	if (m_dragAppSignalId.isEmpty() == false &&
+		event->buttons().testFlag(Qt::LeftButton) == true &&
+		(event->pos() - m_dragStartPos).manhattanLength() >= QApplication::startDragDistance())
+	{
+		// Save signals to protobufer
+		//
+		::Proto::AppSignalSet protoSetMessage;
+
+		bool ok = false;
+		AppSignalParam signalParam = m_simulator->appSignalManager().signalParam(m_dragAppSignalId, &ok);
+
+		if (ok == false)
+		{
+			return QTreeWidget::mouseMoveEvent(event);
+		}
+
+		assert(signalParam.appSignalId() == m_dragAppSignalId) ;
+
+		::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
+		signalParam.save(protoSignalMessage);
+
+		QByteArray data;
+		data.resize(protoSetMessage.ByteSize());
+
+		protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
+
+		// --
+		//
+		if (data.isEmpty() == false)
+		{
+			QDrag* drag = new QDrag(this);
+			QMimeData* mimeData = new QMimeData;
+
+			mimeData->setData(AppSignalParamMimeType::value, data);
+			drag->setMimeData(mimeData);
+
+			drag->exec(Qt::CopyAction);
+		}
+	}
+
+	return QTreeWidget::mouseMoveEvent(event);
 }
 
 

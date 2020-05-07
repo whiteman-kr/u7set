@@ -1,0 +1,97 @@
+
+test Logic_analog01,tests test1
+schema LOGIC_ANALOG_TEST
+compatible MODULE_LM1SF40
+
+set #TUN_IN_FP1 = 1
+set #TUN_IN_FP2 = 2
+set #TUN_IN_FP3 = 3
+
+
+check #OUT_FP1 == -8.66
+check #OUT_FP2 == -0.50
+check #OUT_FP3 == 5.83
+check #OUT_FP4 == 1.41
+check #OUT_FP5 == 5.12
+check #OUT_FP6 == 51.83
+
+set #TUN_IN_FP1 = 22.9
+set #TUN_IN_FP2 = 79.6
+set #TUN_IN_FP3 = 14.88
+
+
+check #OUT_FP1 == -12.79
+check #OUT_FP2 == -0.01
+check #OUT_FP3 == -488.86
+check #OUT_FP4 == 577.42
+check #OUT_FP5 == -488.86
+check #OUT_FP6 == 27662.92
+
+
+set #TUN_IN_FP1 = 1.1
+set #TUN_IN_FP2 = 12.5
+set #TUN_IN_FP3 = 99.9
+
+
+check #OUT_FP1 == -636.95
+check #OUT_FP2 == 0.01
+check #OUT_FP3 == 325.95
+check #OUT_FP4 == 309.01
+check #OUT_FP5 == 325.95
+check #OUT_FP6 == 233650.91
+
+set #TUN_IN_FP1 = 77.6
+set #TUN_IN_FP2 = 10.6
+set #TUN_IN_FP3 = 0.1
+
+check #OUT_FP2 == -0.05
+check #OUT_FP3 == -20.32
+check #OUT_FP4 == 34.19
+check #OUT_FP5 == -20.3
+check #OUT_FP6 == 148.26
+
+endtest
+
+test Logic_analog02,tests test2
+schema LOGIC_ANALOG_TEST
+compatible MODULE_LM1SF40
+
+set #TUN_IN_SI1 = 0
+set #TUN_IN_SI2 = 0
+set #TUN_IN_SI3 = 0
+set #TUN_IN_SI4 = 0
+set #TUN_IN_SI5 = 0
+set #TUN_IN_SI6 = 0
+
+check #OUT_SI1 == -1
+check #OUT_SI2 == -1
+check #OUT_SI3 == -2
+check #OUT_SI4 == -1
+check #OUT_SI5 == 0
+
+set #TUN_IN_SI1 = 1
+set #TUN_IN_SI2 = 1
+set #TUN_IN_SI3 = 1
+set #TUN_IN_SI4 = 1
+set #TUN_IN_SI5 = 1
+set #TUN_IN_SI6 = 1
+
+check #OUT_SI1 == 1
+check #OUT_SI2 == 0
+check #OUT_SI3 == 0
+check #OUT_SI4 == 0
+check #OUT_SI5 == 2
+
+set #TUN_IN_SI1 = 10
+set #TUN_IN_SI2 = 20
+set #TUN_IN_SI3 = 30
+set #TUN_IN_SI4 = 40
+set #TUN_IN_SI5 = 50
+set #TUN_IN_SI6 = 60
+
+check #OUT_SI1 == 0
+check #OUT_SI2 == 0
+check #OUT_SI3 == -1
+check #OUT_SI4 == 39
+check #OUT_SI5 == 5400
+endtest
