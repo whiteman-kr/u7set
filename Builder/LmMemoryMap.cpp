@@ -328,7 +328,9 @@ namespace Builder
 		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredBuses.nextAddress());
 		m_appWordAdressed.wordAccumulator.setSizeW(2);
 
-		if (m_appWordAdressed.wordAccumulator.nextAddress() > m_appWordAdressed.memory.nextAddress())
+		m_appWordAdressed.analogAndBusSignalsHeap.setStartAddress(m_appWordAdressed.wordAccumulator.nextAddress());
+
+		if (m_appWordAdressed.analogAndBusSignalsHeap.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of word-addressed memory range!"));
 
@@ -337,7 +339,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	int LmMemoryMap::getModuleDataOffset(int place) const
 	{
@@ -390,7 +391,9 @@ namespace Builder
 		addRecordSignals(memFile, m_appBitAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals");
 		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteOutputSignals, "non acquired discrete output signals");
 		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteInternalSignals, "non acquired discrete internal signals");
-		addRecordSignals(memFile, m_appBitAdressed.discreteSignalsHeap, "discrete signals heap");
+
+		addRecord(memFile, m_appBitAdressed.discreteSignalsHeap, "discrete signals heap");
+		memFile.append("");
 
 		//
 
@@ -427,6 +430,9 @@ namespace Builder
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredBuses, "non acquired buses");
 
 		addRecord(memFile, m_appWordAdressed.wordAccumulator, "word accumulator");
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.analogAndBusSignalsHeap, "analog and bus signals heap");
 		memFile.append("");
 	}
 

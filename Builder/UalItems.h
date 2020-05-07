@@ -481,6 +481,7 @@ namespace Builder
 		bool isBus() const { return m_refSignals[0]->isBus(); }
 
 		void setHeapPlaced() { m_isHeapPlaced = true; }
+		void resetHeapPlaced() { m_isHeapPlaced = false; }
 		bool isHeapPlaced() const { return m_isHeapPlaced; }
 
 		QString busTypeID() const { return m_refSignals[0]->busTypeID(); }
@@ -636,7 +637,10 @@ namespace Builder
 									 E::AnalogAppSignalFormat constAnalogFormat,
 									 QUuid outPinUuid);
 
-		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal, int expectedReadCount);
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid,
+									const LogicAfbSignal& templateOutAfbSignal,
+									std::optional<int> expectedReadCount);
+
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal);
 
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
@@ -659,8 +663,13 @@ namespace Builder
 		void initDiscreteSignalsHeap(int startAddrW, int sizeW);
 		int getDiscreteSignalsHeapSizeW() const;
 
+		void initAnalogAndBusSignalsHeap(int startAddrW, int sizeW);
+		int getAnalogAndBusSignalsHeapSizeW() const;
+
 		Address16 getSignalWriteAddress(const UalSignal& ualSignal);
 		Address16 getSignalReadAddress(const UalSignal& ualSignal, bool decrementReadCount);
+
+		void removeSignalFromHeap(const UalSignal& ualSignal);
 
 		void getHeapsLog(QStringList* log) const;
 
@@ -669,7 +678,7 @@ namespace Builder
 									QUuid outPinUuid,
 									E::SignalType signalType,
 									E::AnalogAppSignalFormat analogFormat,
-									int expectedReadCount);
+									std::optional<int> expectedReadCount);
 
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
 		void appendPinRefToSignal(QUuid pinUuid, UalSignal* ualSignal);
@@ -692,7 +701,7 @@ namespace Builder
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
 
 		SignalsHeap m_discreteSignalsHeap;
-		SignalsHeap m_otherSignalsHeap;				// for now: Analog and Bus signals
+		SignalsHeap m_analogAndBusSignalsHeap;				// for now: Analog and Bus signals
 	};
 
 }

@@ -12,11 +12,13 @@ namespace Builder
 		return addr;
 	}
 
+	//
+
 	SignalsHeap::SignalsHeap(int memCellSizeBits)
 	{
 		// memCellSizeBits should be == 1 or 16
 		//
-		Q_ASSERT(memCellSizeBits == 1 || memCellSizeBits == SIZE_16BIT);
+		Q_ASSERT(memCellSizeBits == SIZE_1BIT || memCellSizeBits == SIZE_16BIT);
 
 		m_memCellSizeBits = memCellSizeBits;
 	}
@@ -35,11 +37,18 @@ namespace Builder
 	{
 		m_heapStartAddrW = heapStartAddrW;
 		m_heapSizeW = heapSizeW;
+
+		m_heapHighBoundBits = m_heapStartAddrW * SIZE_16BIT;
 	}
 
-	void SignalsHeap::appendItem(const UalSignal& ualSignal, int expectedReadCount)
+	void SignalsHeap::appendItem(const UalSignal& ualSignal, std::optional<int> expectedReadCount)
 	{
-		Q_ASSERT(expectedReadCount > 0);
+		if (expectedReadCount.has_value() == false)
+		{
+			return;
+		}
+
+		Q_ASSERT(expectedReadCount.value() > 0);
 		Q_ASSERT(ualSignal.isHeapPlaced() == true);
 
 		QString appSignalID = ualSignal.appSignalID();
@@ -51,7 +60,7 @@ namespace Builder
 			return;
 		}
 
-		if (m_memCellSizeBits == 1 &&  signalDataSize != 1)
+		if (m_memCellSizeBits == SIZE_1BIT &&  signalDataSize != SIZE_1BIT)
 		{
 			Q_ASSERT(false);
 			return;
@@ -67,7 +76,7 @@ namespace Builder
 
 		item->appSignalID = appSignalID;
 		item->sizeBits = signalDataSize;
-		item->readCount = expectedReadCount;
+		item->readCount = expectedReadCount.value();
 
 		std::pair<QString, HeapItem*> p;
 
@@ -75,6 +84,19 @@ namespace Builder
 		p.second = item;
 
 		m_items.insert(p);
+	}
+
+	void SignalsHeap::removeItem(const UalSignal& ualSignal)
+	{
+		QString appSignalID = ualSignal.appSignalID();
+
+		if (m_items.find(appSignalID) == m_items.end())
+		{
+			Q_ASSERT(false);		// appSignalID is not found, why?
+			return;
+		}
+
+		m_items.erase(appSignalID);
 	}
 
 	Address16 SignalsHeap::getAddressForWrite(const UalSignal& ualSignal)
@@ -242,7 +264,32 @@ namespace Builder
 			heapUsedSizeW++;
 		}
 
+		Q_ASSERT(heapUsedSizeW <= m_heapSizeW);
+
 		return heapUsedSizeW;
+	}
+
+	const QStringList& SignalsHeap::getHeapLog() const
+	{
+		if (m_items.size() > 0)
+		{
+			m_heapLog.append("");
+
+			if (m_itemsInHeap.size() == 0)
+			{
+				m_heapLog.append(QString("Heap is clear on destruction - Ok."));
+			}
+			else
+			{
+				m_heapLog.append(QString("ERROR! Heap contains %1 item(s) on destruction.").arg(m_itemsInHeap.size()));
+			}
+		}
+		else
+		{
+			m_heapLog.append("No signals placed in heap.");
+		}
+
+		return m_heapLog;
 	}
 
 	void SignalsHeap::logAppendToHeap(const HeapItem& heapItem)

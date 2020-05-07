@@ -239,6 +239,7 @@ namespace Builder
 		bool checkLoopbacks();
 		bool linkLoopbackTargets();
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
+		bool removeLoopbackSignalsFromHeap();
 
 		bool checkBusProcessingItemsConnections();
 
@@ -280,6 +281,7 @@ namespace Builder
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool isBusTypesAreEqual(const QStringList& busTypes);
+		std::optional<int> getOutPinExpectedReadCount(const LogicPin& outPin);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
@@ -341,6 +343,7 @@ namespace Builder
 		//
 		bool setDiscreteInputSignalsUalAddresses();
 		bool disposeDiscreteSignalsInBitMemory();
+		bool disposeDiscreteSignalsHeap();
 
 		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
 		//
@@ -353,6 +356,8 @@ namespace Builder
 		//
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
+
+		bool disposeAnalogAndBusSignalsHeap();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -467,8 +472,6 @@ namespace Builder
 		UalSignal* getPinInputAppSignal(const LogicPin& inPin);
 
 		UalSignal* getUalSignalByPinCaption(const UalItem* ualItem, const QString& pinCaption, bool isInput);
-
-		bool isConnectedToTerminator(const LogicPin& outPin);
 
 		bool addToComparatorSet(const UalAfb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);

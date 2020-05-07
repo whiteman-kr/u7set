@@ -172,6 +172,8 @@ namespace Builder
 
 			MemoryArea wordAccumulator;
 
+			MemoryArea analogAndBusSignalsHeap;
+
 		} m_appWordAdressed;
 
 		struct ReadWriteAccess
@@ -216,11 +218,15 @@ namespace Builder
 
 		int appBitMemoryStart() const { return m_appBitAdressed.memory.startAddress(); }
 		int appBitMemorySizeW() const { return m_appBitAdressed.memory.sizeW(); }
+
 		int appBitMemoryDiscreteSignalsHeapStart() const { return m_appBitAdressed.discreteSignalsHeap.startAddress(); }
 		void setAppBitMemoryDiscreteSignalsHeapSizeW(int sizeW) { m_appBitAdressed.discreteSignalsHeap.setSizeW(sizeW); }
 
 		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
 		int wordAccumulatorAddress() const { return m_appWordAdressed.wordAccumulator.startAddress(); }
+
+		int appWordMemoryAnalogAndBusSignalsHeapStart() const { return m_appWordAdressed.analogAndBusSignalsHeap.startAddress(); }
+		void setAppWordMemoryAnalogAndBusSignalsHeapSizeW(int sizeW) { m_appWordAdressed.analogAndBusSignalsHeap.setSizeW(sizeW); }
 
 		int appWordMemoryStart() const { return m_appWordAdressed.memory.startAddress(); }
 		int appWordMemorySizeW() const { return m_appWordAdressed.memory.sizeW(); }

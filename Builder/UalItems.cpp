@@ -2117,7 +2117,7 @@ namespace Builder
 		m_compiler(compiler),
 		m_log(log),
 		m_discreteSignalsHeap(SIZE_1BIT),
-		m_otherSignalsHeap(SIZE_16BIT)
+		m_analogAndBusSignalsHeap(SIZE_16BIT)
 	{
 	}
 
@@ -2258,7 +2258,9 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal, int expectedReadCount)
+	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid,
+											   const LogicAfbSignal& templateOutAfbSignal,
+											   std::optional<int> expectedReadCount)
 	{
 		if (ualItem == nullptr)
 		{
@@ -2289,17 +2291,31 @@ namespace Builder
 	}
 
 	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
-													Signal* s,
+													Signal* connectedSignal,
 													BusShared bus,
 													QUuid outPinUuid,
 													const QString& outPinCaption,
 													std::shared_ptr<Hardware::DeviceModule> lm)
 	{
-		// s can bee nullptr!!!
-		//
-		if (s != nullptr)
+		if (ualItem == nullptr)
 		{
-			UalSignal* ualSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+			Q_ASSERT(false);
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
+		if ((connectedSignal != nullptr && connectedSignal->isBus() == false) || (bus == nullptr))
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		// connectedSignal can bee nullptr!!!
+		//
+		if (connectedSignal != nullptr)
+		{
+			UalSignal* ualSignal = m_idToSignalMap.value(connectedSignal->appSignalID(), nullptr);
 
 			if (ualSignal != nullptr)
 			{
@@ -2317,7 +2333,7 @@ namespace Builder
 
 		Signal* autoSignalPtr = nullptr;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption, lm, &autoSignalPtr);
+		bool result = busParentSignal->createBusParentSignal(ualItem, connectedSignal, bus, outPinCaption, lm, &autoSignalPtr);
 
 		if (result == false)
 		{
@@ -2644,6 +2660,16 @@ namespace Builder
 		return m_discreteSignalsHeap.getHeapUsedSizeW();
 	}
 
+	void UalSignalsMap::initAnalogAndBusSignalsHeap(int startAddrW, int sizeW)
+	{
+		m_analogAndBusSignalsHeap.init(startAddrW, sizeW);
+	}
+
+	int UalSignalsMap::getAnalogAndBusSignalsHeapSizeW() const
+	{
+		return m_analogAndBusSignalsHeap.getHeapUsedSizeW();
+	}
+
 	Address16 UalSignalsMap::getSignalWriteAddress(const UalSignal& ualSignal)
 	{
 		if (ualSignal.isHeapPlaced() == false)
@@ -2658,7 +2684,7 @@ namespace Builder
 			return m_discreteSignalsHeap.getAddressForWrite(ualSignal);
 		}
 
-		return m_otherSignalsHeap.getAddressForWrite(ualSignal);
+		return m_analogAndBusSignalsHeap.getAddressForWrite(ualSignal);
 	}
 
 	Address16 UalSignalsMap::getSignalReadAddress(const UalSignal& ualSignal, bool decrementReadCount)
@@ -2675,7 +2701,30 @@ namespace Builder
 			return m_discreteSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
 		}
 
-		return m_otherSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
+		return m_analogAndBusSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
+	}
+
+	void UalSignalsMap::removeSignalFromHeap(const UalSignal& ualSignal)
+	{
+		if (ualSignal.isHeapPlaced() == false)
+		{
+			return;
+		}
+
+		switch(ualSignal.signalType())
+		{
+		case E::SignalType::Discrete:
+			m_discreteSignalsHeap.removeItem(ualSignal);
+			break;
+
+		case E::SignalType::Analog:
+		case E::SignalType::Bus:
+			m_analogAndBusSignalsHeap.removeItem(ualSignal);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
 	}
 
 	void UalSignalsMap::getHeapsLog(QStringList* log) const
@@ -2686,16 +2735,18 @@ namespace Builder
 		log->append(QString());
 		log->append(m_discreteSignalsHeap.getHeapLog());
 		log->append(QString());
-		log->append(QString("Other signals heap log:"));
+		log->append(QString().fill('-', 80));
 		log->append(QString());
-		log->append(m_otherSignalsHeap.getHeapLog());
+		log->append(QString("Analog and Bus signals heap log:"));
+		log->append(QString());
+		log->append(m_analogAndBusSignalsHeap.getHeapLog());
 	}
 
 	UalSignal* UalSignalsMap::privateCreateAutoSignal(const UalItem* ualItem,
 											   QUuid outPinUuid,
 											   E::SignalType signalType,
 											   E::AnalogAppSignalFormat analogFormat,
-											   int expectedReadCount)
+											   std::optional<int> expectedReadCount)
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(ualItem, m_log);
 
@@ -2762,11 +2813,22 @@ namespace Builder
 		//
 		if (expectedReadCount > 0)
 		{
-			if (ualSignal->isDiscrete() == true)
-			{
-				ualSignal->setHeapPlaced();
+			ualSignal->setHeapPlaced();
 
+			switch(ualSignal->signalType())
+			{
+			case E::SignalType::Discrete:
 				m_discreteSignalsHeap.appendItem(*ualSignal, expectedReadCount);
+				break;
+
+			case E::SignalType::Analog:
+			case E::SignalType::Bus:
+				m_analogAndBusSignalsHeap.appendItem(*ualSignal, expectedReadCount);
+				break;
+
+			default:
+
+				Q_ASSERT(false);
 			}
 		}
 		//

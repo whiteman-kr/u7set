@@ -717,6 +717,8 @@ namespace Builder
 			result &= createUalSignalFromSignal(ualItem, 2);
 		}
 
+		result &= removeLoopbackSignalsFromHeap();
+
 		result &= checkBusProcessingItemsConnections();
 
 		RETURN_IF_FALSE(result);
@@ -1881,32 +1883,26 @@ namespace Builder
 
 			UalSignal* ualSignal = nullptr;
 
-			Signal* s = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
+			Signal* connectedSignal = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
 
 			switch(outAfbSignal.type())
 			{
 			case E::SignalType::Analog:
 			case E::SignalType::Discrete:
-				if (s == nullptr)
+				if (connectedSignal == nullptr)
 				{
-					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal,
-															  static_cast<int>(outPin.associatedIOs().size()));
+					std::optional<int> expectedReadCount = getOutPinExpectedReadCount(outPin);
+
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, expectedReadCount);
 				}
 				else
 				{
-					ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
+					ualSignal = m_ualSignals.createSignal(ualItem, connectedSignal, outPin.guid());
 				}
 				break;
 
 			case E::SignalType::Bus:
 				{
-					if ((s != nullptr && s->isBus() == false) || (bus == nullptr))
-					{
-						assert(false);
-						LOG_INTERNAL_ERROR(m_log);
-						return false;
-					}
-
 					std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
 
 					if (lm == nullptr)
@@ -1915,7 +1911,7 @@ namespace Builder
 						return false;
 					}
 
-					ualSignal = m_ualSignals.createBusParentSignal(ualItem, s, bus, outPin.guid(), outAfbSignal.caption(), lm);
+					ualSignal = m_ualSignals.createBusParentSignal(ualItem, connectedSignal, bus, outPin.guid(), outAfbSignal.caption(), lm);
 				}
 				break;
 
@@ -2481,6 +2477,73 @@ namespace Builder
 			}
 
 			result &= linkLoopbackTarget(ualItem);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(loopbackTargetItem, m_log);
+
+		const UalLoopbackTarget* target = loopbackTargetItem->ualLoopbackTarget();
+
+		if  (target == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString loopbackID = target->loopbackId();
+
+		UalSignal* loopbackUalSignal = m_loopbacks.getLoopbackUalSignal(loopbackID);
+
+		if (loopbackUalSignal == nullptr)
+		{
+			// This is a critical error!
+			// Loopback source signal is't connected to any signal source (is not initialized)
+			//
+			// Corresponding message will display during execution createUalSignalFromSignal(...) on pass 2.
+			// So, to continue compilation we return TRUE here!
+			//
+			return true;
+		}
+
+		const std::vector<LogicPin>& outputs = loopbackTargetItem->outputs();
+
+		if (outputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// link connected items to loopback source signal
+		//
+		bool result = linkConnectedItems(loopbackTargetItem, outputs[0], loopbackUalSignal);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::removeLoopbackSignalsFromHeap()
+	{
+		// loopback signals shouldn't be placed in heap!
+		//
+		bool result = true;
+
+		QList<const UalSignal*> loopbackSignals = m_loopbacks.getLoopbacksUalSignals();
+
+		for(const UalSignal* loopbackSignal : loopbackSignals)
+		{
+			TEST_PTR_CONTINUE(loopbackSignal);
+
+			if (loopbackSignal->isHeapPlaced() == false)
+			{
+				continue;
+			}
+
+			m_ualSignals.removeSignalFromHeap(*loopbackSignal);
+
+			const_cast<UalSignal*>(loopbackSignal)->resetHeapPlaced();
 		}
 
 		return result;
@@ -3103,48 +3166,6 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(loopbackTargetItem, m_log);
-
-		const UalLoopbackTarget* target = loopbackTargetItem->ualLoopbackTarget();
-
-		if  (target == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		QString loopbackID = target->loopbackId();
-
-		UalSignal* loopbackUalSignal = m_loopbacks.getLoopbackUalSignal(loopbackID);
-
-		if (loopbackUalSignal == nullptr)
-		{
-			// This is a critical error!
-			// Loopback source signal is't connected to any signal source (is not initialized)
-			//
-			// Corresponding message will display during execution createUalSignalFromSignal(...) on pass 2.
-			// So, to continue compilation we return TRUE here!
-			//
-			return true;
-		}
-
-		const std::vector<LogicPin>& outputs = loopbackTargetItem->outputs();
-
-		if (outputs.size() != 1)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		// link connected items to loopback source signal
-		//
-		bool result = linkConnectedItems(loopbackTargetItem, outputs[0], loopbackUalSignal);
-
-		return result;
-	}
-
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
@@ -3325,11 +3346,7 @@ namespace Builder
 		{
 			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
 
-			if (connectedItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(connectedItem);
 
 			if (connectedItem->isTerminator() == false)
 			{
@@ -3599,6 +3616,68 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	std::optional<int> ModuleLogicCompiler::getOutPinExpectedReadCount(const LogicPin& outPin)
+	{
+		Q_ASSERT(outPin.IsOutput() == true);
+
+		// calculate expected read count to place signal in heap
+		// if signal can't be placed in heap uninitialized value of std::optional<int> will be returned
+		//
+		int readCount = 0;
+
+		for(const QUuid& inPinGuid : outPin.associatedIOs())
+		{
+			UalItem* inPinParentItem = m_pinParent.value(inPinGuid);
+
+			TEST_PTR_CONTINUE(inPinParentItem);
+
+			switch(inPinParentItem->type())
+			{
+			case E::UalItemType::Afb:
+			case E::UalItemType::BusComposer:
+
+				readCount++;
+
+				break;
+
+			case E::UalItemType::Terminator:
+				break;
+
+			case E::UalItemType::Signal:
+			case E::UalItemType::LoopbackSource:
+			case E::UalItemType::Transmitter:
+
+				return std::nullopt;			// if any ual item of this types is connected to AFB out - signal can't be placed in heap
+
+			case E::UalItemType::BusExtractor:
+
+				Q_ASSERT(false);				// bus signals in heap is not implemeneted now
+
+				return std::nullopt;
+
+			case E::UalItemType::Const:
+			case E::UalItemType::Receiver:
+			case E::UalItemType::LoopbackTarget:
+			case E::UalItemType::Unknown:
+
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);		// Ual items of this types can't be connected to AFB output pin
+
+				return std::nullopt;
+
+			default:
+				Q_ASSERT(false);
+			}
+		}
+
+		if (readCount == 0)
+		{
+			return std::nullopt;
+		}
+
+		return std::optional<int>(readCount);
 	}
 
 	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
@@ -4630,7 +4709,8 @@ namespace Builder
 				s->isBusChild() == false &&
 				s->isAcquired() == false &&
 				s->isAnalog() == true &&
-				s->isInternal() == true)
+				s->isInternal() == true &&
+				s->isHeapPlaced() == false)
 			{
 				m_nonAcquiredAnalogInternalSignals.append(s);
 			}
@@ -4933,6 +5013,8 @@ namespace Builder
 
 			if (disposeDiscreteSignalsInBitMemory() == false) break;
 
+			if (disposeDiscreteSignalsHeap() == false) break;
+
 			if (disposeAcquiredRawDataInRegBuf() == false) break;
 
 			if (disposeAcquiredAnalogSignalsInRegBuf() == false) break;
@@ -4944,6 +5026,8 @@ namespace Builder
 			if (disposeNonAcquiredAnalogSignals() == false) break;
 
 			if (disposeNonAcquiredBuses() == false) break;
+
+			if (disposeAnalogAndBusSignalsHeap() == false) break;
 
 			result = true;
 		}
@@ -5165,6 +5249,11 @@ namespace Builder
 		result &= m_memoryMap.appendNonAcquiredDiscreteStrictOutputSignals(m_nonAcquiredDiscreteStrictOutputSignals);
 		result &= m_memoryMap.appendNonAcquiredDiscreteInternalSignals(m_nonAcquiredDiscreteInternalSignals);
 
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeDiscreteSignalsHeap()
+	{
 		int bitMemoryStartAddrW = m_memoryMap.appBitMemoryStart();
 
 		Q_ASSERT(m_lmDescription->memory().m_appLogicBitDataOffset == static_cast<quint32>(bitMemoryStartAddrW));
@@ -5175,7 +5264,7 @@ namespace Builder
 
 		m_ualSignals.initDiscreteSignalsHeap(discreteSignalsHeapStartAddrW, discreteSignalsHeapSizeW);
 
-		return result;
+		return true;
 	}
 
 	bool ModuleLogicCompiler::disposeAcquiredRawDataInRegBuf()
@@ -5250,6 +5339,21 @@ namespace Builder
 		result &= m_memoryMap.appendNonAcquiredBusses(m_nonAcquiredBuses);
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeAnalogAndBusSignalsHeap()
+	{
+		int wordMemoryStartAddrW = m_memoryMap.appWordMemoryStart();
+
+		Q_ASSERT(m_lmDescription->memory().m_appLogicWordDataOffset == static_cast<quint32>(wordMemoryStartAddrW));
+
+		int heapStartAddrW = m_memoryMap.appWordMemoryAnalogAndBusSignalsHeapStart();
+		int heapSizeW = m_lmDescription->memory().m_appLogicWordDataSize -
+											(heapStartAddrW - wordMemoryStartAddrW);
+
+		m_ualSignals.initAnalogAndBusSignalsHeap(heapStartAddrW, heapSizeW);
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion()
@@ -7456,6 +7560,7 @@ namespace Builder
 		}
 
 		m_memoryMap.setAppBitMemoryDiscreteSignalsHeapSizeW(m_ualSignals.getDiscreteSignalsHeapSizeW());
+		m_memoryMap.setAppWordMemoryAnalogAndBusSignalsHeapSizeW(m_ualSignals.getAnalogAndBusSignalsHeapSizeW());
 
 //		m_alpCode_calculate(&m_resourcesUsageInfo.appLogicCode);
 
@@ -7663,7 +7768,9 @@ namespace Builder
 			}
 			else
 			{
-				cmd.writeFuncBlock32(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->ualAddr(), afbCaption);
+				cmd.writeFuncBlock32(afbOpcode, afbInstance, afbSignalIndex,
+									 m_ualSignals.getSignalReadAddress(*inUalSignal, true),
+									 afbCaption);
 				cmd.setComment(QString("%1.%2 <= %3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->appSignalID()));
 			}
 
@@ -7926,7 +8033,7 @@ namespace Builder
 				return false;
 			}
 
-			if (isConnectedToTerminator(outPin) == true)
+			if (isConnectedToTerminatorOnly(outPin) == true)
 			{
 				continue;
 			}
@@ -8012,7 +8119,7 @@ namespace Builder
 
 		case E::SignalType::Analog:
 
-			cmd.readFuncBlock32(outUalSignal->ualAddr(), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
+			cmd.readFuncBlock32(m_ualSignals.getSignalWriteAddress(*outUalSignal), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
 			cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
 
 			code->append(cmd);
@@ -8497,8 +8604,8 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
 
-		assert(busChildSignal->ualAddr().isValid() == true);
-		assert(busChildSignal->ualAddr().bit() == 0);
+		Q_ASSERT(busChildSignal->ualAddr().isValid() == true);
+		Q_ASSERT(busChildSignal->ualAddr().bit() == 0);
 
 		if (busSignal.conversionRequired() == true)
 		{
@@ -8531,10 +8638,12 @@ namespace Builder
 		}
 		else
 		{
-			assert(inputSignal->ualAddr().isValid() == true);
-			assert(inputSignal->ualAddr().bit() == 0);
+			Address16 inputSignalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
 
-			cmd.mov32(busChildSignal->ualAddr().offset(), inputSignal->ualAddr().offset());
+			Q_ASSERT(inputSignalAddr.isValid() == true);
+			Q_ASSERT(inputSignalAddr.bit() == 0);
+
+			cmd.mov32(busChildSignal->ualAddr().offset(), inputSignalAddr.offset());
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
 		}
 
@@ -9210,35 +9319,6 @@ namespace Builder
 		m_log->errALC5106(pinCaption, ualItem->guid(), ualItem->schemaID());
 
 		return nullptr;
-	}
-
-	bool ModuleLogicCompiler::isConnectedToTerminator(const LogicPin& outPin)
-	{
-		ConnectedAppItems connectedItems;
-
-		bool result = getConnectedAppItems(outPin, &connectedItems);
-
-		if (result == false)
-		{
-			assert(false);
-			return false;
-		}
-
-		for(const std::pair<QUuid, UalItem*> pair : connectedItems)
-		{
-			if (pair.second == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				continue;
-			}
-
-			if (pair.second->isTerminator() == true)
-			{
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* appFb)

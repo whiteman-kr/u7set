@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "../lib/Address16.h"
 
 namespace Builder
@@ -26,14 +28,15 @@ namespace Builder
 
 		void init(int heapStartAddrW, int heapSizeW);
 
-		void appendItem(const UalSignal &ualSignal, int expectedReadCount);
+		void appendItem(const UalSignal &ualSignal, std::optional<int> expectedReadCount);
+		void removeItem(const UalSignal &ualSignal);
 
 		Address16 getAddressForWrite(const UalSignal& ualSignal);		// should be called only once for each appSignalID
 		Address16 getAddressForRead(const UalSignal& ualSignal, bool decrementReadCount);
 
 		int getHeapUsedSizeW() const;
 
-		const QStringList& getHeapLog() const { return m_heapLog; }
+		const QStringList& getHeapLog() const;
 
 	private:
 
@@ -42,9 +45,10 @@ namespace Builder
 		void logRemoveFromHeap(const HeapItem& heapItem);
 
 	private:
+		int m_memCellSizeBits = -1;
+
 		int m_heapStartAddrW = -1;
 		int m_heapSizeW = -1;
-		int m_memCellSizeBits = -1;
 
 		std::map<QString, HeapItem*> m_items;				// all signals will be placed in heap: appSignalID -> HeapItem
 		std::map<int, HeapItem*> m_itemsInHeap;				// current signals in heap: address -> HeapItem
@@ -52,7 +56,7 @@ namespace Builder
 
 		int m_heapHighBoundBits = 0;
 
-		QStringList m_heapLog;
+		mutable QStringList m_heapLog;
 	};
 }
 
