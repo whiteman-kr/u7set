@@ -1,5 +1,5 @@
-#ifndef SIMULATOR_H
-#define SIMULATOR_H
+#pragma once
+
 #include <memory>
 #include <map>
 #include <vector>
@@ -88,4 +88,4 @@ namespace Sim
 	};
 }
 
-#endif // SIMULATOR_H
+

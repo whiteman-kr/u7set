@@ -371,12 +371,12 @@ namespace Sim
 
 		// --
 		//
-		QDateTime utcOffset = QDateTime::currentDateTime();
-
 		QTime perfmanceTimer;
 		perfmanceTimer.start();
 
 		microseconds perfmonaceStartedAt = cd.m_currentTime;
+		QDateTime utcOffset = QDateTime::currentDateTime();
+		quint64 timeStatusUpdateCounter = 0;
 
 		auto finishTime = cd.m_startTime + cd.m_duration;
 		do
@@ -445,7 +445,7 @@ namespace Sim
 				}
 			}
 
-			// Shift current time if requored
+			// Shift current time if required
 			//
 			if (minPossibleTime > cd.m_currentTime)
 			{
@@ -465,6 +465,13 @@ namespace Sim
 				// Assign new currentTime
 				//
 				cd.m_currentTime = minPossibleTime;
+
+				if ((++timeStatusUpdateCounter) % 31 == 0)	// The divider is odd, so the last digit of ms will be changing 0 and 5, if divider is even then we can always see the last digit is 0
+				{
+					// Emit this information signal every 160 ms, we don't need to send it every cycle
+					//
+					emit timeStatusUpdate(cd);
+				}
 
 //				QDateTime t = cd.currentTime();
 //				qDebug() << "CurrentTime changed to: " << t.toString("dd/MM/yyyy HH:mm:ss:zzz");
@@ -524,6 +531,7 @@ namespace Sim
 		// Update current time and last time in m_controlData
 		//
 		updateControlData(cd);
+		emit timeStatusUpdate(cd);
 
 
 		// Some debug info

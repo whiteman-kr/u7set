@@ -1,5 +1,4 @@
-#ifndef SIMCONTROL_H
-#define SIMCONTROL_H
+#pragma once
 
 #include <set>
 #include <atomic>
@@ -98,6 +97,25 @@ namespace Sim
 		}
 	};
 
+	struct ControlTimeStatus
+	{
+		ControlTimeStatus() = default;
+
+		ControlTimeStatus(const ControlData& cd) :
+			m_startTime(cd.m_startTime),
+			m_currentTime(cd.m_currentTime),
+			m_duration(cd.m_currentTime - cd.m_startTime),
+			m_state(cd.m_state)
+		{
+		}
+
+		std::chrono::microseconds m_startTime = 0us;	// When simulation was started, it's computer time
+		std::chrono::microseconds m_currentTime = 0us;	// Current time in simulation
+
+		std::chrono::microseconds m_duration{0};
+		SimControlState m_state = SimControlState::Stop;
+	};
+
 
 	class Control : public QThread, protected Output
 	{
@@ -132,6 +150,7 @@ namespace Sim
 
 	signals:
 		void stateChanged(SimControlState state);
+		void timeStatusUpdate(ControlTimeStatus state);
 
 	protected:
 		virtual void run() override;
@@ -152,4 +171,6 @@ namespace Sim
 
 }
 
-#endif // SIMCONTROL_H
+Q_DECLARE_METATYPE(Sim::ControlTimeStatus);
+
+

@@ -16,6 +16,8 @@ namespace Sim
 		QObject(parent),
 		Output()
 	{
+		qRegisterMetaType<Sim::ControlTimeStatus>("ControlTimeStatus");
+
 		return;
 	}
 

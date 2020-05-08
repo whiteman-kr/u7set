@@ -45,6 +45,7 @@ protected slots:
 	void aboutToQuit();
 
 	void controlStateChanged(Sim::SimControlState state);
+	void updateTimeIndicator(Sim::ControlTimeStatus state);
 	void updateActions();
 
 	void projectOpened(DbProject project);
@@ -75,7 +76,10 @@ private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
 	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	QTabWidget* m_tabWidget = nullptr;
+
 	SimToolBar* m_toolBar = nullptr;
+	QLabel* m_timeIndicator = nullptr;	// Widget on toolbar to show current simulation time
+
 	SimOutputWidget* m_outputWidget = nullptr;
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;

@@ -62,6 +62,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
+	connect(&(m_simulator->control()), &Sim::Control::timeStatusUpdate, this, &SimWidget::updateTimeIndicator);
 
 	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openControlTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
@@ -131,6 +132,18 @@ void SimWidget::createToolBar()
 
 	// --
 	//
+	m_timeIndicator = new QLabel;
+
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Consolas");
+#else
+		QFont f = QFont("Courier");
+#endif
+	m_timeIndicator->setFont(f);
+	updateTimeIndicator(Sim::ControlTimeStatus{});
+
+	// --
+	//
 	m_toolBar->addAction(m_openProjectAction);
 	m_toolBar->addAction(m_closeProjectAction);
 	m_toolBar->addAction(m_refreshProjectAction);
@@ -140,6 +153,9 @@ void SimWidget::createToolBar()
 	m_toolBar->addAction(m_runAction);
 	m_toolBar->addAction(m_pauseAction);
 	m_toolBar->addAction(m_stopAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addWidget(m_timeIndicator);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_trendsAction);
@@ -318,6 +334,46 @@ void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
 	updateActions();
 }
 
+void SimWidget::updateTimeIndicator(Sim::ControlTimeStatus state)
+{
+	Q_ASSERT(m_timeIndicator);
+
+	std::chrono::milliseconds durration = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_duration);
+
+	qint64 days = durration.count() / 1_day;
+	qint64 hours = (durration.count() % 1_day)  / 1_hour;
+	qint64 minutes = (durration.count() % 1_hour)  / 1_min;
+	qint64 seconds = (durration.count() % 1_min)  / 1_sec;
+	qint64 millisecond = durration.count() % 1_sec;
+
+	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_currentTime);
+	QDateTime utcOffset = QDateTime::currentDateTime();
+	TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+
+	QDateTime currentTime = plantTime.toDateTime();
+
+	//        0d 00:20:03.580
+	//05/17/2020 15:18:59.335
+
+	QLocale locale;
+
+	QString dateText = QString("%6 %7")
+					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
+					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
+
+	QString text = tr("%1d %2:%3:%4.%5\n%6")
+					.arg(days, dateText.size() - 14, 10, QChar(' '))
+					.arg(hours, 2, 10, QChar('0'))
+					.arg(minutes, 2, 10, QChar('0'))
+					.arg(seconds, 2, 10, QChar('0'))
+					.arg(millisecond, 3, 10, QChar('0'))
+					.arg(dateText);
+
+	m_timeIndicator->setText(text);
+
+	return;
+}
+
 void SimWidget::updateActions()
 {
 	bool projectIsLoaded = m_simulator->isLoaded();
@@ -337,6 +393,8 @@ void SimWidget::updateActions()
 	m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
 	m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
 	m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+
+	m_timeIndicator->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
 
 	return;
 }
