@@ -31,15 +31,18 @@
 //
 #define SIM_FAULT(message) fault(message, __FUNCTION_NAME__);
 
-
 namespace Sim
 {
+	Q_NAMESPACE
+
 	enum class DeviceMode
 	{
 		Start,
 		Fault,
 		Operate
 	};
+
+	Q_ENUM_NS(DeviceMode)
 
 	enum class CyclePhase
 	{
@@ -51,6 +54,7 @@ namespace Sim
 }
 
 Q_DECLARE_METATYPE(Sim::CyclePhase)
+Q_DECLARE_METATYPE(Sim::DeviceMode)
 
 namespace Sim
 {
@@ -214,16 +218,10 @@ namespace Sim
 		bool parseAppLogicCode();
 		bool parseCommand(const LmCommand& command, int programCounter);
 
-	public slots:
-		//void pause();
-		//void start(int cycles);
-
 	public:
 		void fault(QString reasone, QString func);
 
 	private:
-		//virtual void timerEvent(QTimerEvent* event) override;
-
 		bool processStartMode();
 		bool processFaultMode();
 
@@ -239,10 +237,6 @@ namespace Sim
 		//
 		template <typename TYPE>
 		TYPE getData(int eepromOffset) const;
-
-	signals:
-		void appCodeParsed(bool ok);
-		void faulted(QString message);
 
 		// Props
 		//
@@ -262,6 +256,11 @@ namespace Sim
 		std::unordered_map<int, size_t> offsetToCommands() const;
 
 		const Ram& ram() const;
+
+		DeviceMode currentMode() const;
+
+	private:
+		void setCurrentMode(DeviceMode value);
 
 		// Data
 		//
@@ -283,7 +282,6 @@ namespace Sim
 		// Current state
 		//
 		DeviceMode m_currentMode = DeviceMode::Start;
-		//std::atomic<int> m_timerId = -1;
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;

@@ -52,6 +52,8 @@ SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) 
 
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimProjectWidget::projectUpdated);
 
+	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimProjectWidget::updateModuleStates);
+
 	return;
 }
 
@@ -172,6 +174,56 @@ void SimProjectWidget::openCodeTabPage()
 	// --
 	//
 	emit signal_openCodeTabPage(lmEquipmentId);
+
+	return;
+}
+
+void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
+{
+	Q_ASSERT(m_equipmentTree);
+
+	QString text;
+	text.reserve(64);
+
+	for (const auto& lmState : state.m_lmDeviceModes)
+	{
+		QList<QTreeWidgetItem*> items = m_equipmentTree->findItems(lmState.lmEquipmentId, Qt::MatchFixedString | Qt::MatchRecursive, EquipmentTreeColumns::EquipmentID);
+
+		for (QTreeWidgetItem* item : items)
+		{
+			QColor color{Qt::black};
+			text.clear();
+
+			if (state.m_state == Sim::SimControlState::Pause)
+			{
+				text = tr("Pause - ");
+			}
+
+			if (state.m_state != Sim::SimControlState::Stop)
+			{
+				switch (lmState.deviceMode)
+				{
+				case Sim::DeviceMode::Start:
+					text += QStringLiteral("Start");
+					break;
+				case Sim::DeviceMode::Fault:
+					text += QStringLiteral("Fault");
+					color = qRgb(0xD0, 0x00, 0x00);
+					break;
+				case Sim::DeviceMode::Operate:
+					text += QStringLiteral("Operate");
+					break;
+				default:
+					Q_ASSERT(false);
+					text += QStringLiteral("Unknown");
+					color = qRgb(0xD0, 0x00, 0x00);
+				}
+			}
+
+			item->setText(EquipmentTreeColumns::State, text);
+			item->setTextColor(EquipmentTreeColumns::State, color);
+		}
+	}
 
 	return;
 }

@@ -23,6 +23,8 @@ protected slots:
 	void openControlTabPage();
 	void openCodeTabPage();
 
+	void updateModuleStates(Sim::ControlStatus state);
+
 protected:
 	void fillEquipmentTree();
 

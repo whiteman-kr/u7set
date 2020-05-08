@@ -41,10 +41,10 @@ void SimOutputWidget::simulatorOutputHandler(QtMsgType type, const QMessageLogCo
 			color = "#F87217";
 			break;
 		case QtMsgType::QtCriticalMsg:
-			color = "red";
+			color = "#D00000";
 			break;
 		case QtMsgType::QtFatalMsg:
-			color = "red";
+			color = "#D00000";
 			break;
 		case QtMsgType::QtInfoMsg:
 			color = "black";

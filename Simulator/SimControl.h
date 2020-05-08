@@ -97,16 +97,22 @@ namespace Sim
 		}
 	};
 
-	struct ControlTimeStatus
+	struct ControlStatus
 	{
-		ControlTimeStatus() = default;
+		ControlStatus() = default;
 
-		ControlTimeStatus(const ControlData& cd) :
+		ControlStatus(const ControlData& cd) :
 			m_startTime(cd.m_startTime),
 			m_currentTime(cd.m_currentTime),
 			m_duration(cd.m_currentTime - cd.m_startTime),
 			m_state(cd.m_state)
 		{
+			m_lmDeviceModes.reserve(cd.m_lms.size());
+
+			for (const SimControlRunStruct& lm : cd.m_lms)
+			{
+				m_lmDeviceModes.emplace_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceMode()});
+			}
 		}
 
 		std::chrono::microseconds m_startTime = 0us;	// When simulation was started, it's computer time
@@ -114,6 +120,14 @@ namespace Sim
 
 		std::chrono::microseconds m_duration{0};
 		SimControlState m_state = SimControlState::Stop;
+
+		struct LmMode
+		{
+			QString lmEquipmentId;
+			Sim::DeviceMode deviceMode;
+		};
+
+		std::vector<Sim::ControlStatus::LmMode> m_lmDeviceModes;
 	};
 
 
@@ -150,7 +164,7 @@ namespace Sim
 
 	signals:
 		void stateChanged(SimControlState state);
-		void timeStatusUpdate(ControlTimeStatus state);
+		void statusUpdate(ControlStatus state);
 
 	protected:
 		virtual void run() override;
@@ -171,6 +185,6 @@ namespace Sim
 
 }
 
-Q_DECLARE_METATYPE(Sim::ControlTimeStatus);
+Q_DECLARE_METATYPE(Sim::ControlStatus);
 
 

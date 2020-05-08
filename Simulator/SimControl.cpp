@@ -148,13 +148,15 @@ namespace Sim
 
 			m_controlData.m_state = SimControlState::Stop;
 
-			wl.unlock();		// Unlock before emitting signal, just in case
+			ControlStatus cs{m_controlData};
 
-			emit stateChanged(SimControlState::Stop);
+			wl.unlock();		// Unlock before emitting signal
+
+			emit stateChanged(cs.m_state);
+			emit statusUpdate(cs);
+
 			return false;
 		}
-
-		SimControlState state;
 
 		switch (m_controlData.m_state)
 		{
@@ -192,11 +194,12 @@ namespace Sim
 			assert(false);
 		}
 
-		state = m_controlData.m_state;
+		ControlStatus cs{m_controlData};
 
-		wl.unlock();		// Unlock before emitting signal, just in case
+		wl.unlock();		// Unlock before emitting signal
 
-		emit stateChanged(state);
+		emit stateChanged(cs.m_state);
+		emit statusUpdate(m_controlData);
 
 		return true;
 	}
@@ -204,15 +207,18 @@ namespace Sim
 	void Control::pause()
 	{
 		std::chrono::microseconds leftTime{0};
+		ControlStatus cs;
 
 		{
 			QWriteLocker wl(&m_controlDataLock);
 			m_controlData.m_state = SimControlState::Pause;
 
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+			cs = ControlStatus{m_controlData};
 		}
 
-		emit stateChanged(SimControlState::Pause);
+		emit stateChanged(cs.m_state);
+		emit statusUpdate(cs);
 
 		writeMessage(tr("Pause, left time %1, us").arg(leftTime.count()));
 		return;
@@ -221,15 +227,18 @@ namespace Sim
 	void Control::stop()
 	{
 		std::chrono::microseconds leftTime{0};
+		ControlStatus cs;
 
 		{
 			QWriteLocker wl(&m_controlDataLock);
 			m_controlData.m_state = SimControlState::Stop;
 
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+			cs = ControlStatus{m_controlData};
 		}
 
-		emit stateChanged(SimControlState::Stop);
+		emit stateChanged(cs.m_state);
+		emit statusUpdate(cs);
 
 		writeMessage(tr("Stop, left cycle %1").arg(leftTime.count()));
 		return;
@@ -470,7 +479,14 @@ namespace Sim
 				{
 					// Emit this information signal every 160 ms, we don't need to send it every cycle
 					//
-					emit timeStatusUpdate(cd);
+					static const QMetaMethod timeStatusUpdateSignal = QMetaMethod::fromSignal(&Control::statusUpdate);
+					if (isSignalConnected(timeStatusUpdateSignal) == true)
+					{
+						// if signal is not connected to anything (service?), then no reasone to make expensive
+						// initialization for ControlTimeStatus and pass it to function
+						//
+						emit statusUpdate(ControlStatus{cd});
+					}
 				}
 
 //				QDateTime t = cd.currentTime();
@@ -531,8 +547,7 @@ namespace Sim
 		// Update current time and last time in m_controlData
 		//
 		updateControlData(cd);
-		emit timeStatusUpdate(cd);
-
+		emit statusUpdate(ControlStatus{controlData()});	// Don't use cd! As it has not updated m_state
 
 		// Some debug info
 		//

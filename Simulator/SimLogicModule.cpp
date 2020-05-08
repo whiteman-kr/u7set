@@ -7,10 +7,6 @@ namespace Sim
 	LogicModule::LogicModule() :
 		Output("LogicModule")
 	{
-		connect(&m_device, &DeviceEmulator::appCodeParsed, this, &LogicModule::slot_appCodeParsed);
-		connect(&m_device, &DeviceEmulator::faulted, this, &LogicModule::faulted);
-
-		return;
 	}
 
 	LogicModule::~LogicModule()
@@ -56,6 +52,8 @@ namespace Sim
 		                    m_confEeprom,
 							m_appLogicEeprom,
 							connections);
+
+		setAppCommands(ok);
 
 		return ok;
 	}
@@ -113,9 +111,9 @@ namespace Sim
 		return true;
 	}
 
-	void LogicModule::slot_appCodeParsed(bool ok)
+	void LogicModule::setAppCommands(bool set)
 	{
-		if (ok == true)
+		if (set == true)
 		{
 			m_commands = m_device.commands();
 			m_offsetToCommand = m_device.offsetToCommands();
@@ -192,6 +190,11 @@ namespace Sim
 	const Ram& LogicModule::ram() const
 	{
 		return m_device.ram();
+	}
+
+	DeviceMode LogicModule::deviceMode() const
+	{
+		return m_device.currentMode();
 	}
 
 	void LogicModule::setOverrideSignals(OverrideSignals* overrideSignals)

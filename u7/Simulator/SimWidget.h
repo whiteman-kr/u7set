@@ -45,7 +45,7 @@ protected slots:
 	void aboutToQuit();
 
 	void controlStateChanged(Sim::SimControlState state);
-	void updateTimeIndicator(Sim::ControlTimeStatus state);
+	void updateTimeIndicator(Sim::ControlStatus state);
 	void updateActions();
 
 	void projectOpened(DbProject project);

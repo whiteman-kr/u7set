@@ -16,7 +16,9 @@ namespace Sim
 		QObject(parent),
 		Output()
 	{
-		qRegisterMetaType<Sim::ControlTimeStatus>("ControlTimeStatus");
+		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
+		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
+		qRegisterMetaType<Sim::DeviceMode>("DeviceMode");
 
 		return;
 	}
@@ -88,7 +90,7 @@ namespace Sim
 		m_firmwares.clear();
 		m_lmDescriptions.clear();
 		m_subsystems.clear();
-		m_appSignalManager.reset();
+		m_appSignalManager.resetAll();
 		m_connections.clear();
 
 		return;

@@ -189,7 +189,7 @@ namespace Sim
 	{
 		writeMessage(tr("Reset"));
 
-		m_currentMode = DeviceMode::Start;
+		setCurrentMode(DeviceMode::Start);
 
 		bool ok = initMemory();
 		if (ok == false)
@@ -229,7 +229,7 @@ namespace Sim
 
 	DeviceCommand* DeviceEmulator::command(int index)
 	{
-		if (index >= m_commands.size())
+		if (index >= static_cast<int>(m_commands.size()))
 		{
 			fault(QString("Index of m_commands is out of range"), "DeviceEmulator::command(int index)");
 			return nullptr;
@@ -703,7 +703,7 @@ namespace Sim
 		// Copy EEPROM tuning data to memory
 		//
 		{
-			assert(m_plainTuningData.size() % 2 == 0);
+			Q_ASSERT(m_plainTuningData.size() % 2 == 0);
 
 			const quint16* dataPtr = reinterpret_cast<const quint16*>(m_plainTuningData.constData());
 			quint32 tuningDataOffset = lmDescription().memory().m_tuningDataOffset;
@@ -746,19 +746,6 @@ namespace Sim
 
 		return ok;
 	}
-
-//	void DeviceEmulator::pause()
-//	{
-//		writeMessage(tr("Pause"));
-
-//		if (m_timerId != -1)
-//		{
-//			killTimer(m_timerId);
-//			m_timerId = -1;
-//		}
-
-//		return;
-//	}
 
 	bool DeviceEmulator::initEeprom()
 	{
@@ -849,7 +836,7 @@ namespace Sim
 			}
 
 			int frameCount = m_appLogicEeprom.configFramesCount(m_logicModuleInfo.lmNumber);
-			assert(startFrame + frameCount < m_appLogicEeprom.frameCount());
+			Q_ASSERT(startFrame + frameCount < m_appLogicEeprom.frameCount());
 
 			for (int frameIndex = startFrame;
 				 frameIndex < startFrame + frameCount && frameIndex < m_appLogicEeprom.frameCount();
@@ -876,7 +863,7 @@ namespace Sim
 			}
 
 			int tuningFrameCount = m_tuningEeprom.configFramesCount(m_logicModuleInfo.lmNumber);
-			assert(tuningStartFrame + tuningFrameCount < m_tuningEeprom.frameCount());
+			Q_ASSERT(tuningStartFrame + tuningFrameCount < m_tuningEeprom.frameCount());
 
 			for (int frameIndex = tuningStartFrame;
 				 frameIndex < tuningStartFrame + tuningFrameCount && frameIndex < m_tuningEeprom.frameCount();
@@ -935,13 +922,12 @@ namespace Sim
 
 					if (ok == false)
 					{
-						emit appCodeParsed(false);
 						return false;
 					}
 
 					// Move ProgramCounter
 					//
-					assert(m_commands.empty() == false);
+					Q_ASSERT(m_commands.empty() == false);
 
 					int commandSize = m_commands.back().m_size;
 					if (commandSize == 0)
@@ -950,7 +936,6 @@ namespace Sim
 											.arg(c.caption)
 											.arg(programCounter);
 						writeError(str);
-						emit appCodeParsed(false);
 						return false;
 					}
 
@@ -966,8 +951,6 @@ namespace Sim
 				QString str = tr("Parse command error, command cannot be found for word 0x%1\n")
 									.arg(commandWord, 4, 16, QChar('0'));
 				writeError(str);
-
-				emit appCodeParsed(false);
 				return false;
 			}
 
@@ -997,8 +980,6 @@ namespace Sim
 			m_cacheMutex.unlock();
 		}
 
-		emit appCodeParsed(true);
-
 		return true;
 	}
 
@@ -1006,7 +987,7 @@ namespace Sim
 	{
 		if (m_commandProcessor == nullptr)
 		{
-			assert(m_commandProcessor);
+			Q_ASSERT(m_commandProcessor);
 			return  false;
 		}
 
@@ -1014,7 +995,7 @@ namespace Sim
 		quint16 commandCode = (commandWord & command.codeMask);
 		if (commandCode != command.code)
 		{
-			assert(commandCode == command.code);
+			Q_ASSERT(commandCode == command.code);
 			return false;
 		}
 
@@ -1050,7 +1031,7 @@ namespace Sim
 
 		// Add command to offsetToCommand map
 		//
-		while (m_offsetToCommand.size() < deviceCommand.m_offset)
+		while (static_cast<int>(m_offsetToCommand.size()) < deviceCommand.m_offset)
 		{
 			m_offsetToCommand.push_back(-1);
 		}
@@ -1096,23 +1077,23 @@ namespace Sim
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
 			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
 		{
-			if (m_logicUnit.programCounter >= m_offsetToCommand.size())
+			if (m_logicUnit.programCounter >= static_cast<int>(m_offsetToCommand.size()))
 			{
-				assert(false);
+				Q_ASSERT(false);
 				SIM_FAULT("Command not found in current ProgramCounter.");
 				break;
 			}
 
 			int commandIndex = m_offsetToCommand[m_logicUnit.programCounter];
 
-			if (commandIndex == -1 || commandIndex > m_commands.size())
+			if (commandIndex == -1 || commandIndex > static_cast<int>(m_commands.size()))
 			{
 				SIM_FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
 				break;
 			}
 
 			DeviceCommand& command = m_commands[commandIndex];
-			assert(m_logicUnit.programCounter == command.m_offset);
+			Q_ASSERT(m_logicUnit.programCounter == command.m_offset);
 
 			if (bool ok = runCommand(command);
 				ok == false && m_currentMode != DeviceMode::Fault)
@@ -1154,7 +1135,7 @@ namespace Sim
 		case CyclePhase::ODT:		phase = "ODT";	break;
 		case CyclePhase::ST:		phase = "ST";	break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		QString str1 = QString("Fault");
@@ -1170,19 +1151,17 @@ namespace Sim
 		writeError(str2);
 		writeError(str3);
 
-		m_currentMode = DeviceMode::Fault;
-
-		emit faulted(str1 + "\n" + str2 + "\n" + str3);
+		setCurrentMode(DeviceMode::Fault);
 
 		return;
 	}
 
 	bool DeviceEmulator::processStartMode()
 	{
-		assert(m_currentMode == DeviceMode::Start);
+		Q_ASSERT(m_currentMode == DeviceMode::Start);
 		writeMessage(tr("Start mode"));
 
-		m_currentMode = DeviceMode::Operate;
+		setCurrentMode(DeviceMode::Operate);
 
 		return true;
 	}
@@ -1244,7 +1223,7 @@ namespace Sim
 			ConnectionPortPtr port = c->portForLm(equipmentId());
 			if (port == nullptr)
 			{
-				assert(port);
+				Q_ASSERT(port);
 				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.")
 						  .arg(c->connectionId())
 						  .arg(equipmentId()));
@@ -1255,7 +1234,7 @@ namespace Sim
 			//
 			const ::ConnectionPortInfo& portInfo = port->portInfo();
 
-			assert(portInfo.lmID == equipmentId());
+			Q_ASSERT(portInfo.lmID == equipmentId());
 
 //			QByteArray rb;
 //			QByteArray* receiveBuffer = &rb;
@@ -1309,7 +1288,7 @@ namespace Sim
 					// Payload is received
 					// Write data to memory
 					//
-					assert(receiveBuffer->size() % 2 == 0);
+					Q_ASSERT(receiveBuffer->size() % 2 == 0);
 
 					if (receiveBuffer->size() / 2 != portInfo.rxDataSizeW)
 					{
@@ -1374,7 +1353,7 @@ namespace Sim
 			ConnectionPortPtr port = c->portForLm(equipmentId());
 			if (port == nullptr)
 			{
-				assert(port);
+				Q_ASSERT(port);
 				SIM_FAULT(QString("Communication port not found for connection %1 in LM %2.")
 						  .arg(c->connectionId())
 						  .arg(equipmentId()));
@@ -1385,7 +1364,7 @@ namespace Sim
 			//
 			const ::ConnectionPortInfo& portInfo = port->portInfo();
 
-			assert(portInfo.lmID == equipmentId());
+			Q_ASSERT(portInfo.lmID == equipmentId());
 
 //			QByteArray sb;
 //			QByteArray* sendBuffer = &sb;
@@ -1440,7 +1419,7 @@ namespace Sim
 		//
 		if (eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE))
 		{
-			assert(eepromOffset >= 0 &&
+			Q_ASSERT(eepromOffset >= 0 &&
 				   eepromOffset - sizeof(TYPE) <= m_plainAppLogic.size());
 			return 0;
 		}
@@ -1494,14 +1473,14 @@ namespace Sim
 	std::vector<DeviceCommand> DeviceEmulator::commands() const
 	{
 		QMutexLocker ml(&m_cacheMutex);
-		assert(m_commands.size() == m_cachedCommands.size());
+		Q_ASSERT(m_commands.size() == m_cachedCommands.size());
 		return m_cachedCommands;
 	}
 
 	std::unordered_map<int, size_t> DeviceEmulator::offsetToCommands() const
 	{
 		QMutexLocker ml(&m_cacheMutex);
-		assert(m_cachedOffsetToCommand.size() == m_cachedOffsetToCommand.size());
+		Q_ASSERT(m_cachedOffsetToCommand.size() == m_cachedOffsetToCommand.size());
 		return m_cachedOffsetToCommand;
 	}
 
@@ -1510,5 +1489,14 @@ namespace Sim
 		return m_ram;
 	}
 
+	DeviceMode DeviceEmulator::currentMode() const
+	{
+		return m_currentMode;
+	}
+
+	void DeviceEmulator::setCurrentMode(DeviceMode value)
+	{
+		m_currentMode = value;
+	}
 
 }

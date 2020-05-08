@@ -27,7 +27,10 @@ namespace Sim
 		virtual ~AppSignalManager();
 
 	public:
-		void reset();
+		void resetAll();
+		void resetSignalParam();
+		void resetRam();
+
 		bool load(QString fileName);
 
 		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp systemTime, TimeStamp localTime);

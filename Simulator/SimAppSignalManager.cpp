@@ -17,32 +17,40 @@ namespace Sim
 
 	AppSignalManager::~AppSignalManager()
 	{
-		reset();
+		resetAll();
 	}
 
-	void AppSignalManager::reset()
+	void AppSignalManager::resetAll()
 	{
-		{
-			QWriteLocker wl(&m_signalParamLock);
+		resetSignalParam();
+		resetRam();
+		return;
+	}
 
-			m_signalParams.clear();
-			m_signalParamsExt.clear();
-			m_customToAppSignalId.clear();
-		}
+	void AppSignalManager::resetSignalParam()
+	{
+		QWriteLocker wl(&m_signalParamLock);
 
-		{
-			QWriteLocker wl(&m_ramLock);
+		m_signalParams.clear();
+		m_signalParamsExt.clear();
+		m_customToAppSignalId.clear();
 
-			m_ram.clear();
-			m_ramTimes.clear();
-		}
+		return;
+	}
+
+	void AppSignalManager::resetRam()
+	{
+		QWriteLocker wl(&m_ramLock);
+
+		m_ram.clear();
+		m_ramTimes.clear();
 
 		return;
 	}
 
 	bool AppSignalManager::load(QString fileName)
 	{
-		reset();
+		resetAll();
 
 		// Open, read, decompress file
 		//

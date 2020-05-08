@@ -62,7 +62,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
-	connect(&(m_simulator->control()), &Sim::Control::timeStatusUpdate, this, &SimWidget::updateTimeIndicator);
+	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimWidget::updateTimeIndicator);
 
 	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openControlTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
@@ -140,7 +140,7 @@ void SimWidget::createToolBar()
 		QFont f = QFont("Courier");
 #endif
 	m_timeIndicator->setFont(f);
-	updateTimeIndicator(Sim::ControlTimeStatus{});
+	updateTimeIndicator(Sim::ControlStatus{});
 
 	// --
 	//
@@ -334,7 +334,7 @@ void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
 	updateActions();
 }
 
-void SimWidget::updateTimeIndicator(Sim::ControlTimeStatus state)
+void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 {
 	Q_ASSERT(m_timeIndicator);
 
@@ -498,6 +498,8 @@ void SimWidget::runSimulation()
 	}
 	else
 	{
+		m_simulator->appSignalManager().resetRam();		// It prevents from short show of previouse run results
+
 		// Star simulation for all project
 		//
 		mutableControl.reset();

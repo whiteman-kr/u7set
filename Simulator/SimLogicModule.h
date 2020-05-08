@@ -39,16 +39,13 @@ namespace Sim
 		//
 		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, qint64 workcycle,  bool reset);				// Start running one cycle
 
-	signals:
-		void faulted(QString message);		// Public signal, translated from DeviceEmulator
-
 		// --
 		//
 	protected:
 		bool loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom);
 
 	protected slots:
-		void slot_appCodeParsed(bool ok);
+		void setAppCommands(bool ok);
 
 	public:
 		const QString& equipmentId() const;
@@ -68,6 +65,7 @@ namespace Sim
 		const DeviceCommand& offsetToCommand(int offset) const;
 
 		const Ram& ram() const;
+		DeviceMode deviceMode() const;
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);
 
