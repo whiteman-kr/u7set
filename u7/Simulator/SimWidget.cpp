@@ -344,7 +344,7 @@ void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 	qint64 hours = (durration.count() % 1_day)  / 1_hour;
 	qint64 minutes = (durration.count() % 1_hour)  / 1_min;
 	qint64 seconds = (durration.count() % 1_min)  / 1_sec;
-	qint64 millisecond = durration.count() % 1_sec;
+//	qint64 millisecond = durration.count() % 1_sec;
 
 	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_currentTime);
 	QDateTime utcOffset = QDateTime::currentDateTime();
@@ -352,21 +352,43 @@ void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 
 	QDateTime currentTime = plantTime.toDateTime();
 
-	//        0d 00:20:03.580
-	//05/17/2020 15:18:59.335
+	// IF UNCOMMENTING THIS CODE
+	// and if you want to show milliseconds,
+	// THEN do not forget to send message more frequently
+	// in Sim::Control::processRun emit statusUpdate(ControlStatus{cd});
+	//
+
+//	//        0d 00:20:03.580
+//	//05/17/2020 15:18:59.335
+
+//	QLocale locale;
+
+//	QString dateText = QString("%6 %7")
+//					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
+//					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
+
+//	QString text = tr("%1d %2:%3:%4.%5\n%6")
+//					.arg(days, dateText.size() - 14, 10, QChar(' '))
+//					.arg(hours, 2, 10, QChar('0'))
+//					.arg(minutes, 2, 10, QChar('0'))
+//					.arg(seconds, 2, 10, QChar('0'))
+//					.arg(millisecond, 3, 10, QChar('0'))
+//					.arg(dateText);
+
+	//        0d 00:20:03
+	//05/17/2020 15:18:59
 
 	QLocale locale;
 
 	QString dateText = QString("%6 %7")
 					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
-					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
+					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss")));
 
-	QString text = tr("%1d %2:%3:%4.%5\n%6")
-					.arg(days, dateText.size() - 14, 10, QChar(' '))
+	QString text = tr("%1d %2:%3:%4\n%6")
+					.arg(days, dateText.size() - 10, 10, QChar(' '))
 					.arg(hours, 2, 10, QChar('0'))
 					.arg(minutes, 2, 10, QChar('0'))
 					.arg(seconds, 2, 10, QChar('0'))
-					.arg(millisecond, 3, 10, QChar('0'))
 					.arg(dateText);
 
 	m_timeIndicator->setText(text);

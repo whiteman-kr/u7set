@@ -170,7 +170,7 @@ namespace Sim
 			m_controlData.m_state = SimControlState::Run;
 
 			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-			m_controlData.m_startTime = (m_controlData.m_startTime / 10000) * 10000;	// It will make start time on edge of 10ms, it will make nice timestamp
+			m_controlData.m_startTime = (m_controlData.m_startTime / 1'000'000) * 1'000'000;	// It will make start time on the edge of 1s, it will make nice timestamp
 
 			m_controlData.m_currentTime = m_controlData.m_startTime;
 			m_controlData.m_duration = duration;
@@ -475,7 +475,7 @@ namespace Sim
 				//
 				cd.m_currentTime = minPossibleTime;
 
-				if ((++timeStatusUpdateCounter) % 31 == 0)	// The divider is odd, so the last digit of ms will be changing 0 and 5, if divider is even then we can always see the last digit is 0
+				if ((++timeStatusUpdateCounter) % 200 == 0)	// Update every second
 				{
 					// Emit this information signal every 160 ms, we don't need to send it every cycle
 					//
