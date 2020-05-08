@@ -32,7 +32,7 @@ namespace Sim
 		// for displaying output log
 		//
 		QFuture<bool> future = QtConcurrent::run(
-								[buildPath, this]()
+								[buildPath, this]() -> bool
 								{
 									return this->loadFunc(buildPath);
 								});

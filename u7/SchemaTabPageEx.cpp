@@ -1250,7 +1250,7 @@ QString SchemaListModelEx::fileCaption(int fileId) const
 	}
 
 	const VFrame30::SchemaDetails& d = it->second;
-	return d.m_caption;
+	return d.m_caption.trimmed();
 }
 
 bool SchemaListModelEx::excludedFromBuild(int fileId) const
@@ -1379,7 +1379,7 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 {
 	Q_ASSERT(dbc != nullptr);
 
-	setUniformRowHeights(true);
+	setUniformRowHeights(false);		// Helps to show multiline schema cations
 	setWordWrap(false);
 	setExpandsOnDoubleClick(false);		// DoubleClick signal is used
 
