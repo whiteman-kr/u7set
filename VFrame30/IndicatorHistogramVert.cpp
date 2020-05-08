@@ -716,7 +716,7 @@ namespace VFrame30
 
 				// Create a grid with specified step
 				//
-				auto createGrid = [this, valueDiff, lowLimit, highLimit, addGridPoint](double step, double gridWidth, bool drawValue) -> void
+				auto createGrid = [valueDiff, lowLimit, highLimit, addGridPoint](double step, double gridWidth, bool drawValue) -> void
 				{
 					double prevCurrentValue = 0;
 					double currentValue = lowLimit;
@@ -742,7 +742,7 @@ namespace VFrame30
 							(prevCurrentValue > 0 && currentValue < 0))
 						{
 							// Zero was crossed - next point should be mirrored to previous point
-
+							//
 							if (step > std::fabs(currentValue * 2))
 							{
 								addGridPoint(0, gridWidth, drawValue);	// Draw zero point if necessary
@@ -760,7 +760,6 @@ namespace VFrame30
 				// Draw main grids
 				//
 				createGrid(gridMainStep, mainGridWidth, true);
-
 				createGrid(gridSmallStep, smallGridWidth, false);
 
 				drawGrids(grids, drawParam, barRect, schemaItem);
