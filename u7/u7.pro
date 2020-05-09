@@ -74,6 +74,7 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
+    ../lib/Ui/TabWidgetEx.cpp \
     CentralWidget.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
@@ -214,6 +215,7 @@ SOURCES +=\
 HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/StandardColors.h \
+    ../lib/Ui/TabWidgetEx.h \
     CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \

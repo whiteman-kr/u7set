@@ -10,6 +10,7 @@
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
 #include "../SimulatorTabPage.h"
+#include "../../lib/Ui/TabWidgetEx.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -33,9 +34,8 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	setWindowFlags(windowType);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
-	m_tabWidget = new QTabWidget;
-	m_tabWidget->setTabsClosable(true);
-	m_tabWidget->setMovable(true);
+	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget->tabBarEx()->setDrawTopLine(false);
 	m_tabWidget->setDocumentMode(true);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -64,6 +64,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
 
 	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimWidget::tabCloseRequest);
+	connect(m_tabWidget, &QTabWidget::currentChanged, this, &SimWidget::tabCurrentChanged);
 	connect(m_tabWidget->tabBar(), &QTabWidget::customContextMenuRequested, this, &SimWidget::tabBarContextMenuRequest);
 
 	connect(this, &SimWidget::needUpdateActions, this, &SimWidget::updateActions);
@@ -751,6 +752,23 @@ void SimWidget::openControlTabPage(QString lmEquipmentId)
 
 void SimWidget::openSchemaTabPage(QString schemaId)
 {
+	// Look for already opened schema, and activate it
+	//
+	{
+		for (int i = 0; i < m_tabWidget->count(); i++)
+		{
+			SimSchemaPage* sp = dynamic_cast<SimSchemaPage*>(m_tabWidget->widget(i));
+
+			if (sp != nullptr && sp->schemaId() == schemaId)
+			{
+				m_tabWidget->setCurrentIndex(i);
+				return;
+			}
+		}
+	}
+
+	// There is no such schema, load it and create a widget for it
+	//
 	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId);
 	if (schema == nullptr)
 	{
@@ -798,6 +816,25 @@ void SimWidget::tabCloseRequest(int index)
 	delete w;
 
 	restoreState(state);
+	return;
+}
+
+void SimWidget::tabCurrentChanged(int index)
+{
+	// Show/hide close burron for inactive tab bar
+	//
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		QWidget* w = m_tabWidget->tabBar()->tabButton(i, closeSide);
+
+		if (w != nullptr)
+		{
+			w->setVisible(i == index);
+		}
+	}
+
 	return;
 }
 

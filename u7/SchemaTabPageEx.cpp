@@ -9,6 +9,7 @@
 #include "Forms/CompareDialog.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "../lib/PropertyEditor.h"
+#include "../lib/Ui/TabWidgetEx.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/WiringSchema.h"
@@ -2024,31 +2025,7 @@ int SchemaFileViewEx::parentFileId() const
 SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	MainTabPage(dbc, parent)
 {
-	m_tabWidget = new SchemaTabWidget{this};
-	m_tabWidget->setMovable(true);
-
-	m_tabWidget->tabBar()->setElideMode(Qt::ElideRight);
-	m_tabWidget->setTabsClosable(true);
-
-	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
-	int h = static_cast<int>(sz.height() * 1.75);
-
-	QString ss = QString(R"(
- QTabBar::tab:top
- {
-	height: %1px;
- }
- QTabBar::close-button
- {
-	image: url(":/Images/Images/CloseButtonGray.svg");
- }
- QTabBar::close-button:hover
- {
-	image: url(":/Images/Images/CloseButtonBlack.svg");
- })")
-				 .arg(h);
-
-	m_tabWidget->setStyleSheet(ss);
+	m_tabWidget = new TabWidgetEx{this};
 
 	// --
 	//
@@ -2115,9 +2092,6 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 			});
 
 	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPageEx::tabCloseRequested);
-
-	m_tabWidget->tabBar()->installEventFilter(this);
-
 	connect(m_tabWidget->tabBar(), &QTabBar::currentChanged, this, &SchemasTabPageEx::currentTabChanged);
 
 	return;
@@ -2148,44 +2122,6 @@ void SchemasTabPageEx::refreshControlTabPage()
 	m_controlTabPage->refresh();
 
 	return;
-}
-
-bool SchemasTabPageEx::eventFilter(QObject* object, QEvent* event)
-{
-	// Close SchemaTab on mouse middle button press on tab
-	//
-	if (event->type() == QEvent::MouseButtonRelease && object == m_tabWidget->tabBar())
-	{
-		QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-
-		if (mouseEvent->button() != Qt::MouseButton::MidButton)
-		{
-			return false;
-		}
-
-		int index = m_tabWidget->tabBar()->tabAt(mouseEvent->pos());
-		if (index == -1)
-		{
-			return false;
-		}
-
-		EditSchemaTabPageEx* schemaTab = dynamic_cast<EditSchemaTabPageEx*>(m_tabWidget->widget(index));
-		if (schemaTab == nullptr)
-		{
-			return false;
-		}
-
-		if (schemaTab->modified() == true && m_tabWidget->currentIndex() != index)
-		{
-			m_tabWidget->setCurrentIndex(index);
-		}
-
-		schemaTab->closeTab();
-
-		return true;
-	}
-
-	return QObject::eventFilter(object, event);
 }
 
 void SchemasTabPageEx::projectOpened()

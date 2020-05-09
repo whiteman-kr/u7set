@@ -175,8 +175,8 @@ void SimSchemaWidget::signalInfo(QString appSignalId)
 	//
 	bool ok = false;
 
-	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
-	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
+//	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
+//	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
 
 	if (ok == true)
 	{
