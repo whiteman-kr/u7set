@@ -399,7 +399,7 @@ void MonitorMainWindow::createActions()
 
 	m_signalSnapshotAction = new QAction(tr("Signals Snapshot"), this);
 	m_signalSnapshotAction->setStatusTip(tr("View signals state in real time"));
-	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Camera.svg"));
+	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Snapshot.svg"));
 	m_signalSnapshotAction->setEnabled(true);
 	connect(m_signalSnapshotAction, &QAction::triggered, this, &MonitorMainWindow::slot_signalSnapshot);
 

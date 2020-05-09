@@ -64,6 +64,8 @@
         <file>Images/SimTrends.svg</file>
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
+        <file>Images/SimSnapshot.svg</file>
+        <file>Images/SimFindSignal.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
@@ -76,4 +78,3 @@
         <file>Simulator/Templates/DiscreteSeries.js</file>
     </qresource>
 </RCC>
- 

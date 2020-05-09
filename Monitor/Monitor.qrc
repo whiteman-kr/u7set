@@ -10,7 +10,6 @@
         <file>Images/Close.svg</file>
         <file>Images/About.svg</file>
         <file>Images/FindSignal.svg</file>
-        <file>Images/Camera.svg</file>
         <file>Images/Trends.svg</file>
         <file>Images/Archive.svg</file>
         <file>Images/Log.svg</file>
@@ -19,5 +18,6 @@
         <file>Images/AppDataSources.svg</file>
         <file>Images/NetworkConnections.svg</file>
         <file>Images/dragndrop.png</file>
+        <file>Images/Snapshot.svg</file>
     </qresource>
 </RCC>

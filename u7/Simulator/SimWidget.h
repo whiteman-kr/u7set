@@ -58,6 +58,8 @@ protected slots:
 	void pauseSimulation();
 	void stopSimulation(bool stopSimulationThread = false);
 
+	void showSnapshot();
+	void showFindSignal();
 	void showTrends();
 
 	bool loadBuild(QString buildPath);
@@ -108,6 +110,8 @@ private:
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
 
+	QAction* m_snapshotAction = nullptr;
+	QAction* m_findSignalAction = nullptr;
 	QAction* m_trendsAction = nullptr;
 };
 

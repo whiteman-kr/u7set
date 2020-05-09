@@ -127,6 +127,14 @@ void SimWidget::createToolBar()
 	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
 	connect(m_trendsAction, &QAction::triggered, this, &SimWidget::showTrends);
 
+	m_findSignalAction = new QAction{QIcon(":/Images/Images/SimFindSignal.svg"), tr("Find Signal"), this};
+	m_findSignalAction->setEnabled(true);
+	connect(m_findSignalAction, &QAction::triggered, this, &SimWidget::showFindSignal);
+
+	m_snapshotAction = new QAction{QIcon(":/Images/Images/SimSnapshot.svg"), tr("Signals Snapshot"), this};
+	m_snapshotAction->setEnabled(true);
+	connect(m_snapshotAction, &QAction::triggered, this, &SimWidget::showSnapshot);
+
 	// --
 	//
 	m_timeIndicator = new QLabel;
@@ -153,6 +161,10 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addWidget(m_timeIndicator);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_snapshotAction);
+	m_toolBar->addAction(m_findSignalAction);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_trendsAction);
@@ -599,6 +611,26 @@ void SimWidget::stopSimulation(bool stopSimulationThread)
 	}
 
 	return;
+}
+
+void SimWidget::showSnapshot()
+{
+	// 1. Use this->m_appSignalController for getting signal list and state
+	// 2. this->m_simulator (Sim::Simulator) has signal 'projectUpdated' and function 'isLoaded()' use these to
+	//	  update signal list
+	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
+	//    it is guarantee will not be deleted
+	//
+}
+
+void SimWidget::showFindSignal()
+{
+	// 1. Use this->m_appSignalController for getting signal list and state
+	// 2. this->m_simulator (Sim::Simulator) has signal 'projectUpdated' and function 'isLoaded()' use these to
+	//	  update signal list
+	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
+	//    it is guarantee will not be deleted
+	//
 }
 
 void SimWidget::showTrends()
