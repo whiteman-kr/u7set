@@ -64,7 +64,6 @@ protected slots:
 	void addNewWindow();
 
 	void openControlTabPage(QString lmEquipmentId);
-	void openLogicSchemaTabPage(QString schemaId);
 
 	void openSchemaTabPage(QString fileName);
 	void openCodeTabPage(QString lmEquipmentId);

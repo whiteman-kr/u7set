@@ -37,7 +37,7 @@ namespace VFrame30
 
 		// --
 		//
-		//connect(monitorSchemaView(), &MonitorView::signal_setSchema, this, &MonitorSchemaWidget::slot_setSchema);
+		connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
 
 		// Init history
 		//

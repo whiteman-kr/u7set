@@ -30,10 +30,6 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	createActions();
 
-	// --
-	//
-	connect(monitorSchemaView(), &MonitorView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
-
 	return;
 }
 

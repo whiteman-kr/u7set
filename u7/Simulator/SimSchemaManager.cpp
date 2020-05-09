@@ -1,38 +1,56 @@
 #include "SimSchemaManager.h"
+#include "SimIdeSimulator.h"
+#include "../../lib/DbStruct.h"
 
-SimSchemaManager::SimSchemaManager(/*MonitorConfigController* configController, */QObject* parent /*= nullptr*/) :
-	VFrame30::SchemaManager(parent)
-	//m_configController(configController)
+SimSchemaManager::SimSchemaManager(SimIdeSimulator* simulator, QObject* parent) :
+	VFrame30::SchemaManager(parent),
+	m_simulator(simulator)
 {
-//	assert(m_configController);
-//	connect(m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
+	Q_ASSERT(m_simulator);
+
+	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimSchemaManager::slot_projectUpdated);
 
 	return;
 }
 
 std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(QString schemaId)
 {
-	assert(false);
-	//bool to_do_SimSchemaManager_loadSchema;
-	return std::shared_ptr<VFrame30::Schema>();
-//	QByteArray data;
-//	QString errorString;
+	QString buildPath = QDir::fromNativeSeparators(m_simulator->buildPath());
+	if (buildPath.isEmpty() == true)
+	{
+		return {};
+	}
 
-//	bool result = m_configController->getFileBlockedById(schemaId, &data, &errorString);
-//	if (result == false)
-//	{
-//		return std::shared_ptr<VFrame30::Schema>();
-//	}
+	if (buildPath.endsWith('/') == false)
+	{
+		buildPath += "/";
+	}
 
-//	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(data);
+	// Load schema from one of folowing folder.
+	// Unfortunatelly, schema folder cannot be get from SchemaID, so just try every possible folder.
+	//
+	std::array folders = {Db::File::AlFileExtension,
+						  Db::File::MvsFileExtension,
+						  Db::File::TvsFileExtension,
+						  Db::File::UfbFileExtension,
+						  Db::File::DvsFileExtension};
 
-//	return schema;
+	for (auto ext : folders)
+	{
+		QString fileName = buildPath + QString("Schemas.%1/").arg(ext) + schemaId + "." + QString(ext);
+		std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(fileName);
+
+		if (schema != nullptr)
+		{
+			return schema;
+		}
+	}
+
+	return {};
 }
 
-//void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuration)
-//{
-//	clear();
-//	setGlobalScript(configuration.globalScript);
-//	return;
-//}
+void SimSchemaManager::slot_projectUpdated()
+{
+	return;
+}
 

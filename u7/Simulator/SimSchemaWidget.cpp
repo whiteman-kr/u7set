@@ -1,6 +1,8 @@
 #include "SimSchemaWidget.h"
 #include "SimSchemaView.h"
 #include "SimSchemaManager.h"
+#include "SimIdeSimulator.h"
+#include "SimulatorTabPage.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/AppSignalController.h"
@@ -14,9 +16,13 @@
 SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								 SimSchemaManager* schemaManager,
 								 VFrame30::AppSignalController* appSignalController,
-								 VFrame30::TuningController* tuningController) :
-	VFrame30::ClientSchemaWidget(new SimSchemaView(schemaManager), schema, schemaManager)
+								 VFrame30::TuningController* tuningController,
+								 SimIdeSimulator* simulator) :
+	VFrame30::ClientSchemaWidget(new SimSchemaView(schemaManager), schema, schemaManager),
+	m_simulator(simulator)
 {
+	Q_ASSERT(m_simulator);
+
 	clientSchemaView()->setAppSignalController(appSignalController);
 	clientSchemaView()->setTuningController(tuningController);
 
@@ -31,8 +37,7 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 
 	// --
 	//
-	//bool vynesti_etu_huinyu_iz_konstructora_v_bazovyi_class;
-	connect(simSchemaView(), &SimSchemaView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
+	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimSchemaWidget::updateSchema);
 
 	return;
 }
@@ -152,28 +157,49 @@ void SimSchemaWidget::signalContextMenu(const QStringList signalList)
 
 void SimSchemaWidget::signalInfo(QString appSignalId)
 {
-	//bool to_do_show_signal_info_dialog;
+	// Parent will be SimulatorTabPage*
+	//
+	QWidget* parent = this->parentWidget();
+	while (parent != nullptr)
+	{
+		if (dynamic_cast<SimulatorTabPage*>(parent) != nullptr)
+		{
+			break;
+		}
 
-//	if (theMonitorMainWindow == nullptr)
-//	{
-//		assert(theMonitorMainWindow);
-//		return;
-//	}
+		parent = parent->parentWidget();
+	}
+	Q_ASSERT(parent);
 
-//	bool ok = false;
-//	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+	// --
+	//
+	bool ok = false;
 
-//	if (ok == true)
-//	{
-//		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
+	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
+	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
+
+	if (ok == true)
+	{
+//		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
 //		dsi->show();
-//	}
-//	else
-//	{
-//		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
-//	}
+	}
+	else
+	{
+		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+	}
 
-//	return;
+	return;
+}
+
+void SimSchemaWidget::updateSchema()
+{
+	if (m_simulator->isLoaded() == true)
+	{
+		auto newSchema = schemaManager()->schema(schemaId());
+		BaseSchemaWidget::setSchema(newSchema, true);
+	}
+
+	return;
 }
 
 SimSchemaView* SimSchemaWidget::simSchemaView()

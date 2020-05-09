@@ -8,8 +8,8 @@
 #include "SimControlPage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
+#include "SimTrend/SimTrends.h"
 #include "../SimulatorTabPage.h"
-#include "./SimTrend/SimTrends.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -20,13 +20,9 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	: QMainWindow(parent),
 	  HasDbController(db),
 	  m_slaveWindow(slaveWindow),
-	  m_simulator(simulator)
+	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>()),
+	  m_schemaManager(m_simulator.get())
 {
-	if (m_simulator == nullptr)
-	{
-		m_simulator = std::make_shared<SimIdeSimulator>();
-	}
-
 	// --
 	//
 	m_appSignalController = new VFrame30::AppSignalController{&m_simulator->appSignalManager(), this};
@@ -351,6 +347,11 @@ void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 	TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
 
 	QDateTime currentTime = plantTime.toDateTime();
+
+	if (currentTime.date().year() == 1970)
+	{
+		currentTime = QDateTime::currentDateTime();
+	}
 
 	// IF UNCOMMENTING THIS CODE
 	// and if you want to show milliseconds,
@@ -742,39 +743,18 @@ void SimWidget::openControlTabPage(QString lmEquipmentId)
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-	connect(controlPage, &SimControlPage::openSchemaRequest, this, &SimWidget::openLogicSchemaTabPage);
+	connect(controlPage, &SimControlPage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
 	connect(controlPage, &SimControlPage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
 
 	return;
 }
 
-void SimWidget::openLogicSchemaTabPage(QString schemaId)
+void SimWidget::openSchemaTabPage(QString schemaId)
 {
-	QString buildPath = QDir::fromNativeSeparators(m_simulator->buildPath());
-	if (buildPath.isEmpty() == true)
-	{
-		return;
-	}
-
-	if (buildPath.endsWith('/') == false)
-	{
-		buildPath += "/";
-	}
-
-	// Load schema
-	//
-	QString fileName = buildPath + QLatin1String("Schemas.als/") + schemaId + "." + Db::File::AlFileExtension;
-
-	openSchemaTabPage(fileName);
-	return;
-}
-
-void SimWidget::openSchemaTabPage(QString fileName)
-{
-	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(fileName);
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId);
 	if (schema == nullptr)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1").arg(fileName));
+		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1").arg(schemaId));
 		return;
 	}
 

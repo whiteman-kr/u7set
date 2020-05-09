@@ -6,6 +6,7 @@
 #include "../VFrame30/TuningController.h"
 
 class SimSchemaView;
+class SimIdeSimulator;
 
 namespace VFrame30
 {
@@ -28,7 +29,8 @@ public:
 	SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 					SimSchemaManager* schemaManager,
 					VFrame30::AppSignalController* appSignalController,
-					VFrame30::TuningController* tuningController);
+					VFrame30::TuningController* tuningController,
+					SimIdeSimulator* simulator);
 	virtual ~SimSchemaWidget();
 
 protected:
@@ -51,6 +53,9 @@ public slots:
 
 	void signalInfo(QString appSignalId);
 
+protected slots:
+	void updateSchema();
+
 	// Properties
 	//
 public:
@@ -60,6 +65,7 @@ public:
 	// Data
 	//
 private:
+	SimIdeSimulator* m_simulator = nullptr;
 
 	// Actions
 	//

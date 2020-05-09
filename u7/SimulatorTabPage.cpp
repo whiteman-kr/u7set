@@ -47,7 +47,6 @@ void SimulatorTabPage::closeEvent(QCloseEvent* e)
 	e->accept();
 }
 
-
 void SimulatorTabPage::projectOpened()
 {
 	this->setEnabled(true);

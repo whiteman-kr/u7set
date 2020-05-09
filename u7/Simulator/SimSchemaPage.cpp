@@ -17,7 +17,7 @@ SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
 
 	// --
 	//
-	m_schemaWidget = new SimSchemaWidget(schema, schemaManager, appSignalController, tuningController);
+	m_schemaWidget = new SimSchemaWidget(schema, schemaManager, appSignalController, tuningController, m_simulator);
 
 	QGridLayout* layout = new QGridLayout();
 	layout->addWidget(m_schemaWidget, 0, 0, 1, 1);

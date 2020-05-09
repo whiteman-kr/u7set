@@ -179,7 +179,7 @@ void SchemasWorkspace::slot_itemSelectionChanged()
 	}
 
 	QString schemaId = selectedItem->text(0);
-	m_schemaWidget->setSchema(schemaId);
+	m_schemaWidget->setSchema(schemaId, QStringList{});
 
 }
 

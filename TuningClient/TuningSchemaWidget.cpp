@@ -33,10 +33,6 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 
 	clientSchemaView()->setTuningController(tuningController);
 
-	// --
-	//
-	connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
-
 	return;
 }
 
