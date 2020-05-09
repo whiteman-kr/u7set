@@ -655,6 +655,12 @@ namespace Sim
 		return;
 	}
 
+	bool OverrideSignals::isSignalInOverrideList(QString appSignalId) const
+	{
+		QReadLocker locker(&m_lock);
+		return m_signals.find(appSignalId) != m_signals.end();
+	}
+
 	void OverrideSignals::setEnable(QString appSignalId, bool enable)
 	{
 		bool changed = false;

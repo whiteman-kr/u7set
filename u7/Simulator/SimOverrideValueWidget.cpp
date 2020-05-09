@@ -7,11 +7,12 @@ namespace SimOverrideUI
 	DiscreteSpinBox::DiscreteSpinBox(int value, QWidget* parent) :
 		QSpinBox(parent)
 	{
-		setValue(value);
 		setAccelerated(false);
 		setRange(0, 1);
 		setAlignment(Qt::AlignRight);
 		setWrapping(true);
+
+		setValue(value);
 
 		return;
 	}
@@ -38,9 +39,6 @@ namespace SimOverrideUI
 	SInt32SpinBox::SInt32SpinBox(qint32 value, QWidget* parent) :
 		QSpinBox(parent)
 	{
-		setValue(value);
-
-
 		setRange(std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
 		setWrapping(true);
 		setAccelerated(false);			// on trends it does not look well
@@ -49,6 +47,8 @@ namespace SimOverrideUI
 		setGroupSeparatorShown(true);
 
 		lineEdit()->setInputMethodHints(lineEdit()->inputMethodHints() | Qt::ImhUppercaseOnly);
+
+		setValue(value);
 
 		return;
 	}

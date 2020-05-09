@@ -119,6 +119,10 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 	// Parse data
 	//
 	QStringList signalIds;
+	std::vector<std::tuple<QString, bool, double>> signalValues;
+
+	signalIds.reserve(protoSetMessage.appsignal_size());
+	signalValues.reserve(protoSetMessage.appsignal_size());
 
 	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
 	{
@@ -129,7 +133,13 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 
 		if (ok == true)
 		{
-			signalIds << appSignalParam.appSignalId();
+			QString appSignalId = appSignalParam.appSignalId();
+
+			AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, nullptr, false);
+			bool isAlreadyOverriden = m_simulator->overrideSignals().isSignalInOverrideList(appSignalId);
+
+			signalIds << appSignalId;
+			signalValues.push_back(std::tuple{appSignalId, isAlreadyOverriden, state.value()});
 		}
 	}
 
@@ -157,12 +167,21 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 		// --
 		//
 		int actuallyAdded = m_simulator->overrideSignals().addSignals(signalIds);
-
 		if (actuallyAdded == 0)
 		{
 			// Appartently signal already added, select it
 			//
 			selectSignal(signalIds.back());
+		}
+
+		// SetInitialValues to currents
+		//
+		for (auto&[appSignalId, isAlreadyOverriden, value] : signalValues)
+		{
+			if (isAlreadyOverriden == false)
+			{
+				m_simulator->overrideSignals().setValue(appSignalId, Sim::OverrideSignalMethod::Value, value);
+			}
 		}
 	}
 
@@ -245,7 +264,7 @@ void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 	QAction* setValueAction = menu.addAction(tr("Set Value..."),
 											[this, &appSignalId]
 											{
-												setValue(appSignalId);
+												showSetValueDialog(appSignalId);
 											});
 
 	setValueAction->setEnabled(!appSignalId.isEmpty());
@@ -535,7 +554,7 @@ void SimOverridePane::itemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 	QOverrideTreeWidgetItem* toItem = dynamic_cast<QOverrideTreeWidgetItem*>(item);
 	assert(toItem);
 
-	setValue(toItem->m_overrideSignal.appSignalId());
+	showSetValueDialog(toItem->m_overrideSignal.appSignalId());
 
 	return;
 }
@@ -656,22 +675,50 @@ void SimOverridePane::addSignal()
 
 		if (ok == true && signalId.isEmpty() == false)
 		{
-			// To add signal to override, AppSignalId is required, so go and get it
-			//
-			Hash appSignalIdHash = m_simulator->appSignalManager().customToAppSignal(::calcHash(signalId));
+			QString appSignalId;
 
-			AppSignalParam appSignalParam = m_simulator->appSignalManager().signalParam(appSignalIdHash, &ok);
-			if (ok == false)
+			if (signalId.at(0) == QChar('#'))
 			{
-				QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(signalId));
-				defaultText = signalId;
-				continue;
+				appSignalId = signalId;
+			}
+			else
+			{
+				// To add signal to override, AppSignalId is required, so go and get it
+				//
+				Hash appSignalIdHash = m_simulator->appSignalManager().customToAppSignal(::calcHash(signalId));
+
+				AppSignalParam appSignalParam = m_simulator->appSignalManager().signalParam(appSignalIdHash, &ok);
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(signalId));
+					defaultText = signalId;
+					continue;
+				}
+
+				appSignalId = appSignalParam.appSignalId();
 			}
 
-			// --
+			// If signal already added to simulation, just select it
 			//
-			m_simulator->overrideSignals().addSignals(QStringList{} << appSignalParam.appSignalId());
-			selectSignal(appSignalParam.appSignalId());
+			if (m_simulator->overrideSignals().isSignalInOverrideList(appSignalId) == true)
+			{
+				selectSignal(appSignalId);
+				return;
+			}
+
+			// Get current signal value, and set it as default
+			//
+			AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, nullptr, false);
+
+			// Add signal to override list
+			//
+			m_simulator->overrideSignals().addSignals(QStringList{} << appSignalId);
+
+			// Set default value to override, is actual signal state
+			//
+			m_simulator->overrideSignals().setValue(appSignalId, Sim::OverrideSignalMethod::Value, state.value());
+
+			selectSignal(appSignalId);
 		}
 
 		break;
@@ -681,7 +728,7 @@ void SimOverridePane::addSignal()
 	return;
 }
 
-void SimOverridePane::setValue(QString appSignalId)
+void SimOverridePane::showSetValueDialog(QString appSignalId)
 {
 	std::optional<Sim::OverrideSignalParam> osp = m_simulator->overrideSignals().overrideSignal(appSignalId);
 

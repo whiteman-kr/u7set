@@ -169,6 +169,7 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		int addSignals(const QStringList& appSignalIds);
 		void removeSignal(QString appSignalId);
+		bool isSignalInOverrideList(QString appSignalId) const;
 
 		void setEnable(QString appSignalId, bool enable);
 		void setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value);
