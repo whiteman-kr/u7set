@@ -1,5 +1,5 @@
 #include "SimBasePage.h"
-#include "SimControlPage.h"
+#include "SimModulePage.h"
 
 std::list<SimBasePage*> SimBasePage::m_pages;
 
@@ -43,13 +43,13 @@ void SimBasePage::deleteAllPages()
 	return;
 }
 
-SimControlPage* SimBasePage::controlPage(QString lmEquipmnetId, QWidget* parent)
+SimModulePage* SimBasePage::modulePage(QString lmEquipmnetId, QWidget* parent)
 {
 	QVariant parentValue =  QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
 
 	for (SimBasePage* page : m_pages)
 	{
-		SimControlPage* cp = dynamic_cast<SimControlPage*>(page);
+		SimModulePage* cp = dynamic_cast<SimModulePage*>(page);
 
 		if (cp != nullptr &&
 			cp->equipmnetId() == lmEquipmnetId &&

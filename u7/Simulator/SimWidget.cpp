@@ -5,7 +5,7 @@
 #include "SimOutputWidget.h"
 #include "SimOverridePane.h"
 #include "SimSelectBuildDialog.h"
-#include "SimControlPage.h"
+#include "SimModulePage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
@@ -743,7 +743,7 @@ void SimWidget::openControlTabPage(QString lmEquipmentId)
 
 	// Check if such SimulatorControlPage already exists
 	//
-	SimControlPage* cp = SimBasePage::controlPage(lmEquipmentId, m_tabWidget);
+	SimModulePage* cp = SimBasePage::modulePage(lmEquipmentId, m_tabWidget);
 
 	if (cp != nullptr)
 	{
@@ -771,13 +771,13 @@ void SimWidget::openControlTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimControlPage* controlPage = new SimControlPage{m_simulator.get(), lmEquipmentId, m_tabWidget};
+	SimModulePage* controlPage = new SimModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-	connect(controlPage, &SimControlPage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
-	connect(controlPage, &SimControlPage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
+	connect(controlPage, &SimModulePage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
+	connect(controlPage, &SimModulePage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
 
 	return;
 }

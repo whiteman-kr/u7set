@@ -1,17 +1,17 @@
-#ifndef SIMULATORCONTROLPAGE_H
-#define SIMULATORCONTROLPAGE_H
+#pragma once
 
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
 
-class SimControlPage : public SimBasePage
+class SimModulePage : public SimBasePage
 {
 	Q_OBJECT
 
 public:
-	SimControlPage(SimIdeSimulator* simulator,
-				   QString equipmentId,
-				   QWidget* parent = nullptr);
+	SimModulePage(SimIdeSimulator* simulator,
+				  QString equipmentId,
+				  QWidget* parent);
+	virtual ~SimModulePage();
 
 protected:
 	void updateLogicModuleInfoInfo();
@@ -59,4 +59,3 @@ private:
 	QString m_lmEquipmentId;
 };
 
-#endif // SIMULATORCONTROLPAGE_H

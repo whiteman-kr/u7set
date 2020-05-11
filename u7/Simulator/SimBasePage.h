@@ -3,7 +3,7 @@
 
 #include "SimIdeSimulator.h"
 
-class SimControlPage;
+class SimModulePage;
 
 
 class SimBasePage : public QWidget
@@ -16,7 +16,7 @@ public:
 
 public:
 	static void deleteAllPages();
-	static SimControlPage* controlPage(QString lmEquipmnetId, QWidget* parent);
+	static SimModulePage* modulePage(QString lmEquipmnetId, QWidget* parent);
 
 protected:
 	QAction* m_closeAction = nullptr;

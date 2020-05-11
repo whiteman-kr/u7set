@@ -88,6 +88,7 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
+    Simulator/SimModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
     Simulator/SimTrend/SimTrends.cpp \
@@ -187,7 +188,6 @@ SOURCES +=\
     Simulator/SimProjectWidget.cpp \
     Simulator/SimOutputWidget.cpp \
     Simulator/SimMemoryWidget.cpp \
-    Simulator/SimControlPage.cpp \
     Simulator/SimBasePage.cpp \
     ../lib/Times.cpp \
     SpecificPropertiesEditor.cpp \
@@ -228,6 +228,7 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
+    Simulator/SimModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
     Simulator/SimTrend/SimTrends.h \
@@ -334,7 +335,6 @@ HEADERS  += \
     Simulator/SimSelectBuildDialog.h \
     Simulator/SimSchemaPage.h \
     Simulator/SimBasePage.h \
-    Simulator/SimControlPage.h \
     Simulator/SimMemoryWidget.h \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \

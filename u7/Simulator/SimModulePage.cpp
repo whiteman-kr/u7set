@@ -1,7 +1,7 @@
-#include "SimControlPage.h"
+#include "SimModulePage.h"
 
 
-SimControlPage::SimControlPage(SimIdeSimulator* simulator,
+SimModulePage::SimModulePage(SimIdeSimulator* simulator,
 							   QString equipmentId,
 							   QWidget* parent)
 	: SimBasePage(simulator, parent),
@@ -20,11 +20,15 @@ SimControlPage::SimControlPage(SimIdeSimulator* simulator,
 	schemaListHeader << tr("SchemaID");
 	schemaListHeader << tr("Caption");
 	m_schemasList->setHeaderLabels(schemaListHeader);
+
 	m_schemasList->setItemsExpandable(false);
 	m_schemasList->setRootIsDecorated(false);
 	m_schemasList->setUniformRowHeights(true);
 	m_schemasList->setShortcutEnabled(false);
 	m_schemasList->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+	m_schemasList->setSortingEnabled(true);
+	m_schemasList->sortByColumn(0, Qt::SortOrder::AscendingOrder);
 
 	m_schemaFilterEdit->setPlaceholderText(tr("Schema Filter: Start typing IDs, Labels, Signals' IDS etc"));
 	m_schemaFilterEdit->setClearButtonEnabled(true);
@@ -81,22 +85,49 @@ SimControlPage::SimControlPage(SimIdeSimulator* simulator,
 	// --
 	//
 	updateLogicModuleInfoInfo();
+	m_schemasList->resizeColumnToContents(0);
 
 	// --
 	//
-	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimControlPage::projectUpdated);
+	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimModulePage::projectUpdated);
 
-	connect(m_codeButton, &QPushButton::clicked, this, &SimControlPage::codeButtonClicked);
+	connect(m_codeButton, &QPushButton::clicked, this, &SimModulePage::codeButtonClicked);
 
-	connect(m_schemaFilterEdit, &QLineEdit::textChanged, this, &SimControlPage::schemaFilterChanged);
+	connect(m_schemaFilterEdit, &QLineEdit::textChanged, this, &SimModulePage::schemaFilterChanged);
 
-	connect(m_schemasList, &QTreeWidget::customContextMenuRequested, this, &SimControlPage::schemaContextMenuRequested);
-	connect(m_schemasList, &QTreeWidget::itemDoubleClicked, this, &SimControlPage::schemaItemDoubleClicked);
+	connect(m_schemasList, &QTreeWidget::customContextMenuRequested, this, &SimModulePage::schemaContextMenuRequested);
+	connect(m_schemasList, &QTreeWidget::itemDoubleClicked, this, &SimModulePage::schemaItemDoubleClicked);
+
+	// --
+	//
+	QSettings s;
+
+	if (QByteArray ba = s.value("Simulator/SimModulePage/m_schemasList").toByteArray();
+		ba.isEmpty() == false)
+	{
+		m_schemasList->header()->restoreState(ba);
+	}
+
+	if (QByteArray ba = s.value("Simulator/SimModulePage/m_splitter").toByteArray();
+		ba.isEmpty() == false)
+	{
+		m_splitter->restoreState(ba);
+	}
 
 	return;
 }
 
-void SimControlPage::updateLogicModuleInfoInfo()
+SimModulePage::~SimModulePage()
+{
+	QSettings s;
+
+	s.setValue("Simulator/SimModulePage/m_schemasList", m_schemasList->header()->saveState());
+	s.setValue("Simulator/SimModulePage/m_splitter", m_splitter->saveState());
+
+	return;
+}
+
+void SimModulePage::updateLogicModuleInfoInfo()
 {
 	auto lm = logicModule();
 	if (lm == nullptr)
@@ -119,15 +150,14 @@ void SimControlPage::updateLogicModuleInfoInfo()
 	return;
 }
 
-void SimControlPage::fillSchemaList()
+void SimModulePage::fillSchemaList()
 {
-	assert(m_schemasList);
+	Q_ASSERT(m_schemasList);
 	m_schemasList->clear();
 
 	// Get all schemas fro LM
 	//
 	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmnetId());
-	std::sort(schemas.begin(), schemas.end());
 
 	// Filter data
 	//
@@ -161,26 +191,26 @@ void SimControlPage::fillSchemaList()
 	return;
 }
 
-void SimControlPage::projectUpdated()
+void SimModulePage::projectUpdated()
 {
 	updateLogicModuleInfoInfo();
 	return;
 }
 
-void SimControlPage::codeButtonClicked()
+void SimModulePage::codeButtonClicked()
 {
 	emit openCodePageRequest(equipmnetId());
 	return;
 }
 
-void SimControlPage::schemaFilterChanged()
+void SimModulePage::schemaFilterChanged()
 {
 	fillSchemaList();
 }
 
-void SimControlPage::schemaContextMenuRequested(const QPoint& pos)
+void SimModulePage::schemaContextMenuRequested(const QPoint& pos)
 {
-	assert(m_schemasList);
+	Q_ASSERT(m_schemasList);
 
 	QTreeWidgetItem* currentItem = m_schemasList->currentItem();
 	if (currentItem == nullptr)
@@ -201,7 +231,7 @@ void SimControlPage::schemaContextMenuRequested(const QPoint& pos)
 	return;
 }
 
-void SimControlPage::schemaItemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
+void SimModulePage::schemaItemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 {
 	if (item == nullptr)
 	{
@@ -212,9 +242,9 @@ void SimControlPage::schemaItemDoubleClicked(QTreeWidgetItem* item, int /*column
 	return;
 }
 
-void SimControlPage::openSelectedSchema()
+void SimModulePage::openSelectedSchema()
 {
-	assert(m_schemasList);
+	Q_ASSERT(m_schemasList);
 
 	QTreeWidgetItem* currentItem = m_schemasList->currentItem();
 	if (currentItem == nullptr)
@@ -235,17 +265,17 @@ void SimControlPage::openSelectedSchema()
 	return;
 }
 
-QString SimControlPage::equipmnetId() const
+QString SimModulePage::equipmnetId() const
 {
 	return m_lmEquipmentId;
 }
 
-std::shared_ptr<Sim::LogicModule> SimControlPage::logicModule()
+std::shared_ptr<Sim::LogicModule> SimModulePage::logicModule()
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }
 
-std::shared_ptr<Sim::LogicModule> SimControlPage::logicModule() const
+std::shared_ptr<Sim::LogicModule> SimModulePage::logicModule() const
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }
