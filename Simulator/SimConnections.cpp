@@ -222,6 +222,11 @@ namespace Sim
 		}
 	}
 
+	QString Connection::type() const
+	{
+		return m_buildConnection.type;
+	}
+
 	const std::vector<Sim::ConnectionPortPtr>& Connection::ports() const
 	{
 		return m_ports;
@@ -293,6 +298,7 @@ namespace Sim
 	bool Connections::load(QString fileName, QString* errorMessage)
 	{
 		assert(errorMessage);
+		clear();
 
 		bool ok = m_buildConnections.load(fileName, errorMessage);
 		if (ok == false)
@@ -318,6 +324,11 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	std::vector<ConnectionPtr> Connections::connections() const
+	{
+		return m_connections;
 	}
 
 	std::vector<ConnectionPtr> Connections::lmConnections(const QString& lmEquipmentId) const

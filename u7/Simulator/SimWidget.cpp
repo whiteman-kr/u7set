@@ -60,7 +60,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
 	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimWidget::updateTimeIndicator);
 
-	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openControlTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openModuleTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
 
 	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimWidget::tabCloseRequest);
@@ -734,7 +734,7 @@ void SimWidget::addNewWindow()
 	return;
 }
 
-void SimWidget::openControlTabPage(QString lmEquipmentId)
+void SimWidget::openModuleTabPage(QString lmEquipmentId)
 {
 	if (m_simulator->isLoaded() == false)
 	{

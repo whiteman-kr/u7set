@@ -64,6 +64,8 @@ namespace Sim
 						 std::chrono::microseconds timeout,
 						 bool* timeoutHappend);
 
+		QString type() const;
+
 		const std::vector<Sim::ConnectionPortPtr>& ports() const;
 
 		bool enabled() const;
@@ -109,6 +111,7 @@ namespace Sim
 		void clear();
 		bool load(QString fileName, QString* errorMessage);
 
+		std::vector<ConnectionPtr> connections() const;
 		std::vector<ConnectionPtr> lmConnections(const QString& lmEquipmentId) const;
 
 	private:
