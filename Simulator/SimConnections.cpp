@@ -368,4 +368,21 @@ namespace Sim
 
 		return result;
 	}
+
+	void Connections::enableConnection(QString connectionId, bool enable)
+	{
+		auto c = connection(connectionId);
+		if (c != nullptr && c->enabled() != enable)
+		{
+			c->setEnabled(enable);
+			emit connectionStateChanged(connectionId, enable);
+		}
+
+		return;
+	}
+
+	void Connections::disableConnection(QString connectionId, bool disable)
+	{
+		return enableConnection(connectionId, !disable);
+	}
 }

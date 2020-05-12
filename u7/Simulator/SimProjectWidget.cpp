@@ -118,7 +118,7 @@ void SimProjectWidget::treeDoubleClicked(const QModelIndex& /*index*/)
 void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
 {
 	std::function<void(QTreeWidgetItem*)> visitTreeItems =
-			[&visitTreeItems, &state](QTreeWidgetItem* treeItem)
+			[&visitTreeItems, &state, this](QTreeWidgetItem* treeItem)
 			{
 				for(int i = 0; i < treeItem->childCount(); i++)
 				{
@@ -127,7 +127,7 @@ void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
 					if (BaseTreeItem* baseTreeItem = dynamic_cast<BaseTreeItem*>(item);
 						baseTreeItem != nullptr)
 					{
-						baseTreeItem->updateState(state);
+						baseTreeItem->updateState(this, state);
 					}
 
 					visitTreeItems(item);
@@ -135,7 +135,7 @@ void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
 			};
 
 	std::function<void(QTreeWidget*)> visitTopTreeItems =
-			[&visitTreeItems, &state](QTreeWidget* treeWidget)
+			[&visitTreeItems, &state, this](QTreeWidget* treeWidget)
 			{
 				for(int i=0; i < treeWidget->topLevelItemCount(); i++)
 				{
@@ -144,7 +144,7 @@ void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
 					if (BaseTreeItem* baseTreeItem = dynamic_cast<BaseTreeItem*>(item);
 						baseTreeItem != nullptr)
 					{
-						baseTreeItem->updateState(state);
+						baseTreeItem->updateState(this, state);
 					}
 
 					visitTreeItems(item);
@@ -220,6 +220,16 @@ void SimProjectWidget::fillEquipmentTree()
 	return;
 }
 
+const SimIdeSimulator* SimProjectWidget::simulator() const
+{
+	return m_simulator;
+}
+
+SimIdeSimulator* SimProjectWidget::simulator()
+{
+	return m_simulator;
+}
+
 
 namespace SimProjectTreeItems
 {
@@ -229,7 +239,7 @@ namespace SimProjectTreeItems
 	{
 	}
 
-	void BaseTreeItem::updateState(Sim::ControlStatus /*state*/)
+	void BaseTreeItem::updateState(SimProjectWidget* /*simProjectWidget*/, Sim::ControlStatus /*state*/)
 	{
 		return;
 	}
@@ -256,10 +266,8 @@ namespace SimProjectTreeItems
 		return;
 	}
 
-	void LogicModuleTreeItem::updateState(Sim::ControlStatus state)
+	void LogicModuleTreeItem::updateState(SimProjectWidget* /*simProjectWidget*/, Sim::ControlStatus state)
 	{
-
-
 		auto it = std::find_if(std::begin(state.m_lmDeviceModes),
 							   std::end(state.m_lmDeviceModes),
 							   [this](const Sim::ControlStatus::LmMode& p)
@@ -357,6 +365,37 @@ namespace SimProjectTreeItems
 		return;
 	}
 
+	void ConnectionTreeItem::updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state)
+	{
+		auto c = simProjectWidget->simulator()->connections().connection(m_connectionId);
+		if (c == nullptr)
+		{
+			this->setText(EquipmentTreeColumns::State, {});
+			return;
+		}
+
+		QString text;
+
+		if (state.m_state == Sim::SimControlState::Stop)
+		{
+		}
+		else
+		{
+			if (c->enabled() == true)
+			{
+				text = QObject::tr("ok");
+			}
+			else
+			{
+				text = QObject::tr("Disabled");
+			}
+		}
+
+		this->setText(EquipmentTreeColumns::State, text);
+
+		return;
+	}
+
 	void ConnectionTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
 	{
 		emit simProjectWidget->signal_openConnectionTabPage(m_connectionId);
@@ -365,6 +404,12 @@ namespace SimProjectTreeItems
 
 	void ConnectionTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
 	{
+		auto c = simProjectWidget->simulator()->connections().connection(m_connectionId);
+		if (c == nullptr)
+		{
+			return;
+		}
+
 		QMenu menu(this->treeWidget());
 
 		menu.addAction(QObject::tr("Open..."),
@@ -372,6 +417,14 @@ namespace SimProjectTreeItems
 			{
 				emit simProjectWidget->signal_openConnectionTabPage(m_connectionId);
 			});
+
+		QAction* disableAction = menu.addAction(QObject::tr("Disable"),
+			[simProjectWidget, connectionId = m_connectionId](bool checked)
+			{
+				simProjectWidget->simulator()->connections().disableConnection(connectionId, checked);
+			});
+		disableAction->setCheckable(true);
+		disableAction->setChecked(!c->enabled());
 
 		menu.exec(globalMousePos);
 		return;

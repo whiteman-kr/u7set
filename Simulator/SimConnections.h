@@ -102,8 +102,10 @@ namespace Sim
 	//
 	// Connections
 	//
-	class Connections
+	class Connections : public QObject
 	{
+		Q_OBJECT
+
 	public:
 		Connections();
 		~Connections();
@@ -115,6 +117,12 @@ namespace Sim
 		ConnectionPtr connection(QString connectionId) const;
 		std::vector<ConnectionPtr> connections() const;
 		std::vector<ConnectionPtr> lmConnections(const QString& lmEquipmentId) const;
+
+		void enableConnection(QString connectionId, bool enable);
+		void disableConnection(QString connectionId, bool disable);
+
+	signals:
+		void connectionStateChanged(QString connectionId, bool state);
 
 	private:
 		::ConnectionsInfo m_buildConnections;

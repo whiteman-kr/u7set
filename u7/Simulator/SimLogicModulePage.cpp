@@ -137,7 +137,6 @@ void SimLogicModulePage::updateLogicModuleInfoInfo()
 
 	const Hardware::LogicModuleInfo& lmInfo = lm->logicModuleInfo();
 
-	m_subsystemIdLabel->setText(QString("Subsystem: %1").arg("TODO"));
 	m_equipmentIdLabel->setText(QString("EquipmnetID: %1").arg(lmInfo.equipmentId));
 	m_channelLabel->setText(QString("LmNumber: %1, Channel: %2")
 								.arg(lmInfo.lmNumber)

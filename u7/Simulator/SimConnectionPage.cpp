@@ -18,6 +18,9 @@ SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connect
 	m_connectionIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	m_connectionIdLabel->setFont(font);
 
+	m_disableButton->setCheckable(true);
+	m_disableButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
 	m_connectionType->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	m_connectionType->setFont(font);
 
@@ -45,30 +48,46 @@ SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connect
 	//
 	QGridLayout* layout = new QGridLayout{this};
 
-	layout->addWidget(m_connectionIdLabel, 0, 0, 1, 5);
-	layout->addWidget(m_connectionType, 1, 0, 1, 5);
+	int row = 0;
 
-	layout->addWidget(m_port1Label, 2, 0, 1, 5);
+	layout->addWidget(m_connectionIdLabel, row++, 0, 1, 5);
+	layout->addWidget(m_connectionType, row++, 0, 1, 5);
 
-	layout->addWidget(m_port1TxSignals, 3, 0);
-	layout->addWidget(m_port1RxSignals, 3, 1);
-	layout->addWidget(m_port1TxBuffer, 3, 2);
-	layout->addWidget(m_port1RxBuffer, 3, 3);
+	layout->addWidget(m_disableButton, row, 0, 1, 1);
+	layout->addWidget(m_stateLabel, row++, 1, 1, 1);
 
-	layout->addWidget(m_port2Label, 4, 0, 1, 5);
+	layout->addWidget(m_port1Label, row++, 0, 1, 5);
 
-	layout->addWidget(m_port2TxSignals, 5, 0);
-	layout->addWidget(m_port2RxSignals, 5, 1);
-	layout->addWidget(m_port2TxBuffer, 5, 2);
-	layout->addWidget(m_port2RxBuffer, 5, 3);
+	layout->addWidget(m_port1TxSignals, row, 0);
+	layout->addWidget(m_port1RxSignals, row, 1);
+	layout->addWidget(m_port1TxBuffer, row, 2);
+	layout->addWidget(m_port1RxBuffer, row, 3);
+	row++;
 
-	layout->addWidget(spacer, 6, 0, 1, 5);
+	layout->addWidget(m_port2Label, row++, 0, 1, 5);
+
+	layout->addWidget(m_port2TxSignals, row, 0);
+	layout->addWidget(m_port2RxSignals, row, 1);
+	layout->addWidget(m_port2TxBuffer, row, 2);
+	layout->addWidget(m_port2RxBuffer, row, 3);
+	row++;
+
+	layout->addWidget(spacer, row++, 0, 1, 5);
 
 	setLayout(layout);
 
 	// --
 	//
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimConnectionPage::updateData);
+	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimConnectionPage::updateData);
+	connect(&(m_simulator->connections()), &Sim::Connections::connectionStateChanged, this, &SimConnectionPage::updateConnectionState);
+
+	connect(m_disableButton, &QPushButton::toggled, this, &SimConnectionPage::disableConnection);
+
+	connect(m_port1TxSignals, &QPushButton::clicked, [this](){	this->showTxSignals(0); });
+	connect(m_port1RxSignals, &QPushButton::clicked, [this](){	this->showRxSignals(0); });
+	connect(m_port2TxSignals, &QPushButton::clicked, [this](){	this->showTxSignals(1); });
+	connect(m_port2RxSignals, &QPushButton::clicked, [this](){	this->showRxSignals(1); });
 
 	// Fill data
 	//
@@ -81,6 +100,58 @@ SimConnectionPage::~SimConnectionPage()
 {
 }
 
+void SimConnectionPage::disableConnection(bool disable)
+{
+	bool enable = !disable;
+	Sim::ConnectionPtr c = m_simulator->connections().connection(m_connectionId);
+
+	if (c == nullptr || enable == c->enabled())
+	{
+		return;
+	}
+
+	m_simulator->connections().enableConnection(m_connectionId, enable);
+
+	return;
+}
+
+void SimConnectionPage::updateConnectionState(QString connectionId, bool enabled)
+{
+	if (connectionId != m_connectionId)
+	{
+		return;
+	}
+
+	bool disabled = !enabled;
+
+	if (m_disableButton->isChecked() != disabled)
+	{
+		// Update push button state
+		//
+		m_disableButton->setChecked(disabled);
+	}
+
+	// State
+	//
+	QString stateText;
+
+	if (m_simulator->isLoaded() == true)
+	{
+		if (m_simulator->isStopped() == true)
+		{
+			stateText = tr("State: Stopped");
+		}
+		else
+		{
+			stateText = tr("State: %1").arg(enabled ? tr("ok") : "Disabled");
+		}
+	}
+
+	m_stateLabel->setText(stateText);
+
+	return;
+}
+
 void SimConnectionPage::updateData()
 {
 	Sim::ConnectionPtr c = m_simulator->connections().connection(m_connectionId);
@@ -88,11 +159,32 @@ void SimConnectionPage::updateData()
 	if (c != nullptr)
 	{
 		m_connectionInfo = c->connectionInfo();
+		updateConnectionState(m_connectionId, c->enabled());
 	}
+	else
+	{
+		m_connectionInfo = {};
+		updateConnectionState(m_connectionId, false);
+	}
+
+
+
+	m_disableButton->setEnabled(m_simulator->isLoaded());
+
+	m_port1TxSignals->setEnabled(m_simulator->isLoaded());
+	m_port1RxSignals->setEnabled(m_simulator->isLoaded());
+	m_port1TxBuffer->setEnabled(m_simulator->isLoaded());
+	m_port1RxBuffer->setEnabled(m_simulator->isLoaded());
+	m_port2TxSignals->setEnabled(m_simulator->isLoaded());
+	m_port2RxSignals->setEnabled(m_simulator->isLoaded());
+	m_port2TxBuffer->setEnabled(m_simulator->isLoaded());
+	m_port2RxBuffer->setEnabled(m_simulator->isLoaded());
 
 	m_connectionIdLabel->setText(tr("ConnectionID: <b>%1</b>")
 								 .arg(m_connectionId));
 
+	// --
+	//
 	if (m_connectionInfo.ID.isEmpty() == true)
 	{
 		m_connectionType->setText(tr("Unknown"));
@@ -186,6 +278,79 @@ void SimConnectionPage::updateData()
 	}
 
 	return;
+}
+
+void SimConnectionPage::showTxSignals(int portIndex)
+{
+	const auto& ports = m_connectionInfo.ports;
+
+	if (ports.size() < static_cast<size_t>(portIndex + 1))
+	{
+		return;
+	}
+
+	showXxSignals(ports[portIndex].portNo, ports[portIndex].equipmentID, "TX", ports[portIndex].txSignals);
+	return;
+}
+
+void SimConnectionPage::showRxSignals(int portIndex)
+{
+	const auto& ports = m_connectionInfo.ports;
+
+	if (ports.size() < static_cast<size_t>(portIndex + 1))
+	{
+		return;
+	}
+
+	showXxSignals(ports[portIndex].portNo, ports[portIndex].equipmentID, "RX", ports[portIndex].rxSignals);
+	return;
+}
+
+void SimConnectionPage::showXxSignals(int portNo, QString portId, QString trx, const std::vector<ConnectionTxRxSignal>& ss)
+{
+	QString text;
+	text.reserve(128000);
+
+	for (const ConnectionTxRxSignal& s : ss)
+	{
+		switch (s.type)
+		{
+		case E::SignalType::Analog:
+			text += QString("%1 %2 Offset=0x%3 (%4)\n")
+					.arg(s.ID)
+					.arg("A")
+					.arg(s.addrInBuf.offset(), 4, 16, QChar('0'))
+					.arg(s.addrInBuf.offset());
+			break;
+		case E::SignalType::Discrete:
+			text += QString("%1 %2 Offset=0x%3[%5] (%4[%5])\n")
+					.arg(s.ID)
+					.arg("A")
+					.arg(s.addrInBuf.offset(), 4, 16, QChar('0'))
+					.arg(s.addrInBuf.offset())
+					.arg(s.addrInBuf.bit());
+			break;
+		case E::SignalType::Bus:
+			text += QString("%1 %2 Offset=0x%3 (%4)\n")
+					.arg(s.ID)
+					.arg("B")
+					.arg(s.addrInBuf.offset(), 4, 16, QChar('0'))
+					.arg(s.addrInBuf.offset());
+			break;
+		default:
+			assert(false);
+		}
+	}
+
+	QInputDialog d(this->parentWidget());
+
+	d.setLabelText(tr("Port%1 %2 Signals\n%3").arg(portNo).arg(trx).arg(portId));
+	d.setInputMode(QInputDialog::InputMode::TextInput);
+	d.setOption(QInputDialog::UsePlainTextEditForTextInput);
+
+	d.setTextValue(text);
+
+	d.exec();
 }
 
 const QString& SimConnectionPage::connectionId() const

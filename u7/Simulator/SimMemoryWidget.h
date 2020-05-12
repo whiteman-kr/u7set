@@ -1,8 +1,10 @@
 #pragma once
 #include "../Simulator/SimRam.h"
 
+
 class MemoryView;
 class MemoryHexView;
+
 
 class SimMemoryWidget : public QWidget
 {
@@ -53,6 +55,7 @@ private:
 	MemoryHexView* m_hexView = nullptr;
 	QScrollBar* m_scroll = nullptr;
 };
+
 
 class MemoryHexView : public QWidget
 {

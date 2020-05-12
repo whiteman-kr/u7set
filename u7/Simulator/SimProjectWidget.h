@@ -31,6 +31,10 @@ signals:
 	void signal_openCodeTabPage(QString equipmentID);
 	void signal_openConnectionTabPage(QString connectionId);
 
+public:
+	const SimIdeSimulator* simulator() const;
+	SimIdeSimulator* simulator();
+
 private:
 	SimIdeSimulator* m_simulator = nullptr;
 
@@ -55,7 +59,7 @@ namespace SimProjectTreeItems
 	public:
 		BaseTreeItem(QTreeWidgetItem* parent, const QStringList& strings);
 
-		virtual void updateState(Sim::ControlStatus state);
+		virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state);
 		virtual void doubleClick(SimProjectWidget* simProjectWidget);
 		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos);
 	};
@@ -66,7 +70,7 @@ namespace SimProjectTreeItems
 	public:
 		LogicModuleTreeItem(QTreeWidgetItem* parent, std::shared_ptr<Sim::LogicModule> lm);
 
-		virtual void updateState(Sim::ControlStatus state) override;
+		virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
 		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
 		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos) override;
 
@@ -80,6 +84,7 @@ namespace SimProjectTreeItems
 	public:
 		ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::ConnectionPtr& connection);
 
+		virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
 		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
 		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos) override;
 

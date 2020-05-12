@@ -10,7 +10,14 @@ public:
 	virtual ~SimConnectionPage();
 
 protected slots:
+	void disableConnection(bool disable);
+
+	void updateConnectionState(QString connectionId, bool enabled);
 	void updateData();
+
+	void showTxSignals(int portIndex);
+	void showRxSignals(int portIndex);
+	void showXxSignals(int portNo, QString portId, QString trx, const std::vector<ConnectionTxRxSignal>& ss);
 
 public:
 	const QString& connectionId() const;
@@ -20,6 +27,9 @@ private:
 	ConnectionInfo m_connectionInfo;
 
 	QLabel* m_connectionIdLabel = new QLabel{this};
+	QPushButton* m_disableButton = new QPushButton{tr("Disable"), this};
+	QLabel* m_stateLabel = new QLabel{this};
+
 	QLabel* m_connectionType = new QLabel{this};
 
 	QLabel* m_port1Label = new QLabel{this};

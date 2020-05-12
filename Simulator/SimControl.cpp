@@ -475,9 +475,9 @@ namespace Sim
 				//
 				cd.m_currentTime = minPossibleTime;
 
-				if ((++timeStatusUpdateCounter) % 200 == 0)	// Update every second
+				if ((++timeStatusUpdateCounter) % 40 == 0)	// Update every 200 ms
 				{
-					// Emit this information signal every 160 ms, we don't need to send it every cycle
+					// Emit this information signal every 200 ms, we don't need to send it every cycle
 					//
 					static const QMetaMethod timeStatusUpdateSignal = QMetaMethod::fromSignal(&Control::statusUpdate);
 					if (isSignalConnected(timeStatusUpdateSignal) == true)
