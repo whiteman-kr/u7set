@@ -2,6 +2,9 @@
 
 #include <memory>
 #include <QJSEngine>
+#include <unordered_set>
+
+#include "../lib/StdHashQString.h"
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
 #include "../lib/Connection.h"
@@ -14,7 +17,6 @@
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
 #include "../lib/ComparatorSet.h"
-
 
 namespace Builder
 {
@@ -84,6 +86,8 @@ namespace Builder
 
 		std::shared_ptr<Tuning::TuningDataStorage> m_tuningDataStorage;
 		std::shared_ptr<ComparatorSet> m_comparatorSet;
+
+		std::unordered_set<QString> m_analogSignalsOnSchemas;
 
 		//--
 		//
