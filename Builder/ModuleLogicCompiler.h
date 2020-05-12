@@ -517,6 +517,7 @@ namespace Builder
 
 		bool setLmAppLANDataSize();
 		bool detectUnusedSignals();
+		bool fillAnalogSignalsOnSchemas();
 		bool calculateCodeRunTime();
 
 		QString lmSubsystemEquipmentIdPath() const;

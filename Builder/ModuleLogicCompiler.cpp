@@ -154,6 +154,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 			PROC_TO_CALL(ModuleLogicCompiler::calculateCodeRunTime),
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
@@ -11854,6 +11855,32 @@ namespace Builder
 			// Internal signal %1 is unused.
 			//
 			m_log->wrnALC5148(unusedSignal);
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::fillAnalogSignalsOnSchemas()
+	{
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			QString appSignalID = ualItem->strID();
+
+			Signal* s = m_signals->getSignal(appSignalID);
+
+			TEST_PTR_CONTINUE(s);					// this error should be detected early
+
+			if (s->isAnalog() == true)
+			{
+				m_context->m_analogSignalsOnSchemas.insert(appSignalID);
+			}
 		}
 
 		return true;
