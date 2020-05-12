@@ -108,10 +108,12 @@ namespace VFrame30
 
 	private:
 		void drawBar(CDrawParam* drawParam,
+					 const AppSignalParam& signalParam,
+					 const AppSignalState& appSignalState,
+					 const TuningSignalState& tuningSignalState,
 					 const QRectF& barRect,
 					 int signalIndex,
-					 const QString& appSignalId,
-					 const QColor& barColor,
+					 const QBrush& barBrush,
 					 const SchemaItemIndicator* schemaItem) const;
 
 		struct DrawGridStruct
@@ -128,7 +130,11 @@ namespace VFrame30
 												   const QString& appSignalId,
 												   const SchemaItemIndicator* schemaItem) const;
 
-		std::optional<QRgb> getAlertColor(const std::vector<IndicatorSetpoint>& setpoints, CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const;
+		std::optional<QBrush> getAlertBrush(const std::vector<IndicatorSetpoint>& setpoints,
+											CDrawParam* drawParam,
+											const AppSignalState& appSignalState,
+											const TuningSignalState& tuningSignalState,
+											const SchemaItemIndicator* schemaItem) const;
 
 		struct DrawSetpointStruct
 		{

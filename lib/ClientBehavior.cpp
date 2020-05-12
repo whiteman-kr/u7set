@@ -81,16 +81,18 @@ bool ClientBehavior::load(QXmlStreamReader& reader)
 //
 // MonitorBehavior
 //
+const QString MonitorBehavior::nonValidityTag{"flag_nonvalid"};
+const QString MonitorBehavior::simulatedTag{"flag_simulated"};
+const QString MonitorBehavior::blockedTag{"flag_blocked"};
+const QString MonitorBehavior::mismatchTag{"flag_mismatch"};
+const QString MonitorBehavior::outOfLimitsTag{"flag_outoflimits"};
 const QString MonitorBehavior::criticalTag{"critical"};
 const QString MonitorBehavior::attentionTag{"attention"};
 const QString MonitorBehavior::generalTag{"general"};
 
 MonitorBehavior::MonitorBehavior()
 {
-	m_tagToColors.reserve(3);
-	m_tagToColors.push_back({criticalTag, std::make_pair(QRgb(0xD00000), QRgb(0xD00000))});
-	m_tagToColors.push_back({attentionTag, std::make_pair(QRgb(0xF0F000), QRgb(0xF0F000))});
-	m_tagToColors.push_back({generalTag, std::make_pair(QRgb(0x0F0FF0), QRgb(0x0F0FF0))});
+	addBaseTagToColors();
 
 	return;
 }
@@ -139,7 +141,29 @@ void MonitorBehavior::setTag(int index, const QString& tag)
 	return;
 }
 
-bool MonitorBehavior::removeTagToColor(int index)
+void MonitorBehavior::insertTagToColors(int index, const QString& tag, std::pair<QRgb, QRgb> colors)
+{
+	for (auto& ttc : m_tagToColors)
+	{
+		if (ttc.tag == tag)
+		{
+			return;
+		}
+	}
+
+	if (index < 0 || index >= static_cast<int>(m_tagToColors.size()))
+	{
+		m_tagToColors.push_back({tag, colors});
+	}
+	else
+	{
+		m_tagToColors.insert(m_tagToColors.begin() + index, {tag, colors});
+	}
+
+	return;
+}
+
+bool MonitorBehavior::removeTagToColors(int index)
 {
 	if (index < 0 || index >= static_cast<int>(m_tagToColors.size()))
 	{
@@ -151,7 +175,7 @@ bool MonitorBehavior::removeTagToColor(int index)
 	return true;
 }
 
-bool MonitorBehavior::moveTagToColor(int index, int step)
+bool MonitorBehavior::moveTagToColors(int index, int step)
 {
 	if (index < 0 || index >= static_cast<int>(m_tagToColors.size()))
 	{
@@ -236,6 +260,20 @@ std::optional<std::pair<QRgb, QRgb>> MonitorBehavior::tagToColors(const QStringL
 	return tagToColors(tagSet);
 }
 
+void MonitorBehavior::addBaseTagToColors()
+{
+	int tag = 0;
+
+	insertTagToColors(tag++, nonValidityTag,	std::make_pair(QRgb(0xD00000), QRgb(0xD00000)));
+	insertTagToColors(tag++, simulatedTag,		std::make_pair(QRgb(0x0000D0), QRgb(0x0000D0)));
+	insertTagToColors(tag++, blockedTag,		std::make_pair(QRgb(0xD0D0D0), QRgb(0xD0D0D0)));
+	insertTagToColors(tag++, mismatchTag,		std::make_pair(QRgb(0xD0D000), QRgb(0xD0D000)));
+	insertTagToColors(tag++, outOfLimitsTag,	std::make_pair(QRgb(0xD00000), QRgb(0xD00000)));
+
+	insertTagToColors(tag++, criticalTag,		std::make_pair(QRgb(0xD00000), QRgb(0xD00000)));
+	insertTagToColors(tag++, attentionTag,		std::make_pair(QRgb(0xF0F000), QRgb(0xF0F000)));
+	insertTagToColors(tag++, generalTag,		std::make_pair(QRgb(0x0F0FF0), QRgb(0x0F0FF0)));
+}
 
 void MonitorBehavior::saveToXml(QXmlStreamWriter& writer)
 {
@@ -313,6 +351,10 @@ bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 		reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
 		return !reader.hasError();
 	}
+
+	// Add default tagToColors if they are not loaded
+	//
+	addBaseTagToColors();
 
 	reader.readNext();
 	return !reader.hasError();

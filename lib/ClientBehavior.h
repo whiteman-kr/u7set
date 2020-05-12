@@ -55,24 +55,35 @@ public:
 	QStringList tags() const;
 
 	void setTag(int index, const QString& tag);
-	bool removeTagToColor(int index);
-	bool moveTagToColor(int index, int step);
+
+	void insertTagToColors(int index, const QString& tag, std::pair<QRgb, QRgb> colors);	// Inserts a tag, if tag already exists, does not modify the color
+	bool removeTagToColors(int index);
+	bool moveTagToColors(int index, int step);
 
 	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QString& tag) const;
-	void setTagToColors(const QString& tag, std::pair<QRgb, QRgb> colors);
+	void setTagToColors(const QString& tag, std::pair<QRgb, QRgb> colors);	// Sets tag color, if tag does not exist, adds it
 
 	std::optional<std::pair<QRgb, QRgb>> tagToColors(const std::set<QString>& tags) const;	// Return the most periority color
 	std::optional<std::pair<QRgb, QRgb>> tagToColors(const QStringList& tags) const;		// Return the most periority color
 
 private:
+	void addBaseTagToColors();
+
 	virtual void saveToXml(QXmlStreamWriter& writer) override;
 	virtual bool loadFromXml(QXmlStreamReader& reader) override;
 
-private:
+
+public:
 	static const QString criticalTag;
 	static const QString attentionTag;
 	static const QString generalTag;
+	static const QString nonValidityTag;
+	static const QString simulatedTag;
+	static const QString blockedTag;
+	static const QString mismatchTag;
+	static const QString outOfLimitsTag;
 
+private:
 	struct TagToColorsType
 	{
 		QString tag;
