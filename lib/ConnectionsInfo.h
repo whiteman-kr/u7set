@@ -5,6 +5,7 @@
 #include "Connection.h"
 #include "../Builder/OptoModule.h"
 #include "XmlHelper.h"
+#include "WUtils.h"
 
 #endif
 
@@ -20,17 +21,6 @@ public:
 	E::SignalType type = E::SignalType::Discrete;
 	Address16 addrInBuf;
 	Address16 absAddr;
-
-private:
-	bool load(const QDomElement& txRxSignalElem, QString* errMsg);
-
-#ifdef IS_BUILDER
-
-	void save(XmlWriteHelper& xml) const;
-
-#endif
-
-	friend class ConnectionPortInfo;
 };
 
 class ConnectionPortInfo
@@ -71,20 +61,6 @@ public:
 	Address16 rxValiditySignalAbsAddr;
 
 	std::vector<ConnectionTxRxSignal> rxSignals;
-
-private:
-	bool load(const QDomElement& connectionElement, int prtNo, QString* errMsg);
-
-#ifdef IS_BUILDER
-
-	bool fill(Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(XmlWriteHelper& xml) const;
-
-#endif
-
-	QString portTag() const;
-
-	friend class ConnectionInfo;
 };
 
 class ConnectionInfo
@@ -97,20 +73,6 @@ public:
 	bool disableDataIDControl = false;
 
 	std::vector<ConnectionPortInfo> ports;
-
-private:
-
-	bool load(const QDomNode& node, QString* errMsg);
-
-#ifdef IS_BUILDER
-
-	bool fill(Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(XmlWriteHelper& xml) const;
-
-#endif
-
-	friend class ConnectionsInfo;
-
 };
 
 class ConnectionsInfo
@@ -121,14 +83,11 @@ public:
 	bool load(const QString& fileName, QString* errMsg);
 	bool load(const QByteArray& xmlData, QString* errMsg);
 
-#ifdef IS_BUILDER
-
-	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(QByteArray* xmlFileData) const;
-
-#endif
-
 private:
+	bool load(ConnectionInfo* ci, const QDomNode& node, QString* errMsg);
+	bool load(ConnectionPortInfo* cpi, const QDomElement& connectionElement, int prtNo, QString* errMsg);
+	bool load(ConnectionTxRxSignal* cs, const QDomElement& txRxSignalElem, QString* errMsg);
+
 	static QString errElementNotFound(const QString& elemName);
 	static QString errAttributeNotFound(const QDomElement& elem, const QString& attrName);
 	static QString errAttributeParsing(const QDomElement& elem, const QString& attrName);
@@ -141,6 +100,9 @@ private:
 	static bool getBoolAttribute(const QDomElement& elem, const QString& attrName, bool* value, QString* errMsg);
 	static bool getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg);
 	static bool getUInt32Attribute(const QDomElement& elem, const QString& attrName, quint32* value, QString* errMsg);
+
+protected:
+	static QString portTag(int portNo);
 
 	static const QString ELEM_CONNECTIONS;
 	static const QString ELEM_CONNECTION;
@@ -176,11 +138,27 @@ private:
 
 	static const QString CONN_TYPE_PORT_TO_PORT;
 	static const QString CONN_TYPE_SINGLE_PORT;
-
-	friend class ConnectionTxRxSignal;
-	friend class ConnectionPortInfo;
-	friend class ConnectionInfo;
 };
 
-//extern void testConnInfoLoad();
+#ifdef IS_BUILDER
+
+class ConnectionsInfoWriter : public ConnectionsInfo
+{
+public:
+	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
+	void save(QByteArray* xmlFileData) const;
+
+private:
+
+	bool fill(ConnectionInfo* ci, Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage);
+	void save(const ConnectionInfo& ci, XmlWriteHelper& xml) const;
+
+	bool fill(ConnectionPortInfo* cpi, Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage);
+	void save(const ConnectionPortInfo& cpi, XmlWriteHelper& xml) const;
+
+	void save(const ConnectionTxRxSignal& cs, XmlWriteHelper& xml) const;
+};
+
+#endif
+
 
