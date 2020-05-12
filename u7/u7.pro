@@ -88,7 +88,8 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
-    Simulator/SimModulePage.cpp \
+    Simulator/SimConnectionPage.cpp \
+    Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
     Simulator/SimTrend/SimTrends.cpp \
@@ -228,7 +229,8 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
-    Simulator/SimModulePage.h \
+    Simulator/SimConnectionPage.h \
+    Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
     Simulator/SimTrend/SimTrends.h \

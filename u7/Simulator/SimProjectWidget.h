@@ -1,6 +1,7 @@
 #pragma once
 #include "SimIdeSimulator.h"
 
+//
 // Widget for selection build and module
 //
 class SimProjectWidget : public QWidget
@@ -16,11 +17,9 @@ protected:
 
 protected slots:
 	void projectUpdated();
+
 	void treeContextMenu(const QPoint& pos);
 	void treeDoubleClicked(const QModelIndex &index);
-
-	void openModuleTabPage();
-	void openCodeTabPage();
 
 	void updateModuleStates(Sim::ControlStatus state);
 
@@ -28,15 +27,20 @@ protected:
 	void fillEquipmentTree();
 
 signals:
-	void signal_openControlTabPage(QString equipmentID);
+	void signal_openLogicModuleTabPage(QString equipmentId);
 	void signal_openCodeTabPage(QString equipmentID);
+	void signal_openConnectionTabPage(QString connectionId);
 
 private:
 	SimIdeSimulator* m_simulator = nullptr;
 
 	QLabel* m_buildLabel = nullptr;
 	QTreeWidget* m_treeWidget = nullptr;
+};
 
+
+namespace SimProjectTreeItems
+{
 	enum EquipmentTreeColumns
 	{
 		EquipmentID,
@@ -45,24 +49,15 @@ private:
 		Count
 	};
 
-	QAction* m_openLmControlPageAction = nullptr;
-	QAction* m_openLmCodePageAction = nullptr;
-};
-
-namespace SimProjectTreeItems
-{
-	enum SimProjectTreeTypes
-	{
-		LogicModule = 1010,
-		Connection = 1020,
-		ConnectionPort = 1021,
-	};
-
 
 	class BaseTreeItem : public QTreeWidgetItem
 	{
 	public:
-		BaseTreeItem(QTreeWidgetItem* parent, const QStringList& strings, int type = Type);
+		BaseTreeItem(QTreeWidgetItem* parent, const QStringList& strings);
+
+		virtual void updateState(Sim::ControlStatus state);
+		virtual void doubleClick(SimProjectWidget* simProjectWidget);
+		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos);
 	};
 
 
@@ -70,6 +65,10 @@ namespace SimProjectTreeItems
 	{
 	public:
 		LogicModuleTreeItem(QTreeWidgetItem* parent, std::shared_ptr<Sim::LogicModule> lm);
+
+		virtual void updateState(Sim::ControlStatus state) override;
+		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
+		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos) override;
 
 	public:
 		QString m_equipmentId;
@@ -81,19 +80,24 @@ namespace SimProjectTreeItems
 	public:
 		ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::ConnectionPtr& connection);
 
+		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
+		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos) override;
+
 	public:
 		QString m_connectionId;
 	};
 
 
-	class ConnectionPortTreeItem : public BaseTreeItem
-	{
-	public:
-		ConnectionPortTreeItem(ConnectionTreeItem* parent, const Sim::ConnectionPortPtr& port);
+//	class ConnectionPortTreeItem : public BaseTreeItem
+//	{
+//	public:
+//		ConnectionPortTreeItem(ConnectionTreeItem* parent, const Sim::ConnectionPortPtr& port);
 
-	public:
-		QString m_connectionPortId;
-	};
+//		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
+
+//	public:
+//		QString m_connectionPortId;
+//	};
 
 
 

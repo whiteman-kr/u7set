@@ -66,12 +66,6 @@ SimProjectWidget::~SimProjectWidget()
 
 void SimProjectWidget::createActions()
 {
-	m_openLmControlPageAction = new QAction(tr("Control Page..."), this);
-	connect(m_openLmControlPageAction, &QAction::triggered, this, &SimProjectWidget::openModuleTabPage);
-
-	m_openLmCodePageAction = new QAction(tr("App Code..."), this);
-	connect(m_openLmCodePageAction, &QAction::triggered, this, &SimProjectWidget::openCodeTabPage);
-
 	return;
 }
 
@@ -96,134 +90,68 @@ void SimProjectWidget::projectUpdated()
 
 void SimProjectWidget::treeContextMenu(const QPoint& pos)
 {
-	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
+	BaseTreeItem* currentItem = dynamic_cast<BaseTreeItem*>(m_treeWidget->currentItem());
 	if (currentItem == nullptr)
 	{
 		return;
 	}
 
-	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
-	if (lmEquipmentId.isEmpty() == true)
-	{
-		return;
-	}
+	currentItem->contextMenu(this, m_treeWidget->mapToGlobal(pos));
 
-	QMenu menu(m_treeWidget);
-
-	menu.addAction(m_openLmControlPageAction);
-	menu.addAction(m_openLmCodePageAction);
-
-	menu.exec(m_treeWidget->mapToGlobal(pos));
 	return;
 }
 
 void SimProjectWidget::treeDoubleClicked(const QModelIndex& /*index*/)
 {
-	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
+	BaseTreeItem* currentItem = dynamic_cast<BaseTreeItem*>(m_treeWidget->currentItem());
 	if (currentItem == nullptr)
 	{
 		return;
 	}
 
-	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
-	if (lmEquipmentId.isEmpty() == true)
-	{
-		return;
-	}
-
-	openModuleTabPage();
-	return;
-}
-
-void SimProjectWidget::openModuleTabPage()
-{
-	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
-	if (currentItem == nullptr)
-	{
-		return;
-	}
-
-	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
-	if (lmEquipmentId.isEmpty() == true)
-	{
-		return;
-	}
-
-	// --
-	//
-	emit signal_openControlTabPage(lmEquipmentId);
+	currentItem->doubleClick(this);
 
 	return;
 }
 
-void SimProjectWidget::openCodeTabPage()
-{
-	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
-	if (currentItem == nullptr)
-	{
-		return;
-	}
-
-	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
-	if (lmEquipmentId.isEmpty() == true)
-	{
-		return;
-	}
-
-	// --
-	//
-	emit signal_openCodeTabPage(lmEquipmentId);
-
-	return;
-}
 
 void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
 {
-	Q_ASSERT(m_treeWidget);
-
-	QString text;
-	text.reserve(64);
-
-	for (const auto& lmState : state.m_lmDeviceModes)
-	{
-		QList<QTreeWidgetItem*> items = m_treeWidget->findItems(lmState.lmEquipmentId, Qt::MatchFixedString | Qt::MatchRecursive, EquipmentTreeColumns::EquipmentID);
-
-		for (QTreeWidgetItem* item : items)
-		{
-			QColor color{Qt::black};
-			text.clear();
-
-			if (state.m_state == Sim::SimControlState::Pause)
+	std::function<void(QTreeWidgetItem*)> visitTreeItems =
+			[&visitTreeItems, &state](QTreeWidgetItem* treeItem)
 			{
-				text = tr("Pause - ");
-			}
-
-			if (state.m_state != Sim::SimControlState::Stop)
-			{
-				switch (lmState.deviceMode)
+				for(int i = 0; i < treeItem->childCount(); i++)
 				{
-				case Sim::DeviceMode::Start:
-					text += QStringLiteral("Start");
-					break;
-				case Sim::DeviceMode::Fault:
-					text += QStringLiteral("Fault");
-					color = qRgb(0xD0, 0x00, 0x00);
-					break;
-				case Sim::DeviceMode::Operate:
-					text += QStringLiteral("Operate");
-					break;
-				default:
-					Q_ASSERT(false);
-					text += QStringLiteral("Unknown");
-					color = qRgb(0xD0, 0x00, 0x00);
+					QTreeWidgetItem* item = treeItem->child(i);
+
+					if (BaseTreeItem* baseTreeItem = dynamic_cast<BaseTreeItem*>(item);
+						baseTreeItem != nullptr)
+					{
+						baseTreeItem->updateState(state);
+					}
+
+					visitTreeItems(item);
 				}
-			}
+			};
 
-			item->setText(EquipmentTreeColumns::State, text);
-			item->setTextColor(EquipmentTreeColumns::State, color);
-		}
-	}
+	std::function<void(QTreeWidget*)> visitTopTreeItems =
+			[&visitTreeItems, &state](QTreeWidget* treeWidget)
+			{
+				for(int i=0; i < treeWidget->topLevelItemCount(); i++)
+				{
+					QTreeWidgetItem* item = treeWidget->topLevelItem(i);
 
+					if (BaseTreeItem* baseTreeItem = dynamic_cast<BaseTreeItem*>(item);
+						baseTreeItem != nullptr)
+					{
+						baseTreeItem->updateState(state);
+					}
+
+					visitTreeItems(item);
+				}
+			};
+
+	visitTopTreeItems(m_treeWidget);
 	return;
 }
 
@@ -276,8 +204,15 @@ void SimProjectWidget::fillEquipmentTree()
 		ConnectionTreeItem* connItem = new ConnectionTreeItem(topConnectionItem, c);
 		Q_UNUSED(connItem);
 
-		// Ports are created in ConnectionTreeItem constructor
-		//
+//		// Create ports
+//		//
+//		const std::vector<Sim::ConnectionPortPtr>& ports = c->ports();
+
+//		for (const Sim::ConnectionPortPtr& p : ports)
+//		{
+//			ConnectionPortTreeItem* connPortItem = new ConnectionPortTreeItem{connItem, p};
+//			Q_UNUSED(connPortItem);
+//		}
 	}
 
 	m_treeWidget->expandItem(topConnectionItem);
@@ -288,52 +223,174 @@ void SimProjectWidget::fillEquipmentTree()
 
 namespace SimProjectTreeItems
 {
-	BaseTreeItem::BaseTreeItem(QTreeWidgetItem* parent, const QStringList& strings, int type) :
-		QTreeWidgetItem(parent, strings, type)
+	BaseTreeItem::BaseTreeItem(QTreeWidgetItem* parent,
+							   const QStringList& strings) :
+		QTreeWidgetItem(parent, strings, 0)
 	{
 	}
 
-
-	LogicModuleTreeItem::LogicModuleTreeItem(QTreeWidgetItem* parent, std::shared_ptr<Sim::LogicModule> lm) :
-		BaseTreeItem(parent,
-					 QStringList{} << lm->equipmentId()
-								   << QString("n: %1, ch: %2").arg(lm->lmNumber()).arg(QChar('A' + static_cast<char>(lm->channel()))),
-					 SimProjectTreeTypes::LogicModule),
-		m_equipmentId(lm->equipmentId())
+	void BaseTreeItem::updateState(Sim::ControlStatus /*state*/)
 	{
-		setData(0, Qt::UserRole, QVariant(m_equipmentId));
+		return;
 	}
 
-
-	ConnectionTreeItem::ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::ConnectionPtr& connection) :
-		BaseTreeItem(parent,
-					 QStringList{} << connection->connectionId()
-								   << connection->type(),
-					   SimProjectTreeTypes::Connection),
-		m_connectionId(connection->connectionId())
+	void BaseTreeItem::doubleClick(SimProjectWidget* /*simProjectWidget*/)
 	{
-		setData(0, Qt::UserRole, QVariant(m_connectionId));
+		return;
+	}
 
-		// Create ports
-		//
-		const std::vector<Sim::ConnectionPortPtr>& ports = connection->ports();
-
-		for (const Sim::ConnectionPortPtr& p : ports)
-		{
-			ConnectionPortTreeItem* connPortItem = new ConnectionPortTreeItem{this, p};
-			Q_UNUSED(connPortItem);
-		}
+	void BaseTreeItem::contextMenu(SimProjectWidget* /*simProjectWidget*/, QPoint /*globalMousePos*/)
+	{
 		return;
 	}
 
 
-	ConnectionPortTreeItem::ConnectionPortTreeItem(ConnectionTreeItem* parent, const Sim::ConnectionPortPtr& port) :
+	LogicModuleTreeItem::LogicModuleTreeItem(QTreeWidgetItem* parent,
+											 std::shared_ptr<Sim::LogicModule> lm) :
 		BaseTreeItem(parent,
-					 QStringList{} << port->portInfo().equipmentID
-								   << QString::number(port->portInfo().portNo),
-					 SimProjectTreeTypes::ConnectionPort),
-		m_connectionPortId(port->portInfo().equipmentID)
+					 QStringList{} << lm->equipmentId()
+								   << QString("n: %1, ch: %2").arg(lm->lmNumber()).arg(QChar('A' + static_cast<char>(lm->channel())))),
+		m_equipmentId(lm->equipmentId())
 	{
-		setData(0, Qt::UserRole, QVariant(m_connectionPortId));
+		setData(0, Qt::UserRole, QVariant(m_equipmentId));
+		return;
 	}
+
+	void LogicModuleTreeItem::updateState(Sim::ControlStatus state)
+	{
+
+
+		auto it = std::find_if(std::begin(state.m_lmDeviceModes),
+							   std::end(state.m_lmDeviceModes),
+							   [this](const Sim::ControlStatus::LmMode& p)
+							   {
+									return p.lmEquipmentId == this->m_equipmentId;
+							   });
+
+		if (it == std::end(state.m_lmDeviceModes))
+		{
+			return;
+		}
+
+		const Sim::ControlStatus::LmMode& lmState = *it;
+
+		QColor color{Qt::black};
+
+		QString text;
+		text.reserve(64);
+
+		if (state.m_state == Sim::SimControlState::Pause)
+		{
+			text = QObject::tr("Pause - ");
+		}
+
+		if (state.m_state != Sim::SimControlState::Stop)
+		{
+			switch (lmState.deviceMode)
+			{
+			case Sim::DeviceMode::Start:
+				text += QStringLiteral("Start");
+				break;
+			case Sim::DeviceMode::Fault:
+				text += QStringLiteral("Fault");
+				color = qRgb(0xD0, 0x00, 0x00);
+				break;
+			case Sim::DeviceMode::Operate:
+				text += QStringLiteral("Operate");
+				break;
+			default:
+				Q_ASSERT(false);
+				text += QStringLiteral("Unknown");
+				color = qRgb(0xD0, 0x00, 0x00);
+			}
+		}
+
+		this->setText(EquipmentTreeColumns::State, text);
+		this->setTextColor(EquipmentTreeColumns::State, color);
+
+		return;
+	}
+
+	void LogicModuleTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
+	{
+		emit simProjectWidget->signal_openLogicModuleTabPage(m_equipmentId);
+		return;
+	}
+
+	void LogicModuleTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
+	{
+		QMenu menu(this->treeWidget());
+
+		menu.addAction(QObject::tr("Open..."),
+			[simProjectWidget, this]()
+			{
+				emit simProjectWidget->signal_openLogicModuleTabPage(m_equipmentId);
+			});
+
+		menu.addAction(QObject::tr("Module Code..."),
+			[simProjectWidget, this]()
+			{
+				emit simProjectWidget->signal_openCodeTabPage(m_equipmentId);
+			});
+
+		menu.exec(globalMousePos);
+		return;
+	}
+
+
+	ConnectionTreeItem::ConnectionTreeItem(QTreeWidgetItem* parent,
+										   const Sim::ConnectionPtr& connection) :
+		BaseTreeItem(parent,
+					 QStringList{} << connection->connectionId()
+								   << connection->type()),
+		m_connectionId(connection->connectionId())
+	{
+		setData(0, Qt::UserRole, QVariant(m_connectionId));
+
+		const std::vector<Sim::ConnectionPortPtr>& ports = connection->ports();
+
+		setToolTip(0, QObject::tr("ConnectionID: %1\n\tPort1: %2\n\tPort2: %3")
+						.arg(m_connectionId)
+						.arg(ports.size() >= 1 ? ports[0]->portInfo().equipmentID : "")
+						.arg(ports.size() >= 2 ? ports[1]->portInfo().equipmentID : ""));
+
+		return;
+	}
+
+	void ConnectionTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
+	{
+		emit simProjectWidget->signal_openConnectionTabPage(m_connectionId);
+		return;
+	}
+
+	void ConnectionTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
+	{
+		QMenu menu(this->treeWidget());
+
+		menu.addAction(QObject::tr("Open..."),
+			[simProjectWidget, this]()
+			{
+				emit simProjectWidget->signal_openConnectionTabPage(m_connectionId);
+			});
+
+		menu.exec(globalMousePos);
+		return;
+	}
+
+
+//	ConnectionPortTreeItem::ConnectionPortTreeItem(ConnectionTreeItem* parent,
+//												   const Sim::ConnectionPortPtr& port) :
+//		BaseTreeItem(parent,
+//					 QStringList{} << port->portInfo().equipmentID
+//								   << QString::number(port->portInfo().portNo)),
+//		m_connectionPortId(port->portInfo().equipmentID)
+//	{
+//		setData(0, Qt::UserRole, QVariant(m_connectionPortId));
+//		return;
+//	}
+
+//	void ConnectionPortTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
+//	{
+//		return;
+//	}
 }

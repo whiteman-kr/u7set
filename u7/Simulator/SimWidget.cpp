@@ -5,7 +5,8 @@
 #include "SimOutputWidget.h"
 #include "SimOverridePane.h"
 #include "SimSelectBuildDialog.h"
-#include "SimModulePage.h"
+#include "SimLogicModulePage.h"
+#include "SimConnectionPage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
@@ -60,8 +61,9 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
 	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimWidget::updateTimeIndicator);
 
-	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openModuleTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openLogicModuleTabPage, this, &SimWidget::openLogicModuleTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openConnectionTabPage, this, &SimWidget::openConnectionTabPage);
 
 	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimWidget::tabCloseRequest);
 	connect(m_tabWidget, &QTabWidget::currentChanged, this, &SimWidget::tabCurrentChanged);
@@ -734,7 +736,7 @@ void SimWidget::addNewWindow()
 	return;
 }
 
-void SimWidget::openModuleTabPage(QString lmEquipmentId)
+void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 {
 	if (m_simulator->isLoaded() == false)
 	{
@@ -743,7 +745,7 @@ void SimWidget::openModuleTabPage(QString lmEquipmentId)
 
 	// Check if such SimulatorControlPage already exists
 	//
-	SimModulePage* cp = SimBasePage::modulePage(lmEquipmentId, m_tabWidget);
+	SimLogicModulePage* cp = SimBasePage::logicModulePage(lmEquipmentId, m_tabWidget);
 
 	if (cp != nullptr)
 	{
@@ -761,7 +763,7 @@ void SimWidget::openModuleTabPage(QString lmEquipmentId)
 		return;
 	}
 
-	// Create new SimulatorControlPage
+	// Create new SimLogicModulePage
 	//
 	auto logicModule = m_simulator->logicModule(lmEquipmentId);
 	if (logicModule == nullptr)
@@ -771,13 +773,15 @@ void SimWidget::openModuleTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimModulePage* controlPage = new SimModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
+	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
+	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimLogicModuleIcon.svg"}});
+
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-	connect(controlPage, &SimModulePage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
-	connect(controlPage, &SimModulePage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
+	connect(controlPage, &SimLogicModulePage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
+	connect(controlPage, &SimLogicModulePage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
 
 	return;
 }
@@ -834,6 +838,48 @@ void SimWidget::openCodeTabPage(QString lmEquipmentId)
 
 	int tabIndex = m_tabWidget->addTab(page, lmEquipmentId);
 	m_tabWidget->setCurrentIndex(tabIndex);
+
+	return;
+}
+
+void SimWidget::openConnectionTabPage(QString connectionId)
+{
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	// Check if such SimulatorControlPage already exists
+	//
+	SimConnectionPage* cp = SimBasePage::connectionPage(connectionId, m_tabWidget);
+
+	if (cp != nullptr)
+	{
+		int tabIndex = m_tabWidget->indexOf(cp);
+		if (tabIndex != -1)
+		{
+			m_tabWidget->setCurrentIndex(tabIndex);
+		}
+		else
+		{
+			cp->show();
+			cp->activateWindow();
+		}
+
+		return;
+	}
+
+	// Create new SimConnectionPage
+	//
+	SimConnectionPage* page = new SimConnectionPage{m_simulator.get(), connectionId, m_tabWidget};
+
+	int tabIndex = m_tabWidget->addTab(page, connectionId);
+	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimConnectionIcon.svg"}});
+
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+	//connect(page, &SimLogicModulePage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
+	//connect(page, &SimLogicModulePage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
 
 	return;
 }

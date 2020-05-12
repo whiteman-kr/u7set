@@ -66,10 +66,10 @@ protected slots:
 
 	void addNewWindow();
 
-	void openModuleTabPage(QString lmEquipmentId);
-
+	void openLogicModuleTabPage(QString lmEquipmentId);
 	void openSchemaTabPage(QString fileName);
 	void openCodeTabPage(QString lmEquipmentId);
+	void openConnectionTabPage(QString connectionId);
 
 	void tabCloseRequest(int index);
 	void tabCurrentChanged(int index);

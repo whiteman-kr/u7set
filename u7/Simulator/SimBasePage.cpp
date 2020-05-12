@@ -1,7 +1,9 @@
 #include "SimBasePage.h"
-#include "SimModulePage.h"
+#include "SimLogicModulePage.h"
+#include "SimConnectionPage.h"
 
 std::list<SimBasePage*> SimBasePage::m_pages;
+
 
 SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent)
 	: QWidget(parent),
@@ -43,16 +45,35 @@ void SimBasePage::deleteAllPages()
 	return;
 }
 
-SimModulePage* SimBasePage::modulePage(QString lmEquipmnetId, QWidget* parent)
+SimLogicModulePage* SimBasePage::logicModulePage(QString lmEquipmnetId, QWidget* parent)
 {
 	QVariant parentValue =  QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
 
 	for (SimBasePage* page : m_pages)
 	{
-		SimModulePage* cp = dynamic_cast<SimModulePage*>(page);
+		SimLogicModulePage* cp = dynamic_cast<SimLogicModulePage*>(page);
 
 		if (cp != nullptr &&
 			cp->equipmnetId() == lmEquipmnetId &&
+			cp->property("SimParentObject") == parentValue)
+		{
+			return cp;
+		}
+	}
+
+	return nullptr;
+}
+
+SimConnectionPage* SimBasePage::connectionPage(QString connectionId, QWidget* parent)
+{
+	QVariant parentValue =  QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
+
+	for (SimBasePage* page : m_pages)
+	{
+		SimConnectionPage* cp = dynamic_cast<SimConnectionPage*>(page);
+
+		if (cp != nullptr &&
+			cp->connectionId() == connectionId &&
 			cp->property("SimParentObject") == parentValue)
 		{
 			return cp;

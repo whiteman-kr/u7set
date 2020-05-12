@@ -227,6 +227,11 @@ namespace Sim
 		return m_buildConnection.type;
 	}
 
+	const ::ConnectionInfo& Connection::connectionInfo() const
+	{
+		return m_buildConnection;
+	}
+
 	const std::vector<Sim::ConnectionPortPtr>& Connection::ports() const
 	{
 		return m_ports;
@@ -286,6 +291,7 @@ namespace Sim
 	{
 		m_buildConnections = {};
 
+		m_connectionMap.clear();
 		m_lmToConnection.clear();
 		m_portToConnection.clear();
 		m_portMap.clear();
@@ -313,6 +319,8 @@ namespace Sim
 			ConnectionPtr c = std::make_shared<Sim::Connection>(ci);
 			m_connections.push_back(c);
 
+			m_connectionMap[::calcHash(c->connectionId())] = c;
+
 			// m_lmToConnection
 			//
 			for (auto p : c->ports())
@@ -324,6 +332,19 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	ConnectionPtr Connections::connection(QString connectionId) const
+	{
+		ConnectionPtr result;
+
+		auto it = m_connectionMap.find(::calcHash(connectionId));
+		if (it != m_connectionMap.end())
+		{
+			result = it->second;
+		}
+
+		return result;
 	}
 
 	std::vector<ConnectionPtr> Connections::connections() const
