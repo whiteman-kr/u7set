@@ -450,6 +450,17 @@ namespace VFrame30
 		{
 			const QString& appSignalId = appSignalIds[barIndex];
 
+			// Get signal description and state
+			//
+			AppSignalParam signalParam;
+			AppSignalState appSignalState;
+			TuningSignalState tuningSignalState;
+
+			signalParam.setAppSignalId(appSignalId);
+			signalParam.setCustomSignalId(appSignalId);
+
+			schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
+
 			// Calc bar rect
 			//
 			QRectF barRect{};
@@ -464,20 +475,21 @@ namespace VFrame30
 
 			barRects.push_back(barRect);
 
+			std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId, schemaItem);
+
 			// Get bar color
 			// signalColors[barIndex] - is a base color
-			// if any setpoint is alerted and it has tag, try to fetch color for this tag from behavior
+			// if any setpoint is alerted and it has tag, try to fetch alertedColor for this tag from behavior
 			//
-			std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId, schemaItem);
-			std::optional<QRgb> alertedColor = getAlertColor(signalSetpoints, drawParam, schemaItem);
+			std::optional<QBrush> alertedBrush = getAlertBrush(signalSetpoints, drawParam, appSignalState, tuningSignalState, schemaItem);
 
-			QColor barColor = alertedColor.value_or(signalColors[barIndex].rgb());
+			QBrush barBrush = alertedBrush.value_or(QBrush(signalColors[barIndex]));
 
 			setpoints[appSignalId] = std::move(signalSetpoints);
 
 			// --
 			//
-			drawBar(drawParam, barRect, barIndex, appSignalId, barColor, schemaItem);
+			drawBar(drawParam, signalParam, appSignalState, tuningSignalState, barRect, barIndex, barBrush, schemaItem);
 		}
 
 		// Draw setpoints
@@ -488,10 +500,12 @@ namespace VFrame30
 	}
 
 	void IndicatorHistogramVert::drawBar(CDrawParam* drawParam,
+										 const AppSignalParam& signalParam,
+										 const AppSignalState& appSignalState,
+										 const TuningSignalState& tuningSignalState,
 										 const QRectF& barRect,
 										 int signalIndex,
-										 const QString& appSignalId,
-										 const QColor& barColor,
+										 const QBrush& barBrush,
 										 const SchemaItemIndicator* schemaItem) const
 	{
 		Q_ASSERT(drawParam);
@@ -531,29 +545,21 @@ namespace VFrame30
 				signalValueRect.setBottom(signalValueRect.bottom() - signalValueRect.height() / 2);
 			}
 
-			p->fillRect(signalValueRect, barColor);
+			p->fillRect(signalValueRect, barBrush.color());
 		}
 		else
 		{
-			// Get signal description and state
-			//
-			AppSignalParam signalParam;
-			AppSignalState appSignalState;
-			TuningSignalState tuningSignalState;
-
-			signalParam.setAppSignalId(appSignalId);
-			signalParam.setCustomSignalId(appSignalId);
-
-			schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
-
 			units = signalParam.unit();
 			bool valid = false;
+			bool mismatch = false;
+
 			double currentValue = 0;
 
 			switch (schemaItem->signalSource())
 			{
 				case E::SignalSource::AppDataService:
 					valid = appSignalState.isValid();
+					mismatch = appSignalState.isMismatch();
 					currentValue = pointToScaleValue(appSignalState.value());
 					break;
 
@@ -613,7 +619,8 @@ namespace VFrame30
 					}
 				}
 
-				p->fillRect(signalValueRect, barColor);
+
+				p->fillRect(signalValueRect, barBrush);
 			} // if (valid == true)
 		}
 
@@ -958,8 +965,11 @@ namespace VFrame30
 		return result;
 	}
 
-
-	std::optional<QRgb> IndicatorHistogramVert::getAlertColor(const std::vector<IndicatorSetpoint>& setpoints, CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const
+	std::optional<QBrush> IndicatorHistogramVert::getAlertBrush(const std::vector<IndicatorSetpoint>& setpoints,
+										CDrawParam* drawParam,
+										const AppSignalState& appSignalState,
+										const TuningSignalState& tuningSignalState,
+										const SchemaItemIndicator* schemaItem) const
 	{
 		Q_ASSERT(drawParam);
 		Q_ASSERT(schemaItem);
@@ -967,6 +977,60 @@ namespace VFrame30
 		if (drawParam->isMonitorMode() == false)
 		{
 			return {};
+		}
+
+		bool blocked = false;
+		bool simulated = false;
+		bool mismatch = false;
+		bool outOfLimits = false;
+
+		switch (schemaItem->signalSource())
+		{
+			case E::SignalSource::AppDataService:
+				blocked = appSignalState.isBlocked();
+				simulated = appSignalState.isSimulated();
+				mismatch = appSignalState.isMismatch();
+				outOfLimits = appSignalState.isOutOfLimits();
+				break;
+
+			case E::SignalSource::TuningService:
+				outOfLimits = tuningSignalState.outOfRange();
+				break;
+
+			default:
+				Q_ASSERT(false);
+		}
+
+		Qt::BrushStyle brushStyle = mismatch ? Qt::Dense4Pattern : Qt::SolidPattern;
+
+		std::optional<std::pair<QRgb, QRgb>> flagColor;
+
+		// Test flags
+		//
+		if (outOfLimits == true)
+		{
+			flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::outOfLimitsTag);
+		}
+		else
+		{
+			if (blocked == true)
+			{
+				flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::blockedTag);
+			}
+			else
+			{
+				if (simulated == true)
+				{
+					flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::simulatedTag);
+				}
+			}
+		}
+
+		// If some flags were alerted - return alerted color
+
+		if (flagColor.has_value() == true)
+		{
+			return QBrush(drawParam->blinkPhase() ? flagColor.value().first : flagColor.value().second, brushStyle);
 		}
 
 		// Custom alerted setpoints with m_colorSource == StaticColorFromStruct
@@ -979,7 +1043,7 @@ namespace VFrame30
 				isp.alerted.value() == true &&
 				isp.customSetpointData->colorSource() == E::IndicatorColorSource::StaticColorFromStruct)
 			{
-				return {isp.customSetpointData->color().rgb()};
+				return QBrush(isp.customSetpointData->color().rgb(), brushStyle);
 			}
 		}
 
@@ -1006,14 +1070,14 @@ namespace VFrame30
 			}
 		}
 
-		std::optional<std::pair<QRgb, QRgb>> result = drawParam->monitorBehavor().tagToColors(alertedTags);
+		std::optional<std::pair<QRgb, QRgb>> color = drawParam->monitorBehavor().tagToColors(alertedTags);
 
-		if (result.has_value() == false)
+		if (color.has_value() == true)
 		{
-			return {};
+			return QBrush(drawParam->blinkPhase() ? color.value().first : color.value().second, brushStyle);
 		}
 
-		return drawParam->blinkPhase() ? result.value().first : result.value().second;
+		return {};
 	}
 
 	void IndicatorHistogramVert::drawSetpoints(CDrawParam* drawParam,
