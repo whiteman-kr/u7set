@@ -1,4 +1,5 @@
 #include "SimConnectionPage.h"
+#include "../SimulatorTabPage.h"
 
 SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connectionId, QWidget* parent) :
 	SimBasePage(simulator, parent),
@@ -88,6 +89,11 @@ SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connect
 	connect(m_port1RxSignals, &QPushButton::clicked, [this](){	this->showRxSignals(0); });
 	connect(m_port2TxSignals, &QPushButton::clicked, [this](){	this->showTxSignals(1); });
 	connect(m_port2RxSignals, &QPushButton::clicked, [this](){	this->showRxSignals(1); });
+
+	connect(m_port1TxBuffer, &QPushButton::clicked, [this](){	this->showTxBuffer(0);	});
+	connect(m_port1RxBuffer, &QPushButton::clicked, [this](){	this->showRxBuffer(0);	});
+	connect(m_port2TxBuffer, &QPushButton::clicked, [this](){	this->showTxBuffer(1);	});
+	connect(m_port2RxBuffer, &QPushButton::clicked, [this](){	this->showRxBuffer(1);	});
 
 	// Fill data
 	//
@@ -242,8 +248,8 @@ void SimConnectionPage::updateData()
 										.arg(ports[0].portNo)
 										.arg(ports[0].rxSignals.size()));
 
-			m_port1TxBuffer->setText(tr("Port%1 TX Buffer").arg(ports[0].portNo));
-			m_port1RxBuffer->setText(tr("Port%1 RX Buffer").arg(ports[0].portNo));
+			m_port1TxBuffer->setText(tr("Port%1 TX Buffer Snapshot").arg(ports[0].portNo));
+			m_port1RxBuffer->setText(tr("Port%1 RX Buffer Snapshot").arg(ports[0].portNo));
 		}
 		else
 		{
@@ -268,8 +274,8 @@ void SimConnectionPage::updateData()
 										.arg(ports[1].portNo)
 										.arg(ports[1].rxSignals.size()));
 
-			m_port2TxBuffer->setText(tr("Port%1 TX Buffer").arg(ports[1].portNo));
-			m_port2RxBuffer->setText(tr("Port%1 RX Buffer").arg(ports[1].portNo));
+			m_port2TxBuffer->setText(tr("Port%1 TX Buffer Snapshot").arg(ports[1].portNo));
+			m_port2RxBuffer->setText(tr("Port%1 RX Buffer Snapshot").arg(ports[1].portNo));
 		}
 		else
 		{
@@ -344,6 +350,8 @@ void SimConnectionPage::showXxSignals(int portNo, QString portId, QString trx, c
 
 	QInputDialog d(this->parentWidget());
 
+	d.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	d.setWindowFlag(Qt::WindowSystemMenuHint, false);
 	d.setLabelText(tr("Port%1 %2 Signals\n%3").arg(portNo).arg(trx).arg(portId));
 	d.setInputMode(QInputDialog::InputMode::TextInput);
 	d.setOption(QInputDialog::UsePlainTextEditForTextInput);
@@ -351,6 +359,128 @@ void SimConnectionPage::showXxSignals(int portNo, QString portId, QString trx, c
 	d.setTextValue(text);
 
 	d.exec();
+
+	return;
+}
+
+void SimConnectionPage::showTxBuffer(int portIndex)
+{
+	const auto& ports = m_connectionInfo.ports;
+	if (ports.size() < static_cast<size_t>(portIndex + 1))
+	{
+		return;
+	}
+
+	showXxBuffer(ports[portIndex].portNo,
+				 ports[portIndex].equipmentID,
+				 ports[portIndex].lmID,
+				 E::LogicModuleRamAccess::Write,
+				 ports[portIndex].txBufferAbsAddr,
+				 ports[portIndex].txDataSizeW,
+				 "TX");
+	return;
+}
+
+void SimConnectionPage::showRxBuffer(int portIndex)
+{
+	const auto& ports = m_connectionInfo.ports;
+	if (ports.size() < static_cast<size_t>(portIndex + 1))
+	{
+		return;
+	}
+
+	showXxBuffer(ports[portIndex].portNo,
+				 ports[portIndex].equipmentID,
+				 ports[portIndex].lmID,
+				 E::LogicModuleRamAccess::Read,
+				 ports[portIndex].rxBufferAbsAddr,
+				 ports[portIndex].rxDataSizeW,
+				 "RX");
+}
+
+void SimConnectionPage::showXxBuffer(int portNo,
+									 QString portId,
+									 QString lmEquipmentId,
+									 E::LogicModuleRamAccess access,
+									 quint32 offsetW,
+									 quint32 sizeW,
+									 QString trx)
+{
+	// Parent will be SimulatorTabPage*
+	//
+	QWidget* parent = this->parentWidget();
+	while (parent != nullptr)
+	{
+		if (dynamic_cast<SimulatorTabPage*>(parent) != nullptr)
+		{
+			break;
+		}
+
+		parent = parent->parentWidget();
+	}
+	Q_ASSERT(parent);
+
+	// Get current buffer
+	//
+	Sim::Ram ram;
+
+	bool ok = m_simulator->appSignalManager().getUpdateForRam(lmEquipmentId, &ram);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Memory for module %1 is not found.").arg(lmEquipmentId));
+		return;
+	}
+
+	QByteArray data;
+	ram.readToBuffer(offsetW, access, sizeW, &data, true);
+
+	// Show memory dialog
+	//
+	QString text;
+	text.reserve(65534);
+
+	int offsetInBuffer = 0;
+
+	while (offsetInBuffer < data.size())
+	{
+		if (offsetInBuffer % 16 == 0)
+		{
+			if (text.isEmpty() == false)
+			{
+				text += "\n";
+			}
+
+			// New line
+			//
+			text += QString("%1 | ").arg(offsetInBuffer, 4, 16, QChar('0'));
+		}
+
+		text += QString("%1 ").arg(static_cast<quint8>(data[offsetInBuffer]), 2, 16, QChar('0'));
+
+		offsetInBuffer++;
+	}
+
+	QInputDialog d(this->parentWidget());
+
+	d.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	d.setWindowFlag(Qt::WindowSystemMenuHint, false);
+
+	d.setLabelText(tr("Port%1 %2 Buffer\n%3").arg(portNo).arg(trx).arg(portId));
+	d.setInputMode(QInputDialog::InputMode::TextInput);
+	d.setOption(QInputDialog::UsePlainTextEditForTextInput);
+
+	d.setTextValue(text);
+
+#if defined(Q_OS_WIN)
+		QFont font = QFont("Consolas");
+#else
+		QFont font = QFont("Courier");
+#endif
+	d.setFont(font);
+
+	d.exec();
+
+	return;
 }
 
 const QString& SimConnectionPage::connectionId() const

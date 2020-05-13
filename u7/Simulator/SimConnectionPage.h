@@ -1,5 +1,6 @@
 #pragma once
 #include "SimBasePage.h"
+#include "SimMemoryWidget.h"
 
 class SimConnectionPage : public SimBasePage
 {
@@ -18,6 +19,10 @@ protected slots:
 	void showTxSignals(int portIndex);
 	void showRxSignals(int portIndex);
 	void showXxSignals(int portNo, QString portId, QString trx, const std::vector<ConnectionTxRxSignal>& ss);
+
+	void showTxBuffer(int portIndex);
+	void showRxBuffer(int portIndex);
+	void showXxBuffer(int portNo, QString portId, QString lmEquipmentId, E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, QString trx);
 
 public:
 	const QString& connectionId() const;
@@ -44,5 +49,7 @@ private:
 	QPushButton* m_port2TxBuffer = new QPushButton{this};
 	QPushButton* m_port2RxBuffer = new QPushButton{this};
 };
+
+
 
 
