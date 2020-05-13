@@ -706,7 +706,7 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeOptoConnectionsXml()
 	{
-		ConnectionsInfo connectionsInfo;
+		ConnectionsInfoWriter connectionsInfoWriter;
 
 		Hardware::ConnectionStorage* connStorage = connectionStorage();
 
@@ -716,11 +716,11 @@ namespace Builder
 
 		TEST_PTR_LOG_RETURN_FALSE(optoStorage, log());
 
-		connectionsInfo.fill(*connStorage, *optoStorage);
+		connectionsInfoWriter.fill(*connStorage, *optoStorage);
 
 		QByteArray xmlData;
 
-		connectionsInfo.save(&xmlData);
+		connectionsInfoWriter.save(&xmlData);
 
 		bool result = true;
 

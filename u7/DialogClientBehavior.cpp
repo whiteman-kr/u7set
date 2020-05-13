@@ -245,19 +245,43 @@ void MonitorBehaviorEditWidget::onRemoveTag()
 
 	int row = selectedRows[0].row();
 
+	QTreeWidgetItem* item = m_tagsTree->topLevelItem(row);
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	// Prevent user from removing default tags
+	//
+	QString tag = item->text(static_cast<int>(Columns::Tag));
+	if (tag == MonitorBehavior::criticalTag ||
+		tag == MonitorBehavior::attentionTag ||
+		tag == MonitorBehavior::generalTag ||
+		tag == MonitorBehavior::nonValidityTag ||
+		tag == MonitorBehavior::simulatedTag ||
+		tag == MonitorBehavior::blockedTag ||
+		tag == MonitorBehavior::mismatchTag ||
+		tag == MonitorBehavior::outOfLimitsTag)
+	{
+		QMessageBox::critical(this, qAppName(), tr("This tag can't be removed!"));
+		return;
+	}
+
+
 	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected tag?"), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
 	}
 
-	if (m_behavior->removeTagToColor(row) == false)
+	if (m_behavior->removeTagToColors(row) == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	QTreeWidgetItem* item = m_tagsTree->takeTopLevelItem(row);
+	item = m_tagsTree->takeTopLevelItem(row);
 	if (item == nullptr)
 	{
 		Q_ASSERT(item);
@@ -407,7 +431,7 @@ void MonitorBehaviorEditWidget::moveTag(int step)
 		return;
 	}
 
-	if (m_behavior->moveTagToColor(row, step) == false)
+	if (m_behavior->moveTagToColors(row, step) == false)
 	{
 		Q_ASSERT(false);
 		return;

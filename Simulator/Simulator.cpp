@@ -392,6 +392,16 @@ namespace Sim
 		return m_buildPath;
 	}
 
+	const Sim::Connections& Simulator::connections() const
+	{
+		return m_connections;
+	}
+
+	Sim::Connections& Simulator::connections()
+	{
+		return m_connections;
+	}
+
 	std::vector<std::shared_ptr<Subsystem>> Simulator::subsystems() const
 	{
 		std::vector<std::shared_ptr<Subsystem>> result;
