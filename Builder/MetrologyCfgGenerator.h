@@ -10,6 +10,7 @@ namespace Builder
 	{
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		std::unordered_set<QString> m_analogSignalsOnSchemas;
 
 	public:
 		MetrologyCfgGenerator(Context* context, Hardware::Software* software);
@@ -23,6 +24,7 @@ namespace Builder
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
 
+		bool testElectricRange_Input_mA(const Signal& signal);
 		bool testElectricRange_ThermoCouple(const Signal& signal);
 		bool testElectricRange_ThermoResistor(const Signal& signal);
 

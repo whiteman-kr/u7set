@@ -13853,6 +13853,13 @@ class MetrologySignalLocation : public ::google::protobuf::Message {
   inline ::std::string* release_contact();
   inline void set_allocated_contact(::std::string* contact);
 
+  // optional bool shownOnSchemas = 8 [default = false];
+  inline bool has_shownonschemas() const;
+  inline void clear_shownonschemas();
+  static const int kShownOnSchemasFieldNumber = 8;
+  inline bool shownonschemas() const;
+  inline void set_shownonschemas(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.MetrologySignalLocation)
  private:
   inline void set_has_rackid();
@@ -13869,6 +13876,8 @@ class MetrologySignalLocation : public ::google::protobuf::Message {
   inline void clear_has_place();
   inline void set_has_contact();
   inline void clear_has_contact();
+  inline void set_has_shownonschemas();
+  inline void clear_has_shownonschemas();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -13879,9 +13888,10 @@ class MetrologySignalLocation : public ::google::protobuf::Message {
   ::google::protobuf::int32 module_;
   ::std::string* contact_;
   ::google::protobuf::int32 place_;
+  bool shownonschemas_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -34407,6 +34417,28 @@ inline void MetrologySignalLocation::set_allocated_contact(::std::string* contac
     clear_has_contact();
     contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional bool shownOnSchemas = 8 [default = false];
+inline bool MetrologySignalLocation::has_shownonschemas() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void MetrologySignalLocation::set_has_shownonschemas() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void MetrologySignalLocation::clear_has_shownonschemas() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void MetrologySignalLocation::clear_shownonschemas() {
+  shownonschemas_ = false;
+  clear_has_shownonschemas();
+}
+inline bool MetrologySignalLocation::shownonschemas() const {
+  return shownonschemas_;
+}
+inline void MetrologySignalLocation::set_shownonschemas(bool value) {
+  set_has_shownonschemas();
+  shownonschemas_ = value;
 }
 
 // -------------------------------------------------------------------

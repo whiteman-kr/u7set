@@ -111,24 +111,26 @@ namespace Metrology
 	{
 		public:
 			SignalLocation() {}
-			SignalLocation(Hardware::DeviceObject* pDeviceObject);
+			SignalLocation(Hardware::DeviceObject* pDeviceObject, bool shownOnSchemas);
 			virtual ~SignalLocation() {}
 
 		private:
 
-			RackParam			m_rack;					// rack EquipmentID
+			RackParam			m_rack;						// rack EquipmentID
 
-			QString				m_chassisID;			// chassis EquipmentID
-			int					m_chassis = -1;			// number of chassis
+			QString				m_chassisID;				// chassis EquipmentID
+			int					m_chassis = -1;				// number of chassis
 
-			QString				m_moduleID;				// module EquipmentID
-			int					m_module = -1;			// number of module
+			QString				m_moduleID;					// module EquipmentID
+			int					m_module = -1;				// number of module
 
-			int					m_place = -1;			// number of place
-			QString				m_contact;				// for input: _IN00A or _IN00B, for output: only _OUT00
+			int					m_place = -1;				// number of place
+			QString				m_contact;					// for input: _IN00A or _IN00B, for output: only _OUT00
 
-			QString				m_moduleSerialNoID;		// AppSignalID serial number of module	- write online
-			int					m_moduleSerialNo = 0;	// serial number of module				- write online
+			bool				m_shownOnSchemas = false;	// signal is shown in the schemas - only analog signals
+
+			QString				m_moduleSerialNoID;			// AppSignalID serial number of module	- write online
+			int					m_moduleSerialNo = 0;		// serial number of module				- write online
 
 			void				getParentObject(Hardware::DeviceObject* pDeviceObject);
 
@@ -160,6 +162,10 @@ namespace Metrology
 
 			QString				contact() const { return m_contact; }
 			void				setContact(const QString& contact) { m_contact = contact; }
+
+			bool				shownOnSchemas() const { return m_shownOnSchemas; }
+			QString				shownOnSchemasStr() const;
+			void				setShownOnSchemas(bool show) { m_shownOnSchemas = show; }
 
 			QString				moduleSerialNoID() const { return m_moduleSerialNoID; }
 			void				setModuleSerialNoID(const QString& appSignalID) { m_moduleSerialNoID = appSignalID; }

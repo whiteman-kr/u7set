@@ -1432,6 +1432,8 @@ message MetrologySignalLocation
 
     optional int32 place = 6 [default = -1];
 	optional string contact = 7;
+
+    optional bool shownOnSchemas = 8 [default = false];
 }
 
 message MetrologySignal

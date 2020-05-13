@@ -2266,7 +2266,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ComparatorSet));
   MetrologySignalLocation_descriptor_ = file->message_type(97);
-  static const int MetrologySignalLocation_offsets_[7] = {
+  static const int MetrologySignalLocation_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, rackid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, chassisid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, chassis_),
@@ -2274,6 +2274,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, module_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, place_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, contact_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, shownonschemas_),
   };
   MetrologySignalLocation_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -3193,27 +3194,28 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ComparatorSet\022\025\n\rlmEquipmentID\030\001 \001(\t\022%\n\n"
     "comparator\030\002 \003(\0132\021.Proto.Comparator\"@\n\rC"
     "omparatorSet\022/\n\017lmComparatorSet\030\001 \003(\0132\026."
-    "Proto.LmComparatorSet\"\233\001\n\027MetrologySigna"
+    "Proto.LmComparatorSet\"\272\001\n\027MetrologySigna"
     "lLocation\022\016\n\006rackID\030\001 \001(\t\022\021\n\tchassisID\030\002"
     " \001(\t\022\023\n\007chassis\030\003 \001(\005:\002-1\022\020\n\010moduleID\030\004 "
     "\001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002"
-    "-1\022\017\n\007contact\030\007 \001(\t\"\347\002\n\017MetrologySignal\022"
-    "#\n\tappSignal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010"
-    "location\030\002 \001(\0132\036.Proto.MetrologySignalLo"
-    "cation\022\033\n\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021e"
-    "lectricHighLimit\030\004 \001(\001:\0010\022\031\n\016electricUni"
-    "tID\030\005 \001(\005:\0011\022\035\n\022electricSensorType\030\006 \001(\005"
-    ":\0011\022\030\n\relectricRload\030\013 \001(\001:\0010\022\025\n\nelectri"
-    "cR0\030\007 \001(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:"
-    "\0014\022\033\n\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021physi"
-    "calHighLimit\030\n \001(\001:\0010\"E\n\022MetrologySignal"
-    "Set\022/\n\017metrologySignal\030\001 \003(\0132\026.Proto.Met"
-    "rologySignal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022"
-    "\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionD"
-    "irrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblS"
-    "ignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rF"
-    "blDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedI"
-    "nt\020\001\022\t\n\005Float\020\002", 18175);
+    "-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSchemas\030\010 "
+    "\001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\tappSig"
+    "nal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010location\030"
+    "\002 \001(\0132\036.Proto.MetrologySignalLocation\022\033\n"
+    "\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electricHi"
+    "ghLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001(\005"
+    ":\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\030\n\rel"
+    "ectricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001(\001"
+    ":\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022\033\n\020phy"
+    "sicalLowLimit\030\t \001(\001:\0010\022\034\n\021physicalHighLi"
+    "mit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet\022/\n\017me"
+    "trologySignal\030\001 \003(\0132\026.Proto.MetrologySig"
+    "nal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillim"
+    "eter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection"
+    "\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType"
+    "\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFor"
+    "mat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005F"
+    "loat\020\002", 18206);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -44771,6 +44773,7 @@ const int MetrologySignalLocation::kModuleIDFieldNumber;
 const int MetrologySignalLocation::kModuleFieldNumber;
 const int MetrologySignalLocation::kPlaceFieldNumber;
 const int MetrologySignalLocation::kContactFieldNumber;
+const int MetrologySignalLocation::kShownOnSchemasFieldNumber;
 #endif  // !_MSC_VER
 
 MetrologySignalLocation::MetrologySignalLocation()
@@ -44796,6 +44799,7 @@ void MetrologySignalLocation::SharedCtor() {
   module_ = -1;
   place_ = -1;
   contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  shownonschemas_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -44866,6 +44870,7 @@ void MetrologySignalLocation::Clear() {
         contact_->clear();
       }
     }
+    shownonschemas_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -44988,6 +44993,22 @@ bool MetrologySignalLocation::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(64)) goto parse_shownOnSchemas;
+        break;
+      }
+
+      // optional bool shownOnSchemas = 8 [default = false];
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_shownOnSchemas:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &shownonschemas_)));
+          set_has_shownonschemas();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -45061,6 +45082,11 @@ void MetrologySignalLocation::SerializeWithCachedSizes(
       7, this->contact(), output);
   }
 
+  // optional bool shownOnSchemas = 8 [default = false];
+  if (has_shownonschemas()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->shownonschemas(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -45124,6 +45150,11 @@ void MetrologySignalLocation::SerializeWithCachedSizes(
         7, this->contact(), target);
   }
 
+  // optional bool shownOnSchemas = 8 [default = false];
+  if (has_shownonschemas()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->shownonschemas(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -45184,6 +45215,11 @@ int MetrologySignalLocation::ByteSize() const {
           this->contact());
     }
 
+    // optional bool shownOnSchemas = 8 [default = false];
+    if (has_shownonschemas()) {
+      total_size += 1 + 1;
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -45232,6 +45268,9 @@ void MetrologySignalLocation::MergeFrom(const MetrologySignalLocation& from) {
     if (from.has_contact()) {
       set_contact(from.contact());
     }
+    if (from.has_shownonschemas()) {
+      set_shownonschemas(from.shownonschemas());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -45262,6 +45301,7 @@ void MetrologySignalLocation::Swap(MetrologySignalLocation* other) {
     std::swap(module_, other->module_);
     std::swap(place_, other->place_);
     std::swap(contact_, other->contact_);
+    std::swap(shownonschemas_, other->shownonschemas_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

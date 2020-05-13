@@ -63,6 +63,11 @@ void StatisticBase::createSignalList()
 				continue;
 			}
 
+			if (param.location().shownOnSchemas() == false)
+			{
+				continue;
+			}
+
 			if (param.isInternal() == true)
 			{
 				continue;

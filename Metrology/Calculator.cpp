@@ -69,7 +69,7 @@ void Calculator::createInterface()
 
 	// Thermistor
 	//
-	QGroupBox* trGroup = new QGroupBox(tr("Thermistor (6651-2009)"));
+	QGroupBox* trGroup = new QGroupBox(tr("Thermistor - GOST 6651-2009"));
 	QVBoxLayout *trLayout = new QVBoxLayout;
 
 	m_pTrList = new QComboBox(this);
@@ -123,7 +123,7 @@ void Calculator::createInterface()
 
 	// Thermocouple
 	//
-	QGroupBox* tcGroup = new QGroupBox(tr("Thermocouple (8.585-2001)"));
+	QGroupBox* tcGroup = new QGroupBox(tr("Thermocouple - GOST 8.585-2001"));
 	QVBoxLayout *tcLayout = new QVBoxLayout;
 
 	m_pTcList = new QComboBox(this);

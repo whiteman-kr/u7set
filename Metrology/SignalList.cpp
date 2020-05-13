@@ -113,6 +113,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = Qt::AlignCenter;	break;
@@ -136,6 +137,14 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 	{
 		switch (column)
 		{
+			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:
+
+				if (pSignal->param().isAnalog() == true && pSignal->param().location().shownOnSchemas() == true)
+				{
+					return QColor(0xA0, 0xFF, 0xA0);
+				}
+				break;
+
 			case SIGNAL_LIST_COLUMN_ADC_RANGE:
 
 				if (pSignal->param().highADC() - pSignal->param().lowADC() <= 0)
@@ -223,22 +232,23 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 
 	switch (column)
 	{
-		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();				break;
-		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();			break;
-		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.equipmentID();				break;
-		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();					break;
-		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
-		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();		break;
-		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();		break;
-		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();		break;
-		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(m_showADCInHex);	break;
-		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();			break;
-		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();		break;
-		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();			break;
-		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();		break;
-		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();			break;
-		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = param.tuningDefaultValueStr();		break;
-		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();			break;
+		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();					break;
+		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();				break;
+		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.equipmentID();					break;
+		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();						break;
+		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();		break;
+		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();			break;
+		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();			break;
+		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();			break;
+		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = param.location().shownOnSchemasStr();	break;
+		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(m_showADCInHex);		break;
+		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();				break;
+		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();			break;
+		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();				break;
+		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();			break;
+		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();				break;
+		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = param.tuningDefaultValueStr();			break;
+		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();				break;
 		default:									assert(0);
 	}
 
@@ -577,6 +587,7 @@ void SignalListDialog::updateVisibleColunm()
 
 	hideColumn(SIGNAL_LIST_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
+	hideColumn(SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS, true);
 
 	switch (m_typeAD)
 	{
