@@ -3,8 +3,8 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
-#include "DialogSignalSearch.h"
-#include "DialogSignalSnapshot.h"
+#include "../lib/Ui/DialogSignalSearch.h"
+#include "MonitorSignalSnapshot.h"
 #include "MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
@@ -1044,16 +1044,34 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalSnapshot()
 {
-	DialogSignalSnapshot* dss = new DialogSignalSnapshot(&m_configController, m_tcpSignalClient, this);
-	dss->show();
+
+
+	MonitorDialogSignalSnapshot::showDialog(&m_configController,
+											m_tcpSignalClient,
+											&theSignals,
+											m_configController.configuration().project,
+											m_configController.configuration().softwareEquipmentId,
+											theMonitorMainWindow->monitorCentralWidget());
 
 	return;
 }
 
 void MonitorMainWindow::slot_findSignal()
 {
-	DialogSignalSearch* dsi = new DialogSignalSearch(this);
+	MonitorCentralWidget* cw = theMonitorMainWindow->monitorCentralWidget();
+	if (cw == nullptr)
+	{
+		Q_ASSERT(cw);
+		return;
+	}
+
+	DialogSignalSearch* dsi = new DialogSignalSearch(this, theSignals.signalList());
+
+	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
+	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
+
 	dsi->show();
+
 	return;
 }
 

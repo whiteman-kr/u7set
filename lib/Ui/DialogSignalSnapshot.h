@@ -2,30 +2,22 @@
 #define DIALOGSIGNALSNAPSHOT_H
 
 #include "../lib/AppSignalManager.h"
-#include "DialogColumns.h"
-#include "MonitorConfigController.h"
 #include "../lib/ExportPrint.h"
+#include "../VFrame30/Schema.h"
 
-
-namespace Ui {
-class DialogSignalSnapshot;
-}
-
-class MonitorConfigController;
-class TcpSignalClient;
 class SignalSnapshotModel;
-struct ConfigSettings;
 
 class SnapshotExportPrint : public ExportPrint
 {
 public:
 
-	SnapshotExportPrint(ConfigSettings* configuration, QWidget* parent);
+	SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent);
 
 private:
 	virtual void generateHeader(QTextCursor& cursor) override;
 
-	ConfigSettings* m_configuration = nullptr;
+	QString m_projectName;
+	QString m_softwareEquipmentId;
 };
 
 class SignalSnapshotSorter
@@ -100,7 +92,7 @@ public:
 	};
 
 public:
-	SignalSnapshotModel(QObject *parent);
+	SignalSnapshotModel(AppSignalManager* appSignalManager, QObject *parent);
 
 	void setSignals(std::vector<AppSignalParam>& signalList);
 
@@ -145,6 +137,7 @@ protected:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
+	AppSignalManager* m_appSignalManager = nullptr;
 
 	QStringList m_columnsNames;
 
@@ -167,27 +160,61 @@ private:
 	std::set<QString> m_schemaAppSignals;
 };
 
+struct DialogSignalSnapshotSettings
+{
+	QPoint m_signalSnapshotPos;
+	QByteArray m_signalSnapshotGeometry;
+	QByteArray m_snapshotHorzHeader;
+	int m_snapshotHorzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
+	SignalSnapshotModel::SignalType m_signalSnapshotSignalType = SignalSnapshotModel::SignalType::All;
+	QStringList m_signalSnapshotMaskList;
+	QStringList m_signalSnapshotTagsList;
+	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
+	int m_signalSnapshotSortColumn = 0;
+	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
+
+	void restoreSettings(QSettings& s);
+	void storeSettings(QSettings& s);
+};
+
 class DialogSignalSnapshot : public QDialog
 {
 	Q_OBJECT
 
-public:
-	explicit DialogSignalSnapshot(MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, QWidget *parent = 0);
+protected:
+	explicit DialogSignalSnapshot(AppSignalManager* appSignalManager,
+								  QString projectName,
+								  QString softwareEquipmentId,
+								  QWidget *parent);
 	~DialogSignalSnapshot();
+
+protected:
+	void fillSchemas();
+	void fillSignals();
+
+	void refreshSchemasList();	// Should be called when new configuration is arrived from ConfigService
+	void reloadSignals();		// Should be called when new signals arrived from AppDataService
+
+protected:
+	virtual std::vector<VFrame30::SchemaDetails> schemasDetails() = 0;
+	virtual std::set<QString> schemaAppSignals(const QString& schemaStrId) = 0;
+
+signals:
+	void signalContextMenu(QString appSignalId);
+	void signalInfo(QString appSignalId);
 
 protected slots:
 	void headerColumnContextMenuRequested(const QPoint& pos);
-
 	void headerColumnToggled(bool checked);
 
 private slots:
 	void on_DialogSignalSnapshot_finished(int result);
 
-	void contextMenuRequested(const QPoint& pos);
+	void on_contextMenuRequested(const QPoint& pos);
 
 	void on_tableView_doubleClicked(const QModelIndex &index);
 
-	void sortIndicatorChanged(int column, Qt::SortOrder order);
+	void on_sortIndicatorChanged(int column, Qt::SortOrder order);
 
 	void on_typeCombo_currentIndexChanged(int index);
 
@@ -195,11 +222,7 @@ private slots:
 
 	void on_editTags_returnPressed();
 
-	void tcpSignalClient_signalParamAndUnitsArrived();
-
-	void configController_configurationArrived(ConfigSettings configuration);
-
-	void on_schemaCombo_currentIndexChanged(const QString &arg1);
+	void on_schemaCombo_currentIndexChanged(int index);
 
 	void on_comboMaskType_currentIndexChanged(int index);
 
@@ -208,36 +231,48 @@ private slots:
 	void on_buttonPrint_clicked();
 
 private:
+	void setupUi();
+
 	virtual void timerEvent(QTimerEvent* event) override;
 
 	void maskChanged();
 
 	void tagsChanged();
 
-	void fillSchemas();
-
-	void fillSignals();
-
 private:
-	ConfigSettings m_configuration;
 
-	Ui::DialogSignalSnapshot *ui;
+	QComboBox* m_typeCombo = nullptr;
+	QComboBox* m_schemaCombo = nullptr;
+	QComboBox* m_comboMaskType = nullptr;
+
+	QLineEdit* m_editMask = nullptr;
+	QLineEdit* m_editTags = nullptr;
+
+	QPushButton* m_buttonFixate = nullptr;
+
+	QTableView* m_tableView = nullptr;
+
+	//
+
+	QString m_projectName;
+
+	QString m_softwareEquipmentId;
+
+	AppSignalManager* m_appSignalManager = nullptr;
+
+	SignalSnapshotModel *m_model = nullptr;
+
+	int m_updateStateTimerId = -1;
 
 	QCompleter* m_maskCompleter = nullptr;
 
 	QCompleter* m_tagsCompleter = nullptr;
 
-	SignalSnapshotModel *m_model = nullptr;
-
-	MonitorConfigController* m_configController = nullptr;
-
-	TcpSignalClient* m_tcpSignalClient = nullptr;
-
-	int m_updateStateTimerId = -1;
-
 	static const QString m_maskHelp;
 
 	static const QString m_tagsHelp;
 };
+
+extern DialogSignalSnapshotSettings theDialogSignalSnapshotSettings;
 
 #endif // DIALOGSIGNALSNAPSHOT_H

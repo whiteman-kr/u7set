@@ -211,6 +211,16 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 	return;
 }
 
+void MonitorCentralWidget::slot_signalContextMenu(QString signalId)
+{
+	currentTab()->signalContextMenu(QStringList() << signalId, {});
+}
+
+void MonitorCentralWidget::slot_signalInfo(QString signalId)
+{
+	currentTab()->signalInfo(signalId);
+}
+
 void MonitorCentralWidget::slot_tabCloseRequested(int index)
 {
 	// Close Tab request

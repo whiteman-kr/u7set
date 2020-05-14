@@ -1,9 +1,5 @@
-#include "DialogSignalSearch.h"
-#include "ui_DialogSignalSearch.h"
-#include "MonitorMainWindow.h"
-#include "MonitorCentralWidget.h"
 #include "Stable.h"
-#include "Settings.h"
+#include "DialogSignalSearch.h"
 
 SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
 	m_sortColumn(sortColumn),
@@ -329,62 +325,105 @@ void SignalSearchItemModel::setSignals(std::vector<AppSignalParam>* signalsVecto
 }
 
 //
+// DialogSignalSearchSettings
+//
+
+void DialogSignalSearchSettings::restoreSettings(QSettings& s)
+{
+	pos = s.value("DialogSignalSearch/pos", QPoint(-1, -1)).toPoint();
+	geometry = s.value("DialogSignalSearch/geometry").toByteArray();
+	columnCount = s.value("DialogSignalSearch/columnCount").toInt();
+	columnWidth = s.value("DialogSignalSearch/columnWidth").toByteArray();
+}
+
+void DialogSignalSearchSettings::storeSettings(QSettings& s)
+{
+	s.setValue("DialogSignalSearch/pos", pos);
+	s.setValue("DialogSignalSearch/geometry", geometry);
+	s.setValue("DialogSignalSearch/columnCount", columnCount);
+	s.setValue("DialogSignalSearch/columnWidth", columnWidth);
+}
+
+//
 // DialogSignalSearch
 //
 
 QString DialogSignalSearch::m_signalId = "";
 
-DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
+DialogSignalSearch::DialogSignalSearch(QWidget *parent, const std::vector<AppSignalParam>& allSignals) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogSignalSearch),
-	m_model(this)
+	m_model(this),
+	m_signals(allSignals)
 {
-	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	// Setup UI
+	//
+	QLabel* l = new QLabel("SignalID");
+	m_editSignalID = new QLineEdit();
+	connect(m_editSignalID, &QLineEdit::textEdited, this, &DialogSignalSearch::on_editSignalID_textEdited);
+
+	QHBoxLayout* hl = new QHBoxLayout();
+	hl->addWidget(l);
+	hl->addWidget(m_editSignalID);
+
+	m_tableView = new QTableView();
+
+	m_labelFound = new QLabel();
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(m_tableView);
+	mainLayout->addWidget(m_labelFound);
+
+	setLayout(mainLayout);
+
+	connect(this, &DialogSignalSearch::finished, this, &DialogSignalSearch::on_DialogSignalSearch_finished);
+
+	setMinimumSize(400, 450);
 
 	// Restore window pos
 	//
-	if (theSettings.m_signalSearchPos.x() != -1 && theSettings.m_signalSearchPos.y() != -1)
+	if (theDialogSignalSearchSettings.pos.x() != -1 && theDialogSignalSearchSettings.pos.y() != -1)
 	{
-		move(theSettings.m_signalSearchPos);
-		restoreGeometry(theSettings.m_signalSearchGeometry);
+		move(theDialogSignalSearchSettings.pos);
+		restoreGeometry(theDialogSignalSearchSettings.geometry);
 	}
 
 	// set model
 	//
-	ui->tableView->setModel(&m_model);
-	ui->tableView->verticalHeader()->hide();
-	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
-	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-	ui->tableView->horizontalHeader()->setStretchLastSection(false);
-	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
-	ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->tableView, &QTreeView::customContextMenuRequested,this, &DialogSignalSearch::prepareContextMenu);
+	m_tableView->setModel(&m_model);
+	m_tableView->verticalHeader()->hide();
+	m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	m_tableView->horizontalHeader()->setStretchLastSection(false);
+	m_tableView->setGridStyle(Qt::PenStyle::NoPen);
+	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_tableView, &QTreeView::customContextMenuRequested,this, &DialogSignalSearch::prepareContextMenu);
+	connect(m_tableView, &QTableView::doubleClicked, this, &DialogSignalSearch::on_tableView_doubleClicked);
 
 	int fontHeight = fontMetrics().height() + 4;
 
-	QHeaderView *verticalHeader = ui->tableView->verticalHeader();
+	QHeaderView *verticalHeader = m_tableView->verticalHeader();
 	verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
 	verticalHeader->setDefaultSectionSize(fontHeight);
 
 	// Restore columns width
 	//
-	QDataStream stream(&theSettings.m_signalSearchColumnWidth, QIODevice::ReadOnly);
+	QDataStream stream(&theDialogSignalSearchSettings.columnWidth, QIODevice::ReadOnly);
 
-	for (int i = 0; i < theSettings.m_signalSearchColumnCount; i++)
+	for (int i = 0; i < theDialogSignalSearchSettings.columnCount; i++)
 	{
 		int width;
 		stream >> width;
-		ui->tableView->setColumnWidth(i, width);
+		m_tableView->setColumnWidth(i, width);
 	}
 
 	//
 
-	ui->editSignalID->setText(m_signalId);
-	ui->editSignalID->setPlaceholderText(tr("Enter SignalID here"));
-
-	m_signals = theSignals.signalList();
+	m_editSignalID->setText(m_signalId);
+	m_editSignalID->setPlaceholderText(tr("Enter SignalID here"));
 
 	// Sort m_signals by SignalId
 	//
@@ -419,7 +458,6 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
 
 DialogSignalSearch::~DialogSignalSearch()
 {
-	delete ui;
 }
 
 void DialogSignalSearch::on_editSignalID_textEdited(const QString &arg1)
@@ -442,7 +480,7 @@ void DialogSignalSearch::search()
 		foundSignals.push_back(s);
 	}
 
-	ui->labelFound->setText(QString("Signals found: %1").arg(foundSignals.size()));
+	m_labelFound->setText(QString("Signals found: %1").arg(foundSignals.size()));
 
 	m_model.setSignals(&foundSignals);
 }
@@ -453,49 +491,20 @@ void DialogSignalSearch::on_DialogSignalSearch_finished(int result)
 
 	// Save columns width
 	//
-	theSettings.m_signalSearchColumnWidth.clear();
+	theDialogSignalSearchSettings.columnWidth.clear();
 
-	QDataStream stream(&theSettings.m_signalSearchColumnWidth, QIODevice::WriteOnly);
+	QDataStream stream(&theDialogSignalSearchSettings.columnWidth, QIODevice::WriteOnly);
 
-	theSettings.m_signalSearchColumnCount = m_model.columnCount();
-	for (int i = 0; i < theSettings.m_signalSearchColumnCount; i++)
+	theDialogSignalSearchSettings.columnCount = m_model.columnCount();
+	for (int i = 0; i < theDialogSignalSearchSettings.columnCount; i++)
 	{
-		stream << (int)ui->tableView->columnWidth(i);
+		stream << (int)m_tableView->columnWidth(i);
 	}
 
 	// Save window position
 	//
-	theSettings.m_signalSearchPos = pos();
-	theSettings.m_signalSearchGeometry = saveGeometry();
-}
-
-void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
-{
-	Q_UNUSED(pos);
-
-	if (theMonitorMainWindow == nullptr)
-	{
-		Q_ASSERT(theMonitorMainWindow);
-		return;
-	}
-
-	MonitorCentralWidget* cw = dynamic_cast<MonitorCentralWidget*>(theMonitorMainWindow->centralWidget());
-	if (cw == nullptr)
-	{
-		Q_ASSERT(cw);
-		return;
-	}
-
-	QModelIndex index = ui->tableView->indexAt(pos);
-	if (index.isValid() == false)
-	{
-		return;
-	}
-
-	const AppSignalParam& signal = m_model.getSignal(index);
-	cw->currentTab()->signalContextMenu(QStringList() << signal.appSignalId(), {});
-
-	return;
+	theDialogSignalSearchSettings.pos = pos();
+	theDialogSignalSearchSettings.geometry = saveGeometry();
 }
 
 void DialogSignalSearch::on_tableView_doubleClicked(const QModelIndex &index)
@@ -505,21 +514,28 @@ void DialogSignalSearch::on_tableView_doubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	if (theMonitorMainWindow == nullptr)
-	{
-		Q_ASSERT(theMonitorMainWindow);
-		return;
-	}
+	const AppSignalParam& signal = m_model.getSignal(index);
 
-	MonitorCentralWidget* cw = dynamic_cast<MonitorCentralWidget*>(theMonitorMainWindow->centralWidget());
-	if (cw == nullptr)
+	emit signalInfo(signal.appSignalId());
+
+	return;
+}
+
+void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QModelIndex index = m_tableView->indexAt(pos);
+	if (index.isValid() == false)
 	{
-		Q_ASSERT(cw);
 		return;
 	}
 
 	const AppSignalParam& signal = m_model.getSignal(index);
-	cw->currentTab()->signalInfo(signal.appSignalId());
+
+	emit signalContextMenu(signal.appSignalId());
 
 	return;
 }
+
+DialogSignalSearchSettings theDialogSignalSearchSettings;

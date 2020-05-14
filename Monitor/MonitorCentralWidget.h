@@ -45,6 +45,9 @@ public slots:
 
 	void slot_selectSchemaForCurrentTab(QString schemaId);
 
+	void slot_signalContextMenu(QString signalId);
+	void slot_signalInfo(QString signalId);
+
 protected slots:
 	void slot_tabCloseRequested(int index);
 	void slot_resetSchema();

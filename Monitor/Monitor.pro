@@ -62,8 +62,10 @@ SOURCES += main.cpp \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
+    ../lib/Ui/DialogSignalSnapshot.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
+    MonitorSignalSnapshot.cpp \
 	Settings.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
@@ -87,8 +89,7 @@ SOURCES += main.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     DialogSignalInfo.cpp \
-    DialogSignalSearch.cpp \
-    DialogSignalSnapshot.cpp \
+    ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/CircularLogger.cpp \
@@ -131,8 +132,10 @@ HEADERS  += \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
+    ../lib/Ui/DialogSignalSnapshot.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
+    MonitorSignalSnapshot.h \
 	Stable.h \
 	Settings.h \
     ../lib/SocketIO.h \
@@ -159,8 +162,7 @@ HEADERS  += \
     ../lib/AppSignalManager.h \
     Statistics.h \
     DialogSignalInfo.h \
-    DialogSignalSearch.h \
-    DialogSignalSnapshot.h \
+    ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     ../lib/HostAddressPort.h \
     ../lib/CircularLogger.h \
@@ -203,8 +205,6 @@ HEADERS  += \
 FORMS    += \
     DialogSettings.ui \
     DialogSignalInfo.ui \
-    DialogSignalSearch.ui \
-    DialogSignalSnapshot.ui \
     DialogColumns.ui \
     DialogChooseArchiveSignals.ui
 

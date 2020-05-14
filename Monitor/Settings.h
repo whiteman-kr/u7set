@@ -1,7 +1,8 @@
 #pragma once
 
 #include <../lib/SocketIO.h>
-#include "DialogSignalSnapshot.h"
+#include "MonitorSignalSnapshot.h"
+#include "../lib/Ui/DialogSignalSearch.h"
 
 class Settings
 {
@@ -72,26 +73,8 @@ public:
 	QByteArray m_signalInfoGeometry;
 	QByteArray m_signalInfoTreeSetpointsState;
 
-	// Signal Seacrh dialog
+	// TrendSignals
 	//
-	QPoint m_signalSearchPos;
-	QByteArray m_signalSearchGeometry;
-	int m_signalSearchColumnCount = 0;
-	QByteArray m_signalSearchColumnWidth;
-
-	// Signal Snapshot
-	//
-	QPoint m_signalSnapshotPos;
-	QByteArray m_signalSnapshotGeometry;
-	QByteArray m_snapshotHorzHeader;
-	int m_snapshotHorzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
-    SignalSnapshotModel::SignalType m_signalSnapshotSignalType = SignalSnapshotModel::SignalType::All;
-	QStringList m_signalSnapshotMaskList;
-	QStringList m_signalSnapshotTagsList;
-	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
-	int m_signalSnapshotSortColumn = 0;
-	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
-
 	QStringList m_trendSignalsDialogFilterCompleter;
 
 	// Archive window

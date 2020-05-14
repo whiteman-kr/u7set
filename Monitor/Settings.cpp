@@ -65,24 +65,6 @@ void Settings::writeUserScope() const
 	s.setValue("DialogSignalInfo/geometry", m_signalInfoGeometry);
 	s.setValue("DialogSignalInfo/treeSetpointsState", m_signalInfoTreeSetpointsState);
 
-	s.setValue("DialogSignalSearch/pos", m_signalSearchPos);
-	s.setValue("DialogSignalSearch/geometry", m_signalSearchGeometry);
-	s.setValue("DialogSignalSearch/columnCount", m_signalSearchColumnCount);
-	s.setValue("DialogSignalSearch/columnWidth", m_signalSearchColumnWidth);
-
-	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
-	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
-	s.setValue("DialogSignalSnapshot/horzHeader", m_snapshotHorzHeader);
-	s.setValue("DialogSignalSnapshot/horzHeaderCount", m_snapshotHorzHeaderCount);
-
-    s.setValue("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType));
-	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
-	s.setValue("DialogSignalSnapshot/tags", m_signalSnapshotTagsList);
-
-	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType));
-	s.setValue("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn);
-	s.setValue("DialogSignalSnapshot/sortOrder", static_cast<int>(m_signalSnapshotSortOrder));
-
 	s.setValue("DialogChooseTrendSignals/filter", m_trendSignalsDialogFilterCompleter);
 
 	s.setValue("ArchiveWindow/pos", m_archiveWindowPos);
@@ -93,8 +75,11 @@ void Settings::writeUserScope() const
 
 	s.setValue("ArchiveWindow/timeType", m_archiveTimeType);
 
-
 	s.setValue("DialogChooseArchiveSignals/filter", m_archiveSignalsDialogFilterCompleter);
+
+	theDialogSignalSearchSettings.storeSettings(s);
+
+	theDialogSignalSnapshotSettings.storeSettings(s);
 
 	return;
 }
@@ -110,21 +95,6 @@ void Settings::loadUserScope()
 	m_signalInfoGeometry = s.value("DialogSignalInfo/geometry").toByteArray();
 	m_signalInfoTreeSetpointsState = s.value("DialogSignalInfo/treeSetpointsState").toByteArray();
 
-	m_signalSearchPos = s.value("DialogSignalSearch/pos", QPoint(-1, -1)).toPoint();
-	m_signalSearchGeometry = s.value("DialogSignalSearch/geometry").toByteArray();
-	m_signalSearchColumnCount = s.value("DialogSignalSearch/columnCount").toInt();
-	m_signalSearchColumnWidth = s.value("DialogSignalSearch/columnWidth").toByteArray();
-
-	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
-	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
-	m_snapshotHorzHeader = s.value("DialogSignalSnapshot/horzHeader").toByteArray();
-	m_snapshotHorzHeaderCount = s.value("DialogSignalSnapshot/horzHeaderCount").toInt();
-    m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(s.value("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType)).toInt());
-	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
-	m_signalSnapshotMaskType = static_cast<SignalSnapshotModel::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType)).toInt());
-	m_signalSnapshotTagsList = s.value("DialogSignalSnapshot/tags").toStringList();
-	m_signalSnapshotSortColumn = s.value("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn).toInt();
-	m_signalSnapshotSortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", m_signalSnapshotSortOrder).toInt());
 	m_trendSignalsDialogFilterCompleter = s.value("DialogChooseTrendSignals/filter").toStringList();
 
 	m_archiveWindowPos = s.value("ArchiveWindow/pos", QPoint(200, 200)).toPoint();
@@ -134,6 +104,10 @@ void Settings::loadUserScope()
 	m_archiveHorzHeaderCount = s.value("ArchiveWindow/horzHeaderCount").toInt();
 	m_archiveTimeType = s.value("ArchiveWindow/timeType").toInt();
 	m_archiveSignalsDialogFilterCompleter = s.value("DialogChooseArchiveSignals/filter").toStringList();
+
+	theDialogSignalSearchSettings.restoreSettings(s);
+
+	theDialogSignalSnapshotSettings.restoreSettings(s);
 
 	return;
 }

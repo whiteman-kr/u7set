@@ -3,10 +3,6 @@
 
 #include "../lib/AppSignal.h"
 
-namespace Ui {
-	class DialogSignalSearch;
-}
-
 class SignalSearchSorter	// later move this class to some library file, it can be used in other cases
 {
 public:
@@ -98,34 +94,50 @@ private:
 	QStringList m_columnsNames;
 };
 
+struct DialogSignalSearchSettings
+{
+	QPoint pos;
+	QByteArray geometry;
+	int columnCount = 0;
+	QByteArray columnWidth;
+
+	void restoreSettings(QSettings& s);
+	void storeSettings(QSettings& s);
+};
 
 class DialogSignalSearch : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogSignalSearch(QWidget* parent);
+	explicit DialogSignalSearch(QWidget* parent, const std::vector<AppSignalParam>& allSignals);
 	virtual ~DialogSignalSearch();
+
+signals:
+	void signalContextMenu(QString appSignalId);
+	void signalInfo(QString appSignalId);
 
 private slots:
 	void on_editSignalID_textEdited(const QString &arg1);
 	void on_DialogSignalSearch_finished(int result);
-	void prepareContextMenu(const QPoint& pos);
-
 	void on_tableView_doubleClicked(const QModelIndex &index);
-
-protected:
+	void prepareContextMenu(const QPoint& pos);
 
 private:
 	void search();
 
 private:
-	Ui::DialogSignalSearch* ui;
 	static QString m_signalId;
+
+	QLineEdit* m_editSignalID = nullptr;
+	QTableView* m_tableView = nullptr;
+	QLabel* m_labelFound = nullptr;
 
 	SignalSearchItemModel m_model;
 
 	std::vector<AppSignalParam> m_signals;
 };
+
+extern DialogSignalSearchSettings theDialogSignalSearchSettings;
 
 #endif // DIALOGSIGNALSEARCH_H
