@@ -100,7 +100,8 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	SignalLocation::SignalLocation(Hardware::DeviceObject* pDeviceObject)
+	SignalLocation::SignalLocation(Hardware::DeviceObject* pDeviceObject, bool shownOnSchemas)
+		: m_shownOnSchemas(shownOnSchemas)
 	{
 		if (pDeviceObject == nullptr)
 		{
@@ -125,6 +126,8 @@ namespace Metrology
 
 		m_place = -1;
 		m_contact.clear();
+
+		m_shownOnSchemas = false;
 
 		m_moduleSerialNoID.clear();
 		m_moduleSerialNo = 0;
@@ -201,6 +204,13 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString SignalLocation::shownOnSchemasStr() const
+	{
+		return m_shownOnSchemas == true ? QString("Yes") : QString();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString	SignalLocation::moduleSerialNoStr() const
 	{
 		return m_moduleSerialNo == 0 ? QString("N/A") : QString::number(m_moduleSerialNo);
@@ -226,6 +236,8 @@ namespace Metrology
 
 		l->set_place(m_place);
 		l->set_contact(m_contact.toStdString());
+
+		l->set_shownonschemas(m_shownOnSchemas);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -242,6 +254,8 @@ namespace Metrology
 
 		m_place = l.place();
 		m_contact = QString::fromStdString(l.contact());
+
+		m_shownOnSchemas = l.shownonschemas();
 
 		return true;
 	}

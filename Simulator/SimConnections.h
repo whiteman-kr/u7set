@@ -64,6 +64,9 @@ namespace Sim
 						 std::chrono::microseconds timeout,
 						 bool* timeoutHappend);
 
+		QString type() const;
+		const ::ConnectionInfo& connectionInfo() const;
+
 		const std::vector<Sim::ConnectionPortPtr>& ports() const;
 
 		bool enabled() const;
@@ -99,8 +102,10 @@ namespace Sim
 	//
 	// Connections
 	//
-	class Connections
+	class Connections : public QObject
 	{
+		Q_OBJECT
+
 	public:
 		Connections();
 		~Connections();
@@ -109,12 +114,21 @@ namespace Sim
 		void clear();
 		bool load(QString fileName, QString* errorMessage);
 
+		ConnectionPtr connection(QString connectionId) const;
+		std::vector<ConnectionPtr> connections() const;
 		std::vector<ConnectionPtr> lmConnections(const QString& lmEquipmentId) const;
+
+		void enableConnection(QString connectionId, bool enable);
+		void disableConnection(QString connectionId, bool disable);
+
+	signals:
+		void connectionStateChanged(QString connectionId, bool state);
 
 	private:
 		::ConnectionsInfo m_buildConnections;
 
 		std::vector<ConnectionPtr> m_connections;
+		std::map<Hash, ConnectionPtr> m_connectionMap;				// ConnectionID to connection
 		std::multimap<Hash, ConnectionPtr> m_lmToConnection;		// LM to connections
 		std::map<Hash, ConnectionPtr> m_portToConnection;			// PortID to connection
 		std::map<Hash, ConnectionPortPtr> m_portMap;				// PortID to connection port

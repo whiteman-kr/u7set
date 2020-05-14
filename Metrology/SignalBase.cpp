@@ -2025,6 +2025,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 				continue;
 			}
 
+			if (param.location().shownOnSchemas() == false)
+			{
+				continue;
+			}
+
 			if (param.location().chassis() == -1 || param.location().module() == -1)
 			{
 				continue;

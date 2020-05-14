@@ -47,6 +47,8 @@ namespace Sim
 		AppSignalState signalState(const QString& appSignalId, bool* found, bool applyOverride) const;
 		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;
 
+		bool getUpdateForRam(const QString equipmentId, Sim::Ram* ram) const;
+
 	public:
 		// Implementing IAppSignalManager - AppSignals
 		//
@@ -73,6 +75,12 @@ namespace Sim
 		// Implementing IAppSignalManager - Setpoints/Comparators
 		//
 		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
+
+		// Data Acess
+		//
+	public:
+		const Simulator* simulator() const;
+		Simulator* simulator();
 
 		// Data
 		//

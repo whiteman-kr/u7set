@@ -227,4 +227,25 @@ double conversion(double val, int conversionType, const E::ElectricUnit unitID, 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
+double conversionDegree(double val, int conversionType)
+{
+	if (conversionType < 0 || conversionType > CT_DEGREE_COUNT)
+	{
+		return 0;
+	}
+
+	double retVal = 0;
+
+	switch (conversionType)
+	{
+		case CT_DEGREE_C_TO_F:		retVal = (val * (9.0 / 5.0)) + 32;		break;
+		case CT_DEGREE_F_TO_C:		retVal = ((val - 32) * (5.0 / 9.0));	break;
+		default:					assert(0);
+	}
+
+	return retVal;
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------
+
 

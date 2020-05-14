@@ -66,6 +66,8 @@
         <file>Images/CloseButtonGray.svg</file>
         <file>Images/SimSnapshot.svg</file>
         <file>Images/SimFindSignal.svg</file>
+        <file>Images/SimLogicModuleIcon.svg</file>
+        <file>Images/SimConnectionIcon.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

@@ -3,15 +3,15 @@
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
 
-class SimModulePage : public SimBasePage
+class SimLogicModulePage : public SimBasePage
 {
 	Q_OBJECT
 
 public:
-	SimModulePage(SimIdeSimulator* simulator,
+	SimLogicModulePage(SimIdeSimulator* simulator,
 				  QString equipmentId,
 				  QWidget* parent);
-	virtual ~SimModulePage();
+	virtual ~SimLogicModulePage();
 
 protected:
 	void updateLogicModuleInfoInfo();
@@ -42,17 +42,17 @@ private:
 private:
 	QSplitter* m_splitter = new QSplitter;
 
-	QLabel* m_subsystemIdLabel = new QLabel(this);
-	QLabel* m_equipmentIdLabel = new QLabel(this);
-	QLabel* m_channelLabel = new QLabel(this);
+	QLabel* m_subsystemIdLabel = new QLabel{this};
+	QLabel* m_equipmentIdLabel = new QLabel{this};
+	QLabel* m_channelLabel = new QLabel{this};
 
-	QPushButton* m_signalsButton = new QPushButton(tr("Signals"), this);
-	QPushButton* m_memoryButton = new QPushButton(tr("Memory"), this);
-	QPushButton* m_codeButton = new QPushButton(tr("Code"), this);
+	QPushButton* m_signalsButton = new QPushButton{tr("Signals"), this};
+	QPushButton* m_memoryButton = new QPushButton{tr("Memory"), this};
+	QPushButton* m_codeButton = new QPushButton{tr("Code"), this};
 
-	QLabel* m_schemasLabel = new QLabel(tr("Schemas:"), this);
-	QTreeWidget* m_schemasList = new QTreeWidget(this);
-	QLineEdit* m_schemaFilterEdit = new QLineEdit(this);
+	QLabel* m_schemasLabel = new QLabel{tr("Schemas:"), this};
+	QTreeWidget* m_schemasList = new QTreeWidget{this};
+	QLineEdit* m_schemaFilterEdit = new QLineEdit{this};
 
 	// --
 	//

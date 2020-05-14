@@ -50,6 +50,9 @@ namespace Sim
 		bool isLoaded() const;
 		QString buildPath() const;
 
+		const Sim::Connections& connections() const;
+		Sim::Connections& connections();
+
 		std::vector<std::shared_ptr<Subsystem>> subsystems() const;
 		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
 		std::vector<std::shared_ptr<LogicModule>> logicModules();

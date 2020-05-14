@@ -31,9 +31,45 @@ void Calculator::createInterface()
 
 	m_digitFont = new QFont("Arial", 16, 2);
 
+	// Degree
+	//
+	QGroupBox* drGroup = new QGroupBox(tr("Degree"));
+	QVBoxLayout *drLayout = new QVBoxLayout;
+
+	QHBoxLayout *dr_C_Layout = new QHBoxLayout;
+
+	m_pDrСelsiusRadio = new QRadioButton(this);
+	m_pDrСelsiusEdit = new QLineEdit(tr("100"), this);
+	QLabel* pDrСelsiusLabel = new QLabel(tr("°C"), this);
+	pDrСelsiusLabel->setFixedWidth(30);
+	m_pDrСelsiusEdit->setFont(*m_digitFont);
+
+	dr_C_Layout->addWidget(m_pDrСelsiusRadio);
+	dr_C_Layout->addWidget(m_pDrСelsiusEdit);
+	dr_C_Layout->addWidget(pDrСelsiusLabel);
+	dr_C_Layout->addStretch();
+
+	QHBoxLayout *dr_F_Layout = new QHBoxLayout;
+
+	m_pDrFahrenheitRadio = new QRadioButton(this);
+	m_pDrFahrenheitEdit = new QLineEdit(this);
+	QLabel* pDrFahrenheitLabel = new QLabel(tr("°F"), this);
+	pDrFahrenheitLabel->setFixedWidth(30);
+	m_pDrFahrenheitEdit->setFont(*m_digitFont);
+
+	dr_F_Layout->addWidget(m_pDrFahrenheitRadio);
+	dr_F_Layout->addWidget(m_pDrFahrenheitEdit);
+	dr_F_Layout->addWidget(pDrFahrenheitLabel);
+	dr_F_Layout->addStretch();
+
+	drLayout->addLayout(dr_C_Layout);
+	drLayout->addLayout(dr_F_Layout);
+
+	drGroup->setLayout(drLayout);
+
 	// Thermistor
 	//
-	QGroupBox* trGroup = new QGroupBox(tr("Thermistor"));
+	QGroupBox* trGroup = new QGroupBox(tr("Thermistor - GOST 6651-2009"));
 	QVBoxLayout *trLayout = new QVBoxLayout;
 
 	m_pTrList = new QComboBox(this);
@@ -87,7 +123,7 @@ void Calculator::createInterface()
 
 	// Thermocouple
 	//
-	QGroupBox* tcGroup = new QGroupBox(tr("Thermocouple"));
+	QGroupBox* tcGroup = new QGroupBox(tr("Thermocouple - GOST 8.585-2001"));
 	QVBoxLayout *tcLayout = new QVBoxLayout;
 
 	m_pTcList = new QComboBox(this);
@@ -186,6 +222,7 @@ void Calculator::createInterface()
 	//
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
+	mainLayout->addWidget(drGroup);
 	mainLayout->addWidget(trGroup);
 	mainLayout->addWidget(tcGroup);
 	mainLayout->addWidget(linGroup);
@@ -209,6 +246,20 @@ void Calculator::initDialog()
 	setWindowTitle(tr("Metrological calculator"));
 
 	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
+	// Degrees
+	//
+	m_pDrСelsiusRadio->setChecked(true);
+
+	connect(m_pDrСelsiusRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
+	connect(m_pDrСelsiusEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
+	connect(m_pDrFahrenheitRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
+	connect(m_pDrFahrenheitEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
+
+	m_pDrСelsiusEdit->setValidator(validator);
+	m_pDrFahrenheitEdit->setValidator(validator);
+
+	conversionDr();
 
 	// Thermistor
 	//
@@ -312,6 +363,32 @@ void Calculator::initDialog()
 	// Select first dialog item
 	//
 	m_pTrList->setFocus();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Calculator::conversionDr()
+{
+	if (m_pDrСelsiusRadio->isChecked() == true)
+	{
+		double val = conversionDegree(m_pDrСelsiusEdit->text().toDouble(), CT_DEGREE_C_TO_F);
+
+		m_pDrСelsiusEdit->setFocus();
+		m_pDrСelsiusEdit->setReadOnly(false);
+		m_pDrFahrenheitEdit->setText(QString::number(val, 'f', 4));
+		m_pDrFahrenheitEdit->setReadOnly(true);
+	}
+
+	if (m_pDrFahrenheitRadio->isChecked() == true)
+	{
+		double val = conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), CT_DEGREE_F_TO_C);
+
+		m_pDrFahrenheitEdit->setFocus();
+		m_pDrFahrenheitEdit->setReadOnly(false);
+		m_pDrСelsiusEdit->setText(QString::number(val, 'f', 4));
+		m_pDrСelsiusEdit->setReadOnly(true);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

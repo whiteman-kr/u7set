@@ -68,6 +68,11 @@ private:
 	void			createInterface();
 	void			initDialog();
 
+	QRadioButton*	m_pDrСelsiusRadio = nullptr;
+	QLineEdit*		m_pDrСelsiusEdit = nullptr;
+	QRadioButton*	m_pDrFahrenheitRadio = nullptr;
+	QLineEdit*		m_pDrFahrenheitEdit = nullptr;
+
 	QComboBox*		m_pTrList = nullptr;
 	QRadioButton*	m_pTrDegreeRadio = nullptr;
 	QLineEdit*		m_pTrDegreeEdit = nullptr;
@@ -93,11 +98,15 @@ private:
 
 	QFont*			m_digitFont = nullptr;
 
+	void			conversionDr();
 	void			conversionTr();
 	void			conversionTc();
 	void			conversionLin();
 
 private slots:
+
+	void			onDrRadio() { conversionDr(); }
+	void			onDrValue(QString) { conversionDr(); }
 
 	void			onTrSensorTypeChanged(int) { conversionTr(); }
 	void			onTrRadio() { conversionTr(); }

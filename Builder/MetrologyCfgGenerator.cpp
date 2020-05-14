@@ -8,7 +8,8 @@ namespace Builder
 {
 	MetrologyCfgGenerator::MetrologyCfgGenerator(Context* context, Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software),
-		m_subsystems(context->m_subsystems.get())
+		m_subsystems(context->m_subsystems.get()),
+		m_analogSignalsOnSchemas(context->m_analogSignalsOnSchemas)
 	{
 	}
 
@@ -338,6 +339,14 @@ namespace Builder
 				{
 					switch (signal.electricUnit())
 					{
+						case E::ElectricUnit::mA:
+
+							if (testElectricRange_Input_mA(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
 						case E::ElectricUnit::mV:
 
 							if (testElectricRange_ThermoCouple(signal) == false)
@@ -362,9 +371,18 @@ namespace Builder
 				continue;
 			}
 
+			// signal is shown in the schemas - only analog signals
+			//
+			bool showOnSchemas = false;
+
+			if (signal.isAnalog() == true)
+			{
+				showOnSchemas = m_analogSignalsOnSchemas.find(signal.appSignalID()) != m_analogSignalsOnSchemas.end();
+			}
+
 			// find location of signal in the equipment Tree by signal equipmentID
 			//
-			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()));
+			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()), showOnSchemas);
 
 			// append signal into list
 			//
@@ -416,9 +434,65 @@ namespace Builder
 		return true;
 	}
 
+	bool MetrologyCfgGenerator::testElectricRange_Input_mA(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.electricUnit() != E::ElectricUnit::mA)
+		{
+			return false;
+		}
+
+		if (signal.sensorType() != E::SensorType::V_0_5)
+		{
+			return false;
+		}
+
+		UnitsConvertor uc;
+
+		UnitsConvertResult physicalLowLimit = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.rload_Ohm());
+		UnitsConvertResult physicalHighLimit = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.rload_Ohm());
+
+		if (physicalLowLimit.ok() == false)
+		{
+			// Signal %1 has wrong physical low Limit
+			//
+			m_log->errEQP6110(signal.customAppSignalID());
+			return false;
+		}
+
+		if (physicalHighLimit.ok() == false)
+		{
+			// Signal %1 has wrong physical high Limit
+			//
+			m_log->errEQP6111(signal.customAppSignalID());
+			return false;
+		}
+
+		return true;
+	}
+
 	bool MetrologyCfgGenerator::testElectricRange_ThermoCouple(const Signal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
 		{
 			return true;
 		}
@@ -518,7 +592,7 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoResistor(const Signal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
 		{
 			return true;
 		}
@@ -529,6 +603,11 @@ namespace Builder
 		}
 
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == false)
 		{
 			return true;
 		}

@@ -1,9 +1,9 @@
-#ifndef SIMULATORBASEPAGE_H
-#define SIMULATORBASEPAGE_H
+#pragma once
 
 #include "SimIdeSimulator.h"
 
-class SimModulePage;
+class SimLogicModulePage;
+class SimConnectionPage;
 
 
 class SimBasePage : public QWidget
@@ -16,7 +16,9 @@ public:
 
 public:
 	static void deleteAllPages();
-	static SimModulePage* modulePage(QString lmEquipmnetId, QWidget* parent);
+
+	static SimLogicModulePage* logicModulePage(QString lmEquipmnetId, QWidget* parent);
+	static SimConnectionPage* connectionPage(QString connectionId, QWidget* parent);
 
 protected:
 	QAction* m_closeAction = nullptr;
@@ -28,4 +30,3 @@ protected:
 	SimIdeSimulator* m_simulator = nullptr;
 };
 
-#endif // SIMULATORBASEPAGE_H

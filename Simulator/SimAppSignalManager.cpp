@@ -551,6 +551,28 @@ namespace Sim
 		return state;
 	}
 
+	bool AppSignalManager::getUpdateForRam(const QString equipmentId, Sim::Ram* ram) const
+	{
+		assert(ram);
+
+		Hash lmHash = ::calcHash(equipmentId);
+
+		{
+			QReadLocker wl(&m_ramLock);
+
+			auto it = m_ram.find(lmHash);
+
+			if (it == m_ram.end())
+			{
+				return false;
+			}
+
+			ram->updateFrom(it->second);
+		}
+
+		return true;
+	}
+
 	std::vector<AppSignalParam> AppSignalManager::signalList() const
 	{
 		std::vector<AppSignalParam> result;
@@ -691,6 +713,16 @@ static const AppSignalParam dummy;
 	{
 		Q_ASSERT(false);		// TO DO
 		return {};
+	}
+
+	const Simulator* AppSignalManager::simulator() const
+	{
+		return m_simulator;
+	}
+
+	Simulator* AppSignalManager::simulator()
+	{
+		return m_simulator;
 	}
 
 
