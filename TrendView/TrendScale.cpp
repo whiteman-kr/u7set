@@ -19,9 +19,9 @@ namespace TrendLib
 	{
 		double delta = std::fabs(highLimit - lowLimit);
 
-		if (delta <= DBL_MIN)
+		if (delta <= std::numeric_limits<double>::min())
 		{
-			Q_ASSERT(std::fabs(highLimit - lowLimit) > DBL_MIN);
+			Q_ASSERT(std::fabs(highLimit - lowLimit) > std::numeric_limits<double>::min());
 			return 0;
 		}
 
@@ -31,15 +31,15 @@ namespace TrendLib
 	double TrendScale::scaledPixelToValue(double pixel, const QRectF& rect, double lowLimit, double highLimit)
 	{
 		double delta = std::fabs(highLimit - lowLimit);
-		if (delta <= DBL_MIN)
+		if (delta <= std::numeric_limits<double>::min())
 		{
-			Q_ASSERT(std::fabs(highLimit - lowLimit) > DBL_MIN);
+			Q_ASSERT(std::fabs(highLimit - lowLimit) > std::numeric_limits<double>::min());
 			return 0;
 		}
 
-		if (rect.height() <= DBL_MIN)
+		if (rect.height() <= std::numeric_limits<double>::min())
 		{
-			Q_ASSERT(rect.height() > DBL_MIN);
+			Q_ASSERT(rect.height() > std::numeric_limits<double>::min());
 			return 0;
 		}
 
@@ -64,7 +64,7 @@ namespace TrendLib
 	{
 		if (scaleType == E::TrendScaleType::Period)
 		{
-			if (std::fabs(value) < DBL_MIN)
+			if (std::fabs(value) < std::numeric_limits<double>::min())
 			{
 				// Divide by 0 is possible
 				//
@@ -98,7 +98,7 @@ namespace TrendLib
 
 		if (scaleType == E::TrendScaleType::Period)
 		{
-			if (std::fabs(result) < DBL_MIN)
+			if (std::fabs(result) < std::numeric_limits<double>::min())
 			{
 				// Divide by 0 is possible
 				//
@@ -149,7 +149,7 @@ namespace TrendLib
 
 		if (scaleType == E::TrendScaleType::Log10)
 		{
-			if (std::fabs(value) <= DBL_MIN)
+			if (std::fabs(value) <= std::numeric_limits<double>::min())
 			{
 				return "0";
 			}
@@ -170,20 +170,20 @@ namespace TrendLib
 	double TrendScale::trendLog10(double value)
 	{
 		// Logarithm calculation.
-		// The result is shifted up by DBL_MAX_10_EXP.
+		// The result is shifted up by std::numeric_limits<double>::max_exponent10().
 		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
 		// This means that we take a "ghost" logarithm from negative value.
 
 		double result = std::fabs(value);
 
-		if (result < DBL_MIN)
+		if (result < std::numeric_limits<double>::min())
 		{
-			result = DBL_MIN;
+			result = std::numeric_limits<double>::min();
 		}
 
 		result = std::log10(result);
 
-		result += DBL_MAX_10_EXP;
+		result += std::numeric_limits<double>::max_exponent10;
 
 		if (value < 0)
 		{
@@ -196,12 +196,12 @@ namespace TrendLib
 	double TrendScale::trendPow10(double value)
 	{
 		// Power calculation, reverse function for trendLog10.
-		// Input value is shifted down by DBL_MAX_10_EXP and power is calculated from its absoulte value.
+		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absoulte value.
 		// The sign of the result depened on input value sign.
 
 		double result = std::fabs(value);
 
-		result -= DBL_MAX_10_EXP;
+		result -= std::numeric_limits<double>::max_exponent10;
 
 		result = std::pow(10, result);
 
@@ -236,7 +236,7 @@ namespace TrendLib
 
 				if (std::fabs(value) <= 1.0)
 				{
-					return value > 0 ? DBL_MIN : -DBL_MIN;
+					return value > 0 ? std::numeric_limits<double>::min() : -std::numeric_limits<double>::min();
 				}
 
 				if (value < 0)
@@ -252,7 +252,7 @@ namespace TrendLib
 					else
 					{
 						Q_ASSERT(false);
-						return value > 0 ? DBL_MIN : -DBL_MIN;
+						return value > 0 ? std::numeric_limits<double>::min() : -std::numeric_limits<double>::min();
 					}
 				}
 
@@ -327,7 +327,7 @@ namespace TrendLib
 		}
 
 		double delta = highLimit - lowLimit;
-		if (delta <= DBL_MIN)
+		if (delta <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -412,7 +412,7 @@ namespace TrendLib
 		}
 
 		double delta = highLimit - lowLimit;
-		if (delta <= DBL_MIN)
+		if (delta <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//

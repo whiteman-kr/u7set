@@ -577,7 +577,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
+		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -700,7 +700,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
+		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -804,7 +804,7 @@ namespace TrendLib
 			}
 
 			double signalDelta = signalHighLimit - signalLowLimit;
-			if (std::fabs(signalDelta) <= DBL_MIN)
+			if (std::fabs(signalDelta) <= std::numeric_limits<double>::min())
 			{
 				// Divide by 0 possible
 				//
@@ -1085,7 +1085,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
+		if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 		{
 			// Divide by 0 possible
 			//
@@ -1439,7 +1439,7 @@ namespace TrendLib
 					{
 						QRectF signalRect = trendSignal.tempDrawRect();
 
-						if (signalRect.height() <= DBL_MIN)
+						if (signalRect.height() <= std::numeric_limits<double>::min())
 						{
 							continue;
 						}
@@ -1460,7 +1460,7 @@ namespace TrendLib
 							continue;
 						}
 
-						if (std::fabs(highLimit - lowLimit) <= DBL_MIN)
+						if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min())
 						{
 							continue;
 						}
@@ -1526,7 +1526,7 @@ namespace TrendLib
 							{
 								drawRect.setLeft(x + 2.0 / dpiX);
 
-								if (value <= DBL_MIN)
+								if (value <= std::numeric_limits<double>::min())
 								{
 									// 0
 									//

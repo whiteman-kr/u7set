@@ -8,6 +8,7 @@ namespace VFrame30
 	//
 	class IndicatorArrowIndicator : public Indicator
 	{
+		Q_OBJECT
 	public:
 		IndicatorArrowIndicator() = delete;
 		explicit IndicatorArrowIndicator(SchemaUnit itemUnit);

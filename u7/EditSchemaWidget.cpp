@@ -8941,7 +8941,7 @@ bool EditSchemaWidget::selectNextLeftItem(NextSelectionItem switchToLeftItem)
 
 	// Decay all other items to points
 	//
-	double minDistance = DBL_MAX;
+	double minDistance = std::numeric_limits<double>::max();
 	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, VertFactor](double x, double y, auto schemaItem)
@@ -9149,7 +9149,7 @@ bool EditSchemaWidget::selectNextRightItem(NextSelectionItem switchToRightItem)
 
 	// Decay all other items to points
 	//
-	double minDistance = DBL_MAX;
+	double minDistance = std::numeric_limits<double>::max();
 	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, VertFactor](double x, double y, auto schemaItem)
@@ -9374,7 +9374,7 @@ void EditSchemaWidget::selectNextUpItem()
 
 	// Decay all other items to points
 	//
-	double minDistance = DBL_MAX;
+	double minDistance = std::numeric_limits<double>::max();
 	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, HorzFactor](double x, double y, auto schemaItem)
@@ -9597,7 +9597,7 @@ void EditSchemaWidget::selectNextDownItem()
 
 	// Decay all other items to points
 	//
-	double minDistance = DBL_MAX;
+	double minDistance = std::numeric_limits<double>::max();
 	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, HorzFactor](double x, double y, auto schemaItem)

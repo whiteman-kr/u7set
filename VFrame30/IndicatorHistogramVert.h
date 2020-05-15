@@ -89,6 +89,7 @@ namespace VFrame30
 	//
 	class IndicatorHistogramVert : public Indicator
 	{
+		Q_OBJECT
 	public:
 		IndicatorHistogramVert() = delete;
 		explicit IndicatorHistogramVert(SchemaUnit itemUnit);
