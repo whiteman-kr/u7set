@@ -96,6 +96,7 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
 
 	connect(m_codeButton, &QPushButton::clicked, this, &SimLogicModulePage::codeButtonClicked);
+	connect(m_memoryButton, &QPushButton::clicked, this, &SimLogicModulePage::memoryButtonClicked);
 
 	connect(m_schemaFilterEdit, &QLineEdit::textChanged, this, &SimLogicModulePage::schemaFilterChanged);
 
@@ -205,6 +206,34 @@ void SimLogicModulePage::projectUpdated()
 void SimLogicModulePage::codeButtonClicked()
 {
 	emit openCodePageRequest(equipmnetId());
+	return;
+}
+
+void SimLogicModulePage::memoryButtonClicked()
+{
+	QString memoryDump = m_simulator->appSignalManager().ramDump(m_lmEquipmentId);
+
+	QString fileNameTemplate = QDir::tempPath() + "/" + "ram_dump_" + m_lmEquipmentId + "_XXXXXX.txt";
+
+	QTemporaryFile* file = new QTemporaryFile{fileNameTemplate, this};
+
+	// The end of life of file is this object, so it will be deleted rigt after tab page is closed
+	// thi is done to give time for QDesktopServices::openUrl(url) to open file
+	//
+
+	if (file->open() == false)
+	{
+		return;
+	}
+
+	QTextStream out(file);
+	out << memoryDump;
+
+	file->close();
+
+	QUrl url = QUrl::fromLocalFile(file->fileName());
+	QDesktopServices::openUrl(url);
+
 	return;
 }
 

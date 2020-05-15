@@ -21,6 +21,7 @@ protected slots:
 	void projectUpdated();
 
 	void codeButtonClicked();
+	void memoryButtonClicked();
 
 	void schemaFilterChanged();
 	void schemaContextMenuRequested(const QPoint& pos);
@@ -49,7 +50,7 @@ private:
 	QLabel* m_channelLabel = new QLabel{this};
 
 	QPushButton* m_signalsButton = new QPushButton{tr("Signals"), this};
-	QPushButton* m_memoryButton = new QPushButton{tr("Memory"), this};
+	QPushButton* m_memoryButton = new QPushButton{tr("Memory Dump"), this};
 	QPushButton* m_codeButton = new QPushButton{tr("Code"), this};
 
 	QLabel* m_schemasLabel = new QLabel{tr("Schemas:"), this};

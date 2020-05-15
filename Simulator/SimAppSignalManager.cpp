@@ -20,6 +20,21 @@ namespace Sim
 		resetAll();
 	}
 
+	QString AppSignalManager::ramDump(QString logicModuleId) const
+	{
+		QReadLocker rl(&m_ramLock);
+
+		auto ramIt = m_ram.find(::calcHash(logicModuleId));
+		if (ramIt != m_ram.end())
+		{
+			return ramIt->second.dump(logicModuleId);
+		}
+		else
+		{
+			return {};
+		}
+	}
+
 	void AppSignalManager::resetAll()
 	{
 		resetSignalParam();
