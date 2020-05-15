@@ -123,8 +123,7 @@ namespace Hardware
 
 	const QString PropertyNames::appSignalBusTypeId = "BusTypeID";
 
-	const QString PropertyNames::categoryAnalogAppSignal = "AnalogAppSignal";
-	const QString PropertyNames::categoryBusAppSignal = "BusAppSignal";
+	const QString PropertyNames::categoryAppSignal = "AppSignal";
 
 	//
 	//
@@ -2314,11 +2313,11 @@ R"DELIM({
 		// These properties are used in setType()
 		// So they don take part in PropertyOnDemand
 		//
-		addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAnalogAppSignal, true)
+		addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAppSignal, true)
 				->setUpdateFromPreset(true)
 				.setExpert(preset);
 
-		addProperty<QString, DeviceSignal, &DeviceSignal::appSignalBusTypeId, &DeviceSignal::setAppSignalBusTypeId>(PropertyNames::appSignalBusTypeId, PropertyNames::categoryBusAppSignal, true)
+		addProperty<QString, DeviceSignal, &DeviceSignal::appSignalBusTypeId, &DeviceSignal::setAppSignalBusTypeId>(PropertyNames::appSignalBusTypeId, PropertyNames::categoryAppSignal, true)
 				->setUpdateFromPreset(true)
 				.setExpert(preset);
 
@@ -2374,7 +2373,7 @@ R"DELIM({
 
 		auto validitySignalId = addProperty<QString, DeviceSignal, &DeviceSignal::validitySignalId, &DeviceSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
 
-		auto signalSpecPropsStructProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruct, &DeviceSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, QLatin1String(), true);
+		auto signalSpecPropsStructProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruct, &DeviceSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, PropertyNames::categoryAppSignal, true);
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(m_preset);
