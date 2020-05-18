@@ -21,12 +21,15 @@ protected slots:
 	void projectUpdated();
 
 	void codeButtonClicked();
+	void memoryButtonClicked();
 
 	void schemaFilterChanged();
 	void schemaContextMenuRequested(const QPoint& pos);
 	void schemaItemDoubleClicked(QTreeWidgetItem* item, int column);
 
 	void openSelectedSchema();
+
+	void updateFilterCompleter();
 
 signals:
 	void openSchemaRequest(QString schemaId);
@@ -47,12 +50,14 @@ private:
 	QLabel* m_channelLabel = new QLabel{this};
 
 	QPushButton* m_signalsButton = new QPushButton{tr("Signals"), this};
-	QPushButton* m_memoryButton = new QPushButton{tr("Memory"), this};
+	QPushButton* m_memoryButton = new QPushButton{tr("Memory Dump"), this};
 	QPushButton* m_codeButton = new QPushButton{tr("Code"), this};
 
 	QLabel* m_schemasLabel = new QLabel{tr("Schemas:"), this};
 	QTreeWidget* m_schemasList = new QTreeWidget{this};
+
 	QLineEdit* m_schemaFilterEdit = new QLineEdit{this};
+	QCompleter* m_completer = new QCompleter{QStringList{}, this};
 
 	// --
 	//

@@ -669,8 +669,8 @@ namespace TrendLib
 
 							QRectF signalRect = trendSignal.tempDrawRect();
 
-							if (std::fabs(highLimit - lowLimit) > DBL_MIN &&
-								signalRect.height() > DBL_MIN)
+							if (std::fabs(highLimit - lowLimit) > std::numeric_limits<double>::min() &&
+								signalRect.height() > std::numeric_limits<double>::min())
 							{
 								double dy = mouseOffset.y() / m_trendParam.dpiY();
 								double k = (highLimit - lowLimit) / signalRect.height();
@@ -856,7 +856,7 @@ namespace TrendLib
 				}
 
 				double delta = std::fabs(h - l);
-				if (delta < DBL_MIN)
+				if (delta < std::numeric_limits<double>::min())
 				{
 					continue;
 				}
@@ -1047,8 +1047,8 @@ namespace TrendLib
 					continue;
 				}
 
-				if (std::fabs(highLimit - lowLimit) <= DBL_MIN ||
-					signalRectTsp.height() <= DBL_EPSILON)
+				if (std::fabs(highLimit - lowLimit) <= std::numeric_limits<double>::min() ||
+					signalRectTsp.height() <= std::numeric_limits<double>::epsilon())
 				{
 					// Div by zero possible
 					//

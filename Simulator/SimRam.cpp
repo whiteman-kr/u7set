@@ -15,6 +15,22 @@ namespace Sim
 	{
 	}
 
+	QString RamAreaInfo::dump() const
+	{
+		QString result;
+		result.reserve(m_size * 4);
+
+		result = QString("Memory Area: %1\nAcess: %2\nOffsetW: 0x%3 (%4)\nSizeW: 0x%5 (%6)")
+					.arg(m_name)
+					.arg(E::valueToString<E::LogicModuleRamAccess>(m_access))
+					.arg(m_offset, 6, 16, QLatin1Char('0'))
+					.arg(m_offset, 0, 10)
+					.arg(m_size, 6, 16, QLatin1Char('0'))
+					.arg(m_size, 0, 10);
+
+		return result;
+	}
+
 	bool RamAreaInfo::overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const
 	{
 		quint32 startA = m_offset;
@@ -58,6 +74,69 @@ namespace Sim
 	RamArea::~RamArea()
 	{
 		//qDebug() << "RamArea::~RamArea(), data ptr " << QString::number(reinterpret_cast<quint64>(m_data.data()), 16) << " name = " << name() << " offset = " << offset();
+	}
+
+	QString RamArea::dump() const
+	{
+		QString result = RamAreaInfo::dump() + QLatin1String("\n");
+
+		// Check if all 0's
+		//
+		bool allZeroes = true;
+		for (int i = 0; i < m_data.size(); i++)
+		{
+			if (m_data[i] != 0)
+			{
+				allZeroes = false;
+				break;
+			}
+		}
+
+		// --
+		//
+		quint32 offest = offset();
+
+		if (allZeroes == true)
+		{
+			for (int i = 0; i < std::min(m_data.size(), 32) / 2; i++, offest++)
+			{
+				quint16 data;
+				readWord(offest, &data, E::ByteOrder::BigEndian, true);
+
+				if (i == 0 || offest % 16 == 0)
+				{
+					result += QString("\n %1 | ").arg(offest, 6, 16, QLatin1Char('0'));
+				}
+
+				result += QString(" %1").arg(data, 4, 16, QLatin1Char('0'));
+			}
+
+			if (result.back() != QChar('\n'))
+			{
+				result += "\n";
+			}
+
+			result += QString(" All zeroes....");
+		}
+		else
+		{
+			for (int i = 0; i < m_data.size() / 2; i++, offest++)
+			{
+				quint16 data;
+				readWord(offest, &data, E::ByteOrder::BigEndian, true);
+
+				if (i == 0 || offest % 16 == 0)
+				{
+					result += QString("\n %1 | ").arg(offest, 6, 16, QLatin1Char('0'));
+				}
+
+				result += QString(" %1").arg(data, 4, 16, QLatin1Char('0'));
+			}
+		}
+
+		result += "\n";
+
+		return result;
 	}
 
 	bool RamArea::clear()
@@ -544,6 +623,23 @@ namespace Sim
 		}
 
 		return;
+	}
+
+	QString Ram::dump(QString equipmnetId) const
+	{
+		QString result;
+		result.reserve(1'024'000);
+
+		result += QObject::tr("RAM dump for Module %1\n").arg(equipmnetId);
+		result += QObject::tr("--------------------------------------------------------------------------------\n").arg(equipmnetId);
+
+		for (const RamArea& area : m_memoryAreas)
+		{
+			result += area.dump();
+			result += "\n";
+		}
+
+		return result;
 	}
 
 	std::vector<RamAreaInfo> Ram::memoryAreasInfo() const

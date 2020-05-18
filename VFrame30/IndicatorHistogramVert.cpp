@@ -708,7 +708,7 @@ namespace VFrame30
 					{
 						double gridValue = pointFromScaleValue(value);
 
-						if (std::fabs(gridValue) <= DBL_MIN)
+						if (std::fabs(gridValue) <= std::numeric_limits<double>::min())
 						{
 							gridValue = 0;
 						}
@@ -1203,20 +1203,20 @@ namespace VFrame30
 	double IndicatorHistogramVert::indicatorLog10(double value) const
 	{
 		// Logarithm calculation.
-		// The result is shifted up by DBL_MAX_10_EXP.
+		// The result is shifted up by std::numeric_limits<double>::max_exponent10().
 		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
 		// This means that we take a "ghost" logarithm from negative value.
 
 		double result = std::fabs(value);
 
-		if (result < DBL_MIN)
+		if (result < std::numeric_limits<double>::min())
 		{
-			result = DBL_MIN;
+			result = std::numeric_limits<double>::min();
 		}
 
 		result = std::log10(result);
 
-		result += DBL_MAX_10_EXP;
+		result += std::numeric_limits<double>::max_exponent10;
 
 		if (value < 0)
 		{
@@ -1228,13 +1228,13 @@ namespace VFrame30
 
 	double IndicatorHistogramVert::indicatorPow10(double value) const
 	{
-		// Power calculation, reverse function for trendLog10.
-		// Input value is shifted down by DBL_MAX_10_EXP and power is calculated from its absoulte value.
+		// Power calculation, reverse function for indicatorLog10.
+		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absoulte value.
 		// The sign of the result depened on input value sign.
 
 		double result = std::fabs(value);
 
-		result -= DBL_MAX_10_EXP;
+		result -= std::numeric_limits<double>::max_exponent10;
 
 		result = std::pow(10, result);
 

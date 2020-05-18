@@ -27,6 +27,8 @@ namespace Sim
 		virtual ~AppSignalManager();
 
 	public:
+		QString ramDump(QString logicModuleId) const;
+
 		void resetAll();
 		void resetSignalParam();
 		void resetRam();

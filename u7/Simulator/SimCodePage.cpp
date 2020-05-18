@@ -68,9 +68,9 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 		switch (static_cast<CodePageColumns>(column))
 		{
 		case CodePageColumns::Row:
-				if (row == 20)
-					return QBrush(Qt::darkRed);
-				else
+//				if (row == 20)
+//					return QBrush(Qt::darkRed);
+//				else
 					return QBrush(qRgb(0xF0, 0xF0, 0xF0));
 		case CodePageColumns::Address:		return QBrush(qRgb(0xF0, 0xF0, 0xF0));
 		case CodePageColumns::Code:			return QBrush();
@@ -86,9 +86,9 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 		{
 		//case CodePageColumns::Row:			return QBrush(Qt::darkGray);
 		case CodePageColumns::Row:
-			if (row == 20)
-				return QBrush(Qt::white);
-			else
+//			if (row == 20)
+//				return QBrush(Qt::white);
+//			else
 				return QBrush(Qt::darkGray);
 
 		case CodePageColumns::Address:		return QBrush(Qt::darkGray);
@@ -105,8 +105,8 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 	{
 		switch (static_cast<CodePageColumns>(column))
 		{
-		case CodePageColumns::Row:		return QString(" %1 ").arg(row);
-		case CodePageColumns::Address:	return QString(" 0x%1 ").arg(command.m_offset, 4, 16, QChar('0'));
+		case CodePageColumns::Row:		return QString("%1 ").arg(row, 6, 10, QChar(' '));
+		case CodePageColumns::Address:	return QString(" 0x%1 ").arg(command.m_offset, 6, 16, QChar('0'));
 		case CodePageColumns::Code:		return QString(" %1").arg(command.m_string);
 		default:
 			assert(false);

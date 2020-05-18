@@ -977,7 +977,7 @@ namespace TrendLib
 
 			if (firstValue == false)
 			{
-				if (std::fabs(maxValue - minValue) <= DBL_MIN)
+				if (std::fabs(maxValue - minValue) <= std::numeric_limits<double>::min())
 				{
 					minValue = minValue - 1.0;
 					maxValue = maxValue + 1.0;

@@ -23,6 +23,8 @@ namespace Sim
 		virtual ~RamAreaInfo() = default;
 
 	public:
+		QString dump() const;
+
 		bool contains(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
 		{
 			return  offsetW >= m_offset &&
@@ -60,6 +62,8 @@ namespace Sim
 		RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, bool clearOnStartCycle, QString name);
 
 	public:
+		QString dump() const;
+
 		bool clear();
 
 		bool writeBuffer(quint32 offsetW, const QByteArray& data) noexcept;
@@ -118,6 +122,8 @@ namespace Sim
 		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 
 		void updateFrom(const Ram& source);
+
+		QString dump(QString equipmnetId) const;
 
 		std::vector<RamAreaInfo> memoryAreasInfo() const;
 		RamAreaInfo memoryAreaInfo(const QString& name) const;

@@ -30,8 +30,12 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 	m_schemasList->setSortingEnabled(true);
 	m_schemasList->sortByColumn(0, Qt::SortOrder::AscendingOrder);
 
+
 	m_schemaFilterEdit->setPlaceholderText(tr("Schema Filter: Start typing IDs, Labels, Signals' IDS etc"));
 	m_schemaFilterEdit->setClearButtonEnabled(true);
+
+	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+	m_schemaFilterEdit->setCompleter(m_completer);
 
 	m_splitter->setChildrenCollapsible(false);
 
@@ -92,6 +96,7 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
 
 	connect(m_codeButton, &QPushButton::clicked, this, &SimLogicModulePage::codeButtonClicked);
+	connect(m_memoryButton, &QPushButton::clicked, this, &SimLogicModulePage::memoryButtonClicked);
 
 	connect(m_schemaFilterEdit, &QLineEdit::textChanged, this, &SimLogicModulePage::schemaFilterChanged);
 
@@ -102,13 +107,13 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 	//
 	QSettings s;
 
-	if (QByteArray ba = s.value("Simulator/SimModulePage/m_schemasList").toByteArray();
+	if (QByteArray ba = s.value("Simulator/SimLogicModulePage/m_schemasList").toByteArray();
 		ba.isEmpty() == false)
 	{
 		m_schemasList->header()->restoreState(ba);
 	}
 
-	if (QByteArray ba = s.value("Simulator/SimModulePage/m_splitter").toByteArray();
+	if (QByteArray ba = s.value("Simulator/SimLogicModulePage/m_splitter").toByteArray();
 		ba.isEmpty() == false)
 	{
 		m_splitter->restoreState(ba);
@@ -121,8 +126,8 @@ SimLogicModulePage::~SimLogicModulePage()
 {
 	QSettings s;
 
-	s.setValue("Simulator/SimModulePage/m_schemasList", m_schemasList->header()->saveState());
-	s.setValue("Simulator/SimModulePage/m_splitter", m_splitter->saveState());
+	s.setValue("Simulator/SimLogicModulePage/m_schemasList", m_schemasList->header()->saveState());
+	s.setValue("Simulator/SimLogicModulePage/m_splitter", m_splitter->saveState());
 
 	return;
 }
@@ -145,6 +150,8 @@ void SimLogicModulePage::updateLogicModuleInfoInfo()
 	// Fill schema list
 	//
 	fillSchemaList();
+
+	updateFilterCompleter();
 
 	return;
 }
@@ -202,9 +209,38 @@ void SimLogicModulePage::codeButtonClicked()
 	return;
 }
 
+void SimLogicModulePage::memoryButtonClicked()
+{
+	QString memoryDump = m_simulator->appSignalManager().ramDump(m_lmEquipmentId);
+
+	QString fileNameTemplate = QDir::tempPath() + "/" + "ram_dump_" + m_lmEquipmentId + "_XXXXXX.txt";
+
+	QTemporaryFile* file = new QTemporaryFile{fileNameTemplate, this};
+
+	// The end of life of file is this object, so it will be deleted rigt after tab page is closed
+	// thi is done to give time for QDesktopServices::openUrl(url) to open file
+	//
+
+	if (file->open() == false)
+	{
+		return;
+	}
+
+	QTextStream out(file);
+	out << memoryDump;
+
+	file->close();
+
+	QUrl url = QUrl::fromLocalFile(file->fileName());
+	QDesktopServices::openUrl(url);
+
+	return;
+}
+
 void SimLogicModulePage::schemaFilterChanged()
 {
 	fillSchemaList();
+	return;
 }
 
 void SimLogicModulePage::schemaContextMenuRequested(const QPoint& pos)
@@ -260,6 +296,60 @@ void SimLogicModulePage::openSelectedSchema()
 	}
 
 	emit openSchemaRequest(schemaId);
+
+	return;
+}
+
+void SimLogicModulePage::updateFilterCompleter()
+{
+	// Get all schemas fro LM
+	//
+	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmnetId());
+
+	QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_completer->model());
+
+	if (completerModel == nullptr)
+	{
+		assert(completerModel);
+		return;
+	}
+
+	QStringList completerList;
+
+	for (const VFrame30::SchemaDetails& sd : schemas)
+	{
+		completerList.push_back(sd.m_schemaId);
+		completerList.push_back(sd.m_equipmentId);
+
+		for (const auto& s : sd.m_signals)
+		{
+			completerList.push_back(s);
+		}
+
+		for (const auto& l : sd.m_labels)
+		{
+			completerList.push_back(l);
+		}
+
+		for (const auto& c : sd.m_connections)
+		{
+			completerList.push_back(c);
+		}
+
+		for (const auto& l : sd.m_loopbacks)
+		{
+			completerList.push_back(l);
+		}
+
+		for (const auto& t : sd.m_tags)
+		{
+			completerList.push_back(t);
+		}
+	}
+
+	// --
+	//
+	completerModel->setStringList(completerList);
 
 	return;
 }
