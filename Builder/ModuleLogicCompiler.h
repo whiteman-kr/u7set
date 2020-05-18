@@ -495,7 +495,8 @@ namespace Builder
 
 		bool copyOutputSignalsInOutputModulesMemory(CodeSnippet* code);
 		bool initOutputModulesMemory(CodeSnippet* code);
-		bool conevrtOutputAnalogSignals(CodeSnippet* code);
+		bool convertAndCopyOutputAnalogSignals(CodeSnippet* code);
+		bool copyOutputBusSignals(CodeSnippet* code);
 		bool copyOutputDiscreteSignals(CodeSnippet* code);
 
 		bool copyOptoConnectionsTxData(CodeSnippet* code);

@@ -301,11 +301,14 @@ public:
 	QString unit() const { return m_unit; }
 	void setUnit(const QString& unit) { m_unit = unit; }
 
-	Address16 ioBufAddr() const { return m_ioBufAddr; }
-	void setIoBufAddr(const Address16& addr) { m_ioBufAddr = addr; }
+	Address16 ioBufAddr() const;
+	void setIoBufAddr(const Address16& addr);
 
 	Address16 tuningAddr() const { return m_tuningAddr; }
 	void setTuningAddr(const Address16& addr) { m_tuningAddr = addr; }
+
+	Address16 tuningAbsAddr() const { return m_tuningAbsAddr; }
+	void setTuningAbsAddr(const Address16& addr) { m_tuningAbsAddr = addr; }
 
 	Address16 ualAddr() const { return m_ualAddr; }
 	void setUalAddr(const Address16& addr) { m_ualAddr = addr; }
@@ -383,6 +386,7 @@ private:
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
+	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
 
 private:
 	bool m_isLoaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
@@ -461,8 +465,11 @@ private:
 	Address16 m_ioBufAddr;					// signal address in i/o modules buffers for signals of input/output modules (input and output signals)
 											// or
 
-	Address16 m_tuningAddr;					// signal address in tuning buffer
-											// only for tunable signals
+	Address16 m_tuningAddr;					// address of tunable signal  from beginning of tuning buffer
+
+	Address16 m_tuningAbsAddr;				// absolute address of tunable signal
+											// For analogs m_tuningAddr and m_tuningAbsAddr are EQUAL!
+											// For discretes m_tuningAddr and m_tuningAbsAddr are different, due to 32-bits packing of discretes!
 
 	Address16 m_ualAddr;					// signal address is used in UAL
 											// may be equal to m_ioBufAddr, m_tuningAddr, m_regValueAddr or not

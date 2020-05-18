@@ -136,6 +136,13 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
 		return;
 	}
 
+	checkAndInitTuningSettings(deviceSignal, errMsg);
+
+	if (errMsg->isEmpty() == false)
+	{
+		return;
+	}
+
 	// specific properties processing
 	//
 	m_specPropStruct = deviceSignal.signalSpecPropsStruct();
@@ -682,10 +689,21 @@ void Signal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	setTagsStr(QString::fromStdString(protoData.tags()));
 }
 
+Address16 Signal::ioBufAddr() const
+{
+	return m_ioBufAddr;
+}
+
+void Signal::setIoBufAddr(const Address16& addr)
+{
+	m_ioBufAddr = addr;
+}
+
 void Signal::resetAddresses()
 {
 	m_ioBufAddr.reset();
 	m_tuningAddr.reset();
+	m_tuningAbsAddr.reset();
 	m_ualAddr.reset();
 	m_regValueAddr.reset();
 	m_regValidityAddr.reset();
@@ -1417,6 +1435,51 @@ void Signal::updateTuningValuesType()
 	m_tuningDefaultValue.setType(tvType);
 	m_tuningLowBound.setType(tvType);
 	m_tuningHighBound.setType(tvType);
+}
+
+void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
+{
+	if (deviceSignal.propertyExists(SignalProperties::enableTuningCaption) == false)
+	{
+		return;
+	}
+
+	if (deviceSignal.propertyExists(SignalProperties::tuningDefaultValueCaption) == false ||
+		deviceSignal.propertyExists(SignalProperties::tuningLowBoundCaption) == false ||
+		deviceSignal.propertyExists(SignalProperties::tuningHighBoundCaption) == false)
+	{
+		*errMsg = QString("Not all required properties for tuning settings initialization is exists in device signal %1").
+						arg(deviceSignal.equipmentIdTemplate());
+		return;
+	}
+
+	switch(deviceSignal.type())
+	{
+	case E::SignalType::Analog:
+	case E::SignalType::Discrete:
+		break;
+
+	default:
+		*errMsg = QString("Device signal %1 is not Analog or Discrete. Tuning is no allowed.").
+						arg(deviceSignal.equipmentIdTemplate());
+		return;
+	}
+
+	switch(deviceSignal.function())
+	{
+	case E::SignalFunction::Output:
+		break;
+
+	default:
+		*errMsg = QString("Device signal %1 is not Output. Tuning is no allowed.").
+						arg(deviceSignal.equipmentIdTemplate());
+		return;
+	}
+
+	m_enableTuning = deviceSignal.propertyValue(SignalProperties::enableTuningCaption).toBool();
+	m_tuningDefaultValue.setFloatValue(deviceSignal.propertyValue(SignalProperties::tuningDefaultValueCaption).toFloat());
+	m_tuningLowBound.setFloatValue(deviceSignal.propertyValue(SignalProperties::tuningLowBoundCaption).toFloat());
+	m_tuningHighBound.setFloatValue(deviceSignal.propertyValue(SignalProperties::tuningHighBoundCaption).toFloat());
 }
 
 double Signal::getSpecPropDouble(const QString& name) const

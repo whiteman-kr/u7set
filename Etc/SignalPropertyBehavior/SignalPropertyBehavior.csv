@@ -3,10 +3,10 @@ Type				; False			; Read		; Read		; Read			; Read		; Read			; Read			; Read		; R
 InOutType			; False			; Read		; Read		; Read			; Read		; Read			; Read			; Read		; Read		; Read
 DataSize			; False			; Read		; Read		; Read			; Read		; Read			; Read			; Hide		; Hide		; Hide
 ByteOrder			; False			; Read		; Read		; Read			; Read		; Read			; Read			; Hide		; Hide		; Hide
-EnableTuning			; False			; Hide		; Hide		; Write			; Hide		; Hide			; Write			; Hide		; Hide		; Hide
-TuningDefaultValue		; True			; Hide		; Hide		; Write			; Hide		; Hide			; Write			; Hide		; Hide		; Hide
-TuningLowBound			; True			; Hide		; Hide		; Write			; Hide		; Hide			; Write			; Hide		; Hide		; Hide
-TuningHighBound			; True			; Hide		; Hide		; Write			; Hide		; Hide			; Write			; Hide		; Hide		; Hide
+EnableTuning			; False			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
+TuningDefaultValue		; True			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
+TuningLowBound			; True			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
+TuningHighBound			; True			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
 BusTypeID			; False			; Hide		; Hide		; Hide			; Hide		; Hide			; Hide			; Write		; Write		; Write
 LowValidRange			; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 HighValidRange			; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
