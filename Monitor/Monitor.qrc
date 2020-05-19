@@ -20,6 +20,7 @@
         <file>Images/dragndrop.png</file>
         <file>Images/Snapshot.svg</file>
         <file>Images/ZoomFitToScreen.svg</file>
+        <file>Images/CloseButtonBlack.svg</file>
+        <file>Images/CloseButtonGray.svg</file>
     </qresource>
 </RCC>
- 

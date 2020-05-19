@@ -3,18 +3,20 @@
 
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaManager.h"
+#include "../lib/Ui/TabWidgetEx.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 
 
-class MonitorCentralWidget : public QTabWidget
+class MonitorCentralWidget : public TabWidgetEx
 {
 	Q_OBJECT
 
 public:
 	MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
-						 VFrame30::TuningController* tuningController);
+						 VFrame30::TuningController* tuningController,
+						 QWidget* parent);
 	~MonitorCentralWidget();
 
 public:

@@ -71,7 +71,8 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
-																		  m_tuningController.get());
+																		  m_tuningController.get(),
+																		  this);
 	setCentralWidget(monitorCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar
@@ -528,8 +529,8 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addWidget(m_logoLabel);
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
-	int space = m_toolBar->sizeHint().height() / 6;
-	m_toolBar->setStyleSheet(QString("QToolBar{spacing:%1;padding:%1;}").arg(space));
+	int space = m_toolBar->sizeHint().height() / 10;
+	m_toolBar->setStyleSheet(QString("QToolBar{ padding: %1; }").arg(space));
 
 	return;
 }
