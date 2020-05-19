@@ -35,6 +35,7 @@ namespace VFrame30
 		void zoomIn();
 		void zoomOut();
 		void zoom100();
+		void zoomToFit();
 
 	protected slots:
 		void screenChanged(QScreen* screen);
