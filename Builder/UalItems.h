@@ -538,6 +538,7 @@ namespace Builder
 		void sortRefSignals();
 
 		Signal* getInputSignal();
+		Signal* getOutputSignal();
 		Signal* getTunableSignal();
 		QVector<Signal*> getAnalogOutputSignals();
 

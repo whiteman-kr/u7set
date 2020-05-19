@@ -1156,7 +1156,7 @@ namespace Builder
 
 			if (s->enableTuning() == true)
 			{
-				assert(s->isInternal());
+				Q_ASSERT(s->isInternal() == true || s->isOutput() == true);
 				m_ualSignals.createSignal(s);
 				continue;
 			}
@@ -5187,7 +5187,7 @@ namespace Builder
 				continue;
 			}
 
-			if (s->ioBufAddr().isValid() == false)
+			if (s->tuningAbsAddr().isValid() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -5198,7 +5198,7 @@ namespace Builder
 
 			if (ualSignal != nullptr)
 			{
-				ualSignal->setUalAddr(s->ioBufAddr());
+				ualSignal->setUalAddr(s->tuningAbsAddr());
 			}
 		}
 
@@ -10230,8 +10230,8 @@ namespace Builder
 
 		bool result = true;
 
-		//		result &= initOutputModulesMemory(); is now requred now!!
-		result &= conevrtOutputAnalogSignals(code);
+		result &= convertAndCopyOutputAnalogSignals(code);
+		result &= copyOutputBusSignals(code);
 		result &= copyOutputDiscreteSignals(code);
 
 		//m_alpCode_calculate(&m_resourcesUsageInfo.copyOutputSignalsInOutputModulesMemory);
@@ -10317,7 +10317,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::conevrtOutputAnalogSignals(CodeSnippet* code)
+	bool ModuleLogicCompiler::convertAndCopyOutputAnalogSignals(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10326,7 +10326,7 @@ namespace Builder
 			return true;
 		}
 
-		code->comment_nl("Convertion of output analog signals");
+		code->comment_nl("Copy output analog signals to output modules memory");
 
 		CodeItem cmd;
 
@@ -10386,18 +10386,18 @@ namespace Builder
 					if (constIsFloat == true)
 					{
 						cmd.movConstFloat(s->ioBufAddr().offset(), constFloatValue);
-						cmd.setComment(QString("analog output %1 set to const %2").arg(s->appSignalID()).arg(constFloatValue));
+						cmd.setComment(QString("output analog %1 set to const %2").arg(s->appSignalID()).arg(constFloatValue));
 					}
 					else
 					{
 						cmd.movConstInt32(s->ioBufAddr().offset(), constIntValue);
-						cmd.setComment(QString("analog output %1 set to const %2").arg(s->appSignalID()).arg(constIntValue));
+						cmd.setComment(QString("output analog %1 set to const %2").arg(s->appSignalID()).arg(constIntValue));
 					}
 				}
 				else
 				{
 					cmd.mov32(s->ioBufAddr().offset(), s->ualAddr().offset());
-					cmd.setComment(QString("copy analog output %1").arg(s->appSignalID()));
+					cmd.setComment(QString("copy output analog %1").arg(s->appSignalID()));
 				}
 
 				code->append(cmd);
@@ -10442,14 +10442,14 @@ namespace Builder
 				{
 					cmd.writeFuncBlockConstFloat(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
 													constFloatValue, appFb->caption());
-					cmd.setComment(QString(tr("float const %1 to analog output %2 conversion")).
+					cmd.setComment(QString(tr("float const %1 to output analog %2 conversion")).
 										arg(constFloatValue).arg(s->appSignalID()));
 				}
 				else
 				{
 					cmd.writeFuncBlockConstInt32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
 													constIntValue, appFb->caption());
-					cmd.setComment(QString(tr("int const %1 to analog output %2 conversion")).
+					cmd.setComment(QString(tr("int const %1 to output analog %2 conversion")).
 										arg(constIntValue).arg(s->appSignalID()));
 				}
 
@@ -10459,7 +10459,7 @@ namespace Builder
 			{
 				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
 								   s->ualAddr().offset(), appFb->caption());
-				cmd.setComment(QString(tr("analog output %1 conversion")).arg(s->appSignalID()));
+				cmd.setComment(QString(tr("output analog %1 conversion")).arg(s->appSignalID()));
 				code->append(cmd);
 			}
 
@@ -10481,6 +10481,82 @@ namespace Builder
 			}
 			code->append(cmd);
 			code->newLine();
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyOutputBusSignals(CodeSnippet* code)
+	{
+		bool result = false;
+
+		bool first = true;
+
+		CodeItem cmd;
+
+		for(Signal* s : m_ioSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isBus() == false || s->isOutput() == false)
+			{
+				continue;
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
+
+			if (ualSignal == nullptr)
+			{
+				continue;				// this bus output is not used in app logic, it is ok
+			}
+
+			if (s->ualAddr().isValid() == false)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined UAL address of signal %1").arg(s->appSignalID()));
+				result = false;
+				continue;
+			}
+
+			if (s->ioBufAddr().isValid() == false)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined IO address of signal %1").arg(s->appSignalID()));
+				result = false;
+				continue;
+			}
+
+			QString busTypeID = s->busTypeID();
+
+			BusShared bus = m_signals->getBus(busTypeID);
+
+			TEST_PTR_CONTINUE(bus);
+
+			int busSizeW = bus->sizeW();
+
+			if (first == true)
+			{
+				code->comment_nl("Copy output bus signals to output modules memory");
+				first = false;
+			}
+
+			switch(busSizeW)
+			{
+			case 1:
+				cmd.mov(s->ioBufAddr(), s->ualAddr());
+				break;
+
+			case 2:
+				cmd.mov32(s->ioBufAddr(), s->ualAddr());
+				break;
+
+			default:
+				cmd.movMem(s->ioBufAddr(), s->ualAddr(), busSizeW);
+			}
+
+			cmd.setComment(QString("copy %1").arg(s->appSignalID()));
+
+			code->append(cmd);
 		}
 
 		return true;
@@ -10519,7 +10595,7 @@ namespace Builder
 		int lmOutputsAddress = m_lmDescription->memory().m_appDataOffset;
 		bool lmOutputsIsWritten = false;
 
-		code->comment_nl("Copy discrete output signals to output modules memory");
+		code->comment_nl("Copy output discrete signals to output modules memory");
 
 		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
 
@@ -12137,7 +12213,7 @@ namespace Builder
 		{
 			file.append(QString("\nAnalog signals, type Float (32 bits)"));
 			file.append(line);
-			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : analogFloatSignals)
@@ -12150,11 +12226,11 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%f\t%f\t%f",
-								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
-								signal->tuningAddr().bit(),
-								signal->tuningAddr().offset(),
-								signal->tuningAddr().bit(),
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%f\t%f\t%f",
+								signal->tuningAbsAddr().offset(),
+								signal->tuningAbsAddr().bit(),
+								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
+								signal->tuningAbsAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue().toFloat(),
 								signal->tuningLowBound().floatValue(),
@@ -12169,7 +12245,7 @@ namespace Builder
 		{
 			file.append(QString("\nAnalog signals, type Signed Integer (32 bits)"));
 			file.append(line);
-			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : analogIntSignals)
@@ -12182,11 +12258,11 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
-								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
-								signal->tuningAddr().bit(),
-								signal->tuningAddr().offset(),
-								signal->tuningAddr().bit(),
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%d\t\t%d\t\t%d",
+								signal->tuningAbsAddr().offset(),
+								signal->tuningAbsAddr().bit(),
+								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
+								signal->tuningAbsAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue().int32Value(),
 								signal->tuningLowBound().int32Value(),
@@ -12199,7 +12275,7 @@ namespace Builder
 
 		if (discreteSignals.count() > 0)
 		{
-			// sort signals by ioBufAddr ascending
+			// sort signals by tuningAbsAddr ascending
 			//
 			for(int i = 0; i < discreteSignals.count() - 1; i++)
 			{
@@ -12211,7 +12287,7 @@ namespace Builder
 					TEST_PTR_CONTINUE(s1);
 					TEST_PTR_CONTINUE(s2);
 
-					if (s1->ioBufAddr().bitAddress() > s2->ioBufAddr().bitAddress())
+					if (s1->tuningAbsAddr().bitAddress() > s2->tuningAbsAddr().bitAddress())
 					{
 						discreteSignals[i] = s2;
 						discreteSignals[k] = s1;
@@ -12221,7 +12297,7 @@ namespace Builder
 
 			file.append(QString("\nDiscrete signals (1 bit)"));
 			file.append(line);
-			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : discreteSignals)
@@ -12234,11 +12310,11 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
-								signal->ioBufAddr().offset(),
-								signal->ioBufAddr().bit(),
-								signal->ioBufAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->ioBufAddr().bit(),
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%d\t\t%d\t\t%d",
+								signal->tuningAbsAddr().offset(),
+								signal->tuningAbsAddr().bit(),
+								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
+								signal->tuningAbsAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue().discreteValue(),
 								0,

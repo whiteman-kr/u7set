@@ -1406,17 +1406,17 @@ namespace Builder
 			return inSignal->ioBufAddr();
 		}
 
-		if (m_isTunable == true)
+		if (m_isOutput == true)
 		{
-			Signal* tunSignal = getTunableSignal();
+			Signal* outSignal = getOutputSignal();
 
-			if (tunSignal == nullptr)
+			if (outSignal == nullptr)
 			{
 				assert(false);
 				return Address16();
 			}
 
-			return tunSignal->ioBufAddr();
+			return outSignal->ioBufAddr();
 		}
 
 		if (m_isOptoSignal == true)
@@ -1845,6 +1845,22 @@ namespace Builder
 		}
 
 		return inputSignal;
+	}
+
+	Signal* UalSignal::getOutputSignal()
+	{
+		Signal* outputSignal = nullptr;
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s->isOutput() == true)
+			{
+				outputSignal = s;
+				break;
+			}
+		}
+
+		return outputSignal;
 	}
 
 	Signal* UalSignal::getTunableSignal()

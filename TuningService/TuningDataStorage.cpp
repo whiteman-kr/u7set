@@ -295,7 +295,7 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / WORD_SIZE_IN_BYTES, 0));
 
-						signal->setIoBufAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES, 0));
+						signal->setTuningAbsAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES, 0));
 
 						sizeB += sizeof(float);
 						testSizeB = true;
@@ -330,7 +330,7 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / WORD_SIZE_IN_BYTES, 0));
 
-						signal->setIoBufAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES, 0));
+						signal->setTuningAbsAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES, 0));
 
 						sizeB += sizeof(qint32);
 						testSizeB = true;
@@ -373,7 +373,7 @@ namespace  Tuning
 							bitNo = bitNo % SIZE_16BIT;
 						}
 
-						signal->setIoBufAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES + additionalOffsetToDiscreteW, bitNo));
+						signal->setTuningAbsAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES + additionalOffsetToDiscreteW, bitNo));
 
 						//
 
@@ -404,8 +404,8 @@ namespace  Tuning
 					sizeB += tuningFramePayloadBytes * 2;
 				}
 
-				metaData.append(QVariant(signal->ioBufAddr().offset()));
-				metaData.append(QVariant(signal->ioBufAddr().bit()));
+				metaData.append(QVariant(signal->tuningAbsAddr().offset()));
+				metaData.append(QVariant(signal->tuningAbsAddr().bit()));
 
 				m_metadata.push_back(metaData);
 			}

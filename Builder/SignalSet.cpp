@@ -175,10 +175,12 @@ namespace Builder
 			//
 			if (s.enableTuning() == true)
 			{
-				if (s.isInternal() == false)
+				if (s.isInternal() == false && s.isOutput() == false)
 				{
-					LOG_INTERNAL_ERROR(m_log);				// only Internals can be tunable
-					return false;
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("%1 - only Internal and Output signals can be tunable").
+													arg(s.appSignalID()));
+					result = false;
+					continue;
 				}
 
 				if (s.tuningLowBound() >= s.tuningHighBound())
