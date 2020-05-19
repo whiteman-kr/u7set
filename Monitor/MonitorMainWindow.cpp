@@ -1065,7 +1065,9 @@ void MonitorMainWindow::slot_findSignal()
 		return;
 	}
 
-	DialogSignalSearch* dsi = new DialogSignalSearch(this, theSignals.signalList());
+	DialogSignalSearch* dsi = new DialogSignalSearch(this, &theSignals);
+
+	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dsi, &DialogSignalSearch::on_signalsUpdate);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);

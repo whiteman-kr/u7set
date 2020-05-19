@@ -41,7 +41,31 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	{
 		writeError(tr("File loading error, file name %1.").arg(fileName));
 	}
+	else
+	{
+		emit schemaDetailsUpdated();
+	}
 
 	return ok;
 }
+
+std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasDetails() const
+{
+	std::vector<VFrame30::SchemaDetails> result = m_schemaDetails.schemasDetails();
+
+	return result;
+}
+
+std::set<QString> SimIdeSimulator::schemaAppSignals(const QString& schemaId)
+{
+	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetails.schemaDetails(schemaId);
+
+	if (details == nullptr)
+	{
+		return std::set<QString>();
+	}
+
+	return details->m_signals;
+}
+
 

@@ -74,6 +74,9 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
+    ../lib/ExportPrint.cpp \
+    ../lib/Ui/DialogSignalSearch.cpp \
+    ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     CentralWidget.cpp \
     CreateProjectDialog.cpp \
@@ -92,6 +95,7 @@ SOURCES +=\
     Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
+    Simulator/SimSignalSnapshot.cpp \
     Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
@@ -215,7 +219,10 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ClientBehavior.h \
+    ../lib/ExportPrint.h \
     ../lib/StandardColors.h \
+    ../lib/Ui/DialogSignalSearch.h \
+    ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/TabWidgetEx.h \
     CentralWidget.h \
     CreateProjectDialog.h \
@@ -233,6 +240,7 @@ HEADERS  += \
     Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
+    Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
     UserManagementDialog.h \

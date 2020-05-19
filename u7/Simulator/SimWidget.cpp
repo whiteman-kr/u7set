@@ -12,6 +12,8 @@
 #include "SimTrend/SimTrends.h"
 #include "../SimulatorTabPage.h"
 #include "../../lib/Ui/TabWidgetEx.h"
+#include "../../lib/Ui/DialogSignalSearch.h"
+#include "SimSignalSnapshot.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -56,6 +58,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	//
 	connect(db, &DbController::projectOpened, this, &SimWidget::projectOpened);
 	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
+	connect(db, &DbController::projectClosed, this, &SimWidget::projectClosed);
 
 	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
@@ -86,6 +89,71 @@ SimWidget::~SimWidget()
 void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
 {
 	SimTrends::startTrendApp(m_simulator, appSignals, this);
+}
+
+void SimWidget::signalContextMenu(const QStringList signalList)
+{
+	// Compose menu
+	//
+	QMenu menu(this);
+	QList<QAction*> actions;
+
+	for (const QString& s : signalList)
+	{
+		bool ok = false;
+		AppSignalParam signal =	m_appSignalController->signalParam(s, &ok);
+
+		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+
+		QAction* a = new QAction(signalId, &menu);
+
+		auto f = [this, s]() -> void
+				 {
+					signalInfo(s);
+				 };
+
+		connect(a, &QAction::triggered, this, f);
+
+		actions << a;
+	}
+
+	menu.exec(actions, QCursor::pos(), 0, this);
+}
+
+void SimWidget::signalInfo(QString appSignalId)
+{
+	// Parent will be SimulatorTabPage*
+	//
+	/*QWidget* parent = this->parentWidget();
+	while (parent != nullptr)
+	{
+		if (dynamic_cast<SimulatorTabPage*>(parent) != nullptr)
+		{
+			break;
+		}
+
+		parent = parent->parentWidget();
+	}
+	Q_ASSERT(parent);*/
+
+	// --
+	//
+	bool ok = false;
+
+//	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
+//	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
+
+	if (ok == true)
+	{
+//		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
+//		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+	}
+
+	return;
 }
 
 void SimWidget::createToolBar()
@@ -442,6 +510,11 @@ void SimWidget::projectOpened(DbProject)
 	emit needUpdateActions();
 }
 
+void SimWidget::projectClosed()
+{
+	emit needCloseChildWindows();
+}
+
 void SimWidget::openBuild()
 {
 	m_simulator->control().stop();
@@ -623,6 +696,12 @@ void SimWidget::showSnapshot()
 	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
 	//    it is guarantee will not be deleted
 	//
+
+	QString project = db()->currentProject().projectName().toLower();
+
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, project, this);
+
+	return;
 }
 
 void SimWidget::showFindSignal()
@@ -633,6 +712,18 @@ void SimWidget::showFindSignal()
 	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
 	//    it is guarantee will not be deleted
 	//
+	DialogSignalSearch* dsi = new DialogSignalSearch(this, m_appSignalController->appSignalManager());
+
+	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::on_signalsUpdate);
+
+	connect(dsi, &DialogSignalSearch::signalContextMenu, this, &SimWidget::signalContextMenu);
+	connect(dsi, &DialogSignalSearch::signalInfo, this, &SimWidget::signalInfo);
+
+	connect(this, &SimWidget::needCloseChildWindows, dsi, &QDialog::accept);
+
+	dsi->show();
+
+	return;
 }
 
 void SimWidget::showTrends()

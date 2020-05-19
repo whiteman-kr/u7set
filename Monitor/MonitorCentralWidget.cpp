@@ -211,9 +211,9 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 	return;
 }
 
-void MonitorCentralWidget::slot_signalContextMenu(QString signalId)
+void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList)
 {
-	currentTab()->signalContextMenu(QStringList() << signalId, {});
+	currentTab()->signalContextMenu(signalList, {});
 }
 
 void MonitorCentralWidget::slot_signalInfo(QString signalId)

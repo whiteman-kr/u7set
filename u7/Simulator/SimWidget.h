@@ -32,6 +32,10 @@ public:
 public:
 	void startTrends(const std::vector<AppSignalParam>& appSignals);
 
+public slots:
+	void signalContextMenu(const QStringList signalList);
+	void signalInfo(QString appSignalId);
+
 protected:
 	void createToolBar();
 	void createDocks();
@@ -41,6 +45,7 @@ protected:
 
 signals:
 	void needUpdateActions();
+	void needCloseChildWindows();
 
 protected slots:
 	void aboutToQuit();
@@ -50,6 +55,7 @@ protected slots:
 	void updateActions();
 
 	void projectOpened(DbProject project);
+	void projectClosed();
 	void openBuild();
 	void closeBuild();
 	void refreshBuild();

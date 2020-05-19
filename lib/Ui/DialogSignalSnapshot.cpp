@@ -252,7 +252,7 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 //SnapshotItemModel
 //
 
-SignalSnapshotModel::SignalSnapshotModel(AppSignalManager* appSignalManager, QObject* parent)
+SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, QObject* parent)
 	: QAbstractItemModel(parent),
 	  m_appSignalManager(appSignalManager)
 {
@@ -870,7 +870,7 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 //DialogSignalSnapshotSettings
 //
 
-void DialogSignalSnapshotSettings::restoreSettings(QSettings& s)
+void DialogSignalSnapshotSettings::restore(QSettings& s)
 {
 	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
 	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
@@ -884,7 +884,7 @@ void DialogSignalSnapshotSettings::restoreSettings(QSettings& s)
 	m_signalSnapshotSortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", m_signalSnapshotSortOrder).toInt());
 }
 
-void DialogSignalSnapshotSettings::storeSettings(QSettings& s)
+void DialogSignalSnapshotSettings::store(QSettings& s)
 {
 	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
 	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
@@ -904,7 +904,7 @@ void DialogSignalSnapshotSettings::storeSettings(QSettings& s)
 //DialogSignalSnapshot
 //
 
-DialogSignalSnapshot::DialogSignalSnapshot(AppSignalManager* appSignalManager,
+DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   QString projectName,
 										   QString softwareEquipmentId,
 										   QWidget *parent) :
@@ -1051,6 +1051,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(AppSignalManager* appSignalManager,
 	connect(m_editTags, &QLineEdit::textEdited, [this](){m_tagsCompleter->complete();});
 	connect(m_tagsCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_editTags, &QLineEdit::setText);
 
+	connect(this, &DialogSignalSnapshot::finished, this, &DialogSignalSnapshot::on_DialogSignalSnapshot_finished);
+
 	m_updateStateTimerId = startTimer(500);
 
 	return;
@@ -1058,11 +1060,9 @@ DialogSignalSnapshot::DialogSignalSnapshot(AppSignalManager* appSignalManager,
 
 DialogSignalSnapshot::~DialogSignalSnapshot()
 {
-	theDialogSignalSnapshotSettings.m_snapshotHorzHeader = m_tableView->horizontalHeader()->saveState();
-	theDialogSignalSnapshotSettings.m_snapshotHorzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
 }
 
-void DialogSignalSnapshot::refreshSchemasList()
+void DialogSignalSnapshot::on_schemasUpdate()
 {
 	// Refresh schemas combo
 	//
@@ -1075,7 +1075,7 @@ void DialogSignalSnapshot::refreshSchemasList()
 	return;
 }
 
-void DialogSignalSnapshot::reloadSignals()
+void DialogSignalSnapshot::on_signalsUpdate()
 {
 	bool emptyModel = m_model->rowCount() == 0;
 
@@ -1098,73 +1098,22 @@ void DialogSignalSnapshot::reloadSignals()
 	return;
 }
 
-void DialogSignalSnapshot::fillSchemas()
+void DialogSignalSnapshot::showEvent(QShowEvent* /*e*/)
 {
-	m_schemaCombo->blockSignals(true);
-
-	// Fill schemas
-	//
-	QString currentStrId;
-
-	QVariant data = m_schemaCombo->currentData();
-	if (data.isValid() == true)
+	if (m_firstShow == false)
 	{
-		currentStrId = data.toString();
+		return;
 	}
 
-	m_schemaCombo->clear();
+	m_firstShow = false;
 
-	m_schemaCombo->addItem("All Schemas", "");
+	fillSchemas();
 
-	int selectedIndex = -1;
+	fillSignals();
 
-	std::vector<VFrame30::SchemaDetails> details = schemasDetails();
-
-	for (const VFrame30::SchemaDetails& schema : details )
-	{
-		m_schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
-
-		if (currentStrId == schema.m_schemaId )
-		{
-			selectedIndex = m_schemaCombo->count() - 1;
-		}
-	}
-
-	if (selectedIndex != -1)
-	{
-		m_schemaCombo->setCurrentIndex(selectedIndex);
-	}
-
-	m_schemaCombo->blockSignals(false);
+	return;
 }
 
-void DialogSignalSnapshot::fillSignals()
-{
-	bool modelWasEmpty = m_model->rowCount() == 0;
-
-	m_model->fillSignals();
-
-	m_tableView->sortByColumn(theDialogSignalSnapshotSettings.m_signalSnapshotSortColumn, theDialogSignalSnapshotSettings.m_signalSnapshotSortOrder);
-
-	if (modelWasEmpty == true)
-	{
-		m_tableView->resizeColumnsToContents();
-	}
-}
-
-/*
-std::vector<VFrame30::SchemaDetails> DialogSignalSnapshot::schemasDetails()
-{
-	Q_ASSERT(false);
-	return std::vector<VFrame30::SchemaDetails>();
-}
-
-std::set<QString> DialogSignalSnapshot::schemaAppSignals(const QString& schemaStrId)
-{
-	Q_ASSERT(false);
-	Q_UNUSED(schemaStrId);
-	return std::set<QString>();
-}*/
 
 void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 {
@@ -1252,6 +1201,8 @@ void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 	theDialogSignalSnapshotSettings.m_signalSnapshotPos = pos();
 	theDialogSignalSnapshotSettings.m_signalSnapshotGeometry = saveGeometry();
 
+	theDialogSignalSnapshotSettings.m_snapshotHorzHeader = m_tableView->horizontalHeader()->saveState();
+	theDialogSignalSnapshotSettings.m_snapshotHorzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
 }
 
 void DialogSignalSnapshot::on_contextMenuRequested(const QPoint& pos)
@@ -1275,7 +1226,10 @@ void DialogSignalSnapshot::on_contextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	emit signalContextMenu(s.appSignalId());
+	QStringList list;
+	list << s.appSignalId();
+
+	emit signalContextMenu(list);
 }
 
 void DialogSignalSnapshot::setupUi()
@@ -1298,6 +1252,8 @@ void DialogSignalSnapshot::setupUi()
 	m_schemaCombo = new QComboBox();
 	connect(m_schemaCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_schemaCombo_currentIndexChanged);
 	typeLayout->addWidget(m_schemaCombo, 1, 1);
+
+	m_schemaCombo->setMinimumWidth(160);
 
 	//maskLayout
 
@@ -1374,6 +1330,60 @@ void DialogSignalSnapshot::setupUi()
 
 	setLayout(mainLayout);
 
+}
+
+void DialogSignalSnapshot::fillSchemas()
+{
+	m_schemaCombo->blockSignals(true);
+
+	// Fill schemas
+	//
+	QString currentStrId;
+
+	QVariant data = m_schemaCombo->currentData();
+	if (data.isValid() == true)
+	{
+		currentStrId = data.toString();
+	}
+
+	m_schemaCombo->clear();
+
+	m_schemaCombo->addItem("All Schemas", "");
+
+	int selectedIndex = -1;
+
+	std::vector<VFrame30::SchemaDetails> details = schemasDetails();
+
+	for (const VFrame30::SchemaDetails& schema : details )
+	{
+		m_schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
+
+		if (currentStrId == schema.m_schemaId )
+		{
+			selectedIndex = m_schemaCombo->count() - 1;
+		}
+	}
+
+	if (selectedIndex != -1)
+	{
+		m_schemaCombo->setCurrentIndex(selectedIndex);
+	}
+
+	m_schemaCombo->blockSignals(false);
+}
+
+void DialogSignalSnapshot::fillSignals()
+{
+	bool modelWasEmpty = m_model->rowCount() == 0;
+
+	m_model->fillSignals();
+
+	m_tableView->sortByColumn(theDialogSignalSnapshotSettings.m_signalSnapshotSortColumn, theDialogSignalSnapshotSettings.m_signalSnapshotSortOrder);
+
+	if (modelWasEmpty == true)
+	{
+		m_tableView->resizeColumnsToContents();
+	}
 }
 
 void DialogSignalSnapshot::timerEvent(QTimerEvent* event)

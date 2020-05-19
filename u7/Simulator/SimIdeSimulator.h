@@ -17,10 +17,15 @@ public:
 
 	std::vector<VFrame30::SchemaDetails> schemasForLm(QString equipmentId) const;
 
+signals:
+	void schemaDetailsUpdated();
+
 protected:
 	bool loadSchemaDetails(QString buildPath);
 
 public:
+	std::vector<VFrame30::SchemaDetails> schemasDetails() const;
+	std::set<QString> schemaAppSignals(const QString& schemaId);
 
 private:
 	VFrame30::SchemaDetailsSet m_schemaDetails;
