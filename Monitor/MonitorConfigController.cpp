@@ -522,6 +522,8 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	emit configurationArrived(readSettings);
 
+	emit configurationUpdate();
+
 	return;
 }
 

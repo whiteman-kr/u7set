@@ -47,3 +47,13 @@ QString SimSchemaPage::schemaId() const
 {
 	return m_schemaWidget->schemaId();
 }
+
+SimSchemaWidget* SimSchemaPage::simSchemaWidget()
+{
+	return m_schemaWidget;
+}
+
+const SimSchemaWidget* SimSchemaPage::simSchemaWidget() const
+{
+	return m_schemaWidget;
+}

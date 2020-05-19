@@ -75,6 +75,32 @@ void SimSchemaWidget::createActions()
 
 }
 
+void SimSchemaWidget::signalContextMenu(const QStringList signalList)
+{
+	SimWidget* simWidget = nullptr;
+	QWidget* parent = this->parentWidget();
+	while (parent != nullptr)
+	{
+		simWidget = dynamic_cast<SimWidget*>(parent);
+		if (simWidget != nullptr)
+		{
+			break;
+		}
+
+		parent = parent->parentWidget();
+	}
+
+	if (simWidget == nullptr)
+	{
+		Q_ASSERT(simWidget);
+		return;
+	}
+
+	simWidget->signalContextMenu(signalList);
+
+	return;
+}
+
 void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
 	// Disable/enable actions
@@ -115,78 +141,6 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 //
 //	actions << m_newTabAction;
 //	actions << m_closeTabAction;
-
-	return;
-}
-
-void SimSchemaWidget::signalContextMenu(const QStringList signalList)
-{
-	// Compose menu
-	//
-	QMenu menu(this);
-	QList<QAction*> actions;
-
-	VFrame30::AppSignalController* appSignalController = simSchemaView()->appSignalController();
-	if (appSignalController == nullptr)
-	{
-		assert(appSignalController);
-		return;
-	}
-
-	for (const QString& s : signalList)
-	{
-		bool ok = false;
-		AppSignalParam signal =	appSignalController->signalParam(s, &ok);
-
-		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
-
-		QAction* a = new QAction(signalId, &menu);
-
-		auto f = [this, s]() -> void
-				 {
-					signalInfo(s);
-				 };
-
-		connect(a, &QAction::triggered, this, f);
-
-		actions << a;
-	}
-
-	menu.exec(actions, QCursor::pos(), 0, this);
-}
-
-void SimSchemaWidget::signalInfo(QString appSignalId)
-{
-	// Parent will be SimulatorTabPage*
-	//
-	QWidget* parent = this->parentWidget();
-	while (parent != nullptr)
-	{
-		if (dynamic_cast<SimulatorTabPage*>(parent) != nullptr)
-		{
-			break;
-		}
-
-		parent = parent->parentWidget();
-	}
-	Q_ASSERT(parent);
-
-	// --
-	//
-	bool ok = false;
-
-//	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
-//	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
-
-	if (ok == true)
-	{
-//		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
-//		dsi->show();
-	}
-	else
-	{
-		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
-	}
 
 	return;
 }

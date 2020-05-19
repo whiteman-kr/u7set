@@ -1,4 +1,6 @@
 #include "ExportPrint.h"
+#include <QPrintDialog>
+#include <QPageSetupDialog>
 
 ExportPrint::ExportPrint(QWidget* parent):
 	QObject(parent),

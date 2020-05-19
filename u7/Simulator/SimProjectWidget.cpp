@@ -165,6 +165,11 @@ void SimProjectWidget::fillEquipmentTree()
 		return;
 	}
 
+	// Fill AppLogic Schemas
+	//
+	AppLogicSchemasTreeItem* appLogicSchemasTreeItem = new AppLogicSchemasTreeItem{nullptr};
+	m_treeWidget->addTopLevelItem(appLogicSchemasTreeItem);
+
 	// Fill subsystems and modules
 	//
 	auto subsystems = m_simulator->subsystems();
@@ -446,4 +451,40 @@ namespace SimProjectTreeItems
 //	{
 //		return;
 //	}
+
+	AppLogicSchemasTreeItem::AppLogicSchemasTreeItem(QTreeWidgetItem* parent) :
+		BaseTreeItem(parent,
+					 QStringList{} << "Application Logic Schemas")
+	{
+		QFont f = font(0);
+		f.setWeight(QFont::Medium);
+
+		setFont(0, f);
+
+		return;
+	}
+
+	void AppLogicSchemasTreeItem::updateState(SimProjectWidget* /*simProjectWidget*/, Sim::ControlStatus /*state*/)
+	{
+	}
+
+	void AppLogicSchemasTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
+	{
+		emit simProjectWidget->signal_openAppSchemasTabPage();
+		return;
+	}
+
+	void AppLogicSchemasTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
+	{
+		QMenu menu(this->treeWidget());
+
+		menu.addAction(QObject::tr("Open..."),
+			[simProjectWidget]()
+			{
+				emit simProjectWidget->signal_openAppSchemasTabPage();
+			});
+
+		menu.exec(globalMousePos);
+		return;
+	}
 }

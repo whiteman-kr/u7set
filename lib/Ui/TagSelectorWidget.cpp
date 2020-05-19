@@ -4,8 +4,14 @@
 TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 	: QWidget(parent)
 {
-	setAutoFillBackground(true);
-	setBackgroundRole(QPalette::Light);
+	if (parent != nullptr)
+	{
+		setBackgroundRole(parent->backgroundRole());
+	}
+	else
+	{
+		setBackgroundRole(QPalette::Light);
+	}
 
 	// --
 	//
@@ -171,6 +177,22 @@ QStringList TagSelectorWidget::selectedTags() const
 	}
 
 	return result;
+}
+
+void TagSelectorWidget::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+
+	if (parentWidget() != nullptr)
+	{
+		setBackgroundRole(parentWidget()->backgroundRole());
+	}
+	else
+	{
+		setBackgroundRole(QPalette::Light);
+	}
+
+	return;
 }
 
 void TagSelectorWidget::contextMenuEvent(QContextMenuEvent* event)

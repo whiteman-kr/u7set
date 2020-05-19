@@ -2,6 +2,7 @@
 #define DIALOGSIGNALSEARCH_H
 
 #include "../lib/AppSignal.h"
+#include "../lib/IAppSignalManager.h"
 
 class SignalSearchSorter	// later move this class to some library file, it can be used in other cases
 {
@@ -101,8 +102,8 @@ struct DialogSignalSearchSettings
 	int columnCount = 0;
 	QByteArray columnWidth;
 
-	void restoreSettings(QSettings& s);
-	void storeSettings(QSettings& s);
+	void restore(QSettings& s);
+	void store(QSettings& s);
 };
 
 class DialogSignalSearch : public QDialog
@@ -110,11 +111,14 @@ class DialogSignalSearch : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogSignalSearch(QWidget* parent, const std::vector<AppSignalParam>& allSignals);
+	explicit DialogSignalSearch(QWidget* parent, IAppSignalManager* appSignalManager);
 	virtual ~DialogSignalSearch();
 
+public slots:
+	void on_signalsUpdate();		// Should be called when new signals arrived from AppDataService
+
 signals:
-	void signalContextMenu(QString appSignalId);
+	void signalContextMenu(const QStringList signalList);
 	void signalInfo(QString appSignalId);
 
 private slots:
@@ -132,6 +136,8 @@ private:
 	QLineEdit* m_editSignalID = nullptr;
 	QTableView* m_tableView = nullptr;
 	QLabel* m_labelFound = nullptr;
+
+	IAppSignalManager* m_appSignalManager = nullptr;
 
 	SignalSearchItemModel m_model;
 

@@ -92,7 +92,7 @@ public:
 	};
 
 public:
-	SignalSnapshotModel(AppSignalManager* appSignalManager, QObject *parent);
+	SignalSnapshotModel(IAppSignalManager* appSignalManager, QObject *parent);
 
 	void setSignals(std::vector<AppSignalParam>& signalList);
 
@@ -137,7 +137,7 @@ protected:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
-	AppSignalManager* m_appSignalManager = nullptr;
+	IAppSignalManager* m_appSignalManager = nullptr;
 
 	QStringList m_columnsNames;
 
@@ -173,8 +173,8 @@ struct DialogSignalSnapshotSettings
 	int m_signalSnapshotSortColumn = 0;
 	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
 
-	void restoreSettings(QSettings& s);
-	void storeSettings(QSettings& s);
+	void restore(QSettings& s);
+	void store(QSettings& s);
 };
 
 class DialogSignalSnapshot : public QDialog
@@ -182,25 +182,25 @@ class DialogSignalSnapshot : public QDialog
 	Q_OBJECT
 
 protected:
-	explicit DialogSignalSnapshot(AppSignalManager* appSignalManager,
+	explicit DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 								  QString projectName,
 								  QString softwareEquipmentId,
 								  QWidget *parent);
-	~DialogSignalSnapshot();
+	virtual ~DialogSignalSnapshot();
 
-protected:
-	void fillSchemas();
-	void fillSignals();
 
-	void refreshSchemasList();	// Should be called when new configuration is arrived from ConfigService
-	void reloadSignals();		// Should be called when new signals arrived from AppDataService
+public slots:
+	void on_schemasUpdate();
+	void on_signalsUpdate();		// Should be called when new signals arrived from AppDataService
 
 protected:
 	virtual std::vector<VFrame30::SchemaDetails> schemasDetails() = 0;
 	virtual std::set<QString> schemaAppSignals(const QString& schemaStrId) = 0;
 
+	virtual void showEvent(QShowEvent* e) override;
+
 signals:
-	void signalContextMenu(QString appSignalId);
+	void signalContextMenu(const QStringList signalList);
 	void signalInfo(QString appSignalId);
 
 protected slots:
@@ -209,29 +209,23 @@ protected slots:
 
 private slots:
 	void on_DialogSignalSnapshot_finished(int result);
-
 	void on_contextMenuRequested(const QPoint& pos);
-
 	void on_tableView_doubleClicked(const QModelIndex &index);
-
 	void on_sortIndicatorChanged(int column, Qt::SortOrder order);
-
 	void on_typeCombo_currentIndexChanged(int index);
-
 	void on_editMask_returnPressed();
-
 	void on_editTags_returnPressed();
-
 	void on_schemaCombo_currentIndexChanged(int index);
-
 	void on_comboMaskType_currentIndexChanged(int index);
-
 	void on_buttonExport_clicked();
-
 	void on_buttonPrint_clicked();
 
 private:
 	void setupUi();
+
+	void fillSchemas();
+
+	void fillSignals();
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
@@ -255,21 +249,20 @@ private:
 	//
 
 	QString m_projectName;
-
 	QString m_softwareEquipmentId;
 
-	AppSignalManager* m_appSignalManager = nullptr;
+	IAppSignalManager* m_appSignalManager = nullptr;
 
 	SignalSnapshotModel *m_model = nullptr;
 
 	int m_updateStateTimerId = -1;
 
-	QCompleter* m_maskCompleter = nullptr;
+	bool m_firstShow = true;
 
+	QCompleter* m_maskCompleter = nullptr;
 	QCompleter* m_tagsCompleter = nullptr;
 
 	static const QString m_maskHelp;
-
 	static const QString m_tagsHelp;
 };
 

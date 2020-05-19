@@ -291,9 +291,6 @@ namespace Builder
 			}
 		} while (true);
 
-		filesTree.clear();		// Files are already loaded and not required anymore
-		files.clear();			// Files are already loaded and not required anymore
-
 		// All schemas are parsed and loaded to map schemas
 		// iterate them and joint schemas to left/right/top/buttom
 		//
@@ -399,7 +396,7 @@ namespace Builder
 			// Write schema details for SchemaDetails by folder (Schemas.als/mvs/ufb...)
 			//
 			VFrame30::SchemaDetailsSet& sds = schemaDetails[subDir];
-			sds.add(schema->details());
+			sds.add(schema->details(filesTree.filePath(file->fileId())));
 
 			// Write schema scripts
 			//
@@ -418,7 +415,7 @@ namespace Builder
 			//
 			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
 
-			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
+			if (bool parseOk = schemaFile->details.parseDetails(schema->details(filesTree.filePath(file->fileId())));
 				parseOk == false)
 			{
 				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());

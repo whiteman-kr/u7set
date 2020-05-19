@@ -91,6 +91,7 @@ public:
 	// signals
 	//
 signals:
+	void configurationUpdate();
 	void configurationArrived(ConfigSettings configuration);
 	void unknownClient();										// Error f CfgService cannot find SoftwareID
 

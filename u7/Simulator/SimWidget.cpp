@@ -7,11 +7,14 @@
 #include "SimSelectBuildDialog.h"
 #include "SimLogicModulePage.h"
 #include "SimConnectionPage.h"
+#include "SimAppLogicSchemasPage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
 #include "../SimulatorTabPage.h"
 #include "../../lib/Ui/TabWidgetEx.h"
+#include "../../lib/Ui/DialogSignalSearch.h"
+#include "SimSignalSnapshot.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -56,6 +59,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	//
 	connect(db, &DbController::projectOpened, this, &SimWidget::projectOpened);
 	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
+	connect(db, &DbController::projectClosed, this, &SimWidget::projectClosed);
 
 	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
@@ -64,6 +68,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(m_projectWidget, &SimProjectWidget::signal_openLogicModuleTabPage, this, &SimWidget::openLogicModuleTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openConnectionTabPage, this, &SimWidget::openConnectionTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openAppSchemasTabPage, this, &SimWidget::openAppSchemasTabPage);
 
 	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimWidget::tabCloseRequest);
 	connect(m_tabWidget, &QTabWidget::currentChanged, this, &SimWidget::tabCurrentChanged);
@@ -76,6 +81,19 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 		connect(qApp, &QCoreApplication::aboutToQuit, this, &SimWidget::aboutToQuit);
 	}
 
+	// Add shortcut for switching to control tab page
+	//
+	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
+	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde}
+											  );
+	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
+
+	addAction(m_showControlTabAccelerator);
+
+	connect(m_showControlTabAccelerator, &QAction::triggered, this, &SimWidget::openAppSchemasTabPage);
+
 	return;
 }
 
@@ -86,6 +104,71 @@ SimWidget::~SimWidget()
 void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
 {
 	SimTrends::startTrendApp(m_simulator, appSignals, this);
+}
+
+void SimWidget::signalContextMenu(const QStringList signalList)
+{
+	// Compose menu
+	//
+	QMenu menu(this);
+	QList<QAction*> actions;
+
+	for (const QString& s : signalList)
+	{
+		bool ok = false;
+		AppSignalParam signal =	m_appSignalController->signalParam(s, &ok);
+
+		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+
+		QAction* a = new QAction(signalId, &menu);
+
+		auto f = [this, s]() -> void
+				 {
+					signalInfo(s);
+				 };
+
+		connect(a, &QAction::triggered, this, f);
+
+		actions << a;
+	}
+
+	menu.exec(actions, QCursor::pos(), 0, this);
+}
+
+void SimWidget::signalInfo(QString appSignalId)
+{
+	// Parent will be SimulatorTabPage*
+	//
+	/*QWidget* parent = this->parentWidget();
+	while (parent != nullptr)
+	{
+		if (dynamic_cast<SimulatorTabPage*>(parent) != nullptr)
+		{
+			break;
+		}
+
+		parent = parent->parentWidget();
+	}
+	Q_ASSERT(parent);*/
+
+	// --
+	//
+	bool ok = false;
+
+//	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
+//	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
+
+	if (ok == true)
+	{
+//		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
+//		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+	}
+
+	return;
 }
 
 void SimWidget::createToolBar()
@@ -442,6 +525,11 @@ void SimWidget::projectOpened(DbProject)
 	emit needUpdateActions();
 }
 
+void SimWidget::projectClosed()
+{
+	emit needCloseChildWindows();
+}
+
 void SimWidget::openBuild()
 {
 	m_simulator->control().stop();
@@ -623,6 +711,12 @@ void SimWidget::showSnapshot()
 	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
 	//    it is guarantee will not be deleted
 	//
+
+	QString project = db()->currentProject().projectName().toLower();
+
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, project, this);
+
+	return;
 }
 
 void SimWidget::showFindSignal()
@@ -633,6 +727,18 @@ void SimWidget::showFindSignal()
 	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
 	//    it is guarantee will not be deleted
 	//
+	DialogSignalSearch* dsi = new DialogSignalSearch(this, m_appSignalController->appSignalManager());
+
+	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::on_signalsUpdate);
+
+	connect(dsi, &DialogSignalSearch::signalContextMenu, this, &SimWidget::signalContextMenu);
+	connect(dsi, &DialogSignalSearch::signalInfo, this, &SimWidget::signalInfo);
+
+	connect(this, &SimWidget::needCloseChildWindows, dsi, &QDialog::accept);
+
+	dsi->show();
+
+	return;
 }
 
 void SimWidget::showTrends()
@@ -818,9 +924,15 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 											m_appSignalController,
 											m_tuningController,
 	                                        m_tabWidget};
+	page->simSchemaWidget()->clientSchemaView()->setZoom(0);	// this zoom needs to prevent from blinking
+																// (at first image is large, and scroll is shown, then
+																// second zoom(0) is working and removes scroll), just
+																// two setZoom's are needed here
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
+
+	page->simSchemaWidget()->clientSchemaView()->setZoom(0);	// Fit to screen
 
 	return;
 }
@@ -878,8 +990,49 @@ void SimWidget::openConnectionTabPage(QString connectionId)
 
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-	//connect(page, &SimLogicModulePage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
-	//connect(page, &SimLogicModulePage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
+	return;
+}
+
+void SimWidget::openAppSchemasTabPage()
+{
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	// Check if such SimulatorControlPage already exists
+	//
+	SimAppLogicSchemasPage* cp = SimBasePage::appLogicSchemasPage(m_tabWidget);
+
+	if (cp != nullptr)
+	{
+		int tabIndex = m_tabWidget->indexOf(cp);
+		if (tabIndex != -1)
+		{
+			m_tabWidget->setCurrentIndex(tabIndex);
+		}
+		else
+		{
+			cp->show();
+			cp->activateWindow();
+		}
+
+		return;
+	}
+
+	// Create new SimConnectionPage
+	//
+	SimAppLogicSchemasPage* page = new SimAppLogicSchemasPage{m_simulator.get(), m_tabWidget};
+
+	int tabIndex = m_tabWidget->addTab(page, tr("AppLogic Schemas"));
+	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimAppLogicSchemas.svg"}});
+	m_tabWidget->setTabToolTip(0, tr("Application Logic Schemas\n"
+									 "[CTRL + `]"));
+
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+
+	connect(page, &SimAppLogicSchemasPage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
 
 	return;
 }

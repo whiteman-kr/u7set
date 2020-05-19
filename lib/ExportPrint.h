@@ -1,6 +1,7 @@
 #ifndef EXPORTPRINT_H
 #define EXPORTPRINT_H
 
+#include <QPrinter>
 
 class ExportPrint : public QObject
 {

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="96.66600036621094" height="96.66600036621094" style="" xml:space="preserve"><rect id="backgroundrect" width="100%" height="100%" x="0" y="0" fill="none" stroke="none" class="" style=""/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<g class="currentLayer" style=""><title>Layer 1</title><g class="" filter=""><path fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="3" stroke-dasharray="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-dashoffset="" fill-rule="nonzero" opacity="1" marker-start="" marker-mid="" marker-end="" d="M36.744214495910064,48.15603179475822 L48.519915506706816,48.15603179475822 " id="svg_22" class="" filter=""/><path fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="3" stroke-dasharray="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-dashoffset="" fill-rule="nonzero" opacity="1" marker-start="" marker-mid="" marker-end="" d="M47.87627956635392,35.25883591911354 L59.65198057715068,35.25883591911354 " class="" id="svg_4" filter=""/><path fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="3" stroke-dasharray="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-dashoffset="" fill-rule="nonzero" opacity="1" marker-start="" marker-mid="" marker-end="" d="M47.87628191083844,64.97846340379276 L59.09123584970507,64.97846340379276 " class="" id="svg_5" filter=""/><path fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="3" stroke-dasharray="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-dashoffset="" fill-rule="nonzero" opacity="1" marker-start="" marker-mid="" marker-end="" d="M47.39842008240474,33.76350815773148 L47.39842008240474,66.47379023619807 " id="svg_24" class="" filter=""/><rect fill="none" stroke="#000000" stroke-width="3" stroke-dashoffset="" fill-rule="nonzero" id="svg_6" x="5.242990493774414" y="39.146084293723106" width="30" height="18" style="color: rgb(0, 0, 0);" class="" opacity="1" stroke-opacity="1" rx="0" ry="0" filter=""/><rect fill="none" stroke="#000000" stroke-width="3" stroke-dashoffset="" fill-rule="nonzero" x="60.00934600830078" y="55.781598061323166" width="30" height="18" style="color: rgb(0, 0, 0);" class="" id="svg_10" opacity="1" stroke-opacity="1" rx="0" ry="0" filter=""/><rect fill="none" stroke="#000000" stroke-width="3" stroke-dashoffset="" fill-rule="nonzero" x="60.00934600830078" y="26.62271875143051" width="30" height="18" style="color: rgb(0, 0, 0);" class="" id="svg_9" opacity="1" stroke-opacity="1" rx="0" ry="0" filter=""/></g></g><defs><filter id="f038" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:label="Button" x="0" y="0" width="1" height="1" inkscape:menu="Bevels" inkscape:menu-tooltip="Soft bevel, slightly depressed middle" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="2.3" in="SourceAlpha" result="result0"/>
+            <feMorphology in="SourceAlpha" radius="6.6" result="result1"/>
+            <feGaussianBlur stdDeviation="8.9" in="result1"/>
+            <feColorMatrix id="feColorMatrix2861" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.3 0" result="result91"/>
+            <feComposite in="result0" operator="out" result="result2" in2="result91"/>
+            <feGaussianBlur stdDeviation="1.7" result="result4"/>
+            <feDiffuseLighting surfaceScale="10">
+                <feDistantLight azimuth="225" elevation="45"/>
+            </feDiffuseLighting>
+            <feBlend id="feBlend2863" in2="SourceGraphic" mode="multiply"/>
+            <feComposite in2="SourceAlpha" operator="in" result="result3"/>
+            <feSpecularLighting in="result4" surfaceScale="5" specularExponent="17.9">
+                <feDistantLight azimuth="225" elevation="45"/>
+            </feSpecularLighting>
+            <feComposite in2="result3" operator="atop"/>
+        </filter></defs></svg>

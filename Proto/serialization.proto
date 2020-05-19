@@ -1305,6 +1305,7 @@ message SchemaDetails
 	optional bool excludedfromBuild = 6;
 	optional string equipmentId = 7;
 	optional string lmDescriptionFile = 8;
+	optional string path = 9;
 	repeated string signalIds = 20;
 	repeated string labels = 21;
 	repeated string connections = 22;

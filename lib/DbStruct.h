@@ -347,6 +347,8 @@ public:
 	std::shared_ptr<DbFileInfo> file(int fileId);
 	std::shared_ptr<DbFileInfo> file(int fileId) const;
 
+	QString filePath(int fileId) const;		// Return file path "/ABC/DEF/", "/"
+
 	const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
 	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
 	std::vector<DbFileInfo> toVectorIf(std::function<bool(const DbFileInfo&)> pred) const;

@@ -11,12 +11,19 @@ SimIdeSimulator::~SimIdeSimulator()
 
 bool SimIdeSimulator::load(QString buildPath)
 {
+	m_schemaDetails.clear();
+
 	bool ok = true;
 
-	ok &= Sim::Simulator::load(buildPath);
 	ok &= loadSchemaDetails(buildPath);
+	ok &= Sim::Simulator::load(buildPath);
 
 	return ok;
+}
+
+const VFrame30::SchemaDetailsSet& SimIdeSimulator::schemaDetails() const
+{
+	return m_schemaDetails;
 }
 
 std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasForLm(QString equipmentId) const
@@ -41,7 +48,31 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	{
 		writeError(tr("File loading error, file name %1.").arg(fileName));
 	}
+	else
+	{
+		emit schemaDetailsUpdated();
+	}
 
 	return ok;
 }
+
+std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasDetails() const
+{
+	std::vector<VFrame30::SchemaDetails> result = m_schemaDetails.schemasDetails();
+
+	return result;
+}
+
+std::set<QString> SimIdeSimulator::schemaAppSignals(const QString& schemaId)
+{
+	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetails.schemaDetails(schemaId);
+
+	if (details == nullptr)
+	{
+		return std::set<QString>();
+	}
+
+	return details->m_signals;
+}
+
 

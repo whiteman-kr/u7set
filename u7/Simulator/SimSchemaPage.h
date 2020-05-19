@@ -25,6 +25,10 @@ public:
 protected slots:
 	void controlStateChanged(Sim::SimControlState state);
 
+public:
+	SimSchemaWidget* simSchemaWidget();
+	const SimSchemaWidget* simSchemaWidget() const;
+
 private:
 	SimSchemaWidget* m_schemaWidget = nullptr;
 };

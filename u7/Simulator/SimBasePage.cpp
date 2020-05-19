@@ -1,6 +1,7 @@
 #include "SimBasePage.h"
 #include "SimLogicModulePage.h"
 #include "SimConnectionPage.h"
+#include "SimAppLogicSchemasPage.h"
 
 std::list<SimBasePage*> SimBasePage::m_pages;
 
@@ -74,6 +75,24 @@ SimConnectionPage* SimBasePage::connectionPage(QString connectionId, QWidget* pa
 
 		if (cp != nullptr &&
 			cp->connectionId() == connectionId &&
+			cp->property("SimParentObject") == parentValue)
+		{
+			return cp;
+		}
+	}
+
+	return nullptr;
+}
+
+SimAppLogicSchemasPage* SimBasePage::appLogicSchemasPage(QWidget* parent)
+{
+	QVariant parentValue =  QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
+
+	for (SimBasePage* page : m_pages)
+	{
+		SimAppLogicSchemasPage* cp = dynamic_cast<SimAppLogicSchemasPage*>(page);
+
+		if (cp != nullptr &&
 			cp->property("SimParentObject") == parentValue)
 		{
 			return cp;

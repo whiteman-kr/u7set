@@ -32,6 +32,10 @@ public:
 public:
 	void startTrends(const std::vector<AppSignalParam>& appSignals);
 
+public slots:
+	void signalContextMenu(const QStringList signalList);
+	void signalInfo(QString appSignalId);
+
 protected:
 	void createToolBar();
 	void createDocks();
@@ -41,6 +45,7 @@ protected:
 
 signals:
 	void needUpdateActions();
+	void needCloseChildWindows();
 
 protected slots:
 	void aboutToQuit();
@@ -50,6 +55,7 @@ protected slots:
 	void updateActions();
 
 	void projectOpened(DbProject project);
+	void projectClosed();
 	void openBuild();
 	void closeBuild();
 	void refreshBuild();
@@ -67,9 +73,10 @@ protected slots:
 	void addNewWindow();
 
 	void openLogicModuleTabPage(QString lmEquipmentId);
-	void openSchemaTabPage(QString fileName);
+	void openSchemaTabPage(QString schemaId);
 	void openCodeTabPage(QString lmEquipmentId);
 	void openConnectionTabPage(QString connectionId);
+	void openAppSchemasTabPage();
 
 	void tabCloseRequest(int index);
 	void tabCurrentChanged(int index);
@@ -113,6 +120,8 @@ private:
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 	QAction* m_trendsAction = nullptr;
+
+	QAction* m_showControlTabAccelerator = nullptr;
 };
 
 

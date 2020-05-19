@@ -328,7 +328,7 @@ void SignalSearchItemModel::setSignals(std::vector<AppSignalParam>* signalsVecto
 // DialogSignalSearchSettings
 //
 
-void DialogSignalSearchSettings::restoreSettings(QSettings& s)
+void DialogSignalSearchSettings::restore(QSettings& s)
 {
 	pos = s.value("DialogSignalSearch/pos", QPoint(-1, -1)).toPoint();
 	geometry = s.value("DialogSignalSearch/geometry").toByteArray();
@@ -336,7 +336,7 @@ void DialogSignalSearchSettings::restoreSettings(QSettings& s)
 	columnWidth = s.value("DialogSignalSearch/columnWidth").toByteArray();
 }
 
-void DialogSignalSearchSettings::storeSettings(QSettings& s)
+void DialogSignalSearchSettings::store(QSettings& s)
 {
 	s.setValue("DialogSignalSearch/pos", pos);
 	s.setValue("DialogSignalSearch/geometry", geometry);
@@ -348,14 +348,22 @@ void DialogSignalSearchSettings::storeSettings(QSettings& s)
 // DialogSignalSearch
 //
 
-QString DialogSignalSearch::m_signalId = "";
+QString DialogSignalSearch::m_signalId;
 
-DialogSignalSearch::DialogSignalSearch(QWidget *parent, const std::vector<AppSignalParam>& allSignals) :
+DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSignalManager) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_model(this),
-	m_signals(allSignals)
+	m_appSignalManager(appSignalManager)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	if(m_appSignalManager == nullptr)
+	{
+		Q_ASSERT(m_appSignalManager);
+		return;
+	}
+
+	m_signals = m_appSignalManager->signalList();
 
 	// Setup UI
 	//
@@ -460,11 +468,26 @@ DialogSignalSearch::~DialogSignalSearch()
 {
 }
 
+void DialogSignalSearch::on_signalsUpdate()
+{
+	m_signals = m_appSignalManager->signalList();
+
+	m_editSignalID->blockSignals(true);
+	m_editSignalID->setText(QString());
+	m_editSignalID->blockSignals(false);
+
+	m_signalId.clear();
+	search();
+
+	return;
+}
+
 void DialogSignalSearch::on_editSignalID_textEdited(const QString &arg1)
 {
 	m_signalId = arg1;
 	search();
 
+	return;
 }
 
 void DialogSignalSearch::search()
@@ -533,7 +556,10 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 
 	const AppSignalParam& signal = m_model.getSignal(index);
 
-	emit signalContextMenu(signal.appSignalId());
+	QStringList list;
+	list << signal.appSignalId();
+
+	emit signalContextMenu(list);
 
 	return;
 }

@@ -600,6 +600,24 @@ std::shared_ptr<DbFileInfo> DbFileTree::file(int fileId) const
 	}
 }
 
+QString DbFileTree::filePath(int fileId) const
+{
+	QStringList pathList;
+	std::shared_ptr<DbFileInfo> f = file(fileId);
+
+	while (f != nullptr && f->parentId() != m_rootFileId)
+	{
+		f = file(f->parentId());
+
+		if (f != nullptr)
+		{
+			pathList.push_front(f->fileName());
+		}
+	}
+
+	return QChar('/') + pathList.join(QChar('/'));
+}
+
 const std::map<int, std::shared_ptr<DbFileInfo>>& DbFileTree::files() const
 {
 	return m_files;

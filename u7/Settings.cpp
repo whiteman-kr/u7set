@@ -1,5 +1,7 @@
 #include "../u7/Settings.h"
 #include "../lib/PropertyEditor.h"
+#include "Simulator/SimSignalSnapshot.h"
+#include "../lib/Ui/DialogSignalSearch.h"
 
 #ifdef _WIN32
 #include "keychain.h"
@@ -236,6 +238,10 @@ void Settings::writeUserScope() const
 
 	thePropertyEditorSettings.store(s);
 
+	theDialogSignalSnapshotSettings.store(s);
+
+	theDialogSignalSearchSettings.store(s);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -362,7 +368,11 @@ void Settings::loadUserScope()
 
 	thePropertyEditorSettings.restore(s);
 
-    return;
+	theDialogSignalSnapshotSettings.restore(s);
+
+	theDialogSignalSearchSettings.restore(s);
+
+	return;
 }
 
 void Settings::writeSystemScope() const

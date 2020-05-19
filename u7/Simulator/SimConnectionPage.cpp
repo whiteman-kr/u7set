@@ -173,8 +173,6 @@ void SimConnectionPage::updateData()
 		updateConnectionState(m_connectionId, false);
 	}
 
-
-
 	m_disableButton->setEnabled(m_simulator->isLoaded());
 
 	m_port1TxSignals->setEnabled(m_simulator->isLoaded());
