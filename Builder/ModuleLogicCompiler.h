@@ -458,11 +458,12 @@ namespace Builder
 
 		bool generateBusComposerCode(CodeSnippet* code, const UalItem* ualItem);
 		UalSignal* getBusComposerBusSignal(const UalItem* composerItem, bool* connectedToTedrminatorOnly);
-		bool generateAnalogSignalToBusCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateAnalogSignalToBusAnalogInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 		bool getAnalogSignalToInbusSignalConversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 		bool get_SignedInt32_To_Unsigned16_BE_NoScale_inbusSignalCoversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateDiscreteSignalToBusCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateBusSignalToBusCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateDiscreteSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal);
+		bool generateBusSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
 
 		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
 

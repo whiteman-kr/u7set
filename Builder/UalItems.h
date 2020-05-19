@@ -455,8 +455,12 @@ namespace Builder
 
 		QString appSignalID() const { return m_refSignals[0]->appSignalID(); }
 
-		Address16 ualAddr() const { return m_ualAddr; }
+		Address16 ualAddr() const;
 		bool setUalAddr(Address16 ualAddr);
+
+		bool ualAddrIsValid() const;
+
+		bool checkUalAddr() const;
 
 		Address16 regBufAddr() const { return m_regBufAddr; }
 		bool setRegBufAddr(Address16 regBufAddr);
@@ -495,9 +499,10 @@ namespace Builder
 		int refSignalsCount() const { return m_refSignals.count(); }
 
 		bool isCompatible(const Signal* s, IssueLogger* log) const;
-		bool isCompatible(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;
-		bool isCompatible(const BusSignal& busSignal, IssueLogger* log) const;
-		bool isCompatible(const UalSignal* ualSignal, IssueLogger *log) const;
+		bool isCanBeConnectedTo(const UalItem &ualItem, const LogicAfbSignal& afbSignal, bool afbSignalIsInput, IssueLogger* log) const;
+		bool isCompatible(BusShared bus, const BusSignal& busSignal, IssueLogger* log) const;
+		bool isCompatible(const UalSignal* ualSignal, IssueLogger* log) const;
+		bool isCanBeConnectedTo(const UalSignal* destSignal, IssueLogger* log) const;
 
 		bool isInput() const { return m_isInput; }
 		bool isTunable() const { return m_isTunable; }

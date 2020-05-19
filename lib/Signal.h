@@ -312,6 +312,7 @@ public:
 
 	Address16 ualAddr() const { return m_ualAddr; }
 	void setUalAddr(const Address16& addr) { m_ualAddr = addr; }
+	bool ualAddrIsValid() const { return m_ualAddr.isValid(); }
 
 	Address16 regBufAddr() const { return m_regBufAddr; }
 	void setRegBufAddr(const Address16& addr) { m_regBufAddr = addr; }

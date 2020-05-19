@@ -148,9 +148,23 @@ namespace Builder
 
 		if (heapItem->address != BAD_ADDRESS)
 		{
-			Q_ASSERT(false);
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("Repeated call of getAddressForWrite for %1").arg(appSignalID));
-			return addrForWrite;
+			if (ualSignal.isBus() == true)
+			{
+				// for bus signals multiple calls of getAddressForWrite is allowed due to mutistep bus processing
+				//
+				addrForWrite.setBitAddress(heapItem->address);
+
+				return addrForWrite;
+			}
+			else
+			{
+				// for analog and discrete signals multiple calls of getAddressForWrite is not allowed!
+				//
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Repeated call of getAddressForWrite for %1").arg(appSignalID));
+
+				return addrForWrite;
+			}
 		}
 
 		for(const std::pair<int, int>& freedAddress : m_freedAddresses)

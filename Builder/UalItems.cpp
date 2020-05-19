@@ -1460,77 +1460,79 @@ namespace Builder
 		return m_refSignals[0]->isCompatibleFormat(*s);
 	}
 
-	bool UalSignal::isCompatible(const UalItem& ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const
+	bool UalSignal::isCanBeConnectedTo(const UalItem& ualItem,
+									   const LogicAfbSignal& afbSignal,
+									   bool afbSignalIsInput,
+									   IssueLogger* log) const
 	{
 		TEST_PTR_RETURN_FALSE(log);
 
 		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
-		if (afbSignal.isBus() == true)
+		if (afbSignalIsInput == true)
 		{
-			if(isBus() == true)
+			if (afbSignal.isBus() == true)
 			{
-				// bus signal connection to bus input checking
-				//
-				if (m_bus == nullptr)
+				if(isBus() == true)
 				{
-					assert(false);
+					// bus signal connection to bus input checking
+					//
+					TEST_PTR_RETURN_FALSE(m_bus);
+
+					switch(afbSignal.busDataFormat())
+					{
+					case E::BusDataFormat::Discrete:
+
+						if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
+						{
+							return true;
+						}
+
+						// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+						//
+						log->errALC5172(afbSignal.caption(), ualItem.label(), ualItem.guid(), ualItem.schemaID());
+
+						return false;
+
+					case E::BusDataFormat::Mixed:
+						// any bus can be connected to this afbSignal
+						//
+						return true;
+
+					default:
+						LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
+					}
+
 					return false;
 				}
 
-				switch(afbSignal.busDataFormat())
+				if (isDiscrete() == true)
 				{
-				case E::BusDataFormat::Discrete:
-
-					if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
+					// discrete signal connection to bus input checking
+					//
+					switch(afbSignal.busDataFormat())
 					{
+					case E::BusDataFormat::Discrete:
+					case E::BusDataFormat::Mixed:
 						return true;
+
+					default:
+						LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
 					}
-
-					// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
-					//
-					log->errALC5172(afbSignal.caption(), ualItem.label(), ualItem.guid(), ualItem.schemaID());
-
-					return false;
-
-				case E::BusDataFormat::Mixed:
-					// any bus can be connected to this afbSignal
-					//
-					return true;
-
-				default:
-					LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
 				}
 
 				return false;
 			}
-
-			if (isDiscrete() == true)
-			{
-				// discrete signal connection to bus input checking
-				//
-				switch(afbSignal.busDataFormat())
-				{
-				case E::BusDataFormat::Discrete:
-				case E::BusDataFormat::Mixed:
-					return true;
-
-				default:
-					LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
-				}
-			}
-
-			return false;
 		}
 
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
-	bool UalSignal::isCompatible(const Builder::BusSignal& busSignal, IssueLogger* log) const
+	bool UalSignal::isCompatible(BusShared bus, const Builder::BusSignal& busSignal, IssueLogger* log) const
 	{
 		TEST_PTR_RETURN_FALSE(log);
 
@@ -1547,6 +1549,13 @@ namespace Builder
 			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
 
 		case E::SignalType::Bus:
+
+			if (isDiscrete() == true &&
+				(bus->busDataFormat() == E::BusDataFormat::Discrete || bus->busDataFormat() == E::BusDataFormat::Mixed))
+			{
+				return true;
+			}
+
 			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.busTypeID);
 
 		default:
@@ -1559,6 +1568,25 @@ namespace Builder
 	bool UalSignal::isCompatible(const UalSignal* ualSignal, IssueLogger* log) const
 	{
 		return isCompatible(ualSignal->signal(), log);
+	}
+
+	bool UalSignal::isCanBeConnectedTo(const UalSignal* destSignal, IssueLogger* log) const
+	{
+		// *this - is source signal
+		//
+		if (isDiscrete() == true && destSignal->isBus() == true)
+		{
+			BusShared bus = destSignal->bus();
+
+			TEST_PTR_RETURN_FALSE(bus);
+
+			if (bus->busDataFormat() == E::BusDataFormat::Discrete || bus->busDataFormat() == E::BusDataFormat::Mixed)
+			{
+				return true;
+			}
+		}
+
+		return isCompatible(destSignal->signal(), log);
 	}
 
 	void UalSignal::setReceivedOptoAppSignalID(const QString& recvAppSignalID)
@@ -1682,15 +1710,29 @@ namespace Builder
 		return constValue();
 	}
 
+	Address16 UalSignal::ualAddr() const
+	{
+		Q_ASSERT(isConst() == false);
+		Q_ASSERT(isHeapPlaced() == false);
+
+		return m_ualAddr;
+	}
+
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
 		if (m_isConst == true)
 		{
-			assert(false);					// for Const signals ualAddr isn't assigned
+			Q_ASSERT(false);					// for Const signals ualAddr isn't assigned
 			return false;
 		}
 
-		assert(ualAddr.isValid() == true);
+		if (m_isHeapPlaced == true)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		Q_ASSERT(ualAddr.isValid() == true);
 
 		if (m_ualAddr.isValid() == true && m_isBusChild == true)
 		{
@@ -1699,7 +1741,7 @@ namespace Builder
 
 		if (m_ualAddr.isValid() == true && m_isBusChild == false)
 		{
-			assert(false);				// why and where m_ualAddr is already set???
+			Q_ASSERT(false);				// why and where m_ualAddr is already set???
 			return false;
 		}
 
@@ -1709,7 +1751,7 @@ namespace Builder
 
 		for(Signal* s : m_refSignals)
 		{
-			assert(s->ualAddr().isValid() == false);
+			Q_ASSERT(s->ualAddrIsValid() == false);
 
 			s->setUalAddr(ualAddr);
 		}
@@ -1721,11 +1763,11 @@ namespace Builder
 
 		if (m_bus == nullptr)
 		{
-			assert(false);				// m_bus can't be null
+			Q_ASSERT(false);				// m_bus can't be null
 			return false;
 		}
 
-		assert(ualAddr.bit() == 0);		// bus must be aligned to word
+		Q_ASSERT(ualAddr.bit() == 0);		// bus must be aligned to word
 
 		bool result = true;
 
@@ -1735,7 +1777,7 @@ namespace Builder
 
 			if (childSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				result = false;
 				continue;
 			}
@@ -1751,6 +1793,28 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool UalSignal::ualAddrIsValid() const
+	{
+		return m_ualAddr.isValid();
+	}
+
+	bool UalSignal::checkUalAddr() const
+	{
+		if (isConst() == true)
+		{
+			Q_ASSERT(m_ualAddr.isValid() == false);			// UAL addr shouldn't be set for Const signals
+			return true;
+		}
+
+		if (isHeapPlaced() == true)
+		{
+			Q_ASSERT(m_ualAddr.isValid() == false);			// UAL addr shouldn't be set for heap placed signals
+			return true;
+		}
+
+		return m_ualAddr.isValid();
 	}
 
 	bool UalSignal::setRegBufAddr(Address16 regBufAddr)
@@ -2693,7 +2757,12 @@ namespace Builder
 			return ualSignal.ualAddr();
 		}
 
-		Q_ASSERT(ualSignal.ualAddr().isValid() == false);		// for heap placed signals ualAddr should not be set
+		if (ualSignal.ualAddrIsValid() == true)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("For heap placed signal %1 ualAddr should NOT be set").arg(ualSignal.appSignalID()));
+			return Address16();
+		}
 
 		if (ualSignal.isDiscrete() == true)
 		{
@@ -2707,10 +2776,11 @@ namespace Builder
 	{
 		if (ualSignal.isHeapPlaced() == false)
 		{
+			Q_ASSERT(ualSignal.ualAddrIsValid() == true);
 			return ualSignal.ualAddr();
 		}
 
-		Q_ASSERT(ualSignal.ualAddr().isValid() == false);		// for heap placed signals ualAddr should not be set
+		Q_ASSERT(ualSignal.ualAddrIsValid() == false);		// for heap placed signals ualAddr should not be set
 
 		if (ualSignal.isDiscrete() == true)
 		{

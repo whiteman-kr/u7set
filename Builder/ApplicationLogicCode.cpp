@@ -441,6 +441,14 @@ namespace Builder
 		m_code.setWord3(constVal);
 	}
 
+	void CodeItem::movConst(Address16 addrTo, int constVal)
+	{
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
+
+		movConst(addrTo.offset(), constVal);
+	}
+
 	void CodeItem::movBitConst(int addrTo, int bitNo, int constBit)
 	{
 		Q_ASSERT(addrTo >=0);
@@ -586,6 +594,14 @@ namespace Builder
 		m_code.setWord4(sizeW);
 	}
 
+	void CodeItem::setMem(Address16 addr, int constValue, int sizeW)
+	{
+		Q_ASSERT(addr.isValid() == true);
+		Q_ASSERT(addr.bit() == 0);
+
+		setMem(addr.offset(), constValue, sizeW);
+	}
+
 	void CodeItem::movBit(int addrTo, int bitTo, int addrFrom, int bitFrom)
 	{
 		Q_ASSERT(addrTo >=0);
@@ -697,6 +713,14 @@ namespace Builder
 		m_code.setWord3(static_cast<quint16>((constUInt32 >> 16) & 0xFFFF));
 		m_code.setWord4(static_cast<quint16>(constUInt32 & 0xFFFF));
 		m_code.setConstUInt32(constUInt32);
+	}
+
+	void CodeItem::movConstUInt32(Address16 addrTo, quint32 constUInt32)
+	{
+		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
+
+		movConstUInt32(addrTo.offset(), constUInt32);
 	}
 
 	void CodeItem::movConstFloat(int addrTo, float constFloat)

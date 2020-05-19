@@ -574,7 +574,7 @@ namespace Builder
 
 			if (setUalAddrEqualToRegBufAddr == true)
 			{
-				assert(ualSignal->ualAddr().isValid() == false);			//	checking that ualAddr is not set early
+				assert(ualSignal->ualAddrIsValid() == false);			//	checking that ualAddr is not set early
 				ualSignal->setUalAddr(addr);
 			}
 

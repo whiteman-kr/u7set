@@ -2266,7 +2266,7 @@ namespace Builder
 			return linkSetFlagsItemInput(srcItem, destItem, inPinUuid, ualSignal);
 		}
 
-		result = ualSignal->isCompatible(*destItem, inSignal, log());
+		result = ualSignal->isCanBeConnectedTo(*destItem, inSignal, true, log());
 
 		if (result == false)
 		{
@@ -2374,7 +2374,7 @@ namespace Builder
 			return false;
 		}
 
-		if (ualSignal->isCompatible(busSignal, log()) == false)
+		if (ualSignal->isCompatible(bus, busSignal, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -7227,7 +7227,7 @@ namespace Builder
 				continue;			// for const signals refreshing code is not required
 			}
 
-			if (lbSignal->ualAddr().isValid() == false)
+			if (lbSignal->ualAddrIsValid() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -7435,7 +7435,7 @@ namespace Builder
 			assert(s->isAnalog() == true);
 			assert(s->isInput() == true);
 			assert(s->dataSize() == SIZE_32BIT);
-			assert(s->ualAddr().isValid() == true);
+			assert(s->ualAddrIsValid() == true);
 			assert(s->ioBufAddr().isValid() == true);
 
 			if (s->needConversion() == false)
@@ -7482,9 +7482,6 @@ namespace Builder
 				assert(false);			// unknown format
 				return false;
 			}
-
-			assert(s->ioBufAddr().isValid() == true);
-			assert(s->ualAddr().isValid() == true);
 
 			if (isTconvAfb == true)
 			{
@@ -7712,7 +7709,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inUalSignal, m_log);
 
-		if (inUalSignal->isCompatible(*ualAfb, inAfbSignal, log()) == false)
+		if (inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, true, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -7722,8 +7719,7 @@ namespace Builder
 
 		// inUalSignal and inAfbSignal are compatible
 		//
-		if ((inUalSignal->isConst() == false && inUalSignal->isHeapPlaced() == false) &&
-				inUalSignal->ualAddr().isValid() == false)
+		if (inUalSignal->checkUalAddr() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -7853,8 +7849,7 @@ namespace Builder
 			return false;
 		}
 
-		if ((inUalSignal->isConst() == false && inUalSignal->isHeapPlaced() == false) &&
-				inUalSignal->ualAddr().isValid() == false)
+		if (inUalSignal->checkUalAddr() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -7953,7 +7948,7 @@ namespace Builder
 			return false;
 		}
 
-		bool result = inUalSignal->isCompatible(*ualAfb, inAfbSignal, log());
+		bool result = inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, true, log());
 
 		if (result == false)
 		{
@@ -7963,7 +7958,7 @@ namespace Builder
 			return false;
 		}
 
-		if (inUalSignal->ualAddr().isValid() == false)
+		if (inUalSignal->checkUalAddr() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -7971,9 +7966,11 @@ namespace Builder
 			return false;
 		}
 
-		assert(inUalSignal->ualAddr().bit() == 0);
+		Address16 inSignalUalAddr = m_ualSignals.getSignalReadAddress(*inUalSignal, bpStepInfo.isLastStep());
 
-		int addrFrom = inUalSignal->ualAddr().offset();
+		Q_ASSERT(inSignalUalAddr.bit() == 0);
+
+		int addrFrom = inSignalUalAddr.offset();
 
 		CodeItem cmd;
 
@@ -8094,7 +8091,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->isCompatible(*ualAfb, outAfbSignal, log()) == false)
+		if (outUalSignal->isCanBeConnectedTo(*ualAfb, outAfbSignal, false, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -8102,7 +8099,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->isHeapPlaced() == false && outUalSignal->ualAddr().isValid() == false)
+		if (outUalSignal->checkUalAddr() == false)
 		{
 			LOG_UNDEFINED_UAL_ADDRESS(m_log, outUalSignal);
 			return false;
@@ -8169,7 +8166,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->ualAddr().isValid() == false)
+		if (outUalSignal->checkUalAddr() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -8177,9 +8174,11 @@ namespace Builder
 			return false;
 		}
 
-		assert(outUalSignal->ualAddr().bit() == 0);
+		Address16 outUalSignalAddr = m_ualSignals.getSignalWriteAddress(*outUalSignal);
 
-		int addrTo = outUalSignal->ualAddr().offset();
+		Q_ASSERT(outUalSignalAddr.bit() == 0);
+
+		int addrTo = outUalSignalAddr.offset();
 
 		CodeItem cmd;
 
@@ -8501,7 +8500,7 @@ namespace Builder
 				continue;
 			}
 
-			if (busChildSignal->isCompatible(inputSignal, log()) == false)
+			if (inputSignal->isCanBeConnectedTo(busChildSignal, log()) == false)
 			{
 				assert(false);						// this error should be detected early
 				LOG_INTERNAL_ERROR(m_log);
@@ -8509,8 +8508,7 @@ namespace Builder
 				continue;
 			}
 
-			if ((inputSignal->isConst() == false && inputSignal->isHeapPlaced() == false) &&
-					inputSignal->ualAddr().isValid() == false)
+			if (inputSignal->checkUalAddr() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -8518,7 +8516,7 @@ namespace Builder
 				return false;
 			}
 
-			if (busChildSignal->ualAddr().isValid() == false)
+			if (busChildSignal->ualAddrIsValid() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -8531,15 +8529,30 @@ namespace Builder
 			switch(busChildSignal->signalType())
 			{
 			case E::SignalType::Analog:
-				res = generateAnalogSignalToBusCode(code, inputSignal, busChildSignal, busSignal);
+				res = generateAnalogSignalToBusAnalogInputCode(code, inputSignal, busChildSignal, busSignal);
 				break;
 
 			case E::SignalType::Discrete:
-				res = generateDiscreteSignalToBusCode(code, inputSignal, busChildSignal, busSignal);
+				res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
 				break;
 
 			case E::SignalType::Bus:
-				res = generateBusSignalToBusCode(code, inputSignal, busChildSignal, busSignal);
+				{
+					switch(inputSignal->signalType())
+					{
+					case E::SignalType::Discrete:
+						res = generateDiscreteSignalToBusBusInputCode(code, inputSignal, busChildSignal);
+						break;
+
+					case E::SignalType::Bus:
+						res = generateBusSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal);
+						break;
+
+					default:
+						res = false;
+						LOG_INTERNAL_ERROR(m_log);
+					}
+				}
 				break;
 
 			default:
@@ -8613,13 +8626,13 @@ namespace Builder
 		return busSignal;
 	}
 
-	bool ModuleLogicCompiler::generateAnalogSignalToBusCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal)
+	bool ModuleLogicCompiler::generateAnalogSignalToBusAnalogInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
 
-		Q_ASSERT(busChildSignal->ualAddr().isValid() == true);
+		Q_ASSERT(busChildSignal->ualAddrIsValid() == true);
 		Q_ASSERT(busChildSignal->ualAddr().bit() == 0);
 
 		if (busSignal.conversionRequired() == true)
@@ -8717,13 +8730,13 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateDiscreteSignalToBusCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal)
+	bool ModuleLogicCompiler::generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
 
-		assert(busChildSignal->ualAddr().isValid() == true);
+		assert(busChildSignal->ualAddrIsValid() == true);
 
 		if (busSignal.conversionRequired() == true)
 		{
@@ -8755,13 +8768,15 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusSignalToBusCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal)
+	bool ModuleLogicCompiler::generateDiscreteSignalToBusBusInputCode(CodeSnippet* code,
+																	  UalSignal* inputSignal,
+																	  UalSignal* busChildSignal)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
 
-		if (inputSignal->ualAddr().isValid() == false)
+		if (inputSignal->checkUalAddr() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -8769,7 +8784,96 @@ namespace Builder
 			return false;
 		}
 
-		if (busChildSignal->ualAddr().isValid() == false)
+		if (busChildSignal->checkUalAddr() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(busChildSignal->appSignalID(), busChildSignal->ualItemGuid(), busChildSignal->ualItemSchemaID());
+			return false;
+		}
+
+		Q_ASSERT(inputSignal->isDiscrete() == true);
+		Q_ASSERT(busChildSignal->isBus() == true);
+
+		TEST_PTR_LOG_RETURN_FALSE(busChildSignal->bus(), m_log);
+
+		int busSizeW = busChildSignal->bus()->sizeW();
+
+		CodeItem cmd;
+
+		if (inputSignal->isConst() == true)
+		{
+			if (inputSignal->constValue() == 1)
+			{
+				switch(busSizeW)
+				{
+				case 1:
+					cmd.movConst(busChildSignal->ualAddr(), 0xFFFF);
+					break;
+
+				case 2:
+					cmd.movConstUInt32(busChildSignal->ualAddr(), 0xFFFFFFFFl);
+					break;
+
+				default:
+					cmd.setMem(busChildSignal->ualAddr(), 0xFFFF, busSizeW);
+				}
+
+				cmd.setComment(QString("%1 <= %2").arg(busChildSignal->appSignalID()).arg(inputSignal->appSignalID()));
+
+				code->append(cmd);
+			}
+		}
+		else
+		{
+			int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
+
+			Address16 inputSignalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
+
+			cmd.fill(wordAccAddr, inputSignalAddr.offset(), inputSignalAddr.bit());
+			cmd.setComment(QString("%1 <= %2").arg(busChildSignal->appSignalID()).arg(inputSignal->appSignalID()));
+
+			code->append(cmd);
+
+			if (busSizeW > 1)
+			{
+				cmd.fill(wordAccAddr + 1, inputSignalAddr.offset(), inputSignalAddr.bit());
+				code->append(cmd);
+			}
+
+			for(int i = 0; i < busSizeW / 2; i++)
+			{
+				cmd.mov32(busChildSignal->ualAddr().offset() + i * 2, wordAccAddr);
+				code->append(cmd);
+			}
+
+			if ((busSizeW % 2) != 0)
+			{
+				cmd.mov(busChildSignal->ualAddr().offset() + busSizeW - 1, wordAccAddr);
+				code->append(cmd);
+			}
+
+			code->append(cmd);
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateBusSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
+
+		if (inputSignal->ualAddrIsValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(inputSignal->appSignalID(), inputSignal->ualItemGuid(), inputSignal->ualItemSchemaID());
+			return false;
+		}
+
+		if (busChildSignal->ualAddrIsValid() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
 			//
@@ -8903,7 +9007,7 @@ namespace Builder
 				continue;
 			}
 
-			if (inputSignal->isConst() == false && inputSignal->ualAddr().isValid() == false)
+			if (inputSignal->checkUalAddr() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -8911,7 +9015,7 @@ namespace Builder
 				return false;
 			}
 
-			if (busChildSignal->ualAddr().isValid() == false)
+			if (busChildSignal->ualAddrIsValid() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -8930,7 +9034,7 @@ namespace Builder
 				break;
 
 			case E::SignalType::Discrete:
-				res = generateDiscreteSignalToBusCode(code, inputSignal, busChildSignal, busSignal);
+				res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
 				break;
 
 			default:
@@ -9577,7 +9681,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->ualAddr().isValid() == false ||
+			if (ualSignal->ualAddrIsValid() == false ||
 				ualSignal->regBufAddr().isValid() == false ||
 				ualSignal->regValueAddr().isValid() == false)
 			{
@@ -9626,7 +9730,7 @@ namespace Builder
 		{
 			TEST_PTR_LOG_RETURN_FALSE(ualSignal, m_log);
 
-			if (ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->ualAddrIsValid() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -9708,7 +9812,7 @@ namespace Builder
 			case E::AnalogAppSignalFormat::Float32:
 
 				assert(s->dataSize() == SIZE_32BIT);
-				assert(s->ualAddr().isValid() == true);
+				assert(s->ualAddrIsValid() == true);
 				assert(s->regBufAddr().isValid() == true);
 				break;
 
@@ -9816,7 +9920,7 @@ namespace Builder
 
 			// check signal!
 
-			assert(s->ualAddr().isValid() == true);
+			assert(s->ualAddrIsValid() == true);
 			assert(s->regBufAddr().isValid() == true);
 			assert(s->dataSize() == SIZE_1BIT);
 			assert(s->ualAddr().bit() == s->regBufAddr().bit());
@@ -10183,7 +10287,7 @@ namespace Builder
 
 			assert(ualSignal->isConst() == false);
 
-			if (ualSignal->ualAddr().isValid() == false ||
+			if (ualSignal->ualAddrIsValid() == false ||
 				ualSignal->regBufAddr().isValid() == false ||
 				ualSignal->regValueAddr().isValid() == false)
 			{
@@ -10373,7 +10477,7 @@ namespace Builder
 			}
 			else
 			{
-				assert(s->ualAddr().isValid() == true);
+				assert(s->ualAddrIsValid() == true);
 			}
 
 			if (s->needConversion() == false)
@@ -10510,7 +10614,7 @@ namespace Builder
 				continue;				// this bus output is not used in app logic, it is ok
 			}
 
-			if (s->ualAddr().isValid() == false)
+			if (s->ualAddrIsValid() == false)
 			{
 				Q_ASSERT(false);
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined UAL address of signal %1").arg(s->appSignalID()));
@@ -10653,7 +10757,7 @@ namespace Builder
 				}
 				else
 				{
-					if (s->ualAddr().isValid() == false)
+					if (s->ualAddrIsValid() == false)
 					{
 						assert(false);
 						LOG_INTERNAL_ERROR(m_log);
@@ -10921,7 +11025,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->checkUalAddr() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -11035,7 +11139,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->ualAddrIsValid() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -11135,7 +11239,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->checkUalAddr() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -11620,7 +11724,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->checkUalAddr() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
@@ -11738,7 +11842,7 @@ namespace Builder
 					continue;
 				}
 
-				if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+				if (ualSignal->checkUalAddr() == false)
 				{
 					// Undefined UAL address of signal '%1' (Logic schema '%2').
 					//
@@ -11827,14 +11931,13 @@ namespace Builder
 
 			if (ualSignal->bus() == nullptr)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString("Raw tx UalSignal %1 bus description is undefined (Opto port %2).").
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Raw tx UalSignal %1 bus description is undefined (Opto port %2).").
 										arg(txSignal->appSignalID()).arg(port->equipmentID()));
 				result = false;
 				continue;
 			}
 
-			if (ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->ualAddrIsValid() == false)
 			{
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//

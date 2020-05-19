@@ -243,6 +243,7 @@ namespace Builder
 		void movMem(int addrTo, int addrFrom, int sizeW);
 		void movMem(Address16 addrTo, Address16 addrFrom, int sizeW);
 		void movConst(int addrTo, int constVal);
+		void movConst(Address16 addrTo, int constVal);
 		void movBitConst(int addrTo, int bitNo, int constBit);
 		void movBitConst(Address16 addr16, int constBit);
 		void writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption);
@@ -254,6 +255,7 @@ namespace Builder
 		void readFuncBlockBit(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
 		void readFuncBlockCompare(int fbType, int fbInstance, int fbParamNo, int testValue, const QString& fbCaption);
 		void setMem(int addr, int constValue, int sizeW);
+		void setMem(Address16 addr, int constValue, int sizeW);
 		void movBit(int addrTo, int bitTo, int addrFrom, int bitFrom);
 		void movBit(Address16 addrTo, Address16 addrFrom);
 		void nstart(int fbType, int fbInstance, int startCount, const QString& fbCaption, int fbRunTime);
@@ -264,6 +266,7 @@ namespace Builder
 		void mov32(Address16 addrTo, Address16 addrFrom);
 		void movConstInt32(int addrTo, qint32 constInt32);
 		void movConstUInt32(int addrTo, quint32 constUInt32);
+		void movConstUInt32(Address16 addrTo, quint32 constUInt32);
 		void movConstFloat(int addrTo, float constFloat);
 		void writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption);
 		void writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption);
