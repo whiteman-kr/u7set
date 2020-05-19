@@ -39,6 +39,7 @@ public slots:
 	void slot_zoomIn();
 	void slot_zoomOut();
 	void slot_zoom100();
+	void slot_zoomToFit();
 
 	void slot_historyBack();
 	void slot_historyForward();

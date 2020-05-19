@@ -162,6 +162,21 @@ void MonitorCentralWidget::slot_zoom100()
 	return;
 }
 
+void MonitorCentralWidget::slot_zoomToFit()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		Q_ASSERT(curTabWidget);
+		return;
+	}
+
+	curTabWidget->zoomToFit();
+	return;
+}
+
+
 void MonitorCentralWidget::slot_historyBack()
 {
 	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());

@@ -371,6 +371,13 @@ void MonitorMainWindow::createActions()
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
 	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
 
+	m_zoomToFitAction = new QAction(tr("Zoom to Fit"), this);
+	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit screen"));
+	m_zoomToFitAction->setIcon(QIcon(":/Images/Images/ZoomFitToScreen.svg"));
+	m_zoomToFitAction->setEnabled(true);
+	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash));
+	connect(m_zoomToFitAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomToFit);
+
 	m_historyBack = new QAction(tr("Go Back"), this);
 	m_historyBack->setStatusTip(tr("Click to go back"));
 	m_historyBack->setIcon(QIcon(":/Images/Images/Backward.svg"));
@@ -435,6 +442,7 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addAction(m_zoomInAction);
 	viewMenu->addAction(m_zoomOutAction);
 	viewMenu->addAction(m_zoom100Action);
+	viewMenu->addAction(m_zoomToFitAction);
 	viewMenu->addSeparator();
 
 	viewMenu->addAction(m_historyForward);
@@ -506,6 +514,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_zoomInAction);
 	m_toolBar->addAction(m_zoomOutAction);
+	m_toolBar->addAction(m_zoomToFitAction);
 
 	// Spacer between actions and logo
 	//

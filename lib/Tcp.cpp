@@ -1194,7 +1194,8 @@ namespace Tcp
 			}
 			else
 			{
-				qDebug() << qPrintable(QString("%1: IP address of server is NOT SET! Connection is impossible!"));
+				qDebug() << qPrintable(QString("%1: IP address of server is NOT SET! Connection is impossible!")
+											.arg(objectName()));
 			}
 		}
 	}

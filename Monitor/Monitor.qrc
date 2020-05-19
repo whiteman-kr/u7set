@@ -19,5 +19,7 @@
         <file>Images/NetworkConnections.svg</file>
         <file>Images/dragndrop.png</file>
         <file>Images/Snapshot.svg</file>
+        <file>Images/ZoomFitToScreen.svg</file>
     </qresource>
 </RCC>
+ 
