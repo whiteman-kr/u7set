@@ -68,6 +68,7 @@
         <file>Images/SimFindSignal.svg</file>
         <file>Images/SimLogicModuleIcon.svg</file>
         <file>Images/SimConnectionIcon.svg</file>
+        <file>Images/SimAppLogicSchemas.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
@@ -80,3 +81,4 @@
         <file>Simulator/Templates/DiscreteSeries.js</file>
     </qresource>
 </RCC>
+    

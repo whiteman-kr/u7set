@@ -3,13 +3,13 @@
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
-#include "TagSelectorWidget.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/Ui/TabWidgetEx.h"
+#include "../lib/Ui/TagSelectorWidget.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/WiringSchema.h"
@@ -942,7 +942,7 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 
 	// --
 	//
-	*filesTree = std::move(DbFileTree{filteredFiles, rootFileId});
+	*filesTree = DbFileTree{filteredFiles, rootFileId};
 
 	m_schemaFilterCount = schemaFilterCount;
 
@@ -1048,7 +1048,7 @@ void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int
 
 	// --
 	//
-	*filesTree = std::move(DbFileTree{filteredFiles, rootFileId});
+	*filesTree = DbFileTree{filteredFiles, rootFileId};
 
 	return;
 }
@@ -1099,7 +1099,7 @@ void SchemaListModelEx::refresh()
 	files.removeFilesWithExtension(Db::File::UfbTemplExtension);
 	files.removeFilesWithExtension(Db::File::DvsTemplExtension);
 
-	// Parse file details, befor eapplying filter, as we want to keep tags for all schemas
+	// Parse file details, befor applying filter, as we want to keep tags for all schemas
 	//
 	std::map<int, VFrame30::SchemaDetails> detailsMap;
 
@@ -1386,7 +1386,6 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 
 	setSortingEnabled(true);
 	sortByColumn(0, Qt::AscendingOrder);
-	//setIndentation(10);
 
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -3176,7 +3175,7 @@ void SchemaControlTabPageEx::addSchemaFileToDb(std::shared_ptr<VFrame30::Schema>
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
 	file->setFileName(schema->schemaId() + fileExtension);
-	file->setDetails(schema->details());
+	file->setDetails(schema->details(QString{}));			// Ignore path here
 	file->swapData(data);
 
 	int parentFileId = -1;
@@ -4520,7 +4519,7 @@ void SchemaControlTabPageEx::showFileProperties()
 			// --
 			//
 			file->swapData(data);
-			file->setDetails(schema->details());
+			file->setDetails(schema->details(QString{}));	// Ignore path here
 
 			filesToSave.push_back(file);
 		}
@@ -4551,7 +4550,7 @@ void SchemaControlTabPageEx::showFileProperties()
 				// so we need to update details again!!!
 				// and it will be written to DB later (db()->setWorkcopy(filesToSave, this);)
 				//
-				file->setDetails(schema->details());
+				file->setDetails(schema->details(QString{}));	// Ignore path here
 			}
 		}
 
@@ -5386,7 +5385,8 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 		fileWasRenamed = true;
 	}
 
-	file->setDetails(schema()->details());	// Details must be set here, as file rename will spoils them
+	file->setDetails(schema()->details(QString{}));	// Details must be set here, as file rename will spoils them
+													// Ignore path here
 
 	// Save workcopy
 	//

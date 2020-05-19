@@ -15,6 +15,7 @@ public:
 public:
 	bool load(QString buildPath);	// Overload from Sim::Simulator
 
+	const VFrame30::SchemaDetailsSet& schemaDetails() const;
 	std::vector<VFrame30::SchemaDetails> schemasForLm(QString equipmentId) const;
 
 signals:

@@ -11,12 +11,19 @@ SimIdeSimulator::~SimIdeSimulator()
 
 bool SimIdeSimulator::load(QString buildPath)
 {
+	m_schemaDetails.clear();
+
 	bool ok = true;
 
-	ok &= Sim::Simulator::load(buildPath);
 	ok &= loadSchemaDetails(buildPath);
+	ok &= Sim::Simulator::load(buildPath);
 
 	return ok;
+}
+
+const VFrame30::SchemaDetailsSet& SimIdeSimulator::schemaDetails() const
+{
+	return m_schemaDetails;
 }
 
 std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasForLm(QString equipmentId) const

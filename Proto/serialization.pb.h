@@ -12466,6 +12466,18 @@ class SchemaDetails : public ::google::protobuf::Message {
   inline ::std::string* release_lmdescriptionfile();
   inline void set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile);
 
+  // optional string path = 9;
+  inline bool has_path() const;
+  inline void clear_path();
+  static const int kPathFieldNumber = 9;
+  inline const ::std::string& path() const;
+  inline void set_path(const ::std::string& value);
+  inline void set_path(const char* value);
+  inline void set_path(const char* value, size_t size);
+  inline ::std::string* mutable_path();
+  inline ::std::string* release_path();
+  inline void set_allocated_path(::std::string* path);
+
   // repeated string signalIds = 20;
   inline int signalids_size() const;
   inline void clear_signalids();
@@ -12572,6 +12584,8 @@ class SchemaDetails : public ::google::protobuf::Message {
   inline void clear_has_equipmentid();
   inline void set_has_lmdescriptionfile();
   inline void clear_has_lmdescriptionfile();
+  inline void set_has_path();
+  inline void clear_has_path();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -12581,6 +12595,7 @@ class SchemaDetails : public ::google::protobuf::Message {
   ::std::string* caption_;
   ::std::string* equipmentid_;
   ::std::string* lmdescriptionfile_;
+  ::std::string* path_;
   ::google::protobuf::RepeatedPtrField< ::std::string> signalids_;
   ::google::protobuf::RepeatedPtrField< ::std::string> labels_;
   ::google::protobuf::RepeatedPtrField< ::std::string> connections_;
@@ -12589,7 +12604,7 @@ class SchemaDetails : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::std::string> loopbacks_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -32145,6 +32160,76 @@ inline void SchemaDetails::set_allocated_lmdescriptionfile(::std::string* lmdesc
   } else {
     clear_has_lmdescriptionfile();
     lmdescriptionfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string path = 9;
+inline bool SchemaDetails::has_path() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaDetails::set_has_path() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaDetails::clear_has_path() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaDetails::clear_path() {
+  if (path_ != &::google::protobuf::internal::kEmptyString) {
+    path_->clear();
+  }
+  clear_has_path();
+}
+inline const ::std::string& SchemaDetails::path() const {
+  return *path_;
+}
+inline void SchemaDetails::set_path(const ::std::string& value) {
+  set_has_path();
+  if (path_ == &::google::protobuf::internal::kEmptyString) {
+    path_ = new ::std::string;
+  }
+  path_->assign(value);
+}
+inline void SchemaDetails::set_path(const char* value) {
+  set_has_path();
+  if (path_ == &::google::protobuf::internal::kEmptyString) {
+    path_ = new ::std::string;
+  }
+  path_->assign(value);
+}
+inline void SchemaDetails::set_path(const char* value, size_t size) {
+  set_has_path();
+  if (path_ == &::google::protobuf::internal::kEmptyString) {
+    path_ = new ::std::string;
+  }
+  path_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::mutable_path() {
+  set_has_path();
+  if (path_ == &::google::protobuf::internal::kEmptyString) {
+    path_ = new ::std::string;
+  }
+  return path_;
+}
+inline ::std::string* SchemaDetails::release_path() {
+  clear_has_path();
+  if (path_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = path_;
+    path_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaDetails::set_allocated_path(::std::string* path) {
+  if (path_ != &::google::protobuf::internal::kEmptyString) {
+    delete path_;
+  }
+  if (path) {
+    set_has_path();
+    path_ = path;
+  } else {
+    clear_has_path();
+    path_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

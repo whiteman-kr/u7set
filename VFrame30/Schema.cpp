@@ -859,9 +859,9 @@ namespace VFrame30
 		return result;
 	}
 
-	QString Schema::details() const
+	QString Schema::details(const QString& path) const
 	{
-		return SchemaDetails::getDetailsString(this);
+		return SchemaDetails::getDetailsString(this, path);
 	}
 
 	SchemaDetails Schema::parseDetails(const QString& details)
@@ -1396,7 +1396,7 @@ namespace VFrame30
 		return this->m_schemaId < b.m_schemaId;
 	}
 
-	QString SchemaDetails::getDetailsString(const Schema* schema)
+	QString SchemaDetails::getDetailsString(const Schema* schema, const QString& path)
 	{
 		if (schema == nullptr)
 		{
@@ -1517,6 +1517,7 @@ namespace VFrame30
 			jsonObject.insert(PropertyNames::lmDescriptionFile, QJsonValue(ufbSchema->lmDescriptionFile()));
 		}
 
+		jsonObject.insert("Path", QJsonValue(path));
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
 		jsonObject.insert("Labels", QJsonValue::fromVariant(labelsVariant));
 		jsonObject.insert("Connections", QJsonValue::fromVariant(connectionsVariant));
@@ -1622,6 +1623,10 @@ namespace VFrame30
 					m_lmDescriptionFile.clear();
 				}
 
+				// Path
+				//
+				m_path = jsonObject.value(QLatin1String("Path")).toString();
+
 				// Signals
 				//
 				m_signals.clear();
@@ -1702,6 +1707,7 @@ namespace VFrame30
 		message->set_excludedfrombuild(m_excludedFromBuild);
 		message->set_equipmentid(m_equipmentId.toStdString());
 		message->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
+		message->set_path(m_path.toStdString());
 
 		for (const QString& s : m_signals)
 		{
@@ -1747,6 +1753,7 @@ namespace VFrame30
 		m_excludedFromBuild = message.excludedfrombuild();
 		m_equipmentId = QString::fromStdString(message.equipmentid());
 		m_lmDescriptionFile = QString::fromStdString(message.lmdescriptionfile());
+		m_path = QString::fromStdString(message.path());
 
 		m_signals.clear();
 		int signalsCount = message.signalids_size();
@@ -1947,25 +1954,26 @@ namespace VFrame30
 
 	void SchemaDetailsSet::add(const QString& details)
 	{
-		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(details);
-		return add(d);
+		return add(std::make_shared<SchemaDetails>(details));
 	}
 
 	void SchemaDetailsSet::add(const SchemaDetails& details)
 	{
-		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(details);
-		return add(d);
+		return add(std::make_shared<SchemaDetails>(details));
 	}
 
 	void SchemaDetailsSet::add(SchemaDetails&& details)
 	{
-		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(std::move(details));
-		return add(d);
+		return add(std::make_shared<SchemaDetails>(std::move(details)));
 	}
 
 	void SchemaDetailsSet::add(std::shared_ptr<SchemaDetails> details)
 	{
+		assert(details);
+
 		m_details[details->m_schemaId] = details;
+
+		return;
 	}
 
 	std::vector<SchemaDetails> SchemaDetailsSet::schemasDetails() const
@@ -1973,10 +1981,9 @@ namespace VFrame30
 		std::vector<SchemaDetails> result;
 		result.reserve(m_details.size());
 
-		for (auto schemaPair : m_details)
+		for (const auto& schemaPair : m_details)
 		{
-			SchemaDetails* ptr = schemaPair.second.get();
-			result.push_back(*ptr);
+			result.push_back(*schemaPair.second);
 		}
 
 		return result;
@@ -1987,9 +1994,9 @@ namespace VFrame30
 		std::vector<SchemaDetails> result;
 		result.reserve(m_details.size());
 
-		for (auto schemaPair : m_details)
+		for (const auto& schemaPair : m_details)
 		{
-			SchemaDetails* ptr = schemaPair.second.get();
+			const SchemaDetails* ptr = schemaPair.second.get();
 
 			if (ptr->hasEquipmentId(equipmentId) == true)
 			{
@@ -2002,14 +2009,33 @@ namespace VFrame30
 
 	std::shared_ptr<SchemaDetails> SchemaDetailsSet::schemaDetails(QString schemaId) const
 	{
-		auto it = m_details.find(schemaId);
+		std::shared_ptr<SchemaDetails> result;
 
-		if (it == m_details.end())
+		if (auto it = m_details.find(schemaId);
+			it != m_details.end())
 		{
-			return std::shared_ptr<SchemaDetails>();
+			result = it->second;
 		}
 
-		return it->second;
+		return result;
+	}
+
+	std::shared_ptr<SchemaDetails> SchemaDetailsSet::schemaDetails(int index) const
+	{
+		std::shared_ptr<SchemaDetails> result;
+
+		if (index >=0 && index < static_cast<int>(m_details.size()))
+		{
+			auto it = m_details.begin();
+			std::advance(it, index);
+
+			if (it != m_details.end())
+			{
+				result = it->second;
+			}
+		}
+
+		return result;
 	}
 
 	QStringList SchemaDetailsSet::schemasByAppSignalId(const QString& appSignalId) const
@@ -2043,7 +2069,7 @@ namespace VFrame30
 
 	QString SchemaDetailsSet::schemaCaptionByIndex(int schemaIndex) const
 	{
-		if (schemaIndex >=0 && schemaIndex < m_details.size())
+		if (schemaIndex >=0 && schemaIndex < static_cast<int>(m_details.size()))
 		{
 			auto it = m_details.begin();
 			std::advance(it, schemaIndex);
@@ -2056,7 +2082,7 @@ namespace VFrame30
 
 	QString SchemaDetailsSet::schemaIdByIndex(int schemaIndex) const
 	{
-		if (schemaIndex >=0 && schemaIndex < m_details.size())
+		if (schemaIndex >=0 && schemaIndex < static_cast<int>(m_details.size()))
 		{
 			auto it = m_details.begin();
 			std::advance(it, schemaIndex);

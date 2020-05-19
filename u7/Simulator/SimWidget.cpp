@@ -7,6 +7,7 @@
 #include "SimSelectBuildDialog.h"
 #include "SimLogicModulePage.h"
 #include "SimConnectionPage.h"
+#include "SimAppLogicSchemasPage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
@@ -67,6 +68,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(m_projectWidget, &SimProjectWidget::signal_openLogicModuleTabPage, this, &SimWidget::openLogicModuleTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openConnectionTabPage, this, &SimWidget::openConnectionTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openAppSchemasTabPage, this, &SimWidget::openAppSchemasTabPage);
 
 	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimWidget::tabCloseRequest);
 	connect(m_tabWidget, &QTabWidget::currentChanged, this, &SimWidget::tabCurrentChanged);
@@ -78,6 +80,19 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	{
 		connect(qApp, &QCoreApplication::aboutToQuit, this, &SimWidget::aboutToQuit);
 	}
+
+	// Add shortcut for switching to control tab page
+	//
+	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
+	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde}
+											  );
+	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
+
+	addAction(m_showControlTabAccelerator);
+
+	connect(m_showControlTabAccelerator, &QAction::triggered, this, &SimWidget::openAppSchemasTabPage);
 
 	return;
 }
@@ -909,9 +924,15 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 											m_appSignalController,
 											m_tuningController,
 	                                        m_tabWidget};
+	page->simSchemaWidget()->clientSchemaView()->setZoom(0);	// this zoom needs to prevent from blinking
+																// (at first image is large, and scroll is shown, then
+																// second zoom(0) is working and removes scroll), just
+																// two setZoom's are needed here
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
+
+	page->simSchemaWidget()->clientSchemaView()->setZoom(0);	// Fit to screen
 
 	return;
 }
@@ -969,8 +990,49 @@ void SimWidget::openConnectionTabPage(QString connectionId)
 
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-	//connect(page, &SimLogicModulePage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
-	//connect(page, &SimLogicModulePage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
+	return;
+}
+
+void SimWidget::openAppSchemasTabPage()
+{
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	// Check if such SimulatorControlPage already exists
+	//
+	SimAppLogicSchemasPage* cp = SimBasePage::appLogicSchemasPage(m_tabWidget);
+
+	if (cp != nullptr)
+	{
+		int tabIndex = m_tabWidget->indexOf(cp);
+		if (tabIndex != -1)
+		{
+			m_tabWidget->setCurrentIndex(tabIndex);
+		}
+		else
+		{
+			cp->show();
+			cp->activateWindow();
+		}
+
+		return;
+	}
+
+	// Create new SimConnectionPage
+	//
+	SimAppLogicSchemasPage* page = new SimAppLogicSchemasPage{m_simulator.get(), m_tabWidget};
+
+	int tabIndex = m_tabWidget->addTab(page, tr("AppLogic Schemas"));
+	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimAppLogicSchemas.svg"}});
+	m_tabWidget->setTabToolTip(0, tr("Application Logic Schemas\n"
+									 "[CTRL + `]"));
+
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+
+	connect(page, &SimAppLogicSchemasPage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
 
 	return;
 }

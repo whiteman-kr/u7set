@@ -30,6 +30,7 @@ signals:
 	void signal_openLogicModuleTabPage(QString equipmentId);
 	void signal_openCodeTabPage(QString equipmentID);
 	void signal_openConnectionTabPage(QString connectionId);
+	void signal_openAppSchemasTabPage();
 
 public:
 	const SimIdeSimulator* simulator() const;
@@ -103,6 +104,19 @@ namespace SimProjectTreeItems
 //	public:
 //		QString m_connectionPortId;
 //	};
+
+
+	class AppLogicSchemasTreeItem : public BaseTreeItem
+	{
+	public:
+		AppLogicSchemasTreeItem(QTreeWidgetItem* parent);
+
+		virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
+		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
+		virtual void contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos) override;
+
+	public:
+	};
 
 
 

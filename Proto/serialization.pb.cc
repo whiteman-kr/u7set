@@ -2080,13 +2080,14 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetailsSet));
   SchemaDetails_descriptor_ = file->message_type(88);
-  static const int SchemaDetails_offsets_[12] = {
+  static const int SchemaDetails_offsets_[13] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, version_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, schemaid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, excludedfrombuild_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, lmdescriptionfile_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, path_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, signalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, labels_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, connections_),
@@ -3151,71 +3152,71 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\005:\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024O"
     "bsoleteEnableDuplex\030\n \001(\010:\005false\"@\n\020Sche"
     "maDetailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.P"
-    "roto.SchemaDetails\"\203\002\n\rSchemaDetails\022\017\n\007"
+    "roto.SchemaDetails\"\221\002\n\rSchemaDetails\022\017\n\007"
     "version\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007capti"
     "on\030\005 \001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013e"
     "quipmentId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 "
-    "\001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023"
-    "\n\013connections\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Pro"
-    "to.Uuid\022\014\n\004tags\030\030 \003(\t\022\021\n\tloopbacks\030\031 \003(\t"
-    "\"A\n\nArchSignal\022\014\n\004hash\030\001 \002(\004\022\020\n\010isAnalog"
-    "\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002(\t\"5\n\013ArchSigna"
-    "ls\022&\n\013archSignals\030\001 \003(\0132\021.Proto.ArchSign"
-    "al\"\326\003\n\tBusSignal\022\020\n\010signalId\030\001 \001(\t\022\017\n\007ca"
-    "ption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005units\030\004 \001(\t"
-    "\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tprecision\030\013 \001("
-    "\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:\0011\022\031\n\014fineA"
-    "perture\030\r \001(\001:\0030.5\022\037\n\020adaptiveAperture\030\016"
-    " \001(\010:\005false\022\021\n\tbusTypeId\030\017 \001(\t\022\023\n\013inbusO"
-    "ffset\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030( \001(\005\022"
-    "\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021inbusAnalogF"
-    "ormat\0303 \001(\005\022\034\n\024inbusAnalogByteOrder\0304 \001("
-    "\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032\n\022busAnalo"
-    "gHighLimit\0306 \001(\001\022\033\n\023inbusAnalogLowLimit\030"
-    "7 \001(\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001\"\355\001\n\003"
-    "Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tbusTyp"
-    "eId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Proto.Bu"
-    "sSignal\022!\n\023autoSignalPlacement\030\n \001(\010:\004tr"
-    "ue\022\030\n\rmanualBusSize\030\013 \001(\005:\0010\022\"\n\023enableMa"
-    "nualBusSize\030\014 \001(\010:\005false\0221\n#enableManual"
-    "BusSizeIsNotInitialized\030\r \001(\010:\004true\"p\n\020C"
-    "omparatorSignal\022\025\n\007isConst\030\001 \001(\010:\004true\022\025"
-    "\n\nconstValue\030\002 \001(\001:\0010\022\023\n\013appSignalId\030\003 \001"
-    "(\t\022\031\n\nisAcquired\030\004 \001(\010:\005false\"\352\002\n\nCompar"
-    "ator\022\022\n\007cmpType\030\001 \001(\005:\0011\022\037\n\024inAnalogSign"
-    "alFormat\030\002 \001(\005:\0011\022&\n\005input\030\003 \001(\0132\027.Proto"
-    ".ComparatorSignal\022(\n\007compare\030\004 \001(\0132\027.Pro"
-    "to.ComparatorSignal\022+\n\nhysteresis\030\005 \001(\0132"
-    "\027.Proto.ComparatorSignal\022\'\n\006output\030\006 \001(\013"
-    "2\027.Proto.ComparatorSignal\022#\n\024allSignalsI"
-    "sAcquired\030\007 \001(\010:\005false\022\024\n\tprecision\030\010 \001("
-    "\005:\0012\022\r\n\005label\030\t \001(\t\022\020\n\010schemaId\030\n \001(\t\022#\n"
-    "\016schemaItemUuid\030\013 \001(\0132\013.Proto.Uuid\"O\n\017Lm"
-    "ComparatorSet\022\025\n\rlmEquipmentID\030\001 \001(\t\022%\n\n"
-    "comparator\030\002 \003(\0132\021.Proto.Comparator\"@\n\rC"
-    "omparatorSet\022/\n\017lmComparatorSet\030\001 \003(\0132\026."
-    "Proto.LmComparatorSet\"\272\001\n\027MetrologySigna"
-    "lLocation\022\016\n\006rackID\030\001 \001(\t\022\021\n\tchassisID\030\002"
-    " \001(\t\022\023\n\007chassis\030\003 \001(\005:\002-1\022\020\n\010moduleID\030\004 "
-    "\001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002"
-    "-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSchemas\030\010 "
-    "\001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\tappSig"
-    "nal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010location\030"
-    "\002 \001(\0132\036.Proto.MetrologySignalLocation\022\033\n"
-    "\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electricHi"
-    "ghLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001(\005"
-    ":\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\030\n\rel"
-    "ectricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001(\001"
-    ":\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022\033\n\020phy"
-    "sicalLowLimit\030\t \001(\001:\0010\022\034\n\021physicalHighLi"
-    "mit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet\022/\n\017me"
-    "trologySignal\030\001 \003(\0132\026.Proto.MetrologySig"
-    "nal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillim"
-    "eter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection"
-    "\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType"
-    "\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFor"
-    "mat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005F"
-    "loat\020\002", 18206);
+    "\001(\t\022\014\n\004path\030\t \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006"
+    "labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005gui"
+    "ds\030\027 \003(\0132\013.Proto.Uuid\022\014\n\004tags\030\030 \003(\t\022\021\n\tl"
+    "oopbacks\030\031 \003(\t\"A\n\nArchSignal\022\014\n\004hash\030\001 \002"
+    "(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002("
+    "\t\"5\n\013ArchSignals\022&\n\013archSignals\030\001 \003(\0132\021."
+    "Proto.ArchSignal\"\326\003\n\tBusSignal\022\020\n\010signal"
+    "Id\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022"
+    "\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\t"
+    "precision\030\013 \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001"
+    "(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n\020adap"
+    "tiveAperture\030\016 \001(\010:\005false\022\021\n\tbusTypeId\030\017"
+    " \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbusDiscre"
+    "teBitNo\030( \001(\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031"
+    "\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024inbusAnalog"
+    "ByteOrder\0304 \001(\005\022\031\n\021busAnalogLowLimit\0305 \001"
+    "(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n\023inbusA"
+    "nalogLowLimit\0307 \001(\001\022\034\n\024inbusAnalogHighLi"
+    "mit\0308 \001(\001\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto."
+    "Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 "
+    "\003(\0132\020.Proto.BusSignal\022!\n\023autoSignalPlace"
+    "ment\030\n \001(\010:\004true\022\030\n\rmanualBusSize\030\013 \001(\005:"
+    "\0010\022\"\n\023enableManualBusSize\030\014 \001(\010:\005false\0221"
+    "\n#enableManualBusSizeIsNotInitialized\030\r "
+    "\001(\010:\004true\"p\n\020ComparatorSignal\022\025\n\007isConst"
+    "\030\001 \001(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:\0010\022\023\n\013a"
+    "ppSignalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 \001(\010:\005fa"
+    "lse\"\352\002\n\nComparator\022\022\n\007cmpType\030\001 \001(\005:\0011\022\037"
+    "\n\024inAnalogSignalFormat\030\002 \001(\005:\0011\022&\n\005input"
+    "\030\003 \001(\0132\027.Proto.ComparatorSignal\022(\n\007compa"
+    "re\030\004 \001(\0132\027.Proto.ComparatorSignal\022+\n\nhys"
+    "teresis\030\005 \001(\0132\027.Proto.ComparatorSignal\022\'"
+    "\n\006output\030\006 \001(\0132\027.Proto.ComparatorSignal\022"
+    "#\n\024allSignalsIsAcquired\030\007 \001(\010:\005false\022\024\n\t"
+    "precision\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t\022\020\n\010sch"
+    "emaId\030\n \001(\t\022#\n\016schemaItemUuid\030\013 \001(\0132\013.Pr"
+    "oto.Uuid\"O\n\017LmComparatorSet\022\025\n\rlmEquipme"
+    "ntID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021.Proto.C"
+    "omparator\"@\n\rComparatorSet\022/\n\017lmComparat"
+    "orSet\030\001 \003(\0132\026.Proto.LmComparatorSet\"\272\001\n\027"
+    "MetrologySignalLocation\022\016\n\006rackID\030\001 \001(\t\022"
+    "\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003 \001(\005:\002-1\022"
+    "\020\n\010moduleID\030\004 \001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n"
+    "\005place\030\006 \001(\005:\002-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016sho"
+    "wnOnSchemas\030\010 \001(\010:\005false\"\347\002\n\017MetrologySi"
+    "gnal\022#\n\tappSignal\030\001 \001(\0132\020.Proto.AppSigna"
+    "l\0220\n\010location\030\002 \001(\0132\036.Proto.MetrologySig"
+    "nalLocation\022\033\n\020electricLowLimit\030\003 \001(\001:\0010"
+    "\022\034\n\021electricHighLimit\030\004 \001(\001:\0010\022\031\n\016electr"
+    "icUnitID\030\005 \001(\005:\0011\022\035\n\022electricSensorType\030"
+    "\006 \001(\005:\0011\022\030\n\relectricRload\030\013 \001(\001:\0010\022\025\n\nel"
+    "ectricR0\030\007 \001(\001:\0010\022\034\n\021electricPrecision\030\010"
+    " \001(\005:\0014\022\033\n\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021"
+    "physicalHighLimit\030\n \001(\001:\0010\"E\n\022MetrologyS"
+    "ignalSet\022/\n\017metrologySignal\030\001 \003(\0132\026.Prot"
+    "o.MetrologySignal*3\n\nSchemaUnit\022\013\n\007Displ"
+    "ay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connec"
+    "tionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n"
+    "\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001"
+    "*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSi"
+    "gnedInt\020\001\022\t\n\005Float\020\002", 18220);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -40557,6 +40558,7 @@ const int SchemaDetails::kCaptionFieldNumber;
 const int SchemaDetails::kExcludedfromBuildFieldNumber;
 const int SchemaDetails::kEquipmentIdFieldNumber;
 const int SchemaDetails::kLmDescriptionFileFieldNumber;
+const int SchemaDetails::kPathFieldNumber;
 const int SchemaDetails::kSignalIdsFieldNumber;
 const int SchemaDetails::kLabelsFieldNumber;
 const int SchemaDetails::kConnectionsFieldNumber;
@@ -40587,6 +40589,7 @@ void SchemaDetails::SharedCtor() {
   excludedfrombuild_ = false;
   equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   lmdescriptionfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  path_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -40606,6 +40609,9 @@ void SchemaDetails::SharedDtor() {
   }
   if (lmdescriptionfile_ != &::google::protobuf::internal::kEmptyString) {
     delete lmdescriptionfile_;
+  }
+  if (path_ != &::google::protobuf::internal::kEmptyString) {
+    delete path_;
   }
   if (this != default_instance_) {
   }
@@ -40654,6 +40660,11 @@ void SchemaDetails::Clear() {
     if (has_lmdescriptionfile()) {
       if (lmdescriptionfile_ != &::google::protobuf::internal::kEmptyString) {
         lmdescriptionfile_->clear();
+      }
+    }
+    if (has_path()) {
+      if (path_ != &::google::protobuf::internal::kEmptyString) {
+        path_->clear();
       }
     }
   }
@@ -40764,6 +40775,23 @@ bool SchemaDetails::MergePartialFromCodedStream(
                 input, this->mutable_lmdescriptionfile()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
             this->lmdescriptionfile().data(), this->lmdescriptionfile().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(74)) goto parse_path;
+        break;
+      }
+
+      // optional string path = 9;
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_path:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_path()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->path().data(), this->path().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
@@ -40946,6 +40974,15 @@ void SchemaDetails::SerializeWithCachedSizes(
       8, this->lmdescriptionfile(), output);
   }
 
+  // optional string path = 9;
+  if (has_path()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->path().data(), this->path().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      9, this->path(), output);
+  }
+
   // repeated string signalIds = 20;
   for (int i = 0; i < this->signalids_size(); i++) {
   ::google::protobuf::internal::WireFormat::VerifyUTF8String(
@@ -41055,6 +41092,16 @@ void SchemaDetails::SerializeWithCachedSizes(
         8, this->lmdescriptionfile(), target);
   }
 
+  // optional string path = 9;
+  if (has_path()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->path().data(), this->path().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        9, this->path(), target);
+  }
+
   // repeated string signalIds = 20;
   for (int i = 0; i < this->signalids_size(); i++) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
@@ -41158,6 +41205,13 @@ int SchemaDetails::ByteSize() const {
           this->lmdescriptionfile());
     }
 
+    // optional string path = 9;
+    if (has_path()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->path());
+    }
+
   }
   // repeated string signalIds = 20;
   total_size += 2 * this->signalids_size();
@@ -41252,6 +41306,9 @@ void SchemaDetails::MergeFrom(const SchemaDetails& from) {
     if (from.has_lmdescriptionfile()) {
       set_lmdescriptionfile(from.lmdescriptionfile());
     }
+    if (from.has_path()) {
+      set_path(from.path());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -41284,6 +41341,7 @@ void SchemaDetails::Swap(SchemaDetails* other) {
     std::swap(excludedfrombuild_, other->excludedfrombuild_);
     std::swap(equipmentid_, other->equipmentid_);
     std::swap(lmdescriptionfile_, other->lmdescriptionfile_);
+    std::swap(path_, other->path_);
     signalids_.Swap(&other->signalids_);
     labels_.Swap(&other->labels_);
     connections_.Swap(&other->connections_);

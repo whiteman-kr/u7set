@@ -121,8 +121,8 @@ namespace VFrame30
 		virtual QStringList getLabels() const;
 		virtual std::vector<QUuid> getGuids() const;
 
-		virtual QString details() const;				// form details JSON object (signal list)
-		static SchemaDetails parseDetails(const QString& details);	// parse details section (from DB), result is signal list
+		virtual QString details(const QString& path) const;			// form details JSON object (signal list)
+		static SchemaDetails parseDetails(const QString& detailsString);// parse details section (from DB), result is signal list
 
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
@@ -258,12 +258,12 @@ namespace VFrame30
 		SchemaDetails(const QString& details) noexcept;
 
 		SchemaDetails& operator=(const SchemaDetails&) = default;
-		SchemaDetails& operator=(SchemaDetails&&) = default;
+		SchemaDetails& operator=(SchemaDetails&&) noexcept = default;
 
 		bool operator<(const SchemaDetails& b) const noexcept;
 
 	public:
-		static QString getDetailsString(const Schema* schema);
+		static QString getDetailsString(const Schema* schema, const QString& path);
 		bool parseDetails(const QString& details);
 
 		bool saveData(Proto::SchemaDetails* message) const;
@@ -285,6 +285,7 @@ namespace VFrame30
 		bool m_excludedFromBuild = false;
 		QString m_equipmentId;			// Valid for LogicSchemas
 		QString m_lmDescriptionFile;	// Valid for LogicSchemas and UfbSchemas
+		QString m_path;					// Path in terms of SchemaEditor ("/ABC/DEF", "/")
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
@@ -321,7 +322,9 @@ namespace VFrame30
 
 		std::vector<SchemaDetails> schemasDetails() const;
 		std::vector<SchemaDetails> schemasDetails(QString equipmentId) const;
+
 		std::shared_ptr<SchemaDetails> schemaDetails(QString schemaId) const;
+		std::shared_ptr<SchemaDetails> schemaDetails(int index) const;
 
 		QStringList schemasByAppSignalId(const QString& appSignalId) const;
 
@@ -331,7 +334,7 @@ namespace VFrame30
 		QString schemaIdByIndex(int schemaIndex) const;
 
 	private:
-		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;		// Key is schemaId
+		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;	// Key is schemaId
 	};
 
 

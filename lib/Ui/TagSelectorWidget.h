@@ -27,6 +27,7 @@ public:
 	QStringList selectedTags() const;
 
 protected:
+	virtual void showEvent(QShowEvent* event) override;
 	virtual void contextMenuEvent(QContextMenuEvent* event) override;
 
 signals:

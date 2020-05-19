@@ -73,9 +73,10 @@ protected slots:
 	void addNewWindow();
 
 	void openLogicModuleTabPage(QString lmEquipmentId);
-	void openSchemaTabPage(QString fileName);
+	void openSchemaTabPage(QString schemaId);
 	void openCodeTabPage(QString lmEquipmentId);
 	void openConnectionTabPage(QString connectionId);
+	void openAppSchemasTabPage();
 
 	void tabCloseRequest(int index);
 	void tabCurrentChanged(int index);
@@ -119,6 +120,8 @@ private:
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 	QAction* m_trendsAction = nullptr;
+
+	QAction* m_showControlTabAccelerator = nullptr;
 };
 
 

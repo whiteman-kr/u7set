@@ -78,6 +78,7 @@ SOURCES +=\
     ../lib/Ui/DialogSignalSearch.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
+    ../lib/Ui/TagSelectorWidget.cpp \
     CentralWidget.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
@@ -91,6 +92,7 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
+    Simulator/SimAppLogicSchemasPage.cpp \
     Simulator/SimConnectionPage.cpp \
     Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
@@ -204,7 +206,6 @@ SOURCES +=\
     DialogInputEx.cpp \
     DialogAfbLibraryCheck.cpp \
     ../lib/WidgetUtils.cpp \
-    TagSelectorWidget.cpp \
     Forms/ProjectPropertiesForm.cpp \
     Forms/PendingChangesDialog.cpp \
     ../lib/SimpleMutex.cpp \
@@ -224,6 +225,7 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/TabWidgetEx.h \
+    ../lib/Ui/TagSelectorWidget.h \
     CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
@@ -236,6 +238,7 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
+    Simulator/SimAppLogicSchemasPage.h \
     Simulator/SimConnectionPage.h \
     Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
@@ -359,7 +362,6 @@ HEADERS  += \
     SchemaTabPageEx.h \
     DialogInputEx.h \
     DialogAfbLibraryCheck.h \
-    TagSelectorWidget.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
     ../lib/SimpleMutex.h \
