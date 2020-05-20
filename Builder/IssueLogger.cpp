@@ -6665,6 +6665,47 @@ namespace Builder
 								arg(itemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5182
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   App signal %1 macro expanding error: %2
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 macro expanding error message
+	///
+	/// Description:
+	///		Error occurred during signal macro expanding. Check macrosses in specified signal.
+	///
+	void IssueLogger::errALC5182(QString appSignalID, QString errMsg)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5182,
+				  QString(tr("App signal %1 macro expanding error: %2")).
+								arg(appSignalID).arg(errMsg));
+	}
+
+	/// IssueCode: ALC5183
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Non unique CustomAppSignalID after macro expansion in signals %1 and %2
+	///
+	/// Parameters:
+	///		%1 AppSignalID of first signal
+	///		%2 AppSignalID of second signal
+	///
+	/// Description:
+	///		Non unique CustomAppSignalID after macro expansion. Check macrosses in specified signals.
+	///
+	void IssueLogger::errALC5183(QString appSignalID1, QString appSignalID2)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5183,
+				  QString(tr("Non unique CustomAppSignalID after macro expansion in signals %1 and %2")).
+								arg(appSignalID1).arg(appSignalID2));
+	}
 
 	//
 

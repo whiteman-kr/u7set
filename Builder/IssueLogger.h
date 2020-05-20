@@ -427,6 +427,8 @@ namespace Builder
 		void errALC5179(QString itemCaption, QString signalCaption, QUuid itemUuid, QString schemaID);	// Format of AFB signal %1 is not compatible with any known application signals format
 		void errALC5180(QString loopbackID, QString itemLabel, QUuid itemUuid, QString schemaID);		// Loopback source %1 is not connected to any signal source (Item %2, logic schema %3).
 		void errALC5181(QString itemLabel, QUuid itemUuid, QString schemaID);			// Loopback source cannot be connected to opto/tunable/input signal (Item %1, logic schema %2).
+		void errALC5182(QString appSignalID, QString errMsg);							// App signal %1 macro expanding error: %2
+		void errALC5183(QString appSignalID1, QString appSignalID2);					// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

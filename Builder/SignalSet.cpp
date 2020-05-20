@@ -334,6 +334,79 @@ namespace Builder
 		}
 	}
 
+	bool SignalSet::expandTemplates(Hardware::EquipmentSet* equipment)
+	{
+		int signalCount = count();
+
+		if (signalCount == 0)
+		{
+			return true;
+		}
+
+		QHash<QString, Signal*> expandedCustomAppSignalIDs;
+
+		expandedCustomAppSignalIDs.reserve(signalCount);
+
+		bool result = true;
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& s = (*this)[i];
+
+			if (s.customAppSignalID().contains(Signal::MACRO_START_TOKEN) == false)
+			{
+				continue;
+			}
+
+			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s.equipmentID());
+
+			if (deviceObject == nullptr)
+			{
+				// Application signal %1 is bound to unknown device object %2.
+				//
+				m_log->errALC5013(s.appSignalID(), s.equipmentID());
+				result = false;
+				continue;
+			}
+
+			QString errMsg;
+
+			QString expandedCustomID = s.expandTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+
+			if (errMsg.isEmpty() == false)
+			{
+				// App signal %1 macro expanding error: %2
+				//
+				m_log->errALC5182(s.appSignalID(), errMsg);
+				result = false;
+				continue;
+			}
+
+			Signal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
+
+			if (existsSignal != nullptr)
+			{
+				// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
+				//
+				m_log->errALC5183(existsSignal->appSignalID(), s.appSignalID());
+				result = false;
+				continue;
+			}
+
+			s.setCustomAppSignalID(expandedCustomID);
+
+			expandedCustomAppSignalIDs.insert(expandedCustomID, &s);
+		}
+
+		if (result == true)
+		{
+			LOG_MESSAGE(m_log, QString("CustomAppSignalID macros successfully expanded - %1").
+							arg(expandedCustomAppSignalIDs.count()));
+		}
+
+		return result;
+	}
+
 	Signal* SignalSet::appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
 		Signal* newSignal = createBusChildSignal(s, bus, busSignal);

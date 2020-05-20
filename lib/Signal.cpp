@@ -18,12 +18,15 @@
 //
 // --------------------------------------------------------------------------------------------------------
 
-QString Signal::BUS_SIGNAL_ID_SEPARATOR(".");
+const QString Signal::MACRO_START_TOKEN("$(");
+const QString Signal::MACRO_END_TOKEN(")");
 
-QString Signal::BUS_SIGNAL_MACRO_BUSTYPEID("$(BUSTYPEID)");
-QString Signal::BUS_SIGNAL_MACRO_BUSID("$(BUSID)");
-QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALID("$(BUSSIGNALID)");
-QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION("$(BUSSIGNALCAPTION)");
+const QString Signal::BUS_SIGNAL_ID_SEPARATOR(".");
+
+const QString Signal::BUS_SIGNAL_MACRO_BUSTYPEID("$(BUSTYPEID)");
+const QString Signal::BUS_SIGNAL_MACRO_BUSID("$(BUSID)");
+const QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALID("$(BUSSIGNALID)");
+const QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION("$(BUSSIGNALCAPTION)");
 
 
 Signal::Signal()
@@ -77,6 +80,7 @@ Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
 
 		setDataSize(m_signalType, m_analogSignalFormat);
 		updateTuningValuesType();
+		initTuningValues();
 
 		break;
 
@@ -84,6 +88,7 @@ Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
 
 		setDataSize(m_signalType, m_analogSignalFormat);
 		updateTuningValuesType();
+		initTuningValues();
 
 		break;
 
@@ -1381,6 +1386,55 @@ void Signal::initTuningValues()
 	}
 }
 
+QString Signal::expandTemplate(const Hardware::DeviceObject& startDeviceObject,
+							   const QString& templateStr,
+							   QString* errMsg)
+{
+	QString resultStr;
+
+	int searchStartPos = 0;
+
+	do
+	{
+		int macroStartPos = templateStr.indexOf(MACRO_START_TOKEN, searchStartPos);
+
+		if (macroStartPos == -1)
+		{
+			// no more macroses
+			//
+			resultStr += templateStr.mid(searchStartPos);
+			break;
+		}
+
+		resultStr += templateStr.mid(searchStartPos, macroStartPos - searchStartPos);
+
+		int macroEndPos = templateStr.indexOf(MACRO_END_TOKEN, macroStartPos + 2);
+
+		if (macroEndPos == -1)
+		{
+			*errMsg = QString("End of macro is not found in template %1 of device object %2. ").
+						arg(templateStr).arg(startDeviceObject.equipmentIdTemplate());
+			return QString();
+		}
+
+		QString macroStr = templateStr.mid(macroStartPos + 2, macroEndPos - (macroStartPos + 2));
+
+		QString expandedMacroStr = expandMacro(startDeviceObject, macroStr, errMsg);
+
+		if (errMsg->isEmpty() == false)
+		{
+			return QString();
+		}
+
+		resultStr += expandedMacroStr;
+
+		searchStartPos = macroEndPos + 1;
+	}
+	while(true);
+
+	return resultStr;
+}
+
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
 {
 	if (m_signalType != signalType)
@@ -1455,21 +1509,21 @@ void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
 		m_appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
 	}
 
-	if (deviceSignal.propertyExists(SignalProperties::customSignalIDTemplateCaption) == true)
+	if (deviceSignal.propertyExists(SignalProperties::customAppSignalIDTemplateCaption) == true)
 	{
 		// customSignalIDTemplate will be expand in compile time
 		//
-		m_customAppSignalID = deviceSignal.propertyValue(SignalProperties::customSignalIDTemplateCaption).toString();
+		m_customAppSignalID = deviceSignal.propertyValue(SignalProperties::customAppSignalIDTemplateCaption).toString();
 	}
 	else
 	{
 		m_customAppSignalID = deviceSignalEquipmentID;
 	}
 
-	if (deviceSignal.propertyExists(SignalProperties::captionTemplateCaption) == true)
+	if (deviceSignal.propertyExists(SignalProperties::appSignalCaptionTemplateCaption) == true)
 	{
 		m_caption = expandTemplate(	deviceSignal,
-									deviceSignal.propertyValue((SignalProperties::captionTemplateCaption)).toString(),
+									deviceSignal.propertyValue((SignalProperties::appSignalCaptionTemplateCaption)).toString(),
 									errMsg);
 
 		if (errMsg->isEmpty() == false)
@@ -1490,56 +1544,7 @@ void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
 	}
 }
 
-QString Signal::expandTemplate(const Hardware::DeviceSignal& deviceSignal,
-							   const QString& templateStr,
-							   QString* errMsg)
-{
-	QString resultStr;
-
-	int searchStartPos = 0;
-
-	do
-	{
-		int macroStartPos = templateStr.indexOf("$(", searchStartPos);
-
-		if (macroStartPos == -1)
-		{
-			// no more macroses
-			//
-			resultStr += templateStr.mid(searchStartPos);
-			break;
-		}
-
-		resultStr += templateStr.mid(searchStartPos, macroStartPos - searchStartPos);
-
-		int macroEndPos = templateStr.indexOf(")", macroStartPos + 2);
-
-		if (macroEndPos == -1)
-		{
-			*errMsg = QString("End of macro is not found in template %1 of device signal %2. ").
-						arg(templateStr).arg(deviceSignal.equipmentIdTemplate());
-			return QString();
-		}
-
-		QString macroStr = templateStr.mid(macroStartPos + 2, macroEndPos - (macroStartPos + 2));
-
-		QString expandedMacroStr = expandMacro(deviceSignal, macroStr, errMsg);
-
-		if (errMsg->isEmpty() == false)
-		{
-			return QString();
-		}
-
-		resultStr += expandedMacroStr;
-
-		searchStartPos = macroEndPos + 1;
-	}
-	while(true);
-
-	return resultStr;
-}
-
-QString Signal::expandMacro(const Hardware::DeviceSignal& deviceSignal,
+QString Signal::expandMacro(const Hardware::DeviceObject& startDeviceObject,
 							const QString& macroStr,
 							QString* errMsg)
 {
@@ -1554,7 +1559,7 @@ QString Signal::expandMacro(const Hardware::DeviceSignal& deviceSignal,
 		{
 			// property only
 			//
-			deviceObject = &deviceSignal;
+			deviceObject = &startDeviceObject;
 			propertyCaption = macroFields.at(0);
 		}
 		break;
@@ -1566,7 +1571,7 @@ QString Signal::expandMacro(const Hardware::DeviceSignal& deviceSignal,
 			QString parentObjectType = macroFields.at(0);
 			propertyCaption = macroFields.at(1);
 
-			deviceObject = getParentObjectOfType(deviceSignal, parentObjectType, errMsg);
+			deviceObject = getParentObjectOfType(startDeviceObject, parentObjectType, errMsg);
 
 			if (errMsg->isEmpty() == false)
 			{
@@ -1575,8 +1580,8 @@ QString Signal::expandMacro(const Hardware::DeviceSignal& deviceSignal,
 
 			if (deviceObject == nullptr)
 			{
-				*errMsg = QString("Macro expand error! Parent device object of type '%1' is not found for device signal %2").
-								arg(parentObjectType).arg(deviceSignal.equipmentIdTemplate());
+				*errMsg = QString("Macro expand error! Parent device object of type '%1' is not found for device object %2").
+								arg(parentObjectType).arg(startDeviceObject.equipmentIdTemplate());
 				return QString();
 			}
 
@@ -1585,14 +1590,14 @@ QString Signal::expandMacro(const Hardware::DeviceSignal& deviceSignal,
 
 	default:
 		*errMsg = QString("Unknown format of macro %1 in template of device signal %2").
-				arg(macroStr).arg(deviceSignal.equipmentIdTemplate());
+				arg(macroStr).arg(startDeviceObject.equipmentIdTemplate());
 		return QString();
 	}
 
 	if (deviceObject->propertyExists(propertyCaption) == false)
 	{
-		*errMsg = QString("Device signal %1 macro expand error! Property '%2' is not found in object %3.").
-							arg(deviceSignal.equipmentIdTemplate()).
+		*errMsg = QString("Device signal %1 macro expand error! Property '%2' is not found in device object %3.").
+							arg(startDeviceObject.equipmentIdTemplate()).
 							arg(propertyCaption).
 							arg(deviceObject->equipmentIdTemplate());
 		return QString();
@@ -1608,18 +1613,18 @@ const Hardware::DeviceObject* Signal::getParentObjectOfType(const Hardware::Devi
 																  QString* errMsg)
 {
 	static const std::map<QString, Hardware::DeviceType> objectTypes {
-			std::make_pair(QString("Root"), Hardware::DeviceType::Root),
-			std::make_pair(QString("System"), Hardware::DeviceType::System),
-			std::make_pair(QString("Rack"), Hardware::DeviceType::Rack),
-			std::make_pair(QString("Chassis"), Hardware::DeviceType::Chassis),
-			std::make_pair(QString("Module"), Hardware::DeviceType::Module),
-			std::make_pair(QString("Workstation"), Hardware::DeviceType::Workstation),
-			std::make_pair(QString("Software"), Hardware::DeviceType::Software),
-			std::make_pair(QString("Controller"), Hardware::DeviceType::Controller),
-			std::make_pair(QString("Signal"), Hardware::DeviceType::Signal),
+			std::make_pair(QString("root"), Hardware::DeviceType::Root),
+			std::make_pair(QString("system"), Hardware::DeviceType::System),
+			std::make_pair(QString("rack"), Hardware::DeviceType::Rack),
+			std::make_pair(QString("chassis"), Hardware::DeviceType::Chassis),
+			std::make_pair(QString("module"), Hardware::DeviceType::Module),
+			std::make_pair(QString("workstation"), Hardware::DeviceType::Workstation),
+			std::make_pair(QString("software"), Hardware::DeviceType::Software),
+			std::make_pair(QString("controller"), Hardware::DeviceType::Controller),
+			std::make_pair(QString("signal"), Hardware::DeviceType::Signal),
 	};
 
-	std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType);
+	std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType.toLower());
 
 	if (it == objectTypes.end())
 	{
@@ -1630,7 +1635,7 @@ const Hardware::DeviceObject* Signal::getParentObjectOfType(const Hardware::Devi
 
 	Hardware::DeviceType requestedDeviceType = it->second;
 
-	const Hardware::DeviceObject* parent = startObject.parent();
+	const Hardware::DeviceObject* parent = &startObject;
 
 	do
 	{

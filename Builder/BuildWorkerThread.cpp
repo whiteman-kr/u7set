@@ -923,12 +923,13 @@ namespace Builder
 
 		signalSet->cacheSpecPropValues();
 
+		result = signalSet->expandTemplates(equipment);
+
+		RETURN_IF_FALSE(result);
+
 		result = signalSet->checkSignals();
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		//QStringList
 

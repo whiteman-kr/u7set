@@ -23,6 +23,7 @@ namespace Builder
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
 		void cacheSpecPropValues();
+		bool expandTemplates(Hardware::EquipmentSet* equipment);
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 

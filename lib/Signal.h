@@ -41,12 +41,15 @@ class Signal
 	friend class SignalTests;
 
 public:
-	static QString BUS_SIGNAL_ID_SEPARATOR;
+	static const QString MACRO_START_TOKEN;
+	static const QString MACRO_END_TOKEN;
 
-	static QString BUS_SIGNAL_MACRO_BUSTYPEID;
-	static QString BUS_SIGNAL_MACRO_BUSID;
-	static QString BUS_SIGNAL_MACRO_BUSSIGNALID;
-	static QString BUS_SIGNAL_MACRO_BUSSIGNALCAPTION;
+	static const QString BUS_SIGNAL_ID_SEPARATOR;
+
+	static const QString BUS_SIGNAL_MACRO_BUSTYPEID;
+	static const QString BUS_SIGNAL_MACRO_BUSID;
+	static const QString BUS_SIGNAL_MACRO_BUSSIGNALID;
+	static const QString BUS_SIGNAL_MACRO_BUSSIGNALCAPTION;
 
 public:
 	Signal();
@@ -366,6 +369,10 @@ public:
 
 	void setLog(Builder::IssueLogger* log) { m_log = log; }
 
+	QString expandTemplate(const Hardware::DeviceObject& startDeviceObject,
+	                       const QString& templateStr,
+	                       QString* errMsg);
+
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -391,11 +398,7 @@ private:
 	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
 							QString* errMsg);
 
-	QString expandTemplate(const Hardware::DeviceSignal& deviceSignal,
-						   const QString& templateStr,
-						   QString* errMsg);
-
-	QString expandMacro(const Hardware::DeviceSignal& deviceSignal,
+	QString expandMacro(const Hardware::DeviceObject& startDeviceObject,
 						const QString& macroStr,
 						QString* errMsg);
 
