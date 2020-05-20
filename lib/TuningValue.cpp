@@ -149,6 +149,11 @@ void TuningValue::setValue(E::SignalType signalType, E::AnalogAppSignalFormat an
 	setValue(getTuningValueType(signalType, analogFormat), intValue, doubleValue);
 }
 
+void TuningValue::setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, const QVariant& value)
+{
+	setValue(getTuningValueType(signalType, analogFormat), value.toLongLong(), value.toDouble());
+}
+
 QVariant TuningValue::toVariant() const
 {
 	switch (m_type)

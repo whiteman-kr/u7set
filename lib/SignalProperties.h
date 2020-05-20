@@ -166,6 +166,10 @@ public:
 	static const QString specificPropertiesStructCaption;
 	static const QString tagsCaption;
 
+	static const QString appSignalIDTemplateCaption;
+	static const QString customSignalIDTemplateCaption;
+	static const QString captionTemplateCaption;
+
 	static const QString MISPRINT_lowEngineeringUnitsCaption;
 	static const QString MISPRINT_highEngineeringUnitsCaption;
 

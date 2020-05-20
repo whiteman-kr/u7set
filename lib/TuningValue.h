@@ -47,6 +47,7 @@ public:
 
 	void setValue(TuningValueType valueType, qint64 int32Value, double doubleValue);
 	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint64 intValue, double doubleValue);
+	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, const QVariant& value);
 
 	QVariant toVariant() const;
 	void fromVariant(QVariant value);

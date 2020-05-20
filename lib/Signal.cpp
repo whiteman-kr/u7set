@@ -9,6 +9,7 @@
 
 #include "../Builder/IssueLogger.h"
 #include "../Proto/serialization.pb.h"
+#include "DeviceHelper.h"
 
 
 // --------------------------------------------------------------------------------------------------------
@@ -43,32 +44,25 @@ Signal::Signal(const ID_AppSignalID& ids)
 	m_isLoaded = false;
 }
 
-Signal::Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
+Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
+				QString* errMsg)
 {
 	TEST_PTR_RETURN(errMsg);
 
 	if (deviceSignal.isDiagSignal() == true)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
 	//
 
-	QString deviceSignalEquipmentID = deviceSignal.equipmentIdTemplate();
+	initIDsAndCaption(deviceSignal, errMsg);	// init AppSignalID, CustomAppSignalID, EquipmentID, Caption
 
-	m_appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
-	m_customAppSignalID = deviceSignalEquipmentID;
-	m_equipmentID = deviceSignalEquipmentID;
-
-	int pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
-
-	if (pos != -1)
+	if (errMsg->isEmpty() == false)
 	{
-		deviceSignalEquipmentID = deviceSignalEquipmentID.mid(pos + 1);
+		return;
 	}
-
-	m_caption = QString("Signal #%1").arg(deviceSignalEquipmentID);
 
 	//
 
@@ -1437,6 +1431,226 @@ void Signal::updateTuningValuesType()
 	m_tuningHighBound.setType(tvType);
 }
 
+void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
+								QString* errMsg)
+{
+	TEST_PTR_RETURN(errMsg);
+
+	QString deviceSignalEquipmentID = deviceSignal.equipmentIdTemplate();
+
+	m_equipmentID = deviceSignal.equipmentIdTemplate();
+
+	if (deviceSignal.propertyExists(SignalProperties::appSignalIDTemplateCaption) == true)
+	{
+		m_appSignalID = expandTemplate(	deviceSignal,
+										deviceSignal.propertyValue((SignalProperties::appSignalIDTemplateCaption)).toString(),
+										errMsg);
+		if (errMsg->isEmpty() == false)
+		{
+			return;
+		}
+	}
+	else
+	{
+		m_appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
+	}
+
+	if (deviceSignal.propertyExists(SignalProperties::customSignalIDTemplateCaption) == true)
+	{
+		// customSignalIDTemplate will be expand in compile time
+		//
+		m_customAppSignalID = deviceSignal.propertyValue(SignalProperties::customSignalIDTemplateCaption).toString();
+	}
+	else
+	{
+		m_customAppSignalID = deviceSignalEquipmentID;
+	}
+
+	if (deviceSignal.propertyExists(SignalProperties::captionTemplateCaption) == true)
+	{
+		m_caption = expandTemplate(	deviceSignal,
+									deviceSignal.propertyValue((SignalProperties::captionTemplateCaption)).toString(),
+									errMsg);
+
+		if (errMsg->isEmpty() == false)
+		{
+			return;
+		}
+	}
+	else
+	{
+		int pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
+
+		if (pos != -1)
+		{
+			deviceSignalEquipmentID = deviceSignalEquipmentID.mid(pos + 1);
+		}
+
+		m_caption = QString("Signal #%1").arg(deviceSignalEquipmentID);
+	}
+}
+
+QString Signal::expandTemplate(const Hardware::DeviceSignal& deviceSignal,
+							   const QString& templateStr,
+							   QString* errMsg)
+{
+	QString resultStr;
+
+	int searchStartPos = 0;
+
+	do
+	{
+		int macroStartPos = templateStr.indexOf("$(", searchStartPos);
+
+		if (macroStartPos == -1)
+		{
+			// no more macroses
+			//
+			resultStr += templateStr.mid(searchStartPos);
+			break;
+		}
+
+		resultStr += templateStr.mid(searchStartPos, macroStartPos - searchStartPos);
+
+		int macroEndPos = templateStr.indexOf(")", macroStartPos + 2);
+
+		if (macroEndPos == -1)
+		{
+			*errMsg = QString("End of macro is not found in template %1 of device signal %2. ").
+						arg(templateStr).arg(deviceSignal.equipmentIdTemplate());
+			return QString();
+		}
+
+		QString macroStr = templateStr.mid(macroStartPos + 2, macroEndPos - (macroStartPos + 2));
+
+		QString expandedMacroStr = expandMacro(deviceSignal, macroStr, errMsg);
+
+		if (errMsg->isEmpty() == false)
+		{
+			return QString();
+		}
+
+		resultStr += expandedMacroStr;
+
+		searchStartPos = macroEndPos + 1;
+	}
+	while(true);
+
+	return resultStr;
+}
+
+QString Signal::expandMacro(const Hardware::DeviceSignal& deviceSignal,
+							const QString& macroStr,
+							QString* errMsg)
+{
+	QStringList macroFields = macroStr.split(".");
+
+	const Hardware::DeviceObject* deviceObject = nullptr;
+	QString propertyCaption;
+
+	switch(macroFields.count())
+	{
+	case 1:
+		{
+			// property only
+			//
+			deviceObject = &deviceSignal;
+			propertyCaption = macroFields.at(0);
+		}
+		break;
+
+	case 2:
+		{
+			// parentObject.property
+			//
+			QString parentObjectType = macroFields.at(0);
+			propertyCaption = macroFields.at(1);
+
+			deviceObject = getParentObjectOfType(deviceSignal, parentObjectType, errMsg);
+
+			if (errMsg->isEmpty() == false)
+			{
+				return QString();
+			}
+
+			if (deviceObject == nullptr)
+			{
+				*errMsg = QString("Macro expand error! Parent device object of type '%1' is not found for device signal %2").
+								arg(parentObjectType).arg(deviceSignal.equipmentIdTemplate());
+				return QString();
+			}
+
+		}
+		break;
+
+	default:
+		*errMsg = QString("Unknown format of macro %1 in template of device signal %2").
+				arg(macroStr).arg(deviceSignal.equipmentIdTemplate());
+		return QString();
+	}
+
+	if (deviceObject->propertyExists(propertyCaption) == false)
+	{
+		*errMsg = QString("Device signal %1 macro expand error! Property '%2' is not found in object %3.").
+							arg(deviceSignal.equipmentIdTemplate()).
+							arg(propertyCaption).
+							arg(deviceObject->equipmentIdTemplate());
+		return QString();
+	}
+
+	QString propertyValue = deviceObject->propertyValue(propertyCaption).toString();
+
+	return propertyValue;
+}
+
+const Hardware::DeviceObject* Signal::getParentObjectOfType(const Hardware::DeviceObject& startObject,
+																  const QString& parentObjectType,
+																  QString* errMsg)
+{
+	static const std::map<QString, Hardware::DeviceType> objectTypes {
+			std::make_pair(QString("Root"), Hardware::DeviceType::Root),
+			std::make_pair(QString("System"), Hardware::DeviceType::System),
+			std::make_pair(QString("Rack"), Hardware::DeviceType::Rack),
+			std::make_pair(QString("Chassis"), Hardware::DeviceType::Chassis),
+			std::make_pair(QString("Module"), Hardware::DeviceType::Module),
+			std::make_pair(QString("Workstation"), Hardware::DeviceType::Workstation),
+			std::make_pair(QString("Software"), Hardware::DeviceType::Software),
+			std::make_pair(QString("Controller"), Hardware::DeviceType::Controller),
+			std::make_pair(QString("Signal"), Hardware::DeviceType::Signal),
+	};
+
+	std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType);
+
+	if (it == objectTypes.end())
+	{
+		*errMsg = QString("Unknown object type '%1' in call of getParentObjectOfType(...) for device object %2").
+						arg(parentObjectType).arg(startObject.equipmentIdTemplate());
+		return nullptr;
+	}
+
+	Hardware::DeviceType requestedDeviceType = it->second;
+
+	const Hardware::DeviceObject* parent = startObject.parent();
+
+	do
+	{
+		if (parent == nullptr)
+		{
+			break;
+		}
+
+		if (parent->deviceType() == requestedDeviceType)
+		{
+			return parent;
+		}
+
+		parent = parent->parent();
+	}
+	while(true);
+
+	return nullptr;
+}
+
 void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
 {
 	if (deviceSignal.propertyExists(SignalProperties::enableTuningCaption) == false)
@@ -1477,9 +1691,18 @@ void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSign
 	}
 
 	m_enableTuning = deviceSignal.propertyValue(SignalProperties::enableTuningCaption).toBool();
-	m_tuningDefaultValue.setFloatValue(deviceSignal.propertyValue(SignalProperties::tuningDefaultValueCaption).toFloat());
-	m_tuningLowBound.setFloatValue(deviceSignal.propertyValue(SignalProperties::tuningLowBoundCaption).toFloat());
-	m_tuningHighBound.setFloatValue(deviceSignal.propertyValue(SignalProperties::tuningHighBoundCaption).toFloat());
+
+	m_tuningDefaultValue.setValue(	m_signalType,
+									m_analogSignalFormat,
+									deviceSignal.propertyValue(SignalProperties::tuningDefaultValueCaption));
+
+	m_tuningLowBound.setValue(	m_signalType,
+								m_analogSignalFormat,
+								deviceSignal.propertyValue(SignalProperties::tuningLowBoundCaption));
+
+	m_tuningHighBound.setValue(	m_signalType,
+								m_analogSignalFormat,
+								deviceSignal.propertyValue(SignalProperties::tuningHighBoundCaption));
 }
 
 double Signal::getSpecPropDouble(const QString& name) const

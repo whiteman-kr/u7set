@@ -387,6 +387,22 @@ private:
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
+
+	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
+							QString* errMsg);
+
+	QString expandTemplate(const Hardware::DeviceSignal& deviceSignal,
+						   const QString& templateStr,
+						   QString* errMsg);
+
+	QString expandMacro(const Hardware::DeviceSignal& deviceSignal,
+						const QString& macroStr,
+						QString* errMsg);
+
+	const Hardware::DeviceObject* getParentObjectOfType(const Hardware::DeviceObject& startObject,
+														const QString& parentObjectType,
+														QString* errMsg);
+
 	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
 
 private:
