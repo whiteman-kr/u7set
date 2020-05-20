@@ -1462,7 +1462,6 @@ namespace Builder
 
 	bool UalSignal::isCanBeConnectedTo(const UalItem& ualItem,
 									   const LogicAfbSignal& afbSignal,
-									   bool afbSignalIsInput,
 									   IssueLogger* log) const
 	{
 		TEST_PTR_RETURN_FALSE(log);
@@ -1473,61 +1472,60 @@ namespace Builder
 			return false;
 		}
 
-		if (afbSignalIsInput == true)
+		if (afbSignal.isBus() == true)
 		{
-			if (afbSignal.isBus() == true)
+			if(isBus() == true)
 			{
-				if(isBus() == true)
+				// bus signal connection to bus input checking
+				//
+				TEST_PTR_RETURN_FALSE(m_bus);
+
+				switch(afbSignal.busDataFormat())
 				{
-					// bus signal connection to bus input checking
-					//
-					TEST_PTR_RETURN_FALSE(m_bus);
+				case E::BusDataFormat::Discrete:
 
-					switch(afbSignal.busDataFormat())
+					if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
 					{
-					case E::BusDataFormat::Discrete:
-
-						if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
-						{
-							return true;
-						}
-
-						// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
-						//
-						log->errALC5172(afbSignal.caption(), ualItem.label(), ualItem.guid(), ualItem.schemaID());
-
-						return false;
-
-					case E::BusDataFormat::Mixed:
-						// any bus can be connected to this afbSignal
-						//
 						return true;
-
-					default:
-						LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
 					}
+
+					// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+					//
+					log->errALC5172(afbSignal.caption(), ualItem.label(), ualItem.guid(), ualItem.schemaID());
 
 					return false;
-				}
 
-				if (isDiscrete() == true)
-				{
-					// discrete signal connection to bus input checking
+				case E::BusDataFormat::Mixed:
+					// any bus can be connected to this afbSignal
 					//
-					switch(afbSignal.busDataFormat())
-					{
-					case E::BusDataFormat::Discrete:
-					case E::BusDataFormat::Mixed:
-						return true;
+					return true;
 
-					default:
-						LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
-					}
+				default:
+					LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
 				}
 
 				return false;
 			}
+
+			if (isDiscrete() == true)
+			{
+				// discrete signal connection to bus input checking
+				//
+				switch(afbSignal.busDataFormat())
+				{
+				case E::BusDataFormat::Discrete:
+				case E::BusDataFormat::Mixed:
+					return true;
+
+				default:
+					LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
+				}
+			}
+
+			return false;
 		}
+
+		TEST_PTR_RETURN_FALSE(m_refSignals[0]);
 
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}

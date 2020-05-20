@@ -2266,7 +2266,7 @@ namespace Builder
 			return linkSetFlagsItemInput(srcItem, destItem, inPinUuid, ualSignal);
 		}
 
-		result = ualSignal->isCanBeConnectedTo(*destItem, inSignal, true, log());
+		result = ualSignal->isCanBeConnectedTo(*destItem, inSignal, log());
 
 		if (result == false)
 		{
@@ -7709,7 +7709,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inUalSignal, m_log);
 
-		if (inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, true, log()) == false)
+		if (inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -7948,7 +7948,7 @@ namespace Builder
 			return false;
 		}
 
-		bool result = inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, true, log());
+		bool result = inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, log());
 
 		if (result == false)
 		{
@@ -8091,7 +8091,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->isCanBeConnectedTo(*ualAfb, outAfbSignal, false, log()) == false)
+		if (outUalSignal->isCanBeConnectedTo(*ualAfb, outAfbSignal, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
