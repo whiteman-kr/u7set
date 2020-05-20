@@ -1,0 +1,100 @@
+test UAL_BUSSES.01 , tests UAL_BUSSES
+schema UAL_BUSSES
+compatible MODULE_LM1SF40
+
+set #TUN_UAL_BUS_IN1 = 0
+check #TUN_UAL_BUS_OUT1 == 0
+set #TUN_UAL_BUS_IN1 = 1
+check #TUN_UAL_BUS_OUT1 == 1
+set #TUN_UAL_BUS_IN1 = 0
+check #TUN_UAL_BUS_OUT1 == 0
+endtest 
+
+test UAL_BUSSES.02 , tests UAL_BUSSES
+schema UAL_BUSSES
+compatible MODULE_LM1SF40
+
+set #TUN_UAL_BUS_IN3 = 0
+check #TUN_UAL_BUS_OUT3 == 0
+
+set #TUN_UAL_BUS_IN4 = 0
+check #TUN_UAL_BUS_OUT4 == 0
+
+set #TUN_UAL_BUS_IN5 = 0
+check #TUN_UAL_BUS_OUT5 == 0
+
+set #TUN_UAL_BUS_IN3 = 1
+check #TUN_UAL_BUS_OUT3 == 1
+
+set #TUN_UAL_BUS_IN4 = 1
+check #TUN_UAL_BUS_OUT4 == 1
+
+set #TUN_UAL_BUS_IN5 = 1
+check #TUN_UAL_BUS_OUT5 == 1
+
+set #TUN_UAL_BUS_IN3 = 0
+check #TUN_UAL_BUS_OUT3 == 0
+
+set #TUN_UAL_BUS_IN4 = 0
+check #TUN_UAL_BUS_OUT4 == 0
+
+set #TUN_UAL_BUS_IN5 = 0
+check #TUN_UAL_BUS_OUT5 == 0
+
+endtest
+
+test UAL_BUSSES.03 , tests UAL_BUSSES
+schema UAL_BUSSES
+compatible MODULE_LM1SF40
+
+set #TUN_UAL_BUS_IN6 = 0
+check #TUN_UAL_BUS_OUT6_1 == 1
+check #TUN_UAL_BUS_OUT6_2 == 1
+check #TUN_UAL_BUS_OUT6_3 == 1
+check #TUN_UAL_BUS_OUT6_4 == 1
+
+set #TUN_UAL_BUS_IN6 = 1
+check #TUN_UAL_BUS_OUT6_1 == 0
+check #TUN_UAL_BUS_OUT6_2 == 0
+check #TUN_UAL_BUS_OUT6_3 == 0
+check #TUN_UAL_BUS_OUT6_4 == 0
+
+set #TUN_UAL_BUS_IN6 = 0
+check #TUN_UAL_BUS_OUT6_1 == 1
+check #TUN_UAL_BUS_OUT6_2 == 1
+check #TUN_UAL_BUS_OUT6_3 == 1
+check #TUN_UAL_BUS_OUT6_4 == 1
+
+endtest
+
+test UAL_BUSSES.04 , tests UAL_BUSSES
+schema UAL_BUSSES
+compatible MODULE_LM1SF40
+
+set #TUN_UAL_BUS_IN7 = 0
+check #TUN_UAL_BUS_OUT7_1 == 1
+check #TUN_UAL_BUS_OUT7_2 == 1
+
+set #TUN_UAL_BUS_IN7 = 1
+check #TUN_UAL_BUS_OUT7_1 == 0
+check #TUN_UAL_BUS_OUT7_2 == 0
+
+set #TUN_UAL_BUS_IN7 = 0
+check #TUN_UAL_BUS_OUT7_1 == 1
+check #TUN_UAL_BUS_OUT7_2 == 1
+
+endtest
+
+test UAL_BUSSES.05 , tests UAL_BUSSES
+schema UAL_BUSSES
+compatible MODULE_LM1SF40
+
+const int Const1=1, int Const2=0
+check #TUN_UAL_BUS_CONST1_1 == 1
+check #TUN_UAL_BUS_CONST1_2 == 1
+check #TUN_UAL_BUS_CONST1_3 == 1
+
+check #TUN_UAL_BUS_CONST0_1 == 0
+check #TUN_UAL_BUS_CONST0_2 == 0
+
+endtest
