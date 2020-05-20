@@ -499,7 +499,7 @@ namespace Builder
 		int refSignalsCount() const { return m_refSignals.count(); }
 
 		bool isCompatible(const Signal* s, IssueLogger* log) const;
-		bool isCanBeConnectedTo(const UalItem &ualItem, const LogicAfbSignal& afbSignal, bool afbSignalIsInput, IssueLogger* log) const;
+		bool isCanBeConnectedTo(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;
 		bool isCompatible(BusShared bus, const BusSignal& busSignal, IssueLogger* log) const;
 		bool isCompatible(const UalSignal* ualSignal, IssueLogger* log) const;
 		bool isCanBeConnectedTo(const UalSignal* destSignal, IssueLogger* log) const;

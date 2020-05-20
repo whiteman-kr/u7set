@@ -481,7 +481,7 @@ namespace VFrame30
 		}
 		else
 		{
-			value = qBound(50.0, value, 500.0);
+			value = qBound(30.0, value, 500.0);
 		}
 
 		m_zoom = value;

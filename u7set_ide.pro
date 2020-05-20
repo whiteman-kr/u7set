@@ -9,6 +9,8 @@ SUBDIRS += qtpropertybrowser \
 	VFrame30 \
     Builder \
     Simulator \
-	u7
+    TrendView \
+    u7 \
+
 
 

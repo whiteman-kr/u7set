@@ -48,31 +48,36 @@ SimSchemaWidget::~SimSchemaWidget()
 
 void SimSchemaWidget::createActions()
 {
-	// New tab (duplicate this one)
-	//
-//	m_newTabAction = new QAction(tr("New Tab"), this);
-//	m_newTabAction->setEnabled(true);
-//	QList<QKeySequence> newTabShortcuts;
-//	newTabShortcuts << QKeySequence::AddTab;
-//	newTabShortcuts << QKeySequence::New;
-//	m_newTabAction->setShortcuts(newTabShortcuts);
-//	//m_newTabAction->setShortcutContext(Qt::WidgetShortcut);		// To avoid abigious with main menu same QAction
-//	addAction(m_newTabAction);
+	m_zoomInAction = new QAction(tr("Zoom In"), this);
+	m_zoomInAction->setStatusTip(tr("Zoom in schema view"));
+	m_zoomInAction->setEnabled(true);
+	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+	connect(m_zoomInAction, &QAction::triggered, this, &SimSchemaWidget::zoomIn);
 
-//	connect(m_newTabAction, &QAction::triggered, this, [this](){ emit signal_newTab(this);});
+	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
+	m_zoomOutAction->setStatusTip(tr("Zoom out schema view"));
+	m_zoomOutAction->setEnabled(true);
+	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+	connect(m_zoomOutAction, &QAction::triggered, this, &SimSchemaWidget::zoomOut);
 
-//	// Closet current tab
-//	//
-//	m_closeTabAction = new QAction(tr("Close Tab"), this);
-//	m_closeTabAction->setEnabled(true);
-//	//m_closeTabAction->setShortcuts(QKeySequence::Close);			// To avoid abigious with main menu same QAction
-//	addAction(m_closeTabAction);
+	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
+	m_zoom100Action->setStatusTip(tr("Set zoom to 100%"));
+	m_zoom100Action->setEnabled(true);
+	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+	connect(m_zoom100Action, &QAction::triggered, this, &SimSchemaWidget::zoom100);
 
-//	connect(m_closeTabAction, &QAction::triggered, this, [this](){ emit signal_closeTab(this);});
+	m_zoomToFitAction = new QAction(tr("Zoom to Fit"), this);
+	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit the screen"));
+	m_zoomToFitAction->setEnabled(true);
+	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash));
+	connect(m_zoomToFitAction, &QAction::triggered, this, &SimSchemaWidget::zoomToFit);
 
-	// --
-	//
+	addAction(m_zoomInAction);
+	addAction(m_zoomOutAction);
+	addAction(m_zoom100Action);
+	addAction(m_zoomToFitAction);
 
+	return;
 }
 
 void SimSchemaWidget::signalContextMenu(const QStringList signalList)

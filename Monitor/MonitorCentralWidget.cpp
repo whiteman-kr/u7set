@@ -5,7 +5,9 @@
 
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
-										   VFrame30::TuningController* tuningController) :
+										   VFrame30::TuningController* tuningController,
+										   QWidget* parent) :
+	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
 	m_tuningController(tuningController)
@@ -16,10 +18,10 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 	//
 	tabBar()->setExpanding(true);
 
-	QSize sz = fontMetrics().size(Qt::TextSingleLine, "XEMPTYSCHEMAX");
-	sz.setHeight(static_cast<int>(sz.height() * 1.75));
-
-	setStyleSheet(QString("QTabBar::tab { min-width: %1px; min-height: %2px;})").arg(sz.width()).arg(sz.height()));
+	// At first we see just one tab, so it is not closable
+	//
+	setTabsClosable(false);
+	setMovable(false);
 
 	// On start create an empty MonitorSchema and add a tab with this schema
 	//
@@ -162,6 +164,21 @@ void MonitorCentralWidget::slot_zoom100()
 	return;
 }
 
+void MonitorCentralWidget::slot_zoomToFit()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		Q_ASSERT(curTabWidget);
+		return;
+	}
+
+	curTabWidget->zoomToFit();
+	return;
+}
+
+
 void MonitorCentralWidget::slot_historyBack()
 {
 	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
@@ -244,6 +261,18 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 
 	if (count() <= 1)
 	{
+		// Hide close button to prevent blink
+		//
+		QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, tabBar());
+		for (int i = 0; i < count(); i++)
+		{
+			QWidget* closeButton = tabBar()->tabButton(i, closeSide);
+			if (closeButton != nullptr)
+			{
+				closeButton->setVisible(false);
+			}
+		}
+
 		setTabsClosable(false);
 		setMovable(false);
 	}

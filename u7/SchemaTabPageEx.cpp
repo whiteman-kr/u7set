@@ -2054,7 +2054,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 
 	// Hide close button for control tab page
 	//
-	QToolButton* closeButton = static_cast<QToolButton*>(m_tabWidget->tabBar()->tabButton(0, QTabBar::RightSide));
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
+	QToolButton* closeButton = static_cast<QToolButton*>(m_tabWidget->tabBar()->tabButton(0, closeSide));
 	if (closeButton != nullptr)
 	{
 		closeButton->setVisible(false);

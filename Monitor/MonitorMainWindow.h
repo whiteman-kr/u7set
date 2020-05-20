@@ -168,6 +168,7 @@ private:
 	QAction* m_zoomInAction = nullptr;
 	QAction* m_zoomOutAction = nullptr;
 	QAction* m_zoom100Action = nullptr;
+	QAction* m_zoomToFitAction = nullptr;
 
 	QAction* m_historyBack = nullptr;
 	QAction* m_historyForward = nullptr;

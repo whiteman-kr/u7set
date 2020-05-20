@@ -286,6 +286,12 @@ namespace VFrame30
 		return;
 	}
 
+	void BaseSchemaWidget::zoomToFit()
+	{
+		setZoom(0, false);
+		return;
+	}
+
 	void BaseSchemaWidget::screenChanged(QScreen* /*screen*/)
 	{
 		// If we have several screens with different resolution or DPI, this slot is requeired to recalculate
