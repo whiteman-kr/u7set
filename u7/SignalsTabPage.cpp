@@ -2500,7 +2500,7 @@ void SignalsTabPage::stopLoadingSignals()
 	disconnect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals);
 	disconnect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals);
 	disconnect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
-	disconnect(m_signalsModel, &SignalsModel::finishLoadSignals, this, &SignalsTabPage::stopLoadingSignals);
+	disconnect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals);
 
 	m_loadSignalsTimer->deleteLater();
 	m_loadSignalsTimer = nullptr;
