@@ -66,6 +66,7 @@ SOURCES += main.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
+    MonitorSignalInfo.cpp \
     MonitorSignalSnapshot.cpp \
 	Settings.cpp \
     ../lib/SocketIO.cpp \
@@ -89,7 +90,7 @@ SOURCES += main.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
-    DialogSignalInfo.cpp \
+    ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     ../lib/HostAddressPort.cpp \
@@ -137,6 +138,7 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
+    MonitorSignalInfo.h \
     MonitorSignalSnapshot.h \
 	Stable.h \
 	Settings.h \
@@ -163,7 +165,7 @@ HEADERS  += \
     ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
-    DialogSignalInfo.h \
+    ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     ../lib/HostAddressPort.h \
@@ -206,7 +208,7 @@ HEADERS  += \
 
 FORMS    += \
     DialogSettings.ui \
-    DialogSignalInfo.ui \
+    ../lib/Ui/DialogSignalInfo.ui \
     DialogColumns.ui \
     DialogChooseArchiveSignals.ui
 

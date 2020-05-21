@@ -75,6 +75,7 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
+    ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
@@ -97,6 +98,7 @@ SOURCES +=\
     Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
+    Simulator/SimSignalInfo.cpp \
     Simulator/SimSignalSnapshot.cpp \
     Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
@@ -222,6 +224,7 @@ HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ExportPrint.h \
     ../lib/StandardColors.h \
+    ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/TabWidgetEx.h \
@@ -243,6 +246,7 @@ HEADERS  += \
     Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
+    Simulator/SimSignalInfo.h \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
@@ -375,6 +379,7 @@ HEADERS  += \
 
 
 FORMS    += \
+    ../lib/Ui/DialogSignalInfo.ui \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \

@@ -75,4 +75,8 @@ std::set<QString> SimIdeSimulator::schemaAppSignals(const QString& schemaId)
 	return details->m_signals;
 }
 
+QStringList SimIdeSimulator::schemasByAppSignalId(const QString& appSignalId) const
+{
+	return m_schemaDetails.schemasByAppSignalId(appSignalId);
+}
 

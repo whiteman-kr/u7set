@@ -61,10 +61,6 @@ void Settings::writeUserScope() const
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
 	s.setValue("MainWindow/state", m_mainWindowState);
 
-	s.setValue("DialogSignalInfo/pos", m_signalInfoPos);
-	s.setValue("DialogSignalInfo/geometry", m_signalInfoGeometry);
-	s.setValue("DialogSignalInfo/treeSetpointsState", m_signalInfoTreeSetpointsState);
-
 	s.setValue("DialogChooseTrendSignals/filter", m_trendSignalsDialogFilterCompleter);
 
 	s.setValue("ArchiveWindow/pos", m_archiveWindowPos);
@@ -90,10 +86,6 @@ void Settings::loadUserScope()
 	m_mainWindowPos = s.value("MainWindow/pos", QPoint(200, 200)).toPoint();
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
-
-	m_signalInfoPos = s.value("DialogSignalInfo/pos", QPoint(-1, -1)).toPoint();
-	m_signalInfoGeometry = s.value("DialogSignalInfo/geometry").toByteArray();
-	m_signalInfoTreeSetpointsState = s.value("DialogSignalInfo/treeSetpointsState").toByteArray();
 
 	m_trendSignalsDialogFilterCompleter = s.value("DialogChooseTrendSignals/filter").toStringList();
 

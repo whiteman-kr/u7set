@@ -2,7 +2,7 @@
 #include "MonitorSchemaWidget.h"
 #include "MonitorView.h"
 #include "MonitorSchemaManager.h"
-#include "DialogSignalInfo.h"
+#include "MonitorSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
@@ -278,7 +278,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	DialogSignalInfo::showDialog(appSignalId,
+	MonitorSignalInfo::showDialog(appSignalId,
 	                             theMonitorMainWindow->configController(),
 	                             theMonitorMainWindow->tcpSignalClient(),
 	                             theMonitorMainWindow->monitorCentralWidget());
