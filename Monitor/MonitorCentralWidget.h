@@ -24,10 +24,12 @@ public:
 	VFrame30::TuningController* tuningController();
 
 protected:
+	virtual void timerEvent(QTimerEvent* event) override;
 	int addSchemaTabPage(QString schemaId, const QVariantHash& variables);
 
 	// Signals
 signals:
+	void signal_tabPageChanged(bool schemaWidgetSelected);		// Emmited to enable/disable QActions dependo on current tab (schema/schemalist)
 	void signal_actionCloseTabUpdated(bool allowed);
 	void signal_schemaChanged(QString strId);
 	void signal_historyChanged(bool enableBack, bool enableForward);
@@ -35,6 +37,8 @@ signals:
 	// Slots
 	//
 public slots:
+	void slot_schemaList();
+	void slot_newSchemaTab(QString schemaId);
 	void slot_newTab();
 	void slot_closeCurrentTab();
 
@@ -56,7 +60,7 @@ protected slots:
 	void slot_resetSchema();
 
 	void slot_newSameTab(MonitorSchemaWidget* tabWidget);
-	void slot_closeTab(MonitorSchemaWidget* tabWidget);
+	void slot_closeTab(QWidget* tabWidget);
 
 	void slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget, VFrame30::Schema* schema);
 
@@ -69,6 +73,9 @@ private:
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
 	VFrame30::TuningController* m_tuningController = nullptr;
+
+	int m_eventLoopTimerId = 0;			// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
+	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
 };
 
 #endif // MONITORCENTRALWIDGET_H

@@ -7,7 +7,7 @@
 #include "SimSelectBuildDialog.h"
 #include "SimLogicModulePage.h"
 #include "SimConnectionPage.h"
-#include "SimAppLogicSchemasPage.h"
+#include "SimSelectSchemaPage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
@@ -178,6 +178,8 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
+
+	page->simSchemaWidget()->setZoom(0, false);
 
 	return;
 }
@@ -966,7 +968,7 @@ void SimWidget::openAppSchemasTabPage()
 
 	// Check if such SimulatorControlPage already exists
 	//
-	SimAppLogicSchemasPage* cp = SimBasePage::appLogicSchemasPage(m_tabWidget);
+	SimSelectSchemaPage* cp = SimBasePage::selectSchemaPage(m_tabWidget);
 
 	if (cp != nullptr)
 	{
@@ -986,7 +988,7 @@ void SimWidget::openAppSchemasTabPage()
 
 	// Create new SimConnectionPage
 	//
-	SimAppLogicSchemasPage* page = new SimAppLogicSchemasPage{m_simulator.get(), m_tabWidget};
+	SimSelectSchemaPage* page = new SimSelectSchemaPage{m_simulator.get(), m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(page, tr("AppLogic Schemas"));
 	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimAppLogicSchemas.svg"}});
@@ -995,8 +997,7 @@ void SimWidget::openAppSchemasTabPage()
 
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-
-	connect(page, &SimAppLogicSchemasPage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
+	connect(page, &SimSelectSchemaPage::openSchemaTabPage, this, &SimWidget::openSchemaTabPage);
 
 	return;
 }

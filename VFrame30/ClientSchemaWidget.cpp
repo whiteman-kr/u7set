@@ -20,8 +20,8 @@ namespace VFrame30
 	}
 
 
-	ClientSchemaWidget::ClientSchemaWidget(SchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager) :
-		BaseSchemaWidget(schema, schemaView),
+	ClientSchemaWidget::ClientSchemaWidget(SchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent) :
+		BaseSchemaWidget(schema, schemaView, parent),
 		m_schemaManager(schemaManager)
 	{
 		Q_ASSERT(schemaView);

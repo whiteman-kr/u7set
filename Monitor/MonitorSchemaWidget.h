@@ -29,7 +29,8 @@ public:
 	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 						MonitorSchemaManager* schemaManager,
 						VFrame30::AppSignalController* appSignalController,
-						VFrame30::TuningController* tuningController);
+						VFrame30::TuningController* tuningController,
+						QWidget* parent);
 	virtual ~MonitorSchemaWidget();
 
 protected:

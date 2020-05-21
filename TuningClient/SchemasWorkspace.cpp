@@ -91,7 +91,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager);
+		m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
 		connect(m_schemaWidget, &TuningSchemaWidget::signal_schemaChanged, this, &SchemasWorkspace::slot_schemaChanged);
 
 		m_hSplitter = new QSplitter(this);
@@ -113,7 +113,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 			{
 				std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
-				TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager);
+				TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
 
 				connect(schemaWidget, &TuningSchemaWidget::signal_schemaChanged, this, &SchemasWorkspace::slot_schemaChanged);
 
@@ -141,7 +141,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 			std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
-			m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager);
+			m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
 
 			mainLayout->addWidget(m_schemaWidget);
 		}

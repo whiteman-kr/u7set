@@ -27,7 +27,8 @@ public:
 	TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 					   TuningClientTuningController* tuningController,
 					   std::shared_ptr<VFrame30::Schema> schema,
-					   TuningSchemaManager* schemaManager);
+					   TuningSchemaManager* schemaManager,
+					   QWidget* parent);
 	~TuningSchemaWidget();
 
 	//TuningSchemaView* tuningSchemaView();

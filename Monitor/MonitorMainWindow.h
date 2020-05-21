@@ -32,11 +32,11 @@ public:
 	// Events
 	//
 protected:
-	virtual void closeEvent(QCloseEvent*) override;
+	virtual void closeEvent(QCloseEvent* event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
-	virtual void showEvent(QShowEvent*) override;
 
-	virtual bool eventFilter(QObject *object, QEvent *event) override;
+	virtual void showEvent(QShowEvent* event) override;
+	virtual bool eventFilter(QObject* object, QEvent* event) override;
 
 	// Public methods
 	//
@@ -92,6 +92,7 @@ protected:
 	void slot_signalSnapshot();
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
+	void slot_updateActions(bool schemaWidgetSelected);
 
 	void slot_configurationArrived(ConfigSettings configuration);
 	void slot_unknownClient();
@@ -162,6 +163,7 @@ private:
 	QAction* m_pAboutAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;
 
+	QAction* m_schemaListAction = nullptr;
 	QAction* m_newTabAction = nullptr;
 	QAction* m_closeTabAction = nullptr;
 

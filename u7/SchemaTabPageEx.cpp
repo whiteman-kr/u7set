@@ -2525,7 +2525,7 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 		tabWidget->setCurrentWidget(editTabPage);
 	}
 
-	editTabPage->updateZoomAndScrolls(false);
+	editTabPage->updateZoomAndScrolls(false, false);
 	editTabPage->setVisible(true);
 	editTabPage->activateWindow();
 
@@ -2790,7 +2790,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
+	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx{tabWidget, vf, fi, db()};
 
 	connect(editTabPage, &EditSchemaTabPageEx::vcsFileStateChanged, m_filesView, &SchemaFileViewEx::slot_refreshFiles);
 	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
@@ -2821,6 +2821,8 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
+
+	editTabPage->updateZoomAndScrolls(true, false);
 
 	m_openedFiles.push_back(editTabPage);
 
@@ -2897,7 +2899,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 	// Create TabPage and add it to the TabControl
 	//
-	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
+	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx{tabWidget, vf, fi, db()};
 
 	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
@@ -2906,6 +2908,8 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
+
+	editTabPage->updateZoomAndScrolls(true, false);
 
 	m_openedFiles.push_back(editTabPage);
 
@@ -3451,7 +3455,7 @@ void SchemaControlTabPageEx::deleteFiles()
 		return;
 	}
 
-	Q_ASSERT(selectedIndexes.size() == files.size());
+	Q_ASSERT(selectedIndexes.size() == static_cast<int>(files.size()));
 
 	// --
 	//
@@ -3543,7 +3547,7 @@ void SchemaControlTabPageEx::moveFiles()
 		return;
 	}
 
-	Q_ASSERT(selectedIndexes.size() == files.size());
+	Q_ASSERT(selectedIndexes.size() == static_cast<int>(files.size()));
 
 	// If schema is opened, can't move it
 	//
@@ -3671,7 +3675,7 @@ void SchemaControlTabPageEx::checkOutFiles()
 		return;
 	}
 
-	Q_ASSERT(selectedIndexes.size() == files.size());
+	Q_ASSERT(selectedIndexes.size() == static_cast<int>(files.size()));
 
 	// --
 	//
@@ -3728,7 +3732,7 @@ void SchemaControlTabPageEx::checkInFiles()
 		return;
 	}
 
-	Q_ASSERT(selectedIndexes.size() == selectedFiles.size());
+	Q_ASSERT(selectedIndexes.size() == static_cast<int>(selectedFiles.size()));
 
 	// --
 	//
@@ -4221,6 +4225,8 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 
 	tabWidget->addTab(compareTabPage, compareTabPage->windowTitle());
 	tabWidget->setCurrentWidget(compareTabPage);
+
+	compareTabPage->updateZoomAndScrolls(true, false);
 
 	m_openedFiles.push_back(compareTabPage);
 
@@ -4780,7 +4786,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	//
 	schema->setChangeset(fileInfo.changeset());
 
-	m_schemaWidget = new EditSchemaWidget(schema, fileInfo, dbcontroller);
+	m_schemaWidget = new EditSchemaWidget{schema, fileInfo, dbcontroller, this};
 
 	connect(m_schemaWidget, &EditSchemaWidget::detachOrAttachWindow, this, &EditSchemaTabPageEx::detachOrAttachWindow);
 	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPageEx::closeTab);
@@ -4905,7 +4911,6 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 
 EditSchemaTabPageEx::~EditSchemaTabPageEx()
 {
-	qDebug() << Q_FUNC_INFO;
 }
 
 void EditSchemaTabPageEx::closeEvent(QCloseEvent* event)
@@ -5036,9 +5041,9 @@ void EditSchemaTabPageEx::setPageTitle()
 	return;
 }
 
-void EditSchemaTabPageEx::updateZoomAndScrolls(bool repaint)
+void EditSchemaTabPageEx::updateZoomAndScrolls(bool fitToScreen, bool repaint)
 {
-	m_schemaWidget->setZoom(m_schemaWidget->zoom(), repaint);
+	m_schemaWidget->setZoom(fitToScreen ? 0 : m_schemaWidget->zoom(), repaint);
 	return;
 }
 

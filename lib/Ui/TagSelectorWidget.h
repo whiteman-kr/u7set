@@ -20,11 +20,14 @@ public:
 public:
 	void clear();
 
+	void setTags(const QStringList& tags);
 	void setTags(const std::vector<QString>& tags);
 	void setTags(const std::set<QString>& tags);
 
 	std::map<QString, bool> tags() const;
+
 	QStringList selectedTags() const;
+	void setSelectedTags(const QStringList& tags, bool emitNotify);
 
 protected:
 	virtual void showEvent(QShowEvent* event) override;
@@ -60,7 +63,9 @@ namespace TagSelector
 
 	public:
 		QString tag() const;
+
 		bool selected() const;
+		void setSelected(bool value);
 	};
 
 	// Flow layout is copied form examples of Qt

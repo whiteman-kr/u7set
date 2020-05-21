@@ -44,6 +44,7 @@ namespace VFrame30
 		std::shared_ptr<Schema> schema() const;
 
 		void setSchema(std::shared_ptr<Schema> schema, bool repaint);
+		void setSchemaInternal(std::shared_ptr<Schema> schema);	// Use this when yoo dont need to update zoom, sliders, etc
 
 		// Events
 		//

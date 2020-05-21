@@ -6,8 +6,12 @@
 namespace VFrame30
 {
 
-	BaseSchemaWidget::BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView)
+	BaseSchemaWidget::BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView, QWidget* parent) :
+		QScrollArea(parent),
+		m_schemaView(schemaView)
 	{
+		setFrameStyle(QFrame::NoFrame);
+
 		assert(schema != nullptr);
 		assert(schemaView != nullptr);
 
@@ -17,10 +21,8 @@ namespace VFrame30
 
 		// --
 		//
-		m_schemaView = schemaView;
-		m_schemaView->setSchema(schema, false);
+		m_schemaView->setSchemaInternal(schema);
 
-		m_schemaView->setZoom(100);
 		setWidget(m_schemaView);
 
 		// --

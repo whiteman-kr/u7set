@@ -22,5 +22,6 @@
         <file>Images/ZoomFitToScreen.svg</file>
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
+        <file>Images/SchemaList.svg</file>
     </qresource>
 </RCC>
