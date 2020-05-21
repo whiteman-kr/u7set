@@ -328,16 +328,20 @@ void SignalSearchItemModel::setSignals(std::vector<AppSignalParam>* signalsVecto
 // DialogSignalSearchSettings
 //
 
-void DialogSignalSearchSettings::restore(QSettings& s)
+void DialogSignalSearchSettings::restore()
 {
+	QSettings s;
+
 	pos = s.value("DialogSignalSearch/pos", QPoint(-1, -1)).toPoint();
 	geometry = s.value("DialogSignalSearch/geometry").toByteArray();
 	columnCount = s.value("DialogSignalSearch/columnCount").toInt();
 	columnWidth = s.value("DialogSignalSearch/columnWidth").toByteArray();
 }
 
-void DialogSignalSearchSettings::store(QSettings& s)
+void DialogSignalSearchSettings::store()
 {
+	QSettings s;
+
 	s.setValue("DialogSignalSearch/pos", pos);
 	s.setValue("DialogSignalSearch/geometry", geometry);
 	s.setValue("DialogSignalSearch/columnCount", columnCount);
@@ -351,11 +355,13 @@ void DialogSignalSearchSettings::store(QSettings& s)
 QString DialogSignalSearch::m_signalId;
 
 DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSignalManager) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 	m_model(this),
 	m_appSignalManager(appSignalManager)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	setWindowTitle(tr("Signal Search"));
 
 	if(m_appSignalManager == nullptr)
 	{
@@ -369,34 +375,37 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	//
 	QLabel* l = new QLabel("SignalID");
 	m_editSignalID = new QLineEdit();
-	connect(m_editSignalID, &QLineEdit::textEdited, this, &DialogSignalSearch::on_editSignalID_textEdited);
+	connect(m_editSignalID, &QLineEdit::textEdited, this, &DialogSignalSearch::textEdited);
 
 	QHBoxLayout* hl = new QHBoxLayout();
 	hl->addWidget(l);
 	hl->addWidget(m_editSignalID);
 
 	m_tableView = new QTableView();
+	m_tableView->horizontalHeader()->setHighlightSections(false);
 
 	m_labelFound = new QLabel();
+
+	QHBoxLayout* bl = new QHBoxLayout();
+	bl->addWidget(m_labelFound);
+
+	bl->addStretch();
+
+	QPushButton* b = new QPushButton(tr("Open"));
+	connect(b, &QPushButton::clicked, this, &DialogSignalSearch::openClicked);
+	bl->addWidget(b);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addLayout(hl);
 	mainLayout->addWidget(m_tableView);
-	mainLayout->addWidget(m_labelFound);
+	mainLayout->addLayout(bl);
+	mainLayout->setContentsMargins(5, 5, 5, 5);
 
 	setLayout(mainLayout);
 
-	connect(this, &DialogSignalSearch::finished, this, &DialogSignalSearch::on_DialogSignalSearch_finished);
+	connect(this, &DialogSignalSearch::finished, this, &DialogSignalSearch::finished);
 
 	setMinimumSize(400, 450);
-
-	// Restore window pos
-	//
-	if (theDialogSignalSearchSettings.pos.x() != -1 && theDialogSignalSearchSettings.pos.y() != -1)
-	{
-		move(theDialogSignalSearchSettings.pos);
-		restoreGeometry(theDialogSignalSearchSettings.geometry);
-	}
 
 	// set model
 	//
@@ -409,7 +418,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	m_tableView->setGridStyle(Qt::PenStyle::NoPen);
 	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_tableView, &QTreeView::customContextMenuRequested,this, &DialogSignalSearch::prepareContextMenu);
-	connect(m_tableView, &QTableView::doubleClicked, this, &DialogSignalSearch::on_tableView_doubleClicked);
+	connect(m_tableView, &QTableView::doubleClicked, this, &DialogSignalSearch::tableDoubleClicked);
 
 	int fontHeight = fontMetrics().height() + 4;
 
@@ -417,11 +426,22 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
 	verticalHeader->setDefaultSectionSize(fontHeight);
 
+	// Restore window pos
+	//
+	DialogSignalSearchSettings settings;
+	settings.restore();
+
+	if (settings.pos.x() != -1 && settings.pos.y() != -1)
+	{
+		move(settings.pos);
+		restoreGeometry(settings.geometry);
+	}
+
 	// Restore columns width
 	//
-	QDataStream stream(&theDialogSignalSearchSettings.columnWidth, QIODevice::ReadOnly);
+	QDataStream stream(&settings.columnWidth, QIODevice::ReadOnly);
 
-	for (int i = 0; i < theDialogSignalSearchSettings.columnCount; i++)
+	for (int i = 0; i < settings.columnCount; i++)
 	{
 		int width;
 		stream >> width;
@@ -468,7 +488,7 @@ DialogSignalSearch::~DialogSignalSearch()
 {
 }
 
-void DialogSignalSearch::on_signalsUpdate()
+void DialogSignalSearch::signalsUpdated()
 {
 	m_signals = m_appSignalManager->signalList();
 
@@ -482,7 +502,7 @@ void DialogSignalSearch::on_signalsUpdate()
 	return;
 }
 
-void DialogSignalSearch::on_editSignalID_textEdited(const QString &arg1)
+void DialogSignalSearch::textEdited(const QString &arg1)
 {
 	m_signalId = arg1;
 	search();
@@ -494,13 +514,20 @@ void DialogSignalSearch::search()
 {
 	std::vector<AppSignalParam> foundSignals;
 
-	for (const AppSignalParam& s : m_signals)
+	if (m_signalId.isEmpty() == true)
 	{
-		if (s.customSignalId().startsWith(m_signalId, Qt::CaseInsensitive) == false)
+		foundSignals = m_signals;
+	}
+	else
+	{
+		for (const AppSignalParam& s : m_signals)
 		{
-			continue;
+			if (s.customSignalId().contains(m_signalId, Qt::CaseInsensitive) == false)
+			{
+				continue;
+			}
+			foundSignals.push_back(s);
 		}
-		foundSignals.push_back(s);
 	}
 
 	m_labelFound->setText(QString("Signals found: %1").arg(foundSignals.size()));
@@ -508,29 +535,45 @@ void DialogSignalSearch::search()
 	m_model.setSignals(&foundSignals);
 }
 
-void DialogSignalSearch::on_DialogSignalSearch_finished(int result)
+void DialogSignalSearch::finished(int result)
 {
 	Q_UNUSED(result);
 
 	// Save columns width
 	//
-	theDialogSignalSearchSettings.columnWidth.clear();
+	DialogSignalSearchSettings settings;
 
-	QDataStream stream(&theDialogSignalSearchSettings.columnWidth, QIODevice::WriteOnly);
+	QDataStream stream(&settings.columnWidth, QIODevice::WriteOnly);
 
-	theDialogSignalSearchSettings.columnCount = m_model.columnCount();
-	for (int i = 0; i < theDialogSignalSearchSettings.columnCount; i++)
+	settings.columnCount = m_model.columnCount();
+
+	for (int i = 0; i < settings.columnCount; i++)
 	{
 		stream << (int)m_tableView->columnWidth(i);
 	}
 
 	// Save window position
 	//
-	theDialogSignalSearchSettings.pos = pos();
-	theDialogSignalSearchSettings.geometry = saveGeometry();
+	settings.pos = pos();
+	settings.geometry = saveGeometry();
+
+	settings.store();
 }
 
-void DialogSignalSearch::on_tableView_doubleClicked(const QModelIndex &index)
+void DialogSignalSearch::openClicked()
+{
+	QModelIndex index = m_tableView->currentIndex();
+	if (index.isValid() == false)
+	{
+		return;
+	}
+
+	tableDoubleClicked(index);
+
+	return;
+}
+
+void DialogSignalSearch::tableDoubleClicked(const QModelIndex &index)
 {
 	if (index.isValid() == false)
 	{

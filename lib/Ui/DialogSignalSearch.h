@@ -102,8 +102,8 @@ struct DialogSignalSearchSettings
 	int columnCount = 0;
 	QByteArray columnWidth;
 
-	void restore(QSettings& s);
-	void store(QSettings& s);
+	void restore();
+	void store();
 };
 
 class DialogSignalSearch : public QDialog
@@ -115,16 +115,17 @@ public:
 	virtual ~DialogSignalSearch();
 
 public slots:
-	void on_signalsUpdate();		// Should be called when new signals arrived from AppDataService
+	void signalsUpdated();		// Should be called when new signals arrived from AppDataService
 
 signals:
 	void signalContextMenu(const QStringList signalList);
 	void signalInfo(QString appSignalId);
 
 private slots:
-	void on_editSignalID_textEdited(const QString &arg1);
-	void on_DialogSignalSearch_finished(int result);
-	void on_tableView_doubleClicked(const QModelIndex &index);
+	void textEdited(const QString &arg1);
+	void finished(int result);
+	void openClicked();
+	void tableDoubleClicked(const QModelIndex &index);
 	void prepareContextMenu(const QPoint& pos);
 
 private:
@@ -142,8 +143,7 @@ private:
 	SignalSearchItemModel m_model;
 
 	std::vector<AppSignalParam> m_signals;
-};
 
-extern DialogSignalSearchSettings theDialogSignalSearchSettings;
+};
 
 #endif // DIALOGSIGNALSEARCH_H

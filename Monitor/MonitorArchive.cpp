@@ -253,7 +253,7 @@ static int no = 1;
 
 	// Central widget - model/view
 	//
-	setContentsMargins(2, 2, 2, 2);
+	setContentsMargins(5, 5, 5, 5);
 
 	m_view->setModel(m_model);
 	setCentralWidget(m_view);

@@ -392,6 +392,11 @@ namespace Sim
 		return m_buildPath;
 	}
 
+	QString Simulator::projectName() const
+	{
+		return m_firmwares.projectName();
+	}
+
 	const Sim::Connections& Simulator::connections() const
 	{
 		return m_connections;

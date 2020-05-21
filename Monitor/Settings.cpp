@@ -73,9 +73,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("DialogChooseArchiveSignals/filter", m_archiveSignalsDialogFilterCompleter);
 
-	theDialogSignalSearchSettings.store(s);
-
-	theDialogSignalSnapshotSettings.store(s);
 
 	return;
 }
@@ -96,10 +93,6 @@ void Settings::loadUserScope()
 	m_archiveHorzHeaderCount = s.value("ArchiveWindow/horzHeaderCount").toInt();
 	m_archiveTimeType = s.value("ArchiveWindow/timeType").toInt();
 	m_archiveSignalsDialogFilterCompleter = s.value("DialogChooseArchiveSignals/filter").toStringList();
-
-	theDialogSignalSearchSettings.restore(s);
-
-	theDialogSignalSnapshotSettings.restore(s);
 
 	return;
 }

@@ -4,18 +4,17 @@
 
 bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 										 VFrame30::AppSignalController* appSignalController,
-										 QString projectName,
 										 SimWidget* simWidget)
 {
 
 	SimDialogSignalSnapshot* dss = new SimDialogSignalSnapshot(simuator,
 															   appSignalController->appSignalManager(),
-															   projectName,
+															   simuator->projectName(),
 															   tr("Simulator"),
 															   simWidget);
 
-	connect(simuator, &SimIdeSimulator::projectUpdated, dss, &SimDialogSignalSnapshot::on_signalsUpdate);
-	connect(simuator, &SimIdeSimulator::schemaDetailsUpdated, dss, &SimDialogSignalSnapshot::on_schemasUpdate);
+	connect(simuator, &SimIdeSimulator::projectUpdated, dss, &SimDialogSignalSnapshot::projectUpdated);
+	connect(simuator, &SimIdeSimulator::schemaDetailsUpdated, dss, &SimDialogSignalSnapshot::schemasUpdated);
 
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, simWidget, &SimWidget::signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, simWidget, &SimWidget::signalInfo);
@@ -41,6 +40,15 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 		Q_ASSERT(m_simuator);
 		return;
 	}
+}
+
+void SimDialogSignalSnapshot::projectUpdated()
+{
+	setProjectName(m_simuator->projectName());
+
+	signalsUpdated();
+
+	return;
 }
 
 std::vector<VFrame30::SchemaDetails> SimDialogSignalSnapshot::schemasDetails()

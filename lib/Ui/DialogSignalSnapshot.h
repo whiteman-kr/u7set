@@ -113,6 +113,8 @@ public:
 
 	void setSignalType(SignalType type);
 
+	void setMaskType(SignalSnapshotModel::MaskType type);
+
 	void setMasks(const QStringList& masks);
 
 	void setTags(const QStringList& tags);
@@ -153,6 +155,8 @@ private:
 
 	SignalType m_signalType = SignalType::All;
 
+	MaskType m_maskType = MaskType::AppSignalId;
+
 	QStringList m_masks;
 
 	QStringList m_tags;
@@ -162,19 +166,24 @@ private:
 
 struct DialogSignalSnapshotSettings
 {
-	QPoint m_signalSnapshotPos;
-	QByteArray m_signalSnapshotGeometry;
-	QByteArray m_snapshotHorzHeader;
-	int m_snapshotHorzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
-	SignalSnapshotModel::SignalType m_signalSnapshotSignalType = SignalSnapshotModel::SignalType::All;
-	QStringList m_signalSnapshotMaskList;
-	QStringList m_signalSnapshotTagsList;
-	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
-	int m_signalSnapshotSortColumn = 0;
-	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
+	QPoint pos;
+	QByteArray geometry;
 
-	void restore(QSettings& s);
-	void store(QSettings& s);
+	QByteArray horzHeader;
+	int horzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
+
+	SignalSnapshotModel::SignalType signalType = SignalSnapshotModel::SignalType::All;
+
+	QStringList maskList;
+	SignalSnapshotModel::MaskType maskType = SignalSnapshotModel::MaskType::AppSignalId;
+
+	QStringList tagsList;
+
+	int sortColumn = 0;
+	Qt::SortOrder sortOrder = Qt::AscendingOrder;
+
+	void restore();
+	void store();
 };
 
 class DialogSignalSnapshot : public QDialog
@@ -188,16 +197,19 @@ protected:
 								  QWidget *parent);
 	virtual ~DialogSignalSnapshot();
 
+	QString projectName() const;
+	void setProjectName(const QString& projectName);
 
 public slots:
-	void on_schemasUpdate();
-	void on_signalsUpdate();		// Should be called when new signals arrived from AppDataService
+	void schemasUpdated();
+	void signalsUpdated();		// Should be called when new signals arrived from AppDataService
 
 protected:
 	virtual std::vector<VFrame30::SchemaDetails> schemasDetails() = 0;
 	virtual std::set<QString> schemaAppSignals(const QString& schemaStrId) = 0;
 
 	virtual void showEvent(QShowEvent* e) override;
+	virtual void keyPressEvent(QKeyEvent *event) override;
 
 signals:
 	void signalContextMenu(const QStringList signalList);
@@ -264,8 +276,8 @@ private:
 
 	static const QString m_maskHelp;
 	static const QString m_tagsHelp;
-};
 
-extern DialogSignalSnapshotSettings theDialogSignalSnapshotSettings;
+	DialogSignalSnapshotSettings m_settings;
+};
 
 #endif // DIALOGSIGNALSNAPSHOT_H

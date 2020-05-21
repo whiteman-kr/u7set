@@ -723,9 +723,7 @@ void SimWidget::showSnapshot()
 	//    it is guarantee will not be deleted
 	//
 
-	QString project = db()->currentProject().projectName().toLower();
-
-	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, project, this);
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, this);
 
 	return;
 }
@@ -740,7 +738,7 @@ void SimWidget::showFindSignal()
 	//
 	DialogSignalSearch* dsi = new DialogSignalSearch(this, m_appSignalController->appSignalManager());
 
-	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::on_signalsUpdate);
+	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, this, &SimWidget::signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, this, &SimWidget::signalInfo);

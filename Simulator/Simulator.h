@@ -50,6 +50,8 @@ namespace Sim
 		bool isLoaded() const;
 		QString buildPath() const;
 
+		QString projectName() const;
+
 		const Sim::Connections& connections() const;
 		Sim::Connections& connections();
 
