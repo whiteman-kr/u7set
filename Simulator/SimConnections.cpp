@@ -17,18 +17,6 @@ namespace Sim
 		return m_data.size() / 2;
 	}
 
-	//
-	// Sim::ConnectionPort
-	//
-	ConnectionPort::ConnectionPort(::ConnectionPortInfo portInfo) :
-		m_portInfo(portInfo)
-	{
-	}
-
-	const ::ConnectionPortInfo& ConnectionPort::portInfo() const
-	{
-		return m_portInfo;
-	}
 
 	//
 	// Sim::Connection
@@ -89,7 +77,7 @@ namespace Sim
 
 	Sim::ConnectionPortPtr Connection::portForLm(const QString& lmEquipmnetId)
 	{
-		for (Sim::ConnectionPortPtr p : m_ports)
+		for (Sim::ConnectionPortPtr& p : m_ports)
 		{
 			if (p->portInfo().lmID == lmEquipmnetId)
 			{

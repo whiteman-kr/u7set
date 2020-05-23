@@ -33,10 +33,16 @@ namespace Sim
 	class ConnectionPort
 	{
 	public:
-		ConnectionPort(::ConnectionPortInfo portInfo);
+		ConnectionPort(::ConnectionPortInfo portInfo) :
+			m_portInfo(portInfo)
+		{
+		}
 
 	public:
-		const ::ConnectionPortInfo& portInfo() const;
+		const ::ConnectionPortInfo& portInfo() const
+		{
+			return m_portInfo;
+		}
 
 	private:
 		::ConnectionPortInfo m_portInfo;

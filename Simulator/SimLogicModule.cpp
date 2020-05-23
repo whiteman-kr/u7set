@@ -80,8 +80,12 @@ namespace Sim
 			m_device.reset();
 		}
 
-		auto result = QtConcurrent::run<bool>(&m_device, &DeviceEmulator::runWorkcycle, currentTime, workcycle);
-		return result;
+		return QtConcurrent::run<bool>(&m_device, &DeviceEmulator::runWorkcycle, currentTime, workcycle);
+	}
+
+	bool LogicModule::receiveConnectionsData(std::chrono::microseconds currentTime)
+	{
+		return m_device.receiveConnectionsData(currentTime);
 	}
 
 	bool LogicModule::loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom)

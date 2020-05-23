@@ -395,6 +395,15 @@ namespace Sim
 				break;
 			}
 
+			// Get data from fiber optic channels (LM, OCM)
+			// No concurrent run is required, perfomance measurements show that in
+			// concurent mode it it much slower then this code
+			//
+			for (SimControlRunStruct& lm : lms)
+			{
+				lm->receiveConnectionsData(cd.m_currentTime);
+			}
+
 			for (SimControlRunStruct& lm : lms)
 			{
 				if (lm.m_task.has_value() == true)
@@ -405,8 +414,6 @@ namespace Sim
 					{
 						lm.m_possibleToAdvanceTo = lm.m_lastStartTime + lm->cycleDuration();
 						lm.m_task.reset();
-
-						//qDebug() << "Finished LM " << lm.equipmentId() << " , count = " << lm.m_cylcesCounter;
 
 						// Perform post run cycle actions
 						//
@@ -488,9 +495,6 @@ namespace Sim
 						emit statusUpdate(ControlStatus{cd});
 					}
 				}
-
-//				QDateTime t = cd.currentTime();
-//				qDebug() << "CurrentTime changed to: " << t.toString("dd/MM/yyyy HH:mm:ss:zzz");
 			}
 
 			if (state() != SimControlState::Run)
