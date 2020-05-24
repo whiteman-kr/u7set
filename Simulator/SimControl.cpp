@@ -401,7 +401,10 @@ namespace Sim
 			//
 			for (SimControlRunStruct& lm : lms)
 			{
-				lm->receiveConnectionsData(cd.m_currentTime);
+				if (lm.m_task.has_value() == false)
+				{
+					lm->receiveConnectionsData(cd.m_currentTime);
+				}
 			}
 
 			for (SimControlRunStruct& lm : lms)

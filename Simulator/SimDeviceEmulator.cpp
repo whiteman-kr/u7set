@@ -1238,9 +1238,9 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-//			QByteArray rb;
-//			QByteArray* receiveBuffer = &rb;
-			QByteArray* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
+			//std::vector<char> rb;
+			//std::vector<char>* receiveBuffer = &rb;
+			std::vector<char>* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
 			if (receiveBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port receive buffer error, connection %1, port %2 (%3).")
@@ -1256,7 +1256,7 @@ namespace Sim
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
 									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},	// timeout
 									 &timeout);
 
 			if (ok == false)
@@ -1279,7 +1279,7 @@ namespace Sim
 			}
 			else
 			{
-				if (receiveBuffer->isEmpty() == true)
+				if (receiveBuffer->empty() == true)
 				{
 					// If timeout not happened yet, but receiveBuffer is empty, wait mor time
 					// do not exit from function here, lated validity bit vill be written
@@ -1368,9 +1368,9 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-//			QByteArray sb;
-//			QByteArray* sendBuffer = &sb;
-			QByteArray* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
+			//std::vector<char> sb;
+			//std::vector<char>* sendBuffer = &sb;
+			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port send buffer error, connection %1, port %2 (%3).")

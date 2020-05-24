@@ -19,7 +19,7 @@ namespace Sim
 	//
 	struct ConnectionData
 	{
-		QByteArray m_data;							// Raw data from LM memory
+		std::vector<char> m_data;				// Raw data from LM memory
 		std::chrono::microseconds m_sentTime{0};	// When packet was "sent". If 0 then buffer is not valid
 
 		int sizeBytes() const;
@@ -63,9 +63,12 @@ namespace Sim
 
 		Sim::ConnectionPortPtr portForLm(const QString& lmEquipmnetId);
 
-		bool sendData(int portNo, QByteArray* data, std::chrono::microseconds currentTime);
+		bool sendData(int portNo,
+					  std::vector<char>* data,
+					  std::chrono::microseconds currentTime);
+
 		bool receiveData(int portNo,
-						 QByteArray* data,
+						 std::vector<char>* data,
 						 std::chrono::microseconds currentTime,
 						 std::chrono::microseconds timeout,
 						 bool* timeoutHappend);
@@ -78,8 +81,8 @@ namespace Sim
 		bool enabled() const;
 		void setEnabled(bool value);
 
-		QByteArray* getPortReceiveBuffer(int portNo);
-		QByteArray* getPortSendBuffer(int portNo);
+		std::vector<char>* getPortReceiveBuffer(int portNo);
+		std::vector<char>* getPortSendBuffer(int portNo);
 
 	private:
 		::ConnectionInfo m_buildConnection;
@@ -92,16 +95,16 @@ namespace Sim
 		QMutex m_dataMutexPort1;
 		ConnectionData m_port1sentData;
 
-		QByteArray m_port1receiveBuffer;	// Receive buffer for port 1, accessed only by DeviceEmulator, in single thread
-		QByteArray m_port1sendBuffer;		// Send buffer for port 1, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port1receiveBuffer;		// Receive buffer for port 1, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port1sendBuffer;		// Send buffer for port 1, accessed only by DeviceEmulator, in single thread
 
 		// Data sent by port 2, protected with a mutex
 		//
 		QMutex m_dataMutexPort2;
 		ConnectionData m_port2sentData;
 
-		QByteArray m_port2receiveBuffer;	// Receive buffer for port 2, accessed only by DeviceEmulator, in single thread
-		QByteArray m_port2sendBuffer;		// Send buffer for port 2, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port2receiveBuffer;		// Receive buffer for port 2, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port2sendBuffer;		// Send buffer for port 2, accessed only by DeviceEmulator, in single thread
 	};
 
 
