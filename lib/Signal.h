@@ -46,10 +46,10 @@ public:
 
 	static const QString BUS_SIGNAL_ID_SEPARATOR;
 
-	static const QString BUS_SIGNAL_MACRO_BUSTYPEID;
-	static const QString BUS_SIGNAL_MACRO_BUSID;
-	static const QString BUS_SIGNAL_MACRO_BUSSIGNALID;
-	static const QString BUS_SIGNAL_MACRO_BUSSIGNALCAPTION;
+	static const QString MACRO_BUS_TYPE;
+	static const QString MACRO_BUS_APP_SIGNAL_ID;
+	static const QString MACRO_BUS_CUSTOM_APP_SIGNAL_ID;
+	static const QString MACRO_BUS_CAPTION;
 
 public:
 	Signal();

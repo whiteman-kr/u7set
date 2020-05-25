@@ -23,10 +23,10 @@ const QString Signal::MACRO_END_TOKEN(")");
 
 const QString Signal::BUS_SIGNAL_ID_SEPARATOR(".");
 
-const QString Signal::BUS_SIGNAL_MACRO_BUSTYPEID("$(BUSTYPEID)");
-const QString Signal::BUS_SIGNAL_MACRO_BUSID("$(BUSID)");
-const QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALID("$(BUSSIGNALID)");
-const QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION("$(BUSSIGNALCAPTION)");
+const QString Signal::MACRO_BUS_TYPE("$(BusType)");
+const QString Signal::MACRO_BUS_APP_SIGNAL_ID("$(BusAppSignalID)");
+const QString Signal::MACRO_BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
+const QString Signal::MACRO_BUS_CAPTION("$(BusCaption)");
 
 
 Signal::Signal()

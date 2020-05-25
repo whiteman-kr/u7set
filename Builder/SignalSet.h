@@ -27,11 +27,11 @@ namespace Builder
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 
-		static QString buildBusSignalCaption(const QString& busParentSignalCaption,
+/*		static QString buildBusSignalCaption(const QString& busParentSignalCaption,
 												 const QString& busTypeID,
 												 const QString& busParentSignalCustomID,
 												 const QString& busChildSignalID,
-												 const QString& busChildSignalCaption);
+												 const QString& busChildSignalCaption);*/
 
 		Signal* appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
 		Signal* createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);

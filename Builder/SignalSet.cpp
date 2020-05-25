@@ -506,19 +506,19 @@ namespace Builder
 		}
 	}
 
-	QString SignalSet::buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal)
+	QString SignalSet::buildBusSignalCaption(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal)
 	{
-		QString caption = s.caption();
+		QString caption = busSignal.caption;
 
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSTYPEID, bus->busTypeID());
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSID, s.customAppSignalID());
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALID, busSignal.signalID);
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION, busSignal.caption);
+		caption.replace(Signal::MACRO_BUS_TYPE, bus->busTypeID());
+		caption.replace(Signal::MACRO_BUS_APP_SIGNAL_ID, busParentSignal.appSignalID());
+		caption.replace(Signal::MACRO_BUS_CUSTOM_APP_SIGNAL_ID, busParentSignal.customAppSignalID());
+		caption.replace(Signal::MACRO_BUS_CAPTION, busParentSignal.caption());
 
 		return caption;
 	}
 
-	QString SignalSet::buildBusSignalCaption(const QString& busParentSignalCaption,
+	/*QString SignalSet::buildBusSignalCaption(const QString& busParentSignalCaption,
 											 const QString& busTypeID,
 											 const QString& busParentSignalCustomID,
 											 const QString& busChildSignalID,
@@ -526,13 +526,13 @@ namespace Builder
 	{
 		QString caption = busParentSignalCaption;
 
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSTYPEID, busTypeID);
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSID, busParentSignalCustomID);
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALID, busChildSignalID);
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION, busChildSignalCaption);
+		caption.replace(Signal::MACRO_BUS_TYPE, busTypeID);
+		caption.replace(Signal::MACRO_BUS_APP_SIGNAL_ID, busParentSignalCustomID);
+		caption.replace(Signal::MACRO_BUS_CUSTOM_APP_SIGNAL_ID, busChildSignalID);
+		caption.replace(Signal::MACRO_BUS_CAPTION, busChildSignalCaption);
 
 		return caption;
-	}
+	}*/
 
 	bool SignalSet::checkSignalPropertiesRanges(const Signal& s)
 	{
