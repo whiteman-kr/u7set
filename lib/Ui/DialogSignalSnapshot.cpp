@@ -910,6 +910,52 @@ void DialogSignalSnapshotSettings::store()
 }
 
 //
+// SnapshotTableView
+//
+
+SnapshotTableView::SnapshotTableView()
+	:QTableView()
+{
+
+}
+
+void SnapshotTableView::mousePressEvent(QMouseEvent* event)
+{
+	QTableView::mousePressEvent(event);
+
+	SignalSnapshotModel* snapshotModel = dynamic_cast<SignalSnapshotModel*>(model());
+	if (snapshotModel == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QModelIndexList rows = selectionModel()->selectedRows();
+	if (rows.size() != 1)
+	{
+		return;
+	}
+
+	bool found = false;
+	AppSignalParam appSignalParam = snapshotModel->signalParam(rows.at(0).row(), &found);
+	if (found == false)
+	{
+		return;
+	}
+
+	m_dragDropHelper.onMousePress(event, appSignalParam);
+
+	return;
+}
+
+void SnapshotTableView::mouseMoveEvent(QMouseEvent* event)
+{
+	m_dragDropHelper.onMouseMove(event, this);
+
+	return;
+}
+
+//
 //DialogSignalSnapshot
 //
 
@@ -963,7 +1009,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 	m_tableView->setModel(m_model);
 	m_tableView->verticalHeader()->hide();
 	m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
+	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
 	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_tableView->horizontalHeader()->setStretchLastSection(false);
 	m_tableView->setGridStyle(Qt::PenStyle::NoPen);
@@ -1123,20 +1169,6 @@ void DialogSignalSnapshot::signalsUpdated()
 	return;
 }
 
-void DialogSignalSnapshot::keyPressEvent(QKeyEvent *event)
-{
-	int key = event->key();
-	if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
-	{
-		event->ignore();
-	}
-	else
-	{
-		QDialog::keyPressEvent(event);
-	}
-	return;
-}
-
 void DialogSignalSnapshot::showEvent(QShowEvent* /*e*/)
 {
 	if (m_firstShow == false)
@@ -1153,6 +1185,19 @@ void DialogSignalSnapshot::showEvent(QShowEvent* /*e*/)
 	return;
 }
 
+void DialogSignalSnapshot::keyPressEvent(QKeyEvent *event)
+{
+	int key = event->key();
+	if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
+	{
+		event->ignore();
+	}
+	else
+	{
+		QDialog::keyPressEvent(event);
+	}
+	return;
+}
 
 void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 {
@@ -1330,7 +1375,7 @@ void DialogSignalSnapshot::setupUi()
 
 	// Table
 
-	m_tableView = new QTableView();
+	m_tableView = new SnapshotTableView();
 	connect(m_tableView, &QTableView::doubleClicked, this, &DialogSignalSnapshot::on_tableView_doubleClicked);
 
 	// Main layout

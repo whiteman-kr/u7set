@@ -3,6 +3,7 @@
 
 #include "../lib/AppSignal.h"
 #include "../lib/IAppSignalManager.h"
+#include "../lib/ui/DragDropHelper.h"
 
 class SignalSearchSorter	// later move this class to some library file, it can be used in other cases
 {
@@ -57,7 +58,7 @@ public:
 	SignalSearchItemModel(QObject *parent);
 
 public:
-	AppSignalParam getSignal(const QModelIndex& index) const;
+	AppSignalParam getSignal(const QModelIndex& index, bool* found) const;
 	void setSignals(std::vector<AppSignalParam>* signalsVector);
 
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -106,6 +107,22 @@ struct DialogSignalSearchSettings
 	void store();
 };
 
+class SignalSearchTableView : public QTableView
+{
+public:
+	SignalSearchTableView();
+
+protected:
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
+	AppSignalParam m_appSignalParam;
+	QPoint m_dragStartPosition;
+
+	DragDropHelper m_dragDropHelper;
+};
+
 class DialogSignalSearch : public QDialog
 {
 	Q_OBJECT
@@ -135,7 +152,7 @@ private:
 	static QString m_signalId;
 
 	QLineEdit* m_editSignalID = nullptr;
-	QTableView* m_tableView = nullptr;
+	SignalSearchTableView* m_tableView = nullptr;
 	QLabel* m_labelFound = nullptr;
 
 	IAppSignalManager* m_appSignalManager = nullptr;

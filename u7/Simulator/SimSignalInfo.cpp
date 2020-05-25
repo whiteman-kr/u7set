@@ -23,12 +23,9 @@ bool SimSignalInfo::showDialog(QString appSignalId,
 
 		AppSignalParam signal = simuator->appSignalManager().signalParam(appSignalId, &ok);
 
-		std::optional<Signal> signalExt = simuator->appSignalManager().signalParamExt(appSignalId);
-
 		if (ok == true)
 		{
 			SimSignalInfo* msi = new SimSignalInfo(signal,
-												   signalExt,
 												   simuator,
 												   simWidget);
 
@@ -55,14 +52,13 @@ bool SimSignalInfo::showDialog(QString appSignalId,
 }
 
 SimSignalInfo::SimSignalInfo(const AppSignalParam& signal,
-							 std::optional<Signal> signalExt,
 							 SimIdeSimulator* simuator,
 							 SimWidget* simWidget):
 	DialogSignalInfo(signal,
-					 signalExt,
 					 &simuator->appSignalManager(),
 					 nullptr,
-					 false,
+					 false/*tuningEnabled*/,
+					 DialogType::Simulator,
 					 simWidget),
 	m_simuator(simuator)
 {
@@ -71,15 +67,6 @@ SimSignalInfo::SimSignalInfo(const AppSignalParam& signal,
 		Q_ASSERT(m_simuator);
 		return;
 	}
-
-	// Modify UI to simulator requirements
-	//
-	ui->labelPlantTimeHeader->hide();
-	ui->labelPlantTime->hide();
-
-	ui->labelServerTimeHeader->setText(tr("Time"));
-
-	hideTabPage("Action");
 
 	return;
 }
@@ -92,8 +79,6 @@ void SimSignalInfo::onSignalParamAndUnitsArrived()
 
 	AppSignalParam newSignal = m_simuator->appSignalManager().signalParam(signal().hash(), &ok);
 
-	std::optional<Signal> newSignalExt = m_simuator->appSignalManager().signalParamExt(signal().hash());
-
 	if (ok == false)
 	{
 		//Signal was deleted, keep its #appSignalId and Hash
@@ -103,14 +88,9 @@ void SimSignalInfo::onSignalParamAndUnitsArrived()
 		newSignal = AppSignalParam();
 		newSignal.setAppSignalId(oldSignal.appSignalId());
 		newSignal.setHash(oldSignal.hash());
-
-		newSignalExt = {};
 	}
 
-	setSignal(newSignal);
-	setSignalExt(newSignalExt);
-
-	updateStaticData();
+	updateSignal(newSignal);
 
 	return;
 }
@@ -133,4 +113,7 @@ void SimSignalInfo::setSchema(QString schemaId, QStringList /*highlightIds*/)
 	return;
 }
 
-
+std::optional<Signal> SimSignalInfo::getSignalExt(const AppSignalParam& appSignalParam)
+{
+	return m_simuator->appSignalManager().signalParamExt(appSignalParam.hash());
+}

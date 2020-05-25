@@ -5,6 +5,7 @@
 #include "../VFrame30/TuningController.h"
 #include "../lib/AppSignalManager.h"
 #include "../lib/Signal.h"
+#include "../lib/Ui/DragDropHelper.h"
 
 namespace Ui {
 	class DialogSignalInfo;
@@ -72,22 +73,30 @@ class DialogSignalInfo : public QDialog
 	Q_OBJECT
 
 protected:
-	DialogSignalInfo(const AppSignalParam& signal, std::optional<Signal> signalExt, IAppSignalManager* appSignalManager, VFrame30::TuningController* tuningController, bool tuningEnabled, QWidget* parent);
+	enum class DialogType
+	{
+		Monitor,
+		Simulator
+	};
+
+	DialogSignalInfo(const AppSignalParam& signal,
+					 IAppSignalManager* appSignalManager,
+					 VFrame30::TuningController* tuningController,
+					 bool tuningEnabled,
+					 DialogType dialogType,
+					 QWidget* parent);
 	virtual ~DialogSignalInfo();
 
+	// Register functions
 	static DialogSignalInfo* dialogRegistered(const QString& appSignalId);
 	static void registerDialog(const QString& appSignalId, DialogSignalInfo* dialog);
 	static void unregisterDialog(const QString& appSignalId);
+	//
 
 	AppSignalParam signal() const;
-	void setSignal(const AppSignalParam& signal);
+	void updateSignal(const AppSignalParam& signal);
 
-	std::optional<Signal> signalExt() const;
-	void setSignalExt(const std::optional<Signal>& signalExt);
-
-	void updateStaticData();
-
-	void hideTabPage(const QString& tabName);
+	virtual std::optional<Signal> getSignalExt(const AppSignalParam& appSignalParam) = 0;
 
 private:
 	enum class SchemasColumns
@@ -120,23 +129,26 @@ private slots:
 	void switchToSchema();
 	void showSetpointDetails();
 
-
-protected:
+private:
 	virtual void showEvent(QShowEvent* e) override;
 	virtual void timerEvent(QTimerEvent* event) override;
-	void mousePressEvent(QMouseEvent* event);
-
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 	virtual QStringList schemasByAppSignalId(const QString& appSignalId) = 0;
 	virtual void setSchema(QString schemaId, QStringList highlightIds) = 0;
 
 private:
+	void hideTabPage(const QString& tabName);
+
 	void fillSignalInfo();
 	void fillProperties();
 	void fillExtProperties();
 	void fillSetpoints();
 	void fillSchemas();
 
+	void updateStaticData();
 	void updateDynamicData();
 
 	void updateState();
@@ -146,16 +158,14 @@ private:
 
 	QString signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
 
-protected:
+private:
 	Ui::DialogSignalInfo *ui;
 
-	IAppSignalManager* m_appSignalManager = nullptr;
-
-private:
-	AppSignalParam m_signal;
-	std::optional<Signal> m_signalExt;
-
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
+
+	AppSignalParam m_signal;
+
+	IAppSignalManager* m_appSignalManager = nullptr;
 
 	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
 
@@ -187,7 +197,7 @@ protected:
 
 private:
 	AppSignalParam m_appSignalParam;
-	QPoint m_dragStartPosition;
+	DragDropHelper m_dragDrop;
 };
 
 #endif // DIALOGSIGNALINFO_H

@@ -277,15 +277,23 @@ QVariant SignalSearchItemModel::headerData(int section, Qt::Orientation orientat
 	return QVariant();
 }
 
-AppSignalParam SignalSearchItemModel::getSignal(const QModelIndex& index) const
+AppSignalParam SignalSearchItemModel::getSignal(const QModelIndex& index, bool* found) const
 {
 	int row = index.row();
 	if (row >= m_signals.size())
 	{
 		Q_ASSERT(false);
+		if (found != nullptr)
+		{
+			*found = false;
+		}
 		return AppSignalParam();
 	}
 
+	if (found != nullptr)
+	{
+		*found = true;
+	}
 	return m_signals[row];
 }
 
@@ -349,6 +357,52 @@ void DialogSignalSearchSettings::store()
 }
 
 //
+// SnapshotTableView
+//
+
+SignalSearchTableView::SignalSearchTableView()
+	:QTableView()
+{
+
+}
+
+void SignalSearchTableView::mousePressEvent(QMouseEvent* event)
+{
+	QTableView::mousePressEvent(event);
+
+	SignalSearchItemModel* searchModel = dynamic_cast<SignalSearchItemModel*>(model());
+	if (searchModel == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QModelIndexList rows = selectionModel()->selectedRows();
+	if (rows.size() != 1)
+	{
+		return;
+	}
+
+	bool found = false;
+	AppSignalParam appSignalParam = searchModel->getSignal(rows.at(0), &found);
+	if (found == false)
+	{
+		return;
+	}
+
+	m_dragDropHelper.onMousePress(event, appSignalParam);
+
+	return;
+}
+
+void SignalSearchTableView::mouseMoveEvent(QMouseEvent* event)
+{
+	m_dragDropHelper.onMouseMove(event, this);
+
+	return;
+}
+
+//
 // DialogSignalSearch
 //
 
@@ -381,7 +435,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	hl->addWidget(l);
 	hl->addWidget(m_editSignalID);
 
-	m_tableView = new QTableView();
+	m_tableView = new SignalSearchTableView();
 	m_tableView->horizontalHeader()->setHighlightSections(false);
 
 	m_labelFound = new QLabel();
@@ -579,7 +633,12 @@ void DialogSignalSearch::tableDoubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	const AppSignalParam& signal = m_model.getSignal(index);
+	bool found = false;
+	const AppSignalParam& signal = m_model.getSignal(index, &found);
+	if (found == false)
+	{
+		return;
+	}
 
 	emit signalInfo(signal.appSignalId());
 
@@ -596,7 +655,12 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 		return;
 	}
 
-	const AppSignalParam& signal = m_model.getSignal(index);
+	bool found = false;
+	const AppSignalParam& signal = m_model.getSignal(index, &found);
+	if (found == false)
+	{
+		return;
+	}
 
 	QStringList list;
 	list << signal.appSignalId();

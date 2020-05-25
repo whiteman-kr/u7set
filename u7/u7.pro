@@ -78,6 +78,7 @@ SOURCES +=\
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
+    ../lib/Ui/DragDropHelper.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
     CentralWidget.cpp \
@@ -227,6 +228,7 @@ HEADERS  += \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     ../lib/Ui/DialogSignalSnapshot.h \
+    ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
     CentralWidget.h \

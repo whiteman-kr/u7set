@@ -63,6 +63,7 @@ SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
+    ../lib/Ui/DragDropHelper.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
@@ -135,6 +136,7 @@ HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/Ui/DialogSignalSnapshot.h \
+    ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/TabWidgetEx.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \

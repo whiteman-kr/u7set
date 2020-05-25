@@ -578,11 +578,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tabAction">
-        <attribute name="title">
-         <string>Action</string>
-        </attribute>
-       </widget>
        <widget class="QWidget" name="tabTuning">
         <attribute name="title">
          <string>Tuning</string>

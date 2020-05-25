@@ -383,15 +383,14 @@ int SignalFlagsWidget::point2Flag(const QPoint& pt)
 std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
-								   std::optional<Signal> signalExt,
 								   IAppSignalManager* appSignalManager,
 								   VFrame30::TuningController* tuningController,
 								   bool tuningEnabled,
+								   DialogSignalInfo::DialogType dialogType,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal),
-	m_signalExt(signalExt),
 	m_appSignalManager(appSignalManager),
 	m_tuningController(tuningController)	// it can be nullptr
 {
@@ -438,12 +437,6 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	ui->treeSchemas->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->treeSchemas, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSchemaContextMenu);
 
-	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
-	// tu support Drag and Drop Operation (drag part)
-	//
-	ui->signalIdLabel->setAppSignal(signal);
-	ui->signalIdLabelIcon->setAppSignal(signal);
-
 	ui->tabWidget->setCurrentIndex(0);
 
 	// Remove tuning tab
@@ -453,7 +446,15 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 		hideTabPage("Tuning");
 	}
 
-	if (m_signalExt.has_value() == false)
+	if (dialogType == DialogType::Simulator)
+	{
+		ui->labelPlantTimeHeader->hide();
+		ui->labelPlantTime->hide();
+
+		ui->labelServerTimeHeader->setText(tr("Time"));
+	}
+
+	if (dialogType == DialogType::Monitor)
 	{
 		hideTabPage("Extended");
 	}
@@ -476,6 +477,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	UiTools::adjustDialogPlacement(this);
 
 	m_updateStateTimerId = startTimer(200);
+
+	setAcceptDrops(true);
 }
 
 DialogSignalInfo::~DialogSignalInfo()
@@ -532,48 +535,13 @@ AppSignalParam DialogSignalInfo::signal() const
 	return m_signal;
 }
 
-void DialogSignalInfo::setSignal(const AppSignalParam& signal)
+void DialogSignalInfo::updateSignal(const AppSignalParam& signal)
 {
 	m_signal = signal;
-}
 
-std::optional<Signal> DialogSignalInfo::signalExt() const
-{
-	return m_signalExt;
-}
-
-void DialogSignalInfo::setSignalExt(const std::optional<Signal>& signalExt)
-{
-	m_signalExt = signalExt;
-}
-
-void DialogSignalInfo::updateStaticData()
-{
-	// Fill signal information
-
-	fillSignalInfo();
-
-	fillProperties();
-
-	fillExtProperties();
-
-	fillSetpoints();
-
-	fillSchemas();
+	updateStaticData();
 
 	return;
-}
-
-void DialogSignalInfo::hideTabPage(const QString& tabName)
-{
-	for (int i = 0; i < ui->tabWidget->count(); i++)
-	{
-		if (ui->tabWidget->tabText(i) == tabName)
-		{
-			ui->tabWidget->removeTab(i);
-			break;
-		}
-	}
 }
 
 void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
@@ -672,6 +640,127 @@ void DialogSignalInfo::prepareSetpointsContextMenu(const QPoint& pos)
 	menu.exec(QCursor::pos());
 }
 
+void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	QString schemaId = item->text(static_cast<int>(SchemasColumns::SchemaId));
+
+	setSchema(schemaId, QStringList() << m_signal.appSignalId());
+
+	return;
+}
+
+void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Type), Qt::UserRole).toInt();
+
+	showSetpointDetails();
+
+	// Uncomment this to switch to schema
+
+	/*Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
+	if (currentTab == nullptr)
+	{
+		Q_ASSERT(currentTab);
+		return;
+	}
+
+	QString schemaId = item->text(static_cast<int>(SetpointsColumns::SchemaId));
+
+	if (currentTab->schemaId() != schemaId)
+	{
+		QStringList appSignals;
+		appSignals << m_signal.appSignalId();
+
+		currentTab->setSchema(schemaId, appSignals);
+	}*/
+
+	return;
+}
+
+void DialogSignalInfo::on_pushButtonSetZero_clicked()
+{
+	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_tuningController->writeValue(m_signal.appSignalId(), false);
+}
+
+void DialogSignalInfo::on_pushButtonSetOne_clicked()
+{
+	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_tuningController->writeValue(m_signal.appSignalId(), true);
+}
+
+void DialogSignalInfo::on_pushButtonSetValue_clicked()
+{
+	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QString strValue = ui->editInputValue->text();
+
+	bool ok = false;
+
+	double value = strValue.toDouble(&ok);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Invalid input value!"));
+		return;
+	}
+
+	m_tuningController->writeValue(m_signal.appSignalId(), value);
+}
+
+
+void DialogSignalInfo::switchToSchema()
+{
+	setSchema(m_contextMenuSchemaId, QStringList() << m_signal.appSignalId());
+}
+
+void DialogSignalInfo::showSetpointDetails()
+{
+	if (m_contextMenuSetpointIndex < 0 || m_contextMenuSetpointIndex >= m_setpoints.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_appSignalManager, m_setpoints[m_contextMenuSetpointIndex]);
+	d->exec();
+}
+
 void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
 {
 	if (m_firstShow == false)
@@ -705,6 +794,153 @@ void DialogSignalInfo::mousePressEvent(QMouseEvent* event)
 	if ((ui->labelValue->underMouse() || ui->labelValueTuning->underMouse()) && event->button() == Qt::RightButton)
 	{
 		stateContextMenu(event->pos());
+	}
+}
+
+void DialogSignalInfo::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		return;
+
+	}
+
+	// Load data from drag and drop
+	//
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	if (ok == false)
+	{
+		return;
+	}
+
+	std::vector<AppSignalParam> appSignals;
+	appSignals.reserve(protoSetMessage.appsignal_size());
+
+	// Parse data
+	//
+	ok = false;
+	AppSignalParam appSignalParam;
+
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			break;
+		}
+	}
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Accept only if signal hash is different
+	//
+	if (appSignalParam.hash() == m_signal.hash())
+	{
+		return;
+	}
+
+	event->acceptProposedAction();
+
+	return;
+}
+
+void DialogSignalInfo::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		return;
+	}
+
+	// Load data from drag and drop
+	//
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	std::vector<AppSignalParam> appSignals;
+	appSignals.reserve(protoSetMessage.appsignal_size());
+
+	// Parse data
+	//
+	ok = false;
+	AppSignalParam newSignal;
+
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		ok = newSignal.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			break;
+		}
+	}
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	AppSignalParam oldSignal = m_signal;
+
+	// Unregister current dialog with old id
+	//
+	unregisterDialog(oldSignal.appSignalId());
+
+	// If there is another dialog with such id - swap it with current and re-register with new id
+	//
+	DialogSignalInfo* dsi = DialogSignalInfo::dialogRegistered(newSignal.appSignalId());
+	if (dsi != nullptr)
+	{
+		unregisterDialog(newSignal.appSignalId());
+
+		dsi->updateSignal(oldSignal);
+
+		registerDialog(oldSignal.appSignalId(), dsi);
+	}
+
+	// Set new signal to current dialog
+	//
+	updateSignal(newSignal);
+
+	// Register current dialog with new id
+	//
+	registerDialog(newSignal.appSignalId(), this);
+
+	//qDebug() << "Dialog list:";
+	//for (auto it : m_dialogSignalInfoMap)
+	//{
+	//	qDebug() << it.first << it.second;
+	//}
+
+	return;
+}
+
+void DialogSignalInfo::hideTabPage(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			ui->tabWidget->removeTab(i);
+			break;
+		}
 	}
 }
 
@@ -866,10 +1102,14 @@ void DialogSignalInfo::fillExtProperties()
 {
 	ui->treePropertiesExt->clear();
 
-	if (m_signalExt.has_value() == false)
+	std::optional<Signal> signalExtOpt = getSignalExt(m_signal);
+
+	if (signalExtOpt.has_value() == false)
 	{
 		return;
 	}
+
+	Signal& signalExt = signalExtOpt.value();
 
 	// Fill properties list
 	//
@@ -877,8 +1117,6 @@ void DialogSignalInfo::fillExtProperties()
 	columns << "Caption";
 	columns << "Value";
 	ui->treePropertiesExt->setHeaderLabels(columns);
-
-	Signal& signalExt = m_signalExt.value();
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
 
@@ -1197,6 +1435,26 @@ void DialogSignalInfo::fillSchemas()
 	ui->treeSchemas->sortByColumn(0, Qt::AscendingOrder);
 }
 
+void DialogSignalInfo::updateStaticData()
+{
+	// Fill signal information
+
+	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
+	// tu support Drag and Drop Operation (drag part)
+	//
+
+	ui->signalIdLabel->setAppSignal(m_signal);
+	ui->signalIdLabelIcon->setAppSignal(m_signal);
+
+	fillSignalInfo();
+	fillProperties();
+	fillExtProperties();
+	fillSetpoints();
+	fillSchemas();
+
+	return;
+}
+
 void DialogSignalInfo::updateDynamicData()
 {
 	updateState();
@@ -1448,6 +1706,9 @@ QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const App
 	return strValue;
 }
 
+//
+// QLabelAppSignalDragAndDrop
+//
 
 QLabelAppSignalDragAndDrop::QLabelAppSignalDragAndDrop(QWidget* parent) :
 	QLabel(parent)
@@ -1461,173 +1722,16 @@ void QLabelAppSignalDragAndDrop::setAppSignal(const AppSignalParam& signal)
 
 void QLabelAppSignalDragAndDrop::mousePressEvent(QMouseEvent* event)
 {
-	if (event->button() == Qt::LeftButton)
-	{
-		m_dragStartPosition = event->pos();
-	}
+	m_dragDrop.onMousePress(event, m_appSignalParam);
 
 	return;
 }
 
 void QLabelAppSignalDragAndDrop::mouseMoveEvent(QMouseEvent* event)
 {
-	if (event->buttons().testFlag(Qt::LeftButton) == false)
-	{
-		return;
-	}
-
-	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
-	{
-		return;
-	}
-
-	// Save signals to protobufer
-	//
-	::Proto::AppSignalSet protoSetMessage;
-	::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-	m_appSignalParam.save(protoSignalMessage);
-
-	QByteArray data;
-	data.resize(protoSetMessage.ByteSize());
-
-	protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
-
-	// --
-	//
-	if (data.isEmpty() == false)
-	{
-		QDrag* drag = new QDrag(this);
-		QMimeData* mimeData = new QMimeData;
-
-		mimeData->setData(AppSignalParamMimeType::value, data);
-		drag->setMimeData(mimeData);
-
-		drag->exec(Qt::CopyAction);
-
-		qDebug() << "Start drag for " << m_appSignalParam.appSignalId();
-		qDebug() << "Drag and drop data buffer size " << data.size();
-	}
+	m_dragDrop.onMouseMove(event, this);
 
 	return;
 }
 
-void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column)
-{
-	Q_UNUSED(column);
 
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	QString schemaId = item->text(static_cast<int>(SchemasColumns::SchemaId));
-
-	setSchema(schemaId, QStringList() << m_signal.appSignalId());
-
-	return;
-}
-
-void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item, int column)
-{
-	Q_UNUSED(column);
-
-	if (item == nullptr)
-	{
-		Q_ASSERT(item);
-		return;
-	}
-
-	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Type), Qt::UserRole).toInt();
-
-	showSetpointDetails();
-
-	// Uncomment this to switch to schema
-
-	/*Q_UNUSED(column);
-
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
-	if (currentTab == nullptr)
-	{
-		Q_ASSERT(currentTab);
-		return;
-	}
-
-	QString schemaId = item->text(static_cast<int>(SetpointsColumns::SchemaId));
-
-	if (currentTab->schemaId() != schemaId)
-	{
-		QStringList appSignals;
-		appSignals << m_signal.appSignalId();
-
-		currentTab->setSchema(schemaId, appSignals);
-	}*/
-
-	return;
-}
-
-void DialogSignalInfo::on_pushButtonSetZero_clicked()
-{
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_tuningController->writeValue(m_signal.appSignalId(), false);
-}
-
-void DialogSignalInfo::on_pushButtonSetOne_clicked()
-{
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_tuningController->writeValue(m_signal.appSignalId(), true);
-}
-
-void DialogSignalInfo::on_pushButtonSetValue_clicked()
-{
-	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	QString strValue = ui->editInputValue->text();
-
-	bool ok = false;
-
-	double value = strValue.toDouble(&ok);
-	if (ok == false)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Invalid input value!"));
-		return;
-	}
-
-	m_tuningController->writeValue(m_signal.appSignalId(), value);
-}
-
-
-void DialogSignalInfo::switchToSchema()
-{
-	setSchema(m_contextMenuSchemaId, QStringList() << m_signal.appSignalId());
-}
-
-void DialogSignalInfo::showSetpointDetails()
-{
-	if (m_contextMenuSetpointIndex < 0 || m_contextMenuSetpointIndex >= m_setpoints.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_appSignalManager, m_setpoints[m_contextMenuSetpointIndex]);
-	d->exec();
-}

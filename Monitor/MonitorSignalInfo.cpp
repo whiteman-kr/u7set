@@ -52,9 +52,15 @@ bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController*
 MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 MonitorConfigController* configController,
 									 IAppSignalManager* appSignalManager,
-									 VFrame30::TuningController* tuningController, bool tuningEnabled,
+									 VFrame30::TuningController* tuningController,
+									 bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
-	DialogSignalInfo(signal, {}, appSignalManager, tuningController, tuningEnabled, centralWidget),
+	DialogSignalInfo(signal,
+					 appSignalManager,
+					 tuningController,
+					 tuningEnabled,
+					 DialogType::Monitor,
+					 centralWidget),
 	m_configController(configController),
 	m_centralWidget(centralWidget)
 {
@@ -65,10 +71,6 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 		return;
 	}
 
-	// Modify UI to Monitor requirements
-	//
-	hideTabPage("Action");
-
 	return;
 }
 
@@ -78,7 +80,7 @@ void MonitorSignalInfo::onSignalParamAndUnitsArrived()
 
 	bool ok = false;
 
-	AppSignalParam newSignal = m_appSignalManager->signalParam(signal().hash(), &ok);
+	AppSignalParam newSignal = theSignals.signalParam(signal().hash(), &ok);
 
 	if (ok == false)
 	{
@@ -92,9 +94,7 @@ void MonitorSignalInfo::onSignalParamAndUnitsArrived()
 
 	}
 
-	setSignal(newSignal);
-
-	updateStaticData();
+	updateSignal(newSignal);
 
 	return;
 }
@@ -122,18 +122,7 @@ void MonitorSignalInfo::setSchema(QString schemaId, QStringList highlightIds)
 	return;
 }
 
-
-/*std::vector<VFrame30::SchemaDetails> MonitorSignalInfo::schemasDetails()
+std::optional<Signal> MonitorSignalInfo::getSignalExt(const AppSignalParam& /*appSignalParam*/)
 {
-	return m_configController->schemasDetails();
+	return {};
 }
-
-std::set<QString> MonitorSignalInfo::schemaAppSignals(const QString& schemaStrId)
-{
-	if (schemaStrId.isEmpty() == false)
-	{
-		return m_configController->schemaAppSignals(schemaStrId);
-	}
-
-	return std::set<QString>();
-}*/

@@ -26,6 +26,7 @@ private slots:
 private:
 	virtual QStringList schemasByAppSignalId(const QString& appSignalId) override;
 	virtual void setSchema(QString schemaId, QStringList highlightIds) override;
+	virtual std::optional<Signal> getSignalExt(const AppSignalParam& appSignalParam) override;
 
 private:
 	MonitorConfigController* m_configController = nullptr;

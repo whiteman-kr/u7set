@@ -18,7 +18,6 @@ public:
 
 private:
 	SimSignalInfo(const AppSignalParam& signal,
-				  std::optional<Signal> signalExt,
 				  SimIdeSimulator* simuator,
 				  SimWidget* simWidget);
 
@@ -31,6 +30,7 @@ signals:
 private:
 	virtual QStringList schemasByAppSignalId(const QString& appSignalId) override;
 	virtual void setSchema(QString schemaId, QStringList highlightIds) override;
+	virtual std::optional<Signal> getSignalExt(const AppSignalParam& appSignalParam) override;
 
 private:
 	SimIdeSimulator* m_simuator = nullptr;
