@@ -93,7 +93,7 @@ public:
 signals:
 	void configurationUpdate();
 	void configurationArrived(ConfigSettings configuration);
-	void unknownClient();										// Error f CfgService cannot find SoftwareID
+	void unknownClient();										// Error if CfgService cannot find SoftwareID
 
 	// slots
 	//
@@ -111,6 +111,7 @@ private:
 	// Public properties
 	//
 public:
+	VFrame30::SchemaDetailsSet schemasDetailsSet() const;
 	std::vector<VFrame30::SchemaDetails> schemasDetails() const;
 	std::set<QString> schemaAppSignals(const QString& schemaId);
 

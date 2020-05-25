@@ -61,10 +61,6 @@ void Settings::writeUserScope() const
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
 	s.setValue("MainWindow/state", m_mainWindowState);
 
-	s.setValue("DialogSignalInfo/pos", m_signalInfoPos);
-	s.setValue("DialogSignalInfo/geometry", m_signalInfoGeometry);
-	s.setValue("DialogSignalInfo/treeSetpointsState", m_signalInfoTreeSetpointsState);
-
 	s.setValue("DialogChooseTrendSignals/filter", m_trendSignalsDialogFilterCompleter);
 
 	s.setValue("ArchiveWindow/pos", m_archiveWindowPos);
@@ -77,9 +73,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("DialogChooseArchiveSignals/filter", m_archiveSignalsDialogFilterCompleter);
 
-	theDialogSignalSearchSettings.store(s);
-
-	theDialogSignalSnapshotSettings.store(s);
 
 	return;
 }
@@ -91,10 +84,6 @@ void Settings::loadUserScope()
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
-	m_signalInfoPos = s.value("DialogSignalInfo/pos", QPoint(-1, -1)).toPoint();
-	m_signalInfoGeometry = s.value("DialogSignalInfo/geometry").toByteArray();
-	m_signalInfoTreeSetpointsState = s.value("DialogSignalInfo/treeSetpointsState").toByteArray();
-
 	m_trendSignalsDialogFilterCompleter = s.value("DialogChooseTrendSignals/filter").toStringList();
 
 	m_archiveWindowPos = s.value("ArchiveWindow/pos", QPoint(200, 200)).toPoint();
@@ -104,10 +93,6 @@ void Settings::loadUserScope()
 	m_archiveHorzHeaderCount = s.value("ArchiveWindow/horzHeaderCount").toInt();
 	m_archiveTimeType = s.value("ArchiveWindow/timeType").toInt();
 	m_archiveSignalsDialogFilterCompleter = s.value("DialogChooseArchiveSignals/filter").toStringList();
-
-	theDialogSignalSearchSettings.restore(s);
-
-	theDialogSignalSnapshotSettings.restore(s);
 
 	return;
 }

@@ -12,7 +12,7 @@ namespace VFrame30
 
 	public:
 		BaseSchemaWidget() = delete;
-		BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView);
+		BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView, QWidget* parent);
 		virtual ~BaseSchemaWidget();
 
 	protected:

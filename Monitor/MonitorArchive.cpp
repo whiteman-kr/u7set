@@ -1,7 +1,7 @@
 #include "MonitorMainWindow.h"
 #include "MonitorArchive.h"
 #include "Settings.h"
-#include "DialogSignalInfo.h"
+#include "MonitorSignalInfo.h"
 
 //
 // MonitorExportPrint
@@ -253,7 +253,7 @@ static int no = 1;
 
 	// Central widget - model/view
 	//
-	setContentsMargins(2, 2, 2, 2);
+	setContentsMargins(5, 5, 5, 5);
 
 	m_view->setModel(m_model);
 	setCentralWidget(m_view);
@@ -635,7 +635,7 @@ void MonitorArchiveWidget::signalsButton()
 
 void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
 {
-	DialogSignalInfo::showDialog(appSignalId,
+	MonitorSignalInfo::showDialog(appSignalId,
 	                             theMonitorMainWindow->configController(),
 	                             theMonitorMainWindow->tcpSignalClient(),
 	                             theMonitorMainWindow->monitorCentralWidget());

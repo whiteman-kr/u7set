@@ -18,11 +18,9 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
 	m_schemaManager(&m_configController),
-	m_dialogAlert(this),
-	m_LogFile(qAppName())
+	m_LogFile(qAppName()),
+	m_dialogAlert(this)
 {
-	qDebug() << Q_FUNC_INFO;
-
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
 
@@ -97,6 +95,7 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 		});
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
+	connect(monitorCentralWidget, &MonitorCentralWidget::signal_tabPageChanged, this, &MonitorMainWindow::slot_updateActions);
 
 	connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
@@ -124,8 +123,6 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 MonitorMainWindow::~MonitorMainWindow()
 {
-	qDebug() << Q_FUNC_INFO;
-
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
 
@@ -179,9 +176,8 @@ void MonitorMainWindow::showEvent(QShowEvent*)
 bool MonitorMainWindow::eventFilter(QObject *object, QEvent *event)
 {
 	if (object == m_statusBarLogAlerts &&
-			event->type() == QEvent::MouseButtonPress &&
-			m_statusBarLogAlerts->text().isEmpty() == false
-			)
+		event->type() == QEvent::MouseButtonPress &&
+		m_statusBarLogAlerts->text().isEmpty() == false)
 	{
 		showLog();
 	}
@@ -213,24 +209,21 @@ void MonitorMainWindow::restoreWindowState()
 
 	// Ensure widget is visible
 	//
-	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+	QScreen* screenAt = QGuiApplication::screenAt(pos());
 
-	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
-	QRect intersectRect = screenRect.intersected(frameGeometry());
-
-	if (isMaximized() == false &&
-		(intersectRect.width() < size().width() ||
-		intersectRect.height() < size().height()))
+	if (screenAt == nullptr)
 	{
-		move(screenRect.topLeft());
+		setWindowState(Qt::WindowMaximized);
 	}
-
-	if (isMaximized() == false &&
-		(frameGeometry().width() > screenRect.width() ||
-		frameGeometry().height() > screenRect.height()))
+	else
 	{
-		resize(static_cast<int>(screenRect.width() * 0.7),
-			   static_cast<int>(screenRect.height() * 0.7));
+		QRect screenGeometry = screenAt->geometry();
+
+		QRect intersect = screenGeometry.intersected(geometry());
+		if (intersect.width() * intersect.height() < (screenGeometry.width() * screenGeometry.height()) * 0.2)
+		{
+			move(screenGeometry.topLeft());
+		}
 	}
 
 	return;
@@ -334,6 +327,15 @@ void MonitorMainWindow::createActions()
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &MonitorMainWindow::showAbout);
 
+	m_schemaListAction = new QAction(tr("Schemas"), this);
+	m_schemaListAction->setStatusTip(tr("Open schema list page..."));
+	m_schemaListAction->setIcon(QIcon(":/Images/Images/SchemaList.svg"));
+	m_schemaListAction->setEnabled(true);
+	m_schemaListAction->setShortcuts(QList<QKeySequence>{}
+									 <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
+									 <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde});
+	connect(m_schemaListAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_schemaList);
+
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
 	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
@@ -372,7 +374,7 @@ void MonitorMainWindow::createActions()
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
 	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
 
-	m_zoomToFitAction = new QAction(tr("Zoom to Fit"), this);
+	m_zoomToFitAction = new QAction(tr("Fit to Screen"), this);
 	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit screen"));
 	m_zoomToFitAction->setIcon(QIcon(":/Images/Images/ZoomFitToScreen.svg"));
 	m_zoomToFitAction->setEnabled(true);
@@ -433,6 +435,7 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* schemaMenu = menuBar()->addMenu(tr("&Schema"));
 
+	schemaMenu->addAction(m_schemaListAction);
 	schemaMenu->addAction(m_newTabAction);
 	schemaMenu->addAction(m_closeTabAction);
 
@@ -492,15 +495,13 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar = new MonitorToolBar("ToolBar", this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
+	m_toolBar->addAction(m_schemaListAction);
 	m_toolBar->addAction(m_newTabAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_archiveAction);
-	m_toolBar->addAction(m_trendsAction);
-
-	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_signalSnapshotAction);
-	m_toolBar->addAction(m_findSignalAction);
+	m_toolBar->addAction(m_zoomInAction);
+	m_toolBar->addAction(m_zoomOutAction);
+	m_toolBar->addAction(m_zoomToFitAction);
 
 	m_toolBar->addSeparator();
 	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, monitorCentralWidget());
@@ -512,10 +513,14 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_historyBack);
 	m_toolBar->addAction(m_historyForward);
 
+
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_zoomInAction);
-	m_toolBar->addAction(m_zoomOutAction);
-	m_toolBar->addAction(m_zoomToFitAction);
+	m_toolBar->addAction(m_signalSnapshotAction);
+	m_toolBar->addAction(m_findSignalAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_archiveAction);
+	m_toolBar->addAction(m_trendsAction);
 
 	// Spacer between actions and logo
 	//
@@ -1077,7 +1082,7 @@ void MonitorMainWindow::slot_findSignal()
 
 	DialogSignalSearch* dsi = new DialogSignalSearch(this, &theSignals);
 
-	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dsi, &DialogSignalSearch::on_signalsUpdate);
+	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dsi, &DialogSignalSearch::signalsUpdated);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
@@ -1099,6 +1104,21 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 
 	m_historyBack->setEnabled(enableBack);
 	m_historyForward->setEnabled(enableForward);
+
+	return;
+}
+
+void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
+{
+	m_zoomInAction->setEnabled(schemaWidgetSelected);
+	m_zoomOutAction->setEnabled(schemaWidgetSelected);
+	m_zoom100Action->setEnabled(schemaWidgetSelected);
+	m_zoomToFitAction->setEnabled(schemaWidgetSelected);
+
+	m_historyBack->setEnabled(schemaWidgetSelected);
+	m_historyForward->setEnabled(schemaWidgetSelected);
+
+	m_selectSchemaWidget->setEnabled(schemaWidgetSelected);
 
 	return;
 }

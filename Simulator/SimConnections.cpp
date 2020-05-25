@@ -8,27 +8,15 @@ namespace Sim
 	//
 	int ConnectionData::sizeBytes() const
 	{
-		return m_data.size();
+		return static_cast<int>(m_data.size());
 	}
 
 	int ConnectionData::sizeWords() const
 	{
 		assert(m_data.size() % 2 == 0);
-		return m_data.size() / 2;
+		return static_cast<int>(m_data.size() / 2);
 	}
 
-	//
-	// Sim::ConnectionPort
-	//
-	ConnectionPort::ConnectionPort(::ConnectionPortInfo portInfo) :
-		m_portInfo(portInfo)
-	{
-	}
-
-	const ::ConnectionPortInfo& ConnectionPort::portInfo() const
-	{
-		return m_portInfo;
-	}
 
 	//
 	// Sim::Connection
@@ -44,7 +32,7 @@ namespace Sim
 			// Preallocate buffers for sending and receiving
 			//
 			{
-				QByteArray* portReceiveBuffer = getPortReceiveBuffer(cp->portInfo().portNo);
+				std::vector<char>* portReceiveBuffer = getPortReceiveBuffer(cp->portInfo().portNo);
 				if (portReceiveBuffer == nullptr)
 				{
 					assert(portReceiveBuffer);
@@ -56,7 +44,7 @@ namespace Sim
 			}
 
 			{
-				QByteArray* portSendBuffer = getPortSendBuffer(cp->portInfo().portNo);
+				std::vector<char>* portSendBuffer = getPortSendBuffer(cp->portInfo().portNo);
 				if (portSendBuffer == nullptr)
 				{
 					assert(portSendBuffer);
@@ -89,7 +77,7 @@ namespace Sim
 
 	Sim::ConnectionPortPtr Connection::portForLm(const QString& lmEquipmnetId)
 	{
-		for (Sim::ConnectionPortPtr p : m_ports)
+		for (Sim::ConnectionPortPtr& p : m_ports)
 		{
 			if (p->portInfo().lmID == lmEquipmnetId)
 			{
@@ -100,7 +88,9 @@ namespace Sim
 		return {};
 	}
 
-	bool Connection::sendData(int portNo, QByteArray* data, std::chrono::microseconds currentTime)
+	bool Connection::sendData(int portNo,
+							  std::vector<char>* data,
+							  std::chrono::microseconds currentTime)
 	{
 		if (data == nullptr)
 		{
@@ -114,7 +104,7 @@ namespace Sim
 			{
 				QMutexLocker ml(&m_dataMutexPort1);
 
-				m_port1sentData.m_data.swap(*data);
+				std::swap(m_port1sentData.m_data, *data);
 				m_port1sentData.m_sentTime = currentTime;
 			}
 			return true;
@@ -122,7 +112,7 @@ namespace Sim
 			{
 				QMutexLocker ml(&m_dataMutexPort2);
 
-				m_port2sentData.m_data.swap(*data);
+				std::swap(m_port2sentData.m_data, *data);
 				m_port2sentData.m_sentTime = currentTime;
 			}
 			return true;
@@ -133,7 +123,7 @@ namespace Sim
 	}
 
 	bool Connection::receiveData(int portNo,
-								 QByteArray* data,
+								 std::vector<char>* data,
 								 std::chrono::microseconds currentTime,
 								 std::chrono::microseconds timeout,
 								 bool* timeoutHappend)
@@ -165,7 +155,7 @@ namespace Sim
 				}
 				else
 				{
-					if (m_port2sentData.m_data.isEmpty() == false)
+					if (m_port2sentData.m_data.empty() == false)
 					{
 						// Connection received something
 						//
@@ -198,7 +188,7 @@ namespace Sim
 				}
 				else
 				{
-					if (m_port1sentData.m_data.isEmpty() == false)
+					if (m_port1sentData.m_data.empty() == false)
 					{
 						// Connection received something
 						//
@@ -247,7 +237,7 @@ namespace Sim
 		m_enable = value;
 	}
 
-	QByteArray* Connection::getPortReceiveBuffer(int portNo)
+	std::vector<char>* Connection::getPortReceiveBuffer(int portNo)
 	{
 		switch (portNo)
 		{
@@ -261,7 +251,7 @@ namespace Sim
 		}
 	}
 
-	QByteArray* Connection::getPortSendBuffer(int portNo)
+	std::vector<char>* Connection::getPortSendBuffer(int portNo)
 	{
 		switch (portNo)
 		{

@@ -1,28 +1,29 @@
 #pragma once
 
-#include <QObject>
-#include "SimBasePage.h"
+#include <memory>
+#include <QTreeWidget>
+#include "../../VFrame30/Schema.h"
+
 
 class TagSelectorWidget;
-
 
 //
 //
 //		SimSchemaListView - Tree View
 //
 //
-class SimSchemaListView : public QTreeWidget
+class SchemaListTreeWidget : public QTreeWidget
 {
 	Q_OBJECT
 
 public:
-	SimSchemaListView(SimIdeSimulator* simulator, QWidget* parent);
-	virtual ~SimSchemaListView();
+	SchemaListTreeWidget(QWidget* parent);
+	virtual ~SchemaListTreeWidget();
+
+	void setDetails(VFrame30::SchemaDetailsSet details);
 
 private slots:
 	void fillList();
-
-	void slot_projectUpdated();
 	void slot_doubleClicked(const QModelIndex& /*index*/);
 
 signals:
@@ -32,6 +33,7 @@ public:
 	QString filter() const;
 	void setFilter(QString value);
 
+	QStringList tagFilter() const;
 	void setTagFilter(const QStringList& tags);
 
 	int filterCount() const;
@@ -41,7 +43,7 @@ public:
 	void searchAndSelect(QString searchText);
 
 private:
-	SimIdeSimulator* m_simulator = nullptr;
+	VFrame30::SchemaDetailsSet m_details;
 
 	QString m_filter;
 	QStringList m_tagFilter;
@@ -51,19 +53,19 @@ private:
 
 //
 //
-//		SimAppLogicSchemasPage - Tab Page
+//		SchemaListWidget - Tab Page
 //
 //
-class SimAppLogicSchemasPage : public SimBasePage
+class SchemaListWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	SimAppLogicSchemasPage(SimIdeSimulator* simulator, QWidget* parent);
-	virtual ~SimAppLogicSchemasPage() = default;
+	SchemaListWidget(QWidget* parent);
+	virtual ~SchemaListWidget() = default;
 
-protected:
-	void updateData();
+public:
+	void setDetails(VFrame30::SchemaDetailsSet details);
 
 private slots:
 	void ctrlF();
@@ -78,7 +80,7 @@ signals:
 	void openSchemaRequest(QString schemaId);
 
 private:
-	SimSchemaListView* m_schemasView = nullptr;
+	SchemaListTreeWidget* m_treeWidget = nullptr;
 
 	QAction* m_searchAction = nullptr;
 	QLineEdit* m_searchEdit = nullptr;

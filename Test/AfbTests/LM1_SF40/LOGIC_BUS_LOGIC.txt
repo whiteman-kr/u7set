@@ -1,0 +1,128 @@
+test Logic_bus01,tests test1
+schema LOGIC_BUS_LOGIC
+compatible MODULE_LM1SF40
+
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 0
+
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+
+check #OUT_BUS001 == 1
+check #OUT_BUS002 == 1
+check #OUT_BUS003 == 1
+check #OUT_BUS004 == 1
+check #OUT_BUS005 == 1
+check #OUT_BUS006 == 0
+check #OUT_BUS007 == 0
+check #OUT_BUS008 == 0
+check #OUT_BUS009 == 0
+check #OUT_BUS010 == 0
+
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+
+check #OUT_BUS001 == 1
+check #OUT_BUS002 == 1
+check #OUT_BUS003 == 1
+check #OUT_BUS004 == 1
+check #OUT_BUS005 == 1
+check #OUT_BUS006 == 0
+check #OUT_BUS007 == 0
+check #OUT_BUS008 == 0
+check #OUT_BUS009 == 0
+check #OUT_BUS010 == 0
+
+
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+
+check #OUT_BUS001 == 0
+check #OUT_BUS002 == 1
+check #OUT_BUS003 == 1
+check #OUT_BUS004 == 1
+check #OUT_BUS005 == 1
+check #OUT_BUS006 == 0
+check #OUT_BUS007 == 0
+check #OUT_BUS008 == 0
+check #OUT_BUS009 == 0
+check #OUT_BUS010 == 0
+
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 1
+
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 1
+
+check #OUT_BUS001 == 0
+check #OUT_BUS002 == 1
+check #OUT_BUS003 == 1
+check #OUT_BUS004 == 1
+check #OUT_BUS005 == 1
+check #OUT_BUS006 == 0
+check #OUT_BUS007 == 0
+check #OUT_BUS008 == 0
+check #OUT_BUS009 == 0
+check #OUT_BUS010 == 0
+
+
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP01 = 1
+
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+set #TUN_DSCR_BUS_01_INP02 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+
+check #OUT_BUS001 == 1
+check #OUT_BUS002 == 1
+check #OUT_BUS003 == 1
+check #OUT_BUS004 == 1
+check #OUT_BUS005 == 1
+check #OUT_BUS006 == 0
+check #OUT_BUS007 == 0
+check #OUT_BUS008 == 0
+check #OUT_BUS009 == 0
+check #OUT_BUS010 == 0
+
+endtest
+
+
+
+
+
+

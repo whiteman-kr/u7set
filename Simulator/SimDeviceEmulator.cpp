@@ -1059,18 +1059,20 @@ namespace Sim
 			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
 		}
 
-		// COMMENTED as now there is no need to zero IO modules memory
+		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
 		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 som emeory areas before start work cylce (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
+		// !!! receiveConnectionsData !!! was moved to Sim::Control,
+		// as it is must be called before ALL LMs started to avoid gaps in communication
 		//
-		result = receiveConnectionsData(currentTime);
-		if (result == false)
-		{
-			return false;
-		}
+		//		result = receiveConnectionsData(currentTime);
+		//		if (result == false)
+		//		{
+		//			return false;
+		//		}
 
 		// Run work cylce
 		//
@@ -1236,9 +1238,9 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-//			QByteArray rb;
-//			QByteArray* receiveBuffer = &rb;
-			QByteArray* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
+			//std::vector<char> rb;
+			//std::vector<char>* receiveBuffer = &rb;
+			std::vector<char>* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
 			if (receiveBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port receive buffer error, connection %1, port %2 (%3).")
@@ -1254,7 +1256,7 @@ namespace Sim
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
 									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},	// timeout
 									 &timeout);
 
 			if (ok == false)
@@ -1277,7 +1279,7 @@ namespace Sim
 			}
 			else
 			{
-				if (receiveBuffer->isEmpty() == true)
+				if (receiveBuffer->empty() == true)
 				{
 					// If timeout not happened yet, but receiveBuffer is empty, wait mor time
 					// do not exit from function here, lated validity bit vill be written
@@ -1366,9 +1368,9 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-//			QByteArray sb;
-//			QByteArray* sendBuffer = &sb;
-			QByteArray* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
+			//std::vector<char> sb;
+			//std::vector<char>* sendBuffer = &sb;
+			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port send buffer error, connection %1, port %2 (%3).")
@@ -1417,10 +1419,10 @@ namespace Sim
 	{
 		// eepromOffset - in bytes
 		//
-		if (eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE))
+		if (eepromOffset < 0 || eepromOffset > static_cast<int>(m_plainAppLogic.size() - sizeof(TYPE)))
 		{
 			Q_ASSERT(eepromOffset >= 0 &&
-				   eepromOffset - sizeof(TYPE) <= m_plainAppLogic.size());
+					 static_cast<int>(eepromOffset - sizeof(TYPE)) <= m_plainAppLogic.size());
 			return 0;
 		}
 

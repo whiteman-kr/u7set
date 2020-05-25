@@ -55,9 +55,9 @@ private:
 	QCompleter* m_filterCompleter = nullptr;
 	QCompleter* m_tagsCompleter = nullptr;
 
-	const QString m_filterCompleterSettingsName = "/DialogChooseTrendSignals/trendSignalsDialogFilterCompleter";
-	const QString m_tagsCompleterSettingsName = "/DialogChooseTrendSignals/trendSignalsDialogTagsCompleter";
-	const QString m_sizeSettingsName = "/DialogChooseTrendSignals/size";
+	const QString m_filterCompleterSettingsName = "DialogChooseTrendSignals/trendSignalsDialogFilterCompleter";
+	const QString m_tagsCompleterSettingsName = "DialogChooseTrendSignals/trendSignalsDialogTagsCompleter";
+	const QString m_sizeSettingsName = "DialogChooseTrendSignals/size";
 
 	std::vector<AppSignalParam> m_acceptedSignals;
 };

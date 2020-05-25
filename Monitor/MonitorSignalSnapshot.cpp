@@ -18,8 +18,8 @@ bool MonitorDialogSignalSnapshot::showDialog(MonitorConfigController *configCont
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
 
-	connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dss, &MonitorDialogSignalSnapshot::on_signalsUpdate);
-	connect(configController, &MonitorConfigController::configurationUpdate, dss, &MonitorDialogSignalSnapshot::on_schemasUpdate);
+	connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
+	connect(configController, &MonitorConfigController::configurationUpdate, dss, &MonitorDialogSignalSnapshot::schemasUpdated);
 
 	dss->show();
 

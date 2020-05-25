@@ -35,6 +35,7 @@ public:
 public slots:
 	void signalContextMenu(const QStringList signalList);
 	void signalInfo(QString appSignalId);
+	void openSchemaTabPage(QString schemaId);
 
 protected:
 	void createToolBar();
@@ -73,7 +74,6 @@ protected slots:
 	void addNewWindow();
 
 	void openLogicModuleTabPage(QString lmEquipmentId);
-	void openSchemaTabPage(QString schemaId);
 	void openCodeTabPage(QString lmEquipmentId);
 	void openConnectionTabPage(QString connectionId);
 	void openAppSchemasTabPage();

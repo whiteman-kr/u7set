@@ -315,6 +315,11 @@ void SignalSnapshotModel::setSignalType(SignalType type)
 	m_signalType = type;
 }
 
+void SignalSnapshotModel::setMaskType(SignalSnapshotModel::MaskType type)
+{
+	m_maskType = type;
+}
+
 void SignalSnapshotModel::setMasks(const QStringList& masks)
 {
 	m_masks = masks;
@@ -394,7 +399,7 @@ void SignalSnapshotModel::fillSignals()
 
 			QStringList strIdList;
 
-			switch (theDialogSignalSnapshotSettings.m_signalSnapshotMaskType)
+			switch (m_maskType)
 			{
 			case MaskType::All:
 			{
@@ -870,34 +875,38 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 //DialogSignalSnapshotSettings
 //
 
-void DialogSignalSnapshotSettings::restore(QSettings& s)
+void DialogSignalSnapshotSettings::restore()
 {
-	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
-	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
-	m_snapshotHorzHeader = s.value("DialogSignalSnapshot/horzHeader").toByteArray();
-	m_snapshotHorzHeaderCount = s.value("DialogSignalSnapshot/horzHeaderCount").toInt();
-	m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(s.value("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType)).toInt());
-	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
-	m_signalSnapshotMaskType = static_cast<SignalSnapshotModel::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType)).toInt());
-	m_signalSnapshotTagsList = s.value("DialogSignalSnapshot/tags").toStringList();
-	m_signalSnapshotSortColumn = s.value("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn).toInt();
-	m_signalSnapshotSortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", m_signalSnapshotSortOrder).toInt());
+	QSettings s;
+
+	pos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
+	geometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
+	horzHeader = s.value("DialogSignalSnapshot/horzHeader").toByteArray();
+	horzHeaderCount = s.value("DialogSignalSnapshot/horzHeaderCount").toInt();
+	signalType = static_cast<SignalSnapshotModel::SignalType>(s.value("DialogSignalSnapshot/type", static_cast<int>(signalType)).toInt());
+	maskList = s.value("DialogSignalSnapshot/mask").toStringList();
+	maskType = static_cast<SignalSnapshotModel::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(maskType)).toInt());
+	tagsList = s.value("DialogSignalSnapshot/tags").toStringList();
+	sortColumn = s.value("DialogSignalSnapshot/sortColumn", sortColumn).toInt();
+	sortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", sortOrder).toInt());
 }
 
-void DialogSignalSnapshotSettings::store(QSettings& s)
+void DialogSignalSnapshotSettings::store()
 {
-	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
-	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
-	s.setValue("DialogSignalSnapshot/horzHeader", m_snapshotHorzHeader);
-	s.setValue("DialogSignalSnapshot/horzHeaderCount", m_snapshotHorzHeaderCount);
+	QSettings s;
 
-	s.setValue("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType));
-	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
-	s.setValue("DialogSignalSnapshot/tags", m_signalSnapshotTagsList);
+	s.setValue("DialogSignalSnapshot/pos", pos);
+	s.setValue("DialogSignalSnapshot/geometry", geometry);
+	s.setValue("DialogSignalSnapshot/horzHeader", horzHeader);
+	s.setValue("DialogSignalSnapshot/horzHeaderCount", horzHeaderCount);
 
-	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType));
-	s.setValue("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn);
-	s.setValue("DialogSignalSnapshot/sortOrder", static_cast<int>(m_signalSnapshotSortOrder));
+	s.setValue("DialogSignalSnapshot/type", static_cast<int>(signalType));
+	s.setValue("DialogSignalSnapshot/mask", maskList);
+	s.setValue("DialogSignalSnapshot/tags", tagsList);
+
+	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(maskType));
+	s.setValue("DialogSignalSnapshot/sortColumn", sortColumn);
+	s.setValue("DialogSignalSnapshot/sortOrder", static_cast<int>(sortOrder));
 }
 
 //
@@ -908,7 +917,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   QString projectName,
 										   QString softwareEquipmentId,
 										   QWidget *parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 	m_appSignalManager(appSignalManager),
 	m_projectName(projectName),
 	m_softwareEquipmentId(softwareEquipmentId)
@@ -923,14 +932,19 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
+	setWindowTitle(tr("Signals Snapshot"));
+
 	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
 	// Restore window pos
 	//
-	if (theDialogSignalSnapshotSettings.m_signalSnapshotPos.x() != -1 && theDialogSignalSnapshotSettings.m_signalSnapshotPos.y() != -1)
+
+	m_settings.restore();
+
+	if (m_settings.pos.x() != -1 && m_settings.pos.y() != -1)
 	{
-		move(theDialogSignalSnapshotSettings.m_signalSnapshotPos);
-		restoreGeometry(theDialogSignalSnapshotSettings.m_signalSnapshotGeometry);
+		move(m_settings.pos);
+		restoreGeometry(m_settings.geometry);
 	}
 
 	// crete models
@@ -940,7 +954,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 	std::vector<AppSignalParam> allSignals = m_appSignalManager->signalList();
 	m_model->setSignals(allSignals);
 
-	m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(theDialogSignalSnapshotSettings.m_signalSnapshotSignalType));
+	m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(m_settings.signalType));
+	m_model->setMaskType(static_cast<SignalSnapshotModel::MaskType>(m_settings.maskType));
 
 	// Table view setup
 	//
@@ -968,12 +983,12 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 
 	connect(m_tableView->horizontalHeader(), &QWidget::customContextMenuRequested, this, &DialogSignalSnapshot::headerColumnContextMenuRequested);
 
-	m_tableView->horizontalHeader()->restoreState(theDialogSignalSnapshotSettings.m_snapshotHorzHeader);
+	m_tableView->horizontalHeader()->restoreState(m_settings.horzHeader);
 
 	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_tableView, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSnapshot::on_contextMenuRequested);
 
-	if (theDialogSignalSnapshotSettings.m_snapshotHorzHeader.isEmpty() == true || theDialogSignalSnapshotSettings.m_snapshotHorzHeaderCount != static_cast<int>(SnapshotColumns::ColumnCount))
+	if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SnapshotColumns::ColumnCount))
 	{
 		// First time? Set what is should be hidden by deafult
 		//
@@ -1002,10 +1017,10 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 	m_typeCombo->addItem(tr("Discrete Input signals"), static_cast<int>(SignalSnapshotModel::SignalType::DiscreteInput));
 	m_typeCombo->addItem(tr("Discrete Output signals"), static_cast<int>(SignalSnapshotModel::SignalType::DiscreteOutput));
 
-	if (theDialogSignalSnapshotSettings.m_signalSnapshotSignalType >= SignalSnapshotModel::SignalType::All
-		&& theDialogSignalSnapshotSettings.m_signalSnapshotSignalType < SignalSnapshotModel::SignalType::DiscreteOutput)
+	if (m_settings.signalType >= SignalSnapshotModel::SignalType::All
+		&& m_settings.signalType < SignalSnapshotModel::SignalType::DiscreteOutput)
 	{
-		m_typeCombo->setCurrentIndex(static_cast<int>(theDialogSignalSnapshotSettings.m_signalSnapshotSignalType));
+		m_typeCombo->setCurrentIndex(static_cast<int>(m_settings.signalType));
 	}
 	else
 	{
@@ -1017,10 +1032,10 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 	// Masks setup
 	//
 
-	m_maskCompleter = new QCompleter(theDialogSignalSnapshotSettings.m_signalSnapshotMaskList, this);
+	m_maskCompleter = new QCompleter(m_settings.maskList, this);
 	m_maskCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
-	m_tagsCompleter = new QCompleter(theDialogSignalSnapshotSettings.m_signalSnapshotTagsList, this);
+	m_tagsCompleter = new QCompleter(m_settings.tagsList, this);
 	m_tagsCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
 	m_editMask->setCompleter(m_maskCompleter);
@@ -1035,9 +1050,9 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 	m_comboMaskType->addItem("AppSignalID");
 	m_comboMaskType->addItem("CustomAppSignalID");
 	m_comboMaskType->addItem("EquipmentID");
-	if (theDialogSignalSnapshotSettings.m_signalSnapshotMaskType >= SignalSnapshotModel::MaskType::All && theDialogSignalSnapshotSettings.m_signalSnapshotMaskType <= SignalSnapshotModel::MaskType::EquipmentId)
+	if (m_settings.maskType >= SignalSnapshotModel::MaskType::All && m_settings.maskType <= SignalSnapshotModel::MaskType::EquipmentId)
 	{
-		m_comboMaskType->setCurrentIndex(static_cast<int>(theDialogSignalSnapshotSettings.m_signalSnapshotMaskType));
+		m_comboMaskType->setCurrentIndex(static_cast<int>(m_settings.maskType));
 	}
 	else
 	{
@@ -1062,7 +1077,17 @@ DialogSignalSnapshot::~DialogSignalSnapshot()
 {
 }
 
-void DialogSignalSnapshot::on_schemasUpdate()
+QString DialogSignalSnapshot::projectName() const
+{
+	return m_projectName;
+}
+
+void DialogSignalSnapshot::setProjectName(const QString& projectName)
+{
+	m_projectName = projectName;
+}
+
+void DialogSignalSnapshot::schemasUpdated()
 {
 	// Refresh schemas combo
 	//
@@ -1075,7 +1100,7 @@ void DialogSignalSnapshot::on_schemasUpdate()
 	return;
 }
 
-void DialogSignalSnapshot::on_signalsUpdate()
+void DialogSignalSnapshot::signalsUpdated()
 {
 	bool emptyModel = m_model->rowCount() == 0;
 
@@ -1095,6 +1120,20 @@ void DialogSignalSnapshot::on_signalsUpdate()
 		m_tableView->resizeColumnsToContents();
 	}
 
+	return;
+}
+
+void DialogSignalSnapshot::keyPressEvent(QKeyEvent *event)
+{
+	int key = event->key();
+	if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
+	{
+		event->ignore();
+	}
+	else
+	{
+		QDialog::keyPressEvent(event);
+	}
 	return;
 }
 
@@ -1198,11 +1237,13 @@ void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 
 	// Save window position
 	//
-	theDialogSignalSnapshotSettings.m_signalSnapshotPos = pos();
-	theDialogSignalSnapshotSettings.m_signalSnapshotGeometry = saveGeometry();
+	m_settings.pos = pos();
+	m_settings.geometry = saveGeometry();
 
-	theDialogSignalSnapshotSettings.m_snapshotHorzHeader = m_tableView->horizontalHeader()->saveState();
-	theDialogSignalSnapshotSettings.m_snapshotHorzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
+	m_settings.horzHeader = m_tableView->horizontalHeader()->saveState();
+	m_settings.horzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
+
+	m_settings.store();
 }
 
 void DialogSignalSnapshot::on_contextMenuRequested(const QPoint& pos)
@@ -1284,21 +1325,21 @@ void DialogSignalSnapshot::setupUi()
 	//maskTagsLayout
 
 	QVBoxLayout* maskTagsLayout = new QVBoxLayout();
-	maskTagsLayout->setContentsMargins(1, 1, 1, 1);
+	tagsLayout->setContentsMargins(0, 0, 0, 0);
 	maskTagsLayout->addLayout(maskLayout);
 	maskTagsLayout->addLayout(tagsLayout);
 
 	//groupLayout
 
 	QHBoxLayout* groupLayout = new QHBoxLayout(groupBox);
-	groupLayout->setContentsMargins(1, 1, 1, 1);
+	groupLayout->setContentsMargins(2, 2, 2, 2);
 	groupLayout->addLayout(typeLayout);
 	groupLayout->addLayout(maskTagsLayout);
 
 	// Export/Print/Fixate
 
 	QHBoxLayout* exPrintLayout = new QHBoxLayout();
-	exPrintLayout->setContentsMargins(1, 1, 1, 1);
+	tagsLayout->setContentsMargins(0, 0, 0, 0);
 
 	QPushButton* b = new QPushButton(tr("Export..."));
 	connect(b, &QPushButton::clicked, this, &DialogSignalSnapshot::on_buttonExport_clicked);
@@ -1322,7 +1363,7 @@ void DialogSignalSnapshot::setupUi()
 	// Main layout
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->setContentsMargins(1, 1, 1, 1);
+	mainLayout->setContentsMargins(5, 5, 5, 5);
 
 	mainLayout->addWidget(groupBox);
 	mainLayout->addLayout(exPrintLayout);
@@ -1378,7 +1419,7 @@ void DialogSignalSnapshot::fillSignals()
 
 	m_model->fillSignals();
 
-	m_tableView->sortByColumn(theDialogSignalSnapshotSettings.m_signalSnapshotSortColumn, theDialogSignalSnapshotSettings.m_signalSnapshotSortOrder);
+	m_tableView->sortByColumn(m_settings.sortColumn, m_settings.sortOrder);
 
 	if (modelWasEmpty == true)
 	{
@@ -1446,9 +1487,9 @@ void DialogSignalSnapshot::maskChanged()
 		{
 			// Save filter history
 			//
-			if (theDialogSignalSnapshotSettings.m_signalSnapshotMaskList.contains(mask) == false)
+			if (m_settings.maskList.contains(mask) == false)
 			{
-				theDialogSignalSnapshotSettings.m_signalSnapshotMaskList.append(mask);
+				m_settings.maskList.append(mask);
 
 				QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_maskCompleter->model());
 				if (completerModel == nullptr)
@@ -1457,7 +1498,7 @@ void DialogSignalSnapshot::maskChanged()
 					return;
 				}
 
-				completerModel->setStringList(theDialogSignalSnapshotSettings.m_signalSnapshotMaskList);
+				completerModel->setStringList(m_settings.maskList);
 			}
 		}
 	}
@@ -1480,9 +1521,9 @@ void DialogSignalSnapshot::tagsChanged()
 		{
 			// Save filter history
 			//
-			if (theDialogSignalSnapshotSettings.m_signalSnapshotTagsList.contains(tag) == false)
+			if (m_settings.tagsList.contains(tag) == false)
 			{
-				theDialogSignalSnapshotSettings.m_signalSnapshotTagsList.append(tag);
+				m_settings.tagsList.append(tag);
 
 				QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_tagsCompleter->model());
 				if (completerModel == nullptr)
@@ -1491,7 +1532,7 @@ void DialogSignalSnapshot::tagsChanged()
 					return;
 				}
 
-				completerModel->setStringList(theDialogSignalSnapshotSettings.m_signalSnapshotTagsList);
+				completerModel->setStringList(m_settings.tagsList);
 			}
 		}
 	}
@@ -1527,14 +1568,14 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 
 void DialogSignalSnapshot::on_sortIndicatorChanged(int column, Qt::SortOrder order)
 {
-	theDialogSignalSnapshotSettings.m_signalSnapshotSortColumn = column;
-	theDialogSignalSnapshotSettings.m_signalSnapshotSortOrder = order;
+	m_settings.sortColumn = column;
+	m_settings.sortOrder = order;
 }
 
 void DialogSignalSnapshot::on_typeCombo_currentIndexChanged(int index)
 {
 	m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(index));
-	theDialogSignalSnapshotSettings.m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(index);
+	m_settings.signalType = static_cast<SignalSnapshotModel::SignalType>(index);
 
 	fillSignals();
 }
@@ -1574,7 +1615,8 @@ void DialogSignalSnapshot::on_schemaCombo_currentIndexChanged(int /*index)*/)
 
 void DialogSignalSnapshot::on_comboMaskType_currentIndexChanged(int index)
 {
-	theDialogSignalSnapshotSettings.m_signalSnapshotMaskType = static_cast<SignalSnapshotModel::MaskType>(index);
+	m_model->setMaskType(static_cast<SignalSnapshotModel::MaskType>(index));
+	m_settings.maskType = static_cast<SignalSnapshotModel::MaskType>(index);
 
 	QString mask = m_editMask->text();
 	if (mask.isEmpty() == true)

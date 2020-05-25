@@ -67,7 +67,9 @@ namespace Sim
 		bool clear();
 
 		bool writeBuffer(quint32 offsetW, const QByteArray& data) noexcept;
-		bool readToBuffer(quint32 offsetW, quint32 countW, QByteArray* data, bool applyOverride) const noexcept;
+
+		template<typename CONTAINER>
+		bool readToBuffer(quint32 offsetW, quint32 countW, CONTAINER* data, bool applyOverride) const noexcept;
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
@@ -140,7 +142,9 @@ namespace Sim
 		bool clearMemoryArea(quint32 offsetW, E::LogicModuleRamAccess access);
 
 		bool writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const QByteArray& data) noexcept;
+		bool writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const std::vector<char>& data) noexcept;
 		bool readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, QByteArray* data, bool applyOverride = true) noexcept;
+		bool readToBuffer(quint32 offsetW, E::LogicModuleRamAccess access, quint32 countW, std::vector<char>* data, bool applyOverride = true) noexcept;
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride = true) const noexcept;

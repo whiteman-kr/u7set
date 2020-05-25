@@ -1681,8 +1681,11 @@ bool EditSchemaView::isItemSelected(const SchemaItemPtr& item)
 // EditSchemaWidget
 //
 //
-EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbController) :
-	VFrame30::BaseSchemaWidget(schema, new EditSchemaView(schema)),
+EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
+                                   const DbFileInfo& fileInfo,
+                                   DbController* dbController,
+                                   QWidget* parent) :
+    VFrame30::BaseSchemaWidget(schema, new EditSchemaView{schema}, parent),
 	m_fileInfo(fileInfo),
 	m_dbcontroller(dbController),
 	m_initialSchemaId(schema->schemaId())
@@ -2395,6 +2398,15 @@ void EditSchemaWidget::createActions()
 	connect(m_zoom100Action, &QAction::triggered, this, &VFrame30::BaseSchemaWidget::zoom100);
 	addAction(m_zoom100Action);
 
+	// View->Fit to Screen
+	//
+	m_zoomFitToScreenAction = new QAction(tr("Fit to Screen"), this);
+	m_zoomFitToScreenAction->setEnabled(true);
+	//m_zoomFitToScreenAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash)); It is comment/uncommnet shortcut ((
+	m_zoomFitToScreenAction->setShortcutVisibleInContextMenu(true);
+	connect(m_zoomFitToScreenAction, &QAction::triggered, this, &VFrame30::BaseSchemaWidget::zoomToFit);
+	addAction(m_zoomFitToScreenAction);
+
 	// ------------------------------------
 	//
 	m_viewSeparatorAction0 = new QAction(this);
@@ -2633,6 +2645,7 @@ void EditSchemaWidget::createActions()
 		m_viewMenu->addAction(m_zoomInAction);
 		m_viewMenu->addAction(m_zoomOutAction);
 		m_viewMenu->addAction(m_zoom100Action);
+		m_viewMenu->addAction(m_zoomFitToScreenAction);
 
 	if (schema()->unit() == VFrame30::SchemaUnit::Display)
 	{

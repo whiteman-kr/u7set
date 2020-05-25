@@ -238,10 +238,6 @@ void Settings::writeUserScope() const
 
 	thePropertyEditorSettings.store(s);
 
-	theDialogSignalSnapshotSettings.store(s);
-
-	theDialogSignalSearchSettings.store(s);
-
 	return;
 }
 void Settings::loadUserScope()
@@ -367,10 +363,6 @@ void Settings::loadUserScope()
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
 
 	thePropertyEditorSettings.restore(s);
-
-	theDialogSignalSnapshotSettings.restore(s);
-
-	theDialogSignalSearchSettings.restore(s);
 
 	return;
 }

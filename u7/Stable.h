@@ -8,6 +8,7 @@
 
 // C++ includes
 //
+#include <array>
 #include <memory>
 #include <vector>
 #include <list>

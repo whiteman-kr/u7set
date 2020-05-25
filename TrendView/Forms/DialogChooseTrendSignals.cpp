@@ -16,9 +16,9 @@ DialogChooseTrendSignals::DialogChooseTrendSignals(IAppSignalManager* signalMana
 	// Set filter completer
 	//
 	QSettings s{};
-	QStringList trendSignalsDialogFilterCompleter = s.value(qAppName() + m_filterCompleterSettingsName).toStringList();
-	QStringList trendSignalsDialogTagsCompleter = s.value(qAppName() + m_tagsCompleterSettingsName).toStringList();
-	QSize widgetSize = s.value(qAppName() + m_sizeSettingsName).toSize();
+	QStringList trendSignalsDialogFilterCompleter = s.value(m_filterCompleterSettingsName).toStringList();
+	QStringList trendSignalsDialogTagsCompleter = s.value(m_tagsCompleterSettingsName).toStringList();
+	QSize widgetSize = s.value(m_sizeSettingsName).toSize();
 
 	m_filterCompleter = new QCompleter(trendSignalsDialogFilterCompleter, this);
 	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
@@ -86,7 +86,7 @@ std::vector<AppSignalParam> DialogChooseTrendSignals::acceptedSignals() const
 
 void DialogChooseTrendSignals::resizeEvent(QResizeEvent* event)
 {
-	QSettings{}.setValue(qAppName() + m_sizeSettingsName, event->size());
+	QSettings{}.setValue(m_sizeSettingsName, event->size());
 }
 
 void DialogChooseTrendSignals::fillSignalList()
@@ -296,7 +296,7 @@ void DialogChooseTrendSignals::on_filterEdit_editingFinished()
 	QString arg = ui->filterEdit->text();
 
 	QSettings s;
-	QStringList trendSignalsDialogFilterCompleter = s.value(qAppName() + m_filterCompleterSettingsName).toStringList();
+	QStringList trendSignalsDialogFilterCompleter = s.value(m_filterCompleterSettingsName).toStringList();
 
 	if (trendSignalsDialogFilterCompleter.contains(arg) == false)
 	{
@@ -315,7 +315,7 @@ void DialogChooseTrendSignals::on_filterEdit_editingFinished()
 			completerModel->setStringList(trendSignalsDialogFilterCompleter);
 		}
 
-		s.setValue(qAppName() + m_filterCompleterSettingsName, trendSignalsDialogFilterCompleter);
+		s.setValue(m_filterCompleterSettingsName, trendSignalsDialogFilterCompleter);
 	}
 
 	return;
@@ -331,7 +331,7 @@ void DialogChooseTrendSignals::on_tagsEdit_editingFinished()
 	QString arg = ui->tagsEdit->text();
 
 	QSettings s;
-	QStringList trendSignalsDialogTagsCompleter = s.value(qAppName() + m_tagsCompleterSettingsName).toStringList();
+	QStringList trendSignalsDialogTagsCompleter = s.value(m_tagsCompleterSettingsName).toStringList();
 
 	if (trendSignalsDialogTagsCompleter.contains(arg) == false)
 	{
@@ -350,7 +350,7 @@ void DialogChooseTrendSignals::on_tagsEdit_editingFinished()
 			completerModel->setStringList(trendSignalsDialogTagsCompleter);
 		}
 
-		s.setValue(qAppName() + m_tagsCompleterSettingsName, trendSignalsDialogTagsCompleter);
+		s.setValue(m_tagsCompleterSettingsName, trendSignalsDialogTagsCompleter);
 	}
 
 	return;

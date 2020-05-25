@@ -2,10 +2,7 @@
 #include "ui_DialogSignalInfo.h"
 #include "../lib/Types.h"
 #include "../Proto/serialization.pb.h"
-#include "MonitorCentralWidget.h"
-#include "Settings.h"
 #include "../lib/Ui/UiTools.h"
-
 
 //
 //
@@ -13,10 +10,17 @@
 //
 //
 
-DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, std::shared_ptr<Comparator> comparator):
+DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, IAppSignalManager* appSignalManager, std::shared_ptr<Comparator> comparator):
 QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+  m_appSignalManager(appSignalManager),
   m_comparator(comparator)
 {
+	if (m_appSignalManager == nullptr)
+	{
+		Q_ASSERT(m_appSignalManager);
+		return;
+	}
+
 	setWindowTitle(tr("Setpoint Details"));
 
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -40,7 +44,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 
 	bool ok = false;
 
-	AppSignalParam inputParam = theSignals.signalParam(c->input().appSignalID(), &ok);
+	AppSignalParam inputParam = m_appSignalManager->signalParam(c->input().appSignalID(), &ok);
 	if (ok == false)
 	{
 		s += tr("Input signal: <b>%1</b><br>").arg(c->input().appSignalID());
@@ -58,7 +62,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 	}
 	else
 	{
-		AppSignalParam compareParam = theSignals.signalParam(c->compare().appSignalID(), &ok);
+		AppSignalParam compareParam = m_appSignalManager->signalParam(c->compare().appSignalID(), &ok);
 		if (ok == false)
 		{
 			s += tr("Compare To: <b>%1</b><br>").arg(c->compare().appSignalID());
@@ -72,7 +76,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 
 	// Output
 
-	AppSignalParam outputParam = theSignals.signalParam(c->output().appSignalID(), &ok);
+	AppSignalParam outputParam = m_appSignalManager->signalParam(c->output().appSignalID(), &ok);
 	if (ok == false)
 	{
 		s += tr("Output signal: <b>%1</b><br>").arg(c->output().appSignalID());
@@ -90,7 +94,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 	}
 	else
 	{
-		AppSignalParam hystParam = theSignals.signalParam(c->hysteresis().appSignalID(), &ok);
+		AppSignalParam hystParam = m_appSignalManager->signalParam(c->hysteresis().appSignalID(), &ok);
 		if (ok == false)
 		{
 			s += tr("Hysteresis: <b>%1/b<br>").arg(c->hysteresis().appSignalID());
@@ -378,48 +382,6 @@ int SignalFlagsWidget::point2Flag(const QPoint& pt)
 
 std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
-bool DialogSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget)
-{
-	auto it = m_dialogSignalInfoMap.find(appSignalId);
-	if (it == m_dialogSignalInfoMap.end())
-	{
-		bool ok = false;
-		AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
-
-		if (ok == true)
-		{
-			DialogSignalInfo* dsi = new DialogSignalInfo(signal, configController, centralWidget);
-			connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dsi, &DialogSignalInfo::onSignalParamAndUnitsArrived);
-
-			dsi->show();
-			dsi->raise();
-			dsi->activateWindow();
-
-			m_dialogSignalInfoMap[appSignalId] = dsi;
-		}
-		else
-		{
-			QMessageBox::critical(centralWidget, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
-			return false;
-		}
-	}
-	else
-	{
-		DialogSignalInfo* dsi = it->second;
-		if (dsi == nullptr)
-		{
-			Q_ASSERT(dsi);
-			return false;
-		}
-
-		dsi->raise();
-		dsi->activateWindow();
-
-		UiTools::adjustDialogPlacement(dsi);
-	}
-
-	return true;
-}
 
 void DialogSignalInfo::onSignalParamAndUnitsArrived()
 {
@@ -427,7 +389,7 @@ void DialogSignalInfo::onSignalParamAndUnitsArrived()
 
 	bool ok = false;
 
-	AppSignalParam newSignal = theSignals.signalParam(m_signal.hash(), &ok);
+	AppSignalParam newSignal = m_appSignalManager->signalParam(m_signal.hash(), &ok);
 
 	if (ok == true)
 	{
@@ -456,29 +418,37 @@ void DialogSignalInfo::onSignalParamAndUnitsArrived()
 	fillSchemas();
 }
 
-DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
-	QDialog(centralWidget, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
+								   IAppSignalManager* appSignalManager,
+								   VFrame30::TuningController* tuningController,
+								   bool tuningEnabled,
+								   QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal),
-	m_configController(configController),
-	m_centralWidget(centralWidget)
+	m_appSignalManager(appSignalManager),
+	m_tuningController(tuningController)	// it can be nullptr
 {
-	if (m_configController == nullptr || m_centralWidget == nullptr)
+	if (m_appSignalManager == nullptr)
 	{
-		Q_ASSERT(m_configController);
-		Q_ASSERT(m_centralWidget);
+		Q_ASSERT(m_appSignalManager);
 		return;
 	}
 
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	// Restore window pos
+	// Restore settings
 	//
-	if (theSettings.m_signalInfoPos.x() != -1 && theSettings.m_signalInfoPos.y() != -1)
+	QSettings settings;
+
+	QPoint signalInfoPos = settings.value("DialogSignalInfo/pos", QPoint(-1, -1)).toPoint();
+	QByteArray signalInfoGeometry = settings.value("DialogSignalInfo/geometry").toByteArray();
+
+	if (signalInfoPos.x() != -1 && signalInfoPos.y() != -1)
 	{
-		move(theSettings.m_signalInfoPos);
-		restoreGeometry(theSettings.m_signalInfoGeometry);
+		move(signalInfoPos);
+		restoreGeometry(signalInfoGeometry);
 	}
 
 	//
@@ -492,21 +462,11 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigCo
 	ui->signalIdLabel->setAppSignal(signal);
 	ui->signalIdLabelIcon->setAppSignal(signal);
 
-	// Fill signal information
-
-	fillSignalInfo();
-
-	fillProperties();
-
-	fillSetpoints();
-
-	fillSchemas();
-
 	ui->tabWidget->setCurrentIndex(0);
 
 	// Remove tuning tab
 
-	if (configController->configuration().tuningEnabled == false || m_signal.enableTuning() == false)
+	if (tuningEnabled == false || m_signal.enableTuning() == false)
 	{
 		for (int i = 0; i < ui->tabWidget->count(); i++)
 		{
@@ -518,10 +478,6 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigCo
 		}
 	}
 
-	//
-
-	updateData();
-
 	UiTools::adjustDialogPlacement(this);
 
 	m_updateStateTimerId = startTimer(200);
@@ -529,7 +485,42 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigCo
 
 DialogSignalInfo::~DialogSignalInfo()
 {
-	auto it = m_dialogSignalInfoMap.find(m_signal.appSignalId());
+	unregisterDialog(m_signal.appSignalId());
+
+	// Save window position
+	//
+	QSettings settings;
+
+	QPoint signalInfoPos = pos();
+	QByteArray signalInfoGeometry = saveGeometry();
+	QByteArray signalInfoTreeSetpointsState = ui->treeSetpoints->header()->saveState();
+
+	settings.setValue("DialogSignalInfo/pos", signalInfoPos);
+	settings.setValue("DialogSignalInfo/geometry", signalInfoGeometry);
+	settings.setValue("DialogSignalInfo/treeSetpointsState", signalInfoTreeSetpointsState);
+
+	delete ui;
+}
+
+DialogSignalInfo* DialogSignalInfo::dialogRegistered(const QString& appSignalId)
+{
+	auto it = m_dialogSignalInfoMap.find(appSignalId);
+	if (it == m_dialogSignalInfoMap.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+void DialogSignalInfo::registerDialog(const QString& appSignalId, DialogSignalInfo* dialog)
+{
+	m_dialogSignalInfoMap[appSignalId] = dialog;
+}
+
+void DialogSignalInfo::unregisterDialog(const QString& appSignalId)
+{
+	auto it = m_dialogSignalInfoMap.find(appSignalId);
 	if (it == m_dialogSignalInfoMap.end())
 	{
 
@@ -539,15 +530,6 @@ DialogSignalInfo::~DialogSignalInfo()
 	{
 		m_dialogSignalInfoMap.erase(it);
 	}
-
-	// Save window position
-	//
-	theSettings.m_signalInfoPos = pos();
-	theSettings.m_signalInfoGeometry = saveGeometry();
-
-	theSettings.m_signalInfoTreeSetpointsState = ui->treeSetpoints->header()->saveState();
-
-	delete ui;
 }
 
 void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
@@ -644,6 +626,30 @@ void DialogSignalInfo::prepareSetpointsContextMenu(const QPoint& pos)
 
 	//
 	menu.exec(QCursor::pos());
+}
+
+void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
+{
+	if (m_firstShow == false)
+	{
+		return;
+	}
+
+	m_firstShow = false;
+
+	// Fill signal information
+
+	fillSignalInfo();
+
+	fillProperties();
+
+	fillSetpoints();
+
+	fillSchemas();
+
+	updateData();
+
+	return;
 }
 
 void DialogSignalInfo::timerEvent(QTimerEvent* event)
@@ -835,7 +841,7 @@ void DialogSignalInfo::fillSetpoints()
 	columns << tr("Schema");
 	ui->treeSetpoints->setHeaderLabels(columns);
 
-	m_setpoints = theSignals.setpointsByInputSignalId(m_signal.appSignalId());
+	m_setpoints = m_appSignalManager->setpointsByInputSignalId(m_signal.appSignalId());
 
 	for (int i = 0; i < m_setpoints.size(); i++)
 	{
@@ -854,7 +860,7 @@ void DialogSignalInfo::fillSetpoints()
 		{
 			bool ok = false;
 
-			AppSignalParam paramCompareTo = theSignals.signalParam(c->compare().appSignalID(), &ok);
+			AppSignalParam paramCompareTo = m_appSignalManager->signalParam(c->compare().appSignalID(), &ok);
 			if (ok == true)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::CompareTo), paramCompareTo.customSignalId());
@@ -889,7 +895,7 @@ void DialogSignalInfo::fillSetpoints()
 
 		bool ok = false;
 
-		AppSignalParam paramOutput = theSignals.signalParam(c->output().appSignalID(), &ok);
+		AppSignalParam paramOutput = m_appSignalManager->signalParam(c->output().appSignalID(), &ok);
 		if (ok == true)
 		{
 			item->setText(static_cast<int>(SetpointsColumns::Output), paramOutput.customSignalId());
@@ -925,9 +931,13 @@ void DialogSignalInfo::fillSetpoints()
 
 	// Adjust column width
 	//
-	if (theSettings.m_signalInfoTreeSetpointsState.isEmpty() == false)
+	QSettings settings;
+
+	QByteArray signalInfoTreeSetpointsState = settings.value("DialogSignalInfo/treeSetpointsState").toByteArray();
+
+	if (signalInfoTreeSetpointsState.isEmpty() == false)
 	{
-		ui->treeSetpoints->header()->restoreState(theSettings.m_signalInfoTreeSetpointsState);
+		ui->treeSetpoints->header()->restoreState(signalInfoTreeSetpointsState);
 	}
 	else
 	{
@@ -945,7 +955,7 @@ void DialogSignalInfo::fillSchemas()
 	columns << "Schema";
 	ui->treeSchemas->setHeaderLabels(columns);
 
-	QStringList schemas = m_configController->schemasByAppSignalId(m_signal.appSignalId());
+	QStringList schemas = schemasByAppSignalId(m_signal.appSignalId());
 
 	for (const QString& schema : schemas)
 	{
@@ -973,7 +983,7 @@ void DialogSignalInfo::updateState()
 {
 	bool ok = false;
 
-	AppSignalState state = theSignals.signalState(m_signal.hash(), &ok);
+	AppSignalState state = m_appSignalManager->signalState(m_signal.hash(), &ok);
 	if (ok == false)
 	{
 		return;
@@ -1051,7 +1061,7 @@ void DialogSignalInfo::updateSetpoints()
 
 			bool ok = false;
 
-			AppSignalState stateCompare = theSignals.signalState(paramCompare.hash(), &ok);
+			AppSignalState stateCompare = m_appSignalManager->signalState(paramCompare.hash(), &ok);
 			if (ok == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::CompareToValue), "?");
@@ -1071,7 +1081,7 @@ void DialogSignalInfo::updateSetpoints()
 
 			bool ok = false;
 
-			AppSignalState stateOutput = theSignals.signalState(paramOutput.hash(), &ok);
+			AppSignalState stateOutput = m_appSignalManager->signalState(paramOutput.hash(), &ok);
 			if (ok == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::OutputValue), "?");
@@ -1290,22 +1300,9 @@ void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, i
 		return;
 	}
 
-	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
-	if (currentTab == nullptr)
-	{
-		Q_ASSERT(currentTab);
-		return;
-	}
-
 	QString schemaId = item->text(static_cast<int>(SchemasColumns::SchemaId));
 
-	if (currentTab->schemaId() != schemaId)
-	{
-		QStringList appSignals;
-		appSignals << m_signal.appSignalId();
-
-		currentTab->setSchema(schemaId, appSignals);
-	}
+	setSchema(schemaId, QStringList() << m_signal.appSignalId());
 
 	return;
 }
@@ -1355,29 +1352,29 @@ void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item,
 
 void DialogSignalInfo::on_pushButtonSetZero_clicked()
 {
-	if (m_signal.isDiscrete() == false)
+	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), false);
+	m_tuningController->writeValue(m_signal.appSignalId(), false);
 }
 
 void DialogSignalInfo::on_pushButtonSetOne_clicked()
 {
-	if (m_signal.isDiscrete() == false)
+	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), true);
+	m_tuningController->writeValue(m_signal.appSignalId(), true);
 }
 
 void DialogSignalInfo::on_pushButtonSetValue_clicked()
 {
-	if (m_signal.isAnalog() == false)
+	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
 	{
 		Q_ASSERT(false);
 		return;
@@ -1390,30 +1387,17 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 	double value = strValue.toDouble(&ok);
 	if (ok == false)
 	{
-		QMessageBox::critical(m_centralWidget, qAppName(), tr("Invalid input value!"));
+		QMessageBox::critical(this, qAppName(), tr("Invalid input value!"));
 		return;
 	}
 
-	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), value);
+	m_tuningController->writeValue(m_signal.appSignalId(), value);
 }
 
 
 void DialogSignalInfo::switchToSchema()
 {
-	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
-	if (currentTab == nullptr)
-	{
-		Q_ASSERT(currentTab);
-		return;
-	}
-
-	if (currentTab->schemaId() != m_contextMenuSchemaId)
-	{
-		QStringList appSignals;
-		appSignals << m_signal.appSignalId();
-
-		currentTab->setSchema(m_contextMenuSchemaId, appSignals);
-	}
+	setSchema(m_contextMenuSchemaId, QStringList() << m_signal.appSignalId());
 }
 
 void DialogSignalInfo::showSetpointDetails()
@@ -1424,6 +1408,6 @@ void DialogSignalInfo::showSetpointDetails()
 		return;
 	}
 
-	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_setpoints[m_contextMenuSetpointIndex]);
+	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_appSignalManager, m_setpoints[m_contextMenuSetpointIndex]);
 	d->exec();
 }

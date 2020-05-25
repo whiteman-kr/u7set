@@ -796,12 +796,12 @@
   <customwidget>
    <class>QLabelAppSignalDragAndDrop</class>
    <extends>QLabel</extends>
-   <header location="global">DialogSignalInfo.h</header>
+   <header location="global">../lib/Ui/DialogSignalInfo.h</header>
   </customwidget>
   <customwidget>
    <class>SignalFlagsWidget</class>
    <extends>QWidget</extends>
-   <header>DialogSignalInfo.h</header>
+   <header>../lib/Ui/DialogSignalInfo.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

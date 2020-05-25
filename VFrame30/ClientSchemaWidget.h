@@ -38,7 +38,7 @@ namespace VFrame30
 		ClientSchemaWidget() = delete;
 
 	public:
-		ClientSchemaWidget(SchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager);
+		ClientSchemaWidget(SchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent);
 		virtual ~ClientSchemaWidget();
 
 	protected:

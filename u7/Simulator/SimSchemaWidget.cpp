@@ -17,8 +17,9 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								 SimSchemaManager* schemaManager,
 								 VFrame30::AppSignalController* appSignalController,
 								 VFrame30::TuningController* tuningController,
-								 SimIdeSimulator* simulator) :
-	VFrame30::ClientSchemaWidget(new SimSchemaView(schemaManager), schema, schemaManager),
+                                 SimIdeSimulator* simulator,
+                                 QWidget* parent) :
+    VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
 	m_simulator(simulator)
 {
 	Q_ASSERT(m_simulator);
@@ -66,7 +67,7 @@ void SimSchemaWidget::createActions()
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
 	connect(m_zoom100Action, &QAction::triggered, this, &SimSchemaWidget::zoom100);
 
-	m_zoomToFitAction = new QAction(tr("Zoom to Fit"), this);
+	m_zoomToFitAction = new QAction(tr("Fit to Screen"), this);
 	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit the screen"));
 	m_zoomToFitAction->setEnabled(true);
 	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash));

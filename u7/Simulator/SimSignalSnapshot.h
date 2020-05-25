@@ -13,7 +13,6 @@ class SimDialogSignalSnapshot : public DialogSignalSnapshot
 public:
 	static bool showDialog(SimIdeSimulator* simuator,
 						   VFrame30::AppSignalController* appSignalController,
-						   QString projectName,
 						   SimWidget* simWidget);
 
 private:
@@ -22,6 +21,9 @@ private:
 								  QString projectName,
 								  QString softwareEquipmentId,
 								  QWidget *parent);
+
+private slots:
+	void projectUpdated();
 
 private:
 	virtual std::vector<VFrame30::SchemaDetails> schemasDetails() override;

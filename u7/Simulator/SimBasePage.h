@@ -4,7 +4,7 @@
 
 class SimLogicModulePage;
 class SimConnectionPage;
-class SimAppLogicSchemasPage;
+class SimSelectSchemaPage;
 
 class SimBasePage : public QWidget
 {
@@ -19,7 +19,7 @@ public:
 
 	static SimLogicModulePage* logicModulePage(QString lmEquipmnetId, QWidget* parent);
 	static SimConnectionPage* connectionPage(QString connectionId, QWidget* parent);
-	static SimAppLogicSchemasPage* appLogicSchemasPage(QWidget* parent);
+	static SimSelectSchemaPage* selectSchemaPage(QWidget* parent);
 
 protected:
 	QAction* m_closeAction = nullptr;

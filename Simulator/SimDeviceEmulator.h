@@ -5,6 +5,10 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <array>
+#include <cstddef>
+#include <chrono>
+#include <limits>
 #include <QObject>
 #include <QMutex>
 #include <QTimerEvent>
@@ -229,8 +233,9 @@ namespace Sim
 
 		bool runCommand(DeviceCommand& deviceCommand);
 
-		bool receiveConnectionsData(std::chrono::microseconds currentTime);
-		bool sendConnectionsData(std::chrono::microseconds currentTime);
+	public:
+		bool receiveConnectionsData(std::chrono::microseconds currentTime);	// This one is public to be called from Sim::Control
+		bool sendConnectionsData(std::chrono::microseconds currentTime);	// Actually this one is private
 
 	private:
 		// Getting data from m_plainAppLogic

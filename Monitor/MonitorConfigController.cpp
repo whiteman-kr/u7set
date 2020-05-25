@@ -761,6 +761,12 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 }
 
 
+VFrame30::SchemaDetailsSet MonitorConfigController::schemasDetailsSet() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet;
+}
+
 std::vector<VFrame30::SchemaDetails> MonitorConfigController::schemasDetails() const
 {
 	QMutexLocker l(&m_mutex);

@@ -7,7 +7,7 @@
 #include "SimSelectBuildDialog.h"
 #include "SimLogicModulePage.h"
 #include "SimConnectionPage.h"
-#include "SimAppLogicSchemasPage.h"
+#include "SimSelectSchemaPage.h"
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
@@ -15,6 +15,7 @@
 #include "../../lib/Ui/TabWidgetEx.h"
 #include "../../lib/Ui/DialogSignalSearch.h"
 #include "SimSignalSnapshot.h"
+#include "SimSignalInfo.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -137,36 +138,48 @@ void SimWidget::signalContextMenu(const QStringList signalList)
 
 void SimWidget::signalInfo(QString appSignalId)
 {
-	// Parent will be SimulatorTabPage*
+	SimSignalInfo::showDialog(appSignalId, m_simulator.get(), m_appSignalController->appSignalManager(), this);
+
+	return;
+}
+
+void SimWidget::openSchemaTabPage(QString schemaId)
+{
+	// Look for already opened schema, and activate it
 	//
-	/*QWidget* parent = this->parentWidget();
-	while (parent != nullptr)
 	{
-		if (dynamic_cast<SimulatorTabPage*>(parent) != nullptr)
+		for (int i = 0; i < m_tabWidget->count(); i++)
 		{
-			break;
+			SimSchemaPage* sp = dynamic_cast<SimSchemaPage*>(m_tabWidget->widget(i));
+
+			if (sp != nullptr && sp->schemaId() == schemaId)
+			{
+				m_tabWidget->setCurrentIndex(i);
+				return;
+			}
 		}
-
-		parent = parent->parentWidget();
 	}
-	Q_ASSERT(parent);*/
 
-	// --
+	// There is no such schema, load it and create a widget for it
 	//
-	bool ok = false;
-
-//	AppSignalParam signalParam = clientSchemaView()->appSignalController()->signalParam(appSignalId, &ok);
-//	AppSignalState signalState = clientSchemaView()->appSignalController()->signalState(appSignalId, &ok);
-
-	if (ok == true)
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId);
+	if (schema == nullptr)
 	{
-//		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
-//		dsi->show();
+		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1").arg(schemaId));
+		return;
 	}
-	else
-	{
-		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
-	}
+
+	SimSchemaPage* page = new SimSchemaPage{schema,
+											m_simulator.get(),
+											&m_schemaManager,
+											m_appSignalController,
+											m_tuningController,
+											m_tabWidget};
+
+	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+	page->simSchemaWidget()->setZoom(0, false);
 
 	return;
 }
@@ -712,9 +725,7 @@ void SimWidget::showSnapshot()
 	//    it is guarantee will not be deleted
 	//
 
-	QString project = db()->currentProject().projectName().toLower();
-
-	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, project, this);
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, this);
 
 	return;
 }
@@ -729,7 +740,7 @@ void SimWidget::showFindSignal()
 	//
 	DialogSignalSearch* dsi = new DialogSignalSearch(this, m_appSignalController->appSignalManager());
 
-	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::on_signalsUpdate);
+	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, this, &SimWidget::signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, this, &SimWidget::signalInfo);
@@ -892,51 +903,6 @@ void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 	return;
 }
 
-void SimWidget::openSchemaTabPage(QString schemaId)
-{
-	// Look for already opened schema, and activate it
-	//
-	{
-		for (int i = 0; i < m_tabWidget->count(); i++)
-		{
-			SimSchemaPage* sp = dynamic_cast<SimSchemaPage*>(m_tabWidget->widget(i));
-
-			if (sp != nullptr && sp->schemaId() == schemaId)
-			{
-				m_tabWidget->setCurrentIndex(i);
-				return;
-			}
-		}
-	}
-
-	// There is no such schema, load it and create a widget for it
-	//
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId);
-	if (schema == nullptr)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1").arg(schemaId));
-		return;
-	}
-
-	SimSchemaPage* page = new SimSchemaPage{schema,
-											m_simulator.get(),
-											&m_schemaManager,
-											m_appSignalController,
-											m_tuningController,
-	                                        m_tabWidget};
-	page->simSchemaWidget()->clientSchemaView()->setZoom(0);	// this zoom needs to prevent from blinking
-																// (at first image is large, and scroll is shown, then
-																// second zoom(0) is working and removes scroll), just
-																// two setZoom's are needed here
-
-	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
-	m_tabWidget->setCurrentIndex(tabIndex);
-
-	page->simSchemaWidget()->clientSchemaView()->setZoom(0);	// Fit to screen
-
-	return;
-}
-
 void SimWidget::openCodeTabPage(QString lmEquipmentId)
 {
 	auto lm = m_simulator->logicModule(lmEquipmentId);
@@ -1002,7 +968,7 @@ void SimWidget::openAppSchemasTabPage()
 
 	// Check if such SimulatorControlPage already exists
 	//
-	SimAppLogicSchemasPage* cp = SimBasePage::appLogicSchemasPage(m_tabWidget);
+	SimSelectSchemaPage* cp = SimBasePage::selectSchemaPage(m_tabWidget);
 
 	if (cp != nullptr)
 	{
@@ -1022,7 +988,7 @@ void SimWidget::openAppSchemasTabPage()
 
 	// Create new SimConnectionPage
 	//
-	SimAppLogicSchemasPage* page = new SimAppLogicSchemasPage{m_simulator.get(), m_tabWidget};
+	SimSelectSchemaPage* page = new SimSelectSchemaPage{m_simulator.get(), m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(page, tr("AppLogic Schemas"));
 	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimAppLogicSchemas.svg"}});
@@ -1031,8 +997,7 @@ void SimWidget::openAppSchemasTabPage()
 
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-
-	connect(page, &SimAppLogicSchemasPage::openSchemaRequest, this, &SimWidget::openSchemaTabPage);
+	connect(page, &SimSelectSchemaPage::openSchemaTabPage, this, &SimWidget::openSchemaTabPage);
 
 	return;
 }

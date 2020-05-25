@@ -2,7 +2,7 @@
 #include "MonitorSchemaWidget.h"
 #include "MonitorView.h"
 #include "MonitorSchemaManager.h"
-#include "DialogSignalInfo.h"
+#include "MonitorSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
@@ -20,10 +20,12 @@
 MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
-										 VFrame30::TuningController* tuningController) :
-	VFrame30::ClientSchemaWidget(new MonitorView(schemaManager, appSignalController, tuningController),
+										 VFrame30::TuningController* tuningController,
+										 QWidget* parent) :
+	VFrame30::ClientSchemaWidget(new MonitorView{schemaManager, appSignalController, tuningController},
 								 schema,
-								 schemaManager)
+								 schemaManager,
+								 parent)
 {
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
@@ -278,7 +280,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	DialogSignalInfo::showDialog(appSignalId,
+	MonitorSignalInfo::showDialog(appSignalId,
 	                             theMonitorMainWindow->configController(),
 	                             theMonitorMainWindow->tcpSignalClient(),
 	                             theMonitorMainWindow->monitorCentralWidget());

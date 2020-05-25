@@ -30,7 +30,8 @@ public:
 					SimSchemaManager* schemaManager,
 					VFrame30::AppSignalController* appSignalController,
 					VFrame30::TuningController* tuningController,
-					SimIdeSimulator* simulator);
+					SimIdeSimulator* simulator,
+					QWidget* parent);
 	virtual ~SimSchemaWidget();
 
 protected:

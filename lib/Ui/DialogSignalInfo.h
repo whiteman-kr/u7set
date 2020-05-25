@@ -1,26 +1,24 @@
 #ifndef DIALOGSIGNALINFO_H
 #define DIALOGSIGNALINFO_H
 
+#include "../VFrame30/TuningController.h"
 #include "../lib/AppSignalManager.h"
-#include "MonitorConfigController.h"
-#include "TcpSignalClient.h"
 
 namespace Ui {
 	class DialogSignalInfo;
 }
-
-
-class MonitorCentralWidget;
 
 class DialogSetpointDetails : public QDialog
 {
 	Q_OBJECT
 
 public:
-	DialogSetpointDetails(QWidget* parent, std::shared_ptr<Comparator> comparator);
+	DialogSetpointDetails(QWidget* parent, IAppSignalManager* appSignalManager, std::shared_ptr<Comparator> comparator);
 
 private:
 	std::shared_ptr<Comparator> m_comparator;
+
+	IAppSignalManager* m_appSignalManager = nullptr;
 
 };
 
@@ -71,15 +69,17 @@ class DialogSignalInfo : public QDialog
 {
 	Q_OBJECT
 
-public:
-	static bool showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget);
 
 public slots:
 	void onSignalParamAndUnitsArrived();
 
-private:
-	DialogSignalInfo(const AppSignalParam& signal, MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
-	~DialogSignalInfo();
+protected:
+	DialogSignalInfo(const AppSignalParam& signal, IAppSignalManager* appSignalManager, VFrame30::TuningController* tuningController, bool tuningEnabled, QWidget* parent);
+	virtual ~DialogSignalInfo();
+
+	static DialogSignalInfo* dialogRegistered(const QString& appSignalId);
+	static void registerDialog(const QString& appSignalId, DialogSignalInfo* dialog);
+	static void unregisterDialog(const QString& appSignalId);
 
 private:
 	enum class SchemasColumns
@@ -114,8 +114,13 @@ private slots:
 
 
 protected:
+	virtual void showEvent(QShowEvent* e) override;
 	virtual void timerEvent(QTimerEvent* event) override;
 	void mousePressEvent(QMouseEvent* event);
+
+
+	virtual QStringList schemasByAppSignalId(const QString& appSignalId) = 0;
+	virtual void setSchema(QString schemaId, QStringList highlightIds) = 0;
 
 private:
 	void fillSignalInfo();
@@ -132,15 +137,14 @@ private:
 
 	QString signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
 
-
-
 private:
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
 
 	Ui::DialogSignalInfo *ui;
 
-	MonitorConfigController* m_configController = nullptr;
-	MonitorCentralWidget* m_centralWidget = nullptr;
+	IAppSignalManager* m_appSignalManager = nullptr;
+
+	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
 
 	AppSignalParam m_signal;
 
@@ -153,6 +157,8 @@ private:
 
 	QString m_contextMenuSchemaId;
 	int m_contextMenuSetpointIndex = -1;
+
+	bool m_firstShow = true;
 };
 
 

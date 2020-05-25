@@ -2,6 +2,7 @@
 #include "MonitorSchemaManager.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../lib/Ui/SchemaListWidget.h"
 
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
@@ -23,16 +24,14 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 	setTabsClosable(false);
 	setMovable(false);
 
-	// On start create an empty MonitorSchema and add a tab with this schema
-	//
-	addSchemaTabPage("EMPTYSCHEMA", {});
-
 	// --
 	//
 	connect(this->tabBar(), &QTabBar::tabCloseRequested, this, &MonitorCentralWidget::slot_tabCloseRequested);
 	connect(this, &MonitorCentralWidget::currentChanged, this, &MonitorCentralWidget::slot_tabPageChanged);
 
 	connect(m_schemaManager, &VFrame30::SchemaManager::schemasWereReseted, this, &MonitorCentralWidget::slot_resetSchema);
+
+	m_eventLoopTimerId = startTimer(1);
 
 	return;
 }
@@ -52,6 +51,30 @@ VFrame30::TuningController* MonitorCentralWidget::tuningController()
 	return m_tuningController;
 }
 
+void MonitorCentralWidget::timerEvent(QTimerEvent* event)
+{
+	if (m_eventLoopTimerId != 0)
+	{
+		m_eventLoopTimerCounter ++;
+
+		if (event->timerId() == m_eventLoopTimerId && m_eventLoopTimerCounter > 10)
+		{
+			killTimer(m_eventLoopTimerId);
+			m_eventLoopTimerId = 0;
+
+			// Create first tab here
+			// Problem - we set zoom to FitToScreen, for it we need to have window geometry
+			// but in constructor it is not set correctly, and it changes when message loop starts/
+			// So we have to process several messages in message loop and only after that
+			// we can add new tab page
+			//
+			slot_newSchemaTab("EMPTY");
+		}
+	}
+
+	return;
+}
+
 int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash& variables)
 {
 	std::shared_ptr<VFrame30::Schema> tabSchema = m_schemaManager->schema(schemaId);
@@ -66,7 +89,8 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
 																m_schemaManager,
 																m_appSignalController,
-																m_tuningController);
+																m_tuningController,
+																this);
 	schemaWidget->clientSchemaView()->setVariables(variables);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
@@ -81,7 +105,72 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 	}
 
 	emit signal_actionCloseTabUpdated(count() > 1);
+
 	return index;
+}
+
+void MonitorCentralWidget::slot_schemaList()
+{
+	// Activate tab it schema list already opened
+	//
+	for (int i = 0; i < this->count(); i++)
+	{
+		SchemaListWidget* w = dynamic_cast<SchemaListWidget*>(this->widget(i));
+		if (w != nullptr)
+		{
+			setCurrentIndex(i);
+			return;
+		}
+	}
+
+	// Schemal list is not opened yet, create it and add to tab control
+	//
+	SchemaListWidget* w = new SchemaListWidget{this};
+	w->setDetails(m_schemaManager->monitorConfigController()->schemasDetailsSet());
+
+	connect(w, &SchemaListWidget::openSchemaRequest, this, &MonitorCentralWidget::slot_newSchemaTab);
+
+	connect(m_schemaManager->monitorConfigController(), &MonitorConfigController::configurationUpdate, w,
+			[this, w]()
+			{
+				w->setDetails(m_schemaManager->monitorConfigController()->schemasDetailsSet());
+			});
+
+	int index = this->addTab(w, tr("Schemas"));
+
+	if (count() > 1 && tabsClosable() == false)
+	{
+		setTabsClosable(true);
+		setMovable(true);
+	}
+
+	setCurrentIndex(index);
+
+	emit signal_actionCloseTabUpdated(count() > 1);
+
+	return;
+}
+
+void MonitorCentralWidget::slot_newSchemaTab(QString schemaId)
+{
+	int tabIndex = addSchemaTabPage(schemaId, {});
+
+	// Switch to the new tab
+	//
+	if (tabIndex != -1)
+	{
+		setCurrentIndex(tabIndex);
+		emit signal_schemaChanged(schemaId);
+
+		MonitorSchemaWidget* newTab = currentTab();
+		Q_ASSERT(newTab);
+
+		newTab->clientSchemaView()->setZoom(0, false);
+
+		newTab->emitHistoryChanged();
+	}
+
+	return;
 }
 
 void MonitorCentralWidget::slot_newTab()
@@ -90,11 +179,32 @@ void MonitorCentralWidget::slot_newTab()
 
 	if (curTabWidget == nullptr)
 	{
-		Q_ASSERT(curTabWidget);
-		return;
-	}
+		// If Current tab not schema widget,
+		// then create new empty or start schema widget
+		//
+		QString schemaId = m_schemaManager->monitorConfigController()->configurationStartSchemaId();
 
-	slot_newSameTab(curTabWidget);
+		int tabIndex = addSchemaTabPage(schemaId, {});
+
+		// Switch to the new tab
+		//
+		if (tabIndex != -1)
+		{
+			setCurrentIndex(tabIndex);
+			emit signal_schemaChanged(schemaId);
+
+			MonitorSchemaWidget* newTab = currentTab();
+			Q_ASSERT(newTab);
+
+			newTab->emitHistoryChanged();
+		}
+	}
+	else
+	{
+		// Duplicate tab
+		//
+		slot_newSameTab(curTabWidget);
+	}
 
 	// Set zoom for new tab
 	//
@@ -109,8 +219,7 @@ void MonitorCentralWidget::slot_newTab()
 
 void MonitorCentralWidget::slot_closeCurrentTab()
 {
-	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
-
+	QWidget* curTabWidget = currentWidget();
 	if (curTabWidget == nullptr)
 	{
 		Q_ASSERT(curTabWidget);
@@ -248,11 +357,9 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 		return;
 	}
 
-	MonitorSchemaWidget* tabWidget = dynamic_cast<MonitorSchemaWidget*>(widget(index));
-
+	QWidget* tabWidget = widget(index);
 	if (tabWidget == nullptr)
 	{
-		Q_ASSERT(tabWidget);
 		return;
 	}
 
@@ -291,7 +398,8 @@ void MonitorCentralWidget::slot_resetSchema()
 		MonitorSchemaWidget* tabPage = dynamic_cast<MonitorSchemaWidget*>(widget(i));
 		if (tabPage == nullptr)
 		{
-			Q_ASSERT(tabPage);
+			// it can be schema list
+			//
 			continue;
 		}
 
@@ -360,7 +468,7 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 	return;
 }
 
-void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
+void MonitorCentralWidget::slot_closeTab(QWidget* tabWidget)
 {
 	if (tabWidget == nullptr)
 	{
@@ -403,14 +511,32 @@ void MonitorCentralWidget::slot_schemaChanged(VFrame30::ClientSchemaWidget* tabW
 	return;
 }
 
-void MonitorCentralWidget::slot_tabPageChanged(int /*index*/)
+void MonitorCentralWidget::slot_tabPageChanged(int index)
 {
-	MonitorSchemaWidget* tab = currentTab();
+	MonitorSchemaWidget* schemaWidgetTab = currentTab();
 
-	if (tab != nullptr)
+	emit signal_tabPageChanged(schemaWidgetTab != nullptr);	// This signal is to enable/disable QActions
+
+	// Show/hide close button for inactive tab bar
+	//
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, this->tabBar());
+
+	for (int i = 0; i < this->count(); i++)
 	{
-		emit signal_schemaChanged(tab->schemaId());
-		tab->emitHistoryChanged();
+		QWidget* w = this->tabBar()->tabButton(i, closeSide);
+
+		if (w != nullptr)
+		{
+			w->setVisible(i == index);
+		}
+	}
+
+	// --
+	//
+	if (schemaWidgetTab != nullptr)
+	{
+		emit signal_schemaChanged(schemaWidgetTab->schemaId());
+		schemaWidgetTab->emitHistoryChanged();
 	}
 
 	return;

@@ -39,6 +39,8 @@ namespace Sim
 		//
 		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, qint64 workcycle,  bool reset);				// Start running one cycle
 
+		bool receiveConnectionsData(std::chrono::microseconds currentTime);
+
 		// --
 		//
 	protected:
