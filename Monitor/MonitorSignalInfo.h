@@ -20,6 +20,9 @@ private:
 					  bool tuningEnabled,
 					  MonitorCentralWidget* centralWidget);
 
+private slots:
+	void onSignalParamAndUnitsArrived();
+
 private:
 	virtual QStringList schemasByAppSignalId(const QString& appSignalId) override;
 	virtual void setSchema(QString schemaId, QStringList highlightIds) override;

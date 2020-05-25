@@ -3,6 +3,7 @@
 
 #include "../lib/Ui/DialogSignalInfo.h"
 #include "../../VFrame30/AppSignalController.h"
+#include "SimAppSignalManager.h"
 
 class SimWidget;
 class SimIdeSimulator;
@@ -13,14 +14,16 @@ class SimSignalInfo : public DialogSignalInfo
 public:
 	static bool showDialog(QString appSignalId,
 						   SimIdeSimulator* simuator,
-						   IAppSignalManager* appSignalManager,
 						   SimWidget* simWidget);
 
 private:
 	SimSignalInfo(const AppSignalParam& signal,
-					  SimIdeSimulator* simuator,
-					  IAppSignalManager* appSignalManager,
-					  SimWidget* simWidget);
+				  std::optional<Signal> signalExt,
+				  SimIdeSimulator* simuator,
+				  SimWidget* simWidget);
+
+private slots:
+	void onSignalParamAndUnitsArrived();
 
 signals:
 	void openSchema(QString schemaId);

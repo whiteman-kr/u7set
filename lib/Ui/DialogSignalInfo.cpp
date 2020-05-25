@@ -182,13 +182,13 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 	QPainter painter(this);
 
+	QFont font = painter.font();
+	font.setPointSizeF(font.pointSizeF() * 1.25);
+	painter.setFont(font);
+
 	static QBrush alertBrush(QColor(192, 0, 0));
 	static QColor noAlertBrush(Qt::darkGreen);
 	static QColor noFlagBrush(Qt::lightGray);
-
-	QFont font = painter.font();
-	font.setPixelSize(14);
-	painter.setFont(font);
 
 	int flagNo = 0;
 
@@ -382,43 +382,8 @@ int SignalFlagsWidget::point2Flag(const QPoint& pt)
 
 std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
-
-void DialogSignalInfo::onSignalParamAndUnitsArrived()
-{
-	// Refresh signal param inself
-
-	bool ok = false;
-
-	AppSignalParam newSignal = m_appSignalManager->signalParam(m_signal.hash(), &ok);
-
-	if (ok == true)
-	{
-		m_signal = newSignal;
-	}
-	else
-	{
-		//Signal was deleted, keep its #appSignalId and Hash
-		//
-		AppSignalParam oldSignal = m_signal;
-
-		m_signal = AppSignalParam();
-		m_signal.setAppSignalId(oldSignal.appSignalId());
-		m_signal.setHash(oldSignal.hash());
-
-	}
-
-	// Fill signal information
-
-	fillSignalInfo();
-
-	fillProperties();
-
-	fillSetpoints();
-
-	fillSchemas();
-}
-
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
+								   std::optional<Signal> signalExt,
 								   IAppSignalManager* appSignalManager,
 								   VFrame30::TuningController* tuningController,
 								   bool tuningEnabled,
@@ -426,6 +391,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal),
+	m_signalExt(signalExt),
 	m_appSignalManager(appSignalManager),
 	m_tuningController(tuningController)	// it can be nullptr
 {
@@ -454,7 +420,23 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	//
 
 	ui->tabWidget->tabBar()->setExpanding(true);
-	ui->tabWidget->setStyleSheet("QTabBar::tab { min-width: 100px; height: 28;}");
+
+	// Setup time labels
+
+	QDateTime time = QDateTime::currentDateTime();
+	ui->labelServerTime->setText(time.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelPlantTime->setText(time.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+
+	// Setup tree controls
+
+	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
+
+	ui->treeSetpoints->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeSetpoints, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSetpointsContextMenu);
+
+	ui->treeSchemas->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeSchemas, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSchemaContextMenu);
 
 	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
 	// tu support Drag and Drop Operation (drag part)
@@ -468,15 +450,28 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 
 	if (tuningEnabled == false || m_signal.enableTuning() == false)
 	{
-		for (int i = 0; i < ui->tabWidget->count(); i++)
-		{
-			if (ui->tabWidget->tabText(i) == tr("Tuning"))
-			{
-				ui->tabWidget->removeTab(i);
-				break;
-			}
-		}
+		hideTabPage("Tuning");
 	}
+
+	if (m_signalExt.has_value() == false)
+	{
+		hideTabPage("Extended");
+	}
+
+	// Set minimum size to 7x5 inches
+
+	double minSizeX = 7.0;
+	double minSizeY = 4.0;
+
+	double dpix = logicalDpiX();
+	double dpiy = logicalDpiY();
+
+	double sx = minSizeX * dpix;
+	double sy = minSizeY * dpiy;
+
+	setMinimumSize(static_cast<int>(sx), static_cast<int>(sy));
+
+	//
 
 	UiTools::adjustDialogPlacement(this);
 
@@ -529,6 +524,55 @@ void DialogSignalInfo::unregisterDialog(const QString& appSignalId)
 	else
 	{
 		m_dialogSignalInfoMap.erase(it);
+	}
+}
+
+AppSignalParam DialogSignalInfo::signal() const
+{
+	return m_signal;
+}
+
+void DialogSignalInfo::setSignal(const AppSignalParam& signal)
+{
+	m_signal = signal;
+}
+
+std::optional<Signal> DialogSignalInfo::signalExt() const
+{
+	return m_signalExt;
+}
+
+void DialogSignalInfo::setSignalExt(const std::optional<Signal>& signalExt)
+{
+	m_signalExt = signalExt;
+}
+
+void DialogSignalInfo::updateStaticData()
+{
+	// Fill signal information
+
+	fillSignalInfo();
+
+	fillProperties();
+
+	fillExtProperties();
+
+	fillSetpoints();
+
+	fillSchemas();
+
+	return;
+}
+
+void DialogSignalInfo::hideTabPage(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			ui->tabWidget->removeTab(i);
+			break;
+		}
 	}
 }
 
@@ -639,15 +683,9 @@ void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
 
 	// Fill signal information
 
-	fillSignalInfo();
+	updateStaticData();
 
-	fillProperties();
-
-	fillSetpoints();
-
-	fillSchemas();
-
-	updateData();
+	updateDynamicData();
 
 	return;
 }
@@ -658,7 +696,7 @@ void DialogSignalInfo::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
-		updateData();
+		updateDynamicData();
 	}
 }
 
@@ -821,11 +859,203 @@ void DialogSignalInfo::fillProperties()
 		itemGroup7->setExpanded(true);
 	}
 
-
-	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
-
 	ui->treeProperties->resizeColumnToContents(0);
+}
+
+void DialogSignalInfo::fillExtProperties()
+{
+	ui->treePropertiesExt->clear();
+
+	if (m_signalExt.has_value() == false)
+	{
+		return;
+	}
+
+	// Fill properties list
+	//
+	QStringList columns;
+	columns << "Caption";
+	columns << "Value";
+	ui->treePropertiesExt->setHeaderLabels(columns);
+
+	Signal& signalExt = m_signalExt.value();
+
+	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
+
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << signalExt.appSignalID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << signalExt.equipmentID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("LmEquipmentID") << signalExt.lmEquipmentID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("BusTypeID") << signalExt.busTypeID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("ExcludeFromBuild") << (signalExt.excludeFromBuild() ? tr("Yes") : tr("No")) ));
+
+	if (m_signal.isAnalog())
+	{
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << signalExt.unit()));
+	}
+
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Tags") << signalExt.tags().join(' ')));
+
+	ui->treePropertiesExt->addTopLevelItem(itemGroup1);
+	itemGroup1->setExpanded(true);
+
+	QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList() << tr("Format"));
+
+	if (m_signal.isAnalog())
+	{
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("ByteOrder") << E::valueToString<E::ByteOrder>(signalExt.byteOrder())));
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("DataSize") << QString::number(signalExt.dataSize())));
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("DataFormat") << E::valueToString<E::DataFormat>(signalExt.dataFormat())));
+	}
+
+	ui->treePropertiesExt->addTopLevelItem(itemGroup2);
+	itemGroup2->setExpanded(true);
+
+	if (m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
+
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(signalExt.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Acquire") << (signalExt.acquire() ? tr("Yes") : tr("No")) ));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Archive") << (signalExt.archive() ? tr("Yes") : tr("No")) ));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(signalExt.coarseAperture(), 'f', signalExt.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(signalExt.fineAperture(), 'f', signalExt.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("AdaptiveAperture") << (signalExt.adaptiveAperture() ? tr("Yes") : tr("No")) ));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup3);
+		itemGroup3->setExpanded(true);
+	}
+
+	if (m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup4 = new QTreeWidgetItem(QStringList() << tr("Limits"));
+
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowADC") << QString::number(signalExt.lowADC())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighADC") << QString::number(signalExt.highADC())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowDAC") << QString::number(signalExt.lowDAC())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighDAC") << QString::number(signalExt.highDAC())));
+
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowEngineeringUnits") << QString::number(signalExt.lowEngineeringUnits(), 'f', signalExt.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighEngineeringUnits")<<QString::number(signalExt.highEngineeringUnits(), 'f', signalExt.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowValidRange")<<QString::number(signalExt.lowValidRange(), 'f', signalExt.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighValidRange")<<QString::number(signalExt.highValidRange(), 'f', signalExt.decimalPlaces())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup4);
+		itemGroup4->setExpanded(true);
+	}
+
+	if (m_signal.isInput() && m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup5 = new QTreeWidgetItem(QStringList() << tr("Input"));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputLowLimit") << QString::number(signalExt.electricLowLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputUnitID") << QString::number(signalExt.electricUnit())));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("rload_Ohm") << QString::number(signalExt.rload_Ohm(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("r0_Ohm") << QString::number(signalExt.r0_Ohm(), 'f', signalExt.decimalPlaces())));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("SensorType") << E::valueToString<E::SensorType>(signalExt.sensorType())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime")<<QString::number(signalExt.filteringTime(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance")<<QString::number(signalExt.spreadTolerance(), 'f', signalExt.decimalPlaces())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup5);
+		itemGroup5->setExpanded(true);
+	}
+
+	/*if ((m_signal.isInput() || m_signal.isOutput()) && m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup5 = new QTreeWidgetItem(QStringList() << tr("Electric"));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("ElectricLowLimit") << QString::number(signalExt.electricLowLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("ElectricHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("ElectricUnit") << E::valueToString<E::ElectricUnit>(signalExt.electricUnit())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup5);
+		itemGroup5->setExpanded(true);
+	}*/
+
+
+	if (m_signal.isOutput() && m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup6 = new QTreeWidgetItem(QStringList()<<tr("Output"));
+
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputLowLimit") << QString::number(signalExt.electricLowLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputUnitID") << QString::number(signalExt.electricUnit())));
+
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("SensorType") << E::valueToString<E::SensorType>(signalExt.sensorType())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputMode") << E::valueToString<E::OutputMode>(signalExt.outputMode())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup6);
+		itemGroup6->setExpanded(true);
+	}
+
+	if (m_signal.enableTuning())
+	{
+		QTreeWidgetItem* itemGroup7 = new QTreeWidgetItem(QStringList()<<tr("Tuning"));
+
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(signalExt.enableTuning() ? tr("Yes") : tr("No"))));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningDefaultValue")<<signalExt.tuningDefaultValue().toString()));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningLowBound")<<signalExt.tuningLowBound().toString()));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningHighBound")<<signalExt.tuningHighBound().toString()));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup7);
+		itemGroup7->setExpanded(true);
+	}
+
+	{
+		QTreeWidgetItem* itemGroup = new QTreeWidgetItem(QStringList()<<tr("Specific properties"));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("specPropStruct") << signalExt.specPropStruct()));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup);
+		itemGroup->setExpanded(true);
+	}
+
+	{
+		QTreeWidgetItem* itemGroup = new QTreeWidgetItem(QStringList()<<tr("Signal fields from database"));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ID") << QString::number(signalExt.ID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("signalGroupID") << QString::number(signalExt.signalGroupID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("signalInstanceID") << QString::number(signalExt.signalInstanceID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("changesetID") << QString::number(signalExt.changesetID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("checkedOut") << (signalExt.checkedOut() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("userID") << QString::number(signalExt.userID())));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("created") << signalExt.created().toString("yyyy-MM-dd HH:mm:ss")));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("deleted") << (signalExt.deleted() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceCreated") << signalExt.instanceCreated().toString("yyyy-MM-dd HH:mm:ss")));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceAction") << signalExt.instanceAction().text()));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup);
+		itemGroup->setExpanded(true);
+	}
+
+	{
+		QTreeWidgetItem* itemGroup = new QTreeWidgetItem(QStringList()<<tr("Compile-time Properties"));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ioBufAddr") << signalExt.ioBufAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("tuningAddr") << signalExt.tuningAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("tuningAbsAddr") << signalExt.tuningAbsAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ualAddr") << signalExt.ualAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ualAddrIsValid") << (signalExt.ualAddrIsValid() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regBufAddr") << signalExt.regBufAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regValueAddr") << signalExt.regValueAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regValidityAddr") << signalExt.regValidityAddr().toString()));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("lmRamAccess") << E::valueToString<E::LogicModuleRamAccess>(signalExt.lmRamAccess())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regValueAddrStr") << signalExt.regValueAddrStr()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("needConversion") << (signalExt.needConversion() ? tr("Yes") : tr("No")) ));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("isConst") << (signalExt.isConst() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("constValue") << QString::number(signalExt.constValue(), 'f', signalExt.decimalPlaces())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup);
+		itemGroup->setExpanded(true);
+	}
+
+	ui->treePropertiesExt->resizeColumnToContents(0);
+
 }
 
 void DialogSignalInfo::fillSetpoints()
@@ -926,9 +1156,6 @@ void DialogSignalInfo::fillSetpoints()
 	ui->treeSetpoints->setSortingEnabled(true);
 	ui->treeSetpoints->sortByColumn(static_cast<int>(SetpointsColumns::CompareToValue), Qt::AscendingOrder);
 
-	ui->treeSetpoints->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeSetpoints, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSetpointsContextMenu);
-
 	// Adjust column width
 	//
 	QSettings settings;
@@ -968,12 +1195,9 @@ void DialogSignalInfo::fillSchemas()
 
 	ui->treeSchemas->setSortingEnabled(true);
 	ui->treeSchemas->sortByColumn(0, Qt::AscendingOrder);
-
-	ui->treeSchemas->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeSchemas, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSchemaContextMenu);
 }
 
-void DialogSignalInfo::updateData()
+void DialogSignalInfo::updateDynamicData()
 {
 	updateState();
 	updateSetpoints();
@@ -1020,15 +1244,11 @@ void DialogSignalInfo::updateState()
 		ui->labelValueTuning->setText(strValue);
 	}
 
-	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
 	QDateTime localTime = state.m_time.local.toDateTime();
 	QDateTime plaitTime = state.m_time.plant.toDateTime();
 
-
-	//ui->editSystemTime->setText(systemTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->editLocalTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->editPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-
+	ui->labelServerTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 
 	ui->widgetFlags->updateControl(state.m_flags);
 

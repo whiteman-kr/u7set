@@ -1,8 +1,10 @@
 #ifndef DIALOGSIGNALINFO_H
 #define DIALOGSIGNALINFO_H
 
+#include <optional>
 #include "../VFrame30/TuningController.h"
 #include "../lib/AppSignalManager.h"
+#include "../lib/Signal.h"
 
 namespace Ui {
 	class DialogSignalInfo;
@@ -69,17 +71,23 @@ class DialogSignalInfo : public QDialog
 {
 	Q_OBJECT
 
-
-public slots:
-	void onSignalParamAndUnitsArrived();
-
 protected:
-	DialogSignalInfo(const AppSignalParam& signal, IAppSignalManager* appSignalManager, VFrame30::TuningController* tuningController, bool tuningEnabled, QWidget* parent);
+	DialogSignalInfo(const AppSignalParam& signal, std::optional<Signal> signalExt, IAppSignalManager* appSignalManager, VFrame30::TuningController* tuningController, bool tuningEnabled, QWidget* parent);
 	virtual ~DialogSignalInfo();
 
 	static DialogSignalInfo* dialogRegistered(const QString& appSignalId);
 	static void registerDialog(const QString& appSignalId, DialogSignalInfo* dialog);
 	static void unregisterDialog(const QString& appSignalId);
+
+	AppSignalParam signal() const;
+	void setSignal(const AppSignalParam& signal);
+
+	std::optional<Signal> signalExt() const;
+	void setSignalExt(const std::optional<Signal>& signalExt);
+
+	void updateStaticData();
+
+	void hideTabPage(const QString& tabName);
 
 private:
 	enum class SchemasColumns
@@ -125,10 +133,11 @@ protected:
 private:
 	void fillSignalInfo();
 	void fillProperties();
+	void fillExtProperties();
 	void fillSetpoints();
 	void fillSchemas();
 
-	void updateData();
+	void updateDynamicData();
 
 	void updateState();
 	void updateSetpoints();
@@ -137,16 +146,18 @@ private:
 
 	QString signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
 
-private:
-	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
-
+protected:
 	Ui::DialogSignalInfo *ui;
 
 	IAppSignalManager* m_appSignalManager = nullptr;
 
-	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
-
+private:
 	AppSignalParam m_signal;
+	std::optional<Signal> m_signalExt;
+
+	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
+
+	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
 
 	std::vector<std::shared_ptr<Comparator>> m_setpoints;
 

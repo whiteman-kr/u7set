@@ -2,6 +2,7 @@
 #include "MonitorCentralWidget.h"
 #include "TcpSignalClient.h"
 #include "../lib/Ui/UiTools.h"
+#include "ui_DialogSignalInfo.h"
 
 bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget)
 {
@@ -30,7 +31,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController*
 														   tuningEnabled,
 														   centralWidget);
 
-			connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, msi, &DialogSignalInfo::onSignalParamAndUnitsArrived);
+			connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
 
 			msi->show();
 			msi->raise();
@@ -53,7 +54,7 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 IAppSignalManager* appSignalManager,
 									 VFrame30::TuningController* tuningController, bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
-	DialogSignalInfo(signal, appSignalManager, tuningController, tuningEnabled, centralWidget),
+	DialogSignalInfo(signal, {}, appSignalManager, tuningController, tuningEnabled, centralWidget),
 	m_configController(configController),
 	m_centralWidget(centralWidget)
 {
@@ -64,7 +65,40 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 		return;
 	}
 
+	// Modify UI to Monitor requirements
+	//
+	hideTabPage("Action");
+
+	return;
 }
+
+void MonitorSignalInfo::onSignalParamAndUnitsArrived()
+{
+	// Refresh signal param inself
+
+	bool ok = false;
+
+	AppSignalParam newSignal = m_appSignalManager->signalParam(signal().hash(), &ok);
+
+	if (ok == false)
+	{
+		//Signal was deleted, keep its #appSignalId and Hash
+		//
+		AppSignalParam oldSignal = signal();
+
+		newSignal = AppSignalParam();
+		newSignal.setAppSignalId(oldSignal.appSignalId());
+		newSignal.setHash(oldSignal.hash());
+
+	}
+
+	setSignal(newSignal);
+
+	updateStaticData();
+
+	return;
+}
+
 
 QStringList MonitorSignalInfo::schemasByAppSignalId(const QString& appSignalId)
 {

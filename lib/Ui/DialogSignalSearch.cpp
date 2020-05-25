@@ -399,7 +399,6 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	mainLayout->addLayout(hl);
 	mainLayout->addWidget(m_tableView);
 	mainLayout->addLayout(bl);
-	mainLayout->setContentsMargins(5, 5, 5, 5);
 
 	setLayout(mainLayout);
 

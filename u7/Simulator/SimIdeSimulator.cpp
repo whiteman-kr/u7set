@@ -21,6 +21,14 @@ bool SimIdeSimulator::load(QString buildPath)
 	return ok;
 }
 
+void SimIdeSimulator::clear()
+{
+	m_schemaDetails.clear();
+	Sim::Simulator::clear();
+
+	return;
+}
+
 const VFrame30::SchemaDetailsSet& SimIdeSimulator::schemaDetails() const
 {
 	return m_schemaDetails;

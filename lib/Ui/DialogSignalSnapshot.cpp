@@ -1277,69 +1277,42 @@ void DialogSignalSnapshot::setupUi()
 {
 	QGroupBox* groupBox = new QGroupBox(tr("Filter"));
 
-	//typeLayout
+	//Filter layout
 
-	QGridLayout* typeLayout = new QGridLayout();
-	typeLayout->setContentsMargins(1, 1, 1, 1);
+	QGridLayout* filterLayout = new QGridLayout(groupBox);
 
-	typeLayout->addWidget(new QLabel(tr("Signal Type")), 0, 0);
+	filterLayout->addWidget(new QLabel(tr("Signal Type")), 0, 0);
 
 	m_typeCombo = new QComboBox();
 	connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_typeCombo_currentIndexChanged);
-	typeLayout->addWidget(m_typeCombo, 0, 1);
+	filterLayout->addWidget(m_typeCombo, 0, 1);
 
-	typeLayout->addWidget(new QLabel(tr("Schema")), 1, 0);
+	filterLayout->addWidget(new QLabel(tr("Schema")), 1, 0);
 
 	m_schemaCombo = new QComboBox();
+	m_schemaCombo->setMinimumContentsLength(30);
 	connect(m_schemaCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_schemaCombo_currentIndexChanged);
-	typeLayout->addWidget(m_schemaCombo, 1, 1);
+	filterLayout->addWidget(m_schemaCombo, 1, 1);
 
-	m_schemaCombo->setMinimumWidth(160);
-
-	//maskLayout
-
-	QHBoxLayout* maskLayout = new QHBoxLayout();
-	maskLayout->setContentsMargins(0, 0, 0, 0);
-
-	maskLayout->addWidget(new QLabel(tr("Mask")));
+	filterLayout->addWidget(new QLabel(tr("Mask")), 0, 2);
 
 	m_comboMaskType = new QComboBox();
 	connect(m_comboMaskType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_comboMaskType_currentIndexChanged);
-	maskLayout->addWidget(m_comboMaskType);
+	filterLayout->addWidget(m_comboMaskType, 0, 3);
 
 	m_editMask = new QLineEdit();
 	connect(m_editMask, &QLineEdit::returnPressed, this, &DialogSignalSnapshot::on_editMask_returnPressed);
-	maskLayout->addWidget(m_editMask);
+	filterLayout->addWidget(m_editMask, 0, 4);
 
-	//tagsLayout
-
-	QHBoxLayout* tagsLayout = new QHBoxLayout();
-	tagsLayout->setContentsMargins(0, 0, 0, 0);
-
-	tagsLayout->addWidget(new QLabel(tr("Tags")));
+	filterLayout->addWidget(new QLabel(tr("Tags")), 1, 2);
 
 	m_editTags = new QLineEdit();
 	connect(m_editTags, &QLineEdit::returnPressed, this, &DialogSignalSnapshot::on_editTags_returnPressed);
-	tagsLayout->addWidget(m_editTags);
-
-	//maskTagsLayout
-
-	QVBoxLayout* maskTagsLayout = new QVBoxLayout();
-	tagsLayout->setContentsMargins(0, 0, 0, 0);
-	maskTagsLayout->addLayout(maskLayout);
-	maskTagsLayout->addLayout(tagsLayout);
-
-	//groupLayout
-
-	QHBoxLayout* groupLayout = new QHBoxLayout(groupBox);
-	groupLayout->setContentsMargins(2, 2, 2, 2);
-	groupLayout->addLayout(typeLayout);
-	groupLayout->addLayout(maskTagsLayout);
+	filterLayout->addWidget(m_editTags, 1, 3, 1, 2);
 
 	// Export/Print/Fixate
 
 	QHBoxLayout* exPrintLayout = new QHBoxLayout();
-	tagsLayout->setContentsMargins(0, 0, 0, 0);
 
 	QPushButton* b = new QPushButton(tr("Export..."));
 	connect(b, &QPushButton::clicked, this, &DialogSignalSnapshot::on_buttonExport_clicked);
@@ -1363,7 +1336,6 @@ void DialogSignalSnapshot::setupUi()
 	// Main layout
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->setContentsMargins(5, 5, 5, 5);
 
 	mainLayout->addWidget(groupBox);
 	mainLayout->addLayout(exPrintLayout);
