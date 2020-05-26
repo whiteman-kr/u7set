@@ -392,7 +392,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
-	m_tuningController(tuningController)	// it can be nullptr
+	m_tuningController(tuningController),	// it can be nullptr
+	m_tuningEnabled(tuningEnabled)
 {
 	if (m_appSignalManager == nullptr)
 	{
@@ -431,6 +432,9 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
 
+	ui->treePropertiesExt->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treePropertiesExt, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesExtContextMenu);
+
 	ui->treeSetpoints->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->treeSetpoints, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSetpointsContextMenu);
 
@@ -440,11 +444,6 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	ui->tabWidget->setCurrentIndex(0);
 
 	// Remove tuning tab
-
-	if (tuningEnabled == false || m_signal.enableTuning() == false)
-	{
-		hideTabPage("Tuning");
-	}
 
 	if (dialogType == DialogType::Simulator)
 	{
@@ -456,7 +455,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 
 	if (dialogType == DialogType::Monitor)
 	{
-		hideTabPage("Extended");
+		removeTabPage("Extended");
 	}
 
 	// Set minimum size to 7x5 inches
@@ -530,6 +529,17 @@ void DialogSignalInfo::unregisterDialog(const QString& appSignalId)
 	}
 }
 
+
+bool DialogSignalInfo::tuningEnabled() const
+{
+	return m_tuningEnabled;
+}
+
+void DialogSignalInfo::setTuningEnabled(bool enabled)
+{
+	m_tuningEnabled = enabled;
+}
+
 AppSignalParam DialogSignalInfo::signal() const
 {
 	return m_signal;
@@ -539,7 +549,7 @@ void DialogSignalInfo::updateSignal(const AppSignalParam& signal)
 {
 	m_signal = signal;
 
-	updateStaticData();
+	updateSingnalData();
 
 	return;
 }
@@ -563,6 +573,40 @@ void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
 			 {
 				QClipboard *clipboard = QApplication::clipboard();
 				QTreeWidgetItem* item = ui->treeProperties->currentItem();
+				if (item == nullptr)
+				{
+					return;
+				}
+				clipboard->setText(item->text(1));
+			};
+
+	connect(actionCopy, &QAction::triggered, this, f);
+
+	menu.addAction(actionCopy);
+
+	//
+	menu.exec(QCursor::pos());
+}
+
+void DialogSignalInfo::preparePropertiesExtContextMenu(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QMenu menu(this);
+
+	QTreeWidgetItem* item = ui->treePropertiesExt->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	// Copy
+	QAction* actionCopy = new QAction(tr("Copy"), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QClipboard *clipboard = QApplication::clipboard();
+				QTreeWidgetItem* item = ui->treePropertiesExt->currentItem();
 				if (item == nullptr)
 				{
 					return;
@@ -772,7 +816,7 @@ void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
 
 	// Fill signal information
 
-	updateStaticData();
+	updateSingnalData();
 
 	updateDynamicData();
 
@@ -932,7 +976,38 @@ void DialogSignalInfo::dropEvent(QDropEvent* event)
 	return;
 }
 
-void DialogSignalInfo::hideTabPage(const QString& tabName)
+int DialogSignalInfo::tabPageExists(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+QWidget* DialogSignalInfo::tabPageWidget(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			return ui->tabWidget->widget(i);
+		}
+	}
+
+	return nullptr;
+}
+
+void DialogSignalInfo::addTabPage(const QString& tabName, QWidget* widget)
+{
+	ui->tabWidget->addTab(widget, tabName);
+}
+
+void DialogSignalInfo::removeTabPage(const QString& tabName)
 {
 	for (int i = 0; i < ui->tabWidget->count(); i++)
 	{
@@ -942,6 +1017,27 @@ void DialogSignalInfo::hideTabPage(const QString& tabName)
 			break;
 		}
 	}
+}
+
+void DialogSignalInfo::updateSingnalData()
+{
+	// Fill signal information
+
+	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
+	// tu support Drag and Drop Operation (drag part)
+	//
+
+	ui->signalIdLabel->setAppSignal(m_signal);
+	ui->signalIdLabelIcon->setAppSignal(m_signal);
+
+	fillSignalInfo();
+	fillProperties();
+	fillExtProperties();
+	fillSetpoints();
+	fillSchemas();
+	updateTuningTab();
+
+	return;
 }
 
 void DialogSignalInfo::fillSignalInfo()
@@ -956,17 +1052,11 @@ void DialogSignalInfo::fillSignalInfo()
 	{
 		ui->labelStrUnit->setText(m_signal.unit());
 		ui->labelStrUnitTuning->setText(m_signal.unit());
-
-		ui->pushButtonSetOne->setVisible(false);
-		ui->pushButtonSetZero->setVisible(false);
 	}
 	else
 	{
 		ui->labelStrUnit->setText("");
 		ui->labelStrUnitTuning->setText("");
-
-		ui->editInputValue->setVisible(false);
-		ui->pushButtonSetValue->setVisible(false);
 	}
 	ui->labelValue->setText("");
 	ui->labelValueTuning->setText("");
@@ -1435,24 +1525,48 @@ void DialogSignalInfo::fillSchemas()
 	ui->treeSchemas->sortByColumn(0, Qt::AscendingOrder);
 }
 
-void DialogSignalInfo::updateStaticData()
+void DialogSignalInfo::updateTuningTab()
 {
-	// Fill signal information
+	const QString tuningTabPageName = QObject::tr("Tuning");
 
-	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
-	// tu support Drag and Drop Operation (drag part)
+	bool tuningEnabled = m_signal.enableTuning() == true && m_tuningEnabled == true;
+	bool tuningTabVisible = tabPageExists(tuningTabPageName);
+
+	if (tuningEnabled == false && tuningTabVisible == true)
+	{
+		// Hide Tuning tab page
+		//
+		m_tuningTabWidget = tabPageWidget(tuningTabPageName);
+
+		removeTabPage(tr("Tuning"));
+	}
+	else
+	{
+		if (tuningEnabled == true && tuningTabVisible == false)
+		{
+			// Show Tuning tab page
+			//
+			if (m_tuningTabWidget == nullptr)
+			{
+				Q_ASSERT(m_tuningTabWidget);
+				return;
+			}
+
+			addTabPage(tuningTabPageName, m_tuningTabWidget);
+		}
+	}
+
+	// Update tuning tab page controls
 	//
+	if (tuningEnabled == true)
+	{
+		ui->editInputValue->setVisible(m_signal.isAnalog());
+		ui->pushButtonSetValue->setVisible(m_signal.isAnalog());
 
-	ui->signalIdLabel->setAppSignal(m_signal);
-	ui->signalIdLabelIcon->setAppSignal(m_signal);
+		ui->pushButtonSetZero->setVisible(m_signal.isDiscrete());
+		ui->pushButtonSetOne->setVisible(m_signal.isDiscrete());
+	}
 
-	fillSignalInfo();
-	fillProperties();
-	fillExtProperties();
-	fillSetpoints();
-	fillSchemas();
-
-	return;
 }
 
 void DialogSignalInfo::updateDynamicData()

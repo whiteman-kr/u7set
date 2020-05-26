@@ -76,6 +76,8 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 
 void MonitorSignalInfo::onSignalParamAndUnitsArrived()
 {
+	setTuningEnabled(m_configController->configuration().tuningEnabled);
+
 	// Refresh signal param inself
 
 	bool ok = false;

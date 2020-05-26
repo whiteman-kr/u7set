@@ -91,11 +91,15 @@ protected:
 	static DialogSignalInfo* dialogRegistered(const QString& appSignalId);
 	static void registerDialog(const QString& appSignalId, DialogSignalInfo* dialog);
 	static void unregisterDialog(const QString& appSignalId);
-	//
+
+	// Signal and parameters
+	bool tuningEnabled() const;
+	void setTuningEnabled(bool enabled);
 
 	AppSignalParam signal() const;
 	void updateSignal(const AppSignalParam& signal);
 
+protected:
 	virtual std::optional<Signal> getSignalExt(const AppSignalParam& appSignalParam) = 0;
 
 private:
@@ -116,6 +120,7 @@ private:
 
 private slots:
 	void preparePropertiesContextMenu(const QPoint& pos);
+	void preparePropertiesExtContextMenu(const QPoint& pos);
 	void prepareSchemaContextMenu(const QPoint& pos);
 	void prepareSetpointsContextMenu(const QPoint& pos);
 
@@ -140,20 +145,30 @@ private:
 	virtual void setSchema(QString schemaId, QStringList highlightIds) = 0;
 
 private:
-	void hideTabPage(const QString& tabName);
+	// Tab widget helper functions
+	//
+	int tabPageExists(const QString& tabName);
+	QWidget* tabPageWidget(const QString& tabName);
+	void addTabPage(const QString& tabName, QWidget* widget);
+	void removeTabPage(const QString& tabName);
+
+	//
+	void updateSingnalData();
 
 	void fillSignalInfo();
 	void fillProperties();
 	void fillExtProperties();
 	void fillSetpoints();
 	void fillSchemas();
+	void updateTuningTab();
 
-	void updateStaticData();
+	//
 	void updateDynamicData();
 
 	void updateState();
 	void updateSetpoints();
 
+	//
 	void stateContextMenu(QPoint pos);
 
 	QString signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
@@ -168,6 +183,8 @@ private:
 	IAppSignalManager* m_appSignalManager = nullptr;
 
 	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
+	bool m_tuningEnabled = false;
+	QWidget* m_tuningTabWidget = nullptr;
 
 	std::vector<std::shared_ptr<Comparator>> m_setpoints;
 
@@ -180,6 +197,7 @@ private:
 	int m_contextMenuSetpointIndex = -1;
 
 	bool m_firstShow = true;
+
 };
 
 
