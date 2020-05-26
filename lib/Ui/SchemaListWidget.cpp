@@ -1,17 +1,14 @@
-#include "SimAppLogicSchemasPage.h"
-#include "../lib/Ui/TagSelectorWidget.h"
+#include "./SchemaListWidget.h"
+#include "./TagSelectorWidget.h"
 
 //
 //
-//		SimSchemaListView - Tree View
+//		SchemaListTreeWidget - Tree Widget
 //
 //
-SimSchemaListView::SimSchemaListView(SimIdeSimulator* simulator, QWidget* parent) :
-	QTreeWidget{parent},
-	m_simulator(simulator)
+SchemaListTreeWidget::SchemaListTreeWidget(QWidget* parent) :
+	QTreeWidget{parent}
 {
-	assert(m_simulator);
-
 	setUniformRowHeights(false);		// Helps to show multiline schema cations
 	setWordWrap(false);
 	setExpandsOnDoubleClick(true);		// DoubleClick signal is used
@@ -33,13 +30,11 @@ SimSchemaListView::SimSchemaListView(SimIdeSimulator* simulator, QWidget* parent
 
 	// --
 	//
-	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimSchemaListView::slot_projectUpdated);
-
-	connect(this, &QTreeWidget::doubleClicked, this, &SimSchemaListView::slot_doubleClicked);
+	connect(this, &QTreeWidget::doubleClicked, this, &SchemaListTreeWidget::slot_doubleClicked);
 
 	// --
 	//
-	QByteArray lastState = QSettings{}.value("Simulator/SimSchemaListView/State").toByteArray();
+	QByteArray lastState = QSettings{}.value("SchemaListTreeWidget/State").toByteArray();
 	header()->restoreState(lastState);
 
 	// --
@@ -49,9 +44,9 @@ SimSchemaListView::SimSchemaListView(SimIdeSimulator* simulator, QWidget* parent
 	return;
 }
 
-SimSchemaListView::~SimSchemaListView()
+SchemaListTreeWidget::~SchemaListTreeWidget()
 {
-	QSettings{}.setValue("Simulator/SimSchemaListView/State", header()->saveState());
+	QSettings{}.setValue("SchemaListTreeWidget/State", header()->saveState());
 	return;
 }
 
@@ -132,16 +127,16 @@ public:
 	std::shared_ptr<VFrame30::SchemaDetails> details;
 };
 
-void SimSchemaListView::fillList()
+void SchemaListTreeWidget::setDetails(VFrame30::SchemaDetailsSet details)
+{
+	m_details = std::move(details);
+	fillList();
+	return;
+}
+
+void SchemaListTreeWidget::fillList()
 {
 static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
-
-	assert(m_simulator);
-
-	if (m_simulator->isLoaded() == false)
-	{
-		return;
-	}
 
 	// Save seleted items
 	//
@@ -165,17 +160,15 @@ static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 	//
 	this->clear();
 
-	const VFrame30::SchemaDetailsSet& detailsSet = m_simulator->schemaDetails();
-
 	std::map<QString, QTreeWidgetItem*> createdPath;
 
 	int filtered = 0;
 	int filteredTags = 0;
-	int count = detailsSet.schemaCount();
+	int count = m_details.schemaCount();
 
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<VFrame30::SchemaDetails> schema = detailsSet.schemaDetails(i);
+		std::shared_ptr<VFrame30::SchemaDetails> schema = m_details.schemaDetails(i);
 		assert(schema);
 
 		// Apply filter
@@ -323,13 +316,7 @@ static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 	return;
 }
 
-void SimSchemaListView::slot_projectUpdated()
-{
-	fillList();
-	return;
-}
-
-void SimSchemaListView::slot_doubleClicked(const QModelIndex&)
+void SchemaListTreeWidget::slot_doubleClicked(const QModelIndex&)
 {
 	SortableSchemaTreeWidgetItem* si = dynamic_cast<SortableSchemaTreeWidgetItem*>(currentItem());
 	assert(si);
@@ -348,12 +335,12 @@ void SimSchemaListView::slot_doubleClicked(const QModelIndex&)
 	return;
 }
 
-QString SimSchemaListView::filter() const
+QString SchemaListTreeWidget::filter() const
 {
 	return m_filter;
 }
 
-void SimSchemaListView::setFilter(QString value)
+void SchemaListTreeWidget::setFilter(QString value)
 {
 	m_filter = value;
 	fillList();
@@ -361,19 +348,24 @@ void SimSchemaListView::setFilter(QString value)
 	return;
 }
 
-void SimSchemaListView::setTagFilter(const QStringList& tags)
+QStringList SchemaListTreeWidget::tagFilter() const
+{
+	return m_tagFilter;
+}
+
+void SchemaListTreeWidget::setTagFilter(const QStringList& tags)
 {
 	m_tagFilter = tags;
 	fillList();
 	return;
 }
 
-int SimSchemaListView::filterCount() const
+int SchemaListTreeWidget::filterCount() const
 {
 	return m_filterCount;
 }
 
-std::vector<QTreeWidgetItem*> SimSchemaListView::searchFor(QString searchText)
+std::vector<QTreeWidgetItem*> SchemaListTreeWidget::searchFor(QString searchText)
 {
 	std::vector<QTreeWidgetItem*> result;
 
@@ -437,7 +429,7 @@ std::vector<QTreeWidgetItem*> SimSchemaListView::searchFor(QString searchText)
 	return result;
 }
 
-void SimSchemaListView::searchAndSelect(QString searchText)
+void SchemaListTreeWidget::searchAndSelect(QString searchText)
 {
 	clearSelection();
 
@@ -460,16 +452,17 @@ void SimSchemaListView::searchAndSelect(QString searchText)
 
 //
 //
-//		SimAppLogicSchemasPage - Tab Page
+//		SchemaListWidget - Tab Page
 //
 //
-SimAppLogicSchemasPage::SimAppLogicSchemasPage(SimIdeSimulator* simulator, QWidget* parent) :
-	SimBasePage(simulator, parent)
+SchemaListWidget::SchemaListWidget(QWidget* parent) :
+	QWidget(parent)
 {
-	setBackgroundRole(QPalette::Light);
+	setAutoFillBackground(true);
+	setBackgroundRole(QPalette::Window);
 
-	m_schemasView = new SimSchemaListView{m_simulator, this};
-	m_schemasView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+	m_treeWidget = new SchemaListTreeWidget{this};
+	m_treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
 	m_searchAction = new QAction(tr("Edit Search"), this);
 	m_searchAction->setShortcut(QKeySequence::Find);
@@ -483,7 +476,7 @@ SimAppLogicSchemasPage::SimAppLogicSchemasPage(SimIdeSimulator* simulator, QWidg
 	m_filterEdit->setPlaceholderText(tr("Filter Text"));
 	m_filterEdit->setClearButtonEnabled(true);
 
-	QStringList completerStringList = QSettings{}.value("Simulator/SimAppLogicSchemasPage/SearchCompleter").toStringList();
+	QStringList completerStringList = QSettings{}.value("SchemaListWidget/SearchCompleter").toStringList();
 	m_searchCompleter = new QCompleter(completerStringList, this);
 	m_searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
@@ -498,12 +491,12 @@ SimAppLogicSchemasPage::SimAppLogicSchemasPage(SimIdeSimulator* simulator, QWidg
 
 	m_tagSelector = new TagSelectorWidget{this};
 	m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	connect(m_tagSelector, &TagSelectorWidget::changed, this, &SimAppLogicSchemasPage::tagSelectorHasChanges);
+	connect(m_tagSelector, &TagSelectorWidget::changed, this, &SchemaListWidget::tagSelectorHasChanges);
 
 	// --
 	//
 	QGridLayout* layout = new QGridLayout(this);
-	layout->addWidget(m_schemasView, 0, 0, 1, 6);
+	layout->addWidget(m_treeWidget, 0, 0, 1, 6);
 
 	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
 	layout->addWidget(m_searchButton, 1, 2, 1, 1);
@@ -524,34 +517,31 @@ SimAppLogicSchemasPage::SimAppLogicSchemasPage(SimIdeSimulator* simulator, QWidg
 
 	// --
 	//
-	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimAppLogicSchemasPage::updateData);
+	//connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SchemaListWidget::updateData);
 
-	connect(m_searchAction, &QAction::triggered, this, &SimAppLogicSchemasPage::ctrlF);
-	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SimAppLogicSchemasPage::search);
-	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SimAppLogicSchemasPage::filter);
-	connect(m_searchButton, &QPushButton::clicked, this, &SimAppLogicSchemasPage::search);
-	connect(m_filterButton, &QPushButton::clicked, this, &SimAppLogicSchemasPage::filter);
-	connect(m_resetFilterButton, &QPushButton::clicked, this, &SimAppLogicSchemasPage::resetFilter);
+	connect(m_searchAction, &QAction::triggered, this, &SchemaListWidget::ctrlF);
+	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaListWidget::search);
+	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SchemaListWidget::filter);
+	connect(m_searchButton, &QPushButton::clicked, this, &SchemaListWidget::search);
+	connect(m_filterButton, &QPushButton::clicked, this, &SchemaListWidget::filter);
+	connect(m_resetFilterButton, &QPushButton::clicked, this, &SchemaListWidget::resetFilter);
 
-	connect(m_schemasView, &SimSchemaListView::openSchemaRequest, this, &SimAppLogicSchemasPage::openSchemaRequest);
-	connect(m_schemasView, &QTreeWidget::customContextMenuRequested, this, &SimAppLogicSchemasPage::treeContextMenu);
+	connect(m_treeWidget, &SchemaListTreeWidget::openSchemaRequest, this, &SchemaListWidget::openSchemaRequest);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &SchemaListWidget::treeContextMenu);
 
 	// --
 	//
-	updateData();
-
 	return;
 }
 
-void SimAppLogicSchemasPage::updateData()
+void SchemaListWidget::setDetails(VFrame30::SchemaDetailsSet details)
 {
 	std::set<QString> tags;
-	const VFrame30::SchemaDetailsSet& detailsSet = m_simulator->schemaDetails();
-	int count = detailsSet.schemaCount();
+	int count = details.schemaCount();
 
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<VFrame30::SchemaDetails> schema = detailsSet.schemaDetails(i);
+		std::shared_ptr<VFrame30::SchemaDetails> schema = details.schemaDetails(i);
 		assert(schema);
 
 		const std::set<QString>& schemaTags = schema->tags();
@@ -562,12 +552,17 @@ void SimAppLogicSchemasPage::updateData()
 		}
 	}
 
+	QStringList selectedTags = m_treeWidget->tagFilter();
+
 	m_tagSelector->setTags(tags);
+	m_tagSelector->setSelectedTags(selectedTags, false);				// Restore selected tags
+
+	m_treeWidget->setDetails(std::move(details));
 
 	return;
 }
 
-void SimAppLogicSchemasPage::ctrlF()
+void SchemaListWidget::ctrlF()
 {
 	assert(m_searchEdit);
 
@@ -577,29 +572,29 @@ void SimAppLogicSchemasPage::ctrlF()
 	return;
 }
 
-void SimAppLogicSchemasPage::search()
+void SchemaListWidget::search()
 {
 	// Search for text in schemas
 	//
-	assert(m_schemasView);
+	assert(m_treeWidget);
 	assert(m_searchEdit);
 
 	QString searchText = m_searchEdit->text().trimmed();
 
 	if (searchText.isEmpty() == true)
 	{
-		m_schemasView->clearSelection();
+		m_treeWidget->clearSelection();
 		return;
 	}
 
 	// Save completer
 	//
-	QStringList completerStringList = QSettings{}.value("Simulator/SimAppLogicSchemasPage/SearchCompleter").toStringList();
+	QStringList completerStringList = QSettings{}.value("SchemaListWidget/SearchCompleter").toStringList();
 
 	if (completerStringList.contains(searchText, Qt::CaseInsensitive) == false)
 	{
 		completerStringList.push_back(searchText);
-		QSettings{}.setValue("Simulator/SimAppLogicSchemasPage/SearchCompleter", completerStringList);
+		QSettings{}.setValue("SchemaListWidget/SearchCompleter", completerStringList);
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_searchCompleter->model());
 		assert(completerModel);
@@ -612,30 +607,30 @@ void SimAppLogicSchemasPage::search()
 
 	// Search for text and select schemas with it
 	//
-	m_schemasView->searchAndSelect(searchText);
+	m_treeWidget->searchAndSelect(searchText);
 
-	m_schemasView->setFocus();
+	m_treeWidget->setFocus();
 
 	return;
 }
 
-void SimAppLogicSchemasPage::filter()
+void SchemaListWidget::filter()
 {
 	// Search for text in schemas
 	//
-	assert(m_schemasView);
+	assert(m_treeWidget);
 	assert(m_filterEdit);
 
 	QString filterText = m_filterEdit->text().trimmed();
 
 	// Save completer
 	//
-	QStringList completerStringList = QSettings{}.value("Simulator/SimAppLogicSchemasPage/SearchCompleter").toStringList();
+	QStringList completerStringList = QSettings{}.value("SchemaListWidget/SearchCompleter").toStringList();
 
 	if (completerStringList.contains(filterText, Qt::CaseInsensitive) == false)
 	{
 		completerStringList.push_back(filterText);
-		QSettings{}.setValue("Simulator/SimAppLogicSchemasPage/SearchCompleter", completerStringList);
+		QSettings{}.setValue("SchemaListWidget/SearchCompleter", completerStringList);
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_searchCompleter->model());
 		Q_ASSERT(completerModel);
@@ -648,10 +643,10 @@ void SimAppLogicSchemasPage::filter()
 
 	// Search for text and select schemas with it
 	//
-	m_schemasView->setFilter(filterText);
-	m_schemasView->setFocus();
+	m_treeWidget->setFilter(filterText);
+	m_treeWidget->setFocus();
 
-	int schemaFiletrCount = m_schemasView->filterCount();
+	int schemaFiletrCount = m_treeWidget->filterCount();
 
 	if (filterText.trimmed().isEmpty() == false)
 	{
@@ -675,14 +670,14 @@ void SimAppLogicSchemasPage::filter()
 	return;
 }
 
-void SimAppLogicSchemasPage::resetFilter()
+void SchemaListWidget::resetFilter()
 {
-	assert(m_schemasView);
+	assert(m_treeWidget);
 
 	m_filterEdit->clear();
 
-	m_schemasView->setFilter({});
-	m_schemasView->setFocus();
+	m_treeWidget->setFilter({});
+	m_treeWidget->setFocus();
 
 	m_filterButton->setText(tr("Filter"));
 	QFont font = m_filterButton->font();
@@ -694,21 +689,21 @@ void SimAppLogicSchemasPage::resetFilter()
 	return;
 }
 
-void SimAppLogicSchemasPage::tagSelectorHasChanges()
+void SchemaListWidget::tagSelectorHasChanges()
 {
 	// Filter schemas by tags
 	//
 	QStringList selectedTags = m_tagSelector->selectedTags();
 
-	m_schemasView->setTagFilter(selectedTags);
-	m_schemasView->setFocus();
+	m_treeWidget->setTagFilter(selectedTags);
+	m_treeWidget->setFocus();
 
 	return;
 }
 
-void SimAppLogicSchemasPage::treeContextMenu(const QPoint& pos)
+void SchemaListWidget::treeContextMenu(const QPoint& pos)
 {
-	SortableSchemaTreeWidgetItem* currentItem = dynamic_cast<SortableSchemaTreeWidgetItem*>(m_schemasView->currentItem());
+	SortableSchemaTreeWidgetItem* currentItem = dynamic_cast<SortableSchemaTreeWidgetItem*>(m_treeWidget->currentItem());
 	if (currentItem == nullptr ||
 		currentItem->isFolder == true ||
 		currentItem->details == nullptr)
@@ -724,7 +719,7 @@ void SimAppLogicSchemasPage::treeContextMenu(const QPoint& pos)
 					emit this->openSchemaRequest(currentItem->details->m_schemaId);
 				});
 
-	m.exec(m_schemasView->mapToGlobal(pos));
+	m.exec(m_treeWidget->mapToGlobal(pos));
 
 	return;
 }

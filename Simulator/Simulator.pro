@@ -16,6 +16,17 @@ CONFIG += staticlib
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17
 
+# Optimization flags
+#
+win32 {
+    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
+}
+unix {
+    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+}
+
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 CONFIG += precompile_header

@@ -22,8 +22,9 @@ bool TuningClientTuningController::writingEnabled() const
 TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 									   TuningClientTuningController* tuningController,
 									   std::shared_ptr<VFrame30::Schema> schema,
-									   TuningSchemaManager* schemaManager) :
-	VFrame30::ClientSchemaWidget(new TuningSchemaView(schemaManager), schema, schemaManager)
+                                       TuningSchemaManager* schemaManager,
+                                       QWidget* parent) :
+    VFrame30::ClientSchemaWidget(new TuningSchemaView{schemaManager}, schema, schemaManager, parent)
 {
 	assert(tuningSignalManager);
 	assert(tuningController);

@@ -298,6 +298,10 @@ namespace VFrame30
 	{
 	public:
 		SchemaDetailsSet();
+		SchemaDetailsSet(const SchemaDetailsSet&) = default;
+		SchemaDetailsSet(SchemaDetailsSet&&) = default;
+		SchemaDetailsSet& operator=(const SchemaDetailsSet&) = default;
+		SchemaDetailsSet& operator=(SchemaDetailsSet&&) noexcept = default;
 
 		// Serializatin implementation of Proto::ObjectSerialization<>
 		//

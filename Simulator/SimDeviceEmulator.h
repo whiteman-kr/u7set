@@ -5,6 +5,10 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <array>
+#include <cstddef>
+#include <chrono>
+#include <limits>
 #include <QObject>
 #include <QMutex>
 #include <QTimerEvent>
@@ -175,8 +179,11 @@ namespace Sim
 
 		// RAM access
 		//
-		bool movRamMem(quint32 src, quint32 dst, quint32 size);
+		bool movRamMem(quint32 src, quint32 dst, quint32 sizeW);
+		bool movRamMem(Ram::Handle memoryAreaHandleSrc, quint32 src, Ram::Handle memoryAreaHandleDst, quint32 dst, quint32 sizeW);
+
 		bool setRamMem(quint32 address, quint16 data, quint16 size);
+		bool setRamMem(Ram::Handle memoryAreaHandle, quint32 address, quint16 data, quint16 size);
 
 		bool writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data);
 		bool writeRamBit(Ram::Handle memoryAreaHandle, quint32 offsetW, quint16 bitNo, quint16 data);
@@ -229,8 +236,9 @@ namespace Sim
 
 		bool runCommand(DeviceCommand& deviceCommand);
 
-		bool receiveConnectionsData(std::chrono::microseconds currentTime);
-		bool sendConnectionsData(std::chrono::microseconds currentTime);
+	public:
+		bool receiveConnectionsData(std::chrono::microseconds currentTime);	// This one is public to be called from Sim::Control
+		bool sendConnectionsData(std::chrono::microseconds currentTime);	// Actually this one is private
 
 	private:
 		// Getting data from m_plainAppLogic

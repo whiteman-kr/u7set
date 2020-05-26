@@ -432,7 +432,7 @@ protected:
 public:
 	void ensureVisible();
 	void setPageTitle();
-	void updateZoomAndScrolls(bool repaint);
+	void updateZoomAndScrolls(bool fitToScreen, bool repaint);
 
 	void updateAfbSchemaItems();
 	void updateUfbSchemaItems();

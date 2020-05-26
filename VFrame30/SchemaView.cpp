@@ -176,9 +176,19 @@ namespace VFrame30
 		assert(schema.get() != nullptr);
 		m_schema = schema;
 
-		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
+		setZoom(zoom(), repaint);		// Adjust sliders, widget etc.
 
 		emit signal_schemaChanged(schema.get());
+		return;
+	}
+
+	void SchemaView::setSchemaInternal(std::shared_ptr<Schema> schema)
+	{
+		// Use this when yoo dont need to update zoom, sliders, etc
+		//
+		assert(schema.get() != nullptr);
+		m_schema = schema;
+		return;
 	}
 
 	void SchemaView::mouseMoveEvent(QMouseEvent* event)
@@ -496,9 +506,15 @@ namespace VFrame30
 		scaledPixelSize.setWidth(widthInPixel);
 		scaledPixelSize.setHeight(heightInPixel);
 
-		setMinimumSize(scaledPixelSize);
+		if (minimumSize() != scaledPixelSize)
+		{
+			setMinimumSize(scaledPixelSize);
+		}
 
-		resize(scaledPixelSize);
+		if (size() != scaledPixelSize)
+		{
+			resize(scaledPixelSize);
+		}
 
 		if (repaint == true)
 		{

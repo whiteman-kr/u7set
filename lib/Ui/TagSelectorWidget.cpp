@@ -48,6 +48,18 @@ void TagSelectorWidget::clear()
 	return;
 }
 
+void TagSelectorWidget::setTags(const QStringList& tags)
+{
+	std::set<QString> tagSet;
+
+	for (const QString& tag : tags)
+	{
+		tagSet.insert(tag);
+	}
+
+	return setTags(tagSet);
+}
+
 void TagSelectorWidget::setTags(const std::vector<QString>& tags)
 {
 	std::set<QString> tagSet;
@@ -62,6 +74,8 @@ void TagSelectorWidget::setTags(const std::vector<QString>& tags)
 
 void TagSelectorWidget::setTags(const std::set<QString>& tags)
 {
+	blockSignals(true);
+
 	// Get all tags, remove them from layout
 	//
 	std::map<QString, QLayoutItem*> layoutItems;
@@ -129,6 +143,8 @@ void TagSelectorWidget::setTags(const std::set<QString>& tags)
 		delete li;
 	}
 
+	blockSignals(false);
+
 	return;
 }
 
@@ -177,6 +193,39 @@ QStringList TagSelectorWidget::selectedTags() const
 	}
 
 	return result;
+}
+
+void TagSelectorWidget::setSelectedTags(const QStringList& tags, bool emitNotify)
+{
+	blockSignals(true);
+
+	for (int i = 0; i < m_flowLayout->count(); i++)
+	{
+		QLayoutItem* li = m_flowLayout->itemAt(i);
+
+		if (li->widget() != nullptr)
+		{
+			TagSelector::TagSelectorButton* b = dynamic_cast<TagSelector::TagSelectorButton*>(li->widget());
+			assert(b);
+
+			if (b != nullptr)
+			{
+				if (tags.contains(b->tag()) == true)
+				{
+					b->setSelected(true);
+				}
+			}
+		}
+	}
+
+	blockSignals(false);
+
+	if (emitNotify == true)
+	{
+		emit changed();
+	}
+
+	return;
 }
 
 void TagSelectorWidget::showEvent(QShowEvent* event)
@@ -286,7 +335,6 @@ namespace TagSelector
 
 	TagSelectorButton::~TagSelectorButton()
 	{
-		//qDebug() << "TagSelectorButton::~TagSelectorButton(): " << text();
 	}
 
 	QString TagSelectorButton::tag() const
@@ -297,6 +345,12 @@ namespace TagSelector
 	bool TagSelectorButton::selected() const
 	{
 		return isChecked();
+	}
+
+	void TagSelectorButton::setSelected(bool value)
+	{
+		setChecked(value);
+		return;
 	}
 
 

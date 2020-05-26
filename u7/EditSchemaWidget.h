@@ -225,7 +225,10 @@ private:
 	EditSchemaWidget() = delete;
 
 public:
-	EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbController);
+	EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
+					 const DbFileInfo& fileInfo,
+					 DbController* dbController,
+					 QWidget* parent);
 	virtual ~EditSchemaWidget();
 	
 protected:
@@ -691,6 +694,7 @@ private:
 		QAction* m_zoomInAction = nullptr;
 		QAction* m_zoomOutAction = nullptr;
 		QAction* m_zoom100Action = nullptr;
+		QAction* m_zoomFitToScreenAction = nullptr;
 		// ------------------------------
 		QAction* m_viewSeparatorAction0 = nullptr;
 		QAction* m_snapToGridAction = nullptr;

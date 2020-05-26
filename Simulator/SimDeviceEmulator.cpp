@@ -326,29 +326,147 @@ namespace Sim
 
 	// RAM access
 	//
-	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 size)
+	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 sizeW)
 	{
-		while (size-- > 0)
+//		while (size-- > 0)
+//		{
+//			quint16 w = readRamWord(src++);
+//			writeRamWord(dst++, w);
+//		}
+
+		switch (sizeW)
 		{
-			quint16 w = readRamWord(src++);
-			writeRamWord(dst++, w);
+		case 1:
+			{
+				quint16 w = readRamWord(src);
+				writeRamWord(dst, w);
+			}
+			return true;
+		case 2:
+			{
+				quint32 dw = readRamDword(src);
+				writeRamDword(dst, dw);
+			}
+			return true;
+		default:
+			{
+				bool result = m_ram.movMem(src, dst, sizeW);
+				if (result == false)
+				{
+					SIM_FAULT(QString("move ram mem error, srcW %1, dstW %2, sizeW %3")
+								.arg(src)
+								.arg(dst)
+								.arg(sizeW));
+				}
+
+				return result;
+			}
+		}
+	}
+
+	bool DeviceEmulator::movRamMem(Ram::Handle memoryAreaHandleSrc, quint32 src, Ram::Handle memoryAreaHandleDst, quint32 dst, quint32 sizeW)
+	{
+		RamArea* ramAreaSrc = m_ram.memoryArea(memoryAreaHandleSrc);
+		if (ramAreaSrc == nullptr)
+		{
+			SIM_FAULT(QString("Command movmem error, memory area src handle %1 not found").arg(memoryAreaHandleSrc));
 		}
 
-		// readRamWord, writeRamWord have checks and will set FAULT in case of error
-		//
-		return true;
+		RamArea* ramAreaDst = m_ram.memoryArea(memoryAreaHandleDst);
+		if (ramAreaDst == nullptr)
+		{
+			SIM_FAULT(QString("Command movmem error, memory area dst handle %1 not found").arg(memoryAreaHandleDst));
+		}
+
+		QByteArray buffer;
+
+		bool ok = ramAreaSrc->readToBuffer(src, sizeW, &buffer, true);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Command movmem error, read buffer error, handle %1, offset %2, sizeW %3")
+						.arg(memoryAreaHandleSrc)
+						.arg(src)
+						.arg(sizeW));
+		}
+
+		ok = ramAreaDst->writeBuffer(dst, buffer);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Command movmem error, write data error, handle %1, offset %2, sizeW %3")
+					  .arg(memoryAreaHandleDst)
+					  .arg(dst)
+					  .arg(sizeW));
+		}
+
+		return ok;
 	}
 
 	bool DeviceEmulator::setRamMem(quint32 address, quint16 data, quint16 size)
 	{
-		while (size-- > 0)
+		switch (size)
 		{
-			writeRamWord(address++, data);
-		}
+		case 1:
+			{
+				writeRamWord(address, data);
+				return true;
+			}
+		case 2:
+			{
+				writeRamWord(address++, data);
+				writeRamWord(address, data);
+				return true;
+			}
+		default:
+			{
+				bool ok = m_ram.setMem(address, size, data);
+				if (ok == false)
+				{
+					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3")
+								.arg(address)
+								.arg(size)
+								.arg(data));
+				}
 
-		// writeRamWord have checks and will set FAULT in case of error
-		//
-		return true;
+				return ok;
+			}
+		}
+	}
+
+	bool DeviceEmulator::setRamMem(Ram::Handle memoryAreaHandle, quint32 address, quint16 data, quint16 size)
+	{
+		switch (size)
+		{
+		case 1:
+			{
+				writeRamWord(memoryAreaHandle, address, data);
+				return true;
+			}
+		case 2:
+			{
+				writeRamWord(memoryAreaHandle, address++, data);
+				writeRamWord(memoryAreaHandle, address, data);
+				return true;
+			}
+		default:
+			{
+				RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+				if (ramArea == nullptr)
+				{
+					SIM_FAULT(QString("setmem error, can't get memory area by handle %1").arg(memoryAreaHandle));
+				}
+
+				bool ok = ramArea->setMem(address, size, data);
+				if (ok == false)
+				{
+					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3")
+								.arg(address)
+								.arg(size)
+								.arg(data));
+				}
+
+				return ok;
+			}
+		}
 	}
 
 	bool DeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data)
@@ -1059,18 +1177,20 @@ namespace Sim
 			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
 		}
 
-		// COMMENTED as now there is no need to zero IO modules memory
+		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
 		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 som emeory areas before start work cylce (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
+		// !!! receiveConnectionsData !!! was moved to Sim::Control,
+		// as it is must be called before ALL LMs started to avoid gaps in communication
 		//
-		result = receiveConnectionsData(currentTime);
-		if (result == false)
-		{
-			return false;
-		}
+		//		result = receiveConnectionsData(currentTime);
+		//		if (result == false)
+		//		{
+		//			return false;
+		//		}
 
 		// Run work cylce
 		//
@@ -1236,9 +1356,9 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-//			QByteArray rb;
-//			QByteArray* receiveBuffer = &rb;
-			QByteArray* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
+			//std::vector<char> rb;
+			//std::vector<char>* receiveBuffer = &rb;
+			std::vector<char>* receiveBuffer = c->getPortReceiveBuffer(portInfo.portNo);
 			if (receiveBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port receive buffer error, connection %1, port %2 (%3).")
@@ -1254,7 +1374,7 @@ namespace Sim
 			bool ok = c->receiveData(portInfo.portNo,
 									 receiveBuffer,
 									 currentTime,
-									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},
+									 std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration * 2},	// timeout
 									 &timeout);
 
 			if (ok == false)
@@ -1277,7 +1397,7 @@ namespace Sim
 			}
 			else
 			{
-				if (receiveBuffer->isEmpty() == true)
+				if (receiveBuffer->empty() == true)
 				{
 					// If timeout not happened yet, but receiveBuffer is empty, wait mor time
 					// do not exit from function here, lated validity bit vill be written
@@ -1366,9 +1486,9 @@ namespace Sim
 
 			Q_ASSERT(portInfo.lmID == equipmentId());
 
-//			QByteArray sb;
-//			QByteArray* sendBuffer = &sb;
-			QByteArray* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
+			//std::vector<char> sb;
+			//std::vector<char>* sendBuffer = &sb;
+			std::vector<char>* sendBuffer = c->getPortSendBuffer(portInfo.portNo);
 			if (sendBuffer == nullptr)
 			{
 				SIM_FAULT(QString("Get port send buffer error, connection %1, port %2 (%3).")
@@ -1417,10 +1537,10 @@ namespace Sim
 	{
 		// eepromOffset - in bytes
 		//
-		if (eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE))
+		if (eepromOffset < 0 || eepromOffset > static_cast<int>(m_plainAppLogic.size() - sizeof(TYPE)))
 		{
 			Q_ASSERT(eepromOffset >= 0 &&
-				   eepromOffset - sizeof(TYPE) <= m_plainAppLogic.size());
+					 static_cast<int>(eepromOffset - sizeof(TYPE)) <= m_plainAppLogic.size());
 			return 0;
 		}
 

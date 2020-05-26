@@ -64,7 +64,9 @@ SOURCES += main.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
+    ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
+    ../lib/Ui/TagSelectorWidget.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
     MonitorSignalInfo.cpp \
@@ -137,7 +139,9 @@ HEADERS  += \
     ../lib/ComparatorSet.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
+    ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
+    ../lib/Ui/TagSelectorWidget.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
     MonitorSignalInfo.h \

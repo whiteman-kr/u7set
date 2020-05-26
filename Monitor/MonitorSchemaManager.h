@@ -35,7 +35,6 @@ public:
 	MonitorConfigController* monitorConfigController();
 	const MonitorConfigController* monitorConfigController() const;
 
-
 	QString onConfigurationArrivedScript() const;
 	void setOnConfigurationArrivedScript(QString value);
 

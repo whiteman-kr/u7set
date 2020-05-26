@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg serialport xml printsupport testlib
+QT       += core gui widgets sql network xmlpatterns qml svg serialport xml printsupport testlib concurrent
 
 # --
 # In Qt 5 using testlib module adds a console option via the MODULE_CONFIG mechanism.
@@ -79,6 +79,7 @@ SOURCES +=\
     ../lib/Ui/DialogSignalSearch.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
+    ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
     CentralWidget.cpp \
@@ -94,12 +95,12 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     Settings.cpp \
-    Simulator/SimAppLogicSchemasPage.cpp \
     Simulator/SimConnectionPage.cpp \
     Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
     Simulator/SimSignalInfo.cpp \
+    Simulator/SimSelectSchemaPage.cpp \
     Simulator/SimSignalSnapshot.cpp \
     Simulator/SimTrend/SimTrends.cpp \
     UserManagementDialog.cpp \
@@ -229,6 +230,7 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
+    ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
     CentralWidget.h \
@@ -243,12 +245,12 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Settings.h \
-    Simulator/SimAppLogicSchemasPage.h \
     Simulator/SimConnectionPage.h \
     Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
     Simulator/SimSignalInfo.h \
+    Simulator/SimSelectSchemaPage.h \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
