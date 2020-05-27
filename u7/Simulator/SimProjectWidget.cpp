@@ -200,9 +200,9 @@ void SimProjectWidget::fillEquipmentTree()
 	m_treeWidget->addTopLevelItem(topConnectionItem);
 
 	const Sim::Connections& connections = m_simulator->connections();
-	std::vector<Sim::ConnectionPtr> ñonnectionList = connections.connections();
+	std::vector<Sim::ConnectionPtr> connectionList = connections.connections();
 
-	for (const Sim::ConnectionPtr& c : ñonnectionList)
+	for (const Sim::ConnectionPtr& c : connectionList)
 	{
 		// Add Connection
 		//
