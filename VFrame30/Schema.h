@@ -30,7 +30,7 @@ namespace VFrame30
 	//
 	/*! \class ScriptSchema
 		\ingroup view
-		\brief Represents an class that contains schema. Can be get from global <b>view.Schema</b>.
+		\brief Represents a class that contains schema. Can be get from global <b>view.Schema</b>.
 	*/
 	class ScriptSchema : public QObject
 	{

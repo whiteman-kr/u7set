@@ -20,9 +20,9 @@ namespace VFrame30
 	//
 	/*! \class ScriptSchemaView
 		\ingroup view
-		\brief Represents an class that contains schemas displayed on the screen. Used for switching schemas, searching items and displaying message boxes.
+		\brief Represents a class that contains schemas displayed on the screen. Used for switching schemas, searching items and displaying message boxes.
 
-		Represents an class that contains schemas displayed on the screen. In scripts this object is accessed by global <b>view</b> object.
+		sRepresents a class that contains schemas displayed on the screen. In scripts this object is accessed by global <b>view</b> object.
 
 		Implements following functons:
 
@@ -56,13 +56,13 @@ namespace VFrame30
 		\code
 		// Display information in the message box
 		//
-		view.infoMessageBox(“Hello world!”);
+		view.infoMessageBox("Hello world!");
 
 		...
 
 		// Display a question
 		//
-		if (view.questionMessageBox(“Are you sure?”) == true)
+		if (view.questionMessageBox("Are you sure?") == true)
 		{
 			// User pressed "Yes"
 			....

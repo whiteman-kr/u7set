@@ -12,12 +12,17 @@
 #include "SimTuningSignalManager.h"
 #include "SimOverrideSignals.h"
 #include "SimConnections.h"
+#include "SimScriptSimulator.h"
+
 
 class QTextStream;
+
 
 namespace Sim
 {
 	class LogicModule;
+	class ScriptSimulator;
+
 
 	class Simulator : public QObject, protected Output
 	{
@@ -34,6 +39,11 @@ namespace Sim
 		bool isRunning() const;
 		bool isPaused() const;
 		bool isStopped() const;
+
+		bool runScript(QString script);	// Starts script in separate thread and returns immediately
+		bool stopScript();				// Stops script if it is running
+		bool waitScript(unsigned long msecs = ULONG_MAX);		// Wait script to stop
+		bool scriptResult();
 
 	private:
 		void clearImpl();
@@ -90,6 +100,10 @@ namespace Sim
 		// Control thread
 		//
 		Sim::Control m_control{this};
+
+		// Scripting/Testing
+		//
+		ScriptSimulator m_scriptSimulator;
 	};
 }
 

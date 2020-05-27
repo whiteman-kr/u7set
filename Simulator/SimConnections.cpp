@@ -268,15 +268,6 @@ namespace Sim
 	//
 	// Sim::Connections
 	//
-	Connections::Connections()
-	{
-	}
-
-	Connections::~Connections()
-	{
-		qDebug() << "Connections::~Connections()";
-	}
-
 	void Connections::clear()
 	{
 		m_buildConnections = {};
