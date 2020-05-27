@@ -29,7 +29,8 @@ windows build job:
     - "git status"
     - "git log -1"
     - "set QT_BIN_DIR=C:/Qt/5.15.0/msvc2019_64"
-    - "copy \"C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Redist/MSVC/v142/vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
+    - "rem copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Redist\\MSVC\\v142\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Redist\\MSVC\\v142\\vcredist_x64.exe\" \"C:\\temp\\1\""
 #generation version file
     - "echo #pragma once > gitlabci_version.h"
     - "echo. >> gitlabci_version.h"
