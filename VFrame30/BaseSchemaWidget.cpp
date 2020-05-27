@@ -72,7 +72,7 @@ namespace VFrame30
 			return;
 		}
 
-		int numDegrees = event->delta() / 8;
+		int numDegrees = event->angleDelta().x() / 8;
 		int numSteps = numDegrees / 15;
 
 		if (numSteps != 0)

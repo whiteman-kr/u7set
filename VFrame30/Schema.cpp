@@ -1410,7 +1410,8 @@ namespace VFrame30
 
 		// Get signalIds
 		//
-		QSet<QString> signalIds = schema->getSignalList().toSet();
+		QStringList signalIdsList = schema->getSignalList();
+		QSet<QString> signalIds{signalIdsList.begin(), signalIdsList.end()};
 
 		// Get labels for AFBs
 		//
@@ -1485,10 +1486,10 @@ namespace VFrame30
 
 		// Form JSon object
 		//
-		QVariant signaListVariant(signalIds.toList());
+		QVariant signaListVariant(signalIds.values());
 		QVariant labelsVariant(labels);
-		QVariant connectionsVariant(connections.toList());
-		QVariant loopbacksVariant(loopbacks.toList());
+		QVariant connectionsVariant(connections.values());
+		QVariant loopbacksVariant(loopbacks.values());
 		QVariant tagsVariant(tags);
 		QVariant guidsVariant(guidsStringList);
 

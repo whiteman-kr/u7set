@@ -319,7 +319,7 @@ namespace SimProjectTreeItems
 		}
 
 		this->setText(EquipmentTreeColumns::State, text);
-		this->setTextColor(EquipmentTreeColumns::State, color);
+		this->setForeground(EquipmentTreeColumns::State, color);
 
 		return;
 	}

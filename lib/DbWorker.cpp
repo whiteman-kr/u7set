@@ -2615,7 +2615,6 @@ void DbWorker::slot_isFileExists(QString fileName, int parentId, int* fileId)
 			.arg(fileName);
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -2669,8 +2668,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 		return;
 	}
 
-	QSqlQuery q(db);
-	q.setForwardOnly(true);
+	QSqlQuery q{db};
 
 	if (filter.isEmpty() == true)
 	{
@@ -2687,14 +2685,14 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	}
 
 	bool result = q.exec();
-
 	if (result == false)
 	{
 		emitError(db, tr("Can't get file list. Error: ") +  q.lastError().text());
 		return;
 	}
 
-	files->reserve(q.size());
+	int size = q.size();
+	files->reserve(size);
 
 	while (q.next())
 	{
@@ -2741,7 +2739,6 @@ void DbWorker::slot_getFileListTree(DbFileTree* filesTree, int parentId, QString
 	}
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	q.prepare("SELECT * FROM api.get_file_list_tree(:session_key, :parentid, :filter, :remove_deleted);");
 	q.bindValue(":session_key", sessionKey());
@@ -2808,8 +2805,6 @@ void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
 			.arg(fileName);
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
-
 	bool result = q.exec(request);
 
 	if (result == false)
@@ -2879,10 +2874,8 @@ void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileIn
 	request += "]);";
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
-
 	if (result == false)
 	{
 		emitError(db, tr("Can't get file info. Error: ") +  q.lastError().text());
@@ -2969,10 +2962,8 @@ bool DbWorker::worker_getFilesInfo(const std::vector<QString>& fullPathFileNames
 	request += "]);";
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
-
 	if (result == false)
 	{
 		emitError(db, tr("Can't get file info. Error: ") +  q.lastError().text());
@@ -3046,7 +3037,6 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		// request
 		//
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		if (ensureUniquesInParentTree == false)
 		{
@@ -3186,7 +3176,6 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 				.arg(file.fileId());
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 
@@ -3282,7 +3271,6 @@ void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToPa
 	// --
 	//
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	if (bool result = q.exec(request);
 		result == false)
@@ -3423,7 +3411,6 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -3488,7 +3475,6 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 			.arg(parentFileInfo.fileId());
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -3579,7 +3565,6 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 			.arg(filesArray);
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -3655,7 +3640,6 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -3749,7 +3733,6 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 
@@ -3831,7 +3814,6 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 				.arg(changesetId);
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -3911,7 +3893,6 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateT
 				.arg(date.toString("yyyy-MM-dd HH:mm:ss"));
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -4000,13 +3981,9 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	request += QString("], '%1');")
 			.arg(DbWorker::toSqlStr(comment));
 
-	//qDebug() << files->size();
-	//qDebug() << request;
-
 	// request
 	//
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -4110,7 +4087,6 @@ void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vecto
 	// request
 	//
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -4207,7 +4183,6 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 	// request
 	//
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -4305,7 +4280,6 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	// request
 	//
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -4369,7 +4343,6 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 			.arg(fileInfo->fileId());
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -4426,7 +4399,6 @@ void DbWorker::slot_getHistory(std::vector<DbChangeset>* out)
 			.arg(currentUser().userId());
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -4482,7 +4454,6 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* ou
 			.arg(file.fileId());
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -4538,7 +4509,6 @@ void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<D
 			.arg(parentFile.fileId());
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -6221,7 +6191,6 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 			.arg(signalID);
 
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -6290,7 +6259,6 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 				.arg(changesetId);
 
 		QSqlQuery q(db);
-		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)

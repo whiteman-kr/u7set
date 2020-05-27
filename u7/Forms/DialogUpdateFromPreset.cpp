@@ -88,7 +88,7 @@ DialogUpdateFromPreset::DialogUpdateFromPreset(bool expertOptions, QStringList& 
 QStringList DialogUpdateFromPreset::forceUpdateProperties() const
 {
 	QString text = m_forceUpdateEdit->toPlainText().trimmed();
-	QStringList splitted = text.split(',', QString::SkipEmptyParts);
+	QStringList splitted = text.split(',', Qt::SkipEmptyParts);
 
 	QStringList result;
 
