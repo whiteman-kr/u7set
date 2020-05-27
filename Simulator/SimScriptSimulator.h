@@ -74,6 +74,10 @@ namespace Sim
 		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
 		bool reset();
 
+		/// \brief Get signal value, if signal is not found then -1 is returned (what is actully valid value for existing signals too).
+		/// <b>Note:</b> This function does not return full signal state with validity and other flags.
+		double signalValue(QString appSignalId);
+
 	public:
 		QString buildPath() const;
 

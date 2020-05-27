@@ -74,7 +74,7 @@ namespace Sim
 		}
 		else
 		{
-			writeError(tr("Script finished with result: ok"));
+			writeMessage(tr("Script finished with result: ok"));
 		}
 
 		m_result = boolResult;
@@ -96,7 +96,7 @@ namespace Sim
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
 		m_jsEngine.setInterrupted(true);
 		return true;
-#elif
+#else
 		return false;
 #endif
 	}
@@ -192,16 +192,34 @@ namespace Sim
 
 	bool ScriptSimulator::startForMs(int msecs)
 	{
-		int to_do_startForMs;
-		assert(false);
-		return true;
+		using namespace std::chrono;
+
+		if (m_simulator->isRunning() == true)
+		{
+			writeWaning(tr("Simulation already running"));
+			return false;
+		}
+
+		milliseconds durationMs{msecs};
+		microseconds durationUs = duration_cast<microseconds>(durationMs);
+
+		return m_simulator->control().startSimulation(durationUs);
 	}
 
 	bool ScriptSimulator::reset()
 	{
-		int to_do_reset;
-		assert(false);
+		if (m_simulator->isRunning() == true)
+		{
+			m_simulator->control().stop();
+		}
+
+		m_simulator->control().reset();
 		return true;
+	}
+
+	double ScriptSimulator::signalValue(QString appSignalId)
+	{
+		return m_simulator->appSignalManager().signalState(appSignalId, nullptr, true).value();
 	}
 
 	QString ScriptSimulator::buildPath() const
