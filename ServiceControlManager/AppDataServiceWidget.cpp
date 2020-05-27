@@ -391,7 +391,7 @@ void DataSourcesStateModel::reloadList()
 	if (m_clientSocket != nullptr)
 	{
 		m_dataSource = m_clientSocket->dataSources();
-		qSort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
+		std::sort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
 			return ds1->lmAddress32() < ds2->lmAddress32();
 		});
 	}

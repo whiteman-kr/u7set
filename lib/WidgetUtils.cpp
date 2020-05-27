@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QAction>
 #include <QDesktopWidget>
+#include <QScreen>
 
 void saveWindowPosition(QWidget* window, QString widgetKey)
 {
@@ -27,7 +28,16 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 	QSettings settings;
 	int screenNumber = settings.value(widgetKey + "/screenNumber", QApplication::desktop()->screenNumber(window)).toInt();
 
-	QRect screenRect = QApplication::desktop()->screenGeometry(screenNumber);
+	if (QGuiApplication::screens().size() <= screenNumber)
+	{
+		return;
+	}
+	QScreen* currentScreen = QGuiApplication::screens()[screenNumber];
+	if (currentScreen == nullptr)
+	{
+		return;
+	}
+	QRect screenRect = currentScreen->geometry();
 	QPoint center = screenRect.center();
 
 	QRect baseWindowRect = screenRect;
