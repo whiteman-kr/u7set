@@ -39,7 +39,7 @@ windows build job:
     - "echo #define CI_PIPELINE_ID %CI_PIPELINE_ID% >> gitlabci_version.h"
     - "echo #define COMPUTERNAME \"%COMPUTERNAME%\" >> gitlabci_version.h"
     - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
-    - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
+    - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
 #Build Project
     - "rem ----------------------------------------------"
     - "rem               Build Project"
@@ -53,7 +53,7 @@ windows build job:
     - "rem ----------------------------------------------"
     - "rem               Copy Qt DLL's"
     - "rem ----------------------------------------------"
-    - "copy \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Redist/MSVC/14.16.27012/vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy \"C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Redist/MSVC/v142/vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:/libpq_my_build/libpq.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%/bin/libEGL.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%/bin/libGLESv2.dll \"%CI_PROJECT_DIR%/bin/release/\""
