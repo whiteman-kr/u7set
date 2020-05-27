@@ -779,7 +779,7 @@ void FileTreeView::addFile()
 	//
 	for (int i = 0; i < 65535; i++)
 	{
-		QModelIndex childIndex = parentIndex.child(i, 0);
+		QModelIndex childIndex = model()->index(i, 0, parentIndex);
 
 		if (childIndex.isValid() == false)
 		{

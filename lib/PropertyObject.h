@@ -1049,11 +1049,59 @@ public:
 private:
 	void checkLimits() noexcept
 	{
+		auto operatorLs =
+				[](auto op1, auto op2) -> bool
+				{
+					return op1 < op2;
+				};
+
+		auto operatorGt =
+				[](auto op1, auto op2) -> bool
+				{
+					return op1 > op2;
+				};
+
 		if (m_lowLimit.isValid() == true)
 		{
 			Q_ASSERT(m_lowLimit.type() == m_value.type());
 
-			if (m_value < m_lowLimit)
+			bool less = false;
+
+//#ifdef _MSC_VER
+//	#pragma warning(push)
+//	#pragma warning(disable : 6011)
+//#endif
+			switch (m_value.type())
+			{
+			case QMetaType::Int:
+				assert(m_value.canConvert<int>());
+				less = operatorLs(m_value.value<int>(), m_lowLimit.value<int>());
+				break;
+			case QMetaType::UInt:
+				assert(m_value.canConvert<unsigned int>());
+				less = operatorLs(m_value.value<unsigned int>(), m_lowLimit.value<unsigned int>());
+				break;
+			case QMetaType::LongLong:
+				assert(m_value.canConvert<qlonglong>());
+				less = operatorLs(m_value.value<qlonglong>(), m_lowLimit.value<qlonglong>());
+				break;
+			case QMetaType::ULongLong:
+				assert(m_value.canConvert<qulonglong>());
+				less = operatorLs(m_value.value<qulonglong>(), m_lowLimit.value<qulonglong>());
+				break;
+			case QMetaType::Double:
+				assert(m_value.canConvert<double>());
+				less = operatorLs(m_value.value<double>(), m_lowLimit.value<double>());
+				break;
+			default:
+				less = false;
+				break;
+			}
+//#ifdef _MSC_VER
+//	#pragma warning(pop)
+//#endif
+
+			if (less == true)
 			{
 				m_value = m_lowLimit;
 			}
@@ -1063,7 +1111,43 @@ private:
 		{
 			Q_ASSERT(m_highLimit.type() == m_value.type());
 
-			if (m_value > m_highLimit)
+			bool gt = false;
+
+//#ifdef _MSC_VER
+//	#pragma warning(push)
+//	#pragma warning(disable : 6011)
+//#endif
+			switch (m_value.type())
+			{
+			case QMetaType::Int:
+				assert(m_value.canConvert<int>());
+				gt = operatorGt(m_value.value<int>(), m_lowLimit.value<int>());
+				break;
+			case QMetaType::UInt:
+				assert(m_value.canConvert<unsigned int>());
+				gt = operatorGt(m_value.value<unsigned int>(), m_lowLimit.value<unsigned int>());
+				break;
+			case QMetaType::LongLong:
+				assert(m_value.canConvert<qlonglong>());
+				gt = operatorGt(m_value.value<qlonglong>(), m_lowLimit.value<qlonglong>());
+				break;
+			case QMetaType::ULongLong:
+				assert(m_value.canConvert<qulonglong>());
+				gt = operatorGt(m_value.value<qulonglong>(), m_lowLimit.value<qulonglong>());
+				break;
+			case QMetaType::Double:
+				assert(m_value.canConvert<double>());
+				gt = operatorGt(m_value.value<double>(), m_lowLimit.value<double>());
+				break;
+			default:
+				gt = false;
+				break;
+			}
+//#ifdef _MSC_VER
+//	#pragma warning(pop)
+//#endif
+
+			if (gt == true)
 			{
 				m_value = m_highLimit;
 			}
@@ -2168,7 +2252,7 @@ public:
 		*/
 		QString m_specificPropertiesStructTrimmed = specificProperties;
 
-		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, QString::SkipEmptyParts);
+		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
 		for (QString row : rows)
 		{
@@ -2995,7 +3079,7 @@ public:
 		QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
 		valuesString.remove(' ');
 
-		QStringList valueStringList = valuesString.split(',', QString::SkipEmptyParts);	// split value pairs
+		QStringList valueStringList = valuesString.split(',', Qt::SkipEmptyParts);	// split value pairs
 		if (valueStringList.empty() == true)
 		{
 			*ok = false;
@@ -3009,7 +3093,7 @@ public:
 			// str is like:
 			// EnumValue = 1
 			//
-			QStringList str2intList = str.split('=', QString::SkipEmptyParts);
+			QStringList str2intList = str.split('=', Qt::SkipEmptyParts);
 			if (str2intList.size() != 2)
 			{
 				*ok = false;

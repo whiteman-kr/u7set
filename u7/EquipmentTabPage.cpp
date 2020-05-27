@@ -511,14 +511,14 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 	//
 	QModelIndexList sortedRowList = rowList;
 
-	qSort(sortedRowList.begin(), sortedRowList.end(),
-		[this](QModelIndex& m1, QModelIndex m2)
-		{
-			Hardware::DeviceObject* d1 = deviceObject(m1);
-			Hardware::DeviceObject* d2 = deviceObject(m2);
+	std::sort(sortedRowList.begin(), sortedRowList.end(),
+	          [this](QModelIndex& m1, QModelIndex m2)
+	          {
+		            Hardware::DeviceObject* d1 = deviceObject(m1);
+					Hardware::DeviceObject* d2 = deviceObject(m2);
 
-			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
-		});
+					return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+	          });
 
 	// Update model
 	//
@@ -585,7 +585,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 			continue;
 		}
 
-		QModelIndex childIndex = modelIndex.child(childRow, 0);
+		QModelIndex childIndex = this->index(childRow, 0, modelIndex);
 		if (childIndex.isValid() == false)
 		{
 			assert(childIndex.isValid() == true);
@@ -791,7 +791,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 	// rowList must be sorted in FileID descending order,
 	// to delete first children and then their parents
 	//
-	qSort(rowList.begin(), rowList.end(),
+	std::sort(rowList.begin(), rowList.end(),
 		[this](const QModelIndex& m1, const QModelIndex& m2)
 		{
 			const Hardware::DeviceObject* d1 = this->deviceObject(m1);

@@ -2495,7 +2495,7 @@ void DbWorker::slot_updateUser(DbUser user)
 						 .arg(DbWorker::toSqlStr(user.firstName()))
 						 .arg(DbWorker::toSqlStr(user.lastName()))
 						 .arg(DbWorker::toSqlStr(user.password()))
-						 .arg(user.newPassword().isEmpty() ? QString::null : DbWorker::toSqlStr(user.newPassword()))
+						 .arg(user.newPassword().isEmpty() ? QString{} : DbWorker::toSqlStr(user.newPassword()))
 						 .arg(user.isReadonly() ? "TRUE" : "FALSE")
 						 .arg(user.isDisabled() ? "TRUE" : "FALSE");
 
@@ -3480,7 +3480,7 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 
 	// request, result is a list of DbFile
 	//
-	QTime timerObject;
+	QElapsedTimer timerObject;
 	timerObject.start();
 
 	QString request = QString("SELECT * FROM api.get_latest_file_tree_version('%1', %2);")

@@ -980,7 +980,7 @@ namespace VFrame30
 		//tags.replace(';', QChar::LineFeed);
 		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
-		m_tags = tags.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+		m_tags = tags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
 
 		for (QString& t : m_tags)
 		{
@@ -1879,7 +1879,7 @@ namespace VFrame30
 
 	bool SchemaDetails::hasEquipmentId(const QString& equipmentId) const
 	{
-		QStringList eqs = m_equipmentId.split(' ', QString::SkipEmptyParts);
+		QStringList eqs = m_equipmentId.split(' ', Qt::SkipEmptyParts);
 
 		bool result = eqs.contains(equipmentId, Qt::CaseInsensitive);
 		return result;
