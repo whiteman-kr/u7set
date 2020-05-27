@@ -28,7 +28,7 @@ windows build job:
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
-    - "set QT_BIN_DIR=C:/Qt/5.15.0/msvc2019_64"
+    - "set QT_BIN_DIR=C:\\Qt\\5.15.0\\msvc2019_64"
 #generation version file
     - "echo #pragma once > gitlabci_version.h"
     - "echo. >> gitlabci_version.h"
