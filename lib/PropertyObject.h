@@ -1067,10 +1067,10 @@ private:
 
 			bool less = false;
 
-//#ifdef _MSC_VER
-//	#pragma warning(push)
-//	#pragma warning(disable : 6011)
-//#endif
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable : 4063)
+#endif
 			switch (m_value.type())
 			{
 			case QMetaType::Int:		//NOLINT
@@ -1117,11 +1117,10 @@ private:
 				less = false;
 				break;
 			}
-//#ifdef _MSC_VER
-//	#pragma warning(pop)
-//#endif
-
-			if (less == true)
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
+        if (less == true)
 			{
 				m_value = m_lowLimit;
 			}
@@ -1133,10 +1132,10 @@ private:
 
 			bool gt = false;
 
-//#ifdef _MSC_VER
-//	#pragma warning(push)
-//	#pragma warning(disable : 6011)
-//#endif
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable : 4063)
+#endif
 			switch (m_value.type())
 			{
 			case QMetaType::Int:
@@ -1158,14 +1157,34 @@ private:
 			case QMetaType::Double:
 				assert(m_value.canConvert<double>());
 				gt = operatorGt(m_value.value<double>(), m_lowLimit.value<double>());
-				break;
+                break;
+            case QMetaType::Long:		//NOLINT
+                assert(m_value.canConvert<long>());
+                gt = operatorGt(m_value.value<long>(), m_lowLimit.value<long>());
+                break;
+            case QMetaType::Short:		//NOLINT
+                assert(m_value.canConvert<short>());
+                gt = operatorGt(m_value.value<short>(), m_lowLimit.value<short>());
+                break;
+            case QMetaType::ULong:		//NOLINT
+                assert(m_value.canConvert<unsigned long>());
+                gt = operatorGt(m_value.value<unsigned long>(), m_lowLimit.value<unsigned long>());
+                break;
+            case QMetaType::UShort:		//NOLINT
+                assert(m_value.canConvert<unsigned short>());
+                gt = operatorGt(m_value.value<unsigned short>(), m_lowLimit.value<unsigned short>());
+                break;
+            case QMetaType::Float:		//NOLINT
+                assert(m_value.canConvert<float>());
+                gt = operatorGt(m_value.value<float>(), m_lowLimit.value<float>());
+                break;
 			default:
 				gt = false;
 				break;
 			}
-//#ifdef _MSC_VER
-//	#pragma warning(pop)
-//#endif
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 
 			if (gt == true)
 			{
