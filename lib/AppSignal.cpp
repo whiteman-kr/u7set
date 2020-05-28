@@ -187,7 +187,7 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, int pr
 		{
 			result.insert(p, ' ');
 		}
-		result.insert(40, '\n');
+		result.insert(40, QChar::LineFeed);
 		break;
 
 	default:

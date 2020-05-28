@@ -182,10 +182,6 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 	QPainter painter(this);
 
-	QFont font = painter.font();
-	font.setPointSizeF(font.pointSizeF() * 1.25);
-	painter.setFont(font);
-
 	static QBrush alertBrush(QColor(192, 0, 0));
 	static QColor noAlertBrush(Qt::darkGreen);
 	static QColor noFlagBrush(Qt::lightGray);
@@ -450,28 +446,13 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 		ui->labelPlantTimeHeader->hide();
 		ui->labelPlantTime->hide();
 
-		ui->labelServerTimeHeader->setText(tr("Time"));
+		ui->labelServerTimeHeader->setText(tr("Plant Time"));
 	}
 
 	if (dialogType == DialogType::Monitor)
 	{
 		removeTabPage("Extended");
 	}
-
-	// Set minimum size to 7x5 inches
-
-	double minSizeX = 7.0;
-	double minSizeY = 4.0;
-
-	double dpix = logicalDpiX();
-	double dpiy = logicalDpiY();
-
-	double sx = minSizeX * dpix;
-	double sy = minSizeY * dpiy;
-
-	setMinimumSize(static_cast<int>(sx), static_cast<int>(sy));
-
-	//
 
 	UiTools::adjustDialogPlacement(this);
 
@@ -1587,15 +1568,36 @@ void DialogSignalInfo::updateState()
 
 	// switch font if needed
 	//
-	int oldFontSize = m_currentFontSize;
-	if (m_signal.isAnalog() && m_viewType == E::ValueViewType::Bin64)
+	int labelHeight = ui->labelValue->height();
+
+	if (ui->labelValue->maximumHeight() != labelHeight)
 	{
-		m_currentFontSize = 12;
+		ui->labelValue->setMaximumHeight(labelHeight);
+		ui->labelValueTuning->setMaximumHeight(labelHeight);
+	}
+
+	// Generate value string even if signal is not valid
+	//
+	QString strValue = signalStateText(m_signal, state, m_viewType, m_currentPrecision);
+
+	// Calculate word wrap
+	//
+	bool multiLineText = strValue.contains(QChar::LineFeed);
+
+	// Calculate font size
+	//
+	int oldFontSize = m_currentFontSize;
+
+	if (m_signal.isAnalog() &&
+		(m_viewType == E::ValueViewType::Bin32 || m_viewType == E::ValueViewType::Bin64 || multiLineText == true))
+	{
+		m_currentFontSize = static_cast<int>(labelHeight * 0.33);
 	}
 	else
 	{
-		m_currentFontSize = 20;
+		m_currentFontSize = static_cast<int>(labelHeight * 0.4);
 	}
+
 	if (oldFontSize != m_currentFontSize)
 	{
 		QFont font = ui->labelValue->font();
@@ -1604,11 +1606,7 @@ void DialogSignalInfo::updateState()
 		ui->labelValueTuning->setFont(font);
 	}
 
-	// Generate value string even if signal is not valid
-	//
-	QString strValue = signalStateText(m_signal, state, m_viewType, m_currentPrecision);
-
-	// --
+	// Set text
 	//
 	if (strValue != ui->labelValue->text())
 	{
@@ -1798,7 +1796,19 @@ QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const App
 
 	if (param.isAnalog() == true)
 	{
-		strValue = AppSignalState::toString(state.m_value, viewType, precision);
+		double ipart = 0;
+		double fpart = std::modf(state.m_value, &ipart);
+
+		if((viewType == E::ValueViewType::Bin16 || viewType == E::ValueViewType::Bin32 || viewType == E::ValueViewType::Bin64 || viewType == E::ValueViewType::Hex) &&
+		   precision > 0 &&
+		   fpart != 0)
+		{
+			strValue = tr("Only integer value is displayed in HEX or BIN mode.\nSet view precision to zero to see the value.");
+		}
+		else
+		{
+			strValue = AppSignalState::toString(state.m_value, viewType, precision);
+		}
 	}
 
 	// Generate non valid string
