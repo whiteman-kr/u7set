@@ -36,7 +36,7 @@
 		<TuningDataFramePayload>508</TuningDataFramePayload>
 		<TuningDataFrameSize>512</TuningDataFrameSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
-		<TxDiagDataSize>188</TxDiagDataSize>
+		<TxDiagDataSize>250</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
 		<ClockFrequency>96000000</ClockFrequency>
