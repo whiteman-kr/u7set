@@ -1049,21 +1049,15 @@ public:
 private:
 	void checkLimits() noexcept
 	{
-		auto operatorLs =
-				[](auto op1, auto op2) -> bool
-				{
-					return op1 < op2;
-				};
-
-		auto operatorGt =
-				[](auto op1, auto op2) -> bool
-				{
-					return op1 > op2;
-				};
-
 		if (m_lowLimit.isValid() == true)
 		{
 			Q_ASSERT(m_lowLimit.type() == m_value.type());
+
+            auto operatorLs =
+                [](auto op1, auto op2) -> bool
+                {
+                    return op1 < op2;
+                };
 
 			bool less = false;
 
@@ -1120,7 +1114,7 @@ private:
 #ifdef _MSC_VER
     #pragma warning(pop)
 #endif
-        if (less == true)
+            if (less == true)
 			{
 				m_value = m_lowLimit;
 			}
@@ -1129,6 +1123,12 @@ private:
 		if (m_highLimit.isValid() == true)
 		{
 			Q_ASSERT(m_highLimit.type() == m_value.type());
+
+            auto operatorGt =
+                [](auto op1, auto op2) -> bool
+                {
+                    return op1 > op2;
+                };
 
 			bool gt = false;
 
@@ -1140,43 +1140,43 @@ private:
 			{
 			case QMetaType::Int:
 				assert(m_value.canConvert<int>());
-				gt = operatorGt(m_value.value<int>(), m_lowLimit.value<int>());
+                gt = operatorGt(m_value.value<int>(), m_highLimit.value<int>());
 				break;
 			case QMetaType::UInt:
 				assert(m_value.canConvert<unsigned int>());
-				gt = operatorGt(m_value.value<unsigned int>(), m_lowLimit.value<unsigned int>());
+                gt = operatorGt(m_value.value<unsigned int>(), m_highLimit.value<unsigned int>());
 				break;
 			case QMetaType::LongLong:
 				assert(m_value.canConvert<qlonglong>());
-				gt = operatorGt(m_value.value<qlonglong>(), m_lowLimit.value<qlonglong>());
+                gt = operatorGt(m_value.value<qlonglong>(), m_highLimit.value<qlonglong>());
 				break;
 			case QMetaType::ULongLong:
 				assert(m_value.canConvert<qulonglong>());
-				gt = operatorGt(m_value.value<qulonglong>(), m_lowLimit.value<qulonglong>());
+                gt = operatorGt(m_value.value<qulonglong>(), m_highLimit.value<qulonglong>());
 				break;
 			case QMetaType::Double:
 				assert(m_value.canConvert<double>());
-				gt = operatorGt(m_value.value<double>(), m_lowLimit.value<double>());
+                gt = operatorGt(m_value.value<double>(), m_highLimit.value<double>());
                 break;
             case QMetaType::Long:		//NOLINT
                 assert(m_value.canConvert<long>());
-                gt = operatorGt(m_value.value<long>(), m_lowLimit.value<long>());
+                gt = operatorGt(m_value.value<long>(), m_highLimit.value<long>());
                 break;
             case QMetaType::Short:		//NOLINT
                 assert(m_value.canConvert<short>());
-                gt = operatorGt(m_value.value<short>(), m_lowLimit.value<short>());
+                gt = operatorGt(m_value.value<short>(), m_highLimit.value<short>());
                 break;
             case QMetaType::ULong:		//NOLINT
                 assert(m_value.canConvert<unsigned long>());
-                gt = operatorGt(m_value.value<unsigned long>(), m_lowLimit.value<unsigned long>());
+                gt = operatorGt(m_value.value<unsigned long>(), m_highLimit.value<unsigned long>());
                 break;
             case QMetaType::UShort:		//NOLINT
                 assert(m_value.canConvert<unsigned short>());
-                gt = operatorGt(m_value.value<unsigned short>(), m_lowLimit.value<unsigned short>());
+                gt = operatorGt(m_value.value<unsigned short>(), m_highLimit.value<unsigned short>());
                 break;
             case QMetaType::Float:		//NOLINT
                 assert(m_value.canConvert<float>());
-                gt = operatorGt(m_value.value<float>(), m_lowLimit.value<float>());
+                gt = operatorGt(m_value.value<float>(), m_highLimit.value<float>());
                 break;
 			default:
 				gt = false;
@@ -1185,7 +1185,6 @@ private:
 #ifdef _MSC_VER
     #pragma warning(pop)
 #endif
-
 			if (gt == true)
 			{
 				m_value = m_highLimit;
