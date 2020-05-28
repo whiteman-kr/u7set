@@ -344,7 +344,7 @@
 
 //void MemoryHexView::wheelEvent(QWheelEvent* event)
 //{
-//	QPoint numDegrees = event->angleDelta() / 8;
+//	QPoint numDegrees = event->angleDelta().y() / 8;
 
 //	m_scroll->setValue(m_scroll->value() - numDegrees.y() * 3);
 //	update();

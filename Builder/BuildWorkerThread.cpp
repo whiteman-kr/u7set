@@ -36,7 +36,7 @@ namespace Builder
 
 		QThread::currentThread()->setTerminationEnabled(true);
 
-		QTime buildTime;
+        QElapsedTimer buildTime;
 		buildTime.start();
 
 		bool ok = false;
