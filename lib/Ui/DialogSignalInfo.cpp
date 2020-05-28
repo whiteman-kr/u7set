@@ -1846,7 +1846,7 @@ void QLabelAppSignalDragAndDrop::setAppSignal(const AppSignalParam& signal)
 
 void QLabelAppSignalDragAndDrop::mousePressEvent(QMouseEvent* event)
 {
-	m_dragDrop.onMousePress(event, m_appSignalParam);
+	m_dragDrop.onMousePress(event, QList<AppSignalParam>() << m_appSignalParam);
 
 	return;
 }

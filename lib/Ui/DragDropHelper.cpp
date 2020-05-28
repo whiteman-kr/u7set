@@ -6,7 +6,7 @@ DragDropHelper::DragDropHelper()
 
 }
 
-void DragDropHelper::onMousePress(QMouseEvent* event, AppSignalParam appSignalParam)
+void DragDropHelper::onMousePress(QMouseEvent* event, QList<AppSignalParam> appSignalParams)
 {
 	if (event->button() != Qt::LeftButton)
 	{
@@ -14,7 +14,7 @@ void DragDropHelper::onMousePress(QMouseEvent* event, AppSignalParam appSignalPa
 	}
 
 	m_dragStartPosition = event->pos();
-	m_appSignalParam = appSignalParam;
+	m_appSignalParams = appSignalParams;
 }
 
 void DragDropHelper::onMouseMove(QMouseEvent* event, QObject* dragSource)
@@ -32,8 +32,12 @@ void DragDropHelper::onMouseMove(QMouseEvent* event, QObject* dragSource)
 	// Save signals to protobufer
 	//
 	::Proto::AppSignalSet protoSetMessage;
-	::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-	m_appSignalParam.save(protoSignalMessage);
+
+	for (auto appSignalParam : m_appSignalParams)
+	{
+		::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
+		appSignalParam.save(protoSignalMessage);
+	}
 
 	QByteArray data;
 	data.resize(protoSetMessage.ByteSize());
@@ -51,9 +55,6 @@ void DragDropHelper::onMouseMove(QMouseEvent* event, QObject* dragSource)
 		drag->setMimeData(mimeData);
 
 		drag->exec(Qt::CopyAction);
-
-		qDebug() << "Start drag for " << m_appSignalParam.appSignalId();
-		qDebug() << "Drag and drop data buffer size " << data.size();
 	}
 }
 

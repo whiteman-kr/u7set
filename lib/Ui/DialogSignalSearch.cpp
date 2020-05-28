@@ -377,20 +377,23 @@ void SignalSearchTableView::mousePressEvent(QMouseEvent* event)
 		return;
 	}
 
+	QList<AppSignalParam> appSignalParams;
+
 	QModelIndexList rows = selectionModel()->selectedRows();
-	if (rows.size() != 1)
+
+	for (QModelIndex& index : rows)
 	{
-		return;
+		 bool found = false;
+
+		 AppSignalParam appSignalParam = searchModel->getSignal(index, &found);
+
+		 if (found == true)
+		 {
+			 appSignalParams.push_back(appSignalParam);
+		 }
 	}
 
-	bool found = false;
-	AppSignalParam appSignalParam = searchModel->getSignal(rows.at(0), &found);
-	if (found == false)
-	{
-		return;
-	}
-
-	m_dragDropHelper.onMousePress(event, appSignalParam);
+	m_dragDropHelper.onMousePress(event, appSignalParams);
 
 	return;
 }
@@ -465,7 +468,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	m_tableView->setModel(&m_model);
 	m_tableView->verticalHeader()->hide();
 	m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_tableView->horizontalHeader()->setStretchLastSection(false);
 	m_tableView->setGridStyle(Qt::PenStyle::NoPen);

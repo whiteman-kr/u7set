@@ -10,11 +10,11 @@ class DragDropHelper
 public:
 	DragDropHelper();
 
-	void onMousePress(QMouseEvent* event, AppSignalParam appSignalParam);
+	void onMousePress(QMouseEvent* event, QList<AppSignalParam> appSignalParams);
 	void onMouseMove(QMouseEvent* event, QObject* dragSource);
 
 private:
-	AppSignalParam m_appSignalParam;
+	QList<AppSignalParam> m_appSignalParams;
 	QPoint m_dragStartPosition;
 
 };
