@@ -507,7 +507,7 @@ namespace VFrame30
 
 	void SchemaItemValue::setSignalIdsString(const QString& value)
 	{
-		m_signalIds = value.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+		m_signalIds = value.split(QRegExp("\\s+"), Qt::SkipEmptyParts);
 	}
 
 	QStringList SchemaItemValue::signalIds() const

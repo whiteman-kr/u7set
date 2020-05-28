@@ -247,7 +247,7 @@ namespace VFrame30
 
 	void LogicSchema::setEquipmentIds(const QString& s)
 	{
-		m_equipmentIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+		m_equipmentIds = s.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
 		for (QString& id : m_equipmentIds)
 		{

@@ -75,3 +75,6 @@ unix {
     LIBS += -lprotobuf
 }
 
+RESOURCES += \
+    SimulatorConsole.qrc
+

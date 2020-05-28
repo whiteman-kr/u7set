@@ -143,8 +143,7 @@ namespace Sim
 		void stopThread();
 		void reset();
 
-		bool addToRunList(const QString& equipmentId);
-		int addToRunList(const QStringList& equipmentIds);
+		int setRunList(QStringList equipmentIds);
 
 		void removeFromRunList(const QString& equipmentId);
 		void removeFromRunList(const QStringList& equipmentIds);

@@ -4,7 +4,7 @@
 #include "../lib/AppSignalManager.h"
 #include "../lib/ExportPrint.h"
 #include "../VFrame30/Schema.h"
-#include "../lib/ui/DragDropHelper.h"
+#include "DragDropHelper.h"
 
 class SignalSnapshotModel;
 

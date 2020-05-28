@@ -1498,7 +1498,7 @@ void DialogSignalSnapshot::maskChanged()
 
 	if (maskText.isEmpty() == false)
 	{
-		masks = maskText.split(';', QString::SkipEmptyParts);
+		masks = maskText.split(';', Qt::SkipEmptyParts);
 
 		for (auto mask : masks)
 		{
@@ -1532,7 +1532,7 @@ void DialogSignalSnapshot::tagsChanged()
 
 	if (tagsText.isEmpty() == false)
 	{
-		tags = tagsText.split(';', QString::SkipEmptyParts);
+		tags = tagsText.split(';', Qt::SkipEmptyParts);
 
 		for (auto tag : tags)
 		{

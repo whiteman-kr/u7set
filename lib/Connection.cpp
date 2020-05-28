@@ -846,7 +846,7 @@ namespace Hardware
 			result.push_back(c);
 		}
 
-		qSort(result);
+		std::sort(result.begin(), result.end());
 
 		return result;
 	}

@@ -223,7 +223,7 @@ static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 		//
 		QTreeWidgetItem* addedItemTreeItem = nullptr;
 
-		QStringList pathList = schema->m_path.split(QChar('/'), QString::SplitBehavior::SkipEmptyParts);
+		QStringList pathList = schema->m_path.split(QChar('/'), Qt::SkipEmptyParts);
 
 		if (pathList.isEmpty() == true)
 		{

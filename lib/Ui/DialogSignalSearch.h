@@ -3,7 +3,7 @@
 
 #include "../lib/AppSignal.h"
 #include "../lib/IAppSignalManager.h"
-#include "../lib/ui/DragDropHelper.h"
+#include "DragDropHelper.h"
 
 class SignalSearchSorter	// later move this class to some library file, it can be used in other cases
 {

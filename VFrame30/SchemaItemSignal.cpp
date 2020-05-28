@@ -1135,11 +1135,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 			sLineFeed.replace(';', QChar::LineFeed);
 
-			m_appSignalIds = sLineFeed.split(QChar::LineFeed, QString::SkipEmptyParts);
+			m_appSignalIds = sLineFeed.split(QChar::LineFeed, Qt::SkipEmptyParts);
 		}
 		else
 		{
-			m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+			m_appSignalIds = s.split(QChar::LineFeed, Qt::SkipEmptyParts);
 		}
 
 		for (QString& sref : m_appSignalIds)
@@ -1197,11 +1197,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			QString sLineFeed(s);
 			sLineFeed.replace(';', QChar::LineFeed);
 
-			m_impactAppSignalIds = sLineFeed.split(QChar::LineFeed, QString::SkipEmptyParts);
+			m_impactAppSignalIds = sLineFeed.split(QChar::LineFeed, Qt::SkipEmptyParts);
 		}
 		else
 		{
-			m_impactAppSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+			m_impactAppSignalIds = s.split(QChar::LineFeed, Qt::SkipEmptyParts);
 		}
 
 		for (QString& sref : m_impactAppSignalIds)

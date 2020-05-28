@@ -7,6 +7,7 @@
 #include "../Builder/CfgFiles.h"
 #include "SimLogicModule.h"
 
+
 namespace Sim
 {
 	//
@@ -14,7 +15,8 @@ namespace Sim
 	//
 	Simulator::Simulator(QObject* parent) :
 		QObject(parent),
-		Output()
+		Output(),
+		m_scriptSimulator(this)
 	{
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
@@ -82,6 +84,36 @@ namespace Sim
 	bool Simulator::isStopped() const
 	{
 		return m_control.state() == SimControlState::Stop;
+	}
+
+	bool Simulator::runScript(QString script)
+	{
+		if (m_scriptSimulator.isRunning() == true)
+		{
+			bool ok = m_scriptSimulator.stopScript();
+			if (ok == false)
+			{
+				writeError(tr("RunScript error: cannot stop already running script."));
+				return false;
+			}
+		}
+
+		return m_scriptSimulator.runScript(script);
+	}
+
+	bool Simulator::stopScript()
+	{
+		return m_scriptSimulator.stopScript();
+	}
+
+	bool Simulator::waitScript(unsigned long msecs /*= ULONG_MAX*/)
+	{
+		return m_scriptSimulator.wait(msecs);
+	}
+
+	bool Simulator::scriptResult()
+	{
+		return m_scriptSimulator.result();
 	}
 
 	void Simulator::clearImpl()

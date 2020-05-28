@@ -129,7 +129,7 @@ namespace Builder
 					return false;
 				}
 
-				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
 
 				for (QString& tag : m_schemaTagList)
 				{
@@ -613,7 +613,7 @@ namespace Builder
 			tuningSources = tuningSources.replace(QChar(QChar::CarriageReturn), QChar(';'));
 			tuningSources = tuningSources.replace(QChar(QChar::Tabulation), QChar(';'));
 
-			m_tuningSources = tuningSources.split(QChar(';'), QString::SkipEmptyParts);
+			m_tuningSources = tuningSources.split(QChar(';'), Qt::SkipEmptyParts);
 
 			if (m_tuningSources.isEmpty() == true)
 			{

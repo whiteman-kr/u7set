@@ -84,6 +84,7 @@ SOURCES += \
     ../lib/ModuleFirmware.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimScriptSimulator.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
     SimOutput.cpp \
@@ -120,6 +121,7 @@ HEADERS += \
     ../lib/Hash.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
+    SimScriptSimulator.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \

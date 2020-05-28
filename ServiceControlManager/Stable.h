@@ -27,6 +27,7 @@
 	#pragma warning(disable : 4251)
 	#pragma warning(disable : 4127)
 	#pragma warning(disable : 6326)
+	#pragma warning(disable : 28182)
 #endif
 
 #include <QAbstractSocket>

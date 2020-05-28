@@ -663,7 +663,7 @@ void SimWidget::runSimulation()
 
 		// Start simulation
 		//
-		mutableControl.addToRunList(equipmentIds);
+		mutableControl.setRunList(equipmentIds);
 		mutableControl.startSimulation();
 	}
 

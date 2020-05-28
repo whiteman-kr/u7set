@@ -47,16 +47,28 @@ namespace Sim
 		return;
 	}
 
-	bool Control::addToRunList(const QString& equipmentId)
-	{
-		QStringList l;
-		l << equipmentId;
 
-		return addToRunList(l);
-	}
-
-	int Control::addToRunList(const QStringList& equipmentIds)
+	int Control::setRunList(QStringList equipmentIds)
 	{
+		// if equipmentIds is empty then add all modules to simulation
+		//
+		{
+			auto lms = m_simulator->logicModules();
+
+			for (const auto& lm : lms)
+			{
+				equipmentIds << lm->equipmentId();
+			}
+
+			if (equipmentIds.isEmpty() == true)
+			{
+				writeWaning(tr("Nothing to simulate, no LogicModules are found."));
+				return 0;
+			}
+		}
+
+		// --
+		//
 		writeMessage(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
 		if (state() == SimControlState::Run)
@@ -83,11 +95,13 @@ namespace Sim
 			addedModuleCount ++;
 		}
 
-		// Add to list
+		// set list
 		//
 		{
 			QWriteLocker wl(&m_controlDataLock);
 
+			// Add new LMs, keep old
+			//
 			for (SimControlRunStruct& scrs : lms)
 			{
 				// Check if such lm already present in simulation list
@@ -100,9 +114,27 @@ namespace Sim
 
 				if (presentIt == m_controlData.m_lms.end())
 				{
-					m_controlData.m_lms.push_back(std::move(scrs));
+					m_controlData.m_lms.push_back(scrs);
 				}
 			}
+
+			// Remove LMs
+			//
+			m_controlData.m_lms.erase(
+				std::remove_if(m_controlData.m_lms.begin(),
+							   m_controlData.m_lms.end(),
+							   [&lms](SimControlRunStruct& lm) -> bool
+							   {
+									QString id = lm.equipmentId();
+									return find_if(lms.begin(),
+												   lms.end(),
+												   [&id](SimControlRunStruct& lm)
+												   {
+														return lm.equipmentId() == id;
+												   }) == lms.end();
+							   }
+						),
+				m_controlData.m_lms.end());
 		}
 
 		return addedModuleCount;

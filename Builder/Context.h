@@ -4,7 +4,6 @@
 #include <QJSEngine>
 #include <unordered_set>
 
-#include "../lib/StdHashQString.h"
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
 #include "../lib/Connection.h"

@@ -116,8 +116,8 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		Connections();
-		~Connections();
+		Connections() = default;
+		virtual ~Connections() = default;
 
 	public:
 		void clear();
