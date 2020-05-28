@@ -1137,7 +1137,7 @@ void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_customAppSignalIDMasks = value.split(';', QString::SkipEmptyParts);
+		m_customAppSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
 	}
 
 }
@@ -1162,7 +1162,7 @@ void TuningFilter::setEquipmentIDMask(const QString& value)
 	}
 	else
 	{
-		m_equipmentIDMasks = value.split(';', QString::SkipEmptyParts);
+		m_equipmentIDMasks = value.split(';', Qt::SkipEmptyParts);
 	}
 }
 
@@ -1186,7 +1186,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_appSignalIDMasks = value.split(';', QString::SkipEmptyParts);
+		m_appSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
 	}
 }
 
@@ -1327,7 +1327,7 @@ void TuningFilter::setTags(const QString& value)
 	}
 	else
 	{
-		m_tags = value.split(';', QString::SkipEmptyParts);
+		m_tags = value.split(';', Qt::SkipEmptyParts);
 	}
 }
 

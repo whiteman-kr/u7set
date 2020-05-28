@@ -542,7 +542,7 @@ namespace Builder
 					return false;
 				}
 
-				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
 				schemaTags = m_schemaTagList.join("; ");
 
 				xmlWriter.writeTextElement("SchemaTags", schemaTags);

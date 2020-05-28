@@ -773,7 +773,7 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	m_propertiesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_propertiesTable->setSortingEnabled(true);
 	m_propertiesTable->horizontalHeader()->setStretchLastSection(true);
-	m_propertiesTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	m_propertiesTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	connect(m_propertiesTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SpecificPropertiesEditor::tableSelectionChanged);
 	connect(m_propertiesTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SpecificPropertiesEditor::sortIndicatorChanged);
 
@@ -842,7 +842,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 
 	m_propertiesModel.clear();
 
-	QStringList rows = text.split(QChar::LineFeed, QString::SkipEmptyParts);
+	QStringList rows = text.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
 	for (QString row : rows)
 	{

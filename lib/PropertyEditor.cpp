@@ -1704,7 +1704,7 @@ namespace ExtWidgets
 			spaces += " ";
 		}
 
-		m_plainTextEdit->setTabStopWidth(metrics.width(spaces));
+		m_plainTextEdit->setTabStopDistance(metrics.width(spaces));
 
 		connect(m_plainTextEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
 		connect(m_plainTextEdit->document(), &QTextDocument::contentsChange, this, &PropertyPlainTextEditor::onPlainTextContentsChange);

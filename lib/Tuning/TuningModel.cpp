@@ -297,7 +297,7 @@ TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::ve
 
 	for (const QString& s : valueColumnsAppSignalIdSuffixes)
 	{
-		m_valueColumnAppSignalIdSuffixes.push_back(s.split(';', QString::SkipEmptyParts));
+		m_valueColumnAppSignalIdSuffixes.push_back(s.split(';', Qt::SkipEmptyParts));
 	}
 }
 
@@ -408,7 +408,7 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 					{
 						// Get separate parts of suffix set, separated by '+'. Example TZB5_GENERAL_1SF will give TZB5+_1SF
 
-						QStringList suffixSet = suffix.split('+', QString::SkipEmptyParts);
+						QStringList suffixSet = suffix.split('+', Qt::SkipEmptyParts);
 
 						if (suffixSet.isEmpty() == true)
 						{
