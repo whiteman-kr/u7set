@@ -5376,8 +5376,6 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState&
 	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
 		.arg(currentUser().userId()).arg(sds);
 
-	qDebug() << C_STR(request);
-
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);

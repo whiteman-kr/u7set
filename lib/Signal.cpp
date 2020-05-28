@@ -9,7 +9,6 @@
 
 #include "../Builder/IssueLogger.h"
 #include "../Proto/serialization.pb.h"
-//#include "DeviceHelper.h"
 #include "SignalMacro.h"
 
 
