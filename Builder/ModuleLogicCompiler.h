@@ -176,6 +176,10 @@ namespace Builder
 										   std::set<QString>* linkedSignals,
 										   std::set<const UalItem*>* linkedItems,
 										   std::map<QUuid, const UalItem*>* linkedPins);
+
+		std::shared_ptr<Hardware::DeviceModule> getLmSharedPtr();
+		BusShared getBusShared(const QString& busTypeID);
+
 	private:
 		// pass #1 compilation functions
 		//
@@ -552,7 +556,6 @@ namespace Builder
 
 		std::shared_ptr<Hardware::DeviceObject> getDeviceSharedPtr(const Hardware::DeviceObject* device);
 		std::shared_ptr<Hardware::DeviceObject> getDeviceSharedPtr(const QString& deviceEquipmentID);
-		std::shared_ptr<Hardware::DeviceModule> getLmSharedPtr();
 
 		void dumpApplicationLogicItems();
 

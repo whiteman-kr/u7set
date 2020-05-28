@@ -634,9 +634,9 @@ namespace Builder
 		QHash<UalSignal*, UalSignal*>::iterator end() { return QHash<UalSignal*, UalSignal*>::end(); }
 		QHash<UalSignal*, UalSignal*>::const_iterator end() const { return QHash<UalSignal*, UalSignal*>::end(); }
 
-		UalSignal* createSignal(Signal* s);
+		UalSignal* createSignal(Signal* appSignal);
 
-		UalSignal* createSignal(const UalItem* ualItem, Signal* s, QUuid outPinUuid);
+		UalSignal* createSignal(Signal* appSignal, const UalItem* ualItem, QUuid outPinUuid);
 
 		UalSignal* createConstSignal(const UalItem* ualItem,
 									 E::SignalType constSignalType,
@@ -649,7 +649,8 @@ namespace Builder
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal);
 
-		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
+		UalSignal* createBusParentSignal(Signal* appBusSignal);
+		UalSignal* createBusParentSignal(Signal* appBusSignal, BusShared bus, const UalItem* ualItem, QUuid outPinUuid, const QString& outPinCaption);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

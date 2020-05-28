@@ -4,55 +4,68 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#define ASSERT_RESULT_FALSE_BREAK	assert(false); \
+#define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
 									break;
 
 #define RESULT_FALSE_BREAK			result = false; \
 									break;
 
-#define ASSERT_RETURN_FALSE			assert(false); \
+#define ASSERT_RETURN_FALSE			Q_ASSERT(false); \
 									return false;
 
-#define ASSERT_FALSE_CONTINUE		assert(false); \
+#define ASSERT_FALSE_CONTINUE		Q_ASSERT(false); \
 									continue;
 
 #define TEST_PTR_RETURN_FALSE(ptr)	if (ptr == nullptr) \
 									{	\
-										assert(false);	\
+										Q_ASSERT(false);	\
 										return false; \
+									}
+
+#define TEST_PTR_RETURN_NULLPTR(ptr)	if (ptr == nullptr) \
+									{	\
+										Q_ASSERT(false);	\
+										return nullptr; \
 									}
 
 #define TEST_PTR_LOG_RETURN_FALSE(ptr, log)	if (ptr == nullptr) \
 											{	\
-												assert(false);	\
+												Q_ASSERT(false);	\
 												LOG_NULLPTR_ERROR(log); \
 												return false; \
 											}
 
 #define TEST_PTR_LOG_RETURN_NULLPTR(ptr, log)	if (ptr == nullptr) \
+											{	\
+												Q_ASSERT(false);	\
+												LOG_NULLPTR_ERROR(log); \
+												return nullptr; \
+											}
+
+#define TEST_PTR_LOG_RETURN_NULLPTR(ptr, log)	if (ptr == nullptr) \
 												{	\
-													assert(false);	\
+													Q_ASSERT(false);	\
 													LOG_NULLPTR_ERROR(log); \
 													return nullptr; \
 												}
 
 #define TEST_PTR_LOG_RETURN(ptr, log)		if (ptr == nullptr) \
 											{	\
-												assert(false);	\
+												Q_ASSERT(false);	\
 												LOG_NULLPTR_ERROR(log); \
 												return; \
 											}
 
 #define TEST_PTR_CONTINUE(ptr)		if (ptr == nullptr) \
 									{	\
-										assert(false);	\
+										Q_ASSERT(false);	\
 										continue; \
 									}
 
 #define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
 									{	\
-										assert(false);	\
+										Q_ASSERT(false);	\
 										return; \
 									}
 
@@ -131,5 +144,3 @@ inline quint16 __checkAndCastToQuint16(int value)
 
 bool partitionOfInteger(int number, const std::vector<int>& availableParts, std::vector<int>* resultPartition);
 bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
-
-

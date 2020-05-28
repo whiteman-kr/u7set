@@ -17,12 +17,6 @@ namespace Builder
 	public:
 		struct SignalAddress16
 		{
-		private:
-			Address16 m_address;
-			QString m_signalID;
-			int m_sizeW = 0;
-			bool m_isDiscrete = false;
-
 		public:
 			SignalAddress16() {}
 
@@ -55,6 +49,12 @@ namespace Builder
 
 			void setDiscrete(bool discrete) { m_isDiscrete = discrete; }
 			bool isDiscrete() const { return m_isDiscrete; }
+
+		private:
+			Address16 m_address;
+			QString m_signalID;
+			int m_sizeW = 0;
+			bool m_isDiscrete = false;
 		};
 
 	public:
@@ -100,105 +100,7 @@ namespace Builder
 	{
 		Q_OBJECT
 
-	private:
-
-		struct
-		{
-			MemoryArea memory;
-
-			MemoryArea module[MODULES_COUNT];
-		} m_modules;
-
-		struct
-		{
-			MemoryArea memory;
-
-			MemoryArea channel[OPTO_INTERFACE_COUNT];
-			MemoryArea reserv;
-
-		} m_optoInterface;
-
-		struct
-		{
-			MemoryArea memory;
-
-			MemoryArea bitAccumulator;
-			MemoryArea constBits;
-
-			MemoryArea acquiredDiscreteOutputSignals;
-			MemoryArea acquiredDiscreteInternalSignals;
-
-			MemoryArea nonAcquiredDiscreteOutputSignals;
-			MemoryArea nonAcquiredDiscreteInternalSignals;
-
-			MemoryArea discreteSignalsHeap;
-
-		} m_appBitAdressed;
-
-		struct
-		{
-			MemoryArea memory;
-
-		} m_tuningInterface;
-
-		struct
-		{
-			MemoryArea memory;
-
-			MemoryArea acquiredRawData;							// registered raw data
-
-			MemoryArea acquiredAnalogInputSignals;
-			MemoryArea acquiredAnalogOutputSignals;
-			MemoryArea acquiredAnalogInternalSignals;
-			MemoryArea acquiredAnalogOptoSignals;
-			MemoryArea acquiredAnalogBusChildSignals;
-			MemoryArea acquiredAnalogTuningSignals;
-			MemoryArea acquiredAnalogConstSignals;
-
-			MemoryArea acquiredBuses;
-
-			MemoryArea acquiredDiscreteInputSignals;
-			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
-			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
-			MemoryArea acquiredDiscreteOptoAndBusChildSignals;
-			MemoryArea acquiredDiscreteTuningSignals;
-			MemoryArea acquiredDiscreteConstSignals;
-
-			MemoryArea nonAcquiredAnalogInputSignals;
-			MemoryArea nonAcquiredAnalogOutputSignals;
-			MemoryArea nonAcquiredAnalogInternalSignals;
-
-			MemoryArea nonAcquiredBuses;
-
-			MemoryArea wordAccumulator;
-
-			MemoryArea analogAndBusSignalsHeap;
-
-		} m_appWordAdressed;
-
-		struct ReadWriteAccess
-		{
-			int readCount = 0;
-			int writeCount = 0;
-		};
-
-		int m_appMemorySize = 0;
-		QVector<ReadWriteAccess> m_memory;
-
-		IssueLogger* m_log = nullptr;
-
-		// meory reporting functions nad variables
-
-		int m_sectionStartAddrW = -1;
-
-		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW = -1);
-		void addRecordSignals(QStringList& memFile, MemoryArea& memArea, const QString& title);
-		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
-		void addSignals(QStringList& memFile, MemoryArea& memArea);
-
-
 	public:
-
 		LmMemoryMap(IssueLogger* log);
 
 		bool init(	int appMemorySize,
@@ -306,6 +208,100 @@ namespace Builder
 
 		bool addressInBitMemory(int address) const;
 		bool addressInWordMemory(int address) const;
+
+	private:
+		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW = -1);
+		void addRecordSignals(QStringList& memFile, MemoryArea& memArea, const QString& title);
+		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
+		void addSignals(QStringList& memFile, MemoryArea& memArea);
+
+	private:
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea module[MODULES_COUNT];
+		} m_modules;
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea channel[OPTO_INTERFACE_COUNT];
+			MemoryArea reserv;
+
+		} m_optoInterface;
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea bitAccumulator;
+			MemoryArea constBits;
+
+			MemoryArea acquiredDiscreteOutputSignals;
+			MemoryArea acquiredDiscreteInternalSignals;
+
+			MemoryArea nonAcquiredDiscreteOutputSignals;
+			MemoryArea nonAcquiredDiscreteInternalSignals;
+
+			MemoryArea discreteSignalsHeap;
+
+		} m_appBitAdressed;
+
+		struct
+		{
+			MemoryArea memory;
+
+		} m_tuningInterface;
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea acquiredRawData;							// registered raw data
+
+			MemoryArea acquiredAnalogInputSignals;
+			MemoryArea acquiredAnalogOutputSignals;
+			MemoryArea acquiredAnalogInternalSignals;
+			MemoryArea acquiredAnalogOptoSignals;
+			MemoryArea acquiredAnalogBusChildSignals;
+			MemoryArea acquiredAnalogTuningSignals;
+			MemoryArea acquiredAnalogConstSignals;
+
+			MemoryArea acquiredBuses;
+
+			MemoryArea acquiredDiscreteInputSignals;
+			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
+			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
+			MemoryArea acquiredDiscreteOptoAndBusChildSignals;
+			MemoryArea acquiredDiscreteTuningSignals;
+			MemoryArea acquiredDiscreteConstSignals;
+
+			MemoryArea nonAcquiredAnalogInputSignals;
+			MemoryArea nonAcquiredAnalogOutputSignals;
+			MemoryArea nonAcquiredAnalogInternalSignals;
+
+			MemoryArea nonAcquiredBuses;
+
+			MemoryArea wordAccumulator;
+
+			MemoryArea analogAndBusSignalsHeap;
+
+		} m_appWordAdressed;
+
+		struct ReadWriteAccess
+		{
+			int readCount = 0;
+			int writeCount = 0;
+		};
+
+		int m_appMemorySize = 0;
+		QVector<ReadWriteAccess> m_memory;
+
+		IssueLogger* m_log = nullptr;
+
+		int m_sectionStartAddrW = -1;
 	};
 
 }

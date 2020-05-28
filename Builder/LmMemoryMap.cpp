@@ -106,9 +106,7 @@ namespace Builder
 					array.append(joined);
 				}
 
-				joined.setSignalStrID(sa.signalStrID());
-				joined.setAddress(sa.address());
-				joined.setDiscrete(sa.isDiscrete());
+				joined = sa;
 			}
 			else
 			{

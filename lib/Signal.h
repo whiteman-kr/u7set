@@ -12,6 +12,7 @@
 #include "Hash.h"
 #include "TuningValue.h"
 #include "AppSignalStateFlags.h"
+#include "SignalMacro.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
@@ -41,17 +42,6 @@ class Signal
 	friend class SignalTests;
 
 public:
-	static const QString MACRO_START_TOKEN;
-	static const QString MACRO_END_TOKEN;
-
-	static const QString BUS_SIGNAL_ID_SEPARATOR;
-
-	static const QString MACRO_BUS_TYPE;
-	static const QString MACRO_BUS_APP_SIGNAL_ID;
-	static const QString MACRO_BUS_CUSTOM_APP_SIGNAL_ID;
-	static const QString MACRO_BUS_CAPTION;
-
-public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
@@ -70,9 +60,11 @@ public:
 
 	QString customAppSignalID() const { return m_customAppSignalID; }
 	void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
+	bool customAppSignalIDContainsMacro() const { return m_customAppSignalID.contains(Builder::SignalMacro::START_TOKEN); }
 
 	QString caption() const { return m_caption; }
 	void setCaption(const QString& caption) { m_caption = caption; }
+	bool captionContainsMacro() const { return m_caption.contains(Builder::SignalMacro::START_TOKEN); }
 
 	QString equipmentID() const { return m_equipmentID; }
 	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
@@ -369,10 +361,6 @@ public:
 
 	void setLog(Builder::IssueLogger* log) { m_log = log; }
 
-	QString expandTemplate(const Hardware::DeviceObject& startDeviceObject,
-	                       const QString& templateStr,
-	                       QString* errMsg);
-
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -397,14 +385,6 @@ private:
 
 	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
 							QString* errMsg);
-
-	QString expandMacro(const Hardware::DeviceObject& startDeviceObject,
-						const QString& macroStr,
-						QString* errMsg);
-
-	const Hardware::DeviceObject* getParentObjectOfType(const Hardware::DeviceObject& startObject,
-														const QString& parentObjectType,
-														QString* errMsg);
 
 	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
 

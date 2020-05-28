@@ -1228,55 +1228,64 @@ namespace Builder
 	}
 
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
-											Signal* busSignal,
+											Signal* appBusSignal,
 											Builder::BusShared bus,
 											const QString& outPinCaption,
 											std::shared_ptr<Hardware::DeviceModule> lm,
 											Signal** autoSignalPtr)
 	{
-		// create parent Bus signal
+		TEST_PTR_RETURN_FALSE(bus);
+		TEST_PTR_RETURN_FALSE(lm);
+
+		// at least one of this should be initialized: ualItem, appBusSignal
 		//
-		if (ualItem == nullptr || bus == nullptr)
+		if (ualItem == nullptr && appBusSignal == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
 		m_ualItem = ualItem;
 		m_bus = bus;
 
-		if (busSignal == nullptr)
+		if (appBusSignal == nullptr)
 		{
 			// create auto bus signal
 			//
+			// in this case ualItem and outPinCaption should be initialized!
+			//
+			TEST_PTR_RETURN_FALSE(ualItem);
+			Q_ASSERT(outPinCaption.isEmpty() == false);
+			TEST_PTR_RETURN_FALSE(autoSignalPtr);
+
 			QString appSignalID = QString("%1_%2_%3_%4").
 										arg(AUTO_BUS_ID_PREFIX).
 										arg(lm->equipmentIdTemplate()).
 										arg(ualItem->label()).
 										arg(outPinCaption.toUpper());
 
-			busSignal = *autoSignalPtr = new Signal;
+			*autoSignalPtr = appBusSignal = new Signal;
 
-			busSignal->setAppSignalID(appSignalID);
-			busSignal->setCustomAppSignalID(appSignalID.remove("#"));
-			busSignal->setCaption(busSignal->customAppSignalID());
+			appBusSignal->setAppSignalID(appSignalID);
+			appBusSignal->setCustomAppSignalID(appSignalID.remove("#"));
+			appBusSignal->setCaption(appBusSignal->customAppSignalID());
 
-			busSignal->setSignalType(E::SignalType::Bus);
-			busSignal->setBusTypeID(bus->busTypeID());
+			appBusSignal->setSignalType(E::SignalType::Bus);
+			appBusSignal->setBusTypeID(bus->busTypeID());
 
-			busSignal->setDataSizeW(bus->sizeW());
+			appBusSignal->setDataSizeW(bus->sizeW());
 
-			busSignal->setAcquire(false);
+			appBusSignal->setAcquire(false);
 
-			busSignal->setLm(lm);
+			appBusSignal->setLm(lm);
 		}
 		else
 		{
-			assert(busSignal->isBus());
-			assert(busSignal->busTypeID() == bus->busTypeID());
+			assert(appBusSignal->isBus());
+			assert(appBusSignal->busTypeID() == bus->busTypeID());
 		}
 
-		appendRefSignal(busSignal, false);
+		appendRefSignal(appBusSignal, false);
 
 		return true;
 	}
@@ -1718,6 +1727,11 @@ namespace Builder
 
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
+		if (appSignalID() == "#SHR0S0P1_STATE")
+		{
+			DEBUG_STOP;
+		}
+
 		if (m_isConst == true)
 		{
 			Q_ASSERT(false);					// for Const signals ualAddr isn't assigned
@@ -2204,22 +2218,37 @@ namespace Builder
 		clear();
 	}
 
-	UalSignal* UalSignalsMap::createSignal(Signal* s)
+	UalSignal* UalSignalsMap::createSignal(Signal* appSignal)
 	{
-		return createSignal(nullptr, s, QUuid());
+		TEST_PTR_RETURN_NULLPTR(appSignal);
+
+		switch(appSignal->signalType())
+		{
+		case E::SignalType::Discrete:
+		case E::SignalType::Analog:
+			return createSignal(appSignal, nullptr, QUuid());
+
+		case E::SignalType::Bus:
+			return createBusParentSignal(appSignal);
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return nullptr;
 	}
 
-	UalSignal* UalSignalsMap::createSignal(const UalItem* ualItem, Signal* s, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createSignal(Signal* appSignal, const UalItem* ualItem, QUuid outPinUuid)
 	{
 		// ualItem can be nullptr!!!
 
-		if (s == nullptr)
+		if (appSignal == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return nullptr;
 		}
 
-		UalSignal* ualSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+		UalSignal* ualSignal = m_idToSignalMap.value(appSignal->appSignalID(), nullptr);
 
 		if (ualSignal != nullptr)
 		{
@@ -2238,7 +2267,7 @@ namespace Builder
 		//
 		ualSignal = new UalSignal;
 
-		bool result = ualSignal->createRegularSignal(ualItem, s);
+		bool result = ualSignal->createRegularSignal(ualItem, appSignal);
 
 		if (result == false)
 		{
@@ -2368,32 +2397,56 @@ namespace Builder
 		return privateCreateAutoSignal(ualItem, outPinUuid, templateSignal.signalType(), templateSignal.analogSignalFormat(), -1);
 	}
 
-	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
-													Signal* connectedSignal,
-													BusShared bus,
-													QUuid outPinUuid,
-													const QString& outPinCaption,
-													std::shared_ptr<Hardware::DeviceModule> lm)
+	UalSignal* UalSignalsMap::createBusParentSignal(Signal* appBusSignal)
 	{
-		if (ualItem == nullptr)
+		TEST_PTR_LOG_RETURN_NULLPTR(appBusSignal, m_log);
+
+		if (appBusSignal->isBus() == false)
 		{
-			Q_ASSERT(false);
-			LOG_NULLPTR_ERROR(m_log);
+			LOG_INTERNAL_ERROR(m_log);
 			return nullptr;
 		}
 
-		if ((connectedSignal != nullptr && connectedSignal->isBus() == false) || (bus == nullptr))
+		BusShared bus = m_compiler.getBusShared(appBusSignal->busTypeID());
+
+		if (bus == nullptr)
+		{
+			// Bus type ID %1 of signal %2 is undefined.
+			//
+			m_log->errALC5092(appBusSignal->busTypeID(), appBusSignal->appSignalID());
+			return nullptr;
+		}
+
+		return createBusParentSignal(appBusSignal, bus, nullptr, QUuid(), QString());
+	}
+
+	UalSignal* UalSignalsMap::createBusParentSignal(Signal* appBusSignal,
+													BusShared bus,
+													const UalItem* ualItem,
+													QUuid outPinUuid,
+													const QString& outPinCaption)
+	{
+		// at least one of this should be initialized: ualItem, appBusSignal
+		//
+		if (ualItem == nullptr && appBusSignal == nullptr)
 		{
 			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return nullptr;
 		}
 
-		// connectedSignal can bee nullptr!!!
-		//
-		if (connectedSignal != nullptr)
+		if ((appBusSignal != nullptr && appBusSignal->isBus() == false) || (bus == nullptr))
 		{
-			UalSignal* ualSignal = m_idToSignalMap.value(connectedSignal->appSignalID(), nullptr);
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		//
+
+		if (appBusSignal != nullptr)
+		{
+			UalSignal* ualSignal = m_idToSignalMap.value(appBusSignal->appSignalID(), nullptr);
 
 			if (ualSignal != nullptr)
 			{
@@ -2411,7 +2464,8 @@ namespace Builder
 
 		Signal* autoSignalPtr = nullptr;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, connectedSignal, bus, outPinCaption, lm, &autoSignalPtr);
+		bool result = busParentSignal->createBusParentSignal(ualItem, appBusSignal, bus, outPinCaption,
+															 m_compiler.getLmSharedPtr(), &autoSignalPtr);
 
 		if (result == false)
 		{
@@ -2456,7 +2510,7 @@ namespace Builder
 						continue;
 					}
 
-					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption, lm);
+					busChildSignal = createBusParentSignal(sChild, childBus, ualItem, QUuid(), busSignal.caption);
 				}
 				break;
 

@@ -245,6 +245,18 @@ namespace Builder
 		return result;
 	}
 
+	std::shared_ptr<Hardware::DeviceModule> ModuleLogicCompiler::getLmSharedPtr()
+	{
+		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
+
+		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
+	}
+
+	BusShared ModuleLogicCompiler::getBusShared(const QString& busTypeID)
+	{
+		return m_signals->getBus(busTypeID);
+	}
+
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
@@ -1134,30 +1146,30 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(Signal* s : m_chassisSignals)
+		for(Signal* appSignal : m_chassisSignals)
 		{
-			if (s == nullptr)
+			if (appSignal == nullptr)
 			{
 				LOG_NULLPTR_ERROR(m_log);
 				result = false;
 				continue;
 			}
 
-			if (s->isAcquired() == false)
+			if (appSignal->isAcquired() == false)
 			{
 				continue;
 			}
 
-			if (s->isInput() == true)
+			if (appSignal->isInput() == true)
 			{
-				m_ualSignals.createSignal(s);
+				m_ualSignals.createSignal(appSignal);
 				continue;
 			}
 
-			if (s->enableTuning() == true)
+			if (appSignal->enableTuning() == true)
 			{
-				Q_ASSERT(s->isInternal() == true || s->isOutput() == true);
-				m_ualSignals.createSignal(s);
+				Q_ASSERT(appSignal->isInternal() == true || appSignal->isOutput() == true);
+				m_ualSignals.createSignal(appSignal);
 				continue;
 			}
 		}
@@ -1235,7 +1247,7 @@ namespace Builder
 		return result;
 	}
 
-	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* s, const QString& busTypeID)
+	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* appBusSignal, const QString& busTypeID)
 	{
 		BusShared bus = m_signals->getBus(busTypeID);
 
@@ -1255,7 +1267,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		UalSignal* busParentSignal = m_ualSignals.createBusParentSignal(ualItem, s, bus, outPin.guid(), outPin.caption(), lm);
+		UalSignal* busParentSignal = m_ualSignals.createBusParentSignal(appBusSignal, bus, ualItem, outPin.guid(), outPin.caption());
 
 		return busParentSignal;
 	}
@@ -1475,7 +1487,7 @@ namespace Builder
 			}
 			else
 			{
-				ualSignal = m_ualSignals.createSignal(ualItem, compatibleConnectedSignal, outPin.guid());
+				ualSignal = m_ualSignals.createSignal(compatibleConnectedSignal, ualItem, outPin.guid());
 			}
 			break;
 
@@ -1506,8 +1518,8 @@ namespace Builder
 					return false;
 				}
 
-				ualSignal = m_ualSignals.createBusParentSignal(ualItem, compatibleConnectedSignal, bus,
-															   outPin.guid(), outPin.caption(), lm);
+				ualSignal = m_ualSignals.createBusParentSignal(compatibleConnectedSignal, bus, ualItem,
+															   outPin.guid(), outPin.caption());
 			}
 			break;
 
@@ -1550,15 +1562,15 @@ namespace Builder
 
 		QString validitySignalEquipmentID = port->validitySignalEquipmentID();
 
-		Signal* s = m_equipmentSignals.value(validitySignalEquipmentID);
+		Signal* validityAppSignal = m_equipmentSignals.value(validitySignalEquipmentID);
 
-		if (s == nullptr)
+		if (validityAppSignal == nullptr)
 		{
 			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
 
-		UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
+		UalSignal* ualSignal = m_ualSignals.get(validityAppSignal->appSignalID());
 
 		if (ualSignal != nullptr)
 		{
@@ -1570,7 +1582,7 @@ namespace Builder
 		{
 			// create signal (non-opto! validity is Input signal from module's PI controller)
 			//
-			ualSignal = m_ualSignals.createSignal(ualItem, s, validityPin.guid());
+			ualSignal = m_ualSignals.createSignal(validityAppSignal, ualItem, validityPin.guid());
 
 			if (ualSignal == nullptr)
 			{
@@ -1628,9 +1640,9 @@ namespace Builder
 
 		QString signalID = ualItem->strID();
 
-		Signal* s = m_signals->getSignal(signalID);
+		Signal* appSignal = m_signals->getSignal(signalID);
 
-		if (s == nullptr)
+		if (appSignal == nullptr)
 		{
 			m_log->errALC5000(signalID, ualItem->guid(), ualItem->schemaID());
 			return false;
@@ -1681,7 +1693,7 @@ namespace Builder
 
 		// Only Input and Tunable signals really can generate UalSignal
 		//
-		if (s->isInput() == false && s->enableTuning() == false)
+		if (appSignal->isInput() == false && appSignal->enableTuning() == false)
 		{
 			result = checkInOutsConnectedToSignal(ualItem, true);
 
@@ -1700,7 +1712,7 @@ namespace Builder
 		{
 			// Can't assign value to input or tunable signal '%1' (Logic schema '%2').
 			//
-			m_log->errALC5121(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
+			m_log->errALC5121(appSignal->appSignalID(), ualItem->guid(), ualItem->schemaID());
 			return false;
 		}
 
@@ -1715,7 +1727,33 @@ namespace Builder
 
 		const LogicPin& outPin = ualItem->outputs()[0];
 
-		ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
+		switch(appSignal->signalType())
+		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+			ualSignal = m_ualSignals.createSignal(appSignal, ualItem, outPin.guid());
+			break;
+
+		case E::SignalType::Bus:
+			{
+				BusShared bus = getBusShared(appSignal->busTypeID());
+
+				if (bus == nullptr)
+				{
+					// Bus type ID %1 of signal %2 is undefined.
+					//
+					m_log->errALC5092(appSignal->busTypeID(), appSignal->appSignalID());
+					return false;
+				}
+
+				ualSignal = m_ualSignals.createBusParentSignal(appSignal, bus, ualItem,
+																	outPin.guid(), outPin.caption());
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
 
 		if (ualSignal == nullptr)
 		{
@@ -1905,7 +1943,7 @@ namespace Builder
 				}
 				else
 				{
-					ualSignal = m_ualSignals.createSignal(ualItem, connectedSignal, outPin.guid());
+					ualSignal = m_ualSignals.createSignal(connectedSignal, ualItem, outPin.guid());
 				}
 				break;
 
@@ -1919,7 +1957,7 @@ namespace Builder
 						return false;
 					}
 
-					ualSignal = m_ualSignals.createBusParentSignal(ualItem, connectedSignal, bus, outPin.guid(), outAfbSignal.caption(), lm);
+					ualSignal = m_ualSignals.createBusParentSignal(connectedSignal, bus, ualItem, outPin.guid(), outAfbSignal.caption());
 				}
 				break;
 
@@ -13089,13 +13127,6 @@ namespace Builder
 	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::getDeviceSharedPtr(const QString& deviceEquipmentID)
 	{
 		return m_equipmentSet->deviceObjectSharedPointer(deviceEquipmentID);
-	}
-
-	std::shared_ptr<Hardware::DeviceModule> ModuleLogicCompiler::getLmSharedPtr()
-	{
-		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
-
-		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
 	}
 
 	void ModuleLogicCompiler::dumpApplicationLogicItems()

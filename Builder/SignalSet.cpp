@@ -353,7 +353,8 @@ namespace Builder
 		{
 			Signal& s = (*this)[i];
 
-			if (s.customAppSignalID().contains(Signal::MACRO_START_TOKEN) == false)
+			if (s.customAppSignalIDContainsMacro() == false &&
+					s.captionContainsMacro() == false)
 			{
 				continue;
 			}
@@ -369,38 +370,59 @@ namespace Builder
 				continue;
 			}
 
-			QString errMsg;
-
-			QString expandedCustomID = s.expandTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
-
-			if (errMsg.isEmpty() == false)
+			if (s.customAppSignalIDContainsMacro() == true)
 			{
-				// App signal %1 macro expanding error: %2
-				//
-				m_log->errALC5182(s.appSignalID(), errMsg);
-				result = false;
-				continue;
+				QString errMsg;
+
+				QString expandedCustomID = SignalMacro::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+
+				if (errMsg.isEmpty() == false)
+				{
+					// App signal %1 macro expanding error: %2
+					//
+					m_log->errALC5182(s.appSignalID(), errMsg);
+					result = false;
+					continue;
+				}
+
+				Signal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
+
+				if (existsSignal != nullptr)
+				{
+					// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
+					//
+					m_log->errALC5183(existsSignal->appSignalID(), s.appSignalID());
+					result = false;
+					continue;
+				}
+
+				s.setCustomAppSignalID(expandedCustomID);
+
+				expandedCustomAppSignalIDs.insert(expandedCustomID, &s);
 			}
 
-			Signal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
-
-			if (existsSignal != nullptr)
+			if (s.captionContainsMacro() == true)
 			{
-				// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
-				//
-				m_log->errALC5183(existsSignal->appSignalID(), s.appSignalID());
-				result = false;
-				continue;
+				QString errMsg;
+
+				QString expandedCaption = SignalMacro::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
+
+				if (errMsg.isEmpty() == false)
+				{
+					// App signal %1 macro expanding error: %2
+					//
+					m_log->errALC5182(s.appSignalID(), errMsg);
+					result = false;
+					continue;
+				}
+
+				s.setCaption(expandedCaption);
 			}
-
-			s.setCustomAppSignalID(expandedCustomID);
-
-			expandedCustomAppSignalIDs.insert(expandedCustomID, &s);
 		}
 
 		if (result == true)
 		{
-			LOG_MESSAGE(m_log, QString("CustomAppSignalID macros successfully expanded - %1").
+			LOG_MESSAGE(m_log, QString("App signal macrosses are successfully expanded - %1").
 							arg(expandedCustomAppSignalIDs.count()));
 		}
 
@@ -420,10 +442,10 @@ namespace Builder
 	{
 		Signal* newSignal = new Signal();
 
-		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
-		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + SignalMacro::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + SignalMacro::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
 
-		QString caption = buildBusSignalCaption(busParentSignal, bus, busSignal);
+		QString caption = SignalMacro::expandBusSignalCaptionTemplate(busParentSignal, bus, busSignal);
 
 		newSignal->setCaption(caption);
 		newSignal->setEquipmentID(busParentSignal.equipmentID());
@@ -505,34 +527,6 @@ namespace Builder
 			remove(id);
 		}
 	}
-
-	QString SignalSet::buildBusSignalCaption(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal)
-	{
-		QString caption = busSignal.caption;
-
-		caption.replace(Signal::MACRO_BUS_TYPE, bus->busTypeID());
-		caption.replace(Signal::MACRO_BUS_APP_SIGNAL_ID, busParentSignal.appSignalID());
-		caption.replace(Signal::MACRO_BUS_CUSTOM_APP_SIGNAL_ID, busParentSignal.customAppSignalID());
-		caption.replace(Signal::MACRO_BUS_CAPTION, busParentSignal.caption());
-
-		return caption;
-	}
-
-	/*QString SignalSet::buildBusSignalCaption(const QString& busParentSignalCaption,
-											 const QString& busTypeID,
-											 const QString& busParentSignalCustomID,
-											 const QString& busChildSignalID,
-											 const QString& busChildSignalCaption)
-	{
-		QString caption = busParentSignalCaption;
-
-		caption.replace(Signal::MACRO_BUS_TYPE, busTypeID);
-		caption.replace(Signal::MACRO_BUS_APP_SIGNAL_ID, busParentSignalCustomID);
-		caption.replace(Signal::MACRO_BUS_CUSTOM_APP_SIGNAL_ID, busChildSignalID);
-		caption.replace(Signal::MACRO_BUS_CAPTION, busChildSignalCaption);
-
-		return caption;
-	}*/
 
 	bool SignalSet::checkSignalPropertiesRanges(const Signal& s)
 	{
@@ -643,8 +637,5 @@ namespace Builder
 
 		return result;
 	}
-
-
-
 
 }

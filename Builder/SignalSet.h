@@ -27,20 +27,12 @@ namespace Builder
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 
-/*		static QString buildBusSignalCaption(const QString& busParentSignalCaption,
-												 const QString& busTypeID,
-												 const QString& busParentSignalCustomID,
-												 const QString& busChildSignalID,
-												 const QString& busChildSignalCaption);*/
-
 		Signal* appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
 		Signal* createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
 
 		void findAndRemoveExcludedFromBuildSignals();
 
 	private:
-		QString buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal);
-
 		bool checkSignalPropertiesRanges(const Signal& s);
 		bool checkSignalPropertyRanges(const Signal& s, const QString& propertyName);
 		bool checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName);
