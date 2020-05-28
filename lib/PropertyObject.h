@@ -1073,25 +1073,45 @@ private:
 //#endif
 			switch (m_value.type())
 			{
-			case QMetaType::Int:
+			case QMetaType::Int:		//NOLINT
 				assert(m_value.canConvert<int>());
 				less = operatorLs(m_value.value<int>(), m_lowLimit.value<int>());
 				break;
-			case QMetaType::UInt:
+			case QMetaType::UInt:		//NOLINT
 				assert(m_value.canConvert<unsigned int>());
 				less = operatorLs(m_value.value<unsigned int>(), m_lowLimit.value<unsigned int>());
 				break;
-			case QMetaType::LongLong:
+			case QMetaType::LongLong:	//NOLINT
 				assert(m_value.canConvert<qlonglong>());
 				less = operatorLs(m_value.value<qlonglong>(), m_lowLimit.value<qlonglong>());
 				break;
-			case QMetaType::ULongLong:
+			case QMetaType::ULongLong:	//NOLINT
 				assert(m_value.canConvert<qulonglong>());
 				less = operatorLs(m_value.value<qulonglong>(), m_lowLimit.value<qulonglong>());
 				break;
-			case QMetaType::Double:
+			case QMetaType::Double:		//NOLINT
 				assert(m_value.canConvert<double>());
 				less = operatorLs(m_value.value<double>(), m_lowLimit.value<double>());
+				break;
+			case QMetaType::Long:		//NOLINT
+				assert(m_value.canConvert<long>());
+				less = operatorLs(m_value.value<long>(), m_lowLimit.value<long>());
+				break;
+			case QMetaType::Short:		//NOLINT
+				assert(m_value.canConvert<short>());
+				less = operatorLs(m_value.value<short>(), m_lowLimit.value<short>());
+				break;
+			case QMetaType::ULong:		//NOLINT
+				assert(m_value.canConvert<unsigned long>());
+				less = operatorLs(m_value.value<unsigned long>(), m_lowLimit.value<unsigned long>());
+				break;
+			case QMetaType::UShort:		//NOLINT
+				assert(m_value.canConvert<unsigned short>());
+				less = operatorLs(m_value.value<unsigned short>(), m_lowLimit.value<unsigned short>());
+				break;
+			case QMetaType::Float:		//NOLINT
+				assert(m_value.canConvert<float>());
+				less = operatorLs(m_value.value<float>(), m_lowLimit.value<float>());
 				break;
 			default:
 				less = false;
