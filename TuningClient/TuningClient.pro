@@ -96,6 +96,7 @@ SOURCES +=\
         MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
+    TuningSignalInfo.cpp \
     TuningWorkspace.cpp \
     ConfigController.cpp \
     ../lib/HostAddressPort.cpp \
@@ -143,7 +144,6 @@ SOURCES +=\
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
-    DialogSignalInfo.cpp \
     ../lib/Signal.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
@@ -162,6 +162,7 @@ HEADERS  += MainWindow.h \
     Stable.h \
     TuningPage.h \
     Settings.h \
+    TuningSignalInfo.h \
     TuningWorkspace.h \
     ConfigController.h \
     ../lib/HostAddressPort.h \
@@ -209,7 +210,6 @@ HEADERS  += MainWindow.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
-    DialogSignalInfo.h \
     ../lib/Signal.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAlert.h \
@@ -226,8 +226,8 @@ HEADERS  += MainWindow.h \
 FORMS    += \
     DialogSettings.ui \
     DialogPassword.ui \
-    DialogSignalInfo.ui \
-    SwitchFiltersPageOptions.ui
+    SwitchFiltersPageOptions.ui \
+    TuningSignalInfo.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

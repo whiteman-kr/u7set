@@ -1,5 +1,5 @@
-#include "DialogSignalInfo.h"
-#include "ui_DialogSignalInfo.h"
+#include "TuningSignalInfo.h"
+#include "ui_TuningSignalInfo.h"
 
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
@@ -7,9 +7,9 @@
 #include "TuningClientTcpClient.h"
 #include "Settings.h"
 
-DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
+TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogSignalInfo),
+	ui(new Ui::TuningSignalInfo),
 	m_appSignalHash(appSignalHash),
     m_analogFormat(analogFormat),
 	m_instanceIdHash(instanceIdHash),
@@ -40,12 +40,12 @@ DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 	return;
 }
 
-DialogSignalInfo::~DialogSignalInfo()
+TuningSignalInfo::~TuningSignalInfo()
 {
 	delete ui;
 }
 
-void DialogSignalInfo::timerEvent(QTimerEvent* event)
+void TuningSignalInfo::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
@@ -58,7 +58,7 @@ void DialogSignalInfo::timerEvent(QTimerEvent* event)
 	updateInfo();
 }
 
-void DialogSignalInfo::updateInfo()
+void TuningSignalInfo::updateInfo()
 {
 	bool found = false;
 	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);

@@ -4,7 +4,7 @@
 #include <QKeyEvent>
 #include <QPushButton>
 #include "../VFrame30/DrawParam.h"
-#include "DialogSignalInfo.h"
+#include "TuningSignalInfo.h"
 #include "DialogChooseFilter.h"
 
 #include <QTableView>
@@ -1668,7 +1668,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			auto f = [this, hash]() -> void
 			{
-				DialogSignalInfo* d = new DialogSignalInfo(hash, m_model->analogFormat(), m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
+				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
 				d->show();
 			};
 
