@@ -260,7 +260,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	if (result == true)
 	{
 		QString fileText = file->data();
-		QStringList rows = fileText.split("\n", QString::SkipEmptyParts);
+		QStringList rows = fileText.split("\n", Qt::SkipEmptyParts);
 
 		for (QString row : rows)
 		{
@@ -271,7 +271,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				continue;
 			}
 
-			QStringList&& fields = row.split(';', QString::KeepEmptyParts);
+			QStringList&& fields = row.split(';', Qt::KeepEmptyParts);
 
 			for (QString& field : fields)
 			{

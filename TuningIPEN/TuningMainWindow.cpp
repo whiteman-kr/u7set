@@ -206,7 +206,7 @@ namespace TuningIPEN
 		{
 			caption += ' ';
 		}
-		out << QString("%1 0x%2 = 0b%3 = %4").arg(caption).arg(field, sizeof(field) * 2, 16, QChar('0')).arg(field, sizeof(field) * 8, 2, QChar('0')).arg(field) << endl;
+		out << QString("%1 0x%2 = 0b%3 = %4").arg(caption).arg(field, sizeof(field) * 2, 16, QChar('0')).arg(field, sizeof(field) * 8, 2, QChar('0')).arg(field) << Qt::endl;
 	}
 
 
@@ -217,11 +217,11 @@ namespace TuningIPEN
 		{
 			if (i % 16 == 0)
 			{
-				out << endl << QString("%1: ").arg(i, 3, 16, QChar('0'));
+				out << Qt::endl << QString("%1: ").arg(i, 3, 16, QChar('0'));
 			}
 			out << QString("%1 ").arg(buffer[i], sizeof(*buffer) * 2, 16, QChar('0'));
 		}
-		out << endl;
+		out << Qt::endl;
 	}
 
 
@@ -471,9 +471,9 @@ namespace TuningIPEN
 
 		QTextStream out(&file);
 
-		out << QString("------------------------------ Frame info of %1").arg(caption) << endl;
-		out << QString("At ") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz") << endl;
-		out << QString("-------------------- Header (hex, bin, dec)") << endl;
+		out << QString("------------------------------ Frame info of %1").arg(caption) << Qt::endl;
+		out << QString("At ") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz") << Qt::endl;
+		out << QString("-------------------- Header (hex, bin, dec)") << Qt::endl;
 		auto& header = fotipFrame.header;
 
 		writeField(out, "Protocol version", header.protocolVersion);
@@ -493,7 +493,7 @@ namespace TuningIPEN
 		writeBuffer(out, "------------------------------ Comparison result", reinterpret_cast<quint8*>(fotipFrame.comparisonResult), FOTIP_COMPARISON_RESULT_SIZE);
 		writeBuffer(out, "------------------------------ Data reserv", reinterpret_cast<quint8*>(fotipFrame.reserv), FOTIP_DATA_RESERV_SIZE);
 
-		out << endl << endl;
+		out << Qt::endl << Qt::endl;
 
 		file.close();
 	}

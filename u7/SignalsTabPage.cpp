@@ -347,7 +347,7 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 		return;
 	}
 	QString fileText = file->data();
-	QStringList rows = fileText.split("\n", QString::SkipEmptyParts);
+	QStringList rows = fileText.split("\n", Qt::SkipEmptyParts);
 
 	if (rows.isEmpty() == true)
 	{
@@ -355,7 +355,7 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 		return;
 	}
 
-	QStringList fieldNameList = rows[0].split(';', QString::KeepEmptyParts);
+	QStringList fieldNameList = rows[0].split(';', Qt::KeepEmptyParts);
 	trimm(fieldNameList);
 
 	rows.removeFirst();
@@ -397,7 +397,7 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 			continue;
 		}
 
-		QStringList fields = row.split(';', QString::KeepEmptyParts);
+		QStringList fields = row.split(';', Qt::KeepEmptyParts);
 		trimm(fields);
 
 		if (nameIndex > fields.size())
@@ -1646,8 +1646,8 @@ QVector<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 	m_signalSet.buildID2IndexMap();
 
 	QSet<int> clonedSignalIDs;
-	QList<int> signalIDsList = signalIDs.toList();
-	qSort(signalIDsList);
+	QList<int> signalIDsList = signalIDs.values();
+	std::sort(signalIDsList.begin(), signalIDsList.end());
 	for (const int signalID : signalIDsList)
 	{
 		if (clonedSignalIDs.contains(signalID))
@@ -1667,7 +1667,7 @@ QVector<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		{
 			groupSignalIDs = m_signalSet.getChannelSignalsID(signal);
 		}
-		qSort(groupSignalIDs);
+		std::sort(groupSignalIDs.begin(), groupSignalIDs.end());
 
 		for (int groupSignalID : groupSignalIDs)
 		{
@@ -2062,7 +2062,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsModel, &SignalsModel::updateColumnList, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
-	m_signalsView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+	m_signalsView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
@@ -2575,7 +2575,8 @@ void SignalsTabPage::deleteSignal()
 		int groupId = m_signalsModel->signal(row).signalGroupID();
 		if (groupId != 0)
 		{
-			deletedSignalIDs.unite(m_signalsModel->getChannelSignalsID(groupId).toList().toSet());
+			QVector<int> ids = m_signalsModel->getChannelSignalsID(groupId);
+			deletedSignalIDs.unite(QSet<int>(ids.begin(), ids.end()));
 		}
 		else
 		{
@@ -2862,7 +2863,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 void SignalsTabPage::applySignalIdFilter()
 {
 	m_signalsProxyModel->setIdFilterField(m_signalIdFieldCombo->currentIndex());
-	changeSignalIdFilter(m_filterEdit->text().trimmed().split("|", QString::SkipEmptyParts), false);
+	changeSignalIdFilter(m_filterEdit->text().trimmed().split("|", Qt::SkipEmptyParts), false);
 }
 
 void SignalsTabPage::resetSignalIdFilter()
@@ -3522,7 +3523,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	historyView->setEditTriggers(QTableView::NoEditTriggers);
 
 	historyView->verticalHeader()->setDefaultSectionSize(static_cast<int>(historyView->fontMetrics().height() * 1.4));
-	historyView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+	historyView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
 	historyView->horizontalHeader()->setHighlightSections(false);
 	historyView->horizontalHeader()->setDefaultSectionSize(150);
@@ -3682,7 +3683,7 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_foundList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
 	m_foundList->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_foundList->fontMetrics().height() * 1.4));
-	m_foundList->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+	m_foundList->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
 	m_foundList->horizontalHeader()->setHighlightSections(false);
 	m_foundList->horizontalHeader()->setDefaultSectionSize(100);
