@@ -85,32 +85,32 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 	{
 		v1 = s1.customSignalId();
 		v2 = s2.customSignalId();
-	}
 		break;
+	}
 	case SnapshotColumns::EquipmentID:
 	{
 		v1 = s1.equipmentId();
 		v2 = s2.equipmentId();
-	}
 		break;
+	}
 	case SnapshotColumns::AppSignalID:
 	{
 		v1 = s1.appSignalId();
 		v2 = s2.appSignalId();
-	}
 		break;
+	}
 	case SnapshotColumns::Caption:
 	{
 		v1 = s1.caption();
 		v2 = s2.caption();
-	}
 		break;
+	}
 	case SnapshotColumns::Units:
 	{
 		v1 = s1.unit();
 		v2 = s2.unit();
-	}
 		break;
+	}
 	case SnapshotColumns::Type:
 	{
 		if (s1.isDiscrete() == true && s2.isDiscrete() == true)
@@ -138,33 +138,32 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			v1 = static_cast<int>(s1.type());
 			v2 = static_cast<int>(s2.type());
 		}
-	}
 		break;
-
+	}
 	case SnapshotColumns::Tags:
 	{
 		v1 = s1.tagStringList().join(' ');
 		v2 = s2.tagStringList().join(' ');
-	}
 		break;
+	}
 	case SnapshotColumns::SystemTime:
 	{
 		v1 = st1.m_time.system.timeStamp;
 		v2 = st2.m_time.system.timeStamp;
-	}
 		break;
+	}
 	case SnapshotColumns::LocalTime:
 	{
 		v1 = st1.m_time.local.timeStamp;
 		v2 = st2.m_time.local.timeStamp;
-	}
 		break;
+	}
 	case SnapshotColumns::PlantTime:
 	{
 		v1 = st1.m_time.plant.timeStamp;
 		v2 = st2.m_time.plant.timeStamp;
-	}
 		break;
+	}
 	case SnapshotColumns::Value:
 	{
 		if (st1.m_flags.valid != st2.m_flags.valid)
@@ -192,39 +191,39 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 					v2 = s2.isAnalog();
 				}
 			}
+			break;
 		}
 	}
-		break;
 	case SnapshotColumns::Valid:
 	{
 		v1 = st1.m_flags.valid;
 		v2 = st2.m_flags.valid;
-	}
 		break;
+	}
 	case SnapshotColumns::StateAvailable:
 	{
 		v1 = st1.m_flags.stateAvailable;
 		v2 = st2.m_flags.stateAvailable;
-	}
 		break;
+	}
 	case SnapshotColumns::Simulated:
 	{
 		v1 = st1.m_flags.simulated;
 		v2 = st2.m_flags.simulated;
-	}
 		break;
+	}
 	case SnapshotColumns::Blocked:
 	{
 		v1 = st1.m_flags.blocked;
 		v2 = st2.m_flags.blocked;
-	}
 		break;
+	}
 	case SnapshotColumns::Mismatch:
 	{
 		v1 = st1.m_flags.mismatch;
 		v2 = st2.m_flags.mismatch;
-	}
 		break;
+	}
 	case SnapshotColumns::OutOfLimits:
 	{
 		if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
@@ -237,15 +236,67 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			v1 = st1.m_flags.belowLowLimit;
 			v2 = st2.m_flags.belowLowLimit;
 		}
-
-	}
 		break;
+	}
 	default:
 		Q_ASSERT(false);
 		return index1 < index2;
 	}
 
-	return v1 < v2;
+	if (v1.userType() != v2.userType())
+	{
+		Q_ASSERT(false);
+		return index1 < index2;
+	}
+
+	switch (v1.userType())
+	{
+	case QMetaType::Bool:
+		{
+			return v1.toBool() < v2.toBool();
+			break;
+		}
+	case QMetaType::QString:
+		{
+			return v1.toString() < v2.toString();
+			break;
+		}
+	case QMetaType::Int:
+		{
+			return v1.toInt() < v2.toInt();
+			break;
+		}
+	case QMetaType::UInt:
+		{
+			return v1.toUInt() < v2.toUInt();
+			break;
+		}
+	case QMetaType::LongLong:
+		{
+			return v1.toLongLong() < v2.toLongLong();
+			break;
+		}
+	case QMetaType::ULongLong:
+		{
+			return v1.toULongLong() < v2.toULongLong();
+			break;
+		}
+	case QMetaType::Float:
+		{
+			return v1.toFloat() < v2.toFloat();
+			break;
+		}
+	case QMetaType::Double:
+		{
+			return v1.toDouble() < v2.toDouble();
+			break;
+		}
+	default:
+		break;
+	}
+
+	Q_ASSERT(false);
+	return index1 < index2;
 }
 
 //

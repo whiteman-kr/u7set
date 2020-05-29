@@ -30,7 +30,7 @@ public:
 		TuningDefaultValue
 	};
 
-	SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn = Columns::SignalID, Qt::SortOrder sortOrder = Qt::AscendingOrder);
+	SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec);
 
 	bool operator()(int index1, int index2)
 	{
@@ -40,14 +40,7 @@ public:
 	bool sortFunction(int index1, int index2, const SignalSearchSorter* pThis);
 
 private:
-	Columns m_sortColumn = Columns::SignalID;
-
-	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
-
 	std::vector<AppSignalParam>* m_appSignalParamVec = nullptr;
-
-	QVariant v1;
-	QVariant v2;
 };
 
 class SignalSearchItemModel : public QAbstractItemModel

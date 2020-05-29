@@ -41,19 +41,17 @@ struct TuningModelHashSet
 class TuningModelSorter
 {
 public:
-	TuningModelSorter(TuningModelColumns column, Qt::SortOrder order, const TuningModel* model, const TuningSignalManager* tuningSignalManager);
+	TuningModelSorter(TuningModelColumns column, const TuningModel* model, const TuningSignalManager* tuningSignalManager);
 
 	bool operator()(const TuningModelHashSet& set1, const TuningModelHashSet& set2) const
 	{
-		return sortFunction(set1, set2, m_column, m_order);
+		return sortFunction(set1, set2, m_column);
 	}
 
-	bool sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column, Qt::SortOrder order) const;
+	bool sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column) const;
 
 private:
 	TuningModelColumns m_column = TuningModelColumns::AppSignalID;
-
-	Qt::SortOrder m_order = Qt::AscendingOrder;
 
 	const TuningSignalManager* m_tuningSignalManager = nullptr;
 

@@ -152,7 +152,7 @@ namespace VFrame30
 		//
 		if (appSignal.toTuningType() != TuningValueType::Discrete)
 		{
-			if (value < appSignal.tuningLowBoundToVariant() || value > appSignal.tuningHighBoundToVariant())
+			if (tuningValue < appSignal.tuningLowBound() || tuningValue > appSignal.tuningHighBound())
 			{
 				return false;
 			}
