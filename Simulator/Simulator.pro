@@ -190,7 +190,8 @@ DISTFILES += \
     Scripts/LM1_SR01_SIM.ts \
     Scripts/tsconfig.json \
     Scripts/build.bat \
-    Scripts/out/LM1_SR01_SIM.js
+    Scripts/out/LM1_SR01_SIM.js \
+    SimProjectTests.js
 
 
 

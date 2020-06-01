@@ -87,7 +87,7 @@ namespace Sim
 
 		std::chrono::microseconds m_duration{0};		// Simulation is started for this time
 														// if time < 0 then no time limit
-														// if time == 0 then run one cycle
+                                                        // if time == 0 then run one cycle (NO, IT WILL RESET IF ON PAUSE MODE)
 														// if time > 0 then run this time
 
 		QDateTime currentTime() const

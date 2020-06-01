@@ -6,12 +6,13 @@ Q_LOGGING_CATEGORY(u7sim, "u7.sim")
 
 namespace Sim
 {
+
 	Output::Output(QString scope) :
-		m_scope(scope)
-	{
+        m_scope(scope)
+    {
 		if (m_scope.isEmpty() == false)
 		{
-			writeMessage("Instance created.");
+			writeDebug("Instance created.");
 		}
 
 		return;
@@ -21,10 +22,27 @@ namespace Sim
 	{
 		if (m_scope.isEmpty() == false)
 		{
-			writeMessage("Instance destroyed.");
+			writeDebug("Instance destroyed.");
 		}
 
 		return;
+	}
+
+	void Output::writeDebug(const QString& text)
+	{
+		if (m_scope.isEmpty() == true)
+		{
+			qCDebug(u7sim).noquote() << text;
+		}
+		else
+		{
+			qCDebug(u7sim).noquote() << m_scope  << text;
+		}
+	}
+
+	void Output::writeDebug(const QString& text) const
+	{
+		return const_cast<Output*>(this)->writeDebug(text);
 	}
 
 	void Output::writeMessage(const QString& text)
@@ -37,6 +55,7 @@ namespace Sim
 		{
 			qCInfo(u7sim).noquote() << m_scope  << text;
 		}
+
 		return;
 	}
 
@@ -55,6 +74,7 @@ namespace Sim
 		{
 			qCWarning(u7sim).noquote() << m_scope << text;
 		}
+
 		return;
 	}
 
@@ -90,4 +110,5 @@ namespace Sim
 	{
 		m_scope = value;
 	}
+
 }

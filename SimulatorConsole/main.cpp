@@ -23,11 +23,13 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 	if (QString(context.category) == QLatin1String("u7.sim"))
 	{
 		QByteArray localMsg = msg.toLocal8Bit();
-		switch (type)
+		switch (type)	// NOLINT
 		{
+#ifdef Q_DEBUG
 		case QtDebugMsg:
 			fprintf(stderr, "dbg: %s\n", localMsg.constData());
 			break;
+#endif
 		case QtInfoMsg:
 			fprintf(stderr, "inf: %s\n", localMsg.constData());
 			break;
@@ -35,7 +37,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 			fprintf(stderr, "wrn: %s\n", localMsg.constData());
 			break;
 		case QtCriticalMsg:
-			fprintf(stderr, "err: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            fprintf(stderr, "err: %s\n", localMsg.constData());
 			break;
 		case QtFatalMsg:
 			fprintf(stderr, "fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -101,7 +103,7 @@ bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator
 
 	QString script = file.readAll();
 
-	bool ok = simulator->runScript(script);
+	bool ok = simulator->runScript(script, QFileInfo(file).baseName());
 	if (ok == false)
 	{
 		return false;
@@ -177,6 +179,11 @@ int main(int argc, char *argv[])
 		qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
 
 		bool ok = runScript(scriptFileName, timeout, &simulator);
+
+        if (ok == false)
+        {
+            std::cout << "FAILED\n";
+        }
 
 		return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 	}

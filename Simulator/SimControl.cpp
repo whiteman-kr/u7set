@@ -39,7 +39,7 @@ namespace Sim
 
 	void Control::reset()
 	{
-		writeMessage(tr("Reset"));
+		writeDebug(tr("Reset"));
 
 		QWriteLocker wl(&m_controlDataLock);
 		m_controlData = ControlData{};
@@ -69,7 +69,7 @@ namespace Sim
 
 		// --
 		//
-		writeMessage(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
+		writeDebug(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
 		if (state() == SimControlState::Run)
 		{
@@ -150,7 +150,7 @@ namespace Sim
 
 	void Control::removeFromRunList(const QStringList& equipmentIds)
 	{
-		writeMessage(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
+		writeDebug(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
 		QWriteLocker wl(&m_controlDataLock);
 
@@ -168,7 +168,7 @@ namespace Sim
 
 	bool Control::startSimulation(std::chrono::microseconds duration /* = std::chrono::microseconds{-1}*/)
 	{
-		writeMessage(tr("Start"));
+		writeDebug(tr("Start"));
 
 		QWriteLocker wl(&m_controlDataLock);
 
@@ -202,7 +202,7 @@ namespace Sim
 			m_controlData.m_state = SimControlState::Run;
 
 			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-			m_controlData.m_startTime = (m_controlData.m_startTime / 1'000'000) * 1'000'000;	// It will make start time on the edge of 1s, it will make nice timestamp
+			m_controlData.m_startTime = (m_controlData.m_startTime / 100'000) * 100'000;	// It will make start time on the edge of 100ms, it will make nice timestamp
 
 			m_controlData.m_currentTime = m_controlData.m_startTime;
 			m_controlData.m_duration = duration;
@@ -214,12 +214,8 @@ namespace Sim
 
 		case SimControlState::Pause:
 			m_controlData.m_state = SimControlState::Run;
+            m_controlData.m_startTime = m_controlData.m_currentTime;
 			m_controlData.m_duration = duration;
-			if (duration != std::chrono::microseconds{-1} &&
-				m_controlData.m_currentTime >= m_controlData.m_startTime + m_controlData.m_duration)
-			{
-				m_controlData.m_state = SimControlState::Stop;
-			}
 			break;
 
 		default:
@@ -252,7 +248,7 @@ namespace Sim
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);
 
-		writeMessage(tr("Pause, left time %1, us").arg(leftTime.count()));
+		writeDebug(tr("Pause, left time %1, us").arg(leftTime.count()));
 		return;
 	}
 
@@ -272,7 +268,7 @@ namespace Sim
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);
 
-		writeMessage(tr("Stop, left cycle %1").arg(leftTime.count()));
+		writeDebug(tr("Stop, left cycle %1").arg(leftTime.count()));
 		return;
 	}
 
@@ -288,17 +284,17 @@ namespace Sim
 
 		m_controlData.m_currentTime = cd.m_currentTime;
 
-		for (SimControlRunStruct& rs : m_controlData.m_lms)
-		{
-			for (const SimControlRunStruct& cdrs : cd.m_lms)
-			{
-				if (cdrs.equipmentId() == rs.equipmentId())
-				{
-					rs.m_lastStartTime = cdrs.m_lastStartTime;
-					break;
-				}
-			}
-		}
+        for (SimControlRunStruct& rs : m_controlData.m_lms)
+        {
+            for (const SimControlRunStruct& cdrs : cd.m_lms)
+            {
+                if (cdrs.equipmentId() == rs.equipmentId())
+                {
+                    rs.m_lastStartTime = cdrs.m_lastStartTime;
+                    break;
+                }
+            }
+        }
 
 		return;
 	}
@@ -342,7 +338,7 @@ namespace Sim
 			case SimControlState::Stop:
 				// Have some rest
 				//
-				msleep(200);
+				msleep(50);
 				break;
 
 			case SimControlState::Run:
@@ -360,7 +356,7 @@ namespace Sim
 			case SimControlState::Pause:
 				// Have some rest
 				//
-				msleep(200);
+				yieldCurrentThread();
 				break;
 
 			default:
@@ -379,11 +375,11 @@ namespace Sim
 		using namespace std::chrono;
 
 		bool result = true;
-		ControlData cd = controlData();
+        ControlData cd = controlData();                     // Initialize local data with actual simulation ControlData
 
 		// Get simulation LogicModules
 		//
-		std::vector<SimControlRunStruct>& lms = cd.m_lms;
+        std::vector<SimControlRunStruct>& lms = cd.m_lms;   // Referense to the !local! variable cd
 
 		if (lms.empty() == true)
 		{
@@ -412,7 +408,7 @@ namespace Sim
 
 		// --
 		//
-		QTime perfmanceTimer;
+        QElapsedTimer perfmanceTimer;
 		perfmanceTimer.start();
 
 		microseconds perfmonaceStartedAt = cd.m_currentTime;
@@ -468,7 +464,7 @@ namespace Sim
 				}
 				else
 				{
-					// Task not found for this LM
+                    // Task not found for this LM
 					//
 					if (lm.m_possibleToAdvanceTo <= cd.m_currentTime)
 					{
@@ -494,21 +490,22 @@ namespace Sim
 				{
 					minPossibleTime = lmpt;
 				}
-			}
+            }
 
 			// Shift current time if required
 			//
 			if (minPossibleTime > cd.m_currentTime)
 			{
 				// If current simulation is ahead of physical time, pause it a little bit
-				//
-				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
+                //
+                if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
 					ahead > 0us)
 				{
-					// !!!!!!!!!!!!!!
+                    // !!!!!!!!!!!!!!
 					// COMMENT HERE FOR SPEED UP (IF POSSIBLE, DEPENDS ON HW)
 					//
 					QThread::usleep(ahead.count());
+					//qDebug() << "sleep for us " << ahead.count();
 					// !!!!!!!!!!!!!!
 					// !!!!!!!!!!!!!!
 				}
@@ -537,56 +534,57 @@ namespace Sim
 				break;		// Usually exit point from do-while loop
 			}
 
+            if (cd.m_duration == 0us ||
+                (cd.m_duration > 0us && cd.m_currentTime >= finishTime))
+            {
+                // Simulation time is time up, set PAUSE mode
+                //
+                break;
+            }
+
 			// QThread::yieldCurrentThread();	// Give some time for tasks
 			// This code is instead of QThread::yieldCurrentThread,
 			// It's not tested for several LMs, subject to examine perfomnace
 			//
 			for (SimControlRunStruct& lm : lms)
 			{
-				if (lm.m_task.has_value() == true)
-				{
-					lm.m_task->waitForFinished();
-					break;
-				}
+                if (lm.m_task.has_value() == true)
+                {
+                    lm.m_task->waitForFinished();
+                    break;      // At least one LM has finished the work
+                }
 			}
-		}
-		while (cd.m_duration < 0us ||			// Run always till state is triggered to STOP or PAUSE
-			   cd.m_duration != 0us ||			// Run one cycle only (==0)
-			   (cd.m_duration > 0us && cd.m_currentTime < finishTime));
+        }
+        while (true);	// Run always till state is triggered to STOP or PAUSE
 
-		// Wait everything to finish
-		//
+        // Wait everything to finish and perform post run cycle actions
+        //
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
+
+        TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+        TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+        TimeStamp systemTime{ms.count()};
+
 		for (SimControlRunStruct& lm : lms)
 		{
 			if (lm.m_task.has_value() == true)
 			{
 				QFuture<bool>& future = lm.m_task.value();
-
 				future.waitForFinished();
+
+                lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
 			}
 		}
-
-		// Perform post run cycle actions
-		//
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
-
-		TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-		TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-		TimeStamp systemTime{ms.count()};
-
-		for (SimControlRunStruct& lm : lms)
-		{
-			lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
-		}
-
-		// Set nonvalid state for signal manager
-		//
-		//m_simulator->appSignalManager().setData();
 
 		// Update current time and last time in m_controlData
 		//
 		updateControlData(cd);
 		emit statusUpdate(ControlStatus{controlData()});	// Don't use cd! As it has not updated m_state
+
+        if (state() == SimControlState::Run)
+        {
+            pause();
+        }
 
 		// Some debug info
 		//
@@ -604,7 +602,7 @@ namespace Sim
 								.arg(perfRation);
 
 		//qDebug() << logMessage;
-		writeMessage(logMessage);
+		writeDebug(logMessage);
 
 		return result;
 	}

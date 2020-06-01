@@ -86,7 +86,7 @@ namespace Sim
 		return m_control.state() == SimControlState::Stop;
 	}
 
-	bool Simulator::runScript(QString script)
+	bool Simulator::runScript(QString script, QString testName)
 	{
 		if (m_scriptSimulator.isRunning() == true)
 		{
@@ -98,7 +98,7 @@ namespace Sim
 			}
 		}
 
-		return m_scriptSimulator.runScript(script);
+		return m_scriptSimulator.runScript(script, testName);
 	}
 
 	bool Simulator::stopScript()

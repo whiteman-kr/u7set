@@ -21,7 +21,6 @@ class QTextStream;
 namespace Sim
 {
 	class LogicModule;
-	class ScriptSimulator;
 
 
 	class Simulator : public QObject, protected Output
@@ -40,8 +39,8 @@ namespace Sim
 		bool isPaused() const;
 		bool isStopped() const;
 
-		bool runScript(QString script);	// Starts script in separate thread and returns immediately
-		bool stopScript();				// Stops script if it is running
+		bool runScript(QString script, QString testName);	// Starts script in separate thread and returns immediately
+		bool stopScript();									// Stops script if it is running
 		bool waitScript(unsigned long msecs = ULONG_MAX);		// Wait script to stop
 		bool scriptResult();
 

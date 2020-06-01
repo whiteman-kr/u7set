@@ -60,7 +60,7 @@ namespace Sim
 
 	void LogicModule::clear()
 	{
-		writeMessage(QObject::tr("Clear."));
+		writeDebug(QObject::tr("Clear"));
 
 		m_lmDescription.clear();
 

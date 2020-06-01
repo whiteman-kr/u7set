@@ -134,7 +134,7 @@ namespace Sim
 	//
 	// DeviceEmulator
 	//
-	class DeviceEmulator : public QObject, protected Output
+    class DeviceEmulator : public QObject, protected Output
 	{
 		Q_OBJECT
 

@@ -17,19 +17,27 @@ namespace Sim
 	private:
 		virtual void run() override;
 
+        bool runScriptFunction(const QString& functionName);
+
 	public:
 		void start(QThread::Priority priority = InheritPriority);
 		bool interruptScript();
 
 		bool result() const;
+
 		void setScript(QString value);
+		void setTestName(QString value);
 
 	private:
 		ScriptSimulator* m_scriptSimulator = nullptr;
-		QString m_script;
 
-		QJSEngine m_jsEngine;
-		std::atomic_bool m_result;
+		QString m_script;
+		QString m_testName;
+
+        QJSEngine m_jsEngine;
+        QJSValue m_jsThis;
+
+        std::atomic_bool m_result{true};
 	};
 
 
@@ -53,7 +61,7 @@ namespace Sim
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
 
-		bool runScript(QString script);
+		bool runScript(QString script, QString testName);
 		bool stopScript();
 
 		bool isRunning() const;
@@ -64,9 +72,9 @@ namespace Sim
 		// Public slots which are part of Script API
 		//
 	public slots:
-		void debugOutput(QString str);					// Debug output to qDebug
+        void debugOutput(QString str);					// Debug output to qDebug
 
-		/// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
+        /// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
 		/// <b>Note:</b> Simulation process can last longer than \a msec milliseconds, it depends on project size and simulation hardware.
 		bool startForMs(int msecs);
 
@@ -77,6 +85,15 @@ namespace Sim
 		/// \brief Get signal value, if signal is not found then -1 is returned (what is actully valid value for existing signals too).
 		/// <b>Note:</b> This function does not return full signal state with validity and other flags.
 		double signalValue(QString appSignalId);
+
+		/// \brief Override signal value. Returns true if signal value is overriden.
+		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply override to signal.
+		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they connot be overriden.
+		bool overrideSignalValue(QString appSignalId, double value);
+
+		/// \brief Remove all overriden signals.
+		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
+		void overridesReset();
 
 	public:
 		QString buildPath() const;

@@ -85,7 +85,7 @@ namespace Sim
 
 	DeviceEmulator::~DeviceEmulator()
 	{
-		Output("~DeviceEmulator");
+		writeDebug("~DeviceEmulator");
 		return;
 	}
 
@@ -126,7 +126,7 @@ namespace Sim
 		clear();
 
 		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
-		writeMessage(tr("Init device."));
+		writeDebug(tr("Init device."));
 
 		// --
 		//
@@ -187,7 +187,7 @@ namespace Sim
 
 	bool DeviceEmulator::reset()
 	{
-		writeMessage(tr("Reset"));
+		writeDebug(tr("Reset"));
 
 		setCurrentMode(DeviceMode::Start);
 
@@ -867,7 +867,7 @@ namespace Sim
 
 	bool DeviceEmulator::initEeprom()
 	{
-		writeMessage(tr("Init EEPROM"));
+		writeDebug(tr("Init EEPROM"));
 
 		bool result = true;
 		bool ok = true;
@@ -1161,6 +1161,8 @@ namespace Sim
 
 	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, qint64 workcycle)
 	{
+		//qDebug() << "DeviceEmulator::processOperate " << equipmentId();
+
 		Q_UNUSED(workcycle);
 
 		// One LogicModule Cycle
@@ -1279,7 +1281,7 @@ namespace Sim
 	bool DeviceEmulator::processStartMode()
 	{
 		Q_ASSERT(m_currentMode == DeviceMode::Start);
-		writeMessage(tr("Start mode"));
+		writeDebug(tr("Start mode"));
 
 		setCurrentMode(DeviceMode::Operate);
 
@@ -1618,5 +1620,4 @@ namespace Sim
 	{
 		m_currentMode = value;
 	}
-
 }
