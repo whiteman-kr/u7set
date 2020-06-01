@@ -1275,7 +1275,7 @@ namespace Sim
 				//
 				if (currentInputValue == 1)
 				{
-					result = 0;
+					result = 1;
 					counter = 0;
 				}
 				else
@@ -1286,8 +1286,12 @@ namespace Sim
 
 					if (counter > static_cast<quint32>(time))
 					{
-						result = 1;
+						result = 0;
 						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 1;
 					}
 				}
 			}
@@ -1418,10 +1422,10 @@ namespace Sim
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
 		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
-									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
+									 (instance->param(i_saved_data)->wordValue() & 0x0001) : 0x0000;
 
 		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
-									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+									  ((instance->param(i_saved_data)->wordValue() >> 1) & 0x0001) : 0x0000;
 
 		quint16 currentInputValue = instance->param(i_input)->wordValue();
 
@@ -1469,7 +1473,7 @@ namespace Sim
 				//
 				if (currentInputValue == 1)
 				{
-					result = 0;
+					result = 1;
 					counter = 0;
 				}
 				else
@@ -1480,8 +1484,12 @@ namespace Sim
 
 					if (counter > static_cast<quint32>(time))
 					{
-						result = 1;
+						result = 0;
 						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 1;
 					}
 				}
 			}
@@ -1690,7 +1698,7 @@ namespace Sim
 				//
 				if (currentInputValue == 1)
 				{
-					result = 0;
+					result = 1;
 					counter = 0;
 				}
 				else
@@ -1701,8 +1709,12 @@ namespace Sim
 
 					if (counter > static_cast<quint32>(time))
 					{
-						result = 1;
+						result = 0;
 						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 1;
 					}
 				}
 			}
