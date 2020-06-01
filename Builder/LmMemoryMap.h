@@ -12,7 +12,7 @@ namespace Builder
 
 	class UalSignal;
 
-	struct MemoryArea
+	struct MemoryArea								// Memory area with variable address and size disposed in MemoryDomain
 	{
 	public:
 		struct SignalAddress16
@@ -95,7 +95,6 @@ namespace Builder
 
 	};
 
-
 	class LmMemoryMap : public QObject
 	{
 		Q_OBJECT
@@ -166,7 +165,8 @@ namespace Builder
 		bool appendAcquiredDiscreteInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-		bool appendAcquiredDiscreteOptoAndBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+//		bool appendAcquiredDiscreteBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 
 		bool appendAcquiredDiscreteTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
@@ -176,16 +176,21 @@ namespace Builder
 		bool appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+//		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
 													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
-		bool appendAcquiredBussesInRegBuf(const QVector<UalSignal*>& ualSignals);
+
+		bool appendAcquiredInputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredOutputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredInternalBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredOptoBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 
 		bool appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredAnalogStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredAnalogInternalSignals(const QVector<UalSignal*>& ualSignals);
 
-		bool appendNonAcquiredBusses(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredOutputBusses(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredInternalBusses(const QVector<UalSignal*>& ualSignals);
 
 		Address16 setAcquiredRawDataSize(int sizeW);
 
@@ -216,6 +221,7 @@ namespace Builder
 		void addSignals(QStringList& memFile, MemoryArea& memArea);
 
 	private:
+
 		struct
 		{
 			MemoryArea memory;
@@ -259,22 +265,26 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			MemoryArea acquiredRawData;							// registered raw data
+			MemoryArea acquiredRawData;								// registered raw data
 
 			MemoryArea acquiredAnalogInputSignals;
 			MemoryArea acquiredAnalogOutputSignals;
 			MemoryArea acquiredAnalogInternalSignals;
 			MemoryArea acquiredAnalogOptoSignals;
-			MemoryArea acquiredAnalogBusChildSignals;
+//			MemoryArea acquiredAnalogBusChildSignals;				// Child signals of Input, Output and Internal busses
 			MemoryArea acquiredAnalogTuningSignals;
 			MemoryArea acquiredAnalogConstSignals;
 
-			MemoryArea acquiredBuses;
+			MemoryArea acquiredInputBuses;
+			MemoryArea acquiredOutputBuses;
+			MemoryArea acquiredInternalBuses;
+			MemoryArea acquiredOptoBuses;
 
 			MemoryArea acquiredDiscreteInputSignals;
 			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
 			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
-			MemoryArea acquiredDiscreteOptoAndBusChildSignals;
+			MemoryArea acquiredDiscreteOptoSignals;
+//			MemoryArea acquiredDiscreteBusChildSignals;
 			MemoryArea acquiredDiscreteTuningSignals;
 			MemoryArea acquiredDiscreteConstSignals;
 
@@ -282,7 +292,9 @@ namespace Builder
 			MemoryArea nonAcquiredAnalogOutputSignals;
 			MemoryArea nonAcquiredAnalogInternalSignals;
 
-			MemoryArea nonAcquiredBuses;
+			// non-Acquired Input Buses are disposed in IO modules memory
+			MemoryArea nonAcquiredOutputBuses;
+			MemoryArea nonAcquiredInternalBuses;
 
 			MemoryArea wordAccumulator;
 

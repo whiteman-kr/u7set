@@ -465,6 +465,8 @@ namespace Builder
 		Address16 regBufAddr() const { return m_regBufAddr; }
 		bool setRegBufAddr(Address16 regBufAddr);
 
+		bool checkRegBufAddr() const;
+
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
 

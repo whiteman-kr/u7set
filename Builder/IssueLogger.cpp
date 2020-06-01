@@ -6707,6 +6707,29 @@ namespace Builder
 								arg(appSignalID1).arg(appSignalID2));
 	}
 
+	/// IssueCode: ALC5184
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Undefined RegBuf address of signal %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Undefined RegBuf address of signal. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5184(QString signalID, QUuid signalUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5184, signalUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5184,
+				  QString(tr("Undefined RegBuf address of signal %1 (Logic schema %2).")).
+						arg(signalID).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

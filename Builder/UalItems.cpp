@@ -1727,11 +1727,6 @@ namespace Builder
 
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
-		if (appSignalID() == "#SHR0S0P1_STATE")
-		{
-			DEBUG_STOP;
-		}
-
 		if (m_isConst == true)
 		{
 			Q_ASSERT(false);					// for Const signals ualAddr isn't assigned
@@ -1856,6 +1851,11 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool UalSignal::checkRegBufAddr() const
+	{
+		return m_regBufAddr.isValid();
 	}
 
 	bool UalSignal::setRegValueAddr(Address16 regValueAddr)

@@ -305,7 +305,8 @@ namespace Builder
 		bool createAcquiredDiscreteInputSignalsList();
 		bool createAcquiredDiscreteStrictOutputSignalsList();
 		bool createAcquiredDiscreteInternalSignalsList();
-		bool createAcquiredDiscreteOptoAndBusChildSignalsList();
+		bool createAcquiredDiscreteOptoSignalsList();
+//		bool createAcquiredDiscreteBusChildSignalsList();
 		bool createAcquiredDiscreteTuningSignalsList();
 		bool createAcquiredDiscreteConstSignalsList();
 
@@ -317,7 +318,7 @@ namespace Builder
 		bool createAcquiredAnalogStrictOutputSignalsList();
 		bool createAcquiredAnalogInternalSignalsList();
 		bool createAcquiredAnalogOptoSignalsList();
-		bool createAcquiredAnalogBusChildSignalsList();
+//		bool createAcquiredAnalogBusChildSignalsList();
 		bool createAcquiredAnalogTuninglSignalsList();
 		bool createAcquiredAnalogConstSignalsList();
 
@@ -327,8 +328,13 @@ namespace Builder
 		bool createNonAcquiredAnalogStrictOutputSignalsList();
 		bool createNonAcquiredAnalogInternalSignalsList();
 
-		bool createAcquiredBusSignalsList();
-		bool createNonAcquiredBusSignalsList();
+		bool createAcquiredInputBusesList();
+		bool createAcquiredOutputBusesList();
+		bool createAcquiredInternalBusesList();
+		bool createAcquiredOptoBusesList();
+
+		bool createNonAcquiredOutputBusesList();
+		bool createNonAcquiredInternalBusesList();
 
 		bool setSignalsCalculatedAttributes();
 
@@ -346,7 +352,7 @@ namespace Builder
 
 		// disposing discrete signals in memory
 		//
-		bool setDiscreteInputSignalsUalAddresses();
+		bool setDiscreteAndBusInputSignalsUalAddresses();
 		bool disposeDiscreteSignalsInBitMemory();
 		bool disposeDiscreteSignalsHeap();
 
@@ -471,6 +477,8 @@ namespace Builder
 
 		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
 
+		bool generateMemCopyCode(Address16 toAddr, Address16 fromAddr, int sizeW, const QString& comment, CodeSnippet* code);
+
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
 		const UalSignal *getExtractorBusSignal(const UalItem* appBusExtractor);
@@ -484,15 +492,19 @@ namespace Builder
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
 
 		bool copyAcquiredAnalogOptoSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredAnalogBusChildSignalsToRegBuf(CodeSnippet* code);
+//		bool copyAcquiredAnalogBusChildSignalsToRegBuf(CodeSnippet* code);
 
 		bool copyAcquiredTuningAnalogSignalsToRegBuf(CodeSnippet* code);
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf(CodeSnippet* code);
 
 		bool copyAcquiredAnalogConstSignalsToRegBuf(CodeSnippet* code);
 
+		bool copyAcquiredInputBusesToRegBuf(CodeSnippet* code);
+		bool copyAcquiredOptoBusesToRegBuf(CodeSnippet* code);
+
 		bool copyAcquiredDiscreteInputSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf(CodeSnippet* code);
+		bool copyAcquiredDiscreteOptoSignalsToRegBuf(CodeSnippet* code);
+//		bool copyAcquiredDiscreteBusChildSignalsToRegBuf(CodeSnippet* code);
 		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf(CodeSnippet* code);
 		bool copyAcquiredDiscreteConstSignalsToRegBuf(CodeSnippet* code);
 
@@ -660,12 +672,18 @@ namespace Builder
 
 		Loopbacks m_loopbacks;
 
-		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
-		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
+		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or NOT
+
+		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete Strict Output Signals, used in UAL
+																		//
+																		// Strict Output Signals it is a signals that is not an Input, Tunable, Opto or Const.
+																		// I.e. signals that are formed by the app logic
+
 		QVector<UalSignal*> m_acquiredDiscreteInternalSignals;			// acquired discrete internal non tunable signals, used in UAL
 		QVector<UalSignal*> m_acquiredDiscreteTuningSignals;			// acquired discrete internal tunable signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteConstSignals;
-		QVector<UalSignal*> m_acquiredDiscreteOptoAndBusChildSignals;
+		QVector<UalSignal*> m_acquiredDiscreteOptoSignals;
+//		QVector<UalSignal*> m_acquiredDiscreteBusChildSignals;
 
 		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
@@ -676,7 +694,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredAnalogStrictOutputSignals;		// acquired analog strict output signals, used in UAL
 		QVector<UalSignal*> m_acquiredAnalogInternalSignals;			// acquired analog internal signals, used in UAL
 		QVector<UalSignal*> m_acquiredAnalogOptoSignals;				// acquired analog opto signals (simple copied from opto buffers)
-		QVector<UalSignal*> m_acquiredAnalogBusChildSignals;			// acquired analog opto signals (unlike to opto signals may require conversion from inbus format)
+//		QVector<UalSignal*> m_acquiredAnalogBusChildSignals;			// acquired analog opto signals (unlike to opto signals may require conversion from inbus format)
 		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tunable signals, no matter used in UAL or not
 
 		QHash<int, UalSignal*> m_acquiredAnalogConstIntSignals;
@@ -688,8 +706,13 @@ namespace Builder
 
 		QVector<Signal*> m_analogOutputSignalsToConversion;				// all analog output signals requires conversion
 
-		QVector<UalSignal*> m_acquiredBuses;							// acquired bus signals, used in UAL
-		QVector<UalSignal*> m_nonAcquiredBuses;							// non acquired bus signals, used in UAL
+		QVector<UalSignal*> m_acquiredInputBuses;						// acquired entirely Input Busses (in end of ALP phase should be copied from IO modules memory to regBuf)
+		QVector<UalSignal*> m_acquiredOutputBuses;						// acquired entirely Output Busses (in end of ALP phase should be copied from regBuf to IO modules memory)
+		QVector<UalSignal*> m_acquiredInternalBuses;					// acquired entirely Internal Busses
+		QVector<UalSignal*> m_acquiredOptoBuses;						// acquired entirely Opto Busses
+
+		QVector<UalSignal*> m_nonAcquiredOutputBuses;
+		QVector<UalSignal*> m_nonAcquiredInternalBuses;					// non acquired internal buses AND!
 
 		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
 
