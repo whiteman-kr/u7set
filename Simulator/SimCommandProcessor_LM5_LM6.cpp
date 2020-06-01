@@ -1525,7 +1525,7 @@ namespace Sim
 				{
 					// Start timer
 					//
-					counter = time / m_cycleDurationMs;
+					counter = time / m_cycleDurationMs + 1;
 				}
 
 				if (counter != 0 )
@@ -1592,7 +1592,7 @@ namespace Sim
 					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
-						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+						counter = time / m_cycleDurationMs;		// counter cannot be greater than (time / m_cycleDurationMs)
 					}
 					else
 					{
@@ -1750,7 +1750,7 @@ namespace Sim
 				{
 					// Start timer
 					//
-					counter = time / m_cycleDurationMs;
+					counter = time / m_cycleDurationMs + 1;
 				}
 
 				if (counter != 0 )
