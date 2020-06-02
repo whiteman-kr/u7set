@@ -6,10 +6,10 @@ win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
     qtpropertybrowser \
     QScintilla \
-    ServiceControlManager \
-    Metrology \
     TrendView \
 	VFrame30 \
+	ServiceControlManager \
+	Metrology \
     Simulator \
     SimulatorConsole \
     Builder \

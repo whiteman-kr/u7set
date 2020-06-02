@@ -34,7 +34,8 @@ unix {
 # /DESTDIR
 #
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../lib/SignalMacro.cpp
 
 # Simulator Lib
 #
@@ -77,4 +78,7 @@ unix {
 
 RESOURCES += \
     SimulatorConsole.qrc
+
+HEADERS += \
+    ../lib/SignalMacro.h
 

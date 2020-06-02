@@ -22,6 +22,7 @@ include(../warnings.pri)
 SOURCES +=\
     ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/SignalMacro.cpp \
 	TuningMainWindow.cpp \
 	../lib/ServiceSettings.cpp \
 	../lib/DeviceHelper.cpp \
@@ -73,6 +74,7 @@ HEADERS  += TuningMainWindow.h \
 	../lib/MemLeaksDetection.h \
 	../lib/ServiceSettings.h \
 	../lib/DeviceHelper.h \
+    ../lib/SignalMacro.h \
 	../lib/XmlHelper.h \
 	../lib/DeviceObject.h \
 	../lib/PropertyObject.h \
@@ -154,6 +156,21 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 win32:QMAKE_CXXFLAGS += /std:c++17
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
 #protobuf
 #

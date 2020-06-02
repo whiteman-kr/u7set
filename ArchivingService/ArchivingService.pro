@@ -40,6 +40,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/SignalMacro.cpp \
     ArchivingService.cpp \
     ../lib/Queue.cpp \
     ../lib/Service.cpp \
@@ -90,6 +91,7 @@ HEADERS += \
     ../lib/Address16.h \
     ../lib/HostAddressPort.h \
     ../lib/MemLeaksDetection.h \
+    ../lib/SignalMacro.h \
     ArchivingService.h \
     Stable.h \
     ../lib/Queue.h \
@@ -151,6 +153,21 @@ PRECOMPILED_HEADER = Stable.h
 #protobuf
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
 win32 {
         LIBS += -L$$DESTDIR -lprotobuf

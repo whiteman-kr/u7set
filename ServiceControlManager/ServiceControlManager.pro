@@ -34,6 +34,8 @@ SOURCES += MainWindow.cpp \
     ../lib/Address16.cpp \
     ../lib/ConnectionsInfo.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/SignalMacro.cpp \
     ScanOptionsWidget.cpp \
 	ScmMain.cpp \
 	ScmTcpAppDataClient.cpp \
@@ -57,7 +59,6 @@ SOURCES += MainWindow.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/HostAddressPort.cpp \
     ../AppDataService/AppDataSource.cpp \
     ../lib/CircularLogger.cpp \
@@ -88,8 +89,11 @@ SOURCES += MainWindow.cpp \
 
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
+    ../lib/CUtils.h \
     ../lib/ConnectionsInfo.h \
     ../lib/MemLeaksDetection.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/SignalMacro.h \
     ScanOptionsWidget.h \
     ScmTcpAppDataClient.h \
     ServiceTableModel.h \
@@ -114,7 +118,6 @@ HEADERS  += MainWindow.h \
     ../lib/DeviceObject.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/HostAddressPort.h \
     ../AppDataService/AppDataSource.h \
     ../lib/CircularLogger.h \
@@ -164,6 +167,22 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 #protobuf
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+
+
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
 win32 {
 	LIBS += -L$$DESTDIR -lprotobuf

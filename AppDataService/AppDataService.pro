@@ -34,6 +34,7 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/SignalMacro.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -86,6 +87,7 @@ SOURCES += \
 HEADERS += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/SignalMacro.h \
 	Stable.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
@@ -145,10 +147,25 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#protobuf
-#
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
+#protobuf
+#
 win32 {
 	LIBS += -L$$DESTDIR -lprotobuf
 

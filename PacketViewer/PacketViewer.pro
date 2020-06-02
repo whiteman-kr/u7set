@@ -29,6 +29,7 @@ unix {
 
 SOURCES += main.cpp\
     ../lib/Address16.cpp \
+    ../lib/SignalMacro.cpp \
         SourceListWidget.cpp \
     PacketSourceModel.cpp \
     SourceStatusWidget.cpp \
@@ -59,6 +60,7 @@ SOURCES += main.cpp\
 
 HEADERS  += SourceListWidget.h \
     ../lib/Address16.h \
+    ../lib/SignalMacro.h \
     PacketSourceModel.h \
     SourceStatusWidget.h \
     ../lib/DataSource.h \
@@ -95,6 +97,21 @@ PRECOMPILED_HEADER = Stable.h
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
 #protobuf
 #
