@@ -328,7 +328,7 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		}
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == Columns::IssuesColumn)
 		{
@@ -651,7 +651,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 	//
 	QModelIndexList sortedRowList = selectedIndexes;
 
-	qSort(sortedRowList.begin(), sortedRowList.end(),		// Actually, this sort is not required anymore, as rows to remove are stored in map removeRows, which is sorted itslef
+	std::sort(sortedRowList.begin(), sortedRowList.end(),		// Actually, this sort is not required anymore, as rows to remove are stored in map removeRows, which is sorted itslef
 		[](QModelIndex& m1, QModelIndex m2)
 		{
 			return m1.internalId() >= m2.internalId();

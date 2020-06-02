@@ -23,11 +23,13 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 	if (QString(context.category) == QLatin1String("u7.sim"))
 	{
 		QByteArray localMsg = msg.toLocal8Bit();
-		switch (type)
+		switch (type)	// NOLINT
 		{
+#ifdef Q_DEBUG
 		case QtDebugMsg:
 			fprintf(stderr, "dbg: %s\n", localMsg.constData());
 			break;
+#endif
 		case QtInfoMsg:
 			fprintf(stderr, "inf: %s\n", localMsg.constData());
 			break;
@@ -35,7 +37,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 			fprintf(stderr, "wrn: %s\n", localMsg.constData());
 			break;
 		case QtCriticalMsg:
-			fprintf(stderr, "err: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            fprintf(stderr, "err: %s\n", localMsg.constData());
 			break;
 		case QtFatalMsg:
 			fprintf(stderr, "fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -49,6 +51,74 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 
 	return;
 }
+
+void showProgrammUsageHint()
+{
+	std::cout << "Programm usage:\n";
+	std::cout << "  SimulatorConsole <BuildDirectory>             - Run simulation for all modules from build <BuildDirectory>\n";
+	std::cout << "  SimulatorConsole <BuildDirectory> [Script.js] - Run simulation script for build <BuildDirectory>\n";
+	std::cout << "  SimulatorConsole [/create Script.js]          - Create simple example of simulation script\n";
+	std::cout << "  SimulatorConsole [-create Script.js]          - Create simple example of simulation script\n";
+
+	return;
+}
+
+bool generateScript(QString fileName)
+{
+	QFile file{fileName};
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
+	{
+		std::cout << file.errorString().toStdString() << "\n";
+		return false;
+	}
+
+	QFile rcFile{":/ScriptSample.js"};
+	if (rcFile.open(QIODevice::ReadOnly) == false)
+	{
+		std::cout << rcFile.errorString().toStdString() << "\n";
+		return false;
+	}
+
+	QString str = rcFile.readAll();
+
+	QTextStream out(&file);
+	out << str;
+
+	return true;
+}
+
+bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator)
+{
+	assert(simulator);
+
+	// Script must be run
+	//
+	QFile file{scriptFileName};
+
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		qDebug() << file.errorString();
+		return false;
+	}
+
+	QString script = file.readAll();
+
+	bool ok = simulator->runScript(script, QFileInfo(file).baseName());
+	if (ok == false)
+	{
+		return false;
+	}
+
+	ok = simulator->waitScript(timeout < 0 ? ULONG_MAX : timeout);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	ok = simulator->scriptResult();
+	return ok;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -64,23 +134,66 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	Sim::Simulator simulator;
+	QStringList args = QCoreApplication::arguments();
 
-	if (bool ok = simulator.load("D:/Develop/Build/test_simulator-debug/build");
+	if (args.size() < 2)
+	{
+		showProgrammUsageHint();
+		return EXIT_FAILURE;
+	}
+
+	if (args[1].compare("/create", Qt::CaseInsensitive) == 0 ||
+		args[1].compare("-create", Qt::CaseInsensitive) == 0)
+	{
+		if (args.size() < 3)
+		{
+			std::cout << " Script file name is not specified.\n";
+			return EXIT_FAILURE;
+		}
+
+		bool ok = generateScript(args[2]);
+
+		return ok == true ? EXIT_SUCCESS : EXIT_FAILURE;
+	}
+
+	// --
+	//
+	Sim::Simulator simulator;
+	QString buildPath = args[1];
+
+	if (bool ok = simulator.load(buildPath);
 		ok == false)
 	{
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	// Add modules to simulation
 	//
-	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
-	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
+	simulator.control().setRunList({});
 
-	// Start simulation
-	//
-	simulator.control().startSimulation(std::chrono::microseconds{-1});
+	if (args.size() > 2)
+	{
+		// Script must be run
+		//
+		QString scriptFileName = args[2];
+		qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
+
+		bool ok = runScript(scriptFileName, timeout, &simulator);
+
+        if (ok == false)
+        {
+            std::cout << "FAILED\n";
+        }
+
+		return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	}
+	else
+	{
+		// Start simulation
+		//
+		simulator.control().startSimulation(std::chrono::microseconds{-1});
+	}
 
 	getchar();
-	return 0;
+	return EXIT_SUCCESS;
 }

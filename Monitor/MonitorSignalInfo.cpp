@@ -2,6 +2,7 @@
 #include "MonitorCentralWidget.h"
 #include "TcpSignalClient.h"
 #include "../lib/Ui/UiTools.h"
+#include "ui_DialogSignalInfo.h"
 
 bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget)
 {
@@ -30,7 +31,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController*
 														   tuningEnabled,
 														   centralWidget);
 
-			connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, msi, &DialogSignalInfo::onSignalParamAndUnitsArrived);
+			connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
 
 			msi->show();
 			msi->raise();
@@ -51,9 +52,15 @@ bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController*
 MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 MonitorConfigController* configController,
 									 IAppSignalManager* appSignalManager,
-									 VFrame30::TuningController* tuningController, bool tuningEnabled,
+									 VFrame30::TuningController* tuningController,
+									 bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
-	DialogSignalInfo(signal, appSignalManager, tuningController, tuningEnabled, centralWidget),
+	DialogSignalInfo(signal,
+					 appSignalManager,
+					 tuningController,
+					 tuningEnabled,
+					 DialogType::Monitor,
+					 centralWidget),
 	m_configController(configController),
 	m_centralWidget(centralWidget)
 {
@@ -64,7 +71,36 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 		return;
 	}
 
+	return;
 }
+
+void MonitorSignalInfo::onSignalParamAndUnitsArrived()
+{
+	setTuningEnabled(m_configController->configuration().tuningEnabled);
+
+	// Refresh signal param inself
+
+	bool ok = false;
+
+	AppSignalParam newSignal = theSignals.signalParam(signal().hash(), &ok);
+
+	if (ok == false)
+	{
+		//Signal was deleted, keep its #appSignalId and Hash
+		//
+		AppSignalParam oldSignal = signal();
+
+		newSignal = AppSignalParam();
+		newSignal.setAppSignalId(oldSignal.appSignalId());
+		newSignal.setHash(oldSignal.hash());
+
+	}
+
+	updateSignal(newSignal);
+
+	return;
+}
+
 
 QStringList MonitorSignalInfo::schemasByAppSignalId(const QString& appSignalId)
 {
@@ -88,18 +124,7 @@ void MonitorSignalInfo::setSchema(QString schemaId, QStringList highlightIds)
 	return;
 }
 
-
-/*std::vector<VFrame30::SchemaDetails> MonitorSignalInfo::schemasDetails()
+std::optional<Signal> MonitorSignalInfo::getSignalExt(const AppSignalParam& /*appSignalParam*/)
 {
-	return m_configController->schemasDetails();
+	return {};
 }
-
-std::set<QString> MonitorSignalInfo::schemaAppSignals(const QString& schemaStrId)
-{
-	if (schemaStrId.isEmpty() == false)
-	{
-		return m_configController->schemaAppSignals(schemaStrId);
-	}
-
-	return std::set<QString>();
-}*/

@@ -85,7 +85,7 @@ namespace Sim
 
 	DeviceEmulator::~DeviceEmulator()
 	{
-		Output("~DeviceEmulator");
+		writeDebug("~DeviceEmulator");
 		return;
 	}
 
@@ -126,7 +126,7 @@ namespace Sim
 		clear();
 
 		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
-		writeMessage(tr("Init device."));
+		writeDebug(tr("Init device."));
 
 		// --
 		//
@@ -187,7 +187,7 @@ namespace Sim
 
 	bool DeviceEmulator::reset()
 	{
-		writeMessage(tr("Reset"));
+		writeDebug(tr("Reset"));
 
 		setCurrentMode(DeviceMode::Start);
 
@@ -326,29 +326,147 @@ namespace Sim
 
 	// RAM access
 	//
-	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 size)
+	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 sizeW)
 	{
-		while (size-- > 0)
+//		while (size-- > 0)
+//		{
+//			quint16 w = readRamWord(src++);
+//			writeRamWord(dst++, w);
+//		}
+
+		switch (sizeW)
 		{
-			quint16 w = readRamWord(src++);
-			writeRamWord(dst++, w);
+		case 1:
+			{
+				quint16 w = readRamWord(src);
+				writeRamWord(dst, w);
+			}
+			return true;
+		case 2:
+			{
+				quint32 dw = readRamDword(src);
+				writeRamDword(dst, dw);
+			}
+			return true;
+		default:
+			{
+				bool result = m_ram.movMem(src, dst, sizeW);
+				if (result == false)
+				{
+					SIM_FAULT(QString("move ram mem error, srcW %1, dstW %2, sizeW %3")
+								.arg(src)
+								.arg(dst)
+								.arg(sizeW));
+				}
+
+				return result;
+			}
+		}
+	}
+
+	bool DeviceEmulator::movRamMem(Ram::Handle memoryAreaHandleSrc, quint32 src, Ram::Handle memoryAreaHandleDst, quint32 dst, quint32 sizeW)
+	{
+		RamArea* ramAreaSrc = m_ram.memoryArea(memoryAreaHandleSrc);
+		if (ramAreaSrc == nullptr)
+		{
+			SIM_FAULT(QString("Command movmem error, memory area src handle %1 not found").arg(memoryAreaHandleSrc));
 		}
 
-		// readRamWord, writeRamWord have checks and will set FAULT in case of error
-		//
-		return true;
+		RamArea* ramAreaDst = m_ram.memoryArea(memoryAreaHandleDst);
+		if (ramAreaDst == nullptr)
+		{
+			SIM_FAULT(QString("Command movmem error, memory area dst handle %1 not found").arg(memoryAreaHandleDst));
+		}
+
+		QByteArray buffer;
+
+		bool ok = ramAreaSrc->readToBuffer(src, sizeW, &buffer, true);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Command movmem error, read buffer error, handle %1, offset %2, sizeW %3")
+						.arg(memoryAreaHandleSrc)
+						.arg(src)
+						.arg(sizeW));
+		}
+
+		ok = ramAreaDst->writeBuffer(dst, buffer);
+		if (ok == false)
+		{
+			SIM_FAULT(QString("Command movmem error, write data error, handle %1, offset %2, sizeW %3")
+					  .arg(memoryAreaHandleDst)
+					  .arg(dst)
+					  .arg(sizeW));
+		}
+
+		return ok;
 	}
 
 	bool DeviceEmulator::setRamMem(quint32 address, quint16 data, quint16 size)
 	{
-		while (size-- > 0)
+		switch (size)
 		{
-			writeRamWord(address++, data);
-		}
+		case 1:
+			{
+				writeRamWord(address, data);
+				return true;
+			}
+		case 2:
+			{
+				writeRamWord(address++, data);
+				writeRamWord(address, data);
+				return true;
+			}
+		default:
+			{
+				bool ok = m_ram.setMem(address, size, data);
+				if (ok == false)
+				{
+					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3")
+								.arg(address)
+								.arg(size)
+								.arg(data));
+				}
 
-		// writeRamWord have checks and will set FAULT in case of error
-		//
-		return true;
+				return ok;
+			}
+		}
+	}
+
+	bool DeviceEmulator::setRamMem(Ram::Handle memoryAreaHandle, quint32 address, quint16 data, quint16 size)
+	{
+		switch (size)
+		{
+		case 1:
+			{
+				writeRamWord(memoryAreaHandle, address, data);
+				return true;
+			}
+		case 2:
+			{
+				writeRamWord(memoryAreaHandle, address++, data);
+				writeRamWord(memoryAreaHandle, address, data);
+				return true;
+			}
+		default:
+			{
+				RamArea* ramArea = m_ram.memoryArea(memoryAreaHandle);
+				if (ramArea == nullptr)
+				{
+					SIM_FAULT(QString("setmem error, can't get memory area by handle %1").arg(memoryAreaHandle));
+				}
+
+				bool ok = ramArea->setMem(address, size, data);
+				if (ok == false)
+				{
+					SIM_FAULT(QString("setmem error, address %1, sizeW %2, data %3")
+								.arg(address)
+								.arg(size)
+								.arg(data));
+				}
+
+				return ok;
+			}
+		}
 	}
 
 	bool DeviceEmulator::writeRamBit(quint32 offsetW, quint16 bitNo, quint16 data)
@@ -749,7 +867,7 @@ namespace Sim
 
 	bool DeviceEmulator::initEeprom()
 	{
-		writeMessage(tr("Init EEPROM"));
+		writeDebug(tr("Init EEPROM"));
 
 		bool result = true;
 		bool ok = true;
@@ -1043,6 +1161,8 @@ namespace Sim
 
 	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, qint64 workcycle)
 	{
+		//qDebug() << "DeviceEmulator::processOperate " << equipmentId();
+
 		Q_UNUSED(workcycle);
 
 		// One LogicModule Cycle
@@ -1161,7 +1281,7 @@ namespace Sim
 	bool DeviceEmulator::processStartMode()
 	{
 		Q_ASSERT(m_currentMode == DeviceMode::Start);
-		writeMessage(tr("Start mode"));
+		writeDebug(tr("Start mode"));
 
 		setCurrentMode(DeviceMode::Operate);
 
@@ -1500,5 +1620,4 @@ namespace Sim
 	{
 		m_currentMode = value;
 	}
-
 }

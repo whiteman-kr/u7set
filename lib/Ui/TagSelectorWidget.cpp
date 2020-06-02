@@ -428,7 +428,7 @@ namespace TagSelector
 
 	Qt::Orientations FlowLayout::expandingDirections() const
 	{
-		return 0;
+		return {};
 	}
 
 	bool FlowLayout::hasHeightForWidth() const

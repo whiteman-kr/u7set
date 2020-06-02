@@ -1,8 +1,11 @@
 #ifndef DIALOGSIGNALINFO_H
 #define DIALOGSIGNALINFO_H
 
+#include <optional>
 #include "../VFrame30/TuningController.h"
 #include "../lib/AppSignalManager.h"
+#include "../lib/Signal.h"
+#include "../lib/Ui/DragDropHelper.h"
 
 namespace Ui {
 	class DialogSignalInfo;
@@ -69,17 +72,35 @@ class DialogSignalInfo : public QDialog
 {
 	Q_OBJECT
 
-
-public slots:
-	void onSignalParamAndUnitsArrived();
-
 protected:
-	DialogSignalInfo(const AppSignalParam& signal, IAppSignalManager* appSignalManager, VFrame30::TuningController* tuningController, bool tuningEnabled, QWidget* parent);
+	enum class DialogType
+	{
+		Monitor,
+		Simulator
+	};
+
+	DialogSignalInfo(const AppSignalParam& signal,
+					 IAppSignalManager* appSignalManager,
+					 VFrame30::TuningController* tuningController,
+					 bool tuningEnabled,
+					 DialogType dialogType,
+					 QWidget* parent);
 	virtual ~DialogSignalInfo();
 
+	// Register functions
 	static DialogSignalInfo* dialogRegistered(const QString& appSignalId);
 	static void registerDialog(const QString& appSignalId, DialogSignalInfo* dialog);
 	static void unregisterDialog(const QString& appSignalId);
+
+	// Signal and parameters
+	bool tuningEnabled() const;
+	void setTuningEnabled(bool enabled);
+
+	AppSignalParam signal() const;
+	void updateSignal(const AppSignalParam& signal);
+
+protected:
+	virtual std::optional<Signal> getSignalExt(const AppSignalParam& appSignalParam) = 0;
 
 private:
 	enum class SchemasColumns
@@ -99,6 +120,7 @@ private:
 
 private slots:
 	void preparePropertiesContextMenu(const QPoint& pos);
+	void preparePropertiesExtContextMenu(const QPoint& pos);
 	void prepareSchemaContextMenu(const QPoint& pos);
 	void prepareSetpointsContextMenu(const QPoint& pos);
 
@@ -112,41 +134,57 @@ private slots:
 	void switchToSchema();
 	void showSetpointDetails();
 
-
-protected:
+private:
 	virtual void showEvent(QShowEvent* e) override;
 	virtual void timerEvent(QTimerEvent* event) override;
-	void mousePressEvent(QMouseEvent* event);
-
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 	virtual QStringList schemasByAppSignalId(const QString& appSignalId) = 0;
 	virtual void setSchema(QString schemaId, QStringList highlightIds) = 0;
 
 private:
+	// Tab widget helper functions
+	//
+	int tabPageExists(const QString& tabName);
+	QWidget* tabPageWidget(const QString& tabName);
+	void addTabPage(const QString& tabName, QWidget* widget);
+	void removeTabPage(const QString& tabName);
+
+	//
+	void updateSingnalData();
+
 	void fillSignalInfo();
 	void fillProperties();
+	void fillExtProperties();
 	void fillSetpoints();
 	void fillSchemas();
+	void updateTuningTab();
 
-	void updateData();
+	//
+	void updateDynamicData();
 
 	void updateState();
 	void updateSetpoints();
 
+	//
 	void stateContextMenu(QPoint pos);
 
 	QString signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
 
 private:
+	Ui::DialogSignalInfo *ui;
+
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
 
-	Ui::DialogSignalInfo *ui;
+	AppSignalParam m_signal;
 
 	IAppSignalManager* m_appSignalManager = nullptr;
 
 	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
-
-	AppSignalParam m_signal;
+	bool m_tuningEnabled = false;
+	QWidget* m_tuningTabWidget = nullptr;
 
 	std::vector<std::shared_ptr<Comparator>> m_setpoints;
 
@@ -159,6 +197,7 @@ private:
 	int m_contextMenuSetpointIndex = -1;
 
 	bool m_firstShow = true;
+
 };
 
 
@@ -176,7 +215,7 @@ protected:
 
 private:
 	AppSignalParam m_appSignalParam;
-	QPoint m_dragStartPosition;
+	DragDropHelper m_dragDrop;
 };
 
 #endif // DIALOGSIGNALINFO_H

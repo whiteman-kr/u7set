@@ -529,17 +529,26 @@ bool SpecificPropertyModel::checkLimits(QString* errorMsg)
 			return false;
 		}
 
-		if (lowLimit.isNull() == false && highLimit.isNull() == false)
+		if (lowLimit.isNull() == false &&
+		    highLimit.isNull() == false &&
+		    lowLimit.canConvert(QMetaType::Double) == true &&
+		    highLimit.canConvert(QMetaType::Double) == true)
 		{
-			if (lowLimit >= highLimit)
+			double lowLimitDouble = lowLimit.toDouble();
+			double highLimitDouble = highLimit.toDouble();
+
+			if (lowLimitDouble >= highLimitDouble)
 			{
 				*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value must be greater than LowLimit property value.").arg(spd->caption());
 				return false;
 			}
 
-			if (defaultValue.isNull() == false)
+			if (defaultValue.isNull() == false &&
+			    defaultValue.canConvert(QMetaType::Double) == true)
 			{
-				if (defaultValue < lowLimit || defaultValue > highLimit)
+				double defaultValueDouble = defaultValue.toDouble();
+
+				if (defaultValueDouble < lowLimitDouble || defaultValueDouble > highLimitDouble)
 				{
 					*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value must be in range from LowLimit to HighLimit property values.").arg(spd->caption());
 					return false;
@@ -773,7 +782,7 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	m_propertiesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_propertiesTable->setSortingEnabled(true);
 	m_propertiesTable->horizontalHeader()->setStretchLastSection(true);
-	m_propertiesTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	m_propertiesTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	connect(m_propertiesTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SpecificPropertiesEditor::tableSelectionChanged);
 	connect(m_propertiesTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SpecificPropertiesEditor::sortIndicatorChanged);
 
@@ -842,7 +851,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 
 	m_propertiesModel.clear();
 
-	QStringList rows = text.split(QChar::LineFeed, QString::SkipEmptyParts);
+	QStringList rows = text.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
 	for (QString row : rows)
 	{

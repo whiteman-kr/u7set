@@ -2,10 +2,10 @@
 #include "SimWidget.h"
 #include "SimIdeSimulator.h"
 #include "../lib/Ui/UiTools.h"
+#include "ui_DialogSignalInfo.h"
 
 bool SimSignalInfo::showDialog(QString appSignalId,
 							   SimIdeSimulator* simuator,
-							   IAppSignalManager* appSignalManager,
 							   SimWidget* simWidget)
 {
 	DialogSignalInfo* dsi = DialogSignalInfo::dialogRegistered(appSignalId);
@@ -20,16 +20,16 @@ bool SimSignalInfo::showDialog(QString appSignalId,
 	else
 	{
 		bool ok = false;
-		AppSignalParam signal = appSignalManager->signalParam(appSignalId, &ok);
+
+		AppSignalParam signal = simuator->appSignalManager().signalParam(appSignalId, &ok);
 
 		if (ok == true)
 		{
 			SimSignalInfo* msi = new SimSignalInfo(signal,
 												   simuator,
-												   appSignalManager,
 												   simWidget);
 
-			connect(simuator, &SimIdeSimulator::projectUpdated, msi, &DialogSignalInfo::onSignalParamAndUnitsArrived);
+			connect(simuator, &SimIdeSimulator::projectUpdated, msi, &SimSignalInfo::onSignalParamAndUnitsArrived);
 
 			connect(simWidget, &SimWidget::needCloseChildWindows, msi, &QDialog::accept);
 
@@ -53,9 +53,13 @@ bool SimSignalInfo::showDialog(QString appSignalId,
 
 SimSignalInfo::SimSignalInfo(const AppSignalParam& signal,
 							 SimIdeSimulator* simuator,
-							 IAppSignalManager* appSignalManager,
 							 SimWidget* simWidget):
-	DialogSignalInfo(signal, appSignalManager, nullptr, false, simWidget),
+	DialogSignalInfo(signal,
+					 &simuator->appSignalManager(),
+					 nullptr,
+					 false/*tuningEnabled*/,
+					 DialogType::Simulator,
+					 simWidget),
 	m_simuator(simuator)
 {
 	if (m_simuator == nullptr)
@@ -64,6 +68,31 @@ SimSignalInfo::SimSignalInfo(const AppSignalParam& signal,
 		return;
 	}
 
+	return;
+}
+
+void SimSignalInfo::onSignalParamAndUnitsArrived()
+{
+	// Refresh signal param inself
+
+	bool ok = false;
+
+	AppSignalParam newSignal = m_simuator->appSignalManager().signalParam(signal().hash(), &ok);
+
+	if (ok == false)
+	{
+		//Signal was deleted, keep its #appSignalId and Hash
+		//
+		AppSignalParam oldSignal = signal();
+
+		newSignal = AppSignalParam();
+		newSignal.setAppSignalId(oldSignal.appSignalId());
+		newSignal.setHash(oldSignal.hash());
+	}
+
+	updateSignal(newSignal);
+
+	return;
 }
 
 QStringList SimSignalInfo::schemasByAppSignalId(const QString& appSignalId)
@@ -84,4 +113,7 @@ void SimSignalInfo::setSchema(QString schemaId, QStringList /*highlightIds*/)
 	return;
 }
 
-
+std::optional<Signal> SimSignalInfo::getSignalExt(const AppSignalParam& appSignalParam)
+{
+	return m_simuator->appSignalManager().signalParamExt(appSignalParam.hash());
+}

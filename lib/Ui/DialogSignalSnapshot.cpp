@@ -85,32 +85,32 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 	{
 		v1 = s1.customSignalId();
 		v2 = s2.customSignalId();
-	}
 		break;
+	}
 	case SnapshotColumns::EquipmentID:
 	{
 		v1 = s1.equipmentId();
 		v2 = s2.equipmentId();
-	}
 		break;
+	}
 	case SnapshotColumns::AppSignalID:
 	{
 		v1 = s1.appSignalId();
 		v2 = s2.appSignalId();
-	}
 		break;
+	}
 	case SnapshotColumns::Caption:
 	{
 		v1 = s1.caption();
 		v2 = s2.caption();
-	}
 		break;
+	}
 	case SnapshotColumns::Units:
 	{
 		v1 = s1.unit();
 		v2 = s2.unit();
-	}
 		break;
+	}
 	case SnapshotColumns::Type:
 	{
 		if (s1.isDiscrete() == true && s2.isDiscrete() == true)
@@ -138,33 +138,32 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			v1 = static_cast<int>(s1.type());
 			v2 = static_cast<int>(s2.type());
 		}
-	}
 		break;
-
+	}
 	case SnapshotColumns::Tags:
 	{
 		v1 = s1.tagStringList().join(' ');
 		v2 = s2.tagStringList().join(' ');
-	}
 		break;
+	}
 	case SnapshotColumns::SystemTime:
 	{
 		v1 = st1.m_time.system.timeStamp;
 		v2 = st2.m_time.system.timeStamp;
-	}
 		break;
+	}
 	case SnapshotColumns::LocalTime:
 	{
 		v1 = st1.m_time.local.timeStamp;
 		v2 = st2.m_time.local.timeStamp;
-	}
 		break;
+	}
 	case SnapshotColumns::PlantTime:
 	{
 		v1 = st1.m_time.plant.timeStamp;
 		v2 = st2.m_time.plant.timeStamp;
-	}
 		break;
+	}
 	case SnapshotColumns::Value:
 	{
 		if (st1.m_flags.valid != st2.m_flags.valid)
@@ -192,39 +191,39 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 					v2 = s2.isAnalog();
 				}
 			}
+			break;
 		}
 	}
-		break;
 	case SnapshotColumns::Valid:
 	{
 		v1 = st1.m_flags.valid;
 		v2 = st2.m_flags.valid;
-	}
 		break;
+	}
 	case SnapshotColumns::StateAvailable:
 	{
 		v1 = st1.m_flags.stateAvailable;
 		v2 = st2.m_flags.stateAvailable;
-	}
 		break;
+	}
 	case SnapshotColumns::Simulated:
 	{
 		v1 = st1.m_flags.simulated;
 		v2 = st2.m_flags.simulated;
-	}
 		break;
+	}
 	case SnapshotColumns::Blocked:
 	{
 		v1 = st1.m_flags.blocked;
 		v2 = st2.m_flags.blocked;
-	}
 		break;
+	}
 	case SnapshotColumns::Mismatch:
 	{
 		v1 = st1.m_flags.mismatch;
 		v2 = st2.m_flags.mismatch;
-	}
 		break;
+	}
 	case SnapshotColumns::OutOfLimits:
 	{
 		if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
@@ -237,15 +236,67 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			v1 = st1.m_flags.belowLowLimit;
 			v2 = st2.m_flags.belowLowLimit;
 		}
-
-	}
 		break;
+	}
 	default:
 		Q_ASSERT(false);
 		return index1 < index2;
 	}
 
-	return v1 < v2;
+	if (v1.userType() != v2.userType())
+	{
+		Q_ASSERT(false);
+		return index1 < index2;
+	}
+
+	switch (v1.userType())
+	{
+	case QMetaType::Bool:
+		{
+			return v1.toBool() < v2.toBool();
+			break;
+		}
+	case QMetaType::QString:
+		{
+			return v1.toString() < v2.toString();
+			break;
+		}
+	case QMetaType::Int:
+		{
+			return v1.toInt() < v2.toInt();
+			break;
+		}
+	case QMetaType::UInt:
+		{
+			return v1.toUInt() < v2.toUInt();
+			break;
+		}
+	case QMetaType::LongLong:
+		{
+			return v1.toLongLong() < v2.toLongLong();
+			break;
+		}
+	case QMetaType::ULongLong:
+		{
+			return v1.toULongLong() < v2.toULongLong();
+			break;
+		}
+	case QMetaType::Float:
+		{
+			return v1.toFloat() < v2.toFloat();
+			break;
+		}
+	case QMetaType::Double:
+		{
+			return v1.toDouble() < v2.toDouble();
+			break;
+		}
+	default:
+		break;
+	}
+
+	Q_ASSERT(false);
+	return index1 < index2;
 }
 
 //
@@ -910,6 +961,55 @@ void DialogSignalSnapshotSettings::store()
 }
 
 //
+// SnapshotTableView
+//
+
+SnapshotTableView::SnapshotTableView()
+	:QTableView()
+{
+
+}
+
+void SnapshotTableView::mousePressEvent(QMouseEvent* event)
+{
+	QTableView::mousePressEvent(event);
+
+	SignalSnapshotModel* snapshotModel = dynamic_cast<SignalSnapshotModel*>(model());
+	if (snapshotModel == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QList<AppSignalParam> appSignalParams;
+
+	QModelIndexList rows = selectionModel()->selectedRows();
+
+	for (QModelIndex& index : rows)
+	{
+		 bool found = false;
+
+		 AppSignalParam appSignalParam = snapshotModel->signalParam(index.row(), &found);
+
+		 if (found == true)
+		 {
+			 appSignalParams.push_back(appSignalParam);
+		 }
+	}
+
+	m_dragDropHelper.onMousePress(event, appSignalParams);
+
+	return;
+}
+
+void SnapshotTableView::mouseMoveEvent(QMouseEvent* event)
+{
+	m_dragDropHelper.onMouseMove(event, this);
+
+	return;
+}
+
+//
 //DialogSignalSnapshot
 //
 
@@ -1123,20 +1223,6 @@ void DialogSignalSnapshot::signalsUpdated()
 	return;
 }
 
-void DialogSignalSnapshot::keyPressEvent(QKeyEvent *event)
-{
-	int key = event->key();
-	if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
-	{
-		event->ignore();
-	}
-	else
-	{
-		QDialog::keyPressEvent(event);
-	}
-	return;
-}
-
 void DialogSignalSnapshot::showEvent(QShowEvent* /*e*/)
 {
 	if (m_firstShow == false)
@@ -1153,6 +1239,19 @@ void DialogSignalSnapshot::showEvent(QShowEvent* /*e*/)
 	return;
 }
 
+void DialogSignalSnapshot::keyPressEvent(QKeyEvent *event)
+{
+	int key = event->key();
+	if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
+	{
+		event->ignore();
+	}
+	else
+	{
+		QDialog::keyPressEvent(event);
+	}
+	return;
+}
 
 void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 {
@@ -1277,69 +1376,42 @@ void DialogSignalSnapshot::setupUi()
 {
 	QGroupBox* groupBox = new QGroupBox(tr("Filter"));
 
-	//typeLayout
+	//Filter layout
 
-	QGridLayout* typeLayout = new QGridLayout();
-	typeLayout->setContentsMargins(1, 1, 1, 1);
+	QGridLayout* filterLayout = new QGridLayout(groupBox);
 
-	typeLayout->addWidget(new QLabel(tr("Signal Type")), 0, 0);
+	filterLayout->addWidget(new QLabel(tr("Signal Type")), 0, 0);
 
 	m_typeCombo = new QComboBox();
 	connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_typeCombo_currentIndexChanged);
-	typeLayout->addWidget(m_typeCombo, 0, 1);
+	filterLayout->addWidget(m_typeCombo, 0, 1);
 
-	typeLayout->addWidget(new QLabel(tr("Schema")), 1, 0);
+	filterLayout->addWidget(new QLabel(tr("Schema")), 1, 0);
 
 	m_schemaCombo = new QComboBox();
+	m_schemaCombo->setMinimumContentsLength(30);
 	connect(m_schemaCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_schemaCombo_currentIndexChanged);
-	typeLayout->addWidget(m_schemaCombo, 1, 1);
+	filterLayout->addWidget(m_schemaCombo, 1, 1);
 
-	m_schemaCombo->setMinimumWidth(160);
-
-	//maskLayout
-
-	QHBoxLayout* maskLayout = new QHBoxLayout();
-	maskLayout->setContentsMargins(0, 0, 0, 0);
-
-	maskLayout->addWidget(new QLabel(tr("Mask")));
+	filterLayout->addWidget(new QLabel(tr("Mask")), 0, 2);
 
 	m_comboMaskType = new QComboBox();
 	connect(m_comboMaskType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogSignalSnapshot::on_comboMaskType_currentIndexChanged);
-	maskLayout->addWidget(m_comboMaskType);
+	filterLayout->addWidget(m_comboMaskType, 0, 3);
 
 	m_editMask = new QLineEdit();
 	connect(m_editMask, &QLineEdit::returnPressed, this, &DialogSignalSnapshot::on_editMask_returnPressed);
-	maskLayout->addWidget(m_editMask);
+	filterLayout->addWidget(m_editMask, 0, 4);
 
-	//tagsLayout
-
-	QHBoxLayout* tagsLayout = new QHBoxLayout();
-	tagsLayout->setContentsMargins(0, 0, 0, 0);
-
-	tagsLayout->addWidget(new QLabel(tr("Tags")));
+	filterLayout->addWidget(new QLabel(tr("Tags")), 1, 2);
 
 	m_editTags = new QLineEdit();
 	connect(m_editTags, &QLineEdit::returnPressed, this, &DialogSignalSnapshot::on_editTags_returnPressed);
-	tagsLayout->addWidget(m_editTags);
-
-	//maskTagsLayout
-
-	QVBoxLayout* maskTagsLayout = new QVBoxLayout();
-	tagsLayout->setContentsMargins(0, 0, 0, 0);
-	maskTagsLayout->addLayout(maskLayout);
-	maskTagsLayout->addLayout(tagsLayout);
-
-	//groupLayout
-
-	QHBoxLayout* groupLayout = new QHBoxLayout(groupBox);
-	groupLayout->setContentsMargins(2, 2, 2, 2);
-	groupLayout->addLayout(typeLayout);
-	groupLayout->addLayout(maskTagsLayout);
+	filterLayout->addWidget(m_editTags, 1, 3, 1, 2);
 
 	// Export/Print/Fixate
 
 	QHBoxLayout* exPrintLayout = new QHBoxLayout();
-	tagsLayout->setContentsMargins(0, 0, 0, 0);
 
 	QPushButton* b = new QPushButton(tr("Export..."));
 	connect(b, &QPushButton::clicked, this, &DialogSignalSnapshot::on_buttonExport_clicked);
@@ -1357,13 +1429,12 @@ void DialogSignalSnapshot::setupUi()
 
 	// Table
 
-	m_tableView = new QTableView();
+	m_tableView = new SnapshotTableView();
 	connect(m_tableView, &QTableView::doubleClicked, this, &DialogSignalSnapshot::on_tableView_doubleClicked);
 
 	// Main layout
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->setContentsMargins(5, 5, 5, 5);
 
 	mainLayout->addWidget(groupBox);
 	mainLayout->addLayout(exPrintLayout);
@@ -1481,7 +1552,7 @@ void DialogSignalSnapshot::maskChanged()
 
 	if (maskText.isEmpty() == false)
 	{
-		masks = maskText.split(';', QString::SkipEmptyParts);
+		masks = maskText.split(';', Qt::SkipEmptyParts);
 
 		for (auto mask : masks)
 		{
@@ -1515,7 +1586,7 @@ void DialogSignalSnapshot::tagsChanged()
 
 	if (tagsText.isEmpty() == false)
 	{
-		tags = tagsText.split(';', QString::SkipEmptyParts);
+		tags = tagsText.split(';', Qt::SkipEmptyParts);
 
 		for (auto tag : tags)
 		{

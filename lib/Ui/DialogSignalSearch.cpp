@@ -1,10 +1,8 @@
 #include "Stable.h"
 #include "DialogSignalSearch.h"
 
-SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
-	m_sortColumn(sortColumn),
-	m_sortOrder(sortOrder),
-	m_appSignalParamVec(appSignalParamVec)
+SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec):
+    m_appSignalParamVec(appSignalParamVec)
 {
 	if (appSignalParamVec == nullptr)
 	{
@@ -30,136 +28,15 @@ bool SignalSearchSorter::sortFunction(int index1, int index2, const SignalSearch
 	const AppSignalParam& o1 = (*pThis->m_appSignalParamVec)[index1];
 	const AppSignalParam& o2 = (*pThis->m_appSignalParamVec)[index2];
 
-	switch (m_sortColumn)
-	{
-	case Columns::SignalID:
-		{
-			v1 = o1.customSignalId();
-			v2 = o2.customSignalId();
-		}
-		break;
-	case Columns::AppSignalID:
-		{
-			v1 = o1.appSignalId();
-			v2 = o2.appSignalId();
-		}
-		break;
-	case Columns::EquipmentID:
-		{
-			v1 = o1.equipmentId();
-			v2 = o2.equipmentId();
-		}
-		break;
-	case Columns::Caption:
-		{
-			v1 = o1.caption();
-			v2 = o2.caption();
-		}
-		break;
+	QString s1 = o1.customSignalId();
+	QString s2 = o2.customSignalId();
 
-	case Columns::Channel:
-		{
-			v1 = static_cast<int>(o1.channel());
-			v2 = static_cast<int>(o2.channel());
-		}
-		break;
-
-	case Columns::Type:
-		{
-			if (o1.isDiscrete() == true || o2.isDiscrete() == true)
-			{
-				v1 = static_cast<int>(o1.inOutType());
-				v2 = static_cast<int>(o2.inOutType());
-				break;
-			}
-
-			if (o1.type() == o2.type())
-			{
-				if (o1.analogSignalFormat() == o2.analogSignalFormat())
-				{
-					v1 = static_cast<int>(o1.inOutType());
-					v2 = static_cast<int>(o2.inOutType());
-				}
-				else
-				{
-					v1 = static_cast<int>(o1.analogSignalFormat());
-					v2 = static_cast<int>(o2.analogSignalFormat());
-				}
-			}
-			else
-			{
-				v1 = static_cast<int>(o1.type());
-				v2 = static_cast<int>(o2.type());
-			}
-		}
-		break;
-
-	case Columns::Units:
-		{
-			v1 = o1.unit();
-			v2 = o2.unit();
-		}
-		break;
-
-	case Columns::LowValidRange:
-		{
-			v1 = o1.lowValidRange();
-			v2 = o2.lowValidRange();
-		}
-		break;
-
-	case Columns::HighValidRange:
-		{
-			v1 = o1.highValidRange();
-			v2 = o2.highValidRange();
-		}
-		break;
-
-	case Columns::LowEngineeringUnits:
-		{
-			v1 = o1.lowEngineeringUnits();
-			v2 = o2.lowEngineeringUnits();
-		}
-		break;
-
-	case Columns::HighEngineeringUnits:
-		{
-			v1 = o1.highEngineeringUnits();
-			v2 = o2.highEngineeringUnits();
-		}
-		break;
-
-	case Columns::EnableTuning:
-		{
-			v1 = o1.enableTuning();
-			v2 = o2.enableTuning();
-		}
-		break;
-
-	case Columns::TuningDefaultValue:
-		{
-			v1 = o1.tuningDefaultValue().toDouble();
-			v2 = o2.tuningDefaultValue().toDouble();
-		}
-		break;
-
-	default:
-		{
-			Q_ASSERT(false);
-			v1 = index1;
-			v2 = index2;
-		}
-	}
-
-	if (v1 == v2)
+	if (s1 == s2)
 	{
 		return index1 < index2;
 	}
 
-	if (m_sortOrder == Qt::AscendingOrder)
-		return v1 < v2;
-	else
-		return v1 > v2;
+	return s1 < s2;
 }
 
 //
@@ -277,15 +154,23 @@ QVariant SignalSearchItemModel::headerData(int section, Qt::Orientation orientat
 	return QVariant();
 }
 
-AppSignalParam SignalSearchItemModel::getSignal(const QModelIndex& index) const
+AppSignalParam SignalSearchItemModel::getSignal(const QModelIndex& index, bool* found) const
 {
 	int row = index.row();
 	if (row >= m_signals.size())
 	{
 		Q_ASSERT(false);
+		if (found != nullptr)
+		{
+			*found = false;
+		}
 		return AppSignalParam();
 	}
 
+	if (found != nullptr)
+	{
+		*found = true;
+	}
 	return m_signals[row];
 }
 
@@ -349,6 +234,55 @@ void DialogSignalSearchSettings::store()
 }
 
 //
+// SnapshotTableView
+//
+
+SignalSearchTableView::SignalSearchTableView()
+	:QTableView()
+{
+
+}
+
+void SignalSearchTableView::mousePressEvent(QMouseEvent* event)
+{
+	QTableView::mousePressEvent(event);
+
+	SignalSearchItemModel* searchModel = dynamic_cast<SignalSearchItemModel*>(model());
+	if (searchModel == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QList<AppSignalParam> appSignalParams;
+
+	QModelIndexList rows = selectionModel()->selectedRows();
+
+	for (QModelIndex& index : rows)
+	{
+		 bool found = false;
+
+		 AppSignalParam appSignalParam = searchModel->getSignal(index, &found);
+
+		 if (found == true)
+		 {
+			 appSignalParams.push_back(appSignalParam);
+		 }
+	}
+
+	m_dragDropHelper.onMousePress(event, appSignalParams);
+
+	return;
+}
+
+void SignalSearchTableView::mouseMoveEvent(QMouseEvent* event)
+{
+	m_dragDropHelper.onMouseMove(event, this);
+
+	return;
+}
+
+//
 // DialogSignalSearch
 //
 
@@ -381,7 +315,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	hl->addWidget(l);
 	hl->addWidget(m_editSignalID);
 
-	m_tableView = new QTableView();
+	m_tableView = new SignalSearchTableView();
 	m_tableView->horizontalHeader()->setHighlightSections(false);
 
 	m_labelFound = new QLabel();
@@ -399,7 +333,6 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	mainLayout->addLayout(hl);
 	mainLayout->addWidget(m_tableView);
 	mainLayout->addLayout(bl);
-	mainLayout->setContentsMargins(5, 5, 5, 5);
 
 	setLayout(mainLayout);
 
@@ -412,7 +345,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	m_tableView->setModel(&m_model);
 	m_tableView->verticalHeader()->hide();
 	m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+	m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_tableView->horizontalHeader()->setStretchLastSection(false);
 	m_tableView->setGridStyle(Qt::PenStyle::NoPen);
@@ -479,7 +412,6 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 	m_signals.swap(sortedSignals);
 
 	//
-
 
 	search();
 }
@@ -580,7 +512,12 @@ void DialogSignalSearch::tableDoubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	const AppSignalParam& signal = m_model.getSignal(index);
+	bool found = false;
+	const AppSignalParam& signal = m_model.getSignal(index, &found);
+	if (found == false)
+	{
+		return;
+	}
 
 	emit signalInfo(signal.appSignalId());
 
@@ -597,7 +534,12 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 		return;
 	}
 
-	const AppSignalParam& signal = m_model.getSignal(index);
+	bool found = false;
+	const AppSignalParam& signal = m_model.getSignal(index, &found);
+	if (found == false)
+	{
+		return;
+	}
 
 	QStringList list;
 	list << signal.appSignalId();

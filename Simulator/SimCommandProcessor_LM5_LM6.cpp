@@ -275,12 +275,15 @@ namespace Sim
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1
 		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
 							strAddr(command->m_word0) + ", " +
 							strAddr(command->m_word1) + ", " +
-							strAddr(command->m_word2);
+							strWordConst(command->m_word2);
 
 		return;
 	}
@@ -291,7 +294,23 @@ namespace Sim
 		const quint16 src = command.m_word1;
 		const quint16 dst = command.m_word0;
 
-		m_device->movRamMem(src, dst, size);
+		switch (size)
+		{
+		case 1:
+			{
+				quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, src);
+				m_device->writeRamWord(command.m_memoryAreaTo, dst, data);
+			}
+			break;
+		case 2:
+			{
+				quint32 data = m_device->readRamDword(command.m_memoryAreaFrom, src);
+				m_device->writeRamDword(command.m_memoryAreaTo, dst, data);
+			}
+			break;
+		default:
+			m_device->movRamMem(command.m_memoryAreaFrom, src, command.m_memoryAreaTo, dst, size);
+		}
 
 		return;
 	}
@@ -637,6 +656,8 @@ namespace Sim
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+
 		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
 		//
 
@@ -657,7 +678,7 @@ namespace Sim
 		const quint16& data = command.m_word1;
 		const quint16& address = command.m_word0;
 
-		m_device->setRamMem(address, data, size);		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
+		m_device->setRamMem(command.m_memoryAreaTo, address, data, size);		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
 
 		return;
 	}
@@ -1254,7 +1275,7 @@ namespace Sim
 				//
 				if (currentInputValue == 1)
 				{
-					result = 0;
+					result = 1;
 					counter = 0;
 				}
 				else
@@ -1265,8 +1286,12 @@ namespace Sim
 
 					if (counter > static_cast<quint32>(time))
 					{
-						result = 1;
+						result = 0;
 						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 1;
 					}
 				}
 			}
@@ -1397,10 +1422,10 @@ namespace Sim
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
 		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
-									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
+									 (instance->param(i_saved_data)->wordValue() & 0x0001) : 0x0000;
 
 		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
-									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+									  ((instance->param(i_saved_data)->wordValue() >> 1) & 0x0001) : 0x0000;
 
 		quint16 currentInputValue = instance->param(i_input)->wordValue();
 
@@ -1448,7 +1473,7 @@ namespace Sim
 				//
 				if (currentInputValue == 1)
 				{
-					result = 0;
+					result = 1;
 					counter = 0;
 				}
 				else
@@ -1459,8 +1484,12 @@ namespace Sim
 
 					if (counter > static_cast<quint32>(time))
 					{
-						result = 1;
+						result = 0;
 						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 1;
 					}
 				}
 			}
@@ -1496,7 +1525,7 @@ namespace Sim
 				{
 					// Start timer
 					//
-					counter = time / m_cycleDurationMs;
+					counter = time / m_cycleDurationMs + 1;
 				}
 
 				if (counter != 0 )
@@ -1563,7 +1592,7 @@ namespace Sim
 					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
-						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+						counter = time / m_cycleDurationMs;		// counter cannot be greater than (time / m_cycleDurationMs)
 					}
 					else
 					{
@@ -1669,7 +1698,7 @@ namespace Sim
 				//
 				if (currentInputValue == 1)
 				{
-					result = 0;
+					result = 1;
 					counter = 0;
 				}
 				else
@@ -1680,8 +1709,12 @@ namespace Sim
 
 					if (counter > static_cast<quint32>(time))
 					{
-						result = 1;
+						result = 0;
 						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 1;
 					}
 				}
 			}
@@ -1717,7 +1750,7 @@ namespace Sim
 				{
 					// Start timer
 					//
-					counter = time / m_cycleDurationMs;
+					counter = time / m_cycleDurationMs + 1;
 				}
 
 				if (counter != 0 )

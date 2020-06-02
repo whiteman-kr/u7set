@@ -186,10 +186,6 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 	static QColor noAlertBrush(Qt::darkGreen);
 	static QColor noFlagBrush(Qt::lightGray);
 
-	QFont font = painter.font();
-	font.setPixelSize(14);
-	painter.setFont(font);
-
 	int flagNo = 0;
 
 	for (int j = 0; j < m_rowCount; j++)
@@ -382,52 +378,18 @@ int SignalFlagsWidget::point2Flag(const QPoint& pt)
 
 std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
-
-void DialogSignalInfo::onSignalParamAndUnitsArrived()
-{
-	// Refresh signal param inself
-
-	bool ok = false;
-
-	AppSignalParam newSignal = m_appSignalManager->signalParam(m_signal.hash(), &ok);
-
-	if (ok == true)
-	{
-		m_signal = newSignal;
-	}
-	else
-	{
-		//Signal was deleted, keep its #appSignalId and Hash
-		//
-		AppSignalParam oldSignal = m_signal;
-
-		m_signal = AppSignalParam();
-		m_signal.setAppSignalId(oldSignal.appSignalId());
-		m_signal.setHash(oldSignal.hash());
-
-	}
-
-	// Fill signal information
-
-	fillSignalInfo();
-
-	fillProperties();
-
-	fillSetpoints();
-
-	fillSchemas();
-}
-
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
 								   VFrame30::TuningController* tuningController,
 								   bool tuningEnabled,
+								   DialogSignalInfo::DialogType dialogType,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
-	m_tuningController(tuningController)	// it can be nullptr
+	m_tuningController(tuningController),	// it can be nullptr
+	m_tuningEnabled(tuningEnabled)
 {
 	if (m_appSignalManager == nullptr)
 	{
@@ -454,33 +416,49 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	//
 
 	ui->tabWidget->tabBar()->setExpanding(true);
-	ui->tabWidget->setStyleSheet("QTabBar::tab { min-width: 100px; height: 28;}");
 
-	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
-	// tu support Drag and Drop Operation (drag part)
-	//
-	ui->signalIdLabel->setAppSignal(signal);
-	ui->signalIdLabelIcon->setAppSignal(signal);
+	// Setup time labels
+
+	QDateTime time = QDateTime::currentDateTime();
+	ui->labelServerTime->setText(time.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelPlantTime->setText(time.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+
+	// Setup tree controls
+
+	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
+
+	ui->treePropertiesExt->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treePropertiesExt, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesExtContextMenu);
+
+	ui->treeSetpoints->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeSetpoints, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSetpointsContextMenu);
+
+	ui->treeSchemas->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeSchemas, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSchemaContextMenu);
 
 	ui->tabWidget->setCurrentIndex(0);
 
 	// Remove tuning tab
 
-	if (tuningEnabled == false || m_signal.enableTuning() == false)
+	if (dialogType == DialogType::Simulator)
 	{
-		for (int i = 0; i < ui->tabWidget->count(); i++)
-		{
-			if (ui->tabWidget->tabText(i) == tr("Tuning"))
-			{
-				ui->tabWidget->removeTab(i);
-				break;
-			}
-		}
+		ui->labelPlantTimeHeader->hide();
+		ui->labelPlantTime->hide();
+
+		ui->labelServerTimeHeader->setText(tr("Plant Time"));
+	}
+
+	if (dialogType == DialogType::Monitor)
+	{
+		removeTabPage("Extended");
 	}
 
 	UiTools::adjustDialogPlacement(this);
 
 	m_updateStateTimerId = startTimer(200);
+
+	setAcceptDrops(true);
 }
 
 DialogSignalInfo::~DialogSignalInfo()
@@ -532,6 +510,31 @@ void DialogSignalInfo::unregisterDialog(const QString& appSignalId)
 	}
 }
 
+
+bool DialogSignalInfo::tuningEnabled() const
+{
+	return m_tuningEnabled;
+}
+
+void DialogSignalInfo::setTuningEnabled(bool enabled)
+{
+	m_tuningEnabled = enabled;
+}
+
+AppSignalParam DialogSignalInfo::signal() const
+{
+	return m_signal;
+}
+
+void DialogSignalInfo::updateSignal(const AppSignalParam& signal)
+{
+	m_signal = signal;
+
+	updateSingnalData();
+
+	return;
+}
+
 void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
 {
 	Q_UNUSED(pos);
@@ -551,6 +554,40 @@ void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
 			 {
 				QClipboard *clipboard = QApplication::clipboard();
 				QTreeWidgetItem* item = ui->treeProperties->currentItem();
+				if (item == nullptr)
+				{
+					return;
+				}
+				clipboard->setText(item->text(1));
+			};
+
+	connect(actionCopy, &QAction::triggered, this, f);
+
+	menu.addAction(actionCopy);
+
+	//
+	menu.exec(QCursor::pos());
+}
+
+void DialogSignalInfo::preparePropertiesExtContextMenu(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QMenu menu(this);
+
+	QTreeWidgetItem* item = ui->treePropertiesExt->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	// Copy
+	QAction* actionCopy = new QAction(tr("Copy"), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QClipboard *clipboard = QApplication::clipboard();
+				QTreeWidgetItem* item = ui->treePropertiesExt->currentItem();
 				if (item == nullptr)
 				{
 					return;
@@ -628,6 +665,127 @@ void DialogSignalInfo::prepareSetpointsContextMenu(const QPoint& pos)
 	menu.exec(QCursor::pos());
 }
 
+void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	QString schemaId = item->text(static_cast<int>(SchemasColumns::SchemaId));
+
+	setSchema(schemaId, QStringList() << m_signal.appSignalId());
+
+	return;
+}
+
+void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Type), Qt::UserRole).toInt();
+
+	showSetpointDetails();
+
+	// Uncomment this to switch to schema
+
+	/*Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
+	if (currentTab == nullptr)
+	{
+		Q_ASSERT(currentTab);
+		return;
+	}
+
+	QString schemaId = item->text(static_cast<int>(SetpointsColumns::SchemaId));
+
+	if (currentTab->schemaId() != schemaId)
+	{
+		QStringList appSignals;
+		appSignals << m_signal.appSignalId();
+
+		currentTab->setSchema(schemaId, appSignals);
+	}*/
+
+	return;
+}
+
+void DialogSignalInfo::on_pushButtonSetZero_clicked()
+{
+	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_tuningController->writeValue(m_signal.appSignalId(), false);
+}
+
+void DialogSignalInfo::on_pushButtonSetOne_clicked()
+{
+	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_tuningController->writeValue(m_signal.appSignalId(), true);
+}
+
+void DialogSignalInfo::on_pushButtonSetValue_clicked()
+{
+	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QString strValue = ui->editInputValue->text();
+
+	bool ok = false;
+
+	double value = strValue.toDouble(&ok);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Invalid input value!"));
+		return;
+	}
+
+	m_tuningController->writeValue(m_signal.appSignalId(), value);
+}
+
+
+void DialogSignalInfo::switchToSchema()
+{
+	setSchema(m_contextMenuSchemaId, QStringList() << m_signal.appSignalId());
+}
+
+void DialogSignalInfo::showSetpointDetails()
+{
+	if (m_contextMenuSetpointIndex < 0 || m_contextMenuSetpointIndex >= m_setpoints.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_appSignalManager, m_setpoints[m_contextMenuSetpointIndex]);
+	d->exec();
+}
+
 void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
 {
 	if (m_firstShow == false)
@@ -639,15 +797,9 @@ void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
 
 	// Fill signal information
 
-	fillSignalInfo();
+	updateSingnalData();
 
-	fillProperties();
-
-	fillSetpoints();
-
-	fillSchemas();
-
-	updateData();
+	updateDynamicData();
 
 	return;
 }
@@ -658,7 +810,7 @@ void DialogSignalInfo::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
-		updateData();
+		updateDynamicData();
 	}
 }
 
@@ -668,6 +820,205 @@ void DialogSignalInfo::mousePressEvent(QMouseEvent* event)
 	{
 		stateContextMenu(event->pos());
 	}
+}
+
+void DialogSignalInfo::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		return;
+
+	}
+
+	// Load data from drag and drop
+	//
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	if (ok == false)
+	{
+		return;
+	}
+
+	std::vector<AppSignalParam> appSignals;
+	appSignals.reserve(protoSetMessage.appsignal_size());
+
+	// Parse data
+	//
+	ok = false;
+	AppSignalParam appSignalParam;
+
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			break;
+		}
+	}
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Accept only if signal hash is different
+	//
+	if (appSignalParam.hash() == m_signal.hash())
+	{
+		return;
+	}
+
+	event->acceptProposedAction();
+
+	return;
+}
+
+void DialogSignalInfo::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		return;
+	}
+
+	// Load data from drag and drop
+	//
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	std::vector<AppSignalParam> appSignals;
+	appSignals.reserve(protoSetMessage.appsignal_size());
+
+	// Parse data
+	//
+	ok = false;
+	AppSignalParam newSignal;
+
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		ok = newSignal.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			break;
+		}
+	}
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	AppSignalParam oldSignal = m_signal;
+
+	// Unregister current dialog with old id
+	//
+	unregisterDialog(oldSignal.appSignalId());
+
+	// If there is another dialog with such id - swap it with current and re-register with new id
+	//
+	DialogSignalInfo* dsi = DialogSignalInfo::dialogRegistered(newSignal.appSignalId());
+	if (dsi != nullptr)
+	{
+		unregisterDialog(newSignal.appSignalId());
+
+		dsi->updateSignal(oldSignal);
+
+		registerDialog(oldSignal.appSignalId(), dsi);
+	}
+
+	// Set new signal to current dialog
+	//
+	updateSignal(newSignal);
+
+	// Register current dialog with new id
+	//
+	registerDialog(newSignal.appSignalId(), this);
+
+	//qDebug() << "Dialog list:";
+	//for (auto it : m_dialogSignalInfoMap)
+	//{
+	//	qDebug() << it.first << it.second;
+	//}
+
+	return;
+}
+
+int DialogSignalInfo::tabPageExists(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+QWidget* DialogSignalInfo::tabPageWidget(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			return ui->tabWidget->widget(i);
+		}
+	}
+
+	return nullptr;
+}
+
+void DialogSignalInfo::addTabPage(const QString& tabName, QWidget* widget)
+{
+	ui->tabWidget->addTab(widget, tabName);
+}
+
+void DialogSignalInfo::removeTabPage(const QString& tabName)
+{
+	for (int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		if (ui->tabWidget->tabText(i) == tabName)
+		{
+			ui->tabWidget->removeTab(i);
+			break;
+		}
+	}
+}
+
+void DialogSignalInfo::updateSingnalData()
+{
+	// Fill signal information
+
+	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
+	// tu support Drag and Drop Operation (drag part)
+	//
+
+	ui->signalIdLabel->setAppSignal(m_signal);
+	ui->signalIdLabelIcon->setAppSignal(m_signal);
+
+	fillSignalInfo();
+	fillProperties();
+	fillExtProperties();
+	fillSetpoints();
+	fillSchemas();
+	updateTuningTab();
+
+	return;
 }
 
 void DialogSignalInfo::fillSignalInfo()
@@ -682,17 +1033,11 @@ void DialogSignalInfo::fillSignalInfo()
 	{
 		ui->labelStrUnit->setText(m_signal.unit());
 		ui->labelStrUnitTuning->setText(m_signal.unit());
-
-		ui->pushButtonSetOne->setVisible(false);
-		ui->pushButtonSetZero->setVisible(false);
 	}
 	else
 	{
 		ui->labelStrUnit->setText("");
 		ui->labelStrUnitTuning->setText("");
-
-		ui->editInputValue->setVisible(false);
-		ui->pushButtonSetValue->setVisible(false);
 	}
 	ui->labelValue->setText("");
 	ui->labelValueTuning->setText("");
@@ -821,11 +1166,205 @@ void DialogSignalInfo::fillProperties()
 		itemGroup7->setExpanded(true);
 	}
 
-
-	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
-
 	ui->treeProperties->resizeColumnToContents(0);
+}
+
+void DialogSignalInfo::fillExtProperties()
+{
+	ui->treePropertiesExt->clear();
+
+	std::optional<Signal> signalExtOpt = getSignalExt(m_signal);
+
+	if (signalExtOpt.has_value() == false)
+	{
+		return;
+	}
+
+	Signal& signalExt = signalExtOpt.value();
+
+	// Fill properties list
+	//
+	QStringList columns;
+	columns << "Caption";
+	columns << "Value";
+	ui->treePropertiesExt->setHeaderLabels(columns);
+
+	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
+
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << signalExt.appSignalID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << signalExt.equipmentID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("LmEquipmentID") << signalExt.lmEquipmentID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("BusTypeID") << signalExt.busTypeID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("ExcludeFromBuild") << (signalExt.excludeFromBuild() ? tr("Yes") : tr("No")) ));
+
+	if (m_signal.isAnalog())
+	{
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << signalExt.unit()));
+	}
+
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Tags") << signalExt.tags().join(' ')));
+
+	ui->treePropertiesExt->addTopLevelItem(itemGroup1);
+	itemGroup1->setExpanded(true);
+
+	QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList() << tr("Format"));
+
+	if (m_signal.isAnalog())
+	{
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("ByteOrder") << E::valueToString<E::ByteOrder>(signalExt.byteOrder())));
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("DataSize") << QString::number(signalExt.dataSize())));
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("DataFormat") << E::valueToString<E::DataFormat>(signalExt.dataFormat())));
+	}
+
+	ui->treePropertiesExt->addTopLevelItem(itemGroup2);
+	itemGroup2->setExpanded(true);
+
+	if (m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
+
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(signalExt.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Acquire") << (signalExt.acquire() ? tr("Yes") : tr("No")) ));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Archive") << (signalExt.archive() ? tr("Yes") : tr("No")) ));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(signalExt.coarseAperture(), 'f', signalExt.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(signalExt.fineAperture(), 'f', signalExt.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("AdaptiveAperture") << (signalExt.adaptiveAperture() ? tr("Yes") : tr("No")) ));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup3);
+		itemGroup3->setExpanded(true);
+	}
+
+	if (m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup4 = new QTreeWidgetItem(QStringList() << tr("Limits"));
+
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowADC") << QString::number(signalExt.lowADC())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighADC") << QString::number(signalExt.highADC())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowDAC") << QString::number(signalExt.lowDAC())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighDAC") << QString::number(signalExt.highDAC())));
+
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowEngineeringUnits") << QString::number(signalExt.lowEngineeringUnits(), 'f', signalExt.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighEngineeringUnits")<<QString::number(signalExt.highEngineeringUnits(), 'f', signalExt.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowValidRange")<<QString::number(signalExt.lowValidRange(), 'f', signalExt.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighValidRange")<<QString::number(signalExt.highValidRange(), 'f', signalExt.decimalPlaces())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup4);
+		itemGroup4->setExpanded(true);
+	}
+
+	if (m_signal.isInput() && m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup5 = new QTreeWidgetItem(QStringList() << tr("Input"));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputLowLimit") << QString::number(signalExt.electricLowLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputUnitID") << QString::number(signalExt.electricUnit())));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("rload_Ohm") << QString::number(signalExt.rload_Ohm(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("r0_Ohm") << QString::number(signalExt.r0_Ohm(), 'f', signalExt.decimalPlaces())));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("SensorType") << E::valueToString<E::SensorType>(signalExt.sensorType())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime")<<QString::number(signalExt.filteringTime(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance")<<QString::number(signalExt.spreadTolerance(), 'f', signalExt.decimalPlaces())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup5);
+		itemGroup5->setExpanded(true);
+	}
+
+	/*if ((m_signal.isInput() || m_signal.isOutput()) && m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup5 = new QTreeWidgetItem(QStringList() << tr("Electric"));
+
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("ElectricLowLimit") << QString::number(signalExt.electricLowLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("ElectricHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("ElectricUnit") << E::valueToString<E::ElectricUnit>(signalExt.electricUnit())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup5);
+		itemGroup5->setExpanded(true);
+	}*/
+
+
+	if (m_signal.isOutput() && m_signal.isAnalog())
+	{
+		QTreeWidgetItem* itemGroup6 = new QTreeWidgetItem(QStringList()<<tr("Output"));
+
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputLowLimit") << QString::number(signalExt.electricLowLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputUnitID") << QString::number(signalExt.electricUnit())));
+
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("SensorType") << E::valueToString<E::SensorType>(signalExt.sensorType())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputMode") << E::valueToString<E::OutputMode>(signalExt.outputMode())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup6);
+		itemGroup6->setExpanded(true);
+	}
+
+	if (m_signal.enableTuning())
+	{
+		QTreeWidgetItem* itemGroup7 = new QTreeWidgetItem(QStringList()<<tr("Tuning"));
+
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(signalExt.enableTuning() ? tr("Yes") : tr("No"))));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningDefaultValue")<<signalExt.tuningDefaultValue().toString()));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningLowBound")<<signalExt.tuningLowBound().toString()));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningHighBound")<<signalExt.tuningHighBound().toString()));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup7);
+		itemGroup7->setExpanded(true);
+	}
+
+	{
+		QTreeWidgetItem* itemGroup = new QTreeWidgetItem(QStringList()<<tr("Specific properties"));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("specPropStruct") << signalExt.specPropStruct()));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup);
+		itemGroup->setExpanded(true);
+	}
+
+	{
+		QTreeWidgetItem* itemGroup = new QTreeWidgetItem(QStringList()<<tr("Signal fields from database"));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ID") << QString::number(signalExt.ID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("signalGroupID") << QString::number(signalExt.signalGroupID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("signalInstanceID") << QString::number(signalExt.signalInstanceID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("changesetID") << QString::number(signalExt.changesetID())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("checkedOut") << (signalExt.checkedOut() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("userID") << QString::number(signalExt.userID())));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("created") << signalExt.created().toString("yyyy-MM-dd HH:mm:ss")));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("deleted") << (signalExt.deleted() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceCreated") << signalExt.instanceCreated().toString("yyyy-MM-dd HH:mm:ss")));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceAction") << signalExt.instanceAction().text()));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup);
+		itemGroup->setExpanded(true);
+	}
+
+	{
+		QTreeWidgetItem* itemGroup = new QTreeWidgetItem(QStringList()<<tr("Compile-time Properties"));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ioBufAddr") << signalExt.ioBufAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("tuningAddr") << signalExt.tuningAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("tuningAbsAddr") << signalExt.tuningAbsAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ualAddr") << signalExt.ualAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("ualAddrIsValid") << (signalExt.ualAddrIsValid() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regBufAddr") << signalExt.regBufAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regValueAddr") << signalExt.regValueAddr().toString()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regValidityAddr") << signalExt.regValidityAddr().toString()));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("lmRamAccess") << E::valueToString<E::LogicModuleRamAccess>(signalExt.lmRamAccess())));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("regValueAddrStr") << signalExt.regValueAddrStr()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("needConversion") << (signalExt.needConversion() ? tr("Yes") : tr("No")) ));
+
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("isConst") << (signalExt.isConst() ? tr("Yes") : tr("No")) ));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("constValue") << QString::number(signalExt.constValue(), 'f', signalExt.decimalPlaces())));
+
+		ui->treePropertiesExt->addTopLevelItem(itemGroup);
+		itemGroup->setExpanded(true);
+	}
+
+	ui->treePropertiesExt->resizeColumnToContents(0);
+
 }
 
 void DialogSignalInfo::fillSetpoints()
@@ -926,9 +1465,6 @@ void DialogSignalInfo::fillSetpoints()
 	ui->treeSetpoints->setSortingEnabled(true);
 	ui->treeSetpoints->sortByColumn(static_cast<int>(SetpointsColumns::CompareToValue), Qt::AscendingOrder);
 
-	ui->treeSetpoints->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeSetpoints, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSetpointsContextMenu);
-
 	// Adjust column width
 	//
 	QSettings settings;
@@ -968,12 +1504,53 @@ void DialogSignalInfo::fillSchemas()
 
 	ui->treeSchemas->setSortingEnabled(true);
 	ui->treeSchemas->sortByColumn(0, Qt::AscendingOrder);
-
-	ui->treeSchemas->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeSchemas, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSchemaContextMenu);
 }
 
-void DialogSignalInfo::updateData()
+void DialogSignalInfo::updateTuningTab()
+{
+	const QString tuningTabPageName = QObject::tr("Tuning");
+
+	bool tuningEnabled = m_signal.enableTuning() == true && m_tuningEnabled == true;
+	bool tuningTabVisible = tabPageExists(tuningTabPageName);
+
+	if (tuningEnabled == false && tuningTabVisible == true)
+	{
+		// Hide Tuning tab page
+		//
+		m_tuningTabWidget = tabPageWidget(tuningTabPageName);
+
+		removeTabPage(tr("Tuning"));
+	}
+	else
+	{
+		if (tuningEnabled == true && tuningTabVisible == false)
+		{
+			// Show Tuning tab page
+			//
+			if (m_tuningTabWidget == nullptr)
+			{
+				Q_ASSERT(m_tuningTabWidget);
+				return;
+			}
+
+			addTabPage(tuningTabPageName, m_tuningTabWidget);
+		}
+	}
+
+	// Update tuning tab page controls
+	//
+	if (tuningEnabled == true)
+	{
+		ui->editInputValue->setVisible(m_signal.isAnalog());
+		ui->pushButtonSetValue->setVisible(m_signal.isAnalog());
+
+		ui->pushButtonSetZero->setVisible(m_signal.isDiscrete());
+		ui->pushButtonSetOne->setVisible(m_signal.isDiscrete());
+	}
+
+}
+
+void DialogSignalInfo::updateDynamicData()
 {
 	updateState();
 	updateSetpoints();
@@ -991,15 +1568,36 @@ void DialogSignalInfo::updateState()
 
 	// switch font if needed
 	//
-	int oldFontSize = m_currentFontSize;
-	if (m_signal.isAnalog() && m_viewType == E::ValueViewType::Bin64)
+	int labelHeight = ui->labelValue->height();
+
+	if (ui->labelValue->maximumHeight() != labelHeight)
 	{
-		m_currentFontSize = 12;
+		ui->labelValue->setMaximumHeight(labelHeight);
+		ui->labelValueTuning->setMaximumHeight(labelHeight);
+	}
+
+	// Generate value string even if signal is not valid
+	//
+	QString strValue = signalStateText(m_signal, state, m_viewType, m_currentPrecision);
+
+	// Calculate word wrap
+	//
+	bool multiLineText = strValue.contains(QChar::LineFeed);
+
+	// Calculate font size
+	//
+	int oldFontSize = m_currentFontSize;
+
+	if (m_signal.isAnalog() &&
+		(m_viewType == E::ValueViewType::Bin32 || m_viewType == E::ValueViewType::Bin64 || multiLineText == true))
+	{
+		m_currentFontSize = static_cast<int>(labelHeight * 0.33);
 	}
 	else
 	{
-		m_currentFontSize = 20;
+		m_currentFontSize = static_cast<int>(labelHeight * 0.4);
 	}
+
 	if (oldFontSize != m_currentFontSize)
 	{
 		QFont font = ui->labelValue->font();
@@ -1008,11 +1606,7 @@ void DialogSignalInfo::updateState()
 		ui->labelValueTuning->setFont(font);
 	}
 
-	// Generate value string even if signal is not valid
-	//
-	QString strValue = signalStateText(m_signal, state, m_viewType, m_currentPrecision);
-
-	// --
+	// Set text
 	//
 	if (strValue != ui->labelValue->text())
 	{
@@ -1020,15 +1614,11 @@ void DialogSignalInfo::updateState()
 		ui->labelValueTuning->setText(strValue);
 	}
 
-	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
 	QDateTime localTime = state.m_time.local.toDateTime();
 	QDateTime plaitTime = state.m_time.plant.toDateTime();
 
-
-	//ui->editSystemTime->setText(systemTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->editLocalTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->editPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-
+	ui->labelServerTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 
 	ui->widgetFlags->updateControl(state.m_flags);
 
@@ -1206,7 +1796,19 @@ QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const App
 
 	if (param.isAnalog() == true)
 	{
-		strValue = AppSignalState::toString(state.m_value, viewType, precision);
+		double ipart = 0;
+		double fpart = std::modf(state.m_value, &ipart);
+
+		if((viewType == E::ValueViewType::Bin16 || viewType == E::ValueViewType::Bin32 || viewType == E::ValueViewType::Bin64 || viewType == E::ValueViewType::Hex) &&
+		   precision > 0 &&
+		   fpart != 0)
+		{
+			strValue = tr("Only integer value is displayed in HEX or BIN mode.\nSet view precision to zero to see the value.");
+		}
+		else
+		{
+			strValue = AppSignalState::toString(state.m_value, viewType, precision);
+		}
 	}
 
 	// Generate non valid string
@@ -1228,6 +1830,9 @@ QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const App
 	return strValue;
 }
 
+//
+// QLabelAppSignalDragAndDrop
+//
 
 QLabelAppSignalDragAndDrop::QLabelAppSignalDragAndDrop(QWidget* parent) :
 	QLabel(parent)
@@ -1241,173 +1846,16 @@ void QLabelAppSignalDragAndDrop::setAppSignal(const AppSignalParam& signal)
 
 void QLabelAppSignalDragAndDrop::mousePressEvent(QMouseEvent* event)
 {
-	if (event->button() == Qt::LeftButton)
-	{
-		m_dragStartPosition = event->pos();
-	}
+	m_dragDrop.onMousePress(event, QList<AppSignalParam>() << m_appSignalParam);
 
 	return;
 }
 
 void QLabelAppSignalDragAndDrop::mouseMoveEvent(QMouseEvent* event)
 {
-	if (event->buttons().testFlag(Qt::LeftButton) == false)
-	{
-		return;
-	}
-
-	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
-	{
-		return;
-	}
-
-	// Save signals to protobufer
-	//
-	::Proto::AppSignalSet protoSetMessage;
-	::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-	m_appSignalParam.save(protoSignalMessage);
-
-	QByteArray data;
-	data.resize(protoSetMessage.ByteSize());
-
-	protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
-
-	// --
-	//
-	if (data.isEmpty() == false)
-	{
-		QDrag* drag = new QDrag(this);
-		QMimeData* mimeData = new QMimeData;
-
-		mimeData->setData(AppSignalParamMimeType::value, data);
-		drag->setMimeData(mimeData);
-
-		drag->exec(Qt::CopyAction);
-
-		qDebug() << "Start drag for " << m_appSignalParam.appSignalId();
-		qDebug() << "Drag and drop data buffer size " << data.size();
-	}
+	m_dragDrop.onMouseMove(event, this);
 
 	return;
 }
 
-void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column)
-{
-	Q_UNUSED(column);
 
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	QString schemaId = item->text(static_cast<int>(SchemasColumns::SchemaId));
-
-	setSchema(schemaId, QStringList() << m_signal.appSignalId());
-
-	return;
-}
-
-void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item, int column)
-{
-	Q_UNUSED(column);
-
-	if (item == nullptr)
-	{
-		Q_ASSERT(item);
-		return;
-	}
-
-	m_contextMenuSetpointIndex = item->data(static_cast<int>(SetpointsColumns::Type), Qt::UserRole).toInt();
-
-	showSetpointDetails();
-
-	// Uncomment this to switch to schema
-
-	/*Q_UNUSED(column);
-
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
-	if (currentTab == nullptr)
-	{
-		Q_ASSERT(currentTab);
-		return;
-	}
-
-	QString schemaId = item->text(static_cast<int>(SetpointsColumns::SchemaId));
-
-	if (currentTab->schemaId() != schemaId)
-	{
-		QStringList appSignals;
-		appSignals << m_signal.appSignalId();
-
-		currentTab->setSchema(schemaId, appSignals);
-	}*/
-
-	return;
-}
-
-void DialogSignalInfo::on_pushButtonSetZero_clicked()
-{
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_tuningController->writeValue(m_signal.appSignalId(), false);
-}
-
-void DialogSignalInfo::on_pushButtonSetOne_clicked()
-{
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_tuningController->writeValue(m_signal.appSignalId(), true);
-}
-
-void DialogSignalInfo::on_pushButtonSetValue_clicked()
-{
-	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	QString strValue = ui->editInputValue->text();
-
-	bool ok = false;
-
-	double value = strValue.toDouble(&ok);
-	if (ok == false)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Invalid input value!"));
-		return;
-	}
-
-	m_tuningController->writeValue(m_signal.appSignalId(), value);
-}
-
-
-void DialogSignalInfo::switchToSchema()
-{
-	setSchema(m_contextMenuSchemaId, QStringList() << m_signal.appSignalId());
-}
-
-void DialogSignalInfo::showSetpointDetails()
-{
-	if (m_contextMenuSetpointIndex < 0 || m_contextMenuSetpointIndex >= m_setpoints.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	DialogSetpointDetails* d = new DialogSetpointDetails(this, m_appSignalManager, m_setpoints[m_contextMenuSetpointIndex]);
-	d->exec();
-}

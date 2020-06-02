@@ -51,7 +51,6 @@ namespace Hardware
 
 	ModuleFirmwareWriter::ModuleFirmwareWriter()
 	{
-		qmlRegisterType<JsVariantList>();
 	}
 
 

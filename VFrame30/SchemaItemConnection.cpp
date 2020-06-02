@@ -92,7 +92,7 @@ namespace VFrame30
 
 	void SchemaItemConnection::setConnectionIds(const QString& value)
 	{
-		m_connectionIds = value.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+		m_connectionIds = value.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
 
 		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
 			heightDocPt() < minHeight)
@@ -611,7 +611,7 @@ namespace VFrame30
 
 	void SchemaItemReceiver::setAppSignalIds(const QString& value)
 	{
-		setAppSignalIdsAsList(value.split(QRegExp("\\s+"), QString::SkipEmptyParts));
+		setAppSignalIdsAsList(value.split(QRegExp("\\s+"), Qt::SkipEmptyParts));
 		return;
 	}
 

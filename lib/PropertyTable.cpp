@@ -640,7 +640,7 @@ namespace ExtWidgets
 	void PropertyTable::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
 	{
 		QList<std::shared_ptr<PropertyObject>> list =
-				QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>::fromStdVector(objects));
+		        QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>{objects.begin(), objects.end()});
 
 		return setObjects(list);
 	}
@@ -697,7 +697,7 @@ namespace ExtWidgets
 		m_editPropertyMask->setText(propertyMask);
 		m_editPropertyMask->blockSignals(false);
 
-		m_propertyMasks = propertyMask.split(';', QString::SkipEmptyParts);
+		m_propertyMasks = propertyMask.split(';', Qt::SkipEmptyParts);
 
 		fillProperties();
 	}
@@ -851,7 +851,7 @@ namespace ExtWidgets
 	{
 		QString str = m_editPropertyMask->text().trimmed();
 
-		m_propertyMasks = str.split(';', QString::SkipEmptyParts);
+		m_propertyMasks = str.split(';', Qt::SkipEmptyParts);
 
 		fillProperties();
 	}

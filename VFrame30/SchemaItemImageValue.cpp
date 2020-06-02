@@ -338,7 +338,7 @@ namespace VFrame30
 
 	void SchemaItemImageValue::setSignalIdsString(const QString& value)
 	{
-		m_signalIds = value.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+		m_signalIds = value.split(QRegExp("\\s+"), Qt::SkipEmptyParts);
 	}
 
 	QStringList SchemaItemImageValue::signalIds() const

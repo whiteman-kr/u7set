@@ -55,7 +55,7 @@ public:
 
 	// Signal identificators
 
-	const QString& appSignalID() const { return m_appSignalID; };
+	const QString& appSignalID() const { return m_appSignalID; }
 	void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
 
 	QString customAppSignalID() const { return m_customAppSignalID; }

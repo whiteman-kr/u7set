@@ -138,7 +138,7 @@ void SimWidget::signalContextMenu(const QStringList signalList)
 
 void SimWidget::signalInfo(QString appSignalId)
 {
-	SimSignalInfo::showDialog(appSignalId, m_simulator.get(), m_appSignalController->appSignalManager(), this);
+	SimSignalInfo::showDialog(appSignalId, m_simulator.get(), this);
 
 	return;
 }
@@ -663,7 +663,7 @@ void SimWidget::runSimulation()
 
 		// Start simulation
 		//
-		mutableControl.addToRunList(equipmentIds);
+		mutableControl.setRunList(equipmentIds);
 		mutableControl.startSimulation();
 	}
 

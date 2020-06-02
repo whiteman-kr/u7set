@@ -1818,9 +1818,6 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	std::list<QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>>> threads;
 
-	QTime t;
-	t.start();
-
 	const size_t fileCountPerThread = 2048;
 	std::vector<std::shared_ptr<DbFile>> threadFiles;
 	threadFiles.reserve(fileCountPerThread);
@@ -1902,8 +1899,6 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		assert(rootWasFound == true);
 		return false;
 	}
-
-	qDebug() << "DbController::getDeviceTreeLatestVersion parse " << files.size() << "objects, time " << t.elapsed();
 
 	return ok;
 }

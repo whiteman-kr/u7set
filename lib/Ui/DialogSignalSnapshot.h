@@ -4,6 +4,7 @@
 #include "../lib/AppSignalManager.h"
 #include "../lib/ExportPrint.h"
 #include "../VFrame30/Schema.h"
+#include "DragDropHelper.h"
 
 class SignalSnapshotModel;
 
@@ -186,6 +187,22 @@ struct DialogSignalSnapshotSettings
 	void store();
 };
 
+class SnapshotTableView : public QTableView
+{
+public:
+	SnapshotTableView();
+
+protected:
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
+	AppSignalParam m_appSignalParam;
+	QPoint m_dragStartPosition;
+
+	DragDropHelper m_dragDropHelper;
+};
+
 class DialogSignalSnapshot : public QDialog
 {
 	Q_OBJECT
@@ -256,7 +273,7 @@ private:
 
 	QPushButton* m_buttonFixate = nullptr;
 
-	QTableView* m_tableView = nullptr;
+	SnapshotTableView* m_tableView = nullptr;
 
 	//
 

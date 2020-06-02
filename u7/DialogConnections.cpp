@@ -269,7 +269,7 @@ void DialogConnections::onMaskApply()
 
 	if (maskText.isEmpty() == false)
 	{
-		m_masks = maskText.split(';', QString::SkipEmptyParts);
+		m_masks = maskText.split(';', Qt::SkipEmptyParts);
 		m_masks.removeDuplicates();
 
 		for (QString& mask : m_masks)

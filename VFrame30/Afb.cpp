@@ -471,7 +471,7 @@ namespace Afb
 		if (xmlElement.hasAttribute(QLatin1String("AdditionalSizes")) == true)
 		{
 			QStringList str = xmlElement.attribute(QLatin1String("AdditionalSizes"))
-						  .split(",", QString::SkipEmptyParts);
+			              .split(",", Qt::SkipEmptyParts);
 
 			m_additionalSizes.clear();
 			m_additionalSizes.reserve(str.size());

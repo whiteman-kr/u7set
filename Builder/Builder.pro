@@ -172,7 +172,6 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
     ../lib/Signal.h \
-    ../lib/StdHashQString.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \
     ../lib/ProtoSerialization.h \

@@ -122,7 +122,7 @@ bool ExportPrint::exportToTextDocument(QTableView* tableView, QTextDocument* doc
 	if (onlySelectedRows == true)
 	{
 		selectedIndexes = tableView->selectionModel()->selectedRows();
-		qSort(selectedIndexes);
+		std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
 		rowCount = selectedIndexes.size();
 	}

@@ -48,6 +48,11 @@ void SimDialogSignalSnapshot::projectUpdated()
 
 	signalsUpdated();
 
+	if (m_simuator->isLoaded() == false)
+	{
+		schemasUpdated();
+	}
+
 	return;
 }
 

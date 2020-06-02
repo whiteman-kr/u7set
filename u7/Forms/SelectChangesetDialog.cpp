@@ -47,6 +47,8 @@ SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, Db
 	QList<QTreeWidgetItem*> items;
 	items.reserve(static_cast<int>(history.size()));
 
+	QLocale locale{};
+
 	for (unsigned int i = 0; i < history.size(); i++)
 	{
 		const DbChangeset& ci = history[i];
@@ -55,7 +57,7 @@ SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, Db
 		itemTextList << QString::number(ci.changeset());
 		itemTextList << ci.username();
 		itemTextList << ci.action().text();
-		itemTextList << ci.date().toString(Qt::SystemLocaleShortDate);
+		itemTextList << locale.toString(ci.date(), QLocale::FormatType::ShortFormat);
 		itemTextList << ci.comment();
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(itemTextList);

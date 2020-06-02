@@ -1,24 +1,24 @@
-#ifndef DIALOGSIGNALINFO_H
-#define DIALOGSIGNALINFO_H
+#ifndef TUNINGSIGNALINFO_H
+#define TUNINGSIGNALINFO_H
 
 #include <QDialog>
 #include "../lib/Hash.h"
 #include "../lib/Types.h"
 
 namespace Ui {
-	class DialogSignalInfo;
+	class TuningSignalInfo;
 }
 
 class TuningSignalManager;
 class TuningClientTcpClient;
 
-class DialogSignalInfo : public QDialog
+class TuningSignalInfo : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget* parent = 0);
-	~DialogSignalInfo();
+	explicit TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget* parent = 0);
+	~TuningSignalInfo();
 
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -26,7 +26,7 @@ private:
 	void updateInfo();
 
 private:
-	Ui::DialogSignalInfo *ui;
+	Ui::TuningSignalInfo *ui;
 
 	int m_timerId = -1;
 
@@ -39,4 +39,4 @@ private:
 	QString m_textEditText;
 };
 
-#endif // DIALOGSIGNALINFO_H
+#endif // TUNINGSIGNALINFO_H

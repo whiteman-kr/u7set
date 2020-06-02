@@ -164,7 +164,8 @@ var VersionMSO4: number = 0x00c0;
 //var configScriptVersion: number = 1;
 //var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
 //var configScriptVersion: number = 3;	//Added software type checking
-var configScriptVersion: number = 4;	//Added Lan controller configuration parsing
+//var configScriptVersion: number = 4;	//Added Lan controller configuration parsing
+var configScriptVersion: number = 5;	//Added ConfigFrameCount to service information, NIOS frame changes
 
 var LMDescriptionNumber: number = 0;
 
@@ -498,6 +499,16 @@ function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: Device
 
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] UniqueID = 0\r\n");
 	ptr += 8;
+
+	//configFrameCount
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "ConfigFrameCount", configFrameCount) == false)  
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] ConfigFrameCount = " + configFrameCount + "\r\n");
+	ptr += 2;
+
+	// Child modules
 
 	var chassis: DeviceObject = module.jsParent();
 
@@ -1225,19 +1236,10 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	var blocksPtr : number = ptr;	// bptr is a pointer to Blocks [] array
 
-	var blockPresent: boolean[] = [];
-	for (var i: number = 0; i < ioModulesMaxCount; i++) {
-		blockPresent[i] = false;
-	}
-
 	var blocksCount: number = 0;
-	var blocksMask: number = 0;
 
 	var txAddr: number = 0;
-	var txDataSize: number = 16;
-
 	var rxAddr: number = 0;
-	var rxDataSize: number = 32;
 
 	for (var i: number = 0; i < chassis.childrenCount(); i++) {
 		var ioModule: DeviceObject = chassis.jsChild(i);
@@ -1257,7 +1259,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		var ioEquipmentID: string = ioModule.jsPropertyString("EquipmentID");
 
-		var checkProperties: string[] = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize", "Configuration"];
+		var checkProperties: string[] = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize", "TxDataSize", "RxDataSize", "Configuration"];
 		for (var cp: number = 0; cp < checkProperties.length; cp++) {
 			if (ioModule.propertyValue(checkProperties[cp]) == undefined) {
 				log.errCFG3000(checkProperties[cp], ioEquipmentID);
@@ -1270,16 +1272,13 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			log.errCFG3002("Place", ioPlace, 1, ioModulesMaxCount, ioEquipmentID);
 			return false;
 		}
-
-		var zeroIoPlace: number = ioPlace - 1;
-
-		blockPresent[zeroIoPlace] = true;
+	
+		var blockPtr: number = blocksPtr + (blocksCount * structSize);
 
 		blocksCount++
 
-		blocksMask |= (1 << zeroIoPlace);
-	
-		var blockPtr: number = blocksPtr + (zeroIoPlace * structSize);
+		log.writeMessage("Place = " + ioPlace);
+		log.writeMessage("blockPtr = " + blockPtr);
 
 		// Place
 
@@ -1308,11 +1307,13 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 		}
 		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxAddr = " + txAddr + "\r\n");
 
-		txAddr += 32;
+		txAddr += 128;
 
 		blockPtr += 2;
 
 		// TxDataSize
+
+		var txDataSize: number = ioModule.jsPropertyInt("TxDataSize");
 
 		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxDataSize", txDataSize) == false) {
 			return false;
@@ -1328,11 +1329,13 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 		}
 		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxAddr = " + rxAddr + "\r\n");
 
-		rxAddr += 32;
+		rxAddr += 128;
 
 		blockPtr += 2;
 
 		// RxDataSize
+
+		var rxDataSize: number = ioModule.jsPropertyInt("RxDataSize");
 
 		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxDataSize", rxDataSize) == false) {
 			return false;
@@ -1349,24 +1352,6 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			return false;
 		}
 		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Configuration = " + configurationCode + "\r\n");
-
-		blockPtr += 2;
-	}
-
-	for (var i: number = 0; i < ioModulesMaxCount; i++) {
-		if (blockPresent[i] == true) {
-			continue;
-		}
-
-		var blockPtr: number = blocksPtr + (i * structSize);
-
-		// Place
-
-		value = 0xffff;
-		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "Module Place (reserved)", value) == false) {
-			return false;
-		}
-		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Module Place (reserved) = " + value + "\r\n");
 
 		blockPtr += 2;
 	}

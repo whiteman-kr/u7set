@@ -198,7 +198,7 @@ namespace VFrame30
 			[](QPainter* p, const QRectF rect, QString text, int flags)
 			{
 				p->save();
-				p->resetMatrix();
+				p->resetTransform();
 
 				QRectF textRect(rect.left() * p->device()->logicalDpiX(),
 								   rect.top() * p->device()->logicalDpiY(),

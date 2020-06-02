@@ -34,15 +34,14 @@ int TuningModelHashSet::hashCount() const
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(TuningModelColumns column, Qt::SortOrder order, const TuningModel* model, const TuningSignalManager* tuningSignalManager):
+TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, const TuningSignalManager* tuningSignalManager):
 	m_column(column),
-	m_order(order),
 	m_tuningSignalManager(tuningSignalManager),
 	m_model(model)
 {
 }
 
-bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column, Qt::SortOrder order) const
+bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column) const
 {
 	QVariant v1;
 	QVariant v2;
@@ -135,18 +134,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		{
 			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				double tv1 = m_model->defaultValue(asp1).toDouble();
-				double tv2 = m_model->defaultValue(asp2).toDouble();
-
-				if (tv1 == tv2)
-				{
-					return asp1.customSignalId() < asp2.customSignalId();
-				}
-
-				if (order == Qt::AscendingOrder)
-					return tv1 < tv2;
-				else
-					return tv1 > tv2;
+				v1 = m_model->defaultValue(asp1).toDouble();
+				v2 = m_model->defaultValue(asp2).toDouble();
 			}
 			else
 			{
@@ -159,18 +148,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		{
 			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				double tv1 = tss1.value().toDouble();
-				double tv2 = tss2.value().toDouble();
-
-				if (tv1 == tv2)
-				{
-					return asp1.customSignalId() < asp2.customSignalId();
-				}
-
-				if (order == Qt::AscendingOrder)
-					return tv1 < tv2;
-				else
-					return tv1 > tv2;
+				v1 = tss1.value().toDouble();
+				v2 = tss2.value().toDouble();
 			}
 			else
 			{
@@ -183,18 +162,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		{
 			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				double tv1 = asp1.tuningLowBound().toDouble();
-				double tv2 = asp2.tuningLowBound().toDouble();
-
-				if (tv1 == tv2)
-				{
-					return asp1.customSignalId() < asp2.customSignalId();
-				}
-
-				if (order == Qt::AscendingOrder)
-					return tv1 < tv2;
-				else
-					return tv1 > tv2;
+				v1 = asp1.tuningLowBound().toDouble();
+				v2 = asp2.tuningLowBound().toDouble();
 			}
 			else
 			{
@@ -207,18 +176,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		{
 			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				double tv1 = asp1.tuningHighBound().toDouble();
-				double tv2 = asp2.tuningHighBound().toDouble();
-
-				if (tv1 == tv2)
-				{
-					return asp1.customSignalId() < asp2.customSignalId();
-				}
-
-				if (order == Qt::AscendingOrder)
-					return tv1 < tv2;
-				else
-					return tv1 > tv2;
+				v1 = asp1.tuningHighBound().toDouble();
+				v2 = asp2.tuningHighBound().toDouble();
 			}
 			else
 			{
@@ -244,15 +203,65 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		return false;
 	}
 
+	if (v1.userType() != v2.userType())
+	{
+		Q_ASSERT(false);
+		return asp1.customSignalId() < asp2.customSignalId();
+	}
+
 	if (v1 == v2)
 	{
 		return asp1.customSignalId() < asp2.customSignalId();
 	}
 
-	if (order == Qt::AscendingOrder)
-		return v1 < v2;
-	else
-		return v1 > v2;
+	switch (v1.userType())
+	{
+	case QMetaType::Bool:
+		{
+			return v1.toBool() < v2.toBool();
+			break;
+		}
+	case QMetaType::QString:
+		{
+			return v1.toString() < v2.toString();
+			break;
+		}
+	case QMetaType::Int:
+		{
+			return v1.toInt() < v2.toInt();
+			break;
+		}
+	case QMetaType::UInt:
+		{
+			return v1.toUInt() < v2.toUInt();
+			break;
+		}
+	case QMetaType::LongLong:
+		{
+			return v1.toLongLong() < v2.toLongLong();
+			break;
+		}
+	case QMetaType::ULongLong:
+		{
+			return v1.toULongLong() < v2.toULongLong();
+			break;
+		}
+	case QMetaType::Float:
+		{
+			return v1.toFloat() < v2.toFloat();
+			break;
+		}
+	case QMetaType::Double:
+		{
+			return v1.toDouble() < v2.toDouble();
+			break;
+		}
+	default:
+		break;
+	}
+
+	Q_ASSERT(false);
+	return asp1.customSignalId() < asp2.customSignalId();
 }
 
 //
@@ -297,7 +306,7 @@ TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::ve
 
 	for (const QString& s : valueColumnsAppSignalIdSuffixes)
 	{
-		m_valueColumnAppSignalIdSuffixes.push_back(s.split(';', QString::SkipEmptyParts));
+		m_valueColumnAppSignalIdSuffixes.push_back(s.split(';', Qt::SkipEmptyParts));
 	}
 }
 
@@ -408,7 +417,7 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 					{
 						// Get separate parts of suffix set, separated by '+'. Example TZB5_GENERAL_1SF will give TZB5+_1SF
 
-						QStringList suffixSet = suffix.split('+', QString::SkipEmptyParts);
+						QStringList suffixSet = suffix.split('+', Qt::SkipEmptyParts);
 
 						if (suffixSet.isEmpty() == true)
 						{
@@ -683,7 +692,12 @@ void TuningModel::sort(int column, Qt::SortOrder order)
 
 	TuningModelColumns sortColumn = m_columnsTypes[column];
 
-	std::sort(m_hashSets.begin(), m_hashSets.end(), TuningModelSorter(sortColumn, order, this, m_tuningSignalManager));
+	std::sort(m_hashSets.begin(), m_hashSets.end(), TuningModelSorter(sortColumn, this, m_tuningSignalManager));
+
+	if (order == Qt::DescendingOrder)
+	{
+		std::reverse(m_hashSets.begin(), m_hashSets.end());
+	}
 
 	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 

@@ -1704,7 +1704,7 @@ namespace ExtWidgets
 			spaces += " ";
 		}
 
-		m_plainTextEdit->setTabStopWidth(metrics.width(spaces));
+		m_plainTextEdit->setTabStopDistance(metrics.width(spaces));
 
 		connect(m_plainTextEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
 		connect(m_plainTextEdit->document(), &QTextDocument::contentsChange, this, &PropertyPlainTextEditor::onPlainTextContentsChange);
@@ -3461,7 +3461,7 @@ namespace ExtWidgets
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
 	{
 		QList<std::shared_ptr<PropertyObject>> list =
-				QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>::fromStdVector(objects));
+		        QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>{objects.begin(), objects.end()});
 
 		return setObjects(list);
 	}
