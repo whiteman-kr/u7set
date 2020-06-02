@@ -66,7 +66,9 @@ namespace Sim
 		std::unordered_map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
-		const Ram& ram() const;
+		const Ram& ram() const;	// This RAM access is not protected by any mutext, use it only when no concurent thread is accessing it!
+		Ram& mutableRam();		// This RAM access is not protected by any mutext, use it only when no concurent thread is accessing it!
+
 		DeviceMode deviceMode() const;
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);

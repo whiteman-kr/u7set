@@ -18,6 +18,8 @@ namespace Sim
 		Output(),
 		m_scriptSimulator(this)
 	{
+		qRegisterMetaType<E::LogicModuleRamAccess>("LogicModuleRamAccess");
+		qRegisterMetaType<Sim::RamAddress>("RamAddress");
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
 		qRegisterMetaType<Sim::DeviceMode>("DeviceMode");

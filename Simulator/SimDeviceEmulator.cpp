@@ -1611,6 +1611,11 @@ namespace Sim
 		return m_ram;
 	}
 
+	Ram& DeviceEmulator::mutableRam()
+	{
+		return m_ram;
+	}
+
 	DeviceMode DeviceEmulator::currentMode() const
 	{
 		return m_currentMode;

@@ -1,5 +1,11 @@
 'use strict'
 
+
+const RamReadAccess = 1;        // Use these constants as param for ReadRam*/WriteRam* functions
+const RamWriteAccess = 2;
+const RamReadWriteAccess = 3;
+
+
 function assert(condition, message)
 {
     if (!condition)
@@ -9,6 +15,8 @@ function assert(condition, message)
     }
 }
 
+
+//
 // initTestCase() - will be called before the first test function is executed.
 //
 function initTestCase(sim)

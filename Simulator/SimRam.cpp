@@ -995,38 +995,24 @@ namespace Sim
 		return area->readDword(offsetW, data, byteOrder, applyOverride);
 	}
 
-	bool Ram::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder)
+	bool Ram::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
 	{
-		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder);
+		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder, access);
 	}
 
-	bool Ram::readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride) const
+	bool Ram::readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride) const
 	{
-		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, applyOverride);
+		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, access, applyOverride);
 	}
 
-	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder)
+	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
 	{
-		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
-		if (area == nullptr)
-		{
-			return false;
-		}
-
-		bool ok = area->writeSignedInt(offsetW, data, byteOrder);
-		return ok;
+		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder, access);
 	}
 
-	bool Ram::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, bool applyOverride) const
+	bool Ram::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride) const
 	{
-		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
-		if (area == nullptr)
-		{
-			return false;
-		}
-
-		bool ok = area->readSignedInt(offsetW, data, byteOrder, applyOverride);
-		return ok;
+		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, access, applyOverride);
 	}
 
 	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept
