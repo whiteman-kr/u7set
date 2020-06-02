@@ -151,7 +151,7 @@ void CommandLineParser::parse()
 						{
 							QString value = cmdLineArg.mid(pos + 1);
 
-							op.values = value.split(",", QString::KeepEmptyParts);
+							op.values = value.split(",", Qt::KeepEmptyParts);
 
 							int valueIndex = 0;
 							int settingsCount = op.settingsNames.count();

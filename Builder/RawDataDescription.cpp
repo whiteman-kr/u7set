@@ -41,7 +41,7 @@ namespace Hardware
 
 		// split string
 
-		QStringList list = rawDataDescriptionStr.split("\n", QString::SkipEmptyParts);
+		QStringList list = rawDataDescriptionStr.split("\n", Qt::SkipEmptyParts);
 
 		bool needTxRawDataSize = false;
 		bool needRxRawDataSize = false;
@@ -351,7 +351,7 @@ namespace Hardware
 
 		QString inSignalDescription = str.section("=", 1).trimmed();
 
-		QStringList descItemsList = inSignalDescription.split(",", QString::SkipEmptyParts);
+		QStringList descItemsList = inSignalDescription.split(",", Qt::SkipEmptyParts);
 
 		if (descItemsList.size() != 7)			// must be 7 parameters!
 		{

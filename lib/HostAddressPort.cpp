@@ -261,7 +261,7 @@ bool HostAddressPort::splitAddressPortStr(const QString& addressPortStr, QString
 	addressStr->clear();
 	*port = 0;
 
-	QStringList strList = addressPortStr.split(":", QString::SplitBehavior::SkipEmptyParts);
+	QStringList strList = addressPortStr.split(":", Qt::SkipEmptyParts);
 
 	if (strList.size() == 0)
 	{

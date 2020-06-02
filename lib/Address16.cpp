@@ -117,7 +117,7 @@ QString Address16::toString(bool zeroPadded) const
 {
 	if (zeroPadded == true)
 	{
-		return QString().sprintf("%05d:%02d", m_offset, m_bit);
+		return QString("%1:%2").arg(m_offset, 5, 10, QLatin1Char('0')).arg(m_bit, 2, 10, QLatin1Char('0'));
 	}
 
 	return QString("%1:%2").arg(m_offset).arg(m_bit);

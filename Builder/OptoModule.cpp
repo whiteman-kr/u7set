@@ -1495,8 +1495,13 @@ namespace Hardware
 
 		list.append(QString(tr("Port Tx data:\n")));
 
-		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)\n", txBufAbsAddress(), 0, 0, 0, txDataID(), txDataID());
-		list.append(str);
+		list.append(QString("%1:%2  [%3:%4]  TxDataID = 0x%5 (%6)\n").
+		                arg(format_04d(txBufAbsAddress())).
+		                arg(format_02d(0)).
+		                arg(format_04d(0)).
+		                arg(format_02d(0)).
+		                arg((QString("%1").arg(txDataID(), 8, 16, QLatin1Char('0'))).toUpper()).
+		                arg(txDataID()) );
 
 		list.append("Tx raw signals:\n");
 
@@ -1506,11 +1511,13 @@ namespace Hardware
 		{
 			if (tx->isRaw() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(format_04d(tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(tx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1529,11 +1536,13 @@ namespace Hardware
 		{
 			if (tx->isRegular() == true && tx->isAnalog() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(format_04d(tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(tx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1552,11 +1561,13 @@ namespace Hardware
 		{
 			if (tx->isRegular() == true && tx->isBus() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(format_04d(tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(tx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1575,11 +1586,13 @@ namespace Hardware
 		{
 			if (tx->isRegular() == true && tx->isDiscrete() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(format_04d(tx->addrInBuf().offset())).
+				                arg(format_02d(tx->addrInBuf().bit())).
+				                arg(tx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1618,8 +1631,13 @@ namespace Hardware
 
 		QString linkedPort = linkedPortID();
 
-		str.sprintf("%04d:%02d  [%04d:%02d]  RxDataID = 0x%08X (%u) linkedPortID = %s\n", rxBufAbsAddress(), 0, 0, 0, rxDataID(), rxDataID(), C_STR(linkedPort));
-		list.append(str);
+		list.append(QString("%1:%2  [%3:%4]  TxDataID = 0x%5 (%6)\n").
+		                arg(format_04d(rxBufAbsAddress())).
+		                arg(format_02d(0)).
+		                arg(format_04d(0)).
+		                arg(format_02d(0)).
+		                arg((QString("%1").arg(rxDataID(), 8, 16, QLatin1Char('0'))).toUpper()).
+		                arg(rxDataID()) );
 
 		list.append("Rx raw signals:\n");
 
@@ -1629,11 +1647,13 @@ namespace Hardware
 		{
 			if (rx->isRaw() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(format_04d(rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(rx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1652,11 +1672,13 @@ namespace Hardware
 		{
 			if (rx->isRegular() == true && rx->isAnalog() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(format_04d(rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(rx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1675,11 +1697,13 @@ namespace Hardware
 		{
 			if (rx->isRegular() == true && rx->isBus() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(format_04d(rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(rx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1698,11 +1722,13 @@ namespace Hardware
 		{
 			if (rx->isRegular() == true && rx->isDiscrete() == true)
 			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalIDs().join(", ")));
-				list.append(str);
+				list.append(QString("%1:%2  [%3:%4]  %5").
+				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(format_04d(rx->addrInBuf().offset())).
+				                arg(format_02d(rx->addrInBuf().bit())).
+				                arg(rx->appSignalIDs().join(", "))
+				            );
 
 				hasSignals = true;
 			}
@@ -1947,6 +1973,16 @@ namespace Hardware
 		signalList.append(tempList);
 
 		return true;
+	}
+
+	QString OptoPort::format_04d(int v) const
+	{
+		return QString("%1").arg(v, 4, 10, QLatin1Char('0'));
+	}
+
+	QString OptoPort::format_02d(int v) const
+	{
+		return QString("%1").arg(v, 2, 10, QLatin1Char('0'));
 	}
 
 	// --------------------------------------------------------------------------------------
@@ -3797,7 +3833,7 @@ namespace Hardware
 
 		m_modules.insert(module->equipmentIdTemplate(), optoModule);
 
-		m_lmAssociatedModules.insertMulti(optoModule->lmID(), optoModule);
+		m_lmAssociatedModules.insert(optoModule->lmID(), optoModule);
 
 		const HashedVector<QString, OptoPortShared>& ports = optoModule->ports();
 

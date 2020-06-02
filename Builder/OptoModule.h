@@ -271,6 +271,9 @@ namespace Hardware
 
 		bool sortTxRxSignalList(QVector<TxRxSignalShared> &signalList);
 
+		QString format_04d(int v) const;
+		QString format_02d(int v) const;
+
 	private:
 		OptoModuleStorage& m_storage;
 
@@ -556,7 +559,7 @@ namespace Hardware
 		HashedVector<QString, OptoModuleShared> m_modules;
 		HashedVector<QString, OptoPortShared> m_ports;
 
-		QHash<QString, OptoModuleShared> m_lmAssociatedModules;
+		QMultiHash<QString, OptoModuleShared> m_lmAssociatedModules;
 
 		QHash<QString, ConnectionShared> m_connections;		// connectionID -> connection
 

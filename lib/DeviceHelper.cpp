@@ -126,7 +126,7 @@ bool DeviceHelper::getStrListProperty(const Hardware::DeviceObject* device, cons
 	str.replace('\n', ';');
 	str.remove('\r');
 
-	*strList = str.split(";", QString::SkipEmptyParts);
+	*strList = str.split(";", Qt::SkipEmptyParts);
 
 	for (QString& s : *strList)
 	{

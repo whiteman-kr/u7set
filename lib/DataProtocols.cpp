@@ -71,13 +71,10 @@ namespace Rup
 
 			if ((i % 16) == 0)
 			{
-				v.sprintf("%04X  ", static_cast<unsigned int>(i));
-				s += v;
+				s += QString("%1").arg(static_cast<unsigned int>(i), 4, 16, QLatin1Char('0'));
 			}
 
-			v.sprintf("%02X ", static_cast<unsigned int>(data[i]));
-
-			s += v;
+			s += QString("%1").arg(static_cast<unsigned int>(data[i]), 2, 16, QLatin1Char('0'));;
 
 			if (i > 0 && (i % 7) == 0)
 			{

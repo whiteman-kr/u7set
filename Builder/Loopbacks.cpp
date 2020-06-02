@@ -1,6 +1,7 @@
 #include "../lib/WUtils.h"
 #include "UalItems.h"
 #include "ModuleLogicCompiler.h"
+#include "IssueLogger.h"
 
 #include "Loopbacks.h"
 
@@ -130,7 +131,12 @@ namespace Builder
 
 		TEST_PTR_RETURN_FALSE(src);
 
-		assert(m_loopbacks.contains(src->loopbackId()) == false);
+		if (m_loopbacks.contains(src->loopbackId()) == true)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(log());
+			return false;
+		}
 
 		m_loopbacks.insert(src->loopbackId(),std::make_shared<Loopback>(sourceItem));
 
@@ -194,7 +200,7 @@ namespace Builder
 			}
 		}
 
-		m_ualSignalsToLoopbacks.insertMulti(ualSignal, loopback);
+		m_ualSignalsToLoopbacks.insert(ualSignal, loopback);
 
 		return true;
 	}
@@ -409,7 +415,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(file);
 
-		QStringList loopbacksIDs = m_loopbacks.uniqueKeys();
+		QStringList loopbacksIDs = m_loopbacks.keys();
 
 		loopbacksIDs.sort();
 
@@ -463,4 +469,10 @@ namespace Builder
 
 		return ids;
 	}
+
+	IssueLogger* Loopbacks::log() const
+	{
+		return m_compiler.log();
+	}
+
 }

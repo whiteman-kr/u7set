@@ -575,7 +575,7 @@ namespace Builder
 			{
 				int siTiming[] = { 4, 17, 23, 30, 38, 47 };		// exec time for signed int inputs
 
-				if (index < 0 || index >= sizeof(siTiming) / sizeof(int) )
+				if (index < 0 || index >= static_cast<int>(sizeof(siTiming) / sizeof(int)) )
 				{
 					assert(false);
 				}
@@ -590,7 +590,7 @@ namespace Builder
 			{
 				int fpTiming[] = { 21, 36, 44, 49, 57, 66 };	// exec time for float inputs
 
-				if (index < 0 || index >= sizeof(fpTiming) / sizeof(int) )
+				if (index < 0 || index >= static_cast<int>(sizeof(fpTiming) / sizeof(int)) )
 				{
 					assert(false);
 				}

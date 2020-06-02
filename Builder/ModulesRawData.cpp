@@ -49,7 +49,7 @@ bool ModuleRawDataDescription::parse(const QString& moduleequipmentIdTemplate, c
 
 	// split string
 
-	QStringList list = srcStr.split("\n", QString::SkipEmptyParts);
+	QStringList list = srcStr.split("\n", Qt::SkipEmptyParts);
 
 	bool rawDataSizeFound = false;
 

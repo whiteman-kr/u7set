@@ -1179,7 +1179,7 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 		assert(calcParam->stateflagssignals_size() == 0);
 
-		QList<E::AppSignalStateFlagType> flagTypes = m_stateFlagsSignals.uniqueKeys();
+		QList<E::AppSignalStateFlagType> flagTypes = m_stateFlagsSignals.keys();
 
 		for(E::AppSignalStateFlagType flagType : flagTypes)
 		{

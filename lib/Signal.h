@@ -251,7 +251,7 @@ public:
 
 	void setTags(const QStringList& tags);
 	void setTags(const std::set<QString>& tags) { m_tags = tags; }
-	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegExp("\\W+"), QString::SkipEmptyParts)); }
+	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegExp("\\W+"), Qt::SkipEmptyParts)); }
 
 	bool hasTags() const { return m_tags.size() > 0; }
 	bool hasTag(const QString& tag) const { return m_tags.find(tag.toLower().trimmed()) != m_tags.end(); }

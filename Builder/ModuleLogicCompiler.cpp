@@ -993,7 +993,7 @@ namespace Builder
 				continue;
 			}
 
-			m_loopbacks.addLoopbackSource(ualItem);
+			result &= m_loopbacks.addLoopbackSource(ualItem);
 		}
 
 		return result;
@@ -3039,7 +3039,9 @@ namespace Builder
 			return false;
 		}
 
-		signalWithFlag->addFlagSignalID(flagType, flagSignalID);
+		bool res = signalWithFlag->addFlagSignalID(flagType, flagSignalID);
+
+		Q_ASSERT(res == true);
 
 		m_signalsWithFlagsIDs.insert(signalWithFlagID);
 

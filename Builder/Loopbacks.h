@@ -10,6 +10,7 @@ namespace Builder
 	class UalItem;
 	class UalSignal;
 	class ModuleLogicCompiler;
+	class IssueLogger;
 
 	class Loopback
 	{
@@ -62,7 +63,7 @@ namespace Builder
 
 		LoopbackShared getLoopback(const QString& sourceID) const;
 
-		bool addLoopbackSource(const UalItem *sourceItem);
+		bool addLoopbackSource(const UalItem* sourceItem);
 		bool isSourceExists(const QString& lbSourceID) const;
 
 		bool addLoopbackTarget(const QString& loopbackID, const UalItem* ualItem);
@@ -89,13 +90,14 @@ namespace Builder
 		static QString joinedLoopbackIDs(const QList<LoopbackShared>& loopbacks);
 
 	private:
+		IssueLogger* log() const;
 
 	private:
 		ModuleLogicCompiler& m_compiler;
 
 		QHash<QString, LoopbackShared> m_loopbacks;							// LoopbackID -> Loopback
 
-		QHash<const UalSignal*, LoopbackShared> m_ualSignalsToLoopbacks;	// UalSignal -> Multi loopbacks
+		QMultiHash<const UalSignal*, LoopbackShared> m_ualSignalsToLoopbacks;	// UalSignal -> Multi loopbacks
 
 		QHash<QString, LoopbackShared> m_signalsToLoopbacks;				// SignalID -> Loopback
 		QHash<QUuid, LoopbackShared> m_pinsToLoopbacks;						// Pin Guid -> Multi Loopbacks
