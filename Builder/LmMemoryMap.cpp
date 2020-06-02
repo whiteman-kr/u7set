@@ -901,7 +901,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredInputBuses, ualSignals, true);
+		result &= appendRegSignals(m_appWordAdressed.acquiredInputBuses, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;
@@ -931,7 +931,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredOptoBuses, ualSignals, true);
+		result &= appendRegSignals(m_appWordAdressed.acquiredOptoBuses, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;

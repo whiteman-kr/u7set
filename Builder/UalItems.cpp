@@ -1400,7 +1400,7 @@ namespace Builder
 		return childSignal->appendRefSignal(s, false);
 	}
 
-	Address16 UalSignal::ioBufAddr()
+	Address16 UalSignal::ioBufAddr() const
 	{
 		if (m_isInput == true)
 		{
@@ -1442,6 +1442,11 @@ namespace Builder
 		}
 
 		return Address16();
+	}
+
+	bool UalSignal::checkIoBufAddr() const
+	{
+		return ioBufAddr().isValid();
 	}
 
 	Signal* UalSignal::signal() const
@@ -1907,7 +1912,7 @@ namespace Builder
 		}
 	}
 
-	Signal* UalSignal::getInputSignal()
+	Signal* UalSignal::getInputSignal() const
 	{
 		Signal* inputSignal = nullptr;
 
@@ -1923,7 +1928,7 @@ namespace Builder
 		return inputSignal;
 	}
 
-	Signal* UalSignal::getOutputSignal()
+	Signal* UalSignal::getOutputSignal() const
 	{
 		Signal* outputSignal = nullptr;
 
@@ -1939,7 +1944,7 @@ namespace Builder
 		return outputSignal;
 	}
 
-	Signal* UalSignal::getTunableSignal()
+	Signal* UalSignal::getTunableSignal() const
 	{
 		Signal* tunableSignal = nullptr;
 
@@ -1955,7 +1960,7 @@ namespace Builder
 		return tunableSignal;
 	}
 
-	QVector<Signal*> UalSignal::getAnalogOutputSignals()
+	QVector<Signal*> UalSignal::getAnalogOutputSignals() const
 	{
 		QVector<Signal*> analogOutputs;
 

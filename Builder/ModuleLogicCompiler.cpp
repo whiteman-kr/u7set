@@ -10353,25 +10353,15 @@ namespace Builder
 
 		for(const UalSignal* inputBus : m_acquiredInputBuses)
 		{
-			TEST_PTR_CONTINUE(inputBus);
-
-			if (inputBus->checkUalAddr() == false)
+			if (checkUalAndRegBufAddrs(inputBus) == false)
 			{
-				// Undefined UAL address of signal %1 (Logic schema %2).
-				//
-				m_log->errALC5105(inputBus->appSignalID(), inputBus->ualItemGuid(), inputBus->ualItemSchemaID());
 				result = false;
 				continue;
 			}
 
-			if (inputBus->checkRegBufAddr() == false)
-			{
-				// Undefined RegBuf address of signal %1 (Logic schema %2).
-				//
-				m_log->errALC5184(inputBus->appSignalID(), inputBus->ualItemGuid(), inputBus->ualItemSchemaID());
-				result = false;
-				continue;
-			}
+			Q_ASSERT(inputBus->isBus() == true);
+			Q_ASSERT(inputBus->isBusChild() == false);
+			Q_ASSERT(inputBus->isInput() == true);
 
 			result &= generateMemCopyCode(	inputBus->regBufAddr(),
 											inputBus->ualAddr(),
@@ -10380,13 +10370,95 @@ namespace Builder
 											code);
 		}
 
+		code->newLine();
+
 		return true;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredOptoBusesToRegBuf(CodeSnippet* code)
 	{
-		Q_ASSERT(false);
+		if (m_acquiredOptoBuses.isEmpty() == true)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		CodeItem cmd;
+
+		code->comment_nl("Copy aquired Opto Buses to regBuf");
+
+		for(const UalSignal* optoBus : m_acquiredOptoBuses)
+		{
+			if (checkUalAndRegBufAddrs(optoBus) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			Q_ASSERT(optoBus->isBus() == true);
+			Q_ASSERT(optoBus->isBusChild() == false);
+			Q_ASSERT(optoBus->isOptoSignal() == true);
+
+			result &= generateMemCopyCode(	optoBus->regBufAddr(),
+											optoBus->ualAddr(),
+											optoBus->sizeW(),
+											QString("copy %1").arg(optoBus->refSignalIDsJoined()),
+											code);
+		}
+
+		code->newLine();
+
 		return true;
+	}
+
+	bool ModuleLogicCompiler::checkUalAndRegBufAddrs(const UalSignal* ualSignal) const
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualSignal, m_log);
+
+		bool result = true;
+
+		if (ualSignal->checkUalAddr() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+			result = false;
+		}
+
+		if (ualSignal->checkRegBufAddr() == false)
+		{
+			// Undefined RegBuf address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5184(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+			result = false;
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::checkUalAndIoBufAddrs(const UalSignal* ualSignal) const
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualSignal, m_log);
+
+		bool result = true;
+
+		if (ualSignal->checkUalAddr() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+			result = false;
+		}
+
+		if (ualSignal->checkIoBufAddr() == false)
+		{
+			// Undefined IoBuf address of signal %1 (Logic schema %2).
+			m_log->errALC5185(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+			result = false;
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf(CodeSnippet* code)
@@ -10854,7 +10926,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOutputBusSignals(CodeSnippet* code)
 	{
-		bool result = false;
+		bool result = true;
 
 		bool first = true;
 
@@ -10871,23 +10943,8 @@ namespace Builder
 
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
-			if (ualSignal == nullptr)
+			if (checkUalAndIoBufAddrs(ualSignal) == false)
 			{
-				continue;				// this bus output is not used in app logic, it is ok
-			}
-
-			if (s->ualAddrIsValid() == false)
-			{
-				Q_ASSERT(false);
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined UAL address of signal %1").arg(s->appSignalID()));
-				result = false;
-				continue;
-			}
-
-			if (s->ioBufAddr().isValid() == false)
-			{
-				Q_ASSERT(false);
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Undefined IO address of signal %1").arg(s->appSignalID()));
 				result = false;
 				continue;
 			}
@@ -10902,27 +10959,12 @@ namespace Builder
 
 			if (first == true)
 			{
-				code->comment_nl("Copy output bus signals to output modules memory");
+				code->comment_nl("Copy Output Buses to output modules memory");
 				first = false;
 			}
 
-			switch(busSizeW)
-			{
-			case 1:
-				cmd.mov(s->ioBufAddr(), s->ualAddr());
-				break;
-
-			case 2:
-				cmd.mov32(s->ioBufAddr(), s->ualAddr());
-				break;
-
-			default:
-				cmd.movMem(s->ioBufAddr(), s->ualAddr(), busSizeW);
-			}
-
-			cmd.setComment(QString("copy %1").arg(s->appSignalID()));
-
-			code->append(cmd);
+			result &= generateMemCopyCode(ualSignal->ioBufAddr(), ualSignal->ualAddr(), busSizeW,
+											QString("copy %1").arg(ualSignal->refSignalIDsJoined()), code);
 		}
 
 		return true;

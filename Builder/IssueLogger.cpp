@@ -6730,6 +6730,29 @@ namespace Builder
 						arg(signalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5185
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Undefined IoBuf address of signal %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Undefined IoBuf address of signal. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5185(QString signalID, QUuid signalUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5184, signalUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5185,
+				  QString(tr("Undefined IoBuf address of signal %1 (Logic schema %2).")).
+						arg(signalID).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

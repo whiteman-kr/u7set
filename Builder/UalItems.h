@@ -470,7 +470,9 @@ namespace Builder
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
 
-		Address16 ioBufAddr();
+		Address16 ioBufAddr() const;
+
+		bool checkIoBufAddr() const;
 
 		Signal* signal() const;
 
@@ -544,10 +546,10 @@ namespace Builder
 
 		void sortRefSignals();
 
-		Signal* getInputSignal();
-		Signal* getOutputSignal();
-		Signal* getTunableSignal();
-		QVector<Signal*> getAnalogOutputSignals();
+		Signal* getInputSignal() const;
+		Signal* getOutputSignal() const;
+		Signal* getTunableSignal() const;
+		QVector<Signal*> getAnalogOutputSignals() const;
 
 		QStringList refSignalIDs() const;
 		void refSignalIDs(QStringList* appSignalIDs) const;

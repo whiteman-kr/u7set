@@ -430,7 +430,7 @@ namespace Builder
 		void errALC5182(QString appSignalID, QString errMsg);							// App signal %1 macro expanding error: %2
 		void errALC5183(QString appSignalID1, QString appSignalID2);					// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
 		void errALC5184(QString signalID, QUuid signalUuid, QString schemaID);			// Undefined RegBuf address of signal %1 (Logic schema %2).
-
+		void errALC5185(QString signalID, QUuid signalUuid, QString schemaID);			// Undefined IoBuf address of signal %1 (Logic schema %2).
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
 		void errALC5188(QString appSignalID, QString portID);							// Duplicate signal ID %1 in opto port %2.

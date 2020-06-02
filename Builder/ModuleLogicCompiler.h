@@ -502,6 +502,9 @@ namespace Builder
 		bool copyAcquiredInputBusesToRegBuf(CodeSnippet* code);
 		bool copyAcquiredOptoBusesToRegBuf(CodeSnippet* code);
 
+		bool checkUalAndRegBufAddrs(const UalSignal* ualSignal) const;
+		bool checkUalAndIoBufAddrs(const UalSignal* ualSignal) const;
+
 		bool copyAcquiredDiscreteInputSignalsToRegBuf(CodeSnippet* code);
 		bool copyAcquiredDiscreteOptoSignalsToRegBuf(CodeSnippet* code);
 //		bool copyAcquiredDiscreteBusChildSignalsToRegBuf(CodeSnippet* code);
