@@ -264,6 +264,7 @@ namespace Sim
 		std::unordered_map<int, size_t> offsetToCommands() const;
 
 		const Ram& ram() const;
+		Ram& mutableRam();
 
 		DeviceMode currentMode() const;
 

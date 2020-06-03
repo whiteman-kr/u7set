@@ -196,6 +196,11 @@ namespace Sim
 		return m_device.ram();
 	}
 
+	Ram& LogicModule::mutableRam()
+	{
+		return m_device.mutableRam();
+	}
+
 	DeviceMode LogicModule::deviceMode() const
 	{
 		return m_device.currentMode();

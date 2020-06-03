@@ -255,19 +255,19 @@ namespace Sim
 	public:
 		void resetState();
 
-		bool addParam(const AfbComponentParam& param) noexcept;
-		bool addParam(AfbComponentParam&& param) noexcept;
+		bool addParam(const AfbComponentParam& param);
+		bool addParam(AfbComponentParam&& param);
 
-		const AfbComponentParam* param(quint16 opIndex) noexcept;
+		const AfbComponentParam* param(quint16 opIndex);
 
-		bool paramExists(quint16 opIndex) const noexcept;
+		bool paramExists(quint16 opIndex) const;
 
-		bool addParamWord(quint16 opIndex, quint16 value) noexcept;
-		bool addParamDword(quint16 opIndex, quint32 value) noexcept;
-		bool addParamFloat(quint16 opIndex, float value) noexcept;
-		bool addParamDouble(quint16 opIndex, double value) noexcept;
-		bool addParamSignedInt(quint16 opIndex, qint32 value) noexcept;
-		bool addParamSignedInt64(quint16 opIndex, qint64 value) noexcept;
+		bool addParamWord(quint16 opIndex, quint16 value);
+		bool addParamDword(quint16 opIndex, quint32 value);
+		bool addParamFloat(quint16 opIndex, float value);
+		bool addParamDouble(quint16 opIndex, double value);
+		bool addParamSignedInt(quint16 opIndex, qint32 value);
+		bool addParamSignedInt64(quint16 opIndex, qint64 value);
 
 	private:
 		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
@@ -291,8 +291,8 @@ namespace Sim
 
 		bool isNull() const;
 
-		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept;
-		bool addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept;
+		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
+		bool addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage);
 
 		AfbComponentInstance* instance(quint16 instance) noexcept
 		{
@@ -315,8 +315,8 @@ namespace Sim
 		void resetState();
 
 		bool init(const LmDescription& lmDescription);
-		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept;
-		bool addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept;
+		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
+		bool addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage);
 
 		AfbComponentInstance* componentInstance(int componentOpCode, int instance) noexcept;
 
