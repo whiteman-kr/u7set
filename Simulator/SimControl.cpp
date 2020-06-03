@@ -464,7 +464,7 @@ namespace Sim
 				}
 				else
 				{
-                    // Task not found for this LM
+					// Task not found for this LM
 					//
 					if (lm.m_possibleToAdvanceTo <= cd.m_currentTime)
 					{
@@ -490,18 +490,18 @@ namespace Sim
 				{
 					minPossibleTime = lmpt;
 				}
-            }
+			}
 
 			// Shift current time if required
 			//
 			if (minPossibleTime > cd.m_currentTime)
 			{
 				// If current simulation is ahead of physical time, pause it a little bit
-                //
-                if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
+				//
+				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
 					ahead > 0us)
 				{
-                    // !!!!!!!!!!!!!!
+					// !!!!!!!!!!!!!!
 					// COMMENT HERE FOR SPEED UP (IF POSSIBLE, DEPENDS ON HW)
 					//
 					QThread::usleep(ahead.count());
@@ -534,13 +534,13 @@ namespace Sim
 				break;		// Usually exit point from do-while loop
 			}
 
-            if (cd.m_duration == 0us ||
-                (cd.m_duration > 0us && cd.m_currentTime >= finishTime))
-            {
-                // Simulation time is time up, set PAUSE mode
-                //
-                break;
-            }
+			if (cd.m_duration == 0us ||
+				(cd.m_duration > 0us && cd.m_currentTime >= finishTime))
+			{
+				// Simulation time is time up, set PAUSE mode
+				//
+				break;
+			}
 
 			// QThread::yieldCurrentThread();	// Give some time for tasks
 			// This code is instead of QThread::yieldCurrentThread,
@@ -548,22 +548,22 @@ namespace Sim
 			//
 			for (SimControlRunStruct& lm : lms)
 			{
-                if (lm.m_task.has_value() == true)
-                {
-                    lm.m_task->waitForFinished();
-                    break;      // At least one LM has finished the work
-                }
+				if (lm.m_task.has_value() == true)
+				{
+					lm.m_task->waitForFinished();
+					break;      // At least one LM has finished the work
+				}
 			}
-        }
-        while (true);	// Run always till state is triggered to STOP or PAUSE
+		}
+		while (true);	// Run always till state is triggered to STOP or PAUSE
 
-        // Wait everything to finish and perform post run cycle actions
-        //
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
+		// Wait everything to finish and perform post run cycle actions
+		//
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
 
-        TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-        TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-        TimeStamp systemTime{ms.count()};
+		TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+		TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+		TimeStamp systemTime{ms.count()};
 
 		for (SimControlRunStruct& lm : lms)
 		{
@@ -572,7 +572,7 @@ namespace Sim
 				QFuture<bool>& future = lm.m_task.value();
 				future.waitForFinished();
 
-                lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
+				lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
 			}
 		}
 
