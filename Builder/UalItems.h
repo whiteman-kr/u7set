@@ -52,7 +52,7 @@ namespace Builder
 		Afbl(std::shared_ptr<Afb::AfbElement> afb);
 		virtual ~Afbl();
 
-		bool hasRam() const { return m_afb->hasRam(); }
+		std::optional<bool> hasRam() const { return m_afb->hasRam(); }
 		int opCode() const	{ return m_afb->opCode(); }
 
 		const Afb::AfbElement& afb() const { return *m_afb; }
@@ -147,7 +147,7 @@ namespace Builder
 
 		E::UalItemType type() const;
 
-		bool hasRam() const { return afb().hasRam(); }
+		bool hasRam() const { return afb().hasRam().value_or(afbComponent()->hasRam()); }
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
 		std::vector<LogicPin>& inputs() { return m_appLogicItem.m_fblItem->inputs(); }
@@ -175,6 +175,7 @@ namespace Builder
 		const UalBusExtractor* ualBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
 
 		const Afb::AfbElement& afb() const { return m_appLogicItem.afbElement(); }
+		std::shared_ptr<Afb::AfbComponent> afbComponent() const { return m_appLogicItem.afbComponent(); }
 
 		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 

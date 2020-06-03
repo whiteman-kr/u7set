@@ -8,5 +8,5 @@
     <StartMenuDir>Radiy Platform Configuration Tool</StartMenuDir>
     <TargetDir>@ApplicationsDirX64@/Radiy/Radiy Platform Configuration Tool @Version@</TargetDir>
     <ControlScript>controlScript.qs</ControlScript>
-    <CreateLocalRepository>true</CreateLocalRepository>
+    <CreateLocalRepository>false</CreateLocalRepository>
 </Installer>
