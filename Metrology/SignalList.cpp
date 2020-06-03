@@ -1,7 +1,5 @@
 #include "SignalList.h"
 
-#include <QClipboard>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
@@ -133,7 +131,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		switch (column)
 		{
@@ -366,8 +364,8 @@ void SignalListDialog::createInterface(bool hasButtons)
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Signal.png"));
 	setWindowTitle(tr("Signals"));
-	resize(QApplication::desktop()->availableGeometry().width() - 200, 500);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 200, 500);
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

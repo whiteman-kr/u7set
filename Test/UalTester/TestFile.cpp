@@ -89,9 +89,9 @@ QString TestCmdParam::valueStr(bool addParamName, int precise)
 		case TestCmdParamType::Double:
 			{
 				QString formatStr;
-				formatStr.sprintf(("%%.%df"), precise);
+				formatStr = QString::asprintf(("%%.%df"), precise);
 
-				str.sprintf(formatStr.toUtf8(), m_value.toDouble());
+				str = QString::asprintf(formatStr.toUtf8(), m_value.toDouble());
 
 				// remove unnecessary 0
 				//
@@ -1105,7 +1105,9 @@ bool TestCmd::parseCmdDelay()
 		return false;
 	}
 
-	quint32 delay_ms = ms.sprintf("%0.0f", ms.toDouble()).toUInt(); // float is rounded to int
+	ms = QString::asprintf("%0.0f", ms.toDouble());	// float is rounded to int
+
+	quint32 delay_ms = ms.toUInt();
 
 	TestCmdParam param;
 

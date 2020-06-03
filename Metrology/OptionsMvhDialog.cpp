@@ -126,7 +126,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 		cell->setTextAlignment(Qt::AlignLeft);
 		if (visible == false)
 		{
-			cell->setTextColor(Qt::lightGray);
+			cell->setForeground(Qt::lightGray);
 		}
 
 		m_columnList->setItem(index, MVH_COLUMN_TITLE, cell);
@@ -135,7 +135,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 		cell->setTextAlignment(Qt::AlignHCenter);
 		if (visible == false)
 		{
-			cell->setTextColor(Qt::lightGray);
+			cell->setForeground(Qt::lightGray);
 		}
 
 		m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
@@ -144,7 +144,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 		cell->setTextAlignment(Qt::AlignHCenter);
 		if (visible == false)
 		{
-			cell->setTextColor(Qt::lightGray);
+			cell->setForeground(Qt::lightGray);
 		}
 
 		m_columnList->setItem(index, MVH_COLUMN_WIDTH, cell);

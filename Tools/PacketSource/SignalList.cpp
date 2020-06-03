@@ -113,7 +113,7 @@ QVariant SignalTable::data(const QModelIndex &index, int role) const
 		return result;
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
 		{
@@ -322,11 +322,11 @@ void SignalStateDialog::createInterface()
 				QString strState, formatStr;
 				switch (m_pSignal->analogSignalFormat())
 				{
-					case E::AnalogAppSignalFormat::SignedInt32:		formatStr.sprintf("%%.%df", 0);								break;
-					case E::AnalogAppSignalFormat::Float32:			formatStr.sprintf("%%.%df", m_pSignal->decimalPlaces());	break;
+					case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);								break;
+					case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", m_pSignal->decimalPlaces());	break;
 					default:										assert(0);													break;
 				}
-				strState.sprintf(formatStr.toLocal8Bit(), m_pSignal->state());
+				strState = QString::asprintf(formatStr.toLocal8Bit(), m_pSignal->state());
 
 				m_stateEdit = new QLineEdit(strState);
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
@@ -404,9 +404,9 @@ void SignalStateDialog::onOk()
 	{
 		QString str, formatStr;
 
-		formatStr.sprintf("%%.%df", m_pSignal->decimalPlaces());
+		formatStr = QString::asprintf("%%.%df", m_pSignal->decimalPlaces());
 
-		str.sprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
+		str = QString::asprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
 		str += tr("\nRange of signal: %1").arg(m_pSignal->engineeringRangeStr());
 		str += tr("\nDo you want to change the signal state?");
 

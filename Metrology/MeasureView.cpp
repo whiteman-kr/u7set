@@ -169,12 +169,12 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		}
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		return QVariant();
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		switch(m_measureType)
 		{

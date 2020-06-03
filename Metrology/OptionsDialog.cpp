@@ -1,13 +1,13 @@
 #include "OptionsDialog.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
-#include <assert.h>
+#include <QScreen>
 #include <QSettings>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QPushButton>
+#include <assert.h>
 
 #include "FolderPropertyManager.h"
 #include "OptionsPointsDialog.h"
@@ -123,7 +123,7 @@ void OptionsDialog::createInterface()
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
 	setMinimumSize(850, 400);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 	loadSettings();
 
 	// create interface

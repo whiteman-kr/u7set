@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QThread>
 #include <QTimer>
 #include <QDebug>
@@ -43,7 +43,12 @@ bool MainWindow::createInterface()
 {
 	setWindowTitle(tr("CommView"));
 	resize(700, 750);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+
+	QScreen* screenAt = QGuiApplication::screenAt(pos());
+	if (screenAt != nullptr)
+	{
+		move(screenAt->availableGeometry().center() - rect().center());
+	}
 
 	createActions();
 	createMenu();

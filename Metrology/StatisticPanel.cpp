@@ -125,7 +125,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		switch (theOptions.toolBar().signalConnectionType())
 		{
@@ -160,7 +160,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (column == STATISTIC_COLUMN_CUSTOM_ID || column == STATISTIC_COLUMN_EQUIPMENT_ID || column == STATISTIC_COLUMN_STATE)
 		{

@@ -1,7 +1,5 @@
 #include "RackList.h"
 
-#include <QClipboard>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
@@ -285,7 +283,7 @@ void RackListDialog::createInterface()
 	setWindowIcon(QIcon(":/icons/Rack.png"));
 	setWindowTitle(tr("Racks"));
 	resize(700, 600);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

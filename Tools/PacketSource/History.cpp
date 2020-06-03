@@ -27,7 +27,8 @@ SignalForLog::SignalForLog(PS::Signal* pSignal, double prevState, double state) 
 {
 	QDateTime cdt = QDateTime::currentDateTime();
 
-	m_time.sprintf("%02d-%02d-%04d %02d:%02d:%02d:%03d",
+	m_time = QString::asprintf("%02d-%02d-%04d %02d:%02d:%02d:%03d",
+
 					cdt.date().day(),
 					cdt.date().month(),
 					cdt.date().year(),
@@ -73,12 +74,12 @@ QString SignalForLog::stateStr(double state) const
 
 			switch (m_pSignal->analogSignalFormat())
 			{
-				case E::AnalogAppSignalFormat::SignedInt32:		formatStr.sprintf("%%.%df", 0);								break;
-				case E::AnalogAppSignalFormat::Float32:			formatStr.sprintf("%%.%df", m_pSignal->decimalPlaces());	break;
+				case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);								break;
+				case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", m_pSignal->decimalPlaces());	break;
 				default:										assert(0);													break;
 			}
 
-			str.sprintf(formatStr.toLocal8Bit(), state);
+			str = QString::asprintf(formatStr.toLocal8Bit(), state);
 
 			if (m_pSignal->unit().isEmpty() == false)
 			{

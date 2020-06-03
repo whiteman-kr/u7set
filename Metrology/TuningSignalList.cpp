@@ -1,7 +1,5 @@
 #include "TuningSignalList.h"
 
-#include <QClipboard>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
@@ -127,7 +125,7 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
 		{
@@ -141,7 +139,7 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 	}
 
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (column == TUN_SOURCE_LIST_COLUMN_IS_REPLY)
 		{
@@ -406,7 +404,7 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == TUN_SIGNAL_LIST_COLUMN_DEFAULT)
 		{
@@ -417,7 +415,7 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 	}
 
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (column == TUN_SIGNAL_LIST_COLUMN_STATE)
 		{
@@ -507,9 +505,9 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 	{
 		case E::SignalType::Analog:
 
-			formatStr.sprintf("%%.%df", param.decimalPlaces());
+			formatStr = QString::asprintf("%%.%df", param.decimalPlaces());
 
-			stateStr.sprintf(formatStr.toAscii(), pSignal->state().value());
+			stateStr = QString::asprintf(formatStr.toAscii(), pSignal->state().value());
 
 			break;
 
@@ -676,7 +674,7 @@ void TuningSignalListDialog::createInterface()
 	setWindowIcon(QIcon(":/icons/Tuning.png"));
 	setWindowTitle(tr("Tuning signals"));
 	resize(1000, 600);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);
@@ -1290,9 +1288,9 @@ void TuningSignalStateDialog::onOk()
 	{
 		QString str, formatStr;
 
-		formatStr.sprintf("%%.%df", m_param.decimalPlaces());
+		formatStr = QString::asprintf("%%.%df", m_param.decimalPlaces());
 
-		str.sprintf("Failed input value: " + formatStr.toAscii(), state);
+		str = QString::asprintf("Failed input value: " + formatStr.toAscii(), state);
 		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);

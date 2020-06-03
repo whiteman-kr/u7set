@@ -125,7 +125,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		return theOptions.signalInfo().font();
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == SIGNAL_INFO_COLUMN_CALIBRATOR)
 		{
@@ -138,7 +138,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (column == SIGNAL_INFO_COLUMN_STATE)
 		{

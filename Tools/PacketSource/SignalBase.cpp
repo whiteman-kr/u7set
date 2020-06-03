@@ -94,12 +94,12 @@ QString PS::Signal::engineeringRangeStr() const
 
 	switch (analogSignalFormat())
 	{
-		case E::AnalogAppSignalFormat::SignedInt32:	formatStr.sprintf("%%.%df", 0);					break;
-		case E::AnalogAppSignalFormat::Float32:		formatStr.sprintf("%%.%df", decimalPlaces());	break;
+		case E::AnalogAppSignalFormat::SignedInt32:	formatStr = QString::asprintf("%%.%df", 0);					break;
+		case E::AnalogAppSignalFormat::Float32:		formatStr = QString::asprintf("%%.%df", decimalPlaces());	break;
 		default:									assert(0);										break;
 	}
 
-	range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
+	range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
 
 	if (unit().isEmpty() == false)
 	{
@@ -159,12 +159,12 @@ QString PS::Signal::stateStr() const
 
 			switch (analogSignalFormat())
 			{
-				case E::AnalogAppSignalFormat::SignedInt32:		formatStr.sprintf("%%.%df", 0);					break;
-				case E::AnalogAppSignalFormat::Float32:			formatStr.sprintf("%%.%df", decimalPlaces());	break;
+				case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);					break;
+				case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", decimalPlaces());	break;
 				default:										assert(0);										break;
 			}
 
-			str.sprintf(formatStr.toLocal8Bit(), state());
+			str = QString::asprintf(formatStr.toLocal8Bit(), state());
 
 			if (unit().isEmpty() == false)
 			{

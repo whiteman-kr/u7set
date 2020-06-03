@@ -115,7 +115,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		return;
 	}
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	m_loadedFiles.clear();
@@ -210,7 +210,7 @@ bool ConfigSocket::readMetrologyItems(const QByteArray& fileData)
 		return false;
 	}
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	result &= readRacks(fileData, fileVersion);
@@ -228,7 +228,7 @@ bool ConfigSocket::readMetrologySignalSet(const QByteArray& fileData)
 {
 	::Proto::MetrologySignalSet protoMetrologySignalSet;
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	bool result = protoMetrologySignalSet.ParseFromArray(fileData.constData(), fileData.size());
@@ -259,7 +259,7 @@ bool ConfigSocket::readMetrologySignalSet(const QByteArray& fileData)
 
 bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
 {
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	ComparatorSet comparatorSet;

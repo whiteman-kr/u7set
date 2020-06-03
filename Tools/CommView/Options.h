@@ -73,7 +73,8 @@ public:
 
 		QDateTime ct = QDateTime::currentDateTime();
 
-		timeStr.sprintf("%02d-%02d-%04d %02d:%02d:%02d.%03d",
+		timeStr = QString::asprintf("%02d-%02d-%04d %02d:%02d:%02d.%03d",
+
 						ct.date().day(),
 						ct.date().month(),
 						ct.date().year(),

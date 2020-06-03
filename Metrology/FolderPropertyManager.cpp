@@ -255,7 +255,7 @@ void VariantManager::setValue(QtProperty *property, const QVariant &val)
 			return;
 		}
 
-		QString str = qVariantValue<QString>(val);
+		QString str = val.toString();
 		Data d = m_valuesMap[property];
 
 		if (d.value == str)

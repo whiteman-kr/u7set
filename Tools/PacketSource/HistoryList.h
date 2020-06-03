@@ -1,6 +1,7 @@
 #ifndef SIGNALHISTORYLIST_H
 #define SIGNALHISTORYLIST_H
 
+#include <QScreen>
 #include <QAbstractTableModel>
 #include <QColor>
 #include <QIcon>

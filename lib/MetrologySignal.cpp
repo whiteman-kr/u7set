@@ -518,11 +518,11 @@ namespace Metrology
 
 		if (showHex == false)
 		{
-			range.sprintf("%d .. %d", lowADC(), highADC());
+			range = QString::asprintf("%d .. %d", lowADC(), highADC());
 		}
 		else
 		{
-			range.sprintf("0x%04X .. 0x%04X", lowADC(), highADC());
+			range = QString::asprintf("0x%04X .. 0x%04X", lowADC(), highADC());
 		}
 
 		return range;
@@ -571,7 +571,7 @@ namespace Metrology
 	QString SignalParam::electricRLoadStr() const
 	{
 		QString r0;
-		r0.sprintf("R=%0.0f", m_electricRLoad);
+		r0 = QString::asprintf("R=%0.0f", m_electricRLoad);
 		return r0;
 	}
 
@@ -580,7 +580,7 @@ namespace Metrology
 	QString SignalParam::electricR0Str() const
 	{
 		QString r0;
-		r0.sprintf("R0=%0.2f", m_electricR0);
+		r0 = QString::asprintf("R0=%0.2f", m_electricR0);
 		return r0;
 	}
 
@@ -607,9 +607,9 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", m_electricPrecision);
+		formatStr = QString::asprintf("%%.%df", m_electricPrecision);
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_electricLowLimit, m_electricHighLimit);
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_electricLowLimit, m_electricHighLimit);
 
 		QString unit = electricUnitStr();
 
@@ -639,9 +639,9 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", decimalPlaces());
+		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
 
 		return range;
 	}
@@ -664,9 +664,9 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", decimalPlaces());
+		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
 
 		if (unit().isEmpty() == false)
 		{
@@ -703,9 +703,9 @@ namespace Metrology
 		{
 			case E::SignalType::Analog:
 
-				formatStr.sprintf("%%.%df", decimalPlaces());
+				formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-				stateStr.sprintf(formatStr.toLocal8Bit(), tuningDefaultValue().toDouble());
+				stateStr = QString::asprintf(formatStr.toLocal8Bit(), tuningDefaultValue().toDouble());
 
 				break;
 
@@ -750,9 +750,9 @@ namespace Metrology
 
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", decimalPlaces());
+		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), tuningLowBound().toDouble(), tuningHighBound().toDouble());
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), tuningLowBound().toDouble(), tuningHighBound().toDouble());
 
 		return range;
 	}

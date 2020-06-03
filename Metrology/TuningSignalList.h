@@ -2,6 +2,7 @@
 #define TUNINGSIGNALLISTDIALOG_H
 
 #include <QDebug>
+#include <QScreen>
 #include <QDialog>
 #include <QMenu>
 #include <QMenuBar>
@@ -11,6 +12,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QHeaderView>
+#include <QClipboard>
 
 #include "TuningSignalBase.h"
 

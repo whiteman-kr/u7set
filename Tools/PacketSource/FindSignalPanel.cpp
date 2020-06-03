@@ -123,7 +123,7 @@ QVariant FindSignalTable::data(const QModelIndex &index, int role) const
 		return Qt::AlignLeft;
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == FIND_SIGNAL_COLUMN_ROW)
 		{

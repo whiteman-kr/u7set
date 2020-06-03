@@ -2,6 +2,7 @@
 #define OBJECTPROPERTYDIALOG_H
 
 #include <QDebug>
+#include <QScreen>
 #include <QDialog>
 #include <QMenuBar>
 #include <QGroupBox>

@@ -94,7 +94,7 @@ QVariant CommStateTable::data(const QModelIndex &index, int role) const
 		return Qt::AlignCenter;
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (column == COMM_STATE_LIST_COLUMN_PORT)
 		{
@@ -370,7 +370,7 @@ QVariant CommHeaderTable::data(const QModelIndex &index, int role) const
 		return Qt::AlignCenter;
 	}
 
-    if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
     {
 		if (portOption->isNoReply() == false)
         {
@@ -449,12 +449,12 @@ QString CommHeaderTable::text(int row, int column) const
 	{
 		switch(row)
 		{
-			case COMM_PACKET_FIELD_SIGN:		result.sprintf("0x%08X",  pHeader->Signature);	break;
-			case COMM_PACKET_FIELD_VERSION:		result.sprintf("0x%04X",  pHeader->Version);	break;
-			case COMM_PACKET_FIELD_TRANSID:		result.sprintf("0x%04X",  pHeader->TransID);	break;
-			case COMM_PACKET_FIELD_NUMERATOR:	result.sprintf("0x%04X",  pHeader->Numerator);	break;
-			case COMM_PACKET_FIELD_DATASIZE:	result.sprintf("0x%04X",  pHeader->DataSize);	break;
-			case COMM_PACKET_FIELD_DATAID:		result.sprintf("0x%08X",  SWAP_4_BYTES(pHeader->DataUID));								break;
+			case COMM_PACKET_FIELD_SIGN:		result = QString::asprintf("0x%08X",  pHeader->Signature);	break;
+			case COMM_PACKET_FIELD_VERSION:		result = QString::asprintf("0x%04X",  pHeader->Version);	break;
+			case COMM_PACKET_FIELD_TRANSID:		result = QString::asprintf("0x%04X",  pHeader->TransID);	break;
+			case COMM_PACKET_FIELD_NUMERATOR:	result = QString::asprintf("0x%04X",  pHeader->Numerator);	break;
+			case COMM_PACKET_FIELD_DATASIZE:	result = QString::asprintf("0x%04X",  pHeader->DataSize);	break;
+			case COMM_PACKET_FIELD_DATAID:		result = QString::asprintf("0x%08X",  SWAP_4_BYTES(pHeader->DataUID));								break;
 			case COMM_PACKET_FIELD_HEADER_CRC:	result = "0x" + QString("%1").arg(SWAP_8_BYTES(pHeader->CRC64), 0, 16).toUpper();			break;
 			case COMM_PACKET_FIELD_DATA_CRC:	result = "0x" + QString("%1").arg(SWAP_8_BYTES(portOption->dataCRC()), 0, 16).toUpper();	break;
 		}
@@ -646,13 +646,13 @@ QString CommDataTable::text(int row, int column) const
 
 	if (theOptions.view().showInHex() == true)
 	{
-		result.sprintf(theOptions.view().showInWord() == true ? "0x%04X" : "0x%02X",  portOption->data(row));
+		result = QString::asprintf(theOptions.view().showInWord() == true ? "0x%04X" : "0x%02X",  portOption->data(row));
 	}
 	else
 	{
 		if (theOptions.view().showInFloat() == false)
 		{
-			result.sprintf("%u",  portOption->data(row));
+			result = QString::asprintf("%u",  portOption->data(row));
 		}
 		else
 		{
@@ -682,7 +682,7 @@ QString CommDataTable::text(int row, int column) const
 					}
 
 					memcpy(&aFloat, &dwFolat, sizeof(float));
-					result.sprintf("%.4f",  aFloat);
+					result = QString::asprintf("%.4f",  aFloat);
 				}
 			}
 		}

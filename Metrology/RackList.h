@@ -2,6 +2,7 @@
 #define RACKLISTDIALOG_H
 
 #include <QDebug>
+#include <QScreen>
 #include <QDialog>
 #include <QMenu>
 #include <QMenuBar>
@@ -9,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QDialogButtonBox>
+#include <QClipboard>
 
 #include "SignalBase.h"
 

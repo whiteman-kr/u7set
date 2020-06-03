@@ -1273,7 +1273,7 @@ void MainWindow::onSourceListClicked(const QModelIndex& index)
 
 void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 {
-	Q_UNUSED(index);
+	Q_UNUSED(index)
 
 	setSignalState();
 }

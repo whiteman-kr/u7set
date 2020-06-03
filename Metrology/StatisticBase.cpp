@@ -38,7 +38,7 @@ void StatisticBase::clear()
 
 void StatisticBase::createSignalList()
 {
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	m_signalMutex.lock();
@@ -100,7 +100,7 @@ void StatisticBase::createSignalList()
 
 void StatisticBase::createComparatorList()
 {
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	m_signalMutex.lock();
@@ -187,7 +187,7 @@ void StatisticBase::updateSignalState(QTableView* pView, Hash signalHash)
 		return;
 	}
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	Metrology::Signal* pSignal = theSignalBase.signalPtr(signalHash);
@@ -239,7 +239,7 @@ void StatisticBase::updateSignalsState(QTableView* pView)
 		return;
 	}
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	m_signalMutex.lock();

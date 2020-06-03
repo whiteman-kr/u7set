@@ -123,7 +123,7 @@ void OptionsPointsDialog::setHeaderList()
 	{
 		if (column != POINT_SENSOR_PERCENT)
 		{
-			m_pointList->horizontalHeaderItem(column)->setTextColor(Qt::darkGray);
+			m_pointList->horizontalHeaderItem(column)->setForeground(Qt::darkGray);
 		}
 
 		if (column > POINT_SENSOR_I_4_20_MA)
@@ -248,7 +248,7 @@ void OptionsPointsDialog::updateList()
 
 			if (sensor != POINT_SENSOR_PERCENT)
 			{
-				cell->setTextColor(Qt::darkGray);
+				cell->setForeground(Qt::darkGray);
 			}
 		}
 
@@ -360,7 +360,13 @@ void OptionsPointsDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	QString value = m_pointList->item(row, column)->text();
+	QTableWidgetItem* pItem = m_pointList->item(row, column);
+	if (pItem == nullptr)
+	{
+		return;
+	}
+
+	QString value = pItem->text();
 
 	LinearityPoint point = m_linearity.points().at(index);
 	point.setPercent(value.toDouble());

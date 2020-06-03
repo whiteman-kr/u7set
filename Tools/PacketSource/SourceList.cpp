@@ -97,7 +97,7 @@ QVariant SourceTable::data(const QModelIndex &index, int role) const
 		return Qt::AlignCenter;
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == SOURCE_LIST_COLUMN_STATE)
 		{

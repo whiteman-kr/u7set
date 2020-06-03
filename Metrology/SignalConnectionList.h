@@ -2,6 +2,7 @@
 #define SIGNALCONNECTIONDIALOG_H
 
 #include <QDebug>
+#include <QScreen>
 #include <QDialog>
 #include <QMenu>
 #include <QMenuBar>
@@ -14,6 +15,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QClipboard>
 
 #include "../lib/Signal.h"
 

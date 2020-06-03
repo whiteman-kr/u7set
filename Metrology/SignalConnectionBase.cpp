@@ -295,7 +295,7 @@ int SignalConnectionBase::load()
 		return 0;
 	}
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);

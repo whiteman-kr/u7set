@@ -557,8 +557,8 @@ namespace Builder
 					{
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						QString nowElValStr, newElValStr;
-						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
+						nowElValStr = QString::asprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
+						newElValStr = QString::asprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
 
 						// Signal %1 has wrong engineering low Limit
 						//
@@ -575,8 +575,8 @@ namespace Builder
 					{
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						QString nowElValStr, newElValStr;
-						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
+						nowElValStr = QString::asprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
+						newElValStr = QString::asprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
 
 						// Signal %1 has wrong engineering high Limit
 						//
@@ -662,8 +662,8 @@ namespace Builder
 					{
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						QString nowElValStr, newElValStr;
-						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
+						nowElValStr = QString::asprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
+						newElValStr = QString::asprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
 
 						// Signal %1 - engineering low Limit mismatch electrical low Limit
 						//
@@ -679,8 +679,8 @@ namespace Builder
 					{
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						QString nowElValStr, newElValStr;
-						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = newElValStr.sprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
+						nowElValStr = QString::asprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
+						newElValStr = QString::asprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
 
 						// SSignal %1 - engineering high Limit mismatch electrical high Limit
 						//

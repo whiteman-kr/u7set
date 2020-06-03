@@ -116,7 +116,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return theOptions.comparatorInfo().font();
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (comparatorEx->outputState() == true)
 		{

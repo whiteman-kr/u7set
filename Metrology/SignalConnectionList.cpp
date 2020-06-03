@@ -1,7 +1,5 @@
 #include "SignalConnectionList.h"
 
-#include <QClipboard>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
@@ -107,7 +105,7 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		if (column == SIGNAL_CONNECTION_COLUMN_IN_ID)
 		{
@@ -527,8 +525,8 @@ void SignalConnectionDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Connection.png"));
 	setWindowTitle(tr("Signal connections"));
-	resize(QApplication::desktop()->availableGeometry().width() - 700, 500);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 700, 500);
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	m_pMenuBar = new QMenuBar(this);
 	m_pSignalMenu = new QMenu(tr("&Signal"), this);

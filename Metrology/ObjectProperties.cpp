@@ -54,7 +54,7 @@ void ProjectPropertyDialog::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Properties"));
 	setMinimumSize(600, 300);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
@@ -221,7 +221,7 @@ void RackPropertyDialog::createPropertyList()
 	setWindowTitle(tr("Properties"));
 	setMinimumSize(400, 180);
 	resize(400, 180);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	if (m_rack.isValid() == false)
 	{
@@ -461,7 +461,7 @@ void RackGroupPropertyDialog::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Properties - rack groups"));
 	setMinimumSize(600, 300);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	// create menu
 	//
@@ -806,7 +806,6 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 		return;
 	}
 
-
 	int groupCount = m_groupBase.count();
 	for(int i = 0; i < groupCount; i++)
 	{
@@ -1021,7 +1020,7 @@ void SignalPropertyDialog::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Properties"));
 	setMinimumSize(600, 300);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	if (m_param.isValid() == false)
 	{
@@ -1428,7 +1427,7 @@ void ComparatorPropertyDialog::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Properties"));
 	setMinimumSize(600, 300);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	setWindowTitle(tr("Properties"));
 

@@ -1,7 +1,5 @@
 #include "ComparatorList.h"
 
-#include <QClipboard>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
@@ -95,7 +93,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (comparatorEx->signalsIsValid()  == false)
 		{
@@ -288,8 +286,8 @@ void ComparatorListDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Comparator.png"));
 	setWindowTitle(tr("Comparators"));
-	resize(QApplication::desktop()->availableGeometry().width() - 850, 500);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 850, 500);
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

@@ -106,7 +106,7 @@ QVariant TestResultTable::data(const QModelIndex &index, int role) const
 		return result;
 	}
 
-	if (role == Qt::BackgroundColorRole)
+	if (role == Qt::BackgroundRole)
 	{
 		switch (column)
 		{

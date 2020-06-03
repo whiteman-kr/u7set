@@ -857,7 +857,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 		{
 			case MEASURE_KIND_ONE_RACK:		m_strID = param.customAppSignalID();																			break;
 			case MEASURE_KIND_ONE_MODULE:	m_strID = param.location().moduleID();																			break;
-			case MEASURE_KIND_MULTI_RACK:	m_strID.sprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());	break;
+			case MEASURE_KIND_MULTI_RACK:	m_strID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());	break;
 			default:						assert(false);
 		}
 
@@ -2127,10 +2127,10 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 						}
 
 						QString id;
-						id.sprintf("%d - %d - %d",
-									param.location().rack().index(),
-									param.location().chassis(),
-									param.location().module());
+						id = QString::asprintf("%d - %d - %d",
+										param.location().rack().index(),
+										param.location().chassis(),
+										param.location().module());
 
 						Hash hashid = calcHash(id);
 
@@ -2179,7 +2179,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 						}
 
 						QString id;
-						id.sprintf("%d - %d - %d - %d - ",
+						id = QString::asprintf("%d - %d - %d - %d - ",
 									param.location().rack().groupIndex(),
 									param.location().chassis(),
 									param.location().module(),

@@ -107,7 +107,7 @@ QVariant SignalHistoryTable::data(const QModelIndex &index, int role) const
 		return result;
 	}
 
-	if (role == Qt::TextColorRole)
+	if (role == Qt::ForegroundRole)
 	{
 		if (column == SIGNAL_HISTORY_LIST_COLUMN_TIME || column == SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE)
 		{
@@ -299,9 +299,13 @@ void SignalHistoryDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/History.png"));
 	setWindowTitle(tr("History"));
-	resize(QApplication::desktop()->availableGeometry().width() - 900, 500);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
+	QScreen* screenAt = QGuiApplication::primaryScreen();
+	if (screenAt != nullptr)
+	{
+		resize(screenAt->availableGeometry().width() - 900, 500);
+		move(screenAt->availableGeometry().center() - rect().center());
+	}
 
 	m_pMenuBar = new QMenuBar(this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);

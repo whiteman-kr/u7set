@@ -195,7 +195,7 @@ int RackGroupBase::load()
 		return 0;
 	}
 
-	QTime responseTime;
+	QElapsedTimer responseTime;
 	responseTime.start();
 
 	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
