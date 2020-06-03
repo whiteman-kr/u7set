@@ -127,17 +127,7 @@ namespace Builder
 			return true;
 		}
 
-		QString afbStrID = ualAfb->strID();
-
-		Afbl* afbl = (*this).value(afbStrID, nullptr);
-
-		if (afbl == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);			// unknown FBL strID
-			return false;
-		}
-
-		int opCode = afbl->opCode();
+		int opCode = ualAfb->opcode();
 
 		if (m_fblInstance.contains(opCode) == false)
 		{
@@ -148,11 +138,15 @@ namespace Builder
 		}
 
 		int instance = -1;
-		int maxInstances = afbl->maxInstances();
+		int maxInstances = ualAfb->maxInstances();
 
 		QString instantiatorID = ualAfb->instantiatorID();
 
-		if (afbl->hasRam() == false && m_nonRamFblInstance.contains(instantiatorID) == true)
+		bool afbHasRam = ualAfb->hasRam();
+
+		bool instantiatorAlredyInMap = m_nonRamFblInstance.contains(instantiatorID);
+
+		if (afbHasRam == false && instantiatorAlredyInMap == true)
 		{
 			// ualAfb has no RAM and its instantiatorID already exists - existing instance would be used
 			//
@@ -170,13 +164,13 @@ namespace Builder
 			{
 				// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 				//
-				log->errALC5130(maxInstances, afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+				log->errALC5130(maxInstances, ualAfb->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 				return false;
 			}
 
 			m_fblInstance[opCode] = instance;
 
-			if (afbl->hasRam() == false)
+			if (afbHasRam == false)
 			{
 				// append new instantiatorID for non-RAM afb
 				//

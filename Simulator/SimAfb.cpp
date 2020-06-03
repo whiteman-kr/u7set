@@ -469,11 +469,11 @@ namespace Sim
 		return;
 	}
 
-	bool AfbComponentInstance::addParam(const AfbComponentParam& param) noexcept
+	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		if (param.opIndex() >= m_params_a.size())
+		if (param.opIndex() >= m_params_a.size())				// NOLINT
 		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());
+			Q_ASSERT(param.opIndex() < m_params_a.size());		// NOLINT
 			return false;
 		}
 
@@ -481,11 +481,11 @@ namespace Sim
 		return true;
 	}
 
-	bool AfbComponentInstance::addParam(AfbComponentParam&& param) noexcept
+	bool AfbComponentInstance::addParam(AfbComponentParam&& param)
 	{
-		if (param.opIndex() >= m_params_a.size())
+		if (param.opIndex() >= m_params_a.size())					// NOLINT
 		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());
+			Q_ASSERT(param.opIndex() < m_params_a.size());			// NOLINT
 			return false;
 		}
 
@@ -493,7 +493,7 @@ namespace Sim
 		return true;
 	}
 
-	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex) noexcept
+	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
 	{
 		if (opIndex == m_afbComp->versionOpIndex())
 		{
@@ -516,7 +516,7 @@ namespace Sim
 		return &m_params_a[opIndex];
 	}
 
-	bool AfbComponentInstance::paramExists(quint16 opIndex) const noexcept
+	bool AfbComponentInstance::paramExists(quint16 opIndex) const
 	{
 		if (opIndex > m_params_a.size())
 		{
@@ -526,12 +526,12 @@ namespace Sim
 		return m_params_a[opIndex].opIndex() != 0xFFFF;
 	}
 
-	bool AfbComponentInstance::addParamWord(quint16 opIndex, quint16 value) noexcept
+	bool AfbComponentInstance::addParamWord(quint16 opIndex, quint16 value)
 	{
 		return addParam(AfbComponentParam{opIndex, value});
 	}
 
-	bool AfbComponentInstance::addParamDword(quint16 opIndex, quint32 value) noexcept
+	bool AfbComponentInstance::addParamDword(quint16 opIndex, quint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setDwordValue(value);
@@ -539,7 +539,7 @@ namespace Sim
 		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value) noexcept
+	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
@@ -547,7 +547,7 @@ namespace Sim
 		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value) noexcept
+	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setDoubleValue(value);
@@ -555,7 +555,7 @@ namespace Sim
 		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value) noexcept
+	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
@@ -563,7 +563,7 @@ namespace Sim
 		return addParam(std::move(param));
 	}
 
-	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value) noexcept
+	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedInt64Value(value);
@@ -621,10 +621,10 @@ namespace Sim
 		return m_afbComp == nullptr;
 	}
 
-	bool ModelComponent::addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept
+	bool ModelComponent::addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
 		if (instanceNo >= m_afbComp->maxInstCount() ||
-			instanceNo >= m_instances.size())
+			instanceNo >= static_cast<int>(m_instances.size()))
 		{
 			// Maximum of instatiator is reached
 			//
@@ -659,10 +659,10 @@ namespace Sim
 		return ok;
 	}
 
-	bool ModelComponent::addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept
+	bool ModelComponent::addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage)
 	{
 		if (instanceNo >= m_afbComp->maxInstCount() ||
-			instanceNo >= m_instances.size())
+			instanceNo >= m_instances.size())					// NOLINT
 		{
 			// Maximum of instatiator is reached
 			//
@@ -728,7 +728,7 @@ namespace Sim
 		{
 			Q_ASSERT(keyAfbOpCode == afbComp->opCode());
 
-			if (keyAfbOpCode >= m_components.size())
+			if (keyAfbOpCode >= m_components.size())					// NOLINT
 			{
 				m_components.resize(keyAfbOpCode + 1);
 			}
@@ -747,7 +747,7 @@ namespace Sim
 		return true;
 	}
 
-	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage) noexcept
+	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
 		Q_ASSERT(errorMessage);
 
@@ -770,7 +770,7 @@ namespace Sim
 		return modelComponent.addParam(instanceNo, instParam, errorMessage);
 	}
 
-	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage) noexcept
+	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage)
 	{
 		Q_ASSERT(errorMessage);
 

@@ -484,7 +484,7 @@ namespace Sim
 							case 32:
 								{
 									float data = 0;
-									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder, applyOverride);
+									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder, E::LogicModuleRamAccess::Read, applyOverride);
 										ok == false)
 									{
 										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
@@ -510,7 +510,7 @@ namespace Sim
 							case 32:
 								{
 									qint32 data = 0;
-									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder, applyOverride);
+									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder, E::LogicModuleRamAccess::Read, applyOverride);
 										ok == false)
 									{
 										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")

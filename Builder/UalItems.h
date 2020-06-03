@@ -52,7 +52,6 @@ namespace Builder
 		Afbl(std::shared_ptr<Afb::AfbElement> afb);
 		virtual ~Afbl();
 
-		std::optional<bool> hasRam() const { return m_afb->hasRam(); }
 		int opCode() const	{ return m_afb->opCode(); }
 
 		const Afb::AfbElement& afb() const { return *m_afb; }
@@ -148,6 +147,9 @@ namespace Builder
 		E::UalItemType type() const;
 
 		bool hasRam() const { return afb().hasRam().value_or(afbComponent()->hasRam()); }
+		int maxInstances() const { return afbComponent()->maxInstCount(); }
+		int version() const { return afbComponent()->impVersion(); }
+		QString componentCaption() const { return afbComponent()->caption(); }
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
 		std::vector<LogicPin>& inputs() { return m_appLogicItem.m_fblItem->inputs(); }

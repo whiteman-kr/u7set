@@ -169,11 +169,11 @@ namespace Sim
 		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
 		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride = true) const;
 
-		bool writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder);
-		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride = true) const;
+		bool writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
+		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride = true) const;
 
-		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder);
-		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, bool applyOverride = true) const;
+		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access);
+		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride = true) const;
 
 	private:
 		[[nodiscard]] RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept;
