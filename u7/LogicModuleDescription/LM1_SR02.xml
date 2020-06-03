@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR02" DescriptionNumber="2" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0023">
+<LogicModule Name="LM1_SR02" DescriptionNumber="2" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0024">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -98,7 +98,7 @@
 	</LogicUnitCommnads>
 	
     <AFBImplementation CheckAfbVersions="false" CheckAfbVersionsOffset="0">
-	    <AFBComponent Caption="LOGIC"		OpCode="1"	ImpVersion="207"	VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_logic_v207">
+	    <AFBComponent Caption="LOGIC"		OpCode="1"	HasRam="false"	ImpVersion="207"	VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_logic_v207">
 			<Pin OpName="i_oprd_quant"	OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_bus_width"	OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_conf"		OpIndex ="2"	PinType = "Param"/>
@@ -122,12 +122,12 @@
 			<Pin OpName="o_logic_edi"	OpIndex ="21"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="22"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="NOT"			OpCode="2"	ImpVersion="103"	VersionOpIndex="3"	MaxInstCount="256" SimulationFunc="afb_not_v103">
+		<AFBComponent Caption="NOT"		OpCode="2"	HasRam="false"	ImpVersion="103"	VersionOpIndex="3"	MaxInstCount="256" SimulationFunc="afb_not_v103">
 			<Pin OpName="i_oprd"		OpIndex ="0"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="2"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="3"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="TCT"			OpCode="3"	ImpVersion="208"	VersionOpIndex="14"	MaxInstCount="1024" SimulationFunc="afb_tct_v208">
+		<AFBComponent Caption="TCT"		OpCode="3"	HasRam="true"	ImpVersion="208"	VersionOpIndex="14"	MaxInstCount="1024" SimulationFunc="afb_tct_v208">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_counter"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_counter_dff"	OpIndex ="3"	PinType = "Input"/>
@@ -140,18 +140,18 @@
 			<Pin OpName="o_tct_edi"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="256" SimulationFunc="afb_flipflop_v106">
+		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  	HasRam="true"	ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="256" SimulationFunc="afb_flipflop_v106">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_c_t_prev"	OpIndex ="2"	PinType = "Input"/>
 			<Pin OpName="i_r_c_t"		OpIndex ="3"	PinType = "Input"/>
-			<Pin OpName="i_s_d"			OpIndex ="4"	PinType = "Input"/>
+			<Pin OpName="i_s_d"		OpIndex ="4"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="6"	PinType = "Output"/>
-			<Pin OpName="o_c_t"			OpIndex ="7"	PinType = "Output"/>
+			<Pin OpName="o_c_t"		OpIndex ="7"	PinType = "Output"/>
 			<Pin OpName="o_ff_edi"		OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="9"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_ctud_v106">
+		<AFBComponent Caption="CTUD"		OpCode="5"	HasRam="true"	ImpVersion="106"	VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_ctud_v106">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_counter_dff"	OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_wave_dff"	OpIndex ="3"	PinType = "Input"/>
@@ -162,7 +162,7 @@
 			<Pin OpName="o_ctud_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="107"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_maj_v107">
+		<AFBComponent Caption="MAJ"		OpCode="6"	HasRam="false"	ImpVersion="107"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_maj_v107">
 			<Pin OpName="i_conf_x"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_y"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="2"	PinType = "Input"/>
@@ -187,14 +187,14 @@
 			<Pin OpName="o_maj_err_ms"	OpIndex ="22"	PinType = "Output"/>
 			<Pin OpName="o_maj_err_st"	OpIndex ="23"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="256" SimulationFunc="afb_srsst_v104">
+		<AFBComponent Caption="SRSST"		OpCode="7"	HasRam="false"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="256" SimulationFunc="afb_srsst_v104">
 			<Pin OpName="i_data"		OpIndex ="0"	PinType = "Input"/>
-			<Pin OpName="i_set"			OpIndex ="1"	PinType = "Input"/>
+			<Pin OpName="i_set"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_reset"		OpIndex ="2"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="4"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="5"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="38"	MaxInstCount="256" SimulationFunc="afb_bcod_v103">
+		<AFBComponent Caption="BCOD"		OpCode="8"	HasRam="false"	ImpVersion="103"	VersionOpIndex="38"	MaxInstCount="256" SimulationFunc="afb_bcod_v103">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_x"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="2"	PinType = "Input"/>
@@ -234,7 +234,7 @@
 			<Pin OpName="o_bcod_edi"	OpIndex ="37"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="38"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="103"	VersionOpIndex="37"	MaxInstCount="256" SimulationFunc="afb_bdec_v103">
+		<AFBComponent Caption="BDEC"		OpCode="9"	HasRam="false"	ImpVersion="103"	VersionOpIndex="37"	MaxInstCount="256" SimulationFunc="afb_bdec_v103">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_y"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_number"		OpIndex ="2"	PinType = "Input"/>
@@ -273,34 +273,34 @@
 			<Pin OpName="o_bdec_edi"	OpIndex ="36"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="37"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="BCOMP"		OpCode="10"	ImpVersion="111"	VersionOpIndex="12"	MaxInstCount="512" SimulationFunc="afb_bcomp_v111">
+		<AFBComponent Caption="BCOMP"		OpCode="10"	HasRam="true"	ImpVersion="111"	VersionOpIndex="12"	MaxInstCount="512" SimulationFunc="afb_bcomp_v111">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_sp_s"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_sp_r"		OpIndex ="3"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="5"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="9"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="10"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_bcomp_edi"	OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="12"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="112"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_damper_v112">
+		<AFBComponent Caption="DAMPER"		OpCode="11"	HasRam="true"	ImpVersion="112"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_damper_v112">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
-			<Pin OpName="i_del"			OpIndex ="1"	PinType = "Param"/>
+			<Pin OpName="i_del"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_data_dff"	OpIndex ="3"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="i_track"		OpIndex ="8"	PinType = "Input"/>
-			<Pin OpName="o_y"			OpIndex ="10"	PinType = "Input"/>
+			<Pin OpName="o_y"		OpIndex ="10"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="17"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="18"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="18"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="19"	PinType = "Output"/>
 			<Pin OpName="o_damp_edi"	OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>			
 		</AFBComponent>
-		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="7"		VersionOpIndex="44"	MaxInstCount="256" SimulationFunc="afb_mem_v7">
+		<AFBComponent Caption="MEM"		OpCode="12"	HasRam="false"	ImpVersion="7"		VersionOpIndex="44"	MaxInstCount="256" SimulationFunc="afb_mem_v7">
 			<Pin OpName="i_count"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_1_en"		OpIndex ="2"	PinType = "Input"/>
@@ -319,21 +319,21 @@
 			<Pin OpName="i_6_oprd"		OpIndex ="20"	PinType = "Input"/>
 			<Pin OpName="i_7_oprd"		OpIndex ="22"	PinType = "Input"/>
 			<Pin OpName="i_8_oprd"		OpIndex ="24"	PinType = "Input"/>
-			<Pin OpName="o_med"			OpIndex ="28"	PinType = "Output"/>
-			<Pin OpName="o_max"			OpIndex ="30"	PinType = "Output"/>
-			<Pin OpName="o_min"			OpIndex ="32"	PinType = "Output"/>
+			<Pin OpName="o_med"		OpIndex ="28"	PinType = "Output"/>
+			<Pin OpName="o_max"		OpIndex ="30"	PinType = "Output"/>
+			<Pin OpName="o_min"		OpIndex ="32"	PinType = "Output"/>
 			<Pin OpName="o_med_in"		OpIndex ="34"	PinType = "Output"/>
 			<Pin OpName="o_max_in"		OpIndex ="35"	PinType = "Output"/>
 			<Pin OpName="o_min_in"		OpIndex ="36"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="37"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="38"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="39"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="40"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="40"	PinType = "Output"/>
 			<Pin OpName="o_div_by_zero"	OpIndex ="41"	PinType = "Output"/>
 			<Pin OpName="o_mem_edi"		OpIndex ="43"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="44"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MATH"		OpCode="13"	ImpVersion="104"	VersionOpIndex="14"	MaxInstCount="256" SimulationFunc="afb_math_v104">
+		<AFBComponent Caption="MATH"		OpCode="13"	HasRam="false"	ImpVersion="104"	VersionOpIndex="14"	MaxInstCount="256" SimulationFunc="afb_math_v104">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_2_oprd"		OpIndex ="3"	PinType = "Input"/>
@@ -342,86 +342,86 @@
 			<Pin OpName="o_overflow"	OpIndex ="9"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="11"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="12"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_div_by_zero"	OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="SCALE"		OpCode="14"	ImpVersion="108"	VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_scale_v108">
-			<Pin OpName="i_conf"			OpIndex ="0"	PinType = "Param"/>
+		<AFBComponent Caption="SCALE"		OpCode="14"	HasRam="false"	ImpVersion="108"	VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_scale_v108">
+			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_scal_k1_coef"	OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_scal_k2_coef"	OpIndex ="3"	PinType = "Param"/>
-			<Pin OpName="i_ui_data"			OpIndex ="5"	PinType = "Input"/>
-			<Pin OpName="i_si_fp_data"		OpIndex ="6"	PinType = "Input"/>
-			<Pin OpName="o_ui_result"		OpIndex ="8"	PinType = "Output"/>
+			<Pin OpName="i_ui_data"		OpIndex ="5"	PinType = "Input"/>
+			<Pin OpName="i_si_fp_data"	OpIndex ="6"	PinType = "Input"/>
+			<Pin OpName="o_ui_result"	OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_si_fp_result"	OpIndex ="9"	PinType = "Output"/>
-			<Pin OpName="o_scal_edi"		OpIndex ="11"	PinType = "Output"/>
-			<Pin OpName="o_overflow"		OpIndex ="12"	PinType = "Output"/>
-			<Pin OpName="o_underflow"		OpIndex ="13"	PinType = "Output"/>
-			<Pin OpName="o_zero"			OpIndex ="14"	PinType = "Output"/>
-			<Pin OpName="o_nan"				OpIndex ="15"	PinType = "Output"/>
-			<Pin OpName="o_version"			OpIndex ="16"	PinType = "Output"/>
+			<Pin OpName="o_scal_edi"	OpIndex ="11"	PinType = "Output"/>
+			<Pin OpName="o_overflow"	OpIndex ="12"	PinType = "Output"/>
+			<Pin OpName="o_underflow"	OpIndex ="13"	PinType = "Output"/>
+			<Pin OpName="o_zero"		OpIndex ="14"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="15"	PinType = "Output"/>
+			<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func_v1">
+		<AFBComponent Caption="FUNC"		OpCode="16"	HasRam="true"	ImpVersion="1"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func_v1">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="7"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="9"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="10"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_div_by_zero"	OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_funct_edi"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v6_tiunlim">
-			<Pin OpName="i_ki"			OpIndex ="0"	PinType = "Param"/>
-			<Pin OpName="i_ti"			OpIndex ="2"	PinType = "Param"/>
-			<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>
-			<Pin OpName="i_min"			OpIndex ="6"	PinType = "Param"/>
+		<AFBComponent Caption="INT"		OpCode="17"	HasRam="true"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v6_tiunlim">
+			<Pin OpName="i_ki"		OpIndex ="0"	PinType = "Param"/>
+			<Pin OpName="i_ti"		OpIndex ="2"	PinType = "Param"/>
+			<Pin OpName="i_max"		OpIndex ="4"	PinType = "Param"/>
+			<Pin OpName="i_min"		OpIndex ="6"	PinType = "Param"/>
 			<Pin OpName="i_ri_const"	OpIndex ="8"	PinType = "Param"/>
 			<Pin OpName="i_yi_prev"		OpIndex ="10"	PinType = "Input"/>
 			<Pin OpName="i_x_tr"		OpIndex ="12"	PinType = "Input"/>
-			<Pin OpName="i_x"			OpIndex ="14"	PinType = "Input"/>
+			<Pin OpName="i_x"		OpIndex ="14"	PinType = "Input"/>
 			<Pin OpName="i_reset"		OpIndex ="16"	PinType = "Input"/>
 			<Pin OpName="i_pause"		OpIndex ="17"	PinType = "Input"/>
 			<Pin OpName="i_track"		OpIndex ="18"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="20"	PinType = "Output"/>
-			<Pin OpName="o_max"			OpIndex ="22"	PinType = "Output"/>
-			<Pin OpName="o_min"			OpIndex ="23"	PinType = "Output"/>
+			<Pin OpName="o_max"		OpIndex ="22"	PinType = "Output"/>
+			<Pin OpName="o_min"		OpIndex ="23"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="24"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="25"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="26"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="27"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="28"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="28"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="29"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="3"		VersionOpIndex="16"	MaxInstCount="512" SimulationFunc="afb_dpcomp_v3">
+		<AFBComponent Caption="DPCOMP"		OpCode="20"	HasRam="true"	ImpVersion="3"		VersionOpIndex="16"	MaxInstCount="512" SimulationFunc="afb_dpcomp_v3">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
-			<Pin OpName="i_hys"			OpIndex ="1"	PinType = "Param"/>
+			<Pin OpName="i_hys"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="3"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="4"	PinType = "Input"/>
 			<Pin OpName="i_sp_in"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="9"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="11"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="13"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_dpcomp_edi"	OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MUX"			OpCode="21"	ImpVersion="1"		VersionOpIndex="8"	MaxInstCount="256" SimulationFunc="afb_mux_v1">
-			<Pin OpName="i_sel"			OpIndex ="0"	PinType = "Input"/>
+		<AFBComponent Caption="MUX"		OpCode="21"	HasRam="false"	ImpVersion="1"		VersionOpIndex="8"	MaxInstCount="256" SimulationFunc="afb_mux_v1">
+			<Pin OpName="i_sel"		OpIndex ="0"	PinType = "Input"/>
 			<Pin OpName="i_x1_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_x2_data"		OpIndex ="3"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="6"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="8"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="LATCH"		OpCode="22"	ImpVersion="4"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_latch_v4">
+		<AFBComponent Caption="LATCH"		OpCode="22"	HasRam="true"	ImpVersion="4"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_latch_v4">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_set_prev"	OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_y_prev"		OpIndex ="2"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="4"	PinType = "Input"/>
-			<Pin OpName="i_set"			OpIndex ="6"	PinType = "Input"/>
+			<Pin OpName="i_set"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="i_reset"		OpIndex ="7"	PinType = "Input"/>
 			<Pin OpName="o_set_prev"	OpIndex ="9"	PinType = "Output"/>
 			<Pin OpName="o_y_prev"		OpIndex ="10"	PinType = "Output"/>
@@ -429,20 +429,20 @@
 			<Pin OpName="o_latch_edi"	OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="7"		VersionOpIndex="14"	MaxInstCount="256" SimulationFunc="afb_lim_v7">
+		<AFBComponent Caption="LIM"		OpCode="23"	HasRam="true"	ImpVersion="7"		VersionOpIndex="14"	MaxInstCount="256" SimulationFunc="afb_lim_v7">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_lim_max"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_lim_min"		OpIndex ="3"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="5"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_lim_edi"		OpIndex ="10"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="11"	PinType = "Output"/>
-			<Pin OpName="o_max"			OpIndex ="12"	PinType = "Output"/>
-			<Pin OpName="o_min"			OpIndex ="13"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="11"	PinType = "Output"/>
+			<Pin OpName="o_max"		OpIndex ="12"	PinType = "Output"/>
+			<Pin OpName="o_min"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_deadzone_v5">
+		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	HasRam="false"	ImpVersion="5"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_deadzone_v5">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data_x"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="3"	PinType = "Input"/>
@@ -450,12 +450,12 @@
 			<Pin OpName="o_overflow"	OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="9"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="10"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="11"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_dz_edi"		OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"	MaxInstCount="256" SimulationFunc="afb_pol_v3">
+		<AFBComponent Caption="POL"		OpCode="25"	HasRam="false"	ImpVersion="3"		VersionOpIndex="31"	MaxInstCount="256" SimulationFunc="afb_pol_v3">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_1_oprd"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_2_oprd"		OpIndex ="3"	PinType = "Param"/>
@@ -473,34 +473,34 @@
 			<Pin OpName="o_overflow"	OpIndex ="27"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="28"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="29"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="30"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="30"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="31"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="5"		VersionOpIndex="28"	MaxInstCount="256" SimulationFunc="afb_der_v5_tdunlim">
-			<Pin OpName="i_kd"			OpIndex ="0"	PinType = "Param"/>
-			<Pin OpName="i_td"			OpIndex ="2"	PinType = "Param"/>
-			<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>
-			<Pin OpName="i_min"			OpIndex ="6"	PinType = "Param"/>
+		<AFBComponent Caption="DER"		OpCode="26"	HasRam="true"	ImpVersion="5"		VersionOpIndex="28"	MaxInstCount="256" SimulationFunc="afb_der_v5_tdunlim">
+			<Pin OpName="i_kd"		OpIndex ="0"	PinType = "Param"/>
+			<Pin OpName="i_td"		OpIndex ="2"	PinType = "Param"/>
+			<Pin OpName="i_max"		OpIndex ="4"	PinType = "Param"/>
+			<Pin OpName="i_min"		OpIndex ="6"	PinType = "Param"/>
 			<Pin OpName="i_x_prev"		OpIndex ="8"	PinType = "Param"/>
 			<Pin OpName="i_yd_prev"		OpIndex ="10"	PinType = "Param"/>
-			<Pin OpName="i_x"			OpIndex ="12"	PinType = "Input"/>
+			<Pin OpName="i_x"		OpIndex ="12"	PinType = "Input"/>
 			<Pin OpName="i_reset"		OpIndex ="14"	PinType = "Input"/>
 			<Pin OpName="i_pause"		OpIndex ="15"	PinType = "Input"/>
 			<Pin OpName="o_x_prev"		OpIndex ="17"	PinType = "Output"/>
 			<Pin OpName="o_result"		OpIndex ="19"	PinType = "Output"/>
-			<Pin OpName="o_max"			OpIndex ="21"	PinType = "Output"/>
-			<Pin OpName="o_min"			OpIndex ="22"	PinType = "Output"/>
+			<Pin OpName="o_max"		OpIndex ="21"	PinType = "Output"/>
+			<Pin OpName="o_min"		OpIndex ="22"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="23"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="24"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="25"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="26"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="27"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="27"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="28"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="2"		VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_mismatch_v2">
+		<AFBComponent Caption="MISMATCH"	OpCode="27"	HasRam="false"	ImpVersion="2"		VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_mismatch_v2">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_n"		OpIndex ="1"	PinType = "Param"/>
-			<Pin OpName="i_ust"			OpIndex ="2"	PinType = "Param"/>
+			<Pin OpName="i_ust"		OpIndex ="2"	PinType = "Param"/>
 			<Pin OpName="i_x1_data"		OpIndex ="4"	PinType = "Input"/>
 			<Pin OpName="i_x2_data"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="i_x3_data"		OpIndex ="8"	PinType = "Input"/>
@@ -513,11 +513,11 @@
 			<Pin OpName="o_overflow"	OpIndex ="17"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="18"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="19"	PinType = "Output"/>
-			<Pin OpName="o_nan"			OpIndex ="20"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_amismatch_edi"	OpIndex ="21"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="22"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_tconv_v0">
+		<AFBComponent Caption="TCONV"		OpCode="28"	HasRam="false"	ImpVersion="0"		VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_tconv_v0">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data_x"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="2"	PinType = "Input"/>
@@ -525,20 +525,20 @@
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="7"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="8"	PinType = "Output"/>			
-			<Pin OpName="o_nan"			OpIndex ="9"	PinType = "Output"/>
+			<Pin OpName="o_nan"		OpIndex ="9"	PinType = "Output"/>
 			<Pin OpName="o_tconv_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INDICATION" OpCode="29" ImpVersion="1" VersionOpIndex="13" MaxInstCount="1024" SimulationFunc="afb_indication_v1">
+		<AFBComponent Caption="INDICATION" 	OpCode="29" 	HasRam="true"	ImpVersion="1" VersionOpIndex="13" MaxInstCount="1024" SimulationFunc="afb_indication_v1">
 		    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_input"		OpIndex ="4"	PinType = "Input"/>
-			<Pin OpName="i_ack"			OpIndex ="5"	PinType = "Input"/>
+			<Pin OpName="i_ack"		OpIndex ="5"	PinType = "Input"/>
 			<Pin OpName="i_test"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="i_sync"		OpIndex ="7"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="PULSE_GEN" OpCode="30" ImpVersion="0" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen_v0">
+		<AFBComponent Caption="PULSE_GEN" 	OpCode="30" 	HasRam="true"	ImpVersion="0" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen_v0">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_t_high"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_t_low"		OpIndex ="3"	PinType = "Param"/>
@@ -550,7 +550,7 @@
 			<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="17"	PinType = "Output"/>			
 		</AFBComponent>
-		<AFBComponent Caption="SET_FLAGS" OpCode="255" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
+		<AFBComponent Caption="SET_FLAGS" OpCode="255" HasRam="false"	ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
@@ -559,7 +559,6 @@
 			    <Description>Multiplexor Block selects one of two input bus signals and output result in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>21</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 			</Properties>
@@ -584,7 +583,6 @@
 			    <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>6</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>19</MinWidth>
 			</Properties>
@@ -775,7 +773,6 @@
 			    <Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>2</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>19</MinWidth>
 			</Properties>
@@ -798,7 +795,6 @@
 			    <Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>1</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -905,7 +901,6 @@
 				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>1</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -1012,7 +1007,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Locking and simulation module</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>7</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -1037,7 +1031,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
 				<OpCode>1</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -1144,7 +1137,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Adder Block with float data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -1267,7 +1259,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Adder Block with signed int data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>            
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -1363,7 +1354,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>1</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -1470,7 +1460,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, equal single-precision floating-point comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -1596,7 +1585,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, greater than single-precision floating-point format comparison (dynamic hysteresis)</Description>
 				 <Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -1719,7 +1707,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, less than single-precision floating-point comparison (dynamic hysteresis)</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -1843,7 +1830,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, not equal single-precision floating-point format comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -1967,7 +1953,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, equal single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2085,7 +2070,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, greater than single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2203,7 +2187,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, less than single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2321,7 +2304,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, not equal single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2439,7 +2421,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, equal 32-bit signed int comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2481,7 +2462,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2523,7 +2503,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, less than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -2565,7 +2544,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, not equal 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
 				<OpCode>20</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>				
 			</Properties>
@@ -2607,7 +2585,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -2714,7 +2691,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -2821,7 +2797,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -2928,7 +2903,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -3035,7 +3009,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, equal 32-bit signed int comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -3094,7 +3067,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, greater than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -3153,7 +3125,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -3212,7 +3183,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
 				<OpCode>10</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -3271,7 +3241,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Down Counter Block performs the function of an Down Counter in accordance with control signal and received configuration.</Description>
 				<Category>Counter</Category>
 				<OpCode>5</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -3304,7 +3273,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Up Counter Block performs the function of an Up Counter in accordance with control signal and received configuration.</Description>
 				<Category>Counter</Category>
 				<OpCode>5</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -3337,7 +3305,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Binary Coder Block scans 32 Boolean inputs in sequence from in_32 to in_1, and sets the output, equal to the index of the last TRUE input. The output active is set TRUE if at least one input is TRUE.</Description>
 				<Category>Logic</Category>
 				<OpCode>8</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -3458,7 +3425,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Binary Coder Bus Block analyses input signals state strictly inorder in 32 downto in 1 and detects the bit mask of inputs that are equal to 1. A bit mask will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>8</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -3578,7 +3544,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
 				<OpCode>11</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 			</Properties>
@@ -3722,7 +3687,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
 				<OpCode>11</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 			</Properties>
@@ -3824,7 +3788,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
 				<OpCode>11</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -3985,7 +3948,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
 				<OpCode>11</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -4102,7 +4064,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>24</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -4249,7 +4210,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>24</OpCode>
-				<HasRam>false</HasRam>
 				<RequiredStart>true</RequiredStart>
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
@@ -4355,7 +4315,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>24</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 				<MinHeight>8</MinHeight>				
@@ -4502,7 +4461,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>24</OpCode>
-				<HasRam>false</HasRam>
 				<RequiredStart>true</RequiredStart>
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
@@ -4608,7 +4566,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Binary Decoder Block sets the needed output to state 1 in accordance with the received number and control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>9</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -4728,7 +4685,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Binary Decoder Block sets outputs to state 1 in accordance with bits set in the received number and control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>9</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -4848,7 +4804,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
 				<OpCode>26</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -4984,7 +4939,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
 				<OpCode>26</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>				
 			</Properties>
@@ -5153,7 +5107,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Divider Block with float data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -5290,7 +5243,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Divider Block with signed int data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -5385,7 +5337,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>The D Flip-Flop Block captures the value of the D-input at a decay portion of the clock cycle.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -5415,7 +5366,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>The D Flip-Flop Block captures the value of the D-input at a front portion of the clock cycle.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -5445,7 +5395,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -5475,7 +5424,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Set signal has the priority.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -5505,7 +5453,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a decay.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -5534,7 +5481,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a front.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -5563,7 +5509,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
 				<OpCode>17</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -5702,7 +5647,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
 				<OpCode>17</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -5882,7 +5826,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(floating-point) value by decay and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>30</MinWidth>
 			</Properties>
@@ -5916,7 +5859,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(signed integer) value by decay and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>30</MinWidth>
 			</Properties>
@@ -5950,7 +5892,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(floating-point) value by front and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>30</MinWidth>
 			</Properties>
@@ -5984,7 +5925,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(signed integer) value by front and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>30</MinWidth>
 			</Properties>
@@ -6018,7 +5958,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(floating-point) value by state and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>
 				<RequiredStart>true</RequiredStart>
 				<InternalUse>false</InternalUse>
 				<MinWidth>30</MinWidth>
@@ -6053,7 +5992,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(signed integer) value by state and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>30</MinWidth>
 			</Properties>
@@ -6087,7 +6025,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -6120,7 +6057,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Latch Block performs a latching of the input(signed integer) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -6153,7 +6089,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
 				<OpCode>23</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -6277,7 +6212,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
 				<OpCode>23</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -6387,7 +6321,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
 				<OpCode>23</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -6513,7 +6446,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
 				<OpCode>23</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -6625,7 +6557,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Function Block outputs the absolute value of the input signal</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -6658,7 +6589,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -6690,7 +6620,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Function Block outputs the exponential calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -6812,7 +6741,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Function Block outputs the inversion value of the input signal in accordance with control signals</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 			</Properties>
@@ -6934,7 +6862,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Function Block outputs the natural logarithmic calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -7029,7 +6956,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Function Block outputs the square root calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -7137,7 +7063,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
 				<Category>Logic</Category>
 				<OpCode>12</OpCode>
-				<HasRam>false</HasRam>
 				<RequiredStart>true</RequiredStart>
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
@@ -7417,7 +7342,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
 				<Category>Logic</Category>
 				<OpCode>12</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -7639,7 +7563,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
 				<OpCode>27</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -7869,7 +7792,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
 				<OpCode>27</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -8094,7 +8016,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
 				<OpCode>27</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -8352,7 +8273,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
 				<OpCode>27</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -8553,7 +8473,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
 				<OpCode>27</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -8727,7 +8646,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Multiply Block with float data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -8850,7 +8768,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
 				<OpCode>27</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 			</Properties>
@@ -9019,7 +8936,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Multiply Block with signed int data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -9114,7 +9030,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>2</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -9137,7 +9052,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>1</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -9244,7 +9158,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Polynomial function Block performs evaluation of polynomial coefficients on input values in accordance with control signal.</Description>
 				<Category>Math</Category>
 				<OpCode>25</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -9482,7 +9395,6 @@ function showCoeffitients(videoItemFblElement, afbElement)
 				<Description>Scaling Block, 16-bit unsigned integer to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>true</InternalUse>
 			</Properties>
 			<Inputs>
@@ -9629,7 +9541,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, 16-bit unsigned integer to single-precision floating-point</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>true</InternalUse>
 			</Properties>
 			<Inputs>
@@ -9804,7 +9715,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, 16-bit unsigned integer to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>true</InternalUse>
 			</Properties>
 			<Inputs>
@@ -9951,7 +9861,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, single-precision floating-point to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 			</Properties>
 			<Inputs>
@@ -10126,7 +10035,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, single-precision floating-point to single-precision floating-point</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -10302,7 +10210,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, single-precision floating-point to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -10478,7 +10385,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, 32-bit signed integer to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>true</InternalUse>
 			</Properties>
 			<Inputs>
@@ -10625,7 +10531,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, 32-bit signed integer to single-precision floating-point</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -10801,7 +10706,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Scaling Block, 32-bit signed integer to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
 				<OpCode>14</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>24</MinWidth>
 			</Properties>
@@ -10949,7 +10853,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Locking and simulation module</Description>
 				<Category>Logic</Category>
 				<OpCode>7</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -10981,7 +10884,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Subtract Block with float data format</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -11104,7 +11006,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Subtract Block with signed int data format.</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -11199,7 +11100,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Multiplexor Block selects one of two floating-point input signals and output result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>21</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 			</Properties>
@@ -11224,7 +11124,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Multiplexor Block selects one of two signed integer input signals and output result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>21</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 			</Properties>
@@ -11249,7 +11148,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with dynamic time value, filtering function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>20</MinWidth>
 			</Properties>
@@ -11330,7 +11228,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with dynamic time value, turn off delay function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -11411,7 +11308,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with dynamic time value, turn on delay function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -11491,7 +11387,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with dynamic time value, delay function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -11571,7 +11466,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with dynamic time value, single vibrator function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>20</MinWidth>
 			</Properties>
@@ -11652,7 +11546,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with constant time value, filtering function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -11695,7 +11588,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with constant time value, turn off delay function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>20</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -11738,7 +11630,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with constant time value, turn on delay function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>20</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -11781,7 +11672,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with constant time value, delay function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>20</MinWidth>
 				<MinHeight>8</MinHeight>				
@@ -11824,7 +11714,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Time Counter Block with constant time value, single vibrator function</Description>
 				<Category>Delay</Category>
 				<OpCode>3</OpCode>
-				<HasRam>true</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 				<MinHeight>8</MinHeight>				
@@ -11867,7 +11756,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
 				<Category>Logic</Category>
 				<OpCode>6</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>18</MinWidth>
 			</Properties>
@@ -12059,7 +11947,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>1</OpCode>
-				<HasRam>false</HasRam>				
 				<InternalUse>false</InternalUse>
 				<MinWidth>14</MinWidth>
 			</Properties>
@@ -12166,7 +12053,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 			    <Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12200,7 +12086,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 			    <Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12234,7 +12119,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12268,7 +12152,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Converts little-endian to big-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12302,7 +12185,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Converts big-endian to liggle-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12336,7 +12218,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Converts little-endian to big-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12370,7 +12251,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Type converter block from signed int to floating point</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12404,7 +12284,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Description>Type converter block from floating point to signed int</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
@@ -12513,7 +12392,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Non-latching indication block</Description>
 				<Category>Indication</Category>
 				<OpCode>29</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -12549,7 +12427,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Latching indication block</Description>
 				<Category>Indication</Category>
 				<OpCode>29</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>22</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -12585,7 +12462,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Non-latching indication block</Description>
 				<Category>Indication</Category>
 				<OpCode>29</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -12621,7 +12497,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Latching indication block</Description>
 				<Category>Indication</Category>
 				<OpCode>29</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>28</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -12657,7 +12532,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Pulse generator</Description>
 				<Category>Other</Category>
 				<OpCode>30</OpCode>
-				<HasRam>true</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>26</MinWidth>
 				<MinHeight>8</MinHeight>
@@ -12726,7 +12600,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
 				<Category>Flags</Category>
 				<OpCode>255</OpCode>
-				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
 				<MinWidth>19</MinWidth>
 			</Properties>

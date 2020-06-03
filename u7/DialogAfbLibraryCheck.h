@@ -9,6 +9,7 @@ enum class AfbComponentColumns
 {
 	Caption,
 	OpCode_OpIndex,
+	HasRam,
 	ImpVersion,
 	VersionOpIndex,
 	PinVersionOpIndex,

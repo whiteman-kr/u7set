@@ -2,6 +2,7 @@
 #include <QBitArray>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
+#include <optional>
 
 class QDomElement;
 class QXmlStreamReader;
@@ -106,6 +107,15 @@ namespace Afb
 			m_opCode = value;
 		}
 
+		bool hasRam() const noexcept
+		{
+			return m_hasRam;
+		}
+		void setHasRam(bool value) noexcept
+		{
+			m_hasRam = value;
+		}
+
 		const QString& caption() const noexcept
 		{
 			return m_caption;
@@ -176,6 +186,7 @@ namespace Afb
 		// Operator= is present, don't forget to add new fields to it
 		//
 		int m_opCode = -1;
+		bool m_hasRam = false;
 		QString m_caption;
 		int m_impVersion = -1;
         int m_versionOpIndex = -1;
@@ -464,7 +475,7 @@ private:
 		int opCode() const;
 		void setOpCode(int value);
 
-		bool hasRam() const;
+		std::optional<bool> hasRam() const;
 		void setHasRam(bool value);
 
 		bool internalUse() const;
@@ -509,7 +520,7 @@ private:
 		QString m_version = "0.0000";
 		QString m_category;
 		int m_opCode = -1;
-		bool m_hasRam = false;
+		std::optional<bool> m_hasRam;
 		bool m_internalUse = false;
 		int m_minWidth = 10;			// Min width in GridSize, so read minwidth is m_minWidth * GridSize
 		int m_minHeight = 0;

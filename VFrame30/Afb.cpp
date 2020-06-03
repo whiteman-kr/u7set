@@ -97,6 +97,7 @@ namespace Afb
 	AfbComponent::AfbComponent(const AfbComponent& that)
 	{
 		m_opCode = that.m_opCode;
+		m_hasRam = that.m_hasRam;
 		m_caption = that.m_caption;
 		m_impVersion = that.m_impVersion;
 		m_versionOpIndex = that.m_versionOpIndex;
@@ -141,6 +142,16 @@ namespace Afb
 		}
 
 		m_opCode = xmlElement.attribute(QLatin1String("OpCode")).toInt();
+
+		// HasRam
+		//
+		if (xmlElement.hasAttribute(QLatin1String("HasRam")) == false)
+		{
+			*errorMessage = QString("AFBCompoment %1 does not have attribute HasRam").arg(m_caption);
+			return false;
+		}
+
+		m_hasRam = xmlElement.attribute(QLatin1String("HasRam")).compare(QLatin1String("true"), Qt::CaseInsensitive) == 0 ? true : false;
 
 		// ImpVersion
 		//
@@ -1760,18 +1771,15 @@ namespace Afb
 			}
 			//m_type.fromOpCode(m_opCode);
 
-			// Section Properties::HasRam
+			// Section Properties::HasRam is optional
 			//
 			{
 				QDomElement hasRam = properties.firstChildElement(QLatin1String("HasRam"));
 
-				if (hasRam.isNull() == true)
+				if (hasRam.isNull() == false)
 				{
-					*errorMessage = tr("Cant find section HasRam. AFB %1").arg(m_strId);
-					return false;
+					m_hasRam = hasRam.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 				}
-
-				m_hasRam = hasRam.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 			}
 
 			// Section Properties::InternalUse
@@ -2136,10 +2144,11 @@ namespace Afb
 
 			// Section Properties::HasRam
 			//
+			if (m_hasRam.has_value() == true)
 			{
 				QDomElement s = doc.createElement(QLatin1String("HasRam"));
 				s = properies.appendChild(s).toElement();
-				s.appendChild(doc.createTextNode(m_hasRam ? "true" : "false"));
+				s.appendChild(doc.createTextNode(m_hasRam.value() ? "true" : "false"));
 			}
 
 			// Section Properties::InternalUse
@@ -2369,7 +2378,7 @@ namespace Afb
 		m_opCode = value;
 	}
 
-	bool AfbElement::hasRam() const
+	std::optional<bool> AfbElement::hasRam() const
 	{
 		return m_hasRam;
 	}

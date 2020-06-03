@@ -55,6 +55,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 	QStringList columns;
 	columns << "Caption";
 	columns << "OpCode/OpIndex";
+	columns << "HasRam";
 	columns << "ImpVersion";
 	columns << "VersionOpIndex";
 	columns << "PinVersionOpIndex";
@@ -65,6 +66,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 
 	m_afbComponentTreeWidget->setColumnWidth(static_cast<int>(AfbComponentColumns::Caption), 150);
 	m_afbComponentTreeWidget->setColumnWidth(static_cast<int>(AfbComponentColumns::OpCode_OpIndex), 120);
+	m_afbComponentTreeWidget->setColumnWidth(static_cast<int>(AfbComponentColumns::HasRam), 120);
 	m_afbComponentTreeWidget->setColumnWidth(static_cast<int>(AfbComponentColumns::ImpVersion), 100);
 	m_afbComponentTreeWidget->setColumnWidth(static_cast<int>(AfbComponentColumns::VersionOpIndex), 100);
 	m_afbComponentTreeWidget->setColumnWidth(static_cast<int>(AfbComponentColumns::PinVersionOpIndex), 150);
@@ -215,7 +217,14 @@ void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
 		item->setText(static_cast<int>(AfbElementColumns::StrID), afb->strID());
 		item->setText(static_cast<int>(AfbElementColumns::OpCode_OpIndex), QString::number(afb->opCode()));
 		item->setText(static_cast<int>(AfbElementColumns::Version_Type), afb->version());
-		item->setText(static_cast<int>(AfbElementColumns::HasRam_DataFormat), afb->hasRam() ? tr("true") : tr("false"));
+		if (afb->hasRam().has_value() == true)
+		{
+			item->setText(static_cast<int>(AfbElementColumns::HasRam_DataFormat), afb->hasRam().value() ? tr("true") : tr("false"));
+		}
+		else
+		{
+			item->setText(static_cast<int>(AfbElementColumns::HasRam_DataFormat), tr("inherited"));
+		}
 		item->setText(static_cast<int>(AfbElementColumns::InternalUse_SignalType), afb->internalUse() ? tr("true") : tr("false"));
 
 		m_afbElementTreeWidget->addTopLevelItem(item);
@@ -294,6 +303,7 @@ void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
 
 		item->setText(static_cast<int>(AfbComponentColumns::Caption), afbComponent->caption());
 		item->setText(static_cast<int>(AfbComponentColumns::OpCode_OpIndex), QString::number(afbComponent->opCode()));
+		item->setText(static_cast<int>(AfbComponentColumns::HasRam), afbComponent->hasRam() ? tr("true") : ("false"));
 		item->setText(static_cast<int>(AfbComponentColumns::ImpVersion), QString::number(afbComponent->impVersion()));
 
 		item->setText(static_cast<int>(AfbComponentColumns::VersionOpIndex), QString::number(afbComponent->versionOpIndex()));

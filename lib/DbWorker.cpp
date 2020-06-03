@@ -348,7 +348,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0328.sql", "Upgrade to version 328, Added function api.remove_user_property"},
 	{":/DatabaseUpgrade/Upgrade0329.sql", "Upgrade to version 329, Update of SignalPropertyBehavior.csv"},
 	{":/DatabaseUpgrade/Upgrade0330.sql", "Upgrade to version 330, MSO-4 description and configuration script update"},
-	{":/DatabaseUpgrade/Upgrade0331.sql", "Upgrade to version 330, Change stored procedure set_signal_workcopy(...)"},
+	{":/DatabaseUpgrade/Upgrade0331.sql", "Upgrade to version 331, Change stored procedure set_signal_workcopy(...)"},
+	{":/DatabaseUpgrade/Upgrade0332.sql", "Upgrade to version 332, AFB description update, HasRam added to Afb Components"},
 };
 
 int DbWorker::counter = 0;
