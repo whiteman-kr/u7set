@@ -374,7 +374,7 @@ namespace Builder
 			{
 				QString errMsg;
 
-				QString expandedCustomID = SignalMacro::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+				QString expandedCustomID = Signal::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -405,7 +405,7 @@ namespace Builder
 			{
 				QString errMsg;
 
-				QString expandedCaption = SignalMacro::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
+				QString expandedCaption = Signal::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -442,10 +442,10 @@ namespace Builder
 	{
 		Signal* newSignal = new Signal();
 
-		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + SignalMacro::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
-		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + SignalMacro::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + BusSignal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + BusSignal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
 
-		QString caption = SignalMacro::expandBusSignalCaptionTemplate(busParentSignal, bus, busSignal);
+		QString caption = expandBusSignalCaptionTemplate(busParentSignal, bus, busSignal);
 
 		newSignal->setCaption(caption);
 		newSignal->setEquipmentID(busParentSignal.equipmentID());
@@ -526,6 +526,18 @@ namespace Builder
 		{
 			remove(id);
 		}
+	}
+
+	QString SignalSet::expandBusSignalCaptionTemplate(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal) const
+	{
+		QString caption = busSignal.caption;
+
+		caption.replace(BusSignal::BUS_TYPE, bus->busTypeID());
+		caption.replace(BusSignal::BUS_APP_SIGNAL_ID, busParentSignal.appSignalID());
+		caption.replace(BusSignal::BUS_CUSTOM_APP_SIGNAL_ID, busParentSignal.customAppSignalID());
+		caption.replace(BusSignal::BUS_CAPTION, busParentSignal.caption());
+
+		return caption;
 	}
 
 	bool SignalSet::checkSignalPropertiesRanges(const Signal& s)

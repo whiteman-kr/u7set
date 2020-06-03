@@ -4,6 +4,13 @@
 
 namespace Builder
 {
+	const QString BusSignal::BUS_SIGNAL_ID_SEPARATOR(".");
+
+	const QString BusSignal::BUS_TYPE("$(BusType)");
+	const QString BusSignal::BUS_APP_SIGNAL_ID("$(BusAppSignalID)");
+	const QString BusSignal::BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
+	const QString BusSignal::BUS_CAPTION("$(BusCaption)");
+
 	bool BusSignal::conversionRequired() const
 	{
 		switch(signalType)

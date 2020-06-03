@@ -44,7 +44,6 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
-    ../lib/SignalMacro.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -121,7 +120,6 @@ SOURCES += \
 HEADERS  += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
-    ../lib/SignalMacro.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
@@ -228,21 +226,6 @@ CONFIG(debug, debug|release): DEFINES += _DEBUG
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-# VFrame30 library
-# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-}
-unix {
-    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-}
-
-INCLUDEPATH += ../VFrame30
-DEPENDPATH += ../VFrame30
 
 #protobuf
 #

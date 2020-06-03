@@ -12,7 +12,6 @@
 #include "Hash.h"
 #include "TuningValue.h"
 #include "AppSignalStateFlags.h"
-#include "SignalMacro.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
@@ -42,6 +41,10 @@ class Signal
 	friend class SignalTests;
 
 public:
+	static const QString MACRO_START_TOKEN;
+	static const QString MACRO_END_TOKEN;
+
+public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
@@ -60,11 +63,11 @@ public:
 
 	QString customAppSignalID() const { return m_customAppSignalID; }
 	void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
-	bool customAppSignalIDContainsMacro() const { return m_customAppSignalID.contains(Builder::SignalMacro::START_TOKEN); }
+	bool customAppSignalIDContainsMacro() const { return m_customAppSignalID.contains(MACRO_START_TOKEN); }
 
 	QString caption() const { return m_caption; }
 	void setCaption(const QString& caption) { m_caption = caption; }
-	bool captionContainsMacro() const { return m_caption.contains(Builder::SignalMacro::START_TOKEN); }
+	bool captionContainsMacro() const { return m_caption.contains(MACRO_START_TOKEN); }
 
 	QString equipmentID() const { return m_equipmentID; }
 	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
@@ -361,7 +364,20 @@ public:
 
 	void setLog(Builder::IssueLogger* log) { m_log = log; }
 
+	static QString expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
+												const QString& templateStr,
+												QString* errMsg);
+
 private:
+
+	static QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
+									const QString& macroStr,
+									QString* errMsg);
+
+	static const Hardware::DeviceObject* getParentDeviceObjectOfType(const Hardware::DeviceObject& startObject,
+															  const QString& parentObjectType,
+															  QString* errMsg);
+
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
 	//

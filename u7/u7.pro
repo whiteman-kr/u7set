@@ -75,7 +75,6 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
-    ../lib/SignalMacro.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
@@ -226,7 +225,6 @@ SOURCES +=\
 HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ExportPrint.h \
-    ../lib/SignalMacro.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \

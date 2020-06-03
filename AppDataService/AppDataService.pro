@@ -34,7 +34,6 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
-    ../lib/SignalMacro.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -87,7 +86,6 @@ SOURCES += \
 HEADERS += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
-    ../lib/SignalMacro.h \
 	Stable.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \

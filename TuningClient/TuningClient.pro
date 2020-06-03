@@ -93,7 +93,6 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
-    ../lib/SignalMacro.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -160,7 +159,6 @@ SOURCES +=\
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
-    ../lib/SignalMacro.h \
     Stable.h \
     TuningPage.h \
     Settings.h \

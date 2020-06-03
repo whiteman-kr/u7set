@@ -62,7 +62,6 @@ SOURCES += main.cpp \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
-    ../lib/SignalMacro.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
@@ -138,7 +137,6 @@ HEADERS  += \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
-    ../lib/SignalMacro.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/SchemaListWidget.h \

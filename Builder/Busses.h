@@ -13,6 +13,14 @@ namespace Builder
 	class BusSignal
 	{
 	public:
+		static const QString BUS_SIGNAL_ID_SEPARATOR;
+
+		static const QString BUS_TYPE;
+		static const QString BUS_APP_SIGNAL_ID;
+		static const QString BUS_CUSTOM_APP_SIGNAL_ID;
+		static const QString BUS_CAPTION;
+
+	public:
 		QString signalID;
 		QString caption;
 		E::SignalType signalType = E::SignalType::Discrete;

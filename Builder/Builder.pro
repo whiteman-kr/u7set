@@ -104,7 +104,6 @@ SOURCES += \
     ../lib/SocketIO.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
-    ../lib/SignalMacro.cpp \
     Builder.cpp \
     IssueLogger.cpp \
     BuildWorkerThread.cpp \
@@ -195,8 +194,7 @@ HEADERS += \
     ../lib/Tuning/TuningSignalManager.h \
     ../VFrame30/VFrame30Lib_global.h \
     ../lib/ConnectionsInfo.h \
-    ../lib/SignalMacro.h \
-    Builder.h \
+	Builder.h \
     Loopbacks.h \
     SignalsHeap.h \
     Stable.h \

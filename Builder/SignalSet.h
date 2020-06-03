@@ -33,6 +33,8 @@ namespace Builder
 		void findAndRemoveExcludedFromBuildSignals();
 
 	private:
+		QString expandBusSignalCaptionTemplate(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;
+
 		bool checkSignalPropertiesRanges(const Signal& s);
 		bool checkSignalPropertyRanges(const Signal& s, const QString& propertyName);
 		bool checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName);
