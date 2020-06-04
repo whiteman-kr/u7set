@@ -1342,6 +1342,156 @@ function testAfbBCompSi(sim)
 }
 
 
+// Test for AFB MATH (OpCode 13)
+// Schema: TEST_MATH_FP_1
+//
+function testAfbMathFp(sim)
+{
+    assert(sim.signalValue("#TEST_MATH_FP_ADD1") === 7);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD5") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_ADD6") === Number.POSITIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD7") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD9") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD10") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_ADD11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD12") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD14") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD15") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_SUB1") === -13);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB5") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_SUB6") === Number.NEGATIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB7") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB9") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB10") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_SUB11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB12") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB14") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB15") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_MIL1") === -30);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL5") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_MIL6") === Number.POSITIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL7") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL9") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL10") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_MIL11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL12") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL14") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL15") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV1") === 6);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV55") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV6") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV7") <= (1.9e-38));  // nearly zero
+    assert(sim.signalValue("#TEST_MATH_FP_DIV8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV9") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV10") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV12") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV14") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV15") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV16") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV17") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV18") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV19") === Number.POSITIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV20") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV21") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV22") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV23") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV24") === 1);
+
+    return;
+}
+
+// Test for AFB MATH (OpCode 13)
+// Schema: TEST_MATH_SI_1
+//
+function testAfbMathSi(sim)
+{
+    assert(sim.signalValue("#TEST_MATH_SI_ADD1") === 7);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_ADD7") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_ADD10") === 2147483647);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD12") === 0);
+
+
+    assert(sim.signalValue("#TEST_MATH_SI_SUB1") === -1);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_SUB7") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_SUB10") === 2147483647);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB12") === 0);
+
+
+    assert(sim.signalValue("#TEST_MATH_SI_MUL1") === -12);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_MUL7") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_MUL10") === 2147483647);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL12") === 0);
+
+
+    assert(sim.signalValue("#TEST_MATH_SI_DIV1") === -3);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_DIV7") === -1);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_DIV10") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV12") === 0);
+
+    return;
+}
+
+
 // Test for AFB FUNC (OpCode 16)
 // Schema: TEST_FUNC_V3
 //
