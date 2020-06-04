@@ -1432,7 +1432,7 @@ namespace Builder
 			return false;
 		}
 
-		QHash<QString, AppLogicItem> signalInputItems;
+		QMultiHash<QString, AppLogicItem> signalInputItems;
 		QHash<QString, AppLogicItem> signalOutputItems;
 
 		for (const auto& lipair : m_fblItemsAcc)
@@ -1446,7 +1446,7 @@ namespace Builder
 
 				QString signalStrId = signalElement->appSignalIds();
 
-				signalInputItems.insertMulti(signalStrId, li);
+				signalInputItems.insert(signalStrId, li);
 				continue;
 			}
 

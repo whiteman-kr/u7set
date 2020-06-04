@@ -376,12 +376,23 @@ namespace Sim
 		}
 
 		m_simulator->control().reset();
+		m_simulator->control().setRunList({});
+
 		return true;
 	}
 
 	double ScriptSimulator::signalValue(QString appSignalId)
 	{
-		return m_simulator->appSignalManager().signalState(appSignalId, nullptr, true).value();
+		bool ok = false;
+		AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+
+		if (ok == false)
+		{
+			throwScriptException(tr("signalValue(%1), signal not found.").arg(appSignalId));
+			return -1;
+		}
+
+		return state.value();
 	}
 
 	bool ScriptSimulator::overrideSignalValue(QString appSignalId, double value)
