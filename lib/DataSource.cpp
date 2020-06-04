@@ -396,7 +396,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readStringElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &signalIDs);
 
-	m_associatedSignals = signalIDs.split(",", QString::SkipEmptyParts);
+	m_associatedSignals = signalIDs.split(",", Qt::SkipEmptyParts);
 
 	if (signalCount != m_associatedSignals.count())
 	{
