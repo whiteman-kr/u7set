@@ -2037,6 +2037,70 @@ function testAfbDpCompCompSi1(sim)
     return;
 }
 
+// Test for AFB MUX (OpCode 21)
+// Schema: TEST_MUX
+//
+function testAfbMux(sim)
+{
+    sim.reset();
+
+    // switch_si
+    //
+    sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_SI_T1_RESULT") === 100);
+
+    sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_SI_T1_RESULT") === -200);
+
+    sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_SI_T1_RESULT") === 100);
+
+    // switch_fp
+    //
+    sim.overrideSignalValue("#TEST_MUX_FP_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_FP_T1_RESULT") === 100);
+
+    sim.overrideSignalValue("#TEST_MUX_FP_T1_SELECTOR", 1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_FP_T1_RESULT") === -200);
+
+    sim.overrideSignalValue("#TEST_MUX_FP_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_FP_T1_RESULT") === 100);
+
+    // bus_switch
+    //
+    sim.overrideSignalValue("#TEST_MUX_BUS_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R0") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R1") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R2") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R3") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R4") === 1);
+
+    sim.overrideSignalValue("#TEST_MUX_BUS_T1_SELECTOR", 1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R0") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R1") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R2") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R3") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R4") === 0);
+
+    sim.overrideSignalValue("#TEST_MUX_BUS_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R0") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R1") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R2") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R3") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R4") === 1);
+
+    return;
+}
+
 // Test for AFB LIM (OpCode 23)
 // Schema: TEST_LIM
 //
