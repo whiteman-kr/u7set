@@ -1390,6 +1390,64 @@ function testAfbDamper(sim)
     return;
 }
 
+// Test for AFB MEDIAN (OpCode 12)
+// Schema: TEST_MEDIAN_V7
+//
+function testAfbMedianV7(sim)
+{
+    // median_si -- Test for two valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMED") === 80);
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMIN") === 0);
+
+    // median_si -- Test for one valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T2_RMED") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T2_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T2_RMIN") === 0);
+
+    // median_si -- Test for all valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T3_RMED") === 70);
+    assert(sim.signalValue("#TEST_MED_V7_T3_RMAX") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T3_RMIN") === 50);
+
+
+    // median_fp -- Test for two valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMED") === 80);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMIN") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_ROV") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RUF") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RZ") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RNAN") === 0);
+
+    // median_fp -- Test for one valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T12_RMED") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RMIN") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_ROV") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RUF") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RZ") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RNAN") === 0);
+
+    // median_fp -- Test for all valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T13_RMED") === 70);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RMAX") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RMIN") === 50);
+    assert(sim.signalValue("#TEST_MED_V7_T13_ROV") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RUF") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RZ") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RNAN") === 0);
+
+    return;
+}
+
+
 
 // Test for AFB MATH (OpCode 13)
 // Schema: TEST_MATH_FP_1
