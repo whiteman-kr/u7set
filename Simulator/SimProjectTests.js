@@ -1342,6 +1342,55 @@ function testAfbBCompSi(sim)
 }
 
 
+// Test for AFB DAMPER (OpCode 11)
+// Schema: TEST_DAMPER
+//
+function testAfbDamper(sim)
+{
+    sim.reset();
+
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#TEST_MUX_FP_T2_OV") === 0);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_UF") === 0);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_ZERO") === 1);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_NAN") === 0);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MUX_SI_T3_ZERO") === 1);
+    assert(sim.signalValue("#TEST_MUX_SI_T3_PE") === 0);
+
+    // Start damper from 0 to 1000
+    //
+    sim.overrideSignalValue("#TEST_DAMPER_FP_T2_SEL", 1);
+
+    // 63.2% - 600 (+-1) cylces - out value 632
+    //
+    sim.startForMs(600 * 5);
+
+    assert(sim.signalValue("#TEST_MUX_FP_T2_ZERO") === 0);
+    assert(sim.signalValue("#TEST_MUX_SI_T3_ZERO") === 0);
+
+    let fpv = sim.signalValue("#TEST_MUX_FP_T2_OUT");
+    let siv = sim.signalValue("#TEST_MUX_SI_T3_OUT");
+
+    assert(fpv >= 631.5 && fpv <= 632.5);
+    assert(fpv >= 631 && fpv <= 633);
+
+    // 86.5% - 1200 (+-1) cylces - out value 865
+    //
+    sim.startForMs(600 * 5);
+
+    fpv = sim.signalValue("#TEST_MUX_FP_T2_OUT");
+    siv = sim.signalValue("#TEST_MUX_SI_T3_OUT");
+
+    assert(fpv >= 864.5 && fpv <= 865.5);
+    assert(fpv >= 664 && fpv <= 8655);
+
+    return;
+}
+
+
 // Test for AFB MATH (OpCode 13)
 // Schema: TEST_MATH_FP_1
 //
