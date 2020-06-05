@@ -2037,7 +2037,128 @@ function testAfbDpCompCompSi1(sim)
     return;
 }
 
+// Test for AFB LIM (OpCode 23)
+// Schema: TEST_LIM
+//
+function testAfbLimiter(sim)
+{
+    // limc_si
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R1MIN") === 0);
 
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R2") === -5);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R2MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R2MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R3") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R3MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R3MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R4") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R4MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R4MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R5") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R5MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R5MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R6") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R6MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R6MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R7") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R7MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R7MIN") === 0);
+
+    // limc_fp
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R2") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R1MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R3") === -5);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R4") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R3MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R3MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R5") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R6") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R5MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R5MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R7") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R8") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R7MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R7MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R9") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R10") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R9MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R9MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R11") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R12") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R11MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R11MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R13") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R14") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R13MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R13MIN") === 0);
+
+    // lim_si
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R1MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R2") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R3") === 10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R3MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R3MIN") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R4") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R5") === 100);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R5MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R5MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R6") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R7") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R7MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R7MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R8") === 1);
+
+    // lim_fp
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R2") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R1MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R3") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R4") === 10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R5") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R4MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R4MIN") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R6") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R7") === 100);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R8") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R7MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R7MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R9") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R10") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R11") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R10MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R10MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R12") === 1);
+
+    return;
+}
 
 // Test for AFB PULSE_GET (OpCode 30)
 // Schema: TEST_PULSE_GET_V0
