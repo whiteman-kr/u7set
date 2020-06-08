@@ -33,6 +33,7 @@ unix {
 }
 
 SOURCES += \
+    ../../lib/Address16.cpp \
         main.cpp \
     UalTester.cpp \
     ../../lib/CommandLineParser.cpp \
@@ -73,6 +74,7 @@ SOURCES += \
 
 
 HEADERS += \
+    ../../lib/Address16.h \
 	UalTester.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \

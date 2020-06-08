@@ -25,6 +25,7 @@
 	#pragma warning(disable : 4251)
 	#pragma warning(disable : 4127)
 	#pragma warning(disable : 6326)
+	#pragma warning(disable : 28182)
 #endif
 
 // Qt includes
@@ -86,13 +87,13 @@
 // Disable some warnings
 //
 #ifdef Q_OS_WIN
-#pragma warning(disable : 4482)		// nonstandard extension used: enum 'enum' used in qualified name
-#pragma warning(disable : 4251)
+	#pragma warning(disable : 4482)		// nonstandard extension used: enum 'enum' used in qualified name
+	#pragma warning(disable : 4251)
 
 	// Disable 4996 warning
-#ifndef _SCL_SECURE_NO_WARNINGS
-	#define _SCL_SECURE_NO_WARNINGS
-#endif
+	#ifndef _SCL_SECURE_NO_WARNINGS
+		#define _SCL_SECURE_NO_WARNINGS
+	#endif
 #endif
 
 // Turn on memory leaks detection
