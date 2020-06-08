@@ -427,6 +427,7 @@ namespace Hardware
 				{
 					const int numCharsCount = 4;					// number of symbols in number "0000" (4)
 					const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
+					const int maxStringLength = recCharsCount * frameStringWidth;
 
 					const std::vector<quint8>& frame = firmwareData.frames[i];
 
@@ -441,7 +442,7 @@ namespace Hardware
 					int dataBytePos = 0;
 
 					QByteArray str;
-					str.resize(recCharsCount * frameStringWidth - 1);
+					str.resize(maxStringLength);
 
 					char buf[10];
 
@@ -495,12 +496,19 @@ namespace Hardware
 
 							if (dataBytePos >= frameSize)
 							{
-								str[ip * recCharsCount + numCharsCount] = 0;
+								int pos = ip * recCharsCount + numCharsCount;
+								if (pos >= maxStringLength)
+								{
+									Q_ASSERT(false);
+									break;
+								}
+
+								str[pos] = 0;
 								break;
 							}
 						}
 
-						jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
+						jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.trimmed().data()));
 					}
 
 					jFrame.insert(QLatin1String("frameIndex"), i);
