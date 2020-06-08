@@ -261,4 +261,5 @@ unix {
 
 DISTFILES += \
     ../Proto/network.proto \
-    ../Proto/serialization.proto
+    ../Proto/serialization.proto \
+    ../Test/CompilerTests/CompilerTests.js

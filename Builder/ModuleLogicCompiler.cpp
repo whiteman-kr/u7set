@@ -10945,6 +10945,11 @@ namespace Builder
 
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
+			if (ualSignal == nullptr)
+			{
+				continue;			// it is Ok, output signal isn't used in app logic
+			}
+
 			if (checkUalAndIoBufAddrs(ualSignal) == false)
 			{
 				result = false;

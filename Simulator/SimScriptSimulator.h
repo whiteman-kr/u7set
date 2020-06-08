@@ -22,6 +22,9 @@ namespace Sim
 		/// \brief Bit no for for discerete signals, 0xFFFFFFFF means non valid address.
 		Q_PROPERTY(quint32 bit READ bit WRITE setBit)
 
+		/// \brief Check address validity
+		Q_PROPERTY(bool isValid READ isValid)
+
 	public:
 		RamAddress() = default;
 		RamAddress(const RamAddress&) = default;
@@ -29,6 +32,9 @@ namespace Sim
 		RamAddress(quint32 offset, quint32 bit);
 
 		~RamAddress() = default;
+
+	public:
+		static const quint32 BadAddress = std::numeric_limits<quint32>::max();
 
 	public:
 		/// \brief Get address validity, returns true if the address is valid and can be used for RAM operations.
@@ -44,8 +50,6 @@ namespace Sim
 		Q_INVOKABLE QString toString() const;
 
 	private:
-		static const quint32 BadAddress = std::numeric_limits<quint32>::max();
-
 		quint32 m_offset = BadAddress;
 		quint32 m_bit = BadAddress;
 	};
@@ -150,16 +154,28 @@ namespace Sim
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
 		void overridesReset();
 
+		bool isLmExists(QString lmEquipmentId) const;
+		bool isSignalExists(QString appSignalId) const;
+
 		/// \brief Returns signal address in User Application Logic. Return type is Sim::RamAddress
 		/// <b>Note:</b> This function is mostly used for internal test cases.
-		RamAddress signalUalAddress(QString appSignalId);
+		RamAddress signalUalAddr(QString appSignalId) const;
 
-		RamAddress signalIoAddress(QString appSignalId);
-		RamAddress signalTuningAddr(QString appSignalId);
-		RamAddress signalTuningAbsAddr(QString appSignalId);
-		RamAddress signalRegBufAddr(QString appSignalId);
-		RamAddress signalRegValueAddr(QString appSignalId);
-		RamAddress signalRegValidityAddr(QString appSignalId);
+		RamAddress signalIoAddr(QString appSignalId) const;
+		RamAddress signalTuningAddr(QString appSignalId) const;
+		RamAddress signalTuningAbsAddr(QString appSignalId) const;
+		RamAddress signalRegBufAddr(QString appSignalId) const;
+		RamAddress signalRegValueAddr(QString appSignalId) const;
+		RamAddress signalRegValidityAddr(QString appSignalId) const;
+
+		quint32 signalSizeW(QString appSignalId) const;
+		quint32 signalSizeBit(QString appSignalId) const;
+
+		bool signalIsAcquired(QString appSignalId) const;
+
+		bool addrInIoModuleBuf(QString lmEquipmentId, quint32 modulePlace, RamAddress addr) const;
+		bool addrInRegBuf(QString lmEquipmentId, RamAddress addr) const;
+		quint32 regBufStartAddr(QString lmEquipmentId) const;
 
 		quint16 readRamBit(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
 		quint16 readRamWord(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
