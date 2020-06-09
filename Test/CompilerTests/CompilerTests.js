@@ -191,6 +191,10 @@ function test_UAL_BUSSES_3_2_3(sim)
 	assert(regValueAddr.bit === 0);
 	assert(regValueAddr.offset === (regBufAddr.offset - sim.regBufStartAddr(LM_QUIPMENT_ID)));
 
+	// UAL_BUSSES_3_2_3_04
+	//
+
+
 	return;
 }
 
@@ -231,6 +235,88 @@ function test_UAL_BUSSES_3_2_4(sim)
 	// UAL_BUSSES_3_2_4_04
 	//
 	let regValueAddr = sim.signalRegValueAddr(ACQUIRED_USED_INPUT_BUS_SIGNAL_ID);
+
+	assert(regValueAddr.isValid === true);
+	assert(regValueAddr.bit === 0);
+	assert(regValueAddr.offset === (regBufAddr.offset - sim.regBufStartAddr(LM_QUIPMENT_ID)));
+
+	// UAL_BUSSES_3_2_4_05
+	//
+	// Copy code should be generated!
+
+	// UAL_BUSSES_3_2_4_05
+	//
+	const ACQUIRED_USED_INPUT_BUS_NESTED1_SIGNAL_ID = "#SHR0S2P14_STATE.DU";
+
+	assert(sim.isSignalExists(ACQUIRED_USED_INPUT_BUS_NESTED1_SIGNAL_ID) === true);
+
+	let ualAddr1 = sim.signalUalAddr(ACQUIRED_USED_INPUT_BUS_NESTED1_SIGNAL_ID);
+
+	assert(ualAddr1.isValid === true);
+
+	let regBufAddr1 = sim.signalRegBufAddr(ACQUIRED_USED_INPUT_BUS_NESTED1_SIGNAL_ID);
+
+	assert(regBufAddr1.isValid === true);
+
+	let regValueAddr1 = sim.signalRegValueAddr(ACQUIRED_USED_INPUT_BUS_NESTED1_SIGNAL_ID);
+
+	assert(regValueAddr1.isValid === true);
+
+	//
+
+	const ACQUIRED_USED_INPUT_BUS_NESTED2_SIGNAL_ID = "#SHR0S2P14_STATE.SAR.SSCC";
+
+	assert(sim.isSignalExists(ACQUIRED_USED_INPUT_BUS_NESTED2_SIGNAL_ID) === true);
+
+	let ualAddr2 = sim.signalUalAddr(ACQUIRED_USED_INPUT_BUS_NESTED2_SIGNAL_ID);
+
+	assert(ualAddr2.isValid === true);
+
+	let regBufAddr2 = sim.signalRegBufAddr(ACQUIRED_USED_INPUT_BUS_NESTED2_SIGNAL_ID);
+
+	assert(regBufAddr2.isValid === true);
+
+	let regValueAddr2 = sim.signalRegValueAddr(ACQUIRED_USED_INPUT_BUS_NESTED2_SIGNAL_ID);
+
+	assert(regValueAddr2.isValid === true);
+
+	return;
+}
+
+function test_UAL_BUSSES_3_2_5(sim)
+{
+	// Acquired Used buses tests
+	//
+	const ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID = "#BUS16_ACQUIRED";
+
+	assert(sim.isSignalExists(ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID) === true);
+	assert(sim.signalIsAcquired(ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID) === true);
+
+	// UAL_BUSSES_3_2_5_01
+	//
+	let ioAddr = sim.signalIoAddr(ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID);
+
+	assert(ioAddr.isValid === false);
+
+	// UAL_BUSSES_3_2_5_02
+	//
+	let ualAddr = sim.signalUalAddr(ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID);
+
+	assert(ualAddr.isValid === true);
+	assert(sim.addrInRegBuf(LM_QUIPMENT_ID, ualAddr) === true);
+	assert(ualAddr.bit === 0);
+
+	// UAL_BUSSES_3_2_5_03
+	//
+	let regBufAddr = sim.signalRegBufAddr(ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID);
+
+	assert(regBufAddr.isValid === true);
+	assert(ualAddr.offset === regBufAddr.offset);
+	assert(regBufAddr.bit === 0);
+
+	// UAL_BUSSES_3_2_5_04
+	//
+	let regValueAddr = sim.signalRegValueAddr(ACQUIRED_USED_INTERNAL_BUS_SIGNAL_ID);
 
 	assert(regValueAddr.isValid === true);
 	assert(regValueAddr.bit === 0);
