@@ -281,18 +281,28 @@ namespace Builder
 				continue;
 			}
 
+			if (m->propertyExists("SubsystemChannel") == false)
+			{
+				lmReport << "No SubsystemChannel property found in " + m->equipmentIdTemplate();
+				assert(false);
+				continue;
+			}
+
 			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
 			int lmNumber = m->propertyValue("LMNumber").toInt();
+			int channel = m->propertyValue("SubsystemChannel").toInt();
 
 			Q_ASSERT(ssKey >= 0 && ssKey <= std::numeric_limits<quint16>::max());
 
 			lmReport << "\r\n";
-			lmReport << "StrID: " + m->equipmentIdTemplate();
+			lmReport << "Equipment ID: " + m->equipmentIdTemplate();
 			lmReport << "Caption: " + m->caption();
 			lmReport << "Place: " + QString::number(m->place());
 			lmReport << "Subsystem ID: " + m->propertyValue("SubsystemID").toString();
-			lmReport << "Subsystem code: " + QString::number(ssKey);
+			lmReport << "Subsystem Code: " + QString::number(ssKey);
+			lmReport << "Subsystem Channel: " + E::valueToString<E::Channel>(channel);
 			lmReport << "LM Number: " + QString::number(lmNumber);
+
 
 			quint16 jumpers = static_cast<quint16>(ssKey) << 6;
 			jumpers |= lmNumber;
@@ -315,9 +325,9 @@ namespace Builder
 			lmReportData.append(s + "\r\n");
 		}
 
-		if (m_buildResultWriter->addFile("Reports", "lmJumpers.txt", lmReportData) == nullptr)
+		if (m_buildResultWriter->addFile("Reports", "LmJumpers.txt", lmReportData) == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save lmJumpers.txt file!"));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save LmJumpers.txt file!"));
 			return false;
 		}
 
