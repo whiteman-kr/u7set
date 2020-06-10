@@ -769,6 +769,74 @@ function testAfbCtud(sim)
     return;
 }
 
+// Test for AFB MAJ (OpCode 6)
+// Schema: TEST_MAJ_V107
+//
+function testAfbMajV107(sim)
+{
+    assert(sim.signalValue("#TEST_MAJ_V107_T1_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T1_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T1_RES3") === 0);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T2_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T2_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T2_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T3_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T3_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T3_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T4_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T4_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T4_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T5_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T5_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T5_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T6_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T6_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T6_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T7_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T7_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T7_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T8_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T8_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T8_RES3") === 0);
+
+    // --
+    //
+    assert(sim.signalValue("#TEST_MAJ_V107_T10_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T10_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T10_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T11_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T11_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T11_RES3") === 1);
+
+    // --
+    //
+    assert(sim.signalValue("#TEST_MAJ_V107_T20_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T20_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T20_RES3") === 0);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T21_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T21_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T21_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T22_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T22_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T22_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T23_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T23_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T23_RES3") === 0);
+
+    return;
+}
+
 
 // Test for AFB BDEC (OpCode 9), conf 1
 // Schema: TEST_BDEC_CONF1
@@ -2159,119 +2227,6 @@ function testAfbMux(sim)
     return;
 }
 
-// Test for AFB MISMATCH (OpCode 22)
-// Schema: TEST_MISMATCH_V4
-//
-function testAfbMismatchV4(sim)
-{
-    // mismatch_si
-    //
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_PE") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_R1") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_R2") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_PE") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_PE") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R3") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_PE") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_PE") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R4") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_PE") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R4") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_PE") === 0);
-
-    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
-    sim.startForMs(5);
-    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
-
-    // mismatch_fp
-    //
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_NAN") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_R1") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_R2") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_NAN") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_NAN") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R3") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_NAN") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_NAN") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R4") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_NAN") === 0);
-
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R1") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R2") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R3") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R4") === 1);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_PE") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_OV") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_UF") === 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_NAN") === 0);
-
-    sim.overrideSignalValue("#TEST_MISMATCH_V4_TFL_VAL", 0);
-    assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
-    sim.startForMs(5);
-    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
-
-    return;
-}
-
 
 // Test for AFB LIM (OpCode 23)
 // Schema: TEST_LIM
@@ -2395,6 +2350,166 @@ function testAfbLimiter(sim)
 
     return;
 }
+
+// Test for AFB POLY (OpCode 25)
+// Schema: TEST_POL_V3
+//
+function testAfbPolyV3(sim)
+{
+    assert(sim.signalValue("#TEST_POL_V3_T1_RESULT") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T1_ROV") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T1_RUF") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T1_RZERO") === 1);
+    assert(sim.signalValue("#TEST_POL_V3_T1_RNAN") === 0);
+
+    assert(isNaN(sim.signalValue("#TEST_POL_V3_T3_RESULT")) === true);
+    assert(sim.signalValue("#TEST_POL_V3_T3_ROV") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T3_RUF") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T3_RZERO") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T3_RNAN") === 1);
+
+    // Manual
+    // Initial 0   = 0,006228204
+    //     Set 100 = 1,033206711        -- 1.033207178
+    //     Set 200 = 15,85704089        -- 15.857046127
+    //     Set 300 = 87,60783114        -- 87.607826233
+    //
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 0);
+    sim.startForMs(5);
+    console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 0.006228203 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 0.006228205);
+
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 100);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 1.033207178 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 1.033207179); //  ???
+
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 200);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 15.857046127 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 15.857046128); //  ???
+
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 300);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 87.607826232 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 87.607826234); //  ???
+
+    return;
+}
+
+// Test for AFB MISMATCH (OpCode 27)
+// Schema: TEST_MISMATCH_V4
+//
+function testAfbMismatchV4(sim)
+{
+    // mismatch_si
+    //
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_R1") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_R2") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R3") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_PE") === 0);
+
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
+    sim.startForMs(5);
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
+
+    // mismatch_fp
+    //
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_R1") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_R2") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R3") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_NAN") === 0);
+
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TFL_VAL", 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
+    sim.startForMs(5);
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
+
+    return;
+}
+
 
 // Test for AFB PULSE_GET (OpCode 30)
 // Schema: TEST_PULSE_GET_V0
