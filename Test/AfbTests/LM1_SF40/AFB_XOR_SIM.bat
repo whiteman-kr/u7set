@@ -1,1 +1,1 @@
-"C:\Radiy Platform Configuration Tool 0.8.1015\SimulatorConsole.exe" C:\Users\Workstation\AppData\Local\ualtests_sf40-debug\build AFB_XOR.js
+C:\u7_actual\SimulatorConsole.exe C:\Builds\ualtests_sf40-debug\build AFB_XOR.js
