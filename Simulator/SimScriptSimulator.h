@@ -3,65 +3,13 @@
 #include <QQmlEngine>
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
-
-namespace Sim
-{
-
-
-	/*! \class RamAddress
-		\ingroup simulator
-		\brief Represents address in RAM of simulated module.
-	*/
-	class RamAddress
-	{
-		Q_GADGET
-
-		/// \brief Offset in RAM, 0xFFFFFFFF means non valid address.
-		Q_PROPERTY(quint32 offset READ offset WRITE setOffset)
-
-		/// \brief Bit no for for discerete signals, 0xFFFFFFFF means non valid address.
-		Q_PROPERTY(quint32 bit READ bit WRITE setBit)
-
-		/// \brief Check address validity
-		Q_PROPERTY(bool isValid READ isValid)
-
-	public:
-		RamAddress() = default;
-		RamAddress(const RamAddress&) = default;
-		RamAddress(const Address16& addr16);
-		RamAddress(quint32 offset, quint32 bit);
-
-		~RamAddress() = default;
-
-	public:
-		static const quint32 BadAddress = std::numeric_limits<quint32>::max();
-
-	public:
-		/// \brief Get address validity, returns true if the address is valid and can be used for RAM operations.
-		bool isValid() const;
-
-		quint32 offset() const;
-		void setOffset(quint32 value);
-
-		quint32 bit() const;
-		void setBit(quint32 value);
-
-		/// \brief Convert address to string representation.
-		Q_INVOKABLE QString toString() const;
-
-	private:
-		quint32 m_offset = BadAddress;
-		quint32 m_bit = BadAddress;
-	};
-
-}
-
-Q_DECLARE_METATYPE(Sim::RamAddress);
+#include "../lib/AppSignal.h"
+#include "SimScriptSignal.h"
+#include "SimScriptDevUtils.h"
 
 
 namespace Sim
 {
-	class Simulator;
 	class ScriptSimulator;
 	class LogicModule;
 
@@ -141,7 +89,7 @@ namespace Sim
 		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
 		bool reset();
 
-		/// \brief Get signal value, if signal is not found then -1 is returned (what is actully valid value for existing signals too).
+		/// \brief Get signal value, if signal is not found then exception is thrown.
 		/// <b>Note:</b> This function does not return full signal state with validity and other flags.
 		double signalValue(QString appSignalId);
 
@@ -154,28 +102,17 @@ namespace Sim
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
 		void overridesReset();
 
-		bool isLmExists(QString lmEquipmentId) const;
-		bool isSignalExists(QString appSignalId) const;
+		/// \brief Checks if a LogicModule exists.
+		bool logicModuleExists(QString equipmentId) const;
 
-		/// \brief Returns signal address in User Application Logic. Return type is Sim::RamAddress
-		/// <b>Note:</b> This function is mostly used for internal test cases.
-		RamAddress signalUalAddr(QString appSignalId) const;
+		/// \brief Checks if a signal exists.
+		bool signalExists(QString appSignalId) const;
 
-		RamAddress signalIoAddr(QString appSignalId) const;
-		RamAddress signalTuningAddr(QString appSignalId) const;
-		RamAddress signalTuningAbsAddr(QString appSignalId) const;
-		RamAddress signalRegBufAddr(QString appSignalId) const;
-		RamAddress signalRegValueAddr(QString appSignalId) const;
-		RamAddress signalRegValidityAddr(QString appSignalId) const;
+		/// \brief Get signal description, if a signal is not found then exception is thrown.
+		AppSignalParam signalParam(QString appSignalId);
 
-		quint32 signalSizeW(QString appSignalId) const;
-		quint32 signalSizeBit(QString appSignalId) const;
-
-		bool signalIsAcquired(QString appSignalId) const;
-
-		bool addrInIoModuleBuf(QString lmEquipmentId, quint32 modulePlace, RamAddress addr) const;
-		bool addrInRegBuf(QString lmEquipmentId, RamAddress addr) const;
-		quint32 regBufStartAddr(QString lmEquipmentId) const;
+		/// \brief Get full signal description, if a signal is not found then exception is thrown.
+		ScriptSignal signalParamExt(QString appSignalId);
 
 		quint16 readRamBit(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
 		quint16 readRamWord(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
@@ -188,6 +125,8 @@ namespace Sim
 		void writeRamDword(QString lmEquipmentId, RamAddress address, quint32 value, E::LogicModuleRamAccess access);
 		void writeRamSignedInt(QString lmEquipmentId, RamAddress address, qint32 value, E::LogicModuleRamAccess access);
 		void writeRamFloat(QString lmEquipmentId, RamAddress address, float value, E::LogicModuleRamAccess access);
+
+		ScriptDevUtils devUtils();
 
 	private:
 		// Throws Script Exception if logic module is not found

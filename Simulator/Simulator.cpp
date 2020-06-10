@@ -6,6 +6,8 @@
 #include "../lib/ModuleFirmware.h"
 #include "../Builder/CfgFiles.h"
 #include "SimLogicModule.h"
+#include "SimScriptSignal.h"
+#include "SimScriptDevUtils.h"
 
 
 namespace Sim
@@ -18,11 +20,16 @@ namespace Sim
 		Output(),
 		m_scriptSimulator(this)
 	{
-		qRegisterMetaType<E::LogicModuleRamAccess>("LogicModuleRamAccess");
-		qRegisterMetaType<Sim::RamAddress>("RamAddress");
+		qRegisterMetaType<AppSignalParam>("AppSignalParam");
+
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
 		qRegisterMetaType<Sim::DeviceMode>("DeviceMode");
+
+		qRegisterMetaType<Sim::RamAddress>("RamAddress");
+		qRegisterMetaType<Sim::ScriptSignal>("ScriptSignal");
+		qRegisterMetaType<Sim::ScriptDevUtils>("ScriptDevUtils");
+		qRegisterMetaType<E::LogicModuleRamAccess>("LogicModuleRamAccess");
 
 		return;
 	}

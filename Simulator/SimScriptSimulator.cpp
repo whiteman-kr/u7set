@@ -4,49 +4,6 @@
 
 namespace Sim
 {
-
-	RamAddress::RamAddress(const Address16& addr16) :
-		m_offset(addr16.isValid() ? addr16.offset() : BadAddress),
-		m_bit(addr16.isValid() ? addr16.bit() : BadAddress)
-	{
-	}
-
-	RamAddress::RamAddress(quint32 offset, quint32 bit) :
-		m_offset(offset),
-		m_bit(bit)
-	{
-	}
-
-	bool RamAddress::isValid() const
-	{
-		return m_offset != BadAddress && m_bit != BadAddress;
-	}
-
-	quint32 RamAddress::offset() const
-	{
-		return m_offset;
-	}
-
-	void RamAddress::setOffset(quint32 value)
-	{
-		m_offset = value;
-	}
-
-	quint32 RamAddress::bit() const
-	{
-		return m_bit;
-	}
-
-	void RamAddress::setBit(quint32 value)
-	{
-		m_bit = value;
-	}
-
-	QString RamAddress::toString() const
-	{
-		return QString("Offset: %1 (%2), bit: %3, Access: %4");
-	}
-
 	ScriptWorkerThread::ScriptWorkerThread(ScriptSimulator* scriptSimulator) :
 		QThread(),
 		m_scriptSimulator{scriptSimulator}
@@ -415,215 +372,45 @@ namespace Sim
 		m_simulator->overrideSignals().clear();
 	}
 
-	bool ScriptSimulator::isLmExists(QString lmEquipmentId) const
+	bool ScriptSimulator::logicModuleExists(QString equipmentId) const
 	{
-		std::vector<std::shared_ptr<LogicModule>> lms = m_simulator->logicModules();
-
-		std::shared_ptr<LogicModule> lm = m_simulator->logicModule(lmEquipmentId);
-
+		auto lm = m_simulator->logicModule(equipmentId);
 		return lm != nullptr;
 	}
 
-	bool ScriptSimulator::isSignalExists(QString appSignalId) const
+	bool ScriptSimulator::signalExists(QString appSignalId) const
 	{
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-
-		return signal.has_value();
+		return m_simulator->appSignalManager().signalExists(appSignalId);
 	}
 
-	RamAddress ScriptSimulator::signalUalAddr(QString appSignalId) const
+	AppSignalParam ScriptSimulator::signalParam(QString appSignalId)
 	{
-		RamAddress result;
+		bool ok = false;
 
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
+		AppSignalParam result = m_simulator->appSignalManager().signalParam(appSignalId, &ok);
+		if (ok == false)
 		{
-			return result;
+			throwScriptException(tr("signalParam(%1), signal not found.").arg(appSignalId));
 		}
-
-		result = signal->ualAddr();
-		return result;
-	}
-
-	RamAddress ScriptSimulator::signalIoAddr(QString appSignalId) const
-	{
-		RamAddress result;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->ioBufAddr();
-		return result;
-	}
-
-	RamAddress ScriptSimulator::signalTuningAddr(QString appSignalId) const
-	{
-		RamAddress result;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->tuningAddr();
-		return result;
-	}
-
-	RamAddress ScriptSimulator::signalTuningAbsAddr(QString appSignalId) const
-	{
-		RamAddress result;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->tuningAbsAddr();
-		return result;
-	}
-
-	RamAddress ScriptSimulator::signalRegBufAddr(QString appSignalId) const
-	{
-		RamAddress result;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->regBufAddr();
-		return result;
-	}
-
-	RamAddress ScriptSimulator::signalRegValueAddr(QString appSignalId) const
-	{
-		RamAddress result;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->regValueAddr();
-		return result;
-	}
-
-	RamAddress ScriptSimulator::signalRegValidityAddr(QString appSignalId) const
-	{
-		RamAddress result;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->regValidityAddr();
-		return result;
-	}
-
-	quint32 ScriptSimulator::signalSizeW(QString appSignalId) const
-	{
-		quint32 result = 0;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->sizeW();
-		return result;
-	}
-
-	quint32 ScriptSimulator::signalSizeBit(QString appSignalId) const
-	{
-		quint32 result = 0;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->sizeBit();
-		return result;
-	}
-
-	bool ScriptSimulator::signalIsAcquired(QString appSignalId) const
-	{
-		quint32 result = false;
-
-		std::optional<Signal> signal = m_simulator->appSignalManager().signalParamExt(appSignalId);
-
-		if (signal.has_value() == false)
-		{
-			return result;
-		}
-
-		result = signal->isAcquired();
 
 		return result;
 	}
 
-	bool ScriptSimulator::addrInIoModuleBuf(QString lmEquipmentId, quint32 modulePlace, RamAddress addr) const
+
+	ScriptSignal ScriptSimulator::signalParamExt(QString appSignalId)
 	{
-		std::shared_ptr<LogicModule> lm = m_simulator->logicModule(lmEquipmentId);
+		ScriptSignal scriptSignal;
 
-		if (lm == nullptr)
+		std::optional<Signal> s = m_simulator->appSignalManager().signalParamExt(appSignalId);
+		if (s.has_value() == false)
 		{
-			return false;
+			throwScriptException(tr("signalParamExt(%1), signal not found.").arg(appSignalId));
+			return scriptSignal;
 		}
 
-		const LmDescription& lmDescription = lm->lmDescription();
-
-		if (modulePlace < 1 || modulePlace > lmDescription.memory().m_moduleCount)
-		{
-			return false;
-		}
-
-		return	addr.offset() >= (lmDescription.memory().m_moduleDataOffset + (modulePlace - 1) * lmDescription.memory().m_moduleDataSize) &&
-				addr.offset() < (lmDescription.memory().m_moduleDataOffset + modulePlace * lmDescription.memory().m_moduleDataSize);
+		scriptSignal.setSignal(s.value());
+		return scriptSignal;
 	}
-
-	bool ScriptSimulator::addrInRegBuf(QString lmEquipmentId, RamAddress addr) const
-	{
-		std::shared_ptr<LogicModule> lm = m_simulator->logicModule(lmEquipmentId);
-
-		if (lm == nullptr)
-		{
-			return false;
-		}
-
-		const LmDescription& lmDescription = lm->lmDescription();
-
-		return	addr.offset() >= lmDescription.memory().m_appLogicWordDataOffset &&
-				addr.offset() < lmDescription.memory().m_appLogicWordDataOffset + lmDescription.memory().m_appLogicWordDataSize;
-	}
-
-	quint32 ScriptSimulator::regBufStartAddr(QString lmEquipmentId) const
-	{
-		std::shared_ptr<LogicModule> lm = m_simulator->logicModule(lmEquipmentId);
-
-		if (lm == nullptr)
-		{
-			return RamAddress::BadAddress;
-		}
-
-		const LmDescription& lmDescription = lm->lmDescription();
-
-		return	lmDescription.memory().m_appLogicWordDataOffset;
-	}
-
 
 	quint16 ScriptSimulator::readRamBit(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access)
 	{
@@ -811,6 +598,10 @@ namespace Sim
 		return;
 	}
 
+	ScriptDevUtils ScriptSimulator::devUtils()
+	{
+		return ScriptDevUtils{m_simulator};
+	}
 
 	std::shared_ptr<LogicModule> ScriptSimulator::logicModule(QString lmEquipmentId)
 	{

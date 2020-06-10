@@ -53,11 +53,11 @@ namespace Proto
 
 	// Check signal validity
 	//
-	if (state.Valid == true)
+	if (state.valid == true)
 	{
 		// Put signal value to a schema item
 		//
-		schemaItemValue.Text = signalState.Value;
+		schemaItemValue.Text = signalState.value;
 	}
 	\endcode
 */
@@ -66,6 +66,7 @@ class AppSignalState
 	Q_GADGET
 
 	/// \brief Contains a unique 64-bit hash of a signal identifier
+	Q_PROPERTY(Hash hash READ hash)
 	Q_PROPERTY(Hash Hash READ hash)
 
 	/*! \brief Contains current signal value
@@ -77,7 +78,7 @@ class AppSignalState
 		It is recommended to make comparsions as follows, especially analog values:
 
 		\code
-		var a = state.Value;
+		var a = state.value;
 		var b = 1.5;
 
 		var threshold = 0.0000001;
@@ -88,30 +89,39 @@ class AppSignalState
 		}
 		\endcode
 	*/
+	Q_PROPERTY(double value READ value)
 	Q_PROPERTY(double Value READ value)
 
 	/// \brief Contains signal validity flag
+	Q_PROPERTY(bool valid READ isValid)
 	Q_PROPERTY(bool Valid READ isValid)
 
 	/// \brief Signal value is received from Application Data Service
+	Q_PROPERTY(bool stateAvailable READ isStateAvailable)
 	Q_PROPERTY(bool StateAvailable READ isStateAvailable)
 
 	/// \brief Signal value simulated flag (see AFB simlock)
+	Q_PROPERTY(bool simulated READ isSimulated)
 	Q_PROPERTY(bool Simulated READ isSimulated)
 
 	/// \brief Signal value blocked flag (see AFB simlock)
+	Q_PROPERTY(bool blocked READ isBlocked)
 	Q_PROPERTY(bool Blocked READ isBlocked)
 
 	/// \brief Signal value mismatch flag (see AFB mismatch)
+	Q_PROPERTY(bool mismatch READ isMismatch)
 	Q_PROPERTY(bool Mismatch READ isMismatch)
 
 	/// \brief Signal value is above high limit
+	Q_PROPERTY(bool aboveHighLimit READ isAboveHighLimit)
 	Q_PROPERTY(bool AboveHighLimit READ isAboveHighLimit)
 
 	/// \brief Signal value is below low limit
+	Q_PROPERTY(bool belowLowLimit READ isBelowLowLimit)
 	Q_PROPERTY(bool BelowLowLimit READ isBelowLowLimit)
 
 	/// \brief Signal value is out of limits
+	Q_PROPERTY(bool outOfLimits READ isOutOfLimits)
 	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)
 
 public:
@@ -203,19 +213,19 @@ Q_DECLARE_METATYPE(AppSignalState)
 
 	// Output parameters of signal A
 	//
-	schemaItemValue.Text = param1.Caption;
+	schemaItemValue.Text = param1.caption;
 
 	// Check if signal B is analog and input
 	//
-	if (param2.IsAnalog)
+	if (param2.isAnalog)
 	{
-		if (param2.IsInput)
+		if (param2.isInput)
 		{
-			// Create a string with template "Caption, Units"
+			// Create a string with template "caption, units"
 			//
-			var units = param2.Unit;
+			var units = param2.unit;
 
-			var text = param2.Caption + ", " + units;
+			var text = param2.caption + ", " + units;
 			...
 		}
 	}
@@ -226,68 +236,90 @@ class AppSignalParam
 	Q_GADGET
 
 	/// \brief Contains a 64-bit hash of a signal
+	Q_PROPERTY(Hash hash READ hash)
 	Q_PROPERTY(Hash Hash READ hash)
 
 	/// \brief Application Signal Identifier
+	Q_PROPERTY(QString appSignalID READ appSignalId)
 	Q_PROPERTY(QString AppSignalID READ appSignalId)
 
 	/// \brief Custom Application Signal Identifier
+	Q_PROPERTY(QString customAppSignalID READ customSignalId)
 	Q_PROPERTY(QString CustomAppSignalID READ customSignalId)
 
+	Q_PROPERTY(QString customSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
 	Q_PROPERTY(QString CustomSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
 
 	/// \brief Signal Caption
+	Q_PROPERTY(QString caption READ caption)
 	Q_PROPERTY(QString Caption READ caption)
 
 	/// \brief Signal Equipment ID
+	Q_PROPERTY(QString equipmentID READ equipmentId)
 	Q_PROPERTY(QString EquipmentID READ equipmentId)
 
 	/// \brief Signal Measure Units
+	Q_PROPERTY(QString unit READ unit)
 	Q_PROPERTY(QString Unit READ unit)
 
 	/// \brief Signal precision (digits after point)
+	Q_PROPERTY(int precision READ precision)
 	Q_PROPERTY(int Precision READ precision)
 
 	/// \brief Signal channel
+	Q_PROPERTY(E::Channel channel READ channel)
 	Q_PROPERTY(E::Channel Channel READ channel)
 
 	/// \brief Low Valid Range
+	Q_PROPERTY(double lowValidRange READ lowValidRange)
 	Q_PROPERTY(double LowValidRange READ lowValidRange)
 
 	/// \brief High Valid Range
+	Q_PROPERTY(double highValidRange READ highValidRange)
 	Q_PROPERTY(double HighValidRange READ highValidRange)
 
 	/// \brief Low Engineering Units
+	Q_PROPERTY(double lowEngineeringUnits READ lowEngineeringUnits)
 	Q_PROPERTY(double LowEngineeringUnits READ lowEngineeringUnits)
 
 	/// \brief High Engineering Units
+	Q_PROPERTY(double highEngineeringUnits READ highEngineeringUnits)
 	Q_PROPERTY(double HighEngineeringUnits READ highEngineeringUnits)
 
 	/// \brief Signal is tunable
+	Q_PROPERTY(bool enableTuning READ enableTuning)
 	Q_PROPERTY(bool EnableTuning READ enableTuning)
 
 	/// \brief Default value of tunable signal
+	Q_PROPERTY(QVariant tuningDefaultValue READ tuningDefaultValueToVariant)
 	Q_PROPERTY(QVariant TuningDefaultValue READ tuningDefaultValueToVariant)
 
 	/// \brief Low tuning limit of the signal
+	Q_PROPERTY(QVariant tuningLowBound READ tuningLowBoundToVariant)
 	Q_PROPERTY(QVariant TuningLowBound READ tuningLowBoundToVariant)
 
 	/// \brief High tuning limit of the signal
+	Q_PROPERTY(QVariant tuningHighBound READ tuningHighBoundToVariant)
 	Q_PROPERTY(QVariant TuningHighBound READ tuningHighBoundToVariant)
 
 	/// \brief Signal is input
+	Q_PROPERTY(bool isInput READ isInput)
 	Q_PROPERTY(bool IsInput READ isInput)
 
 	/// \brief Signal is output
+	Q_PROPERTY(bool isOutput READ isOutput)
 	Q_PROPERTY(bool IsOutput READ isOutput)
 
 	/// \brief Signal is internal
+	Q_PROPERTY(bool isInternal READ isInternal)
 	Q_PROPERTY(bool IsInternal READ isInternal)
 
 	/// \brief Signal is analog
+	Q_PROPERTY(bool isAnalog READ isAnalog)
 	Q_PROPERTY(bool IsAnalog READ isAnalog)
 
 	/// \brief Signal is discrete
+	Q_PROPERTY(bool isDiscrete READ isDiscrete)
 	Q_PROPERTY(bool IsDiscrete READ isDiscrete)
 
 public:
