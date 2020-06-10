@@ -5,7 +5,8 @@
 #include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
 #include "../Builder/CfgFiles.h"
-#include "SimLogicModule.h"
+#include "SimScriptRamAddress.h"
+#include "SimScriptLogicModule.h"
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
 
@@ -28,6 +29,7 @@ namespace Sim
 
 		qRegisterMetaType<Sim::RamAddress>("RamAddress");
 		qRegisterMetaType<Sim::ScriptSignal>("ScriptSignal");
+		qRegisterMetaType<Sim::ScriptLogicModule>("ScriptLogicModule");
 		qRegisterMetaType<Sim::ScriptDevUtils>("ScriptDevUtils");
 		qRegisterMetaType<E::LogicModuleRamAccess>("LogicModuleRamAccess");
 

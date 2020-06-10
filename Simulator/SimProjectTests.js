@@ -2376,7 +2376,7 @@ function testAfbPolyV3(sim)
     //
     sim.overrideSignalValue("#TEST_POL_V3_T2_X", 0);
     sim.startForMs(5);
-    console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
     assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 0.006228203 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 0.006228205);
 
     sim.overrideSignalValue("#TEST_POL_V3_T2_X", 100);
