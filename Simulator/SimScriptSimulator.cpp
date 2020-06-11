@@ -284,6 +284,25 @@ namespace Sim
 		return m_workerThread.result();
 	}
 
+	void ScriptSimulator::throwScriptException(const QObject* object, QString text)
+	{
+		if (object == nullptr)
+		{
+			Q_ASSERT(object);
+			return;
+		}
+
+		QJSEngine* jsEngine = qjsEngine(object);
+		Q_ASSERT(jsEngine);
+
+		if (jsEngine != nullptr)
+		{
+			jsEngine->throwError(QJSValue::ErrorType::GenericError, text);
+		}
+
+		return;
+	}
+
 	void ScriptSimulator::debugOutput(QString str)
 	{
 		qDebug() << str;
@@ -345,7 +364,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			throwScriptException(tr("signalValue(%1), signal not found.").arg(appSignalId));
+			throwScriptException(this, tr("signalValue(%1), signal not found.").arg(appSignalId));
 			return -1;
 		}
 
@@ -378,6 +397,26 @@ namespace Sim
 		return lm != nullptr;
 	}
 
+	QJSValue ScriptSimulator::logicModule(QString equipmentId)
+	{
+		auto lm = m_simulator->logicModule(equipmentId);
+		if (lm == nullptr)
+		{
+			throwScriptException(this, tr("LogicModule %1 not found").arg(equipmentId));
+			return {};
+		}
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return {};
+		}
+
+		ScriptLogicModule* slm = new ScriptLogicModule{lm};
+		return jsEngine->newQObject(slm);
+	}
+
 	bool ScriptSimulator::signalExists(QString appSignalId) const
 	{
 		return m_simulator->appSignalManager().signalExists(appSignalId);
@@ -390,7 +429,7 @@ namespace Sim
 		AppSignalParam result = m_simulator->appSignalManager().signalParam(appSignalId, &ok);
 		if (ok == false)
 		{
-			throwScriptException(tr("signalParam(%1), signal not found.").arg(appSignalId));
+			throwScriptException(this, tr("signalParam(%1), signal not found.").arg(appSignalId));
 		}
 
 		return result;
@@ -404,7 +443,7 @@ namespace Sim
 		std::optional<Signal> s = m_simulator->appSignalManager().signalParamExt(appSignalId);
 		if (s.has_value() == false)
 		{
-			throwScriptException(tr("signalParamExt(%1), signal not found.").arg(appSignalId));
+			throwScriptException(this, tr("signalParamExt(%1), signal not found.").arg(appSignalId));
 			return scriptSignal;
 		}
 
@@ -412,217 +451,9 @@ namespace Sim
 		return scriptSignal;
 	}
 
-	quint16 ScriptSimulator::readRamBit(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception, but it will not throw c++ exception
-		if (lm == nullptr)
-		{
-			return {};
-		}
-
-		quint16 result = {};
-
-		bool ok = lm->ram().readBit(address.offset(), address.bit(), &result, E::ByteOrder::BigEndian, access, true);
-		if (ok == false)
-		{
-			throwScriptException(tr("readRamBit error, address %1").arg(address.toString()));
-			return {};
-		}
-
-		return result;
-	}
-
-	quint16 ScriptSimulator::readRamWord(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception
-		if (lm == nullptr)
-		{
-			return {};
-		}
-
-		quint16 result = {};
-
-		bool ok = lm->ram().readWord(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
-		if (ok == false)
-		{
-			throwScriptException(tr("readRamWord error, address %1").arg(address.toString()));
-			return {};
-		}
-
-		return result;
-	}
-
-	quint32 ScriptSimulator::readRamDword(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception
-		if (lm == nullptr)
-		{
-			return {};
-		}
-
-		quint32 result = {};
-
-		bool ok = lm->ram().readDword(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
-		if (ok == false)
-		{
-			throwScriptException(tr("readRamDword error, address %1").arg(address.toString()));
-			return {};
-		}
-
-		return result;
-	}
-
-	qint32 ScriptSimulator::readRamSignedInt(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception
-		if (lm == nullptr)
-		{
-			return {};
-		}
-
-		qint32 result = {};
-
-		bool ok = lm->ram().readSignedInt(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
-		if (ok == false)
-		{
-			throwScriptException(tr("readRamSignedInt error, address %1").arg(address.toString()));
-			return {};
-		}
-
-		return result;
-	}
-
-	float ScriptSimulator::readRamFloat(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception
-		if (lm == nullptr)
-		{
-			return {};
-		}
-
-		float result = {};
-
-		bool ok = lm->ram().readFloat(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
-		if (ok == false)
-		{
-			throwScriptException(tr("readRamFloat error, address %1").arg(address.toString()));
-			return {};
-		}
-
-		return result;
-	}
-
-
-	void ScriptSimulator::writeRamBit(QString lmEquipmentId, RamAddress address, quint16 value, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception, but it will not throw c++ exception
-		if (lm == nullptr)
-		{
-			return;
-		}
-
-		bool ok = lm->mutableRam().writeBit(address.offset(), address.bit(), value, E::ByteOrder::BigEndian, access);
-		if (ok == false)
-		{
-			throwScriptException(tr("writeRamBit error, address %1").arg(address.toString()));
-		}
-
-		return;
-	}
-
-	void ScriptSimulator::writeRamWord(QString lmEquipmentId, RamAddress address, quint16 value, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception, but it will not throw c++ exception
-		if (lm == nullptr)
-		{
-			return;
-		}
-
-		bool ok = lm->mutableRam().writeWord(address.offset(), value, E::ByteOrder::BigEndian, access);
-		if (ok == false)
-		{
-			throwScriptException(tr("writeRamWord error, address %1").arg(address.toString()));
-		}
-
-		return;
-	}
-
-	void ScriptSimulator::writeRamDword(QString lmEquipmentId, RamAddress address, quint32 value, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception, but it will not throw c++ exception
-		if (lm == nullptr)
-		{
-			return;
-		}
-
-		bool ok = lm->mutableRam().writeDword(address.offset(), value, E::ByteOrder::BigEndian, access);
-		if (ok == false)
-		{
-			throwScriptException(tr("writeRamDword error, address %1").arg(address.toString()));
-		}
-
-		return;
-	}
-
-	void ScriptSimulator::writeRamSignedInt(QString lmEquipmentId, RamAddress address, qint32 value, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception, but it will not throw c++ exception
-		if (lm == nullptr)
-		{
-			return;
-		}
-
-		bool ok = lm->mutableRam().writeSignedInt(address.offset(), value, E::ByteOrder::BigEndian, access);
-		if (ok == false)
-		{
-			throwScriptException(tr("writeRamSignedInt error, address %1").arg(address.toString()));
-		}
-
-		return;
-	}
-
-	void ScriptSimulator::writeRamFloat(QString lmEquipmentId, RamAddress address, float value, E::LogicModuleRamAccess access)
-	{
-		auto lm = logicModule(lmEquipmentId);	// Throws script exception, but it will not throw c++ exception
-		if (lm == nullptr)
-		{
-			return;
-		}
-
-		bool ok = lm->mutableRam().writeFloat(address.offset(), value, E::ByteOrder::BigEndian, access);
-		if (ok == false)
-		{
-			throwScriptException(tr("writeRamFloat error, address %1").arg(address.toString()));
-		}
-
-		return;
-	}
-
 	ScriptDevUtils ScriptSimulator::devUtils()
 	{
 		return ScriptDevUtils{m_simulator};
-	}
-
-	std::shared_ptr<LogicModule> ScriptSimulator::logicModule(QString lmEquipmentId)
-	{
-		auto lm = m_simulator->logicModule(lmEquipmentId);
-		if (lm == nullptr)
-		{
-			throwScriptException(tr("readRamBit LogicModule %1 not found").arg(lmEquipmentId));
-		}
-
-		return lm;
-	}
-
-	void ScriptSimulator::throwScriptException(QString text)
-	{
-		QJSEngine* jsEngine = qjsEngine(this);
-
-		Q_ASSERT(jsEngine);
-		if (jsEngine != nullptr)
-		{
-			jsEngine->throwError(QJSValue::ErrorType::GenericError, text);
-		}
 	}
 
 	QString ScriptSimulator::buildPath() const

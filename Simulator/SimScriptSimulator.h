@@ -6,6 +6,7 @@
 #include "../lib/AppSignal.h"
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
+#include "SimScriptLogicModule.h"
 
 
 namespace Sim
@@ -76,6 +77,8 @@ namespace Sim
 		bool wait(unsigned long msecs = ULONG_MAX);		// Wait script to stop
 		bool result() const;
 
+		static void throwScriptException(const QObject* object, QString text);
+
 		// Public slots which are part of Script API
 		//
 	public slots:
@@ -105,6 +108,8 @@ namespace Sim
 		/// \brief Checks if a LogicModule exists.
 		bool logicModuleExists(QString equipmentId) const;
 
+		QJSValue logicModule(QString equipmentId);
+
 		/// \brief Checks if a signal exists.
 		bool signalExists(QString appSignalId) const;
 
@@ -114,25 +119,7 @@ namespace Sim
 		/// \brief Get full signal description, if a signal is not found then exception is thrown.
 		ScriptSignal signalParamExt(QString appSignalId);
 
-		quint16 readRamBit(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
-		quint16 readRamWord(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
-		quint32 readRamDword(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
-		qint32 readRamSignedInt(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
-		float readRamFloat(QString lmEquipmentId, RamAddress address, E::LogicModuleRamAccess access);
-
-		void writeRamBit(QString lmEquipmentId, RamAddress address, quint16 value, E::LogicModuleRamAccess access);
-		void writeRamWord(QString lmEquipmentId, RamAddress address, quint16 value, E::LogicModuleRamAccess access);
-		void writeRamDword(QString lmEquipmentId, RamAddress address, quint32 value, E::LogicModuleRamAccess access);
-		void writeRamSignedInt(QString lmEquipmentId, RamAddress address, qint32 value, E::LogicModuleRamAccess access);
-		void writeRamFloat(QString lmEquipmentId, RamAddress address, float value, E::LogicModuleRamAccess access);
-
 		ScriptDevUtils devUtils();
-
-	private:
-		// Throws Script Exception if logic module is not found
-		//
-		std::shared_ptr<LogicModule> logicModule(QString lmEquipmentId);
-		void throwScriptException(QString text);
 
 	public:
 		QString buildPath() const;

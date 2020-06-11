@@ -4470,7 +4470,7 @@ void SchemaControlTabPageEx::showFileProperties()
 	}
 
 	propertyEditor->setObjects(propertyObjects);
-	propertyEditor->resizeColumnToContents(0);
+	propertyEditor->autoAdjustSplitterPosition();
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 

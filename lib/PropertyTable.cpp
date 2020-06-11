@@ -627,11 +627,6 @@ namespace ExtWidgets
 		m_tableModel.clear();
 	}
 
-	void PropertyTable::closeCurrentEditor()
-	{
-		m_tableView->closeCurrentEditorIfOpen();
-	}
-
 	const QList<std::shared_ptr<PropertyObject>>& PropertyTable::objects() const
 	{
 		return m_objects;
@@ -800,6 +795,14 @@ namespace ExtWidgets
 		}
 
 		return;
+	}
+
+	void PropertyTable::hideEvent(QHideEvent* event)
+	{
+		if (event->type() == QEvent::Hide)
+		{
+			m_tableView->closeCurrentEditorIfOpen();
+		}
 	}
 
 	void PropertyTable::updatePropertiesList()

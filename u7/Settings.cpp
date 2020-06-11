@@ -236,8 +236,6 @@ void Settings::writeUserScope() const
 	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
 
-	thePropertyEditorSettings.store(s);
-
 	return;
 }
 void Settings::loadUserScope()
@@ -361,8 +359,6 @@ void Settings::loadUserScope()
 
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
-
-	thePropertyEditorSettings.restore(s);
 
 	return;
 }

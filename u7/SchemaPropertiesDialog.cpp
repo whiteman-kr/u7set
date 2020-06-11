@@ -11,7 +11,6 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngin
 	ui->setupUi(this);
 
 	m_propertyEditor = new SchemaPropertyEditor(editEngine, this);
-    m_propertyEditor->setResizeMode(ExtWidgets::PropertyEditor::ResizeToContents);
 
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
@@ -43,7 +42,7 @@ void SchemaPropertiesDialog::setSchema(std::shared_ptr<VFrame30::Schema> schema)
 	ol.push_back(schema);
 
 	m_propertyEditor->setObjects(ol);
-	m_propertyEditor->resizeColumnToContents(0);
+	m_propertyEditor->autoAdjustSplitterPosition();
 
 	return;
 }
