@@ -244,6 +244,7 @@ function test_AFB_11AND(sim)
 
     return;
 }
+
 function test_AFB_16AND(sim)
 {
 	
