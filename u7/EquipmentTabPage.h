@@ -254,8 +254,6 @@ public slots:
 	void modeSwitched();
 	void showConnections();
 
-	void propertiesModeTabChanged(int index);
-
 	//void moduleConfiguration();
 
 	void setProperties();

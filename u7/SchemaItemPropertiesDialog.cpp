@@ -23,8 +23,6 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	tabWidget->addTab(m_propertyTable, "Table view");
 	tabWidget->setTabPosition(QTabWidget::South);
 
-	connect(tabWidget, &QTabWidget::currentChanged, this, &SchemaItemPropertiesDialog::propertiesModeTabChanged);
-
 	ui->horizontalLayout->addWidget(tabWidget);
 
 	setWindowTitle(tr("Schema Item(s) Properties"));
@@ -122,29 +120,6 @@ void SchemaItemPropertiesDialog::saveSettings()
 	theSettings.m_schemaItemPropertiesGeometry = saveGeometry();
 
 	return;
-}
-
-//
-void SchemaItemPropertiesDialog::propertiesModeTabChanged(int index)
-{
-	if (m_propertyEditor == nullptr)
-	{
-		Q_ASSERT(m_propertyEditor);
-		return;
-	}
-
-	if (m_propertyTable == nullptr)
-	{
-		Q_ASSERT(m_propertyTable);
-		return;
-	}
-
-	if (index == 0)
-	{
-		m_propertyEditor->updatePropertyValues(QString());
-
-		m_propertyTable->closeCurrentEditor();
-	}
 }
 
 //
