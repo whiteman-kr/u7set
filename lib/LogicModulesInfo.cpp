@@ -1,47 +1,21 @@
-#include "ConnectionsInfo.h"
+#include "LogicModulesInfo.h"
 
 // -----------------------------------------------------------------------------------
 //
-// ConnectionsInfo implementation
+// LogicModulesInfo implementation
 //
 // -----------------------------------------------------------------------------------
 
-const QString ConnectionsInfo::ELEM_CONNECTIONS("Connections");
-const QString ConnectionsInfo::ELEM_CONNECTION("Connection");
-const QString ConnectionsInfo::ELEM_MANUAL_SETTINGS("ManualSettings");
-const QString ConnectionsInfo::ELEM_SERIAL_SETTINGS("SerialSettings");
-const QString ConnectionsInfo::ELEM_TX("Tx");
-const QString ConnectionsInfo::ELEM_TX_RX_SIGNAL("TxRxSignal");
-const QString ConnectionsInfo::ELEM_RX("Rx");
-const QString ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL("RxValiditySignal");
+const QString LogicModulesInfo::ELEM_LOGIC_MODULES("LogicModules");
+const QString LogicModulesInfo::ELEM_LOGIC_MODULE("LogicModule");
 
-const QString ConnectionsInfo::ATTR_COUNT("Count");
-const QString ConnectionsInfo::ATTR_ID("ID");
-const QString ConnectionsInfo::ATTR_LINK_ID("LinkID");
-const QString ConnectionsInfo::ATTR_TYPE("Type");
-const QString ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS("EnableManualSettings");
-const QString ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL("DisableDataIDControl");
-const QString ConnectionsInfo::ATTR_PORTS_COUNT("PortsCount");
-const QString ConnectionsInfo::ATTR_EQUIPMENT_ID("EquipmentID");
-const QString ConnectionsInfo::ATTR_MODULE_ID("ModuleID");
-const QString ConnectionsInfo::ATTR_LM_ID("LmID");
-const QString ConnectionsInfo::ATTR_RX_WORDS_QUANTITY("RxWordsQuantity");
-const QString ConnectionsInfo::ATTR_TX_START_ADDRESS("TxStartAddress");
-const QString ConnectionsInfo::ATTR_TX_WORDS_QUANTITY("TxWordsQuantity");
-const QString ConnectionsInfo::ATTR_ENABLE_SERIAL("EnableSerial");
-const QString ConnectionsInfo::ATTR_ENABLE_DUPLEX("EnableDuplex");
-const QString ConnectionsInfo::ATTR_SERIAL_MODE("SerialMode");
-const QString ConnectionsInfo::ATTR_BUFFER_ABS_ADDR("BufferAbsAddr");
-const QString ConnectionsInfo::ATTR_DATA_SIZE_W("DataSizeW");
-const QString ConnectionsInfo::ATTR_DATA_ID("DataID");
-const QString ConnectionsInfo::ATTR_HEX_DATA_ID("HexDataID");
-const QString ConnectionsInfo::ATTR_ABS_ADDR("AbsAddr");
-const QString ConnectionsInfo::ATTR_ADDR_IN_BUF("AddrInBuf");
+const QString LogicModulesInfo::ATTR_COUNT("Count");
+const QString LogicModulesInfo::ATTR_ID("ID");
+const QString LogicModulesInfo::ATTR_EQUIPMENT_ID("EquipmentID");
+const QString LogicModulesInfo::ATTR_DATA_ID("DataID");
+const QString LogicModulesInfo::ATTR_HEX_DATA_ID("HexDataID");
 
-const QString ConnectionsInfo::CONN_TYPE_PORT_TO_PORT("PortToPort");
-const QString ConnectionsInfo::CONN_TYPE_SINGLE_PORT("SinglePort");
-
-bool ConnectionsInfo::load(const QString& fileName, QString* errMsg)
+bool LogicModulesInfo::load(const QString& fileName, QString* errMsg)
 {
 	if (errMsg == nullptr)
 	{
@@ -70,7 +44,7 @@ bool ConnectionsInfo::load(const QString& fileName, QString* errMsg)
 	return load(xmlData, errMsg);
 }
 
-bool ConnectionsInfo::load(const QByteArray& xmlData, QString* errMsg)
+bool LogicModulesInfo::load(const QByteArray& xmlData, QString* errMsg)
 {
 	if (errMsg == nullptr)
 	{
@@ -92,99 +66,80 @@ bool ConnectionsInfo::load(const QByteArray& xmlData, QString* errMsg)
 		return false;
 	}
 
-	connections.clear();
+	logicModulesInfo.clear();
 
-	QDomElement connectionsElem = xmlDoc.documentElement();
+	QDomElement logicModulesElem = xmlDoc.documentElement();
 
-	if (connectionsElem.isNull() == true || connectionsElem.tagName() != ConnectionsInfo::ELEM_CONNECTIONS)
+	if (logicModulesElem.isNull() == true || logicModulesElem.tagName() != LogicModulesInfo::ELEM_LOGIC_MODULES)
 	{
-		*errMsg = DomXmlHelper::errElementNotFound(ConnectionsInfo::ELEM_CONNECTIONS);
+		*errMsg = DomXmlHelper::errElementNotFound(LogicModulesInfo::ELEM_LOGIC_MODULES);
 		return false;
 	}
 
-	int connectionsCount = 0;
+	int lmsCount = 0;
 
-	result = DomXmlHelper::getIntAttribute(connectionsElem, ATTR_COUNT, &connectionsCount, errMsg);
+	result = DomXmlHelper::getIntAttribute(logicModulesElem, LogicModulesInfo::ATTR_COUNT, &lmsCount, errMsg);
 
 	if (result == false)
 	{
 		return false;
 	}
 
-	QDomNodeList connectionNodes = connectionsElem.elementsByTagName(ConnectionsInfo::ELEM_CONNECTION);
+	QDomNodeList lmsNodes = logicModulesElem.elementsByTagName(LogicModulesInfo::ELEM_LOGIC_MODULE);
 
-	if (connectionNodes.count() != connectionsCount)
+	if (lmsNodes.count() != lmsCount)
 	{
-		*errMsg = QString("File corruption! Count of Conection nodes is not equal to Connections Count attribute value");
+		*errMsg = QString("File corruption! Count of LogicModule nodes is not equal to LogicModules Count attribute value");
 		return false;
 	}
 
-	connections.resize(connectionsCount);
+	logicModulesInfo.resize(lmsCount);
 
-	for(int i = 0; i < connectionNodes.count(); i++)
+	for(int i = 0; i < lmsCount; i++)
 	{
-		bool res = load(&connections[i], connectionNodes.item(i), errMsg);
+/*		bool res = load(&connections[i], connectionNodes.item(i), errMsg);
 
 		if (res == false)
 		{
 			return false;
-		}
+		}*/
 	}
 
 	return true;
 }
 
-bool ConnectionsInfo::load(ConnectionInfo* ci, const QDomNode& node, QString* errMsg)
+bool LogicModulesInfo::load(LogicModuleInfo* lmi, const QDomNode& node, QString* errMsg)
 {
-	if (ci == nullptr)
+	if (lmi == nullptr)
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	if (node.isElement() == false || node.nodeName() != ConnectionsInfo::ELEM_CONNECTION)
+	if (node.isElement() == false || node.nodeName() != LogicModulesInfo::ELEM_LOGIC_MODULE)
 	{
-		*errMsg = DomXmlHelper::errElementNotFound(ConnectionsInfo::ELEM_CONNECTION);
+		*errMsg = DomXmlHelper::errElementNotFound(LogicModulesInfo::ELEM_LOGIC_MODULE);
 		return false;
 	}
 
 	QDomElement elem = node.toElement();
 
 	bool result = true;
-
-	result &= DomXmlHelper::getStringAttribute(elem, ConnectionsInfo::ATTR_ID, &ci->ID, errMsg);
-	result &= DomXmlHelper::getIntAttribute(elem, ConnectionsInfo::ATTR_LINK_ID, &ci->linkID, errMsg);
-	result &= DomXmlHelper::getStringAttribute(elem, ConnectionsInfo::ATTR_TYPE, &ci->type, errMsg);
-	result &= DomXmlHelper::getBoolAttribute(elem, ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS, &ci->enableManualSettings, errMsg);
-	result &= DomXmlHelper::getBoolAttribute(elem, ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL, &ci->disableDataIDControl, errMsg);
+/*
+	result &= DomXmlHelper::getStringAttribute(elem, DomXmlHelper::ATTR_ID, &ci->ID, errMsg);
+	result &= DomXmlHelper::getIntAttribute(elem, DomXmlHelper::ATTR_LINK_ID, &ci->linkID, errMsg);
+	result &= DomXmlHelper::getStringAttribute(elem, DomXmlHelper::ATTR_TYPE, &ci->type, errMsg);
+	result &= DomXmlHelper::getBoolAttribute(elem, DomXmlHelper::ATTR_ENABLE_MANUAL_SETTINGS, &ci->enableManualSettings, errMsg);
+	result &= DomXmlHelper::getBoolAttribute(elem, DomXmlHelper::ATTR_DISABLE_DATA_ID_CONTROL, &ci->disableDataIDControl, errMsg);
 
 	int portsCount = 0;
 
-	result &= DomXmlHelper::getIntAttribute(elem, ConnectionsInfo::ATTR_PORTS_COUNT, &portsCount, errMsg);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	if (portsCount != 1 && portsCount != 2)
-	{
-		assert(false);
-		*errMsg = QString("Wrong ports count in connection %1").arg(ci->ID);
-		return false;
-	}
-
-	ci->ports.resize(portsCount);
-
-	for(int i = 0; i < portsCount; i++)
-	{
-		result &= load(&ci->ports[i], elem, i + 1 /* portNo */, errMsg);
-	}
-
+	result &= DomXmlHelper::getIntAttribute(elem, DomXmlHelper::ATTR_PORTS_COUNT, &portsCount, errMsg);
+*/
 	return result;
 }
 
-bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectionElement, int prtNo, QString* errMsg)
+/*bool DomXmlHelper::load(ConnectionPortInfo* cpi, const QDomElement& connectionElement, int prtNo, QString* errMsg)
 {
 	if (cpi == nullptr)
 	{
@@ -192,7 +147,7 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 		return false;
 	}
 
-	Q_ASSERT(connectionElement.tagName() == ConnectionsInfo::ELEM_CONNECTION);
+	Q_ASSERT(connectionElement.tagName() == DomXmlHelper::ELEM_CONNECTION);
 	Q_ASSERT(prtNo == 1 || prtNo == 2);
 
 	cpi->portNo = prtNo;
@@ -208,9 +163,9 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 		return false;
 	}
 
-	result &= DomXmlHelper::getStringAttribute(portElem, ConnectionsInfo::ATTR_EQUIPMENT_ID, &cpi->equipmentID, errMsg);
-	result &= DomXmlHelper::getStringAttribute(portElem, ConnectionsInfo::ATTR_MODULE_ID, &cpi->moduleID, errMsg);
-	result &= DomXmlHelper::getStringAttribute(portElem, ConnectionsInfo::ATTR_LM_ID, &cpi->lmID, errMsg);
+	result &= DomXmlHelper::getStringAttribute(portElem, DomXmlHelper::ATTR_EQUIPMENT_ID, &cpi->equipmentID, errMsg);
+	result &= ConnectionsInfo::getStringAttribute(portElem, ConnectionsInfo::ATTR_MODULE_ID, &cpi->moduleID, errMsg);
+	result &= ConnectionsInfo::getStringAttribute(portElem, ConnectionsInfo::ATTR_LM_ID, &cpi->lmID, errMsg);
 
 	if (result == false)
 	{
@@ -221,16 +176,16 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 
 	QDomElement manSettingElem;
 
-	result = DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_MANUAL_SETTINGS, &manSettingElem, errMsg);
+	result = ConnectionsInfo::getSingleChildElement(portElem, ConnectionsInfo::ELEM_MANUAL_SETTINGS, &manSettingElem, errMsg);
 
 	if (result == false)
 	{
 		return false;
 	}
 
-	result &= DomXmlHelper::getIntAttribute(manSettingElem, ConnectionsInfo::ATTR_RX_WORDS_QUANTITY, &cpi->manualRxWordsQuantity, errMsg);
-	result &= DomXmlHelper::getIntAttribute(manSettingElem, ConnectionsInfo::ATTR_TX_START_ADDRESS, &cpi->manualTxStartAddr, errMsg);
-	result &= DomXmlHelper::getIntAttribute(manSettingElem, ConnectionsInfo::ATTR_TX_WORDS_QUANTITY, &cpi->manualTxWordsQuantity, errMsg);
+	result &= ConnectionsInfo::getIntAttribute(manSettingElem, ConnectionsInfo::ATTR_RX_WORDS_QUANTITY, &cpi->manualRxWordsQuantity, errMsg);
+	result &= ConnectionsInfo::getIntAttribute(manSettingElem, ConnectionsInfo::ATTR_TX_START_ADDRESS, &cpi->manualTxStartAddr, errMsg);
+	result &= ConnectionsInfo::getIntAttribute(manSettingElem, ConnectionsInfo::ATTR_TX_WORDS_QUANTITY, &cpi->manualTxWordsQuantity, errMsg);
 
 	if (result == false)
 	{
@@ -241,16 +196,16 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 
 	QDomElement serialSettingElem;
 
-	result = DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_SERIAL_SETTINGS, &serialSettingElem, errMsg);
+	result = ConnectionsInfo::getSingleChildElement(portElem, ConnectionsInfo::ELEM_SERIAL_SETTINGS, &serialSettingElem, errMsg);
 
 	if (result == false)
 	{
 		return false;
 	}
 
-	result &= DomXmlHelper::getBoolAttribute(serialSettingElem, ConnectionsInfo::ATTR_ENABLE_SERIAL, &cpi->enableSerial, errMsg);
-	result &= DomXmlHelper::getBoolAttribute(serialSettingElem, ConnectionsInfo::ATTR_ENABLE_DUPLEX, &cpi->enableDuplex, errMsg);
-	result &= DomXmlHelper::getStringAttribute(serialSettingElem, ConnectionsInfo::ATTR_SERIAL_MODE, &cpi->serialMode, errMsg);
+	result &= ConnectionsInfo::getBoolAttribute(serialSettingElem, ConnectionsInfo::ATTR_ENABLE_SERIAL, &cpi->enableSerial, errMsg);
+	result &= ConnectionsInfo::getBoolAttribute(serialSettingElem, ConnectionsInfo::ATTR_ENABLE_DUPLEX, &cpi->enableDuplex, errMsg);
+	result &= ConnectionsInfo::getStringAttribute(serialSettingElem, ConnectionsInfo::ATTR_SERIAL_MODE, &cpi->serialMode, errMsg);
 
 	if (result == false)
 	{
@@ -262,16 +217,16 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 	{
 		QDomElement txElem;
 
-		result = DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_TX, &txElem, errMsg);
+		result = ConnectionsInfo::getSingleChildElement(portElem, ConnectionsInfo::ELEM_TX, &txElem, errMsg);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		result &= DomXmlHelper::getIntAttribute(txElem, ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, &cpi->txBufferAbsAddr, errMsg);
-		result &= DomXmlHelper::getIntAttribute(txElem, ConnectionsInfo::ATTR_DATA_SIZE_W, &cpi->txDataSizeW, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(txElem, ConnectionsInfo::ATTR_DATA_ID, &cpi->txDataID, errMsg);
+		result &= ConnectionsInfo::getIntAttribute(txElem, ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, &cpi->txBufferAbsAddr, errMsg);
+		result &= ConnectionsInfo::getIntAttribute(txElem, ConnectionsInfo::ATTR_DATA_SIZE_W, &cpi->txDataSizeW, errMsg);
+		result &= ConnectionsInfo::getUInt32Attribute(txElem, ConnectionsInfo::ATTR_DATA_ID, &cpi->txDataID, errMsg);
 
 		QDomNodeList txSignalsNodes = txElem.elementsByTagName(ConnectionsInfo::ELEM_TX_RX_SIGNAL);
 
@@ -297,28 +252,28 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 	{
 		QDomElement rxElem;
 
-		result = DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_RX, &rxElem, errMsg);
+		result = ConnectionsInfo::getSingleChildElement(portElem, ConnectionsInfo::ELEM_RX, &rxElem, errMsg);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		result &= DomXmlHelper::getIntAttribute(rxElem, ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, &cpi->rxBufferAbsAddr, errMsg);
-		result &= DomXmlHelper::getIntAttribute(rxElem, ConnectionsInfo::ATTR_DATA_SIZE_W, &cpi->rxDataSizeW, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(rxElem,ConnectionsInfo::ATTR_DATA_ID, &cpi->rxDataID, errMsg);
+		result &= ConnectionsInfo::getIntAttribute(rxElem, ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, &cpi->rxBufferAbsAddr, errMsg);
+		result &= ConnectionsInfo::getIntAttribute(rxElem, ConnectionsInfo::ATTR_DATA_SIZE_W, &cpi->rxDataSizeW, errMsg);
+		result &= ConnectionsInfo::getUInt32Attribute(rxElem,ConnectionsInfo::ATTR_DATA_ID, &cpi->rxDataID, errMsg);
 
 		QDomElement rxValiditySignalElem;
 
-		result = DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL, &rxValiditySignalElem, errMsg);
+		result = ConnectionsInfo::getSingleChildElement(portElem, ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL, &rxValiditySignalElem, errMsg);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		result &= DomXmlHelper::getStringAttribute(rxValiditySignalElem, ConnectionsInfo::ATTR_EQUIPMENT_ID, &cpi->rxValiditySignalEquipmentID, errMsg);
-		result &= DomXmlHelper::getAddress16Attribute(rxValiditySignalElem, ConnectionsInfo::ATTR_ABS_ADDR, &cpi->rxValiditySignalAbsAddr, errMsg);
+		result &= ConnectionsInfo::getStringAttribute(rxValiditySignalElem, ConnectionsInfo::ATTR_EQUIPMENT_ID, &cpi->rxValiditySignalEquipmentID, errMsg);
+		result &= ConnectionsInfo::getAddress16Attribute(rxValiditySignalElem, ConnectionsInfo::ATTR_ABS_ADDR, &cpi->rxValiditySignalAbsAddr, errMsg);
 
 		QDomNodeList rxSignalsNodes = rxElem.elementsByTagName(ConnectionsInfo::ELEM_TX_RX_SIGNAL);
 
@@ -347,11 +302,11 @@ bool ConnectionsInfo::load(ConnectionTxRxSignal* cs, const QDomElement& txRxSign
 
 	bool result = true;
 
-	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_ID, &cs->ID, errMsg);
+	result &= ConnectionsInfo::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_ID, &cs->ID, errMsg);
 
 	QString signalTypeStr;
 
-	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_TYPE, &signalTypeStr, errMsg);
+	result &= ConnectionsInfo::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_TYPE, &signalTypeStr, errMsg);
 
 	bool ok = false;
 
@@ -359,62 +314,78 @@ bool ConnectionsInfo::load(ConnectionTxRxSignal* cs, const QDomElement& txRxSign
 
 	if (ok == false)
 	{
-		*errMsg = DomXmlHelper::errAttributeParsing(txRxSignalElem, ConnectionsInfo::ATTR_TYPE);
+		*errMsg = ConnectionsInfo::errAttributeParsing(txRxSignalElem, ConnectionsInfo::ATTR_TYPE);
 		return false;
 	}
 
-	result &= DomXmlHelper::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ADDR_IN_BUF, &cs->addrInBuf, errMsg);
-	result &= DomXmlHelper::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ABS_ADDR, &cs->absAddr, errMsg);
+	result &= ConnectionsInfo::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ADDR_IN_BUF, &cs->addrInBuf, errMsg);
+	result &= ConnectionsInfo::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ABS_ADDR, &cs->absAddr, errMsg);
 
 	return result;
-}
+}*/
 
-QString ConnectionsInfo::portTag(int portNo)
-{
-	Q_ASSERT(portNo == 1 || portNo == 2);
-
-	return QString("Port%1").arg(portNo);
-}
 
 #ifdef IS_BUILDER
 
 	// -----------------------------------------------------------------------------------
 	//
-	// ConnectionsInfoWriter implementation
+	// LogicModulesInfoWriter implementation
 	//
 	// -----------------------------------------------------------------------------------
 
-	bool ConnectionsInfoWriter::fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage)
+	bool LogicModulesInfoWriter::fill(const QVector<Builder::ModuleLogicCompiler*>& moduleCompilers)
 	{
 		bool result = true;
 
-		std::vector<Hardware::SharedConnection> conns = connectionsStorage.getConnections();
+		logicModulesInfo.clear();
 
-		std::map<QString, Hardware::SharedConnection> connectionsSet;
-
-		for(Hardware::SharedConnection connection : conns)
+		for(const Builder::ModuleLogicCompiler* mc : moduleCompilers)
 		{
-			TEST_PTR_CONTINUE(connection);
+			LogicModuleInfo lmInfo;
 
-			connectionsSet.insert(std::pair<QString, Hardware::SharedConnection>(connection->connectionID(), connection));
-		}
+			result &= fill(&lmInfo, *mc);
 
-		connections.clear();
-
-		for(const std::pair<QString, Hardware::SharedConnection> p : connectionsSet)
-		{
-			Hardware::SharedConnection connection = p.second;
-
-			ConnectionInfo ci;
-
-			result &= fill(&ci, connection, optoModuleStorage);
-
-			connections.push_back(ci);
+			logicModulesInfo.push_back(lmInfo);
 		}
 
 		return result;
 	}
 
+	void LogicModulesInfoWriter::save(QByteArray* xmlFileData) const
+	{
+		TEST_PTR_RETURN(xmlFileData);
+
+		XmlWriteHelper xml(xmlFileData);
+
+		xml.setAutoFormatting(true);
+		xml.writeStartDocument();
+
+		{
+			xml.writeStartElement(LogicModulesInfo::ELEM_LOGIC_MODULES);
+
+			xml.writeIntAttribute(LogicModulesInfo::ATTR_COUNT, static_cast<int>(logicModulesInfo.size()));
+
+/*			for(const ConnectionInfo& connectionInfo : connections)
+			{
+				save(connectionInfo, xml);
+			}*/
+
+			xml.writeEndElement();
+		}
+
+		xml.writeEndDocument();
+	}
+
+
+	bool LogicModulesInfoWriter::fill(LogicModuleInfo* lmInfo, const Builder::ModuleLogicCompiler& mc)
+	{
+		TEST_PTR_RETURN_FALSE(lmInfo);
+
+		bool result = true;
+
+		return result;
+	}
+/*
 	void ConnectionsInfoWriter::save(QByteArray* xmlFileData) const
 	{
 		TEST_PTR_RETURN(xmlFileData);
@@ -688,7 +659,7 @@ QString ConnectionsInfo::portTag(int portNo)
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ABS_ADDR, cs.absAddr);
 
 		xml.writeEndElement();
-	}
+	}*/
 
 #endif
 

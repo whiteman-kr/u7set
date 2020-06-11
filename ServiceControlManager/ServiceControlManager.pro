@@ -32,7 +32,6 @@ unix {
 
 SOURCES += MainWindow.cpp \
     ../lib/Address16.cpp \
-    ../lib/ConnectionsInfo.cpp \
 	../lib/MemLeaksDetection.cpp \
     ../lib/ProtoSerialization.cpp \
     ScanOptionsWidget.cpp \
@@ -89,7 +88,6 @@ SOURCES += MainWindow.cpp \
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/CUtils.h \
-    ../lib/ConnectionsInfo.h \
     ../lib/MemLeaksDetection.h \
     ../lib/ProtoSerialization.h \
     ScanOptionsWidget.h \
