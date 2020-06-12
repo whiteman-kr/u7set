@@ -2928,6 +2928,16 @@ int DbController::etcFileId() const
 	return m_worker->etcFileId();
 }
 
+int DbController::testsFileId() const
+{
+	return m_worker->testsFileId();
+}
+
+int DbController::simTestsFileId() const
+{
+	return m_worker->simTestsFileId();
+}
+
 std::vector<DbFileInfo> DbController::systemFiles() const
 {
 	return m_worker->systemFiles();

@@ -351,6 +351,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0331.sql", "Upgrade to version 331, Change stored procedure set_signal_workcopy(...)"},
 	{":/DatabaseUpgrade/Upgrade0332.sql", "Upgrade to version 332, AFB description update, HasRam added to Afb Components"},
 	{":/DatabaseUpgrade/Upgrade0333.sql", "Upgrade to version 333, Fixed TxDiagDataSize and DiagDataSize in few presets"},
+	{":/DatabaseUpgrade/Upgrade0334.sql", "Upgrade to version 334, Added folders $root$/Tests and $root$/Tests/SimTests"},
 };
 
 int DbWorker::counter = 0;
@@ -561,6 +562,18 @@ int DbWorker::etcFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_etcFileId;
+}
+
+int DbWorker::testsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_testsFileId;
+}
+
+int DbWorker::simTestsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_simTestsFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -1107,7 +1120,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	std::vector<DbFileInfo> systemFiles;
 	std::vector<QString> systemFileNames = {Db::File::AfblFileName, Db::File::SchemasFileName, Db::File::UfblFileName, Db::File::AlFileName, Db::File::HcFileName,
 											Db::File::HpFileName, Db::File::MvsFileName, Db::File::TvsFileName, Db::File::DvsFileName, Db::File::McFileName,
-											Db::File::ConnectionsFileName, Db::File::BusTypesFileName, Db::File::EtcFileName};
+											Db::File::ConnectionsFileName, Db::File::BusTypesFileName, Db::File::EtcFileName,
+											Db::File::TestsFileName, Db::File::SimTestsFileName};
 
 	bool ok = worker_getFilesInfo(systemFileNames, &systemFiles);
 	if (ok == false)
@@ -1133,6 +1147,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		m_connectionsFileId = -1;
 		m_busTypesFileId = -1;
 		m_etcFileId = -1;
+		m_testsFileId = -1;
+		m_simTestsFileId = -1;
 
 		m_systemFiles.clear();
 	}
@@ -1253,6 +1269,22 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::TestsFileName))
+		{
+			QMutexLocker locker(&m_mutex);
+			m_testsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
+
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::SimTestsFileName))
+		{
+			QMutexLocker locker(&m_mutex);
+			m_simTestsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -1272,6 +1304,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		result &= m_connectionsFileId != -1;
 		result &= m_busTypesFileId != -1;
 		result &= m_etcFileId != -1;
+		result &= m_testsFileId != -1;
+		result &= m_simTestsFileId != -1;
 	}
 
 	if (result == false)
