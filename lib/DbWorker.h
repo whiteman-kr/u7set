@@ -65,6 +65,8 @@ public:
 	int connectionsFileId() const;
 	int busTypesFileId() const;
 	int etcFileId() const;
+	int testsFileId() const;
+	int simTestsFileId() const;
 
     std::vector<DbFileInfo> systemFiles() const;
 
@@ -276,7 +278,7 @@ private:
     DbProject m_currentProject;
 
 	int m_afblFileId = -1;			// Application Functional Block Library
-	int m_schemasFileId = -1;			// User Functional Block Libabry
+	int m_schemasFileId = -1;		// User Functional Block Libabry
 	int m_ufblFileId = -1;			// User Functional Block Libabry
 	int m_alFileId = -1;			// Application Logic
 	int m_hcFileId = -1;			// Hardware Configuration
@@ -288,6 +290,8 @@ private:
 	int m_connectionsFileId = -1;	// Connections
 	int m_busTypesFileId = -1;		// BusTypes
 	int m_etcFileId = -1;			//
+	int m_testsFileId = -1;			// Folder for tests ($root$/Tests)
+	int m_simTestsFileId = -1;		// Folder for sim tests ($root$/Tests/SimTests)
 
     std::vector<DbFileInfo> m_systemFiles;		// All system files
 
