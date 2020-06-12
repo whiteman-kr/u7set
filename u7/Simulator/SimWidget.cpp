@@ -379,8 +379,6 @@ QDockWidget* SimWidget::createMemoryDock(QString /*caption*/)
 
 void SimWidget::showEvent(QShowEvent* e)
 {
-	qDebug() << "SimWidget::showEvent";
-
 	QMainWindow::showEvent(e);
 	e->ignore();
 
@@ -398,17 +396,12 @@ static bool firstEvent = true;
 			if (v.isValid() == true)
 			{
 				bool restoreOk = restoreState(v.toByteArray());
-				qDebug() << "SimWidget::showEvent: restoreStateOk = " << restoreOk;
 
-				//if (restoreOk == false)
+				QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
+				for (QDockWidget* dw : dockWidgets)
 				{
-					QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
-					for (QDockWidget* dw : dockWidgets)
-					{
-						qDebug() << "DockWidget objectname " << dw->objectName();
-						restoreDockWidget(dw);
-						dw->setVisible(true);
-					}
+					restoreDockWidget(dw);
+					dw->setVisible(true);
 				}
 			}
 

@@ -17,6 +17,7 @@
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "SimulatorTabPage.h"
+#include "TestsTabPage.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/ProjectPropertiesForm.h"
@@ -83,6 +84,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
+
+	m_testsTabPage = new TestsTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_testsTabPage, tr("Tests"));
 
 	// --
 	//

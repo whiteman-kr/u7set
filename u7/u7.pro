@@ -103,6 +103,7 @@ SOURCES +=\
     Simulator/SimSelectSchemaPage.cpp \
     Simulator/SimSignalSnapshot.cpp \
     Simulator/SimTrend/SimTrends.cpp \
+    TestsTabPage.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -254,6 +255,7 @@ HEADERS  += \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
+    TestsTabPage.h \
     UserManagementDialog.h \
     ../lib/DbStruct.h \
     ../lib/DeviceObject.h \
