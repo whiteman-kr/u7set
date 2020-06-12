@@ -350,6 +350,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0330.sql", "Upgrade to version 330, MSO-4 description and configuration script update"},
 	{":/DatabaseUpgrade/Upgrade0331.sql", "Upgrade to version 331, Change stored procedure set_signal_workcopy(...)"},
 	{":/DatabaseUpgrade/Upgrade0332.sql", "Upgrade to version 332, AFB description update, HasRam added to Afb Components"},
+	{":/DatabaseUpgrade/Upgrade0333.sql", "Upgrade to version 333, Fixed TxDiagDataSize and DiagDataSize in few presets"},
 };
 
 int DbWorker::counter = 0;
