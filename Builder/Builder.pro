@@ -71,6 +71,8 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
+    ../lib/DomXmlHelper.cpp \
+    ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbController.cpp \
     ../lib/DbProgress.cpp \
@@ -155,6 +157,8 @@ SOURCES += \
 
 HEADERS += \
     ../lib/ClientBehavior.h \
+    ../lib/DomXmlHelper.h \
+    ../lib/LogicModulesInfo.h \
     ../lib/OutputLog.h \
     ../lib/DbController.h \
     ../lib/DbProgress.h \

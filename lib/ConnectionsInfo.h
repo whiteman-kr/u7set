@@ -9,10 +9,9 @@
 
 #endif
 
-#include <QDomDocument>
 #include "Address16.h"
 #include "Types.h"
-
+#include "DomXmlHelper.h"
 
 class ConnectionTxRxSignal
 {
@@ -87,19 +86,6 @@ private:
 	bool load(ConnectionInfo* ci, const QDomNode& node, QString* errMsg);
 	bool load(ConnectionPortInfo* cpi, const QDomElement& connectionElement, int prtNo, QString* errMsg);
 	bool load(ConnectionTxRxSignal* cs, const QDomElement& txRxSignalElem, QString* errMsg);
-
-	static QString errElementNotFound(const QString& elemName);
-	static QString errAttributeNotFound(const QDomElement& elem, const QString& attrName);
-	static QString errAttributeParsing(const QDomElement& elem, const QString& attrName);
-
-	static bool getSingleChildElement(const QDomElement& parentElement, const QString& childElementTagName,
-									  QDomElement* childElem, QString* errMsg);
-
-	static bool getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg);
-	static bool getStringAttribute(const QDomElement& elem, const QString& attrName, QString* value, QString* errMsg);
-	static bool getBoolAttribute(const QDomElement& elem, const QString& attrName, bool* value, QString* errMsg);
-	static bool getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg);
-	static bool getUInt32Attribute(const QDomElement& elem, const QString& attrName, quint32* value, QString* errMsg);
 
 protected:
 	static QString portTag(int portNo);

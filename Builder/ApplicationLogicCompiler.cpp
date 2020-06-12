@@ -3,6 +3,7 @@
 #include "../lib/DataSource.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/ConnectionsInfo.h"
+#include "../lib/LogicModulesInfo.h"
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
@@ -65,6 +66,7 @@ namespace Builder
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 			&ApplicationLogicCompiler::writeOptoConnectionsXml,
+			&ApplicationLogicCompiler::writeLogicModulesInfoXml,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
@@ -725,6 +727,28 @@ namespace Builder
 		bool result = true;
 
 		BuildFile* file = buildResultWriter()->addFile(Builder::DIR_COMMON, Builder::FILE_CONNECTIONS_XML, "", "", xmlData);
+
+		if (file == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeLogicModulesInfoXml()
+	{
+		LogicModulesInfoWriter writer;
+
+		writer.fill(m_moduleCompilers);
+
+		QByteArray xmlData;
+
+		writer.save(&xmlData);
+
+		bool result = true;
+
+		BuildFile* file = buildResultWriter()->addFile(Builder::DIR_COMMON, Builder::FILE_LOGIC_MODULES_XML, "", "", xmlData);
 
 		if (file == nullptr)
 		{
