@@ -733,6 +733,403 @@ function testAfbTctV209Conf6(sim)
     return;
 }
 
+// Test for AFB FLIPFLOP (OpCode 4), Conf 1
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf1(sim)
+{
+    // Conf 1, SR
+    //    Manual Tests:
+    //    Signals: #TEST_FF_V106_T1_SET, #TEST_FF_V106_T1_RESET
+    //    Sequence is important!
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 1
+    //    3. Set values 0, 0 = 1
+    //    4. Set values 0, 1 = 0
+    //    5. Set values 1, 1 = 1
+    //
+
+    let setSignal = "#TEST_FF_V106_T1_SET";
+    let resetSignal = "#TEST_FF_V106_T1_RESET";
+    let resultSignal = "#TEST_FF_V106_T1_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    3. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set values 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set values 1, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 2 RS
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf2(sim)
+{
+    // Conf 2, RS
+    //    Manual Tests:
+    //    Signals: #TEST_FF_V106_T2_SET, #TEST_FF_V106_T2_RESET
+    //    Sequence is important!
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 1
+    //    3. Set values 0, 0 = 1
+    //    4. Set values 0, 1 = 0
+    //    5. Set values 1, 1 = 0
+    //    6. Set values 1, 0 = 1
+    //
+
+    let setSignal = "#TEST_FF_V106_T2_SET";
+    let resetSignal = "#TEST_FF_V106_T2_RESET";
+    let resultSignal = "#TEST_FF_V106_T2_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    3. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set values 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set values 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 3 D ON FRONT
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf3(sim)
+{
+    // Conf 3, D ON FRONT
+    //    Manual Tests:
+    //    Signals: #TEST_FF_V106_T3_D, #TEST_FF_V106_T3_C
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 0
+    //    3. Set values 1, 1 = 1
+    //    4. Set values 0, 1 = 1
+    //    5. Set values 0, 0 = 1
+    //    6. Set values 0, 1 = 0
+    //    7. Set values 0, 0 = 0
+    //
+    let setSignal = "#TEST_FF_V106_T3_D";
+    let resetSignal = "#TEST_FF_V106_T3_C";
+    let resultSignal = "#TEST_FF_V106_T3_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    3. Set values 1, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set values 0, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    5. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    6. Set values 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    7. Set values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 4 T ON FRONT
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf4(sim)
+{
+    // Conf 4, T ON FRONT
+    //    Manual Tests:
+    //    Signal: #TEST_FF_V106_T4_T
+    //
+    //    1. Initial values 0 = 0
+    //    2. Set 1 = 1
+    //    3. Set 0 = 1
+    //    4. Set 1 = 0
+    //    5. Set 0 = 0
+    //    6. Set 1 = 1
+    //
+    let setSignal = "#TEST_FF_V106_T4_T";
+    let resultSignal = "#TEST_FF_V106_T4_RESULT";
+
+    //    1. Initial values 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    3. Set 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 5, D ON DECAY
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf5(sim)
+{
+    // Conf 5, D ON DECAY
+    //    Manual Tests:
+    //    Signal: #TEST_FF_V106_T5_D, #TEST_FF_V106_T5_C
+    //
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 0
+    //    3. Set values 1, 1 = 0
+    //    4. Set values 1, 0 = 1
+    //    5. Set values 0, 0 = 1
+    //    6. Set values 0, 1 = 1
+    //    7. Set values 0, 0 = 0
+    //
+    let setSignal = "#TEST_FF_V106_T5_D";
+    let resetSignal = "#TEST_FF_V106_T5_C";
+    let resultSignal = "#TEST_FF_V106_T5_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    3. Set values 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    4. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    5. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    6. Set values 0, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    7. Set values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 6 T ON DECAY
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf6(sim)
+{
+    // Conf 6, T ON DECAY
+    //    Manual Tests:
+    //    Signal: #TEST_FF_V106_T6_T
+    //
+    //    1. Initial values 0 = 0
+    //    2. Set 1 = 0
+    //    3. Set 0 = 1
+    //    4. Set 1 = 1
+    //    5. Set 0 = 0
+    //    6. Set 1 = 0
+    //    7. Set 0 = 1
+    //
+    let setSignal = "#TEST_FF_V106_T6_T";
+    let resultSignal = "#TEST_FF_V106_T6_RESULT";
+
+    //    1. Initial values 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    3. Set 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    5. Set 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    7. Set 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+
 // Test for AFB CTUP (OpCode 5)
 // Schema: TEST_CTUD_1
 //
