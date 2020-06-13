@@ -22,11 +22,12 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueDiscrete, PropertyNames::constCategory, true, SchemaItemConst::discreteValue, SchemaItemConst::setDiscreteValue);
 
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::constCategory, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
+		ADD_PROPERTY_GET_SET_CAT(E::AnalogFormat, PropertyNames::analogFormat, PropertyNames::constCategory, true, SchemaItemConst::analogFormat, SchemaItemConst::setAnalogFormat);
 
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemConst::horzAlign, SchemaItemConst::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemConst::vertAlign, SchemaItemConst::setVertAlign);
 
-		setPrecision(precision());		// This function will set Presion for valueFloat property
+		setPrecision(precision());		// This function will set Precision for valueFloat property for dispaying in property editor
 
 		// --
 		//
@@ -55,10 +56,12 @@ namespace VFrame30
 		Proto::SchemaItemConst* constitem = message->mutable_schemaitem()->mutable_constitem();
 
 		constitem->set_type(m_type);
-		constitem->set_intvalue(m_intValue);
-		constitem->set_floatvalue(m_floatValue);
-		constitem->set_discretevalue(m_discreteValue);
+		constitem->set_intvalue(m_value.intValue);
+		constitem->set_floatvalue(m_value.floatValue);
+		constitem->set_discretevalue(m_value.discreteValue);
+
 		constitem->set_precision(m_precision);
+		constitem->set_analogformat(static_cast<int32_t>(m_analogFormat));
 
 		constitem->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		constitem->set_vertalign(static_cast<int32_t>(m_vertAlign));
@@ -86,12 +89,13 @@ namespace VFrame30
 
 		setType(static_cast<ConstType>(constitem.type()));		// Value properties created here
 
-		m_intValue = constitem.intvalue();
-		m_floatValue = constitem.floatvalue();
-		m_discreteValue = constitem.discretevalue();
+		m_value.intValue = constitem.intvalue();
+		m_value.floatValue = constitem.floatvalue();
+		m_value.discreteValue = constitem.discretevalue();
 		m_precision = constitem.precision();
 
-		setPrecision(m_precision);		// This function will set Presion for valueFloat property
+		setPrecision(m_precision);			// This function will set Precision for valueFloat property
+		m_analogFormat = static_cast<E::AnalogFormat>(constitem.analogformat());
 
 		m_horzAlign = static_cast<E::HorzAlign>(constitem.horzalign());
 		m_vertAlign = static_cast<E::VertAlign>(constitem.vertalign());
@@ -176,10 +180,11 @@ namespace VFrame30
 			text = QString("SI: %1").arg(QString::number(intValue()));
 			break;
 		case ConstType::FloatType:
-			text = QString("FP: %1").arg(QString::number(floatValue(), 'g', precision()));
+			text = QString("FP: %1")
+			        .arg(static_cast<double>(floatValue()), 0, static_cast<char>(analogFormat()), precision());
 			break;
 		case ConstType::Discrete:
-			text = QString("%1").arg(m_discreteValue);
+			text = QString("%1").arg(discreteValue());
 			break;
 		default:
 			assert(false);
@@ -240,6 +245,7 @@ namespace VFrame30
 			propertyByCaption(PropertyNames::valueFloat)->setVisible(false);
 			propertyByCaption(PropertyNames::valueDiscrete)->setVisible(false);
 			propertyByCaption(PropertyNames::precision)->setVisible(false);
+			propertyByCaption(PropertyNames::analogFormat)->setVisible(false);
 			emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
 			break;
 		case ConstType::FloatType:
@@ -247,6 +253,7 @@ namespace VFrame30
 			propertyByCaption(PropertyNames::valueFloat)->setVisible(true);
 			propertyByCaption(PropertyNames::valueDiscrete)->setVisible(false);
 			propertyByCaption(PropertyNames::precision)->setVisible(true);
+			propertyByCaption(PropertyNames::analogFormat)->setVisible(true);
 			emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
 			break;
 		case ConstType::Discrete:
@@ -254,6 +261,7 @@ namespace VFrame30
 			propertyByCaption(PropertyNames::valueFloat)->setVisible(false);
 			propertyByCaption(PropertyNames::valueDiscrete)->setVisible(true);
 			propertyByCaption(PropertyNames::precision)->setVisible(false);
+			propertyByCaption(PropertyNames::analogFormat)->setVisible(false);
 			emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
 			break;
 		default:
@@ -281,31 +289,31 @@ namespace VFrame30
 
 	int SchemaItemConst::intValue() const
 	{
-		return m_intValue;
+		return m_value.intValue;
 	}
 
 	void SchemaItemConst::setIntValue(int intValue)
 	{
-		m_intValue = intValue;
+		m_value.intValue = intValue;
 	}
 	double SchemaItemConst::floatValue() const
 	{
-		return m_floatValue;
+		return m_value.floatValue;
 	}
 
 	void SchemaItemConst::setFloatValue(double doubleValue)
 	{
-		m_floatValue = doubleValue;
+		m_value.floatValue = doubleValue;
 	}
 
 	int SchemaItemConst::discreteValue() const
 	{
-		return m_discreteValue;
+		return m_value.discreteValue;
 	}
 
 	void SchemaItemConst::setDiscreteValue(int discreteValue)
 	{
-		m_discreteValue = qBound(0, discreteValue, 1);
+		m_value.discreteValue = qBound(0, discreteValue, 1);
 	}
 
 	int SchemaItemConst::precision() const
@@ -328,6 +336,16 @@ namespace VFrame30
 		}
 
 		prop->setPrecision(m_precision);
+	}
+
+	E::AnalogFormat SchemaItemConst::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void SchemaItemConst::setAnalogFormat(E::AnalogFormat value)
+	{
+		m_analogFormat = value;
 	}
 
 	// Align propertis
