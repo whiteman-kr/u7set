@@ -352,6 +352,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0332.sql", "Upgrade to version 332, AFB description update, HasRam added to Afb Components"},
 	{":/DatabaseUpgrade/Upgrade0333.sql", "Upgrade to version 333, Fixed TxDiagDataSize and DiagDataSize in few presets"},
 	{":/DatabaseUpgrade/Upgrade0334.sql", "Upgrade to version 334, Added folders $root$/Tests and $root$/Tests/SimTests"},
+	{":/DatabaseUpgrade/Upgrade0335.sql", "Upgrade to version 335, Added AFB mux (discrete multiplexor) for all LMs and MSO4_SR21"},
 };
 
 int DbWorker::counter = 0;
