@@ -3396,6 +3396,11 @@ namespace ExtWidgets
 		m_treeWidget->resizeColumnToContents(static_cast<int>(PropertyEditorColumns::Caption));
 	}
 
+	bool PropertyEditor::isPropertyExists(const QString& propertyName) const
+	{
+		return m_treeObjects.find(propertyName) != m_treeObjects.end();
+	}
+
 	void PropertyEditor::updatePropertiesValues()
 	{
 		for (auto it : m_treeObjects)
