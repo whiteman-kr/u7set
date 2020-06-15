@@ -172,6 +172,8 @@ public:
 		E::LanControllerType lanControllerType(int index, bool* ok = nullptr) const;
 		int lanControllerPlace(int index, bool* ok = nullptr) const;
 
+		LanController lanController(int index, bool* ok) const;
+
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 

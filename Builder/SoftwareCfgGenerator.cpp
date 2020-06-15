@@ -2,6 +2,7 @@
 #include "ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/ServiceSettings.h"
+#include "../lib/LanControllerInfoHelper.h"
 
 
 namespace Builder
@@ -648,7 +649,6 @@ namespace Builder
 		return result;
 	}
 
-
 	bool SoftwareCfgGenerator::checkLmToSoftwareLinks(Context* context)
 	{
 		TEST_PTR_RETURN_FALSE(context);
@@ -676,10 +676,11 @@ namespace Builder
 			{
 				bool ok = false;
 
-				DataSource::LmEthernetAdapterProperties adapterProperties;
+				LanControllerInfo lanControllerInfo;
 				Hardware::Software* software = nullptr;
 
-				result &= adapterProperties.getLmEthernetAdapterNetworkProperties(lm, lanController.m_place, lanController.m_type, log);
+				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
+				                                           &lanControllerInfo, log);
 
 				if (result == false)
 				{
@@ -700,36 +701,36 @@ namespace Builder
 
 				if (tuning == true)
 				{
-					if (adapterProperties.tuningEnable == true)
+					if (lanControllerInfo.tuningEnable == true)
 					{
-						if (adapterProperties.tuningServiceID.isEmpty() == true)
+						if (lanControllerInfo.tuningServiceID.isEmpty() == true)
 						{
 							// Property '%1.%2' is empty.
 							//
-							log->errCFG3022(adapterProperties.adapterID,
-											DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID);
+							log->errCFG3022(lanControllerInfo.equipmentID,
+							                LanControllerInfoHelper::PROP_TUNING_SERVICE_ID);
 						}
 						else
 						{
-							if (m_softwareList.contains(adapterProperties.tuningServiceID) == false)
+							if (m_softwareList.contains(lanControllerInfo.tuningServiceID) == false)
 							{
 								// Property '%1.%2' is linked to undefined software ID '%3'.
 								//
-								log->errCFG3021(adapterProperties.adapterID,
-												DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID,
-												adapterProperties.tuningServiceID);
+								log->errCFG3021(lanControllerInfo.equipmentID,
+								                LanControllerInfoHelper::PROP_TUNING_SERVICE_ID,
+								                lanControllerInfo.tuningServiceID);
 							}
 							else
 							{
-								software = m_softwareList[adapterProperties.tuningServiceID];
+								software = m_softwareList[lanControllerInfo.tuningServiceID];
 
 								if (software->type() != E::SoftwareType::TuningService)
 								{
 									// Property '%1.%2' is linked to not compatible software '%3'.
 									//
-									log->errCFG3017(adapterProperties.adapterID,
-													DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID,
-													adapterProperties.tuningServiceID);
+									log->errCFG3017(lanControllerInfo.equipmentID,
+									                LanControllerInfoHelper::PROP_TUNING_SERVICE_ID,
+									                lanControllerInfo.tuningServiceID);
 									result = false;
 								}
 							}
@@ -739,36 +740,36 @@ namespace Builder
 
 				if (appData == true)
 				{
-					if (adapterProperties.appDataEnable == true)
+					if (lanControllerInfo.appDataEnable == true)
 					{
-						if (adapterProperties.appDataServiceID.isEmpty() == true)
+						if (lanControllerInfo.appDataServiceID.isEmpty() == true)
 						{
 							// Property '%1.%2' is empty.
 							//
-							log->errCFG3022(adapterProperties.adapterID,
-											DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID);
+							log->errCFG3022(lanControllerInfo.equipmentID,
+							                LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID);
 						}
 						else
 						{
-							if (m_softwareList.contains(adapterProperties.appDataServiceID) == false)
+							if (m_softwareList.contains(lanControllerInfo.appDataServiceID) == false)
 							{
 								// Property '%1.%2' is linked to undefined software ID '%3'.
 								//
-								log->errCFG3021(adapterProperties.adapterID,
-												DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID,
-												adapterProperties.appDataServiceID);
+								log->errCFG3021(lanControllerInfo.equipmentID,
+								                LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID,
+								                lanControllerInfo.appDataServiceID);
 							}
 							else
 							{
-								software = m_softwareList[adapterProperties.appDataServiceID];
+								software = m_softwareList[lanControllerInfo.appDataServiceID];
 
 								if (software->type() != E::SoftwareType::AppDataService)
 								{
 									// Property '%1.%2' is linked to not compatible software '%3'.
 									//
-									log->errCFG3017(adapterProperties.adapterID,
-													DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID,
-													adapterProperties.appDataServiceID);
+									log->errCFG3017(lanControllerInfo.equipmentID,
+									                LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID,
+									                lanControllerInfo.appDataServiceID);
 									result = false;
 								}
 							}
@@ -778,36 +779,36 @@ namespace Builder
 
 				if (diagData == true)
 				{
-					if (adapterProperties.diagDataEnable == true)
+					if (lanControllerInfo.diagDataEnable == true)
 					{
-						if (adapterProperties.diagDataServiceID.isEmpty() == true)
+						if (lanControllerInfo.diagDataServiceID.isEmpty() == true)
 						{
 							// Property '%1.%2' is empty.
 							//
-							log->errCFG3022(adapterProperties.adapterID,
-											DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID);
+							log->errCFG3022(lanControllerInfo.equipmentID,
+							                LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID);
 						}
 						else
 						{
-							if (m_softwareList.contains(adapterProperties.diagDataServiceID) == false)
+							if (m_softwareList.contains(lanControllerInfo.diagDataServiceID) == false)
 							{
 								// Property '%1.%2' is linked to undefined software ID '%3'.
 								//
-								log->errCFG3021(adapterProperties.adapterID,
-												DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID,
-												adapterProperties.diagDataServiceID);
+								log->errCFG3021(lanControllerInfo.equipmentID,
+								                LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID,
+								                lanControllerInfo.diagDataServiceID);
 							}
 							else
 							{
-								software = m_softwareList[adapterProperties.diagDataServiceID];
+								software = m_softwareList[lanControllerInfo.diagDataServiceID];
 
 								if (software->type() != E::SoftwareType::DiagDataService)
 								{
 									// Property '%1.%2' is linked to not compatible software '%3'.
 									//
-									log->errCFG3017(adapterProperties.adapterID,
-													DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID,
-													adapterProperties.diagDataServiceID);
+									log->errCFG3017(lanControllerInfo.equipmentID,
+									                LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID,
+									                lanControllerInfo.diagDataServiceID);
 									result = false;
 								}
 							}

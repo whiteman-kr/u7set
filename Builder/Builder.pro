@@ -72,6 +72,7 @@ DEFINES += IS_BUILDER
 SOURCES += \
     ../lib/ClientBehavior.cpp \
     ../lib/DomXmlHelper.cpp \
+    ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbController.cpp \
@@ -158,6 +159,8 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/DomXmlHelper.h \
+    ../lib/LanControllerInfo.h \
+    ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
     ../lib/OutputLog.h \
     ../lib/DbController.h \

@@ -2,129 +2,7 @@
 #include "WUtils.h"
 #include "Crc.h"
 #include "DeviceHelper.h"
-#include "LmDescription.h"
-
-// ---------------------------------------------------------------------------------
-//
-//	DataSource::LmEthernetAdapterProperties class implementation
-//
-// ---------------------------------------------------------------------------------
-
-const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE = "TuningEnable";
-const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_IP = "TuningIP";
-const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_PORT = "TuningPort";
-const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID = "TuningServiceID";
-
-const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_ENABLE = "AppDataEnable";
-const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_IP = "AppDataIP";
-const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_PORT = "AppDataPort";
-const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID = "AppDataServiceID";
-const char* DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID = "AppLANDataUID";
-const char* DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_SIZE = "AppLANDataSize";
-
-const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_ENABLE = "DiagDataEnable";
-const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_IP = "DiagDataIP";
-const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_PORT = "DiagDataPort";
-const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID = "DiagDataServiceID";
-const char* DataSource::LmEthernetAdapterProperties::PROP_LM_DIAG_DATA_UID = "DiagLANDataUID";
-const char* DataSource::LmEthernetAdapterProperties::PROP_LM_DIAG_DATA_SIZE= "DiagLANDataSize";
-
-const char* DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR = "_ETHERNET0%1";
-
-bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm,
-																					int lanControllerNo,
-																					E::LanControllerType lanControllerType,
-																					Builder::IssueLogger* log)
-{
-	TEST_PTR_RETURN_FALSE(log);
-	TEST_PTR_LOG_RETURN_FALSE(lm, log);
-
-	adapterNo = lanControllerNo;
-	adapterType = lanControllerType;
-
-	QString suffix = QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(adapterNo);
-
-	Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix, log);
-
-	if (adapter == nullptr)
-	{
-		return false;
-	}
-
-	adapterID = adapter->equipmentIdTemplate();
-
-	bool tuning = false;
-	bool appData = false;
-	bool diagData = false;
-
-	bool result = DataSource::lanControllerFunctions(adapterType, &tuning, &appData, &diagData);
-
-	if (result == false)
-	{
-		LOG_INTERNAL_ERROR(log);
-		return false;
-	}
-
-	if (tuning == true)
-	{
-		// tunig adapter
-		//
-		result &= DeviceHelper::getBoolProperty(adapter, PROP_TUNING_ENABLE, &tuningEnable, log);
-		result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_IP, &tuningIP, log);
-		result &= DeviceHelper::getIntProperty(adapter, PROP_TUNING_PORT, &tuningPort, log);
-		result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_SERVICE_ID, &tuningServiceID, log);
-	}
-
-	if (appData == true)
-	{
-		// application data adapter
-		//
-		result &= DeviceHelper::getBoolProperty(adapter, PROP_APP_DATA_ENABLE, &appDataEnable, log);
-		result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_IP, &appDataIP, log);
-		result &= DeviceHelper::getIntProperty(adapter, PROP_APP_DATA_PORT, &appDataPort, log);
-		result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_SERVICE_ID, &appDataServiceID, log);
-
-		result &= DeviceHelper::getUIntProperty(lm, PROP_LM_APP_DATA_UID, &appDataUID, log);
-
-		result &= DeviceHelper::getIntProperty(lm, PROP_LM_APP_DATA_SIZE, &appDataSize, log);
-
-		appDataSize *= sizeof(quint16);		// size in words convert to size in bytes
-
-		appDataFramesQuantity = appDataSize / sizeof(Rup::Frame::data) +
-				((appDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
-
-	}
-
-	if (diagData == true)
-	{
-		// diagnostics data adapter
-		//
-		result &= DeviceHelper::getBoolProperty(adapter, PROP_DIAG_DATA_ENABLE, &diagDataEnable, log);
-		result &= DeviceHelper::getStrProperty(adapter, PROP_DIAG_DATA_IP, &diagDataIP, log);
-		result &= DeviceHelper::getIntProperty(adapter, PROP_DIAG_DATA_PORT, &diagDataPort, log);
-		result &= DeviceHelper::getStrProperty(adapter, PROP_DIAG_DATA_SERVICE_ID, &diagDataServiceID, log);
-
-		diagDataUID = 0;
-		diagDataSize = 0;
-		diagDataFramesQuantity = 0;
-
-/*		UNCOMMENT when LM will have PROP_LM_DIAG_DATA_UID and PROP_LM_DIAG_DATA_SIZE properties  !!!
- *
- * 		result &= DeviceHelper::getIntProperty(lm, PROP_LM_DIAG_DATA_UID, &dataUID, log);
-
-		diagDataUID = dataUID;
-
-		result &= DeviceHelper::getIntProperty(lm, PROP_LM_DIAG_DATA_SIZE, &diagDataSize, log);
-
-		diagDataFramesQuantity = diagDataSize / sizeof(Rup::Frame::data) +
-				((diagDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
-*/
-	}
-
-	return result;
-}
-
-
+#include "LanControllerInfoHelper.h"
 
 // -----------------------------------------------------------------------------
 //
@@ -176,7 +54,7 @@ DataSource::~DataSource()
 bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 										   DataType dataType,
 										   int adapterNo,
-										   E::LanControllerType adapterType,
+										   E::LanControllerType lanControllerType,
 										   const SubsystemKeyMap& subsystemKeyMap,
 										   const QHash<QString, quint64>& lmUniqueIdMap,
 										   Builder::IssueLogger* log)
@@ -207,48 +85,48 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 	m_lmSubsystemKey = subsystemKeyMap.value(m_lmSubsystemID);
 	m_lmUniqueID = lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
 
-	LmEthernetAdapterProperties adapterProp;
+	LanControllerInfo lanControllerInfo;
 
-	result &= adapterProp.getLmEthernetAdapterNetworkProperties(lm, adapterNo, adapterType, log);
+	result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType, &lanControllerInfo, log);
 
-	m_lmAdapterID = adapterProp.adapterID;
+	m_lmAdapterID = lanControllerInfo.equipmentID;
 
 	switch(m_lmDataType)
 	{
 	case DataType::App:
 
-		assert(adapterType == E::LanControllerType::AppData || adapterType == E::LanControllerType::AppAndDiagData);
+		assert(lanControllerType == E::LanControllerType::AppData || lanControllerType == E::LanControllerType::AppAndDiagData);
 
-		m_lmDataEnable = adapterProp.appDataEnable;
-		m_lmAddressPort.setAddressPort(adapterProp.appDataIP, adapterProp.appDataPort);
-		m_lmDataID = adapterProp.appDataUID;
-		m_lmDataSize = adapterProp.appDataSize;
-		m_lmRupFramesQuantity = adapterProp.appDataFramesQuantity;
-		m_serviceID = adapterProp.appDataServiceID;
+		m_lmDataEnable = lanControllerInfo.appDataEnable;
+		m_lmAddressPort.setAddressPort(lanControllerInfo.appDataIP, lanControllerInfo.appDataPort);
+		m_lmDataID = lanControllerInfo.appDataUID;
+		m_lmDataSize = lanControllerInfo.appDataSize;
+		m_lmRupFramesQuantity = lanControllerInfo.appDataFramesQuantity;
+		m_serviceID = lanControllerInfo.appDataServiceID;
 		break;
 
 	case DataType::Diag:
 
-		assert(adapterType == E::LanControllerType::DiagData || adapterType == E::LanControllerType::AppAndDiagData);
+		assert(lanControllerType == E::LanControllerType::DiagData || lanControllerType == E::LanControllerType::AppAndDiagData);
 
-		m_lmDataEnable = adapterProp.diagDataEnable;
-		m_lmAddressPort.setAddressPort(adapterProp.diagDataIP, adapterProp.diagDataPort);
-		m_lmDataID = adapterProp.diagDataUID;
-		m_lmDataSize = adapterProp.diagDataSize;
-		m_lmRupFramesQuantity = adapterProp.diagDataFramesQuantity;
-		m_serviceID = adapterProp.diagDataServiceID;
+		m_lmDataEnable = lanControllerInfo.diagDataEnable;
+		m_lmAddressPort.setAddressPort(lanControllerInfo.diagDataIP, lanControllerInfo.diagDataPort);
+		m_lmDataID = lanControllerInfo.diagDataUID;
+		m_lmDataSize = lanControllerInfo.diagDataSize;
+		m_lmRupFramesQuantity = lanControllerInfo.diagDataFramesQuantity;
+		m_serviceID = lanControllerInfo.diagDataServiceID;
 		break;
 
 	case DataType::Tuning:
 
-		assert(adapterType == E::LanControllerType::Tuning);
+		assert(lanControllerType == E::LanControllerType::Tuning);
 
-		m_lmDataEnable = adapterProp.tuningEnable;
-		m_lmAddressPort.setAddressPort(adapterProp.tuningIP, adapterProp.tuningPort);
+		m_lmDataEnable = lanControllerInfo.tuningEnable;
+		m_lmAddressPort.setAddressPort(lanControllerInfo.tuningIP, lanControllerInfo.tuningPort);
 		m_lmDataID = 0;
 		m_lmDataSize = 0;
 		m_lmRupFramesQuantity = 0;
-		m_serviceID = adapterProp.tuningServiceID;
+		m_serviceID = lanControllerInfo.tuningServiceID;
 		break;
 
 	default:

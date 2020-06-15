@@ -8,50 +8,14 @@
 #include "WUtils.h"
 #include "ModuleLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
+#include "LmDescription.h"
+#include "LanControllerInfoHelper.h".h
 
 #endif
 
 #include "Address16.h"
 #include "Types.h"
 #include "DomXmlHelper.h"
-
-class LanControllerInfo
-{
-	QString equipmentID;
-	E::LanControllerType lanControllerType;
-
-	//
-
-	bool tuningEnabled = false;
-	QHostAddress tuningIP;
-	int tuningPort = 0;
-
-	//
-
-	bool appDataEnabled = false;
-	QHostAddress appDataIP;
-	int appDataPort = 0;
-
-	QString appDataServiceEquipmentID;
-	QHostAddress appDataServiceIP;
-	int appDataServicePort = 0;
-
-	int appDataSizeW = 0;
-	int overrideAppDataWordCount = -1;
-
-	//
-
-	bool diagDataEnabled = false;
-	QHostAddress diagDataIP;
-	int diagDataPort = 0;
-
-	QString diagDataServiceEquipmentID;
-	QHostAddress diagDataServiceIP;
-	int diagDataServicePort;
-
-	int diagDataSizeW = 0;
-	int overrideDiagDataWordCount = -1;
-};
 
 class LogicModuleInfo
 {
@@ -115,29 +79,22 @@ protected:
 class LogicModulesInfoWriter : public LogicModulesInfo
 {
 public:
-	bool fill(const QVector<Builder::ModuleLogicCompiler *> &moduleCompilers);
+	LogicModulesInfoWriter(const QVector<Builder::ModuleLogicCompiler *>& moduleCompilers,
+						   const Hardware::EquipmentSet& equipmentSet);
+
+	bool fill();
 	void save(QByteArray* xmlFileData) const;
 
 private:
 	bool fill(LogicModuleInfo* lmInfo, Builder::ModuleLogicCompiler& mc);
+
 	bool save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const;
 
 	bool save(const LanControllerInfo& lci, XmlWriteHelper& xml) const;
 
-/*
-public:
-	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(QByteArray* xmlFileData) const;
-
 private:
-
-	bool fill(ConnectionInfo* ci, Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(const ConnectionInfo& ci, XmlWriteHelper& xml) const;
-
-	bool fill(ConnectionPortInfo* cpi, Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(const ConnectionPortInfo& cpi, XmlWriteHelper& xml) const;
-
-	void save(const ConnectionTxRxSignal& cs, XmlWriteHelper& xml) const;*/
+	const QVector<Builder::ModuleLogicCompiler *>& m_moduleCompilers;
+	const Hardware::EquipmentSet& m_equipmentSet;
 };
 
 #endif

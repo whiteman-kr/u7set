@@ -168,17 +168,24 @@ bool LogicModulesInfo::load(LogicModuleInfo* lmi, const QDomNode& node, QString*
 	//
 	// -----------------------------------------------------------------------------------
 
-	bool LogicModulesInfoWriter::fill(const QVector<Builder::ModuleLogicCompiler*>& moduleCompilers)
+	LogicModulesInfoWriter::LogicModulesInfoWriter(	const QVector<Builder::ModuleLogicCompiler *>& moduleCompilers,
+													const Hardware::EquipmentSet& equipmentSet) :
+		m_moduleCompilers(moduleCompilers),
+		m_equipmentSet(equipmentSet)
+	{
+	}
+
+	bool LogicModulesInfoWriter::fill()
 	{
 		bool result = true;
 
-		int lmsCount = moduleCompilers.size();
+		int lmsCount = m_moduleCompilers.size();
 
 		logicModulesInfo.resize(lmsCount);
 
 		for(int i = 0; i < lmsCount; i++)
 		{
-			Builder::ModuleLogicCompiler* mc = moduleCompilers[i];
+			Builder::ModuleLogicCompiler* mc = m_moduleCompilers[i];
 
 			TEST_PTR_CONTINUE(mc);
 
@@ -213,7 +220,6 @@ bool LogicModulesInfo::load(LogicModuleInfo* lmi, const QDomNode& node, QString*
 		xml.writeEndDocument();
 	}
 
-
 	bool LogicModulesInfoWriter::fill(LogicModuleInfo* lmInfo, Builder::ModuleLogicCompiler& mc)
 	{
 		TEST_PTR_RETURN_FALSE(lmInfo);
@@ -236,6 +242,33 @@ bool LogicModulesInfo::load(LogicModuleInfo* lmi, const QDomNode& node, QString*
 
 		lmInfo->presetName = lmModule->presetName();
 		result &= DeviceHelper::getStrProperty(lmModule.get(), ATTR_LM_DESCRIPTION_FILE, &lmInfo->lmDescriptionFile, mc.log());
+
+		lmInfo->lanControllers.clear();
+
+		std::shared_ptr<LmDescription> lmDescription = mc.getLmDescription();
+
+		TEST_PTR_RETURN_FALSE(lmDescription);
+
+		int lanControllersCount = lmDescription->lan().lanControllerCount();
+
+		lmInfo->lanControllers.resize(lanControllersCount);
+
+		for(int i = 0; i < lanControllersCount; i++)
+		{
+			bool ok = false;
+
+			LmDescription::LanController lc = lmDescription->lan().lanController(i, &ok);
+
+			if (ok == false)
+			{
+				result = false;
+				continue;
+			}
+
+			LanControllerInfo& lci = lmInfo->lanControllers[i];
+
+			result &= LanControllerInfoHelper::getInfo(	*lmModule.get(),	lc.m_place, lc.m_type, &lci, mc.log());
+		}
 
 		return result;
 	}
