@@ -72,9 +72,8 @@ namespace Builder
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
 
-		QString buildDir = QString("%1-%2/build")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildResultWriter->buildInfo().typeStr());
+		QString buildDir = QString("%1/build")
+		        .arg(m_dbController->currentProject().projectName());
 
 		content += " -b=" + appDataPath + "/" + buildDir;
 
@@ -119,9 +118,8 @@ namespace Builder
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
 
-		QString buildDir = QString("%1-%2/build")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildResultWriter->buildInfo().typeStr());
+		QString buildDir = QString("%1/build")
+		        .arg(m_dbController->currentProject().projectName());
 
 		content += " -b=" + appDataPath + "/" + buildDir;
 

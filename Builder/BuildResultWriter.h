@@ -132,7 +132,7 @@ namespace Builder
 		BuildResultWriter(QObject* parent = nullptr);
 		~BuildResultWriter();
 
-		bool start(const QString& outputPath, DbController *db, IssueLogger* log, bool release, int changesetID);
+		bool start(const QString& outputPath, DbController *db, IssueLogger* log, int changesetID);
 		bool finish();
 
 		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress = false);
@@ -161,9 +161,6 @@ namespace Builder
 		BuildFile* getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const;
 
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
-
-		bool isDebug() const;
-		bool isRelease() const;
 
 		QString outputPath() const;
 

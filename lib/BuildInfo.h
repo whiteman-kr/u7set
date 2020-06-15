@@ -15,13 +15,11 @@ namespace Builder
 	{
 		QString project;
 		int id = -1;
-		bool release = false;
 		QDateTime date;
 		int changeset = 0;
 		QString user;
 		QString workstation;
 
-		QString typeStr() const { return release ? "release" : "debug"; }
 		QString dateStr() const { return date.toString("dd.MM.yyyy hh:mm:ss"); }
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;

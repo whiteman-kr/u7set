@@ -172,7 +172,7 @@ public:
 
 	// Build management
 	//
-	bool buildStart(QString workstation, bool release, int changeset, int* buildID, QWidget *parentWidget);
+	bool buildStart(QString workstation, int changeset, int* buildID, QWidget *parentWidget);
 	bool buildFinish(int buildID, int errors, int warnings, QString buildLog, QWidget* parentWidget);
 
 	// Version Control
@@ -281,7 +281,7 @@ signals:
 
 	// Build management
 	//
-	void signal_buildStart(QString workstation, bool release, int changeset, int* buildID);
+	void signal_buildStart(QString workstation, int changeset, int* buildID);
 	void signal_buildFinish(int buildID, int errors, int warnings, QString buildLog);
 
 	// Version Control
