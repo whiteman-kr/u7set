@@ -95,9 +95,10 @@ namespace Builder
 			return false;
 		}
 
-		*reportStr = QString("%1;%2;%3").
+		*reportStr = QString("%1;%2;%3;%4").
 				arg(m_loopbackID).
 				arg(m_sourceItem->label()).
+				arg(E::valueToString<E::SignalType>(m_ualSignal->signalType())).
 				arg(m_ualSignal->refSignalIDsJoined(";"));
 
 		return true;
