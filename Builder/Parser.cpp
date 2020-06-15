@@ -2536,6 +2536,10 @@ namespace Builder
 
 		// Check if some LmDescripnFiles were not loaded
 		//
+		double loadSchemaProgress = 0;		// 0 - 1
+		double loadSchemaItem = 1.0 / schemas.size();				// All load is 5%
+		int startProgress = m_context->m_progress;
+
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
 			if (m_lmDescriptions->has(schema->lmDescriptionFile()) == false)
@@ -2544,6 +2548,9 @@ namespace Builder
 				//
 				ok &= m_lmDescriptions->loadFile(log(), db(), schema->schemaId(), schema->lmDescriptionFile());
 			}
+
+			loadSchemaProgress += loadSchemaItem;
+			m_context->m_progress = startProgress + static_cast<int>(5.0 * loadSchemaProgress);
 		}
 
 		if (ok == false)
@@ -2662,6 +2669,8 @@ namespace Builder
 			result &= task.result();
 		}
 
+		m_context->m_progress += 5;
+
 		// Set all parsed data to modules
 		//
 		readyParseDataContainer.setToAppData(applicationData(), m_log);
@@ -2727,6 +2736,8 @@ namespace Builder
 		//  Save/show item order for displaying on schemas
 		//
 		setRunOrder();
+
+		m_context->m_progress += 15;
 
 		return result;
 	}

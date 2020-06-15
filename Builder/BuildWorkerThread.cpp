@@ -32,6 +32,8 @@ namespace Builder
 				this->m_context.reset();		// this will release m_context on leaving run()
 			});
 
+		m_context->m_progress = 0;
+
 		assert(m_context->m_log);
 
 		QThread::currentThread()->setTerminationEnabled(true);
@@ -123,6 +125,8 @@ namespace Builder
 				break;
 			}
 
+			m_context->m_progress += 10;			// Total progress 10
+
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
@@ -157,6 +161,8 @@ namespace Builder
 				break;
 			}
 
+			m_context->m_progress += 10;		// Total progress 20
+
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
@@ -170,6 +176,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 5;			// Total progress 25
 
 			//
 			// Loading subsystems
@@ -213,6 +221,9 @@ namespace Builder
 				break;
 			}
 
+			//m_context->m_progress is set inside parseApplicationLogic(); up to 25%
+			//m_context->m_progress += 25;		// Total progress 50
+
 			//
 			// Save LogicModule Descriptions
 			//
@@ -237,6 +248,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 10;		// Total progress 60
 
 			//
 			// Tuning parameters
@@ -275,6 +288,8 @@ namespace Builder
 			LmsUniqueIdMap lmsUniqueIdMap;
 			generateLmsUniqueID(*m_context->m_buildResultWriter, m_context->m_lmModules, lmsUniqueIdMap);
 
+			m_context->m_progress += 10;		// Total progress 70
+
 			//
 			// Generate MATS software configurations
 			//
@@ -285,6 +300,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 10;		// Total progress 80
 
 			//
 			// Write logic, configuration and tuning binary files
@@ -310,6 +327,8 @@ namespace Builder
 				break;
 			}
 
+			m_context->m_progress += 10;		// Total progress 90
+
 			//
 			// Write Firmware Statistics
 			//
@@ -321,6 +340,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 5;		// Total progress 95
 
 			LOG_SUCCESS(m_context->m_log, tr("Ok"));
 		}
@@ -348,6 +369,8 @@ namespace Builder
 		// We've done, exit
 		//
 		qDebug("Leave BuildWorkerThread::run()");
+
+		m_context->m_progress += 5;		// Total progress 100
 
 		// QThread::finished will be emitted, it should be counted as reasultReady
 		//
@@ -1640,5 +1663,17 @@ namespace Builder
 	bool BuildWorkerThread::isInterruptRequested()
 	{
 		return QThread::currentThread()->isInterruptionRequested();
+	}
+
+	int BuildWorkerThread::progress() const
+	{
+		if (m_context != nullptr)
+		{
+			return m_context->m_progress;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 }

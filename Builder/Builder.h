@@ -38,6 +38,8 @@ namespace Builder
 		bool stop();
 		bool isRunning() const;
 
+		int progress() const;	// return 0 - 100
+
 		IssueLogger& log();
 
 	protected slots:
@@ -47,10 +49,12 @@ namespace Builder
 		void started();
 		void finished(int errorCount);			// Finished or canceled (if canceled errorCount > 0)
 
+		void progressChanged(int value);		// Always from 0 to 100
+
 		void runOrderReady(RunOrder runOrder);
 
 	private:
-		BuildWorkerThread* m_thread;
+		BuildWorkerThread* m_thread = nullptr;
 		IssueLogger m_log;
 	};
 }

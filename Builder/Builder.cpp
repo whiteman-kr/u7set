@@ -98,8 +98,6 @@ namespace Builder
 			return true;
 		}
 
-		qDebug() << "Cancel build";
-
 		m_thread->requestInterruption();
 		bool result = m_thread->wait(120000);		// Wait for a couple minutes.
 
@@ -117,6 +115,16 @@ namespace Builder
 	bool Builder::isRunning() const
 	{
 		return m_thread->isRunning();
+	}
+
+	int Builder::progress() const
+	{
+		if (isRunning() == false)
+		{
+			return 0;
+		}
+
+		return m_thread->progress();
 	}
 
 	IssueLogger& Builder::log()

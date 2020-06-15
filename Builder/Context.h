@@ -38,17 +38,6 @@ namespace Builder
 		mutable IssueLogger* m_log = nullptr;
 
 		DbController m_db;
-
-		//QString m_projectName;
-
-		//QString m_serverIpAddress;
-		//int m_serverPort = 0;
-		//QString m_serverUsername;
-		//QString m_serverPassword;
-
-		//QString m_projectUserName;
-		//QString m_projectUserPassword;
-
 		DbProjectProperties m_projectProperties;
 
 		QString m_buildOutputPath;
@@ -91,6 +80,8 @@ namespace Builder
 		//--
 		//
 		QJSEngine m_jsEngine;
+
+		std::atomic_int m_progress;			// 0 - 100%
 	};
 
 }
