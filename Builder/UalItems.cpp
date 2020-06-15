@@ -1601,6 +1601,23 @@ namespace Builder
 		m_isOptoSignal = true;
 	}
 
+	bool UalSignal::anyParentBusIsAcquired() const
+	{
+		if (m_parentBusSignal == nullptr)
+		{
+			// this is top level bus parent signal
+			//
+			return isAcquired();
+		}
+
+		if (m_parentBusSignal->isAcquired() == true)
+		{
+			return true;
+		}
+
+		return m_parentBusSignal->anyParentBusIsAcquired();
+	}
+
 	void UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
 		if (m_loopback != nullptr)
@@ -1740,12 +1757,12 @@ namespace Builder
 
 		Q_ASSERT(ualAddr.isValid() == true);
 
-		if (m_ualAddr.isValid() == true && m_isBusChild == true)
+		if (m_ualAddr.isValid() == true && isBusChild() == true)
 		{
 			return true;			// ualAddress of bus child signal is allredy set, its ok
 		}
 
-		if (m_ualAddr.isValid() == true && m_isBusChild == false)
+		if (m_ualAddr.isValid() == true && isBusChild() == false)
 		{
 			Q_ASSERT(false);				// why and where m_ualAddr is already set???
 			return false;
@@ -2195,7 +2212,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setBusChild(true);
+		ualSignal->setParentBusSignal(this);
 
 		m_busChildSignals.insert(busSignalID, ualSignal);
 
