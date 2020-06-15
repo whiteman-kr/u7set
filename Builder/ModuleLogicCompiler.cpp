@@ -4084,7 +4084,7 @@ namespace Builder
 		result &= createAcquiredDiscreteStrictOutputSignalsList();
 		result &= createAcquiredDiscreteInternalSignalsList();
 		result &= createAcquiredDiscreteOptoSignalsList();
-//		result &= createAcquiredDiscreteBusChildSignalsList();
+		result &= createAcquiredDiscreteBusChildSignalsList();
 		result &= createAcquiredDiscreteTuningSignalsList();
 		result &= createAcquiredDiscreteConstSignalsList();
 
@@ -4096,7 +4096,7 @@ namespace Builder
 		result &= createAcquiredAnalogStrictOutputSignalsList();
 		result &= createAcquiredAnalogInternalSignalsList();
 		result &= createAcquiredAnalogOptoSignalsList();
-//		result &= createAcquiredAnalogBusChildSignalsList();
+		result &= createAcquiredAnalogBusChildSignalsList();
 		result &= createAcquiredAnalogTuninglSignalsList();
 		result &= createAcquiredAnalogConstSignalsList();
 
@@ -4109,6 +4109,7 @@ namespace Builder
 		result &= createAcquiredInputBusesList();
 		result &= createAcquiredOutputBusesList();
 		result &= createAcquiredInternalBusesList();
+		result &= createAcquiredBusBusChildSignalsList();
 		result &= createAcquiredOptoBusesList();
 
 		result &= createNonAcquiredOutputBusesList();
@@ -4132,7 +4133,7 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_acquiredDiscreteInternalSignals);
 		sortSignalList(m_acquiredDiscreteOptoSignals);
-//		sortSignalList(m_acquiredDiscreteBusChildSignals);
+		sortSignalList(m_acquiredDiscreteBusChildSignals);
 		sortSignalList(m_acquiredDiscreteConstSignals);
 		// m_acquiredDiscreteTuningSignals						// Not need to sort!
 
@@ -4144,7 +4145,7 @@ namespace Builder
 		sortSignalList(m_acquiredAnalogStrictOutputSignals);
 		sortSignalList(m_acquiredAnalogInternalSignals);
 		sortSignalList(m_acquiredAnalogOptoSignals);
-//		sortSignalList(m_acquiredAnalogBusChildSignals);
+		sortSignalList(m_acquiredAnalogBusChildSignals);
 		// m_acquiredAnalogTuningSignals						// Not need to sort!
 
 		sortSignalList(m_nonAcquiredAnalogInputSignals);
@@ -4154,6 +4155,7 @@ namespace Builder
 		sortSignalList(m_acquiredInputBuses);
 		sortSignalList(m_acquiredOutputBuses);
 		sortSignalList(m_acquiredInternalBuses);
+		sortSignalList(m_acquiredBusChildBuses);
 
 		sortSignalList(m_nonAcquiredOutputBuses);
 		sortSignalList(m_nonAcquiredInternalBuses);
@@ -4267,7 +4269,7 @@ namespace Builder
 		return true;
 	}
 
-/*	bool ModuleLogicCompiler::createAcquiredDiscreteBusChildSignalsList()
+	bool ModuleLogicCompiler::createAcquiredDiscreteBusChildSignalsList()
 	{
 		m_acquiredDiscreteBusChildSignals.clear();
 
@@ -4278,14 +4280,15 @@ namespace Builder
 			if (ualSignal->isAcquired() == true &&
 				ualSignal->isDiscrete() == true &&
 				ualSignal->isBusChild() == true &&
-				ualSignal->isConst() == false)
+				ualSignal->isConst() == false &&
+				ualSignal->anyParentBusIsAcquired() == false)
 			{
 				m_acquiredDiscreteBusChildSignals.append(ualSignal);
 			}
 		}
 
 		return true;
-	} */
+	}
 
 	bool ModuleLogicCompiler::createAcquiredDiscreteTuningSignalsList()
 	{
@@ -4557,7 +4560,7 @@ namespace Builder
 		return true;
 	}
 
-/*	bool ModuleLogicCompiler::createAcquiredAnalogBusChildSignalsList()
+	bool ModuleLogicCompiler::createAcquiredAnalogBusChildSignalsList()
 	{
 		m_acquiredAnalogBusChildSignals.clear();
 
@@ -4568,14 +4571,15 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isBusChild() == true &&
-				s->isConst() == false)
+				s->isConst() == false &&
+				s->anyParentBusIsAcquired() == false)
 			{
 				m_acquiredAnalogBusChildSignals.append(s);
 			}
 		}
 
 		return true;
-	} */
+	}
 
 	bool ModuleLogicCompiler::createAcquiredAnalogTuninglSignalsList()
 	{
@@ -4860,6 +4864,27 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::createAcquiredBusBusChildSignalsList()
+	{
+		m_acquiredBusChildBuses.clear();
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == true &&
+				s->isBus() == true &&
+				s->isBusChild() == true &&
+				s->isConst() == false &&
+				s->anyParentBusIsAcquired() == false)
+			{
+				m_acquiredBusChildBuses.append(s);
+			}
+		}
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::createAcquiredOptoBusesList()
 	{
 		m_acquiredOptoBuses.clear();
@@ -4916,7 +4941,7 @@ namespace Builder
 				ualSignal->isBusChild() == false &&
 				ualSignal->isOptoSignal() == false)
 			{
-				m_nonAcquiredOutputBuses.append(ualSignal);
+				m_nonAcquiredInternalBuses.append(ualSignal);
 			}
 		}
 
@@ -5088,7 +5113,7 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteOptoSignals);
-//		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteBusChildSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteBusChildSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteTuningSignals);
 
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteStrictOutputSignals);
@@ -5098,7 +5123,7 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogOptoSignals);
-//		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogBusChildSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogBusChildSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogTuningSignals);
 
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInputSignals);
@@ -5108,6 +5133,7 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_acquiredInputBuses);
 		result &= listUniquenessCheck(signalsMap, m_acquiredOutputBuses);
 		result &= listUniquenessCheck(signalsMap, m_acquiredInternalBuses);
+		result &= listUniquenessCheck(signalsMap, m_acquiredBusChildBuses);
 		result &= listUniquenessCheck(signalsMap, m_acquiredOptoBuses);
 
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredOutputBuses);
@@ -5447,7 +5473,7 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredAnalogStrictOutputSignalsInRegBuf(m_acquiredAnalogStrictOutputSignals);
 		result &= m_memoryMap.appendAcquiredAnalogInternalSignalsInRegBuf(m_acquiredAnalogInternalSignals);
 		result &= m_memoryMap.appendAcquiredAnalogOptoSignalsInRegBuf(m_acquiredAnalogOptoSignals);
-//		result &= m_memoryMap.appendAcquiredAnalogBusChildSignalsInRegBuf(m_acquiredAnalogBusChildSignals);
+		result &= m_memoryMap.appendAcquiredAnalogBusChildSignalsInRegBuf(m_acquiredAnalogBusChildSignals);
 		result &= m_memoryMap.appendAcquiredAnalogTuningSignalsInRegBuf(m_acquiredAnalogTuningSignals);
 		result &= m_memoryMap.appendAcquiredAnalogConstSignalsInRegBuf(m_acquiredAnalogConstIntSignals,
 																	   m_acquiredAnalogConstFloatSignals);
@@ -5461,6 +5487,7 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredInputBusesInRegBuf(m_acquiredInputBuses);
 		result &= m_memoryMap.appendAcquiredOutputBusesInRegBuf(m_acquiredOutputBuses);
 		result &= m_memoryMap.appendAcquiredInternalBusesInRegBuf(m_acquiredInternalBuses);
+		result &= m_memoryMap.appendAcquiredBusChildBusesInRegBuf(m_acquiredBusChildBuses);
 		result &= m_memoryMap.appendAcquiredOptoBusesInRegBuf(m_acquiredOptoBuses);
 
 		return result;
@@ -5474,7 +5501,7 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredDiscreteStrictOutputSignalsInRegBuf(m_acquiredDiscreteStrictOutputSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteInternalSignalsInRegBuf(m_acquiredDiscreteInternalSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteOptoSignalsInRegBuf(m_acquiredDiscreteOptoSignals);
-//		result &= m_memoryMap.appendAcquiredDiscreteBusChildSignalsInRegBuf(m_acquiredDiscreteBusChildSignals);
+		result &= m_memoryMap.appendAcquiredDiscreteBusChildSignalsInRegBuf(m_acquiredDiscreteBusChildSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteTuningSignalsInRegBuf(m_acquiredDiscreteTuningSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteConstSignalsInRegBuf(m_acquiredDiscreteConstSignals);
 
@@ -6936,17 +6963,18 @@ namespace Builder
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
 
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf),
-//			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsToRegBuf),
 
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesToRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesToRegBuf),
 
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsToRegBuf),
-//			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsToRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsToRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
@@ -9913,7 +9941,7 @@ namespace Builder
 		return result;
 	}
 
-/*	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -9962,7 +9990,7 @@ namespace Builder
 		code->newLine();
 
 		return result;
-	} */
+	}
 
 	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf(CodeSnippet* code)
 	{
@@ -10342,44 +10370,24 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredInputBusesToRegBuf(CodeSnippet* code)
 	{
-		if (m_acquiredInputBuses.isEmpty() == true)
-		{
-			return true;
-		}
+		return copyBusesToRegBuf("Copy aquired Input Buses to RegBuf", m_acquiredInputBuses, code);
+	}
 
-		bool result = true;
-
-		CodeItem cmd;
-
-		code->comment_nl("Copy aquired Input Buses to regBuf");
-
-		for(const UalSignal* inputBus : m_acquiredInputBuses)
-		{
-			if (checkUalAndRegBufAddrs(inputBus) == false)
-			{
-				result = false;
-				continue;
-			}
-
-			Q_ASSERT(inputBus->isBus() == true);
-			Q_ASSERT(inputBus->isBusChild() == false);
-			Q_ASSERT(inputBus->isInput() == true);
-
-			result &= generateMemCopyCode(	inputBus->regBufAddr(),
-											inputBus->ualAddr(),
-											inputBus->sizeW(),
-											QString("copy %1").arg(inputBus->refSignalIDsJoined()),
-											code);
-		}
-
-		code->newLine();
-
-		return true;
+	bool ModuleLogicCompiler::copyAcquiredBusChildBusesToRegBuf(CodeSnippet* code)
+	{
+		return copyBusesToRegBuf("Copy aquired bus child Buses to RegBuf", m_acquiredBusChildBuses, code);
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredOptoBusesToRegBuf(CodeSnippet* code)
 	{
-		if (m_acquiredOptoBuses.isEmpty() == true)
+		return copyBusesToRegBuf("Copy aquired Opto Buses to regBuf", m_acquiredOptoBuses, code);
+	}
+
+	bool ModuleLogicCompiler::copyBusesToRegBuf(const QString& comment, const QVector<UalSignal*>& buses, CodeSnippet* code)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+
+		if (buses.isEmpty() == true)
 		{
 			return true;
 		}
@@ -10388,30 +10396,31 @@ namespace Builder
 
 		CodeItem cmd;
 
-		code->comment_nl("Copy aquired Opto Buses to regBuf");
-
-		for(const UalSignal* optoBus : m_acquiredOptoBuses)
+		if (comment.isEmpty() == false)
 		{
-			if (checkUalAndRegBufAddrs(optoBus) == false)
+			code->comment_nl(comment);
+		}
+
+		for(const UalSignal* bus : buses)
+		{
+			if (checkUalAndRegBufAddrs(bus) == false)
 			{
 				result = false;
 				continue;
 			}
 
-			Q_ASSERT(optoBus->isBus() == true);
-			Q_ASSERT(optoBus->isBusChild() == false);
-			Q_ASSERT(optoBus->isOptoSignal() == true);
+			Q_ASSERT(bus->isBus() == true);
 
-			result &= generateMemCopyCode(	optoBus->regBufAddr(),
-											optoBus->ualAddr(),
-											optoBus->sizeW(),
-											QString("copy %1").arg(optoBus->refSignalIDsJoined()),
+			result &= generateMemCopyCode(	bus->regBufAddr(),
+											bus->ualAddr(),
+											bus->sizeW(),
+											QString("copy %1 to RegBuf").arg(bus->refSignalIDsJoined()),
 											code);
 		}
 
 		code->newLine();
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::checkUalAndRegBufAddrs(const UalSignal* ualSignal) const
@@ -10489,7 +10498,8 @@ namespace Builder
 		return result;
 	}
 
-/*	bool ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsToRegBuf(CodeSnippet* code)
+
+	bool ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsToRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10500,7 +10510,7 @@ namespace Builder
 		//m_alpCode_calculate(&m_resourcesUsageInfo.copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf);
 
 		return result;
-	} */
+	}
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf(CodeSnippet* code)
 	{
@@ -12534,16 +12544,17 @@ namespace Builder
 		acquiredSignals.append(m_acquiredDiscreteTuningSignals);
 		acquiredSignals.append(m_acquiredDiscreteConstSignals);
 		acquiredSignals.append(m_acquiredDiscreteOptoSignals);
-//		acquiredSignals.append(m_acquiredDiscreteBusChildSignals);
+		acquiredSignals.append(m_acquiredDiscreteBusChildSignals);
 		acquiredSignals.append(m_acquiredAnalogInputSignals);
 		acquiredSignals.append(m_acquiredAnalogStrictOutputSignals);
 		acquiredSignals.append(m_acquiredAnalogInternalSignals);
 		acquiredSignals.append(m_acquiredAnalogOptoSignals);
-//		acquiredSignals.append(m_acquiredAnalogBusChildSignals);
+		acquiredSignals.append(m_acquiredAnalogBusChildSignals);
 		acquiredSignals.append(m_acquiredAnalogTuningSignals);
 		acquiredSignals.append(m_acquiredInputBuses);
 		acquiredSignals.append(m_acquiredOutputBuses);
 		acquiredSignals.append(m_acquiredInternalBuses);
+		acquiredSignals.append(m_acquiredBusChildBuses);
 		acquiredSignals.append(m_acquiredOptoBuses);
 
 		QStringList constSignalsIDs;
@@ -13474,11 +13485,12 @@ namespace Builder
 		result &= writeSignalList(m_acquiredDiscreteTuningSignals, "acquiredDiscreteTuning");
 		result &= writeSignalList(m_acquiredDiscreteConstSignals, "acquiredDiscreteConst");
 		result &= writeSignalList(m_acquiredDiscreteOptoSignals, "acquiredDiscreteOpto");
-//		result &= writeSignalList(m_acquiredDiscreteBusChildSignals, "acquiredDiscreteBusChild");
+		result &= writeSignalList(m_acquiredDiscreteBusChildSignals, "acquiredDiscreteBusChild");
 
 		result &= writeSignalList(m_acquiredInputBuses, "acquiredInputBuses");
 		result &= writeSignalList(m_acquiredOutputBuses, "acquiredOutputBuses");
 		result &= writeSignalList(m_acquiredInternalBuses, "acquiredInternalBuses");
+		result &= writeSignalList(m_acquiredBusChildBuses, "acquiredBusChildBuses");
 		result &= writeSignalList(m_acquiredOptoBuses, "acquiredOptoBuses");
 
 		result &= writeSignalList(m_nonAcquiredDiscreteInputSignals, "nonAcquiredDiscreteInput");
@@ -13490,7 +13502,7 @@ namespace Builder
 		result &= writeSignalList(m_acquiredAnalogStrictOutputSignals, "acquiredAnalogStrictOutput");
 		result &= writeSignalList(m_acquiredAnalogInternalSignals, "acquiredAnalogInternal");
 		result &= writeSignalList(m_acquiredAnalogOptoSignals, "acquiredAnalogOpto");
-//		result &= writeSignalList(m_acquiredAnalogBusChildSignals, "acquiredAnalogBusChild");
+		result &= writeSignalList(m_acquiredAnalogBusChildSignals, "acquiredAnalogBusChild");
 		result &= writeSignalList(m_acquiredAnalogTuningSignals, "acquiredAnalogTuning");
 
 		result &= writeSignalList(m_nonAcquiredAnalogInputSignals, "nonAcquiredAnalogInput");

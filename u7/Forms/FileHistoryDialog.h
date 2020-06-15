@@ -13,6 +13,7 @@ class FileHistoryDialog : public QDialog
 	
 private:
 	FileHistoryDialog();
+
 public:
 	FileHistoryDialog(QString title, DbController* db, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	~FileHistoryDialog();
@@ -21,6 +22,8 @@ public:
 
 protected:
 	virtual void showEvent(QShowEvent* event) override;
+
+	void fillList();
 	
 private slots:
 	void on_changesetList_doubleClicked(const QModelIndex &index);
@@ -30,9 +33,14 @@ private slots:
 
 	void on_buttonBox_clicked(QAbstractButton *button);
 
+	void on_userComboBox_currentIndexChanged(int index);
+
 private:
 	Ui::FileHistoryDialog *ui;
 	std::vector<DbChangeset> m_fileHistory;
 	DbController* m_db = nullptr;
+
+	const int AllUsersUserId = -1;
+	const QString AllUsersText = "All users";
 };
 

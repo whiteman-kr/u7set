@@ -333,6 +333,8 @@
         <file>Upgrade0331.sql</file>
         <file>Upgrade0332.sql</file>
         <file>Upgrade0333.sql</file>
+        <file>Upgrade0334.sql</file>
+        <file>Upgrade0335.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

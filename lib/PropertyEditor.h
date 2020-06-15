@@ -644,6 +644,8 @@ namespace ExtWidgets
 
 		void autoAdjustSplitterPosition();
 
+		bool isPropertyExists(const QString& propertyName) const;
+
 	public slots:
 		void updatePropertiesValues();
 		void updatePropertyValue(const QString& propertyName);

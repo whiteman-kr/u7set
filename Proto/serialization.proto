@@ -697,8 +697,8 @@ message SchemaItemLink
 //
 message SchemaItemAfb
 {
-	repeated AfbParam params = 2;					// NOT USED anymore, keep it for a while, RPCT-812
-	optional wstring afbStrid = 3;					// NOT USED anymore, keep it for a while, RPCT-812
+    repeated AfbParam params = 2;						// NOT USED anymore, keep it for a while, RPCT-812
+	optional wstring afbStrid = 3;						// NOT USED anymore, keep it for a while, RPCT-812
 	optional int32 precision = 4 [default = 2];
 	optional AfbElementXml deprecated_afbelement = 5;	// Old formatted XML for AFB, use now afbelement = 7
 	optional string deprecated_label = 6;				// Don't use 6 anymore
@@ -715,8 +715,9 @@ message SchemaItemConst
 	optional double floatValue = 3 [default = 0.0];
 	optional int32 discreteValue = 7 [default = 0];
 	optional int32 precision = 4 [default = 2];
-	optional int32 horzAlign = 5  [default = 4];	// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
-	optional int32 vertAlign = 6  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
+	optional int32 horzAlign = 5  [default = 4];		// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 6  [default = 128];		// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
+	optional int32 analogFormat = 8 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
 }
 
 //

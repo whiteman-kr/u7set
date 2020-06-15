@@ -6307,6 +6307,13 @@ class SchemaItemConst : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 vertalign() const;
   inline void set_vertalign(::google::protobuf::int32 value);
 
+  // optional int32 analogFormat = 8 [default = 102];
+  inline bool has_analogformat() const;
+  inline void clear_analogformat();
+  static const int kAnalogFormatFieldNumber = 8;
+  inline ::google::protobuf::int32 analogformat() const;
+  inline void set_analogformat(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemConst)
  private:
   inline void set_has_type();
@@ -6323,6 +6330,8 @@ class SchemaItemConst : public ::google::protobuf::Message {
   inline void clear_has_horzalign();
   inline void set_has_vertalign();
   inline void clear_has_vertalign();
+  inline void set_has_analogformat();
+  inline void clear_has_analogformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -6333,9 +6342,10 @@ class SchemaItemConst : public ::google::protobuf::Message {
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
+  ::google::protobuf::int32 analogformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -22819,6 +22829,28 @@ inline ::google::protobuf::int32 SchemaItemConst::vertalign() const {
 inline void SchemaItemConst::set_vertalign(::google::protobuf::int32 value) {
   set_has_vertalign();
   vertalign_ = value;
+}
+
+// optional int32 analogFormat = 8 [default = 102];
+inline bool SchemaItemConst::has_analogformat() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemConst::set_has_analogformat() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemConst::clear_has_analogformat() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemConst::clear_analogformat() {
+  analogformat_ = 102;
+  clear_has_analogformat();
+}
+inline ::google::protobuf::int32 SchemaItemConst::analogformat() const {
+  return analogformat_;
+}
+inline void SchemaItemConst::set_analogformat(::google::protobuf::int32 value) {
+  set_has_analogformat();
+  analogformat_ = value;
 }
 
 // -------------------------------------------------------------------

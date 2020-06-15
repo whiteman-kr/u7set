@@ -36,24 +36,27 @@ namespace Db
 		constexpr static const char* RootFileName = "$root$";						// root file name
 		constexpr static const char* AfblFileName = "$root$/AFBL";					// Application Functional Block Library
 
-		constexpr static const char* SchemasFileName = "$root$/Schemas";				// Schemas root fie
+		constexpr static const char* SchemasFileName = "$root$/Schemas";			// Schemas root fie
 		constexpr static const char* UfblFileName = "$root$/Schemas/UFBL";			// User Functional Block Library
-		constexpr static const char* AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
-		constexpr static const char* MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
+		constexpr static const char* AlFileName = "$root$/Schemas/ApplicationLogic";// Application Logic Schemas
+		constexpr static const char* MvsFileName = "$root$/Schemas/Monitor";		// Monitor Video Schemas
 		constexpr static const char* TvsFileName = "$root$/Schemas/Tuning";			// TuningClient Video Schemas;			// Tuning Video Schemas
-		constexpr static const char* DvsFileName = "$root$/Diagnostics";				// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
+		constexpr static const char* DvsFileName = "$root$/Diagnostics";			// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
 
 		constexpr static const char* HcFileName = "$root$/HC";						// Hardware Configuratiun
 		constexpr static const char* HpFileName = "$root$/HP";						// Hardware Presets
 		constexpr static const char* McFileName = "$root$/MC";						// Module Configuration
-		constexpr static const char* ConnectionsFileName = "$root$/CONNECTIONS";		// Connections
+		constexpr static const char* ConnectionsFileName = "$root$/CONNECTIONS";	// Connections
 		constexpr static const char* BusTypesFileName = "$root$/BUSTYPES";			// BustTypes
-		constexpr static const char* EtcFileName = "$root$/ETC";						// Etc file name
+		constexpr static const char* EtcFileName = "$root$/ETC";					// Etc file name
+
+		constexpr static const char* TestsFileName = "$root$/Tests";				// Tests folder
+		constexpr static const char* SimTestsFileName = "$root$/Tests/SimTests";	// SimTests folder
 
 		constexpr static const char* SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
 
 		constexpr static const char* AlFileExtension = "als";						// Application Logic schema file extension
-		constexpr static const char* AlTemplExtension = "templ_als";					// Application Logic schema template file extnesion
+		constexpr static const char* AlTemplExtension = "templ_als";				// Application Logic schema template file extnesion
 
 		constexpr static const char* UfbFileExtension = "ufb";						// User Functional Block schema file extnesion;		// User Functional Block schema file extnesion
 		constexpr static const char* UfbTemplExtension = "templ_ufb";				// User Functional Block template file extnesion
@@ -70,8 +73,8 @@ namespace Db
 		constexpr static const char* OclFileExtension = "ocl";						// (Optical) Connection Link
 		constexpr static const char* BusFileExtension = "bus_type";					// Bus type
 
-		constexpr static const char* AppSignalFileExtension = "asg";					// Application signal file extention (::Proto::AppSignal message)
-		constexpr static const char* AppSignalSetFileExtension = "asgs";				// Application signals set file extention (::Proto::AppSignalSet message)
+		constexpr static const char* AppSignalFileExtension = "asg";				// Application signal file extention (::Proto::AppSignal message)
+		constexpr static const char* AppSignalSetFileExtension = "asgs";			// Application signals set file extention (::Proto::AppSignalSet message)
 	};
 }
 
