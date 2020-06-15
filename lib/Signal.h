@@ -110,6 +110,7 @@ public:
 	void setDataSizeW(int sizeW);
 
 	int sizeW() const { return (m_dataSize / SIZE_16BIT + ((m_dataSize % SIZE_16BIT) ? 1 : 0)); }
+	int sizeBit() const { return m_dataSize; }
 
 	E::ByteOrder byteOrder() const { return m_byteOrder; }
 	int byteOrderInt() const { return TO_INT(m_byteOrder); }

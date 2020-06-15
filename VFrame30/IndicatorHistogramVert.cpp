@@ -459,8 +459,6 @@ namespace VFrame30
 			signalParam.setAppSignalId(appSignalId);
 			signalParam.setCustomSignalId(appSignalId);
 
-			schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
-
 			// Calc bar rect
 			//
 			QRectF barRect{};
@@ -475,17 +473,27 @@ namespace VFrame30
 
 			barRects.push_back(barRect);
 
-			std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId, schemaItem);
+			QBrush barBrush = QBrush(signalColors[barIndex]);
 
-			// Get bar color
-			// signalColors[barIndex] - is a base color
-			// if any setpoint is alerted and it has tag, try to fetch alertedColor for this tag from behavior
-			//
-			std::optional<QBrush> alertedBrush = getAlertBrush(signalSetpoints, drawParam, appSignalState, tuningSignalState, schemaItem);
+			if (drawParam->isMonitorMode() == true)
+			{
+				schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
 
-			QBrush barBrush = alertedBrush.value_or(QBrush(signalColors[barIndex]));
+				std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId, schemaItem);
 
-			setpoints[appSignalId] = std::move(signalSetpoints);
+				// Get bar color
+				// signalColors[barIndex] - is Ba base color
+				// if any setpoint is alerted and it has tag, try to fetch alertedColor for this tag from behavior
+				//
+				std::optional<QBrush> alertedBrush = getAlertBrush(signalSetpoints, drawParam, appSignalState, tuningSignalState, schemaItem);
+
+				if (alertedBrush.has_value() == true)
+				{
+					barBrush = alertedBrush.value();
+				}
+
+				setpoints[appSignalId] = std::move(signalSetpoints);
+			}
 
 			// --
 			//

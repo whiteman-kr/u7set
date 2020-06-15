@@ -3902,8 +3902,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	tabWidget->setTabPosition(QTabWidget::South);
 
-	connect(tabWidget, &QTabWidget::currentChanged, this, &EquipmentTabPage::propertiesModeTabChanged);
-
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(tabWidget);
 
@@ -4844,28 +4842,6 @@ void EquipmentTabPage::showConnections()
 	return;
 }
 
-void EquipmentTabPage::propertiesModeTabChanged(int index)
-{
-	if (m_propertyEditor == nullptr)
-	{
-		Q_ASSERT(m_propertyEditor);
-		return;
-	}
-
-	if (m_propertyTable == nullptr)
-	{
-		Q_ASSERT(m_propertyTable);
-		return;
-	}
-
-	if (index == 0)
-	{
-		m_propertyEditor->updatePropertyValues(QString());
-
-		m_propertyTable->closeCurrentEditor();
-	}
-}
-
 //void EquipmentTabPage::moduleConfiguration()
 //{
 	// Show modules configurations dialog
@@ -4966,7 +4942,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 	//
 	if (m_propertyEditor != nullptr)
 	{
-		m_propertyEditor->updatePropertyValues("EquipmentID");
+		m_propertyEditor->updatePropertyValue("EquipmentID");
 	}
 
 	// --

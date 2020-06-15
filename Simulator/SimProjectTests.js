@@ -733,6 +733,507 @@ function testAfbTctV209Conf6(sim)
     return;
 }
 
+// Test for AFB FLIPFLOP (OpCode 4), Conf 1
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf1(sim)
+{
+    // Conf 1, SR
+    //    Manual Tests:
+    //    Signals: #TEST_FF_V106_T1_SET, #TEST_FF_V106_T1_RESET
+    //    Sequence is important!
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 1
+    //    3. Set values 0, 0 = 1
+    //    4. Set values 0, 1 = 0
+    //    5. Set values 1, 1 = 1
+    //
+
+    let setSignal = "#TEST_FF_V106_T1_SET";
+    let resetSignal = "#TEST_FF_V106_T1_RESET";
+    let resultSignal = "#TEST_FF_V106_T1_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    3. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set values 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set values 1, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 2 RS
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf2(sim)
+{
+    // Conf 2, RS
+    //    Manual Tests:
+    //    Signals: #TEST_FF_V106_T2_SET, #TEST_FF_V106_T2_RESET
+    //    Sequence is important!
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 1
+    //    3. Set values 0, 0 = 1
+    //    4. Set values 0, 1 = 0
+    //    5. Set values 1, 1 = 0
+    //    6. Set values 1, 0 = 1
+    //
+
+    let setSignal = "#TEST_FF_V106_T2_SET";
+    let resetSignal = "#TEST_FF_V106_T2_RESET";
+    let resultSignal = "#TEST_FF_V106_T2_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    3. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set values 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set values 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 3 D ON FRONT
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf3(sim)
+{
+    // Conf 3, D ON FRONT
+    //    Manual Tests:
+    //    Signals: #TEST_FF_V106_T3_D, #TEST_FF_V106_T3_C
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 0
+    //    3. Set values 1, 1 = 1
+    //    4. Set values 0, 1 = 1
+    //    5. Set values 0, 0 = 1
+    //    6. Set values 0, 1 = 0
+    //    7. Set values 0, 0 = 0
+    //
+    let setSignal = "#TEST_FF_V106_T3_D";
+    let resetSignal = "#TEST_FF_V106_T3_C";
+    let resultSignal = "#TEST_FF_V106_T3_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    3. Set values 1, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set values 0, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    5. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    6. Set values 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    7. Set values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 4 T ON FRONT
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf4(sim)
+{
+    // Conf 4, T ON FRONT
+    //    Manual Tests:
+    //    Signal: #TEST_FF_V106_T4_T
+    //
+    //    1. Initial values 0 = 0
+    //    2. Set 1 = 1
+    //    3. Set 0 = 1
+    //    4. Set 1 = 0
+    //    5. Set 0 = 0
+    //    6. Set 1 = 1
+    //
+    let setSignal = "#TEST_FF_V106_T4_T";
+    let resultSignal = "#TEST_FF_V106_T4_RESULT";
+
+    //    1. Initial values 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    3. Set 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 5, D ON DECAY
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf5(sim)
+{
+    // Conf 5, D ON DECAY
+    //    Manual Tests:
+    //    Signal: #TEST_FF_V106_T5_D, #TEST_FF_V106_T5_C
+    //
+    //    1. Initial values 0, 0 = 0
+    //    2. Set values 1, 0 = 0
+    //    3. Set values 1, 1 = 0
+    //    4. Set values 1, 0 = 1
+    //    5. Set values 0, 0 = 1
+    //    6. Set values 0, 1 = 1
+    //    7. Set values 0, 0 = 0
+    //
+    let setSignal = "#TEST_FF_V106_T5_D";
+    let resetSignal = "#TEST_FF_V106_T5_C";
+    let resultSignal = "#TEST_FF_V106_T5_RESULT";
+
+    //    1. Initial values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set values 1, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    3. Set values 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    4. Set values 1, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    5. Set values 0, 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    6. Set values 0, 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    7. Set values 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+
+// Test for AFB FLIPFLOP (OpCode 4), Conf 6 T ON DECAY
+// Schema: TEST_FLIPFLOP_V106
+//
+function testAfbFilpFlopV106Conf6(sim)
+{
+    // Conf 6, T ON DECAY
+    //    Manual Tests:
+    //    Signal: #TEST_FF_V106_T6_T
+    //
+    //    1. Initial values 0 = 0
+    //    2. Set 1 = 0
+    //    3. Set 0 = 1
+    //    4. Set 1 = 1
+    //    5. Set 0 = 0
+    //    6. Set 1 = 0
+    //    7. Set 0 = 1
+    //
+    let setSignal = "#TEST_FF_V106_T6_T";
+    let resultSignal = "#TEST_FF_V106_T6_RESULT";
+
+    //    1. Initial values 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    3. Set 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    4. Set 1 = 1
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    //    5. Set 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    7. Set 0 = 1
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+
+    return;
+}
+
+
+// Test for AFB CTUP (OpCode 5)
+// Schema: TEST_CTUD_1
+//
+function testAfbCtud(sim)
+{
+    // AFB cnt_up, cnt_dn
+    //
+    let counterSignal = "#TEST_CTUD_T1_CNT";        // 0, 1, 2, 3, 4, 5, ....
+    let initiatorSignal = "#TEST_CTUD_T1_CNT1";     // 0, 1, 0, 1, 0, 1, ....
+    let resultUpSignal = "#TEST_CTUD_T1_RES1";        // 1, 1, 2, 2, 3, 3, ....
+    let resultDnSignal = "#TEST_CTUD_T2_RES1";        // 1, 1, 2, 2, 3, 3, ....
+
+    sim.reset();
+
+    for (let i = 0; i < 10; i++)
+    {
+        sim.startForMs(5);
+
+        assert(sim.signalValue(counterSignal) === i + 1);
+        assert(sim.signalValue(initiatorSignal) === (i + 1) % 2);
+
+        assert(sim.signalValue(resultUpSignal) === Math.floor(i / 2) + 1);
+        assert(sim.signalValue(resultDnSignal) === Math.floor((i + 1) / 2) * -1);
+    }
+
+    // Test reset signal
+    //
+    sim.overrideSignalValue("#TEST_CTUD_T1_RESET", 1);
+    sim.startForMs(5);
+
+    assert(sim.signalValue(resultUpSignal) === 0);
+    assert(sim.signalValue(resultDnSignal) === 0);
+
+    return;
+}
+
+// Test for AFB MAJ (OpCode 6)
+// Schema: TEST_MAJ_V107
+//
+function testAfbMajV107(sim)
+{
+    assert(sim.signalValue("#TEST_MAJ_V107_T1_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T1_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T1_RES3") === 0);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T2_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T2_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T2_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T3_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T3_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T3_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T4_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T4_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T4_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T5_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T5_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T5_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T6_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T6_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T6_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T7_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T7_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T7_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T8_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T8_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T8_RES3") === 0);
+
+    // --
+    //
+    assert(sim.signalValue("#TEST_MAJ_V107_T10_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T10_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T10_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T11_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T11_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T11_RES3") === 1);
+
+    // --
+    //
+    assert(sim.signalValue("#TEST_MAJ_V107_T20_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T20_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T20_RES3") === 0);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T21_RES1") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T21_RES2") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T21_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T22_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T22_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T22_RES3") === 1);
+
+    assert(sim.signalValue("#TEST_MAJ_V107_T23_RES1") === 1);
+    assert(sim.signalValue("#TEST_MAJ_V107_T23_RES2") === 0);
+    assert(sim.signalValue("#TEST_MAJ_V107_T23_RES3") === 0);
+
+    return;
+}
+
 
 // Test for AFB BDEC (OpCode 9), conf 1
 // Schema: TEST_BDEC_CONF1
@@ -1004,6 +1505,564 @@ function testAfbBDecConf2(sim)
     return;
  }
 
+// Test for AFB BCOMP (OpCode 10)
+// Schema: TEST_BCOMP_FP_1
+//
+function testAfbBCompFp(sim)
+{
+    // cmpc_fp_ls
+    //
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T1R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T2R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T3R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T4R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T4RNAN") === 0);
+
+    //  Test steps:
+    //    1. Initial value 0, expected result 1
+    //    2. Set input to 150, expected result 0
+    //    3. Set input to 99, expected result 1
+    //    4. Set input to 104, expected result 1
+    //    5. Set input to 105, expected result 0
+    //
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_LESS_T5IN", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_LESS_T5IN", 150);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_LESS_T5IN", 99);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_LESS_T5IN", 104);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_LESS_T5IN", 105);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_LESS_T5RNAN") === 0);
+
+
+    // cmpc_fp_gr
+    //
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T1R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T2R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T3R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T4R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T4RNAN") === 0);
+
+    // Test steps:
+    //    1. Initial value 0, expected result 0
+    //    2. Set input to 150, expected result 1
+    //    3. Set input to 96, expected result 1
+    //    4. Set input to 95, expected result 0
+    //    5. Set input to 101, expected result 1
+    //
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_GR_T5IN", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_GR_T5IN", 150);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5RNAN") === 0);
+
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_GR_T5IN", 96);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_GR_T5IN", 95);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_FP_1_GR_T5IN", 101);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_GR_T5RNAN") === 0);
+
+    // cmpc_fp_eq
+    //
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T1R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T2R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T3R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T4R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T4RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T5R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T5RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T6R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T6RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T7R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T7RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T8R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T8RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T9R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T9RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T10R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T10RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T11R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T11RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T12R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T12RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T13R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T13RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T14R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_EQ_T14RNAN") === 0);
+
+    // cmpc_fp_ne
+    //
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT1R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT2R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT3R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT4R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT4RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT5RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT6R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT6RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT7R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT7RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT8R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT8RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT9R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT9RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT10R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT10RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT11R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT11RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT12R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT12RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT13R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT13RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT14R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_FP_1_NEQT14RNAN") === 0);
+
+    return;
+}
+
+
+// Test for AFB BCOMP (OpCode 10)
+// Schema: TEST_BCOMP_SI_1
+//
+function testAfbBCompSi(sim)
+{
+    // cmpc_si_ls
+    //
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T1R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T2R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T3R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T4R") === 1);
+
+    //  Test steps:
+    //    1. Initial value 0, expected result 1
+    //    2. Set input to 150, expected result 0
+    //    3. Set input to 99, expected result 1
+    //    4. Set input to 104, expected result 1
+    //    5. Set input to 105, expected result 0
+    //
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_LESS_T5IN", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_LESS_T5IN", 150);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T5R") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_LESS_T5IN", 99);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_LESS_T5IN", 104);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_LESS_T5IN", 105);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_LESS_T5R") === 0);
+
+    // cmpc_si_gr
+    //
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T1R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T2R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T3R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T4R") === 0);
+
+    // Test steps:
+    //    1. Initial value 0, expected result 0
+    //    2. Set input to 150, expected result 1
+    //    3. Set input to 96, expected result 1
+    //    4. Set input to 95, expected result 0
+    //    5. Set input to 101, expected result 1
+    //
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_GR_T5IN", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T5R") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_GR_T5IN", 150);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_GR_T5IN", 96);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_GR_T5IN", 95);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T5R") === 0);
+
+    sim.overrideSignalValue("#TEST_BCOMP_SI_1_GR_T5IN", 101);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_GR_T5R") === 1);
+
+    // cmpc_si_eq
+    //
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T1R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T2R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T3R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T4R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T5R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T6R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T7R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T8R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T9R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T10R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T11R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T12R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T13R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_EQ_T14R") === 0);
+
+    // cmpc_si_ne
+    //
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT1R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT2R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT3R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT4R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT5R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT6R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT7R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT8R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT9R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT10R") === 1);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT11R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT12R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT13R") === 0);
+    assert(sim.signalValue("#TEST_BCOMP_SI_1_NEQT14R") === 1);
+
+    return;
+}
+
+
+// Test for AFB DAMPER (OpCode 11)
+// Schema: TEST_DAMPER
+//
+function testAfbDamper(sim)
+{
+    sim.reset();
+
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#TEST_MUX_FP_T2_OV") === 0);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_UF") === 0);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_ZERO") === 1);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_NAN") === 0);
+    assert(sim.signalValue("#TEST_MUX_FP_T2_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MUX_SI_T3_ZERO") === 1);
+    assert(sim.signalValue("#TEST_MUX_SI_T3_PE") === 0);
+
+    // Start damper from 0 to 1000
+    //
+    sim.overrideSignalValue("#TEST_DAMPER_FP_T2_SEL", 1);
+
+    // 63.2% - 600 (+-1) cylces - out value 632
+    //
+    sim.startForMs(600 * 5);
+
+    assert(sim.signalValue("#TEST_MUX_FP_T2_ZERO") === 0);
+    assert(sim.signalValue("#TEST_MUX_SI_T3_ZERO") === 0);
+
+    let fpv = sim.signalValue("#TEST_MUX_FP_T2_OUT");
+    let siv = sim.signalValue("#TEST_MUX_SI_T3_OUT");
+
+    assert(fpv >= 631.5 && fpv <= 632.5);
+    assert(fpv >= 631 && fpv <= 633);
+
+    // 86.5% - 1200 (+-1) cylces - out value 865
+    //
+    sim.startForMs(600 * 5);
+
+    fpv = sim.signalValue("#TEST_MUX_FP_T2_OUT");
+    siv = sim.signalValue("#TEST_MUX_SI_T3_OUT");
+
+    assert(fpv >= 864.5 && fpv <= 865.5);
+    assert(fpv >= 664 && fpv <= 8655);
+
+    return;
+}
+
+// Test for AFB MEDIAN (OpCode 12)
+// Schema: TEST_MEDIAN_V7
+//
+function testAfbMedianV7(sim)
+{
+    // median_si -- Test for two valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMED") === 80);
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMIN") === 0);
+
+    // median_si -- Test for one valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T2_RMED") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T2_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T2_RMIN") === 0);
+
+    // median_si -- Test for all valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T3_RMED") === 70);
+    assert(sim.signalValue("#TEST_MED_V7_T3_RMAX") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T3_RMIN") === 50);
+
+
+    // median_fp -- Test for two valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMED") === 80);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMIN") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_ROV") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RUF") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RZ") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RNAN") === 0);
+
+    // median_fp -- Test for one valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T12_RMED") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RMAX") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RMIN") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_ROV") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RUF") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RZ") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T12_RNAN") === 0);
+
+    // median_fp -- Test for all valid inputs
+    //
+    assert(sim.signalValue("#TEST_MED_V7_T13_RMED") === 70);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RMAX") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RMIN") === 50);
+    assert(sim.signalValue("#TEST_MED_V7_T13_ROV") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RUF") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RZ") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T13_RNAN") === 0);
+
+    return;
+}
+
+
+
+// Test for AFB MATH (OpCode 13)
+// Schema: TEST_MATH_FP_1
+//
+function testAfbMathFp(sim)
+{
+    assert(sim.signalValue("#TEST_MATH_FP_ADD1") === 7);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD5") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_ADD6") === Number.POSITIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD7") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD9") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD10") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_ADD11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD12") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD14") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_ADD15") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_SUB1") === -13);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB5") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_SUB6") === Number.NEGATIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB7") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB9") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB10") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_SUB11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB12") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB14") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_SUB15") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_MIL1") === -30);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL5") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_MIL6") === Number.POSITIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL7") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL9") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL10") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_MIL11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL12") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL14") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_MIL15") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV1") === 6);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV2") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV3") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV4") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV55") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV6") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV7") <= (1.9e-38));  // nearly zero
+    assert(sim.signalValue("#TEST_MATH_FP_DIV8") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV9") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV10") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV11") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV12") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV13") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV14") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV15") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV16") === 1);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV17") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV18") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_FP_DIV19") === Number.POSITIVE_INFINITY);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV20") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV21") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV22") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV23") === 0);
+    assert(sim.signalValue("#TEST_MATH_FP_DIV24") === 1);
+
+    return;
+}
+
+// Test for AFB MATH (OpCode 13)
+// Schema: TEST_MATH_SI_1
+//
+function testAfbMathSi(sim)
+{
+    assert(sim.signalValue("#TEST_MATH_SI_ADD1") === 7);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_ADD7") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_ADD10") === 2147483647);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_ADD12") === 0);
+
+
+    assert(sim.signalValue("#TEST_MATH_SI_SUB1") === -1);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_SUB7") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_SUB10") === 2147483647);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_SUB12") === 0);
+
+
+    assert(sim.signalValue("#TEST_MATH_SI_MUL1") === -12);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_MUL7") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_MUL10") === 2147483647);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_MUL12") === 0);
+
+
+    assert(sim.signalValue("#TEST_MATH_SI_DIV1") === -3);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV2") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV3") === 0);
+
+    assert(sim.signalValue("#TEST_MATH_SI_DIV7") === -1);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV8") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV9") === 1);
+
+    assert(sim.signalValue("#TEST_MATH_SI_DIV10") === 0);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV11") === 1);
+    assert(sim.signalValue("#TEST_MATH_SI_DIV12") === 0);
+
+    return;
+}
+
 
 // Test for AFB FUNC (OpCode 16)
 // Schema: TEST_FUNC_V3
@@ -1113,6 +2172,742 @@ function testAfbFuncV3(sim)
 }
 
 
+// Test for AFB DPCOMP (OpCode 20)
+// Schema: TEST_DPCOMP_FP_1
+//
+function testAfbDpCompCompFp1(sim)
+{
+    // cmp_fp_ls
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T1R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T1ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T1RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T2R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T2ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T2RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T3R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T3ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T3RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T4R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T4ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T4RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T4RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T6R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T6ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T6RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T6RNAN") === 1)
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T7R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T7ROV") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T7RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T7RNAN") === 0)
+
+    // Test steps:
+    //    1. Initial value 0, expected result 1
+    //    2. Set input to 150, expected result 0
+    //    3. Set input to 99, expected result 1
+    //    4. Set input to 104, expected result 1
+    //    5. Set input to 105, expected result 0
+    //
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_LESS_T5IN", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_LESS_T5IN", 150);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_LESS_T5IN", 99);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_LESS_T5IN", 104);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_LESS_T5IN", 105);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_LESS_T5RNAN") === 0);
+
+    // cmp_fp_gr
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T1R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T1ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T1RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T2R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T2ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T2RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T3R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T4R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T4RNAN") === 0);
+
+    // Test steps:
+    //    1. Initial value 0, expected result 0
+    //    2. Set input to 150, expected result 1
+    //    3. Set input to 96, expected result 1
+    //    4. Set input to 95, expected result 0
+    //    5. Set input to 101, expected result 1
+    //
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_GR_T5IN", 0);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_GR_T5IN", 150);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_GR_T5IN", 96);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_GR_T5IN", 95);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5RNAN") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_FP_1_GR_T5IN", 101);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_GR_T5RNAN") === 0);
+
+    // cmp_fp_eq
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T1R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T1ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T1RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T2R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T2ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T2RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T3R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T3ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T3RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T4R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T4ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T4RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T4RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T5R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T5RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T6R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T6ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T6RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T6RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T8R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T8ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T8RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T8RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T9R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T9ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T9RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T9RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T10R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T10ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T10RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T10RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T11R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T11ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T11RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T11RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T12R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T12ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T12RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T12RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T13R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T13ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T13RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T13RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T14R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T14ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T14RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_EQ_T14RNAN") === 0);
+
+    // cmp_fp_ne
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT1R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT1ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT1RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT1RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT2R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT2ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT2RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT2RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT3R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT3ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT3RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT3RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT4R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT4ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT4RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT4RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT5ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT5RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT5RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT6R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT6ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT6RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT6RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT7R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT7ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT7RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT7RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT8R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT8ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT8RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT8RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT9R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT9ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT9RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT9RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT10R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT10ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT10RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT10RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT11R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT11ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT11RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT11RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT12R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT12ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT12RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT12RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT13RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT14R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT14ROV") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT14RUF") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_FP_1_NEQT14RNAN") === 0);
+
+    return;
+}
+
+
+
+// Test for AFB DPCOMP (OpCode 20)
+// Schema: TEST_DPCOMP_SI_1
+//
+function testAfbDpCompCompSi1(sim)
+{
+    // cmp_si_ls
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T1R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T2R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T3R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T4R") === 1);
+
+    // Test steps:
+    //    1. Initial value 0, expected result 1
+    //    2. Set input to 150, expected result 0
+    //    3. Set input to 99, expected result 1
+    //    4. Set input to 104, expected result 1
+    //    5. Set input to 105, expected result 0
+    //
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_LESS_T5IN", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_LESS_T5IN", 150);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T5R") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_LESS_T5IN", 99);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_LESS_T5IN", 104);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_LESS_T5IN", 105);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_LESS_T5R") === 0);
+
+    // cmp_si_gr
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T1R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T2R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T3R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T4R") === 0);
+
+    // Test steps:
+    //    1. Initial value 0, expected result 0
+    //    2. Set input to 150, expected result 1
+    //    3. Set input to 96, expected result 1
+    //    4. Set input to 95, expected result 0
+    //    5. Set input to 101, expected result 1
+    //
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_GR_T5IN", 0);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T5R") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_GR_T5IN", 150);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_GR_T5IN", 96);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T5R") === 1);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_GR_T5IN", 95);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T5R") === 0);
+
+    sim.overrideSignalValue("#TEST_DPCOMP_SI_1_GR_T5IN", 101);
+    sim.startForMs(150);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_GR_T5R") === 1);
+
+    // cmp_si_eq
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T1R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T2R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T3R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T4R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T5R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T6R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T7R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T8R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T9R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T10R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T11R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T12R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T13R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_EQ_T14R") === 0);
+
+    // cmp_si_ne
+    //
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT1R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT2R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT3R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT4R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT5R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT6R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT7R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT8R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT9R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT10R") === 1);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT11R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT12R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT13R") === 0);
+    assert(sim.signalValue("#TEST_DPCOMP_SI_1_NEQT14R") === 1);
+
+    return;
+}
+
+// Test for AFB MUX (OpCode 21)
+// Schema: TEST_MUX
+//
+function testAfbMux(sim)
+{
+    sim.reset();
+
+    // switch_si
+    //
+    sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_SI_T1_RESULT") === 100);
+
+    sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_SI_T1_RESULT") === -200);
+
+    sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_SI_T1_RESULT") === 100);
+
+    // switch_fp
+    //
+    sim.overrideSignalValue("#TEST_MUX_FP_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_FP_T1_RESULT") === 100);
+
+    sim.overrideSignalValue("#TEST_MUX_FP_T1_SELECTOR", 1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_FP_T1_RESULT") === -200);
+
+    sim.overrideSignalValue("#TEST_MUX_FP_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_FP_T1_RESULT") === 100);
+
+    // bus_switch
+    //
+    sim.overrideSignalValue("#TEST_MUX_BUS_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R0") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R1") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R2") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R3") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R4") === 1);
+
+    sim.overrideSignalValue("#TEST_MUX_BUS_T1_SELECTOR", 1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R0") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R1") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R2") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R3") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R4") === 0);
+
+    sim.overrideSignalValue("#TEST_MUX_BUS_T1_SELECTOR", 0);
+    sim.startForMs(5);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R0") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R1") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R2") === 0);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R3") === 1);
+    assert(sim.signalValue("#TEST_MUX_BUS_T1_R4") === 1);
+
+    return;
+}
+
+
+// Test for AFB LIM (OpCode 23)
+// Schema: TEST_LIM
+//
+function testAfbLimiter(sim)
+{
+    // limc_si
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R1MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R2") === -5);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R2MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R2MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R3") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R3MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R3MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R4") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R4MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R4MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R5") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R5MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R5MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R6") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R6MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R6MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R7") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R7MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T1R7MIN") === 0);
+
+    // limc_fp
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R2") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R1MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R3") === -5);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R4") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R3MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R3MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R5") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R6") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R5MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R5MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R7") === -10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R8") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R7MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R7MIN") === 1);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R9") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R10") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R9MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R9MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R11") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R12") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R11MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R11MIN") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R13") === 2000);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R14") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R13MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T2R13MIN") === 0);
+
+    // lim_si
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R1MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R2") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R3") === 10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R3MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R3MIN") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R4") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R5") === 100);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R5MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R5MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R6") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R7") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R7MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R7MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T3R8") === 1);
+
+    // lim_fp
+    //
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R1") === 50);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R2") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R1MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R1MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R3") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R4") === 10);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R5") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R4MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R4MIN") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R6") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R7") === 100);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R8") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R7MAX") === 1);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R7MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R9") === 0);
+
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R10") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R11") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R10MAX") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R10MIN") === 0);
+    assert(sim.signalValue("#TEST_LIM_LIMC_T4R12") === 1);
+
+    return;
+}
+
+// Test for AFB POLY (OpCode 25)
+// Schema: TEST_POL_V3
+//
+function testAfbPolyV3(sim)
+{
+    assert(sim.signalValue("#TEST_POL_V3_T1_RESULT") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T1_ROV") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T1_RUF") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T1_RZERO") === 1);
+    assert(sim.signalValue("#TEST_POL_V3_T1_RNAN") === 0);
+
+    assert(isNaN(sim.signalValue("#TEST_POL_V3_T3_RESULT")) === true);
+    assert(sim.signalValue("#TEST_POL_V3_T3_ROV") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T3_RUF") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T3_RZERO") === 0);
+    assert(sim.signalValue("#TEST_POL_V3_T3_RNAN") === 1);
+
+    // Manual
+    // Initial 0   = 0,006228204
+    //     Set 100 = 1,033206711        -- 1.033207178
+    //     Set 200 = 15,85704089        -- 15.857046127
+    //     Set 300 = 87,60783114        -- 87.607826233
+    //
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 0);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 0.006228203 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 0.006228205);
+
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 100);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 1.033207178 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 1.033207179); //  ???
+
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 200);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 15.857046127 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 15.857046128); //  ???
+
+    sim.overrideSignalValue("#TEST_POL_V3_T2_X", 300);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#TEST_POL_V3_T2_RESULT"));
+    assert(sim.signalValue("#TEST_POL_V3_T2_RESULT") >= 87.607826232 && sim.signalValue("#TEST_POL_V3_T2_RESULT") <= 87.607826234); //  ???
+
+    return;
+}
+
+// Test for AFB MISMATCH (OpCode 27)
+// Schema: TEST_MISMATCH_V4
+//
+function testAfbMismatchV4(sim)
+{
+    // mismatch_si
+    //
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T1_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_R1") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_R2") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T2_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T3_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_R3") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T4_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T5_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T6_PE") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T7_PE") === 0);
+
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
+    sim.startForMs(5);
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
+
+    // mismatch_fp
+    //
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T41_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_R1") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_R2") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T42_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T43_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_R3") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T44_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T45_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T46_NAN") === 0);
+
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R1") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R2") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R3") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_R4") === 1);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_PE") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_OV") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_UF") === 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_T47_NAN") === 0);
+
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TFL_VAL", 0);
+    assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
+    sim.startForMs(5);
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
+
+    return;
+}
+
+
 // Test for AFB PULSE_GET (OpCode 30)
 // Schema: TEST_PULSE_GET_V0
 //
@@ -1176,3 +2971,5 @@ function testAfbPulseGenV0(sim)
 
     return;
 }
+
+

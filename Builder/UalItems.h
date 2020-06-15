@@ -521,14 +521,16 @@ namespace Builder
 		bool isSource() const { return m_isInput || m_isTunable || m_isOptoSignal || m_isConst; }
 
 		bool isOutput() const { return m_isOutput; }
-		bool isStrictOutput() const { return m_isOutput == true && isSource() == false && m_isBusChild == false; }
+		bool isStrictOutput() const { return m_isOutput == true && isSource() == false && isBusChild() == false; }
 
 		bool isInternal() const { return isSource() == false && m_isOutput == false; }
 
 		bool isAcquired() const { return m_isAcquired; }
 
-		bool isBusChild() const { return m_isBusChild; }
-		void setBusChild(bool busChild) { m_isBusChild = busChild; }
+		bool isBusChild() const { return m_parentBusSignal != nullptr; }
+		void setParentBusSignal(UalSignal* parentBusSignal) { m_parentBusSignal = parentBusSignal; }
+
+		bool anyParentBusIsAcquired() const;
 
 		bool isLoopbackSource() const { return m_loopback != nullptr; }
 
@@ -617,7 +619,7 @@ namespace Builder
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
 
-		bool m_isBusChild = false;
+		UalSignal* m_parentBusSignal = nullptr;			// if not nullptr - this ual signal is bus child
 
 		bool m_computed = false;
 		bool m_resultSaved = false;

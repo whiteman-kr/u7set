@@ -9770,6 +9770,30 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
+        <AFB id="#mux_v1"       Caption="mux"       Version="1.0001">
+		    <Properties>
+			    <Description>Multiplexor Block selects one of two discrete input signals and output result in accordance with control signal.</Description>
+				<Category>Other</Category>
+				<OpCode>21</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>22</MinWidth>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_sel" Caption="sel" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>
+				<Pin OpName="i_x1_data" Caption="in_x1" Type="Discrete" ByteOrder="BigEndian" OpIndex="1" Size="1"/>
+				<Pin OpName="i_x2_data" Caption="in_x2" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+			</Outputs>
+			<Params>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
 		<AFB id="#tct_filter_v1"      Caption="tct_filter"      Version="1.0006">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, filtering function</Description>

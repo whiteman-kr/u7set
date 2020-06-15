@@ -183,8 +183,6 @@ void Settings::StoreUser()
 
 	s.setValue("MainWindow/language", m_language);
 
-	thePropertyEditorSettings.store(s);
-
 }
 
 void Settings::RestoreUser()
@@ -239,8 +237,6 @@ void Settings::RestoreUser()
 	m_tuningWorkspaceMasks = s.value("TuningWorkspace/Masks").toStringList();
 
 	m_language = s.value("MainWindow/language", m_language).toString();
-
-	thePropertyEditorSettings.restore(s);
 }
 
 QStringList Settings::instanceHistory()

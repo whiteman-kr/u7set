@@ -74,6 +74,9 @@ namespace VFrame30
 		int precision() const;
 		void setPrecision(int value);
 
+		E::AnalogFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogFormat value);
+
 		E::HorzAlign horzAlign() const;
 		void setHorzAlign(E::HorzAlign align);
 
@@ -84,10 +87,16 @@ namespace VFrame30
 		//
 	private:
 		ConstType m_type = ConstType::FloatType;
-		int m_intValue = 0;
-		double m_floatValue = 0.0;
-		int m_discreteValue = 0;
-		int m_precision = 6;
+
+		struct ConstValue
+		{
+			int intValue = 0;
+			double floatValue = 0.0;
+			int discreteValue = 0;
+		} m_value;
+
+		int m_precision = 2;
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;		// Used only when m_type == ConstType::FloatType;
 
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;

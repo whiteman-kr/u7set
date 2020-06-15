@@ -19,4 +19,5 @@ namespace Builder
 
 	const char* const FILE_CONNECTIONS_TXT = "Connections.txt";
 	const char* const FILE_CONNECTIONS_XML = "Connections.xml";
+	const char* const FILE_LOGIC_MODULES_XML = "LogicModules.xml";
 }

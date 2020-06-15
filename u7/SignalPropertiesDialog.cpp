@@ -384,7 +384,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	}
 
 	m_propertyEditor->setObjects(m_objList);
-	m_propertyEditor->resizeColumnToContents(0);
+	m_propertyEditor->autoAdjustSplitterPosition();
 	vl->addWidget(m_propertyEditor);
 
 	if (!readOnly)
@@ -545,7 +545,11 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 			if (isPropertyDependentOnPrecision(property->caption()) == true)
 			{
 				property->setPrecision(precision);
-				m_propertyEditor->updatePropertyValues(property->caption());
+
+				if (m_propertyEditor->isPropertyExists(property->caption()) == true)
+				{
+					m_propertyEditor->updatePropertyValue(property->caption());
+				}
 			}
 		}
 	}

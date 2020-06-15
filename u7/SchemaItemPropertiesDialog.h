@@ -40,9 +40,6 @@ private:
 
 	void saveSettings();
 
-private slots:
-	void propertiesModeTabChanged(int index);
-
 private:
 	Ui::SchemaItemPropertiesDialog *ui;
 

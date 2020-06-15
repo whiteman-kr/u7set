@@ -327,7 +327,7 @@ void TestAppDataService::TADS_001_001()
 
 		// AppDataSourceState::lostedPacketCount
 		//
-		qint64 lostPacketCount = nextSourceMessage->lostedpacketcount() - previusSourceMessage->lostedpacketcount();
+		qint64 lostPacketCount = nextSourceMessage->lostpacketcount() - previusSourceMessage->lostpacketcount();
 
 		VERIFY_STR(lostPacketCount == 0,
 				   "Source " + m_dataSources[i].lmEquipmentID() +

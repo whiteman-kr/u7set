@@ -232,10 +232,6 @@ FORMS    += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# QtPropertyBrowser
-#
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
-
 TRANSLATIONS = languages/TuningClient_ru.ts
 
 DISTFILES += \

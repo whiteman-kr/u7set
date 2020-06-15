@@ -344,6 +344,8 @@ public:
 	int connectionsFileId() const;	// Connections
 	int busTypesFileId() const;		// BusTypes
 	int etcFileId() const;			//
+	int testsFileId() const;		// Folder for tests ($root$/Tests)
+	int simTestsFileId() const;		// Folder for sim tests ($root$/Tests/SimTests)
 
 	std::vector<DbFileInfo> systemFiles() const;
 

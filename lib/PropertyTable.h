@@ -146,8 +146,6 @@ namespace ExtWidgets
 
 		void clear();
 
-		void closeCurrentEditor();
-
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
@@ -168,6 +166,7 @@ namespace ExtWidgets
 
 	protected:
 		virtual void valueChanged(const ModifiedObjectsData& modifiedObjectsData);
+		virtual void hideEvent(QHideEvent* event) override;
 
 	protected slots:
 		void updatePropertiesList();

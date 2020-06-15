@@ -1601,6 +1601,23 @@ namespace Builder
 		m_isOptoSignal = true;
 	}
 
+	bool UalSignal::anyParentBusIsAcquired() const
+	{
+		if (m_parentBusSignal == nullptr)
+		{
+			// this is top level bus parent signal
+			//
+			return isAcquired();
+		}
+
+		if (m_parentBusSignal->isAcquired() == true)
+		{
+			return true;
+		}
+
+		return m_parentBusSignal->anyParentBusIsAcquired();
+	}
+
 	void UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
 		if (m_loopback != nullptr)
@@ -1740,12 +1757,12 @@ namespace Builder
 
 		Q_ASSERT(ualAddr.isValid() == true);
 
-		if (m_ualAddr.isValid() == true && m_isBusChild == true)
+		if (m_ualAddr.isValid() == true && isBusChild() == true)
 		{
 			return true;			// ualAddress of bus child signal is allredy set, its ok
 		}
 
-		if (m_ualAddr.isValid() == true && m_isBusChild == false)
+		if (m_ualAddr.isValid() == true && isBusChild() == false)
 		{
 			Q_ASSERT(false);				// why and where m_ualAddr is already set???
 			return false;
@@ -1839,6 +1856,8 @@ namespace Builder
 
 		for(Signal* s : m_refSignals)
 		{
+			TEST_PTR_CONTINUE(s);
+
 			if (s->isAcquired() == false)
 			{
 				continue;
@@ -1849,7 +1868,41 @@ namespace Builder
 			s->setRegBufAddr(regBufAddr);
 		}
 
-		return true;
+		if (isBus() == false)
+		{
+			return true;
+		}
+
+		if (m_bus == nullptr)
+		{
+			Q_ASSERT(false);				// m_bus can't be null
+			return false;
+		}
+
+		bool result = true;
+
+		for(const BusSignal& busSignal : m_bus->busSignals())
+		{
+			UalSignal* childSignal = m_busChildSignals.value(busSignal.signalID);
+
+			if (childSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				result = false;
+				continue;
+			}
+
+			int busBitAddr = regBufAddr.bitAddress();
+			int busSignalBitAddr = busSignal.inbusAddr.bitAddress();
+
+			Address16 addr(0, 0);
+
+			addr.addBit(busBitAddr + busSignalBitAddr);
+
+			result &= childSignal->setRegBufAddr(addr);
+		}
+
+		return result;
 	}
 
 	bool UalSignal::checkRegBufAddr() const
@@ -1873,6 +1926,8 @@ namespace Builder
 
 		for(Signal* s : m_refSignals)
 		{
+			TEST_PTR_CONTINUE(s);
+
 			if (s->isAcquired() == false)
 			{
 				continue;
@@ -1881,6 +1936,40 @@ namespace Builder
 			assert(s->regValueAddr().isValid() == false);
 
 			s->setRegValueAddr(regValueAddr);
+		}
+
+		if (isBus() == false)
+		{
+			return true;
+		}
+
+		if (m_bus == nullptr)
+		{
+			Q_ASSERT(false);				// m_bus can't be null
+			return false;
+		}
+
+		bool result = true;
+
+		for(const BusSignal& busSignal : m_bus->busSignals())
+		{
+			UalSignal* childSignal = m_busChildSignals.value(busSignal.signalID);
+
+			if (childSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				result = false;
+				continue;
+			}
+
+			int busBitAddr = regValueAddr.bitAddress();
+			int busSignalBitAddr = busSignal.inbusAddr.bitAddress();
+
+			Address16 addr(0, 0);
+
+			addr.addBit(busBitAddr + busSignalBitAddr);
+
+			result &= childSignal->setRegValueAddr(addr);
 		}
 
 		return true;
@@ -2123,7 +2212,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setBusChild(true);
+		ualSignal->setParentBusSignal(this);
 
 		m_busChildSignals.insert(busSignalID, ualSignal);
 

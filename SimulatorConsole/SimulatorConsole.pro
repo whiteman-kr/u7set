@@ -34,7 +34,8 @@ unix {
 # /DESTDIR
 #
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../lib/DomXmlHelper.cpp
 
 # Simulator Lib
 #
@@ -77,4 +78,7 @@ unix {
 
 RESOURCES += \
     SimulatorConsole.qrc
+
+HEADERS += \
+    ../lib/DomXmlHelper.h
 

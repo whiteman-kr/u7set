@@ -22,6 +22,14 @@ namespace ExtWidgets
 
 	PropertyEditorBase::PropertyEditorBase()
 	{
+		QSettings s;
+		thePropertyEditorSettings.restore(s);
+	}
+
+	PropertyEditorBase::~PropertyEditorBase()
+	{
+		QSettings s;
+		thePropertyEditorSettings.store(s);
 	}
 
 	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
@@ -975,7 +983,6 @@ namespace ExtWidgets
 		}
 
 		m_childPropertyEditor->setObjects(propertyObjectList);
-		m_childPropertyEditor->resizeColumnToContents(0);
 
 		return;
 	}
@@ -1704,7 +1711,7 @@ namespace ExtWidgets
 			spaces += " ";
 		}
 
-		m_plainTextEdit->setTabStopDistance(metrics.width(spaces));
+		m_plainTextEdit->setTabStopDistance(metrics.horizontalAdvance(spaces));
 
 		connect(m_plainTextEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
 		connect(m_plainTextEdit->document(), &QTextDocument::contentsChange, this, &PropertyPlainTextEditor::onPlainTextContentsChange);
@@ -3021,376 +3028,6 @@ namespace ExtWidgets
 	}
 
 	//
-	// ---------QtMultiVariantFactory----------
-	//
-
-	MultiVariantFactory::MultiVariantFactory(PropertyEditor* propertyEditor):
-		QtAbstractEditorFactory<MultiVariantPropertyManager>(propertyEditor),
-		m_propertyEditor(propertyEditor)
-	{
-	}
-
-	QWidget* MultiVariantFactory::createEditor(MultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent)
-	{
-		if (manager == nullptr)
-		{
-			Q_ASSERT(manager);
-			return new QWidget();
-		}
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return new QWidget();
-		}
-		if (m_propertyEditor == nullptr)
-		{
-			Q_ASSERT(m_propertyEditor);
-			return new QWidget();
-		}
-
-		m_manager = manager;
-		m_property = property;
-
-		std::shared_ptr<Property> propertyPtr = manager->value(property);
-		if (propertyPtr == nullptr)
-		{
-			assert(propertyPtr);
-			return nullptr;
-		}
-
-		PropertyEditCellWidget* editorWidget = m_propertyEditor->createCellEditor(propertyPtr, manager->sameValue(property), property->isEnabled() == false, parent);
-		if (editorWidget == nullptr)
-		{
-			Q_ASSERT(editorWidget);
-			return new QWidget(parent);
-		}
-
-		connect(editorWidget, &PropertyEditCellWidget::valueChanged, this, &MultiVariantFactory::slotSetValue);
-		connect(editorWidget, &QObject::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-		return editorWidget;
-	}
-
-	void MultiVariantFactory::connectPropertyManager (MultiVariantPropertyManager* manager)
-	{
-		Q_UNUSED(manager);
-	}
-
-	void MultiVariantFactory::disconnectPropertyManager(MultiVariantPropertyManager* manager)
-	{
-		Q_UNUSED(manager);
-	}
-
-	void MultiVariantFactory::slotSetValue(QVariant value)
-	{
-		if (m_manager == nullptr)
-		{
-			Q_ASSERT(m_manager);
-			return;
-		}
-		if (m_property == nullptr)
-		{
-			Q_ASSERT(m_property);
-			return;
-		}
-
-        m_manager->setAttribute(m_property, "@propertyEditor@sameValue", true);
-        m_manager->emitSetValue(m_property, value);
-	}
-
-	void MultiVariantFactory::slotEditorDestroyed(QObject* object)
-	{
-		Q_UNUSED(object);
-	}
-
-	//
-	// ---------QtMultiVariantPropertyManager----------
-	//
-
-	MultiVariantPropertyManager::MultiVariantPropertyManager(QObject* parent) :
-		QtAbstractPropertyManager(parent)
-	{
-
-	}
-
-	QVariant MultiVariantPropertyManager::attribute(const QtProperty* property, const QString& attribute) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return QVariant();
-		}
-
-		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-			return QVariant();
-		}
-
-		const QMap<QString, QVariant>::const_iterator attrit = it.value().attributes.constFind(attribute);
-		if (attrit == it.value().attributes.end())
-		{
-			Q_ASSERT(false);
-			return QVariant();
-		}
-
-		return attrit.value();
-	}
-
-	bool MultiVariantPropertyManager::hasAttribute(const QtProperty* property, const QString& attribute) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return false;
-		}
-
-		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		const QMap<QString, QVariant>::const_iterator attrit = it.value().attributes.constFind(attribute);
-		return attrit != it.value().attributes.end();
-	}
-
-	std::shared_ptr<Property> MultiVariantPropertyManager::value(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return nullptr;
-		}
-
-		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-			return nullptr;
-		}
-
-		return it->p;
-	}
-
-	int MultiVariantPropertyManager::valueType(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return QVariant::Invalid;
-		}
-
-        return value(property)->value().type();
-	}
-
-	void MultiVariantPropertyManager::setProperty(const QtProperty* property, std::shared_ptr<Property> propertyValue)
-    {
-        if (property == nullptr)
-        {
-            assert(property);
-            return;
-        }
-
-        const QMap<const QtProperty*, Data>::iterator it = values.find(property);
-        if (it == values.end())
-        {
-            Q_ASSERT(false);
-            return;
-        }
-
-        it->p = propertyValue;
-    }
-
-	bool MultiVariantPropertyManager::sameValue(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return false;
-		}
-
-		QVariant attr = attribute(property, "@propertyEditor@sameValue");
-		if (attr.isValid() == false)
-		{
-			return false;
-		}
-
-		return attr.toBool();
-
-	}
-
-	QSet<QtProperty*> MultiVariantPropertyManager::propertyByName(const QString& propertyName)
-	{
-		QSet<QtProperty*> result;
-		QSet<QtProperty*> allProps = properties();
-
-		for (auto p : allProps)
-		{
-			if (p->propertyName() == propertyName)
-			{
-				result << p;
-			}
-		}
-		return result;
-	}
-
-	void MultiVariantPropertyManager::updateProperty(QtProperty* property)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		emit propertyChanged(property);
-	}
-
-	void MultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVariant& value)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		emit valueChanged(property, value);
-
-		emit propertyChanged(property);
-	}
-
-
-
-	void MultiVariantPropertyManager::setAttribute (QtProperty* property, const QString& attribute, const QVariant& value)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		const QMap<const QtProperty*, Data>::iterator it = values.find(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		it.value().attributes[attribute] = value;
-	}
-
-
-	void MultiVariantPropertyManager::initializeProperty(QtProperty* property)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		values[property] = MultiVariantPropertyManager::Data();
-	}
-	void MultiVariantPropertyManager::uninitializeProperty(QtProperty* property)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		values.remove(property);
-	}
-
-	QIcon MultiVariantPropertyManager::valueIcon(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return QIcon();
-		}
-
-        // Get the property value from Property object
-        //
-        std::shared_ptr<Property> p = value(property);
-        if (p == nullptr)
-        {
-            assert(false);
-            return QIcon();
-        }
-
-		return PropertyEditorBase::propertyIcon(p.get(), sameValue(property) == true, property->isEnabled() == true);
-	}
-
-	QString MultiVariantPropertyManager::valueText(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return QString();
-		}
-
-        // Get the property value from Property object
-        //
-        std::shared_ptr<Property> p = value(property);
-        if (p == nullptr)
-        {
-            assert(false);
-            return QString();
-        }
-
-        if (p->password() == true)
-        {
-            return "";
-        }
-
-        // Output the text
-        //
-        if (sameValue(property) == true)
-		{
-			return PropertyEditorBase::propertyValueText(p.get(), -1/*row*/);
-		}
-
-		QVariant value = p->value();
-
-		// PropertyVector, PropertyList
-		//
-		if (variantIsPropertyVector(value) == true)
-		{
-			return tr("<PropertyVector>");
-		}
-
-		if (variantIsPropertyList(value) == true)
-		{
-			return tr("<PropertyList>");
-		}
-
-		switch (value.type())
-		{
-		case QVariant::Bool:
-			return "<Different values>";
-		default:
-			return QString();
-		}
-
-	}
-
-	QString MultiVariantPropertyManager::displayText(const QtProperty* property) const
-	{
-		QString str = property->propertyName();
-
-		int slashIndex = str.lastIndexOf("\\");
-
-		if (slashIndex != -1)
-		{
-			str = str.right(str.length() - slashIndex - 1);
-		}
-
-		return str;
-	}
-
-	//
 	// ------- Property Editor Settings ----------
 	//
 
@@ -3425,37 +3062,272 @@ namespace ExtWidgets
 		s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
 	}
 
+
+	//
+	// PropertyTableItemDelegate
+	//
+
+	PropertyEditorDelegate::PropertyEditorDelegate(PropertyTreeWidget* treeWidget, PropertyEditor* propretyEditor) :
+		QItemDelegate(treeWidget),
+		m_treeWidget(treeWidget),
+		m_propertyEditor(propretyEditor)
+	{
+	}
+
+	QWidget* PropertyEditorDelegate::createEditor(QWidget *parent,
+													 const QStyleOptionViewItem &option,
+													 const QModelIndex &index) const
+	{
+		Q_UNUSED(option);
+
+		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
+		{
+			Q_ASSERT(m_treeWidget);
+			Q_ASSERT(m_propertyEditor);
+			return new QWidget(parent);
+		}
+
+		int row = -1;
+
+		std::shared_ptr<Property> p = m_propertyEditor->propertyFromIndex(index);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return new QWidget(parent);
+		}
+
+		m_cellEditor = m_propertyEditor->createCellRowEditor(p, row, true, p->readOnly() == true || m_propertyEditor->isReadOnly() == true, parent);
+
+		connect(m_cellEditor, &PropertyEditCellWidget::valueChanged, this, &PropertyEditorDelegate::onValueChanged);
+
+		m_editIndex = index;
+
+		return m_cellEditor;
+	}
+
+	void PropertyEditorDelegate::destroyEditor(QWidget *editor, const QModelIndex &index) const
+	{
+		Q_UNUSED(editor);
+
+		if (m_editIndex == index)
+		{
+			m_editIndex = QModelIndex();
+		}
+
+		QItemDelegate::destroyEditor(editor, index);
+	}
+
+	void PropertyEditorDelegate::setEditorData(QWidget *editor,
+												  const QModelIndex &index) const
+	{
+		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
+		{
+			Q_ASSERT(m_treeWidget);
+			Q_ASSERT(m_propertyEditor);
+			return;
+		}
+
+		std::shared_ptr<Property> p = m_propertyEditor->propertyFromIndex(index);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return;
+		}
+
+		PropertyEditCellWidget *cellEditor = dynamic_cast<PropertyEditCellWidget*>(editor);
+		if (cellEditor == nullptr)
+		{
+			Q_ASSERT(cellEditor);
+			return;
+		}
+		cellEditor->setValue(p, p->readOnly() == true || m_propertyEditor->isReadOnly() == true);
+
+		return;
+	}
+
+	void PropertyEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+	{
+		Q_UNUSED(editor);
+		Q_UNUSED(model);
+		Q_UNUSED(index);
+
+		// This function is called when user press Enter or changes selection
+	}
+
+	void PropertyEditorDelegate::updateEditorGeometry(QWidget *editor,
+														 const QStyleOptionViewItem &option,
+														 const QModelIndex &index) const
+	{
+		Q_UNUSED(index);
+		editor->setGeometry(option.rect);
+	}
+
+	QSize PropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+	{
+		return QItemDelegate::sizeHint(option, index) + QSize(3, 4);
+	}
+
+	void PropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+				const QModelIndex &index) const
+	{
+
+		// Don't draw if editor is active for this index
+		//
+		if (index == m_editIndex)
+		{
+			//painter->fillRect(option.rect, Qt::red);
+		}
+		else
+		{
+			QItemDelegate::paint(painter, option, index);
+		}
+
+		// Draw vertical grid line
+		//
+		QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
+		painter->save();
+		painter->setPen(QPen(color));
+		int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
+		painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
+		painter->restore();
+	}
+
+	void PropertyEditorDelegate::onValueChanged(QVariant value)
+	{
+		emit valueChanged(value);
+	}
+
+	// PropertyTreeWidget
+	//
+
+	QString PropertyTreeWidget::propertyCaption(const QModelIndex& mi)
+	{
+		QTreeWidgetItem* item = itemFromIndex(mi);
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return QString();
+		}
+
+		return item->text(static_cast<int>(PropertyEditorColumns::Caption));
+	}
+
+	void PropertyTreeWidget::closeCurrentEditorIfOpen()
+	{
+		QWidget* editWidget = indexWidget(currentIndex());
+		if (editWidget != nullptr)
+		{
+			closeEditor(editWidget, QAbstractItemDelegate::RevertModelCache);
+		}
+
+		return;
+	}
+
+	void PropertyTreeWidget::mousePressEvent(QMouseEvent *event)
+	{
+		QTreeWidget::mousePressEvent(event);
+
+		if (event->button() == Qt::MouseButton::LeftButton)
+		{
+			QModelIndex mi = indexAt(event->pos());
+
+			if (mi.column() == static_cast<int>(PropertyEditorColumns::Value))
+			{
+				emit mousePressed();
+			}
+		}
+	}
+
+	void PropertyTreeWidget::keyPressEvent(QKeyEvent *event)
+	{
+		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return)
+		{
+			emit editKeyPressed();
+			return;
+		}
+
+		if (event->key() == Qt::Key_Space)
+		{
+			emit spaceKeyPressed();
+			return;
+		}
+
+		QTreeWidget::keyPressEvent(event);
+	}
+
+	void PropertyTreeWidget::drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+	{
+		QStyleOptionViewItem opt = option;
+
+		QTreeWidget::drawRow(painter, opt, index);
+		QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
+		painter->save();
+		painter->setPen(QPen(color));
+		painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom());
+		painter->restore();
+	}
+
 	//
 	// ------- Property Editor ----------
 	//
 
 	PropertyEditor::PropertyEditor(QWidget* parent) :
-		QtTreePropertyBrowser(parent),
+		QWidget(parent),
 		PropertyEditorBase()
 	{
-		setResizeMode(ResizeMode::Interactive);
+		QVBoxLayout* mainLayout = new QVBoxLayout(this);
+		mainLayout->setContentsMargins(1, 1, 1, 1);
+		mainLayout->setSpacing(2);
 
-		setAlternatingRowColors(false);
+		// Table View
 
-		m_propertyGroupManager = new QtGroupPropertyManager(this);
-		m_propertyVariantManager = new MultiVariantPropertyManager(this);
+		m_treeWidget = new PropertyTreeWidget();
+		mainLayout->addWidget(m_treeWidget);
 
-		MultiVariantFactory* editFactory = new MultiVariantFactory(this);
+		QStringList labels;
+		labels << tr("Property");
+		labels << tr("Value");
+		m_treeWidget->setHeaderLabels(labels);
+		m_treeWidget->setColumnCount(labels.size());
+		m_treeWidget->setAutoFillBackground(true);
+		m_treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
+		m_treeWidget->setSelectionMode(QTreeWidget::SingleSelection);
 
-		setFactoryForManager(m_propertyVariantManager, editFactory);
+		connect(m_treeWidget, &PropertyTreeWidget::mousePressed, this, &PropertyEditor::onCellClicked);
+		connect(m_treeWidget, &PropertyTreeWidget::editKeyPressed, this, &PropertyEditor::onCellEditKeyPressed);
+		connect(m_treeWidget, &PropertyTreeWidget::spaceKeyPressed, this, &PropertyEditor::onCellToggleKeyPressed);
 
-		connect(m_propertyVariantManager, &MultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+		m_treeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+		// Edit Delegate
+
+		m_itemDelegate = new PropertyEditorDelegate(m_treeWidget, this);
+		connect(m_itemDelegate, &PropertyEditorDelegate::valueChanged, this, &PropertyEditor::onValueChanged);
+		connect(m_itemDelegate, &QItemDelegate::closeEditor, this, &PropertyEditor::onCellEditorClosed);
+		m_treeWidget->setItemDelegate(m_itemDelegate);
 
 		connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
 		//
 
-		if (thePropertyEditorSettings.m_propertyEditorFontScaleFactor != 1.0)
+		/*if (thePropertyEditorSettings.m_propertyEditorFontScaleFactor != 1.0)
 		{
 			setFontSizeF(fontSizeF() * thePropertyEditorSettings.m_propertyEditorFontScaleFactor);
-		}
+		}*/
 
 		return;
+	}
+
+	void PropertyEditor::clear()
+	{
+		m_treeWidget->clear();
+
+		m_treeObjects.clear();
+	}
+
+	const QList<std::shared_ptr<PropertyObject>>& PropertyEditor::objects() const
+	{
+		return m_objects;
 	}
 
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
@@ -3509,110 +3381,166 @@ namespace ExtWidgets
 		return;
 	}
 
-	const QList<std::shared_ptr<PropertyObject>>& PropertyEditor::objects() const
+	int PropertyEditor::splitterPosition() const
 	{
-		return m_objects;
+		return m_treeWidget->columnWidth(static_cast<int>(PropertyEditorColumns::Caption));
 	}
 
-	QtProperty* PropertyEditor::createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString& description, const std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly)
+	void PropertyEditor::setSplitterPosition(int pos)
 	{
-        if (parentProperty == nullptr)
+		m_treeWidget->setColumnWidth(static_cast<int>(PropertyEditorColumns::Caption), pos);
+	}
+
+	void PropertyEditor::autoAdjustSplitterPosition()
+	{
+		m_treeWidget->resizeColumnToContents(static_cast<int>(PropertyEditorColumns::Caption));
+	}
+
+	bool PropertyEditor::isPropertyExists(const QString& propertyName) const
+	{
+		return m_treeObjects.find(propertyName) != m_treeObjects.end();
+	}
+
+	void PropertyEditor::updatePropertiesValues()
+	{
+		for (auto it : m_treeObjects)
 		{
-            // Add the property now
-			//
-			QtProperty* subGroup = nullptr;
+			updatePropertyValue(it.first);
+		}
+	}
 
-            QList<QtProperty*> propList = properties();
-			for (QtProperty* p : propList)
-			{
-                if (p->propertyName() == category)
-				{
-					subGroup = p;
-					break;
-				}
-			}
+	void PropertyEditor::updatePropertyValue(const QString& propertyName)
+	{
+		auto it = m_treeObjects.find(propertyName);
+		if (it == m_treeObjects.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
 
-			if (subGroup == nullptr)
-			{
-                subGroup = m_propertyGroupManager->addProperty(category);
-			}
+		const PropertyEditorObject& po = it->second;
 
-			QtProperty* property = createProperty(subGroup, caption, category, description, propertyPtr, sameValue, readOnly);
+		if (po.item == nullptr)
+		{
+			Q_ASSERT(po.item);
+			return;
+		}
 
-			if (parentProperty == nullptr)
-			{
-				addProperty(subGroup);
-			}
-			else
-			{
-				parentProperty->addSubProperty(subGroup);
-			}
+		if (po.property == nullptr)
+		{
+			Q_ASSERT(po.property);
+			return;
+		}
 
-			return property;
+		// Output the text
+		//
+		if (po.property->password() == true)
+		{
+			po.item->setText(static_cast<int>(PropertyEditorColumns::Value), QString());
+			return;
+		}
+
+		QString text;
+
+		if (po.sameValue == true)
+		{
+			text = PropertyEditorBase::propertyValueText(po.property.get(), -1);
 		}
 		else
 		{
-			// Add the property now
+			// Get the property value from Property object
 			//
-			QtProperty* subProperty = nullptr;
+			QVariant value = po.property->value();
 
-            subProperty = m_propertyVariantManager->addProperty(caption);
-            subProperty->setToolTip(description);
-			subProperty->setEnabled(isReadOnly() == false && readOnly == false);
-
-			if (propertyPtr->essential() == true)
+			// PropertyVector, PropertyList
+			//
+			if (variantIsPropertyVector(value) == true)
 			{
-				//subProperty->setBackgroundColor(QColor(0xEA, 0xF0, 0xFF));
-				subProperty->setBackgroundColor(QColor(0xf0, 0xf0, 0xf0));
+				text = tr("<PropertyVector>");
 			}
 
-			m_propertyVariantManager->setProperty(subProperty, propertyPtr);
-            m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
-
-
-
-			if (parentProperty == nullptr)
+			if (variantIsPropertyList(value) == true)
 			{
-				Q_ASSERT(parentProperty);
-				return nullptr;
+				text = tr("<PropertyList>");
 			}
 
-			parentProperty->addSubProperty(subProperty);
+			// Bool
 
-			return subProperty;
+			if (value.type() == QVariant::Bool)
+			{
+				text = "<Different values>";
+			}
 		}
 
+		po.item->setText(static_cast<int>(PropertyEditorColumns::Value), text);
+		po.item->setIcon(static_cast<int>(PropertyEditorColumns::Value), propertyIcon(po.property.get(), po.sameValue, po.readOnly == false));
+
+		return;
 	}
 
-	bool PropertyEditor::createPropertyStructsSortFunc(const CreatePropertyStruct& cs1, const CreatePropertyStruct& cs2)
+	void PropertyEditor::valueChanged(QString propertyName, QVariant value)
 	{
-		return std::make_tuple(cs1.category, cs1.property->viewOrder(), cs1.caption)  < std::make_tuple(cs2.category, cs2.property->viewOrder(), cs2.caption);
+		// Set the new property value in all objects
+		//
+		QList<std::shared_ptr<PropertyObject>> modifiedObjects;
+
+		QString errorString;
+
+		for (auto i : m_objects)
+		{
+			PropertyObject* pObject = i.get();
+
+			// Do not set property, if it has same value
+
+			QVariant oldValue = pObject->propertyValue(propertyName);
+
+			if (oldValue == value)
+			{
+				continue;
+			}
+
+			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
+			// property pointer becomes unusable! So next calls to property-> will cause crash
+
+			pObject->setPropertyValue(propertyName, value);
+
+			QVariant newValue = pObject->propertyValue(propertyName);
+
+			if (oldValue == newValue && errorString.isEmpty() == true)
+			{
+				errorString = QString("Property: %1 - incorrect input value")
+							  .arg(propertyName);
+			}
+
+			modifiedObjects.append(i);
+		}
+
+		if (errorString.isEmpty() == false)
+		{
+			emit showErrorMessage(errorString);
+		}
+
+		if (modifiedObjects.count() > 0)
+		{
+			emit propertiesChanged(modifiedObjects);
+		}
+		return;
 	}
 
-	void PropertyEditor::updatePropertyValues(const QString& propertyName)
+	void PropertyEditor::showEvent(QShowEvent* event)
 	{
-        QSet<QtProperty*> props;
-        QMap<QtProperty*, std::pair<QVariant, bool>> vals;
-
-		if (propertyName.isEmpty() == true)
+		if (event->type() == QEvent::Show)
 		{
-			props = m_propertyVariantManager->properties();
+			updatePropertiesValues();
 		}
-		else
+	}
+
+	void PropertyEditor::hideEvent(QHideEvent* event)
+	{
+		if (event->type() == QEvent::Hide)
 		{
-			props = m_propertyVariantManager->propertyByName(propertyName);
+			m_treeWidget->closeCurrentEditorIfOpen();
 		}
-
-		createValuesMap(props, vals);
-
-		for (auto p : props)
-		{
-            bool sameValue = vals.value(p).second;
-
-            m_propertyVariantManager->setAttribute(p, "@propertyEditor@sameValue", sameValue);
-
-			m_propertyVariantManager->updateProperty(p);
-        }
 	}
 
 	void PropertyEditor::updatePropertiesList()
@@ -3634,19 +3562,87 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyEditor::updatePropertiesValues()
+	void PropertyEditor::onCellClicked()
 	{
-		updatePropertyValues(QString());
+		startEditing();
+	}
+
+	void PropertyEditor::onCellEditKeyPressed()
+	{
+		if (getSelectionType() != QVariant::Bool)
+		{
+			startEditing();
+		}
+	}
+
+	void PropertyEditor::onCellToggleKeyPressed()
+	{
+		if (getSelectionType() == QVariant::Bool)
+		{
+			toggleSelected();
+		}
+	}
+
+	void PropertyEditor::onValueChanged(QVariant value)
+	{
+		QModelIndexList selectedRows = m_treeWidget->selectionModel()->selectedRows();
+		if (selectedRows.size() != 1)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		const QModelIndex& mi = selectedRows[0];
+
+		std::shared_ptr<Property> p = propertyFromIndex(mi);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return;
+		}
+
+		valueChanged(p->caption(), value);
+
+		// Value is now the same for all objects
+
+		auto it = m_treeObjects.find(p->caption());
+		if (it == m_treeObjects.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		PropertyEditorObject& propertyEditorObject = it->second;
+		propertyEditorObject.sameValue = true;
+
+		// Force redraw
+
+		updatePropertyValue(p->caption());
+
+		return;
+	}
+
+	void PropertyEditor::onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
+	{
+		Q_UNUSED(editor);
+		Q_UNUSED(hint);
+
+		m_treeWidget->setFocus();
+	}
+
+	void PropertyEditor::onShowErrorMessage(QString message)
+	{
+		QMessageBox::warning(this, "Error", message);
 	}
 
 	void PropertyEditor::fillProperties()
 	{
-		clearProperties();
+		clear();
 
 		QMap<QString, std::shared_ptr<Property>> propertyItems;
 		QList<QString> propertyNames;
 
-		std::vector<CreatePropertyStruct> createPropertyStructs;
+		std::vector<PropertyEditorObject> propertyEditorObjects;
 
 		// Create a map with all properties
 		//
@@ -3822,138 +3818,175 @@ namespace ExtWidgets
 				}
 			}
 
-			QString category = p->category();
-			if (category.isEmpty())
-			{
-				category = m_commonCategoryName;
-			}
-
-			CreatePropertyStruct cs;
-			cs.property = p;
-			cs.caption = p->caption();
-			cs.category = category;
-			cs.description = description;
-			cs.sameValue = sameValue;
-			cs.readOnly = readOnly;
-
-			createPropertyStructs.push_back(cs);
+			propertyEditorObjects.emplace_back(p, sameValue, readOnly);
 		}
 
 		// Sort here
 
-		std::sort(createPropertyStructs.begin(), createPropertyStructs.end(), createPropertyStructsSortFunc);
+		std::sort(propertyEditorObjects.begin(), propertyEditorObjects.end(), [](const PropertyEditorObject& o1, const PropertyEditorObject& o2){
+			return std::make_tuple(o1.property->category(), o1.property->viewOrder(), o1.property->caption()) <
+					std::make_tuple(o2.property->category(), o2.property->viewOrder(), o2.property->caption());
+
+		});
 
 		// Sort
 
-		for (const CreatePropertyStruct& cs : createPropertyStructs)
+		for (const PropertyEditorObject& poe : propertyEditorObjects)
 		{
-			createProperty(nullptr, cs.caption, cs.category, cs.description, cs.property, cs.sameValue, cs.readOnly);
+			createProperty(poe);
 		}
 
-		//sortItems(0, Qt::AscendingOrder);
-	}
-
-	void PropertyEditor::clearProperties()
-	{
-		m_propertyVariantManager->clear();
-		m_propertyGroupManager->clear();
-		clear();
-	}
-
-    void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool>>& values)
-	{
-        values.clear();
-
-		for (auto p = props.begin(); p != props.end(); p++)
-		{
-			QtProperty* property = *p;
-
-			bool sameValue = true;
-			QVariant value;
-
-            for (auto i = m_objects.begin(); i != m_objects.end(); i++)
-			{
-                PropertyObject* pObject = i->get();
-
-                QVariant val = pObject->propertyValue(property->propertyName());
-
-                if (i == m_objects.begin())
-				{
-					value = val;
-				}
-				else
-				{
-					if (value != val)
-					{
-						sameValue = false;
-						break;
-					}
-				}
-			}
-
-            values.insert(property, std::make_pair(value, sameValue));
-        }
-	}
-
-	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
-	{
-	   valueChanged(property->propertyName(), value);
-	}
-
-	void PropertyEditor::valueChanged(QString propertyName, QVariant value)
-	{
-		// Set the new property value in all objects
-		//
-        QList<std::shared_ptr<PropertyObject>> modifiedObjects;
-
-		QString errorString;
-
-		for (auto i : m_objects)
-		{
-            PropertyObject* pObject = i.get();
-
-			// Do not set property, if it has same value
-
-			QVariant oldValue = pObject->propertyValue(propertyName);
-
-			if (oldValue == value)
-			{
-				continue;
-			}
-
-			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
-			// property pointer becomes unusable! So next calls to property-> will cause crash
-
-			pObject->setPropertyValue(propertyName, value);
-
-			QVariant newValue = pObject->propertyValue(propertyName);
-
-			if (oldValue == newValue && errorString.isEmpty() == true)
-			{
-				errorString = QString("Property: %1 - incorrect input value")
-							  .arg(propertyName);
-			}
-
-			modifiedObjects.append(i);
-		}
-
-		if (errorString.isEmpty() == false)
-		{
-			emit showErrorMessage(errorString);
-		}
-
-		if (modifiedObjects.count() > 0)
-		{
-            emit propertiesChanged(modifiedObjects);
-		}
 		return;
 	}
 
-	void PropertyEditor::onShowErrorMessage(QString message)
+	void PropertyEditor::createProperty(const PropertyEditorObject& poe)
 	{
-		QMessageBox::warning(this, "Error", message);
+		QTreeWidgetItem* groupItem = nullptr;
+
+		const QString& caption = poe.property->caption();
+		const QString& description = poe.property->description();
+		QString category = poe.property->category();
+		if (category.isEmpty() == true)
+		{
+			category = m_commonCategoryName;
+		}
+
+		for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
+		{
+			QTreeWidgetItem* item = m_treeWidget->topLevelItem(i);
+			if (item == nullptr)
+			{
+				Q_ASSERT(item);
+				return;
+			}
+
+			if (item->text(static_cast<int>(PropertyEditorColumns::Caption)) == category)
+			{
+				groupItem = item;
+				break;
+			}
+		}
+
+		if (groupItem == nullptr)
+		{
+			groupItem = new QTreeWidgetItem(QStringList() << category);
+			m_treeWidget->addTopLevelItem(groupItem);
+		}
+
+		// Add the property now
+		//
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << caption);
+		item->setToolTip(static_cast<int>(PropertyEditorColumns::Caption), description);
+		item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+		if (poe.property->essential() == true)
+		{
+			item->setBackground(static_cast<int>(PropertyEditorColumns::Caption), QColor(0xf0, 0xf0, 0xf0));
+			item->setBackground(static_cast<int>(PropertyEditorColumns::Value), QColor(0xf0, 0xf0, 0xf0));
+		}
+
+		// Add object to the map
+		//
+		m_treeObjects[caption] = poe;
+		m_treeObjects[caption].setTreeWidgetItem(item);
+
+		// Fill property value
+		//
+		updatePropertyValue(poe.property->caption());
+
+		// Add item to group
+		//
+		groupItem->addChild(item);
+
+		if (groupItem->isExpanded() == false)
+		{
+			groupItem->setExpanded(true);
+		}
+
+		return;
 	}
 
-}
+	std::shared_ptr<Property> PropertyEditor::propertyFromIndex(QModelIndex index) const
+	{
+		QString propertyName = m_treeWidget->propertyCaption(index);
 
-ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
+		auto it = m_treeObjects.find(propertyName);
+		if (it == m_treeObjects.end())
+		{
+			return nullptr;
+		}
+
+		const PropertyEditorObject& po = it->second;
+		return po.property;
+	}
+
+	// returns -1 if no type is selected or they are different
+	//
+	int PropertyEditor::getSelectionType()
+	{
+		QModelIndexList selectedRows = m_treeWidget->selectionModel()->selectedRows();
+		if (selectedRows.size() != 1)
+		{
+			return -1;
+		}
+
+		const QModelIndex& mi = selectedRows[0];
+
+		std::shared_ptr<Property> p = propertyFromIndex(mi);
+		if (p == nullptr)
+		{
+			return -1;
+		}
+
+		return p->value().userType();
+	}
+
+	void PropertyEditor::startEditing()
+	{
+		if (getSelectionType() == -1)
+		{
+			return;
+		}
+
+		QModelIndex index = m_treeWidget->currentIndex();
+
+		if (index.column() != static_cast<int>(PropertyEditorColumns::Value))
+		{
+			index = index.siblingAtColumn(static_cast<int>(PropertyEditorColumns::Value));
+		}
+
+		m_treeWidget->edit(index);
+	}
+
+	void PropertyEditor::toggleSelected()
+	{
+		QModelIndexList selectedRows = m_treeWidget->selectionModel()->selectedRows();
+		if (selectedRows.size() != 1)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		const QModelIndex& mi = selectedRows[0];
+
+		std::shared_ptr<Property> p = propertyFromIndex(mi);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return;
+		}
+
+		if (p->value().userType() == QVariant::Bool)
+		{
+			bool b = p->value().toBool();
+
+			valueChanged(p->caption(), !b);
+
+			updatePropertyValue(p->caption());
+		}
+
+		return;
+	}
+
+	PropertyEditorSettings thePropertyEditorSettings;
+}

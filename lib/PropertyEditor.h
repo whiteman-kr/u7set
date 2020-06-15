@@ -1,13 +1,9 @@
 #ifndef PROPERTYEDITOR_H
 #define PROPERTYEDITOR_H
 
+#include <QItemDelegate>
 #include "../lib/PropertyObject.h"
 
-#include <QtTreePropertyBrowser>
-#include <QtVariantPropertyManager>
-#include <QtGroupPropertyManager>
-
-class QtProperty;
 class QPlainTextEdit;
 
 namespace ExtWidgets
@@ -17,11 +13,36 @@ namespace ExtWidgets
 	class PropertyEditCellWidget;
 	class PropertyTextEditor;
 
+	//
+	// PropertyEditorSettings
+	//
+
+	struct PropertyEditorSettings
+	{
+		QByteArray m_arrayPropertyEditorSplitterState;
+		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
+
+		QSize m_vectorEditorSize = QSize(-1, -1);
+
+		QPoint m_multiLinePropertyEditorWindowPos;
+		QByteArray m_multiLinePropertyEditorGeometry;
+
+		double m_propertyEditorFontScaleFactor = 1.0;
+
+		void restore(QSettings& s);
+		void store(QSettings& s);
+	};
+
+	//
+	// PropertyEditorBase
+	//
+
 	class PropertyEditorBase
 	{
 	public:
 
 		PropertyEditorBase();
+		virtual ~PropertyEditorBase();
 
 		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
 		virtual PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent);
@@ -182,7 +203,6 @@ namespace ExtWidgets
 		virtual ~PropertyTextEditor();
 
 		virtual void setText(const QString& text) = 0;
-
 		virtual QString text() = 0;
 
 		virtual void setReadOnly(bool value) = 0;
@@ -227,11 +247,8 @@ namespace ExtWidgets
 
 	public:
 		PropertyPlainTextEditor(QWidget* parent);
-
 		virtual void setText(const QString& text) override;
-
 		virtual QString text() override;
-
 		virtual void setReadOnly(bool value) override;
 
 	protected:
@@ -244,7 +261,6 @@ namespace ExtWidgets
 		QPlainTextEdit* m_plainTextEdit = nullptr;
 
 		QString m_prevPlainText;
-
 	};
 
 
@@ -510,150 +526,145 @@ namespace ExtWidgets
 	};
 
 	//
-	// MultiVariantPropertyManager
+	// PropertyEditorObject
 	//
 
-	class MultiVariantPropertyManager : public QtAbstractPropertyManager
+	class PropertyTreeWidget;
+
+	enum class PropertyEditorColumns
 	{
-		Q_OBJECT
+		Caption,
+		Value
+	};
 
-	public:
-		explicit MultiVariantPropertyManager(QObject* parent);
+	struct PropertyEditorObject
+	{
+		PropertyEditorObject() = default;
 
-		QVariant attribute(const QtProperty* property, const QString& attribute) const;
-		bool hasAttribute(const QtProperty* property, const QString& attribute) const;
-
-        std::shared_ptr<Property> value(const QtProperty* property) const;
-		int valueType(const QtProperty* property) const;
-
-        void setProperty(const QtProperty* property, std::shared_ptr<Property> propertyValue);
-        bool sameValue(const QtProperty* property) const;
-
-		QSet<QtProperty*> propertyByName(const QString& propertyName);
-
-		void updateProperty(QtProperty* property);
-
-		void emitSetValue(QtProperty* property, const QVariant& value);
-
-	private:
-		virtual QString displayText(const QtProperty* property) const;
-
-	private:
-
-        struct Data
+		PropertyEditorObject(std::shared_ptr<Property> property, bool sameValue, bool readOnly)
 		{
-            std::shared_ptr<Property> p;
-			QMap<QString, QVariant> attributes;
-		};
-        QMap<const QtProperty*, Data> values;
+			this->property = property;
+			this->sameValue = sameValue;
+			this->readOnly = readOnly;
+		}
 
-	public slots:
-		void setAttribute (QtProperty* property, const QString& attribute, const QVariant& value);
+		void setTreeWidgetItem(QTreeWidgetItem* item)
+		{
+			this->item = item;
+		}
 
-	signals:
-		void valueChanged(QtProperty* property, QVariant value);
-
-	protected:
-		void initializeProperty(QtProperty* property);
-		void uninitializeProperty(QtProperty* property);
-		QIcon valueIcon(const QtProperty* property) const;
-		QString valueText(const QtProperty* property) const;
-
-	};
-
-	//
-	// MultiVariantFactory
-	//
-
-	class MultiVariantFactory : public QtAbstractEditorFactory<MultiVariantPropertyManager>
-	{
-		Q_OBJECT
-
-	public:
-		explicit MultiVariantFactory(PropertyEditor* propertyEditor);
-
-		void connectPropertyManager (MultiVariantPropertyManager* manager);
-		QWidget* createEditor(MultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent);
-		void disconnectPropertyManager(MultiVariantPropertyManager* manager);
-
-	public slots:
-
-		void slotSetValue(QVariant value);		// sets value from argument
-
-		void slotEditorDestroyed(QObject* object);
-
-	private:
-		MultiVariantPropertyManager* m_manager = nullptr;
-		QtProperty* m_property = nullptr;
-
-		PropertyEditor* m_propertyEditor = nullptr;
-
-	};
-
-	// -------------------------------------------------------------------------------
-
-	struct CreatePropertyStruct
-	{
 		std::shared_ptr<Property> property;
-		QString caption;
-		QString description;
-		QString category;
-		bool sameValue = false;
+		bool sameValue = true;
 		bool readOnly = false;
 
+		QTreeWidgetItem* item = nullptr;
 	};
 
-	struct PropertyEditorSettings
+	//
+	// PropertyEditorDelegate
+	//
+
+	class PropertyEditorDelegate : public QItemDelegate
 	{
-		QByteArray m_arrayPropertyEditorSplitterState;
-		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
+		Q_OBJECT
+	public:
+		explicit PropertyEditorDelegate(PropertyTreeWidget* treeWidget, PropertyEditor* propretyEditor);
 
-		QSize m_vectorEditorSize = QSize(-1, -1);
+	private:
+		QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+		void destroyEditor(QWidget *editor, const QModelIndex &index) const override;
+		void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+		void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+		void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
-		QPoint m_multiLinePropertyEditorWindowPos;
-		QByteArray m_multiLinePropertyEditorGeometry;
+		QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+		void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
-		// Ide Property Editor Options
-		//
-		double m_propertyEditorFontScaleFactor = 1.0;
+	private slots:
+		void onValueChanged(QVariant value);
 
-		void restore(QSettings& s);
-		void store(QSettings& s);
+	signals:
+		void valueChanged(QVariant value);
+
+	private:
+		mutable PropertyEditCellWidget *m_cellEditor = nullptr;
+		PropertyEditor* m_propertyEditor = nullptr;
+		PropertyTreeWidget* m_treeWidget = nullptr;
+		mutable QModelIndex m_editIndex;
+	};
+
+	//
+	// PropertyTreeWidget
+	//
+
+	class PropertyTreeWidget : public QTreeWidget
+	{
+		Q_OBJECT
+
+	public:
+		QString propertyCaption(const QModelIndex& mi);
+		void closeCurrentEditorIfOpen();
+
+	protected:
+		virtual void mousePressEvent(QMouseEvent *event) override;
+		virtual void keyPressEvent(QKeyEvent *event) override;
+		virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+	signals:
+		void mousePressed();
+		void editKeyPressed();
+		void spaceKeyPressed();
 	};
 
 	//
 	// PropertyEditor
 	//
 
-	class PropertyEditor : public QtTreePropertyBrowser, public PropertyEditorBase
+	class PropertyEditor : public QWidget, public PropertyEditorBase
 	{
-		friend class MultiTextEditorDialog;
-
 		Q_OBJECT
+
+		friend class PropertyEditorDelegate;
 
 	public:
 		explicit PropertyEditor(QWidget* parent);
 
-		// Public functions
+		// Objects operations
 		//
-	public:
-		void updatePropertyValues(const QString& propertyName);
+		void clear();
 
+		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
-		const QList<std::shared_ptr<PropertyObject>>& objects() const;
+		// Properties and support
+		//
+		int splitterPosition() const;
+		void setSplitterPosition(int pos);
+
+		void autoAdjustSplitterPosition();
+
+		bool isPropertyExists(const QString& propertyName) const;
+
+	public slots:
+		void updatePropertiesValues();
+		void updatePropertyValue(const QString& propertyName);
 
 	protected:
 		virtual void valueChanged(QString propertyName, QVariant value);
+		virtual void showEvent(QShowEvent* event) override;
+		virtual void hideEvent(QHideEvent* event) override;
 
 	protected slots:
 		void updatePropertiesList();
-		void updatePropertiesValues();
 
 	private slots:
-		void onValueChanged(QtProperty* property, QVariant value);
+		void onCellClicked();
+		void onCellEditKeyPressed();
+		void onCellToggleKeyPressed();
+		void onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
 		void onShowErrorMessage (QString message);
+		void onValueChanged(QVariant value);
 
 	signals:
 		void showErrorMessage(QString message);
@@ -661,29 +672,27 @@ namespace ExtWidgets
 
 	private:
 		void fillProperties();
-		void clearProperties();
-
-		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool> > &values);
-		QtProperty* createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue, bool readOnly);
-
-		static bool createPropertyStructsSortFunc(const CreatePropertyStruct& cs1, const CreatePropertyStruct& cs2);
+		void createProperty(const PropertyEditorObject& poe);
+		std::shared_ptr<Property> propertyFromIndex(QModelIndex index) const;
+		int getSelectionType();	// returns -1 if no type is selected or they are different
+		void startEditing();
+		void toggleSelected();
 
 	private:
 		// Private Data
 		//
-		QtGroupPropertyManager* m_propertyGroupManager = nullptr;
-
-		MultiVariantPropertyManager* m_propertyVariantManager = nullptr;
-
+		PropertyTreeWidget* m_treeWidget = nullptr;
+		std::map<QString, PropertyEditorObject> m_treeObjects;
 		QList<std::shared_ptr<PropertyObject>> m_objects;
-
+		PropertyEditorDelegate* m_itemDelegate = nullptr;
 	};
+
+	extern PropertyEditorSettings thePropertyEditorSettings;
 }
+
 
 Q_DECLARE_METATYPE(std::shared_ptr<Property>)
 Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 Q_DECLARE_METATYPE(QVector<QColor>)
-
-extern ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
 
 #endif // PROPERTYEDITOR_H

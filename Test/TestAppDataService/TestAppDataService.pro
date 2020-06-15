@@ -6,6 +6,7 @@
 
 QT       += testlib
 QT       += qml
+QT       += xml
 
 TARGET = TestAppDataSrv
 CONFIG   += console
@@ -41,6 +42,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
+    ../../lib/Address16.h \
     ../../lib/ServiceSettings.h \
     ../../lib/SimpleMutex.h \
     ../../lib/XmlHelper.h \
@@ -76,6 +78,7 @@ HEADERS += \
 
 
 SOURCES += \
+    ../../lib/Address16.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/XmlHelper.cpp \
     ../../lib/ServiceSettings.cpp \

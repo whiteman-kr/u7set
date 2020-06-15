@@ -340,9 +340,9 @@ namespace Builder
 
 		// Display build time
 		//
-		int buildEllapsed = buildTime.elapsed() / 1000;
-		int durationSecs = buildEllapsed % 60;
-		int durationMins = buildEllapsed / 60;
+		qint64 buildEllapsed = buildTime.elapsed() / 1000;
+		qint64 durationSecs = buildEllapsed % 60;
+		qint64 durationMins = buildEllapsed / 60;
 		LOG_MESSAGE(m_context->m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
 
 		// We've done, exit
