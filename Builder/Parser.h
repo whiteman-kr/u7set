@@ -327,9 +327,6 @@ namespace Builder
 		IssueLogger* log() const;
 		int changesetId() const;
 
-		bool debug() const;
-		bool release() const;
-
 		const AppLogicData* applicationData() const;
 		AppLogicData* applicationData();
 
@@ -338,7 +335,6 @@ namespace Builder
 		DbController* m_db = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 		int m_changesetId = 0;
-		int m_debug = false;
 
 		std::shared_ptr<AppLogicData> m_applicationData;
 		LmDescriptionSet* m_lmDescriptions = nullptr;

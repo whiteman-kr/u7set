@@ -826,7 +826,6 @@ namespace Builder
 
 		QString comments = "@rem Project: " + b.project + "\n";
 		comments += "@rem BuildNo: " + QString::number(b.id) + "\n";
-		comments += "@rem Type: " + b.typeStr() + "\n";
 		comments += "@rem Date: " + b.dateStr() + "\n";
 		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
 		comments += "@rem User: " + b.user + "\n";
@@ -843,7 +842,6 @@ namespace Builder
 
 		comments += "# Project: " + b.project + "\n";
 		comments += "# BuildNo: " + QString::number(b.id) + "\n";
-		comments += "# Type: " + b.typeStr() + "\n";
 		comments += "# Date: " + b.dateStr() + "\n";
 		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
 		comments += "# User: " + b.user + "\n";

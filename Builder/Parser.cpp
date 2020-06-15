@@ -2375,7 +2375,6 @@ namespace Builder
 		m_db(&context->m_db),
 		m_log(context->m_log),
 		m_changesetId(context->m_lastChangesetId),
-		m_debug(context->m_debug),
 		m_applicationData(context->m_appLogicData),
 		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_equipmentSet(context->m_equipmentSet.get()),
@@ -4964,16 +4963,6 @@ namespace Builder
 	int Parser::changesetId() const
 	{
 		return m_changesetId;
-	}
-
-	bool Parser::debug() const
-	{
-		return m_debug;
-	}
-
-	bool Parser::release() const
-	{
-		return !debug();
 	}
 
 	const AppLogicData* Parser::applicationData() const

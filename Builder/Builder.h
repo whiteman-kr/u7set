@@ -7,12 +7,6 @@ namespace Builder
 {
 	class BuildWorkerThread;
 
-	enum class BuildType
-	{
-		Debug,
-		Release
-	};
-
 	void init();
 	void shutdown();
 
@@ -33,7 +27,6 @@ namespace Builder
 				   QString projectUserName,
 				   QString projectUserPassword,
 				   QString buildPath,
-				   BuildType buildType,
 				   bool expertMode);
 		bool stop();
 		bool isRunning() const;

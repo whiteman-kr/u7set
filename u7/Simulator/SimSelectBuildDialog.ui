@@ -16,7 +16,10 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="1" rowspan="3">
+     <item row="1" column="0">
+      <widget class="QListWidget" name="buildList"/>
+     </item>
+     <item row="0" column="1" rowspan="2">
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -26,30 +29,11 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QRadioButton" name="releaseButton">
-       <property name="text">
-        <string>Release</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QRadioButton" name="debugButton">
-       <property name="text">
-        <string>Debug</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QListWidget" name="buildList"/>
-     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>debugButton</tabstop>
-  <tabstop>releaseButton</tabstop>
   <tabstop>buildList</tabstop>
  </tabstops>
  <resources/>

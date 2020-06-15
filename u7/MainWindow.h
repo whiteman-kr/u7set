@@ -147,6 +147,7 @@ private:
 
 #ifdef Q_OS_WINDOWS
 	QWinTaskbarButton* m_taskBarButton = nullptr;
+	int m_timerId = -1;
 #endif
 };
 

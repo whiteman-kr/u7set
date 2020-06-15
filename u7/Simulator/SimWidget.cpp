@@ -548,20 +548,15 @@ void SimWidget::openBuild()
 	m_simulator->control().stop();
 
 	QSettings settings;
-	SimSelectBuildDialog::BuildType buildType = static_cast<SimSelectBuildDialog::BuildType>(settings.value("SimulatorWidget/BuildType", 0).toInt());
 
 	QString project = db()->currentProject().projectName().toLower();
 	QString lastPath = settings.value("SimulatorWidget/ProjectLastPath/" + project).toString();
 
-	SimSelectBuildDialog d(project,
-								 buildType,
-								 lastPath,
-								 this);
+	SimSelectBuildDialog d(project, lastPath, this);
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
 	{
-		settings.setValue("SimulatorWidget/BuildType", static_cast<int>(d.resultBuildType()));
 		lastPath = d.resultBuildPath();
 
 		bool ok = loadBuild(lastPath);

@@ -94,7 +94,7 @@ private:
 
 	QWidget* m_settingsWidget = nullptr;
 
-	QCheckBox* m_debugCheckBox = nullptr;
+	//QCheckBox* m_debugCheckBox = nullptr;
 	QComboBox* m_warningsLevelComboBox = nullptr;
 
 	int m_logTimerId = -1;

@@ -25,7 +25,7 @@ namespace Builder
 	class Context
 	{
 	public:
-		Context(IssueLogger* log, QString buildOutputPath, bool debug, bool expertMode);
+		Context(IssueLogger* log, QString buildOutputPath, bool expertMode);
 		Context(const Context&) = delete;
 		Context(Context&&) = delete;
 		Context& operator=(const Context&) = delete;
@@ -42,7 +42,6 @@ namespace Builder
 
 		QString m_buildOutputPath;
 
-		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
 		bool m_expertMode = false;
 
 		int m_lastChangesetId = 0;

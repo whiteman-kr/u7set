@@ -101,9 +101,9 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_settingsWidget = new QWidget(m_vsplitter);
 	QVBoxLayout* settingsWidgetLayout = new QVBoxLayout();
 
-	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
-	m_debugCheckBox->setChecked(true);
-	settingsWidgetLayout->addWidget(m_debugCheckBox);
+//	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
+//	m_debugCheckBox->setChecked(true);
+//	settingsWidgetLayout->addWidget(m_debugCheckBox);
 
 	m_warningsLevelComboBox = new QComboBox(m_settingsWidget);
 
@@ -364,8 +364,6 @@ void BuildTabPage::build()
 	//
 	GlobalMessanger::instance().fireBuildStarted();
 
-	bool debug = m_debugCheckBox->isChecked();
-
 	m_builder.start(
 		db()->host(),
 		db()->port(),
@@ -375,7 +373,6 @@ void BuildTabPage::build()
 		db()->currentUser().username(),
 		db()->currentUser().password(),
 		theSettings.buildOutputPath(),
-		debug ? Builder::BuildType::Debug : Builder::BuildType::Release,
 		theSettings.isExpertMode());
 
 	return;

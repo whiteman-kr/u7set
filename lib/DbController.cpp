@@ -2572,7 +2572,7 @@ bool DbController::hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidg
 }
 
 
-bool DbController::buildStart(QString workstation, bool release, int changeset, int* buildID, QWidget* parentWidget)
+bool DbController::buildStart(QString workstation, int changeset, int* buildID, QWidget* parentWidget)
 {
 	if (buildID == nullptr)
 	{
@@ -2589,7 +2589,7 @@ bool DbController::buildStart(QString workstation, bool release, int changeset, 
 		return false;
 	}
 
-	emit signal_buildStart(workstation, release, changeset, buildID);
+	emit signal_buildStart(workstation, changeset, buildID);
 
 	ok = waitForComplete(parentWidget, tr("Build started"));
 

@@ -86,7 +86,6 @@ void CfgControlServer::sendLoadedBuildInfo()
 
 	message.set_project(b.project.toStdString());
 	message.set_id(b.id);
-	message.set_release(b.release);
 	message.set_date(b.date.toMSecsSinceEpoch());
 	message.set_changeset(b.changeset);
 	message.set_user(b.user.toStdString());

@@ -96,8 +96,6 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	centralWidget()->show();
 
-	startTimer(100);
-
 	return;
 }
 
@@ -1104,6 +1102,8 @@ void MainWindow::buildStarted()
 #ifdef Q_OS_WINDOWS
 	m_taskBarButton->progress()->setRange(0, 100);
 	m_taskBarButton->progress()->show();
+
+	m_timerId = startTimer(50);
 #endif
 }
 
@@ -1111,6 +1111,7 @@ void MainWindow::buildFinished(int /*errorCount*/)
 {
 #ifdef Q_OS_WINDOWS
 	m_taskBarButton->progress()->hide();
+	killTimer(m_timerId);
 #endif
 }
 
