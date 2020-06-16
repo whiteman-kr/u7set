@@ -37,6 +37,7 @@ unix {
 }
 
 SOURCES += \
+    ../../lib/LanControllerInfoHelper.cpp \
     main.cpp \
     ../../Proto/network.pb.cc \
     ../../Proto/serialization.pb.cc \
@@ -89,6 +90,8 @@ SOURCES += \
     UalTesterServer.cpp
 
 HEADERS += \
+    ../../lib/LanControllerInfo.h \
+    ../../lib/LanControllerInfoHelper.h \
     Stable.h \
     ../../Proto/network.pb.h \
     ../../Proto/serialization.pb.h \
