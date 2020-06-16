@@ -287,7 +287,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 	out << "__Host: " + QString(firstConfiguration.host);
 	out << "__User: " + QString(firstConfiguration.userName);
 	out << "__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0');
-	out << "__Build Config: " + QString(firstConfiguration.buildConfig);
+	out << "__Build Config: " + QString();	// Obsolete
 	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 
 	out << "Last time configured: ";
@@ -295,7 +295,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 	out << "__Host: " + QString(lastConfiguration.host);
 	out << "__User: " + QString(lastConfiguration.userName);
 	out << "__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0');
-	out << "__Build Config: " + QString(lastConfiguration.buildConfig);
+	out << "__Build Config: " + QString();	// Obsolete
 	out << "__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString();
 
 	return;
@@ -318,7 +318,7 @@ void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmw
 
 	firstConfiguration.buildNo = storage->buildNumber();
 
-	QString buildConfig = storage->buildConfig().right(sizeof(firstConfiguration) - 1);
+	QString buildConfig;	// Obsolete
 	std::strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
 
 	QString userName = storage->userName().right(sizeof(firstConfiguration.userName) - 1);
@@ -341,7 +341,7 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 
 	lastConfiguration.buildNo = storage->buildNumber();
 
-	QString buildConfig = storage->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
+	QString buildConfig;	// Obsolete
 	std::strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
 
 	QString userName = storage->userName().right(sizeof(lastConfiguration.userName) - 1);
@@ -851,7 +851,6 @@ bool Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareS
 		m_Log->writeMessage(tr("ChangesetID: %1").arg(storage->changesetId()));
 		m_Log->writeMessage(tr("Build User: %1").arg(storage->userName()));
 		m_Log->writeMessage(tr("Build No: %1").arg(QString::number(storage->buildNumber())));
-		m_Log->writeMessage(tr("Build Config: %1").arg(storage->buildConfig()));
 		m_Log->writeMessage(tr("Subsystems: %1").arg(storage->subsystemsString()));
 
 		emit loadBinaryFileHeaderComplete();
@@ -1715,7 +1714,7 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
 		QString userName = QDir::home().dirName();
 
 		Hardware::ModuleFirmwareStorage storage;
-		storage.setProjectInfo("projectName", userName, 0, false, 0);
+		storage.setProjectInfo("projectName", userName, 0, 0);
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||

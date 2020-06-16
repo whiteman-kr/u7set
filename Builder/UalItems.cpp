@@ -2832,10 +2832,18 @@ namespace Builder
 			str.append(ualSignal->isOptoSignal() == true ? "true" : "false");
 			str += ";";
 
-			str.append(QString::number(ualSignal->ualAddr().offset()));
-			str += ";";
-			str.append(QString::number(ualSignal->ualAddr().bit()));
-			str += ";";
+			if (ualSignal->isHeapPlaced() == true)
+			{
+				str.append("heap;-1;-1;");		// no ualAddr
+			}
+			else
+			{
+				str.append("static;");
+				str.append(QString::number(ualSignal->ualAddr().offset()));
+				str += ";";
+				str.append(QString::number(ualSignal->ualAddr().bit()));
+				str += ";";
+			}
 
 			str.append(QString::number(ualSignal->ioBufAddr().offset()));
 			str += ";";

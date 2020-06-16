@@ -6384,7 +6384,7 @@ void DbWorker::hasCheckedOutSignals(QSqlDatabase& db, bool* hasCheckedOut)
 // Build management
 //
 
-void DbWorker::slot_buildStart(QString workstation, bool release, int changeset, int* buildID)
+void DbWorker::slot_buildStart(QString workstation, int changeset, int* buildID)
 {
 	AUTO_COMPLETE
 
@@ -6406,8 +6406,7 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 
 	// Log action
 	//
-	QString logMessage = QString("slot_buildStart: Release %1, Changeset %2")
-						 .arg(release)
+	QString logMessage = QString("slot_buildStart: Changeset %1")
 						 .arg(changeset);
 
 	addLogRecord(db, logMessage);
@@ -6417,7 +6416,7 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 	QString request = QString("SELECT * FROM build_start(%1, '%2', cast(%3 as boolean), %4)")
 					  .arg(currentUser().userId())
 					  .arg(DbWorker::toSqlStr(workstation))
-					  .arg(release)
+					  .arg(true)
 					  .arg(changeset);
 
 	QSqlQuery q(db);

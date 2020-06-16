@@ -45,6 +45,7 @@ namespace VFrame30
 	const QString PropertyNames::drawRect{"DrawRect"};
 	const QString PropertyNames::textColor{"TextColor"};
 	const QString PropertyNames::text{"Text"};
+	const QString PropertyNames::wordWrap{"WordWrap"};
 	const QString PropertyNames::placeholderText{"PlaceholderText"};
 	const QString PropertyNames::label{"Label"};
 	const QString PropertyNames::labelPos{"LabelPos"};

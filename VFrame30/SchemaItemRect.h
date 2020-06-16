@@ -107,6 +107,9 @@ namespace VFrame30
 		/// \brief Rectangle text
 		Q_PROPERTY(QString Text READ text WRITE setText)
 
+		/// \brief Wrap words for long text
+		Q_PROPERTY(bool WordWrap READ wordWrap WRITE setWordWrap)
+
 		/// \brief Horizontal text alignment
 		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
 
@@ -168,6 +171,9 @@ namespace VFrame30
 		const QString& text() const;
 		void setText(QString value);
 
+		bool wordWrap() const;
+		void setWordWrap(bool value);
+
 		E::HorzAlign horzAlign() const;
 		void setHorzAlign(E::HorzAlign align);
 
@@ -187,12 +193,17 @@ namespace VFrame30
 		QColor m_lineColor;
 		QColor m_fillColor;
 		QColor m_textColor;
+
 		QString m_text;
+		bool m_wordWrap = false;
+
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
+
 		FontParam m_font;
 		bool m_fill = true;
 		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
+
 
 		// Drawing resources
 		//

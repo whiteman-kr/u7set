@@ -251,12 +251,11 @@ static const std::vector<quint8> err;
 	{
 	}
 
-	void ModuleFirmwareStorage::setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, bool debug, int changesetId)
+	void ModuleFirmwareStorage::setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, int changesetId)
 	{
 		m_projectName = projectName;
 		m_userName = userName;
 		m_buildNumber = buildNumber;
-		m_debug = debug;
 		m_changesetId = changesetId;
 	}
 
@@ -497,15 +496,6 @@ static ModuleFirmware err;
 			return false;
 		}
 		m_userName = jConfig.value(QLatin1String("userName")).toString();
-
-		if (jConfig.value(QLatin1String("buildConfig")).isUndefined() == true)
-		{
-			m_debug = true;
-		}
-		else
-		{
-			m_debug = jConfig.value(QLatin1String("buildConfig")).toString() == "debug";
-		}
 
 		if (jConfig.value(QLatin1String("buildNumber")).isUndefined() == true)
 		{
@@ -832,11 +822,5 @@ static ModuleFirmware err;
 	{
 		return m_buildNumber;
 	}
-
-	QString ModuleFirmwareStorage::buildConfig() const
-	{
-		return m_debug ? "debug" : "release";
-	}
-
 
 }

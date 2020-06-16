@@ -3,9 +3,8 @@
 #include "../Settings.h"
 
 SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
-													   BuildType buildType,
-													   QString buildPath,
-													   QWidget* parent) :
+										   QString buildPath,
+										   QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SimSelectBuildDialog),
 	m_projectName(currentProject.toLower())
@@ -18,23 +17,10 @@ SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
 
 	okButton->setEnabled(false);
 
-	// buildType, buildPath of the currently selected project
-	//
-	if (buildType == BuildType::Debug)
-	{
-		ui->debugButton->setChecked(true);
-	}
-	else
-	{
-		ui->releaseButton->setChecked(true);
-	}
-
 	// --
 	//
 	connect(ui->buildList, &QListWidget::currentRowChanged, this, &SimSelectBuildDialog::buildListSelectionChanged);
 	connect(ui->buildList, &QListWidget::itemDoubleClicked, this, &SimSelectBuildDialog::buildListItemDoubleClicked);
-
-	connect(ui->debugButton, &QRadioButton::toggled, this, [this](bool)	{fillBuildList("");});
 
 	// --
 	//
@@ -50,14 +36,7 @@ SimSelectBuildDialog::~SimSelectBuildDialog()
 
 QString SimSelectBuildDialog::buildsPath()
 {
-	QString configurationType = ui->debugButton->isChecked() ? QLatin1String("debug") : QLatin1String("release");
-
-	QString buildSearchPath = QString("%1%2%3-%4")
-							  .arg(theSettings.buildOutputPath())
-							  .arg(QDir::separator())
-							  .arg(m_projectName)
-							  .arg(configurationType);
-
+	QString buildSearchPath = theSettings.buildOutputPath() + QDir::separator() + m_projectName;
 	return buildSearchPath;
 }
 
@@ -132,11 +111,6 @@ void SimSelectBuildDialog::accept()
 {
 	QDialog::accept();
 	return;
-}
-
-SimSelectBuildDialog::BuildType SimSelectBuildDialog::resultBuildType() const
-{
-	return ui->debugButton->isChecked() ? BuildType::Debug : BuildType::Release;
 }
 
 QString SimSelectBuildDialog::resultBuildPath() const

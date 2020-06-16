@@ -854,9 +854,6 @@ namespace Builder
 		str = QString("-- Build No:\t%1").arg(bi.id);
 		list.append(str);
 
-		str = QString("-- Build type:\t%1").arg(bi.release == true ? "Release" : "Debug");
-		list.append(str);
-
 		str = QString("-- Build date:\t%1").arg(bi.dateStr());
 		list.append(str);
 
@@ -1037,9 +1034,6 @@ namespace Builder
 		list.append(str);
 
 		str = QString("-- Build No:\t%1").arg(bi.id);
-		list.append(str);
-
-		str = QString("-- Build type:\t%1").arg(bi.release == true ? "Release" : "Debug");
 		list.append(str);
 
 		str = QString("-- Build date:\t%1").arg(bi.dateStr());

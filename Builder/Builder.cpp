@@ -53,7 +53,6 @@ namespace Builder
 						QString projectUserName,
 						QString projectUserPassword,
 						QString buildPath,
-						BuildType buildType,
 						bool expertMode)
 	{
 		qDebug() << "Build started\n" <<
@@ -62,8 +61,7 @@ namespace Builder
 					"\tdatabaseUserName: " << databaseUserName << "\n" <<
 					"\tProjectName: " << projectName << "\n" <<
 					"\tprojectUserName: " << projectUserName << "\n" <<
-					"\tbuildPath: " << buildPath << "\n" <<
-					"\tbuildType: " << (buildType == BuildType::Debug ? "Debug" : "Release") << "\n";
+		            "\tbuildPath: " << buildPath << "\n";
 
 		if (isRunning() == true)
 		{
@@ -79,7 +77,6 @@ namespace Builder
 		m_thread->setProjectUserName(projectUserName);
 		m_thread->setProjectUserPassword(projectUserPassword);
 		m_thread->setBuildOutputPath(buildPath);
-		m_thread->setDebug(buildType == BuildType::Debug);
 		m_thread->setExpertMode(expertMode);
 
 		m_log.clear();
@@ -98,8 +95,6 @@ namespace Builder
 			return true;
 		}
 
-		qDebug() << "Cancel build";
-
 		m_thread->requestInterruption();
 		bool result = m_thread->wait(120000);		// Wait for a couple minutes.
 
@@ -117,6 +112,16 @@ namespace Builder
 	bool Builder::isRunning() const
 	{
 		return m_thread->isRunning();
+	}
+
+	int Builder::progress() const
+	{
+		if (isRunning() == false)
+		{
+			return 0;
+		}
+
+		return m_thread->progress();
 	}
 
 	IssueLogger& Builder::log()

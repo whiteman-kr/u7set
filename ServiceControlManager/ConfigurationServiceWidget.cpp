@@ -147,7 +147,7 @@ void ConfigurationServiceWidget::updateBuildInfo()
 	m_buildTabModel->setData(m_buildTabModel->index(1, 1), b.project);
 
 	m_buildTabModel->setData(m_buildTabModel->index(2, 0), "Build type");
-	m_buildTabModel->setData(m_buildTabModel->index(2, 1), b.typeStr());
+	m_buildTabModel->setData(m_buildTabModel->index(2, 1), "");
 
 	m_buildTabModel->setData(m_buildTabModel->index(3, 0), "Build No");
 	m_buildTabModel->setData(m_buildTabModel->index(3, 1), b.id);

@@ -3869,6 +3869,13 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 vertalign() const;
   inline void set_vertalign(::google::protobuf::int32 value);
 
+  // optional bool wordWrap = 11 [default = false];
+  inline bool has_wordwrap() const;
+  inline void clear_wordwrap();
+  static const int kWordWrapFieldNumber = 11;
+  inline bool wordwrap() const;
+  inline void set_wordwrap(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemRect)
  private:
   inline void set_has_weight();
@@ -3891,6 +3898,8 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline void clear_has_horzalign();
   inline void set_has_vertalign();
   inline void clear_has_vertalign();
+  inline void set_has_wordwrap();
+  inline void clear_has_wordwrap();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3902,11 +3911,12 @@ class SchemaItemRect : public ::google::protobuf::Message {
   ::google::protobuf::uint32 textcolor_;
   bool fill_;
   bool drawrect_;
+  bool wordwrap_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20181,6 +20191,28 @@ inline ::google::protobuf::int32 SchemaItemRect::vertalign() const {
 inline void SchemaItemRect::set_vertalign(::google::protobuf::int32 value) {
   set_has_vertalign();
   vertalign_ = value;
+}
+
+// optional bool wordWrap = 11 [default = false];
+inline bool SchemaItemRect::has_wordwrap() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SchemaItemRect::set_has_wordwrap() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SchemaItemRect::clear_has_wordwrap() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void SchemaItemRect::clear_wordwrap() {
+  wordwrap_ = false;
+  clear_has_wordwrap();
+}
+inline bool SchemaItemRect::wordwrap() const {
+  return wordwrap_;
+}
+inline void SchemaItemRect::set_wordwrap(bool value) {
+  set_has_wordwrap();
+  wordwrap_ = value;
 }
 
 // -------------------------------------------------------------------

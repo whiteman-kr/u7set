@@ -207,11 +207,11 @@ test job:
     - "rem ----------------------------------------------"
     - "rem               Run BuilderConsole tests"
     - "rem ----------------------------------------------"
-    - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"
+    - "rmdir /Q /S c:\\temp\\build\\test_simulator"
     - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe %CI_PROJECT_DIR%\\Test\\BuilderConsoleArgs.xml"
 
 #Run Sim AFB Tests
     - "rem ----------------------------------------------"
     - "rem               Run Simulator AFBs tests"
     - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v334-debug\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v334\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"

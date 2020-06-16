@@ -33,6 +33,8 @@ public:
 	const std::map<QUuid, OutputMessageLevel>* itemsIssues() const;
 	void cancelBuild();
 
+	int progress() const;
+
 protected:
 	void CreateActions();
 
@@ -55,12 +57,14 @@ protected slots:
 	void buildWasStarted();
 	void buildWasFinished(int errorCount);
 
-	//void newLogItem(OutputLogItem logItem);
-
 	void prevIssue();
 	void nextIssue();
 
 	void search();
+
+signals:
+	void buildStarted();					// Just retranslate signal from Builder
+	void buildFinished(int errorCount);		// Just retranslate signal from Builder
 
 	// Data
 	//
@@ -90,7 +94,7 @@ private:
 
 	QWidget* m_settingsWidget = nullptr;
 
-	QCheckBox* m_debugCheckBox = nullptr;
+	//QCheckBox* m_debugCheckBox = nullptr;
 	QComboBox* m_warningsLevelComboBox = nullptr;
 
 	int m_logTimerId = -1;

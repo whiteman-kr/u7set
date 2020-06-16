@@ -25,7 +25,7 @@ namespace Builder
 	class Context
 	{
 	public:
-		Context(IssueLogger* log, QString buildOutputPath, bool debug, bool expertMode);
+		Context(IssueLogger* log, QString buildOutputPath, bool expertMode);
 		Context(const Context&) = delete;
 		Context(Context&&) = delete;
 		Context& operator=(const Context&) = delete;
@@ -38,22 +38,10 @@ namespace Builder
 		mutable IssueLogger* m_log = nullptr;
 
 		DbController m_db;
-
-		//QString m_projectName;
-
-		//QString m_serverIpAddress;
-		//int m_serverPort = 0;
-		//QString m_serverUsername;
-		//QString m_serverPassword;
-
-		//QString m_projectUserName;
-		//QString m_projectUserPassword;
-
 		DbProjectProperties m_projectProperties;
 
 		QString m_buildOutputPath;
 
-		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
 		bool m_expertMode = false;
 
 		int m_lastChangesetId = 0;
@@ -91,6 +79,8 @@ namespace Builder
 		//--
 		//
 		QJSEngine m_jsEngine;
+
+		std::atomic_int m_progress;			// 0 - 100%
 	};
 
 }

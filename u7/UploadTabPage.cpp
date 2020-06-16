@@ -25,14 +25,6 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QVBoxLayout *pConfigurationLayout = new QVBoxLayout(pConfigurationWidget);
 
-	pConfigurationLayout->addWidget(new QLabel(tr("Choose Configuration:")));
-	m_pConfigurationCombo = new QComboBox();
-	m_pConfigurationCombo->addItem(tr("Debug"), tr("debug"));
-	m_pConfigurationCombo->addItem(tr("Release"), tr("release"));
-	m_pConfigurationCombo->setCurrentIndex(0);
-	connect(m_pConfigurationCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::configurationTypeChanged);
-	pConfigurationLayout->addWidget(m_pConfigurationCombo);
-
 	// Create Build list widget
 
 	pConfigurationLayout->addWidget(new QLabel(tr("Choose the Build:")));
@@ -296,21 +288,7 @@ void UploadTabPage::refreshProjectBuilds()
 		return;
 	}
 
-	QVariant data = m_pConfigurationCombo->currentData();
-	if (data.isNull() == true || data.isValid() == false)
-	{
-		assert(false);
-		return;
-	}
-
-	QString configurationType = data.toString();
-	if (configurationType.isEmpty() == true)
-	{
-		assert(false);
-		return;
-	}
-
-	m_buildSearchPath = QString("%1%2%3-%4").arg(theSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName).arg(configurationType);
+	m_buildSearchPath = QString("%1%2%3").arg(theSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName);
 
 	// Get builds list
 
@@ -387,17 +365,6 @@ void UploadTabPage::refreshProjectBuilds()
 
 	refreshBinaryFile();
 }
-
-void UploadTabPage::configurationTypeChanged(const QString& s)
-{
-	Q_UNUSED(s);
-
-	m_currentBuild.clear();
-	m_currentFilePath.clear();
-
-	refreshProjectBuilds();
-}
-
 
 void UploadTabPage::buildChanged()
 {
