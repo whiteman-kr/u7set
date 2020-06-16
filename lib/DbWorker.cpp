@@ -1055,6 +1055,13 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result = db_logIn(db, username, password, &errorMessage);
 	if (result == false)
 	{
+		if (errorMessage.contains("User does not exist or the password is incorrect.") == true)
+		{
+			// It clears extra debug info like context, and other db stuff
+			//
+			errorMessage = tr("User does not exist or the password is incorrect.");
+		}
+
 		emitError(db, errorMessage);
 		db.close();
 		return;

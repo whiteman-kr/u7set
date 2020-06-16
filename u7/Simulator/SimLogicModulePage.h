@@ -20,6 +20,7 @@ protected:
 protected slots:
 	void projectUpdated();
 
+	void signalsButtonClicked();
 	void codeButtonClicked();
 	void memoryButtonClicked();
 
