@@ -95,6 +95,7 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 	//
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
 
+	connect(m_signalsButton, &QPushButton::clicked, this, &SimLogicModulePage::signalsButtonClicked);
 	connect(m_codeButton, &QPushButton::clicked, this, &SimLogicModulePage::codeButtonClicked);
 	connect(m_memoryButton, &QPushButton::clicked, this, &SimLogicModulePage::memoryButtonClicked);
 
@@ -200,6 +201,14 @@ void SimLogicModulePage::fillSchemaList()
 void SimLogicModulePage::projectUpdated()
 {
 	updateLogicModuleInfoInfo();
+	return;
+}
+
+void SimLogicModulePage::signalsButtonClicked()
+{
+	// Show snapshot with applied filter lmEquipmnetId()
+	//
+	int to_do_show_signals_snapshot_for_lm;
 	return;
 }
 
