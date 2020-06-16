@@ -2973,3 +2973,78 @@ function testAfbPulseGenV0(sim)
 }
 
 
+
+function test3ChannelDicreteMajority(sim)
+{
+    // Schema: TEST_3CHANNEL_INPUT
+    // Inputs:
+    //      #TEST_3CHV_T1_INA
+    //      #TEST_3CHV_T1_INB
+    //      #TEST_3CHV_T1_INC
+    //
+    let aInput = "#TEST_3CHV_T1_INA";
+    let bInput = "#TEST_3CHV_T1_INB";
+    let cInput = "#TEST_3CHV_T1_INC";
+
+    let aResult = "#TEST_3CHV_T1_MAJ_A";
+    let bResult = "#TEST_3CHV_T1_MAJ_B";
+    let cResult = "#TEST_3CHV_T1_MAJ_C";
+
+    sim.overrideSignalValue(aInput, 0);
+    sim.overrideSignalValue(bInput, 0);
+    sim.overrideSignalValue(cInput, 0);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 0);
+    assert(sim.signalValue(bResult) === 0);
+    assert(sim.signalValue(cResult) === 0);
+
+    sim.overrideSignalValue(aInput, 1);
+    sim.overrideSignalValue(bInput, 0);
+    sim.overrideSignalValue(cInput, 0);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 0);
+    assert(sim.signalValue(bResult) === 0);
+    assert(sim.signalValue(cResult) === 0);
+
+    sim.overrideSignalValue(aInput, 0);
+    sim.overrideSignalValue(bInput, 1);
+    sim.overrideSignalValue(cInput, 0);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 0);
+    assert(sim.signalValue(bResult) === 0);
+    assert(sim.signalValue(cResult) === 0);
+
+    sim.overrideSignalValue(aInput, 0);
+    sim.overrideSignalValue(bInput, 0);
+    sim.overrideSignalValue(cInput, 1);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 0);
+    assert(sim.signalValue(bResult) === 0);
+    assert(sim.signalValue(cResult) === 0);
+
+    sim.overrideSignalValue(aInput, 1);
+    sim.overrideSignalValue(bInput, 1);
+    sim.overrideSignalValue(cInput, 0);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 1);
+    assert(sim.signalValue(bResult) === 1);
+    assert(sim.signalValue(cResult) === 1);
+
+    sim.overrideSignalValue(aInput, 1);
+    sim.overrideSignalValue(bInput, 0);
+    sim.overrideSignalValue(cInput, 1);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 1);
+    assert(sim.signalValue(bResult) === 1);
+    assert(sim.signalValue(cResult) === 1);
+
+    sim.overrideSignalValue(aInput, 0);
+    sim.overrideSignalValue(bInput, 1);
+    sim.overrideSignalValue(cInput, 1);
+    sim.startForMs(10);
+    assert(sim.signalValue(aResult) === 1);
+    assert(sim.signalValue(bResult) === 1);
+    assert(sim.signalValue(cResult) === 1);
+
+    return;
+}

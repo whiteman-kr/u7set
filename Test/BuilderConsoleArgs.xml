@@ -4,7 +4,7 @@
     <DatabasePort>5432</DatabasePort>
     <DatabaseUserName>u7</DatabaseUserName>
     <DatabasePassword>P2ssw0rd</DatabasePassword>
-	<ProjectName>test_simulator_v334</ProjectName>
+	<ProjectName>test_simulator_v335</ProjectName>
     <ProjectUserName>Administrator</ProjectUserName>
     <ProjectUserPassword>P2ssw0rd</ProjectUserPassword>
 	<BuildOutputPath>c:\temp\build\</BuildOutputPath>
