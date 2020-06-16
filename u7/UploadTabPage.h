@@ -31,7 +31,6 @@ public:
 	void refreshProjectBuilds();
 
 protected slots:
-	void configurationTypeChanged(const QString& s);
 	void buildChanged();
 	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
@@ -105,8 +104,6 @@ private:
 
 	QSplitter* m_pLeftSplitter = nullptr;
 	QSplitter* m_pRightSplitter = nullptr;
-
-	QComboBox* m_pConfigurationCombo = nullptr;
 
 	QTreeWidget* m_pBuildTree = nullptr;
 

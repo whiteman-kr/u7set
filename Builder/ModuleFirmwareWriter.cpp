@@ -598,7 +598,6 @@ namespace Hardware
 		jObject.insert(QLatin1String("userName"), m_userName);
 		jObject.insert(QLatin1String("projectName"), m_projectName);
 		jObject.insert(QLatin1String("buildNumber"), m_buildNumber);
-		jObject.insert(QLatin1String("buildConfig"), m_debug ? "debug" : "release");
 		jObject.insert(QLatin1String("changesetId"), m_changesetId);
 		jObject.insert(QLatin1String("fileVersion"), maxFileVersion());
 		jObject.insert(QLatin1String("buildSoftware"), m_buildSoftware);

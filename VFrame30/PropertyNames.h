@@ -53,6 +53,7 @@ namespace VFrame30
 		static const QString drawRect;
 		static const QString textColor;
 		static const QString text;
+		static const QString wordWrap;
 		static const QString placeholderText;
 		static const QString label;
 		static const QString labelPos;

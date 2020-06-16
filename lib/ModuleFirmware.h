@@ -114,7 +114,7 @@ namespace Hardware
 	public:
 		// Initializing and loading
 		//
-		void setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, bool debug, int changesetId);
+		void setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, int changesetId);
 
 		bool load(QString fileName, QString* errorCode);
 		bool load(const QByteArray& data, QString* errorCode);
@@ -147,7 +147,6 @@ namespace Hardware
 		QString userName() const;
 		int changesetId() const;
 		int buildNumber() const;
-		QString buildConfig() const;
 
 		// Data
 		//
@@ -162,7 +161,6 @@ namespace Hardware
 		QString m_userName;
 		int m_changesetId = 0;
 		int m_buildNumber = 0;
-		bool m_debug = false;
 
 		std::map<QString, ModuleFirmware> m_firmwares;
 	};

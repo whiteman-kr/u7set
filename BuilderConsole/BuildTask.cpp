@@ -21,7 +21,6 @@ void BuildTask::start()
 				  m_projectUserName,
 				  m_projectUserPassword,
 				  m_buildOutputPath,
-				  m_buildType,
 				  false);
 
 	return;
@@ -80,22 +79,5 @@ void BuildTask::setProjectUserPassword(QString value)
 void BuildTask::setBuildOutputPath(QString value)
 {
 	m_buildOutputPath = value;
-}
-
-void BuildTask::setBuildType(QString value)
-{
-	if (value.compare(QLatin1String("release"), Qt::CaseInsensitive) == 0)
-	{
-		setBuildType(Builder::BuildType::Release);
-	}
-	else
-	{
-		setBuildType(Builder::BuildType::Debug);
-	}
-}
-
-void BuildTask::setBuildType(Builder::BuildType value)
-{
-	m_buildType = value;
 }
 

@@ -31,6 +31,7 @@ public:
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
 	virtual void showEvent(QShowEvent* event) override;
+	virtual void timerEvent(QTimerEvent* event) override;
 
 	// Public methods
 	//
@@ -86,6 +87,9 @@ private slots:
 	void projectOpened(DbProject project);
 	void projectClosed();
 
+	void buildStarted();
+	void buildFinished(int errorCount);
+
 	// Properties
 	//
 protected:
@@ -140,5 +144,10 @@ private:
 
 	int m_filesTabPageIndex = 0;
 	FilesTabPage* m_filesTabPage = nullptr;
+
+#ifdef Q_OS_WINDOWS
+	QWinTaskbarButton* m_taskBarButton = nullptr;
+	int m_timerId = -1;
+#endif
 };
 

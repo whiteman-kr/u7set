@@ -196,7 +196,7 @@ public slots:
 
     // Build management
     //
-    void slot_buildStart(QString workstation, bool release, int changeset, int* buildID);
+	void slot_buildStart(QString workstation, int changeset, int* buildID);
     void slot_buildFinish(int buildID, int errors, int warnings, QString buildLog);
 
     // Version Control

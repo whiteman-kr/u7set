@@ -268,7 +268,7 @@ message BuildInfo
 {
     required string project = 1;
     required int32 id = 2 [default = -1];
-    required bool release = 3 [default = false];
+	//required bool release = 3 [default = false];	Obsolete
     required int64 date = 4;
     required int32 changeset = 5 [default = 0];
     required string user = 6;

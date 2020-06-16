@@ -3350,13 +3350,6 @@ class BuildInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 id() const;
   inline void set_id(::google::protobuf::int32 value);
 
-  // required bool release = 3 [default = false];
-  inline bool has_release() const;
-  inline void clear_release();
-  static const int kReleaseFieldNumber = 3;
-  inline bool release() const;
-  inline void set_release(bool value);
-
   // required int64 date = 4;
   inline bool has_date() const;
   inline void clear_date();
@@ -3401,8 +3394,6 @@ class BuildInfo : public ::google::protobuf::Message {
   inline void clear_has_project();
   inline void set_has_id();
   inline void clear_has_id();
-  inline void set_has_release();
-  inline void clear_has_release();
   inline void set_has_date();
   inline void clear_has_date();
   inline void set_has_changeset();
@@ -3415,15 +3406,14 @@ class BuildInfo : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* project_;
-  ::google::protobuf::int32 id_;
-  bool release_;
   ::google::protobuf::int64 date_;
+  ::google::protobuf::int32 id_;
+  ::google::protobuf::int32 changeset_;
   ::std::string* user_;
   ::std::string* workstation_;
-  ::google::protobuf::int32 changeset_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -11221,37 +11211,15 @@ inline void BuildInfo::set_id(::google::protobuf::int32 value) {
   id_ = value;
 }
 
-// required bool release = 3 [default = false];
-inline bool BuildInfo::has_release() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void BuildInfo::set_has_release() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void BuildInfo::clear_has_release() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void BuildInfo::clear_release() {
-  release_ = false;
-  clear_has_release();
-}
-inline bool BuildInfo::release() const {
-  return release_;
-}
-inline void BuildInfo::set_release(bool value) {
-  set_has_release();
-  release_ = value;
-}
-
 // required int64 date = 4;
 inline bool BuildInfo::has_date() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void BuildInfo::set_has_date() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void BuildInfo::clear_has_date() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void BuildInfo::clear_date() {
   date_ = GOOGLE_LONGLONG(0);
@@ -11267,13 +11235,13 @@ inline void BuildInfo::set_date(::google::protobuf::int64 value) {
 
 // required int32 changeset = 5 [default = 0];
 inline bool BuildInfo::has_changeset() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void BuildInfo::set_has_changeset() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void BuildInfo::clear_has_changeset() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void BuildInfo::clear_changeset() {
   changeset_ = 0;
@@ -11289,13 +11257,13 @@ inline void BuildInfo::set_changeset(::google::protobuf::int32 value) {
 
 // required string user = 6;
 inline bool BuildInfo::has_user() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void BuildInfo::set_has_user() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void BuildInfo::clear_has_user() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void BuildInfo::clear_user() {
   if (user_ != &::google::protobuf::internal::kEmptyString) {
@@ -11359,13 +11327,13 @@ inline void BuildInfo::set_allocated_user(::std::string* user) {
 
 // required string workstation = 7;
 inline bool BuildInfo::has_workstation() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void BuildInfo::set_has_workstation() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void BuildInfo::clear_has_workstation() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void BuildInfo::clear_workstation() {
   if (workstation_ != &::google::protobuf::internal::kEmptyString) {

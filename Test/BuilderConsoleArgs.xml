@@ -8,5 +8,4 @@
     <ProjectUserName>Administrator</ProjectUserName>
     <ProjectUserPassword>P2ssw0rd</ProjectUserPassword>
 	<BuildOutputPath>c:\temp\build\</BuildOutputPath>
-    <BuildType>debug</BuildType>
 </BuilderArguments>

@@ -86,6 +86,11 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
+	connect(m_buildTabPage, &BuildTabPage::buildStarted, this, &MainWindow::buildStarted);
+	connect(m_buildTabPage, &BuildTabPage::buildFinished, this, &MainWindow::buildFinished);
+
+	// --
+	//
 	setMinimumSize(500, 300);
 	restoreWindowState();
 
@@ -179,7 +184,22 @@ void MainWindow::showEvent(QShowEvent*)
 			   static_cast<int>(screenRect.height() * 0.7));
 	}
 
+#ifdef Q_OS_WINDOWS
+	m_taskBarButton = new QWinTaskbarButton(this);
+	m_taskBarButton->setWindow(windowHandle());
+#endif
+
 	return;
+}
+
+void MainWindow::timerEvent(QTimerEvent* /*event*/)
+{
+#ifdef Q_OS_WINDOWS
+	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
+	{
+		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
+	}
+#endif
 }
 
 void MainWindow::saveWindowState()
@@ -1074,6 +1094,25 @@ void MainWindow::projectClosed()
 	}
 
 	return;
+}
+
+void MainWindow::buildStarted()
+{
+	Q_ASSERT(m_taskBarButton);
+#ifdef Q_OS_WINDOWS
+	m_taskBarButton->progress()->setRange(0, 100);
+	m_taskBarButton->progress()->show();
+
+	m_timerId = startTimer(50);
+#endif
+}
+
+void MainWindow::buildFinished(int /*errorCount*/)
+{
+#ifdef Q_OS_WINDOWS
+	m_taskBarButton->progress()->hide();
+	killTimer(m_timerId);
+#endif
 }
 
 

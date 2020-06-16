@@ -101,9 +101,9 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_settingsWidget = new QWidget(m_vsplitter);
 	QVBoxLayout* settingsWidgetLayout = new QVBoxLayout();
 
-	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
-	m_debugCheckBox->setChecked(true);
-	settingsWidgetLayout->addWidget(m_debugCheckBox);
+//	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
+//	m_debugCheckBox->setChecked(true);
+//	settingsWidgetLayout->addWidget(m_debugCheckBox);
 
 	m_warningsLevelComboBox = new QComboBox(m_settingsWidget);
 
@@ -149,7 +149,9 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(&m_builder, &Builder::Builder::started, this, &BuildTabPage::buildWasStarted);
 	connect(&m_builder, &Builder::Builder::finished, this, &BuildTabPage::buildWasFinished);
-	//connect(&m_builder.log(), &OutputLog::newLogItem, this, &BuildTabPage::newLogItem);
+
+	connect(&m_builder, &Builder::Builder::started, this, &BuildTabPage::buildStarted);
+	connect(&m_builder, &Builder::Builder::finished, this, &BuildTabPage::buildFinished);
 
 	connect(m_warningsLevelComboBox , static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			[](int index)
@@ -172,6 +174,8 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
+
+	return;
 }
 
 BuildTabPage::~BuildTabPage()
@@ -208,6 +212,11 @@ void BuildTabPage::cancelBuild()
 			qDebug() << "WARNING: Exit while the build thread is still running!";
 		}
 	}
+}
+
+int BuildTabPage::progress() const
+{
+	return m_builder.progress();
 }
 
 void BuildTabPage::CreateActions()
@@ -355,8 +364,6 @@ void BuildTabPage::build()
 	//
 	GlobalMessanger::instance().fireBuildStarted();
 
-	bool debug = m_debugCheckBox->isChecked();
-
 	m_builder.start(
 		db()->host(),
 		db()->port(),
@@ -366,7 +373,6 @@ void BuildTabPage::build()
 		db()->currentUser().username(),
 		db()->currentUser().password(),
 		theSettings.buildOutputPath(),
-		debug ? Builder::BuildType::Debug : Builder::BuildType::Release,
 		theSettings.isExpertMode());
 
 	return;
@@ -379,6 +385,19 @@ void BuildTabPage::cancel()
 
 void BuildTabPage::buildWasStarted()
 {
+	// This is required for showng progress indicator on task bar button
+//#ifdef Q_OS_WIN32
+//	m_taskbarButton->setWindow(windowHandle());
+//#endif
+
+//	QWinTaskbarButton* button = new QWinTaskbarButton(this);
+//	button->setWindow(windowHandle());
+//	QWinTaskbarProgress* progress = button->progress();
+
+//	progress->setRange(0, 100);
+//	progress->show();
+//	progress->setValue(50);
+
 	GlobalMessanger::instance().clearBuildSchemaIssues();
 	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
@@ -388,6 +407,10 @@ void BuildTabPage::buildWasStarted()
 
 void BuildTabPage::buildWasFinished(int errorCount)
 {
+//	QWinTaskbarButton* button = new QWinTaskbarButton(this);
+//	QWinTaskbarProgress* progress = button->progress();
+//	progress->hide();
+
 	m_buildButton->setEnabled(true);
 	m_cancelButton->setEnabled(false);
 

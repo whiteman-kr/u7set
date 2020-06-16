@@ -10,14 +10,7 @@ class SimSelectBuildDialog : public QDialog
 	Q_OBJECT
 
 public:
-	enum BuildType
-	{
-		Debug,
-		Release
-	};
-
-public:
-	SimSelectBuildDialog(QString currentProject, BuildType buildType, QString buildPath, QWidget* parent);
+	SimSelectBuildDialog(QString currentProject, QString buildPath, QWidget* parent);
 	~SimSelectBuildDialog();
 
 protected:
@@ -31,7 +24,6 @@ protected slots:
 	virtual void accept() override;
 
 public:
-	BuildType resultBuildType() const;
 	QString resultBuildPath() const;
 
 private:

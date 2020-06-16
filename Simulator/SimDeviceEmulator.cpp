@@ -1402,7 +1402,7 @@ namespace Sim
 				if (receiveBuffer->empty() == true)
 				{
 					// If timeout not happened yet, but receiveBuffer is empty, wait mor time
-					// do not exit from function here, lated validity bit vill be written
+					// do not exit from function here, later validity bit will be written
 					//
 				}
 				else
@@ -1432,6 +1432,24 @@ namespace Sim
 								  .arg(portInfo.portNo)
 								  .arg(portInfo.equipmentID));
 						return false;
+					}
+
+					// Check the DataID which is the part of the payload (first 4 bytes)
+					//
+					if (c->connectionInfo().disableDataIDControl == false)
+					{
+						quint32 receivedDataId = readRamDword(portInfo.rxBufferAbsAddr);
+
+						if (port->portInfo().rxDataID != receivedDataId)
+						{
+							SIM_FAULT(QString("Received DataID mismatch, received 0x%1, expected 0x%2, connection %3, port %4 (%5).")
+									  .arg(receivedDataId, 8, 16, QChar('0'))
+									  .arg(port->portInfo().rxDataID, 8, 16, QChar('0'))
+									  .arg(c->connectionId())
+									  .arg(portInfo.portNo)
+									  .arg(portInfo.equipmentID));
+							return false;
+						}
 					}
 				}
 			}
