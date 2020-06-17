@@ -254,9 +254,13 @@ class AppSignalParam
 	Q_PROPERTY(QString caption READ caption)
 	Q_PROPERTY(QString Caption READ caption)
 
-	/// \brief Signal Equipment ID
+	/// \brief Signal EquipmentID, can be port EquipmentID for inputs/ouputs or LmEquipmentID for internal signals.
 	Q_PROPERTY(QString equipmentID READ equipmentId)
 	Q_PROPERTY(QString EquipmentID READ equipmentId)
+
+	/// \brief Signal Equipment ID
+	Q_PROPERTY(QString lmEquipmentID READ lmEquipmentId)
+	Q_PROPERTY(QString LmEquipmentID READ lmEquipmentId)
 
 	/// \brief Signal Measure Units
 	Q_PROPERTY(QString unit READ unit)
@@ -346,6 +350,9 @@ public:
 
 	QString equipmentId() const;
 	void setEquipmentId(const QString& value);
+
+	QString lmEquipmentId() const;
+	void setLmEquipmentId(const QString& value);
 
 	E::Channel channel() const;
 	void setChannel(E::Channel value);
@@ -441,6 +448,7 @@ private:
 	QString m_customSignalId;
 	QString m_caption;
 	QString m_equipmentId;
+	QString m_lmEquipmentId;
 
 	E::Channel m_channel = E::Channel::A;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;

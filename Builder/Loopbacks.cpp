@@ -191,6 +191,7 @@ namespace Builder
 		if (loopback->ualSignal() == nullptr)
 		{
 			loopback->setUalSignal(ualSignal);
+			ualSignal->setLoopback(loopback);
 		}
 		else
 		{

@@ -246,7 +246,6 @@ namespace Builder
 		bool checkLoopbacks();
 		bool linkLoopbackTargets();
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
-		bool removeLoopbackSignalsFromHeap();
 
 		bool checkBusProcessingItemsConnections();
 
@@ -289,6 +288,7 @@ namespace Builder
 		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool isBusTypesAreEqual(const QStringList& busTypes);
 		std::optional<int> getOutPinExpectedReadCount(const LogicPin& outPin);
+		int getAfbInPinExpectedReadCount(const UalItem* ualItem, const QUuid& inPinGuid);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
@@ -301,6 +301,8 @@ namespace Builder
 
 		bool buildTuningData();
 		bool getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled);
+
+		bool disposeSignalsInHeap();
 
 		bool createSignalLists();
 
@@ -678,6 +680,7 @@ namespace Builder
 		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
 		::std::set<QString> m_signalsWithFlagsIDs;
+		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;
 
 		Loopbacks m_loopbacks;
 

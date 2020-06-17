@@ -440,6 +440,7 @@ namespace Builder
 		void wrnALC5192(QString appSignalID, QString portID, QString connectionID);		// Tx signal %1 is defined in port %2 raw data description isn't connected to transmitter (Connection %3).
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
+		void errALC5195(QString itemLabel, QUuid itemID, QString schemaID);							// Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2).
 
 		// firmware writing errors
 
