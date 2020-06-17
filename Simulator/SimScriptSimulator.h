@@ -92,6 +92,9 @@ namespace Sim
 		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
 		bool reset();
 
+		/// \brief Get signal state, if signal is not found then exception is thrown.
+		QJSValue signalState(QString appSignalId);
+
 		/// \brief Get signal value, if signal is not found then exception is thrown.
 		/// <b>Note:</b> This function does not return full signal state with validity and other flags.
 		double signalValue(QString appSignalId);
