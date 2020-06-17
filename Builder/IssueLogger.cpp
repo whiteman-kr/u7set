@@ -6951,8 +6951,28 @@ namespace Builder
 						arg(port1ID).arg(port2ID));
 	}
 
+	/// IssueCode: ALC5195
+	///
+	/// IssueType: Error
+	///
+	/// Title: Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2).
+	///
+	/// Parameters:
+	///		%1 schema item label
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Named signal isn't connected to set_flags item output. Check set_flags item connections.
+	///
+	void IssueLogger::errALC5195(QString itemLabel, QUuid itemID, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5195, itemID, schemaID);
 
-
+		LOG_ERROR(IssueType::AlCompiler,
+				  5195,
+				  QString(tr("Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2).")).
+						arg(itemLabel).arg(schemaID));
+	}
 
 
 	/// IssueCode: ALC5800

@@ -361,6 +361,9 @@ public:
 	QStringList getFlagSignalsIDs() const { return m_stateFlagsSignals.values(); }
 	bool hasFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
+	const AppSignalStateFlagsMap& stateFlagsSignals() const { return m_stateFlagsSignals;};
+
+
 	void initTuningValues();
 
 	void setLog(Builder::IssueLogger* log) { m_log = log; }

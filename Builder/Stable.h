@@ -5,6 +5,9 @@
 #include <typeindex>
 #include <functional>
 #include <set>
+#include <unordered_set>
+#include <vector>
+#include <optional>
 #include <memory>
 
 // Qt includes

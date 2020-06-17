@@ -357,6 +357,27 @@ namespace Sim
 		return true;
 	}
 
+	QJSValue ScriptSimulator::signalState(QString appSignalId)
+	{
+		bool ok = false;
+		AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+
+		if (ok == false)
+		{
+			throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
+			return -1;
+		}
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return {};
+		}
+
+		return jsEngine->toScriptValue(state);
+	}
+
 	double ScriptSimulator::signalValue(QString appSignalId)
 	{
 		bool ok = false;
