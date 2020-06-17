@@ -1741,6 +1741,11 @@ namespace Builder
 		return m_ualAddr;
 	}
 
+	Address16 UalSignal::ualAddrWithoutChecks() const
+	{
+		return m_ualAddr;
+	}
+
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
 		if (m_isConst == true)
@@ -2287,9 +2292,41 @@ namespace Builder
 		return result;
 	}
 
+	void UalSignal::preliminarySetHeapPlaced(int expectedHeapReadsCount)
+	{
+		m_expectedHeapReadsCount = expectedHeapReadsCount;
+	}
+
+	bool UalSignal::canBePlacedInHeap() const
+	{
+		return	m_isAcquired == false &&
+				m_loopback == nullptr &&
+				m_expectedHeapReadsCount > 0;
+	}
+
+	void UalSignal::setHeapPlaced()
+	{
+		Q_ASSERT(m_expectedHeapReadsCount > 0);
+		m_isHeapPlaced = true;
+	}
+
+	void UalSignal::resetHeapPlaced()
+	{
+		m_isHeapPlaced = false;
+		m_expectedHeapReadsCount = 0;
+	}
+
+	int UalSignal::expectedHeapReadsCount() const
+	{
+		Q_ASSERT(m_isHeapPlaced == true);
+
+		return m_expectedHeapReadsCount;
+	}
+
+
 	// ---------------------------------------------------------------------------------------
 	//
-	// AppSignalsMap class implementation
+	// UalSignalsMap class implementation
 	//
 	// ---------------------------------------------------------------------------------------
 
@@ -2838,11 +2875,18 @@ namespace Builder
 			}
 			else
 			{
-				str.append("static;");
-				str.append(QString::number(ualSignal->ualAddr().offset()));
-				str += ";";
-				str.append(QString::number(ualSignal->ualAddr().bit()));
-				str += ";";
+				if (ualSignal->isConst() == true)
+				{
+					str.append("const;-1;-1;");		// no ualAddr
+				}
+				else
+				{
+					str.append("static;");
+					str.append(QString::number(ualSignal->ualAddr().offset()));
+					str += ";";
+					str.append(QString::number(ualSignal->ualAddr().bit()));
+					str += ";";
+				}
 			}
 
 			str.append(QString::number(ualSignal->ioBufAddr().offset()));
@@ -2938,26 +2982,43 @@ namespace Builder
 		return m_analogAndBusSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
 	}
 
-	void UalSignalsMap::removeSignalFromHeap(const UalSignal& ualSignal)
+	void UalSignalsMap::disposeSignalsInHeaps(const std::unordered_set<UalSignal *>& flagsSignals)
 	{
-		if (ualSignal.isHeapPlaced() == false)
+		for(UalSignal* ualSignal : *this)
 		{
-			return;
-		}
+			TEST_PTR_CONTINUE(ualSignal);
 
-		switch(ualSignal.signalType())
-		{
-		case E::SignalType::Discrete:
-			m_discreteSignalsHeap.removeItem(ualSignal);
-			break;
+			if (flagsSignals.find(ualSignal) != flagsSignals.end())
+			{
+				// any signal used in flags processing can't be placed in heap
+				//
+				ualSignal->resetHeapPlaced();
+				continue;
+			}
 
-		case E::SignalType::Analog:
-		case E::SignalType::Bus:
-			m_analogAndBusSignalsHeap.removeItem(ualSignal);
-			break;
+			if (ualSignal->canBePlacedInHeap() == false)
+			{
+				ualSignal->resetHeapPlaced();
+				continue;
+			}
 
-		default:
-			Q_ASSERT(false);
+			ualSignal->setHeapPlaced();
+
+			switch(ualSignal->signalType())
+			{
+			case E::SignalType::Discrete:
+				m_discreteSignalsHeap.appendItem(*ualSignal, ualSignal->expectedHeapReadsCount());
+				break;
+
+			case E::SignalType::Analog:
+			case E::SignalType::Bus:
+				m_analogAndBusSignalsHeap.appendItem(*ualSignal, ualSignal->expectedHeapReadsCount());
+				break;
+
+			default:
+
+				Q_ASSERT(false);
+			}
 		}
 	}
 
@@ -3051,25 +3112,9 @@ namespace Builder
 
 		// signals heap support
 		//
-		if (expectedReadCount > 0)
+		if (expectedReadCount.has_value() == true &&  expectedReadCount.value() > 0)
 		{
-			ualSignal->setHeapPlaced();
-
-			switch(ualSignal->signalType())
-			{
-			case E::SignalType::Discrete:
-				m_discreteSignalsHeap.appendItem(*ualSignal, expectedReadCount);
-				break;
-
-			case E::SignalType::Analog:
-			case E::SignalType::Bus:
-				m_analogAndBusSignalsHeap.appendItem(*ualSignal, expectedReadCount);
-				break;
-
-			default:
-
-				Q_ASSERT(false);
-			}
+			ualSignal->preliminarySetHeapPlaced(expectedReadCount.value());
 		}
 		//
 		// signals heap support
