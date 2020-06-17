@@ -153,7 +153,7 @@ namespace Builder
 
 				QRegExp rx(m);
 				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(s.equipmentID()))
+				if (rx.exactMatch(s.lmEquipmentID()))
 				{
 					result = true;
 					break;

@@ -37,7 +37,7 @@ namespace TuningLog
 			l << userName;
 		}
 
-		l << asp.equipmentId();
+		l << asp.lmEquipmentId();
 		l << asp.customSignalId();
 		l << oldValue.toString();
 		l << newValue.toString();

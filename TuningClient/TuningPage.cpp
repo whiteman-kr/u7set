@@ -1193,7 +1193,7 @@ void TuningPage::fillObjectsList()
 			case FilterType::All:
 				if (asp.appSignalId().contains(mask, Qt::CaseInsensitive) == true
 						|| asp.customSignalId().contains(mask, Qt::CaseInsensitive) == true
-						|| asp.equipmentId().contains(mask, Qt::CaseInsensitive) == true
+						|| asp.lmEquipmentId().contains(mask, Qt::CaseInsensitive) == true
 						|| asp.caption().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
@@ -1212,7 +1212,7 @@ void TuningPage::fillObjectsList()
 				}
 				break;
 			case FilterType::EquipmentID:
-				if (asp.equipmentId().contains(mask, Qt::CaseInsensitive) == true)
+				if (asp.lmEquipmentId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}

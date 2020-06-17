@@ -840,7 +840,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 									  .arg(m_signals->newValue(arrivedState.hash()).toString())
 									  .arg(param.customSignalId())
 									  .arg(param.caption())
-									  .arg(param.equipmentId())
+									  .arg(param.lmEquipmentId())
 									  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
 									  );
 					}
