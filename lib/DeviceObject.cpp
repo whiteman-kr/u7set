@@ -125,6 +125,29 @@ namespace Hardware
 
 	const QString PropertyNames::categoryAppSignal = "AppSignal";
 
+	// Ethernet adapter properties
+	//
+	const QString overrideAppDataWordCount;
+	const QString overrideDiagDataWordCount;
+
+	// TuningService properties
+	//
+	const QString PropertyNames::tuningDataIp = "TuningDataIP";
+	const QString PropertyNames::tuningDataPort = "TuningDataPort";
+	const QString PropertyNames::tuningDataNetmask = "TuningDataNetmask";
+
+	// AppDataService properties
+	//
+	const QString PropertyNames::appDataReceivingIp = "AppDataReceivingIP";
+	const QString PropertyNames::appDataReceivingPort = "AppDataReceivingPort";
+	const QString PropertyNames::appDataReceivingNetmask = "AppDataReceivingNetmask";
+
+	// DiagDataService properties
+	//
+	const QString PropertyNames::diagDataReceivingIp = "DiagDataReceivingIP";
+	const QString PropertyNames::diagDataReceivingPort = "DiagDataReceivingPort";
+	const QString PropertyNames::diagDataReceivingNetmask = "DiagDataReceivingNetmask";
+
 	//
 	//
 	// DeviceObject

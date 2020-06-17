@@ -12,6 +12,7 @@ public:
 							int lanControllerNo,
 							E::LanControllerType lanControllerType,
 							LanControllerInfo* lanControllerInfo,
+							const Hardware::EquipmentSet& equipmentSet,
 							Builder::IssueLogger* log);
 
 	static bool isProvideTuning(E::LanControllerType lanControllerType);
@@ -32,6 +33,7 @@ public:
 	static const QString PROP_APP_DATA_SERVICE_ID;
 	static const QString PROP_LM_APP_DATA_UID;
 	static const QString PROP_LM_APP_DATA_SIZE;
+	static const QString PROP_LM_OVERRIDE_APP_DATA_WORD_COUNT;
 
 	static const QString PROP_DIAG_DATA_ENABLE;
 	static const QString PROP_DIAG_DATA_IP;
@@ -41,6 +43,8 @@ public:
 	static const QString PROP_LM_DIAG_DATA_SIZE;
 
 	static const QString LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
+
+	static const QString IP_NULL;
 
 private:
 	static Hardware::DeviceController* getLanControllerBySuffix(const Hardware::DeviceModule& lm, const QString& suffix);

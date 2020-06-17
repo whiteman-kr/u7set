@@ -100,6 +100,29 @@ namespace Hardware
 		static const QString appSignalBusTypeId;
 
 		static const QString categoryAppSignal;
+
+		// Ethernet adapter properties
+		//
+		static const QString overrideAppDataWordCount;
+		static const QString overrideDiagDataWordCount;
+
+		// TuningService properties
+		//
+		static const QString tuningDataIp;
+		static const QString tuningDataPort;
+		static const QString tuningDataNetmask;
+
+		// AppDataService properties
+		//
+		static const QString appDataReceivingIp;
+		static const QString appDataReceivingPort;
+		static const QString appDataReceivingNetmask;
+
+		// DiagDataService properties
+		//
+		static const QString diagDataReceivingIp;
+		static const QString diagDataReceivingPort;
+		static const QString diagDataReceivingNetmask;
 	};
 
 	// Forward declarations

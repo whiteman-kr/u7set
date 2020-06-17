@@ -23,6 +23,7 @@ const QString LanControllerInfoHelper::PROP_APP_DATA_PORT("AppDataPort");
 const QString LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID("AppDataServiceID");
 const QString LanControllerInfoHelper::PROP_LM_APP_DATA_UID("AppLANDataUID");
 const QString LanControllerInfoHelper::PROP_LM_APP_DATA_SIZE("AppLANDataSize");
+const QString LanControllerInfoHelper::PROP_LM_OVERRIDE_APP_DATA_WORD_COUNT("OverrideAppDataWordCount");
 
 const QString LanControllerInfoHelper::PROP_DIAG_DATA_ENABLE("DiagDataEnable");
 const QString LanControllerInfoHelper::PROP_DIAG_DATA_IP("DiagDataIP");
@@ -30,12 +31,16 @@ const QString LanControllerInfoHelper::PROP_DIAG_DATA_PORT("DiagDataPort");
 const QString LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID("DiagDataServiceID");
 const QString LanControllerInfoHelper::PROP_LM_DIAG_DATA_UID("DiagLANDataUID");
 const QString LanControllerInfoHelper::PROP_LM_DIAG_DATA_SIZE("DiagLANDataSize");
+const QString LanControllerInfoHelper::PROP_LM_OVERRIDE_DIAG_DATA_WORD_COUNT("OverrideDiagDataWordCount");
 
 const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("_ETHERNET0%1");
+
+const QString LanControllerInfoHelper::IP_NULL("0.0.0.0");
 
 bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 										int lanControllerNo,
 										E::LanControllerType lanControllerType,
+										const Hardware::EquipmentSet& equipmentSet,
 										LanControllerInfo* lanControllerInfo,
 										Builder::IssueLogger* log)
 {
@@ -76,6 +81,38 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 											   &lanControllerInfo->tuningPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, PROP_TUNING_SERVICE_ID,
 											   &lanControllerInfo->tuningServiceID, log);
+
+
+		lanControllerInfo->tuningServiceIP = IP_NULL;
+		lanControllerInfo->tuningServicePort = 0;
+
+		if (lanControllerInfo->tuningEnable == true &&
+			lanControllerInfo->tuningServiceID.isEmpty() == false)
+		{
+			Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID);
+
+			if (tunService == nullptr)
+			{
+				// Property %1.%2 is linked to undefined software ID %3.
+				//
+				log->errCFG3021(lanControllerInfo->equipmentID, PROP_TUNING_SERVICE_ID, lanControllerInfo->tuningServiceID);
+				result = false;
+			}
+			else
+			{
+				result &= DeviceHelper::getStrProperty(tunService,
+													   Hardware::PropertyNames::tuningDataIp,
+													   &lanControllerInfo->tuningServiceID, log);
+
+				result &= DeviceHelper::getIntProperty(tunService,
+													   Hardware::PropertyNames::tuningDataPort,
+													   &lanControllerInfo->tuningServicePort, log);
+
+				result &= DeviceHelper::getStrProperty(tunService,
+													   Hardware::PropertyNames::tuningDataNetmask,
+													   &lanControllerInfo->tuningServiceNetmask, log);
+			}
+		}
 	}
 
 	if (isProvideAppData(lanControllerType) == true)
@@ -92,6 +129,8 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 											   &lanControllerInfo->appDataPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, PROP_APP_DATA_SERVICE_ID,
 											   &lanControllerInfo->appDataServiceID, log);
+		result &= DeviceHelper::getUIntProperty(&lm, PROP_LM_OVERRIDE_APP_DATA_WORD_COUNT,
+												&lanControllerInfo->overrideAppDataWordCount, log);
 
 		result &= DeviceHelper::getUIntProperty(&lm, PROP_LM_APP_DATA_UID,
 												&lanControllerInfo->appDataUID, log);
@@ -120,6 +159,9 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 											   &lanControllerInfo->diagDataPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, PROP_DIAG_DATA_SERVICE_ID,
 											   &lanControllerInfo->diagDataServiceID, log);
+		result &= DeviceHelper::getUIntProperty(&lm, PROP_LM_OVERRIDE_DIAG_DATA_WORD_COUNT,
+												&lanControllerInfo->overrideDiagDataWordCount, log);
+
 
 		lanControllerInfo->diagDataUID = 0;
 		lanControllerInfo->diagDataSize = 0;
