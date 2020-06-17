@@ -68,6 +68,7 @@ windows build job:
     - "copy %QT_BIN_DIR%\\bin\\Qt5Svg.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Test.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Widgets.dll \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy %QT_BIN_DIR%\\bin\\Qt5WinExtras.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Xml.dll \"%CI_PROJECT_DIR%/bin/release/\""
 # Copy Qt plugins
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/bearer\""
