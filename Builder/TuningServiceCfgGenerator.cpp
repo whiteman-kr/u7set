@@ -111,6 +111,7 @@ namespace Builder
 				result &= ts.getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
 													   lanController.m_place,
 													   lanController.m_type,
+				                                       *m_equipment,
 													   m_subsystemKeyMap,
 													   m_lmsUniqueIdMap,
 													   m_log);

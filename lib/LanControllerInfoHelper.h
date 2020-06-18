@@ -2,6 +2,7 @@
 
 #include "Types.h"
 #include "DeviceObject.h"
+#include "ConstStrings.h"
 #include "../Builder/IssueLogger.h"
 #include "LanControllerInfo.h"
 
@@ -22,26 +23,6 @@ public:
 	static QString getLanControllerSuffix(int controllerNo);
 
 public:
-	static const QString PROP_TUNING_ENABLE;
-	static const QString PROP_TUNING_IP;
-	static const QString PROP_TUNING_PORT;
-	static const QString PROP_TUNING_SERVICE_ID;
-
-	static const QString PROP_APP_DATA_ENABLE;
-	static const QString PROP_APP_DATA_IP;
-	static const QString PROP_APP_DATA_PORT;
-	static const QString PROP_APP_DATA_SERVICE_ID;
-	static const QString PROP_LM_APP_DATA_UID;
-	static const QString PROP_LM_APP_DATA_SIZE;
-	static const QString PROP_LM_OVERRIDE_APP_DATA_WORD_COUNT;
-
-	static const QString PROP_DIAG_DATA_ENABLE;
-	static const QString PROP_DIAG_DATA_IP;
-	static const QString PROP_DIAG_DATA_PORT;
-	static const QString PROP_DIAG_DATA_SERVICE_ID;
-	static const QString PROP_LM_DIAG_DATA_UID;
-	static const QString PROP_LM_DIAG_DATA_SIZE;
-
 	static const QString LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
 
 	static const QString IP_NULL;

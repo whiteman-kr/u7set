@@ -55,6 +55,7 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 										   DataType dataType,
 										   int adapterNo,
 										   E::LanControllerType lanControllerType,
+                                           const Hardware::EquipmentSet& equipmentSet,
 										   const SubsystemKeyMap& subsystemKeyMap,
 										   const QHash<QString, quint64>& lmUniqueIdMap,
 										   Builder::IssueLogger* log)
@@ -87,7 +88,7 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 
 	LanControllerInfo lanControllerInfo;
 
-	result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType, &lanControllerInfo, log);
+	result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType, &lanControllerInfo, equipmentSet, log);
 
 	m_lmAdapterID = lanControllerInfo.equipmentID;
 

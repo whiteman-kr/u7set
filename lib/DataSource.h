@@ -74,6 +74,7 @@ public:
 								   DataType dataType,
 								   int adapterNo,
 								   E::LanControllerType adapterType,
+								   const Hardware::EquipmentSet& equipmentSet,
 								   const SubsystemKeyMap& subsystemKeyMap,
 								   const QHash<QString, quint64>& lmUniqueIdMap,
 								   Builder::IssueLogger* log);

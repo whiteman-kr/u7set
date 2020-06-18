@@ -680,7 +680,7 @@ namespace Builder
 				Hardware::Software* software = nullptr;
 
 				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
-				                                           &lanControllerInfo, log);
+				                                           &lanControllerInfo, *m_equipment, log);
 
 				if (result == false)
 				{
@@ -708,7 +708,7 @@ namespace Builder
 							// Property '%1.%2' is empty.
 							//
 							log->errCFG3022(lanControllerInfo.equipmentID,
-							                LanControllerInfoHelper::PROP_TUNING_SERVICE_ID);
+							                EquipmentPropNames::TUNING_SERVICE_ID);
 						}
 						else
 						{
@@ -717,7 +717,7 @@ namespace Builder
 								// Property '%1.%2' is linked to undefined software ID '%3'.
 								//
 								log->errCFG3021(lanControllerInfo.equipmentID,
-								                LanControllerInfoHelper::PROP_TUNING_SERVICE_ID,
+								                EquipmentPropNames::TUNING_SERVICE_ID,
 								                lanControllerInfo.tuningServiceID);
 							}
 							else
@@ -729,7 +729,7 @@ namespace Builder
 									// Property '%1.%2' is linked to not compatible software '%3'.
 									//
 									log->errCFG3017(lanControllerInfo.equipmentID,
-									                LanControllerInfoHelper::PROP_TUNING_SERVICE_ID,
+									                EquipmentPropNames::TUNING_SERVICE_ID,
 									                lanControllerInfo.tuningServiceID);
 									result = false;
 								}
@@ -747,7 +747,7 @@ namespace Builder
 							// Property '%1.%2' is empty.
 							//
 							log->errCFG3022(lanControllerInfo.equipmentID,
-							                LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID);
+							                EquipmentPropNames::APP_DATA_SERVICE_ID);
 						}
 						else
 						{
@@ -756,7 +756,7 @@ namespace Builder
 								// Property '%1.%2' is linked to undefined software ID '%3'.
 								//
 								log->errCFG3021(lanControllerInfo.equipmentID,
-								                LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID,
+								                EquipmentPropNames::APP_DATA_SERVICE_ID,
 								                lanControllerInfo.appDataServiceID);
 							}
 							else
@@ -768,7 +768,7 @@ namespace Builder
 									// Property '%1.%2' is linked to not compatible software '%3'.
 									//
 									log->errCFG3017(lanControllerInfo.equipmentID,
-									                LanControllerInfoHelper::PROP_APP_DATA_SERVICE_ID,
+									                EquipmentPropNames::APP_DATA_SERVICE_ID,
 									                lanControllerInfo.appDataServiceID);
 									result = false;
 								}
@@ -786,7 +786,7 @@ namespace Builder
 							// Property '%1.%2' is empty.
 							//
 							log->errCFG3022(lanControllerInfo.equipmentID,
-							                LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID);
+							                EquipmentPropNames::DIAG_DATA_SERVICE_ID);
 						}
 						else
 						{
@@ -795,7 +795,7 @@ namespace Builder
 								// Property '%1.%2' is linked to undefined software ID '%3'.
 								//
 								log->errCFG3021(lanControllerInfo.equipmentID,
-								                LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID,
+								                EquipmentPropNames::DIAG_DATA_SERVICE_ID,
 								                lanControllerInfo.diagDataServiceID);
 							}
 							else
@@ -807,7 +807,7 @@ namespace Builder
 									// Property '%1.%2' is linked to not compatible software '%3'.
 									//
 									log->errCFG3017(lanControllerInfo.equipmentID,
-									                LanControllerInfoHelper::PROP_DIAG_DATA_SERVICE_ID,
+									                EquipmentPropNames::DIAG_DATA_SERVICE_ID,
 									                lanControllerInfo.diagDataServiceID);
 									result = false;
 								}

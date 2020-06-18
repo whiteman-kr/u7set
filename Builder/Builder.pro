@@ -158,6 +158,7 @@ SOURCES += \
 
 HEADERS += \
     ../lib/ClientBehavior.h \
+    ../lib/ConstStrings.h \
     ../lib/DomXmlHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \

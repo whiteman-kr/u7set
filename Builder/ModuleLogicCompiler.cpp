@@ -4112,7 +4112,7 @@ namespace Builder
 			return false;
 		}
 
-		if (DeviceHelper::isPropertyExists(adapter, LanControllerInfoHelper::PROP_TUNING_ENABLE) == false)
+		if (DeviceHelper::isPropertyExists(adapter, EquipmentPropNames::TUNING_ENABLE) == false)
 		{
 			*tuningPropertyExists = false;
 			return true;
@@ -4121,7 +4121,7 @@ namespace Builder
 		*tuningPropertyExists = true;
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
-												 LanControllerInfoHelper::PROP_TUNING_ENABLE,
+		                                         EquipmentPropNames::TUNING_ENABLE,
 												 tuningEnabled,
 												 m_log);
 		return res;
@@ -12463,7 +12463,7 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											LanControllerInfoHelper::PROP_LM_APP_DATA_SIZE,
+		                                    EquipmentPropNames::LM_APP_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
@@ -12743,7 +12743,7 @@ namespace Builder
 		m_appLogicUniqueID = crc.result();
 
 		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											LanControllerInfoHelper::PROP_LM_APP_DATA_UID,
+		                                    EquipmentPropNames::LM_APP_DATA_UID,
 											crc.result32(),
 											m_log);
 	}

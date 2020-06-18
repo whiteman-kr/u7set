@@ -226,7 +226,8 @@ namespace Builder
 			{
 				LanControllerInfo lanControllerInfo;
 
-				LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type, &lanControllerInfo, log());
+				LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
+				                                 &lanControllerInfo, *equipmentSet(), log());
 
 				bool tuning = false;
 				bool appData = false;

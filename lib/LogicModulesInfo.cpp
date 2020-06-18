@@ -267,7 +267,8 @@ bool LogicModulesInfo::load(LogicModuleInfo* lmi, const QDomNode& node, QString*
 
 			LanControllerInfo& lci = lmInfo->lanControllers[i];
 
-			result &= LanControllerInfoHelper::getInfo(	*lmModule.get(),	lc.m_place, lc.m_type, &lci, mc.log());
+			result &= LanControllerInfoHelper::getInfo(	*lmModule.get(), lc.m_place, lc.m_type, &lci,
+														m_equipmentSet, mc.log());
 		}
 
 		return result;
