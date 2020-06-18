@@ -101,8 +101,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		break;
 		case TuningModelColumns::EquipmentID:
 		{
-			v1 = asp1.equipmentId();
-			v2 = asp2.equipmentId();
+			v1 = asp1.lmEquipmentId();
+			v2 = asp2.lmEquipmentId();
 		}
 		break;
 	case TuningModelColumns::AppSignalID:
@@ -813,10 +813,10 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.equipmentId()).arg(hashCount - 1);
+				return tr("%1 [+%2]").arg(asp.lmEquipmentId()).arg(hashCount - 1);
 			}
 
-			return asp.equipmentId();
+			return asp.lmEquipmentId();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::AppSignalID))

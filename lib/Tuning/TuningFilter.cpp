@@ -855,7 +855,7 @@ bool TuningFilter::match(const AppSignalParam& object) const
 		return false;
 	}
 
-	if (processMaskList(object.equipmentId(), m_equipmentIDMasks) == false)
+	if (processMaskList(object.lmEquipmentId(), m_equipmentIDMasks) == false)
 	{
 		return false;
 	}

@@ -18,6 +18,26 @@ namespace Sim
 {
 	class Simulator;
 
+
+	struct FlagsReadStruct : Sim::Output
+	{
+		size_t flagCount = 0;
+		std::array<std::pair<E::AppSignalStateFlagType, Address16>, sizeof AppSignalStateFlags::all * 8> flagsSignalAddresses;
+
+		size_t flagConstsCount = 0;
+		std::array<std::pair<E::AppSignalStateFlagType, quint32>, sizeof AppSignalStateFlags::all * 8> flagsConsts;
+
+		bool create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams);
+
+		AppSignalStateFlags signalFlags(const Ram& ram) const;
+	};
+
+
+	//
+	//
+	//	AppSignalManager
+	//
+	//
 	class AppSignalManager : public QObject, public IAppSignalManager, protected Sim::Output
 	{
 		Q_OBJECT
@@ -96,9 +116,10 @@ namespace Sim
 
 		// SimRuntime data
 		//
-		mutable QReadWriteLock m_ramLock;
+		mutable QReadWriteLock m_ramLock{QReadWriteLock::Recursive};
 		std::map<Hash, Ram> m_ram;			// key is hash EquipmentID
 		std::map<Hash, Times> m_ramTimes;	// RAM memory update time - key is hash EquipmentID
+		std::unordered_map<Hash, FlagsReadStruct> m_flagsStruct;	// Signnal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
 
 		// Realtime trends data
 		//
@@ -123,6 +144,7 @@ namespace Sim
 		mutable QMutex m_trendMutex;
 		std::list<Trend> m_trends;
 	};
+
 
 }
 

@@ -75,6 +75,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../lib/Address16.cpp \
+    ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
@@ -121,6 +122,7 @@ SOURCES += \
 HEADERS += \
     ../Builder/CfgFiles.h \
     ../lib/Address16.h \
+    ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
     ../lib/Hash.h \
     SimCommandProcessor_LM5_LM6.h \

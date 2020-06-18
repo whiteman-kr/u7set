@@ -30,6 +30,7 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 	ui->m_lineCustomAppSignalId->setText(asp.customSignalId());
 	ui->m_lineCaption->setText(asp.caption());
 	ui->m_lineEquipmentId->setText(asp.equipmentId());
+	ui->m_lineLmEquipmentId->setText(asp.lmEquipmentId());
 
 	updateInfo();
 

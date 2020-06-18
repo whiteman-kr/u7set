@@ -2973,7 +2973,6 @@ function testAfbPulseGenV0(sim)
 }
 
 
-
 function test3ChannelDicreteMajority(sim)
 {
     // Schema: TEST_3CHANNEL_INPUT
@@ -3048,3 +3047,227 @@ function test3ChannelDicreteMajority(sim)
 
     return;
 }
+
+
+function testFlags(sim)
+{
+    // Schema: TEST_FLAGS
+    //
+    let state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 0);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_IN_VALIDITY", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_IN_VALIDITY", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_IN_SIMULATED", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 1);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_IN_VALIDITY", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_IN_BLOCKED", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 1);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_IN_VALIDITY", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_IN_MISMATCH", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 1);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_IN_VALIDITY", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_IN_HIGHLIMIT", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 1);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_IN_VALIDITY", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_IN_LOWLIMIT", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_R1");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 1);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_T2_SIM", 0);
+    sim.overrideSignalValue("#TEST_FLAGS_T2_BLOCK", 0);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_T2_RESULT");
+    assert(state1.value === 1);
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_T2_SIM", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_T2_BLOCK", 0);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_T2_RESULT");
+    assert(state1.value === 1);
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 1);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_T2_SIM", 0);
+    sim.overrideSignalValue("#TEST_FLAGS_T2_BLOCK", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_T2_RESULT");
+    assert(state1.value === 0);
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 1);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_FLAGS_T2_SIM", 1);
+    sim.overrideSignalValue("#TEST_FLAGS_T2_BLOCK", 1);
+    sim.startForMs(5);
+    state1 = sim.signalState("#TEST_FLAGS_T2_RESULT");
+    assert(state1.value === 0);
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 1);
+    assert(state1.blocked == 1);
+    assert(state1.mismatch == 0);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 0);
+
+    state1 = sim.signalState("#TEST_FLAGS_T3_IN1");
+    assert(state1.mismatch == 0);
+
+    state1 = sim.signalState("#TEST_FLAGS_T4_IN1");
+    assert(state1.mismatch == 1);
+
+    state1 = sim.signalState("#TEST_FLAGS_R5");
+    assert(state1.valid == 1);
+    assert(state1.stateAvailable == 1);
+    assert(state1.simulated == 0);
+    assert(state1.blocked == 0);
+    assert(state1.mismatch == 1);
+    assert(state1.aboveHighLimit == 0);
+    assert(state1.belowLowLimit == 1);
+
+    // Test from schema TEST_MISMATCH_V4
+    //
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_IN1", 100);
+    sim.startForMs(5);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").mismatch == 1);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN2").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN3").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN4").mismatch == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_IN2", 100);
+    sim.startForMs(5);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN2").mismatch == 1);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN3").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN4").mismatch == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_IN3", 100);
+    sim.startForMs(5);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN2").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN3").mismatch == 1);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN4").mismatch == 0);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_IN4", 100);
+    sim.startForMs(5);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN2").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN3").mismatch == 0);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN4").mismatch == 1);
+
+    // Test for analog inputs with validity input
+    //
+    sim.overridesReset();
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03AVALID", 0);
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03BVALID", 0);
+    sim.startForMs(5);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03A").valid === false);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03B").valid === false);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03AVALID", 1);
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03BVALID", 0);
+    sim.startForMs(5);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03A").valid === true);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03B").valid === false);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03AVALID", 0);
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03BVALID", 1);
+    sim.startForMs(5);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03A").valid === false);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03B").valid === true);
+
+    return;
+}
+
