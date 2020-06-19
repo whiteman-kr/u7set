@@ -59,6 +59,7 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsTabPage::testsTreeDoubleClicked);
 	connect(m_openFilesTreeWidget, &QTreeWidget::doubleClicked, this, &TestsTabPage::openFilesDoubleClicked);
 
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
@@ -207,19 +208,16 @@ void TestsTabPage::openDocument()
 
 	TestTabPageDocument& doc = m_openDocuments[fullFileName];
 
-	doc.textEditor = new QsciScintilla(this);
-	doc.textEditor->setUtf8(true);
-	doc.textEditor->setText(dbFile->data());
-	doc.textEditor->setReadOnly(readOnly);
-	doc.textEditor->setLexer(&m_lexerJavaScript);
-	doc.textEditor->setMarginType(0, QsciScintilla::NumberMargin);
-	doc.textEditor->setMarginWidth(0, 40);
-	doc.textEditor->setFont(m_editorFont);
-	doc.textEditor->setTabWidth(4);
-	doc.textEditor->setAutoIndent(true);
-	connect(doc.textEditor, &QsciScintilla::textChanged, this, &TestsTabPage::textChanged);
-	connect(doc.textEditor, &QsciScintilla::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
-	m_editorLayout->addWidget(doc.textEditor);
+	doc.codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
+	doc.codeEditor->setText(dbFile->data());
+	doc.codeEditor->setReadOnly(readOnly);
+
+	connect(doc.codeEditor, &IdeCodeEditor::textChanged, this, &TestsTabPage::textChanged);
+	connect(doc.codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
+	connect(doc.codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsTabPage::onCloseKeyPressed);
+	connect(doc.codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsTabPage::onSaveKeyPressed);
+	connect(doc.codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsTabPage::onCtrlTabKeyPressed);
+	m_editorLayout->addWidget(doc.codeEditor);
 
 
 	doc.treeWidgetItem = item;
@@ -283,6 +281,54 @@ void TestsTabPage::closeCurrentDocument()
 {
 	closeDocument(m_currentDocument);
 	return;
+}
+
+void TestsTabPage::onSaveKeyPressed()
+{
+	if (documentIsOpen(m_currentDocument) == true)
+	{
+		const TestTabPageDocument& doc = m_openDocuments[m_currentDocument];
+
+		if (doc.modified == true)
+		{
+			saveDocument(m_currentDocument);
+		}
+	}
+}
+
+void TestsTabPage::onCloseKeyPressed()
+{
+	if (documentIsOpen(m_currentDocument) == true)
+	{
+		closeDocument(m_currentDocument);
+	}
+}
+
+void TestsTabPage::onCtrlTabKeyPressed()
+{
+	if (documentIsOpen(m_currentDocument) == true)
+	{
+		const TestTabPageDocument& doc = m_openDocuments[m_currentDocument];
+
+		int currentIndex = m_openFilesTreeWidget->indexOfTopLevelItem(doc.treeWidgetItem);
+
+		int openIndex = 0;
+
+		if (currentIndex < m_openFilesTreeWidget->topLevelItemCount() - 1)
+		{
+			openIndex = currentIndex + 1;
+		}
+
+		QTreeWidgetItem* openItem = m_openFilesTreeWidget->topLevelItem(openIndex);
+		if (openItem == nullptr)
+		{
+			Q_ASSERT(openItem);
+			return;
+		}
+
+		QString fileName = openItem->data(0, Qt::UserRole).toString();
+		setCurrentDocument(fileName);
+	}
 }
 
 void TestsTabPage::createUi()
@@ -663,9 +709,9 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 	{
 		const QString& docFileName = it.first;
 		TestTabPageDocument& doc = it.second;
-		if (docFileName != fileName && doc.textEditor->isVisible())
+		if (docFileName != fileName && doc.codeEditor->isVisible())
 		{
-			doc.textEditor->setVisible(false);
+			doc.codeEditor->setVisible(false);
 		}
 	}
 
@@ -677,7 +723,8 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 		TestTabPageDocument& doc = it.second;
 		if (docFileName == fileName)
 		{
-			doc.textEditor->setVisible(true);
+			doc.codeEditor->setVisible(true);
+			doc.codeEditor->activateEditor();
 
 			if (m_lineLabel == nullptr || m_columnLabel == nullptr)
 			{
@@ -688,7 +735,7 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 
 			int line = 0;
 			int index = 0;
-			doc.textEditor->getCursorPosition(&line, &index);
+			doc.codeEditor->getCursorPosition(&line, &index);
 
 			m_lineLabel->setText(tr(" Line: %1 ").arg(line));
 			m_columnLabel->setText(tr(" Col: %1 ").arg(index));
@@ -725,7 +772,7 @@ void TestsTabPage::saveDocument(const QString& fileName)
 
 	TestTabPageDocument& doc = m_openDocuments[fileName];
 
-	doc.dbFile->setData(doc.textEditor->text().toUtf8());
+	doc.dbFile->setData(doc.codeEditor->text().toUtf8());
 
 	if (db()->setWorkcopy(doc.dbFile, this) == false)
 	{
@@ -774,7 +821,7 @@ void TestsTabPage::closeDocument(const QString& fileName)
 
 	// Delete item documents list
 
-	delete document.textEditor;
+	document.codeEditor->deleteLater();
 	m_openDocuments.erase(fileName);
 
 	// Open another document
@@ -811,7 +858,7 @@ void TestsTabPage::closeAllDocuments()
 {
 	for (auto& it : m_openDocuments)
 	{
-		delete it.second.textEditor;
+		delete it.second.codeEditor;
 	}
 
 	m_openDocuments.clear();
@@ -824,4 +871,27 @@ void TestsTabPage::hideEditor()
 	m_editorToolBar->setVisible(false);
 	m_editorEmptyLabel->setVisible(true);
 	m_currentDocument.clear();
+}
+
+void TestsTabPage::keyPressEvent(QKeyEvent* event)
+{
+	if (event->modifiers() & Qt::ControlModifier)
+	{
+		if (event->key() == Qt::Key_S)
+		{
+			onSaveKeyPressed();
+		}
+
+		if (event->key() == Qt::Key_W)
+		{
+			onCloseKeyPressed();
+		}
+
+		if (event->key() == Qt::Key_Tab)
+		{
+			onCtrlTabKeyPressed();
+			return;
+		}
+	}
+
 }

@@ -340,11 +340,159 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     m_textEdit->setAutoIndent(true);
 
     connect(m_textEdit, &QsciScintilla::textChanged, this, &PropertyTextEditor::textChanged);
+
+	connect(m_textEdit, &QsciScintilla::textChanged, this, &IdeCodeEditor::onTextChanged);
+	connect(m_textEdit, &QsciScintilla::cursorPositionChanged, this, &IdeCodeEditor::onCursorPositionChanged);
+
 }
 
 IdeCodeEditor::~IdeCodeEditor()
 {
 }
+
+void IdeCodeEditor::setText(const QString& text)
+{
+	m_textEdit->blockSignals(true);
+
+	m_textEdit->setText(text);
+
+	m_textEdit->blockSignals(false);
+}
+
+QString IdeCodeEditor::text()
+{
+	return m_textEdit->text();
+}
+
+void IdeCodeEditor::getCursorPosition(int* line, int* index)
+{
+	m_textEdit->getCursorPosition(line, index);
+}
+
+void IdeCodeEditor::setReadOnly(bool value)
+{
+	m_textEdit->setReadOnly(value);
+}
+
+void IdeCodeEditor::activateEditor()
+{
+	m_textEdit->setFocus();
+}
+
+
+void IdeCodeEditor::findFirst(QString findText)
+{
+	if (findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	bool result = false;
+
+	if (m_findText == findText)
+	{
+		result = m_textEdit->findNext();
+	}
+	else
+	{
+		result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+
+		m_findText = findText;
+	}
+
+	if (result == false)
+	{
+		QMessageBox::information(this, qAppName(), tr("Text was not found."));
+	}
+}
+
+void IdeCodeEditor::findNext()
+{
+	if (m_findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (m_findFirst == true)
+	{
+		m_findFirst = false;
+
+		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+
+		if (result == false)
+		{
+			QMessageBox::information(this, qAppName(), tr("Text was not found."));
+		}
+	}
+	else
+	{
+		m_textEdit->findNext();
+	}
+
+	return;
+}
+
+void IdeCodeEditor::replace(QString findText, QString replaceText)
+{
+	if (findText.isEmpty() || replaceText.isEmpty())
+	{
+		return;
+	}
+
+	if (findText == m_findText)
+	{
+		m_textEdit->replace(replaceText);
+		return;
+	}
+
+	m_findText = findText;
+
+	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	{
+		return;
+	}
+
+	m_textEdit->replace(replaceText);
+}
+
+void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
+{
+	if (findText.isEmpty() || replaceText.isEmpty())
+	{
+		return;
+	}
+
+	int counter = 0;
+
+	m_findText = findText;
+
+	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	{
+		return;
+	}
+
+	while (counter < 1000)
+	{
+		m_textEdit->replace(replaceText);
+
+		counter++;
+
+		if (m_textEdit->findNext() == false)
+		{
+			break;
+		}
+
+		if (counter >= 1000)
+		{
+			// for not to hang
+			assert(false);
+			break;
+		}
+	}
+
+	QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+}
+
 
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 {
@@ -380,144 +528,37 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 				findNext();
 				return true;
 			}
+
+			if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				emit ctrlTabKeyPressed();
+				return true;
+			}
+
+			if (keyEvent->key() == Qt::Key_S && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				emit saveKeyPressed();
+			}
+
+			if (keyEvent->key() == Qt::Key_W && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				emit closeKeyPressed();
+			}
 		}
 	}
 
-    // pass the event on to the parent class
-    return PropertyTextEditor::eventFilter(obj, event);
+	// pass the event on to the parent class
+	return PropertyTextEditor::eventFilter(obj, event);
 }
 
-void IdeCodeEditor::setText(const QString& text)
+void IdeCodeEditor::onCursorPositionChanged(int line, int index)
 {
-    m_textEdit->blockSignals(true);
-
-    m_textEdit->setText(text);
-
-    m_textEdit->blockSignals(false);
+	emit cursorPositionChanged(line, index);
 }
 
-QString IdeCodeEditor::text()
+void IdeCodeEditor::onTextChanged()
 {
-    return m_textEdit->text();
-}
-
-void IdeCodeEditor::setReadOnly(bool value)
-{
-    m_textEdit->setReadOnly(value);
-}
-
-
-void IdeCodeEditor::findFirst(QString findText)
-{
-	if (findText.isEmpty() == true)
-    {
-        return;
-    }
-
-    bool result = false;
-
-    if (m_findText == findText)
-    {
-        result = m_textEdit->findNext();
-    }
-    else
-    {
-        result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
-
-        m_findText = findText;
-    }
-
-    if (result == false)
-    {
-        QMessageBox::information(this, qAppName(), tr("Text was not found."));
-    }
-}
-
-void IdeCodeEditor::findNext()
-{
-	if (m_findText.isEmpty() == true)
-	{
-		return;
-	}
-
-	if (m_findFirst == true)
-	{
-		m_findFirst = false;
-
-		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
-
-		if (result == false)
-		{
-			QMessageBox::information(this, qAppName(), tr("Text was not found."));
-		}
-	}
-	else
-	{
-		m_textEdit->findNext();
-	}
-
-	return;
-}
-
-void IdeCodeEditor::replace(QString findText, QString replaceText)
-{
-    if (findText.isEmpty() || replaceText.isEmpty())
-    {
-        return;
-    }
-
-    if (findText == m_findText)
-    {
-        m_textEdit->replace(replaceText);
-        return;
-    }
-
-    m_findText = findText;
-
-    if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
-    {
-        return;
-    }
-
-    m_textEdit->replace(replaceText);
-}
-
-void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
-{
-    if (findText.isEmpty() || replaceText.isEmpty())
-    {
-        return;
-    }
-
-    int counter = 0;
-
-    m_findText = findText;
-
-    if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
-    {
-        return;
-    }
-
-    while (counter < 1000)
-    {
-        m_textEdit->replace(replaceText);
-
-        counter++;
-
-        if (m_textEdit->findNext() == false)
-        {
-            break;
-        }
-
-        if (counter >= 1000)
-        {
-            // for not to hang
-            assert(false);
-            break;
-        }
-    }
-
-    QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+	emit textChanged();
 }
 
 //

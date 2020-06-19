@@ -4,9 +4,7 @@
 
 #include <QToolBar>
 
-#include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
-#include "../lib/QScintillaLexers/LexerXML.h"
-#include "../lib/QScintillaLexers/LexerJavaScript.h"
+#include "IdePropertyEditor.h"
 
 #include "../lib/Ui/FilesTreeView.h"
 
@@ -25,7 +23,7 @@ private:
 
 struct TestTabPageDocument
 {
-	QsciScintilla* textEditor = nullptr;
+	IdeCodeEditor* codeEditor = nullptr;
 	bool readOnly = false;
 	bool modified = false;
 	QTreeWidgetItem* treeWidgetItem = nullptr;
@@ -57,6 +55,11 @@ private slots:
 	void cursorPositionChanged(int line, int index);
 	void closeCurrentDocument();
 
+	void onSaveKeyPressed();
+	void onCloseKeyPressed();
+	void onCtrlTabKeyPressed();
+
+
 private:
 	void createUi();
 	void createActions();
@@ -72,6 +75,8 @@ private:
 	void closeDocument(const QString& fileName);
 	void closeAllDocuments();
 	void hideEditor();
+
+	virtual void keyPressEvent(QKeyEvent* event) override;
 
 private:
 	// Data

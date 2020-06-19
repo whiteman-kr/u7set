@@ -115,7 +115,11 @@ public:
 	virtual void setText(const QString& text) override;
 	virtual QString text() override;
 
+	void getCursorPosition(int* line, int* index);
+
 	virtual void setReadOnly(bool value) override;
+
+	void activateEditor();
 
 public slots:
     void findFirst(QString findText);
@@ -123,8 +127,20 @@ public slots:
     void replace(QString findText, QString replaceText);
     void replaceAll(QString findText, QString replaceText);
 
-protected:
+signals:
+	void cursorPositionChanged(int line, int index);
+	void textChanged();
+	void saveKeyPressed();
+	void closeKeyPressed();
+	void ctrlTabKeyPressed();
+
+
+private:
     bool eventFilter(QObject* obj, QEvent* event);
+
+private slots:
+	void onCursorPositionChanged(int line, int index);
+	void onTextChanged();
 
 private:
     QsciScintilla* m_textEdit = nullptr;
