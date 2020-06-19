@@ -25,8 +25,6 @@ public:
 public:
 	static const QString LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
 
-	static const QString IP_NULL;
-
 private:
 	static Hardware::DeviceController* getLanControllerBySuffix(const Hardware::DeviceModule& lm, const QString& suffix);
 };

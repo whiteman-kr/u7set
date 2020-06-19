@@ -101,7 +101,7 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 		m_lmDataEnable = lanControllerInfo.appDataEnable;
 		m_lmAddressPort.setAddressPort(lanControllerInfo.appDataIP, lanControllerInfo.appDataPort);
 		m_lmDataID = lanControllerInfo.appDataUID;
-		m_lmDataSize = lanControllerInfo.appDataSize;
+		m_lmDataSize = lanControllerInfo.appDataSizeBytes;
 		m_lmRupFramesQuantity = lanControllerInfo.appDataFramesQuantity;
 		m_serviceID = lanControllerInfo.appDataServiceID;
 		break;
@@ -113,7 +113,7 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 		m_lmDataEnable = lanControllerInfo.diagDataEnable;
 		m_lmAddressPort.setAddressPort(lanControllerInfo.diagDataIP, lanControllerInfo.diagDataPort);
 		m_lmDataID = lanControllerInfo.diagDataUID;
-		m_lmDataSize = lanControllerInfo.diagDataSize;
+		m_lmDataSize = lanControllerInfo.diagDataSizeBytes;
 		m_lmRupFramesQuantity = lanControllerInfo.diagDataFramesQuantity;
 		m_serviceID = lanControllerInfo.diagDataServiceID;
 		break;

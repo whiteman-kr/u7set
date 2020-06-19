@@ -1,21 +1,20 @@
 #pragma once
 
-#ifdef IS_BUILDER
-
-#include "Connection.h"
-#include "../Builder/OptoModule.h"
-#include "XmlHelper.h"
-#include "WUtils.h"
-#include "ModuleLogicCompiler.h"
-#include "../lib/DeviceHelper.h"
-#include "LmDescription.h"
-#include "LanControllerInfoHelper.h".h
-
-#endif
-
 #include "Address16.h"
 #include "Types.h"
 #include "DomXmlHelper.h"
+#include "LanControllerInfo.h"
+
+#ifdef IS_BUILDER
+
+#include "XmlHelper.h"
+#include "WUtils.h"
+#include "ModuleLogicCompiler.h"
+#include "DeviceHelper.h"
+#include "LmDescription.h"
+#include "LanControllerInfoHelper.h"
+
+#endif
 
 class LogicModuleInfo
 {
@@ -39,13 +38,14 @@ public:
 class LogicModulesInfo
 {
 public:
-	std::vector<LogicModuleInfo> logicModulesInfo;
+	std::vector<::LogicModuleInfo> logicModulesInfo;
 
 	bool load(const QString& fileName, QString* errMsg);
 	bool load(const QByteArray& xmlData, QString* errMsg);
 
 private:
-	bool load(LogicModuleInfo* lmi, const QDomNode& node, QString* errMsg);
+	bool load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QString* errMsg);
+	bool load(LanControllerInfo* lci, const QDomNode& lanControllerNode, QString* errMsg);
 
 protected:
 	static const QString ELEM_LOGIC_MODULES;
@@ -54,24 +54,13 @@ protected:
 	static const QString ELEM_LAN_CONTROLLERS;
 	static const QString ELEM_LAN_CONTROLLER;
 
-	static const QString ATTR_COUNT;
-	static const QString ATTR_ID;
+	static const QString ELEM_TUNING_PARAMS;
+	static const QString ELEM_APP_DATA_PARAMS;
+	static const QString ELEM_DIAG_DATA_PARAMS;
 
-	static const QString ATTR_EQUIPMENT_ID;
-	static const QString ATTR_CAPTION;
-
-	static const QString ATTR_SUBSYSTEM_ID;
-	static const QString ATTR_LM_NUMBER;
-	static const QString ATTR_SUBSYSTEM_CHANNEL;
-
-	static const QString ATTR_MODULE_FAMILY;
-	static const QString ATTR_MODULE_VERSION;
-
-	static const QString ATTR_PRESET_NAME;
-	static const QString ATTR_LM_DESCRIPTION_FILE;
-
-	static const QString ATTR_DATA_ID;
-	static const QString ATTR_HEX_DATA_ID;
+	static const QString ATTR_TUNING_PROVIDED;
+	static const QString ATTR_APP_DATA_PROVIDED;
+	static const QString ATTR_DIAG_DATA_PROVIDED;
 };
 
 #ifdef IS_BUILDER
@@ -98,5 +87,7 @@ private:
 };
 
 #endif
+
+void testLogicModulesInfoLoad();
 
 

@@ -11,10 +11,9 @@
 #include "WUtils.h"
 #include "DeviceHelper.h"
 #include "DataProtocols.h"
+#include "Socket.h"
 
 const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("_ETHERNET0%1");
-
-const QString LanControllerInfoHelper::IP_NULL("0.0.0.0");
 
 bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 										int lanControllerNo,
@@ -61,27 +60,19 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::TUNING_SERVICE_ID,
 											   &lanControllerInfo->tuningServiceID, log);
 
-
-		lanControllerInfo->tuningServiceIP = IP_NULL;
+		lanControllerInfo->tuningServiceIP = Socket::IP_NULL;
 		lanControllerInfo->tuningServicePort = 0;
+		lanControllerInfo->tuningServiceNetmask = Socket::IP_NULL;
 
-		if (lanControllerInfo->tuningEnable == true &&
-			lanControllerInfo->tuningServiceID.isEmpty() == false)
+		if (lanControllerInfo->tuningEnable == true)
 		{
 			const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID);
 
-			if (tunService == nullptr)
-			{
-				// Property %1.%2 is linked to undefined software ID %3.
-				//
-				log->errCFG3021(lanControllerInfo->equipmentID, EquipmentPropNames::TUNING_SERVICE_ID, lanControllerInfo->tuningServiceID);
-				result = false;
-			}
-			else
+			if (tunService != nullptr)
 			{
 				result &= DeviceHelper::getStrProperty(tunService,
 													   EquipmentPropNames::TUNING_DATA_IP,
-													   &lanControllerInfo->tuningServiceID, log);
+													   &lanControllerInfo->tuningServiceIP, log);
 
 				result &= DeviceHelper::getIntProperty(tunService,
 													   EquipmentPropNames::TUNING_DATA_PORT,
@@ -108,20 +99,45 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 											   &lanControllerInfo->appDataPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::APP_DATA_SERVICE_ID,
 											   &lanControllerInfo->appDataServiceID, log);
-		result &= DeviceHelper::getIntProperty(&lm, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT,
+		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT,
 												&lanControllerInfo->overrideAppDataWordCount, log);
 
 		result &= DeviceHelper::getUIntProperty(&lm, EquipmentPropNames::LM_APP_LAN_DATA_UID,
 												&lanControllerInfo->appDataUID, log);
 
+		int appDataSizeW = 0;
+
 		result &= DeviceHelper::getIntProperty(&lm, EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
-											   &lanControllerInfo->appDataSize, log);
+											   &appDataSizeW, log);
 
-		lanControllerInfo->appDataSize *= sizeof(quint16);		// size in words convert to size in bytes
+		lanControllerInfo->appDataSizeBytes = appDataSizeW * sizeof(quint16);
 
-		lanControllerInfo->appDataFramesQuantity = lanControllerInfo->appDataSize / sizeof(Rup::Frame::data) +
-													((lanControllerInfo->appDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
+		lanControllerInfo->appDataFramesQuantity = lanControllerInfo->appDataSizeBytes / sizeof(Rup::Frame::data) +
+													((lanControllerInfo->appDataSizeBytes % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
 
+		lanControllerInfo->appDataServiceIP = Socket::IP_NULL;
+		lanControllerInfo->appDataServicePort = 0;
+		lanControllerInfo->appDataServiceNetmask = Socket::IP_NULL;
+
+		if (lanControllerInfo->appDataEnable == true)
+		{
+			const Hardware::DeviceObject* appDataService = equipmentSet.deviceObject(lanControllerInfo->appDataServiceID);
+
+			if (appDataService != nullptr)
+			{
+				result &= DeviceHelper::getStrProperty(appDataService,
+													   EquipmentPropNames::APP_DATA_RECEIVING_IP,
+													   &lanControllerInfo->appDataServiceIP, log);
+
+				result &= DeviceHelper::getIntProperty(appDataService,
+													   EquipmentPropNames::APP_DATA_RECEIVING_PORT,
+													   &lanControllerInfo->appDataServicePort, log);
+
+				result &= DeviceHelper::getStrProperty(appDataService,
+													   EquipmentPropNames::APP_DATA_RECEIVING_NETMASK,
+													   &lanControllerInfo->appDataServiceNetmask, log);
+			}
+		}
 	}
 
 	if (isProvideDiagData(lanControllerType) == true)
@@ -138,11 +154,11 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 											   &lanControllerInfo->diagDataPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::DIAG_DATA_SERVICE_ID,
 											   &lanControllerInfo->diagDataServiceID, log);
-		result &= DeviceHelper::getIntProperty(&lm, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT,
+		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT,
 												&lanControllerInfo->overrideDiagDataWordCount, log);
 
 		lanControllerInfo->diagDataUID = 0;
-		lanControllerInfo->diagDataSize = 0;
+		lanControllerInfo->diagDataSizeBytes = 0;
 		lanControllerInfo->diagDataFramesQuantity = 0;
 
 /*		UNCOMMENT when LM will have PROP_LM_DIAG_DATA_UID and PROP_LM_DIAG_DATA_SIZE properties  !!!
@@ -156,6 +172,29 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 		diagDataFramesQuantity = diagDataSize / sizeof(Rup::Frame::data) +
 				((diagDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
 */
+		lanControllerInfo->diagDataServiceIP = Socket::IP_NULL;
+		lanControllerInfo->diagDataServicePort = 0;
+		lanControllerInfo->diagDataServiceNetmask = Socket::IP_NULL;
+
+		if (lanControllerInfo->diagDataEnable == true)
+		{
+			const Hardware::DeviceObject* diagDataService = equipmentSet.deviceObject(lanControllerInfo->diagDataServiceID);
+
+			if (diagDataService != nullptr)
+			{
+				result &= DeviceHelper::getStrProperty(diagDataService,
+													   EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+													   &lanControllerInfo->diagDataServiceIP, log);
+
+				result &= DeviceHelper::getIntProperty(diagDataService,
+													   EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
+													   &lanControllerInfo->diagDataServicePort, log);
+
+				result &= DeviceHelper::getStrProperty(diagDataService,
+													   EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK,
+													   &lanControllerInfo->diagDataServiceNetmask, log);
+			}
+		}
 	}
 
 	return result;

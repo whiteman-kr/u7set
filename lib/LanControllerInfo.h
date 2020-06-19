@@ -32,7 +32,7 @@ struct LanControllerInfo
 	int appDataServicePort = 0;
 	QString appDataServiceNetmask;
 	quint32 appDataUID = 0;
-	int appDataSize = 0;
+	int appDataSizeBytes = 0;
 	int appDataFramesQuantity = 0;
 	int overrideAppDataWordCount = -1;
 
@@ -48,7 +48,7 @@ struct LanControllerInfo
 	int diagDataServicePort = 0;
 	QString diagDataServiceNetmask;
 	quint32 diagDataUID = 0;
-	int diagDataSize = 0;
+	int diagDataSizeBytes = 0;
 	int diagDataFramesQuantity = 0;
 	int overrideDiagDataWordCount = -1;
 };

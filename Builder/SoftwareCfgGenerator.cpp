@@ -680,137 +680,119 @@ namespace Builder
 				Hardware::Software* software = nullptr;
 
 				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
-				                                           &lanControllerInfo, *m_equipment, log);
+														   &lanControllerInfo, *context->m_equipmentSet.get(), log);
 
 				if (result == false)
 				{
 					continue;
 				}
 
-				bool tuning = false;
-				bool appData = false;
-				bool diagData = false;
-
-				ok = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
-
-				if (ok == false)
+				if (lanControllerInfo.tuningProvided == true &&
+					lanControllerInfo.tuningEnable == true)
 				{
-					assert(false);
-					continue;
-				}
-
-				if (tuning == true)
-				{
-					if (lanControllerInfo.tuningEnable == true)
+					if (lanControllerInfo.tuningServiceID.isEmpty() == true)
 					{
-						if (lanControllerInfo.tuningServiceID.isEmpty() == true)
+						// Property '%1.%2' is empty.
+						//
+						log->errCFG3022(lanControllerInfo.equipmentID,
+										EquipmentPropNames::TUNING_SERVICE_ID);
+					}
+					else
+					{
+						if (m_softwareList.contains(lanControllerInfo.tuningServiceID) == false)
 						{
-							// Property '%1.%2' is empty.
+							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
-							log->errCFG3022(lanControllerInfo.equipmentID,
-							                EquipmentPropNames::TUNING_SERVICE_ID);
+							log->errCFG3021(lanControllerInfo.equipmentID,
+											EquipmentPropNames::TUNING_SERVICE_ID,
+											lanControllerInfo.tuningServiceID);
 						}
 						else
 						{
-							if (m_softwareList.contains(lanControllerInfo.tuningServiceID) == false)
-							{
-								// Property '%1.%2' is linked to undefined software ID '%3'.
-								//
-								log->errCFG3021(lanControllerInfo.equipmentID,
-								                EquipmentPropNames::TUNING_SERVICE_ID,
-								                lanControllerInfo.tuningServiceID);
-							}
-							else
-							{
-								software = m_softwareList[lanControllerInfo.tuningServiceID];
+							software = m_softwareList[lanControllerInfo.tuningServiceID];
 
-								if (software->type() != E::SoftwareType::TuningService)
-								{
-									// Property '%1.%2' is linked to not compatible software '%3'.
-									//
-									log->errCFG3017(lanControllerInfo.equipmentID,
-									                EquipmentPropNames::TUNING_SERVICE_ID,
-									                lanControllerInfo.tuningServiceID);
-									result = false;
-								}
+							if (software->type() != E::SoftwareType::TuningService)
+							{
+								// Property '%1.%2' is linked to not compatible software '%3'.
+								//
+								log->errCFG3017(lanControllerInfo.equipmentID,
+												EquipmentPropNames::TUNING_SERVICE_ID,
+												lanControllerInfo.tuningServiceID);
+								result = false;
 							}
 						}
 					}
 				}
 
-				if (appData == true)
+				if (lanControllerInfo.appDataProvided == true &&
+					lanControllerInfo.appDataEnable == true)
 				{
-					if (lanControllerInfo.appDataEnable == true)
+					if (lanControllerInfo.appDataServiceID.isEmpty() == true)
 					{
-						if (lanControllerInfo.appDataServiceID.isEmpty() == true)
+						// Property '%1.%2' is empty.
+						//
+						log->errCFG3022(lanControllerInfo.equipmentID,
+										EquipmentPropNames::APP_DATA_SERVICE_ID);
+					}
+					else
+					{
+						if (m_softwareList.contains(lanControllerInfo.appDataServiceID) == false)
 						{
-							// Property '%1.%2' is empty.
+							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
-							log->errCFG3022(lanControllerInfo.equipmentID,
-							                EquipmentPropNames::APP_DATA_SERVICE_ID);
+							log->errCFG3021(lanControllerInfo.equipmentID,
+											EquipmentPropNames::APP_DATA_SERVICE_ID,
+											lanControllerInfo.appDataServiceID);
 						}
 						else
 						{
-							if (m_softwareList.contains(lanControllerInfo.appDataServiceID) == false)
-							{
-								// Property '%1.%2' is linked to undefined software ID '%3'.
-								//
-								log->errCFG3021(lanControllerInfo.equipmentID,
-								                EquipmentPropNames::APP_DATA_SERVICE_ID,
-								                lanControllerInfo.appDataServiceID);
-							}
-							else
-							{
-								software = m_softwareList[lanControllerInfo.appDataServiceID];
+							software = m_softwareList[lanControllerInfo.appDataServiceID];
 
-								if (software->type() != E::SoftwareType::AppDataService)
-								{
-									// Property '%1.%2' is linked to not compatible software '%3'.
-									//
-									log->errCFG3017(lanControllerInfo.equipmentID,
-									                EquipmentPropNames::APP_DATA_SERVICE_ID,
-									                lanControllerInfo.appDataServiceID);
-									result = false;
-								}
+							if (software->type() != E::SoftwareType::AppDataService)
+							{
+								// Property '%1.%2' is linked to not compatible software '%3'.
+								//
+								log->errCFG3017(lanControllerInfo.equipmentID,
+												EquipmentPropNames::APP_DATA_SERVICE_ID,
+												lanControllerInfo.appDataServiceID);
+								result = false;
 							}
 						}
 					}
 				}
 
-				if (diagData == true)
+				if (lanControllerInfo.diagDataProvided == true &&
+					lanControllerInfo.diagDataEnable == true)
 				{
-					if (lanControllerInfo.diagDataEnable == true)
+					if (lanControllerInfo.diagDataServiceID.isEmpty() == true)
 					{
-						if (lanControllerInfo.diagDataServiceID.isEmpty() == true)
+						// Property '%1.%2' is empty.
+						//
+						log->errCFG3022(lanControllerInfo.equipmentID,
+										EquipmentPropNames::DIAG_DATA_SERVICE_ID);
+					}
+					else
+					{
+						if (m_softwareList.contains(lanControllerInfo.diagDataServiceID) == false)
 						{
-							// Property '%1.%2' is empty.
+							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
-							log->errCFG3022(lanControllerInfo.equipmentID,
-							                EquipmentPropNames::DIAG_DATA_SERVICE_ID);
+							log->errCFG3021(lanControllerInfo.equipmentID,
+											EquipmentPropNames::DIAG_DATA_SERVICE_ID,
+											lanControllerInfo.diagDataServiceID);
 						}
 						else
 						{
-							if (m_softwareList.contains(lanControllerInfo.diagDataServiceID) == false)
-							{
-								// Property '%1.%2' is linked to undefined software ID '%3'.
-								//
-								log->errCFG3021(lanControllerInfo.equipmentID,
-								                EquipmentPropNames::DIAG_DATA_SERVICE_ID,
-								                lanControllerInfo.diagDataServiceID);
-							}
-							else
-							{
-								software = m_softwareList[lanControllerInfo.diagDataServiceID];
+							software = m_softwareList[lanControllerInfo.diagDataServiceID];
 
-								if (software->type() != E::SoftwareType::DiagDataService)
-								{
-									// Property '%1.%2' is linked to not compatible software '%3'.
-									//
-									log->errCFG3017(lanControllerInfo.equipmentID,
-									                EquipmentPropNames::DIAG_DATA_SERVICE_ID,
-									                lanControllerInfo.diagDataServiceID);
-									result = false;
-								}
+							if (software->type() != E::SoftwareType::DiagDataService)
+							{
+								// Property '%1.%2' is linked to not compatible software '%3'.
+								//
+								log->errCFG3017(lanControllerInfo.equipmentID,
+												EquipmentPropNames::DIAG_DATA_SERVICE_ID,
+												lanControllerInfo.diagDataServiceID);
+								result = false;
 							}
 						}
 					}
