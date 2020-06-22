@@ -3245,6 +3245,29 @@ function testFlags(sim)
     assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN3").mismatch == 0);
     assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN4").mismatch == 1);
 
+    // Test for analog inputs with validity input
+    //
+    sim.overridesReset();
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03AVALID", 0);
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03BVALID", 0);
+    sim.startForMs(5);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03A").valid === false);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03B").valid === false);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03AVALID", 1);
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03BVALID", 0);
+    sim.startForMs(5);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03A").valid === true);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03B").valid === false);
+
+    sim.overridesReset();
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03AVALID", 0);
+    sim.overrideSignalValue("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03BVALID", 1);
+    sim.startForMs(5);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03A").valid === false);
+    assert(sim.signalState("#SYSTEMID_RACKID_FSCC01_MD03_CTRLIN_IN03B").valid === true);
+
     return;
 }
 

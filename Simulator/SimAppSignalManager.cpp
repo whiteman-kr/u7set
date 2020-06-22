@@ -6,6 +6,134 @@
 namespace Sim
 {
 
+	bool FlagsReadStruct::create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams)
+	{
+		auto flagIt = s.stateFlagsSignals().constBegin();
+
+		while (flagIt != s.stateFlagsSignals().constEnd())
+		{
+			E::AppSignalStateFlagType flagType = flagIt.key();
+			const QString& flagAppSignalId = flagIt.value();
+			Hash flagSignalHash = ::calcHash(flagAppSignalId);
+
+			if (auto flagSignalIt = signalParams.find(flagSignalHash);
+				flagSignalIt == signalParams.end())
+			{
+				// Error, flag signal is not found
+				//
+				writeError(QObject::tr("AppSignalManager::signalFlags(%1) cannot find flag signal %2")
+						   .arg(s.appSignalID())
+						   .arg(flagAppSignalId));
+
+				Q_ASSERT(flagSignalIt != signalParams.end());
+				return {};
+			}
+			else
+			{
+				const Signal& flagSignal = flagSignalIt->second;
+				Q_ASSERT(flagSignal.hash() == flagSignalHash);
+
+				if (flagSignal.isDiscrete() == false)
+				{
+					writeError(QObject::tr("AppSignalManager::signalFlags(%1) flag is not discrete signal, flag signal %2")
+							   .arg(s.appSignalID())
+							   .arg(flagAppSignalId));
+					Q_ASSERT(flagSignal.isDiscrete());
+					return {};
+				}
+
+				if (flagSignal.isConst() == true)
+				{
+					flagsConsts[flagConstsCount] = std::make_pair(flagType, flagSignal.constValue());
+					flagConstsCount ++;
+				}
+				else
+				{
+					Address16 flagAddress = flagSignal.ualAddr();
+
+					if (flagAddress.isValid() == false)
+					{
+						writeError(QObject::tr("AppSignalManager::signalFlags(%1) invalid flag signal address, flag signal %2")
+								   .arg(s.appSignalID())
+								   .arg(flagAppSignalId));
+						Q_ASSERT(flagAddress.isValid());
+						return {};
+					}
+					else
+					{
+						flagsSignalAddresses[flagCount] = std::make_pair(flagType, flagAddress);
+						flagCount ++;
+					}
+				}
+			}
+
+			// --
+			//
+			++flagIt;
+		}
+
+		return true;
+	}
+
+	AppSignalStateFlags FlagsReadStruct::signalFlags(const Ram& ram) const
+	{
+		AppSignalStateFlags result{};
+		bool hasValidity = false;
+
+		// Read flags value from memory
+		//
+		for (size_t i = 0; i < flagCount; i++)
+		{
+			const auto& p = flagsSignalAddresses[i];
+			E::AppSignalStateFlagType flagType = p.first;
+			const Address16& flagAddress = p.second;
+
+			quint16 flagValue = 0;
+
+			if (bool readOk = ram.readBit(flagAddress.offset(), flagAddress.bit(), &flagValue, E::ByteOrder::BigEndian);
+				readOk == false)
+			{
+				writeError(QObject::tr("AppSignalManager::signalFlags error read flag signal by address %1")
+						   .arg(flagAddress.toString()));
+
+				Q_ASSERT(readOk);
+				return result;
+			}
+
+			result.setFlag(flagType, flagValue);
+
+			if (flagType == E::AppSignalStateFlagType::Validity)
+			{
+				hasValidity = true;
+			}
+		}
+
+		// Some flags can be constant values, write consts to flag
+		//
+		for (size_t i = 0; i < flagConstsCount; i++)
+		{
+			const auto& p = flagsConsts[i];
+			result.setFlag(p.first, p.second);
+
+			if (p.first == E::AppSignalStateFlagType::Validity)
+			{
+				hasValidity = true;
+			}
+		}
+
+		if (hasValidity == false)
+		{
+			result.valid = 1;		// All signals which do not have explicit validty signal are accounted as valid
+		}
+
+		return result;
+	}
+
+	//
+	//
+	//	AppSignalManager
+	//
+	//
 	AppSignalManager::AppSignalManager(Simulator* simulator, QObject* /*parent*/) :
 		Sim::Output("AppSignalManager"),
 		m_simulator(simulator)
@@ -44,11 +172,18 @@ namespace Sim
 
 	void AppSignalManager::resetSignalParam()
 	{
-		QWriteLocker wl(&m_signalParamLock);
+		{
+			QWriteLocker wl(&m_signalParamLock);
 
-		m_signalParams.clear();
-		m_signalParamsExt.clear();
-		m_customToAppSignalId.clear();
+			m_signalParams.clear();
+			m_signalParamsExt.clear();
+			m_customToAppSignalId.clear();
+		}
+
+		{
+			QWriteLocker wl(&m_ramLock);
+			m_flagsStruct.clear();
+		}
 
 		return;
 	}
@@ -93,6 +228,7 @@ namespace Sim
 		std::unordered_map<Hash, AppSignalParam> signalParams;
 		std::unordered_map<Hash, Signal> signalParamsExt;
 		std::unordered_map<Hash, Hash> customToAppSignalId;
+		std::unordered_map<Hash, FlagsReadStruct> flagsStruct;
 
 		signalParams.reserve(message.appsignal_size());
 		signalParamsExt.reserve(message.appsignal_size());
@@ -112,6 +248,11 @@ namespace Sim
 			customToAppSignalId[::calcHash(signalParams[hash].customSignalId())] = hash;
 		}
 
+		for (const auto&[h, s] : signalParamsExt)
+		{
+			flagsStruct[h].create(s, signalParamsExt);
+		}
+
 		if (ok == false)
 		{
 			writeError(QString("Cannot load Proto::AppSignal"));
@@ -126,6 +267,11 @@ namespace Sim
 			std::swap(signalParams, m_signalParams);
 			std::swap(signalParamsExt, m_signalParamsExt);
 			std::swap(customToAppSignalId, m_customToAppSignalId);
+		}
+
+		{
+			QWriteLocker wl(&m_ramLock);
+			std::swap(flagsStruct, m_flagsStruct);
 		}
 
 		return ok;
@@ -388,8 +534,6 @@ namespace Sim
 		AppSignalState state;
 		state.m_hash = signalHash;
 
-		FlagsReadStruct flagsReadData;
-
 		{
 			QReadLocker rl(&m_signalParamLock);
 
@@ -425,8 +569,6 @@ namespace Sim
 			dataSize = s.dataSize();
 			isConst = s.isConst();
 			constValue = s.constValue();
-
-			flagsReadData.create(s, m_signalParamsExt);
 		}
 
 		// Get data from memory
@@ -458,7 +600,12 @@ namespace Sim
 
 			// Set flags
 			//
-			state.m_flags = flagsReadData.signalFlags(ram);
+			if (auto flagIt = m_flagsStruct.find(signalHash);
+				flagIt != m_flagsStruct.end())
+			{
+				state.m_flags = flagIt->second.signalFlags(ram);
+			}
+
 			if (m_simulator->isStopped() == true)
 			{
 				state.m_flags.all = 0;		// It resets stateAvailable and all othe flags
@@ -757,127 +904,4 @@ static const AppSignalParam dummy;
 		return m_simulator;
 	}
 
-
-	bool FlagsReadStruct::create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams)
-	{
-		auto flagIt = s.stateFlagsSignals().constBegin();
-
-		while (flagIt != s.stateFlagsSignals().constEnd())
-		{
-			E::AppSignalStateFlagType flagType = flagIt.key();
-			const QString& flagAppSignalId = flagIt.value();
-			Hash flagSignalHash = ::calcHash(flagAppSignalId);
-
-			if (auto flagSignalIt = signalParams.find(flagSignalHash);
-				flagSignalIt == signalParams.end())
-			{
-				// Error, flag signal is not found
-				//
-				writeError(QObject::tr("AppSignalManager::signalFlags(%1) cannot find flag signal %2")
-						   .arg(s.appSignalID())
-						   .arg(flagAppSignalId));
-
-				Q_ASSERT(flagSignalIt != signalParams.end());
-				return {};
-			}
-			else
-			{
-				const Signal& flagSignal = flagSignalIt->second;
-				Q_ASSERT(flagSignal.hash() == flagSignalHash);
-
-				if (flagSignal.isDiscrete() == false)
-				{
-					writeError(QObject::tr("AppSignalManager::signalFlags(%1) flag is not discrete signal, flag signal %2")
-							   .arg(s.appSignalID())
-							   .arg(flagAppSignalId));
-					Q_ASSERT(flagSignal.isDiscrete());
-					return {};
-				}
-
-				if (flagSignal.isConst() == true)
-				{
-					flagsConsts[flagConstsCount] = std::make_pair(flagType, flagSignal.constValue());
-					flagConstsCount ++;
-				}
-				else
-				{
-					Address16 flagAddress = flagSignal.ualAddr();
-
-					if (flagAddress.isValid() == false)
-					{
-						writeError(QObject::tr("AppSignalManager::signalFlags(%1) invalid flag signal address, flag signal %2")
-								   .arg(s.appSignalID())
-								   .arg(flagAppSignalId));
-						Q_ASSERT(flagAddress.isValid());
-						return {};
-					}
-					else
-					{
-						flagsSignalAddresses[flagCount] = std::make_pair(flagType, flagAddress);
-						flagCount ++;
-					}
-				}
-			}
-
-			// --
-			//
-			++flagIt;
-		}
-
-		return true;
-	}
-
-	AppSignalStateFlags FlagsReadStruct::signalFlags(const Ram& ram)
-	{
-		AppSignalStateFlags result{};
-		bool hasValidity = false;
-
-		// Read flags value from memory
-		//
-		for (size_t i = 0; i < flagCount; i++)
-		{
-			const auto& p = flagsSignalAddresses[i];
-			E::AppSignalStateFlagType flagType = p.first;
-			const Address16& flagAddress = p.second;
-
-			quint16 flagValue = 0;
-
-			if (bool readOk = ram.readBit(flagAddress.offset(), flagAddress.bit(), &flagValue, E::ByteOrder::BigEndian);
-				readOk == false)
-			{
-				writeError(QObject::tr("AppSignalManager::signalFlags error read flag signal by address %1")
-						   .arg(flagAddress.toString()));
-
-				Q_ASSERT(readOk);
-				return result;
-			}
-
-			result.setFlag(flagType, flagValue);
-
-			if (flagType == E::AppSignalStateFlagType::Validity)
-			{
-				hasValidity = true;
-			}
-		}
-
-		// Some flags can be constant values, write consts to flag
-		//
-		for (size_t i = 0; i < flagConstsCount; i++)
-		{
-			const auto& p = flagsConsts[i];
-			result.setFlag(p.first, p.second);
-
-			if (p.first == E::AppSignalStateFlagType::Validity)
-			{
-				hasValidity = true;
-			}
-		}
-
-		if (hasValidity == false)
-		{
-			result.valid = 1;		// All signals which do not have explicit validty signal are accounted as valid
-		}
-
-		return result;
-	}
 }
