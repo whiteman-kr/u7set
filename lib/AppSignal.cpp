@@ -139,7 +139,7 @@ bool AppSignalState::hasSameValue(const AppSignalState& b) const
 		   m_hash == b.m_hash;
 }
 
-QString AppSignalState::toString(double value, E::ValueViewType viewType, int precision)
+QString AppSignalState::toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision)
 {
 	QString result;
 	result.reserve(32);
@@ -149,7 +149,7 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, int pr
 	switch (viewType)
 	{
 	case E::ValueViewType::Dec:
-		result = QString::number(value, 'f', precision);
+		result = QString::number(value, static_cast<char>(analogFormat), precision);
 		break;
 
 	case E::ValueViewType::Hex:

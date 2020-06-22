@@ -3240,16 +3240,22 @@ namespace ExtWidgets
 
 	void PropertyTreeWidget::keyPressEvent(QKeyEvent *event)
 	{
-		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return)
+		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
 		{
-			emit editKeyPressed();
-			return;
+			if (selectedIndexes().size() > 0)
+			{
+				emit editKeyPressed();
+				return;
+			}
 		}
 
 		if (event->key() == Qt::Key_Space)
 		{
-			emit spaceKeyPressed();
-			return;
+			if (selectedIndexes().size() > 0)
+			{
+				emit spaceKeyPressed();
+				return;
+			}
 		}
 
 		QTreeWidget::keyPressEvent(event);

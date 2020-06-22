@@ -52,7 +52,7 @@ public slots:
 
 	void slot_selectSchemaForCurrentTab(QString schemaId);
 
-	void slot_signalContextMenu(const QStringList signalList);
+	void slot_signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void slot_signalInfo(QString signalId);
 
 protected slots:

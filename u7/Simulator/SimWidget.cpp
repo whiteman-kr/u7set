@@ -107,12 +107,11 @@ void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
 	SimTrends::startTrendApp(m_simulator, appSignals, this);
 }
 
-void SimWidget::signalContextMenu(const QStringList signalList)
+void SimWidget::signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu)
 {
 	// Compose menu
 	//
 	QMenu menu(this);
-	QList<QAction*> actions;
 
 	for (const QString& s : signalList)
 	{
@@ -121,19 +120,25 @@ void SimWidget::signalContextMenu(const QStringList signalList)
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
-		QAction* a = new QAction(signalId, &menu);
-
 		auto f = [this, s]() -> void
 				 {
 					signalInfo(s);
 				 };
 
-		connect(a, &QAction::triggered, this, f);
-
-		actions << a;
+		menu.addAction(signalId, f);
 	}
 
-	menu.exec(actions, QCursor::pos(), 0, this);
+	if (customMenu.empty() == false)
+	{
+		menu.addSeparator();
+
+		for (auto cm : customMenu)
+		{
+			menu.addActions(cm->actions());
+		}
+	}
+
+	menu.exec(QCursor::pos());
 }
 
 void SimWidget::signalInfo(QString appSignalId)
@@ -720,7 +725,7 @@ void SimWidget::showSnapshot()
 	//    it is guarantee will not be deleted
 	//
 
-	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, this);
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, QString(), this);
 
 	return;
 }
@@ -885,7 +890,7 @@ void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
+	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), m_appSignalController, lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimLogicModuleIcon.svg"}});
