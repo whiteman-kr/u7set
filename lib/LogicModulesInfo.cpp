@@ -1,4 +1,5 @@
 #include "LogicModulesInfo.h"
+#include "ConstStrings.h"
 
 // -----------------------------------------------------------------------------------
 //
@@ -234,7 +235,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_APP_DATA_PROVIDED, &lci->appDataProvided, errMsg);
 	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_DIAG_DATA_PROVIDED, &lci->diagDataProvided, errMsg);
 
-	RETURN_IF_FALSE(result);
+	if (result == false)
+	{
+		return false;
+	}
 
 	if (lci->tuningProvided == true)
 	{
@@ -242,7 +246,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_TUNING_PARAMS, &tuningElem, errMsg);
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			return false;
+		}
 
 		result &= DomXmlHelper::getBoolAttribute(tuningElem, EquipmentPropNames::TUNING_ENABLE, &lci->tuningEnable, errMsg);
 		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_IP, &lci->tuningIP, errMsg);
@@ -252,7 +259,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_PORT, &lci->tuningServicePort, errMsg);
 		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_NETMASK, &lci->tuningServiceNetmask, errMsg);
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			return false;
+		}
 	}
 
 	if (lci->appDataProvided == true)
@@ -261,7 +271,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_APP_DATA_PARAMS, &appDataElem, errMsg);
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			return false;
+		}
 
 		result &= DomXmlHelper::getBoolAttribute(appDataElem, EquipmentPropNames::APP_DATA_ENABLE, &lci->appDataEnable, errMsg);
 		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_IP, &lci->appDataIP, errMsg);
@@ -275,7 +288,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &lci->appDataFramesQuantity, errMsg);
 		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &lci->overrideAppDataWordCount, errMsg);
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			return false;
+		}
 	}
 
 	if (lci->diagDataProvided == true)
@@ -284,7 +300,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_DIAG_DATA_PARAMS, &diagDataElem, errMsg);
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			return false;
+		}
 
 		result &= DomXmlHelper::getBoolAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_ENABLE, &lci->diagDataEnable, errMsg);
 		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_IP, &lci->diagDataIP, errMsg);
@@ -298,7 +317,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &lci->diagDataFramesQuantity, errMsg);
 		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &lci->overrideDiagDataWordCount, errMsg);
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			return false;
+		}
 	}
 
 	return result;
