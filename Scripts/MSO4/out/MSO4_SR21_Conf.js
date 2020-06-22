@@ -854,7 +854,7 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             continue;
         }
         var ioEquipmentID = ioModule.jsPropertyString("EquipmentID");
-        var checkProperties = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize", "TxDataSize", "RxDataSize", "Configuration"];
+        var checkProperties = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize", "Configuration"];
         for (var cp = 0; cp < checkProperties.length; cp++) {
             if (ioModule.propertyValue(checkProperties[cp]) == undefined) {
                 log.errCFG3000(checkProperties[cp], ioEquipmentID);
@@ -883,20 +883,6 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
         }
         confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Module ID = " + value + "\r\n");
         blockPtr += 2;
-        // TxAddr
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxAddr", txAddr) == false) {
-            return false;
-        }
-        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxAddr = " + txAddr + "\r\n");
-        txAddr += 128;
-        blockPtr += 2;
-        // TxDataSize
-        var txDataSize = ioModule.jsPropertyInt("TxDataSize");
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxDataSize", txDataSize) == false) {
-            return false;
-        }
-        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxDataSize = " + txDataSize + "\r\n");
-        blockPtr += 2;
         // RxAddr
         if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxAddr", rxAddr) == false) {
             return false;
@@ -904,12 +890,26 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
         confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxAddr = " + rxAddr + "\r\n");
         rxAddr += 128;
         blockPtr += 2;
-        // RxDataSize
-        var rxDataSize = ioModule.jsPropertyInt("RxDataSize");
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxDataSize", rxDataSize) == false) {
+        // RxAppDataSize
+        var rxAppDataSize = ioModule.jsPropertyInt("RxAppDataSize") * 2;
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxAppDataSize", rxAppDataSize) == false) {
             return false;
         }
-        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxDataSize = " + rxDataSize + "\r\n");
+        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxAppDataSize = " + rxAppDataSize + "\r\n");
+        blockPtr += 2;
+        // TxAddr
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxAddr", txAddr) == false) {
+            return false;
+        }
+        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxAddr = " + txAddr + "\r\n");
+        txAddr += 128;
+        blockPtr += 2;
+        // TxAppDataSize
+        var txAppDataSize = ioModule.jsPropertyInt("TxAppDataSize") * 2;
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxAppDataSize", txAppDataSize) == false) {
+            return false;
+        }
+        confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxAppDataSize = " + txAppDataSize + "\r\n");
         blockPtr += 2;
         // Configuration
         var configurationCode = ioModule.jsPropertyInt("Configuration");
