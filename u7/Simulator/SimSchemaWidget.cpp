@@ -102,7 +102,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList signalList)
 		return;
 	}
 
-	simWidget->signalContextMenu(signalList);
+	simWidget->signalContextMenu(signalList, {});
 
 	return;
 }

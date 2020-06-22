@@ -709,6 +709,26 @@ AppSignalState SignalSnapshotModel::signalState(int rowIndex, bool* found)
 	return m_allStates[si];
 }
 
+E::AnalogFormat SignalSnapshotModel::analogFormat() const
+{
+	return m_analogFormat;
+}
+
+void SignalSnapshotModel::setAnalogFormat(E::AnalogFormat format)
+{
+	m_analogFormat = format;
+}
+
+int SignalSnapshotModel::analogPrecision() const
+{
+	return m_analogPrecision;
+}
+
+void SignalSnapshotModel::setAnalogPrecision(int precision)
+{
+	m_analogPrecision = precision;
+}
+
 QModelIndex SignalSnapshotModel::parent(const QModelIndex &index) const
 {
 	Q_UNUSED(index);
@@ -819,7 +839,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			switch (s.type())
 			{
 			case E::SignalType::Analog:
-				valueResult = state.toString(state.m_value, E::ValueViewType::Dec, s.precision());
+				valueResult = state.toString(state.m_value, E::ValueViewType::Dec, m_analogFormat, m_analogPrecision == -1 ? s.precision() : m_analogPrecision);
 				break;
 			case E::SignalType::Discrete:
 				valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
@@ -1210,6 +1230,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 
 	connect(this, &DialogSignalSnapshot::finished, this, &DialogSignalSnapshot::on_DialogSignalSnapshot_finished);
 
+	createMenus();
+
 	m_updateStateTimerId = startTimer(500);
 
 	return;
@@ -1411,7 +1433,22 @@ void DialogSignalSnapshot::on_contextMenuRequested(const QPoint& pos)
 	QStringList list;
 	list << s.appSignalId();
 
-	emit signalContextMenu(list);
+	// Check analog format options
+
+	m_formatAutoSelect->setChecked(m_model->analogFormat() == E::AnalogFormat::g_9_or_9e || m_model->analogFormat() == E::AnalogFormat::G_9_or_9E);
+	m_formatDecimal->setChecked(m_model->analogFormat() == E::AnalogFormat::f_9);
+	m_formatExponential->setChecked(m_model->analogFormat() == E::AnalogFormat::e_9e || m_model->analogFormat() == E::AnalogFormat::E_9E);
+
+	m_precisionDefault->setChecked(m_model->analogPrecision() == -1);
+
+	for (int i = 0; i < static_cast<int>(m_precisionActions.size()); i++)
+	{
+		m_precisionActions[i]->setChecked(m_model->analogPrecision() == i);
+	}
+
+	//
+
+	emit signalContextMenu(list, QList<QMenu*>() << &m_formatMenu);
 }
 
 void DialogSignalSnapshot::setupUi()
@@ -1486,6 +1523,47 @@ void DialogSignalSnapshot::setupUi()
 
 }
 
+void DialogSignalSnapshot::createMenus()
+{
+	// Analog Format and precision
+
+	QMenu* menuFormat = m_formatMenu.addMenu("Format");
+
+	m_formatAutoSelect = new QAction(tr("Auto-select"), this);
+	m_formatAutoSelect->setCheckable(true);
+	connect(m_formatAutoSelect, &QAction::triggered, this, [this]() { m_model->setAnalogFormat(E::AnalogFormat::g_9_or_9e); updateTableItems();});
+	menuFormat->addAction(m_formatAutoSelect);
+
+	m_formatDecimal = new QAction(tr("Decimal (as [-]9.9)"), this);
+	m_formatDecimal->setCheckable(true);
+	connect(m_formatDecimal, &QAction::triggered, this, [this]() { m_model->setAnalogFormat(E::AnalogFormat::f_9); updateTableItems();});
+	menuFormat->addAction(m_formatDecimal);
+
+	m_formatExponential = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), this);
+	m_formatExponential->setCheckable(true);
+	connect(m_formatExponential, &QAction::triggered, this, [this]() { m_model->setAnalogFormat(E::AnalogFormat::e_9e); updateTableItems();});
+	menuFormat->addAction(m_formatExponential);
+
+	menuFormat->addSeparator();
+
+	m_precisionDefault = new QAction(tr("Default"), this);
+	m_precisionDefault->setCheckable(true);
+	connect(m_precisionDefault, &QAction::triggered, this, [this]() { m_model->setAnalogPrecision(-1); updateTableItems();});
+	menuFormat->addAction(m_precisionDefault);
+
+	for (int i = 0; i < 10; i++)
+	{
+		QAction* a = new QAction(tr(".%1").arg(QString().fill('0', i)), this);
+		a->setCheckable(true);
+		connect(a, &QAction::triggered, this, [this, i]() { m_model->setAnalogPrecision(i); updateTableItems();});
+		m_precisionActions << a;
+		menuFormat->addAction(a);
+	}
+
+	return;
+
+}
+
 void DialogSignalSnapshot::fillSchemas()
 {
 	m_schemaCombo->blockSignals(true);
@@ -1548,40 +1626,47 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 	{
 		if (m_buttonFixate->isChecked() == false && m_model->rowCount() > 0)
 		{
-			// Update only visible dynamic items
-			//
-			int from = m_tableView->rowAt(0);
+			updateTableItems();
+		}
+	}
+}
 
-			int to = m_tableView->rowAt(m_tableView->height() - m_tableView->horizontalHeader()->height());
+void DialogSignalSnapshot::updateTableItems()
+{
+	// Update only visible dynamic items
+	//
+	int from = m_tableView->rowAt(0);
 
-			if (from == -1)
+	int to = m_tableView->rowAt(m_tableView->height() - m_tableView->horizontalHeader()->height());
+
+	if (from == -1)
+	{
+		from = 0;
+	}
+
+	if (to == -1)
+	{
+		to = m_model->rowCount() - 1;
+	}
+
+	// Update signal states
+	//
+	m_model->updateStates(from, to);
+
+	// Redraw visible table items
+	//
+	for (int col = 0; col < m_model->columnCount(); col++)
+	{
+		if (col >= static_cast<int>(SnapshotColumns::SystemTime))
+		{
+			for (int row = from; row <= to; row++)
 			{
-				from = 0;
-			}
-
-			if (to == -1)
-			{
-				to = m_model->rowCount() - 1;
-			}
-
-			// Update signal states
-			//
-			m_model->updateStates(from, to);
-
-			// Redraw visible table items
-			//
-			for (int col = 0; col < m_model->columnCount(); col++)
-			{
-				if (col >= static_cast<int>(SnapshotColumns::SystemTime))
-				{
-					for (int row = from; row <= to; row++)
-					{
-						m_tableView->update(m_model->index(row, col));
-					}
-				}
+				m_tableView->update(m_model->index(row, col));
 			}
 		}
 	}
+
+	return;
 }
 
 void DialogSignalSnapshot::maskChanged()

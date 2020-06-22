@@ -209,6 +209,9 @@ void SimLogicModulePage::projectUpdated()
 
 void SimLogicModulePage::signalsButtonClicked()
 {
+	// Show snapshot with applied filter lmEquipmnetId()
+	//
+
 	SimWidget* simWidget = nullptr;
 
 	QWidget* pw = parentWidget();
@@ -230,9 +233,6 @@ void SimLogicModulePage::signalsButtonClicked()
 
 	SimDialogSignalSnapshot::showDialog(m_simulator, m_appSignalController, equipmentId(), simWidget);
 
-	// Show snapshot with applied filter lmEquipmnetId()
-	//
-	int to_do_show_signals_snapshot_for_lm;
 	return;
 }
 

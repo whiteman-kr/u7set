@@ -544,7 +544,7 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 	QStringList list;
 	list << signal.appSignalId();
 
-	emit signalContextMenu(list);
+	emit signalContextMenu(list, {});
 
 	return;
 }

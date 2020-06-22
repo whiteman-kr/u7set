@@ -134,6 +134,12 @@ public:
 
 	AppSignalState signalState(int rowIndex, bool* found);
 
+	E::AnalogFormat analogFormat() const;
+	void setAnalogFormat(E::AnalogFormat format);
+
+	int analogPrecision() const;
+	void setAnalogPrecision(int precision);
+
 protected:
 	QModelIndex parent(const QModelIndex &index) const override;
 
@@ -165,6 +171,10 @@ private:
 	QStringList m_tags;
 
 	std::set<QString> m_schemaAppSignals;
+
+	E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
+
+	int m_analogPrecision = -1;
 };
 
 struct DialogSignalSnapshotSettings
@@ -238,7 +248,7 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event) override;
 
 signals:
-	void signalContextMenu(const QStringList signalList);
+	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
 protected slots:
@@ -261,11 +271,15 @@ private slots:
 private:
 	void setupUi();
 
+	void createMenus();
+
 	void fillSchemas();
 
 	void fillSignals();
 
 	virtual void timerEvent(QTimerEvent* event) override;
+
+	void updateTableItems();
 
 	void maskChanged();
 
@@ -304,6 +318,15 @@ private:
 	static const QString m_tagsHelp;
 
 	DialogSignalSnapshotSettings m_settings;
+
+	QAction* m_formatAutoSelect = nullptr;
+	QAction* m_formatDecimal = nullptr;
+	QAction* m_formatExponential = nullptr;
+
+	QAction* m_precisionDefault = nullptr;
+	QList<QAction*> m_precisionActions;
+
+	QMenu m_formatMenu;
 };
 
 #endif // DIALOGSIGNALSNAPSHOT_H

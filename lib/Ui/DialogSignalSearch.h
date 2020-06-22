@@ -128,7 +128,7 @@ public slots:
 	void signalsUpdated();		// Should be called when new signals arrived from AppDataService
 
 signals:
-	void signalContextMenu(const QStringList signalList);
+	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
 private slots:

@@ -153,7 +153,7 @@ public:
 
 	bool hasSameValue(const AppSignalState& b) const;
 
-	static QString toString(double value, E::ValueViewType viewType, int precision);
+	static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision);
 
 public:
 	Hash m_hash = 0;					// == ::calcHash(AppSignalID)

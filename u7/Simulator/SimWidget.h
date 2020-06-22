@@ -33,7 +33,7 @@ public:
 	void startTrends(const std::vector<AppSignalParam>& appSignals);
 
 public slots:
-	void signalContextMenu(const QStringList signalList);
+	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 	void openSchemaTabPage(QString schemaId);
 
