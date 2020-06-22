@@ -77,9 +77,11 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
+	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
+	../lib/LogicModulesInfo.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
@@ -125,6 +127,9 @@ HEADERS += \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
     ../lib/Hash.h \
+	../lib/LanControllerInfo.h \
+	../lib/LanControllerInfoHelper.h \
+	../lib/LogicModulesInfo.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
     SimScriptDevUtils.h \

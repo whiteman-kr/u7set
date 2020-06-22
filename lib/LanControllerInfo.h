@@ -8,11 +8,10 @@ struct LanControllerInfo
 	int controllerNo = -1;				// == place
 	E::LanControllerType lanControllerType = E::LanControllerType::Unknown;
 
-
 	// only for adapterType == E::LanControllerType::Tuning
 	//
 	bool tuningProvided = false;
-	bool tuningEnable = true;
+	bool tuningEnable = false;
 	QString tuningIP;
 	int tuningPort = 0;
 	QString tuningServiceID;
@@ -20,11 +19,10 @@ struct LanControllerInfo
 	int tuningServicePort = 0;
 	QString tuningServiceNetmask;
 
-
 	// only for adapterType == E::LanControllerType::AppData or E::LanControllerType::AppAndDiagData
 	//
 	bool appDataProvided = false;
-	bool appDataEnable = true;
+	bool appDataEnable = false;
 	QString appDataIP;
 	int appDataPort = 0;
 	QString appDataServiceID;
@@ -36,11 +34,10 @@ struct LanControllerInfo
 	int appDataFramesQuantity = 0;
 	int overrideAppDataWordCount = -1;
 
-
 	// only for adapterType == E::LanControllerType::DiagData or E::LanControllerType::AppAndDiagData
 	//
 	bool diagDataProvided = false;
-	bool diagDataEnable = true;
+	bool diagDataEnable = false;
 	QString diagDataIP;
 	int diagDataPort = 0;
 	QString diagDataServiceID;

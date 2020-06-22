@@ -88,6 +88,6 @@ private:
 
 #endif
 
-void testLogicModulesInfoLoad();
+//void testLogicModulesInfoLoad();
 
 

@@ -234,24 +234,71 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_APP_DATA_PROVIDED, &lci->appDataProvided, errMsg);
 	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_DIAG_DATA_PROVIDED, &lci->diagDataProvided, errMsg);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	if (lci->tuningProvided == true)
 	{
-fdsdfsdfsdf
+		QDomElement tuningElem;
+
+		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_TUNING_PARAMS, &tuningElem, errMsg);
+
+		RETURN_IF_FALSE(result);
+
+		result &= DomXmlHelper::getBoolAttribute(tuningElem, EquipmentPropNames::TUNING_ENABLE, &lci->tuningEnable, errMsg);
+		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_IP, &lci->tuningIP, errMsg);
+		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_PORT, &lci->tuningPort, errMsg);
+		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_ID, &lci->tuningServiceID, errMsg);
+		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_IP, &lci->tuningServiceIP, errMsg);
+		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_PORT, &lci->tuningServicePort, errMsg);
+		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_NETMASK, &lci->tuningServiceNetmask, errMsg);
+
+		RETURN_IF_FALSE(result);
 	}
 
 	if (lci->appDataProvided == true)
 	{
-sdfsdfsdfsdf
+		QDomElement appDataElem;
+
+		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_APP_DATA_PARAMS, &appDataElem, errMsg);
+
+		RETURN_IF_FALSE(result);
+
+		result &= DomXmlHelper::getBoolAttribute(appDataElem, EquipmentPropNames::APP_DATA_ENABLE, &lci->appDataEnable, errMsg);
+		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_IP, &lci->appDataIP, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_PORT, &lci->appDataPort, errMsg);
+		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_ID, &lci->appDataServiceID, errMsg);
+		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_IP, &lci->appDataServiceIP, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_PORT, &lci->appDataServicePort, errMsg);
+		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_NETMASK, &lci->appDataServiceNetmask, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &lci->appDataSizeBytes, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(appDataElem, EquipmentPropNames::APP_DATA_UID, &lci->appDataUID, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &lci->appDataFramesQuantity, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &lci->overrideAppDataWordCount, errMsg);
+
+		RETURN_IF_FALSE(result);
 	}
 
 	if (lci->diagDataProvided == true)
 	{
-sdfsdfsdf
+		QDomElement diagDataElem;
+
+		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_DIAG_DATA_PARAMS, &diagDataElem, errMsg);
+
+		RETURN_IF_FALSE(result);
+
+		result &= DomXmlHelper::getBoolAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_ENABLE, &lci->diagDataEnable, errMsg);
+		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_IP, &lci->diagDataIP, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_PORT, &lci->diagDataPort, errMsg);
+		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_ID, &lci->diagDataServiceID, errMsg);
+		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_IP, &lci->diagDataServiceIP, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_PORT, &lci->diagDataServicePort, errMsg);
+		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, &lci->diagDataServiceNetmask, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &lci->diagDataSizeBytes, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(diagDataElem, EquipmentPropNames::DIAG_DATA_UID, &lci->diagDataUID, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &lci->diagDataFramesQuantity, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &lci->overrideDiagDataWordCount, errMsg);
+
+		RETURN_IF_FALSE(result);
 	}
 
 	return result;
@@ -477,7 +524,7 @@ sdfsdfsdf
 #endif
 
 
-
+/*
 void testLogicModulesInfoLoad()
 {
 	LogicModulesInfo lmi;
@@ -494,4 +541,4 @@ void testLogicModulesInfoLoad()
 	{
 		qDebug() << "OK";
 	}
-}
+}*/

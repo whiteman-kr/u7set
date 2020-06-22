@@ -90,8 +90,6 @@ int reportingHook(int, char* userMessage, int*)
 
 int main(int argc, char *argv[])
 {
-	testLogicModulesInfoLoad();
-
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	// To see all memory leaks, not only in the own code, comment the next line
