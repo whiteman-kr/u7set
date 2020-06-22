@@ -55,7 +55,7 @@ SimLogicModulePage* SimBasePage::logicModulePage(QString lmEquipmnetId, QWidget*
 		SimLogicModulePage* cp = dynamic_cast<SimLogicModulePage*>(page);
 
 		if (cp != nullptr &&
-			cp->equipmnetId() == lmEquipmnetId &&
+			cp->equipmentId() == lmEquipmnetId &&
 			cp->property("SimParentObject") == parentValue)
 		{
 			return cp;

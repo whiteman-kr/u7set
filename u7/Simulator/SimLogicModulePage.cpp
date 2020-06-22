@@ -1,13 +1,16 @@
 #include "SimLogicModulePage.h"
+#include "SimSignalSnapshot.h"
+#include "SimWidget.h"
 
-
-SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
+SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::AppSignalController* appSignalController,
 									   QString equipmentId,
 									   QWidget* parent)
 	: SimBasePage(simulator, parent),
-	m_lmEquipmentId(equipmentId)
+	  m_lmEquipmentId(equipmentId),
+	  m_appSignalController(appSignalController)
 {
 	assert(m_simulator);
+	assert(m_appSignalController);
 	assert(m_lmEquipmentId.isEmpty() == false);
 
 	// --
@@ -164,7 +167,7 @@ void SimLogicModulePage::fillSchemaList()
 
 	// Get all schemas fro LM
 	//
-	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmnetId());
+	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmentId());
 
 	// Filter data
 	//
@@ -206,6 +209,27 @@ void SimLogicModulePage::projectUpdated()
 
 void SimLogicModulePage::signalsButtonClicked()
 {
+	SimWidget* simWidget = nullptr;
+
+	QWidget* pw = parentWidget();
+	while (pw != nullptr)
+	{
+		if (dynamic_cast<SimWidget*>(pw) != nullptr)
+		{
+			simWidget = dynamic_cast<SimWidget*>(pw);
+			break;
+		}
+		pw = pw->parentWidget();
+	}
+
+	if (simWidget == nullptr)
+	{
+		Q_ASSERT(simWidget);
+		return;
+	}
+
+	SimDialogSignalSnapshot::showDialog(m_simulator, m_appSignalController, equipmentId(), simWidget);
+
 	// Show snapshot with applied filter lmEquipmnetId()
 	//
 	int to_do_show_signals_snapshot_for_lm;
@@ -214,7 +238,7 @@ void SimLogicModulePage::signalsButtonClicked()
 
 void SimLogicModulePage::codeButtonClicked()
 {
-	emit openCodePageRequest(equipmnetId());
+	emit openCodePageRequest(equipmentId());
 	return;
 }
 
@@ -313,7 +337,7 @@ void SimLogicModulePage::updateFilterCompleter()
 {
 	// Get all schemas fro LM
 	//
-	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmnetId());
+	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmentId());
 
 	QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_completer->model());
 
@@ -363,7 +387,7 @@ void SimLogicModulePage::updateFilterCompleter()
 	return;
 }
 
-QString SimLogicModulePage::equipmnetId() const
+QString SimLogicModulePage::equipmentId() const
 {
 	return m_lmEquipmentId;
 }

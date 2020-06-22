@@ -93,6 +93,12 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		v2 = s2.equipmentId();
 		break;
 	}
+	case SnapshotColumns::LmEquipmentID:
+	{
+		v1 = s1.lmEquipmentId();
+		v2 = s2.lmEquipmentId();
+		break;
+	}
 	case SnapshotColumns::AppSignalID:
 	{
 		v1 = s1.appSignalId();
@@ -311,6 +317,7 @@ SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, QO
 	//
 	m_columnsNames << tr("Signal ID");
 	m_columnsNames << tr("Equipment ID");
+	m_columnsNames << tr("Lm Equipment ID");
 	m_columnsNames << tr("App Signal ID");
 	m_columnsNames << tr("Caption");
 	m_columnsNames << tr("Type");
@@ -472,6 +479,10 @@ void SignalSnapshotModel::fillSignals()
 			case MaskType::EquipmentId:
 			{
 				strIdList << s.equipmentId().trimmed();
+			}
+			case MaskType::LmEquipmentId:
+			{
+				strIdList << s.lmEquipmentId().trimmed();
 			}
 				break;
 			}
@@ -845,6 +856,11 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			return s.equipmentId();
 		}
 
+		case SnapshotColumns::LmEquipmentID:
+		{
+			return s.lmEquipmentId();
+		}
+
 		case SnapshotColumns::AppSignalID:
 		{
 			return s.appSignalId();
@@ -952,10 +968,14 @@ void DialogSignalSnapshotSettings::store()
 	s.setValue("DialogSignalSnapshot/horzHeaderCount", horzHeaderCount);
 
 	s.setValue("DialogSignalSnapshot/type", static_cast<int>(signalType));
-	s.setValue("DialogSignalSnapshot/mask", maskList);
 	s.setValue("DialogSignalSnapshot/tags", tagsList);
 
-	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(maskType));
+	if (maskSetAutomatically == false)
+	{
+		s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(maskType));
+		s.setValue("DialogSignalSnapshot/mask", maskList);
+	}
+
 	s.setValue("DialogSignalSnapshot/sortColumn", sortColumn);
 	s.setValue("DialogSignalSnapshot/sortOrder", static_cast<int>(sortOrder));
 }
@@ -1012,10 +1032,18 @@ void SnapshotTableView::mouseMoveEvent(QMouseEvent* event)
 //
 //DialogSignalSnapshot
 //
+DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
+										   QString projectName,
+										   QString softwareEquipmentId,
+										   QWidget *parent) :
+	DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, QString(), parent)
+{
+}
 
 DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   QString projectName,
 										   QString softwareEquipmentId,
+										   QString lmEquipmentId,
 										   QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 	m_appSignalManager(appSignalManager),
@@ -1093,6 +1121,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 		// First time? Set what is should be hidden by deafult
 		//
 		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::EquipmentID));
+		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::LmEquipmentID));
 		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::AppSignalID));
 		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Type));
 		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Tags));
@@ -1150,14 +1179,27 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 	m_comboMaskType->addItem("AppSignalID");
 	m_comboMaskType->addItem("CustomAppSignalID");
 	m_comboMaskType->addItem("EquipmentID");
-	if (m_settings.maskType >= SignalSnapshotModel::MaskType::All && m_settings.maskType <= SignalSnapshotModel::MaskType::EquipmentId)
+	m_comboMaskType->addItem("LmEquipmentID");
+
+	if (lmEquipmentId.isEmpty() == false)
 	{
+		m_settings.maskSetAutomatically = true;
+		m_settings.maskType = SignalSnapshotModel::MaskType::LmEquipmentId;
+		m_editMask->setText(lmEquipmentId);
 		m_comboMaskType->setCurrentIndex(static_cast<int>(m_settings.maskType));
 	}
 	else
 	{
-		m_comboMaskType->setCurrentIndex(0);
+		if (m_settings.maskType >= SignalSnapshotModel::MaskType::All && m_settings.maskType <= SignalSnapshotModel::MaskType::LmEquipmentId)
+		{
+			m_comboMaskType->setCurrentIndex(static_cast<int>(m_settings.maskType));
+		}
+		else
+		{
+			m_comboMaskType->setCurrentIndex(0);
+		}
 	}
+
 	m_comboMaskType->blockSignals(false);
 
 	connect(m_editMask, &QLineEdit::textEdited, [this](){m_maskCompleter->complete();});
@@ -1653,6 +1695,8 @@ void DialogSignalSnapshot::on_typeCombo_currentIndexChanged(int index)
 
 void DialogSignalSnapshot::on_editMask_returnPressed()
 {
+	m_settings.maskSetAutomatically = false;
+
 	maskChanged();
 
 	fillSignals();
@@ -1686,6 +1730,8 @@ void DialogSignalSnapshot::on_schemaCombo_currentIndexChanged(int /*index)*/)
 
 void DialogSignalSnapshot::on_comboMaskType_currentIndexChanged(int index)
 {
+	m_settings.maskSetAutomatically = false;
+
 	m_model->setMaskType(static_cast<SignalSnapshotModel::MaskType>(index));
 	m_settings.maskType = static_cast<SignalSnapshotModel::MaskType>(index);
 

@@ -44,6 +44,7 @@ enum class SnapshotColumns
 {
 	SignalID = 0,		// Signal Param Columns
 	EquipmentID,
+	LmEquipmentID,
 	AppSignalID,
 	Caption,
 	Type,
@@ -89,7 +90,8 @@ public:
         All = 0,
 		AppSignalId,
 		CustomAppSignalId,
-		EquipmentId
+		EquipmentId,
+		LmEquipmentId
 	};
 
 public:
@@ -175,6 +177,7 @@ struct DialogSignalSnapshotSettings
 
 	SignalSnapshotModel::SignalType signalType = SignalSnapshotModel::SignalType::All;
 
+	bool maskSetAutomatically = false;
 	QStringList maskList;
 	SignalSnapshotModel::MaskType maskType = SignalSnapshotModel::MaskType::AppSignalId;
 
@@ -211,6 +214,12 @@ protected:
 	explicit DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 								  QString projectName,
 								  QString softwareEquipmentId,
+								  QWidget *parent);
+
+	explicit DialogSignalSnapshot(IAppSignalManager* appSignalManager,
+								  QString projectName,
+								  QString softwareEquipmentId,
+								  QString lmEquipmentId,
 								  QWidget *parent);
 	virtual ~DialogSignalSnapshot();
 

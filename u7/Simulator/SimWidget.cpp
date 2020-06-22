@@ -720,7 +720,7 @@ void SimWidget::showSnapshot()
 	//    it is guarantee will not be deleted
 	//
 
-	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, this);
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, QString(), this);
 
 	return;
 }
@@ -885,7 +885,7 @@ void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
+	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), m_appSignalController, lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimLogicModuleIcon.svg"}});

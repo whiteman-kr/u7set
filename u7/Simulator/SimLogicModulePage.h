@@ -2,6 +2,7 @@
 
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
+#include "../../VFrame30/AppSignalController.h"
 
 class SimLogicModulePage : public SimBasePage
 {
@@ -9,8 +10,9 @@ class SimLogicModulePage : public SimBasePage
 
 public:
 	SimLogicModulePage(SimIdeSimulator* simulator,
-				  QString equipmentId,
-				  QWidget* parent);
+					   VFrame30::AppSignalController* appSignalController,
+					   QString equipmentId,
+					   QWidget* parent);
 	virtual ~SimLogicModulePage();
 
 protected:
@@ -34,10 +36,10 @@ protected slots:
 
 signals:
 	void openSchemaRequest(QString schemaId);
-	void openCodePageRequest(QString equipmnetId);
+	void openCodePageRequest(QString equipmentId);
 
 public:
-	QString equipmnetId() const;
+	QString equipmentId() const;
 
 private:
 	std::shared_ptr<Sim::LogicModule> logicModule();
@@ -63,5 +65,6 @@ private:
 	// --
 	//
 	QString m_lmEquipmentId;
+	VFrame30::AppSignalController* m_appSignalController = nullptr;
 };
 

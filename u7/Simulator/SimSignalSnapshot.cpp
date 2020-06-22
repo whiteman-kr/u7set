@@ -4,6 +4,7 @@
 
 bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 										 VFrame30::AppSignalController* appSignalController,
+										 QString lmEquipmentId,
 										 SimWidget* simWidget)
 {
 
@@ -11,6 +12,7 @@ bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 															   appSignalController->appSignalManager(),
 															   simuator->projectName(),
 															   tr("Simulator"),
+															   lmEquipmentId,
 															   simWidget);
 
 	connect(simuator, &SimIdeSimulator::projectUpdated, dss, &SimDialogSignalSnapshot::projectUpdated);
@@ -31,8 +33,9 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 												 IAppSignalManager* appSignalManager,
 												 QString projectName,
 												 QString softwareEquipmentId,
+												 QString lmEquipmentId,
 												 QWidget *parent)
-	:DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
+    :DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, lmEquipmentId, parent),
 	  m_simuator(simuator)
 {
 	if (m_simuator == nullptr)
@@ -40,6 +43,9 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 		Q_ASSERT(m_simuator);
 		return;
 	}
+
+	return;
+
 }
 
 void SimDialogSignalSnapshot::projectUpdated()
