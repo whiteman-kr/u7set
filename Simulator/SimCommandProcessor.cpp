@@ -48,7 +48,7 @@ namespace Sim
 		}
 	}
 
-	bool CommandProcessor::updatePlatformInterfaceState(std::chrono::microseconds currentTime)
+	bool CommandProcessor::updatePlatformInterfaceState(const QDateTime& currentTime)
 	{
 		Q_UNUSED(currentTime);
 

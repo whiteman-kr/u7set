@@ -1,10 +1,12 @@
 #include <array>
 #include <cfenv>
 #include <cmath>
+#include <chrono>
 #include "../lib/TimeStamp.h"
 #include "SimCommandProcessor_LM5_LM6.h"
 #include "SimException.h"
 #include "SimAfb.h"
+
 
 namespace Sim
 {
@@ -45,7 +47,7 @@ namespace Sim
 		return;
 	}
 
-	bool CommandProcessor_LM5_LM6::updatePlatformInterfaceState(std::chrono::microseconds currentTime)
+	bool CommandProcessor_LM5_LM6::updatePlatformInterfaceState(const QDateTime& currentTime)
 	{
 		using namespace std::chrono;
 
@@ -69,17 +71,16 @@ namespace Sim
 
 		// Date/Time
 		//
-		quint32 yearAddress = 57784;
-		quint32 monthAddress = 57786;
-		quint32 dayAddress = 57788;
-		quint32 hoursAddress = 57790;
-		quint32 minutesAddress = 57792;
-		quint32 secondsAddress = 57794;
-		quint32 millisecondsAddress = 57796;
+		const quint32 yearAddress = 57784;
+		const quint32 monthAddress = 57786;
+		const quint32 dayAddress = 57788;
+		const quint32 hoursAddress = 57790;
+		const quint32 minutesAddress = 57792;
+		const quint32 secondsAddress = 57794;
+		const quint32 millisecondsAddress = 57796;
 
-		QDateTime dt = QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(currentTime).count());
-		QDate date = dt.date();
-		QTime time = dt.time();
+		QDate date = currentTime.date();
+		QTime time = currentTime.time();
 
 		m_device->writeRamDword(yearAddress, date.year(), E::LogicModuleRamAccess::Read);
 		m_device->writeRamDword(monthAddress, date.month(), E::LogicModuleRamAccess::Read);
@@ -88,6 +89,7 @@ namespace Sim
 		m_device->writeRamDword(hoursAddress, time.hour(), E::LogicModuleRamAccess::Read);
 		m_device->writeRamDword(minutesAddress, time.minute(), E::LogicModuleRamAccess::Read);
 		m_device->writeRamDword(secondsAddress, time.second(), E::LogicModuleRamAccess::Read);
+
 		m_device->writeRamDword(millisecondsAddress, time.msec(), E::LogicModuleRamAccess::Read);
 
 		return true;

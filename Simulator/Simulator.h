@@ -53,7 +53,7 @@ namespace Sim
 		bool loadAppSignals(QString buildPath);
 
 	signals:
-		void projectUpdated();	// Project was loaded or cleared
+		void projectUpdated();				// Project was loaded or cleared
 
 	public:
 		bool isLoaded() const;

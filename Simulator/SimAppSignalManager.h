@@ -67,9 +67,9 @@ namespace Sim
 		Hash customToAppSignal(Hash customSignalHash) const;
 
 		AppSignalState signalState(const QString& appSignalId, bool* found, bool applyOverride) const;
-		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;
+		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;			// <<<< GETTING STATE CODE HERE
 
-		bool getUpdateForRam(const QString equipmentId, Sim::Ram* ram) const;
+		bool getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const;
 
 	public:
 		// Implementing IAppSignalManager - AppSignals

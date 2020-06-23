@@ -73,14 +73,14 @@ namespace Sim
 		return;
 	}
 
-	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime, qint64 workcycle, bool reset)
+	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle, bool reset)
 	{
 		if (reset == true)
 		{
 			m_device.reset();
 		}
 
-		return QtConcurrent::run<bool>(&m_device, &DeviceEmulator::runWorkcycle, currentTime, workcycle);
+		return QtConcurrent::run<bool>(&m_device, &DeviceEmulator::runWorkcycle, currentTime, currentDateTime, workcycle);
 	}
 
 	bool LogicModule::receiveConnectionsData(std::chrono::microseconds currentTime)
@@ -211,4 +211,32 @@ namespace Sim
 		m_device.setOverrideSignals(overrideSignals);
 	}
 
+	void LogicModule::setAppSignalManager(AppSignalManager* appSignalManager)
+	{
+		m_device.setAppSignalManager(appSignalManager);
+	}
+
+	bool LogicModule::isPowerOff() const
+	{
+		return deviceMode() == DeviceMode::Off;
+	}
+
+	void LogicModule::setPowerOff(bool value)
+	{
+		if (value == true)
+		{
+			if (isPowerOff() == false)
+			{
+				m_device.powerOff();
+			}
+		}
+		else
+		{
+			m_device.reset();
+//			if (isPowerOff() == true)
+//			{
+//				m_device.reset();
+//			}
+		}
+	}
 }

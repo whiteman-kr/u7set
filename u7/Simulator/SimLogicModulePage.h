@@ -22,6 +22,7 @@ protected:
 protected slots:
 	void projectUpdated();
 
+	void powerOff(bool toPowerOff);
 	void signalsButtonClicked();
 	void codeButtonClicked();
 	void memoryButtonClicked();
@@ -33,6 +34,8 @@ protected slots:
 	void openSelectedSchema();
 
 	void updateFilterCompleter();
+
+	void updateModuleStates(Sim::ControlStatus state);
 
 signals:
 	void openSchemaRequest(QString schemaId);
@@ -51,6 +54,9 @@ private:
 	QLabel* m_subsystemIdLabel = new QLabel{this};
 	QLabel* m_equipmentIdLabel = new QLabel{this};
 	QLabel* m_channelLabel = new QLabel{this};
+
+	QPushButton* m_disableButton = new QPushButton{tr("Disable"), this};
+	QLabel* m_stateLabel = new QLabel{this};
 
 	QPushButton* m_signalsButton = new QPushButton{tr("Signals"), this};
 	QPushButton* m_memoryButton = new QPushButton{tr("Memory Dump"), this};

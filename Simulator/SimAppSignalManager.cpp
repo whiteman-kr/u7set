@@ -302,46 +302,48 @@ namespace Sim
 		// Later trend will fetch it itself
 		//
 		{
-			QDateTime currentTime = QDateTime::currentDateTime();
-
 			QMutexLocker ml(&m_trendMutex);
 
-			for (auto it = m_trends.begin(); it != m_trends.end();)
+			if (m_trends.empty() == false)
 			{
-				Trend& trend = *it;
+				qint64 currentTime = QDateTime::currentDateTime().toSecsSinceEpoch();
 
-				if (currentTime.toSecsSinceEpoch() - trend.lastAccess.toSecsSinceEpoch() >= 5)	// 5 seconds
+				for (auto it = m_trends.begin(); it != m_trends.end();)
 				{
-					// Remove this thend form obeserved, as it did not have fetched data for 5 seconds
-					//
-					it = m_trends.erase(it);
-					continue;
-				}
+					Trend& trend = *it;
 
-				for (TrendSignal& ts : trend.trendSignals)
-				{
-					if (ts.lmEquipmentIdHash == lmHash)
+					if (currentTime - trend.lastAccess.toSecsSinceEpoch() >= 10)	// 10 seconds
 					{
-						// Fetching appsignals states from ram is cause locking m_ramLock for read,
-						// so it is nested lock m_trendMutex -> m_trendMutex.
-						// Just keep it in mind and do not try to lock in other dirrection
+						// Remove this thend from obeserved, as it did not have fetched data for 10 seconds
 						//
+						it = m_trends.erase(it);
+						continue;
+					}
 
-						AppSignalState& addedState = ts.states.emplace_back(this->signalState(ts.appSignalHash, nullptr));
-
-						if (ts.states.size() > 3 &&
-							addedState.hasSameValue(ts.states[ts.states.size() - 2]) == true &&
-							addedState.hasSameValue(ts.states[ts.states.size() - 3]) == true)
+					for (TrendSignal& ts : trend.trendSignals)
+					{
+						if (ts.lmEquipmentIdHash == lmHash)
 						{
-							ts.states[ts.states.size() - 2] = addedState;
-							ts.states.resize(ts.states.size() - 1);		// If last 3 points have the same value, then extend 2nt to 3rd;
+							// Fetching appsignals states from ram is cause locking m_ramLock for read,
+							// so it is nested lock m_trendMutex -> m_trendMutex.
+							// Just keep it in mind and do not try to lock in other dirrection
+							//
+							AppSignalState& addedState = ts.states.emplace_back(this->signalState(ts.appSignalHash, nullptr));
+
+							if (ts.states.size() > 3 &&
+								addedState.hasSameValue(ts.states[ts.states.size() - 2]) == true &&
+								addedState.hasSameValue(ts.states[ts.states.size() - 3]) == true)
+							{
+								ts.states[ts.states.size() - 2] = addedState;
+								ts.states.resize(ts.states.size() - 1);		// If last 3 points have the same value, then extend 2nt to 3rd;
+							}
 						}
 					}
-				}
 
-				// Increment it here, as we erase some items in loop
-				//
-				++it;
+					// Increment it here, as we erase some items in loop
+					//
+					++it;
+				}
 			}
 		}
 
@@ -598,6 +600,13 @@ namespace Sim
 				state.m_time = timeIt->second;
 			}
 
+			if (m_simulator->logicModule(logicModuleId)->isPowerOff() == true)
+			{
+				// Time stamp is already set set
+				//
+				return state;
+			}
+
 			// Set flags
 			//
 			if (auto flagIt = m_flagsStruct.find(signalHash);
@@ -729,9 +738,9 @@ namespace Sim
 		return state;
 	}
 
-	bool AppSignalManager::getUpdateForRam(const QString equipmentId, Sim::Ram* ram) const
+	bool AppSignalManager::getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const
 	{
-		assert(ram);
+		Q_ASSERT(ram);
 
 		Hash lmHash = ::calcHash(equipmentId);
 
