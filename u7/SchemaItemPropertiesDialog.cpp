@@ -30,7 +30,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	// --
 	//
 	m_propertyEditor->setSplitterPosition(theSettings.m_schemaItemPropertiesSplitterPosition);
-	m_propertyTable->setPropertyMask(theSettings.m_schemaItemPropertiesPropertyMask);
+	m_propertyTable->setPropertyFilter(theSettings.m_schemaItemPropertiesPropertyFilter);
 	m_propertyTable->setExpandValuesToAllRows(theSettings.m_schemaItemPropertiesExpandValuesToAllRows);
 	m_propertyTable->setColumnsWidth(theSettings.m_schemaItemPropertiesColumnsWidth);
 	m_propertyTable->setGroupByCategory(theSettings.m_schemaItemPropertiesGroupByCategory);
@@ -113,7 +113,7 @@ void SchemaItemPropertiesDialog::done(int r)
 void SchemaItemPropertiesDialog::saveSettings()
 {
 	theSettings.m_schemaItemPropertiesSplitterPosition = m_propertyEditor->splitterPosition();
-	theSettings.m_schemaItemPropertiesPropertyMask = m_propertyTable->propertyMask();
+	theSettings.m_schemaItemPropertiesPropertyFilter = m_propertyTable->propertyFilter();
 	theSettings.m_schemaItemPropertiesExpandValuesToAllRows = m_propertyTable->expandValuesToAllRows();
 	theSettings.m_schemaItemPropertiesColumnsWidth = m_propertyTable->getColumnsWidth();
 	theSettings.m_schemaItemPropertiesGroupByCategory = m_propertyTable->groupByCategory();

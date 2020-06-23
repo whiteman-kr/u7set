@@ -172,7 +172,7 @@ public:
 	// SchemaItemPropertiesDialog
 
 	int m_schemaItemPropertiesSplitterPosition = 100;
-	QString m_schemaItemPropertiesPropertyMask;
+	QString m_schemaItemPropertiesPropertyFilter;
 	bool m_schemaItemPropertiesExpandValuesToAllRows = true;
 	QMap<QString, int> m_schemaItemPropertiesColumnsWidth;
 	bool m_schemaItemPropertiesGroupByCategory = false;
