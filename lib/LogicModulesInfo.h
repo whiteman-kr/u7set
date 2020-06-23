@@ -1,57 +1,20 @@
 #pragma once
 
-#ifdef IS_BUILDER
-
-#include "Connection.h"
-#include "../Builder/OptoModule.h"
-#include "XmlHelper.h"
-#include "WUtils.h"
-#include "ModuleLogicCompiler.h"
-#include "../lib/DeviceHelper.h"
-
-#endif
-
 #include "Address16.h"
 #include "Types.h"
 #include "DomXmlHelper.h"
+#include "LanControllerInfo.h"
 
-class LanControllerInfo
-{
-	QString equipmentID;
-	E::LanControllerType lanControllerType;
+#ifdef IS_BUILDER
 
-	//
+#include "XmlHelper.h"
+#include "WUtils.h"
+#include "ModuleLogicCompiler.h"
+#include "DeviceHelper.h"
+#include "LmDescription.h"
+#include "LanControllerInfoHelper.h"
 
-	bool tuningEnabled = false;
-	QHostAddress tuningIP;
-	int tuningPort = 0;
-
-	//
-
-	bool appDataEnabled = false;
-	QHostAddress appDataIP;
-	int appDataPort = 0;
-
-	QString appDataServiceEquipmentID;
-	QHostAddress appDataServiceIP;
-	int appDataServicePort = 0;
-
-	int appDataSizeW = 0;
-	int overrideAppDataWordCount = -1;
-
-	//
-
-	bool diagDataEnabled = false;
-	QHostAddress diagDataIP;
-	int diagDataPort = 0;
-
-	QString diagDataServiceEquipmentID;
-	QHostAddress diagDataServiceIP;
-	int diagDataServicePort;
-
-	int diagDataSizeW = 0;
-	int overrideDiagDataWordCount = -1;
-};
+#endif
 
 class LogicModuleInfo
 {
@@ -75,13 +38,14 @@ public:
 class LogicModulesInfo
 {
 public:
-	std::vector<LogicModuleInfo> logicModulesInfo;
+	std::vector<::LogicModuleInfo> logicModulesInfo;
 
 	bool load(const QString& fileName, QString* errMsg);
 	bool load(const QByteArray& xmlData, QString* errMsg);
 
 private:
-	bool load(LogicModuleInfo* lmi, const QDomNode& node, QString* errMsg);
+	bool load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QString* errMsg);
+	bool load(LanControllerInfo* lci, const QDomNode& lanControllerNode, QString* errMsg);
 
 protected:
 	static const QString ELEM_LOGIC_MODULES;
@@ -90,24 +54,13 @@ protected:
 	static const QString ELEM_LAN_CONTROLLERS;
 	static const QString ELEM_LAN_CONTROLLER;
 
-	static const QString ATTR_COUNT;
-	static const QString ATTR_ID;
+	static const QString ELEM_TUNING_PARAMS;
+	static const QString ELEM_APP_DATA_PARAMS;
+	static const QString ELEM_DIAG_DATA_PARAMS;
 
-	static const QString ATTR_EQUIPMENT_ID;
-	static const QString ATTR_CAPTION;
-
-	static const QString ATTR_SUBSYSTEM_ID;
-	static const QString ATTR_LM_NUMBER;
-	static const QString ATTR_SUBSYSTEM_CHANNEL;
-
-	static const QString ATTR_MODULE_FAMILY;
-	static const QString ATTR_MODULE_VERSION;
-
-	static const QString ATTR_PRESET_NAME;
-	static const QString ATTR_LM_DESCRIPTION_FILE;
-
-	static const QString ATTR_DATA_ID;
-	static const QString ATTR_HEX_DATA_ID;
+	static const QString ATTR_TUNING_PROVIDED;
+	static const QString ATTR_APP_DATA_PROVIDED;
+	static const QString ATTR_DIAG_DATA_PROVIDED;
 };
 
 #ifdef IS_BUILDER
@@ -115,31 +68,26 @@ protected:
 class LogicModulesInfoWriter : public LogicModulesInfo
 {
 public:
-	bool fill(const QVector<Builder::ModuleLogicCompiler *> &moduleCompilers);
+	LogicModulesInfoWriter(const QVector<Builder::ModuleLogicCompiler *>& moduleCompilers,
+						   const Hardware::EquipmentSet& equipmentSet);
+
+	bool fill();
 	void save(QByteArray* xmlFileData) const;
 
 private:
 	bool fill(LogicModuleInfo* lmInfo, Builder::ModuleLogicCompiler& mc);
+
 	bool save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const;
 
 	bool save(const LanControllerInfo& lci, XmlWriteHelper& xml) const;
 
-/*
-public:
-	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(QByteArray* xmlFileData) const;
-
 private:
-
-	bool fill(ConnectionInfo* ci, Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(const ConnectionInfo& ci, XmlWriteHelper& xml) const;
-
-	bool fill(ConnectionPortInfo* cpi, Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(const ConnectionPortInfo& cpi, XmlWriteHelper& xml) const;
-
-	void save(const ConnectionTxRxSignal& cs, XmlWriteHelper& xml) const;*/
+	const QVector<Builder::ModuleLogicCompiler *>& m_moduleCompilers;
+	const Hardware::EquipmentSet& m_equipmentSet;
 };
 
 #endif
+
+//void testLogicModulesInfoLoad();
 
 

@@ -178,6 +178,8 @@ namespace Builder
 										   std::map<QUuid, const UalItem*>* linkedPins);
 
 		std::shared_ptr<Hardware::DeviceModule> getLmSharedPtr();
+		std::shared_ptr<LmDescription> getLmDescription();
+
 		BusShared getBusShared(const QString& busTypeID);
 
 	private:

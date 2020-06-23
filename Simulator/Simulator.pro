@@ -77,9 +77,11 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
+	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
+	../lib/LogicModulesInfo.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
@@ -115,9 +117,9 @@ SOURCES += \
     SimCommandProcessor.cpp \
     SimException.cpp \
     SimOverrideSignals.cpp \
-    ../lib/SignalProperties.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp
+	../lib/SignalProperties.cpp \
+   ../Builder/IssueLogger.cpp \
+   ../lib/OutputLog.cpp
 
 HEADERS += \
     ../Builder/CfgFiles.h \
@@ -125,6 +127,9 @@ HEADERS += \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
     ../lib/Hash.h \
+	../lib/LanControllerInfo.h \
+	../lib/LanControllerInfoHelper.h \
+	../lib/LogicModulesInfo.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
     SimScriptDevUtils.h \
@@ -167,9 +172,10 @@ HEADERS += \
     SimCommandProcessor.h \
     SimException.h \
     SimOverrideSignals.h \
-    ../lib/SignalProperties.h \
-    ../Builder/IssueLogger.h \
-    ../lib/OutputLog.h
+	../lib/SignalProperties.h \
+	../Builder/IssueLogger.h \
+	../lib/OutputLog.h
+
 
 ## VFrame30 library
 ## $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30

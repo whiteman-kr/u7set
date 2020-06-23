@@ -33,6 +33,7 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
+    ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
@@ -85,6 +86,8 @@ SOURCES += \
 
 HEADERS += \
     ../lib/Address16.h \
+    ../lib/LanControllerInfo.h \
+    ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
 	Stable.h \
     ../lib/SocketIO.h \

@@ -21,6 +21,7 @@ include(../warnings.pri)
 
 SOURCES +=\
     ../lib/Address16.cpp \
+    ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
 	TuningMainWindow.cpp \
 	../lib/ServiceSettings.cpp \
@@ -70,6 +71,8 @@ SOURCES +=\
 
 HEADERS  += TuningMainWindow.h \
     ../lib/Address16.h \
+    ../lib/LanControllerInfo.h \
+    ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
 	../lib/ServiceSettings.h \
 	../lib/DeviceHelper.h \

@@ -4,6 +4,7 @@
 #include "../lib/DataSource.h"
 #include "../lib/Crc.h"
 #include "../lib/Connection.h"
+#include "../lib/LanControllerInfoHelper.h"
 #include "../TuningIPEN/TuningIPENDataStorage.h"
 
 #include "SoftwareCfgGenerator.h"
@@ -251,6 +252,13 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
 
 		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
+	}
+
+	std::shared_ptr<LmDescription> ModuleLogicCompiler::getLmDescription()
+	{
+		TEST_PTR_LOG_RETURN_NULLPTR(m_lmDescription, m_log);
+
+		return m_lmDescription;
 	}
 
 	BusShared ModuleLogicCompiler::getBusShared(const QString& busTypeID)
@@ -4094,8 +4102,7 @@ namespace Builder
 			return true;
 		}
 
-		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
-							arg(tuningControllerNo);
+		QString suffix = LanControllerInfoHelper::getLanControllerSuffix(tuningControllerNo);
 
 		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
 
@@ -4105,7 +4112,7 @@ namespace Builder
 			return false;
 		}
 
-		if (DeviceHelper::isPropertyExists(adapter, DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE) == false)
+		if (DeviceHelper::isPropertyExists(adapter, EquipmentPropNames::TUNING_ENABLE) == false)
 		{
 			*tuningPropertyExists = false;
 			return true;
@@ -4114,7 +4121,7 @@ namespace Builder
 		*tuningPropertyExists = true;
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
-												 DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE,
+		                                         EquipmentPropNames::TUNING_ENABLE,
 												 tuningEnabled,
 												 m_log);
 		return res;
@@ -12456,7 +12463,7 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_SIZE,
+		                                    EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
@@ -12736,7 +12743,7 @@ namespace Builder
 		m_appLogicUniqueID = crc.result();
 
 		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID,
+		                                    EquipmentPropNames::LM_APP_LAN_DATA_UID,
 											crc.result32(),
 											m_log);
 	}
