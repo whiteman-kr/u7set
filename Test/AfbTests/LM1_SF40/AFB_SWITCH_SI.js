@@ -48,7 +48,7 @@ function cleanup(sim)
 
 
 
-function test_AFB_SWITCH(sim)
+function test_AFB_SWITCH_SI(sim)
 {
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_IN_SI1", 0);

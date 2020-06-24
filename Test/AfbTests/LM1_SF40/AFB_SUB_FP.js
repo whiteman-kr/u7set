@@ -97,15 +97,8 @@ function test_AFB_SUB_FP(sim)
     assert(sim.signalValue("#OUT_SUB_FP001") ===  NaN);
     assert(sim.signalValue("#OUT_NAN_SUB_FP001") === 1);
 
-
-	   
     return;
 }
-
-
-
-	
-	
     // Start simulation for N msecs:
     //      sim.startForMs(50);
 

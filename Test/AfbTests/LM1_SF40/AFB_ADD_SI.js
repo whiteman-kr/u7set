@@ -48,48 +48,47 @@ function cleanup(sim)
 
 
 
-function test_AFB_SQRT_FP(sim)
+function test_AFB_ADD_SI(sim)
 {
-    
-    sim.overrideSignalValue("#TUN_IN_FP1", 0);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 0);
-    assert(sim.signalValue("#OUT_ZERO_SQRT_FP001") === 1);
-
-	sim.overrideSignalValue("#TUN_IN_FP1", 4);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 2);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", 128);
+	
+    sim.overrideSignalValue("#TUN_IN_SI1", 0);
+    sim.overrideSignalValue("#TUN_IN_SI2", 0);
     sim.startForMs(5);
-    console.log("#OUT_SQRT_FP001");
-    //assert(sim.signalValue("#OUT_SQRT_FP001") === 11.313708498984761);
+    //console.log(sim.signalValue("#OUT_ADD_SI001"));
+    //console.log(sim.signalValue("#OUT_ZERO_ADD_SI001"));
+    assert(sim.signalValue("#OUT_ADD_SI001") === 0);
+    assert(sim.signalValue("#OUT_ZERO_ADD_SI001") === 1);
 
-    sim.overrideSignalValue("#TUN_IN_FP1", -1);
+    sim.overrideSignalValue("#TUN_IN_SI1", 1);
+    sim.overrideSignalValue("#TUN_IN_SI2", 1);
+    sim.startForMs(5);
+    //console.log(sim.signalValue("#OUT_ADD_SI001"));
+    assert(sim.signalValue("#OUT_ADD_SI001") === 2);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", 1);
+    sim.overrideSignalValue("#TUN_IN_SI2", 1);
 	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === NaN);
-    assert(sim.signalValue("#OUT_NAN_SQRT_FP001") === 1);
+    assert(sim.signalValue("#OUT_ADD_SI001") === 2);
 
-    sim.overrideSignalValue("#TUN_IN_FP1", -15.8);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", 1200);
+    sim.overrideSignalValue("#TUN_IN_SI2", 6880);
 	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === NaN);
-    assert(sim.signalValue("#OUT_NAN_SQRT_FP001") === 1);
+    assert(sim.signalValue("#OUT_ADD_SI001") === 8080);
 
-    sim.overrideSignalValue("#TUN_IN_FP1", -0.1);
+    sim.overrideSignalValue("#TUN_IN_SI1", 1);
+    sim.overrideSignalValue("#TUN_IN_SI2", -1);
 	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === NaN);
-    assert(sim.signalValue("#OUT_NAN_SQRT_FP001") === 1);
+    assert(sim.signalValue("#OUT_ADD_SI001") === 0);
+    assert(sim.signalValue("#OUT_ZERO_ADD_SI001") === 1);
 
-    sim.overrideSignalValue("#TUN_IN_FP1", 0.1);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 0.31622776);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", 1000000);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 1000);
-
-
+    sim.overrideSignalValue("#TUN_IN_SI1", 1999999999);
+    sim.overrideSignalValue("#TUN_IN_SI2", 999999990);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_ADD_SI001") === 2147483647);
+    assert(sim.signalValue("#OVERFLOW_ADD_SI001") === 1);
     
+
     return;
 }
 

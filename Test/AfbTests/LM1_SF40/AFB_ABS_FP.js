@@ -48,48 +48,31 @@ function cleanup(sim)
 
 
 
-function test_AFB_SQRT_FP(sim)
+function test_AFB_ABS_FP(sim)
 {
     
+    sim.overrideSignalValue("#TUN_IN_FP1", -12);
+    sim.startForMs(5);
+    console.log(sim.signalValue("#OUT_ABS_FP001"));
+    assert(sim.signalValue("#OUT_ABS_FP001") === 12);
+    
+	sim.overrideSignalValue("#TUN_IN_FP1", -1.01);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_ABS_FP001") === 1.01);
+    
+    sim.overrideSignalValue("#TUN_IN_FP1", 2.2);
+	sim.startForMs(5);
+    assert(sim.signalValue("#OUT_ABS_FP001") === 2.2);
+
+    sim.overrideSignalValue("#TUN_IN_FP1", -99.99);
+	sim.startForMs(5);
+    assert(sim.signalValue("#OUT_ABS_FP001") === 99.99);
+
     sim.overrideSignalValue("#TUN_IN_FP1", 0);
 	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 0);
-    assert(sim.signalValue("#OUT_ZERO_SQRT_FP001") === 1);
+    assert(sim.signalValue("#OUT_ABS_FP001") === 0);
+	
 
-	sim.overrideSignalValue("#TUN_IN_FP1", 4);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 2);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", 128);
-    sim.startForMs(5);
-    console.log("#OUT_SQRT_FP001");
-    //assert(sim.signalValue("#OUT_SQRT_FP001") === 11.313708498984761);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", -1);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === NaN);
-    assert(sim.signalValue("#OUT_NAN_SQRT_FP001") === 1);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", -15.8);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === NaN);
-    assert(sim.signalValue("#OUT_NAN_SQRT_FP001") === 1);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", -0.1);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === NaN);
-    assert(sim.signalValue("#OUT_NAN_SQRT_FP001") === 1);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", 0.1);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 0.31622776);
-
-    sim.overrideSignalValue("#TUN_IN_FP1", 1000000);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 1000);
-
-
-    
     return;
 }
 
