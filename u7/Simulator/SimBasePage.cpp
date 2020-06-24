@@ -30,7 +30,6 @@ SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent)
 
 SimBasePage::~SimBasePage()
 {
-	qDebug() << "SimulatorBasePage::~SimulatorBasePage()";
 	m_pages.remove(this);
 }
 

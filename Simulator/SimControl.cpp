@@ -90,6 +90,7 @@ namespace Sim
 			}
 
 			lm->setOverrideSignals(&m_simulator->overrideSignals());
+			lm->setAppSignalManager(&m_simulator->appSignalManager());
 
 			lms.emplace_back(lm);
 			addedModuleCount ++;
@@ -284,17 +285,17 @@ namespace Sim
 
 		m_controlData.m_currentTime = cd.m_currentTime;
 
-        for (SimControlRunStruct& rs : m_controlData.m_lms)
-        {
-            for (const SimControlRunStruct& cdrs : cd.m_lms)
-            {
-                if (cdrs.equipmentId() == rs.equipmentId())
-                {
-                    rs.m_lastStartTime = cdrs.m_lastStartTime;
-                    break;
-                }
-            }
-        }
+		for (SimControlRunStruct& rs : m_controlData.m_lms)
+		{
+			for (const SimControlRunStruct& cdrs : cd.m_lms)
+			{
+				if (cdrs.equipmentId() == rs.equipmentId())
+				{
+					rs.m_lastStartTime = cdrs.m_lastStartTime;
+					break;
+				}
+			}
+		}
 
 		return;
 	}
@@ -375,11 +376,11 @@ namespace Sim
 		using namespace std::chrono;
 
 		bool result = true;
-        ControlData cd = controlData();                     // Initialize local data with actual simulation ControlData
+		ControlData cd = controlData();                     // Initialize local data with actual simulation ControlData
 
 		// Get simulation LogicModules
 		//
-        std::vector<SimControlRunStruct>& lms = cd.m_lms;   // Referense to the !local! variable cd
+		std::vector<SimControlRunStruct>& lms = cd.m_lms;   // Referense to the !local! variable cd
 
 		if (lms.empty() == true)
 		{
@@ -387,6 +388,8 @@ namespace Sim
 			writeError(tr("processRun, No LogicModules to simulate."));
 			return false;
 		}
+
+		quint32 minimulLmWorkcycleUs = 5000;
 
 		for (const SimControlRunStruct& lm : lms)
 		{
@@ -399,6 +402,8 @@ namespace Sim
 				result = false;
 				continue;
 			}
+
+			minimulLmWorkcycleUs = std::min(minimulLmWorkcycleUs, simLm->lmDescription().logicUnit().m_cycleDuration);
 		}
 
 		if (result == false)
@@ -412,10 +417,11 @@ namespace Sim
 		perfmanceTimer.start();
 
 		microseconds perfmonaceStartedAt = cd.m_currentTime;
-		QDateTime utcOffset = QDateTime::currentDateTime();
 		quint64 timeStatusUpdateCounter = 0;
+		QDateTime currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
 		auto finishTime = cd.m_startTime + cd.m_duration;
+
 		do
 		{
 			if (isInterruptionRequested() == true)
@@ -427,14 +433,28 @@ namespace Sim
 			// No concurrent run is required, perfomance measurements show that in
 			// concurent mode it it much slower then this code
 			//
+			bool allLmsArePoweredOff = true;
+
 			for (SimControlRunStruct& lm : lms)
 			{
+				if (lm->isPowerOff() == true)
+				{
+					continue;
+				}
+				else
+				{
+					allLmsArePoweredOff = false;
+				}
+
 				if (lm.m_task.has_value() == false)
 				{
 					lm->receiveConnectionsData(cd.m_currentTime);
 				}
 			}
 
+			// Check if workcylce finished on lms then fetch data
+			// Start new workcycle on finished lms
+			//
 			for (SimControlRunStruct& lm : lms)
 			{
 				if (lm.m_task.has_value() == true)
@@ -445,16 +465,6 @@ namespace Sim
 					{
 						lm.m_possibleToAdvanceTo = lm.m_lastStartTime + lm->cycleDuration();
 						lm.m_task.reset();
-
-						// Perform post run cycle actions
-						//
-						auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
-
-						TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-						TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-						TimeStamp systemTime{ms.count()};
-
-						lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
 					}
 					else
 					{
@@ -474,22 +484,38 @@ namespace Sim
 
 						// Task can be STARTED again
 						//
-						lm.m_task = lm.start(cd.m_currentTime);
+						lm.m_task = lm.start(cd.m_currentTime, currentDateTime);
 					}
 				}
 			}	// for (SimControlRunStruct& lm : lms)
 
 			// Calculate minimum possible time
 			//
-			microseconds minPossibleTime = lms.front().m_possibleToAdvanceTo;
+			microseconds minPossibleTime{0};
 			for (const SimControlRunStruct& lm : lms)
 			{
-				microseconds lmpt = lm.m_possibleToAdvanceTo;
+				if (lm.m_lm->isPowerOff() == true)
+				{
+					continue;
+				}
 
-				if (lmpt.count() < minPossibleTime.count())	// using count() makes it faster, no need to convert to different ratio
+				if (minPossibleTime == 0us)	// First init
+				{
+					minPossibleTime = lm.m_possibleToAdvanceTo;
+				}
+
+				if (microseconds lmpt = lm.m_possibleToAdvanceTo;
+					lmpt < minPossibleTime)
 				{
 					minPossibleTime = lmpt;
 				}
+			}
+
+			if (minPossibleTime == 0us)
+			{
+				// All LMs are switched off, but the time still must move forward
+				//
+				minPossibleTime = duration_cast<microseconds>(system_clock::now().time_since_epoch());
 			}
 
 			// Shift current time if required
@@ -513,19 +539,22 @@ namespace Sim
 				// Assign new currentTime
 				//
 				cd.m_currentTime = minPossibleTime;
+				currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
-				if ((++timeStatusUpdateCounter) % 40 == 0)	// Update every 200 ms
+				if ((++timeStatusUpdateCounter) % 20 == 0)	// Update every ~100 ms
 				{
-					// Emit this information signal every 200 ms, we don't need to send it every cycle
+					// Emit this information signal every 100 ms, we don't need to send it every cycle
 					//
-					static const QMetaMethod timeStatusUpdateSignal = QMetaMethod::fromSignal(&Control::statusUpdate);
-					if (isSignalConnected(timeStatusUpdateSignal) == true)
-					{
-						// if signal is not connected to anything (service?), then no reasone to make expensive
-						// initialization for ControlTimeStatus and pass it to function
-						//
-						emit statusUpdate(ControlStatus{cd});
-					}
+					emit statusUpdate(ControlStatus{cd});
+				}
+			}
+			else
+			{
+				if (allLmsArePoweredOff == true && (++timeStatusUpdateCounter) % 20 == 0)	// Update every ~100 ms
+				{
+					// Emit this information signal every 100 ms, we don't need to send it every cycle
+					//
+					emit statusUpdate(ControlStatus{cd});
 				}
 			}
 
@@ -542,37 +571,52 @@ namespace Sim
 				break;
 			}
 
-			// QThread::yieldCurrentThread();	// Give some time for tasks
-			// This code is instead of QThread::yieldCurrentThread,
-			// It's not tested for several LMs, subject to examine perfomnace
+			// Give some time for tasks
 			//
+			bool hadWait = false;
 			for (SimControlRunStruct& lm : lms)
 			{
-				if (lm.m_task.has_value() == true)
+				if (lm.m_task.has_value() == true && lm->isPowerOff() == false)
 				{
 					lm.m_task->waitForFinished();
+					hadWait = true;
 					break;      // At least one LM has finished the work
 				}
+			}
+
+			if (hadWait == true)
+			{
+				continue;
+			}
+
+			// If all lms are switched off then sleep for one workcycle
+			//
+			allLmsArePoweredOff = true;
+
+			for (SimControlRunStruct& lm : lms)
+			{
+				if (lm->isPowerOff() == false)
+				{
+					allLmsArePoweredOff = false;
+					break;
+				}
+			}
+
+			if (allLmsArePoweredOff == true)
+			{
+				QThread::usleep(minimulLmWorkcycleUs);
 			}
 		}
 		while (true);	// Run always till state is triggered to STOP or PAUSE
 
-		// Wait everything to finish and perform post run cycle actions
+		// Wait everything to finish
 		//
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime);
-
-		TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-		TimeStamp localTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-		TimeStamp systemTime{ms.count()};
-
 		for (SimControlRunStruct& lm : lms)
 		{
 			if (lm.m_task.has_value() == true)
 			{
 				QFuture<bool>& future = lm.m_task.value();
 				future.waitForFinished();
-
-				lm.afterWorkCycleTask(m_simulator->appSignalManager(), plantTime, localTime, systemTime);
 			}
 		}
 

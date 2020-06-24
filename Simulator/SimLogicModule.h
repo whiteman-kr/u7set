@@ -37,7 +37,7 @@ namespace Sim
 
 		// Running LM
 		//
-		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, qint64 workcycle,  bool reset);				// Start running one cycle
+		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle,  bool reset);				// Start running one cycle
 
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);
 
@@ -72,6 +72,10 @@ namespace Sim
 		DeviceMode deviceMode() const;
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);
+		void setAppSignalManager(AppSignalManager* appSignalManager);
+
+		bool isPowerOff() const;
+		void setPowerOff(bool value);
 
 	private:
 		// Loaded LM data

@@ -20,6 +20,7 @@
 #include "SimConnections.h"
 #include "SimAfb.h"
 #include "SimOverrideSignals.h"
+#include "SimAppSignalManager.h"
 
 
 #ifndef __FUNCTION_NAME__
@@ -41,6 +42,7 @@ namespace Sim
 
 	enum class DeviceMode
 	{
+		Off,
 		Start,
 		Fault,
 		Operate
@@ -151,8 +153,9 @@ namespace Sim
 				  const Eeprom& appLogicEeprom,
 				  const Connections& connections);
 
+		bool powerOff();
 		bool reset();
-		bool runWorkcycle(std::chrono::microseconds currentTime, qint64 workcycle);
+		bool runWorkcycle(std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle);
 
 		//	Public methods to access from simulation commands
 		//
@@ -229,10 +232,11 @@ namespace Sim
 		void fault(QString reasone, QString func);
 
 	private:
+		bool processOffMode();
 		bool processStartMode();
 		bool processFaultMode();
 
-		bool processOperate(std::chrono::microseconds currentTime, qint64 workcycle);
+		bool processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle);
 
 		bool runCommand(DeviceCommand& deviceCommand);
 
@@ -259,6 +263,7 @@ namespace Sim
 		const LmDescription& lmDescription() const;
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);
+		void setAppSignalManager(AppSignalManager* appSignalManager);
 
 		std::vector<DeviceCommand> commands() const;
 		std::unordered_map<int, size_t> offsetToCommands() const;
@@ -278,6 +283,7 @@ namespace Sim
 		LmDescription m_lmDescription;
 
 		OverrideSignals* m_overrideSignals = nullptr;
+		AppSignalManager* m_appSignalManager = nullptr;
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 
@@ -290,8 +296,9 @@ namespace Sim
 
 		// Current state
 		//
-		DeviceMode m_currentMode = DeviceMode::Start;
-
+		std::atomic<DeviceMode> m_currentMode = DeviceMode::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
+																	// powerOff can be called while simulation is running
+																	// reset can be called to restart module after powerOff
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
 		std::vector<ConnectionPtr> m_connections;
@@ -300,7 +307,6 @@ namespace Sim
 		std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands
 																// empty offsets is -1
 																// Programm memory is not so big, max
-
 		AfbComponentSet m_afbComponents;
 
 		// Cached state

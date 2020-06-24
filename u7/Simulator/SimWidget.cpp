@@ -402,18 +402,13 @@ static bool firstEvent = true;
 			QVariant v = QSettings().value("SimWidget/state");
 			if (v.isValid() == true)
 			{
-				bool restoreOk = restoreState(v.toByteArray());
-				qDebug() << "SimWidget::showEvent: restoreStateOk = " << restoreOk;
+				restoreState(v.toByteArray());
 
-				//if (restoreOk == false)
+				QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
+				for (QDockWidget* dw : dockWidgets)
 				{
-					QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
-					for (QDockWidget* dw : dockWidgets)
-					{
-						qDebug() << "DockWidget objectname " << dw->objectName();
-						restoreDockWidget(dw);
-						dw->setVisible(true);
-					}
+					restoreDockWidget(dw);
+					dw->setVisible(true);
 				}
 			}
 

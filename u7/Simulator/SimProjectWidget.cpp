@@ -137,7 +137,7 @@ void SimProjectWidget::updateModuleStates(Sim::ControlStatus state)
 	std::function<void(QTreeWidget*)> visitTopTreeItems =
 			[&visitTreeItems, &state, this](QTreeWidget* treeWidget)
 			{
-				for(int i=0; i < treeWidget->topLevelItemCount(); i++)
+				for(int i = 0; i < treeWidget->topLevelItemCount(); i++)
 				{
 					QTreeWidgetItem* item = treeWidget->topLevelItem(i);
 
@@ -301,6 +301,9 @@ namespace SimProjectTreeItems
 		{
 			switch (lmState.deviceMode)
 			{
+			case Sim::DeviceMode::Off:
+				text += QStringLiteral("Off");
+				break;
 			case Sim::DeviceMode::Start:
 				text += QStringLiteral("Start");
 				break;
@@ -332,6 +335,13 @@ namespace SimProjectTreeItems
 
 	void LogicModuleTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
 	{
+		auto lm = simProjectWidget->simulator()->logicModule(m_equipmentId);
+		if (lm == nullptr)
+		{
+			Q_ASSERT(lm);
+			return;
+		}
+
 		QMenu menu(this->treeWidget());
 
 		menu.addAction(QObject::tr("Open..."),
@@ -345,6 +355,19 @@ namespace SimProjectTreeItems
 			{
 				emit simProjectWidget->signal_openCodeTabPage(m_equipmentId);
 			});
+
+		QAction* powerOffAction = menu.addAction(QObject::tr("Disable"),
+			[simProjectWidget, equipmentId = m_equipmentId](bool checked)
+			{
+				auto lm = simProjectWidget->simulator()->logicModule(equipmentId);
+				if (lm != nullptr)
+				{
+					lm->setPowerOff(checked);
+				}
+			});
+
+		powerOffAction->setCheckable(true);
+		powerOffAction->setChecked(lm->isPowerOff());
 
 		menu.exec(globalMousePos);
 		return;
@@ -372,8 +395,8 @@ namespace SimProjectTreeItems
 
 	void ConnectionTreeItem::updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state)
 	{
-		auto c = simProjectWidget->simulator()->connections().connection(m_connectionId);
-		if (c == nullptr)
+		auto connection = simProjectWidget->simulator()->connections().connection(m_connectionId);
+		if (connection == nullptr)
 		{
 			this->setText(EquipmentTreeColumns::State, {});
 			return;
@@ -386,9 +409,16 @@ namespace SimProjectTreeItems
 		}
 		else
 		{
-			if (c->enabled() == true)
+			if (connection->enabled() == true)
 			{
-				text = QObject::tr("ok");
+				if (connection->timeout() == true)
+				{
+					text = QObject::tr("Timeout");
+				}
+				else
+				{
+					text = QObject::tr("ok");
+				}
 			}
 			else
 			{
@@ -434,23 +464,6 @@ namespace SimProjectTreeItems
 		menu.exec(globalMousePos);
 		return;
 	}
-
-
-//	ConnectionPortTreeItem::ConnectionPortTreeItem(ConnectionTreeItem* parent,
-//												   const Sim::ConnectionPortPtr& port) :
-//		BaseTreeItem(parent,
-//					 QStringList{} << port->portInfo().equipmentID
-//								   << QString::number(port->portInfo().portNo)),
-//		m_connectionPortId(port->portInfo().equipmentID)
-//	{
-//		setData(0, Qt::UserRole, QVariant(m_connectionPortId));
-//		return;
-//	}
-
-//	void ConnectionPortTreeItem::doubleClick(SimProjectWidget* simProjectWidget)
-//	{
-//		return;
-//	}
 
 	AppLogicSchemasTreeItem::AppLogicSchemasTreeItem(QTreeWidgetItem* parent) :
 		BaseTreeItem(parent,

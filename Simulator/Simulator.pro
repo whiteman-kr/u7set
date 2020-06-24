@@ -87,6 +87,7 @@ SOURCES += \
     ../lib/ModuleFirmware.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
     SimScriptLogicModule.cpp \
     SimScriptRamAddress.cpp \
@@ -132,6 +133,7 @@ HEADERS += \
 	../lib/LogicModulesInfo.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
+    SimScriptConnection.h \
     SimScriptDevUtils.h \
     SimScriptLogicModule.h \
     SimScriptRamAddress.h \

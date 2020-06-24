@@ -94,18 +94,6 @@ namespace SimProjectTreeItems
 	};
 
 
-//	class ConnectionPortTreeItem : public BaseTreeItem
-//	{
-//	public:
-//		ConnectionPortTreeItem(ConnectionTreeItem* parent, const Sim::ConnectionPortPtr& port);
-
-//		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
-
-//	public:
-//		QString m_connectionPortId;
-//	};
-
-
 	class AppLogicSchemasTreeItem : public BaseTreeItem
 	{
 	public:

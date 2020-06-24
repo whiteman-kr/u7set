@@ -3271,3 +3271,91 @@ function testFlags(sim)
     return;
 }
 
+function testLogicModulePowerOff(sim)
+{
+    sim.overridesReset();
+    sim.reset();
+
+    let lm = sim.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
+
+    sim.startForMs(5);
+    assert(lm.powerOff === false);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").valid === true);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").stateAvailable === true);
+
+    lm.powerOff = true;
+
+    sim.startForMs(5);
+    assert(lm.powerOff === true);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").valid === false);
+    assert(sim.signalState("#TEST_MISMATCH_V4_TF_IN1").stateAvailable === false);
+
+    // All other LMs are working
+    //
+    assert(sim.logicModule("SYSTEMID_RACKID_FSCC02_MD00").powerOff === false);
+    assert(sim.logicModule("SYSTEMID_3CHRACK_CH01_MD00").powerOff === false);
+    assert(sim.logicModule("SYSTEMID_3CHRACK_CH02_MD00").powerOff === false);
+    assert(sim.logicModule("SYSTEMID_3CHRACK_CH03_MD00").powerOff === false);
+
+    // Check connection state if lm is off
+    //
+    assert(sim.connection("CONN_CH1_CH2").timeout === false);
+    assert(sim.connection("CONN_CH1_CH3").timeout === false);
+    assert(sim.connection("CONN_CH2_CH3").timeout === false);
+
+    sim.logicModule("SYSTEMID_3CHRACK_CH02_MD00").powerOff = true;
+
+    // CONN_CH1_CH2
+    // CONN_CH1_CH3
+    // CONN_CH2_CH3
+    //
+    sim.startForMs(20);
+    assert(sim.connection("CONN_CH1_CH2").timeout === true);
+    assert(sim.connection("CONN_CH1_CH3").timeout === false);
+    assert(sim.connection("CONN_CH2_CH3").timeout === true);
+
+    sim.logicModule("SYSTEMID_3CHRACK_CH02_MD00").powerOff = false;
+
+    sim.startForMs(10);
+    assert(sim.connection("CONN_CH1_CH2").timeout === false);
+    assert(sim.connection("CONN_CH1_CH3").timeout === false);
+    assert(sim.connection("CONN_CH2_CH3").timeout === false);
+
+    return;
+}
+
+function testConnectionEnable(sim)
+{
+    sim.reset();
+
+    let validitySignal = "#PORT1_TO_PORT1_VALIDITY";
+    let conn = sim.connection("PORT1_TO_PORT1");
+
+    // --
+    //
+    sim.startForMs(10);
+    assert(sim.signalValue(validitySignal) === 1);
+    assert(conn.connectionID === "PORT1_TO_PORT1");
+    assert(conn.enabled === true);
+    assert(conn.timeout === false);
+
+    // --
+    //
+    conn.enabled = false;
+    sim.startForMs(20);
+
+    assert(sim.signalValue(validitySignal) === 0);
+    assert(conn.enabled === false);
+    assert(conn.timeout === true);
+
+    // --
+    //
+    conn.enabled = true;
+    sim.startForMs(20);
+
+    assert(sim.signalValue(validitySignal) === 1);
+    assert(conn.enabled === true);
+    assert(conn.timeout === false);
+
+    return;
+}

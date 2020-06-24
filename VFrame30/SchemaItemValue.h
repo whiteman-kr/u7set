@@ -27,7 +27,7 @@ namespace VFrame30
 
 		<b>Event handlers</b>
 
-		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+		To customize item's apperance and behavior, event handler code is placed to following properties of the schema item using RPCT:
 
 		- <b>ClickScript</b> contains mouse click event handler code.
 		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>

@@ -52,6 +52,28 @@ namespace Sim
 		return 0xFFFFFFFF;
 	}
 
+	bool ScriptLogicModule::isPowerOff() const
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->isPowerOff();
+	}
+
+	void ScriptLogicModule::setPowerOff(bool value)
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return;
+		}
+
+		return m_logicModule->setPowerOff(value);
+	}
+
 	quint16 ScriptLogicModule::readRamBit(RamAddress address, E::LogicModuleRamAccess access)
 	{
 		quint16 result = {};
