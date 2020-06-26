@@ -556,7 +556,7 @@ namespace VFrame30
 		std::vector<SchemaPoint> points = getPointList();
 		QRectF r = {points[0].X, points[0].Y, 2000, 2000};
 
-		static FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		static FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
 		p->setPen(Qt::red);
 
 		DrawHelper::drawText(p,
