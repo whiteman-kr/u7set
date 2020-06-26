@@ -20,18 +20,6 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		m_columns.resize(2);
-
-		Column& c0 = m_columns[0];
-		c0.width = 80;
-		c0.data = E::ColumnData::AppSignalID;
-		c0.horzAlign = E::HorzAlign::AlignLeft;
-
-		Column& c1 = m_columns[1];
-		c1.width = 20;
-		c1.data = E::ColumnData::State;
-		c1.horzAlign = E::HorzAlign::AlignHCenter;
-
 		Property* prop = nullptr;
 
 		prop = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
@@ -1403,6 +1391,18 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	SchemaItemInput::SchemaItemInput(SchemaUnit unit) :
 		SchemaItemSignal(unit)
 	{
+		m_columns.resize(2);
+
+		Column& c0 = m_columns[0];
+		c0.width = 80;
+		c0.data = E::ColumnData::AppSignalID;
+		c0.horzAlign = E::HorzAlign::AlignLeft;
+
+		Column& c1 = m_columns[1];
+		c1.width = 20;
+		c1.data = E::ColumnData::State;
+		c1.horzAlign = E::HorzAlign::AlignHCenter;
+
 		addOutput();
 		setAppSignalIds("#IN_STRID");
 	}
@@ -1493,6 +1493,18 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	SchemaItemOutput::SchemaItemOutput(SchemaUnit unit) :
 		SchemaItemSignal(unit)
 	{
+		m_columns.resize(2);
+
+		Column& c0 = m_columns[0];
+		c0.width = 20;
+		c0.data = E::ColumnData::State;
+		c0.horzAlign = E::HorzAlign::AlignHCenter;
+
+		Column& c1 = m_columns[1];
+		c1.width = 80;
+		c1.data = E::ColumnData::AppSignalID;
+		c1.horzAlign = E::HorzAlign::AlignLeft;
+
 		addInput();
 		setAppSignalIds("#OUT_STRID");
 	}
