@@ -907,7 +907,7 @@ namespace VFrame30
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY)
-		return QString();
+		return {};
 	}
 
 	QString SchemaItem::lastScriptError() const

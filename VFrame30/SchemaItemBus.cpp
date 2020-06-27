@@ -130,6 +130,11 @@ namespace VFrame30
 		return m_busTypeHash;
 	}
 
+	const Bus& SchemaItemBus::bus() const
+	{
+		return m_bus;
+	}
+
 	//
 	//
 	//			SchemaItemBusComposer
@@ -284,6 +289,55 @@ namespace VFrame30
 		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
+	}
+
+	QString SchemaItemBusComposer::toolTipText(int /*dpiX*/, int /*dpiY*/) const
+	{
+		QString html = QString(
+R"(<p><b>BusComposer:</b> Create a bus signal</p>
+<p><b>BustTypeID:</b> %1</p>
+<p><b>Inputs:</b></p>)")
+.arg(busTypeId());
+
+		QString busSignals="<ul style=\"list-style-type:none\">";
+
+		for (const VFrame30::BusSignal& busSignal : bus().busSignals())
+		{
+			QString type;
+			switch (busSignal.type())
+			{
+			case E::SignalType::Analog:
+				if (busSignal.analogFormat() == E::AnalogAppSignalFormat::SignedInt32)
+				{
+					type = "SI32";
+					break;
+				}
+				if (busSignal.analogFormat() == E::AnalogAppSignalFormat::Float32)
+				{
+					type = "FP32";
+					break;
+				}
+
+				Q_ASSERT(false);
+				type = "UNKNOWN ANALOG";
+				break;
+			case E::SignalType::Discrete:
+				type = "Discrete";
+				break;
+			case E::SignalType::Bus:
+				type = QString("Bus (%1)").arg(busSignal.busTypeId());
+				break;
+			}
+
+			busSignals += QString("<li>%1  Type: %2</li>")
+						  .arg(busSignal.signalId())
+						  .arg(type);
+		}
+		busSignals += "</ul>";
+
+		html += busSignals;
+
+		return html;
 	}
 
 	QString SchemaItemBusComposer::buildName() const
@@ -517,6 +571,55 @@ namespace VFrame30
 		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
+	}
+
+	QString SchemaItemBusExtractor::toolTipText(int /*dpiX*/, int /*dpiY*/) const
+	{
+		QString html = QString(
+R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
+<p><b>BustTypeID:</b> %1</p>
+<p><b>Outputs:</b></p>)")
+.arg(busTypeId());
+
+		QString busSignals="<ul style=\"list-style-type:none\">";
+
+		for (const VFrame30::BusSignal& busSignal : bus().busSignals())
+		{
+			QString type;
+			switch (busSignal.type())
+			{
+			case E::SignalType::Analog:
+				if (busSignal.analogFormat() == E::AnalogAppSignalFormat::SignedInt32)
+				{
+					type = "SI32";
+					break;
+				}
+				if (busSignal.analogFormat() == E::AnalogAppSignalFormat::Float32)
+				{
+					type = "FP32";
+					break;
+				}
+
+				Q_ASSERT(false);
+				type = "UNKNOWN ANALOG";
+				break;
+			case E::SignalType::Discrete:
+				type = "Discrete";
+				break;
+			case E::SignalType::Bus:
+				type = QString("Bus (%1)").arg(busSignal.busTypeId());
+				break;
+			}
+
+			busSignals += QString("<li>%1  Type: %2</li>")
+						  .arg(busSignal.signalId())
+						  .arg(type);
+		}
+		busSignals += "</ul>";
+
+		html += busSignals;
+
+		return html;
 	}
 
 	QString SchemaItemBusExtractor::buildName() const
