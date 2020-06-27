@@ -551,9 +551,8 @@ win32 {
     DEFINES += QTKEYCHAIN_NO_EXPORT
     DEFINES += USE_CREDENTIAL_STORE
 
-    INCLUDEPATH += ./qtkeychain-0.9.1
-
-    include(../Tools/qtkeychain-0.9.1/qt5keychain.pri)
+    INCLUDEPATH += ./qtkeychain-0.10
+	include(../Tools/qtkeychain-0.10/qt5keychain.pri)
 }
 unix {
     LIBS += -lqtkeychain
