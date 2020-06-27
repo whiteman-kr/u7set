@@ -3359,3 +3359,42 @@ function testConnectionEnable(sim)
 
     return;
 }
+
+function testBusses(sim)
+{
+    // Test bus composer/extractor
+    //
+    assert(sim.signalValue("#TEST_BUSSES_BC_RES1") === 1);
+    assert(sim.signalValue("#TEST_BUSSES_BC_RES2") === 1);
+    assert(sim.signalValue("#TEST_BUSSES_BC_RES3") === 3);
+    assert(sim.signalValue("#TEST_BUSSES_BC_RES4") === 10);
+    assert(sim.signalValue("#TEST_BUSSES_BC_RES5") === 1);
+    assert(sim.signalValue("#TEST_BUSSES_BC_RES6") === 20);
+
+    // Test sending bus to opto connectin
+    //
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES1") === 1);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES2") === 1);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES3") === 3);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES4") === 10);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES5") === 1);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES6") === 20);
+
+    // Switch off connection and check that all data in 0's
+    //
+    let conn = sim.connection("PORT1_TO_PORT1");
+    conn.enabled = false;
+    sim.startForMs(20);
+
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES1") === 0);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES2") === 0);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES3") === 0);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES4") === 0);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES5") === 0);
+    assert(sim.signalValue("#TEST_BUSSES_BC_REC_RES6") === 0);
+
+    conn.enabled = true;
+    sim.startForMs(20);
+
+    return;
+}
