@@ -118,6 +118,9 @@ namespace Sim
 		/// \brief Returns Connection by ID (type ScriptConnection) or undefined if it is not exists.
 		QJSValue connection(QString connectionID);
 
+		/// \brief Sets enable property to all connections.
+		void connectionsSetEnabled(bool value);
+
 		/// \brief Checks if a signal exists.
 		bool signalExists(QString appSignalId) const;
 
