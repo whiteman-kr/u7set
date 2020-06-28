@@ -2757,8 +2757,6 @@ function testAfbDpCompCompSi1(sim)
 //
 function testAfbMux(sim)
 {
-    sim.reset();
-
     // switch_si
     //
     sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
@@ -2815,6 +2813,232 @@ function testAfbMux(sim)
 
     return;
 }
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4OnDecay(sim)
+{
+    // 1. Initial 0, 0 = 0
+    // 2. Set 1, 0 = 0
+    // 3. Set 0, 0 = 99
+    // 4. Set 0, 1 = 0
+    // 5. Set 0, 0 = 0
+    //
+    let setSignal = "#TEST_LATCH_V4_T1_SET";
+    let resetSignal = "#TEST_LATCH_V4_T1_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T1_RESULT";
+
+    // 1. Initial 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 2. Set 1, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 3. Set 0, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 4. Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 5. Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4OnFront(sim)
+{
+    // 1.   Initial 0, 0 = 0
+    // 2.   Set 1, 0 = 99
+    // 3.   Set 0, 0 = 99
+    // 4.   Set 0, 1 = 0
+    // 5.   Set 0, 0 = 0
+    // 6.   Set 1, 0 = 99
+    // 7.   Set 1, 1 = 0
+    //
+    let setSignal = "#TEST_LATCH_V4_T2_SET";
+    let resetSignal = "#TEST_LATCH_V4_T2_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T2_RESULT";
+
+    // 1. Initial 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 2.   Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 3.   Set 0, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 4.   Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 5.   Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 6.   Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 7.   Set 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4OnState(sim)
+{
+    //    1. Initial 0, 0 = 0
+    //    2. Set 1, 0 = 99
+    //    3. Set 0, 0 = 99
+    //    4. Set 0, 1 = 0
+    //    5. Set 0, 0 = 0
+    //    6. Set 1, 0 = 99
+    //    7. Set 1, 1 = 0
+    //
+    let setSignal = "#TEST_LATCH_V4_T3_SET";
+    let resetSignal = "#TEST_LATCH_V4_T3_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T3_RESULT";
+
+    //   1. Initial 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    //    3. Set 0, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    //    4. Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    //    7. Set 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4DealyFor1Cycle(sim)
+{
+    // Programm differs from schemas programm
+    let inSignal = "#TEST_LATCH_V4_T4_IN";
+    let resetSignal = "#TEST_LATCH_V4_T4_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T4_RESULT";
+
+    sim.overrideSignalValue(inSignal, 0);
+    sim.startForMs(10);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 50);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 50);
+
+    sim.overrideSignalValue(inSignal, 60);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 50);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 60);
+
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
 
 
 // Test for AFB LIM (OpCode 23)
