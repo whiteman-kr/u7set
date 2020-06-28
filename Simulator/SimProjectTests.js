@@ -3099,6 +3099,47 @@ function testAfbMismatchV4(sim)
     return;
 }
 
+// Test for AFB TCONV v0 (OpCode 28)
+// Schema: TEST_TCONV_V0
+//
+function testAfbTconvV0(sim)
+{
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RESULT") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_ROV") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_RESULT") === 2147483647);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_RESULT") === -2147483648);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_RESULT") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_ROV") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_RNAN") === 1);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_RESULT") === 2147483647);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_RESULT") === -2147483648);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_SI_FP_T1_RESULT") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_SI_FP_T2_RESULT") === 12345);
+    assert(sim.signalValue("#TEST_TCONV_V0_SI_FP_T3_RESULT") === -12345);
+
+    return;
+}
 
 // Test for AFB PULSE_GET (OpCode 30)
 // Schema: TEST_PULSE_GET_V0
