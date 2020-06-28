@@ -2196,6 +2196,65 @@ function testAfbMathSi(sim)
     return;
 }
 
+// Test for AFB SCALE (OpCode 14)
+// Schema: TEST_SCALE_SI_SI
+//
+function testAfbScaleSiSi(sim)
+{
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R3") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R3") === 1);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R5") === 0);
+
+    return;
+}
+
+// Test for AFB SCALE (OpCode 14)
+// Schema: TEST_SCALE_FP_FP
+//
+function testAfbScaleFpFp(sim)
+{
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R5") === 0);
+
+    return;
+}
 
 // Test for AFB FUNC (OpCode 16)
 // Schema: TEST_FUNC_V3
