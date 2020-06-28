@@ -2363,6 +2363,71 @@ function testAfbFuncV3(sim)
     return;
 }
 
+// Test for AFB INT (OpCode 17)
+// Schema: TEST_INT_V6
+//
+function testAfbIntV6(sim)
+{
+    sim.reset();
+    sim.startForMs(5);
+
+    let trackInSignal = "#TEST_INT_V6_T1_TRACK_IN";
+    let trackSignal = "#TEST_INT_V6_T1_TRACK";
+    let resetSignal = "#TEST_INT_V6_T1_RESET";
+    let pauseSignal = "#TEST_INT_V6_T1_PAUSE";
+    let kiSignal = "#TEST_INT_V6_T1_KI";
+    let outSignal = "#TEST_INT_V6_T1_ROUT";
+
+    // Set ki to 5.0, out must go from 0 to 1000 for 2secs
+    //
+    sim.overrideSignalValue(kiSignal, 5.0);
+    sim.startForMs(1000);
+    let outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 499 && outSignalValue <= 501);
+
+    sim.startForMs(1000);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 999 && outSignalValue <= 1000.5);
+
+    // Set track_in = -100, track = 1, out must be -100
+    //
+    sim.overrideSignalValue(trackInSignal, -100);
+    sim.overrideSignalValue(trackSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === -100);
+
+    sim.overrideSignalValue(trackSignal, 0);
+    sim.startForMs(50);
+
+    // Set reset = 1, then out = 100
+    //
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 100);
+
+    // Test pause
+    //
+    sim.overridesReset();
+    sim.reset();
+    sim.startForMs(5);
+
+    sim.overrideSignalValue(kiSignal, 5.0);
+    sim.startForMs(1000);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 499 && outSignalValue <= 501);
+
+    sim.overrideSignalValue(pauseSignal, 1);
+    sim.startForMs(100);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 499 && outSignalValue <= 501);
+
+    sim.overrideSignalValue(pauseSignal, 0);
+    sim.startForMs(1000);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 999 && outSignalValue <= 1000.5);
+
+    return;
+}
 
 // Test for AFB DPCOMP (OpCode 20)
 // Schema: TEST_DPCOMP_FP_1
@@ -3012,6 +3077,7 @@ function testAfbLatchV4OnState(sim)
 function testAfbLatchV4DealyFor1Cycle(sim)
 {
     // Programm differs from schemas programm
+    //
     let inSignal = "#TEST_LATCH_V4_T4_IN";
     let resetSignal = "#TEST_LATCH_V4_T4_RESET";
     let resultSignal = "#TEST_LATCH_V4_T4_RESULT";
