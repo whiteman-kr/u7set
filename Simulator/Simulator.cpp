@@ -272,12 +272,12 @@ namespace Sim
 		{
 			LogicModulesInfo lmsInfo;
 			QString loadLmsInfoErrorMessage;
-			QString lmsInfoFileName = QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
+			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
 
 			ok = lmsInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
 			if (ok == false)
 			{
-				writeError(loadLmsInfoErrorMessage);
+				writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
 				clearImpl();
 				return false;
 			}
@@ -303,7 +303,6 @@ namespace Sim
 				{
 					const ::LogicModuleInfo& lmi = *fit;
 					Q_ASSERT(lmi.equipmentID == lm->equipmentId());
-					Q_ASSERT(lmi.subsystemID == lm->logicModuleInfo().subsystemId);
 					Q_ASSERT(lmi.lmNumber == lm->logicModuleInfo().lmNumber);
 
 					lm->setLogicModuleExtraInfo(lmi);

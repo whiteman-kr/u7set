@@ -4187,3 +4187,17 @@ function testBusses(sim)
 
     return;
 }
+
+function testGetLogicModuleInfoTests(sim)
+{
+    let lm = sim.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
+
+    assert(lm.equipmentID === "SYSTEMID_RACKID_FSCC01_MD00");
+    assert(lm.regBufferStartAddress === 53956);
+
+    //console.log(lm.equipmentID);                // SYSTEMID_RACKID_FSCC01_MD00
+    //console.log(lm.regBufferStartAddress);      // 53956
+    //console.log(lm.regBufferSize);              //
+
+    return;
+}

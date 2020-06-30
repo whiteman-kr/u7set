@@ -54,7 +54,7 @@ namespace Sim
 			return {};
 		}
 
-		return m_logicModule->logicModuleExtraInfo().appDataSizeBytes;
+		return m_logicModule->logicModuleExtraInfo().appDataSizeBytes / 2;
 	}
 
 	bool ScriptLogicModule::isPowerOff() const
