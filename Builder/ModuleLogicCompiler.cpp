@@ -292,7 +292,9 @@ namespace Builder
 
 		m_memoryMap.init(m_lmDescription->memory().m_appMemorySize,
 						 moduleData,
+						 m_lmDescription->memory().m_moduleCount,
 						 optoInterfaceData,
+						 m_lmDescription->optoInterface().m_optoPortCount,
 						 appLogicBitData,
 						 tuningData,
 						 appLogicWordData);
@@ -364,7 +366,7 @@ namespace Builder
 
 		// build Module structures array
 		//
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		for(int place = 1; place <= m_lmDescription->memory().m_moduleCount; place++)
 		{
 			Module m;
 
@@ -11881,7 +11883,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		for(int place = 1; place <= m_lmDescription->memory().m_moduleCount; place++)
 		{
 			const Hardware::DeviceModule* module = DeviceHelper::getModuleOnPlace(m_lm, place);
 

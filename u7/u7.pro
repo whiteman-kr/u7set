@@ -316,7 +316,6 @@ HEADERS  += \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
     Forms/ChooseUfbDialog.h \
-    ../lib/LmLimits.h \
     Forms/SelectChangesetDialog.h \
     Forms/FileHistoryDialog.h \
     Forms/ChangesetDetailsDialog.h \

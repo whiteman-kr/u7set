@@ -1,5 +1,4 @@
 #include "../lib/DeviceHelper.h"
-#include "../lib/LmLimits.h"
 #include "../lib/WUtils.h"
 #include <QHostAddress>
 
@@ -511,12 +510,6 @@ const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::Dev
 		return nullptr;
 	}
 
-	if (place < FIRST_MODULE_PLACE || place > LAST_MODULE_PLACE)
-	{
-		assert(false);
-		return nullptr;
-	}
-
 	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
 
 	if (chassis == nullptr)
@@ -646,14 +639,6 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
 			return 	module;
-
-/*			if (module->place() == LM1_PLACE)
-			{
-				return 	module;
-			}
-
-			assert(false);
-			break;*/
 		}
 	}
 
