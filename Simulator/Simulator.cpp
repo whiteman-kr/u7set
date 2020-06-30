@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
+#include "../lib/LogicModulesInfo.h"
 #include "../Builder/CfgFiles.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"
@@ -141,6 +142,12 @@ namespace Sim
 
 	bool Simulator::loadFunc(QString buildPath)
 	{
+		buildPath = QDir::fromNativeSeparators(buildPath);
+		if (buildPath.endsWith(QChar('/')) == false)
+		{
+			buildPath.append(QChar('/'));
+		}
+
 		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
 
 		//--
@@ -255,6 +262,56 @@ namespace Sim
 			{
 				// Error must be reported in Subsystem::load
 				//
+				clearImpl();
+				return false;
+			}
+		}
+
+		// Load LogicModules info - /Common/LogicModules.xml
+		//
+		{
+			LogicModulesInfo lmsInfo;
+			QString loadLmsInfoErrorMessage;
+			QString lmsInfoFileName = QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
+
+			ok = lmsInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
+			if (ok == false)
+			{
+				writeError(loadLmsInfoErrorMessage);
+				clearImpl();
+				return false;
+			}
+
+			auto lms = this->logicModules();
+			for (auto lm : lms)
+			{
+				QString lmEquipmentId = lm->equipmentId();
+
+				auto fit = std::find_if(lmsInfo.logicModulesInfo.begin(), lmsInfo.logicModulesInfo.end(),
+							 [&lmEquipmentId](const ::LogicModuleInfo& lmi)
+							 {
+								return lmi.equipmentID == lmEquipmentId;
+							 });
+				if (fit == lmsInfo.logicModulesInfo.end())
+				{
+					writeError(tr("Information for LogicModule %1 is not found (file %2)")
+								.arg(lmEquipmentId)
+								.arg(lmsInfoFileName));
+					ok = false;
+				}
+				else
+				{
+					const ::LogicModuleInfo& lmi = *fit;
+					Q_ASSERT(lmi.equipmentID == lm->equipmentId());
+					Q_ASSERT(lmi.subsystemID == lm->logicModuleInfo().subsystemId);
+					Q_ASSERT(lmi.lmNumber == lm->logicModuleInfo().lmNumber);
+
+					lm->setLogicModuleExtraInfo(lmi);
+				}
+			}
+
+			if (ok == false)
+			{
 				clearImpl();
 				return false;
 			}

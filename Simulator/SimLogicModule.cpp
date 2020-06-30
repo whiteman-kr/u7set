@@ -161,6 +161,16 @@ namespace Sim
 		return m_lmDescription;
 	}
 
+	const ::LogicModuleInfo& LogicModule::logicModuleExtraInfo() const
+	{
+		return m_logicModuleExtraInfo;
+	}
+
+	void LogicModule::setLogicModuleExtraInfo(const ::LogicModuleInfo& value)
+	{
+		m_logicModuleExtraInfo = value;
+	}
+
 	std::chrono::microseconds LogicModule::cycleDuration() const
 	{
 		return std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration};
