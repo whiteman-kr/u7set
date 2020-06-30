@@ -52,6 +52,9 @@ namespace VFrame30
 
 		Hash busTypeHash() const;
 
+	protected:
+		const Bus& bus() const;
+
 		// Data
 		//
 	private:
@@ -93,10 +96,12 @@ namespace VFrame30
 		//
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
-		virtual QString buildName() const override;
+
+		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString buildName() const final;
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus);
+		virtual void setBusPins(const VFrame30::Bus& bus) final;
 
 		// Properties
 		//
@@ -129,24 +134,26 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const final;
+		virtual bool LoadData(const Proto::Envelope& message) final;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 		// Public Methods
 		//
 	public:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
-		virtual QString buildName() const override;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
+
+		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString buildName() const final;
 
 		void specificPropertyCouldBeChanged(QString propertyName, const QVariant& value);
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus);
+		virtual void setBusPins(const VFrame30::Bus& bus) final;
 
 		// Properties
 		//

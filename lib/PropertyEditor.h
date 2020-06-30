@@ -281,6 +281,7 @@ namespace ExtWidgets
 		~PropertyEditCellWidget();
 
 		virtual void setValue(std::shared_ptr<Property> property, bool readOnly);
+		virtual void setInitialText(const QString& text);
 
 	signals:
 		void valueChanged(QVariant value);
@@ -473,6 +474,8 @@ namespace ExtWidgets
 		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent);
 
 		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
+
+		void setInitialText(const QString& text) override;
 
 	public slots:
 		void onTextEdited(const QString &text);

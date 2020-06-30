@@ -152,6 +152,8 @@ namespace Sim
 
 					data->clear();
 					*timeoutHappend = true;
+
+					m_timeout = true;
 				}
 				else
 				{
@@ -163,6 +165,8 @@ namespace Sim
 
 						m_port2sentData.m_data.clear();
 						m_port2sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
+
+						m_timeout = false;
 					}
 					else
 					{
@@ -185,6 +189,8 @@ namespace Sim
 
 					data->clear();
 					*timeoutHappend = true;
+
+					m_timeout = true;
 				}
 				else
 				{
@@ -196,6 +202,8 @@ namespace Sim
 
 						m_port1sentData.m_data.clear();
 						m_port1sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
+
+						m_timeout = false;
 					}
 					else
 					{
@@ -235,6 +243,11 @@ namespace Sim
 	void Connection::setEnabled(bool value)
 	{
 		m_enable = value;
+	}
+
+	bool Connection::timeout() const
+	{
+		return m_timeout;
 	}
 
 	std::vector<char>* Connection::getPortReceiveBuffer(int portNo)

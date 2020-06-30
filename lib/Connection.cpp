@@ -12,7 +12,9 @@
 namespace Hardware
 {
 
-    //
+	const char* Connection::mimeType = "application/x-radiyconnection";
+
+	//
     //
     // Connection
     //

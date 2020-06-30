@@ -120,7 +120,6 @@ namespace Sim
 
 		Ram& operator=(const Ram& that);
 
-
 	public:
 		void reset();
 		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words

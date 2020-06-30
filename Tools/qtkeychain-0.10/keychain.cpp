@@ -169,7 +169,7 @@ void JobExecutor::startNextIfNoneRunning() {
 void JobExecutor::jobDestroyed( QObject* object ) {
     Job* job = static_cast<Job*>(object);
     Q_UNUSED( object ) // for release mode
-    job->disconnect( this );
+	job->disconnect( this );
     m_jobRunning = false;
     startNextIfNoneRunning();
 }
@@ -181,12 +181,12 @@ void JobExecutor::jobFinished( Job* job ) {
     startNextIfNoneRunning();
 }
 
+//JobExecutor* JobExecutor::s_instance = 0;
 JobExecutor JobExecutor::s_instance;
 
 JobExecutor* JobExecutor::instance() {
 //    if ( !s_instance )
 //        s_instance = new JobExecutor;
-//    return s_instance;
 	return &s_instance;
 }
 
@@ -197,7 +197,7 @@ ReadPasswordJobPrivate::ReadPasswordJobPrivate(const QString &service_, ReadPass
 
 JobPrivate::JobPrivate(const QString &service_, Job *qq)
     : q(qq)
-    , mode( Text )
+	, mode( Text )
     , error( NoError )
     , service( service_ )
     , autoDelete( true )

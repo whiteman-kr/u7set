@@ -7,6 +7,7 @@
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLogicModule.h"
+#include "SimScriptConnection.h"
 
 
 namespace Sim
@@ -111,7 +112,11 @@ namespace Sim
 		/// \brief Checks if a LogicModule exists.
 		bool logicModuleExists(QString equipmentId) const;
 
+		/// \brief Returns LogicModule (type ScriptLogicModule) or undefined if it is not exists.
 		QJSValue logicModule(QString equipmentId);
+
+		/// \brief Returns Connection by ID (type ScriptConnection) or undefined if it is not exists.
+		QJSValue connection(QString connectionID);
 
 		/// \brief Checks if a signal exists.
 		bool signalExists(QString appSignalId) const;

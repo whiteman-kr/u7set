@@ -24,7 +24,7 @@ namespace VFrame30
 		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
 		setItemUnit(unit);
-		m_font.setName("Sans");
+		m_font.setName(QStringLiteral("Arial"));
 
 		switch (itemUnit())
 		{
@@ -664,7 +664,7 @@ namespace VFrame30
 			Q_ASSERT(false);
 		}
 
-		FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
 		p->setPen(Qt::darkGray);
 
 		DrawHelper::drawText(p, font, itemUnit(), label(), labelRect, Qt::TextDontClip | alignFlags);
@@ -681,7 +681,7 @@ namespace VFrame30
 		QRectF drawRect(r.right(), r.bottom(),
 						widthDocPt(), m_font.drawSize());
 
-		static FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		static FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
 		p->setPen(Qt::red);
 
 		QString str = QString("roi %1").arg(runOrderIndex);

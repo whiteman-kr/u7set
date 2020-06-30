@@ -192,10 +192,23 @@ void CreateSignalDialog::initSignalIds()
 		return;
 	}
 
-	size_t index = 0;
+	size_t signalFieldIndex = 0;
+
 	for (QString id  : m_options.m_proposedAppSignalIds)
 	{
-		if (index < m_appSiganalIds.size())
+		// Set proposed signal ids only to checked modules
+		//
+		while (signalFieldIndex < m_equipmentCheckBoxes.size())
+		{
+			if (m_equipmentCheckBoxes[signalFieldIndex]->isChecked() == true)
+			{
+				break;
+			}
+
+			signalFieldIndex ++;
+		}
+
+		if (signalFieldIndex < m_appSiganalIds.size())
 		{
 			QString appSignalId = id;
 			if (appSignalId.startsWith('#') == false)
@@ -203,10 +216,10 @@ void CreateSignalDialog::initSignalIds()
 				appSignalId.prepend('#');
 			}
 
-			m_appSiganalIds[index]->setText(appSignalId);
+			m_appSiganalIds[signalFieldIndex]->setText(appSignalId);
 		}
 
-		if (index < m_customSiganalIds.size())
+		if (signalFieldIndex < m_customSiganalIds.size())
 		{
 			QString customSignalId = id;
 			if (customSignalId.startsWith('#') == true)
@@ -214,10 +227,10 @@ void CreateSignalDialog::initSignalIds()
 				customSignalId.remove(0, 1);
 			}
 
-			m_customSiganalIds[index]->setText(customSignalId);
+			m_customSiganalIds[signalFieldIndex]->setText(customSignalId);
 		}
 
-		index ++;
+		signalFieldIndex ++;
 	}
 
 	return;

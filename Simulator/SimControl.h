@@ -36,25 +36,15 @@ namespace Sim
 		{
 		}
 
-		QFuture<bool> start(std::chrono::microseconds time)
+		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime)
 		{
 			bool reset = m_lastStartTime == 0us;
 
 			m_lastStartTime = time;
 			m_possibleToAdvanceTo = time;
 			m_cyclesCounter ++;
-			return m_lm->asyncRunCycle(time, m_cyclesCounter, reset);
+			return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset);
 		}
-
-		bool afterWorkCycleTask(AppSignalManager& appSignalManager, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime)
-		{
-			// Set LogicModule's RAM to Sim::AppSignalManager
-			//
-			appSignalManager.setData(equipmentId(), m_lm->ram(), plantTime, localTime, systemTime);
-
-			return true;
-		}
-
 
 		const QString& equipmentId() const
 		{
@@ -167,7 +157,6 @@ namespace Sim
 
 	protected:
 		virtual void run() override;
-
 		bool processRun();
 
 	private:

@@ -2,6 +2,7 @@
 #include <QtEndian>
 #include "SimException.h"
 #include "SimCommandProcessor.h"
+#include "Simulator.h"
 
 namespace Sim
 {
@@ -185,43 +186,73 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::reset()
+	bool DeviceEmulator::powerOff()
 	{
-		writeDebug(tr("Reset"));
-
-		setCurrentMode(DeviceMode::Start);
-
-		bool ok = initMemory();
-		if (ok == false)
-		{
-			writeError(tr("Init memory error."));
-			return false;
-		}
-
-		m_afbComponents.resetState();	// It will clear all AFBs' params
-
+		writeDebug(tr("Off"));
+		setCurrentMode(DeviceMode::Off);
 		return true;
 	}
 
-	bool DeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, qint64 workcycle)
+	bool DeviceEmulator::reset()
 	{
-		if (m_currentMode == DeviceMode::Start)
+		writeDebug(tr("Reset"));
+		setCurrentMode(DeviceMode::Start);
+		return true;
+	}
+
+	bool DeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle)
+	{
+		bool ok = false;
+
+		do
 		{
-			if (bool ok = processStartMode();
-				ok == false)
+			if (m_currentMode == DeviceMode::Start)
 			{
-				return false;
+				if (bool ok = processStartMode();
+					ok == false)
+				{
+					return false;
+				}
+			}
+
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				ok = processFaultMode();
+				break;
+			}
+			else
+			{
+				if (m_currentMode == DeviceMode::Off)
+				{
+					ok = processOffMode();
+				}
+				else
+				{
+					Q_ASSERT(m_currentMode == DeviceMode::Operate);
+					ok = processOperate(currentTime, currentDateTime, workcycle);
+				}
+				break;
 			}
 		}
+		while (false);
 
-		bool ok = false;
-		if (m_currentMode == DeviceMode::Fault)
+		// Perform post run cycle actions
+		//
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
+
+		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+		TimeStamp localTime{plantTime};
+		TimeStamp systemTime{ms.count()};
+
+		// Set LogicModule's RAM to Sim::AppSignalManager
+		//
+		if (m_appSignalManager != nullptr)
 		{
-			ok = processFaultMode();
+			m_appSignalManager->setData(equipmentId(), ram(), plantTime, localTime, systemTime);
 		}
 		else
 		{
-			ok = processOperate(currentTime, workcycle);
+			Q_ASSERT(m_appSignalManager);
 		}
 
 		return ok;
@@ -1159,11 +1190,9 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, qint64 workcycle)
+	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 /*workcycle*/)
 	{
 		//qDebug() << "DeviceEmulator::processOperate " << equipmentId();
-
-		Q_UNUSED(workcycle);
 
 		// One LogicModule Cycle
 		//
@@ -1172,17 +1201,21 @@ namespace Sim
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
-		m_commandProcessor->updatePlatformInterfaceState(currentTime);
+		m_commandProcessor->updatePlatformInterfaceState(currentDateTime);
 
 		if (m_overrideSignals != nullptr)
 		{
 			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
 		}
+		else
+		{
+			Q_ASSERT(m_overrideSignals);
+		}
 
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
-		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 som emeory areas before start work cylce (like memory area for write i/o modules)
+		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some meory areas before start work cylce (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
 		// !!! receiveConnectionsData !!! was moved to Sim::Control,
@@ -1231,6 +1264,12 @@ namespace Sim
 				break;
 			}
 
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				result = true;
+				break;
+			}
+
 			// If ProgramCounter was not changed in runCommand (can be changed by APPSTART command), then
 			// incerement ProgramCounter to coommand size
 			//
@@ -1242,7 +1281,7 @@ namespace Sim
 
 		// Send data to fiber optic channels (LM, OCM)
 		//
-		result = sendConnectionsData(currentTime);
+		result &= sendConnectionsData(currentTime);
 
 		return result;
 	}
@@ -1278,10 +1317,26 @@ namespace Sim
 		return;
 	}
 
+	bool DeviceEmulator::processOffMode()
+	{
+		Q_ASSERT(m_currentMode == DeviceMode::Off);
+		return true;
+	}
+
 	bool DeviceEmulator::processStartMode()
 	{
 		Q_ASSERT(m_currentMode == DeviceMode::Start);
 		writeDebug(tr("Start mode"));
+
+		bool ok = initMemory();
+		if (ok == false)
+		{
+			writeError(tr("Init memory error."));
+			setCurrentMode(DeviceMode::Fault);
+			return false;
+		}
+
+		m_afbComponents.resetState();	// It will clear all AFBs' params
 
 		setCurrentMode(DeviceMode::Operate);
 
@@ -1330,6 +1385,11 @@ namespace Sim
 
 	bool DeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
+		if (m_currentMode == DeviceMode::Off)
+		{
+			return true;
+		}
+
 		for (ConnectionPtr& c : m_connections)
 		{
 			if (c->enabled() == false)
@@ -1479,6 +1539,11 @@ namespace Sim
 
 	bool DeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
 	{
+		if (m_currentMode == DeviceMode::Off)
+		{
+			return true;
+		}
+
 		for (ConnectionPtr& c : m_connections)
 		{
 			if (c->enabled() == false)
@@ -1608,6 +1673,11 @@ namespace Sim
 	void DeviceEmulator::setOverrideSignals(OverrideSignals* overrideSignals)
 	{
 		m_overrideSignals = overrideSignals;
+	}
+
+	void DeviceEmulator::setAppSignalManager(AppSignalManager* appSignalManager)
+	{
+		m_appSignalManager = appSignalManager;
 	}
 
 	std::vector<DeviceCommand> DeviceEmulator::commands() const

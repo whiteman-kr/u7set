@@ -1830,6 +1830,12 @@ namespace ExtWidgets
 		return;
 	}
 
+	void PropertyEditCellWidget::setInitialText(const QString& text)
+	{
+		Q_UNUSED(text);
+		return;
+	}
+
 	//
 	// ------------ MultiFilePathEdit ------------
 	//
@@ -2619,6 +2625,18 @@ namespace ExtWidgets
 		{
 			m_button->setEnabled(readOnly == false);
 		}
+	}
+
+	void MultiTextEdit::setInitialText(const QString& text)
+	{
+		if (m_lineEdit == nullptr)
+		{
+			Q_ASSERT(m_lineEdit);
+			return;
+		}
+
+		m_lineEdit->setText(text);
+		m_textEdited = true;
 	}
 
 	void MultiTextEdit::onTextEdited(const QString &text)

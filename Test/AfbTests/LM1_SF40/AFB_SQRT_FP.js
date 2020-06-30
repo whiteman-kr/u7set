@@ -60,9 +60,10 @@ function test_AFB_SQRT_FP(sim)
 	sim.startForMs(5);
     assert(sim.signalValue("#OUT_SQRT_FP001") === 2);
 
-   /* sim.overrideSignalValue("#TUN_IN_FP1", 128);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_SQRT_FP001") === 11.313708498984761);*/
+    sim.overrideSignalValue("#TUN_IN_FP1", 128);
+    sim.startForMs(5);
+    console.log("#OUT_SQRT_FP001");
+    //assert(sim.signalValue("#OUT_SQRT_FP001") === 11.313708498984761);
 
     sim.overrideSignalValue("#TUN_IN_FP1", -1);
 	sim.startForMs(5);

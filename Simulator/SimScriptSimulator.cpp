@@ -438,6 +438,26 @@ namespace Sim
 		return jsEngine->newQObject(slm);
 	}
 
+	QJSValue ScriptSimulator::connection(QString connectionID)
+	{
+		auto conn = m_simulator->connections().connection(connectionID);
+		if (conn == nullptr)
+		{
+			throwScriptException(this, tr("Connection %1 not found").arg(connectionID));
+			return {};
+		}
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return {};
+		}
+
+		ScriptConnection* sconn = new ScriptConnection{conn};
+		return jsEngine->newQObject(sconn);
+	}
+
 	bool ScriptSimulator::signalExists(QString appSignalId) const
 	{
 		return m_simulator->appSignalManager().signalExists(appSignalId);

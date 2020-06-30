@@ -323,14 +323,13 @@ void SimTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::Realti
 		return;
 	}
 
-	const TrendLib::RealtimeDataChunk& chunk = data->signalData.front();
-	if (chunk.states.empty() == true)
+	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
+	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
+
+	if (maxTime == 0 || maxTime == 0)
 	{
 		return;
 	}
-
-	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
-	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
 
 	// Shift view area if autoshift mode is turned on
 	//

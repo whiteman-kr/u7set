@@ -27,16 +27,23 @@ private slots:
 
     void onAdd();
     void onRemove();
+	void onCopy();
+	void onPaste();
     void onCheckOut();
     void onCheckIn();
     void onUndo();
     void onReport();
     void onRefresh();
 
-    void onCustomContextMenuRequested(const QPoint &pos);
+	void onCopyShortcut();
+	void onPasteShortcut();
+	void onRemoveShortcut();
+
+	void onCustomContextMenuRequested(const QPoint &pos);
 
 private:
-	bool addConnection(std::shared_ptr<Hardware::Connection> conn);
+	bool addConnection(std::shared_ptr<Hardware::Connection> connection);
+	bool pasteConnection(std::shared_ptr<Hardware::Connection> connection);
 
     void fillConnectionsList();
     void setPropertyEditorObjects();
@@ -79,6 +86,8 @@ private:
     QMenu* m_popupMenu = nullptr;
     QAction* m_addAction = nullptr;
     QAction* m_removeAction = nullptr;
+	QAction* m_copyAction = nullptr;
+	QAction* m_pasteAction = nullptr;
     QAction* m_checkOutAction = nullptr;
     QAction* m_checkInAction = nullptr;
     QAction* m_undoAction = nullptr;
