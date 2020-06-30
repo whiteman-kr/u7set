@@ -44,9 +44,10 @@ function init(sim)
 //
 function cleanup(sim)
 {
+    sim.reset();
     sim.overridesReset();
     sim.connectionsSetEnabled(true);
-    sim.startForMs(5);      // For applying overridesReset()
+    sim.startForMs(5);      // For applying overridesReset(), and for actual reset all modules
 
     return;
 }
@@ -3276,6 +3277,97 @@ function testAfbPolyV3(sim)
     return;
 }
 
+
+// Test for AFB DER (OpCode 26)
+// Schema: TEST_DER_V5
+//
+function testAfbDerV5(sim)
+{
+    let inSignal = "#TEST_DER_V5_T1_IN";
+    let resetSignal = "#TEST_DER_V5_T1_RESET";
+    let pauseSignal = "#TEST_DER_V5_T1_PAUSE";
+    let kdSignal = "#TEST_DER_V5_T1_KD";
+    let tdSignal = "#TEST_DER_V5_T1_TD";
+    let outSignal = "#TEST_DER_V5_T1_ROUT";
+    let outSignalValue;
+
+    // Set ki to 5.0, out must go from 0 to 1000 for 2secs
+    //
+    sim.overrideSignalValue(kdSignal, 1.0);
+    sim.overrideSignalValue(tdSignal, 1000);
+    sim.startForMs(10);
+
+    sim.overrideSignalValue(inSignal, 1000);
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 286 && outSignalValue <= 288);     // 287
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 81.5 && outSignalValue <= 82.5);     // 81.98
+
+    sim.startForMs(2500);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 6.6 && outSignalValue <= 6.8);     // 6.68
+
+    sim.startForMs(5000);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 0.0443 && outSignalValue <= 0.0445);     // 0.0444
+
+    // Test pause
+    //
+    cleanup(sim);
+
+    sim.overrideSignalValue(kdSignal, 1.0);
+    sim.overrideSignalValue(tdSignal, 1000);
+    sim.startForMs(10);
+
+    sim.overrideSignalValue(inSignal, 1000);
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 286 && outSignalValue <= 288);     // 287
+
+    sim.overrideSignalValue(pauseSignal, 1);
+    let pausedValue = sim.signalValue(outSignal);       // pause
+
+    sim.startForMs(500);
+    assert(pausedValue === sim.signalValue(outSignal));
+
+    sim.overrideSignalValue(pauseSignal, 0);            // resume
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 81.5 && outSignalValue <= 82.5);     // 81.98
+
+    // Test reset
+    //
+    sim.reset();
+    sim.overridesReset();
+    sim.startForMs(5);
+
+    sim.overrideSignalValue(kdSignal, 1.0);
+    sim.overrideSignalValue(tdSignal, 1000); sim.startForMs(10);
+
+    sim.overrideSignalValue(inSignal, 1000);
+    sim.startForMs(1250);
+
+    sim.overrideSignalValue(resetSignal, 1);
+
+    sim.startForMs(1250);
+    assert(sim.signalValue(outSignal) === 0);
+
+    return;
+}
+
+
 // Test for AFB MISMATCH (OpCode 27)
 // Schema: TEST_MISMATCH_V4
 //
@@ -3885,6 +3977,8 @@ function testConnectionEnable(sim)
 
 function testBusses(sim)
 {
+    sim.startForMs(10);
+
     // Test bus composer/extractor
     //
     assert(sim.signalValue("#TEST_BUSSES_BC_RES1") === 1);
