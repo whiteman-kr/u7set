@@ -3523,6 +3523,178 @@ function testAfbTconvV0(sim)
     return;
 }
 
+// Test for AFB INDIC (OpCode 29)
+// Schema: TEST_INDICATION_V1
+//
+function testAfbIndicationV1Stateless(sim)
+{
+    let inSignal = "#TEST_IND_V1_T1_IN";
+    let ackSignal = "#TEST_IND_V1_T1_ACK";
+    let testSignal = "#TEST_IND_V1_T1_TEST";
+    let cyncSignal = "#SYSTEMID_RACKID_FSCC01_MD00_PI_BLINK";
+    let outSignal = "#TEST_IND_V1_T1_ROUT";
+    let univSignal = "#TEST_IND_V1_T1_RUV";
+
+    // Test test signal
+    //
+    sim.startForMs(20);
+    sim.overrideSignalValue(testSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 1);
+
+    sim.overrideSignalValue(testSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test indication
+    //
+    cleanup(sim);
+
+    sim.startForMs(50);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+
+    // Test Ack
+    //
+    sim.overrideSignalValue(ackSignal, 1);
+    sim.startForMs(5);
+    sim.overrideSignalValue(ackSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(300);
+    assert(sim.signalValue(outSignal) === 1);
+
+    sim.overrideSignalValue(inSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(300);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test univiabrator signal
+    //
+    cleanup(sim);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(univSignal) === 0);
+
+    return;
+}
+
+// Test for AFB INDIC (OpCode 29)
+// Schema: TEST_INDICATION_V1
+//
+function testAfbIndicationV1Latch(sim)
+{
+    let inSignal = "#TEST_IND_V1_T21_IN";
+    let ackSignal = "#TEST_IND_V1_T21_ACK";
+    let testSignal = "#TEST_IND_V1_T21_TEST";
+    let cyncSignal = "#SYSTEMID_RACKID_FSCC01_MD00_PI_BLINK";
+    let outSignal = "#TEST_IND_V1_T21_ROUT";
+    let univSignal = "#TEST_IND_V1_T21_RUV";
+
+    // Test test signal
+    //
+    sim.startForMs(20);
+    sim.overrideSignalValue(testSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 1);
+
+    sim.overrideSignalValue(testSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test indication
+    //
+    cleanup(sim);
+
+    sim.startForMs(50);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+
+    // Test Ack
+    //
+    sim.overrideSignalValue(ackSignal, 1);
+    sim.startForMs(5);
+    sim.overrideSignalValue(ackSignal, 0);
+
+    sim.overrideSignalValue(inSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(300);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test univiabrator signal
+    //
+    cleanup(sim);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(univSignal) === 0);
+
+    return;
+}
+
+
 // Test for AFB PULSE_GET (OpCode 30)
 // Schema: TEST_PULSE_GET_V0
 //
