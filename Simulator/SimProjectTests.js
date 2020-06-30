@@ -44,8 +44,10 @@ function init(sim)
 //
 function cleanup(sim)
 {
+    sim.reset();
     sim.overridesReset();
-    sim.startForMs(5);      // For applying overridesReset()
+    sim.connectionsSetEnabled(true);
+    sim.startForMs(5);      // For applying overridesReset(), and for actual reset all modules
 
     return;
 }
@@ -1234,92 +1236,137 @@ function testAfbMajV107(sim)
     return;
 }
 
-
-// Test for AFB BDEC (OpCode 9), conf 1
-// Schema: TEST_BDEC_CONF1
+// Test for AFB SRSST (OpCode 8)
+// Schema: TEST_SRSST_V104
 //
-function testAfbBDecConf1(sim)
+function testAfbSrsstV104(sim)
 {
-    // Test 0 to dec
+    //  Test steps:
+    //    1. Initial 0, 0 = 0
+    //    2. Set 1, 0 = 1
+    //    3. Set 1, 1 = 0
+    //    4. Set 0, 1 = 0
+    //    5. Set 0, 0 = 0
     //
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R1") === 1);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R2") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R3") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R4") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R5") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R6") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R7") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R8") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R9") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R10") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R11") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R12") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R13") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R14") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R15") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R16") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R17") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R18") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R19") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R20") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R21") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R22") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R23") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R24") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R25") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R26") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R27") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R28") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R29") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R30") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R31") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R32") === 0);
+    let simSignal = "#TEST_SRSST_V104_T1_SIM";
+    let blockSignal = "#TEST_SRSST_V104_T1_BLOCK";
+    let resultSignal = "#TEST_SRSST_V104_T1_RESULT";
 
-    // Test 31 to dec
+    //    1. Initial 0, 0 = 0
     //
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R1") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R2") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R3") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R4") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R5") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R6") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R7") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R8") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R9") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R10") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R11") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R12") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R13") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R14") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R15") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R16") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R17") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R18") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R19") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R20") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R21") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R22") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R23") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R24") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R25") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R26") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R27") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R28") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R29") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R30") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R31") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R32") === 1);
+    sim.overrideSignalValue(simSignal, 0);
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    let state = sim.signalState(resultSignal);
+    assert(state.value === 0);
+    assert(state.simulated === false);
+    assert(state.blocked === false);
 
-    // Test 1 to dec
+    //    2. Set 1, 0 = 1
     //
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R1") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R2") === 1);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R3") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R4") === 0);
-    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R5") === 0);
+    sim.overrideSignalValue(simSignal, 1);
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    state = sim.signalState(resultSignal);
+    assert(state.value === 1);
+    assert(state.simulated === true);
+    assert(state.blocked === false);
+
+    //    3. Set 1, 1 = 0
+    //
+    sim.overrideSignalValue(simSignal, 1);
+    sim.overrideSignalValue(blockSignal, 1);
+    sim.startForMs(5);
+    state = sim.signalState(resultSignal);
+    assert(state.value === 0);
+    assert(state.simulated === true);
+    assert(state.blocked === true);
+
+    //    4. Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(simSignal, 0);
+    sim.overrideSignalValue(blockSignal, 1);
+    sim.startForMs(5);
+    state = sim.signalState(resultSignal);
+    assert(state.value === 0);
+    assert(state.simulated === false);
+    assert(state.blocked === true);
+
+    //    5. Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(simSignal, 0);
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    state = sim.signalState(resultSignal);
+    assert(state.value === 0);
+    assert(state.simulated === false);
+    assert(state.blocked === false);
+
+
+    //  Test steps:
+    //    1. Initial 0, 0 = 1
+    //    2. Set 1, 0 = 1
+    //    3. Set 1, 1 = 0
+    //    4. Set 0, 1 = 0
+    //    5. Set 0, 0 = 1
+    //
+    simSignal = "#TEST_SRSST_V104_T2_SIM";
+    blockSignal = "#TEST_SRSST_V104_T2_BLOCK";
+    resultSignal = "#TEST_SRSST_V104_T2_RESULT";
+
+    //    1. Initial 0, 0 = 1
+    //
+    sim.overrideSignalValue(simSignal, 0);
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+    state = sim.signalState(resultSignal);
+    assert(state.simulated === false);              // Itme has proprty assignflags == false, thus flags must not be assigned
+    assert(state.blocked === false);
+
+    //    2. Set 1, 0 = 1
+    //
+    sim.overrideSignalValue(simSignal, 1);
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+    state = sim.signalState(resultSignal);
+    assert(state.simulated === false);              // Itme has proprty assignflags == false, thus flags must not be assigned
+    assert(state.blocked === false);
+
+    //    3. Set 1, 1 = 0
+    //
+    sim.overrideSignalValue(simSignal, 1);
+    sim.overrideSignalValue(blockSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+    state = sim.signalState(resultSignal);
+    assert(state.simulated === false);              // Itme has proprty assignflags == false, thus flags must not be assigned
+    assert(state.blocked === false);
+
+    //    4. Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(simSignal, 0);
+    sim.overrideSignalValue(blockSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+    state = sim.signalState(resultSignal);
+    assert(state.simulated === false);              // Itme has proprty assignflags == false, thus flags must not be assigned
+    assert(state.blocked === false);
+
+    //    5. Set 0, 0 = 1
+    //
+    sim.overrideSignalValue(simSignal, 0);
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 1);
+    state = sim.signalState(resultSignal);
+    assert(state.simulated === false);              // Itme has proprty assignflags == false, thus flags must not be assigned
+    assert(state.blocked === false);
 
     return;
 }
+
 
 // Test for AFB BCOD (OpCode 8), conf 1
 // Schema: TEST_BCOD_CONF1
@@ -1414,6 +1461,93 @@ function testAfbBCodConf2(sim)
     // Test 1 to cod_num
     //
     assert(sim.signalValue("#TEST_BCOD_CONF2_T9R") === 1);
+
+    return;
+}
+
+
+// Test for AFB BDEC (OpCode 9), conf 1
+// Schema: TEST_BDEC_CONF1
+//
+function testAfbBDecConf1(sim)
+{
+    // Test 0 to dec
+    //
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R1") === 1);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R2") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R3") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R4") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R5") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R6") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R7") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R8") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R9") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R10") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R11") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R12") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R13") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R14") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R15") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R16") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R17") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R18") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R19") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R20") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R21") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R22") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R23") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R24") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R25") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R26") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R27") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R28") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R29") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R30") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R31") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T1R32") === 0);
+
+    // Test 31 to dec
+    //
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R1") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R2") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R3") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R4") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R5") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R6") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R7") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R8") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R9") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R10") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R11") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R12") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R13") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R14") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R15") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R16") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R17") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R18") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R19") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R20") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R21") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R22") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R23") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R24") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R25") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R26") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R27") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R28") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R29") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R30") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R31") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T2R32") === 1);
+
+    // Test 1 to dec
+    //
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R1") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R2") === 1);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R3") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R4") === 0);
+    assert(sim.signalValue("#TEST_BDEC_CONF1_T3R5") === 0);
 
     return;
 }
@@ -2063,6 +2197,65 @@ function testAfbMathSi(sim)
     return;
 }
 
+// Test for AFB SCALE (OpCode 14)
+// Schema: TEST_SCALE_SI_SI
+//
+function testAfbScaleSiSi(sim)
+{
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T1R3") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R3") === 1);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R5") === 0);
+
+    return;
+}
+
+// Test for AFB SCALE (OpCode 14)
+// Schema: TEST_SCALE_FP_FP
+//
+function testAfbScaleFpFp(sim)
+{
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T1R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T2R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R1") === 1500);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R5") === 0);
+
+    return;
+}
 
 // Test for AFB FUNC (OpCode 16)
 // Schema: TEST_FUNC_V3
@@ -2171,6 +2364,71 @@ function testAfbFuncV3(sim)
     return;
 }
 
+// Test for AFB INT (OpCode 17)
+// Schema: TEST_INT_V6
+//
+function testAfbIntV6(sim)
+{
+    sim.reset();
+    sim.startForMs(5);
+
+    let trackInSignal = "#TEST_INT_V6_T1_TRACK_IN";
+    let trackSignal = "#TEST_INT_V6_T1_TRACK";
+    let resetSignal = "#TEST_INT_V6_T1_RESET";
+    let pauseSignal = "#TEST_INT_V6_T1_PAUSE";
+    let kiSignal = "#TEST_INT_V6_T1_KI";
+    let outSignal = "#TEST_INT_V6_T1_ROUT";
+
+    // Set ki to 5.0, out must go from 0 to 1000 for 2secs
+    //
+    sim.overrideSignalValue(kiSignal, 5.0);
+    sim.startForMs(1000);
+    let outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 499 && outSignalValue <= 501);
+
+    sim.startForMs(1000);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 999 && outSignalValue <= 1000.5);
+
+    // Set track_in = -100, track = 1, out must be -100
+    //
+    sim.overrideSignalValue(trackInSignal, -100);
+    sim.overrideSignalValue(trackSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === -100);
+
+    sim.overrideSignalValue(trackSignal, 0);
+    sim.startForMs(50);
+
+    // Set reset = 1, then out = 100
+    //
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 100);
+
+    // Test pause
+    //
+    sim.overridesReset();
+    sim.reset();
+    sim.startForMs(5);
+
+    sim.overrideSignalValue(kiSignal, 5.0);
+    sim.startForMs(1000);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 499 && outSignalValue <= 501);
+
+    sim.overrideSignalValue(pauseSignal, 1);
+    sim.startForMs(100);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 499 && outSignalValue <= 501);
+
+    sim.overrideSignalValue(pauseSignal, 0);
+    sim.startForMs(1000);
+    outSignalValue = sim.signalValue(outSignal);
+    assert(outSignalValue >= 999 && outSignalValue <= 1000.5);
+
+    return;
+}
 
 // Test for AFB DPCOMP (OpCode 20)
 // Schema: TEST_DPCOMP_FP_1
@@ -2565,8 +2823,6 @@ function testAfbDpCompCompSi1(sim)
 //
 function testAfbMux(sim)
 {
-    sim.reset();
-
     // switch_si
     //
     sim.overrideSignalValue("#TEST_MUX_SI_T1_SELECTOR", 0);
@@ -2623,6 +2879,233 @@ function testAfbMux(sim)
 
     return;
 }
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4OnDecay(sim)
+{
+    // 1. Initial 0, 0 = 0
+    // 2. Set 1, 0 = 0
+    // 3. Set 0, 0 = 99
+    // 4. Set 0, 1 = 0
+    // 5. Set 0, 0 = 0
+    //
+    let setSignal = "#TEST_LATCH_V4_T1_SET";
+    let resetSignal = "#TEST_LATCH_V4_T1_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T1_RESULT";
+
+    // 1. Initial 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 2. Set 1, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 3. Set 0, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 4. Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 5. Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4OnFront(sim)
+{
+    // 1.   Initial 0, 0 = 0
+    // 2.   Set 1, 0 = 99
+    // 3.   Set 0, 0 = 99
+    // 4.   Set 0, 1 = 0
+    // 5.   Set 0, 0 = 0
+    // 6.   Set 1, 0 = 99
+    // 7.   Set 1, 1 = 0
+    //
+    let setSignal = "#TEST_LATCH_V4_T2_SET";
+    let resetSignal = "#TEST_LATCH_V4_T2_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T2_RESULT";
+
+    // 1. Initial 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 2.   Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 3.   Set 0, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 4.   Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 5.   Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    // 6.   Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    // 7.   Set 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4OnState(sim)
+{
+    //    1. Initial 0, 0 = 0
+    //    2. Set 1, 0 = 99
+    //    3. Set 0, 0 = 99
+    //    4. Set 0, 1 = 0
+    //    5. Set 0, 0 = 0
+    //    6. Set 1, 0 = 99
+    //    7. Set 1, 1 = 0
+    //
+    let setSignal = "#TEST_LATCH_V4_T3_SET";
+    let resetSignal = "#TEST_LATCH_V4_T3_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T3_RESULT";
+
+    //   1. Initial 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    2. Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    //    3. Set 0, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    //    4. Set 0, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    5. Set 0, 0 = 0
+    //
+    sim.overrideSignalValue(setSignal, 0);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    //    6. Set 1, 0 = 99
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 99);
+
+    //    7. Set 1, 1 = 0
+    //
+    sim.overrideSignalValue(setSignal, 1);
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
+// Test for AFB LATCH, v4 (OpCode 22)
+// Schema: TEST_LATCH_V4
+//
+function testAfbLatchV4DealyFor1Cycle(sim)
+{
+    // Programm differs from schemas programm
+    //
+    let inSignal = "#TEST_LATCH_V4_T4_IN";
+    let resetSignal = "#TEST_LATCH_V4_T4_RESET";
+    let resultSignal = "#TEST_LATCH_V4_T4_RESULT";
+
+    sim.overrideSignalValue(inSignal, 0);
+    sim.startForMs(10);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 50);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 50);
+
+    sim.overrideSignalValue(inSignal, 60);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 50);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 60);
+
+    sim.overrideSignalValue(resetSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(resultSignal) === 0);
+
+    return;
+}
+
 
 
 // Test for AFB LIM (OpCode 23)
@@ -2794,6 +3277,97 @@ function testAfbPolyV3(sim)
     return;
 }
 
+
+// Test for AFB DER (OpCode 26)
+// Schema: TEST_DER_V5
+//
+function testAfbDerV5(sim)
+{
+    let inSignal = "#TEST_DER_V5_T1_IN";
+    let resetSignal = "#TEST_DER_V5_T1_RESET";
+    let pauseSignal = "#TEST_DER_V5_T1_PAUSE";
+    let kdSignal = "#TEST_DER_V5_T1_KD";
+    let tdSignal = "#TEST_DER_V5_T1_TD";
+    let outSignal = "#TEST_DER_V5_T1_ROUT";
+    let outSignalValue;
+
+    // Set ki to 5.0, out must go from 0 to 1000 for 2secs
+    //
+    sim.overrideSignalValue(kdSignal, 1.0);
+    sim.overrideSignalValue(tdSignal, 1000);
+    sim.startForMs(10);
+
+    sim.overrideSignalValue(inSignal, 1000);
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 286 && outSignalValue <= 288);     // 287
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 81.5 && outSignalValue <= 82.5);     // 81.98
+
+    sim.startForMs(2500);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 6.6 && outSignalValue <= 6.8);     // 6.68
+
+    sim.startForMs(5000);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 0.0443 && outSignalValue <= 0.0445);     // 0.0444
+
+    // Test pause
+    //
+    cleanup(sim);
+
+    sim.overrideSignalValue(kdSignal, 1.0);
+    sim.overrideSignalValue(tdSignal, 1000);
+    sim.startForMs(10);
+
+    sim.overrideSignalValue(inSignal, 1000);
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 286 && outSignalValue <= 288);     // 287
+
+    sim.overrideSignalValue(pauseSignal, 1);
+    let pausedValue = sim.signalValue(outSignal);       // pause
+
+    sim.startForMs(500);
+    assert(pausedValue === sim.signalValue(outSignal));
+
+    sim.overrideSignalValue(pauseSignal, 0);            // resume
+
+    sim.startForMs(1250);
+    outSignalValue = sim.signalValue(outSignal);
+    //console.log(outSignalValue);
+    assert(outSignalValue >= 81.5 && outSignalValue <= 82.5);     // 81.98
+
+    // Test reset
+    //
+    sim.reset();
+    sim.overridesReset();
+    sim.startForMs(5);
+
+    sim.overrideSignalValue(kdSignal, 1.0);
+    sim.overrideSignalValue(tdSignal, 1000); sim.startForMs(10);
+
+    sim.overrideSignalValue(inSignal, 1000);
+    sim.startForMs(1250);
+
+    sim.overrideSignalValue(resetSignal, 1);
+
+    sim.startForMs(1250);
+    assert(sim.signalValue(outSignal) === 0);
+
+    return;
+}
+
+
 // Test for AFB MISMATCH (OpCode 27)
 // Schema: TEST_MISMATCH_V4
 //
@@ -2903,6 +3477,219 @@ function testAfbMismatchV4(sim)
     assert(sim.signalValue("#TEST_MISMATCH_V4_TF_VAL") === 0);
     sim.startForMs(5);
     sim.overrideSignalValue("#TEST_MISMATCH_V4_TF_PE", 1);
+
+    return;
+}
+
+// Test for AFB TCONV v0 (OpCode 28)
+// Schema: TEST_TCONV_V0
+//
+function testAfbTconvV0(sim)
+{
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RESULT") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_ROV") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_RESULT") === 2147483647);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T2_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_RESULT") === -2147483648);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T21_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_RESULT") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_ROV") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T3_RNAN") === 1);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_RESULT") === 2147483647);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T4_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_RESULT") === -2147483648);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_ROV") === 1);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_RUF") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_FP_SI_T5_RNAN") === 0);
+
+    assert(sim.signalValue("#TEST_TCONV_V0_SI_FP_T1_RESULT") === 0);
+    assert(sim.signalValue("#TEST_TCONV_V0_SI_FP_T2_RESULT") === 12345);
+    assert(sim.signalValue("#TEST_TCONV_V0_SI_FP_T3_RESULT") === -12345);
+
+    return;
+}
+
+// Test for AFB INDIC (OpCode 29)
+// Schema: TEST_INDICATION_V1
+//
+function testAfbIndicationV1Stateless(sim)
+{
+    let inSignal = "#TEST_IND_V1_T1_IN";
+    let ackSignal = "#TEST_IND_V1_T1_ACK";
+    let testSignal = "#TEST_IND_V1_T1_TEST";
+    let cyncSignal = "#SYSTEMID_RACKID_FSCC01_MD00_PI_BLINK";
+    let outSignal = "#TEST_IND_V1_T1_ROUT";
+    let univSignal = "#TEST_IND_V1_T1_RUV";
+
+    // Test test signal
+    //
+    sim.startForMs(20);
+    sim.overrideSignalValue(testSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 1);
+
+    sim.overrideSignalValue(testSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test indication
+    //
+    cleanup(sim);
+
+    sim.startForMs(50);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+
+    // Test Ack
+    //
+    sim.overrideSignalValue(ackSignal, 1);
+    sim.startForMs(5);
+    sim.overrideSignalValue(ackSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(300);
+    assert(sim.signalValue(outSignal) === 1);
+
+    sim.overrideSignalValue(inSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(300);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test univiabrator signal
+    //
+    cleanup(sim);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(univSignal) === 0);
+
+    return;
+}
+
+// Test for AFB INDIC (OpCode 29)
+// Schema: TEST_INDICATION_V1
+//
+function testAfbIndicationV1Latch(sim)
+{
+    let inSignal = "#TEST_IND_V1_T21_IN";
+    let ackSignal = "#TEST_IND_V1_T21_ACK";
+    let testSignal = "#TEST_IND_V1_T21_TEST";
+    let cyncSignal = "#SYSTEMID_RACKID_FSCC01_MD00_PI_BLINK";
+    let outSignal = "#TEST_IND_V1_T21_ROUT";
+    let univSignal = "#TEST_IND_V1_T21_RUV";
+
+    // Test test signal
+    //
+    sim.startForMs(20);
+    sim.overrideSignalValue(testSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 1);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 1);
+
+    sim.overrideSignalValue(testSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(600);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test indication
+    //
+    cleanup(sim);
+
+    sim.startForMs(50);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+    sim.startForMs(100);
+    assert(sim.signalValue(outSignal) === sim.signalValue(cyncSignal));
+
+    // Test Ack
+    //
+    sim.overrideSignalValue(ackSignal, 1);
+    sim.startForMs(5);
+    sim.overrideSignalValue(ackSignal, 0);
+
+    sim.overrideSignalValue(inSignal, 0);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(500);
+    assert(sim.signalValue(outSignal) === 0);
+    sim.startForMs(300);
+    assert(sim.signalValue(outSignal) === 0);
+
+    // Test univiabrator signal
+    //
+    cleanup(sim);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.overrideSignalValue(inSignal, 1);
+
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(univSignal) === 0);
+
+    sim.startForMs(500);
+    assert(sim.signalValue(univSignal) === 0);
 
     return;
 }
@@ -3362,6 +4149,8 @@ function testConnectionEnable(sim)
 
 function testBusses(sim)
 {
+    sim.startForMs(10);
+
     // Test bus composer/extractor
     //
     assert(sim.signalValue("#TEST_BUSSES_BC_RES1") === 1);

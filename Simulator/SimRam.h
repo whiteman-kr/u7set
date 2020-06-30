@@ -121,9 +121,10 @@ namespace Sim
 		Ram& operator=(const Ram& that);
 
 	public:
+		bool isNull() const;
 		void reset();
-		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 
+		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 		void updateFrom(const Ram& source);
 
 		QString dump(QString equipmnetId) const;

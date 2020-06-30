@@ -194,19 +194,30 @@ namespace Sim
 		switch (m_controlData.m_state)
 		{
 		case SimControlState::Stop:
+			m_controlData.m_state = SimControlState::Run;
+
+			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+			//m_controlData.m_startTime = (m_controlData.m_startTime / 100'000) * 100'000;	// It will make start time on the edge of 100ms, it will make nice timestamp
+			m_controlData.m_startTime = (m_controlData.m_startTime / 5'000) * 5'000;	// It will make start time on the edge of 5ms, it will make nice timestamp
+
+			m_controlData.m_currentTime = m_controlData.m_startTime;
+			m_controlData.m_duration = duration;
+
 			for (SimControlRunStruct& cs : m_controlData.m_lms)
 			{
 				cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
 				m_simulator->overrideSignals().requestToResetOverrideScripts(cs.equipmentId());	// It will reset all scripts, clear global variables, etc
+
+				// It sets nonvalid point to realtime trends
+				//
+				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_controlData.m_currentTime);
+
+				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+				TimeStamp localTime{plantTime};
+				TimeStamp systemTime{ms.count()};
+
+				m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
 			}
-
-			m_controlData.m_state = SimControlState::Run;
-
-			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-			m_controlData.m_startTime = (m_controlData.m_startTime / 100'000) * 100'000;	// It will make start time on the edge of 100ms, it will make nice timestamp
-
-			m_controlData.m_currentTime = m_controlData.m_startTime;
-			m_controlData.m_duration = duration;
 			break;
 
 		case SimControlState::Run:

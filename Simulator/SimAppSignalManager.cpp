@@ -288,14 +288,21 @@ namespace Sim
 		{
 			QWriteLocker wl(&m_ramLock);
 
-			m_ram[lmHash].updateFrom(ram);
+			if (ram.isNull() == true)
+			{
+				m_ram.erase(lmHash);
+			}
+			else
+			{
+				m_ram[lmHash].updateFrom(ram);
+			}
 
 			Times tm;
 			tm.system = systemTime;
 			tm.local = localTime;
 			tm.plant = plantTime;
 
-			m_ramTimes[lmHash] = tm;
+			m_ramTimes[lmHash] = tm;		// keep record in m_ramTimes even for for null ram, as it is usefull for getting nonvalid point for trends
 		}
 
 		// Fetch data for realtime trends now, while this memory was not updated yet
@@ -533,6 +540,8 @@ namespace Sim
 		bool isConst{};
 		double constValue{};
 
+		Hash logicModuleHash = UNDEFINED_HASH;
+
 		AppSignalState state;
 		state.m_hash = signalHash;
 
@@ -564,6 +573,7 @@ namespace Sim
 
 			appSignalId = s.appSignalID();
 			logicModuleId = s.lmEquipmentID();
+			logicModuleHash = ::calcHash(logicModuleId);
 			ualAddress = s.ualAddr();
 			type = s.signalType();
 			byteOrder = s.byteOrder();
@@ -578,7 +588,17 @@ namespace Sim
 		{
 			QReadLocker rl(&m_ramLock);
 
-			auto ramIt = m_ram.find(::calcHash(logicModuleId));
+			// Get time for this ram
+			//
+			auto timeIt = m_ramTimes.find(logicModuleHash);
+			if (timeIt != m_ramTimes.end())
+			{
+				state.m_time = timeIt->second;
+			}
+
+			// Get ram
+			//
+			auto ramIt = m_ram.find(logicModuleHash);
 
 			if (found != nullptr)
 			{
@@ -592,13 +612,8 @@ namespace Sim
 
 			const Ram& ram = ramIt->second;
 
-			// Get time for this ram
+			// --
 			//
-			auto timeIt = m_ramTimes.find(::calcHash(logicModuleId));
-			if (timeIt != m_ramTimes.end())
-			{
-				state.m_time = timeIt->second;
-			}
 
 			if (m_simulator->logicModule(logicModuleId)->isPowerOff() == true)
 			{

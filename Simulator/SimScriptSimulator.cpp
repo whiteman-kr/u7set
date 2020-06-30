@@ -458,6 +458,17 @@ namespace Sim
 		return jsEngine->newQObject(sconn);
 	}
 
+	void ScriptSimulator::connectionsSetEnabled(bool value)
+	{
+		auto connections = m_simulator->connections().connections();
+		for (auto c : connections)
+		{
+			c->setEnabled(value);
+		}
+
+		return;
+	}
+
 	bool ScriptSimulator::signalExists(QString appSignalId) const
 	{
 		return m_simulator->appSignalManager().signalExists(appSignalId);

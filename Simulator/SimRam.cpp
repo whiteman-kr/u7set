@@ -620,6 +620,11 @@ namespace Sim
 		return *this;
 	}
 
+	bool Ram::isNull() const
+	{
+		return m_memoryAreas.empty();
+	}
+
 	void Ram::reset()
 	{
 		m_memoryAreas.clear();
