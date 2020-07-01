@@ -679,6 +679,8 @@ namespace ExtWidgets
 		m_editPropertyFilter->setToolTip(tr("To filter properties, enter a caption fragment. Multiple fragments can be separated by semicolons."));
 
 		QPushButton* filterHelpButton = new QPushButton("?");
+		filterHelpButton->setDefault(false);
+		filterHelpButton->setAutoDefault(false);
 		connect(filterHelpButton, &QPushButton::clicked, [this](){
 			QString filterHelp = tr("Property Filter\n\nTo filter properties, enter a caption fragment.\n\nMultiple fragments can be separated by semicolons.\n\nExample: Caption;Enable");
 			QMessageBox::information(this, qAppName(), filterHelp);
@@ -687,6 +689,8 @@ namespace ExtWidgets
 		// GroupByCategory
 		m_buttonGroupByCategory = new QPushButton(tr("Group by Category"));
 		m_buttonGroupByCategory->setCheckable(true);
+		m_buttonGroupByCategory->setDefault(false);
+		m_buttonGroupByCategory->setAutoDefault(false);
 		connect(m_buttonGroupByCategory, &QPushButton::toggled, this, &PropertyTable::onGroupByCategoryToggled);
 
 		// Toolbar
