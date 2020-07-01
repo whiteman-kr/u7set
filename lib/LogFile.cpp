@@ -795,7 +795,7 @@ namespace Log
 
 		if (processRecordFilter(record) == true)
 		{
-			int index = static_cast<int>(m_filteredRecordsIndex.size() + 1);
+			int index = static_cast<int>(m_filteredRecordsIndex.size());
 
 			beginInsertRows(QModelIndex(), index, index);
 
@@ -1329,7 +1329,7 @@ namespace Log
 				out << ";";
 			}
 		}
-		out << endl;
+		out << Qt::endl;
 
 		for (int r = 0; r < rowCount; r++)
 		{
@@ -1342,7 +1342,7 @@ namespace Log
 					out << ";";
 				}
 			}
-			out << endl;
+			out << Qt::endl;
 		}
 	}
 
@@ -1362,10 +1362,23 @@ namespace Log
 
 		m_logThread.addWorker(m_logFileWorker);
 		m_logThread.start();
+
+
+		// Register LogFileRecord meta type
+		//
+		static int regLogFileRecordMetaType = false;
+
+		if (regLogFileRecordMetaType == false)
+		{
+			regLogFileRecordMetaType = true;
+			qRegisterMetaType<LogFileRecord>();
+		}
 	}
 
 	LogFile::~LogFile()
 	{
+		m_logFileWorker = nullptr;
+
 		bool ok = m_logThread.quitAndWait(10000);
 
 		if (ok == false)
@@ -1373,6 +1386,7 @@ namespace Log
 			// Thread termination timeout
 			assert(ok);
 		}
+
 	}
 
 	bool LogFile::writeMessage(const QString& text)
@@ -1410,11 +1424,21 @@ namespace Log
 
 	bool LogFile::writeArray(const QStringList& textArray)
 	{
+		if (m_logFileWorker == nullptr)
+		{
+			return true;
+		}
+
 		return m_logFileWorker->writeArray(textArray);
 	}
 
 	bool LogFile::write(MessageType type, const QString& text)
 	{
+		if (m_logFileWorker == nullptr)
+		{
+			return true;
+		}
+
 		return m_logFileWorker->write(type, text);
 	}
 
