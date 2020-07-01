@@ -97,6 +97,8 @@ namespace Sim
 		m_commandProcessor.reset();
 
 		m_lmDescription.clear();
+		m_logicModuleExtraInfo = {};
+
 		m_tuningEeprom.clear();
 		m_confEeprom.clear();
 		m_appLogicEeprom.clear();
@@ -134,6 +136,7 @@ namespace Sim
 		setLogicModuleInfo(logicModuleInfo);
 
 		m_lmDescription = lmDescription;
+
 		m_tuningEeprom = tuningEeprom;
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
@@ -246,13 +249,48 @@ namespace Sim
 
 		// Set LogicModule's RAM to Sim::AppSignalManager
 		//
-		if (m_appSignalManager != nullptr)
-		{
-			m_appSignalManager->setData(equipmentId(), ram(), plantTime, localTime, systemTime);
-		}
-		else
+		if (m_appSignalManager == nullptr ||
+			m_appDataTransmitter == nullptr)
 		{
 			Q_ASSERT(m_appSignalManager);
+			Q_ASSERT(m_appDataTransmitter);
+
+			return false;
+		}
+
+		m_appSignalManager->setData(equipmentId(), ram(), plantTime, localTime, systemTime);
+
+		{
+			QByteArray regData;
+
+			quint32 regDataOffsetW = m_lmDescription.memory().m_appLogicWordDataOffset;
+			quint32 regDataSizeW = m_logicModuleExtraInfo.appDataSizeBytes / 2;
+
+			if (regDataSizeW > m_lmDescription.memory().m_appLogicWordDataSize)
+			{
+				writeError(tr("Send reg data error, buffer size is too big. LM %1, OffsetW %2, SizeW %3, AppLogicWordDataSize %4.")
+						   .arg(equipmentId())
+						   .arg(regDataOffsetW)
+						   .arg(regDataSizeW)
+						   .arg(m_lmDescription.memory().m_appLogicWordDataSize));
+
+				setCurrentMode(DeviceMode::Fault);
+				return false;
+			}
+
+			bool readRegBufferOk = m_ram.readToBuffer(regDataOffsetW, E::LogicModuleRamAccess::Write, regDataSizeW, &regData, true);
+			if (readRegBufferOk == false)
+			{
+				writeError(tr("Error reading regBuffer for LM %1, OffsetW %2, SizeW %3.")
+						   .arg(equipmentId())
+						   .arg(regDataOffsetW)
+						   .arg(regDataSizeW));
+
+				setCurrentMode(DeviceMode::Fault);
+				return false;
+			}
+
+			m_appDataTransmitter->sendData(equipmentId(), std::move(regData), plantTime);
 		}
 
 		return ok;
@@ -1665,6 +1703,16 @@ namespace Sim
 		return;
 	}
 
+	const ::LogicModuleInfo& DeviceEmulator::logicModuleExtraInfo() const
+	{
+		return m_logicModuleExtraInfo;
+	}
+
+	void DeviceEmulator::setLogicModuleExtraInfo(const ::LogicModuleInfo& value)
+	{
+		m_logicModuleExtraInfo = value;
+	}
+
 	const LmDescription& DeviceEmulator::lmDescription() const
 	{
 		return m_lmDescription;
@@ -1678,6 +1726,11 @@ namespace Sim
 	void DeviceEmulator::setAppSignalManager(AppSignalManager* appSignalManager)
 	{
 		m_appSignalManager = appSignalManager;
+	}
+
+	void DeviceEmulator::setAppDataTransmitter(AppDataTransmitter* appDataTransmitter)
+	{
+		m_appDataTransmitter = appDataTransmitter;
 	}
 
 	std::vector<DeviceCommand> DeviceEmulator::commands() const

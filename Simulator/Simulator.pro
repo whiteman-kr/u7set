@@ -86,6 +86,7 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
+    SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
     SimScriptConnection.cpp \
@@ -133,6 +134,7 @@ HEADERS += \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
+    SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
     SimScriptConnection.h \

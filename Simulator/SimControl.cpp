@@ -41,8 +41,12 @@ namespace Sim
 	{
 		writeDebug(tr("Reset"));
 
-		QWriteLocker wl(&m_controlDataLock);
-		m_controlData = ControlData{};
+		{
+			QWriteLocker wl(&m_controlDataLock);
+			m_controlData = ControlData{};
+		}
+
+		m_simulator->appDataTransmitter().stopSimulation();
 
 		return;
 	}
@@ -91,6 +95,7 @@ namespace Sim
 
 			lm->setOverrideSignals(&m_simulator->overrideSignals());
 			lm->setAppSignalManager(&m_simulator->appSignalManager());
+			lm->setAppDataTransmitter(&m_simulator->appDataTransmitter());
 
 			lms.emplace_back(lm);
 			addedModuleCount ++;
@@ -218,6 +223,8 @@ namespace Sim
 
 				m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
 			}
+
+			m_simulator->appDataTransmitter().startSimulation();
 			break;
 
 		case SimControlState::Run:
@@ -276,6 +283,8 @@ namespace Sim
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 			cs = ControlStatus{m_controlData};
 		}
+
+		m_simulator->appDataTransmitter().stopSimulation();
 
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);

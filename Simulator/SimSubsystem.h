@@ -1,5 +1,5 @@
-#ifndef SUBSYSTEM_H
-#define SUBSYSTEM_H
+#pragma once
+
 #include <map>
 #include <memory>
 #include "SimOutput.h"
@@ -51,4 +51,3 @@ namespace Sim
 	};
 }
 
-#endif // SUBSYSTEM_H

@@ -1,5 +1,5 @@
-#ifndef LMMODEL_H
-#define LMMODEL_H
+#pragma once
+
 #include <memory>
 #include <QTextStream>
 #include <QByteArray>
@@ -77,6 +77,7 @@ namespace Sim
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);
 		void setAppSignalManager(AppSignalManager* appSignalManager);
+		void setAppDataTransmitter(AppDataTransmitter* appDataTransmitter);
 
 		bool isPowerOff() const;
 		void setPowerOff(bool value);
@@ -86,7 +87,6 @@ namespace Sim
 		//
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
-		::LogicModuleInfo m_logicModuleExtraInfo;			// Read from /Common/LogicModules.xml
 
 		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartId::Configuration);
@@ -104,4 +104,3 @@ namespace Sim
 
 }
 
-#endif // LMMODEL_H

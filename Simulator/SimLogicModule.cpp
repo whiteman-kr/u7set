@@ -11,7 +11,6 @@ namespace Sim
 
 	LogicModule::~LogicModule()
 	{
-		//qDebug() << "LogicModule::~LogicModule() " << equipmentId();
 		return;
 	}
 
@@ -47,7 +46,7 @@ namespace Sim
 		// Init DeviceEmulator
 		//
 		ok &= m_device.init(m_logicModuleInfo,
-		                    m_lmDescription,
+							m_lmDescription,
 		                    m_tuningEeprom,
 		                    m_confEeprom,
 							m_appLogicEeprom,
@@ -163,12 +162,12 @@ namespace Sim
 
 	const ::LogicModuleInfo& LogicModule::logicModuleExtraInfo() const
 	{
-		return m_logicModuleExtraInfo;
+		return m_device.logicModuleExtraInfo();
 	}
 
 	void LogicModule::setLogicModuleExtraInfo(const ::LogicModuleInfo& value)
 	{
-		m_logicModuleExtraInfo = value;
+		m_device.setLogicModuleExtraInfo(value);
 	}
 
 	std::chrono::microseconds LogicModule::cycleDuration() const
@@ -224,6 +223,11 @@ namespace Sim
 	void LogicModule::setAppSignalManager(AppSignalManager* appSignalManager)
 	{
 		m_device.setAppSignalManager(appSignalManager);
+	}
+
+	void LogicModule::setAppDataTransmitter(AppDataTransmitter* appDataTransmitter)
+	{
+		m_device.setAppDataTransmitter(appDataTransmitter);
 	}
 
 	bool LogicModule::isPowerOff() const
