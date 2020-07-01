@@ -1238,8 +1238,9 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	var blocksCount: number = 0;
 
-	var txAddr: number = 0;
-	var rxAddr: number = 0;
+	var txAddrSize: number = 128;
+
+	var rxAddrSize: number = 128;
 
 	for (var i: number = 0; i < chassis.childrenCount(); i++) {
 		var ioModule: DeviceObject = chassis.jsChild(i);
@@ -1302,12 +1303,12 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		// RxAddr
 
+		var rxAddr: number = rxAddrSize * (ioPlace - 1);
+
 		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "RxAddr", rxAddr) == false) {
 			return false;
 		}
 		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: RxAddr = " + rxAddr + "\r\n");
-
-		rxAddr += 128;
 
 		blockPtr += 2;
 
@@ -1324,12 +1325,12 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		// TxAddr
 
+		var txAddr: number = txAddrSize * (ioPlace - 1);
+
 		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "TxAddr", txAddr) == false) {
 			return false;
 		}
 		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: TxAddr = " + txAddr + "\r\n");
-
-		txAddr += 128;
 
 		blockPtr += 2;
 
