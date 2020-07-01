@@ -72,8 +72,9 @@ namespace Sim
 		std::vector<SimControlRunStruct> m_lms;			// LMs added to simulation
 		SimControlState m_state = SimControlState::Stop;
 
-		std::chrono::microseconds m_startTime = 0us;	// When simulation was started, it's computer time
-		std::chrono::microseconds m_currentTime = 0us;	// Current time in simulation
+		std::chrono::microseconds m_startTime = 0us;		// When simulation was started, computer time
+		std::chrono::microseconds m_sliceStartTime = 0us;	// When simulation was started for current 'slice' (duration)
+		std::chrono::microseconds m_currentTime = 0us;		// Current time in simulation
 
 		std::chrono::microseconds m_duration{0};		// Simulation is started for this time
 														// if time < 0 then no time limit
@@ -151,6 +152,9 @@ namespace Sim
 		std::chrono::microseconds duration() const;
 		std::chrono::microseconds leftTime() const;
 
+		bool unlockTimer() const;
+		void setUnlockTimer(bool value);
+
 	signals:
 		void stateChanged(SimControlState state);
 		void statusUpdate(ControlStatus state);
@@ -161,6 +165,8 @@ namespace Sim
 
 	private:
 		Simulator* m_simulator = nullptr;
+
+		std::atomic<bool> m_unlockTimer{false};
 
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/

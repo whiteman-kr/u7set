@@ -66,6 +66,9 @@ namespace Sim
 		/// \brief Script execution timeout in milliseconds, if negative then timeout is not applied.
 		Q_PROPERTY(qint64 executionTimeOut READ executionTimeOut WRITE setExecutionTimeOut)
 
+		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
+		Q_PROPERTY(bool unlockTimer READ unlockTimer WRITE setUnlockTimer)
+
 	public:
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
@@ -137,6 +140,10 @@ namespace Sim
 
 		qint64 executionTimeOut() const;
 		void setExecutionTimeOut(qint64 value);
+
+	private:
+		bool unlockTimer() const;
+		void setUnlockTimer(bool value);
 
 		// Data
 		//

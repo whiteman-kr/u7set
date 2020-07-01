@@ -443,9 +443,11 @@ void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
 
 void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 {
+using namespace std::chrono;
+
 	Q_ASSERT(m_timeIndicator);
 
-	std::chrono::milliseconds durration = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_duration);
+	milliseconds durration = duration_cast<milliseconds>(state.m_duration);
 
 	qint64 days = durration.count() / 1_day;
 	qint64 hours = (durration.count() % 1_day)  / 1_hour;
@@ -453,7 +455,7 @@ void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 	qint64 seconds = (durration.count() % 1_min)  / 1_sec;
 //	qint64 millisecond = durration.count() % 1_sec;
 
-	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_currentTime);
+	auto ms = duration_cast<milliseconds>(state.m_currentTime);
 	QDateTime utcOffset = QDateTime::currentDateTime();
 	TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
 

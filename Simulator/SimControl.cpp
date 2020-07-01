@@ -174,6 +174,8 @@ namespace Sim
 
 	bool Control::startSimulation(std::chrono::microseconds duration /* = std::chrono::microseconds{-1}*/)
 	{
+		using namespace std::chrono;
+
 		writeDebug(tr("Start"));
 
 		QWriteLocker wl(&m_controlDataLock);
@@ -201,11 +203,12 @@ namespace Sim
 		case SimControlState::Stop:
 			m_controlData.m_state = SimControlState::Run;
 
-			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+			m_controlData.m_startTime = duration_cast<microseconds>(system_clock::now().time_since_epoch());
 			//m_controlData.m_startTime = (m_controlData.m_startTime / 100'000) * 100'000;	// It will make start time on the edge of 100ms, it will make nice timestamp
 			m_controlData.m_startTime = (m_controlData.m_startTime / 5'000) * 5'000;	// It will make start time on the edge of 5ms, it will make nice timestamp
+			m_controlData.m_sliceStartTime = m_controlData.m_startTime;
 
-			m_controlData.m_currentTime = m_controlData.m_startTime;
+			m_controlData.m_currentTime = m_controlData.m_sliceStartTime;
 			m_controlData.m_duration = duration;
 
 			for (SimControlRunStruct& cs : m_controlData.m_lms)
@@ -233,7 +236,7 @@ namespace Sim
 
 		case SimControlState::Pause:
 			m_controlData.m_state = SimControlState::Run;
-            m_controlData.m_startTime = m_controlData.m_currentTime;
+			m_controlData.m_sliceStartTime = m_controlData.m_currentTime;
 			m_controlData.m_duration = duration;
 			break;
 
@@ -260,7 +263,7 @@ namespace Sim
 			QWriteLocker wl(&m_controlDataLock);
 			m_controlData.m_state = SimControlState::Pause;
 
-			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 			cs = ControlStatus{m_controlData};
 		}
 
@@ -274,13 +277,13 @@ namespace Sim
 	void Control::stop()
 	{
 		std::chrono::microseconds leftTime{0};
-		ControlStatus cs;
 
+		ControlStatus cs;
 		{
 			QWriteLocker wl(&m_controlDataLock);
 			m_controlData.m_state = SimControlState::Stop;
 
-			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 			cs = ControlStatus{m_controlData};
 		}
 
@@ -341,7 +344,17 @@ namespace Sim
 	std::chrono::microseconds Control::leftTime() const
 	{
 		QReadLocker rl(&m_controlDataLock);
-		return (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+		return (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+	}
+
+	bool Control::unlockTimer() const
+	{
+		return m_unlockTimer;
+	}
+
+	void Control::setUnlockTimer(bool value)
+	{
+		m_unlockTimer = value;
 	}
 
 	void Control::run()
@@ -440,7 +453,7 @@ namespace Sim
 		quint64 timeStatusUpdateCounter = 0;
 		QDateTime currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
-		auto finishTime = cd.m_startTime + cd.m_duration;
+		auto finishTime = cd.m_sliceStartTime + cd.m_duration;
 
 		do
 		{
@@ -542,18 +555,18 @@ namespace Sim
 			//
 			if (minPossibleTime > cd.m_currentTime)
 			{
-				// If current simulation is ahead of physical time, pause it a little bit
-				//
-				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
-					ahead > 0us)
+				if (m_unlockTimer == false)
 				{
-					// !!!!!!!!!!!!!!
-					// COMMENT HERE FOR SPEED UP (IF POSSIBLE, DEPENDS ON HW)
+					// If current simulation is ahead of physical time, pause it a little bit
 					//
-					QThread::usleep(ahead.count());
-					//qDebug() << "sleep for us " << ahead.count();
-					// !!!!!!!!!!!!!!
-					// !!!!!!!!!!!!!!
+					microseconds timeEllapsed{perfmanceTimer.elapsed() * 1000ul};
+					microseconds simulatedTime = cd.m_currentTime - perfmonaceStartedAt;
+					microseconds ahead = simulatedTime - timeEllapsed;
+
+					if (ahead > 0us)
+					{
+						QThread::usleep(ahead.count());
+					}
 				}
 
 				// Assign new currentTime

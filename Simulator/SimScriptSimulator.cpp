@@ -523,6 +523,15 @@ namespace Sim
 		m_executionTimeOut = value;
 	}
 
+	bool ScriptSimulator::unlockTimer() const
+	{
+		return m_simulator->control().unlockTimer();
+	}
+
+	void ScriptSimulator::setUnlockTimer(bool value)
+	{
+		m_simulator->control().setUnlockTimer(value);
+	}
 
 
 }

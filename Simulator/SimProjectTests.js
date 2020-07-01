@@ -23,6 +23,8 @@ function initTestCase(sim)
 {
     console.log(sim.buildPath);
 
+    sim.unlockTimer = true;
+
     // Warm up all modules
     //
     sim.startForMs(5);
