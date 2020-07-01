@@ -14,6 +14,7 @@
 #include <QTimerEvent>
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
+#include "../lib/LogicModulesInfo.h"
 #include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
@@ -21,6 +22,7 @@
 #include "SimAfb.h"
 #include "SimOverrideSignals.h"
 #include "SimAppSignalManager.h"
+#include "SimAppDataTransmitter.h"
 
 
 #ifndef __FUNCTION_NAME__
@@ -260,10 +262,14 @@ namespace Sim
 		Hardware::LogicModuleInfo logicModuleInfo() const;
 		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
 
+		const ::LogicModuleInfo& logicModuleExtraInfo() const;
+		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);
+
 		const LmDescription& lmDescription() const;
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);
 		void setAppSignalManager(AppSignalManager* appSignalManager);
+		void setAppDataTransmitter(AppDataTransmitter* appDataTransmitter);
 
 		std::vector<DeviceCommand> commands() const;
 		std::unordered_map<int, size_t> offsetToCommands() const;
@@ -281,9 +287,11 @@ namespace Sim
 	private:
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
+		::LogicModuleInfo m_logicModuleExtraInfo;
 
 		OverrideSignals* m_overrideSignals = nullptr;
 		AppSignalManager* m_appSignalManager = nullptr;
+		AppDataTransmitter* m_appDataTransmitter = nullptr;
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 

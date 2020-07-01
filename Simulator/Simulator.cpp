@@ -552,6 +552,16 @@ namespace Sim
 		return result;
 	}
 
+	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
+	{
+		return m_appDataTransmitter;
+	}
+
+	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
+	{
+		return m_appDataTransmitter;
+	}
+
 	Sim::AppSignalManager& Simulator::appSignalManager()
 	{
 		return m_appSignalManager;

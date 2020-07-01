@@ -13,6 +13,7 @@
 #include "SimOverrideSignals.h"
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
+#include "SimAppDataTransmitter.h"
 
 
 class QTextStream;
@@ -68,6 +69,9 @@ namespace Sim
 		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
 		std::vector<std::shared_ptr<LogicModule>> logicModules();
 
+		Sim::AppDataTransmitter& appDataTransmitter();
+		const Sim::AppDataTransmitter& appDataTransmitter() const;
+
 		Sim::AppSignalManager& appSignalManager();
 		const Sim::AppSignalManager& appSignalManager() const;
 
@@ -91,6 +95,8 @@ namespace Sim
 
 		// Signals Management
 		//
+		Sim::AppDataTransmitter m_appDataTransmitter{this};
+
 		Sim::AppSignalManager m_appSignalManager{this};
 		Sim::TuningSignalManager m_tuningSignalManager;
 
