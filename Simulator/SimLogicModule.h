@@ -12,6 +12,7 @@
 #include "SimCommandProcessor.h"
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
+#include "../lib/LogicModulesInfo.h"
 
 
 namespace Sim
@@ -59,6 +60,9 @@ namespace Sim
 		LmDescription& lmDescription();
 		const LmDescription& lmDescription() const;
 
+		const ::LogicModuleInfo& logicModuleExtraInfo() const;
+		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);
+
 		std::chrono::microseconds cycleDuration() const;
 
 		const std::vector<DeviceCommand>& appCommands() const;
@@ -82,6 +86,7 @@ namespace Sim
 		//
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
+		::LogicModuleInfo m_logicModuleExtraInfo;			// Read from /Common/LogicModules.xml
 
 		Eeprom m_tuningEeprom = Eeprom(UartId::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartId::Configuration);

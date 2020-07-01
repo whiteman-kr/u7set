@@ -23,8 +23,8 @@ TcpAppDataServer::~TcpAppDataServer()
 
 void TcpAppDataServer::onServerThreadStarted()
 {
-	m_signalCount = m_thread->appSignalIDsCount();
-	m_signalListPartCount = getSignalListPartCount(m_signalCount);
+	m_acquiredSignalCount = m_thread->acquiredAppSignalIDsCount();
+	m_acquiredSignalListPartCount = getSignalListPartCount(m_acquiredSignalCount);
 
 	qDebug() << "TcpAppDataServer::onServerThreadStarted()";
 }
@@ -152,9 +152,9 @@ void TcpAppDataServer::onGetState()
 
 void TcpAppDataServer::onGetAppSignalListStartRequest()
 {
-	m_getSignalListStartReply.set_totalitemcount(m_signalCount);
+	m_getSignalListStartReply.set_totalitemcount(m_acquiredSignalCount);
 
-	m_getSignalListStartReply.set_partcount(m_signalListPartCount);
+	m_getSignalListStartReply.set_partcount(m_acquiredSignalListPartCount);
 
 	m_getSignalListStartReply.set_itemsperpart(ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART);
 
@@ -178,14 +178,14 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	int requestPartNo = m_getSignalListNextRequest.part();
 
-	if (requestPartNo < 0 ||  requestPartNo >= m_signalListPartCount)
+	if (requestPartNo < 0 ||  requestPartNo >= m_acquiredSignalListPartCount)
 	{
 		m_getSignalListNextReply.set_error(TO_INT(NetworkError::WrongPartNo));
 		sendReply(m_getSignalListNextReply);
 		return;
 	}
 
-	int itemsInPart = m_signalCount - requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART;
+	int itemsInPart = m_acquiredSignalCount - requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART;
 
 	if (itemsInPart > ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART)
 	{
@@ -194,7 +194,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	m_getSignalListNextReply.set_part(requestPartNo);
 
-	const QVector<QString>& IDs = appSignalIDs();
+	const QVector<QString>& IDs = acquiredAppSignalIDs();
 
 	int endIndex = requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART + itemsInPart;
 
@@ -469,9 +469,9 @@ int TcpAppDataServer::getSignalListPartCount(int signalCount)
 			((signalCount % ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART) == 0 ? 0 : 1);
 }
 
-const QVector<QString>& TcpAppDataServer::appSignalIDs() const
+const QVector<QString>& TcpAppDataServer::acquiredAppSignalIDs() const
 {
-	return m_thread->appSignalIDs();
+	return m_thread->acquiredAppSignalIDs();
 }
 
 const AppSignals& TcpAppDataServer::appSignals() const
@@ -560,17 +560,17 @@ QString TcpAppDataServerThread::cfgServiceIP2Str() const
 
 void TcpAppDataServerThread::buildAppSignalIDs()
 {
-	m_appSignalIDs.clear();
-
-	m_appSignalIDs.resize(m_appSignals.count());
-
-	int i = 0;
+	m_acquiredAppSignalIDs.clear();
+	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
 
 	for(Signal* signal : m_appSignals)
 	{
-		m_appSignalIDs[i] = signal->appSignalID();
+		TEST_PTR_CONTINUE(signal);
 
-		i++;
+		if (signal->isAcquired() == true)
+		{
+			m_acquiredAppSignalIDs.append(signal->appSignalID());
+		}
 	}
 }
 

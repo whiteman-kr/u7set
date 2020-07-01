@@ -32,6 +32,9 @@ public:
 	QString presetName;
 	QString lmDescriptionFile;
 
+	int appDataSizeBytes = 0;
+	int diagDataSizeBytes = 0;
+
 	std::vector<LanControllerInfo> lanControllers;
 };
 

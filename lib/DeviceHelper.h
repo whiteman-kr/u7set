@@ -7,6 +7,8 @@
 
 #include "../Builder/IssueLogger.h"
 
+const int	LM1_PLACE = 0;
+
 class DeviceHelper : public QObject
 {
 	Q_OBJECT

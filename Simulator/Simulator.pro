@@ -77,6 +77,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
+    ../lib/DomXmlHelper.cpp \
 	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
@@ -127,6 +128,7 @@ HEADERS += \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
+    ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \

@@ -288,7 +288,7 @@ bool LibSecretKeyring::writePassword(const QString &display_name,
                               pwd.constData(), NULL, on_password_stored, self,
                               "user", user.toUtf8().constData(),
                               "server", server.toUtf8().constData(),
-                              "type", type.toUtf8().constData(),
+							  "type", type.toUtf8().constData(),
                               NULL);
     return true;
 #else
@@ -320,7 +320,7 @@ bool LibSecretKeyring::deletePassword(const QString &key, const QString &service
 }
 
 LibSecretKeyring::LibSecretKeyring()
-    : QLibrary("secret-1")
+    : QLibrary(QLatin1String("secret-1"), 0)
 {
 #ifdef HAVE_LIBSECRET
     if (load()) {

@@ -140,6 +140,9 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::LM_NUMBER, &lmi->lmNumber, errMsg);
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::SUBSYSTEM_CHANNEL, &lmi->subsystemChannel, errMsg);
 
+	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &lmi->appDataSizeBytes, errMsg);
+	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &lmi->diagDataSizeBytes, errMsg);
+
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY, &lmi->moduleFamily, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::MODULE_VERSION, &lmi->moduleVersion, errMsg);
 
@@ -435,6 +438,26 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 			result &= LanControllerInfoHelper::getInfo(	*lmModule.get(), lc.m_place, lc.m_type, &lci,
 														m_equipmentSet, mc.log());
+
+			if (lci.appDataProvided == true && lci.appDataEnable == true)
+			{
+				if (lmInfo->appDataSizeBytes != 0)
+				{
+					Q_ASSERT(lmInfo->appDataSizeBytes == lci.appDataSizeBytes);
+				}
+
+				lmInfo->appDataSizeBytes = lci.appDataSizeBytes;
+			}
+
+			if (lci.diagDataProvided == true && lci.diagDataEnable == true)
+			{
+				if (lmInfo->diagDataSizeBytes != 0)
+				{
+					Q_ASSERT(lmInfo->diagDataSizeBytes == lci.diagDataSizeBytes);
+				}
+
+				lmInfo->diagDataSizeBytes = lci.diagDataSizeBytes;
+			}
 		}
 
 		return result;
@@ -450,6 +473,9 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_ID, lmInfo.subsystemID);
 		xml.writeIntAttribute(EquipmentPropNames::LM_NUMBER, lmInfo.lmNumber);
 		xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_CHANNEL, lmInfo.subsystemChannel);
+
+		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lmInfo.appDataSizeBytes);
+		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, lmInfo.diagDataSizeBytes);
 
 		xml.writeStringAttribute(EquipmentPropNames::MODULE_FAMILY, lmInfo.moduleFamily);
 		xml.writeIntAttribute(EquipmentPropNames::MODULE_VERSION, lmInfo.moduleVersion);

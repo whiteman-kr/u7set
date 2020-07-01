@@ -168,8 +168,10 @@ namespace Builder
 
 
 	bool LmMemoryMap::init(	int appMemorySize,
-							const MemoryArea& moduleData,
+							const MemoryArea& ioModuleData,
+							int ioModulesCount,
 							const MemoryArea& optoInterfaceData,
+							int optoInterfaceCount,
 							const MemoryArea& appLogicBitData,
 							const MemoryArea& tuningData,
 							const MemoryArea& appLogicWordData)
@@ -180,37 +182,33 @@ namespace Builder
 
 		// init modules memory mapping
 		//
-		m_modules.memory.setStartAddress(moduleData.startAddress());
-		m_modules.memory.setSizeW(moduleData.sizeW() * MODULES_COUNT);
+		m_modules.memory.setStartAddress(ioModuleData.startAddress());
+		m_modules.memory.setSizeW(ioModuleData.sizeW() * ioModulesCount);
 		m_modules.memory.lock();
 
-		for(int i = 0; i < MODULES_COUNT; i++)
+		m_modules.module.resize(ioModulesCount);
+
+		for(int i = 0; i < ioModulesCount; i++)
 		{
-			m_modules.module[i].setStartAddress(m_modules.memory.startAddress() + i * moduleData.sizeW());
-			m_modules.module[i].setSizeW(moduleData.sizeW());
+			m_modules.module[i].setStartAddress(m_modules.memory.startAddress() + i * ioModuleData.sizeW());
+			m_modules.module[i].setSizeW(ioModuleData.sizeW());
 		}
 
 		// init opto interface memory mapping
 		//
 		m_optoInterface.memory.setStartAddress(optoInterfaceData.startAddress());
-		m_optoInterface.memory.setSizeW(optoInterfaceData.sizeW() * (OPTO_INTERFACE_COUNT + 1));
+		m_optoInterface.memory.setSizeW(optoInterfaceData.sizeW() * (optoInterfaceCount));	// optoInterfaceCount+1
 		m_optoInterface.memory.lock();
 
-		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
-		{
-			if (i == 0)
-			{
-				m_optoInterface.channel[i].setStartAddress(m_optoInterface.memory.startAddress());
-			}
-			else
-			{
-				m_optoInterface.channel[i].setStartAddress(m_optoInterface.channel[i-1].nextAddress());
-			}
+		m_optoInterface.channel.resize(optoInterfaceCount);
 
+		for(int i = 0; i < optoInterfaceCount; i++)
+		{
+			m_optoInterface.channel[i].setStartAddress(m_optoInterface.memory.startAddress() + i * optoInterfaceData.sizeW());
 			m_optoInterface.channel[i].setSizeW(optoInterfaceData.sizeW());
 		}
 
-		m_optoInterface.reserv.setStartAddress(m_optoInterface.channel[OPTO_INTERFACE_COUNT -1].nextAddress());
+		m_optoInterface.reserv.setStartAddress(m_optoInterface.channel[optoInterfaceCount - 1].nextAddress());
 		m_optoInterface.reserv.setSizeW(optoInterfaceData.sizeW());
 
 		// init application bit-addressed memory mapping
@@ -364,7 +362,12 @@ namespace Builder
 
 	int LmMemoryMap::getModuleDataOffset(int place) const
 	{
-		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+		if (place < 1 ||
+			place > m_modules.module.size())
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
 
 		return m_modules.module[place - 1].startAddress();;
 	}
@@ -378,7 +381,7 @@ namespace Builder
 
 		addSection(memFile, m_modules.memory, "I/O modules controller memory");
 
-		for(int i = 0; i < MODULES_COUNT; i++)
+		for(int i = 0; i < m_modules.module.size(); i++)
 		{
 			addRecord(memFile, m_modules.module[i], QString().sprintf("I/O module %02d", i + 1));
 		}
@@ -389,7 +392,7 @@ namespace Builder
 
 		//
 
-		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
+		for(int i = 0; i < m_optoInterface.channel.size(); i++)
 		{
 			addRecord(memFile, m_optoInterface.channel[i], QString().sprintf("opto port %02d", i + 1));
 		}
