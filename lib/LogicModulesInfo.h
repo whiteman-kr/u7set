@@ -27,15 +27,23 @@ public:
 	QString subsystemChannel;
 
 	QString moduleFamily;
+	int moduleFamilyID = 0;
 	int moduleVersion = 0;
 
 	QString presetName;
 	QString lmDescriptionFile;
 
+	bool appDataEnable = false;
 	int appDataSizeBytes = 0;
+	quint32 appDataUID = 0;
+
+	bool diagDataEnable = false;
 	int diagDataSizeBytes = 0;
+	quint32 diagDataUID = 0;
 
 	std::vector<LanControllerInfo> lanControllers;
+
+	int moduleType() const { return (moduleFamilyID & 0xFF00) | (moduleVersion & 0x00FF); }
 };
 
 class LogicModulesInfo

@@ -520,7 +520,7 @@ namespace Sim
 		return result;
 	}
 
-	std::shared_ptr<LogicModule> Simulator::logicModule(QString equipmentId)
+	std::shared_ptr<LogicModule> Simulator::logicModule(QString equipmentId) const
 	{
 		for (const auto&[key, ss] : m_subsystems)
 		{
@@ -536,7 +536,7 @@ namespace Sim
 		return std::shared_ptr<LogicModule>();
 	}
 
-	std::vector<std::shared_ptr<LogicModule>> Simulator::logicModules()
+	std::vector<std::shared_ptr<LogicModule>> Simulator::logicModules() const
 	{
 		std::vector<std::shared_ptr<LogicModule>> result;
 		result.reserve(m_subsystems.size() * 10);			// Just some number

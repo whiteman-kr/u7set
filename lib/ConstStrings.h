@@ -59,6 +59,7 @@ namespace EquipmentPropNames
 	const QString SUBSYSTEM_CHANNEL = "SubsystemChannel";
 
 	const QString MODULE_FAMILY = "ModuleFamily";
+	const QString MODULE_FAMILY_ID = "ModuleFamilyID";
 	const QString MODULE_VERSION = "ModuleVersion";
 
 	const QString PRESET_NAME = "PresetName";

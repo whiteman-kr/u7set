@@ -140,10 +140,16 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::LM_NUMBER, &lmi->lmNumber, errMsg);
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::SUBSYSTEM_CHANNEL, &lmi->subsystemChannel, errMsg);
 
+	result &= DomXmlHelper::getBoolAttribute(lmElem, EquipmentPropNames::APP_DATA_ENABLE, &lmi->appDataEnable, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &lmi->appDataSizeBytes, errMsg);
+	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::APP_DATA_UID, &lmi->appDataUID, errMsg);
+
+	result &= DomXmlHelper::getBoolAttribute(lmElem, EquipmentPropNames::DIAG_DATA_ENABLE, &lmi->diagDataEnable, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &lmi->diagDataSizeBytes, errMsg);
+	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::DIAG_DATA_UID, &lmi->diagDataUID, errMsg);
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY, &lmi->moduleFamily, errMsg);
+	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY_ID, &lmi->moduleFamilyID, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::MODULE_VERSION, &lmi->moduleVersion, errMsg);
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::PRESET_NAME, &lmi->presetName, errMsg);
@@ -407,6 +413,7 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		result &= DeviceHelper::getStrProperty(lmModule.get(), EquipmentPropNames::SUBSYSTEM_CHANNEL, &lmInfo->subsystemChannel, mc.log());
 
 		result &= DeviceHelper::getStrProperty(lmModule.get(), EquipmentPropNames::MODULE_FAMILY, &lmInfo->moduleFamily, mc.log());
+		lmInfo->moduleFamilyID = static_cast<int>(lmModule->moduleFamily());
 		result &= DeviceHelper::getIntProperty(lmModule.get(), EquipmentPropNames::MODULE_VERSION, &lmInfo->moduleVersion, mc.log());
 
 		lmInfo->presetName = lmModule->presetName();
@@ -441,22 +448,40 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 			if (lci.appDataProvided == true && lci.appDataEnable == true)
 			{
+				lmInfo->appDataEnable = true;
+
 				if (lmInfo->appDataSizeBytes != 0)
 				{
 					Q_ASSERT(lmInfo->appDataSizeBytes == lci.appDataSizeBytes);
 				}
 
 				lmInfo->appDataSizeBytes = lci.appDataSizeBytes;
+
+				if (lmInfo->appDataUID != 0)
+				{
+					Q_ASSERT(lmInfo->appDataUID == lci.appDataUID);
+				}
+
+				lmInfo->appDataUID = lci.appDataUID;
 			}
 
 			if (lci.diagDataProvided == true && lci.diagDataEnable == true)
 			{
+				lmInfo->diagDataEnable = true;
+
 				if (lmInfo->diagDataSizeBytes != 0)
 				{
 					Q_ASSERT(lmInfo->diagDataSizeBytes == lci.diagDataSizeBytes);
 				}
 
 				lmInfo->diagDataSizeBytes = lci.diagDataSizeBytes;
+
+				if (lmInfo->diagDataUID != 0)
+				{
+					Q_ASSERT(lmInfo->diagDataUID == lci.diagDataUID);
+				}
+
+				lmInfo->diagDataUID = lci.diagDataUID;
 			}
 		}
 
@@ -474,10 +499,16 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		xml.writeIntAttribute(EquipmentPropNames::LM_NUMBER, lmInfo.lmNumber);
 		xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_CHANNEL, lmInfo.subsystemChannel);
 
+		xml.writeBoolAttribute(EquipmentPropNames::APP_DATA_ENABLE, lmInfo.appDataEnable);
 		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lmInfo.appDataSizeBytes);
+		xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, lmInfo.appDataUID, true);
+
+		xml.writeBoolAttribute(EquipmentPropNames::DIAG_DATA_ENABLE, lmInfo.diagDataEnable);
 		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, lmInfo.diagDataSizeBytes);
+		xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, lmInfo.diagDataUID, true);
 
 		xml.writeStringAttribute(EquipmentPropNames::MODULE_FAMILY, lmInfo.moduleFamily);
+		xml.writeIntAttribute(EquipmentPropNames::MODULE_FAMILY_ID, lmInfo.moduleFamilyID, true);
 		xml.writeIntAttribute(EquipmentPropNames::MODULE_VERSION, lmInfo.moduleVersion);
 
 		xml.writeStringAttribute(EquipmentPropNames::PRESET_NAME, lmInfo.presetName);

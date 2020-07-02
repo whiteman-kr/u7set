@@ -66,8 +66,8 @@ namespace Sim
 		Sim::Connections& connections();
 
 		std::vector<std::shared_ptr<Subsystem>> subsystems() const;
-		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
-		std::vector<std::shared_ptr<LogicModule>> logicModules();
+		std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
+		std::vector<std::shared_ptr<LogicModule>> logicModules() const;
 
 		Sim::AppDataTransmitter& appDataTransmitter();
 		const Sim::AppDataTransmitter& appDataTransmitter() const;
