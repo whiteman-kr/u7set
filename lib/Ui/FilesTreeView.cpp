@@ -106,14 +106,69 @@ void FileTreeModelItem::deleteAllChildren()
 	m_children.clear();
 }
 
-void FileTreeModelItem::sortChildrenByFileName()
+FileTreeProxyModel::FileTreeProxyModel(QObject *parent):
+	QSortFilterProxyModel(parent)
 {
-	std::sort(std::begin(m_children), std::end(m_children),
-		[](const std::shared_ptr<FileTreeModelItem>& f1, const std::shared_ptr<FileTreeModelItem>& f2)
+
+}
+
+bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+	FileTreeModel* treeModel = dynamic_cast<FileTreeModel*>(sourceModel());
+	if (treeModel == nullptr)
+	{
+		Q_ASSERT(treeModel);
+		return false;
+	}
+
+	const FileTreeModelItem* f1 = treeModel->fileItem(left);
+	const FileTreeModelItem* f2 = treeModel->fileItem(right);
+
+	if (f1 == nullptr || f2 == nullptr)
+	{
+		Q_ASSERT(f1);
+		Q_ASSERT(f2);
+		return false;
+	}
+
+	FileTreeModel::Columns column = treeModel->columnAtIndex(left.column());
+
+	switch (static_cast<FileTreeModel::Columns>(column))
+	{
+	case FileTreeModel::Columns::FileNameColumn:
 		{
 			return f1->fileName() < f2->fileName();
-		});
-	return;
+		}
+		break;
+	case FileTreeModel::Columns::FileSizeColumn:
+		{
+			return f1->size() < f2->size();
+		}
+		break;
+	case FileTreeModel::Columns::FileStateColumn:
+		{
+			return f1->state() < f2->state();
+		}
+		break;
+	case FileTreeModel::Columns::FileUserColumn:
+		{
+			return f1->userId() < f2->userId();
+		}
+		break;
+	case FileTreeModel::Columns::FileIdColumn:
+		{
+			return f1->fileId() < f2->fileId();
+		}
+		break;
+	case FileTreeModel::Columns::FileAttributesColumn:
+		{
+			return f1->attributes() < f2->attributes();
+		}
+		break;
+	}
+
+	// Custom column
+	return QSortFilterProxyModel::lessThan(left, right);
 }
 
 //
@@ -154,6 +209,18 @@ void FileTreeModel::setColumns(std::vector<Columns> columns)
 	endInsertColumns();
 }
 
+FileTreeModel::Columns FileTreeModel::columnAtIndex(int index) const
+{
+	if (index < 0 || index >= static_cast<int>(m_columns.size()))
+	{
+		Q_ASSERT(false);
+		return Columns::FileNameColumn;
+	}
+
+	return m_columns[index];
+
+}
+
 QString FileTreeModel::customColumnText(Columns column, const FileTreeModelItem* item) const
 {
 	Q_UNUSED(column);
@@ -165,6 +232,13 @@ QString FileTreeModel::customColumnName(Columns column) const
 {
 	Q_UNUSED(column);
 	return QString();
+}
+
+QVariant FileTreeModel::columnIcon(const QModelIndex& index, FileTreeModelItem* file) const
+{
+	Q_UNUSED(index);
+	Q_UNUSED(file);
+	return QVariant();
 }
 
 QModelIndex FileTreeModel::index(int row, const QModelIndex& parentIndex) const
@@ -359,6 +433,11 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 			}
 		}
 		break;
+	case Qt::DecorationRole:
+			{
+				return columnIcon(index, file);
+			}
+		break;
 	}
 
 	return QVariant();
@@ -484,8 +563,6 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 		parentFile->addChild(std::make_shared<FileTreeModelItem>(fi));
 	}
 
-	parentFile->sortChildrenByFileName();
-
 	endInsertRows();
 
 	return;
@@ -578,7 +655,6 @@ void FileTreeModel::addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeMo
 	beginInsertRows(parentIndex, parentFile->childrenCount(), parentFile->childrenCount());
 
 	parentFile->addChild(file);
-	parentFile->sortChildrenByFileName();
 
 	endInsertRows();
 
@@ -749,6 +825,84 @@ FileTreeView::FileTreeView(DbController* dbc) :
 FileTreeView::~FileTreeView()
 {
 }
+
+void FileTreeView::newFile(const QString& fileName)
+{
+	// Find parent file
+	//
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(selectedIndexList.size() == 1);
+		return;
+	}
+
+	QModelIndex parentIndex = selectedIndexList[0];
+	FileTreeModelItem* parentFile = fileTreeModel()->fileItem(parentIndex);
+
+	if (parentFile == nullptr || parentFile->fileId() == -1)
+	{
+		assert(parentFile);
+		assert(parentFile->fileId() != -1);
+		return;
+	}
+
+	selectionModel()->clear();				// clear selction. New selection will be set after files added to db
+
+	// Create files vector
+	//
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+	file->setFileName(fileName);
+
+	// Add files to the DB
+	//
+	bool ok = db()->addFile(file, parentFile->fileId(), this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Add files to the FileModel and select them
+	//
+	std::shared_ptr<FileTreeModelItem> fi = std::make_shared<FileTreeModelItem>(*file);
+	fileTreeModel()->addFile(parentIndex, fi);
+
+	// Find and select
+	//
+	for (int i = 0; i < 65535; i++)
+	{
+		QModelIndex childIndex = model()->index(i, 0, parentIndex);
+
+		if (childIndex.isValid() == false)
+		{
+			break;
+		}
+
+		FileTreeModelItem* childFile = fileTreeModel()->fileItem(childIndex);
+
+		if (childFile == nullptr)
+		{
+			assert(childFile);
+			break;
+		}
+
+		if (file->fileId() == childFile->fileId())
+		{
+			selectionModel()->select(childIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+			break;
+		}
+	}
+
+	if (isExpanded(parentIndex) == false)
+	{
+		expand(parentIndex);
+	}
+
+	return;
+}
+
 void FileTreeView::addFile()
 {
 	// Find parent file

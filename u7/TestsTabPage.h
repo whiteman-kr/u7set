@@ -18,6 +18,7 @@ public:
 private:
 	QString customColumnText(Columns column, const FileTreeModelItem* item) const override;
 	QString customColumnName(Columns column) const override;
+	QVariant columnIcon(const QModelIndex& index, FileTreeModelItem* file) const override;
 
 };
 
@@ -50,6 +51,7 @@ private slots:
 	void testsTreeDoubleClicked(const QModelIndex &index);
 	void openFilesDoubleClicked(const QModelIndex &index);
 
+	void newDocument();
 	void openDocument();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
@@ -89,6 +91,7 @@ private:
 	//
 	FileTreeView* m_testsTreeView = nullptr;
 	TestsFileTreeModel* m_testsTreeModel = nullptr;
+	FileTreeProxyModel* m_proxyModel = nullptr;
 
 	QTreeWidget* m_openFilesTreeWidget = nullptr;
 
@@ -101,13 +104,12 @@ private:
 	QLabel* m_lineLabel = nullptr;
 	QLabel* m_columnLabel = nullptr;
 
-	LexerJavaScript m_lexerJavaScript;
-
 	QSplitter* m_leftSplitter = nullptr;
 	QSplitter* m_verticalSplitter = nullptr;
 
 	//Actions
 	//
+	QAction* m_newFileAction = nullptr;
 	QAction* m_addFileAction = nullptr;
 	QAction* m_openFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;

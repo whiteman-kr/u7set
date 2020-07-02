@@ -22,14 +22,24 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	// Controls
 	//
-	m_fileView = new FileTreeView(dbcontroller);
 	m_fileModel = new FileTreeModel(dbcontroller, DbFileInfo::fullPathToFileName(Db::File::RootFileName), this, this);
-	m_fileView->setModel(m_fileModel);
+
+	m_proxyModel = new FileTreeProxyModel(this);
+	m_proxyModel->setSourceModel(m_fileModel);
+
+	m_fileView = new FileTreeView(dbcontroller);
+	m_fileView->setModel(m_proxyModel);
+
+	m_fileView->setSortingEnabled(true);
+	connect(m_fileView->header(), &QHeaderView::sortIndicatorChanged, [this](int index, Qt::SortOrder order)
+	{
+		m_fileView->sortByColumn(index, order);
+	});
+	m_fileView->sortByColumn(0, Qt::AscendingOrder);
 
 	// Create Actions
 	//
 	createActions();
-
 
 	//
 	// Set context menu to Equipment View

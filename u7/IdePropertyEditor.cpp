@@ -326,7 +326,11 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 	if (codeType == CodeType::JavaScript || codeType == CodeType::Xml)
     {
         m_textEdit->setMarginType(0, QsciScintilla::NumberMargin);
-        m_textEdit->setMarginWidth(0, 40);
+
+		QFontMetrics fm(f);
+		int width = static_cast<int>(fm.boundingRect("0000").width() * 1.2);
+
+		m_textEdit->setMarginWidth(0, width);
     }
     else
     {

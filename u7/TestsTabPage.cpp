@@ -30,6 +30,16 @@ QString TestsFileTreeModel::customColumnName(Columns column) const
 	return QObject::tr("Custom %1").arg(static_cast<int>(column));
 }
 
+QVariant TestsFileTreeModel::columnIcon(const QModelIndex& index, FileTreeModelItem* file) const
+{
+	if(file->isFolder() == true && index.column() == static_cast<int>(Columns::FileNameColumn))
+	{
+		return QIcon(":/Images/Images/SchemaFolder.svg");
+	}
+
+	return QVariant();
+}
+
 //
 // TestsTabPage
 //
@@ -43,13 +53,6 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 
 	restoreSettings();
 
-	std::vector<FileTreeModel::Columns> columns;
-	columns.push_back(FileTreeModel::Columns::FileNameColumn);
-	columns.push_back(FileTreeModel::Columns::FileStateColumn);
-	columns.push_back(FileTreeModel::Columns::FileUserColumn);
-	columns.push_back(FileTreeModel::Columns::CustomColumnIndex);
-	m_testsTreeModel->setColumns(columns);
-
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &TestsTabPage::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &TestsTabPage::projectClosed);
 
@@ -58,7 +61,6 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 
 	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsTabPage::testsTreeDoubleClicked);
 	connect(m_openFilesTreeWidget, &QTreeWidget::doubleClicked, this, &TestsTabPage::openFilesDoubleClicked);
-
 
 	// Evidently, project is not opened yet
 	//
@@ -136,6 +138,21 @@ void TestsTabPage::openFilesDoubleClicked(const QModelIndex &index)
 
 	QString fileName = item->data(0, Qt::UserRole).toString();
 	setCurrentDocument(fileName);
+
+	return;
+}
+
+void TestsTabPage::newDocument()
+{
+	QString fileName = QInputDialog::getText(this, qAppName(), tr("Enter the file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_testsTreeView->newFile(fileName);
+
+	openDocument();
 
 	return;
 }
@@ -354,9 +371,26 @@ void TestsTabPage::createUi()
 
 	m_testsTreeModel = new TestsFileTreeModel(db(), DbFileInfo::fullPathToFileName(Db::File::TestsFileName), this, this);
 
+	std::vector<FileTreeModel::Columns> columns;
+	columns.push_back(FileTreeModel::Columns::FileNameColumn);
+	columns.push_back(FileTreeModel::Columns::FileStateColumn);
+	columns.push_back(FileTreeModel::Columns::FileUserColumn);
+	columns.push_back(FileTreeModel::Columns::CustomColumnIndex);
+	m_testsTreeModel->setColumns(columns);
+
+	m_proxyModel = new FileTreeProxyModel(this);
+	m_proxyModel->setSourceModel(m_testsTreeModel);
+
 	m_testsTreeView = new FileTreeView(db());
+	m_testsTreeView->setModel(m_proxyModel);
 	m_testsTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_testsTreeView->setModel(m_testsTreeModel);
+
+	m_testsTreeView->setSortingEnabled(true);
+	connect(m_testsTreeView->header(), &QHeaderView::sortIndicatorChanged, [this](int index, Qt::SortOrder order)
+	{
+		m_testsTreeView->sortByColumn(index, order);
+	});
+	m_testsTreeView->sortByColumn(0, Qt::AscendingOrder);
 
 	testsLayout->addWidget(m_testsTreeView);
 
@@ -432,8 +466,6 @@ void TestsTabPage::createUi()
 	m_editorEmptyLabel->setAlignment(Qt::AlignCenter);
 	m_editorLayout->addWidget(m_editorEmptyLabel);
 
-	m_lexerJavaScript.setDefaultFont(m_editorFont);
-
 	// Left splitter
 
 	m_leftSplitter = new QSplitter(Qt::Vertical);
@@ -467,12 +499,17 @@ void TestsTabPage::createActions()
 		return;
 	}
 
-	m_addFileAction = new QAction(tr("Add file"), this);
+	m_newFileAction = new QAction(tr("New file..."), this);
+	m_newFileAction->setStatusTip(tr("New file..."));
+	m_newFileAction->setEnabled(false);
+	connect(m_newFileAction, &QAction::triggered, this, &TestsTabPage::newDocument);
+
+	m_addFileAction = new QAction(tr("Add file..."), this);
 	m_addFileAction->setStatusTip(tr("Add file..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::addFile);
 
-	m_openFileAction = new QAction(tr("Open file"), this);
+	m_openFileAction = new QAction(tr("Open file..."), this);
 	m_openFileAction->setStatusTip(tr("Open file..."));
 	m_openFileAction->setEnabled(false);
 	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openDocument);
@@ -519,6 +556,7 @@ void TestsTabPage::createActions()
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	// -----------------
+	m_testsTreeView->addAction(m_newFileAction);
 	m_testsTreeView->addAction(m_addFileAction);
 	m_testsTreeView->addAction(m_openFileAction);
 	m_testsTreeView->addAction(m_deleteFileAction);
@@ -573,6 +611,7 @@ void TestsTabPage::setActionState()
 {
 	// Disable all
 	//
+	m_newFileAction->setEnabled(false);
 	m_addFileAction->setEnabled(false);
 	m_openFileAction->setEnabled(false);
 	m_deleteFileAction->setEnabled(false);
@@ -596,6 +635,7 @@ void TestsTabPage::setActionState()
 
 	// Add Action
 	//
+	m_newFileAction->setEnabled(selectedIndexList.size() == 1);
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
 
 	// Delete Items action

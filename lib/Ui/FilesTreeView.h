@@ -28,13 +28,22 @@ public:
 	void deleteChild(FileTreeModelItem* child);
 	void deleteAllChildren();
 
-	void sortChildrenByFileName();
-
 private:
 	FileTreeModelItem* m_parent = nullptr;
 	std::vector<std::shared_ptr<FileTreeModelItem>> m_children;
 };
 
+class FileTreeProxyModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+
+public:
+	FileTreeProxyModel(QObject *parent = 0);
+
+protected:
+	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+
+};
 
 class FileTreeModel : public QAbstractItemModel
 {
@@ -62,9 +71,12 @@ public:
 
 	void setColumns(std::vector<Columns> columns);
 
+	Columns columnAtIndex(int index) const;
+
 protected:
 	virtual QString customColumnText(Columns column, const FileTreeModelItem* item) const;
 	virtual QString customColumnName(Columns column) const;
+	virtual QVariant columnIcon(const QModelIndex& index, FileTreeModelItem* file) const;
 
 private:
 
@@ -131,6 +143,7 @@ public:
 	// public slots
 	//
 public slots:
+	void newFile(const QString& fileName);
 	void addFile();
 	void viewFile();
 	void editFile();
