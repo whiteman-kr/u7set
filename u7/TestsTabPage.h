@@ -53,6 +53,7 @@ private slots:
 
 	void newDocument();
 	void openDocument();
+	void filterChanged();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
 	void closeCurrentDocument();
@@ -91,9 +92,12 @@ private:
 	//
 	FileTreeView* m_testsTreeView = nullptr;
 	TestsFileTreeModel* m_testsTreeModel = nullptr;
-	FileTreeProxyModel* m_proxyModel = nullptr;
+	FileTreeProxyModel* m_testsTreeProxyModel = nullptr;
 
 	QTreeWidget* m_openFilesTreeWidget = nullptr;
+
+	QLineEdit* m_filterLineEdit = nullptr;
+	QCompleter* m_filterCompleter = nullptr;
 
 	QVBoxLayout* m_editorLayout = nullptr;
 

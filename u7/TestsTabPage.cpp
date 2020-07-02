@@ -159,14 +159,14 @@ void TestsTabPage::newDocument()
 
 void TestsTabPage::openDocument()
 {
-	QModelIndexList indexes = m_testsTreeView->selectionModel()->selectedRows();
+	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
 
-	if (indexes.size() != 1)
+	if (selectedIndexList.size() != 1)
 	{
 		return;
 	}
 
-	QModelIndex& mi = indexes[0];
+	QModelIndex& mi = selectedIndexList[0];
 
 	FileTreeModelItem* f = m_testsTreeModel->fileItem(mi);
 	if (f == nullptr)
@@ -248,6 +248,35 @@ void TestsTabPage::openDocument()
 	return;
 }
 
+
+void TestsTabPage::filterChanged()
+{
+	m_testsTreeProxyModel->setFilterKeyColumn(static_cast<int>(FileTreeModel::Columns::FileNameColumn));
+
+	QString filterText = m_filterLineEdit->text();
+	m_testsTreeProxyModel->setFilterFixedString(filterText);
+
+	// Save completer
+	//
+	QStringList completerStringList = QSettings{}.value("TestsTabPage/FilterCompleter").toStringList();
+
+	if (filterText.isEmpty() == false &&
+		completerStringList.contains(filterText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(filterText);
+		QSettings{}.setValue("TestsTabPage/FilterCompleter", completerStringList);
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_filterCompleter->model());
+		Q_ASSERT(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(completerStringList);
+		}
+	}
+
+	return;
+}
 
 void TestsTabPage::textChanged()
 {
@@ -360,8 +389,8 @@ void TestsTabPage::createUi()
 	    m_editorFont = QFont("Courier");
 #endif
 
-	// Tests tree
-
+	// Tests tree and model
+	//
 	QWidget* testsWidget = new QWidget();
 
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
@@ -378,12 +407,11 @@ void TestsTabPage::createUi()
 	columns.push_back(FileTreeModel::Columns::CustomColumnIndex);
 	m_testsTreeModel->setColumns(columns);
 
-	m_proxyModel = new FileTreeProxyModel(this);
-	m_proxyModel->setSourceModel(m_testsTreeModel);
+	m_testsTreeProxyModel = new FileTreeProxyModel(this);
+	m_testsTreeProxyModel->setSourceModel(m_testsTreeModel);
 
 	m_testsTreeView = new FileTreeView(db());
-	m_testsTreeView->setModel(m_proxyModel);
-	m_testsTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_testsTreeView->setModel(m_testsTreeProxyModel);
 
 	m_testsTreeView->setSortingEnabled(true);
 	connect(m_testsTreeView->header(), &QHeaderView::sortIndicatorChanged, [this](int index, Qt::SortOrder order)
@@ -394,8 +422,39 @@ void TestsTabPage::createUi()
 
 	testsLayout->addWidget(m_testsTreeView);
 
-	// Open files
+	// Filter widgets
+	//
+	QHBoxLayout* filterLayout = new QHBoxLayout();
 
+	m_filterLineEdit = new QLineEdit();
+	m_filterLineEdit->setPlaceholderText(tr("Filter Text"));
+	m_filterLineEdit->setClearButtonEnabled(true);
+
+	connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &TestsTabPage::filterChanged);
+	filterLayout->addWidget(m_filterLineEdit);
+
+	QPushButton* b = new QPushButton(tr("Filter"));
+	connect(b, &QPushButton::clicked, this, &TestsTabPage::filterChanged);
+	filterLayout->addWidget(b);
+
+	b = new QPushButton(tr("Reset Filter"));
+	connect(b, &QPushButton::clicked, [this](){
+		m_filterLineEdit->clear();
+		filterChanged();
+	});
+	filterLayout->addWidget(b);
+
+	testsLayout->addLayout(filterLayout);
+
+	// Filter completer
+	QStringList completerStringList = QSettings{}.value("TestsTabPage/FilterCompleter").toStringList();
+	m_filterCompleter = new QCompleter(completerStringList, this);
+	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+
+	m_filterLineEdit->setCompleter(m_filterCompleter);
+
+	// Opened files
+	//
 	QWidget* filesWidget = new QWidget();
 
 	QVBoxLayout* filesLayout = new QVBoxLayout(filesWidget);
@@ -411,12 +470,12 @@ void TestsTabPage::createUi()
 	filesLayout->addWidget(m_openFilesTreeWidget);
 
 	// Editor layout
-
+	//
 	QWidget* editorWidget = new QWidget();
 	m_editorLayout = new QVBoxLayout(editorWidget);
 
 	// Editor toolbar
-
+	//
 	m_editorToolBar = new QToolBar();
 	m_editorToolBar->setVisible(false);
 	m_editorToolBar->setAutoFillBackground(true);
@@ -461,13 +520,13 @@ void TestsTabPage::createUi()
 	m_editorLayout->addWidget(m_editorToolBar);
 
 	// Empty editor
-
+	//
 	m_editorEmptyLabel = new QLabel(tr("No open documents"));
 	m_editorEmptyLabel->setAlignment(Qt::AlignCenter);
 	m_editorLayout->addWidget(m_editorEmptyLabel);
 
 	// Left splitter
-
+	//
 	m_leftSplitter = new QSplitter(Qt::Vertical);
 	m_leftSplitter->addWidget(testsWidget);
 	m_leftSplitter->addWidget(filesWidget);
@@ -475,7 +534,7 @@ void TestsTabPage::createUi()
 	m_leftSplitter->setStretchFactor(1, 1);
 
 	// Vertical splitter
-
+	//
 	m_verticalSplitter = new QSplitter(Qt::Horizontal);
 	m_verticalSplitter->addWidget(m_leftSplitter);
 	m_verticalSplitter->addWidget(editorWidget);
@@ -483,7 +542,7 @@ void TestsTabPage::createUi()
 	m_verticalSplitter->setStretchFactor(1, 4);
 
 	// Main layout
-
+	//
 	QHBoxLayout* mainLayout = new QHBoxLayout();
 	mainLayout->addWidget(m_verticalSplitter);
 	setLayout(mainLayout);
@@ -631,16 +690,34 @@ void TestsTabPage::setActionState()
 
 	// --
 	//
-	QModelIndexList selectedIndexList = m_testsTreeView->selectionModel()->selectedRows();
+	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
+
+	// New Action
+	//
+	bool folderSelected = true;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
+		assert(file);
+
+		if (file->isFolder() == false)
+		{
+			folderSelected = false;
+			break;
+		}
+	}
+
+	m_newFileAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
 
 	// Add Action
 	//
-	m_newFileAction->setEnabled(selectedIndexList.size() == 1);
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
 
 	// Delete Items action
 	//
 	m_deleteFileAction->setEnabled(false);
+
 	for (const QModelIndex& mi : selectedIndexList)
 	{
 		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);

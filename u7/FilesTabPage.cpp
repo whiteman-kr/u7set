@@ -219,7 +219,7 @@ void FilesTabPage::setActionState()
 
 	// --
 	//
-	QModelIndexList selectedIndexList = m_fileView->selectionModel()->selectedRows();
+	QModelIndexList selectedIndexList = m_fileView->selectedSourceRows();
 
 	// Add Action
 	//

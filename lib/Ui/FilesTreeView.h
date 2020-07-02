@@ -41,6 +41,7 @@ public:
 	FileTreeProxyModel(QObject *parent = 0);
 
 protected:
+	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
 };
@@ -70,8 +71,9 @@ public:
 	};
 
 	void setColumns(std::vector<Columns> columns);
-
 	Columns columnAtIndex(int index) const;
+
+	QModelIndex childIndex(int row, int column, const QModelIndex& parentIndex) const;
 
 protected:
 	virtual QString customColumnText(Columns column, const FileTreeModelItem* item) const;
@@ -140,6 +142,8 @@ public:
 	explicit FileTreeView(DbController* dbc);
 	virtual ~FileTreeView();
 
+	QModelIndexList selectedSourceRows() const;	// Returns selected rows mapped to source model
+
 	// public slots
 	//
 public slots:
@@ -167,6 +171,10 @@ private:
 protected:
 	FileTreeModel* fileTreeModel();
 	FileTreeModel* fileTreeModel() const;
+
+	FileTreeProxyModel* fileTreeProxyModel();
+	FileTreeProxyModel* fileTreeProxyModel() const;
+
 	DbController* db();
 
 	// Data
