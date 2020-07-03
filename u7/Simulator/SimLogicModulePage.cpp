@@ -469,7 +469,13 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 		}
 	}
 
-	bool disabled = logicModule()->isPowerOff();
+	bool disabled = false;
+
+	if (auto lm = logicModule();
+		lm != nullptr)
+	{
+		disabled = lm->isPowerOff();
+	}
 
 	if (m_disableButton->isChecked() != disabled)
 	{
