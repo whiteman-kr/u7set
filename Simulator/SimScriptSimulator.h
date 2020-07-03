@@ -69,6 +69,9 @@ namespace Sim
 		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
 		Q_PROPERTY(bool unlockTimer READ unlockTimer WRITE setUnlockTimer)
 
+		/// \brief Allows or disables LogicModules' Application Data transmittion to AppDataSrv
+		Q_PROPERTY(bool appDataTrasmittion READ appDataTrasmittion WRITE setAppDataTrasmittion)
+
 	public:
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
@@ -144,6 +147,9 @@ namespace Sim
 	private:
 		bool unlockTimer() const;
 		void setUnlockTimer(bool value);
+
+		bool appDataTrasmittion() const;
+		void setAppDataTrasmittion(bool value);
 
 		// Data
 		//

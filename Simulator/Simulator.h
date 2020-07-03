@@ -93,6 +93,7 @@ namespace Sim
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
 
+
 		// Signals Management
 		//
 		Sim::AppDataTransmitter m_appDataTransmitter{this};

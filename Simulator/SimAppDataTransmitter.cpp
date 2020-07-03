@@ -52,6 +52,16 @@ namespace Sim
 		//
 	}
 
+	bool AppDataTransmitter::enabled() const
+	{
+		return m_enabled;
+	}
+
+	void AppDataTransmitter::setEnabled(bool value)
+	{
+		m_enabled = value;
+	}
+
 	void AppDataTransmitter::shutdownTransmitterThread()
 	{
 		if (m_transmitterThread != nullptr)
@@ -243,5 +253,4 @@ namespace Sim
 
 		adsi.rupFramesNumerator++;
 	}
-
 }

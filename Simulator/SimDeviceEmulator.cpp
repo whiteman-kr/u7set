@@ -241,14 +241,6 @@ namespace Sim
 
 		// Perform post run cycle actions
 		//
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
-
-		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
-		TimeStamp localTime{plantTime};
-		TimeStamp systemTime{ms.count()};
-
-		// Set LogicModule's RAM to Sim::AppSignalManager
-		//
 		if (m_appSignalManager == nullptr ||
 			m_appDataTransmitter == nullptr)
 		{
@@ -258,8 +250,19 @@ namespace Sim
 			return false;
 		}
 
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
+
+		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+		TimeStamp localTime{plantTime};
+		TimeStamp systemTime{ms.count()};
+
+		// Set LogicModule's RAM to Sim::AppSignalManager
+		//
 		m_appSignalManager->setData(equipmentId(), ram(), plantTime, localTime, systemTime);
 
+		// Send reg data to AppDataSrv
+		//
+		if (m_appDataTransmitter->enabled() == true)
 		{
 			QByteArray regData;
 

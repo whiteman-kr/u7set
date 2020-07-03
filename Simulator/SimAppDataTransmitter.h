@@ -30,12 +30,17 @@ namespace Sim
 	protected slots:
 		void projectUpdated();		// Project was loaded or cleared
 
+	public:
+		bool enabled() const;
+		void setEnabled(bool value);
+
 	private:
 		void shutdownTransmitterThread();
 
 	private:
 		Simulator* m_simulator;
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
+		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
 	};
 
 	//
