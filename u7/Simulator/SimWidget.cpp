@@ -225,6 +225,11 @@ void SimWidget::createToolBar()
 	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
+	m_allowRegData = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"), tr("Allow LogicModules' Application Data transmittion to AppDataSrv"), this};
+	m_allowRegData->setCheckable(true);
+	m_allowRegData->setChecked(m_simulator->appDataTransmitter().enabled());
+	connect(m_allowRegData, &QAction::toggled, this, &SimWidget::allowRegDataToggled);
+
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
 	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
@@ -264,6 +269,9 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addWidget(m_timeIndicator);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_allowRegData);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_snapshotAction);
@@ -710,6 +718,12 @@ void SimWidget::stopSimulation(bool stopSimulationThread)
 		control.stopThread();
 	}
 
+	return;
+}
+
+void SimWidget::allowRegDataToggled(bool state)
+{
+	m_simulator->appDataTransmitter().setEnabled(state);
 	return;
 }
 

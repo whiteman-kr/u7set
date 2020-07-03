@@ -53,4 +53,14 @@ namespace Sim
 		//
 	}
 
+	bool AppDataTransmitter::enabled() const
+	{
+		return m_enabled;
+	}
+
+	void AppDataTransmitter::setEnabled(bool value)
+	{
+		m_enabled = value;
+	}
+
 }

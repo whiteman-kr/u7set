@@ -63,7 +63,11 @@ namespace Sim
 
         // initTestCase() - will be called before the first test function is executed.
         //
-        runScriptFunction("initTestCase");
+		m_result = runScriptFunction("initTestCase");
+		if (m_result == false)
+		{
+			return;
+		}
 
         // Call all functions which starts from 'test', like 'testAfbNot()'
         //
@@ -533,5 +537,13 @@ namespace Sim
 		m_simulator->control().setUnlockTimer(value);
 	}
 
+	bool ScriptSimulator::appDataTrasmittion() const
+	{
+		return m_simulator->appDataTransmitter().enabled();
+	}
 
+	void ScriptSimulator::setAppDataTrasmittion(bool value)
+	{
+		m_simulator->appDataTransmitter().setEnabled(value);
+	}
 }

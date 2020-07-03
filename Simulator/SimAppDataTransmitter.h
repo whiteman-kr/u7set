@@ -22,8 +22,14 @@ namespace Sim
 	protected slots:
 		void projectUpdated();		// Project was loaded or cleared
 
+	public:
+		bool enabled() const;
+		void setEnabled(bool value);
+
 	private:
 		Simulator* m_simulator;
+
+		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
 	};
 
 }
