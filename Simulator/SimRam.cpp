@@ -186,8 +186,7 @@ namespace Sim
 			qint32 wordsToOverride = data.size() / 2;
 			for (qint32 i = 0; i < wordsToOverride; i++)
 			{
-				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
-				dataPtr ++;
+				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
 			}
 		}
 
@@ -242,8 +241,7 @@ namespace Sim
 			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
 			for (quint32 i = 0; i < countW; i++)
 			{
-				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
-				dataPtr ++;
+				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
 			}
 		}
 
