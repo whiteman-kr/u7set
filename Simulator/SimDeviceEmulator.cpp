@@ -262,7 +262,7 @@ namespace Sim
 
 		// Send reg data to AppDataSrv
 		//
-		if (m_appDataTransmitter->enabled() == true)
+		if (m_appDataTransmitter->enabled() == true && logicModuleExtraInfo().appDataEnable == true)
 		{
 			QByteArray regData;
 

@@ -149,7 +149,21 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::DIAG_DATA_UID, &lmi->diagDataUID, errMsg);
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY, &lmi->moduleFamily, errMsg);
-	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY_ID, &lmi->moduleFamilyID, errMsg);
+
+	QString strModuleFamilyID;
+
+	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY_ID, &strModuleFamilyID, errMsg);
+
+	bool ok = false;
+
+	lmi->moduleFamilyID = strModuleFamilyID.toInt(&ok, 0);
+
+	if (ok == false)
+	{
+		*errMsg = DomXmlHelper::errAttributeParsing(lmElem, EquipmentPropNames::MODULE_FAMILY_ID);
+		return false;
+	}
+
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::MODULE_VERSION, &lmi->moduleVersion, errMsg);
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::PRESET_NAME, &lmi->presetName, errMsg);

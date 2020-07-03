@@ -96,10 +96,11 @@ namespace Sim
 		ExtAppData extAppData;
 
 		extAppData.lmEquipmentID = lmEquipmentId;
-		extAppData.appData.swap(data);
 		extAppData.timeStamp = timeStamp;
 
 		m_appDataQueue.push(extAppData);
+
+		m_appDataQueue.back().appData.swap(data);			// !
 
 		m_appDataQueueMutex.unlock(curThread);
 
@@ -202,9 +203,11 @@ namespace Sim
 
 		AppDataSourceInfo& adsi = item->second;
 
+		Q_ASSERT(extAppData.appData.size() == adsi.appDataSizeBytes);
+
 		Rup::SimFrame simFrame;
 
-		simFrame.simVersion = 1;
+		simFrame.simVersion = reverseUint16(1);
 
 		Rup::Frame& rupFrame = simFrame.rupFrame;
 
@@ -234,19 +237,35 @@ namespace Sim
 
 		rupHeader.reverseBytes();
 
+		const int RUP_FRAME_DATA_SIZE = sizeof(rupFrame.data);
+
 		for(int frameNo = 0; frameNo < adsi.rupFramesCount; frameNo++)
 		{
 			rupHeader.frameNumber = reverseUint16(static_cast<quint16>(frameNo));
 
-			int 'fsd;'f.s'd;.f's;d.f
+			int inFrameDataSize = extAppData.appData.size() - (frameNo * RUP_FRAME_DATA_SIZE);
+
+			if (inFrameDataSize > RUP_FRAME_DATA_SIZE)
+			{
+				inFrameDataSize = RUP_FRAME_DATA_SIZE;
+			}
+
+			memcpy(rupFrame.data, extAppData.appData.constData() + (frameNo * RUP_FRAME_DATA_SIZE), inFrameDataSize);
+
+			if (inFrameDataSize < RUP_FRAME_DATA_SIZE)
+			{
+				memset(rupFrame.data + inFrameDataSize, 0, RUP_FRAME_DATA_SIZE - inFrameDataSize);
+			}
+
+			rupFrame.calcCRC64();
 
 			for(LanController& lanController: adsi.lanControllers)
 			{
-				simFrame.sourceIP = lanController.sourceIP;
+				simFrame.sourceIP = reverseUint32(lanController.sourceIP.toIPv4Address());
 
 				m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
 										sizeof(simFrame),
-										QHostAddress(Socket::IP_LOCALHOST) /* lanController.destinationIP !!!! */,
+										lanController.destinationIP,
 										lanController.destinationPort);
 			}
 		}

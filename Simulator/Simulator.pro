@@ -77,6 +77,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
+	../lib/DataProtocols.cpp \
     ../lib/DomXmlHelper.cpp \
 	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
@@ -84,8 +85,11 @@ SOURCES += \
     ../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
     ../lib/ProtoSerialization.cpp \
+	../lib/SimpleMutex.cpp \
+	../lib/SimpleThread.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
+	../lib/WUtils.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
@@ -129,11 +133,15 @@ HEADERS += \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
+	../lib/DataProtocols.h \
     ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
+	../lib/SimpleMutex.h \
+	../lib/SimpleThread.h \
+	../lib/WUtils.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \

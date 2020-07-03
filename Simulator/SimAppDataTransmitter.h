@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include <QUdpSocket>
 
 #include "SimOutput.h"
 #include "../lib/TimeStamp.h"
@@ -39,8 +40,10 @@ namespace Sim
 
 	private:
 		Simulator* m_simulator;
-		AppDataTransmitterThread* m_transmitterThread = nullptr;
 		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
+
+		AppDataTransmitterThread* m_transmitterThread = nullptr;
+
 	};
 
 	//
