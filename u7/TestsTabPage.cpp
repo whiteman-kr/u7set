@@ -79,6 +79,7 @@ TestsTabPage::~TestsTabPage()
 void TestsTabPage::projectOpened()
 {
 	this->setEnabled(true);
+
 	return;
 }
 
@@ -249,6 +250,20 @@ void TestsTabPage::openDocument()
 }
 
 
+void TestsTabPage::addFolder()
+{
+	QString folderName = QInputDialog::getText(this, qAppName(), tr("Enter the folder name:"), QLineEdit::Normal, tr("FOLDER_%1").arg(db()->nextCounterValue()));
+	if (folderName.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_testsTreeView->addFolder(folderName);
+
+	return;
+
+}
+
 void TestsTabPage::filterChanged()
 {
 	m_testsTreeProxyModel->setFilterKeyColumn(static_cast<int>(FileTreeModel::Columns::FileNameColumn));
@@ -310,15 +325,15 @@ void TestsTabPage::textChanged()
 
 void TestsTabPage::cursorPositionChanged(int line, int index)
 {
-	if (m_lineLabel == nullptr || m_columnLabel == nullptr)
+	if (m_lineButton == nullptr || m_columnLabel == nullptr)
 	{
-		Q_ASSERT(m_lineLabel);
+		Q_ASSERT(m_lineButton);
 		Q_ASSERT(m_columnLabel);
 		return;
 	}
 
-	m_lineLabel->setText(tr(" Line: %1 ").arg(line));
-	m_columnLabel->setText(tr(" Col: %1 ").arg(index));
+	m_lineButton->setText(tr(" Line: %1 ").arg(line + 1));
+	m_columnLabel->setText(tr(" Col: %1 ").arg(index + 1));
 
 	return;
 }
@@ -377,6 +392,36 @@ void TestsTabPage::onCtrlTabKeyPressed()
 	}
 }
 
+void TestsTabPage::onGoToLine()
+{
+	if (documentIsOpen(m_currentDocument) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	TestTabPageDocument& document = m_openDocuments[m_currentDocument];
+
+	int line = 0;
+	int index = 0;
+	document.codeEditor->getCursorPosition(&line, &index);
+
+	int maxLine = document.codeEditor->lines();
+
+	bool ok = false;
+
+	int newLine = QInputDialog::getInt(this, qAppName(), tr("Go To Line:"), line + 1, 1, maxLine + 1, 1, &ok);
+	if (ok == false)
+	{
+		return;
+	}
+
+	document.codeEditor->setCursorPosition(newLine - 1, 0);
+	document.codeEditor->activateEditor();
+
+	return;
+}
+
 void TestsTabPage::createUi()
 {
 	// Set up default font
@@ -404,7 +449,7 @@ void TestsTabPage::createUi()
 	columns.push_back(FileTreeModel::Columns::FileNameColumn);
 	columns.push_back(FileTreeModel::Columns::FileStateColumn);
 	columns.push_back(FileTreeModel::Columns::FileUserColumn);
-	columns.push_back(FileTreeModel::Columns::CustomColumnIndex);
+	//columns.push_back(FileTreeModel::Columns::CustomColumnIndex);
 	m_testsTreeModel->setColumns(columns);
 
 	m_testsTreeProxyModel = new FileTreeProxyModel(this);
@@ -479,28 +524,35 @@ void TestsTabPage::createUi()
 	m_editorToolBar = new QToolBar();
 	m_editorToolBar->setVisible(false);
 	m_editorToolBar->setAutoFillBackground(true);
-	m_editorToolBar->setStyleSheet("QToolBar{spacing:3px; background: gray; }");
+	//m_editorToolBar->setStyleSheet("QToolBar{spacing:3px; background: gray; }");
+
+	m_editorToolBar->setStyleSheet("QToolBar{spacing:3px; \
+								   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060); }");
+
+
 
 	m_editorFileNameLabel = new QLabel("FileName");
 	m_editorFileNameLabel->setStyleSheet("QLabel{color: white}");
 	m_editorToolBar->addWidget(m_editorFileNameLabel);
 
+	const int toolbarButtonSize = 25;
+
+	QString toolbarButtonStyle = "QPushButton {\
+												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060);\
+												color: white;\
+											}\
+											QPushButton:hover {\
+												border-style: none;\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #909090, stop: 1 #707070);\
+											}\
+											QPushButton:pressed {\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #707070, stop: 1 #505050);\
+											}";
+
 	QPushButton* closeButton = new QPushButton("X");
 	closeButton->setFlat(true);
-	closeButton->setStyleSheet("QPushButton {\
-	                                background-color: #808080;\
-	                                color: white;\
-                                }\
-                                QPushButton:hover {\
-	                                border-style: inset;\
-									border-width: 1px;\
-									border-color: #808080;\
-									background-color: #909090;\
-                                }\
-                                QPushButton:pressed {\
-	                                background-color: #707070;\
-                                }");
-    closeButton->setFixedSize(20, 20);
+	closeButton->setStyleSheet(toolbarButtonStyle);
+	closeButton->setFixedSize(toolbarButtonSize, toolbarButtonSize);
 	connect(closeButton, &QPushButton::clicked, this, &TestsTabPage::closeCurrentDocument);
 
 	m_editorToolBar->addWidget(closeButton);
@@ -509,11 +561,14 @@ void TestsTabPage::createUi()
 	empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_editorToolBar->addWidget(empty);
 
-	m_lineLabel = new QLabel("Line: 0");
-	m_lineLabel->setStyleSheet("QLabel{color: white}");
-	m_editorToolBar->addWidget(m_lineLabel);
+	m_lineButton = new QPushButton("Line: 1");
+	m_lineButton->setFlat(true);
+	m_lineButton->setStyleSheet(toolbarButtonStyle);
+	m_lineButton->setFixedHeight(toolbarButtonSize);
+	connect(m_lineButton, &QPushButton::clicked, this, &TestsTabPage::onGoToLine);
+	m_editorToolBar->addWidget(m_lineButton);
 
-	m_columnLabel = new QLabel("Col: 0");
+	m_columnLabel = new QLabel("Col: 1");
 	m_columnLabel->setStyleSheet("QLabel{color: white}");
 	m_editorToolBar->addWidget(m_columnLabel);
 
@@ -568,10 +623,20 @@ void TestsTabPage::createActions()
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::addFile);
 
+	m_addFolderAction = new QAction(tr("Add folder..."), this);
+	m_addFolderAction->setStatusTip(tr("Add folder..."));
+	m_addFolderAction->setEnabled(false);
+	connect(m_addFolderAction, &QAction::triggered, this, &TestsTabPage::addFolder);
+
 	m_openFileAction = new QAction(tr("Open file..."), this);
 	m_openFileAction->setStatusTip(tr("Open file..."));
 	m_openFileAction->setEnabled(false);
 	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openDocument);
+
+	m_renameFileAction = new QAction(tr("Rename file..."), this);
+	m_renameFileAction->setStatusTip(tr("Rename file..."));
+	m_renameFileAction->setEnabled(false);
+	connect(m_renameFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::renameFile);
 
 	m_deleteFileAction = new QAction(tr("Delete file"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete file..."));
@@ -617,7 +682,9 @@ void TestsTabPage::createActions()
 	// -----------------
 	m_testsTreeView->addAction(m_newFileAction);
 	m_testsTreeView->addAction(m_addFileAction);
+	m_testsTreeView->addAction(m_addFolderAction);
 	m_testsTreeView->addAction(m_openFileAction);
+	m_testsTreeView->addAction(m_renameFileAction);
 	m_testsTreeView->addAction(m_deleteFileAction);
 
 	// -----------------
@@ -641,6 +708,7 @@ void TestsTabPage::saveSettings()
 	QSettings s;
 	s.setValue("TestsTabPage/leftSplitterState", m_leftSplitter->saveState());
 	s.setValue("TestsTabPage/verticalSplitterState", m_verticalSplitter->saveState());
+	s.setValue("TestsTabPage/testsHeaderState", m_testsTreeView->header()->saveState());
 
 	return;
 }
@@ -663,6 +731,12 @@ void TestsTabPage::restoreSettings()
 		m_verticalSplitter->restoreState(data);
 	}
 
+	QByteArray headerState = s.value("TestsTabPage/testsHeaderState").toByteArray();
+	if (headerState.isEmpty() == false)
+	{
+		m_testsTreeView->header()->restoreState(headerState);
+	}
+
 	return;
 }
 
@@ -672,7 +746,9 @@ void TestsTabPage::setActionState()
 	//
 	m_newFileAction->setEnabled(false);
 	m_addFileAction->setEnabled(false);
+	m_addFolderAction->setEnabled(false);
 	m_openFileAction->setEnabled(false);
+	m_renameFileAction->setEnabled(false);
 	m_deleteFileAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
 	m_checkInAction->setEnabled(false);
@@ -713,6 +789,10 @@ void TestsTabPage::setActionState()
 	// Add Action
 	//
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
+
+	// Add Folder Action
+	//
+	m_addFolderAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
 
 	// Delete Items action
 	//
@@ -794,6 +874,8 @@ void TestsTabPage::setActionState()
 
 	m_openFileAction->setEnabled(editableExtension && selectedIndexList.size() == 1);
 
+	m_renameFileAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
+
 	return;
 }
 
@@ -843,9 +925,9 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 			doc.codeEditor->setVisible(true);
 			doc.codeEditor->activateEditor();
 
-			if (m_lineLabel == nullptr || m_columnLabel == nullptr)
+			if (m_lineButton == nullptr || m_columnLabel == nullptr)
 			{
-				Q_ASSERT(m_lineLabel);
+				Q_ASSERT(m_lineButton);
 				Q_ASSERT(m_columnLabel);
 				return;
 			}
@@ -854,8 +936,8 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 			int index = 0;
 			doc.codeEditor->getCursorPosition(&line, &index);
 
-			m_lineLabel->setText(tr(" Line: %1 ").arg(line));
-			m_columnLabel->setText(tr(" Col: %1 ").arg(index));
+			m_lineButton->setText(tr(" Line: %1 ").arg(line + 1));
+			m_columnLabel->setText(tr(" Col: %1 ").arg(index + 1));
 		}
 	}
 

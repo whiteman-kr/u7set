@@ -70,9 +70,9 @@ public:
 	~DialogFindReplace();
 
 signals:
-    void findFirst(QString findText);
-    void replace(QString findText, QString text);
-    void replaceAll(QString findText, QString replaceText);
+	void findFirst(QString findText, bool caseSensitive);
+	void replace(QString findText, QString text, bool caseSensitive);
+	void replaceAll(QString findText, QString replaceText, bool caseSensitive);
 
 private slots:
     void onFind();
@@ -92,6 +92,10 @@ private:
 
 	QCompleter* m_findCompleter = nullptr;
 	QCompleter* m_replaceCompleter = nullptr;
+
+	QCheckBox* m_caseSensitiveCheck = nullptr;
+
+	static bool m_caseSensitive;
 };
 
 //
@@ -115,17 +119,19 @@ public:
 	virtual void setText(const QString& text) override;
 	virtual QString text() override;
 
-	void getCursorPosition(int* line, int* index);
+	int lines() const;
+	void getCursorPosition(int* line, int* index) const;
+	void setCursorPosition(int line, int index);
 
 	virtual void setReadOnly(bool value) override;
 
 	void activateEditor();
 
 public slots:
-    void findFirst(QString findText);
-    void findNext();
-    void replace(QString findText, QString replaceText);
-    void replaceAll(QString findText, QString replaceText);
+	void findFirst(QString findText, bool caseSensitive);
+	void findNext();
+	void replace(QString findText, QString replaceText, bool caseSensitive);
+	void replaceAll(QString findText, QString replaceText, bool caseSensitive);
 
 signals:
 	void cursorPositionChanged(int line, int index);
@@ -154,6 +160,7 @@ private:
 
 	bool m_findFirst = true;
 
+	static bool m_findCaseSensitive;
 	static QString m_findText;
 
 };

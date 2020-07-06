@@ -95,6 +95,7 @@ private:
 
 	virtual bool hasChildren(const QModelIndex& parentIndex = QModelIndex()) const override;
 
+public:
 	virtual bool canFetchMore(const QModelIndex& parent) const override;
 	virtual void fetchMore(const QModelIndex& parent) override;
 
@@ -149,8 +150,10 @@ public:
 public slots:
 	void newFile(const QString& fileName);
 	void addFile();
+	void addFolder(const QString& folderName);
 	void viewFile();
 	void editFile();
+	void renameFile();
 	void deleteFile();
 	void checkOutFile();
 	void checkInFile();
@@ -163,6 +166,7 @@ public slots:
 	void refreshFileTree();
 
 private:
+	void createFiles(std::vector<std::shared_ptr<DbFile> > files);
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
 	void runFileEditor(bool viewOnly);
 

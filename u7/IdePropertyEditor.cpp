@@ -117,6 +117,8 @@ ExtWidgets::PropertyTextEditor* IdePropertyTable::createPropertyTextEditor(std::
 // DialogFindReplace
 //
 
+bool DialogFindReplace::m_caseSensitive = false;
+
 DialogFindReplace::DialogFindReplace(QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
@@ -152,6 +154,9 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
     connect(m_replaceButton, &QPushButton::clicked, this, &DialogFindReplace::onReplace);
     connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAll);
 
+	m_caseSensitiveCheck = new QCheckBox(tr("Case Sensitive"));
+	m_caseSensitiveCheck->setChecked(m_caseSensitive);
+
 	// Layout
 
     QGridLayout* gridLayout = new QGridLayout();
@@ -162,6 +167,7 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
     gridLayout->addWidget(m_replaceEdit, 1, 1);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	buttonsLayout->addWidget(m_caseSensitiveCheck);
     buttonsLayout->addStretch();
     buttonsLayout->addWidget(m_findButton);
     buttonsLayout->addWidget(m_replaceButton);
@@ -179,6 +185,7 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
 
 DialogFindReplace::~DialogFindReplace()
 {
+	m_caseSensitive = m_caseSensitiveCheck->isChecked();
 }
 
 void DialogFindReplace::onFind()
@@ -191,7 +198,7 @@ void DialogFindReplace::onFind()
 
 	saveCompleters();
 
-    emit findFirst(text);
+	emit findFirst(text, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::onReplace()
@@ -210,7 +217,7 @@ void DialogFindReplace::onReplace()
 
 	saveCompleters();
 
-    emit replace(textFind, textReplace);
+	emit replace(textFind, textReplace, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::onReplaceAll()
@@ -229,7 +236,7 @@ void DialogFindReplace::onReplaceAll()
 
 	saveCompleters();
 
-    emit replaceAll(textFind, textReplace);
+	emit replaceAll(textFind, textReplace, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::saveCompleters()
@@ -278,6 +285,8 @@ void DialogFindReplace::saveCompleters()
 //
 
 QString IdeCodeEditor::m_findText;
+
+bool IdeCodeEditor::m_findCaseSensitive = false;
 
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     PropertyTextEditor(parent),
@@ -368,9 +377,19 @@ QString IdeCodeEditor::text()
 	return m_textEdit->text();
 }
 
-void IdeCodeEditor::getCursorPosition(int* line, int* index)
+int IdeCodeEditor::lines() const
+{
+	return m_textEdit->lines();
+}
+
+void IdeCodeEditor::getCursorPosition(int* line, int* index) const
 {
 	m_textEdit->getCursorPosition(line, index);
+}
+
+void IdeCodeEditor::setCursorPosition(int line, int index)
+{
+	m_textEdit->setCursorPosition(line, index);
 }
 
 void IdeCodeEditor::setReadOnly(bool value)
@@ -384,7 +403,7 @@ void IdeCodeEditor::activateEditor()
 }
 
 
-void IdeCodeEditor::findFirst(QString findText)
+void IdeCodeEditor::findFirst(QString findText, bool caseSensitive)
 {
 	if (findText.isEmpty() == true)
 	{
@@ -393,19 +412,23 @@ void IdeCodeEditor::findFirst(QString findText)
 
 	bool result = false;
 
-	if (m_findText == findText)
+	if (m_findText == findText && caseSensitive == m_findCaseSensitive)
 	{
 		result = m_textEdit->findNext();
 	}
 	else
 	{
-		result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+		result = m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/);
+
+		m_findCaseSensitive = caseSensitive;
 
 		m_findText = findText;
 	}
 
 	if (result == false)
 	{
+		m_textEdit->selectAll(false);
+
 		QMessageBox::information(this, qAppName(), tr("Text was not found."));
 	}
 }
@@ -421,7 +444,7 @@ void IdeCodeEditor::findNext()
 	{
 		m_findFirst = false;
 
-		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, m_findCaseSensitive, false/*whole*/, true/*wrap*/);
 
 		if (result == false)
 		{
@@ -436,7 +459,7 @@ void IdeCodeEditor::findNext()
 	return;
 }
 
-void IdeCodeEditor::replace(QString findText, QString replaceText)
+void IdeCodeEditor::replace(QString findText, QString replaceText, bool caseSensitive)
 {
 	if (findText.isEmpty() || replaceText.isEmpty())
 	{
@@ -451,7 +474,7 @@ void IdeCodeEditor::replace(QString findText, QString replaceText)
 
 	m_findText = findText;
 
-	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	if (m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/) == false)
 	{
 		return;
 	}
@@ -459,7 +482,7 @@ void IdeCodeEditor::replace(QString findText, QString replaceText)
 	m_textEdit->replace(replaceText);
 }
 
-void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
+void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool caseSensitive)
 {
 	if (findText.isEmpty() || replaceText.isEmpty())
 	{
@@ -470,7 +493,7 @@ void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
 
 	m_findText = findText;
 
-	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	if (m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/) == false)
 	{
 		return;
 	}

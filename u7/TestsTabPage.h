@@ -53,6 +53,7 @@ private slots:
 
 	void newDocument();
 	void openDocument();
+	void addFolder();
 	void filterChanged();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
@@ -61,6 +62,8 @@ private slots:
 	void onSaveKeyPressed();
 	void onCloseKeyPressed();
 	void onCtrlTabKeyPressed();
+
+	void onGoToLine();
 
 
 private:
@@ -105,7 +108,7 @@ private:
 	QLabel* m_editorEmptyLabel = nullptr;
 
 	QLabel* m_editorFileNameLabel = nullptr;
-	QLabel* m_lineLabel = nullptr;
+	QPushButton* m_lineButton = nullptr;
 	QLabel* m_columnLabel = nullptr;
 
 	QSplitter* m_leftSplitter = nullptr;
@@ -115,7 +118,9 @@ private:
 	//
 	QAction* m_newFileAction = nullptr;
 	QAction* m_addFileAction = nullptr;
+	QAction* m_addFolderAction = nullptr;
 	QAction* m_openFileAction = nullptr;
+	QAction* m_renameFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
