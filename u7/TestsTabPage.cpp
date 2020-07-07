@@ -30,16 +30,6 @@ QString TestsFileTreeModel::customColumnName(Columns column) const
 	return QObject::tr("Custom %1").arg(static_cast<int>(column));
 }
 
-QVariant TestsFileTreeModel::columnIcon(const QModelIndex& index, FileTreeModelItem* file) const
-{
-	if(file->isFolder() == true && index.column() == static_cast<int>(Columns::FileNameColumn))
-	{
-		return QIcon(":/Images/Images/SchemaFolder.svg");
-	}
-
-	return QVariant();
-}
-
 //
 // TestsTabPage
 //
@@ -800,6 +790,13 @@ void TestsTabPage::setActionState()
 
 	for (const QModelIndex& mi : selectedIndexList)
 	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid root items deleting
+			//
+			continue;
+		}
+
 		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
 		assert(file);
 

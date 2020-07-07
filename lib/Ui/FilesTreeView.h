@@ -95,8 +95,9 @@ private:
 
 	virtual bool hasChildren(const QModelIndex& parentIndex = QModelIndex()) const override;
 
-public:
+private:
 	virtual bool canFetchMore(const QModelIndex& parent) const override;
+public:
 	virtual void fetchMore(const QModelIndex& parent) override;
 
 	// Extensions
@@ -125,8 +126,8 @@ public:
 	// Data
 	//
 private:
-	DbController* m_dbc;
-	QWidget* m_parentWidget;
+	DbController* m_dbc = nullptr;
+	QWidget* m_parentWidget = nullptr;
 	QString m_rootFilePath;
 	int m_rootFileId = -1;
 

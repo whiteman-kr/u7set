@@ -18,7 +18,6 @@ public:
 private:
 	QString customColumnText(Columns column, const FileTreeModelItem* item) const override;
 	QString customColumnName(Columns column) const override;
-	QVariant columnIcon(const QModelIndex& index, FileTreeModelItem* file) const override;
 
 };
 
