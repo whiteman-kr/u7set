@@ -17,8 +17,8 @@ namespace Sim
 		Q_PROPERTY(int sizeW READ (m_signal.sizeW))
 		Q_PROPERTY(int sizeBit READ (m_signal.sizeBit))
 
-		Q_PROPERTY(int isAcquired READ (m_signal.isAcquired))
-		Q_PROPERTY(int isArchived READ (m_signal.isArchived))
+		Q_PROPERTY(bool isAcquired READ (m_signal.isAcquired))
+		Q_PROPERTY(bool isArchived READ (m_signal.isArchived))
 
 		Q_PROPERTY(RamAddress ualAddr READ (m_signal.ualAddr))
 		Q_PROPERTY(RamAddress ioBufAddr READ (m_signal.ioBufAddr))

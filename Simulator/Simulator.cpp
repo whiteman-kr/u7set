@@ -30,6 +30,7 @@ namespace Sim
 
 		qRegisterMetaType<Sim::RamAddress>("RamAddress");
 		qRegisterMetaType<Sim::ScriptSignal>("ScriptSignal");
+		qRegisterMetaType<Sim::ScriptLmDescription>("ScriptLmDescription");
 		qRegisterMetaType<Sim::ScriptLogicModule>("ScriptLogicModule");
 		qRegisterMetaType<Sim::ScriptDevUtils>("ScriptDevUtils");
 		qRegisterMetaType<E::LogicModuleRamAccess>("LogicModuleRamAccess");

@@ -111,7 +111,7 @@ namespace Sim
 	{
 		initAppDataSources();
 
-		m_socket = new QUdpSocket(this);
+		m_socket = new QUdpSocket();
 
 		QThread* curThread = QThread::currentThread();
 
