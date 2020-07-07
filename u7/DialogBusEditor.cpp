@@ -208,19 +208,51 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	setLayout(mainLayout);
 
+	// Shortcuts
+	//
+	QShortcut* addShortcut = new QShortcut(QKeySequence("Insert"), this);
+	connect(addShortcut, &QShortcut::activated, this, &DialogBusEditor::onAddShortcut);
+
+	QShortcut* removeShortcut = new QShortcut(QKeySequence(QKeySequence::Delete), this);
+	connect(removeShortcut, &QShortcut::activated, this, &DialogBusEditor::onRemoveShortcut);
+
+	QShortcut* copyShortcut = new QShortcut(QKeySequence(QKeySequence::Copy), this);
+	connect(copyShortcut, &QShortcut::activated, this, &DialogBusEditor::onCopyShortcut);
+
+	QShortcut* pasteShortcut = new QShortcut(QKeySequence(QKeySequence::Paste), this);
+	connect(pasteShortcut, &QShortcut::activated, this, &DialogBusEditor::onPasteShortcut);
+
+	QShortcut* refreshShortcut = new QShortcut(QKeySequence(QKeySequence::Refresh), this);
+	connect(refreshShortcut, &QShortcut::activated, this, &DialogBusEditor::onRefresh);
+
 	// Bus Popup menu
 	//
 	m_addAction = new QAction(tr("Add"), this);
+	m_addAction->setShortcut(QKeySequence("Insert"));
+
 	m_removeAction = new QAction(tr("Remove"), this);
+	m_removeAction->setShortcut(QKeySequence::Delete);
+
 	m_cloneAction = new QAction(tr("Clone"), this);
+
+	m_copyAction = new QAction(tr("Copy"), this);
+	m_copyAction->setShortcut(QKeySequence::Copy);
+
+	m_pasteAction = new QAction(tr("Paste"), this);
+	m_pasteAction->setShortcut(QKeySequence::Paste);
+
 	m_checkOutAction = new QAction(tr("Check Out"), this);
 	m_checkInAction = new QAction(tr("Check In"), this);
 	m_undoAction = new QAction(tr("Undo"), this);
+
 	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setShortcut(QKeySequence::Refresh);
 
 	connect(m_addAction, &QAction::triggered, this, &DialogBusEditor::onAdd);
 	connect(m_removeAction, &QAction::triggered, this, &DialogBusEditor::onRemove);
 	connect(m_cloneAction, &QAction::triggered, this, &DialogBusEditor::onClone);
+	connect(m_copyAction, &QAction::triggered, this, &DialogBusEditor::onCopy);
+	connect(m_pasteAction, &QAction::triggered, this, &DialogBusEditor::onPaste);
 	connect(m_checkOutAction, &QAction::triggered, this, &DialogBusEditor::onCheckOut);
 	connect(m_checkInAction, &QAction::triggered, this, &DialogBusEditor::onCheckIn);
 	connect(m_undoAction, &QAction::triggered, this, &DialogBusEditor::onUndo);
@@ -231,6 +263,9 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_popupMenu->addAction(m_removeAction);
 	m_popupMenu->addSeparator();
 	m_popupMenu->addAction(m_cloneAction);
+	m_popupMenu->addSeparator();
+	m_popupMenu->addAction(m_copyAction);
+	m_popupMenu->addAction(m_pasteAction);
 	m_popupMenu->addSeparator();
 	m_popupMenu->addAction(m_checkOutAction);
 	m_popupMenu->addAction(m_checkInAction);
@@ -346,17 +381,6 @@ void DialogBusEditor::onAdd()
 		return;
 	}
 
-	int count = m_busses.count();
-	for (int i = 0; i < count; i++)
-	{
-		const std::shared_ptr<VFrame30::Bus> existingBus = m_busses.get(i);
-
-		if (existingBus->busTypeId() == busTypeId)
-		{
-			QMessageBox::critical(this, qAppName(), tr("A bus with specified type ID already exists!"));
-			return;
-		}
-	}
 
 	bus->setUuid(QUuid::createUuid());
 	bus->setBusTypeId(busTypeId);
@@ -454,21 +478,127 @@ void DialogBusEditor::onClone()
 		return;
 	}
 
-	int count = m_busses.count();
-	for (int i = 0; i < count; i++)
-	{
-		const std::shared_ptr<VFrame30::Bus> existingBus = m_busses.get(i);
-		if (existingBus->busTypeId() == busTypeId)
-		{
-			QMessageBox::critical(this, qAppName(), tr("A bus with specified type ID already exists!"));
-			return;
-		}
-	}
-
 	cloneBus->setUuid(QUuid::createUuid());
 	cloneBus->setBusTypeId(busTypeId);
 
 	addBus(cloneBus);
+
+}
+
+void DialogBusEditor::onCopy()
+{
+	QList<QTreeWidgetItem*> selectedItems = m_busTree->selectedItems();
+	if (selectedItems.empty() == true)
+	{
+		return;
+	}
+
+	Proto::EnvelopeSet envelopeSet;
+
+	QList<std::shared_ptr<PropertyObject>> busObjects;
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		QVariant d = item->data(0, Qt::UserRole);
+		if (d.isNull() || d.isValid() == false)
+		{
+			assert(false);
+			return;
+		}
+
+		QUuid uuid = d.toUuid();
+
+		std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
+		if (bus == nullptr)
+		{
+			assert(bus);
+			return;
+		}
+
+		Proto::Envelope* envelope = envelopeSet.add_items();
+		bus->SaveData(envelope);
+	}
+
+	QByteArray data;
+	data.resize(envelopeSet.ByteSize());
+
+	bool result = envelopeSet.SerializeToArray(data.data(), envelopeSet.ByteSize());
+	if (result == false)
+	{
+		Q_ASSERT(result);
+		return;
+	}
+
+	if (data.isEmpty() == false)
+	{
+		QMimeData* mime = new QMimeData();
+		mime->setData(VFrame30::Bus::mimeType, data);
+
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->clear();
+		clipboard->setMimeData(mime);
+	}
+
+	return;
+}
+
+
+void DialogBusEditor::onPaste()
+{
+	QClipboard* clipboard = QApplication::clipboard();
+
+	const QMimeData *mimeData = clipboard->mimeData();
+	if (mimeData->hasFormat(VFrame30::Bus::mimeType) == false)
+	{
+		return;
+	}
+
+	QByteArray data = mimeData->data(VFrame30::Bus::mimeType);
+	if (data.isEmpty() == true)
+	{
+		return;
+	}
+
+	Proto::EnvelopeSet envelopeSet;
+	if (envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
+	{
+		return;
+	}
+
+	std::vector<std::shared_ptr<VFrame30::Bus>> busses;
+
+	for (int i = 0; i < envelopeSet.items_size(); i++)
+	{
+		const Proto::Envelope& envelope = envelopeSet.items(i);
+
+		if (envelope.has_bus() == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		std::shared_ptr<VFrame30::Bus> pasteBus = std::make_shared<VFrame30::Bus>();
+
+		if (pasteBus->LoadData(envelope) == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		pasteBus->setUuid(QUuid::createUuid());
+
+		busses.push_back(pasteBus);
+	}
+
+	addBus(busses);
+
+	return;
 
 }
 
@@ -665,6 +795,46 @@ void DialogBusEditor::onRefresh()
 	updateButtonsEnableState();
 
 	return;
+}
+
+void DialogBusEditor::onCopyShortcut()
+{
+	if (m_busTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onCopy();
+}
+
+void DialogBusEditor::onPasteShortcut()
+{
+	if (m_busTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onPaste();
+}
+
+void DialogBusEditor::onAddShortcut()
+{
+	if (m_busTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onAdd();
+}
+
+void DialogBusEditor::onRemoveShortcut()
+{
+	if (m_busTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onRemove();
 }
 
 void DialogBusEditor::onSignalAdd()
@@ -1019,6 +1189,44 @@ void DialogBusEditor::onSignalItemDoubleClicked(QTreeWidgetItem* item, int colum
 	}
 }
 
+bool DialogBusEditor::checkBusNames()
+{
+	int count = m_busses.count();
+	for (int i = 0; i < count; i++)
+	{
+		const std::shared_ptr<VFrame30::Bus> busI = m_busses.get(i);
+
+		for (int j = 0; j < count; j++)
+		{
+			if (i == j)
+			{
+				continue;
+			}
+
+			const std::shared_ptr<VFrame30::Bus> busJ = m_busses.get(j);
+
+			if (busI->busTypeId() == busJ->busTypeId())
+			{
+				int result = QMessageBox::warning(this, qAppName(),
+												  tr("Busses with duplicated ID found! Are you sure you want to continue?"),
+												  QMessageBox::StandardButton::Yes,
+												  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape
+												  );
+				if (result == QMessageBox::StandardButton::Yes)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
 void DialogBusEditor::keyPressEvent(QKeyEvent *evt)
 {
 	if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
@@ -1030,11 +1238,24 @@ void DialogBusEditor::keyPressEvent(QKeyEvent *evt)
 
 void DialogBusEditor::closeEvent(QCloseEvent* e)
 {
-	e->accept();
+	if (checkBusNames() == false)
+	{
+		e->ignore();
+	}
+	else
+	{
+		e->accept();
+	}
+	return;
 }
 
 void DialogBusEditor::reject()
 {
+	if (checkBusNames() == false)
+	{
+		return;
+	}
+
 	QDialog::reject();
 }
 
@@ -1049,33 +1270,6 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 		{
 			assert(editBus);
 			return;
-		}
-
-		// Check if bus ID already exists
-
-		bool alreadyExists = false;
-
-		int count = m_busses.count();
-		for (int i = 0; i < count; i++)
-		{
-			const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(i);
-			if (bus->busTypeId() == editBus->busTypeId() && bus->uuid() != editBus->uuid())
-			{
-				QMessageBox::critical(this, qAppName(), tr("A bus with type ID '%1' already exists!").arg(bus->busTypeId()));
-				alreadyExists = true;
-				break;
-			}
-		}
-
-		// Skip if bus ID already exists
-
-		if (alreadyExists == true)
-		{
-			refillPropeties = true;
-
-			reloadBus(editBus->uuid());
-
-			continue;
 		}
 
 		// Save and update bus information
@@ -1254,36 +1448,65 @@ void DialogBusEditor::fillBusSignals()
 	return;
 }
 
-bool DialogBusEditor::addBus(const std::shared_ptr<VFrame30::Bus> bus)
+void DialogBusEditor::addBus(const std::shared_ptr<VFrame30::Bus> bus)
 {
-	// Add bus, update UI
-	//
-	m_busses.add(bus->uuid(), bus);
+	std::vector<std::shared_ptr<VFrame30::Bus>> busses;
+	busses.push_back(bus);
 
-	bool ok = saveBus(bus->uuid());
-	if (ok == false)
+	addBus(busses);
+
+	return;
+}
+
+void DialogBusEditor::addBus(const std::vector<std::shared_ptr<VFrame30::Bus>> busses)
+{
+	m_busTree->clearSelection();
+
+	QTreeWidgetItem* firstItem = nullptr;
+
+	for (auto bus : busses)
 	{
-		return false;
+		// Add bus, update UI
+		//
+		m_busses.add(bus->uuid(), bus);
+
+		bool ok = saveBus(bus->uuid());
+		if (ok == false)
+		{
+			return;
+		}
+
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+
+		item->setData(0, Qt::UserRole, bus->uuid());
+
+		item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+		m_busTree->addTopLevelItem(item);
+
+		updateBusTreeItemText(item);
+
+		if (firstItem == nullptr)
+		{
+			firstItem = item;
+		}
+		else
+		{
+			item->setSelected(true);
+		}
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem();
-
-	item->setData(0, Qt::UserRole, bus->uuid());
-
-	item->setFlags(item->flags() | Qt::ItemIsEditable);
-
-	m_busTree->addTopLevelItem(item);
-
-	updateBusTreeItemText(item);
 	updateButtonsEnableState();
-
-	m_busTree->setCurrentItem(item);
-	m_busTree->clearSelection();
-	item->setSelected(true);
 
 	fillBusProperties();
 
-	return true;
+	if (firstItem != nullptr)
+	{
+		m_busTree->setCurrentItem(firstItem);
+		firstItem->setSelected(true);
+	}
+
+	return;
 }
 
 void DialogBusEditor::updateButtonsEnableState()
