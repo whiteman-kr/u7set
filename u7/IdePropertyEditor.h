@@ -127,6 +127,9 @@ protected:
     bool eventFilter(QObject* obj, QEvent* event);
 
 private:
+	void adjustMarginWidth();
+
+private:
     QsciScintilla* m_textEdit = nullptr;
 
 	LexerJavaScript m_lexerJavaScript;
