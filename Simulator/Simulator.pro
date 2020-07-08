@@ -95,6 +95,7 @@ SOURCES += \
     SimConnections.cpp \
     SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
+	SimScriptLmDescription.cpp \
     SimScriptLogicModule.cpp \
     SimScriptRamAddress.cpp \
     SimScriptSignal.cpp \
@@ -147,6 +148,7 @@ HEADERS += \
     SimConnections.h \
     SimScriptConnection.h \
     SimScriptDevUtils.h \
+	SimScriptLmDescription.h \
     SimScriptLogicModule.h \
     SimScriptRamAddress.h \
     SimScriptSignal.h \

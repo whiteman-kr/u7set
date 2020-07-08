@@ -141,7 +141,7 @@ namespace VFrame30
 		bool save(Proto::Bus* message) const;
 		bool load(const Proto::Bus& message);
 
-	protected:
+	public:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
@@ -195,6 +195,9 @@ namespace VFrame30
 		bool m_enableManualBusSizeIsNotIntialized = false;		// This property is not shown for users in BusType editor!
 																// Required only for FIRST loading of Bus message after
 																// adding of enableManualBusSize field.
+
+	public:
+		static const char* mimeType; // = "application/x-radiybus";
 	};
 
 	//

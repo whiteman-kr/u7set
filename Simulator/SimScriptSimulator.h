@@ -7,6 +7,7 @@
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLogicModule.h"
+#include "SimScriptLmDescription.h"
 #include "SimScriptConnection.h"
 
 
@@ -135,6 +136,9 @@ namespace Sim
 
 		/// \brief Get full signal description, if a signal is not found then exception is thrown.
 		ScriptSignal signalParamExt(QString appSignalId);
+
+		/// \brief Returns ScriptLmDescription for LM  with specified equipmentId, if LM is not found then exception is thrown.
+		ScriptLmDescription scriptLmDescription(QString equipmentId);
 
 		ScriptDevUtils devUtils();
 

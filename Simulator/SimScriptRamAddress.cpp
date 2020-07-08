@@ -45,4 +45,10 @@ namespace Sim
 		return QString("Offset: %1 (%2), bit: %3, Access: %4");
 	}
 
+	quint32 RamAddress::bitAddress() const
+	{
+		return m_offset * 16 + m_bit;
+	}
+
+
 }
