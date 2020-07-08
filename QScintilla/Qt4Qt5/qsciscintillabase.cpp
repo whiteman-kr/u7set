@@ -1,6 +1,6 @@
 // This module implements the "official" low-level API.
 //
-// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2020 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -130,11 +130,6 @@ QsciScintillaBase::QsciScintillaBase(QWidget *parent)
         Scintilla_LinkLexers();
         lexersLinked = true;
     }
-
-    QClipboard *cb = QApplication::clipboard();
-
-    if (cb->supportsSelection())
-        connect(cb, SIGNAL(selectionChanged()), SLOT(handleSelection()));
 
     // Add it to the pool.
     poolList.append(this);
@@ -366,14 +361,6 @@ bool QsciScintillaBase::focusNextPrevChild(bool next)
         return false;
 
     return QAbstractScrollArea::focusNextPrevChild(next);
-}
-
-
-// Handle the selection changing.
-void QsciScintillaBase::handleSelection()
-{
-    if (!QApplication::clipboard()->ownsSelection())
-        sci->UnclaimSelection();
 }
 
 

@@ -1,6 +1,6 @@
 // This class defines the "official" low-level API.
 //
-// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2020 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -3862,7 +3862,6 @@ protected:
 private slots:
     void handleVSb(int value);
     void handleHSb(int value);
-    void handleSelection();
 
 private:
     // This is needed to allow QsciScintillaQt to emit this class's signals.
