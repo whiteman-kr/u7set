@@ -171,31 +171,17 @@ namespace VFrame30
 		qDebug() << "ScriptAppSignalController::~ScriptAppSignalController()";
 	}
 
-	QVariant ScriptAppSignalController::signalParam(QString signalId) const
+	QJSValue ScriptAppSignalController::signalParam(QString signalId) const
 	{
-		if (m_appSignalManager == nullptr)
-		{
-			assert(m_appSignalManager);
-			return QVariant();
-		}
-
-		bool ok = false;
-		AppSignalParam s = m_appSignalManager->signalParam(signalId, &ok);
-
-		if (ok == false)
-		{
-			return QVariant();
-		}
-
-		return QVariant::fromValue(s);
+		return signalParam(::calcHash(signalId));
 	}
 
-	QVariant ScriptAppSignalController::signalParam(Hash signalHash) const
+	QJSValue ScriptAppSignalController::signalParam(Hash signalHash) const
 	{
 		if (m_appSignalManager == nullptr)
 		{
 			assert(m_appSignalManager);
-			return QVariant();
+			return {};
 		}
 
 		bool ok = false;
@@ -203,37 +189,31 @@ namespace VFrame30
 
 		if (ok == false)
 		{
-			return QVariant();
+			return {};
 		}
 
-		return QVariant::fromValue(s);
+		QJSEngine* engine = qjsEngine(this);
+
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return {};
+		}
+
+		return engine->toScriptValue(s);
 	}
 
-	QVariant ScriptAppSignalController::signalState(QString signalId) const
+	QJSValue ScriptAppSignalController::signalState(QString signalId) const
+	{
+		return signalState(::calcHash(signalId));
+	}
+
+	QJSValue ScriptAppSignalController::signalState(Hash signalHash) const
 	{
 		if (m_appSignalManager == nullptr)
 		{
 			assert(m_appSignalManager);
-			return QVariant();
-		}
-
-		bool ok = false;
-		AppSignalState s = m_appSignalManager->signalState(signalId, &ok);
-
-		if (ok == false)
-		{
-			return QVariant();
-		}
-
-		return QVariant::fromValue(s);
-	}
-
-	QVariant ScriptAppSignalController::signalState(Hash signalHash) const
-	{
-		if (m_appSignalManager == nullptr)
-		{
-			assert(m_appSignalManager);
-			return QVariant();
+			return {};
 		}
 
 		bool ok = false;
@@ -241,10 +221,18 @@ namespace VFrame30
 
 		if (ok == false)
 		{
-			return QVariant();
+			return {};
 		}
 
-		return QVariant::fromValue(s);
+		QJSEngine* engine = qjsEngine(this);
+
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return {};
+		}
+
+		return engine->toScriptValue(s);
 	}
 
 }

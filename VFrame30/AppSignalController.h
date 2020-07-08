@@ -117,12 +117,12 @@ namespace VFrame30
 		//
 	public slots:
 		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
-		QVariant signalParam(QString signalId) const;		// Returns AppSignalParam
-		QVariant signalParam(Hash signalHash) const;		// Returns AppSignalParam
+		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
+		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
 
 		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
-		QVariant signalState(QString signalId) const;		// Returns AppSignalState
-		QVariant signalState(Hash signalHash) const;		// Returns AppSignalState
+		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
+		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
 
 		// Data
 		//

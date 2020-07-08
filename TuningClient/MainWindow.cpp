@@ -454,7 +454,6 @@ void MainWindow::createWorkspace()
 			{
 				// Show both Workspaces
 				//
-
 				m_tabWidget = new QTabWidget();
 				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
 				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));

@@ -11,13 +11,13 @@ SelectSchemaWidget::SelectSchemaWidget(MonitorConfigController* configController
 
 	// --
 	//
-	m_button = new QPushButton;
+	m_button = new QPushButton{this};
 	m_button->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
 	m_button->setStyleSheet("Text-align:left");
 
 	// --
 	//
-	setLayout(new QHBoxLayout);
+	setLayout(new QHBoxLayout{this});
 	layout()->setMargin(layout()->margin() / 4);
 
 	layout()->addWidget(m_button);
@@ -174,17 +174,17 @@ SelectSchemaPopup::SelectSchemaPopup(QString defaultSchemaId, const std::vector<
 
 	// --
 	//
-	m_edit = new QLineEdit;
+	m_edit = new QLineEdit{this};
 	m_edit->setPlaceholderText(tr("Filter"));
 	m_edit->setClearButtonEnabled(true);
 
 	// List
 	//
-	m_tableWidget = new SelectSchemaTable(m_schemas, defaultSchemaId, this);
+	m_tableWidget = new SelectSchemaTable{m_schemas, defaultSchemaId, this};
 
 	// --
 	//
-	setLayout(new QVBoxLayout);
+	setLayout(new QVBoxLayout{this});
 
 	layout()->addWidget(m_edit);
 	layout()->addWidget(m_tableWidget);
@@ -209,7 +209,7 @@ QString SelectSchemaPopup::selectedSchemaId() const
 
 void SelectSchemaPopup::showEvent(QShowEvent* /*event*/)
 {
-	QPropertyAnimation* animation = new QPropertyAnimation(this, "windowOpacity");
+	QPropertyAnimation* animation = new QPropertyAnimation{this, "windowOpacity"};
 	animation->setStartValue(0.0);
 	animation->setEndValue(1.0);
 	animation->setDuration(200);
@@ -400,7 +400,7 @@ SelectSchemaTable::SelectSchemaTable(const std::vector<SelectSchemaItem>& schema
 
 	// Model
 	//
-	m_model = new SelectSchemaModel(schemas, this);
+	m_model = new SelectSchemaModel{schemas, this};
 	setModel(m_model);
 
 	applyFilter(QString(), defaultSchemaId);
