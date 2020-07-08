@@ -949,18 +949,18 @@ void MonitorMainWindow::slot_archive()
 		QVariant data = triggeredAction->data();
 
 		bool ok = false;
-		size_t archiveIndex = data.toInt(&ok);
+		int archiveIndex = data.toInt(&ok);
 
-		if (archiveIndex == -1)
+		if (archiveIndex < 0)
 		{
 			archiveWindowToActivate.clear();	// if trendToActivate is empty, then create new trend
 		}
 		else
 		{
-			if (ok == false || archiveIndex < 0 || archiveIndex >= archives.size())
+			if (ok == false || archiveIndex >= static_cast<int>(archives.size()))
 			{
 				Q_ASSERT(ok == true);
-				Q_ASSERT(archiveIndex >= 0 && archiveIndex < archives.size());
+				Q_ASSERT(archiveIndex < static_cast<int>(archives.size()));
 				return;
 			}
 
