@@ -4242,7 +4242,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == true &&
 				s->isDiscrete() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_acquiredDiscreteInputSignals.append(s);
 			}
@@ -4440,7 +4441,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_nonAcquiredDiscreteInputSignals.append(s);
 			}
@@ -4530,7 +4532,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == true &&
 				s->isAnalog() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_acquiredAnalogInputSignals.append(s);
 			}
@@ -4771,7 +4774,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool ModuleLogicCompiler::createNonAcquiredAnalogInputSignalsList()
 	{
 		m_nonAcquiredAnalogInputSignals.clear();
@@ -4791,7 +4793,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == false &&
 				s->isAnalog() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_nonAcquiredAnalogInputSignals.append(s);
 			}

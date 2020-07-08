@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../lib/LmDescription.h"
+
+#include "SimLogicModule.h"
 #include "SimScriptRamAddress.h"
 
 namespace Sim
@@ -10,24 +12,32 @@ namespace Sim
 		Q_GADGET
 
 		Q_PROPERTY(bool isNull READ isNull)
+		Q_PROPERTY(RamAddress appDataStartAddr READ appDataStartAddr)
 
 	public:
 		ScriptLmDescription() = default;
 		~ScriptLmDescription() = default;
 
-		void setLmDescription(const LmDescription& lmDesc);
+		void setLogicModule(std::shared_ptr<LogicModule> lm);
 
 		bool isNull() const;
 
 	public slots:
 
 		bool isAddrInIoModuleBuf(int modulePlace, RamAddress addr) const;
+		bool isAddrInAcquiredAppDataBuf(RamAddress addr) const;
+		bool isAddrAfterAcquiredAppDataBuf(RamAddress addr) const;
 
 		RamAddress ioModuleBufStartAddr(int modulePlace) const;
 		int ioModuleBufSize() const;
 
+		RamAddress appDataStartAddr() const;
+		int appDataSizeW() const;
+		int appDataSizeBytes() const;
+
 	private:
 		LmDescription m_lmDesc;
+		::LogicModuleInfo m_lmInfo;
 	};
 }
 

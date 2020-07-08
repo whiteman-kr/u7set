@@ -2,9 +2,10 @@
 
 namespace Sim
 {
-	void ScriptLmDescription::setLmDescription(const LmDescription& lmDesc)
+	void ScriptLmDescription::setLogicModule(std::shared_ptr<LogicModule> lm)
 	{
-		m_lmDesc = lmDesc;
+		m_lmDesc = lm->lmDescription();
+		m_lmInfo = lm->logicModuleExtraInfo();
 	}
 
 	bool ScriptLmDescription::isNull() const
@@ -18,6 +19,29 @@ namespace Sim
 
 		return	addr.bitAddress() >= ioBufStartAddr &&
 				addr.bitAddress() < ioBufStartAddr + ioModuleBufSize();
+	}
+
+	bool ScriptLmDescription::isAddrInAcquiredAppDataBuf(RamAddress addr) const
+	{
+		RamAddress adStartAddr(appDataStartAddr());
+
+		RamAddress appDataEndAddr;
+
+		appDataEndAddr.setOffset(adStartAddr.offset() + appDataSizeW());
+		appDataEndAddr.setBit(0);
+
+		return	addr.bitAddress() >= adStartAddr.bitAddress() &&
+				addr.bitAddress() < appDataEndAddr.bitAddress();
+	}
+
+	bool ScriptLmDescription::isAddrAfterAcquiredAppDataBuf(RamAddress addr) const
+	{
+		RamAddress appDataEndAddr;
+
+		appDataEndAddr.setOffset(appDataStartAddr().offset() + appDataSizeW());
+		appDataEndAddr.setBit(0);
+
+		return	addr.bitAddress() >= appDataEndAddr.bitAddress();
 	}
 
 	RamAddress ScriptLmDescription::ioModuleBufStartAddr(int modulePlace) const
@@ -35,6 +59,26 @@ namespace Sim
 	int ScriptLmDescription::ioModuleBufSize() const
 	{
 		return m_lmDesc.memory().m_moduleDataSize;
+	}
+
+	RamAddress ScriptLmDescription::appDataStartAddr() const
+	{
+		RamAddress appDataStartAddr;
+
+		appDataStartAddr.setOffset(m_lmDesc.memory().m_appLogicWordDataOffset);
+		appDataStartAddr.setBit(0);
+
+		return appDataStartAddr;
+	}
+
+	int ScriptLmDescription::appDataSizeW() const
+	{
+		return m_lmInfo.appDataSizeBytes / sizeof(quint16);
+	}
+
+	int ScriptLmDescription::appDataSizeBytes() const
+	{
+		return m_lmInfo.appDataSizeBytes;
 	}
 }
 

@@ -519,7 +519,7 @@ namespace Sim
 			return lmDesc;
 		}
 
-		lmDesc.setLmDescription(lm->lmDescription());
+		lmDesc.setLogicModule(lm);
 
 		return lmDesc;
 	}
