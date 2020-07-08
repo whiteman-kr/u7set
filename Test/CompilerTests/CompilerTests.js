@@ -22,7 +22,7 @@ function initTestCase(sim)
 {
     console.log(sim.buildPath);
 
-	assert(sim.isLmExists(LM_QUIPMENT_ID) === true);
+    assert(sim.logicModuleExists(LM_QUIPMENT_ID) === true);
 
     // Warm up all modules
     //
@@ -50,25 +50,6 @@ function cleanup(sim)
     return;
 }
 
-// Test 1
-//
-/*function test1(sim)
-{
-    // Start simulation for N msecs:
-    //      sim.startForMs(50);
-
-    // Check signal value:
-	//         assert(sim.signalValue("#TEST_NOT_1") === 1);
-
-    // Override signal value:
-    //      sim.overrideSignalValue("#TEST_NOT_1", 0);
-
-    // Clear override signal list:
-    //      sim.overridesReset();
-
-    return;
-}*/
-
 function test_UAL_BUSSES_3_2_1(sim)
 {
 	// Not acquired Not used buses tests
@@ -76,38 +57,46 @@ function test_UAL_BUSSES_3_2_1(sim)
 	const NOT_ACQUIRED_NOT_USED_MUM_PLACE = 1;
 	const NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID = "#SHR0S2P1_STATE";
 
-	assert(sim.isSignalExists(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID) === true);
-	assert(sim.signalIsAcquired(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID) === false);
+    assert(sim.signalExists(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID) === true);
+
+    let sg = sim.signalParamExt(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID);
+
+    assert(sg.isAcquired === false);
 
 	// UAL_BUSSES_3_2_1_01
 	//
-	let ioAddr = sim.signalIoAddr(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID);
+    let ioAddr = sg.ioBufAddr;
 
 	assert(ioAddr.isValid === true);
-	assert(sim.addrInIoModuleBuf(LM_QUIPMENT_ID, NOT_ACQUIRED_NOT_USED_MUM_PLACE, ioAddr) === true);
-	assert(ioAddr.bit === 0);
+    assert(ioAddr.bit === 0);
+
+    let lmDesc = sim.scriptLmDescription(LM_QUIPMENT_ID);
+
+    assert(lmDesc.isAddrInIoModuleBuf(NOT_ACQUIRED_NOT_USED_MUM_PLACE, ioAddr) === true);
+
+    assert(lmDesc.isNull !== true);
 
 	// UAL_BUSSES_3_2_1_02
 	//
-	let ualAddr = sim.signalUalAddr(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID);
+    let ualAddr = sg.ualAddr;
 
 	assert(ualAddr.isValid === false);
 
 	// UAL_BUSSES_3_2_1_03
 	//
-	let regBufAddr = sim.signalRegBufAddr(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID);
+    let regBufAddr = sg.regBufAddr;
 
 	assert(regBufAddr.isValid === false);
 
 	// UAL_BUSSES_3_2_1_04
 	//
-	let regValueAddr = sim.signalRegValueAddr(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID);
+    let regValueAddr = sg.regValueAddr;
 
 	assert(regValueAddr.isValid === false);
 
 	return;
 }
-
+/*
 function test_UAL_BUSSES_3_2_2(sim)
 {
 	// Not acquired Used buses tests
@@ -326,4 +315,4 @@ function test_UAL_BUSSES_3_2_5(sim)
 }
 
 
-
+*/

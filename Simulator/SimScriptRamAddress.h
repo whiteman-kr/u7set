@@ -44,6 +44,8 @@ namespace Sim
 		/// \brief Convert address to string representation.
 		Q_INVOKABLE QString toString() const;
 
+		quint32 bitAddress() const;
+
 	private:
 		quint32 m_offset = BadAddress;
 		quint32 m_bit = BadAddress;

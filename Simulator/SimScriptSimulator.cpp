@@ -507,6 +507,23 @@ namespace Sim
 		return scriptSignal;
 	}
 
+	ScriptLmDescription ScriptSimulator::scriptLmDescription(QString equipmentId)
+	{
+		ScriptLmDescription lmDesc;
+
+		std::shared_ptr<LogicModule> lm = m_simulator->logicModule(equipmentId);
+
+		if (lm == nullptr)
+		{
+			throwScriptException(this, tr("scriptLmDescription(%1), LM is not found.").arg(equipmentId));
+			return lmDesc;
+		}
+
+		lmDesc.setLmDescription(lm->lmDescription());
+
+		return lmDesc;
+	}
+
 	ScriptDevUtils ScriptSimulator::devUtils()
 	{
 		return ScriptDevUtils{m_simulator};
