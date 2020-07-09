@@ -146,10 +146,11 @@ public:
 
 	QModelIndexList selectedSourceRows() const;	// Returns selected rows mapped to source model
 
+	bool addNewFile(const QString& fileName);
+
 	// public slots
 	//
 public slots:
-	void newFile(const QString& fileName);
 	void addFile();
 	void addFolder(const QString& folderName);
 	void viewFile();
@@ -167,7 +168,7 @@ public slots:
 	void refreshFileTree();
 
 private:
-	void createFiles(std::vector<std::shared_ptr<DbFile> > files);
+	bool createFiles(std::vector<std::shared_ptr<DbFile> > files);
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
 	void runFileEditor(bool viewOnly);
 

@@ -356,7 +356,7 @@ void FilesTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 
 	// Check file extension
 	//
-	std::array<QString, 5> extensions = {".xml", ".xsd", ".descr", ".txt", ".afb"};
+	std::array<QString, 6> extensions = {".xml", ".xsd", ".descr", ".txt", ".afb", ".js"};
 
 	bool extFound = false;
 	QString fileName = object.name();

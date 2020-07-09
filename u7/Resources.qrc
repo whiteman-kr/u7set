@@ -70,6 +70,8 @@
         <file>Images/SimConnectionIcon.svg</file>
         <file>Images/SimAppLogicSchemas.svg</file>
         <file>Images/dragndrop.png</file>
+        <file>Images/CloseButtonWhite.svg</file>
+        <file>Images/ComboDownArrow.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

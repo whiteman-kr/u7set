@@ -112,7 +112,7 @@ void TestsTabPage::testsTreeDoubleClicked(const QModelIndex &index)
 
 	if (m_openFileAction->isEnabled() == true)
 	{
-		openDocument();
+		openFile();
 	}
 
 	return;
@@ -128,30 +128,34 @@ void TestsTabPage::openFilesDoubleClicked(const QModelIndex &index)
 	}
 
 	QString fileName = item->data(0, Qt::UserRole).toString();
+
 	setCurrentDocument(fileName);
 
 	return;
 }
 
-void TestsTabPage::newDocument()
+void TestsTabPage::newFile()
 {
-	QString fileName = QInputDialog::getText(this, qAppName(), tr("Enter the file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
+	QString fileName = QInputDialog::getText(this, "New File", tr("Enter the file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
 
-	m_testsTreeView->newFile(fileName);
-
-	openDocument();
+	bool result = m_testsTreeView->addNewFile(fileName);
+	if (result == true)
+	{
+		// addNewFile will select new document
+		//
+		openFile();
+	}
 
 	return;
 }
 
-void TestsTabPage::openDocument()
+void TestsTabPage::openFile()
 {
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
-
 	if (selectedIndexList.size() != 1)
 	{
 		return;
@@ -183,11 +187,11 @@ void TestsTabPage::openDocument()
 		return;
 	}
 
+	// Load file
+
 	bool readOnly = f->state() != VcsState::CheckedOut ||
 					  (db()->currentUser().isAdminstrator() == false
 					   && db()->currentUser().userId() != f->userId());
-
-	// Load file
 
 	std::shared_ptr<DbFile> dbFile;
 	if (db()->getLatestVersion(*f, &dbFile, this) == false)
@@ -214,23 +218,24 @@ void TestsTabPage::openDocument()
 
 	// Create document
 
-	TestTabPageDocument& doc = m_openDocuments[fullFileName];
+	TestTabPageDocument& document = m_openDocuments[fullFileName];
 
-	doc.codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
-	doc.codeEditor->setText(dbFile->data());
-	doc.codeEditor->setReadOnly(readOnly);
+	document.codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
+	document.codeEditor->setText(dbFile->data());
+	document.codeEditor->setReadOnly(readOnly);
 
-	connect(doc.codeEditor, &IdeCodeEditor::textChanged, this, &TestsTabPage::textChanged);
-	connect(doc.codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
-	connect(doc.codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsTabPage::onCloseKeyPressed);
-	connect(doc.codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsTabPage::onSaveKeyPressed);
-	connect(doc.codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsTabPage::onCtrlTabKeyPressed);
-	m_editorLayout->addWidget(doc.codeEditor);
+	connect(document.codeEditor, &IdeCodeEditor::textChanged, this, &TestsTabPage::textChanged);
+	connect(document.codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
+	connect(document.codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsTabPage::onCloseKeyPressed);
+	connect(document.codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsTabPage::onSaveKeyPressed);
+	connect(document.codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsTabPage::onCtrlTabKeyPressed);
+	m_editorLayout->addWidget(document.codeEditor);
 
+	document.treeWidgetItem = item;
+	document.readOnly = readOnly;
+	document.dbFile = dbFile;
 
-	doc.treeWidgetItem = item;
-	doc.readOnly = readOnly;
-	doc.dbFile = dbFile;
+	m_openDocumentsCombo->addItem(fullFileName);
 
 	// Open file in editor
 
@@ -240,9 +245,9 @@ void TestsTabPage::openDocument()
 }
 
 
-void TestsTabPage::addFolder()
+void TestsTabPage::newFolder()
 {
-	QString folderName = QInputDialog::getText(this, qAppName(), tr("Enter the folder name:"), QLineEdit::Normal, tr("FOLDER_%1").arg(db()->nextCounterValue()));
+	QString folderName = QInputDialog::getText(this, "New Folder", tr("Enter the folder name:"), QLineEdit::Normal, tr("FOLDER_%1").arg(db()->nextCounterValue()));
 	if (folderName.isEmpty() == true)
 	{
 		return;
@@ -291,22 +296,19 @@ void TestsTabPage::textChanged()
 		return;
 	}
 
-	TestTabPageDocument& doc = m_openDocuments[m_currentDocument];
+	TestTabPageDocument& document = m_openDocuments[m_currentDocument];
+	if (document.treeWidgetItem == nullptr)
+	{
+		Q_ASSERT(document.treeWidgetItem);
+		return;
+	}
 
-	if (doc.modified == false)
+	if (document.modified == false)
 	{
 		// Mark document as modified
 		//
-		doc.modified = true;
-
-		if (doc.treeWidgetItem == nullptr)
-		{
-			Q_ASSERT(doc.treeWidgetItem);
-		}
-		else
-		{
-			doc.treeWidgetItem->setText(0, doc.treeWidgetItem->text(0) + "*");
-		}
+		document.modified = true;
+		document.treeWidgetItem->setText(0, document.treeWidgetItem->text(0) + "*");
 	}
 
 	return;
@@ -315,15 +317,13 @@ void TestsTabPage::textChanged()
 
 void TestsTabPage::cursorPositionChanged(int line, int index)
 {
-	if (m_lineButton == nullptr || m_columnLabel == nullptr)
+	if (m_cursorPosButton == nullptr)
 	{
-		Q_ASSERT(m_lineButton);
-		Q_ASSERT(m_columnLabel);
+		Q_ASSERT(m_cursorPosButton);
 		return;
 	}
 
-	m_lineButton->setText(tr(" Line: %1 ").arg(line + 1));
-	m_columnLabel->setText(tr(" Col: %1 ").arg(index + 1));
+	m_cursorPosButton->setText(tr(" Line: %1  Col: %2 ").arg(line + 1).arg(index + 1));
 
 	return;
 }
@@ -338,9 +338,9 @@ void TestsTabPage::onSaveKeyPressed()
 {
 	if (documentIsOpen(m_currentDocument) == true)
 	{
-		const TestTabPageDocument& doc = m_openDocuments[m_currentDocument];
+		const TestTabPageDocument& document = m_openDocuments[m_currentDocument];
 
-		if (doc.modified == true)
+		if (document.modified == true)
 		{
 			saveDocument(m_currentDocument);
 		}
@@ -359,9 +359,9 @@ void TestsTabPage::onCtrlTabKeyPressed()
 {
 	if (documentIsOpen(m_currentDocument) == true)
 	{
-		const TestTabPageDocument& doc = m_openDocuments[m_currentDocument];
+		const TestTabPageDocument& document = m_openDocuments[m_currentDocument];
 
-		int currentIndex = m_openFilesTreeWidget->indexOfTopLevelItem(doc.treeWidgetItem);
+		int currentIndex = m_openFilesTreeWidget->indexOfTopLevelItem(document.treeWidgetItem);
 
 		int openIndex = 0;
 
@@ -392,6 +392,12 @@ void TestsTabPage::onGoToLine()
 
 	TestTabPageDocument& document = m_openDocuments[m_currentDocument];
 
+	if (document.codeEditor == nullptr)
+	{
+		Q_ASSERT(document.codeEditor);
+		return;
+	}
+
 	int line = 0;
 	int index = 0;
 	document.codeEditor->getCursorPosition(&line, &index);
@@ -400,7 +406,7 @@ void TestsTabPage::onGoToLine()
 
 	bool ok = false;
 
-	int newLine = QInputDialog::getInt(this, qAppName(), tr("Go To Line:"), line + 1, 1, maxLine + 1, 1, &ok);
+	int newLine = QInputDialog::getInt(this, "Go to Line", tr("Enter line number:"), line + 1, 1, maxLine + 1, 1, &ok);
 	if (ok == false)
 	{
 		return;
@@ -408,6 +414,107 @@ void TestsTabPage::onGoToLine()
 
 	document.codeEditor->setCursorPosition(newLine - 1, 0);
 	document.codeEditor->activateEditor();
+
+	return;
+}
+
+void TestsTabPage::setCurrentDocument(const QString& fileName)
+{
+	if (m_currentDocument == fileName)
+	{
+		return;
+	}
+
+	if (documentIsOpen(fileName) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	// Show Editor
+
+	m_editorEmptyLabel->setVisible(false);
+	m_editorToolBar->setVisible(true);
+
+	// Hide current editor
+
+	for (auto& it : m_openDocuments)
+	{
+		const QString& docFileName = it.first;
+		TestTabPageDocument& document = it.second;
+
+		if (document.codeEditor == nullptr)
+		{
+			Q_ASSERT(document.codeEditor);
+			return;
+		}
+
+		if (docFileName != fileName && document.codeEditor->isVisible())
+		{
+			document.codeEditor->setVisible(false);
+		}
+	}
+
+	// Show new editor
+
+	for (auto& it : m_openDocuments)
+	{
+		const QString& docFileName = it.first;
+		TestTabPageDocument& document = it.second;
+
+		if (document.codeEditor == nullptr)
+		{
+			Q_ASSERT(document.codeEditor);
+			return;
+		}
+
+		if (docFileName == fileName)
+		{
+			document.codeEditor->setVisible(true);
+			document.codeEditor->activateEditor();
+
+			if (m_cursorPosButton == nullptr)
+			{
+				Q_ASSERT(m_cursorPosButton);
+				return;
+			}
+
+			int line = 0;
+			int index = 0;
+			document.codeEditor->getCursorPosition(&line, &index);
+
+			m_cursorPosButton->setText(tr(" Line: %1  Col: %2").arg(line + 1).arg(index + 1));
+		}
+	}
+
+	// Set new text
+	//
+	const TestTabPageDocument& newFile = m_openDocuments[fileName];
+
+	if (newFile.treeWidgetItem == nullptr)
+	{
+		Q_ASSERT(newFile.treeWidgetItem);
+		return;
+	}
+
+	newFile.treeWidgetItem->setSelected(true);
+	m_openFilesTreeWidget->setCurrentItem(newFile.treeWidgetItem);
+
+	//
+
+	m_currentDocument = fileName;
+
+	//
+
+	int comboIndex = m_openDocumentsCombo->findText(fileName);
+	if (comboIndex == -1)
+	{
+		Q_ASSERT(false);
+	}
+	else
+	{
+		m_openDocumentsCombo->setCurrentIndex(comboIndex);
+	}
 
 	return;
 }
@@ -462,7 +569,7 @@ void TestsTabPage::createUi()
 	QHBoxLayout* filterLayout = new QHBoxLayout();
 
 	m_filterLineEdit = new QLineEdit();
-	m_filterLineEdit->setPlaceholderText(tr("Filter Text"));
+	m_filterLineEdit->setPlaceholderText(tr("Filter File Name"));
 	m_filterLineEdit->setClearButtonEnabled(true);
 
 	connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &TestsTabPage::filterChanged);
@@ -511,21 +618,45 @@ void TestsTabPage::createUi()
 
 	// Editor toolbar
 	//
+	const int toolbarButtonSize = static_cast<int>(0.25 * logicalDpiY());
+
 	m_editorToolBar = new QToolBar();
 	m_editorToolBar->setVisible(false);
 	m_editorToolBar->setAutoFillBackground(true);
-	//m_editorToolBar->setStyleSheet("QToolBar{spacing:3px; background: gray; }");
-
 	m_editorToolBar->setStyleSheet("QToolBar{spacing:3px; \
 								   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060); }");
 
+	m_openDocumentsCombo = new QComboBox();
+	m_openDocumentsCombo->setStyleSheet(tr("QComboBox{\
+												border: 0px;\
+												color: white;\
+												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060);\
+											}\
+											QComboBox:hover {\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #909090, stop: 1 #707070);\
+											}\
+											QComboBox:!editable:on, QComboBox::drop-down:editable:on {\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #707070, stop: 1 #505050);\
+											}\
+											QComboBox:on { \
+												padding-top: 3px;\
+												padding-left: 4px;\
+											}\
+											QComboBox::drop-down{\
+												border: 1px;\
+											}\
+											QComboBox::down-arrow {\
+													image: url(:/Images/Images/ComboDownArrow.svg);\
+													width: %1px;\
+													height: %1px;\
+											}").arg(toolbarButtonSize/3));
 
+	m_openDocumentsCombo->setFixedHeight(toolbarButtonSize);
+	QString longFileName = QString().fill('0', 48);
+	m_openDocumentsCombo->setMinimumWidth(QFontMetrics(m_openDocumentsCombo->font()).horizontalAdvance(longFileName));
+	connect(m_openDocumentsCombo, &QComboBox::currentTextChanged, this, &TestsTabPage::setCurrentDocument);
 
-	m_editorFileNameLabel = new QLabel("FileName");
-	m_editorFileNameLabel->setStyleSheet("QLabel{color: white}");
-	m_editorToolBar->addWidget(m_editorFileNameLabel);
-
-	const int toolbarButtonSize = 25;
+	m_editorToolBar->addWidget(m_openDocumentsCombo);
 
 	QString toolbarButtonStyle = "QPushButton {\
 												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060);\
@@ -539,7 +670,9 @@ void TestsTabPage::createUi()
 												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #707070, stop: 1 #505050);\
 											}";
 
-	QPushButton* closeButton = new QPushButton("X");
+	// Close Button
+	//
+	QPushButton* closeButton = new QPushButton(QIcon(":/Images/Images/CloseButtonWhite.svg"), QString());
 	closeButton->setFlat(true);
 	closeButton->setStyleSheet(toolbarButtonStyle);
 	closeButton->setFixedSize(toolbarButtonSize, toolbarButtonSize);
@@ -547,20 +680,23 @@ void TestsTabPage::createUi()
 
 	m_editorToolBar->addWidget(closeButton);
 
+	// Spacer
+	//
 	QWidget* empty = new QWidget();
 	empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_editorToolBar->addWidget(empty);
 
-	m_lineButton = new QPushButton("Line: 1");
-	m_lineButton->setFlat(true);
-	m_lineButton->setStyleSheet(toolbarButtonStyle);
-	m_lineButton->setFixedHeight(toolbarButtonSize);
-	connect(m_lineButton, &QPushButton::clicked, this, &TestsTabPage::onGoToLine);
-	m_editorToolBar->addWidget(m_lineButton);
+	// Cursor Pos Button
+	//
+	m_cursorPosButton = new QPushButton("Line: 1  Col: 1");
+	m_cursorPosButton->setFlat(true);
+	m_cursorPosButton->setStyleSheet(toolbarButtonStyle);
 
-	m_columnLabel = new QLabel("Col: 1");
-	m_columnLabel->setStyleSheet("QLabel{color: white}");
-	m_editorToolBar->addWidget(m_columnLabel);
+	QString longCursorPos = "Line: 9999 Col: 9999";
+	m_cursorPosButton->setMinimumWidth(QFontMetrics(m_cursorPosButton->font()).horizontalAdvance(longCursorPos));
+	m_cursorPosButton->setFixedHeight(toolbarButtonSize);
+	connect(m_cursorPosButton, &QPushButton::clicked, this, &TestsTabPage::onGoToLine);
+	m_editorToolBar->addWidget(m_cursorPosButton);
 
 	m_editorLayout->addWidget(m_editorToolBar);
 
@@ -603,39 +739,42 @@ void TestsTabPage::createActions()
 		return;
 	}
 
-	m_newFileAction = new QAction(tr("New file..."), this);
-	m_newFileAction->setStatusTip(tr("New file..."));
+	m_openFileAction = new QAction(tr("Open File"), this);
+	m_openFileAction->setStatusTip(tr("Open File..."));
+	m_openFileAction->setEnabled(false);
+	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openFile);
+
+	m_SeparatorAction1 = new QAction(this);
+	m_SeparatorAction1->setSeparator(true);
+
+	m_newFileAction = new QAction(tr("New File..."), this);
+	m_newFileAction->setStatusTip(tr("New File..."));
 	m_newFileAction->setEnabled(false);
-	connect(m_newFileAction, &QAction::triggered, this, &TestsTabPage::newDocument);
+	connect(m_newFileAction, &QAction::triggered, this, &TestsTabPage::newFile);
+
+	m_newFolderAction = new QAction(tr("New Folder..."), this);
+	m_newFolderAction->setStatusTip(tr("New Folder..."));
+	m_newFolderAction->setEnabled(false);
+	connect(m_newFolderAction, &QAction::triggered, this, &TestsTabPage::newFolder);
 
 	m_addFileAction = new QAction(tr("Add file..."), this);
 	m_addFileAction->setStatusTip(tr("Add file..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::addFile);
 
-	m_addFolderAction = new QAction(tr("Add folder..."), this);
-	m_addFolderAction->setStatusTip(tr("Add folder..."));
-	m_addFolderAction->setEnabled(false);
-	connect(m_addFolderAction, &QAction::triggered, this, &TestsTabPage::addFolder);
-
-	m_openFileAction = new QAction(tr("Open file..."), this);
-	m_openFileAction->setStatusTip(tr("Open file..."));
-	m_openFileAction->setEnabled(false);
-	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openDocument);
-
-	m_renameFileAction = new QAction(tr("Rename file..."), this);
-	m_renameFileAction->setStatusTip(tr("Rename file..."));
+	m_renameFileAction = new QAction(tr("Rename..."), this);
+	m_renameFileAction->setStatusTip(tr("Rename..."));
 	m_renameFileAction->setEnabled(false);
 	connect(m_renameFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::renameFile);
 
-	m_deleteFileAction = new QAction(tr("Delete file"), this);
-	m_deleteFileAction->setStatusTip(tr("Delete file..."));
+	m_deleteFileAction = new QAction(tr("Delete"), this);
+	m_deleteFileAction->setStatusTip(tr("Delete"));
 	m_deleteFileAction->setEnabled(false);
 	connect(m_deleteFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::deleteFile);
 
 	//----------------------------------
-	m_SeparatorAction1 = new QAction(this);
-	m_SeparatorAction1->setSeparator(true);
+	m_SeparatorAction2 = new QAction(this);
+	m_SeparatorAction2->setSeparator(true);
 
 	m_checkOutAction = new QAction(tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
@@ -647,21 +786,27 @@ void TestsTabPage::createActions()
 	m_checkInAction->setEnabled(false);
 	connect(m_checkInAction, &QAction::triggered, m_testsTreeView, &FileTreeView::checkInFile);
 
-	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
+	m_undoChangesAction = new QAction(tr("Undo Changes"), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
 	connect(m_undoChangesAction, &QAction::triggered, m_testsTreeView, &FileTreeView::undoChangesFile);
 
-	//----------------------------------
-	m_SeparatorAction2 = new QAction(this);
-	m_SeparatorAction2->setSeparator(true);
+	m_historyAction = new QAction(tr("History"), this);
+	m_historyAction->setStatusTip(tr("View History"));
+	m_historyAction->setEnabled(false);
+	connect(m_historyAction, &QAction::triggered, m_testsTreeView, &FileTreeView::showHistory);
+
+	m_compareAction = new QAction(tr("Compare..."), this);
+	m_compareAction->setStatusTip(tr("Compare"));
+	m_compareAction->setEnabled(false);
+	connect(m_compareAction, &QAction::triggered, m_testsTreeView, &FileTreeView::showCompare);
 
 	//----------------------------------
-	m_SeparatorAction2 = new QAction(this);
-	m_SeparatorAction2->setSeparator(true);
+	m_SeparatorAction3 = new QAction(this);
+	m_SeparatorAction3->setSeparator(true);
 
 	m_refreshAction = new QAction(tr("Refresh"), this);
-	m_refreshAction->setStatusTip(tr("Refresh object list"));
+	m_refreshAction->setStatusTip(tr("Refresh Objects List"));
 	m_refreshAction->setEnabled(false);
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, m_testsTreeView, &FileTreeView::refreshFileTree);
@@ -670,25 +815,25 @@ void TestsTabPage::createActions()
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	// -----------------
-	m_testsTreeView->addAction(m_newFileAction);
-	m_testsTreeView->addAction(m_addFileAction);
-	m_testsTreeView->addAction(m_addFolderAction);
+
 	m_testsTreeView->addAction(m_openFileAction);
+	m_testsTreeView->addAction(m_SeparatorAction1);
+
+	m_testsTreeView->addAction(m_newFileAction);
+	m_testsTreeView->addAction(m_newFolderAction);
+	m_testsTreeView->addAction(m_addFileAction);
 	m_testsTreeView->addAction(m_renameFileAction);
 	m_testsTreeView->addAction(m_deleteFileAction);
+	m_testsTreeView->addAction(m_SeparatorAction2);
 
-	// -----------------
-	m_testsTreeView->addAction(m_SeparatorAction1);
 	m_testsTreeView->addAction(m_checkOutAction);
 	m_testsTreeView->addAction(m_checkInAction);
 	m_testsTreeView->addAction(m_undoChangesAction);
-	// -----------------
-	m_testsTreeView->addAction(m_SeparatorAction2);
-	// -----------------
-	m_testsTreeView->addAction(m_SeparatorAction2);
-	m_testsTreeView->addAction(m_refreshAction);
-	// -----------------
+	m_testsTreeView->addAction(m_historyAction);
+	m_testsTreeView->addAction(m_compareAction);
+	m_testsTreeView->addAction(m_SeparatorAction3);
 
+	m_testsTreeView->addAction(m_refreshAction);
 
 	return;
 }
@@ -734,15 +879,17 @@ void TestsTabPage::setActionState()
 {
 	// Disable all
 	//
-	m_newFileAction->setEnabled(false);
-	m_addFileAction->setEnabled(false);
-	m_addFolderAction->setEnabled(false);
 	m_openFileAction->setEnabled(false);
+	m_newFileAction->setEnabled(false);
+	m_newFolderAction->setEnabled(false);
+	m_addFileAction->setEnabled(false);
 	m_renameFileAction->setEnabled(false);
 	m_deleteFileAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
 	m_checkInAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
+	m_historyAction->setEnabled(false);
+	m_compareAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
@@ -750,22 +897,22 @@ void TestsTabPage::setActionState()
 		return;
 	}
 
-	// Refresh
-	//
-	m_refreshAction->setEnabled(true);
-
 	// --
 	//
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
 
-	// New Action
-	//
 	bool folderSelected = true;
 
+	// Folder is selected
+	//
 	for (const QModelIndex& mi : selectedIndexList)
 	{
 		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
-		assert(file);
+		if (file == nullptr)
+		{
+			assert(file);
+			return;
+		}
 
 		if (file->isFolder() == false)
 		{
@@ -774,15 +921,70 @@ void TestsTabPage::setActionState()
 		}
 	}
 
+	// Enable edit only files with several extensions!
+	//
+	QStringList editableExtensions;
+	editableExtensions << tr("js");
+
+	bool editableExtension = false;
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
+		if (file == nullptr)
+		{
+			assert(file);
+			return;
+		}
+
+		QString ext = QFileInfo(file->fileName()).suffix();
+		if (editableExtensions.contains(ext))
+		{
+			editableExtension = true;
+			break;
+		}
+	}
+
+	// CheckIn, CheckOut, Undo, Get/set Workcopy
+	//
+	bool canAnyBeCheckedIn = false;
+	bool canAnyBeCheckedOut = false;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
+		if (file == nullptr)
+		{
+			assert(file);
+			return;
+		}
+
+		if (file->state() == VcsState::CheckedOut &&
+			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		{
+			canAnyBeCheckedIn = true;
+		}
+
+		if (file->state() == VcsState::CheckedIn)
+		{
+			canAnyBeCheckedOut = true;
+		}
+
+		// Don't need to go further
+		//
+		if (canAnyBeCheckedIn == true &&
+			canAnyBeCheckedOut == true )
+		{
+			break;
+		}
+	}
+
+	// Enable Actions
+	//
+	m_openFileAction->setEnabled(editableExtension && selectedIndexList.size() == 1);
 	m_newFileAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
-
-	// Add Action
-	//
+	m_newFolderAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
-
-	// Add Folder Action
-	//
-	m_addFolderAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
+	m_renameFileAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
 
 	// Delete Items action
 	//
@@ -816,62 +1018,13 @@ void TestsTabPage::setActionState()
 		}
 	}
 
-	// CheckIn, CheckOut, Undo, Get/set Workcopy
-	//
-	bool canAnyBeCheckedIn = false;
-	bool canAnyBeCheckedOut = false;
-
-	for (const QModelIndex& mi : selectedIndexList)
-	{
-		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
-		assert(file);
-
-		if (file->state() == VcsState::CheckedOut &&
-			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
-		{
-			canAnyBeCheckedIn = true;
-		}
-
-		if (file->state() == VcsState::CheckedIn)
-		{
-			canAnyBeCheckedOut = true;
-		}
-
-		// Don't need to go further
-		//
-		if (canAnyBeCheckedIn == true &&
-			canAnyBeCheckedOut == true )
-		{
-			break;
-		}
-	}
-
 	m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
+	m_historyAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == false);
+	m_compareAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == false);
 
-	// Enable edit only files with several extensions!
-	//
-	QStringList editableExtensions;
-	editableExtensions << tr("js");
-
-	bool editableExtension = false;
-	for (const QModelIndex& mi : selectedIndexList)
-	{
-		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
-		assert(file);
-
-		QString ext = QFileInfo(file->fileName()).suffix();
-		if (editableExtensions.contains(ext))
-		{
-			editableExtension = true;
-			break;
-		}
-	}
-
-	m_openFileAction->setEnabled(editableExtension && selectedIndexList.size() == 1);
-
-	m_renameFileAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
+	m_refreshAction->setEnabled(true);
 
 	return;
 }
@@ -879,83 +1032,6 @@ void TestsTabPage::setActionState()
 bool TestsTabPage::documentIsOpen(const QString& fileName)
 {
 	return m_openDocuments.find(fileName) != m_openDocuments.end();
-}
-
-void TestsTabPage::setCurrentDocument(const QString& fileName)
-{
-	if (m_currentDocument == fileName)
-	{
-		return;
-	}
-
-	if (documentIsOpen(fileName) == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	// Show Editor
-
-	m_editorEmptyLabel->setVisible(false);
-	m_editorToolBar->setVisible(true);
-
-	// Hide current editor
-
-	for (auto& it : m_openDocuments)
-	{
-		const QString& docFileName = it.first;
-		TestTabPageDocument& doc = it.second;
-		if (docFileName != fileName && doc.codeEditor->isVisible())
-		{
-			doc.codeEditor->setVisible(false);
-		}
-	}
-
-	// Show new editor
-
-	for (auto& it : m_openDocuments)
-	{
-		const QString& docFileName = it.first;
-		TestTabPageDocument& doc = it.second;
-		if (docFileName == fileName)
-		{
-			doc.codeEditor->setVisible(true);
-			doc.codeEditor->activateEditor();
-
-			if (m_lineButton == nullptr || m_columnLabel == nullptr)
-			{
-				Q_ASSERT(m_lineButton);
-				Q_ASSERT(m_columnLabel);
-				return;
-			}
-
-			int line = 0;
-			int index = 0;
-			doc.codeEditor->getCursorPosition(&line, &index);
-
-			m_lineButton->setText(tr(" Line: %1 ").arg(line + 1));
-			m_columnLabel->setText(tr(" Col: %1 ").arg(index + 1));
-		}
-	}
-
-	// Set new text
-	//
-	const TestTabPageDocument& newFile = m_openDocuments[fileName];
-
-	if (newFile.treeWidgetItem == nullptr)
-	{
-		Q_ASSERT(newFile.treeWidgetItem);
-		return;
-	}
-
-	newFile.treeWidgetItem->setSelected(true);
-	m_openFilesTreeWidget->setCurrentItem(newFile.treeWidgetItem);
-
-	//
-
-	m_currentDocument = fileName;
-
-	m_editorFileNameLabel->setText(tr(" %1 ").arg(fileName));
 }
 
 void TestsTabPage::saveDocument(const QString& fileName)
@@ -966,18 +1042,25 @@ void TestsTabPage::saveDocument(const QString& fileName)
 		return;
 	}
 
-	TestTabPageDocument& doc = m_openDocuments[fileName];
+	TestTabPageDocument& document = m_openDocuments[fileName];
 
-	doc.dbFile->setData(doc.codeEditor->text().toUtf8());
+	if (document.codeEditor == nullptr || document.treeWidgetItem == nullptr)
+	{
+		Q_ASSERT(document.treeWidgetItem);
+		Q_ASSERT(document.codeEditor);
+		return;
+	}
 
-	if (db()->setWorkcopy(doc.dbFile, this) == false)
+	document.dbFile->setData(document.codeEditor->text().toUtf8());
+
+	if (db()->setWorkcopy(document.dbFile, this) == false)
 	{
 		QMessageBox::critical(this, "Error", "Set work copy error!");
 		return;
 	}
 
-	doc.modified = false;
-	doc.treeWidgetItem->setText(0, doc.treeWidgetItem->text(0).remove('*'));
+	document.modified = false;
+	document.treeWidgetItem->setText(0, document.treeWidgetItem->text(0).remove('*'));
 }
 
 void TestsTabPage::closeDocument(const QString& fileName)
@@ -989,6 +1072,13 @@ void TestsTabPage::closeDocument(const QString& fileName)
 	}
 
 	TestTabPageDocument& document = m_openDocuments[fileName];
+
+	if (document.codeEditor == nullptr || document.treeWidgetItem == nullptr)
+	{
+		Q_ASSERT(document.treeWidgetItem);
+		Q_ASSERT(document.codeEditor);
+		return;
+	}
 
 	if (document.modified == true)
 	{
@@ -1009,6 +1099,18 @@ void TestsTabPage::closeDocument(const QString& fileName)
 	// Delete item from opened files list
 
 	int closeIndex = m_openFilesTreeWidget->indexOfTopLevelItem(document.treeWidgetItem);
+
+	// Delete item from combo box
+
+	int comboIndex = m_openDocumentsCombo->findText(fileName);
+	if (comboIndex == -1)
+	{
+		Q_ASSERT(false);
+	}
+	else
+	{
+		m_openDocumentsCombo->removeItem(comboIndex);
+	}
 
 	// Delete item from opened files list
 
@@ -1058,6 +1160,7 @@ void TestsTabPage::closeAllDocuments()
 	}
 
 	m_openDocuments.clear();
+	m_openDocumentsCombo->clear();
 
 	return;
 }
@@ -1089,5 +1192,4 @@ void TestsTabPage::keyPressEvent(QKeyEvent* event)
 			return;
 		}
 	}
-
 }

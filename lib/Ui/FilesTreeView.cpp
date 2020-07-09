@@ -920,7 +920,7 @@ QModelIndexList FileTreeView::selectedSourceRows() const
 }
 
 
-void FileTreeView::newFile(const QString& fileName)
+bool FileTreeView::addNewFile(const QString& fileName)
 {
 	// Find parent file
 	//
@@ -929,7 +929,7 @@ void FileTreeView::newFile(const QString& fileName)
 	if (selectedRows.size() != 1 )
 	{
 		assert(selectedRows.size() == 1);
-		return;
+		return false;
 	}
 
 	// Create files vector
@@ -941,9 +941,9 @@ void FileTreeView::newFile(const QString& fileName)
 
 	files.push_back(file);
 
-	createFiles(files);
+	bool result = createFiles(files);
 
-	return;
+	return result;
 
 }
 
@@ -1555,7 +1555,7 @@ void FileTreeView::getLatestTreeVersion()
 	return;
 }
 
-void FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
+bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 {
 	//
 	QModelIndexList selectedRows = selectedSourceRows();	// Indexes from source model
@@ -1565,7 +1565,7 @@ void FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 	{
 		assert(selectedProxyRows.size() == 1);
 		assert(selectedRows.size() == 1);
-		return;
+		return false;
 	}
 
 	QModelIndex selectedIndex = selectedRows[0];
@@ -1578,7 +1578,7 @@ void FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 	{
 		assert(parentFile);
 		assert(parentFile->fileId() != -1);
-		return;
+		return false;
 	}
 
 	bool parentIsExpanded = isExpanded(selectedProxyIndex);
@@ -1592,7 +1592,7 @@ void FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 		bool ok = db()->addFile(file, parentFile->fileId(), this);
 		if (ok == false)
 		{
-			return;
+			return false;
 		}
 
 		// Add files to the FileModel
@@ -1661,7 +1661,7 @@ void FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 		}
 	}
 
-	return;
+	return true;
 
 }
 

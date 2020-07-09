@@ -50,9 +50,9 @@ private slots:
 	void testsTreeDoubleClicked(const QModelIndex &index);
 	void openFilesDoubleClicked(const QModelIndex &index);
 
-	void newDocument();
-	void openDocument();
-	void addFolder();
+	void newFile();
+	void openFile();
+	void newFolder();
 	void filterChanged();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
@@ -63,7 +63,7 @@ private slots:
 	void onCtrlTabKeyPressed();
 
 	void onGoToLine();
-
+	void setCurrentDocument(const QString& fileName);
 
 private:
 	void createUi();
@@ -75,7 +75,6 @@ private:
 	void setActionState();
 
 	bool documentIsOpen(const QString& fileName);
-	void setCurrentDocument(const QString& fileName);
 	void saveDocument(const QString& fileName);
 	void closeDocument(const QString& fileName);
 	void closeAllDocuments();
@@ -106,9 +105,8 @@ private:
 	QToolBar* m_editorToolBar = nullptr;
 	QLabel* m_editorEmptyLabel = nullptr;
 
-	QLabel* m_editorFileNameLabel = nullptr;
-	QPushButton* m_lineButton = nullptr;
-	QLabel* m_columnLabel = nullptr;
+	QComboBox* m_openDocumentsCombo = nullptr;
+	QPushButton* m_cursorPosButton = nullptr;
 
 	QSplitter* m_leftSplitter = nullptr;
 	QSplitter* m_verticalSplitter = nullptr;
@@ -116,18 +114,22 @@ private:
 	//Actions
 	//
 	QAction* m_newFileAction = nullptr;
+	QAction* m_SeparatorAction1 = nullptr;
+
 	QAction* m_addFileAction = nullptr;
-	QAction* m_addFolderAction = nullptr;
+	QAction* m_newFolderAction = nullptr;
 	QAction* m_openFileAction = nullptr;
 	QAction* m_renameFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;
 	//----------------------------------
-	QAction* m_SeparatorAction1 = nullptr;
+	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
+	QAction* m_historyAction = nullptr;
+	QAction* m_compareAction = nullptr;
 	//----------------------------------
-	QAction* m_SeparatorAction2 = nullptr;
+	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_refreshAction = nullptr;
 
 };

@@ -498,7 +498,7 @@ void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool caseS
 		return;
 	}
 
-	while (counter < 1000)
+	while (counter < 10000)
 	{
 		m_textEdit->replace(replaceText);
 
@@ -509,7 +509,7 @@ void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool caseS
 			break;
 		}
 
-		if (counter >= 1000)
+		if (counter >= 10000)
 		{
 			// for not to hang
 			assert(false);
