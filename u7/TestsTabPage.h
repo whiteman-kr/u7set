@@ -1,11 +1,9 @@
 #pragma once
 
 #include "MainTabPage.h"
-
 #include <QToolBar>
-
 #include "IdePropertyEditor.h"
-
+#include "GlobalMessanger.h"
 #include "../lib/Ui/FilesTreeView.h"
 
 class TestsFileTreeModel : public FileTreeModel
@@ -47,6 +45,7 @@ private slots:
 
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
+	void modelReset();
 	void testsTreeDoubleClicked(const QModelIndex &index);
 	void openFilesDoubleClicked(const QModelIndex &index);
 
@@ -64,6 +63,8 @@ private slots:
 
 	void onGoToLine();
 	void setCurrentDocument(const QString& fileName);
+
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
 private:
 	void createUi();
@@ -89,16 +90,22 @@ private:
 	QString m_currentDocument;
 	QFont m_editorFont;
 
+	QStringList m_editableExtensions;
+
 	// Widgets
 	//
+
+	QToolBar* m_testsToolbar = nullptr;
+
 	FileTreeView* m_testsTreeView = nullptr;
 	TestsFileTreeModel* m_testsTreeModel = nullptr;
 	FileTreeProxyModel* m_testsTreeProxyModel = nullptr;
 
-	QTreeWidget* m_openFilesTreeWidget = nullptr;
 
 	QLineEdit* m_filterLineEdit = nullptr;
 	QCompleter* m_filterCompleter = nullptr;
+
+	QTreeWidget* m_openFilesTreeWidget = nullptr;
 
 	QVBoxLayout* m_editorLayout = nullptr;
 
@@ -131,7 +138,6 @@ private:
 	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_refreshAction = nullptr;
-
 };
 
 

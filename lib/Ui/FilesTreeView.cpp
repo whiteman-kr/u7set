@@ -5,6 +5,7 @@
 #include "CheckInDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
+#include "../lib/StandardColors.h"
 
 //
 //
@@ -314,7 +315,6 @@ QModelIndex FileTreeModel::index(int row, int column, const QModelIndex& parentI
 	}
 
 	FileTreeModelItem* parent = static_cast<FileTreeModelItem*>(parentIndex.internalPointer());
-
 	if (parent == nullptr)
 	{
 		assert(parent);
@@ -437,7 +437,7 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 			case Columns::FileUserColumn:
 				if (file->state() == VcsState::CheckedOut)
 				{
-					v.setValue<qint32>(file->userId());
+					v = db()->username(file->userId());
 				}
 				break;
 
@@ -457,6 +457,14 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 		}
 		break;
 
+		/*
+	case  Qt::UserRole:
+		{
+			return file->fileId();
+		}
+		break;
+		*/
+
 	case Qt::TextAlignmentRole:
 		{
 			return Qt::AlignLeft + Qt::AlignVCenter;
@@ -467,18 +475,19 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 		{
 			if (file->state() == VcsState::CheckedOut)
 			{
-				QBrush b(QColor(0xFF, 0xFF, 0xFF));
+
+				QBrush b(StandardColors::VcsCheckedIn);
 
 				switch (static_cast<VcsItemAction::VcsItemActionType>(file->action().toInt()))
 				{
 				case VcsItemAction::Added:
-					b.setColor(QColor(0xF9, 0xFF, 0xF9));
+					b.setColor(StandardColors::VcsAdded);
 					break;
 				case VcsItemAction::Modified:
-					b.setColor(QColor(0xF4, 0xFA, 0xFF));
+					b.setColor(StandardColors::VcsModified);
 					break;
 				case VcsItemAction::Deleted:
-					b.setColor(QColor(0xFF, 0xF4, 0xF4));
+					b.setColor(StandardColors::VcsDeleted);
 					break;
 				}
 
@@ -885,8 +894,6 @@ FileTreeView::FileTreeView(DbController* dbc) :
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
-	setUniformRowHeights(true);
-	setIndentation(10);
 }
 
 FileTreeView::~FileTreeView()
@@ -1891,7 +1898,154 @@ void FileTreeView::setWorkcopy()
 
 void FileTreeView::refreshFileTree()
 {
+
+	// Save old selection
+	//
+	/*std::vector<int> selectedFilesIds;
+
+	{
+		const QItemSelection proxySelection = selectionModel()->selection();
+		const QItemSelection mappedSelection = fileTreeProxyModel()->mapSelectionToSource(proxySelection);
+
+		selectedFilesIds.reserve(mappedSelection.size());
+
+		for (QModelIndex mi : mappedSelection.indexes())
+		{
+			FileTreeModelItem* file = fileTreeModel()->fileItem(mi);
+			if (file == nullptr)
+			{
+				Q_ASSERT(file);
+				return;
+			}
+
+			if (file != nullptr && file->isNull() == false)
+			{
+				selectedFilesIds.push_back(file->fileId());
+			}
+		}
+	}
+
+	// Save expansion
+	//
+	std::vector<int> expandedFileIds;
+
+	{
+		FileTreeProxyModel* proxyModel = fileTreeProxyModel();
+		if (proxyModel == nullptr)
+		{
+			Q_ASSERT(proxyModel);
+			return;
+		}
+
+		QModelIndexList indexes = proxyModel->persistentIndexList();
+
+		qDebug() << indexes.size();
+
+		expandedFileIds.reserve(indexes.size());
+
+		for (QModelIndex& mi : indexes)
+		{
+			const FileTreeModelItem* file = fileTreeModel()->fileItem(proxyModel->mapToSource(mi));
+			if (file == nullptr)
+			{
+				Q_ASSERT(file);
+				return;
+			}
+
+			int fileId = file->fileId();
+
+			qDebug() << file->fileName();
+			qDebug() << fileId;
+
+			if (isExpanded(mi) == true)
+			{
+				if (fileId != DbFileInfo::Null)
+				{
+					expandedFileIds.push_back(fileId);
+				}
+			}
+		}
+
+		qDebug() << expandedFileIds.size();
+	}
+
+	selectionModel()->reset();
+*/
+	// Update model
+	//
 	fileTreeModel()->refresh();
+
+/*
+	expandAll();
+
+	collapseAll();*/
+
+	/*
+	// Restore selection
+	//
+	selectionModel()->blockSignals(true);
+
+	// Select
+	//
+	for (int fileId : selectedFilesIds)
+	{
+		qDebug() << fileId;
+
+		QModelIndexList matched = fileTreeModel()->match(fileTreeModel()->index(0, 0),
+													 Qt::UserRole,
+													 QVariant::fromValue(fileId),
+													 1,
+													 Qt::MatchExactly | Qt::MatchRecursive);
+
+		qDebug() << matched.size();
+
+		if (matched.size() == 1)
+		{
+			QModelIndex fileModelIndex = matched.front();
+			QModelIndex mappedModelIndex = fileTreeProxyModel()->mapFromSource(fileModelIndex);
+
+			selectionModel()->select(mappedModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+			QModelIndex expandParent = mappedModelIndex.parent();
+			while (expandParent.isValid() == true)
+			{
+				expand(expandParent);
+				expandParent = expandParent.parent();
+			}
+		}
+	}
+
+	// Expand
+	//
+	for (int fileId : expandedFileIds)
+	{
+		QModelIndexList matched = fileTreeModel()->match(fileTreeModel()->index(0, 0),
+													 Qt::UserRole,
+													 QVariant::fromValue(fileId),
+													 1,
+													 Qt::MatchExactly | Qt::MatchRecursive);
+
+		if (matched.size() == 1)
+		{
+			QModelIndex fileModelIndex = matched.front();
+			QModelIndex mappedModelIndex = fileTreeProxyModel()->mapFromSource(fileModelIndex);
+
+			QModelIndex expandIndex = mappedModelIndex;
+			while (expandIndex.isValid() == true)
+			{
+				expand(expandIndex);
+				expandIndex = expandIndex.parent();
+			}
+		}
+	}
+
+	selectionModel()->blockSignals(false);
+
+	selectionChanged({}, {});					// To update actions
+	*/
+
+
+	return;
 }
 
 // Protected props

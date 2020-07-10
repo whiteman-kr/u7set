@@ -279,31 +279,31 @@ void FilesTabPage::setActionState()
 		}
 	}
 
+	// Enable edit only files with several extensions!
+	//
+	bool editableExtension = false;
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const FileTreeModelItem* file = m_fileModel->fileItem(mi);
+		assert(file);
+
+		QString ext = QFileInfo(file->fileName()).suffix();
+		if (m_editableExtensions.endsWith(ext))
+		{
+			editableExtension = true;
+			break;
+		}
+	}
+
 	m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 	m_historyAction->setEnabled(selectedIndexList.size() == 1);
-	m_compareAction->setEnabled(selectedIndexList.size() == 1);
+	m_compareAction->setEnabled(selectedIndexList.size() == 1 && editableExtension == true);
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_getLatestTreeVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_importWorkingcopyAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
-
-    // Enable edit only files with several extensions!
-    //
-    bool editableExtension = false;
-    for (const QModelIndex& mi : selectedIndexList)
-    {
-        const FileTreeModelItem* file = m_fileModel->fileItem(mi);
-        assert(file);
-
-        QString ext = QFileInfo(file->fileName()).suffix();
-        if (m_editableExtensions.contains(ext))
-        {
-            editableExtension = true;
-            break;
-        }
-    }
 
 	m_viewFileAction->setEnabled(editableExtension && selectedIndexList.size() == 1);
     m_editFileAction->setEnabled(editableExtension && canAnyBeCheckedIn && selectedIndexList.size() == 1);

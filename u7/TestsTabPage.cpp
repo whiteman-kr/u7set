@@ -1,6 +1,7 @@
 #include "TestsTabPage.h"
 #include "GlobalMessanger.h"
 #include "../lib/DbController.h"
+#include "Forms/ComparePropertyObjectDialog.h"
 
 //
 // TestsFileTreeModel
@@ -37,6 +38,8 @@ QString TestsFileTreeModel::customColumnName(Columns column) const
 TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 	MainTabPage(dbc, parent)
 {
+	m_editableExtensions << tr("js");
+
 	createUi();
 
 	createActions();
@@ -46,8 +49,11 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &TestsTabPage::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &TestsTabPage::projectClosed);
 
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &TestsTabPage::compareObject);
+
 	connect(m_testsTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &TestsTabPage::selectionChanged);
 	connect(m_testsTreeModel, &FileTreeModel::dataChanged, this, &TestsTabPage::modelDataChanged);
+	connect(m_testsTreeModel, &FileTreeModel::modelReset, this, &TestsTabPage::modelReset);
 
 	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsTabPage::testsTreeDoubleClicked);
 	connect(m_openFilesTreeWidget, &QTreeWidget::doubleClicked, this, &TestsTabPage::openFilesDoubleClicked);
@@ -101,6 +107,13 @@ void TestsTabPage::modelDataChanged(const QModelIndex& topLeft,
 	Q_UNUSED(bottomRight);
 	Q_UNUSED(roles);
 
+	setActionState();
+
+	return;
+}
+
+void TestsTabPage::modelReset()
+{
 	setActionState();
 
 	return;
@@ -235,7 +248,9 @@ void TestsTabPage::openFile()
 	document.readOnly = readOnly;
 	document.dbFile = dbFile;
 
+	m_openDocumentsCombo->blockSignals(true);
 	m_openDocumentsCombo->addItem(fullFileName);
+	m_openDocumentsCombo->blockSignals(false);
 
 	// Open file in editor
 
@@ -427,6 +442,7 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 
 	if (documentIsOpen(fileName) == false)
 	{
+		qDebug() << fileName;
 		Q_ASSERT(false);
 		return;
 	}
@@ -513,8 +529,160 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 	}
 	else
 	{
+		m_openDocumentsCombo->blockSignals(true);
 		m_openDocumentsCombo->setCurrentIndex(comboIndex);
+		m_openDocumentsCombo->blockSignals(false);
 	}
+
+	return;
+}
+
+void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
+{
+	// Can compare only files which are EquipmentObjects
+	//
+	if (object.isFile() == false)
+	{
+		return;
+	}
+
+	// Check file extension
+	//
+	bool extFound = false;
+	QString fileName = object.name();
+
+	for (const QString& ext : m_editableExtensions)
+	{
+		if (fileName.endsWith(ext) == true)
+		{
+			extFound = true;
+			break;
+		}
+	}
+
+	if (extFound == false)
+	{
+		return;
+	}
+
+	// Get vesrions from the project database
+	//
+	QString source;
+
+	switch (compareData.sourceVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceChangeset, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+		break;
+	default:
+		assert(false);
+	}
+
+	if (source == nullptr)
+	{
+		return;
+	}
+
+	// Get target file version
+	//
+	QString target = nullptr;
+
+	switch (compareData.targetVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetChangeset, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (target == nullptr)
+	{
+		return;
+	}
+
+	// Compare
+	//
+	ComparePropertyObjectDialog::showDialog(object, compareData, source, target, this);
 
 	return;
 }
@@ -539,6 +707,9 @@ void TestsTabPage::createUi()
 	testsLayout->setContentsMargins(0, 0, 0, 0);
 
 	testsLayout->addWidget(new QLabel(tr("Tests Files")));
+
+	m_testsToolbar = new QToolBar();
+	testsLayout->addWidget(m_testsToolbar);
 
 	m_testsTreeModel = new TestsFileTreeModel(db(), DbFileInfo::fullPathToFileName(Db::File::TestsFileName), this, this);
 
@@ -713,6 +884,8 @@ void TestsTabPage::createUi()
 	m_leftSplitter->addWidget(filesWidget);
 	m_leftSplitter->setStretchFactor(0, 2);
 	m_leftSplitter->setStretchFactor(1, 1);
+	m_leftSplitter->setCollapsible(0, false);
+	m_leftSplitter->setCollapsible(1, false);
 
 	// Vertical splitter
 	//
@@ -721,6 +894,8 @@ void TestsTabPage::createUi()
 	m_verticalSplitter->addWidget(editorWidget);
 	m_verticalSplitter->setStretchFactor(0, 1);
 	m_verticalSplitter->setStretchFactor(1, 4);
+	m_verticalSplitter->setCollapsible(0, false);
+	m_verticalSplitter->setCollapsible(1, false);
 
 	// Main layout
 	//
@@ -739,59 +914,73 @@ void TestsTabPage::createActions()
 		return;
 	}
 
-	m_openFileAction = new QAction(tr("Open File"), this);
+	QList<QAction*> toolbarActions;
+
+	m_openFileAction = new QAction(QIcon(":/Images/Images/SchemaOpen.svg"), tr("Open File"), this);
 	m_openFileAction->setStatusTip(tr("Open File..."));
 	m_openFileAction->setEnabled(false);
 	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openFile);
+	toolbarActions.push_back(m_openFileAction);
 
 	m_SeparatorAction1 = new QAction(this);
 	m_SeparatorAction1->setSeparator(true);
+	toolbarActions.push_back(m_SeparatorAction1);
 
-	m_newFileAction = new QAction(tr("New File..."), this);
+	m_newFileAction = new QAction(QIcon(":/Images/Images/SchemaNewFile.svg"), tr("New File..."), this);
 	m_newFileAction->setStatusTip(tr("New File..."));
 	m_newFileAction->setEnabled(false);
+	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
 	connect(m_newFileAction, &QAction::triggered, this, &TestsTabPage::newFile);
+	toolbarActions.push_back(m_newFileAction);
 
-	m_newFolderAction = new QAction(tr("New Folder..."), this);
+	m_newFolderAction = new QAction(QIcon(":/Images/Images/SchemaAddFolder2.svg"), tr("New Folder..."), this);
 	m_newFolderAction->setStatusTip(tr("New Folder..."));
 	m_newFolderAction->setEnabled(false);
 	connect(m_newFolderAction, &QAction::triggered, this, &TestsTabPage::newFolder);
+	toolbarActions.push_back(m_newFolderAction);
 
-	m_addFileAction = new QAction(tr("Add file..."), this);
+	m_addFileAction = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("Add file..."), this);
 	m_addFileAction->setStatusTip(tr("Add file..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::addFile);
+	toolbarActions.push_back(m_addFileAction);
 
 	m_renameFileAction = new QAction(tr("Rename..."), this);
 	m_renameFileAction->setStatusTip(tr("Rename..."));
 	m_renameFileAction->setEnabled(false);
 	connect(m_renameFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::renameFile);
 
-	m_deleteFileAction = new QAction(tr("Delete"), this);
+	m_deleteFileAction = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete"));
 	m_deleteFileAction->setEnabled(false);
+	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
 	connect(m_deleteFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::deleteFile);
+	toolbarActions.push_back(m_deleteFileAction);
 
 	//----------------------------------
 	m_SeparatorAction2 = new QAction(this);
 	m_SeparatorAction2->setSeparator(true);
+	toolbarActions.push_back(m_SeparatorAction2);
 
-	m_checkOutAction = new QAction(tr("CheckOut"), this);
+	m_checkOutAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutAction->setEnabled(false);
 	connect(m_checkOutAction, &QAction::triggered, m_testsTreeView, &FileTreeView::checkOutFile);
+	toolbarActions.push_back(m_checkOutAction);
 
-	m_checkInAction = new QAction(tr("CheckIn"), this);
+	m_checkInAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
 	m_checkInAction->setStatusTip(tr("Check in changes"));
 	m_checkInAction->setEnabled(false);
 	connect(m_checkInAction, &QAction::triggered, m_testsTreeView, &FileTreeView::checkInFile);
+	toolbarActions.push_back(m_checkInAction);
 
-	m_undoChangesAction = new QAction(tr("Undo Changes"), this);
+	m_undoChangesAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
 	connect(m_undoChangesAction, &QAction::triggered, m_testsTreeView, &FileTreeView::undoChangesFile);
+	toolbarActions.push_back(m_undoChangesAction);
 
-	m_historyAction = new QAction(tr("History"), this);
+	m_historyAction = new QAction(QIcon(":/Images/Images/SchemaHistory.svg"), tr("History"), this);
 	m_historyAction->setStatusTip(tr("View History"));
 	m_historyAction->setEnabled(false);
 	connect(m_historyAction, &QAction::triggered, m_testsTreeView, &FileTreeView::showHistory);
@@ -804,12 +993,14 @@ void TestsTabPage::createActions()
 	//----------------------------------
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
+	toolbarActions.push_back(m_SeparatorAction3);
 
-	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh Objects List"));
 	m_refreshAction->setEnabled(false);
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, m_testsTreeView, &FileTreeView::refreshFileTree);
+	toolbarActions.push_back(m_refreshAction);
 	addAction(m_refreshAction);
 
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -834,6 +1025,8 @@ void TestsTabPage::createActions()
 	m_testsTreeView->addAction(m_SeparatorAction3);
 
 	m_testsTreeView->addAction(m_refreshAction);
+
+	m_testsToolbar->addActions(toolbarActions);
 
 	return;
 }
@@ -923,9 +1116,6 @@ void TestsTabPage::setActionState()
 
 	// Enable edit only files with several extensions!
 	//
-	QStringList editableExtensions;
-	editableExtensions << tr("js");
-
 	bool editableExtension = false;
 	for (const QModelIndex& mi : selectedIndexList)
 	{
@@ -937,7 +1127,7 @@ void TestsTabPage::setActionState()
 		}
 
 		QString ext = QFileInfo(file->fileName()).suffix();
-		if (editableExtensions.contains(ext))
+		if (m_editableExtensions.endsWith(ext))
 		{
 			editableExtension = true;
 			break;
@@ -980,11 +1170,11 @@ void TestsTabPage::setActionState()
 
 	// Enable Actions
 	//
-	m_openFileAction->setEnabled(editableExtension && selectedIndexList.size() == 1);
+	m_openFileAction->setEnabled(selectedIndexList.size() == 1 && editableExtension == true);
 	m_newFileAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
 	m_newFolderAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == true);
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
-	m_renameFileAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
+	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
 
 	// Delete Items action
 	//
@@ -1109,7 +1299,9 @@ void TestsTabPage::closeDocument(const QString& fileName)
 	}
 	else
 	{
+		m_openDocumentsCombo->blockSignals(true);
 		m_openDocumentsCombo->removeItem(comboIndex);
+		m_openDocumentsCombo->blockSignals(false);
 	}
 
 	// Delete item from opened files list

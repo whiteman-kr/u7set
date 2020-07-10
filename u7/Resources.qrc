@@ -72,6 +72,7 @@
         <file>Images/dragndrop.png</file>
         <file>Images/CloseButtonWhite.svg</file>
         <file>Images/ComboDownArrow.svg</file>
+        <file>Images/SchemaNewFile.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
