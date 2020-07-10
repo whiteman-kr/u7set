@@ -95,11 +95,6 @@ void ProjectPropertyDialog::createPropertyList()
 			item->setAttribute(QLatin1String("readOnly"), true);
 			infoGroup->addSubProperty(item);
 
-			item = m_pManager->addProperty(QVariant::String, tr("Build"));
-			item->setValue(m_info.release());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			infoGroup->addSubProperty(item);
-
 			item = m_pManager->addProperty(QVariant::String, tr("Date"));
 			item->setValue(m_info.date());
 			item->setAttribute(QLatin1String("readOnly"), true);

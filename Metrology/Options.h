@@ -37,7 +37,6 @@ private:
 
 	QString				m_projectName;
 	int					m_id = -1;
-	QString				m_release;
 	QString				m_date;
 	int					m_changeset = 0;
 	QString				m_user;
@@ -49,7 +48,6 @@ public:
 
 	QString				projectName() { return m_projectName; }
 	int					id() { return m_id; }
-	QString				release() { return m_release; }
 	QString				date() { return m_date; }
 	int					changeset() { return m_changeset; }
 	QString				user() { return m_user; }
