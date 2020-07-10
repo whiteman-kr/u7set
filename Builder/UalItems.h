@@ -723,7 +723,7 @@ namespace Builder
 
 		QHash<QString, UalSignal*> m_idToSignalMap;
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
-		QHash<UalSignal*, QUuid> m_signalToPinsMap;
+		QMultiHash<UalSignal*, QUuid> m_signalToPinsMap;
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
 
 		SignalsHeap m_discreteSignalsHeap;

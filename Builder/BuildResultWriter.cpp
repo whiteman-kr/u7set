@@ -3,6 +3,7 @@
 #include "../u7/Settings.h"
 #include "../lib/DbController.h"
 #include "../lib/WUtils.h"
+#include "../lib/ConstStrings.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QCryptographicHash>
@@ -1023,13 +1024,9 @@ namespace Builder
 
 		bool result = true;
 
-		QString buildNoStr;
-
-		buildNoStr.sprintf("%06d", m_buildInfo.id);
-
-		QString buildDir = QString("%1/build-%2")
-		                   .arg(m_dbController->currentProject().projectName())
-		                   .arg(buildNoStr);
+		QString buildDir = QString("%1/build-%2").
+								arg(m_dbController->currentProject().projectName()).
+								arg(m_buildInfo.id, 6, 10, Latin1Char::ZERO);
 
 		QString buildFullPath = appDataPath + "/" + buildDir;
 

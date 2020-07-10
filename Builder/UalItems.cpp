@@ -3188,7 +3188,7 @@ namespace Builder
 		}
 
 		m_pinToSignalMap.insert(pinUuid, ualSignal);
-		m_signalToPinsMap.insertMulti(ualSignal, pinUuid);
+		m_signalToPinsMap.insert(ualSignal, pinUuid);
 	}
 
 	QString UalSignalsMap::getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin)

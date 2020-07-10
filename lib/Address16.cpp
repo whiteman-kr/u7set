@@ -1,4 +1,5 @@
 #include "Address16.h"
+#include "ConstStrings.h"
 
 Address16::Address16()
 {
@@ -117,7 +118,7 @@ QString Address16::toString(bool zeroPadded) const
 {
 	if (zeroPadded == true)
 	{
-		return QString("%1:%2").arg(m_offset, 5, 10, QLatin1Char('0')).arg(m_bit, 2, 10, QLatin1Char('0'));
+		return QString("%1:%2").arg(m_offset, 5, 10, Latin1Char::ZERO).arg(m_bit, 2, 10, Latin1Char::ZERO);
 	}
 
 	return QString("%1:%2").arg(m_offset).arg(m_bit);

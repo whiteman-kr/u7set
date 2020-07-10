@@ -6147,7 +6147,7 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 	}
 }
 
-void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs)
+void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs)
 {
 	AUTO_COMPLETE
 
@@ -6203,7 +6203,7 @@ void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equi
 		{
 			int signalID = q.value(0).toInt();
 
-			signalIDs->insertMulti(equipmentID, signalID);
+			signalIDs->insert(equipmentID, signalID);
 		}
 	}
 }

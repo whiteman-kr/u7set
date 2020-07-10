@@ -121,3 +121,10 @@ namespace XmlAttribute
 	const QString HEX_DATA_ID("HexDataID");
 }
 
+namespace Latin1Char
+{
+	const QLatin1Char ZERO('0');
+	const QLatin1Char SPACE(' ');
+}
+
+

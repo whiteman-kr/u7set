@@ -1,5 +1,6 @@
 #include "../Builder/LmMemoryMap.h"
 #include "../lib/WUtils.h"
+#include "../lib/ConstStrings.h"
 
 #include "UalItems.h"
 
@@ -383,7 +384,7 @@ namespace Builder
 
 		for(int i = 0; i < m_modules.module.size(); i++)
 		{
-			addRecord(memFile, m_modules.module[i], QString().sprintf("I/O module %02d", i + 1));
+			addRecord(memFile, m_modules.module[i], QString("I/O module %1").arg(i + 1, 2, 10, Latin1Char::ZERO));
 		}
 
 		memFile.append("");
@@ -394,7 +395,7 @@ namespace Builder
 
 		for(int i = 0; i < m_optoInterface.channel.size(); i++)
 		{
-			addRecord(memFile, m_optoInterface.channel[i], QString().sprintf("opto port %02d", i + 1));
+			addRecord(memFile, m_optoInterface.channel[i], QString("opto port %1").arg(i + 1, 2, 10, Latin1Char::ZERO));
 		}
 
 		memFile.append("");
@@ -479,8 +480,10 @@ namespace Builder
 		memFile.append(QString(" Address   Offset    Size      Description"));
 		memFile.append(QString().rightJustified(80, '-'));
 
-		QString str;
-		str.sprintf(" %05d               %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+		QString str = QString(" %1               %2     %3").
+							arg(memArea.startAddress(), 5, 10, Latin1Char::ZERO).
+							arg(memArea.sizeW(), 5, 10, Latin1Char::ZERO).
+							arg(title);
 
 		memFile.append(str);
 		memFile.append(QString().rightJustified(80, '-'));
@@ -500,15 +503,18 @@ namespace Builder
 
 		if (m_sectionStartAddrW == -1)
 		{
-			str.sprintf(" %05d               %05d     %s",
-						memArea.startAddress(), memArea.sizeW(), C_STR(title));
+			str = QString(" %1               %2     %3").
+						arg(memArea.startAddress(), 5, 10, Latin1Char::ZERO).
+						arg(memArea.sizeW(), 5, 10, Latin1Char::ZERO).
+						arg(title);
 		}
 		else
 		{
-			str.sprintf(" %05d     %05d     %05d     %s",
-						memArea.startAddress(),
-						memArea.startAddress() - m_sectionStartAddrW,
-						memArea.sizeW(), C_STR(title));
+			str = QString(" %1     %2     %3     %4").
+						arg(memArea.startAddress(), 5, 10, Latin1Char::ZERO).
+						arg(memArea.startAddress() - m_sectionStartAddrW, 5, 10, Latin1Char::ZERO).
+						arg(memArea.sizeW(), 5, 10, Latin1Char::ZERO).
+						arg(title);
 		}
 
 		memFile.append(str);
@@ -532,36 +538,37 @@ namespace Builder
 			{
 				if (m_sectionStartAddrW == -1)
 				{
-					str.sprintf(" %05d.%02d            00000.01  - %s",
-								signal.address().offset(), signal.address().bit(),
-								C_STR(signal.signalStrID()));
+					str = QString(" %1.%2            00000.01  - %3").
+								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal.address().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal.signalStrID());
 				}
 				else
 				{
-					str.sprintf(" %05d.%02d  %05d.%02d  00000.01  - %s",
-								signal.address().offset(),
-								signal.address().bit(),
-								signal.address().offset() - m_sectionStartAddrW,
-								signal.address().bit(),
-								C_STR(signal.signalStrID()));
+					str = QString(" %1.%2  %3.%4  00000.01  - %5").
+								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal.address().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal.address().offset() - m_sectionStartAddrW, 5, 10, Latin1Char::ZERO).
+								arg(signal.address().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal.signalStrID());
 				}
 			}
 			else
 			{
 				if (m_sectionStartAddrW == -1)
 				{
-					str.sprintf(" %05d               %05d     - %s",
-								signal.address().offset(),
-								signal.sizeW(),
-								C_STR(signal.signalStrID()));
+					str = QString(" %1               %2     - %3").
+								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal.sizeW(), 5, 10, Latin1Char::ZERO).
+								arg(signal.signalStrID());
 				}
 				else
 				{
-					str.sprintf(" %05d     %05d     %05d     - %s",
-								signal.address().offset(),
-								signal.address().offset() - m_sectionStartAddrW,
-								signal.sizeW(),
-								C_STR(signal.signalStrID()));
+					str = QString(" %1     %2     %3     - %4").
+								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal.address().offset() - m_sectionStartAddrW, 5, 10, Latin1Char::ZERO).
+								arg(signal.sizeW(), 5, 10, Latin1Char::ZERO).
+								arg(signal.signalStrID());
 				}
 			}
 
@@ -874,14 +881,14 @@ namespace Builder
 		return result;
 	}
 
-	bool LmMemoryMap::appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal*>& acquiredAnalogConstIntSignals,
-															   const QHash<float, UalSignal*>& acquiredAnalogConstFloatSignals)
+	bool LmMemoryMap::appendAcquiredAnalogConstSignalsInRegBuf(const QMultiHash<int, UalSignal*>& acquiredAnalogConstIntSignals,
+															   const QMultiHash<float, UalSignal*>& acquiredAnalogConstFloatSignals)
 	{
 		bool result = true;
 
 		QVector<int> sortedIntConsts = QVector<int>::fromList(acquiredAnalogConstIntSignals.uniqueKeys());
 
-		qSort(sortedIntConsts);
+		std::sort(sortedIntConsts.begin(), sortedIntConsts.end());
 
 		for(int intConst : sortedIntConsts)
 		{
@@ -891,7 +898,7 @@ namespace Builder
 
 		QVector<float> sortedFloatConsts = QVector<float>::fromList(acquiredAnalogConstFloatSignals.uniqueKeys());
 
-		qSort(sortedFloatConsts);
+		std::sort(sortedFloatConsts.begin(), sortedFloatConsts.end());
 
 		for(float floatConst : sortedFloatConsts)
 		{

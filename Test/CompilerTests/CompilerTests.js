@@ -92,23 +92,8 @@ function test_UAL_BUSSES_3_2_1(sim)
 
     // UAL_BUSSES_3_2_1_05
     //
-    try
-    {
-        let sg1 = sim.signalParamExt(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID_DU);
-    }
-    catch(err1)
-    {
-        assert(err1.message.includes("not found") === true);
-    }
-
-    try
-    {
-        let sg2 = sim.signalParamExt(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID_DU_SOCO);
-    }
-    catch(err2)
-    {
-        assert(err2.message.includes("not found") === true);
-    }
+    assert(sim.signalExists(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID_DU) === false);
+    assert(sim.signalExists(NOT_ACQUIRED_NOT_USED_INPUT_BUS_SIGNAL_ID_DU_SOCO) === false);
 
     return;
 }

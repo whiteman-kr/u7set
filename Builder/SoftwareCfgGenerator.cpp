@@ -674,8 +674,6 @@ namespace Builder
 
 			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
-				bool ok = false;
-
 				LanControllerInfo lanControllerInfo;
 				Hardware::Software* software = nullptr;
 

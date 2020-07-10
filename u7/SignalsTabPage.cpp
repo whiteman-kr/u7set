@@ -6,6 +6,7 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../lib/WUtils.h"
+#include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include <QMessageBox>
@@ -1448,7 +1449,7 @@ void SignalsModel::addSignal()
 	int signalCounter = dbController()->nextCounterValue();
 	if (signalCounter >= 0)
 	{
-		QString newId = QString(E::valueToString<E::SignalType>(signal.signalType()).toUpper() + "_%1").arg(signalCounter, 3, 10, QLatin1Char('0'));
+		QString newId = QString(E::valueToString<E::SignalType>(signal.signalType()).toUpper() + "_%1").arg(signalCounter, 3, 10, Latin1Char::ZERO);
 		signal.setAppSignalID('#' + newId);
 		signal.setCustomAppSignalID(newId);
 		signal.setCaption(newId);
@@ -2129,7 +2130,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		equipmentIDs.append(deviceSignal->equipmentId());
 	}
 
-	QHash<QString, int> signalIDsMap;
+	QMultiHash<QString, int> signalIDsMap;
 
 	bool result = dbc->getMultipleSignalsIDsWithEquipmentID(equipmentIDs, &signalIDsMap, nullptr);
 
@@ -4186,8 +4187,8 @@ void FindSignalDialog::markFistInstancesIfItTheyNotUnique()
 
 void FindSignalDialog::updateCounters()
 {
-	m_signalsQuantityLabel->setText(QString("Found signals (%1) / ").arg(m_totalSignalQuantity, 3, 10, QLatin1Char('0')));
-	m_canBeReplacedQuantityLabel->setText(QString("Can be replaced:(%1)").arg(m_replaceableSignalQuantity, 3, 10, QLatin1Char('0')));
+	m_signalsQuantityLabel->setText(QString("Found signals (%1) / ").arg(m_totalSignalQuantity, 3, 10, Latin1Char::ZERO));
+	m_canBeReplacedQuantityLabel->setText(QString("Can be replaced:(%1)").arg(m_replaceableSignalQuantity, 3, 10, Latin1Char::ZERO));
 
 	if (m_totalSignalQuantity != m_replaceableSignalQuantity)
 	{
