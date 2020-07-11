@@ -2203,7 +2203,8 @@ namespace Sim
 		quint16 err_ms = 0;
 		quint16 err_st = 0;
 
-		for (size_t i = 0, mask = 0x0001; i < 16; i++, mask <<= 1)
+		mask = 0x0001;
+		for (size_t i = 0; i < 16; i++, mask <<= 1)
 		{
 			int ac = alertedCount[i];
 
@@ -2782,7 +2783,7 @@ namespace Sim
 				float inputValue = dataParam->floatValue();
 
 				float prevValue = prevValueParam ? prevValueParam->floatValue() : 0.0f;	// First cycle prevValue is 0
-				float n = time / m_cycleDurationMs;
+				float n = static_cast<float>(time / m_cycleDurationMs);
 
 				std::feclearexcept(FE_ALL_EXCEPT);
 				float result = prevValue + inputValue / n - prevValue / n;
@@ -2808,8 +2809,8 @@ namespace Sim
 				qint32 inputValue = dataParam->signedIntValue();
 
 				instance->addParamSignedInt(o_result, inputValue);
-				instance->addParamSignedInt64(o_current, inputValue << 16);		// This input is extended for SI
-				instance->addParamSignedInt64(i_prev, inputValue << 16);		// This output is extended for SI
+				instance->addParamSignedInt64(o_current, static_cast<qint64>(inputValue) << 16);		// This input is extended for SI
+				instance->addParamSignedInt64(i_prev, static_cast<qint64>(inputValue) << 16);			// This output is extended for SI
 
 				isOverflow = false;
 				isUnderflow = false;
@@ -2971,9 +2972,9 @@ namespace Sim
 				break;
 			}
 
-			instance->addParamWord(o_med_val, median.value);
-			instance->addParamWord(o_max_val, maxOperand.value);
-			instance->addParamWord(o_min_val, minOperand.value);
+			instance->addParamSignedInt(o_med_val, static_cast<qint32>(median.value));
+			instance->addParamSignedInt(o_max_val, static_cast<qint32>(maxOperand.value));
+			instance->addParamSignedInt(o_min_val, static_cast<qint32>(minOperand.value));
 //			instance->addParamWord(o_med_index, median.operandIndex);			// This output is not used in AFB
 //			instance->addParamWord(o_max_index, maxOperand.operandIndex);		// This output is not used in AFB
 //			instance->addParamWord(o_min_index, minOperand.operandIndex);		// This output is not used in AFB
@@ -3864,7 +3865,7 @@ namespace Sim
 					}
 
 					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
-					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+					instance->addParamWord(o_underflow, setValLow.mathUnderflow() || setValHigh.mathUnderflow());
 				}
 				break;
 
@@ -3945,7 +3946,7 @@ namespace Sim
 					}
 
 					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
-					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+					instance->addParamWord(o_underflow, setValLow.mathUnderflow() || setValHigh.mathUnderflow());
 				}
 				break;
 
@@ -4112,7 +4113,7 @@ namespace Sim
 					}
 
 					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
-					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+					instance->addParamWord(o_underflow, setValLow.mathUnderflow() || setValHigh.mathUnderflow());
 				}
 				break;
 
@@ -4193,7 +4194,7 @@ namespace Sim
 					}
 
 					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
-					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+					instance->addParamWord(o_underflow, setValLow.mathUnderflow() || setValHigh.mathUnderflow());
 				}
 				break;
 

@@ -211,8 +211,8 @@ namespace Sim
 		{
 			if (m_currentMode == DeviceMode::Start)
 			{
-				if (bool ok = processStartMode();
-					ok == false)
+				bool processStartOk = processStartMode();
+				if (processStartOk == false)
 				{
 					return false;
 				}
@@ -442,12 +442,14 @@ namespace Sim
 		if (ramAreaSrc == nullptr)
 		{
 			SIM_FAULT(QString("Command movmem error, memory area src handle %1 not found").arg(memoryAreaHandleSrc));
+			return false;
 		}
 
 		RamArea* ramAreaDst = m_ram.memoryArea(memoryAreaHandleDst);
 		if (ramAreaDst == nullptr)
 		{
 			SIM_FAULT(QString("Command movmem error, memory area dst handle %1 not found").arg(memoryAreaHandleDst));
+			return false;
 		}
 
 		QByteArray buffer;
@@ -588,6 +590,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint16 data = 0;
@@ -680,6 +683,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint16 data = 0;
@@ -770,6 +774,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint32 data = 0;

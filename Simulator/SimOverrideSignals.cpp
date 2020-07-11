@@ -623,9 +623,9 @@ namespace Sim
 					//
 					int maxIndex = m_signals.begin()->second.index();
 
-					for (const auto&[id, s] : m_signals)
+					for (const auto&[sid, s] : m_signals)
 					{
-						Q_UNUSED(id);
+						Q_UNUSED(sid);
 						maxIndex = std::max(maxIndex, s.index());
 					}
 

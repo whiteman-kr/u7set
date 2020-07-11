@@ -15,6 +15,7 @@ CONFIG += staticlib
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17
+win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
 
 # Optimization flags
 #

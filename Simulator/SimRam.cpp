@@ -464,6 +464,7 @@ namespace Sim
 			break;
 		default:
 			assert(false);
+			valueToWrite = {};
 		}
 
 		// Apply override to data

@@ -44,7 +44,7 @@ namespace Sim
 
 				if (flagSignal.isConst() == true)
 				{
-					flagsConsts[flagConstsCount] = std::make_pair(flagType, flagSignal.constValue());
+					flagsConsts[flagConstsCount] = std::make_pair(flagType, static_cast<quint32>(flagSignal.constValue()));
 					flagConstsCount ++;
 				}
 				else
@@ -913,7 +913,7 @@ static const AppSignalParam dummy;
 
 	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& /*appSignalId*/) const
 	{
-		int todo_setpointsByInputSignalId = 0;
+		//int todo_setpointsByInputSignalId = 0;
 		//Q_ASSERT(false);		// TO DO
 		return {};
 	}
