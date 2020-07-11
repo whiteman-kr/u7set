@@ -14,8 +14,8 @@ namespace Sim
 		virtual ~CommandProcessor_LM5_LM6();
 
 	public:
-
-		virtual void cacheCommands(std::vector<DeviceCommand>* commands) override;
+		virtual void beforeAppLogicParse() override;
+		virtual void afterAppLogicParse(std::vector<DeviceCommand>* commands) override;
 
 		// Update platform interface, this function is called before work cyle,
 		// to update such platform inteface signals as Blink.
@@ -32,182 +32,182 @@ namespace Sim
 		// Code: 1
 		// Description: No operation
 		//
-		void parse_nop(DeviceCommand* command) const;
+		void parse_nop(DeviceCommand* command);
 		void command_nop(const DeviceCommand& command);
 
 		// Command: startafb
 		// Code: 2
 		// Description: Execute AFB
 		//
-		void parse_startafb(DeviceCommand* command) const;
+		void parse_startafb(DeviceCommand* command);
 		void command_startafb(const DeviceCommand& command);
 
 		// Command: stop
 		// Code: 3
 		// Description: Stop IDR phase and start ALP, if ALP is current phase then stop work cycle
 		//
-		void parse_stop(DeviceCommand* command) const;
+		void parse_stop(DeviceCommand* command);
 		void command_stop(const DeviceCommand& command);
 
 		// Command: mov
 		// Code: 4
 		// Description: Move word from RAM to RAM
 		//
-		void parse_mov(DeviceCommand* command) const;
+		void parse_mov(DeviceCommand* command);
 		void command_mov(const DeviceCommand& command);
 
 		// Command: movmem
 		// Code: 5
 		// Description: Move N words from RAM to RAM
 		//
-		void parse_movmem(DeviceCommand* command) const;
+		void parse_movmem(DeviceCommand* command);
 		void command_movmem(const DeviceCommand& command);
 
 		// Command: movc
 		// Code: 6
 		// Description: Write word const to RAM
 		//
-		void parse_movc(DeviceCommand* command) const;
+		void parse_movc(DeviceCommand* command);
 		void command_movc(const DeviceCommand& command);
 
 		// Command: movbc
 		// Code: 7
 		// Description: Write constant bit to RAM
 		//
-		void parse_movbc(DeviceCommand* command) const;
+		void parse_movbc(DeviceCommand* command);
 		void command_movbc(const DeviceCommand& command);
 
 		// Command: wrfb
 		// Code: 8
 		// Description: Read 16bit data from RAM and write to AFB input
 		//
-		void parse_wrfb(DeviceCommand* command) const;
+		void parse_wrfb(DeviceCommand* command);
 		void command_wrfb(const DeviceCommand& command);
 
 		// Command: rdfb
 		// Code: 9
 		// Description: Read 16-bit word from AFB output and write to memory
 		//
-		void parse_rdfb(DeviceCommand* command) const;
+		void parse_rdfb(DeviceCommand* command);
 		void command_rdfb(const DeviceCommand& command);
 
 		// Command: wrfbc
 		// Code: 10
 		// Description: Write constant word to AFB input
 		//
-		void parse_wrfbc(DeviceCommand* command) const;
+		void parse_wrfbc(DeviceCommand* command);
 		void command_wrfbc(const DeviceCommand& command);
 
 		// Command: wrfbb
 		// Code: 11
 		// Description: Read bit from RAM and write it to AFB
 		//
-		void parse_wrfbb(DeviceCommand* command) const;
+		void parse_wrfbb(DeviceCommand* command);
 		void command_wrfbb(const DeviceCommand& command);
 
 		// Command: rdfbb
 		// Code: 12
 		// Description: Read bit from AFB and write it to RAM
 		//
-		void parse_rdfbb(DeviceCommand* command) const;
+		void parse_rdfbb(DeviceCommand* command);
 		void command_rdfbb(const DeviceCommand& command);
 
 		// Command: rdfbcmp
 		// Code: 13
 		// Description: Read 16-bit data from AFB instance and compare it with constant, set compare bit if equal
 		//
-		void parse_rdfbcmp(DeviceCommand* command) const;
+		void parse_rdfbcmp(DeviceCommand* command);
 		void command_rdfbcmp(const DeviceCommand& command);
 
 		// Command: setmem
 		// Code: 14
 		// Description: Set memory area to 16-bit word constant
 		//
-		void parse_setmem(DeviceCommand* command) const;
+		void parse_setmem(DeviceCommand* command);
 		void command_setmem(const DeviceCommand& command);
 
 		// Command: movb
 		// Code: 15
 		// Description: Move bit from RAM to RAM
 		//
-		void parse_movb(DeviceCommand* command) const;
+		void parse_movb(DeviceCommand* command);
 		void command_movb(const DeviceCommand& command);
 
 		// Command: appstart
 		// Code: 17
 		// Description: Save ALP phase start address
 		//
-		void parse_appstart(DeviceCommand* command) const;
+		void parse_appstart(DeviceCommand* command);
 		void command_appstart(const DeviceCommand& command);
 
 		// Command: mov32
 		// Code: 18
 		// Description: Move 32-bit data from RAM to RAM
 		//
-		void parse_mov32(DeviceCommand* command) const;
+		void parse_mov32(DeviceCommand* command);
 		void command_mov32(const DeviceCommand& command);
 
 		// Command: movc32
 		// Code: 19
 		// Description: Move 32bit constant to RAM
 		//
-		void parse_movc32(DeviceCommand* command) const;
+		void parse_movc32(DeviceCommand* command);
 		void command_movc32(const DeviceCommand& command);
 
 		// Command: wrfb32
 		// Code: 20
 		// Description: Read 32bit data from RAM and write to AFB input
 		//
-		void parse_wrfb32(DeviceCommand* command) const;
+		void parse_wrfb32(DeviceCommand* command);
 		void command_wrfb32(const DeviceCommand& command);
 
 		// Command: rdfb32
 		// Code: 21
 		// Description: Read 32bit data from AFB output and write it to RAM
 		//
-		void parse_rdfb32(DeviceCommand* command) const;
+		void parse_rdfb32(DeviceCommand* command);
 		void command_rdfb32(const DeviceCommand& command);
 
 		// Command: wrfbc32
 		// Code: 22
 		// Description: Write 32bit constant to FunctionalBlock input
 		//
-		void parse_wrfbc32(DeviceCommand* command) const;
+		void parse_wrfbc32(DeviceCommand* command);
 		void command_wrfbc32(const DeviceCommand& command);
 
 		// Command: rdfbcmp32
 		// Code: 23
 		// Description: Read 32-bit data from AFB instance and compare it with constant, set compare bit if equal
 		//
-		void parse_rdfbcmp32(DeviceCommand* command) const;
+		void parse_rdfbcmp32(DeviceCommand* command);
 		void command_rdfbcmp32(const DeviceCommand& command);
 
 		// Command: movcmpf
 		// Code: 24
 		// Description: Write compare flag to memory [flag result from rdfbcmp(32)]
 		//
-		void parse_movcmpf(DeviceCommand* command) const;
+		void parse_movcmpf(DeviceCommand* command);
 		void command_movcmpf(const DeviceCommand& command);
 
 		// Command: pmov
 		// Code: 25
 		// Description: Copy 16-bit word from memory to memory written in prior cycle
 		//
-		void parse_pmov(DeviceCommand* command) const;
+		void parse_pmov(DeviceCommand* command);
 		void command_pmov(const DeviceCommand& command);
 
 		// Command: pmov32
 		// Code: 26
 		// Description: Copy 32-bit data from memory to memory written in prior cycle
 		//
-		void parse_pmov32(DeviceCommand* command) const;
+		void parse_pmov32(DeviceCommand* command);
 		void command_pmov32(const DeviceCommand& command);
 
 		// Command: fillb
 		// Code: 27
 		// Description: Fill 16-bit word with 1-bit constant and write it to memory
 		//
-		void parse_fillb(DeviceCommand* command) const;
+		void parse_fillb(DeviceCommand* command);
 		void command_fillb(const DeviceCommand& command);
 
 		//

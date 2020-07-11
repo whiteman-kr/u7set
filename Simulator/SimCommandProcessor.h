@@ -35,7 +35,8 @@ namespace Sim
 		//
 		bool parseFunc(QString parseFunc, DeviceCommand* command);
 
-		virtual void cacheCommands(std::vector<DeviceCommand>* commands);
+		virtual void beforeAppLogicParse();
+		virtual void afterAppLogicParse(std::vector<DeviceCommand>* commands);
 
 		// Update platform interface, this function is called before work cyle,
 		// to update such platform inteface signals as Blink.
@@ -63,6 +64,11 @@ namespace Sim
 		//
 		void checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, const QString& paramName) const;
 
+		// Memory sanitizer
+		//
+		void sanitizerWrite(quint32 address, quint32 wordCount);
+		void sanitizerCheck(quint32 address, quint32 wordCount) const;
+
 		// Generation command string functions (helpers)
 		//
 		QString strCommand(QString command) const;
@@ -81,6 +87,11 @@ namespace Sim
 
 	protected:
 		DeviceEmulator* m_device = nullptr;
+
+		std::set<quint32> m_parseMemorySanitizer;	// This set is used only during parsing app logic code
+													// It contains already written addresses or addresses wich are
+													// written by platform logic (like IO module, receiving data from optic channel, ...)
+													// m_parseMemorySanitizer is used to detect reading uninitialized memory
 	};
 }
 

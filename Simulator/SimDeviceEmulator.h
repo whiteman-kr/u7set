@@ -85,6 +85,15 @@ namespace Sim
 		} flags;
 	};
 
+	enum class DeviceError
+	{
+		Ok,
+		NoCommandProcessor,
+		AfbComponentNotFound,
+		InitEepromError,
+		ParsingAppLogicError
+	};
+
 
 	class DeviceCommand
 	{
@@ -148,12 +157,12 @@ namespace Sim
 
 	public:
 		bool clear();
-		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
-				  const LmDescription& lmDescription,
-				  const Eeprom& tuningEeprom,
-				  const Eeprom& confEeprom,
-				  const Eeprom& appLogicEeprom,
-				  const Connections& connections);
+		DeviceError init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
+						 const LmDescription& lmDescription,
+						 const Eeprom& tuningEeprom,
+						 const Eeprom& confEeprom,
+						 const Eeprom& appLogicEeprom,
+						 const Connections& connections);
 
 		bool powerOff();
 		bool reset();
