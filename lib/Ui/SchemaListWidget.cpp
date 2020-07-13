@@ -327,7 +327,7 @@ void SchemaListTreeWidget::slot_doubleClicked(const QModelIndex&)
 
 		if (si->details != nullptr)
 		{
-			emit openSchemaRequest(si->details->m_schemaId);
+			emit openSchemaRequest(si->details->m_schemaId, {});
 			return;
 		}
 	}
@@ -716,7 +716,7 @@ void SchemaListWidget::treeContextMenu(const QPoint& pos)
 	m.addAction(tr("Open..."),
 				[this, currentItem]()
 				{
-					emit this->openSchemaRequest(currentItem->details->m_schemaId);
+		            emit this->openSchemaRequest(currentItem->details->m_schemaId, {});
 				});
 
 	m.exec(m_treeWidget->mapToGlobal(pos));

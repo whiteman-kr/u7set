@@ -27,7 +27,7 @@ private slots:
 	void slot_doubleClicked(const QModelIndex& /*index*/);
 
 signals:
-	void openSchemaRequest(QString schemaId);
+	void openSchemaRequest(QString schemaId, QStringList highlightIds);
 
 public:
 	QString filter() const;
@@ -77,7 +77,7 @@ private slots:
 	void treeContextMenu(const QPoint& pos);
 
 signals:
-	void openSchemaRequest(QString schemaId);
+	void openSchemaRequest(QString schemaId, QStringList highlightIds);
 
 private:
 	SchemaListTreeWidget* m_treeWidget = nullptr;

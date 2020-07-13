@@ -25,7 +25,7 @@ private slots:
 	void onSignalParamAndUnitsArrived();
 
 signals:
-	void openSchema(QString schemaId);
+	void openSchema(QString schemaId, QStringList highlightIds);
 
 private:
 	virtual QStringList schemasByAppSignalId(const QString& appSignalId) override;

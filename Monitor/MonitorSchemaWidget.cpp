@@ -42,41 +42,10 @@ MonitorSchemaWidget::~MonitorSchemaWidget()
 
 void MonitorSchemaWidget::createActions()
 {
-	// New tab (duplicate this one)
-	//
-//	m_newTabAction = new QAction(tr("New Tab"), this);
-//	m_newTabAction->setEnabled(true);
-//	QList<QKeySequence> newTabShortcuts;
-//	newTabShortcuts << QKeySequence::AddTab;
-//	newTabShortcuts << QKeySequence::New;
-//	m_newTabAction->setShortcuts(newTabShortcuts);
-//	//m_newTabAction->setShortcutContext(Qt::WidgetShortcut);		// To avoid abigious with main menu same QAction
-//	addAction(m_newTabAction);
-
-//	connect(m_newTabAction, &QAction::triggered, this, [this](){ emit signal_newTab(this);});
-
-//	// Closet current tab
-//	//
-//	m_closeTabAction = new QAction(tr("Close Tab"), this);
-//	m_closeTabAction->setEnabled(true);
-//	//m_closeTabAction->setShortcuts(QKeySequence::Close);			// To avoid abigious with main menu same QAction
-//	addAction(m_closeTabAction);
-
-//	connect(m_closeTabAction, &QAction::triggered, this, [this](){ emit signal_closeTab(this);});
-
-	// --
-	//
-
 }
 
 void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
-	// Disable/enable actions
-	//
-
-	//m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
-
-
 	// Signals items
 	//
 	std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
@@ -125,10 +94,6 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 		}
 	}
-
-//
-//	actions << m_newTabAction;
-//	actions << m_closeTabAction;
 
 	return;
 }
