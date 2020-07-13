@@ -220,7 +220,8 @@ SOURCES +=\
     DialogShortcuts.cpp \
     ../lib/Ui/UiTools.cpp \
     SvgEditor.cpp \
-    ../lib/PropertyTable.cpp
+	../lib/PropertyTable.cpp \
+    ../lib/SignalSetProvider.cpp
 
 
 HEADERS  += \
@@ -380,7 +381,8 @@ HEADERS  += \
     DialogShortcuts.h \
     ../lib/Ui/UiTools.h \
     SvgEditor.h \
-    ../lib/PropertyTable.h
+	../lib/PropertyTable.h \
+    ../lib/SignalSetProvider.h
 
 
 FORMS    += \

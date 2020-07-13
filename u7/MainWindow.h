@@ -13,6 +13,7 @@ class BuildTabPage;
 class UploadTabPage;
 class SimulatorTabPage;
 class DialogShortcuts;
+class SignalSetProvider;
 
 namespace Ui {
 class MainWindow;
@@ -139,6 +140,7 @@ private:
 	SimulatorTabPage* m_simulatorTabPage = nullptr;
 
 	DbController* m_dbController = nullptr;
+	SignalSetProvider* m_signalSetProvider = nullptr;
 
 	DialogShortcuts* m_dialogShortcuts = nullptr;
 

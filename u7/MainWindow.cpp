@@ -26,6 +26,7 @@
 #include "../lib/LogicModuleSet.h"
 #include "DialogShortcuts.h"
 #include "../lib/Ui/UiTools.h"
+#include "../lib/SignalSetProvider.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -54,11 +55,13 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::changeCurrentTab, getCentralWidget(), &CentralWidget::setCurrentWidget);
 
+	m_signalSetProvider = new SignalSetProvider();
+
 	// Add main tab pages
 	//
 	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
-	m_signalsTab = new SignalsTabPage(dbController(), nullptr);
+	m_signalsTab = new SignalsTabPage(m_signalSetProvider, dbController(), nullptr);
 
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
