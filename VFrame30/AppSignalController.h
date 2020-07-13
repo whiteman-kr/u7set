@@ -80,14 +80,14 @@ namespace VFrame30
 
 		// Check for functions result
 		//
-		if  (param == undefined)
+		if  (param === undefined)
 		{
 			// Signal static parameters request failed
 			//
 			...
 			return;
 		}
-		if  (state == undefined)
+		if  (state === undefined)
 		{
 			// Signal state request failed
 			//
@@ -98,7 +98,7 @@ namespace VFrame30
 		// Further processing
 		//
 
-		if (state.Valid == true)
+		if (state.Valid === true)
 		{
 			var text = param.Caption;
 			...

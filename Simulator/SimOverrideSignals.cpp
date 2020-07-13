@@ -1,6 +1,7 @@
 #include "SimOverrideSignals.h"
 #include "Simulator.h"
 #include "SimRam.h"
+#include "SimAppSignalManager.h"
 
 namespace Sim
 {
@@ -771,6 +772,13 @@ namespace Sim
 					osp.m_scriptEngine = std::make_unique<QJSEngine>();
 					osp.m_scriptEngine->installExtensions(QJSEngine::ConsoleExtension);
 
+					// Create global variable "signals"
+					//
+					QJSValue appSignalManager = osp.m_scriptEngine->newQObject(new ScriptAppSignalManager{&m_simulator->appSignalManager(), osp.m_scriptEngine.get()});
+					osp.m_scriptEngine->globalObject().setProperty("signals", appSignalManager);
+
+					// Evaluate override script
+					//
 					*osp.m_scriptValue = osp.m_scriptEngine->evaluate(osp.script());
 
 					if (osp.m_scriptValue->isError() == true)
