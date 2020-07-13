@@ -12,6 +12,7 @@ public:
 	void clearSignals();
 
 	const SignalSet& signalSet() const	{ return m_signalSet; }
+	static void trimSignalTextFields(Signal& signal);
 
 	int signalCount() { return m_signalSet.count(); }
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
@@ -40,6 +41,9 @@ public:
 	void saveSignal(Signal& signal);
 	QVector<int> cloneSignals(const QSet<int>& signalIDs);
 
+	void showError(const ObjectState& state);
+	void showErrors(const QVector<ObjectState>& states);
+
 signals:
 	void error(const QString& message) const;
 	void usersLoaded() const;
@@ -58,10 +62,7 @@ public slots:
 	void loadSignal(int signalId);
 
 private:
-	QString errorMessage(const ObjectState& state) const;	// Converts ObjectState to human readable text
-	void showError(const ObjectState& state) const;
-	void showErrors(const QVector<ObjectState>& states) const;
-	static void trimSignalTextFields(Signal& signal);
+	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
 
 	DbController* m_dbController;
 	QWidget* m_parentWidget;	//used by DbController

@@ -217,6 +217,7 @@ public:
 	SignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
 
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
+	void detectNewProperties(const Signal& signal);
 
 
 signals:
@@ -226,13 +227,11 @@ signals:
 	void updateColumnList();
 
 public slots:
-	void addSignal();
 	void updateSignalsPropertyBehaviour();
 	void beginAddProperty(int propertyIndex);
 	void endAddProperty();
 
 private:
-	void detectNewProperties(const Signal& signal);
 	void loadNotSpecificProperties(Signal& signal);
 	// Data
 	//
@@ -268,6 +267,7 @@ private:
 	void applyNewFilter();
 
 	SignalsModel* m_sourceModel;
+	SignalSetProvider* m_signalSetProvider;
 	int m_signalType = ST_ANY;
 	int m_idFilterField = FI_EQUIPMENT_ID;
 	QStringList m_strIdMasks;
@@ -292,6 +292,7 @@ public:
 
 private:
 	SignalsModel* m_sourceModel;
+	SignalSetProvider* m_signalSetProvider;
 	QTableView* m_view;
 	QVector<Qt::CheckState> states;
 };
@@ -312,6 +313,7 @@ protected:
 
 private:
 	SignalsModel *m_sourceModel;
+	SignalSetProvider* m_signalSetProvider;
 	CheckedoutSignalsModel* m_proxyModel;
 	QTableView* m_signalsView = nullptr;
 	QPlainTextEdit* m_commentEdit;
@@ -338,6 +340,7 @@ protected:
 
 private:
 	SignalsModel *m_sourceModel;
+	SignalSetProvider* m_signalSetProvider;
 	CheckedoutSignalsModel* m_proxyModel;
 };
 
@@ -439,6 +442,8 @@ private:
 	SignalsProxyModel* m_signalProxyModel = nullptr;
 	SignalsModel* m_signalModel = nullptr;
 
+	SignalSetProvider* m_signalSetProvider = nullptr;
+
 	QLineEdit* m_findString = nullptr;
 	QLineEdit* m_replaceString = nullptr;
 
@@ -486,6 +491,7 @@ public:
 
 	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
 	int getMiddleVisibleRow();
+	bool editSignals(QVector<int> ids);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -507,6 +513,7 @@ public slots:
 	void onTabPageChanged();
 	void stopLoadingSignals();
 
+	void addSignal();
 	void editSignal();
 	void cloneSignal();
 	void deleteSignal();

@@ -119,7 +119,7 @@ bool SignalSetProvider::checkoutSignal(int index)
 
 // Converts ObjectState to human readable message
 //
-QString SignalSetProvider::errorMessage(const ObjectState& state) const
+QString SignalSetProvider::errorMessage(const ObjectState& state)
 {
 	switch(state.errCode)
 	{
@@ -135,7 +135,7 @@ QString SignalSetProvider::errorMessage(const ObjectState& state) const
 
 // Throws error signal with human readable message for single ObjectState
 //
-void SignalSetProvider::showError(const ObjectState& state) const
+void SignalSetProvider::showError(const ObjectState& state)
 {
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -149,7 +149,7 @@ void SignalSetProvider::showError(const ObjectState& state) const
 
 // Throws single error signal with human readable message for set of ObjectState
 //
-void SignalSetProvider::showErrors(const QVector<ObjectState>& states) const
+void SignalSetProvider::showErrors(const QVector<ObjectState>& states)
 {
 	QString message;
 
@@ -375,6 +375,33 @@ bool SignalSetProvider::undoSignal(int id)
 	return true;
 }
 
+void SignalSetProvider::deleteSignal(int signalID)
+{
+	ObjectState state;
+	dbController()->deleteSignal(signalID, &state, m_parentWidget);
+	if (state.errCode != ERR_SIGNAL_OK)
+	{
+		showError(state);
+	}
+}
+
+void SignalSetProvider::deleteSignals(const QSet<int>& signalIDs)
+{
+	for (const int signalID : signalIDs)
+	{
+		deleteSignal(signalID);
+	}
+	loadSignals();
+}
+
+void SignalSetProvider::loadSignalSet(QVector<int> keys)
+{
+	for (int i = 0; i < keys.count(); i++)
+	{
+		loadSignal(keys[i]);
+	}
+}
+
 void SignalSetProvider::loadSignal(int signalId)
 {
 	int index = keyIndex(signalId);
@@ -501,6 +528,15 @@ QVector<int> SignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
 	}
 	loadSignals();
 	return resultSignalIDs;
+}
+
+void SignalSetProvider::clearSignals()
+{
+	if (m_signalSet.count() != 0)
+	{
+		m_signalSet.clear();
+		emit signalCountChanged();
+	}
 }
 
 void SignalSetProvider::trimSignalTextFields(Signal& signal)

@@ -8,6 +8,7 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
 #include "../lib/WidgetUtils.h"
+#include "../lib/SignalSetProvider.h"
 
 
 // Returns vector of pairs,
@@ -92,7 +93,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 				continue;
 			}
 			ObjectState state;
-			SignalsModel::trimSignalTextFields(*signalPtrVector[i]);
+			SignalSetProvider::trimSignalTextFields(*signalPtrVector[i]);
 			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
