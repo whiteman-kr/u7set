@@ -35,7 +35,7 @@ public:
 public slots:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
-	void openSchemaTabPage(QString schemaId);
+	void openSchemaTabPage(QString schemaId, QStringList highlightIds);
 
 protected:
 	void createToolBar();

@@ -16,7 +16,7 @@ public slots:
 	void updateSchemaList();
 
 signals:
-	void openSchemaTabPage(QString schemaId);
+	void openSchemaTabPage(QString schemaId, QStringList highlightIds);
 
 private:
 	SchemaListWidget* m_schemaListWidget = nullptr;

@@ -928,4 +928,80 @@ static const AppSignalParam dummy;
 		return m_simulator;
 	}
 
+
+	//
+	//	ScriptAppSignalManager
+	//
+	ScriptAppSignalManager::ScriptAppSignalManager(const IAppSignalManager* appSignalManager, QObject* parent) :
+		QObject(parent),
+		m_appSignalManager(appSignalManager)
+	{
+		assert(m_appSignalManager);
+	}
+
+	QJSValue ScriptAppSignalManager::signalParam(QString signalId) const
+	{
+		return signalParam(::calcHash(signalId));
+	}
+
+	QJSValue ScriptAppSignalManager::signalParam(Hash signalHash) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+		AppSignalParam s = m_appSignalManager->signalParam(signalHash, &ok);
+
+		if (ok == false)
+		{
+			return {};
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return {};
+		}
+
+		return engine->toScriptValue(s);
+	}
+
+	QJSValue ScriptAppSignalManager::signalState(QString signalId) const
+	{
+		return signalState(::calcHash(signalId));
+	}
+
+	QJSValue ScriptAppSignalManager::signalState(Hash signalHash) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+		AppSignalState s = m_appSignalManager->signalState(signalHash, &ok);
+
+		if (ok == false)
+		{
+			return {};
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return {};
+		}
+
+		return engine->toScriptValue(s);
+	}
+
+
 }
