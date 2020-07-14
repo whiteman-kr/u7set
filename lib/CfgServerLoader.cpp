@@ -184,7 +184,8 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
 	m_enableDownloadConfiguration(enableDownloadCfg),
 	m_logger(logger),
-	m_timer(this)
+	m_timer(this),
+	m_getFileBlockedMutex(QMutex::RecursionMode::NonRecursive)
 {
 	if (m_registerTypes == true)
 	{
@@ -241,46 +242,50 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 {
 	// execute in context of calling thread
 	//
-	if (fileData == nullptr || errorStr == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(fileData);
+	TEST_PTR_RETURN_FALSE(errorStr);
 
 	fileData->clear();
 
-	WaitForSignalHelper wsh(this, SIGNAL(signal_fileReady()));
+	bool result = false;
+
+	m_getFileBlockedMutex.lock();
 
 	m_localFileData.clear();
 
 	emit signal_getFile(pathFileName, &m_localFileData);
 
-	if (wsh.wait(6000) == true)
+	bool res = m_fileReadyCondition.wait(&m_getFileBlockedMutex, 6000);
+
+	if (res == true)
 	{
 		*errorStr = getLastErrorStr();
 
-		if (errorStr->isEmpty())
+		if (errorStr->isEmpty() == true)
 		{
 			fileData->swap(m_localFileData);
-			return true;
+			result = true;
 		}
 		else
 		{
-			return false;
+			result = false;
 		}
 	}
+	else
+	{
+		*errorStr = tr("File reading timeout");
+		result = false;
+	}
 
-	*errorStr = tr("File reading timeout");
+	m_getFileBlockedMutex.unlock();
 
-	return false;
+	return result;
 }
 
 bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 {
 	// execute in context of calling thread
 	//
-	setFileReady(false);
-
 	if (fileData == nullptr)
 	{
 		assert(false);
@@ -296,11 +301,8 @@ bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 
 bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr)
 {
-	if (fileData == nullptr || errorStr == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(fileData);
+	TEST_PTR_RETURN_FALSE(errorStr);
 
 	QString pathFileName = getFilePathNameByID(fileID);
 
@@ -325,17 +327,6 @@ bool CfgLoader::hasFileID(QString fileID) const
 	QMutexLocker l(&m_mutex);
 
 	return m_fileIDPathMap.contains(fileID);
-}
-
-bool CfgLoader::isFileReady()
-{
-	m_mutex.lock();
-
-	bool result = m_fileReady;
-
-	m_mutex.unlock();
-
-	return result;
 }
 
 Builder::BuildInfo CfgLoader::buildInfo()
@@ -413,14 +404,14 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 	if (m_configurationXmlReady == false)
 	{
 		m_lastError = Tcp::FileTransferResult::ConfigurationIsNotReady;
-		setFileReady(true);
+		emitFileReady();
 		return;
 	}
 
 	if (m_cfgFilesInfo.contains(fileName) == false)
 	{
 		m_lastError = Tcp::FileTransferResult::NotFoundRemoteFile;
-		setFileReady(true);
+		emitFileReady();
 		return;
 	}
 
@@ -429,7 +420,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 		qDebug() << "File " << fileName << " already exists, md5 = " << m_cfgFilesInfo[fileName].md5;
 
 		m_lastError = Tcp::FileTransferResult::Ok;
-		setFileReady(true);
+		emitFileReady();
 		return;
 	}
 
@@ -560,7 +551,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
-		setFileReady(true);
+		emitFileReady();
 		return;
 	}
 
@@ -577,7 +568,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 			assert(false);
 
 			m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::FileDataCorrupted);
-			setFileReady(true);
+			emitFileReady();
 			return;
 		}
 	}
@@ -628,18 +619,18 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 			{
 				assert(false);
 				m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::InternalError);
-				setFileReady(true);
+				emitFileReady();
 			}
 			else
 			{
 				if (readCfgFile(fileName, m_currentDownloadRequest.fileData, m_currentDownloadRequest.needUncompress) == false)
 				{
 					m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::LocalFileReadingError);
-					setFileReady(true);
+					emitFileReady();
 				}
 				else
 				{
-					setFileReady(true);
+					emitFileReady();
 				}
 			}
 		}
@@ -870,15 +861,11 @@ void CfgLoader::configurationChanged()
 	emit signal_configurationChanged();
 }
 
-void CfgLoader::setFileReady(bool value)
+void CfgLoader::emitFileReady()
 {
-	m_mutex.lock();
-
-	m_fileReady = value;
-
-	m_mutex.unlock();
-
 	emit signal_fileReady();
+
+	m_fileReadyCondition.wakeAll();
 }
 
 QString CfgLoader::getFilePathNameByID(QString fileID) const
@@ -991,9 +978,7 @@ bool CfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fi
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
 
-	AUTO_LOCK(m_mutex);
-
-	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);;
+	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
 }
 
 bool CfgLoaderThread::getFile(const QString& pathFileName, QByteArray* fileData)
@@ -1009,8 +994,6 @@ bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* file
 {
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
-
-	AUTO_LOCK(m_mutex);
 
 	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);;
 }
@@ -1029,13 +1012,6 @@ bool CfgLoaderThread::hasFileID(QString fileID) const
 	AUTO_LOCK(m_mutex);
 
 	return m_cfgLoader->hasFileID(fileID);
-}
-
-bool CfgLoaderThread::isFileReady()
-{
-	AUTO_LOCK(m_mutex);
-
-	return m_cfgLoader->isFileReady();;
 }
 
 Builder::BuildInfo CfgLoaderThread::buildInfo()

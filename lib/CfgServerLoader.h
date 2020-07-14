@@ -104,8 +104,6 @@ public:
 	Tcp::FileTransferResult getLastError() const { return m_lastError; }
 	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
 
-	bool isFileReady();
-
 	Builder::BuildInfo buildInfo();
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
@@ -156,7 +154,7 @@ private:
 
 	void configurationChanged();
 
-	void setFileReady(bool value);
+	void emitFileReady();
 
 	QString getFilePathNameByID(QString fileID) const;
 
@@ -222,7 +220,9 @@ private:
 	bool m_hasValidSavedConfiguration = false;
 	CfgFilesInfo m_savedCfgFileInfo;
 
-	bool m_fileReady = false;
+	QWaitCondition m_fileReadyCondition;
+	QMutex m_getFileBlockedMutex;
+
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
 	QMap<QString, QString> m_fileIDPathMap;
@@ -266,8 +266,6 @@ public:
 	bool getFileByID(const QString& fileID, QByteArray* fileData);
 
 	bool hasFileID(QString fileID) const;
-
-	bool isFileReady();
 
 	Builder::BuildInfo buildInfo();
 
