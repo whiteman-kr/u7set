@@ -246,7 +246,7 @@ namespace ExtWidgets
 		if (sm == nullptr)
 		{
 			Q_ASSERT(sm);
-			return nullptr;
+			return false;
 		}
 
 		int leftPropertyRow = -1;
