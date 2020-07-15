@@ -27,15 +27,25 @@
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
+SignalPropertyManager* SignalPropertyManager::m_instance = nullptr;
+
 SignalPropertyManager::SignalPropertyManager(DbController* dbController, QWidget* parentWidget) :
 	m_dbController(dbController),
 	m_parentWidget(parentWidget)
 {
+	assert (m_instance == nullptr);
 	for (size_t i = 0; i < m_propertyDescription.size(); i++)
 	{
 		m_propertyName2IndexMap[m_propertyDescription[i].name] = static_cast<int>(i);
 	}
 	loadNotSpecificProperties();
+	m_instance = this;
+}
+
+SignalPropertyManager* SignalPropertyManager::getInstance()
+{
+	assert (m_instance != nullptr);
+	return m_instance;
 }
 
 int SignalPropertyManager::count() const
@@ -308,7 +318,7 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 void SignalPropertyManager::loadNotSpecificProperties()
 {
 	Signal signal;
-	SignalProperties signalProperties(signal);
+	SignalProperties signalProperties(signal, true);
 	std::vector<SignalPropertyDescription> propetyDescription = signalProperties.getProperties();
 
 	for (SignalPropertyDescription& property : propetyDescription)
@@ -504,10 +514,9 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 		return;
 	}
 	int propertyIndex = static_cast<int>(m_propertyDescription.size());
-	emit beginAddProperty(propertyIndex);
 	m_propertyDescription.push_back(newProperty);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
-	emit endAddProperty();
+	emit propertyCountChanged();
 
 	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
 	{
@@ -863,8 +872,12 @@ SignalsModel::SignalsModel(SignalSetProvider* signalSetProvider, DbController* d
 	m_signalSetProvider(signalSetProvider),
 	m_parentWindow(parent)
 {
-	connect(&m_propertyManager, &SignalPropertyManager::beginAddProperty, this, &SignalsModel::beginAddProperty, Qt::DirectConnection);
-	connect(&m_propertyManager, &SignalPropertyManager::endAddProperty, this, &SignalsModel::endAddProperty, Qt::DirectConnection);
+	connect(m_signalSetProvider, &SignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
+	connect(m_signalSetProvider, &SignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
+	connect(m_signalSetProvider, &SignalSetProvider::signalPropertiesChanged, &m_propertyManager, &SignalPropertyManager::detectNewProperties);
+	connect(&m_propertyManager, &SignalPropertyManager::propertyCountChanged, this, &SignalsModel::changeColumnCount);
+
+	changeColumnCount();
 }
 
 SignalsModel::~SignalsModel()
@@ -879,7 +892,7 @@ int SignalsModel::rowCount(const QModelIndex& parentIndex) const
 	{
 		return 0;
 	}
-	return m_signalSetProvider->signalCount();
+	return m_rowCount;
 }
 
 int SignalsModel::columnCount(const QModelIndex& parentIndex) const
@@ -888,7 +901,7 @@ int SignalsModel::columnCount(const QModelIndex& parentIndex) const
 	{
 		return 0;
 	}
-	return m_propertyManager.count() + 1;	// Usual properties and "Last change user"
+	return m_columnCount + 1;	// Usual properties and "Last change user"
 }
 
 QString SignalsModel::getUserStr(int userId) const
@@ -909,7 +922,6 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	{
 		return QVariant();
 	}
-
 
 	if (role == Qt::BackgroundRole)
 	{
@@ -1054,39 +1066,30 @@ void SignalsModel::updateSignalsPropertyBehaviour()
 	m_propertyManager.reloadPropertyBehaviour();
 }
 
-void SignalsModel::beginAddProperty(int propertyIndex)
+void SignalsModel::updateSignal(int signalIndex)
 {
-	beginInsertColumns(QModelIndex(), propertyIndex, propertyIndex);
+	assert(signalIndex < m_rowCount);
+	emit dataChanged(index(signalIndex, 0), index(signalIndex, m_columnCount));
 }
 
-void SignalsModel::endAddProperty()
+void SignalsModel::changeRowCount()
 {
-	endInsertColumns();
-}
-
-void SignalsModel::detectNewProperties(const Signal& signal)
-{
-	int oldColumnCount = columnCount();
-
-	m_propertyManager.detectNewProperties(signal);
-
-	if (oldColumnCount < columnCount())
+	if (m_rowCount != m_signalSetProvider->signalCount())
 	{
-		emit updateColumnList();
+		beginResetModel();
+		m_rowCount = m_signalSetProvider->signalCount();
+		endResetModel();
 	}
 }
 
-void SignalsModel::loadNotSpecificProperties(Signal& signal)
+void SignalsModel::changeColumnCount()
 {
-	int oldColumnCount = columnCount();
-
-	SignalProperties signalProperties(signal, true);
-
-	m_propertyManager.loadNotSpecificProperties();
-
-	if (oldColumnCount < columnCount())
+	if (m_columnCount != m_propertyManager.count())
 	{
-		emit updateColumnList();
+		assert(m_columnCount < m_propertyManager.count());
+		beginInsertColumns(QModelIndex(), m_columnCount, m_propertyManager.count() - 1);
+		m_columnCount = m_propertyManager.count();
+		endInsertColumns();
 	}
 }
 
@@ -1161,7 +1164,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 
 	//For testing purposes
 	//
-	new QAbstractItemModelTester(m_signalsModel, QAbstractItemModelTester::FailureReportingMode::Fatal, this);
+	// new QAbstractItemModelTester(m_signalsModel, QAbstractItemModelTester::FailureReportingMode::Fatal, this);
 	//
 
 	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
@@ -1211,7 +1214,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	}
 
 	m_signalsColumnVisibilityController = new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
-	connect(m_signalsModel, &SignalsModel::updateColumnList, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
+	connect(&m_signalsModel->signalPropertyManager(), &SignalPropertyManager::propertyCountChanged, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -1223,6 +1226,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
+	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeLazySignalLoadingSequence);
 
 	connect(signalSetProvider, &SignalSetProvider::error, this, &SignalsTabPage::showError);
 	connect(signalSetProvider, &SignalSetProvider::usersLoaded, m_signalsModel, &SignalsModel::updateSignalsPropertyBehaviour);
@@ -1479,7 +1483,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("New signal"), this);
 	action->setShortcut(QKeySequence::StandardKey::New);
-	connect(action, &QAction::triggered, m_signalSetProvider, &SignalSetProvider::addSignal);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::addSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -1563,18 +1567,7 @@ void SignalsTabPage::projectOpened()
 
 	m_signalSetProvider->initLazyLoadSignals();
 
-	if (m_loadSignalsTimer == nullptr && m_signalsModel->rowCount() > 0)
-	{
-		m_loadSignalsTimer = new QTimer(this);
-
-		if (m_tabWidget != nullptr)
-		{
-			connect(m_tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);
-		}
-
-		QRect rect = m_signalsView->viewport()->rect();
-		m_signalSetProvider->loadNextSignalsPortion(m_signalsView->indexAt(rect.center()).row());
-	}
+	changeLazySignalLoadingSequence();
 }
 
 void SignalsTabPage::projectClosed()
@@ -1771,7 +1764,6 @@ void SignalsTabPage::addSignal()
 				for (int i = 0; i < signalVector.count(); i++)
 				{
 					resultSignalVector.append(signalVector[i]);
-					m_signalsModel->detectNewProperties(signalVector[i]);
 				}
 			}
 		}
@@ -1780,8 +1772,9 @@ void SignalsTabPage::addSignal()
 		{
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
-				m_signalSetProvider->loadSignal(resultSignalVector[i].ID());
+				m_signalSetProvider->addSignal(resultSignalVector[i]);
 			}
+			m_signalsModel->changeRowCount();
 		}
 	}
 
@@ -1824,7 +1817,7 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 	for (int i = 0; i < ids.count(); i++)
 	{
 		int index = m_signalSetProvider->keyIndex(ids[i]);
-		if (m_signalSetProvider->isEditableSignal(index))
+		if (!m_signalSetProvider->isEditableSignal(index))
 		{
 			readOnly = true;
 		}
@@ -2033,6 +2026,11 @@ void SignalsTabPage::changeCheckedoutSignalActionsVisibility()
 		}
 	}
 	emit setCheckedoutSignalActionsVisibility(false);
+}
+
+void SignalsTabPage::changeLazySignalLoadingSequence()
+{
+	m_signalSetProvider->setMiddleVisibleSignalIndex(getMiddleVisibleRow());
 }
 
 void SignalsTabPage::setSelection(const QVector<int>& selectedRowsSignalID, int focusedCellSignalID)
@@ -2670,6 +2668,7 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 	QSortFilterProxyModel(parent),
 	m_sourceModel(sourceModel)
 {
+	m_signalSetProvider = SignalSetProvider::getInstance();
 	setSourceModel(sourceModel);
 }
 

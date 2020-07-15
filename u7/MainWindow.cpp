@@ -55,7 +55,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::changeCurrentTab, getCentralWidget(), &CentralWidget::setCurrentWidget);
 
-	m_signalSetProvider = new SignalSetProvider();
+	m_signalSetProvider = new SignalSetProvider(dbController(), this);
 
 	// Add main tab pages
 	//

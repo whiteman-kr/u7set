@@ -395,7 +395,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		return {};
 	}
 
-	SignalsModel* model = SignalsModel::instance();
+	SignalSetProvider* model = SignalSetProvider::getInstance();
 	model->loadSignals();
 
 	QVector<int> selectIdList(newSignals.size());
@@ -407,8 +407,6 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		resultAppSignalIds << signal.appSignalID();
 		selectIdList[currentIdIndex++] = signal.ID();
 	}
-
-	model->parentWindow()->setSelection(selectIdList);
 
 	return resultAppSignalIds;
 }

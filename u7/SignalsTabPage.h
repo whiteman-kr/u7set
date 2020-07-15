@@ -62,11 +62,12 @@ public:
 	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
 
 signals:
-	void beginAddProperty(int propertyIndex);
-	void endAddProperty();
+	void propertyCountChanged();
 
 public:
 	SignalPropertyManager(DbController* dbController, QWidget* parentWidget);
+
+	static SignalPropertyManager* getInstance();
 
 	// Data for models
 	//
@@ -90,9 +91,11 @@ public:
 	bool isHidden(E::PropertyBehaviourType behaviour) const;
 	bool isReadOnly(E::PropertyBehaviourType behaviour) const;
 
-	void detectNewProperties(const Signal& signal);
 	void loadNotSpecificProperties();
 	void reloadPropertyBehaviour();
+
+public slots:
+	void detectNewProperties(const Signal& signal);
 
 private:
 	bool isNotCorrect(int propertyIndex) const;
@@ -111,6 +114,7 @@ private:
 
 	DbController* m_dbController;
 	QWidget* m_parentWidget;
+	static SignalPropertyManager* m_instance;
 
 	// is initialized by non specific properties
 	//
@@ -217,8 +221,6 @@ public:
 	SignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
 
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
-	void detectNewProperties(const Signal& signal);
-
 
 signals:
 	void aboutToClearSignals();
@@ -228,15 +230,17 @@ signals:
 
 public slots:
 	void updateSignalsPropertyBehaviour();
-	void beginAddProperty(int propertyIndex);
-	void endAddProperty();
+	void updateSignal(int signalIndex);
+	void changeRowCount();
+	void changeColumnCount();
 
 private:
-	void loadNotSpecificProperties(Signal& signal);
 	// Data
 	//
 	SignalPropertyManager m_propertyManager;
 	SignalSetProvider* m_signalSetProvider;
+	int m_rowCount = 0;
+	int m_columnCount = 0;
 
 	SignalsTabPage* m_parentWindow;
 	QString getUserStr(int userId) const;
@@ -526,6 +530,7 @@ public slots:
 
 	void changeSignalActionsVisibility();
 	void changeCheckedoutSignalActionsVisibility();
+	void changeLazySignalLoadingSequence();
 
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();

@@ -1,12 +1,25 @@
 #include "SignalSetProvider.h"
 #include "DbController.h"
 
+SignalSetProvider* SignalSetProvider::m_instance = nullptr;
+
 SignalSetProvider::SignalSetProvider(DbController* dbController, QWidget* parentWidget) :
 	m_dbController(dbController),
 	m_parentWidget(parentWidget)
-
 {
+	assert(m_instance == nullptr);
+	m_instance = this;
+}
 
+SignalSetProvider* SignalSetProvider::getInstance()
+{
+	assert(m_instance != nullptr);
+	return m_instance;
+}
+
+void SignalSetProvider::setMiddleVisibleSignalIndex(int signalIndex)
+{
+	m_middleVisibleSignalIndex = signalIndex;
 }
 
 
@@ -51,11 +64,11 @@ void SignalSetProvider::loadUsers()
 
 bool SignalSetProvider::isEditableSignal(const Signal& signal) const
 {
-	if (signal.checkedOut() && (signal.userID() != m_dbController->currentUser().userId() && !m_dbController->currentUser().isAdminstrator()))
+	if (signal.checkedOut() && (signal.userID() == m_dbController->currentUser().userId() && m_dbController->currentUser().isAdminstrator()))
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 QString SignalSetProvider::getUserStr(int userId) const
@@ -113,7 +126,6 @@ bool SignalSetProvider::checkoutSignal(int index)
 	{
 		loadSignal(id);
 	}
-	emit hasCheckedOutSignals(true);
 	return true;
 }
 
@@ -189,12 +201,18 @@ void SignalSetProvider::initLazyLoadSignals()
 	}
 
 	emit signalCountChanged();
+
+	m_lazyLoadSignalsTimer = new QTimer(this);
+	connect(m_lazyLoadSignalsTimer, &QTimer::timeout, this, &SignalSetProvider::loadNextSignalsPortion);
+	m_lazyLoadSignalsTimer->start(100);
 }
 
 void SignalSetProvider::finishLoadSignals()
 {
 	if (m_partialLoading == true)
 	{
+		m_lazyLoadSignalsTimer->stop();
+
 		QVector<int> signalIds;
 		for (int i = 0; i < m_signalSet.count(); i++)
 		{
@@ -215,7 +233,8 @@ void SignalSetProvider::finishLoadSignals()
 			{
 				m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
-				emit signalUpdated(loadedSignal);
+				emit signalUpdated(keyIndex(loadedSignal.ID()));
+				emit signalPropertiesChanged(loadedSignal);
 			}
 		}
 	}
@@ -223,14 +242,14 @@ void SignalSetProvider::finishLoadSignals()
 	m_partialLoading = false;
 }
 
-void SignalSetProvider::loadNextSignalsPortion(int middlePosition)
+void SignalSetProvider::loadNextSignalsPortion()
 {
 	QVector<int> signalIds;
 	signalIds.reserve(250);
-	int low = middlePosition - 1;
-	int high = middlePosition;
+	int low = m_middleVisibleSignalIndex - 1;
+	int high = m_middleVisibleSignalIndex;
 
-	if (middlePosition == -1)
+	if (m_middleVisibleSignalIndex == -1)
 	{
 		high = 0;
 	}
@@ -271,7 +290,8 @@ void SignalSetProvider::loadNextSignalsPortion(int middlePosition)
 		{
 			m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
-			signalUpdated(loadedSignal);
+			emit signalUpdated(keyIndex(loadedSignal.ID()));
+			emit signalPropertiesChanged(loadedSignal);
 		}
 	}
 	else
@@ -385,6 +405,11 @@ void SignalSetProvider::deleteSignal(int signalID)
 	}
 }
 
+void SignalSetProvider::addSignal(Signal& signal)
+{
+	m_signalSet.replaceOrAppendIfNotExists(signal.ID(), signal);
+}
+
 void SignalSetProvider::deleteSignals(const QSet<int>& signalIDs)
 {
 	for (const int signalID : signalIDs)
@@ -412,20 +437,26 @@ void SignalSetProvider::loadSignal(int signalId)
 	dbController()->getLatestSignal(signalId, &m_signalSet[index], m_parentWidget);
 
 	signalUpdated(index);
-	signalUpdated(signal(index));
+	signalPropertiesChanged(signal(index));
 }
 
 void SignalSetProvider::loadSignals()
 {
+	if (m_partialLoading == true)
+	{
+		m_lazyLoadSignalsTimer->stop();
+		m_partialLoading = false;
+	}
 	clearSignals();
 
 	loadUsers();
 
-	SignalSet temporarySignalSet;
-	if (!dbController()->getSignals(&temporarySignalSet, false, m_parentWidget))
+	if (!dbController()->getSignals(&m_signalSet, false, m_parentWidget))
 	{
 		emit error(tr("Could not load signals"));
 	}
+
+	emit signalCountChanged();
 }
 
 void SignalSetProvider::saveSignal(Signal& signal)
@@ -439,8 +470,6 @@ void SignalSetProvider::saveSignal(Signal& signal)
 	{
 		showError(state);
 	}
-
-	loadSignal(signal.ID());
 }
 
 QVector<int> SignalSetProvider::cloneSignals(const QSet<int>& signalIDs)

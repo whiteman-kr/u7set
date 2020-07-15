@@ -174,7 +174,7 @@ void initNewSignal(Signal& signal)
 
 	signal.initSpecificProperties();
 
-	SignalPropertyManager& propertyManager = SignalsModel::instance()->signalPropertyManager();
+	SignalPropertyManager& propertyManager = *SignalPropertyManager::getInstance();
 
 	auto setter = [&signal, &propertyManager](const QString& name, QVariant value) {
 		int index = propertyManager.index(name);
@@ -345,10 +345,10 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		int precision = appSignal.decimalPlaces();
 
-		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
+		SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
 		manager.detectNewProperties(appSignal);
-		manager.loadNotSpecificProperties(*signalProperties);
-		manager.reloadPropertyBehaviour(dbController, parent);
+		manager.loadNotSpecificProperties();
+		manager.reloadPropertyBehaviour();
 
 		for (auto property : signalProperties->properties())
 		{
@@ -433,7 +433,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}
 	}
 
-	connect(this, &SignalPropertiesDialog::signalChanged, SignalsModel::instance(), &SignalsModel::loadSignal, Qt::QueuedConnection);
+	connect(this, &SignalPropertiesDialog::signalChanged, SignalSetProvider::getInstance(), &SignalSetProvider::loadSignal, Qt::QueuedConnection);
 
 	// Save
 	//
@@ -450,7 +450,10 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 		signalProperties->updateSpecPropValues();
 
-		signal = signalProperties->signal();
+		Signal& editedSignalCopy = signalProperties->signal();
+
+		signal.setTags(editedSignalCopy.tagsSet());	// Crashes here
+		signal = editedSignalCopy;
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
@@ -706,14 +709,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		return;
 	}
 
-	SignalsModel* model = SignalsModel::instance();
-
-	if (model == nullptr)
-	{
-		return;
-	}
-
-	SignalPropertyManager& manager = model->signalPropertyManager();
+	SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
 
 	const Signal& signal = *m_signalVector[0];
 

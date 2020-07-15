@@ -6,8 +6,12 @@ class DbController;
 class SignalSetProvider : public QObject
 {
 	Q_OBJECT
+
 public:
 	SignalSetProvider(DbController* dbController, QWidget* parentWidget);
+	static SignalSetProvider* getInstance();
+
+	void setMiddleVisibleSignalIndex(int signalIndex);
 
 	void clearSignals();
 
@@ -45,17 +49,16 @@ public:
 	void showErrors(const QVector<ObjectState>& states);
 
 signals:
-	void error(const QString& message) const;
+	void error(const QString& message) const;	// for throwing message boxes
 	void usersLoaded() const;
-	void signalCountChanged() const;
-	void signalUpdated(int signalIndex);
-	void signalUpdated(const Signal& signal) const;
-	void hasCheckedOutSignals(bool state);
+	void signalCountChanged() const;	// for reloading entire signal model content
+	void signalUpdated(int signalIndex) const;	// for updating row in signal view (throwing models DataChanged signal)
+	void signalPropertiesChanged(const Signal& signal) const; // for updating property list if new properties exist in signal
 
 public slots:
 	void initLazyLoadSignals();
 	void finishLoadSignals();
-	void loadNextSignalsPortion(int middlePosition);
+	void loadNextSignalsPortion();
 	void loadUsers();
 	void loadSignals();
 	void loadSignalSet(QVector<int> keys);
@@ -64,7 +67,11 @@ public slots:
 private:
 	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
 
+	static SignalSetProvider* m_instance;
+
 	DbController* m_dbController;
+	QTimer* m_lazyLoadSignalsTimer;
+	int m_middleVisibleSignalIndex = 0;
 	QWidget* m_parentWidget;	//used by DbController
 	SignalSet m_signalSet;
 	QMap<int, QString> m_usernameMap;
