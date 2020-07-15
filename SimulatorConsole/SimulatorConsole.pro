@@ -37,6 +37,13 @@ unix {
 SOURCES += main.cpp \
     ../lib/DomXmlHelper.cpp
 
+HEADERS += \
+    ../lib/DomXmlHelper.h
+
+RESOURCES += \
+    SimulatorConsole.qrc
+
+
 # Simulator Lib
 #
 INCLUDEPATH += $$PWD/../Simulator
@@ -46,7 +53,7 @@ win32 {
     LIBS += -L$$DESTDIR -lSimulator
 
     CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
-    CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
+	CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
 }
 unix {
     LIBS += -lSimulator
@@ -56,11 +63,11 @@ unix {
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-    CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
 }
 unix {
     CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-    CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
 }
 
 INCLUDEPATH += ../VFrame30
@@ -70,15 +77,9 @@ DEPENDPATH += ../VFrame30
 #
 win32 {
     LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
+	INCLUDEPATH += ./../Protobuf
 }
 unix {
     LIBS += -lprotobuf
 }
-
-RESOURCES += \
-    SimulatorConsole.qrc
-
-HEADERS += \
-    ../lib/DomXmlHelper.h
 

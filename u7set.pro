@@ -28,5 +28,6 @@ SUBDIRS += qtservice \
     mconf \
 	./Tools/CommView \
     ./Tools/PacketSource \
+	./Test/SimulatorTests \
 	./Test/u7databaseTests
 

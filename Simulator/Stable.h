@@ -1,5 +1,9 @@
-#ifndef STABLE_H
-#define STABLE_H
+#pragma once
+
+#include <memory>
+#include <map>
+#include <unordered_map>
+#include <optional>
 
 // Qt includes
 //
@@ -12,6 +16,10 @@
 #endif
 
 #include <QtCore>
+#include <QtQml>
+#include <QtNetwork>
+#include <QtConcurrent>
+#include <QtXml>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
@@ -42,5 +50,3 @@
    #endif
 #endif
 
-
-#endif // STABLE_H

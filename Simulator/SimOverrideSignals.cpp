@@ -2,6 +2,7 @@
 #include "Simulator.h"
 #include "SimRam.h"
 #include "SimAppSignalManager.h"
+#include <QJSEngine>
 
 namespace Sim
 {

@@ -4,10 +4,13 @@
 #include <optional>
 #include <QObject>
 #include <QReadWriteLock>
-#include <QJSEngine>
 #include "SimOutput.h"
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
+
+
+class QJSValue;
+class QJSEngine;
 
 
 namespace Sim

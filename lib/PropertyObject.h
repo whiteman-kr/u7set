@@ -1,15 +1,14 @@
 #pragma once
 
-#include <type_traits>
 #include <functional>
 #include <algorithm>
-#include <map>
-#include <unordered_map>
 #include <list>
 #include <vector>
+#include <map>
+#include <unordered_map>
 #include <utility>
 #include <memory>
-#include <algorithm>
+#include <type_traits>
 
 #include <QtGlobal>
 #include <QObject>

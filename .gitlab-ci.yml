@@ -203,6 +203,7 @@ test job:
     - "rem               Run unit tests"
     - "rem ----------------------------------------------"
     - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorTests.exe"
 
 #Run Builder test
     - "rem ----------------------------------------------"

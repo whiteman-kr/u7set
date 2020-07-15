@@ -4,6 +4,7 @@
 #include <SimOverrideSignals.h>
 #include <SimException.h>
 
+
 namespace Sim
 {
 
@@ -346,7 +347,7 @@ namespace Sim
 
 	bool RamArea::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept
 	{
-		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
+		if (contains(offsetW) == false ||
 			bitNo >= 16 ||
 			data == nullptr)
 		{
