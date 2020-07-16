@@ -33,7 +33,6 @@ private slots:
 private:
 	FileTreeView* m_fileView = nullptr;
 	FileTreeModel* m_fileModel = nullptr;
-	FileTreeProxyModel* m_proxyModel = nullptr;
 
     QStringList m_editableExtensions;
 

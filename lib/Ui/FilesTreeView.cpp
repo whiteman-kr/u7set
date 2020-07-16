@@ -107,14 +107,30 @@ void FileTreeModelItem::deleteAllChildren()
 	m_children.clear();
 }
 
+bool FileTreeModelItem::fetched() const
+{
+	return m_fetched;
+}
+
+void FileTreeModelItem::setFetched()
+{
+	m_fetched = true;
+}
+
 //
 // FileTreeProxyModel
 //
 
-FileTreeProxyModel::FileTreeProxyModel(QObject *parent):
-	QSortFilterProxyModel(parent)
+FileTreeProxyModel::FileTreeProxyModel(FileTreeModel* sourceModel, QObject *parent):
+	QSortFilterProxyModel(parent),
+	m_sourceModel(sourceModel)
 {
 
+}
+
+QModelIndexList FileTreeProxyModel::getPersistentIndexList() const
+{
+	return persistentIndexList();
 }
 
 bool FileTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
@@ -125,16 +141,9 @@ bool FileTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sour
 		return true;
 	}
 
-	QModelIndex index = sourceModel()->index(sourceRow, filterKeyColumn(), sourceParent);
+	QModelIndex index = m_sourceModel->childIndex(sourceRow, filterKeyColumn(), sourceParent);
 
-	FileTreeModel* treeModel = dynamic_cast<FileTreeModel*>(sourceModel());
-	if (treeModel == nullptr)
-	{
-		Q_ASSERT(treeModel);
-		return false;
-	}
-
-	FileTreeModelItem* item = treeModel->fileItem(index);
+	FileTreeModelItem* item = m_sourceModel->fileItem(index);
 	if (item == nullptr)
 	{
 		Q_ASSERT(item);
@@ -152,15 +161,13 @@ bool FileTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sour
 
 bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-	FileTreeModel* treeModel = dynamic_cast<FileTreeModel*>(sourceModel());
-	if (treeModel == nullptr)
+	if (left.isValid() == false || right.isValid() == false)
 	{
-		Q_ASSERT(treeModel);
 		return false;
 	}
 
-	const FileTreeModelItem* f1 = treeModel->fileItem(left);
-	const FileTreeModelItem* f2 = treeModel->fileItem(right);
+	const FileTreeModelItem* f1 = m_sourceModel->fileItem(left);
+	const FileTreeModelItem* f2 = m_sourceModel->fileItem(right);
 
 	if (f1 == nullptr || f2 == nullptr)
 	{
@@ -169,7 +176,7 @@ bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 		return false;
 	}
 
-	FileTreeModel::Columns column = treeModel->columnAtIndex(left.column());
+	FileTreeModel::Columns column = m_sourceModel->columnAtIndex(left.column());
 
 	switch (static_cast<FileTreeModel::Columns>(column))
 	{
@@ -246,13 +253,19 @@ FileTreeModel::~FileTreeModel()
 
 void FileTreeModel::setColumns(std::vector<Columns> columns)
 {
-	beginRemoveColumns(QModelIndex(), 0, static_cast<int>(m_columns.size() - 1));
-	endRemoveColumns();
+	if (m_columns.size() > 0)
+	{
+		beginRemoveColumns(QModelIndex(), 0, static_cast<int>(m_columns.size() - 1));
+		m_columns.clear();
+		endRemoveColumns();
+	}
 
-	m_columns = columns;
-
-	beginInsertColumns(QModelIndex(), 0, static_cast<int>(m_columns.size() - 1));
-	endInsertColumns();
+	if (columns.size() > 0)
+	{
+		beginInsertColumns(QModelIndex(), 0, static_cast<int>(columns.size() - 1));
+		m_columns = columns;
+		endInsertColumns();
+	}
 }
 
 FileTreeModel::Columns FileTreeModel::columnAtIndex(int index) const
@@ -264,6 +277,11 @@ FileTreeModel::Columns FileTreeModel::columnAtIndex(int index) const
 	}
 
 	return m_columns[index];
+}
+
+int FileTreeModel::childCount(const QModelIndex& parentIndex) const
+{
+	return rowCount(parentIndex);
 }
 
 QModelIndex FileTreeModel::childIndex(int row, int column, const QModelIndex& parentIndex) const
@@ -293,11 +311,6 @@ QVariant FileTreeModel::columnIcon(const QModelIndex& index, FileTreeModelItem* 
 	}
 
 	return QVariant();
-}
-
-QModelIndex FileTreeModel::index(int row, const QModelIndex& parentIndex) const
-{
-	return index(row, 0, parentIndex);
 }
 
 QModelIndex FileTreeModel::index(int row, int column, const QModelIndex& parentIndex) const
@@ -457,14 +470,6 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 		}
 		break;
 
-		/*
-	case  Qt::UserRole:
-		{
-			return file->fileId();
-		}
-		break;
-		*/
-
 	case Qt::TextAlignmentRole:
 		{
 			return Qt::AlignLeft + Qt::AlignVCenter;
@@ -555,11 +560,22 @@ bool FileTreeModel::hasChildren(const QModelIndex& parentIndex) const
 		return false;
 	}
 
+	if (parentIndex.column() > 0)
+	{
+		return 0;
+	}
+
 	const FileTreeModelItem* file = fileItem(parentIndex);
+	if (file == nullptr)
+	{
+		Q_ASSERT(file);
+		return false;
+	}
 
 	if (file->childrenCount() > 0)
 	{
-		return true;	// seems that we already got file list for this object
+		// seems that we already got file list for this object
+		return true;
 	}
 
 	bool hasChildren = false;
@@ -568,37 +584,40 @@ bool FileTreeModel::hasChildren(const QModelIndex& parentIndex) const
 	bool result = db()->fileHasChildren(&hasChildren, fi, m_parentWidget);
 	if (result == false)
 	{
+		return false;
+	}
+
+	if (m_addFileInProgress == true &&
+		hasChildren == true &&
+		file->childrenCount() == 0)
+	{
+		// seems that file has been added to filesystem but not yet added to child array
 		return false;
 	}
 
 	return hasChildren;
 }
 
-bool FileTreeModel::canFetchMore(const QModelIndex& parent) const
+bool FileTreeModel::canFetchMore(const QModelIndex& parentIndex) const
 {
 	if (db()->isProjectOpened() == false)
 	{
 		return false;
 	}
 
-	const FileTreeModelItem* file = fileItem(parent);
+	const FileTreeModelItem* file = fileItem(parentIndex);
+	if (file == nullptr)
+	{
+		Q_ASSERT(file);
+		return false;
+	}
 
 	if (file->childrenCount() > 0)
 	{
 		return false;	// seems that we already got file list for this object
 	}
 
-	bool hasChildren = false;
-	DbFileInfo fi(*file);
-
-	bool result = db()->fileHasChildren(&hasChildren, fi, m_parentWidget);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	return hasChildren;
+	return file->fetched() == false;
 }
 
 void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
@@ -615,29 +634,71 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 		return;
 	}
 
-	if (parentFile->childrenCount() != 0)
+	if (parentFile->fetched() == true)
 	{
-		beginRemoveRows(parentIndex, 0, parentFile->childrenCount() - 1);
-
-		endRemoveRows();
-
-		parentFile->deleteAllChildren();
+		if (parentFile->fileId() != m_rootFileId)
+		{
+			Q_ASSERT(false);
+		}
+		return;
 	}
+
+	parentFile->setFetched();
 
 	std::vector<DbFileInfo> files;
 
 	bool ok = db()->getFileList(&files, parentFile->fileId(), true, m_parentWidget);
 	if (ok == false)
+	{
+		Q_ASSERT(false);
 		return;
+	}
 
-	beginInsertRows(parentIndex, 0, static_cast<int>(files.size()) - 1);
+	int oldChildCount = parentFile->childrenCount();
+	int newChildrenCount = static_cast<int>(files.size());
+
+	if (newChildrenCount <= oldChildCount)
+	{
+		return;
+	}
+
+	beginInsertRows(parentIndex, oldChildCount, newChildrenCount - 1);
+
+	parentFile->deleteAllChildren();
 
 	for (const DbFileInfo& fi : files)
 	{
-		parentFile->addChild(std::make_shared<FileTreeModelItem>(fi));
+		std::shared_ptr childFile = std::make_shared<FileTreeModelItem>(fi);
+
+		parentFile->addChild(childFile);
+
+		// fetch child files also
+
+		std::vector<DbFileInfo> childFiles;
+
+		ok = db()->getFileList(&childFiles, fi.fileId(), true, m_parentWidget);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		for (const DbFileInfo& childFi : childFiles)
+		{
+			childFile->addChild(std::make_shared<FileTreeModelItem>(childFi));
+		}
+
+		childFile->setFetched();
 	}
 
 	endInsertRows();
+
+	return;
+}
+
+void FileTreeModel::fetch(const QModelIndex& parent)
+{
+	fetchMore(parent);
 
 	return;
 }
@@ -661,8 +722,6 @@ FileTreeModelItem* FileTreeModel::fileItem(QModelIndex& index)
 
 const FileTreeModelItem* FileTreeModel::fileItem(const QModelIndex& index) const
 {
-
-
 	const FileTreeModelItem* f = nullptr;
 
 	if (index.isValid() == false)
@@ -721,18 +780,19 @@ void FileTreeModel::addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeMo
 	assert(parentIndex.isValid());
 
 	FileTreeModelItem* parentFile = fileItem(parentIndex);
-
 	if (parentFile == nullptr)
 	{
 		assert(parentFile);
 		return;
 	}
 
+	m_addFileInProgress = true;
+
 	beginInsertRows(parentIndex, parentFile->childrenCount(), parentFile->childrenCount());
-
 	parentFile->addChild(file);
-
 	endInsertRows();
+
+	m_addFileInProgress = false;
 
 	return;
 }
@@ -835,7 +895,7 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 void FileTreeModel::refresh()
 {
 	beginResetModel();
-	*m_root.get() = FileTreeModelItem(db()->systemFileInfo(m_rootFileId));
+	*m_root.get() =  FileTreeModelItem(db()->systemFileInfo(m_rootFileId));
 	endResetModel();
 }
 
@@ -887,13 +947,25 @@ DbController* FileTreeModel::db() const
 //
 //
 
-FileTreeView::FileTreeView(DbController* dbc) :
-	m_dbc(dbc)
+FileTreeView::FileTreeView(DbController* dbc, FileTreeModel* model) :
+	m_dbc(dbc),
+	m_model(model)
 {
-	assert(m_dbc);
+	if (m_model == nullptr || m_dbc == nullptr)
+	{
+		Q_ASSERT(m_dbc);
+		Q_ASSERT(m_model);
+		return;
+	}
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+	m_proxyModel = new FileTreeProxyModel(model, this);
+	m_proxyModel->setSourceModel(model);
+	m_proxyModel->setFilterKeyColumn(static_cast<int>(FileTreeModel::Columns::FileNameColumn));
+
+	setModel(m_proxyModel);
 }
 
 FileTreeView::~FileTreeView()
@@ -952,6 +1024,11 @@ bool FileTreeView::addNewFile(const QString& fileName)
 
 	return result;
 
+}
+
+void FileTreeView::setFileNameFilter(const QString& filterText)
+{
+	m_proxyModel->setFilterFixedString(filterText);
 }
 
 void FileTreeView::addFile()
@@ -1065,7 +1142,7 @@ void FileTreeView::renameFile()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 
@@ -1094,7 +1171,7 @@ void FileTreeView::renameFile()
 		return;
 	}
 
-	fileTreeModel()->updateFile(indexes[0], newFi);
+	m_model->updateFile(indexes[0], newFi);
 
 	return;
 
@@ -1121,7 +1198,7 @@ void FileTreeView::deleteFile()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		if (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())
@@ -1148,7 +1225,7 @@ void FileTreeView::deleteFile()
 		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
 			[&fi, this](QModelIndex& mi)
 			{
-				FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+				FileTreeModelItem* f = m_model->fileItem(mi);
 				assert(f);
 				return f->fileId() == fi.fileId();
 			});
@@ -1157,7 +1234,7 @@ void FileTreeView::deleteFile()
 
 		if (mipos != selectedIndexList.end())
 		{
-			fileTreeModel()->updateFile(*mipos, fi);
+			m_model->updateFile(*mipos, fi);
 		}
 	}
 
@@ -1185,7 +1262,7 @@ void FileTreeView::checkOutFile()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		if (f->state() == VcsState::CheckedOut)
@@ -1214,7 +1291,7 @@ void FileTreeView::checkOutFile()
 		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
 			[&fi, this](QModelIndex& mi)
 			{
-				FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+				FileTreeModelItem* f = m_model->fileItem(mi);
 				assert(f);
 				return f->fileId() == fi.fileId();
 			});
@@ -1223,7 +1300,7 @@ void FileTreeView::checkOutFile()
 
 		if (mipos != selectedIndexList.end())
 		{
-			fileTreeModel()->updateFile(*mipos, fi);
+			m_model->updateFile(*mipos, fi);
 		}
 	}
 
@@ -1251,7 +1328,7 @@ void FileTreeView::checkInFile()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		if (f->state() == VcsState::CheckedOut &&
@@ -1281,7 +1358,7 @@ void FileTreeView::checkInFile()
 		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
 			[&fi, this](QModelIndex& mi)
 			{
-				FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+				FileTreeModelItem* f = m_model->fileItem(mi);
 				assert(f);
 				return f->fileId() == fi.fileId();
 			});
@@ -1290,7 +1367,7 @@ void FileTreeView::checkInFile()
 
 		if (mipos != selectedIndexList.end())
 		{
-			fileTreeModel()->updateFile(*mipos, fi);
+			m_model->updateFile(*mipos, fi);
 		}
 	}
 
@@ -1318,7 +1395,7 @@ void FileTreeView::undoChangesFile()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		if (f->state() == VcsState::CheckedOut &&
@@ -1356,7 +1433,7 @@ void FileTreeView::undoChangesFile()
 		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
 			[&fi, this](QModelIndex& mi)
 			{
-				FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+				FileTreeModelItem* f = m_model->fileItem(mi);
 				assert(f);
 				return f->fileId() == fi.fileId();
 			});
@@ -1365,7 +1442,7 @@ void FileTreeView::undoChangesFile()
 
 		if (mipos != selectedIndexList.end())
 		{
-			fileTreeModel()->updateFile(*mipos, fi);
+			m_model->updateFile(*mipos, fi);
 		}
 	}
 
@@ -1383,7 +1460,7 @@ void FileTreeView::showHistory()
 
 	// --
 	//
-	FileTreeModelItem* file = fileTreeModel()->fileItem(selected.first());
+	FileTreeModelItem* file = m_model->fileItem(selected.first());
 
 	if (file == nullptr)
 	{
@@ -1419,7 +1496,7 @@ void FileTreeView::showCompare()
 
 	// --
 	//
-	FileTreeModelItem* file = fileTreeModel()->fileItem(selected.first());
+	FileTreeModelItem* file = m_model->fileItem(selected.first());
 
 	if (file == nullptr)
 	{
@@ -1453,7 +1530,7 @@ void FileTreeView::getLatestVersion()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		files.push_back(*f);
@@ -1525,7 +1602,7 @@ void FileTreeView::getLatestTreeVersion()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		files.push_back(*f);
@@ -1564,7 +1641,6 @@ void FileTreeView::getLatestTreeVersion()
 
 bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 {
-	//
 	QModelIndexList selectedRows = selectedSourceRows();	// Indexes from source model
 	QModelIndexList selectedProxyRows = selectionModel()->selectedRows();	// Indexes from proxy model
 
@@ -1580,7 +1656,7 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 
 	//
 
-	FileTreeModelItem* parentFile = fileTreeModel()->fileItem(selectedIndex);
+	FileTreeModelItem* parentFile = m_model->fileItem(selectedIndex);
 	if (parentFile == nullptr || parentFile->fileId() == -1)
 	{
 		assert(parentFile);
@@ -1588,35 +1664,28 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 		return false;
 	}
 
-	bool parentIsExpanded = isExpanded(selectedProxyIndex);
-
-	bool parentIsEmpty = parentFile->childrenCount() == 0;
-
 	for (std::shared_ptr<DbFile> file : files)
 	{
 		// Add files to the DB
 		//
+
 		bool ok = db()->addFile(file, parentFile->fileId(), this);
 		if (ok == false)
 		{
 			return false;
 		}
 
-		// Add files to the FileModel
-		//
-		std::shared_ptr<FileTreeModelItem> fi = std::make_shared<FileTreeModelItem>(*file);
-		fileTreeModel()->addFile(selectedIndex, fi);
+		if (parentFile->fetched() == true)
+		{
+			std::shared_ptr<FileTreeModelItem> fi = std::make_shared<FileTreeModelItem>(*file);
+			m_model->addFile(selectedIndex, fi);
+		}
 	}
 
 	// Expand parent
 	//
-	if (parentIsExpanded == false)
+	if (isExpanded(selectedProxyIndex) == false)
 	{
-		if (parentIsEmpty == true)
-		{
-			fileTreeModel()->fetchMore(selectedIndex);
-		}
-
 		expand(selectedProxyIndex);
 	}
 
@@ -1624,22 +1693,18 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 	//
 	selectionModel()->clear();				// clear selction. New selection will be set after files added to db
 
-	FileTreeModel* sourceModel = fileTreeModel();
-
-	FileTreeProxyModel* proxyModel = fileTreeProxyModel();
-
 	for (std::shared_ptr<DbFile> file : files)
 	{
 		for (int i = 0; i < 65535; i++)
 		{
-			QModelIndex childIndex = sourceModel->childIndex(i, 0, selectedIndex);
+			QModelIndex childIndex = m_model->childIndex(i, 0, selectedIndex);
 
 			if (childIndex.isValid() == false)
 			{
 				break;
 			}
 
-			FileTreeModelItem* childFile = sourceModel->fileItem(childIndex);
+			FileTreeModelItem* childFile = m_model->fileItem(childIndex);
 
 			if (childFile == nullptr)
 			{
@@ -1649,18 +1714,11 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 
 			if (file->fileId() == childFile->fileId())
 			{
-				if (proxyModel == nullptr)
-				{
-					selectionModel()->select(childIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-				}
-				else
-				{
-					QModelIndex selectIndex = proxyModel->mapFromSource(childIndex);
+				QModelIndex selectIndex = m_proxyModel->mapFromSource(childIndex);
 
-					if (selectIndex.isValid() == true)
-					{
-						selectionModel()->select(selectIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-					}
+				if (selectIndex.isValid() == true)
+				{
+					selectionModel()->select(selectIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 				}
 
 				break;
@@ -1744,7 +1802,7 @@ void FileTreeView::runFileEditor(bool viewOnly)
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		if (viewOnly == true ||
@@ -1823,7 +1881,7 @@ void FileTreeView::setWorkcopy()
 			continue;
 		}
 
-		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
 		if (f->state() == VcsState::CheckedOut &&
@@ -1879,7 +1937,7 @@ void FileTreeView::setWorkcopy()
 		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
 			[&fi, this](QModelIndex& mi)
 			{
-				FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+				FileTreeModelItem* f = m_model->fileItem(mi);
 				assert(f);
 				return f->fileId() == fi->fileId();
 			});
@@ -1888,7 +1946,7 @@ void FileTreeView::setWorkcopy()
 
 		if (mipos != selectedIndexList.end())
 		{
-			fileTreeModel()->updateFile(*mipos, *fi);
+			m_model->updateFile(*mipos, *fi);
 		}
 	}
 
@@ -1898,20 +1956,24 @@ void FileTreeView::setWorkcopy()
 
 void FileTreeView::refreshFileTree()
 {
-
 	// Save old selection
 	//
-	/*std::vector<int> selectedFilesIds;
+	std::vector<int> selectedFilesIds;
 
 	{
 		const QItemSelection proxySelection = selectionModel()->selection();
-		const QItemSelection mappedSelection = fileTreeProxyModel()->mapSelectionToSource(proxySelection);
+		const QItemSelection mappedSelection = m_proxyModel->mapSelectionToSource(proxySelection);
 
 		selectedFilesIds.reserve(mappedSelection.size());
 
 		for (QModelIndex mi : mappedSelection.indexes())
 		{
-			FileTreeModelItem* file = fileTreeModel()->fileItem(mi);
+			if (mi.column() > 0)
+			{
+				continue;
+			}
+
+			FileTreeModelItem* file = m_model->fileItem(mi);
 			if (file == nullptr)
 			{
 				Q_ASSERT(file);
@@ -1920,6 +1982,7 @@ void FileTreeView::refreshFileTree()
 
 			if (file != nullptr && file->isNull() == false)
 			{
+
 				selectedFilesIds.push_back(file->fileId());
 			}
 		}
@@ -1930,22 +1993,18 @@ void FileTreeView::refreshFileTree()
 	std::vector<int> expandedFileIds;
 
 	{
-		FileTreeProxyModel* proxyModel = fileTreeProxyModel();
-		if (proxyModel == nullptr)
-		{
-			Q_ASSERT(proxyModel);
-			return;
-		}
-
-		QModelIndexList indexes = proxyModel->persistentIndexList();
-
-		qDebug() << indexes.size();
+		QModelIndexList indexes = m_proxyModel->getPersistentIndexList();
 
 		expandedFileIds.reserve(indexes.size());
 
 		for (QModelIndex& mi : indexes)
 		{
-			const FileTreeModelItem* file = fileTreeModel()->fileItem(proxyModel->mapToSource(mi));
+			if (mi.column() > 0)
+			{
+				continue;
+			}
+
+			const FileTreeModelItem* file = m_model->fileItem(m_proxyModel->mapToSource(mi));
 			if (file == nullptr)
 			{
 				Q_ASSERT(file);
@@ -1953,9 +2012,6 @@ void FileTreeView::refreshFileTree()
 			}
 
 			int fileId = file->fileId();
-
-			qDebug() << file->fileName();
-			qDebug() << fileId;
 
 			if (isExpanded(mi) == true)
 			{
@@ -1965,138 +2021,116 @@ void FileTreeView::refreshFileTree()
 				}
 			}
 		}
-
-		qDebug() << expandedFileIds.size();
 	}
 
-	selectionModel()->reset();
-*/
+	// Save Header
+
+	QByteArray headerState = header()->saveState();
+
+	// Save Scroll Pos
+
+	int xScroll = horizontalScrollBar()->value();
+	int yScroll = verticalScrollBar()->value();
+
 	// Update model
 	//
-	fileTreeModel()->refresh();
 
-/*
-	expandAll();
+	setVisible(false);
 
-	collapseAll();*/
+	selectionModel()->reset();
 
-	/*
-	// Restore selection
+	m_proxyModel->setSourceModel(nullptr);
+
+	m_model->refresh();
+
+	m_proxyModel->setSourceModel(m_model);
+
+	header()->restoreState(headerState);
+
+	// Restore expansion and selection
 	//
 	selectionModel()->blockSignals(true);
 
-	// Select
-	//
-	for (int fileId : selectedFilesIds)
+	m_model->fetch(QModelIndex());
+
+	int rootChildCount = m_model->childCount(QModelIndex());
+
+	for (int i = 0; i < rootChildCount; i++)
 	{
-		qDebug() << fileId;
-
-		QModelIndexList matched = fileTreeModel()->match(fileTreeModel()->index(0, 0),
-													 Qt::UserRole,
-													 QVariant::fromValue(fileId),
-													 1,
-													 Qt::MatchExactly | Qt::MatchRecursive);
-
-		qDebug() << matched.size();
-
-		if (matched.size() == 1)
-		{
-			QModelIndex fileModelIndex = matched.front();
-			QModelIndex mappedModelIndex = fileTreeProxyModel()->mapFromSource(fileModelIndex);
-
-			selectionModel()->select(mappedModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-
-			QModelIndex expandParent = mappedModelIndex.parent();
-			while (expandParent.isValid() == true)
-			{
-				expand(expandParent);
-				expandParent = expandParent.parent();
-			}
-		}
-	}
-
-	// Expand
-	//
-	for (int fileId : expandedFileIds)
-	{
-		QModelIndexList matched = fileTreeModel()->match(fileTreeModel()->index(0, 0),
-													 Qt::UserRole,
-													 QVariant::fromValue(fileId),
-													 1,
-													 Qt::MatchExactly | Qt::MatchRecursive);
-
-		if (matched.size() == 1)
-		{
-			QModelIndex fileModelIndex = matched.front();
-			QModelIndex mappedModelIndex = fileTreeProxyModel()->mapFromSource(fileModelIndex);
-
-			QModelIndex expandIndex = mappedModelIndex;
-			while (expandIndex.isValid() == true)
-			{
-				expand(expandIndex);
-				expandIndex = expandIndex.parent();
-			}
-		}
+		expandAndSelect(m_model->childIndex(i, 0, QModelIndex()), expandedFileIds, selectedFilesIds);
 	}
 
 	selectionModel()->blockSignals(false);
 
 	selectionChanged({}, {});					// To update actions
-	*/
 
+	setVisible(true);
+
+	// Restore scroll
+
+	QTimer::singleShot(1, [this, xScroll, yScroll](){
+		if (xScroll <= horizontalScrollBar()->maximum())
+		{
+			horizontalScrollBar()->setValue(xScroll);
+		}
+		if (yScroll <= verticalScrollBar()->maximum())
+		{
+			verticalScrollBar()->setValue(yScroll);
+		}
+	});
 
 	return;
 }
 
+bool FileTreeView::expandAndSelect(const QModelIndex& mi, std::vector<int> expandedFileIds, std::vector<int> selectedFilesIds)
+{
+	const FileTreeModelItem* file = m_model->fileItem(mi);
+	if (file == nullptr)
+	{
+		Q_ASSERT(file);
+		return false;
+	}
+
+	bool parentIsExpanded = false;
+
+	if (std::find(expandedFileIds.begin(), expandedFileIds.end(), file->fileId()) != expandedFileIds.end())
+	{
+		setExpanded(m_proxyModel->mapFromSource(mi), true);
+
+		parentIsExpanded = true;
+	}
+
+	if (std::find(selectedFilesIds.begin(), selectedFilesIds.end(), file->fileId()) != selectedFilesIds.end())
+	{
+		selectionModel()->select(m_proxyModel->mapFromSource(mi), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	}
+
+	if (parentIsExpanded == true)
+	{
+		if (file->fetched() == false)
+		{
+			m_model->fetch(mi);	// Fetch children because parent is expanded and they can be selected
+		}
+
+		int childCount = m_model->childCount(mi);
+		for (int i = 0; i < childCount; i++)
+		{
+			QModelIndex childIndex = m_model->childIndex(i, 0, mi);
+			if (childIndex.isValid() == false)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+
+			expandAndSelect(childIndex, expandedFileIds, selectedFilesIds);
+		}
+	}
+
+	return true;
+}
+
 // Protected props
 //
-FileTreeModel* FileTreeView::fileTreeModel()
-{
-	FileTreeModel* result  = nullptr;
-
-	FileTreeProxyModel* proxyModel = dynamic_cast<FileTreeProxyModel*>(model());
-	if (proxyModel != nullptr)
-	{
-		result =  dynamic_cast<FileTreeModel*>(proxyModel->sourceModel());
-	}
-	else
-	{
-		result = dynamic_cast<FileTreeModel*>(model());
-	}
-
-	assert(result);
-	return result;
-}
-
-FileTreeModel* FileTreeView::fileTreeModel() const
-{
-	FileTreeModel* result  = nullptr;
-
-	FileTreeProxyModel* proxyModel = dynamic_cast<FileTreeProxyModel*>(model());
-	if (proxyModel != nullptr)
-	{
-		result =  dynamic_cast<FileTreeModel*>(proxyModel->sourceModel());
-	}
-	else
-	{
-		result = dynamic_cast<FileTreeModel*>(model());
-	}
-
-	assert(result);
-	return result;
-}
-
-FileTreeProxyModel* FileTreeView::fileTreeProxyModel()
-{
-	FileTreeProxyModel* proxyModel = dynamic_cast<FileTreeProxyModel*>(model());
-	return proxyModel;
-}
-
-FileTreeProxyModel* FileTreeView::fileTreeProxyModel() const
-{
-	FileTreeProxyModel* proxyModel = dynamic_cast<FileTreeProxyModel*>(model());
-	return proxyModel;
-}
 
 DbController* FileTreeView::db()
 {

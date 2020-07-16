@@ -3,6 +3,9 @@
 #include "../lib/DbController.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
+#ifdef _DEBUG
+	#include <QAbstractItemModelTester>
+#endif
 //
 // TestsFileTreeModel
 //
@@ -78,6 +81,7 @@ void TestsTabPage::projectOpened()
 
 	return;
 }
+
 
 void TestsTabPage::projectClosed()
 {
@@ -183,20 +187,20 @@ void TestsTabPage::openFile()
 		return;
 	}
 
-	QString fullFileName = f->fileName();
+	QString fileName = f->fileName();
 
 	FileTreeModelItem* parent = f->parent();
 	while (parent != nullptr)
 	{
-		fullFileName = parent->fileName() + "/" + fullFileName;
+		fileName = parent->fileName() + "/" + fileName;
 		parent = parent->parent();
 	}
 
 	// Check if file is already open
 
-	if (documentIsOpen(fullFileName) == true)
+	if (documentIsOpen(fileName) == true)
 	{
-		setCurrentDocument(fullFileName);
+		setCurrentDocument(fileName);
 		return;
 	}
 
@@ -222,8 +226,8 @@ void TestsTabPage::openFile()
 	}
 
 	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << itemName);
-	item->setToolTip(0, fullFileName);
-	item->setData(0, Qt::UserRole, fullFileName);
+	item->setToolTip(0, fileName);
+	item->setData(0, Qt::UserRole, fileName);
 	item->setSelected(true);
 
 	m_openFilesTreeWidget->addTopLevelItem(item);
@@ -231,7 +235,7 @@ void TestsTabPage::openFile()
 
 	// Create document
 
-	TestTabPageDocument& document = m_openDocuments[fullFileName];
+	TestTabPageDocument& document = m_openDocuments[fileName];
 
 	document.codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
 	document.codeEditor->setText(dbFile->data());
@@ -249,12 +253,13 @@ void TestsTabPage::openFile()
 	document.dbFile = dbFile;
 
 	m_openDocumentsCombo->blockSignals(true);
-	m_openDocumentsCombo->addItem(fullFileName);
+	m_openDocumentsCombo->addItem(DbFileInfo::fullPathToFileName(fileName), fileName);
+
 	m_openDocumentsCombo->blockSignals(false);
 
 	// Open file in editor
 
-	setCurrentDocument(fullFileName);
+	setCurrentDocument(fileName);
 
 	return;
 }
@@ -276,10 +281,9 @@ void TestsTabPage::newFolder()
 
 void TestsTabPage::filterChanged()
 {
-	m_testsTreeProxyModel->setFilterKeyColumn(static_cast<int>(FileTreeModel::Columns::FileNameColumn));
-
 	QString filterText = m_filterLineEdit->text();
-	m_testsTreeProxyModel->setFilterFixedString(filterText);
+
+	m_testsTreeView->setFileNameFilter(filterText);
 
 	// Save completer
 	//
@@ -522,7 +526,7 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 
 	//
 
-	int comboIndex = m_openDocumentsCombo->findText(fileName);
+	int comboIndex = m_openDocumentsCombo->findData(fileName, Qt::UserRole);
 	if (comboIndex == -1)
 	{
 		Q_ASSERT(false);
@@ -535,6 +539,19 @@ void TestsTabPage::setCurrentDocument(const QString& fileName)
 	}
 
 	return;
+}
+
+void TestsTabPage::openDocumentsComboTextChanged(int index)
+{
+	if (index < 0 || index >= m_openDocumentsCombo->count())
+	{
+		return;
+	}
+
+
+	QString fileName = m_openDocumentsCombo->itemData(index).toString();
+
+	setCurrentDocument(fileName);
 }
 
 void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
@@ -713,6 +730,12 @@ void TestsTabPage::createUi()
 
 	m_testsTreeModel = new TestsFileTreeModel(db(), DbFileInfo::fullPathToFileName(Db::File::TestsFileName), this, this);
 
+#ifdef _DEBUG
+	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_testsTreeModel,
+																	 QAbstractItemModelTester::FailureReportingMode::Fatal,
+																		 this);
+#endif
+
 	std::vector<FileTreeModel::Columns> columns;
 	columns.push_back(FileTreeModel::Columns::FileNameColumn);
 	columns.push_back(FileTreeModel::Columns::FileStateColumn);
@@ -720,11 +743,7 @@ void TestsTabPage::createUi()
 	//columns.push_back(FileTreeModel::Columns::CustomColumnIndex);
 	m_testsTreeModel->setColumns(columns);
 
-	m_testsTreeProxyModel = new FileTreeProxyModel(this);
-	m_testsTreeProxyModel->setSourceModel(m_testsTreeModel);
-
-	m_testsTreeView = new FileTreeView(db());
-	m_testsTreeView->setModel(m_testsTreeProxyModel);
+	m_testsTreeView = new FileTreeView(db(), m_testsTreeModel);
 
 	m_testsTreeView->setSortingEnabled(true);
 	connect(m_testsTreeView->header(), &QHeaderView::sortIndicatorChanged, [this](int index, Qt::SortOrder order)
@@ -823,9 +842,9 @@ void TestsTabPage::createUi()
 											}").arg(toolbarButtonSize/3));
 
 	m_openDocumentsCombo->setFixedHeight(toolbarButtonSize);
-	QString longFileName = QString().fill('0', 48);
+	QString longFileName = QString().fill('0', 32);
 	m_openDocumentsCombo->setMinimumWidth(QFontMetrics(m_openDocumentsCombo->font()).horizontalAdvance(longFileName));
-	connect(m_openDocumentsCombo, &QComboBox::currentTextChanged, this, &TestsTabPage::setCurrentDocument);
+	connect(m_openDocumentsCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestsTabPage::openDocumentsComboTextChanged);
 
 	m_editorToolBar->addWidget(m_openDocumentsCombo);
 
@@ -1127,7 +1146,7 @@ void TestsTabPage::setActionState()
 		}
 
 		QString ext = QFileInfo(file->fileName()).suffix();
-		if (m_editableExtensions.endsWith(ext))
+		if (m_editableExtensions.contains(ext))
 		{
 			editableExtension = true;
 			break;
@@ -1292,7 +1311,7 @@ void TestsTabPage::closeDocument(const QString& fileName)
 
 	// Delete item from combo box
 
-	int comboIndex = m_openDocumentsCombo->findText(fileName);
+	int comboIndex = m_openDocumentsCombo->findData(fileName, Qt::UserRole);
 	if (comboIndex == -1)
 	{
 		Q_ASSERT(false);

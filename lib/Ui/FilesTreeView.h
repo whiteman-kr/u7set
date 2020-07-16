@@ -5,6 +5,7 @@
 
 class DbController;
 class FileTreeView;
+class FileTreeModel;
 
 class FileTreeModelItem : public DbFileInfo
 {
@@ -28,9 +29,14 @@ public:
 	void deleteChild(FileTreeModelItem* child);
 	void deleteAllChildren();
 
+	bool fetched() const;
+	void setFetched();
+
 private:
 	FileTreeModelItem* m_parent = nullptr;
 	std::vector<std::shared_ptr<FileTreeModelItem>> m_children;
+
+	bool m_fetched = false;
 };
 
 class FileTreeProxyModel : public QSortFilterProxyModel
@@ -38,11 +44,16 @@ class FileTreeProxyModel : public QSortFilterProxyModel
 	Q_OBJECT
 
 public:
-	FileTreeProxyModel(QObject *parent = 0);
+	FileTreeProxyModel(FileTreeModel* sourceModel, QObject *parent = 0);
+
+	QModelIndexList getPersistentIndexList() const;
 
 protected:
 	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+
+private:
+	FileTreeModel* m_sourceModel = nullptr;
 
 };
 
@@ -73,6 +84,7 @@ public:
 	void setColumns(std::vector<Columns> columns);
 	Columns columnAtIndex(int index) const;
 
+	int childCount(const QModelIndex& parentIndex) const;
 	QModelIndex childIndex(int row, int column, const QModelIndex& parentIndex) const;
 
 protected:
@@ -81,10 +93,7 @@ protected:
 	virtual QVariant columnIcon(const QModelIndex& index, FileTreeModelItem* file) const;
 
 private:
-
-	QModelIndex index(int row, const QModelIndex& parentIndex) const;
 	virtual QModelIndex index(int row, int column, const QModelIndex& parentIndex) const override;
-
 	virtual QModelIndex parent(const QModelIndex& childIndex) const override;
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -96,9 +105,11 @@ private:
 	virtual bool hasChildren(const QModelIndex& parentIndex = QModelIndex()) const override;
 
 private:
-	virtual bool canFetchMore(const QModelIndex& parent) const override;
-public:
+	virtual bool canFetchMore(const QModelIndex& parentIndex) const override;
 	virtual void fetchMore(const QModelIndex& parent) override;
+
+public:
+	void fetch(const QModelIndex& parent);
 
 	// Extensions
 	//
@@ -131,6 +142,8 @@ private:
 	QString m_rootFilePath;
 	int m_rootFileId = -1;
 
+	bool m_addFileInProgress = false;
+
 	std::shared_ptr<FileTreeModelItem> m_root;
 
 	std::vector<Columns> m_columns;
@@ -141,12 +154,14 @@ class FileTreeView : public QTreeView
 	Q_OBJECT
 public:
 	FileTreeView() = delete;
-	explicit FileTreeView(DbController* dbc);
+	explicit FileTreeView(DbController* dbc, FileTreeModel* model);
 	virtual ~FileTreeView();
 
 	QModelIndexList selectedSourceRows() const;	// Returns selected rows mapped to source model
 
 	bool addNewFile(const QString& fileName);
+
+	void setFileNameFilter(const QString& filterText);
 
 	// public slots
 	//
@@ -168,6 +183,8 @@ public slots:
 	void refreshFileTree();
 
 private:
+	bool expandAndSelect(const QModelIndex& mi, std::vector<int> expandedFileIds, std::vector<int> selectedFilesIds);
+
 	bool createFiles(std::vector<std::shared_ptr<DbFile> > files);
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
 	void runFileEditor(bool viewOnly);
@@ -175,18 +192,15 @@ private:
 	// Protected props
 	//
 protected:
-	FileTreeModel* fileTreeModel();
-	FileTreeModel* fileTreeModel() const;
-
-	FileTreeProxyModel* fileTreeProxyModel();
-	FileTreeProxyModel* fileTreeProxyModel() const;
-
 	DbController* db();
 
 	// Data
 	//
 private:
-	DbController* m_dbc;
+	DbController* m_dbc = nullptr;
+
+	FileTreeModel* m_model = nullptr;
+	FileTreeProxyModel* m_proxyModel = nullptr;
 };
 
 #endif // FILESTREEMODEL_H

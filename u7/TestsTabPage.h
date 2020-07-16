@@ -64,6 +64,8 @@ private slots:
 	void onGoToLine();
 	void setCurrentDocument(const QString& fileName);
 
+	void openDocumentsComboTextChanged(int index);
+
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
 private:
@@ -99,8 +101,6 @@ private:
 
 	FileTreeView* m_testsTreeView = nullptr;
 	TestsFileTreeModel* m_testsTreeModel = nullptr;
-	FileTreeProxyModel* m_testsTreeProxyModel = nullptr;
-
 
 	QLineEdit* m_filterLineEdit = nullptr;
 	QCompleter* m_filterCompleter = nullptr;

@@ -3,6 +3,9 @@
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
+#ifdef _DEBUG
+	#include <QAbstractItemModelTester>
+#endif
 //
 //
 //	FilesTabPage
@@ -23,12 +26,13 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Controls
 	//
 	m_fileModel = new FileTreeModel(dbcontroller, DbFileInfo::fullPathToFileName(Db::File::RootFileName), this, this);
+#ifdef _DEBUG
+	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_fileModel,
+																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
+																		 this);
+#endif
 
-	m_proxyModel = new FileTreeProxyModel(this);
-	m_proxyModel->setSourceModel(m_fileModel);
-
-	m_fileView = new FileTreeView(dbcontroller);
-	m_fileView->setModel(m_proxyModel);
+	m_fileView = new FileTreeView(dbcontroller, m_fileModel);
 
 	m_fileView->setSortingEnabled(true);
 	connect(m_fileView->header(), &QHeaderView::sortIndicatorChanged, [this](int index, Qt::SortOrder order)
@@ -288,7 +292,7 @@ void FilesTabPage::setActionState()
 		assert(file);
 
 		QString ext = QFileInfo(file->fileName()).suffix();
-		if (m_editableExtensions.endsWith(ext))
+		if (m_editableExtensions.contains(ext))
 		{
 			editableExtension = true;
 			break;
