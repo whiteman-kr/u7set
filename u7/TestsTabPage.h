@@ -24,7 +24,7 @@ struct TestTabPageDocument
 	IdeCodeEditor* codeEditor = nullptr;
 	bool readOnly = false;
 	bool modified = false;
-	QTreeWidgetItem* treeWidgetItem = nullptr;
+	QTreeWidgetItem* openFilesTreeWidgetItem = nullptr;
 	std::shared_ptr<DbFile> dbFile;
 };
 
@@ -40,49 +40,84 @@ public:
 	virtual ~TestsTabPage();
 
 private slots:
+
+	// Project operations
+
 	void projectOpened();
 	void projectClosed();
+	void buildStarted();
 
-	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
-	void modelReset();
+	// Tree controls operations
+
+	void testsTreeSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void testsTreeModelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
+	void testsTreeModelReset();
 	void testsTreeDoubleClicked(const QModelIndex &index);
+
 	void openFilesDoubleClicked(const QModelIndex &index);
+
+	// File operations
 
 	void newFile();
 	void openFile();
 	void newFolder();
+	void renameFile();
+	void checkInFile();
+	void checkOutFile();
+	void undoChangesFile();
+	void deleteFile();
+
+	// Editor slots
+
 	void filterChanged();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
 	void closeCurrentDocument();
+	void onGoToLine();
+
+	// Hotkeys
 
 	void onSaveKeyPressed();
 	void onCloseKeyPressed();
 	void onCtrlTabKeyPressed();
 
-	void onGoToLine();
-	void setCurrentDocument(const QString& fileName);
+	// Open documents combo operations
 
 	void openDocumentsComboTextChanged(int index);
+
+	// Other operations
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
 private:
 	void createUi();
 	void createActions();
+	void setActionState();
 
 	void saveSettings();
 	void restoreSettings();
 
-	void setActionState();
-
-	bool documentIsOpen(const QString& fileName);
-	void saveDocument(const QString& fileName);
-	void closeDocument(const QString& fileName);
-	void closeAllDocuments();
 	void hideEditor();
 
+	QString getFullFileName(FileTreeModelItem* f) const;
+
+	// Documents operations
+
+	bool documentIsOpen(const QString& fileName);
+	bool documentIsModified(const QString& fileName);
+	void setCurrentDocument(const QString& fileName);
+	void setDocumentReadOnly(const QString& fileName, bool readOnly);
+	void saveDocument(const QString& fileName);
+	void saveAllDocuments();
+	void closeDocument(const QString& fileName, bool force);
+	void closeAllDocuments();
+
+	// Open documents widget operation
+
+	QTreeWidgetItem* openFilesTreeWidgetItem(const QString& fileName);
+
+	// Override functions
+private:
 	virtual void keyPressEvent(QKeyEvent* event) override;
 
 private:
