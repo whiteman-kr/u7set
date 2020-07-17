@@ -354,6 +354,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0334.sql", "Upgrade to version 334, Added folders $root$/Tests and $root$/Tests/SimTests"},
 	{":/DatabaseUpgrade/Upgrade0335.sql", "Upgrade to version 335, Added AFB mux (discrete multiplexor) for all LMs and MSO4_SR21"},
 	{":/DatabaseUpgrade/Upgrade0336.sql", "Upgrade to version 336, Updated schema templates, set default font to Arial"},
+	{":/DatabaseUpgrade/Upgrade0337.sql", "Upgrade to version 337, TuningClient preset update (StartSchemaID and ConfigurationArrivedScript added)"},
 };
 
 int DbWorker::counter = 0;

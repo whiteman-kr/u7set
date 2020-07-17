@@ -2,6 +2,10 @@
 #include "TuningSchemaWidget.h"
 #include "../VFrame30/MonitorSchema.h"
 
+//
+//TuningSchemaWidget
+//
+
 TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent):
 	VFrame30::TuningController(signalManager, tcpClient, parent)
 {
@@ -19,6 +23,10 @@ bool TuningClientTuningController::writingEnabled() const
 	return true;
 }
 
+//
+//TuningSchemaWidget
+//
+
 TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 									   TuningClientTuningController* tuningController,
 									   std::shared_ptr<VFrame30::Schema> schema,
@@ -33,6 +41,7 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	Q_UNUSED(tuningSignalManager);
 
 	clientSchemaView()->setTuningController(tuningController);
+	clientSchemaView()->setZoom(100, true);
 
 	return;
 }

@@ -136,15 +136,21 @@ public slots:
 
 private:
 
-	enum class FilterType
+	enum class FilterIDType
 	{
 		All = 0,
 		AppSignalID,
 		CustomAppSignalID,
 		EquipmentID,
-		Caption,
+		Caption
+	};
+
+	enum class FilterValueType
+	{
+		All = 0,
 		Zero,
-		One
+		One,
+		DefaultNotSet
 	};
 
 private:
