@@ -41,7 +41,7 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	Q_UNUSED(tuningSignalManager);
 
 	clientSchemaView()->setTuningController(tuningController);
-	clientSchemaView()->setZoom(100, true);
+	clientSchemaView()->setZoom(100, false);
 
 	return;
 }
