@@ -154,8 +154,8 @@ R"+++((function(lastOverrideValue, workcycle)
 	public:
 		std::atomic<bool> m_scriptValueRequiresReset{true};	// Indicator that m_scriptValue, m_scriptEngine must be reset (deleted and created again)
 
-		std::unique_ptr<QJSValue> m_scriptValue;		// Must be created and worked with in thrread where it is used
-		std::unique_ptr<QJSEngine> m_scriptEngine;		// Must be created and worked with in thrread where it is used
+		std::unique_ptr<QJSValue> m_scriptValue;			// Must be created and worked with in thrread where it is used
+		std::unique_ptr<QJSEngine> m_scriptEngine;			// Must be created and worked with in thrread where it is used
 	};
 
 
@@ -171,6 +171,8 @@ R"+++((function(lastOverrideValue, workcycle)
 		void clear();
 
 		int addSignals(const QStringList& appSignalIds);
+		bool addSignal(QString appSignalId, bool enabled, int index, OverrideSignalMethod method, QVariant value, QString script);
+
 		void removeSignal(QString appSignalId);
 		bool isSignalInOverrideList(QString appSignalId) const;
 
@@ -181,6 +183,9 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		bool runOverrideScripts(const QString& lmEquipmentId, qint64 workcycle);	// Runs override scripts and sets value to override signals
 		void requestToResetOverrideScripts(const QString& lmEquipmentId);			// If module is reset, then script must be restarted, clear global variables, etc
+
+		bool saveWorkspace(QString fileName) const;
+		bool loadWorkspace(QString fileName);
 
 	signals:
 		void signalsChanged(QStringList addedAppSignalIds);	// Added or deleted signal

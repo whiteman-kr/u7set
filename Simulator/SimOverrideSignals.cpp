@@ -644,6 +644,51 @@ namespace Sim
 		return addedSignals.size();
 	}
 
+	bool OverrideSignals::addSignal(QString appSignalId, bool enabled, int index, OverrideSignalMethod method, QVariant value, QString script)
+	{
+		std::optional<Signal> sp = appSignalManager().signalParamExt(appSignalId);
+
+		if (sp.has_value() == false)
+		{
+			writeWaning(QString("Cannot add signal to override list, signal %1 not found.").arg(appSignalId));
+			return false;
+		}
+
+		{
+			QWriteLocker locker(&m_lock);
+			m_changesCounter ++;
+
+			auto[it, ok] = m_signals.emplace(appSignalId, *sp);
+			if (ok == false)
+			{
+				writeWaning(QString("Signal %1 aldready added to override list.").arg(appSignalId));
+				return false;
+			}
+			else
+			{
+				OverrideSignalParam& osp = it->second;
+
+				osp.setEnabled(enabled);
+				osp.setIndex(index);
+
+				switch (method)
+				{
+				case OverrideSignalMethod::Value:
+					osp.setValue(value, method, true);
+					break;
+				case OverrideSignalMethod::Script:
+					osp.setValue(script, method, true);
+					break;
+				default:
+					assert(false);
+				}
+			}
+		}
+
+		emit signalsChanged(QStringList{} << appSignalId);
+		return true;
+	}
+
 	void OverrideSignals::removeSignal(QString appSignalId)
 	{
 		{
@@ -881,6 +926,69 @@ namespace Sim
 				osp.m_scriptValueRequiresReset = true;
 			}
 		}
+	}
+
+	bool OverrideSignals::saveWorkspace(QString fileName) const
+	{
+		std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);
+		if (output.is_open() == false || output.bad() == true)
+		{
+			return false;
+		}
+
+		std::vector<OverrideSignalParam> osignals = overrideSignals();
+
+		::Proto::SimOverrideSignalWorkspace message;
+
+		for (const OverrideSignalParam& osp : osignals)
+		{
+			::Proto::SimOverrideSignal* signalMessage = message.add_overridesignals();
+
+			signalMessage->set_enabled(osp.enabled());
+			signalMessage->set_index(osp.index());
+
+			signalMessage->set_appsignalid(osp.appSignalId().toStdString());
+			signalMessage->set_overridemethod(static_cast<qint32>(osp.method()));
+
+			::Proto::Write(signalMessage->mutable_overridevalue(), osp.value());
+			signalMessage->set_overridescript(osp.script().toStdString());
+		}
+
+		bool ok = message.SerializeToOstream(&output);
+		return ok;
+	}
+
+	bool OverrideSignals::loadWorkspace(QString fileName)
+	{
+		clear();
+
+		std::fstream input(fileName.toStdString(), std::ios::in | std::ios::binary);
+		if (input.is_open() == false || input.bad() == true)
+		{
+			return false;
+		}
+
+		::Proto::SimOverrideSignalWorkspace message;
+
+		bool result = ParseFromIstream(message, input);
+		if (result == false)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < message.overridesignals_size(); i++)
+		{
+			auto ospm = message.overridesignals(i);
+
+			addSignal(QString::fromStdString(ospm.appsignalid()),
+					  ospm.enabled(),
+					  ospm.index(),
+					  static_cast<OverrideSignalMethod>(ospm.overridemethod()),
+					  Proto::Read(ospm.overridevalue()),
+					  QString::fromStdString(ospm.overridescript()));
+		}
+
+		return true;
 	}
 
 	Sim::AppSignalManager& OverrideSignals::appSignalManager()

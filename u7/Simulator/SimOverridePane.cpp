@@ -1,6 +1,7 @@
 #include "SimOverridePane.h"
 #include "../../lib/AppSignal.h"
 #include "../../Simulator/SimOverrideSignals.h"
+#include "../../Proto/serialization.pb.h"
 #include "SimOverrideValueWidget.h"
 
 
@@ -294,6 +295,20 @@ void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 	//
 	QAction* clearAction = menu.addAction(tr("Clear"), [this]{clear();});
 	clearAction->setEnabled(!selectedItems.empty());
+
+	// ---------------------------------------
+	//
+	menu.addSeparator()->setText(tr("Workspace"));
+
+	// Save to files
+	//
+	QAction* saveWorkspaceAction = menu.addAction(tr("Save Worksapce..."), [this]{	saveWorkspace();	});
+	saveWorkspaceAction->setEnabled(m_treeWidget->topLevelItemCount() != 0);
+
+	// Save to files
+	//
+	QAction* restoreWorkspaceAction = menu.addAction(tr("Restore Workspace..."), [this]{	restoreWorkspace();	});
+	Q_UNUSED(restoreWorkspaceAction);
 
 	// Dispaly format menu
 	// Radix: 10 or 16
@@ -725,6 +740,43 @@ void SimOverridePane::addSignal()
 	}
 	while (true);
 
+	return;
+}
+
+void SimOverridePane::saveWorkspace()
+{
+	if (m_treeWidget->topLevelItemCount() == 0)
+	{
+		return;
+	}
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save File"),
+													QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/untitled.sow",
+													tr("u7 Signal Override Workspace (*.sow);;All files (*.*)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_simulator->overrideSignals().saveWorkspace(fileName);
+	return;
+}
+
+void SimOverridePane::restoreWorkspace()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+													tr("Open File"),
+													QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+													tr("u7 Signal Override Workspace (*.sow);;All files (*.*)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_simulator->overrideSignals().loadWorkspace(fileName);
 	return;
 }
 
