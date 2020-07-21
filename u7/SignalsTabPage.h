@@ -28,11 +28,6 @@ class TableDataVisibilityController;
 class SignalSetProvider;
 
 
-#define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
-#define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())
-#define TOTAL_SIGNAL_TYPE_COUNT (SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT)
-
-
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
 			ST_DISCRETE = TO_INT(E::SignalType::Discrete),
 			ST_BUS = TO_INT(E::SignalType::Bus),
@@ -44,118 +39,6 @@ const int	FI_ANY = 0,
 			FI_CUSTOM_APP_SIGNAL_ID = 2,
 			FI_EQUIPMENT_ID = 3,
 			FI_CAPTION = 4;
-
-
-class SignalPropertyManager : public QObject
-{
-	Q_OBJECT
-public:
-	struct PropertyBehaviourDescription
-	{
-		QString name;
-		bool dependsOnPrecision = false;
-		std::vector<E::PropertyBehaviourType> behaviourType = std::vector<E::PropertyBehaviourType>(
-					static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT),
-					E::PropertyBehaviourType::Write);
-	};
-
-	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
-
-signals:
-	void propertyCountChanged();
-
-public:
-	SignalPropertyManager(DbController* dbController, QWidget* parentWidget);
-
-	static SignalPropertyManager* getInstance();
-
-	// Data for models
-	//
-
-	int count() const;
-
-	int index(const QString& name);
-	QString caption(int propertyIndex) const;
-	QString name(int propertyIndex);
-
-	QVariant value(const Signal* signal, int propertyIndex) const;
-	const std::vector<std::pair<int, QString>> values(int propertyIndex) const;
-
-	void setValue(Signal* signal, int propertyIndex, const QVariant& value);
-
-	QVariant::Type type(const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(const Signal& signal, const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
-	bool dependsOnPrecision(const int propertyIndex) const;
-	bool isHiddenFor(E::SignalType type, const int propertyIndex) const;
-	bool isHidden(E::PropertyBehaviourType behaviour) const;
-	bool isReadOnly(E::PropertyBehaviourType behaviour) const;
-
-	void loadNotSpecificProperties();
-	void reloadPropertyBehaviour();
-
-public slots:
-	void detectNewProperties(const Signal& signal);
-
-private:
-	bool isNotCorrect(int propertyIndex) const;
-	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
-	QString typeName(int typeIndex, int inOutTypeIndex);
-
-	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
-
-	void addNewProperty(const SignalPropertyDescription& newProperty);
-
-	static void trimm(QStringList& stringList);
-
-	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
-	QHash<QString, int> m_propertyName2IndexMap;
-	QHash<int, int> m_propertyIndex2BehaviourIndexMap;
-
-	DbController* m_dbController;
-	QWidget* m_parentWidget;
-	static SignalPropertyManager* m_instance;
-
-	// is initialized by non specific properties
-	//
-	std::vector<SignalPropertyDescription> m_propertyDescription = {
-		{ SignalProperties::appSignalIDCaption,
-		  SignalProperties::appSignalIDCaption,
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->appSignalID(); },
-		  [](Signal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
-
-		{ SignalProperties::customSignalIDCaption,
-		  SignalProperties::customSignalIDCaption,
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->customAppSignalID(); },
-		  [](Signal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
-
-		{ SignalProperties::equipmentIDCaption,
-		  SignalProperties::equipmentIDCaption,
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->equipmentID(); },
-		  [](Signal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
-
-		{ SignalProperties::busTypeIDCaption,
-		  SignalProperties::busTypeIDCaption,
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->busTypeID(); },
-		  [](Signal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
-
-		{ SignalProperties::typeCaption,
-		  "A/D/B",
-		  QVariant::String, {},
-		  [](const Signal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
-		  nullptr },
-
-		{ SignalProperties::inOutTypeCaption,
-		  "Input-output type",
-		  QVariant::Int, E::enumValues<E::SignalInOutType>(),
-		  [](const Signal* s){ return TO_INT(s->inOutType()); },
-		  [](Signal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
-	};
-};
 
 
 struct CreatingSignalOptions
@@ -204,7 +87,7 @@ class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(SignalSetProvider* signalSetProvider, DbController* dbController, SignalsTabPage* parent = nullptr);
+	SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage* parent = nullptr);
 	virtual ~SignalsModel() override;
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -217,8 +100,6 @@ public:
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
 	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel) { return new SignalsDelegate(m_signalSetProvider, this, signalsProxyModel, parent()); }
-
-	SignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
 
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
 
@@ -237,7 +118,6 @@ public slots:
 private:
 	// Data
 	//
-	SignalPropertyManager m_propertyManager;
 	SignalSetProvider* m_signalSetProvider;
 	int m_rowCount = 0;
 	int m_columnCount = 0;

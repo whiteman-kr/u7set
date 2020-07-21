@@ -148,10 +148,6 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 void initNewSignal(Signal& signal)
 {
 	QSettings settings;
-	auto loader = [&settings](const QString& name, QVariant defaultValue = QVariant())
-	{
-		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, defaultValue);
-	};
 
 	switch (signal.signalType())
 	{
@@ -185,7 +181,7 @@ void initNewSignal(Signal& signal)
 
 		if (propertyManager.getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
 		{
-			propertyManager.setValue(&signal, index, value);
+			propertyManager.setValue(&signal, index, value, theSettings.isExpertMode());
 		}
 	};
 
@@ -207,14 +203,14 @@ void initNewSignal(Signal& signal)
 		}
 
 		QVariant::Type type = propertyManager.type(i);
-		if (type == QVariant::String && propertyManager.value(&signal, i).toString().isEmpty() == false)
+		if (type == QVariant::String && propertyManager.value(&signal, i, theSettings.isExpertMode()).toString().isEmpty() == false)
 		{
 			continue;
 		}
 
 		if (value.canConvert(type) && value.convert(type))
 		{
-			propertyManager.setValue(&signal, i, value);
+			propertyManager.setValue(&signal, i, value, theSettings.isExpertMode());
 		}
 	}
 
@@ -370,7 +366,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 
 			E::PropertyBehaviourType behaviour = manager.getBehaviour(appSignal, propertyIndex);
-			if (manager.isHidden(behaviour))
+			if (manager.isHidden(behaviour, theSettings.isExpertMode()))
 			{
 				property->setVisible(false);
 			}
@@ -717,12 +713,12 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 
 	for (int i = 0; i < manager.count(); i++)
 	{
-		if (manager.isHidden(manager.getBehaviour(signal, i)))
+		if (manager.isHidden(manager.getBehaviour(signal, i), theSettings.isExpertMode()))
 		{
 			continue;
 		}
 
 		QString name = manager.name(i);
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i));
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i, theSettings.isExpertMode()));
 	}
 }

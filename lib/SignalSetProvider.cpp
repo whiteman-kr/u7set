@@ -1,14 +1,538 @@
 #include "SignalSetProvider.h"
 #include "DbController.h"
 
+
+SignalPropertyManager* SignalPropertyManager::m_instance = nullptr;
+
+SignalPropertyManager::SignalPropertyManager(DbController* dbController, QWidget* parentWidget) :
+	m_dbController(dbController),
+	m_parentWidget(parentWidget)
+{
+	assert (m_instance == nullptr);
+	for (size_t i = 0; i < m_propertyDescription.size(); i++)
+	{
+		m_propertyName2IndexMap[m_propertyDescription[i].name] = static_cast<int>(i);
+	}
+	loadNotSpecificProperties();
+	m_instance = this;
+}
+
+SignalPropertyManager* SignalPropertyManager::getInstance()
+{
+	assert (m_instance != nullptr);
+	return m_instance;
+}
+
+int SignalPropertyManager::count() const
+{
+	return static_cast<int>(m_propertyDescription.size());
+}
+
+int SignalPropertyManager::index(const QString& name)
+{
+	for (size_t i = 0; i < m_propertyDescription.size(); i++)
+	{
+		if (m_propertyDescription[i].name == name)
+		{
+			return static_cast<int>(i);
+		}
+	}
+	return -1;
+}
+
+QString SignalPropertyManager::caption(int propertyIndex) const
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return QString();
+	}
+	return m_propertyDescription[static_cast<size_t>(propertyIndex)].caption;
+}
+
+QString SignalPropertyManager::name(int propertyIndex)
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return QString();
+	}
+	return m_propertyDescription[static_cast<size_t>(propertyIndex)].name;
+}
+
+QVariant SignalPropertyManager::value(const Signal* signal, int propertyIndex, bool isExpert) const
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return QVariant();
+	}
+
+	E::PropertyBehaviourType behaviour = getBehaviour(*signal, propertyIndex);
+	if (isHidden(behaviour, isExpert))
+	{
+		return QVariant();
+	}
+
+	const SignalPropertyDescription& property = m_propertyDescription[static_cast<size_t>(propertyIndex)];
+	if (property.enumValues.size() == 0)
+	{
+		return property.valueGetter(signal);
+	}
+	else
+	{
+		int value = property.valueGetter(signal).toInt();
+		for (const auto& enumValue : property.enumValues)
+		{
+			if (value == enumValue.first)
+			{
+				return enumValue.second;
+			}
+		}
+		return QString("Unknown value (%1)").arg(value);
+	}
+}
+
+const std::vector<std::pair<int, QString> > SignalPropertyManager::values(int propertyIndex) const
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return {};
+	}
+
+	return m_propertyDescription[static_cast<size_t>(propertyIndex)].enumValues;
+}
+
+void SignalPropertyManager::setValue(Signal* signal, int propertyIndex, const QVariant& value, bool isExpert)
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+	}
+
+	E::PropertyBehaviourType behaviour = getBehaviour(*signal, propertyIndex);
+	if (isHidden(behaviour, isExpert) || isReadOnly(behaviour, isExpert))
+	{
+		assert(false);
+	}
+
+	m_propertyDescription[static_cast<size_t>(propertyIndex)].valueSetter(signal, value);
+}
+
+QVariant::Type SignalPropertyManager::type(const int propertyIndex) const
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return QVariant::Invalid;
+	}
+	return m_propertyDescription[static_cast<size_t>(propertyIndex)].type;
+}
+
+E::PropertyBehaviourType SignalPropertyManager::getBehaviour(const Signal& signal, const int propertyIndex) const
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return defaultBehaviour;
+	}
+
+	return getBehaviour(signal.signalType(), signal.inOutType(), propertyIndex);
+}
+
+E::PropertyBehaviourType SignalPropertyManager::getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const
+{
+	int behaviourIndex = m_propertyIndex2BehaviourIndexMap.value(propertyIndex, -1);
+	if (behaviourIndex == -1)
+	{
+		return defaultBehaviour;
+	}
+
+	auto typeEnum = QMetaEnum::fromType<E::SignalType>();
+	auto inOutTypeEnum = QMetaEnum::fromType<E::SignalInOutType>();
+	for (int i = 0; i < SIGNAL_TYPE_COUNT; i++)
+	{
+		if (type != typeEnum.value(i))
+		{
+			continue;
+		}
+		for (int j = 0; j < IN_OUT_TYPE_COUNT; j++)
+		{
+			if (directionType == static_cast<E::SignalInOutType>(inOutTypeEnum.value(j)))
+			{
+				return m_propertyBehaviorDescription[static_cast<size_t>(behaviourIndex)].behaviourType[static_cast<size_t>(i * typeEnum.keyCount() + j)];
+			}
+		}
+	}
+
+	return defaultBehaviour;
+}
+
+bool SignalPropertyManager::dependsOnPrecision(const int propertyIndex) const
+{
+	if (isNotCorrect(propertyIndex))
+	{
+		assert(false);
+		return false;
+	}
+
+	int behaviourIndex = m_propertyIndex2BehaviourIndexMap.value(propertyIndex, -1);
+	if (behaviourIndex == -1)
+	{
+		return false;
+	}
+
+	return m_propertyBehaviorDescription[static_cast<size_t>(behaviourIndex)].dependsOnPrecision;
+}
+
+bool SignalPropertyManager::isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const
+{
+	auto inOutTypeEnum = QMetaEnum::fromType<E::SignalInOutType>();
+	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
+	{
+		E::SignalInOutType directionType = static_cast<E::SignalInOutType>(inOutTypeEnum.value(i));
+		E::PropertyBehaviourType behaviour = getBehaviour(type, directionType, propertyIndex);
+		if (isHidden(behaviour, isExpert) == false)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void SignalPropertyManager::detectNewProperties(const Signal &signal)
+{
+	PropertyObject propObject;
+
+	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(signal.specPropStruct());
+
+	if (result.first == false)
+	{
+		assert(false);
+		return;
+	}
+
+	std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
+
+	SignalSpecPropValues spValues;
+
+	for(std::shared_ptr<Property> specificProperty : specificProperties)
+	{
+		int index = m_propertyName2IndexMap.value(specificProperty->caption(), -1);
+		if (index != -1)
+		{
+			continue;
+		}
+
+		SignalPropertyDescription newProperty;
+
+		QString propertyName = specificProperty->caption();
+		bool propertyIsEnum = specificProperty->isEnum();
+		QVariant::Type type = specificProperty->value().type();
+
+		newProperty.name = propertyName;
+		newProperty.caption = SignalProperties::generateCaption(propertyName);
+		newProperty.type = type;
+		if (propertyIsEnum)
+		{
+			newProperty.enumValues = specificProperty->enumValues();
+		}
+
+		newProperty.valueGetter = [propertyIsEnum, propertyName, type](const Signal* s)
+		{
+			QVariant qv;
+
+			bool isEnum = propertyIsEnum;
+			QString name = propertyName;
+
+			bool result = s->getSpecPropValue(name, &qv, &isEnum);
+
+			if (result == false)
+			{
+				return QVariant();
+			}
+
+			assert(qv.type() == type);
+
+			return qv;
+		};
+
+		newProperty.valueSetter = [propertyIsEnum, propertyName](Signal* s, const QVariant& v)
+		{
+			bool isEnum = propertyIsEnum;
+			QString name = propertyName;
+
+			bool result = s->setSpecPropValue(name, v, isEnum);
+
+			assert(result == true);
+
+			Q_UNUSED(result);
+		};
+
+		switch (newProperty.type)
+		{
+		case QVariant::String:
+		case QVariant::Double:
+		case QVariant::Int:
+		case QVariant::UInt:
+		case QVariant::Bool:
+			break;
+		default:
+			assert(false);
+			continue;
+		}
+
+		addNewProperty(newProperty);
+	}
+}
+
+
+// Loads properties that uninitialized signal contains
+//
+void SignalPropertyManager::loadNotSpecificProperties()
+{
+	Signal signal;
+	SignalProperties signalProperties(signal, true);
+	std::vector<SignalPropertyDescription> propetyDescription = signalProperties.getProperties();
+
+	for (SignalPropertyDescription& property : propetyDescription)
+	{
+		if (index(property.name) == -1)
+		{
+			auto propertyPtr = signalProperties.propertyByCaption(property.name);
+			if (propertyPtr != nullptr && propertyPtr->category().isEmpty() == false)
+			{
+				addNewProperty(property);
+			}
+		}
+	}
+}
+
+void SignalPropertyManager::reloadPropertyBehaviour()
+{
+	if (m_dbController == nullptr)
+	{
+		return;
+	}
+
+	DbFileInfo mcInfo = m_dbController->systemFileInfo(m_dbController->etcFileId());
+
+	if (mcInfo.isNull() == true)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").arg(Db::File::EtcFileName));
+		return;
+	}
+
+	DbFileInfo propertyBehaviorFile;
+	m_dbController->getFileInfo(mcInfo.fileId(), QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, m_parentWidget);
+
+	if (propertyBehaviorFile.isNull() == true)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	std::shared_ptr<DbFile> file;
+	bool result = m_dbController->getLatestVersion(propertyBehaviorFile, &file, m_parentWidget);
+	if (result == false)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+	QString fileText = file->data();
+	QStringList rows = fileText.split("\n", Qt::SkipEmptyParts);
+
+	if (rows.isEmpty() == true)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is empty").arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	QStringList fieldNameList = rows[0].split(';', Qt::KeepEmptyParts);
+	trimm(fieldNameList);
+
+	rows.removeFirst();
+
+	QString uncorrectFileMessage =  QString("Uncorrect format of file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName);
+
+	int nameIndex = fieldNameList.indexOf("PropertyName");
+	if (nameIndex < 0)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": PropertyName column not found");
+		return;
+	}
+
+	int precisionIndex = fieldNameList.indexOf("DependsOnPrecision");
+	if (precisionIndex < 0)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": DependosOnPrecision column not found");
+		return;
+	}
+
+	std::vector<int> typeIndexes(static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT), -1);
+	for (int i = 0; i < SIGNAL_TYPE_COUNT; i++)
+	{
+		for (int j = 0; j < IN_OUT_TYPE_COUNT; j++)
+		{
+			typeIndexes[static_cast<size_t>(i * SIGNAL_TYPE_COUNT + j)] = fieldNameList.indexOf(typeName(i, j));
+		}
+	}
+
+	m_propertyBehaviorDescription.clear();
+	m_propertyIndex2BehaviourIndexMap.clear();
+
+	for (QString row : rows)
+	{
+		row = row.trimmed();
+
+		if (row.isEmpty() == true)
+		{
+			continue;
+		}
+
+		QStringList fields = row.split(';', Qt::KeepEmptyParts);
+		trimm(fields);
+
+		if (nameIndex > fields.size())
+		{
+			continue;
+		}
+
+		PropertyBehaviourDescription behaviour;
+		behaviour.name = fields[nameIndex];
+
+		if (precisionIndex < fields.size())
+		{
+			behaviour.dependsOnPrecision = fields[precisionIndex].toLower() == "true";
+		}
+
+		for (size_t i = 0; i < static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT); i++)
+		{
+			if (typeIndexes[i] < 0 && typeIndexes[i] >= fields.size())
+			{
+				continue;
+			}
+
+			bool ok = false;
+			E::PropertyBehaviourType behaviourType = E::stringToValue<E::PropertyBehaviourType>(fields[typeIndexes[i]], &ok);
+			if (ok == true)
+			{
+				behaviour.behaviourType[i] = behaviourType;
+			}
+		}
+
+		m_propertyBehaviorDescription.push_back(behaviour);
+
+		int propertyIndex = m_propertyName2IndexMap.value(behaviour.name, -1);
+		if (propertyIndex != -1)
+		{
+			int behaviourIndex = static_cast<int>(m_propertyBehaviorDescription.size()) - 1;
+			assert(m_propertyDescription[propertyIndex].name == m_propertyBehaviorDescription[behaviourIndex].name);
+
+			m_propertyIndex2BehaviourIndexMap[propertyIndex] = behaviourIndex;
+		}
+	}
+}
+
+bool SignalPropertyManager::isNotCorrect(int propertyIndex) const
+{
+	if (propertyIndex < 0 || propertyIndex >= static_cast<int>(m_propertyDescription.size()))
+	{
+		return true;
+	}
+	return false;
+}
+
+QString SignalPropertyManager::typeName(E::SignalType type, E::SignalInOutType inOutType)
+{
+	return E::valueToString<E::SignalType>(type) + E::valueToString<E::SignalInOutType>(inOutType);
+}
+
+QString SignalPropertyManager::typeName(int typeIndex, int inOutTypeIndex)
+{
+	return typeName(IntToEnum<E::SignalType>(QMetaEnum::fromType<E::SignalType>().value(typeIndex)),
+					IntToEnum<E::SignalInOutType>(QMetaEnum::fromType<E::SignalInOutType>().value(inOutTypeIndex)));
+}
+
+TuningValue SignalPropertyManager::variant2TuningValue(const QVariant& variant, TuningValueType type)
+{
+	TuningValue value;
+	value.setType(type);
+
+	bool ok = false;
+	value.fromString(variant.toString(), &ok);
+	assert(ok == true);
+
+	return value;
+}
+
+bool SignalPropertyManager::isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const
+{
+	bool hidden = behaviour == E::PropertyBehaviourType::Hide;
+	hidden |= behaviour == E::PropertyBehaviourType::Expert && isExpert == false;
+	return hidden;
+}
+
+bool SignalPropertyManager::isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const
+{
+	bool readOnly = behaviour != E::PropertyBehaviourType::Write;
+	readOnly |= behaviour == E::PropertyBehaviourType::Expert && isExpert == false;
+	return readOnly;
+}
+
+void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newProperty)
+{
+	if (m_propertyName2IndexMap.contains(newProperty.name))
+	{
+		assert(false);
+		return;
+	}
+	int propertyIndex = static_cast<int>(m_propertyDescription.size());
+	m_propertyDescription.push_back(newProperty);
+	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
+	emit propertyCountChanged();
+
+	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
+	{
+		if (newProperty.name == m_propertyBehaviorDescription[i].name)
+		{
+			m_propertyIndex2BehaviourIndexMap[propertyIndex] = static_cast<int>(i);
+			break;
+		}
+	}
+}
+
+void SignalPropertyManager::trimm(QStringList& stringList)
+{
+	for (QString& string : stringList)
+	{
+		string = string.trimmed();
+	}
+}
+
+
 SignalSetProvider* SignalSetProvider::m_instance = nullptr;
 
 SignalSetProvider::SignalSetProvider(DbController* dbController, QWidget* parentWidget) :
+	QObject(parentWidget),
 	m_dbController(dbController),
+	m_propertyManager(dbController, parentWidget),
 	m_parentWidget(parentWidget)
 {
 	assert(m_instance == nullptr);
 	m_instance = this;
+
+	connect(this, &SignalSetProvider::signalPropertiesChanged, &m_propertyManager, &SignalPropertyManager::detectNewProperties);
+}
+
+SignalSetProvider::~SignalSetProvider()
+{
+	if (m_lazyLoadSignalsTimer != nullptr)
+	{
+		m_lazyLoadSignalsTimer->stop();
+		delete m_lazyLoadSignalsTimer;
+	}
 }
 
 SignalSetProvider* SignalSetProvider::getInstance()
@@ -202,8 +726,12 @@ void SignalSetProvider::initLazyLoadSignals()
 
 	emit signalCountChanged();
 
-	m_lazyLoadSignalsTimer = new QTimer(this);
-	connect(m_lazyLoadSignalsTimer, &QTimer::timeout, this, &SignalSetProvider::loadNextSignalsPortion);
+	if (m_lazyLoadSignalsTimer == nullptr)
+	{
+		m_lazyLoadSignalsTimer = new QTimer(this);
+		connect(m_lazyLoadSignalsTimer, &QTimer::timeout, this, &SignalSetProvider::loadNextSignalsPortion);
+	}
+
 	m_lazyLoadSignalsTimer->start(100);
 }
 
@@ -470,6 +998,20 @@ void SignalSetProvider::saveSignal(Signal& signal)
 	{
 		showError(state);
 	}
+}
+
+void SignalSetProvider::saveSignals(QVector<Signal*> signalVector)
+{
+	QVector<ObjectState> states;
+	for (int i = 0; i < signalVector.count(); i++)
+	{
+		ObjectState state;
+		trimSignalTextFields(*signalVector[i]);
+
+		dbController()->setSignalWorkcopy(signalVector[i], &state, m_parentWidget);
+		states.append(state);
+	}
+	showErrors(states);
 }
 
 QVector<int> SignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
