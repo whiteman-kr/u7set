@@ -20,10 +20,10 @@ public:
 
 	FileTreeModelItem* child(int index) const;
 	int childIndex(FileTreeModelItem* child) const;
-
 	FileTreeModelItem* childByFileId(int fileId) const;
-
 	std::shared_ptr<FileTreeModelItem> childSharedPtr(int index);
+
+	void expandChildFilesToArray(std::vector<FileTreeModelItem*>& result);
 
 	void addChild(std::shared_ptr<FileTreeModelItem> child);
 	void deleteChild(FileTreeModelItem* child);
@@ -87,6 +87,8 @@ public:
 	int childCount(const QModelIndex& parentIndex) const;
 	QModelIndex childIndex(int row, int column, const QModelIndex& parentIndex) const;
 
+	QModelIndex childParent(const QModelIndex& childIndex) const;
+
 protected:
 	virtual QString customColumnText(Columns column, const FileTreeModelItem* item) const;
 	virtual QString customColumnName(Columns column) const;
@@ -110,6 +112,7 @@ private:
 
 public:
 	void fetch(const QModelIndex& parent);
+	void fetchRecursively(QModelIndex parentIndex, const std::vector<int>& fileIdSet);
 
 	// Extensions
 	//
@@ -122,6 +125,7 @@ public:
 	void addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeModelItem>& file);
 	void removeFile(QModelIndex index);
 	void updateFile(QModelIndex index, const DbFileInfo& file);
+	bool moveFiles(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
 
 	void refresh();
 
@@ -142,8 +146,6 @@ private:
 	QString m_rootFilePath;
 	int m_rootFileId = -1;
 
-	bool m_addFileInProgress = false;
-
 	std::shared_ptr<FileTreeModelItem> m_root;
 
 	std::vector<Columns> m_columns;
@@ -159,7 +161,8 @@ public:
 
 	QModelIndexList selectedSourceRows() const;	// Returns selected rows mapped to source model
 
-	bool addNewFile(const QString& fileName);
+	bool newFile(const QString& fileName);
+	void moveFile(int parentFileId);
 
 	void setFileNameFilter(const QString& filterText);
 
@@ -167,6 +170,7 @@ public:
 	//
 public slots:
 	void addFile();
+	void addFileToFolder();
 	void addFolder(const QString& folderName);
 	void viewFile();
 	void editFile();
@@ -185,7 +189,7 @@ public slots:
 private:
 	bool expandAndSelect(const QModelIndex& mi, std::vector<int> expandedFileIds, std::vector<int> selectedFilesIds);
 
-	bool createFiles(std::vector<std::shared_ptr<DbFile> > files);
+	bool createFiles(std::vector<std::shared_ptr<DbFile> > files, bool createInParentFolder);
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
 	void runFileEditor(bool viewOnly);
 

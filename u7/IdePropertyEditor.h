@@ -116,13 +116,14 @@ public:
     IdeCodeEditor(CodeType codeType, QWidget* parent);
     ~IdeCodeEditor();
 
+	virtual QString text() const override;
 	virtual void setText(const QString& text) override;
-	virtual QString text() override;
 
 	int lines() const;
 	void getCursorPosition(int* line, int* index) const;
 	void setCursorPosition(int line, int index);
 
+	virtual bool readOnly() const override;
 	virtual void setReadOnly(bool value) override;
 
 	void activateEditor();
@@ -176,10 +177,10 @@ public:
 	explicit IdeTuningFiltersEditor(DbController* dbController, QWidget* parent);
     virtual ~IdeTuningFiltersEditor();
 
-    void setText(const QString& text) override;
+	QString text() const override;
+	void setText(const QString& text) override;
 
-    QString text() override;
-
+	bool readOnly() const override;
     void setReadOnly(bool value) override;
 
 private:

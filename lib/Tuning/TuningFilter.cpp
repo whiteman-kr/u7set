@@ -1984,7 +1984,7 @@ bool TuningFilterStorage::save(QByteArray& data)
 	return true;
 }
 
-bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType)
+bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType) const
 {
     QXmlStreamWriter writer(&data);
 

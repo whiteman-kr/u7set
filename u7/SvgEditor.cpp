@@ -173,6 +173,11 @@ SvgEditor::~SvgEditor()
 	theSettings.m_svgEditorSplitterState = m_topSplitter->saveState();
 }
 
+QString SvgEditor::text() const
+{
+	return m_svgWidget.svgData();
+}
+
 void SvgEditor::setText(const QString& text)
 {
 	m_textEdit->blockSignals(true);
@@ -184,9 +189,9 @@ void SvgEditor::setText(const QString& text)
 	return;
 }
 
-QString SvgEditor::text()
+bool SvgEditor::readOnly() const
 {
-	return m_svgWidget.svgData();
+	return m_textEdit->isReadOnly();
 }
 
 void SvgEditor::setReadOnly(bool value)

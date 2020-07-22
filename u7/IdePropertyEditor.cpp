@@ -363,6 +363,11 @@ IdeCodeEditor::~IdeCodeEditor()
 {
 }
 
+QString IdeCodeEditor::text() const
+{
+	return m_textEdit->text();
+}
+
 void IdeCodeEditor::setText(const QString& text)
 {
 	m_textEdit->blockSignals(true);
@@ -370,11 +375,6 @@ void IdeCodeEditor::setText(const QString& text)
 	m_textEdit->setText(text);
 
 	m_textEdit->blockSignals(false);
-}
-
-QString IdeCodeEditor::text()
-{
-	return m_textEdit->text();
 }
 
 int IdeCodeEditor::lines() const
@@ -390,6 +390,11 @@ void IdeCodeEditor::getCursorPosition(int* line, int* index) const
 void IdeCodeEditor::setCursorPosition(int line, int index)
 {
 	m_textEdit->setCursorPosition(line, index);
+}
+
+bool IdeCodeEditor::readOnly() const
+{
+	return m_textEdit->isReadOnly();
 }
 
 void IdeCodeEditor::setReadOnly(bool value)
@@ -667,7 +672,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 }
 
-QString IdeTuningFiltersEditor::text()
+QString IdeTuningFiltersEditor::text() const
 {
     QByteArray data;
 
@@ -682,6 +687,11 @@ QString IdeTuningFiltersEditor::text()
     }
 
     return QString();
+}
+
+bool IdeTuningFiltersEditor::readOnly() const
+{
+	return false;
 }
 
 void IdeTuningFiltersEditor::setReadOnly(bool value)

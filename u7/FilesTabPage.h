@@ -41,6 +41,7 @@ private:
 	QAction* m_viewFileAction = nullptr;
     QAction* m_editFileAction = nullptr;
     QAction* m_deleteFileAction = nullptr;
+
 	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_checkOutAction = nullptr;

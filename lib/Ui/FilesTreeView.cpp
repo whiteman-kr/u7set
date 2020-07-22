@@ -6,6 +6,7 @@
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
 #include "../lib/StandardColors.h"
+#include "../lib/Ui/DbControllerTools.h"
 
 //
 //
@@ -77,6 +78,19 @@ std::shared_ptr<FileTreeModelItem> FileTreeModelItem::childSharedPtr(int index)
 {
 	std::shared_ptr<FileTreeModelItem> sp = m_children.at(index);
 	return sp;
+}
+
+void FileTreeModelItem::expandChildFilesToArray(std::vector<FileTreeModelItem*>& result)
+{
+	for (std::shared_ptr<FileTreeModelItem> child : m_children)
+	{
+		if (child->isFolder() == false)
+		{
+			result.push_back(child.get());
+		}
+
+		child->expandChildFilesToArray(result);
+	}
 }
 
 void FileTreeModelItem::addChild(std::shared_ptr<FileTreeModelItem> child)
@@ -151,9 +165,25 @@ bool FileTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sour
 	}
 
 
-	if (item->isFolder() == true || item->fileName().contains(filter, Qt::CaseInsensitive) == true)
+	if (item->isFolder() == true)
 	{
-		return true;
+		std::vector<FileTreeModelItem*> recursiveChildren;
+		item->expandChildFilesToArray(recursiveChildren);
+
+		for (FileTreeModelItem* recursiveItem : recursiveChildren)
+		{
+			if (recursiveItem->fileName().contains(filter, Qt::CaseInsensitive) == true)
+			{
+				return true;
+			}
+		}
+	}
+	else
+	{
+		if (item->fileName().contains(filter, Qt::CaseInsensitive) == true)
+		{
+			return true;
+		}
 	}
 
 	return false;
@@ -176,46 +206,73 @@ bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 		return false;
 	}
 
+	// Folders first
+
+	if (f1->isFolder() != f2->isFolder())
+	{
+		if (sortOrder() == Qt::AscendingOrder)
+		{
+			return f1->isFolder() > f2->isFolder();
+		}
+		else
+		{
+			return f1->isFolder() < f2->isFolder();
+		}
+	}
+
 	FileTreeModel::Columns column = m_sourceModel->columnAtIndex(left.column());
 
 	switch (static_cast<FileTreeModel::Columns>(column))
 	{
-	case FileTreeModel::Columns::FileNameColumn:
-		{
-			if (f1->isFolder() == f2->isFolder())
-			{
-				return f1->fileName() < f2->fileName();
-			}
-			else
-			{
-
-				return f1->isFolder() > f2->isFolder();
-			}
-		}
-		break;
-	case FileTreeModel::Columns::FileSizeColumn:
-		{
-			return f1->size() < f2->size();
-		}
-		break;
-	case FileTreeModel::Columns::FileStateColumn:
-		{
-			return f1->state() < f2->state();
-		}
-		break;
-	case FileTreeModel::Columns::FileUserColumn:
-		{
-			return f1->userId() < f2->userId();
-		}
-		break;
 	case FileTreeModel::Columns::FileIdColumn:
 		{
-			return f1->fileId() < f2->fileId();
+			if (f1->fileId() != f2->fileId())
+			{
+				return f1->fileId() < f2->fileId();
+			}
+			Q_ASSERT(false);
 		}
-		break;
+		//break;
 	case FileTreeModel::Columns::FileAttributesColumn:
 		{
-			return f1->attributes() < f2->attributes();
+			if (f1->attributes() != f2->attributes())
+			{
+				return f1->attributes() < f2->attributes();
+			}
+		}
+		//break;
+	case FileTreeModel::Columns::FileSizeColumn:
+		{
+			if (f1->size() != f2->size())
+			{
+				return f1->size() < f2->size();
+			}
+		}
+		//break;
+	case FileTreeModel::Columns::FileUserColumn:
+		{
+			if ( m_sourceModel->db()->username(f1->userId()) !=  m_sourceModel->db()->username(f2->userId()))
+			{
+				return m_sourceModel->db()->username(f1->userId()) < m_sourceModel->db()->username(f2->userId());
+			}
+		}
+		//break;
+	case FileTreeModel::Columns::FileStateColumn:
+		{
+			if (f1->state() != f2->state())
+			{
+				return f1->state() < f2->state();
+			}
+
+			if (f1->action().toInt() != f2->action().toInt())
+			{
+				return f1->action().toInt() < f2->action().toInt();
+			}
+		}
+		//break;
+	case FileTreeModel::Columns::FileNameColumn:
+		{
+			return f1->fileName() < f2->fileName();
 		}
 		break;
 	}
@@ -288,6 +345,11 @@ QModelIndex FileTreeModel::childIndex(int row, int column, const QModelIndex& pa
 {
 	return index(row, column, parentIndex);
 
+}
+
+QModelIndex FileTreeModel::childParent(const QModelIndex& childIndex) const
+{
+	return parent(childIndex);
 }
 
 QString FileTreeModel::customColumnText(Columns column, const FileTreeModelItem* item) const
@@ -470,6 +532,12 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 		}
 		break;
 
+	case Qt::UserRole:
+		{
+			return file->fileId();
+		}
+		break;
+
 	case Qt::TextAlignmentRole:
 		{
 			return Qt::AlignLeft + Qt::AlignVCenter;
@@ -587,14 +655,6 @@ bool FileTreeModel::hasChildren(const QModelIndex& parentIndex) const
 		return false;
 	}
 
-	if (m_addFileInProgress == true &&
-		hasChildren == true &&
-		file->childrenCount() == 0)
-	{
-		// seems that file has been added to filesystem but not yet added to child array
-		return false;
-	}
-
 	return hasChildren;
 }
 
@@ -636,10 +696,6 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 
 	if (parentFile->fetched() == true)
 	{
-		if (parentFile->fileId() != m_rootFileId)
-		{
-			Q_ASSERT(false);
-		}
 		return;
 	}
 
@@ -655,22 +711,28 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 	}
 
 	int oldChildCount = parentFile->childrenCount();
-	int newChildrenCount = static_cast<int>(files.size());
+	int newChildCount = static_cast<int>(files.size());
 
-	if (newChildrenCount <= oldChildCount)
+	if (newChildCount > oldChildCount)
 	{
-		return;
+		beginInsertRows(parentIndex, oldChildCount, newChildCount - 1);
 	}
-
-	beginInsertRows(parentIndex, oldChildCount, newChildrenCount - 1);
-
-	parentFile->deleteAllChildren();
+	else
+	{
+		if (newChildCount < oldChildCount)
+		{
+			beginRemoveRows(parentIndex, newChildCount, oldChildCount - 1);
+		}
+	}
 
 	for (const DbFileInfo& fi : files)
 	{
 		std::shared_ptr childFile = std::make_shared<FileTreeModelItem>(fi);
 
-		parentFile->addChild(childFile);
+		if (parentFile->childByFileId(childFile->fileId()) == nullptr)
+		{
+			parentFile->addChild(childFile);
+		}
 
 		// fetch child files also
 
@@ -691,7 +753,17 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 		childFile->setFetched();
 	}
 
-	endInsertRows();
+	if (newChildCount > oldChildCount)
+	{
+		endInsertRows();
+	}
+	else
+	{
+		if (newChildCount < oldChildCount)
+		{
+			endRemoveRows();
+		}
+	}
 
 	return;
 }
@@ -699,6 +771,42 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 void FileTreeModel::fetch(const QModelIndex& parent)
 {
 	fetchMore(parent);
+
+	return;
+}
+
+void FileTreeModel::fetchRecursively(QModelIndex parentIndex, const std::vector<int>& fileIdSet)
+{
+	FileTreeModelItem* f = fileItem(parentIndex);
+	if (f == nullptr)
+	{
+		Q_ASSERT(f);
+		return;
+	}
+
+	if (f->fetched() == false)
+	{
+		fetch(parentIndex);
+	}
+
+	int rows = rowCount(parentIndex);
+
+	for (int i = 0; i < rows; i++)
+	{
+		QModelIndex childFileIndex = childIndex(i, 0, parentIndex);
+
+		FileTreeModelItem* childFile = fileItem(childFileIndex);
+		if (childFile == nullptr)
+		{
+			Q_ASSERT(childFile);
+			return;
+		}
+
+		if (std::find(fileIdSet.begin(), fileIdSet.end(), childFile->fileId()) != fileIdSet.end())
+		{
+			fetchRecursively(childFileIndex, fileIdSet);
+		}
+	}
 
 	return;
 }
@@ -786,13 +894,16 @@ void FileTreeModel::addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeMo
 		return;
 	}
 
-	m_addFileInProgress = true;
+	if (parentFile->childByFileId(file->fileId()) != nullptr)
+	{
+		// File with this fileId already exists
+		//
+		return;
+	}
 
 	beginInsertRows(parentIndex, parentFile->childrenCount(), parentFile->childrenCount());
 	parentFile->addChild(file);
 	endInsertRows();
-
-	m_addFileInProgress = false;
 
 	return;
 }
@@ -886,10 +997,120 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 
 	*(static_cast<DbFileInfo*>(childFile)) = file;
 
-	QModelIndex leftIndex = this->index(parentFile->childIndex(childFile), static_cast<int>(m_columns[0]), parentIndex);
-	emit dataChanged(index, leftIndex);
+	QModelIndex rightIndex = this->index(parentFile->childIndex(childFile), static_cast<int>(m_columns.size()) - 1, parentIndex);
+	emit dataChanged(index, rightIndex);
 
 	return;
+}
+
+bool FileTreeModel::moveFiles(const QModelIndexList& selectedIndexes,
+                                        int movedToParnetId,
+                                        const std::vector<DbFileInfo>& movedFiles,
+                                        std::vector<QModelIndex>* addedFilesIndexes)
+{
+	if (addedFilesIndexes == nullptr)
+	{
+		Q_ASSERT(addedFilesIndexes);
+		refresh();
+		return false;
+	}
+
+	if (movedFiles.empty() == true)
+	{
+		Q_ASSERT(movedFiles.empty() == false);
+		refresh();
+		return false;
+	}
+
+	if (movedToParnetId == DbFileInfo::Null)
+	{
+		Q_ASSERT(movedToParnetId != DbFileInfo::Null);
+		refresh();
+		return false;
+	}
+
+	// Remove moved files
+	//
+	for (QModelIndex index : selectedIndexes)
+	{
+		FileTreeModelItem* file = fileItem(index);
+		if (file == nullptr)
+		{
+			Q_ASSERT(file);
+			return false;
+		}
+
+		FileTreeModelItem* parentFile = file->parent();
+		if (parentFile == nullptr)
+		{
+			Q_ASSERT(parentFile);
+			return false;
+		}
+
+		int childIndex = parentFile->childIndex(file);
+
+		QModelIndex pi = index.parent();
+
+		beginRemoveRows(pi, childIndex, childIndex);
+		parentFile->deleteChild(file);
+		endRemoveRows();
+	}
+
+
+	// Get parent index where files were moved
+	//
+	QModelIndexList matched = match(index(0, 0, QModelIndex()),
+	                                Qt::UserRole,
+	                                QVariant::fromValue(movedToParnetId),
+	                                1,
+	                                Qt::MatchExactly | Qt::MatchRecursive);
+
+	if (matched.size() != 1)
+	{
+		// Cant find ModelIndex for parent
+		//
+		Q_ASSERT(matched.size() == 1);
+
+		// Mitigate error
+		//
+		refresh();
+		return false;
+	}
+
+	QModelIndex movedToParentIndex = matched.front();
+	Q_ASSERT(movedToParentIndex.isValid());
+
+	FileTreeModelItem* movedToFile = fileItem(movedToParentIndex);
+	if (movedToFile == nullptr)
+	{
+		Q_ASSERT(movedToFile);
+		return false;
+	}
+
+	if (movedToParnetId != movedToFile->fileId())
+	{
+		Q_ASSERT(movedToParnetId == movedToFile->fileId());
+
+		refresh();
+		return false;
+	}
+
+	// Add moved files to destination index
+	//
+
+	if (movedToFile->fetched() == true)
+	{
+		for (const DbFileInfo& f : movedFiles)
+		{
+			std::shared_ptr<FileTreeModelItem> fi = std::make_shared<FileTreeModelItem>(f);
+			addFile(movedToParentIndex, fi);
+
+			QModelIndex addedIndex = childIndex(rowCount(movedToParentIndex) - 1, 0, movedToParentIndex);
+			addedFilesIndexes->push_back(addedIndex);
+		}
+	}
+
+	return true;
 }
 
 void FileTreeModel::refresh()
@@ -999,7 +1220,7 @@ QModelIndexList FileTreeView::selectedSourceRows() const
 }
 
 
-bool FileTreeView::addNewFile(const QString& fileName)
+bool FileTreeView::newFile(const QString& fileName)
 {
 	// Find parent file
 	//
@@ -1020,10 +1241,120 @@ bool FileTreeView::addNewFile(const QString& fileName)
 
 	files.push_back(file);
 
-	bool result = createFiles(files);
+	bool result = createFiles(files, true/*createInParentFolder*/);
 
 	return result;
 
+}
+
+void FileTreeView::moveFile(int parentFileId)
+{
+	QModelIndexList	selectedIndexes = selectedSourceRows();
+
+	std::vector<DbFileInfo> filesToMove;
+	filesToMove.reserve(selectedIndexes.size());
+
+	for (QModelIndex& mi : selectedIndexes)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid root items deleting
+			//
+			continue;
+		}
+		FileTreeModelItem* f = m_model->fileItem(mi);
+
+		if (db()->isSystemFile(f->fileId()) == true ||
+			f->state() != VcsState::CheckedOut)
+		{
+			continue;
+		}
+
+		if (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())
+		{
+			filesToMove.push_back(*f);
+		}
+	}
+
+	if (filesToMove.empty() == true)
+	{
+		Q_ASSERT(filesToMove.empty() == false);
+		return;
+	}
+
+	// Get destination folder
+	//
+
+	std::pair<int, std::vector<int>> result = DbControllerTools::showSelectFolderDialog(db(), parentFileId, filesToMove.front().parentId(), false, this);
+
+	int moveToFileId = result.first;
+	if (moveToFileId == -1)
+	{
+		return;
+	}
+
+	const std::vector<int>& moveToFileIdParents = result.second;
+
+	// Move files in DB
+	//
+	std::vector<DbFileInfo> movedFiles;
+
+	if (bool ok = db()->moveFiles(filesToMove, moveToFileId, &movedFiles, this);
+		ok == false)
+	{
+		return;
+	}
+
+	// Fetch all items that are parents of moveToFileId. This will enable search of added item
+
+	m_model->fetchRecursively(QModelIndex(), moveToFileIdParents);
+
+	// Update model/view
+	//
+	std::vector<QModelIndex> addedIndexes;
+	addedIndexes.reserve(selectedIndexes.size());
+
+	if (bool ok = m_model->moveFiles(selectedIndexes, moveToFileId, movedFiles, &addedIndexes);
+		ok == false)
+	{
+		return;
+	}
+
+	// Expand parent
+	//
+	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+															  Qt::UserRole,
+															  QVariant::fromValue(moveToFileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+	Q_ASSERT(matched.size() == 1);
+
+	if (matched.size() == 1)
+	{
+		QModelIndex fileModelIndex = matched.front();
+		QModelIndex mappedModelIndex = m_proxyModel->mapFromSource(fileModelIndex);
+
+		QModelIndex expandParent = mappedModelIndex;
+		while (expandParent.isValid() == true)
+		{
+			expand(expandParent);
+			expandParent = expandParent.parent();
+		}
+	}
+
+
+	// Select moved files
+	//
+	selectionModel()->reset();
+
+	for (const QModelIndex& mi : addedIndexes)
+	{
+		QModelIndex mappedToProxy = m_proxyModel->mapFromSource(mi);
+
+		selectionModel()->select(mappedToProxy, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	}
+
+	return;
 }
 
 void FileTreeView::setFileNameFilter(const QString& filterText)
@@ -1033,52 +1364,13 @@ void FileTreeView::setFileNameFilter(const QString& filterText)
 
 void FileTreeView::addFile()
 {
-	QModelIndexList selectedRows = selectedSourceRows();	// Indexes from source model
+	createFiles({}, false/*createInParentFolder*/);
+	return;
+}
 
-	if (selectedRows.size() != 1)
-	{
-		assert(selectedRows.size() == 1);
-		return;
-	}
-
-	// Select and read files
-	//
-	QFileDialog fd(this);
-	fd.setFileMode(QFileDialog::ExistingFiles);
-
-	if (fd.exec() == QDialog::Rejected)
-	{
-		return;
-	}
-
-	QStringList selectedFiles = fd.selectedFiles();
-
-	// Create files vector
-	//
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	for (int i = 0; i < selectedFiles.size(); i++)
-	{
-		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
-
-		bool ok = file->readFromDisk(selectedFiles[i]);
-		if (ok == false)
-		{
-			QMessageBox msgBox;
-
-			msgBox.setText(tr("File %1 cannot be read.").arg(selectedFiles[i]));
-			msgBox.setInformativeText(tr("The operation is terminated."));
-
-			msgBox.exec();
-			return;
-		}
-
-		files.push_back(file);
-	}
-
-	createFiles(files);
-
-
+void FileTreeView::addFileToFolder()
+{
+	createFiles({}, true/*createInParentFolder*/);
 	return;
 }
 
@@ -1106,7 +1398,7 @@ void FileTreeView::addFolder(const QString& folderName)
 
 	files.push_back(file);
 
-	createFiles(files);
+	createFiles(files, true/*createInParentFolder*/);
 
 	return;
 }
@@ -1237,6 +1529,8 @@ void FileTreeView::deleteFile()
 			m_model->updateFile(*mipos, fi);
 		}
 	}
+
+	setFocus();
 
 	return;
 }
@@ -1446,6 +1740,8 @@ void FileTreeView::undoChangesFile()
 		}
 	}
 
+	setFocus();
+
 	return;
 }
 
@@ -1639,22 +1935,54 @@ void FileTreeView::getLatestTreeVersion()
 	return;
 }
 
-bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
+bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files, bool createInParentFolder)
 {
 	QModelIndexList selectedRows = selectedSourceRows();	// Indexes from source model
-	QModelIndexList selectedProxyRows = selectionModel()->selectedRows();	// Indexes from proxy model
 
-	if (selectedRows.size() != 1 || selectedProxyRows.size() != 1)
+	if (selectedRows.size() != 1)
 	{
-		assert(selectedProxyRows.size() == 1);
 		assert(selectedRows.size() == 1);
 		return false;
 	}
 
-	QModelIndex selectedIndex = selectedRows[0];
-	QModelIndex selectedProxyIndex = selectedProxyRows[0];
+	// Select and read files if files array is empty
+	//
+	if (files.empty() == true)
+	{
+
+		QFileDialog fd(this);
+		fd.setFileMode(QFileDialog::ExistingFiles);
+
+		if (fd.exec() == QDialog::Rejected)
+		{
+			return false;
+		}
+
+		QStringList selectedFiles = fd.selectedFiles();
+
+		for (int i = 0; i < selectedFiles.size(); i++)
+		{
+			std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+			bool ok = file->readFromDisk(selectedFiles[i]);
+			if (ok == false)
+			{
+				QMessageBox msgBox;
+
+				msgBox.setText(tr("File %1 cannot be read.").arg(selectedFiles[i]));
+				msgBox.setInformativeText(tr("The operation is terminated."));
+
+				msgBox.exec();
+				return false;
+			}
+
+			files.push_back(file);
+		}
+	}
 
 	//
+
+	QModelIndex selectedIndex = selectedRows[0];
 
 	FileTreeModelItem* parentFile = m_model->fileItem(selectedIndex);
 	if (parentFile == nullptr || parentFile->fileId() == -1)
@@ -1663,6 +1991,42 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 		assert(parentFile->fileId() != -1);
 		return false;
 	}
+
+	if (createInParentFolder == true)
+	{
+		// If file is selected, change selectedIndex to parent folder
+		//
+		while (parentFile->isFolder() == false)
+		{
+			selectedIndex = m_model->childParent(selectedIndex);
+
+			if (selectedIndex.isValid() == false)
+			{
+				// Root is reached
+				break;
+			}
+
+			parentFile = m_model->fileItem(selectedIndex);
+			if (parentFile == nullptr || parentFile->fileId() == -1)
+			{
+				assert(parentFile);
+				assert(parentFile->fileId() != -1);
+				return false;
+			}
+		}
+
+		if (parentFile == nullptr || parentFile->isFolder() == false)
+		{
+			QMessageBox msgBox;
+
+			msgBox.setText(tr("Can't find the parent folder for selected file."));
+			msgBox.setInformativeText(tr("The operation is terminated."));
+			msgBox.exec();
+			return false;
+		}
+	}
+
+	//
 
 	for (std::shared_ptr<DbFile> file : files)
 	{
@@ -1684,6 +2048,8 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files)
 
 	// Expand parent
 	//
+	QModelIndex selectedProxyIndex = m_proxyModel->mapFromSource(selectedIndex);
+
 	if (isExpanded(selectedProxyIndex) == false)
 	{
 		expand(selectedProxyIndex);
@@ -2078,6 +2444,8 @@ void FileTreeView::refreshFileTree()
 			verticalScrollBar()->setValue(yScroll);
 		}
 	});
+
+	setFocus();
 
 	return;
 }

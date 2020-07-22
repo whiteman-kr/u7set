@@ -22,7 +22,6 @@ private:
 struct TestTabPageDocument
 {
 	IdeCodeEditor* codeEditor = nullptr;
-	bool readOnly = false;
 	bool modified = false;
 	QTreeWidgetItem* openFilesTreeWidgetItem = nullptr;
 	std::shared_ptr<DbFile> dbFile;
@@ -38,6 +37,10 @@ class TestsTabPage : public MainTabPage
 public:
 	explicit TestsTabPage(DbController* dbc, QWidget* parent);
 	virtual ~TestsTabPage();
+
+	bool hasUnsavedTests() const;
+	void saveUnsavedTests();
+	void resetModified();
 
 private slots:
 
@@ -66,6 +69,8 @@ private slots:
 	void checkOutFile();
 	void undoChangesFile();
 	void deleteFile();
+	void moveFile();
+	void refreshFileTree();
 
 	// Editor slots
 
@@ -99,22 +104,17 @@ private:
 
 	void hideEditor();
 
-	QString getFullFileName(FileTreeModelItem* f) const;
-
 	// Documents operations
 
-	bool documentIsOpen(const QString& fileName);
-	bool documentIsModified(const QString& fileName);
-	void setCurrentDocument(const QString& fileName);
-	void setDocumentReadOnly(const QString& fileName, bool readOnly);
-	void saveDocument(const QString& fileName);
+	bool documentIsOpen(int fileId);
+	bool documentIsModified(int fileId);
+	void setCurrentDocument(int fileId);
+	void setDocumentReadOnly(int fileId, bool readOnly);
+	void saveDocument(int fileId);
 	void saveAllDocuments();
-	void closeDocument(const QString& fileName, bool force);
+	void closeDocument(int fileId, bool force);
 	void closeAllDocuments();
-
-	// Open documents widget operation
-
-	QTreeWidgetItem* openFilesTreeWidgetItem(const QString& fileName);
+	void updateOpenDocumentInfo(int fileId);
 
 	// Override functions
 private:
@@ -123,8 +123,8 @@ private:
 private:
 	// Data
 	//
-	std::map<QString, TestTabPageDocument> m_openDocuments;
-	QString m_currentDocument;
+	std::map<int, TestTabPageDocument> m_openDocuments;
+	int m_currentFileId = -1;
 	QFont m_editorFont;
 
 	QStringList m_editableExtensions;
@@ -137,6 +137,8 @@ private:
 	FileTreeView* m_testsTreeView = nullptr;
 	TestsFileTreeModel* m_testsTreeModel = nullptr;
 
+	QPushButton* m_filterSetButton = nullptr;
+	QPushButton* m_filterResetButton = nullptr;
 	QLineEdit* m_filterLineEdit = nullptr;
 	QCompleter* m_filterCompleter = nullptr;
 
@@ -163,6 +165,7 @@ private:
 	QAction* m_openFileAction = nullptr;
 	QAction* m_renameFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;
+	QAction* m_moveFileAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;

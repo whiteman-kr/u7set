@@ -387,7 +387,7 @@ public:
 	bool load(const QString& fileName, QString* errorCode);
 
 	bool save(QByteArray& data);
-	bool save(QByteArray& data, TuningFilter::Source saveSourceType);
+	bool save(QByteArray& data, TuningFilter::Source saveSourceType) const;
 	bool save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType);
 
 	bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);

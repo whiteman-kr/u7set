@@ -116,19 +116,20 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		assert(m_buildTabPage);
 	}
 
-	// check if any schema is not saved
+	// check if any schema or test is not saved
 	//
-	if (m_editSchemaTabPage == nullptr)
+	if (m_editSchemaTabPage == nullptr || m_testsTabPage == nullptr)
 	{
 		assert(m_editSchemaTabPage);
+		assert(m_testsTabPage);
 		e->accept();
 		return;
 	}
 
-	if (m_editSchemaTabPage->hasUnsavedSchemas() == true)
+	if (m_editSchemaTabPage->hasUnsavedSchemas() == true || m_testsTabPage->hasUnsavedTests() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
-																   tr("Some schemas have unsaved changes."),
+																   tr("Some items on Schemas and Tests tab pages have unsaved changes."),
 																   QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
 																   QMessageBox::SaveAll);
 
@@ -141,12 +142,14 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		if (result == QMessageBox::SaveAll)
 		{
 			m_editSchemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
+			m_testsTabPage->saveUnsavedTests();	// It will reset modified flag
 		}
 
 		if (result == QMessageBox::Discard)
 		{
 			m_editSchemaTabPage->resetModified();		// Reset modidied flag for all opened files, so on closeEvent for tese files
 														// prompt to save them will not be shown
+			m_testsTabPage->resetModified();
 		}
 	}
 
