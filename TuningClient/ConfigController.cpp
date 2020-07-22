@@ -203,7 +203,9 @@ void ConfigController::start()
 
 void ConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
-	ConfigSettings readSettings;
+	// Copy old settings to new settings
+
+	ConfigSettings readSettings = theConfigSettings;
 
 	// Parse XML
 	//
@@ -317,40 +319,39 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		schemasDetails = m_schemaDetailsSet.schemasDetails();
 	}
 
-	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
+	for (const Builder::BuildFileInfo& buildFileInfo: buildFileInfoArray)
 	{
-
-		// Add MD5 record to a map, if it does not exist
-		//
-
-		if (f.ID.isEmpty())
+		if (buildFileInfo.ID.isEmpty())
 		{
 			continue;
 		}
 
-		if (m_filesMD5Map.find(f.ID) == m_filesMD5Map.end())
+		// Add MD5 record to a map, if it does not exist
+		//
+
+		if (m_filesMD5Map.find(buildFileInfo.ID) == m_filesMD5Map.end())
 		{
-			m_filesMD5Map[f.ID] = "";
+			m_filesMD5Map[buildFileInfo.ID] = "";
 		}
 
 		// Get previous MD5
 		//
 
-		const QString& md5 = m_filesMD5Map[f.ID];
+		const QString& previousMD5 = m_filesMD5Map[buildFileInfo.ID];
 
-		if (md5 != f.md5)
+		if (previousMD5 != buildFileInfo.md5)
 		{
-			m_filesMD5Map[f.ID] = f.md5;
+			m_filesMD5Map[buildFileInfo.ID] = buildFileInfo.md5;
 
 			someFilesUpdated = true;
 
 			// Filters
 
-			if (f.ID == CFG_FILE_ID_TUNING_FILTERS)
+			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_FILTERS)
 			{
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(buildFileInfo.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
@@ -363,11 +364,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Signals
 
-			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
+			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_SIGNALS)
 			{
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(buildFileInfo.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
@@ -377,18 +378,39 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 			}
 
-			if (f.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
+			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
 			{
-				if (getFileBlockedById(f.ID, &m_globalScriptData, &errorStr) == false)
-				{
-					m_globalScriptData.clear();
+				QByteArray globalScriptData;
 
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
+				if (getFileBlockedById(buildFileInfo.ID, &globalScriptData, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(buildFileInfo.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
+				else
+				{
+					readSettings.globalScript = globalScriptData;
+				}
 			}
 
+			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT)
+			{
+				QByteArray configurationArrivedScriptData;
+
+				if (getFileBlockedById(buildFileInfo.ID, &configurationArrivedScriptData, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(buildFileInfo.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					readSettings.configurationArrivedScript = configurationArrivedScriptData;
+				}
+			}
+
+			/*
 			if (f.ID == CFG_FILE_ID_BEHAVIOR)
 			{
 				QByteArray behaviorData;
@@ -410,21 +432,20 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 						Q_ASSERT(ok);
 					}
 				}
-			}
+			}*/
 		}
 
 		// If this file is schema details - place the information about it
 
 		for (auto si : schemasDetails)
 		{
-			if (f.ID == si.m_schemaId)
+			if (buildFileInfo.ID == si.m_schemaId)
 			{
 				SchemaSettings s(si.m_schemaId, si.m_caption);
 				readSettings.schemas.push_back(s);
 			}
 		}
 	}
-
 
 	bool apperanceUpdated = false;
 
@@ -438,7 +459,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode ||
 			theConfigSettings.logonMode != readSettings.logonMode ||
 			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
-			theConfigSettings.usersAccounts != readSettings.usersAccounts
+			theConfigSettings.usersAccounts != readSettings.usersAccounts ||
+			theConfigSettings.globalScript != readSettings.globalScript ||
+			theConfigSettings.configurationArrivedScript != readSettings.configurationArrivedScript ||
+			theConfigSettings.schemas.size() != readSettings.schemas.size()
 			)
 	{
 		apperanceUpdated = true;
@@ -471,8 +495,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		emit configurationArrived();
 	}
-
-	emit globalScriptArrived(m_globalScriptData);
 
 	return;
 }
@@ -651,6 +673,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
 			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
 			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
+			outSetting->startSchemaID = dasXmlElement.attribute("startSchemaID");
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 

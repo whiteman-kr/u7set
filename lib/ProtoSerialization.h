@@ -58,7 +58,6 @@ namespace Proto
 			std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);
 			if (output.is_open() == false || output.bad() == true)
 			{
-				assert(false);
 				return false;
 			}
 
@@ -71,7 +70,6 @@ namespace Proto
 			std::fstream output(fn.toStdString(), std::ios::out | std::ios::binary);
 			if (output.is_open() == false || output.bad() == true)
 			{
-				assert(false);
 				return false;
 			}
 
@@ -81,7 +79,6 @@ namespace Proto
 		{
 			if (stream.is_open() == false || stream.bad() == true)
 			{
-				assert(false);
 				return false;
 			}
 
@@ -261,7 +258,6 @@ namespace Proto
 			std::fstream input(fn.toStdString(), std::ios::in | std::ios::binary);
 			if (input.is_open() == false || input.bad() == true)
 			{
-				assert(false);
 				return false;
 			}
 
@@ -271,7 +267,6 @@ namespace Proto
 		{
 			if (stream.is_open() == false || stream.bad() == true)
 			{
-				assert(false);
 				return false;
 			}
 

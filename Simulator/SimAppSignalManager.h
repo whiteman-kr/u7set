@@ -1,16 +1,10 @@
 #pragma once
 
-#include <memory>
-#include <map>
-#include <unordered_map>
-#include <optional>
-#include <QHash>
-#include <QReadWriteLock>
 #include "../lib/Signal.h"
 #include "../lib/AppSignalManager.h"
+#include "../TrendView/TrendSignal.h"
 #include "SimRam.h"
 #include "SimOutput.h"
-#include "../TrendView/TrendSignal.h"
 
 
 namespace Sim

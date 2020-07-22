@@ -495,6 +495,14 @@ namespace Builder
 				return false;
 			}
 
+			//
+			// startSchemaID
+			//
+			QString startSchemaID = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "StartSchemaID", &ok);
+			if (ok == false)
+			{
+				return false;
+			}
 
 			{
 				xmlWriter.writeStartElement("TuningService");
@@ -530,6 +538,7 @@ namespace Builder
 				xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
 				xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
 				xmlWriter.writeAttribute("usersAccounts", usersAccounts);
+				xmlWriter.writeAttribute("startSchemaID", startSchemaID);
 			}
 
 			// SchemaTags
@@ -768,6 +777,23 @@ namespace Builder
 			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CFG_FILE_ID_TUNING_GLOBALSCRIPT, "", globalScript);
 
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);
+		}
+
+		// Writing OnConfigurationArrived
+		//
+		result = true;
+
+		if (m_software->propertyExists("OnConfigurationArrived") == false)
+		{
+			m_log->errCFG3000("OnConfigurationArrived", m_software->equipmentIdTemplate());
+			result = false;
+		}
+		else
+		{
+			QString arrivedScript = m_software->propertyValue("OnConfigurationArrived").toString();
+			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
+
+			m_cfgXml->addLinkToFile(arrivedScriptBuildFile);
 		}
 
 		return result;

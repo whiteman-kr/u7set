@@ -74,7 +74,7 @@ private:
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
 	VFrame30::TuningController* m_tuningController = nullptr;
 
-	int m_eventLoopTimerId = 0;			// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
+	int m_eventLoopTimerId = 0;				// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
 	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
 };
 

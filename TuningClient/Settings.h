@@ -57,6 +57,11 @@ struct BuildInfo
 
 struct SchemaSettings
 {
+	SchemaSettings()
+	{
+
+	}
+
 	SchemaSettings(const QString& id, const QString& caption)
 	{
 		m_id = id;
@@ -91,6 +96,8 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
+	QString startSchemaID;
+
 	LmStatusFlagMode lmStatusFlagMode = LmStatusFlagMode::SOR;
 
 	int loginSessionLength = 120;
@@ -102,6 +109,10 @@ struct ConfigSettings
 	BuildInfo buildInfo;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
+
+	QString globalScript;
+
+	QString configurationArrivedScript;
 
 };
 
