@@ -176,7 +176,6 @@ public:
 
 private:
 	SignalsModel* m_sourceModel;
-	SignalSetProvider* m_signalSetProvider;
 	QTableView* m_view;
 	QVector<Qt::CheckState> states;
 };
@@ -197,7 +196,6 @@ protected:
 
 private:
 	SignalsModel *m_sourceModel;
-	SignalSetProvider* m_signalSetProvider;
 	CheckedoutSignalsModel* m_proxyModel;
 	QTableView* m_signalsView = nullptr;
 	QPlainTextEdit* m_commentEdit;
@@ -224,7 +222,6 @@ protected:
 
 private:
 	SignalsModel *m_sourceModel;
-	SignalSetProvider* m_signalSetProvider;
 	CheckedoutSignalsModel* m_proxyModel;
 };
 

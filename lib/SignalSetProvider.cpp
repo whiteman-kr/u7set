@@ -588,7 +588,16 @@ void SignalSetProvider::loadUsers()
 
 bool SignalSetProvider::isEditableSignal(const Signal& signal) const
 {
-	if (signal.checkedOut() && (signal.userID() == m_dbController->currentUser().userId() && m_dbController->currentUser().isAdminstrator()))
+	if (!signal.checkedOut() || (signal.userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator()))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool SignalSetProvider::isCheckinableSignalForMe(const Signal& signal) const
+{
+	if (signal.checkedOut() && (signal.userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator()))
 	{
 		return true;
 	}
@@ -711,8 +720,6 @@ void SignalSetProvider::showErrors(const QVector<ObjectState>& states)
 
 void SignalSetProvider::initLazyLoadSignals()
 {
-	m_partialLoading = true;
-
 	loadUsers();
 	emit usersLoaded();
 
@@ -725,6 +732,7 @@ void SignalSetProvider::initLazyLoadSignals()
 	}
 
 	emit signalCountChanged();
+	m_partialLoading = true;
 
 	if (m_lazyLoadSignalsTimer == nullptr)
 	{
@@ -735,7 +743,16 @@ void SignalSetProvider::initLazyLoadSignals()
 	m_lazyLoadSignalsTimer->start(100);
 }
 
-void SignalSetProvider::finishLoadSignals()
+void SignalSetProvider::stopLoadingSignals()
+{
+	if (m_partialLoading == true)
+	{
+		m_lazyLoadSignalsTimer->stop();
+		m_partialLoading = false;
+	}
+}
+
+void SignalSetProvider::finishLoadingSignals()
 {
 	if (m_partialLoading == true)
 	{
@@ -772,6 +789,10 @@ void SignalSetProvider::finishLoadSignals()
 
 void SignalSetProvider::loadNextSignalsPortion()
 {
+	if (m_partialLoading == false)
+	{
+		return;
+	}
 	QVector<int> signalIds;
 	signalIds.reserve(250);
 	int low = m_middleVisibleSignalIndex - 1;

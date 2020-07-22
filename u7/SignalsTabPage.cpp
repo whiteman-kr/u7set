@@ -1071,6 +1071,8 @@ void SignalsTabPage::projectOpened()
 
 void SignalsTabPage::projectClosed()
 {
+	m_signalSetProvider->stopLoadingSignals();
+
 	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
 
 	this->setEnabled(false);
@@ -1318,7 +1320,7 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 		int index = m_signalSetProvider->keyIndex(ids[i]);
 		Signal* signal = new Signal(m_signalSetProvider->signal(index));
 
-		if (signal->checkedOut() && !m_signalSetProvider->isEditableSignal(index))
+		if (!m_signalSetProvider->isEditableSignal(index))
 		{
 			readOnly = true;
 		}
@@ -1448,7 +1450,7 @@ void SignalsTabPage::updateFindOrReplaceDialog()
 
 void SignalsTabPage::undoSignalChanges()
 {
-	m_signalSetProvider->finishLoadSignals();
+	m_signalSetProvider->finishLoadingSignals();
 
 	UndoSignalsDialog dlg(m_signalsModel, m_signalsColumnVisibilityController, this);
 
@@ -1469,7 +1471,7 @@ void SignalsTabPage::checkIn()
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
 	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
 
-	m_signalSetProvider->finishLoadSignals();
+	m_signalSetProvider->finishLoadingSignals();
 
 	CheckinSignalsDialog dlg(m_signalsModel, m_signalsColumnVisibilityController, sourceSelection.indexes(), this);
 
@@ -1526,7 +1528,7 @@ void SignalsTabPage::changeCheckedoutSignalActionsVisibility()
 {
 	for (int i = 0; i < m_signalSetProvider->signalCount(); i++)
 	{
-		if (m_signalSetProvider->isEditableSignal(i))
+		if (m_signalSetProvider->isCheckinableSignalForMe(i))
 		{
 			emit setCheckedoutSignalActionsVisibility(true);
 			return;
@@ -1863,7 +1865,7 @@ Qt::ItemFlags CheckedoutSignalsModel::flags(const QModelIndex& index) const
 
 bool CheckedoutSignalsModel::filterAcceptsRow(int source_row, const QModelIndex&) const
 {
-	return m_signalSetProvider->isEditableSignal(source_row);
+	return SignalSetProvider::getInstance()->isCheckinableSignalForMe(source_row);
 }
 
 void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool fromSourceModel)
@@ -1889,7 +1891,7 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 
 void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 {
-	QVector<int> sourceRows = m_signalSetProvider->getSameChannelSignals(mapToSource(index(row, 0)).row());
+	QVector<int> sourceRows = SignalSetProvider::getInstance()->getSameChannelSignals(mapToSource(index(row, 0)).row());
 	foreach (const int sourceRow, sourceRows)
 	{
 		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
@@ -2010,6 +2012,7 @@ void CheckinSignalsDialog::checkinSelected()
 		return;
 	}
 	QVector<int> IDs;
+	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
 		QModelIndex proxyIndex = m_proxyModel->index(i, 0);
@@ -2018,7 +2021,7 @@ void CheckinSignalsDialog::checkinSelected()
 			continue;
 		}
 		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
-		IDs << m_signalSetProvider->key(sourceRow);
+		IDs << signalSetProvider->key(sourceRow);
 	}
 	if (IDs.count() == 0)
 	{
@@ -2027,8 +2030,8 @@ void CheckinSignalsDialog::checkinSelected()
 	}
 	QVector<ObjectState> states;
 	states.resize(IDs.size());
-	m_signalSetProvider->dbController()->checkinSignals(&IDs, commentText, &states, this);
-	m_signalSetProvider->showErrors(states);
+	signalSetProvider->dbController()->checkinSignals(&IDs, commentText, &states, this);
+	signalSetProvider->showErrors(states);
 
 	accept();
 }
@@ -2129,6 +2132,8 @@ void UndoSignalsDialog::undoSelected()
 {
 	saveDialogGeometry();
 
+	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+
 	QVector<int> IDs;
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
@@ -2138,7 +2143,7 @@ void UndoSignalsDialog::undoSelected()
 			continue;
 		}
 		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
-		IDs << m_signalSetProvider->key(sourceRow);
+		IDs << signalSetProvider->key(sourceRow);
 	}
 	if (IDs.count() == 0)
 	{
@@ -2149,7 +2154,7 @@ void UndoSignalsDialog::undoSelected()
 	foreach (int ID, IDs)
 	{
 		ObjectState state;
-		m_signalSetProvider->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
+		signalSetProvider->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
 			states << state;
@@ -2157,7 +2162,7 @@ void UndoSignalsDialog::undoSelected()
 	}
 	if (!states.isEmpty())
 	{
-		m_signalSetProvider->showErrors(states);
+		signalSetProvider->showErrors(states);
 	}
 
 	accept();

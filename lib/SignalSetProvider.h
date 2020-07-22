@@ -146,8 +146,12 @@ public:
 	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
 	const Signal& signal(int index) const { return m_signalSet[index]; }
 	QVector<int> getSameChannelSignals(int index);
+
 	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
 	bool isEditableSignal(const Signal& signal) const;
+	bool isCheckinableSignalForMe(int index) const{ return isCheckinableSignalForMe(m_signalSet[index]); }
+	bool isCheckinableSignalForMe(const Signal& signal) const;
+
 	QString getUserStr(int userId) const;
 
 	DbController* dbController() { return m_dbController; }
@@ -178,7 +182,8 @@ signals:
 
 public slots:
 	void initLazyLoadSignals();
-	void finishLoadSignals();
+	void finishLoadingSignals();
+	void stopLoadingSignals();
 	void loadNextSignalsPortion();
 	void loadUsers();
 	void loadSignals();
@@ -194,8 +199,8 @@ private:
 	SignalPropertyManager m_propertyManager;
 	QTimer* m_lazyLoadSignalsTimer = nullptr;
 	int m_middleVisibleSignalIndex = 0;
-	QWidget* m_parentWidget;	//used by DbController
+	QWidget* m_parentWidget = nullptr;	//used by DbController
 	SignalSet m_signalSet;
 	QMap<int, QString> m_usernameMap;
-	bool m_partialLoading;
+	bool m_partialLoading = false;
 };
