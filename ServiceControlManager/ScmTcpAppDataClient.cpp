@@ -123,8 +123,6 @@ void TcpAppDataClient::init()
 
 void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
-	restartWatchdogTimer();
-
 	switch(requestID)
 	{
 	// Static data

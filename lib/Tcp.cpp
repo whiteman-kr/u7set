@@ -40,7 +40,7 @@ namespace Tcp
 
 	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo) :
 		m_mutex(QMutex::Recursive),
-		m_watchdogTimer(this)
+		m_timeoutTimer(this)
 	{
 		m_state.localSoftwareInfo = softwareInfo;
 
@@ -50,6 +50,8 @@ namespace Tcp
 	SocketWorker::~SocketWorker()
 	{
 		delete [] m_receiveDataBuffer;
+
+		Q_ASSERT(m_tcpSocket == nullptr);
 	}
 
 	bool SocketWorker::isConnected() const
@@ -96,11 +98,13 @@ namespace Tcp
 
 	void SocketWorker::enableWatchdogTimer(bool enable)
 	{
-		m_watchdogTimerEnable = enable;
+		AUTO_LOCK(m_mutex);
+
+		m_enableTimeoutTimer = enable;
 
 		if (enable == false)
 		{
-			m_watchdogTimer.stop();
+			m_timeoutTimer.stop();
 		}
 	}
 
@@ -117,15 +121,6 @@ namespace Tcp
 		quint16 locPort = m_tcpSocket->localPort();
 
 		return HostAddressPort(locAddr, locPort);
-	}
-
-	void SocketWorker::restartWatchdogTimer()
-	{
-		if (m_watchdogTimerEnable == true)
-		{
-			m_watchdogTimer.setSingleShot(true);
-			m_watchdogTimer.start(m_watchdogTimerTimeout);
-		}
 	}
 
 	ConnectionState SocketWorker::getConnectionState() const
@@ -191,7 +186,7 @@ namespace Tcp
 	{
 		createSocket();
 
-		connect(&m_watchdogTimer, &QTimer::timeout, this, &SocketWorker::onWatchdogTimerTimeout);
+		connect(&m_timeoutTimer, &QTimer::timeout, this, &SocketWorker::onTimeoutTimer);
 		connect(this, &SocketWorker::closeConnectionSignal, this, &SocketWorker::onCloseConnection);
 	}
 
@@ -208,22 +203,14 @@ namespace Tcp
 			return -1;
 		}
 
-		//assert(m_bytesWritten == true);
-
 		qint64 written = m_tcpSocket->write(data, size);
-
-		//qDebug() << "Socket written bytes  =" << written;
 
 		if (written == -1)
 		{
 			return -1;
 		}
 
-		// m_tcpSocket->flush();
-
 		m_bytesWritten = false;
-
-		//m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
 
 		addSentBytes(size);
 
@@ -289,12 +276,23 @@ namespace Tcp
 		m_state.replyCount = 0;
 	}
 
-	void SocketWorker::onWatchdogTimerTimeout()
+	void SocketWorker::startTimeoutTimer()
 	{
-		if (m_watchdogTimerEnable == true)
+		if (m_enableTimeoutTimer == true)
 		{
-			qDebug() << "Tcp connection WatchdogTimer timeout";
+			m_timeoutTimer.setSingleShot(true);
+			m_timeoutTimer.start(m_timeout);
 		}
+	}
+
+	void SocketWorker::stopTimeoutTimer()
+	{
+		m_timeoutTimer.stop();
+	}
+
+	void SocketWorker::onTimeoutTimer()
+	{
+		qDebug() << "SocketWorker::onTimeoutTimer()";
 	}
 
 	int SocketWorker::readHeader(int bytesAvailable)
@@ -538,6 +536,8 @@ namespace Tcp
 		SocketWorker(sotwareInfo),
 		m_autoAckTimer(this)
 	{
+		m_timeout = TCP_CLIENT_REQUEST_TIMEOUT;
+
 		m_id = staticId;
 		staticId++;
 
@@ -751,6 +751,8 @@ namespace Tcp
 		onServerThreadStarted();
 
 		onConnection();
+
+		startTimeoutTimer();
 	}
 
 	void Server::onThreadFinished()
@@ -791,6 +793,8 @@ namespace Tcp
 			return;
 		}
 
+		stopTimeoutTimer();
+
 		m_serverState = ServerState::RequestProcessing;
 
 		if (m_autoAck == true)
@@ -802,39 +806,59 @@ namespace Tcp
 
 		addRequest();
 
-		if (m_header.id == RQID_INTRODUCE_MYSELF)
+		switch(m_header.id)
 		{
-			Network::SoftwareInfo inMessage;
+		case RQID_INTRODUCE_MYSELF:
+			processIntroduceMyselfRequest(m_receiveDataBuffer, m_header.dataSize);
+			break;
 
-			bool result = inMessage.ParseFromArray(m_receiveDataBuffer, m_header.dataSize);
+		case TCP_CLIENT_ALIVE:
+			// Wow! Client still alive!
+			// nothing to do, only restart timeout timer
+			//
+			qDebug() << "receive TCP_CLIENT_ALIVE";
 
-			if (result == false)
-			{
-				assert(false);
-				return;
-			}
+			// reply on TCP_CLIENT_ALIVE request is not required
+			//
+			initReadStatusVariables();
 
-			m_stateMutex.lock();
+			break;
 
-			m_state.connectedSoftwareInfo.serializeFrom(inMessage);
-			m_state.clientDescription = QString::fromStdString(inMessage.clientdescription());
-
-			Network::SoftwareInfo outMessage;
-
-			m_state.localSoftwareInfo.serializeTo(&outMessage);
-
-			m_stateMutex.unlock();
-
-			sendReply(outMessage);
-
-			onConnectedSoftwareInfoChanged();
-
-			emit connectedSoftwareInfoChanged();
-		}
-		else
-		{
+		default:
 			processRequest(m_header.id, m_receiveDataBuffer, m_header.dataSize);
 		}
+
+		startTimeoutTimer();
+	}
+
+	void Server::processIntroduceMyselfRequest(const char* dataBuffer, int dataSize)
+	{
+		Network::SoftwareInfo inMessage;
+
+		bool result = inMessage.ParseFromArray(dataBuffer, dataSize);
+
+		if (result == false)
+		{
+			assert(false);
+			return;
+		}
+
+		m_stateMutex.lock();
+
+		m_state.connectedSoftwareInfo.serializeFrom(inMessage);
+		m_state.clientDescription = QString::fromStdString(inMessage.clientdescription());
+
+		Network::SoftwareInfo outMessage;
+
+		m_state.localSoftwareInfo.serializeTo(&outMessage);
+
+		m_stateMutex.unlock();
+
+		sendReply(outMessage);
+
+		onConnectedSoftwareInfoChanged();
+
+		emit connectedSoftwareInfoChanged();
 	}
 
 	void Server::onAutoAckTimer()
@@ -847,6 +871,13 @@ namespace Tcp
 		}
 
 		sendAck();
+	}
+
+	void Server::onTimeoutTimer()
+	{
+		qDebug() << "Tcp::Server::onTimeoutTimer()";
+
+		closeConnection();
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -947,7 +978,7 @@ namespace Tcp
 			connect(m_tcpServer, &TcpServer::newConnection, this, &Listener::onNewConnection);
 		}
 
-		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()))
+		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()) == true)
 		{
 			onStartListening(m_listenAddressPort, true, "");
 		}
@@ -1054,10 +1085,11 @@ namespace Tcp
 				   const QString& clientDescription) :
 		SocketWorker(softwareInfo),
 		m_clientDescription(clientDescription),
-		m_periodicTimer(this),
-		m_replyTimeoutTimer(this)
+		m_periodicTimer(this)
 	{
-		setServer(serverAddressPort, false);
+		m_timeout = TCP_SERVER_REPLY_TIMEOUT;
+
+		setServers(serverAddressPort, serverAddressPort,false);
 		initReadStatusVariables();
 	}
 
@@ -1067,34 +1099,19 @@ namespace Tcp
 				   const HostAddressPort& serverAddressPort2, const QString &clientDescription) :
 		SocketWorker(softwareInfo),
 		m_clientDescription(clientDescription),
-		m_periodicTimer(this),
-		m_replyTimeoutTimer(this)
+		m_periodicTimer(this)
 	{
+		m_timeout = TCP_SERVER_REPLY_TIMEOUT;
+
 		setServers(serverAddressPort1, serverAddressPort2, false);
 		initReadStatusVariables();
 	}
-
 
 	Client::~Client()
 	{
 		if (m_protobufBuffer != nullptr)
 		{
 			delete [] m_protobufBuffer;
-		}
-	}
-
-	void Client::setServer(const HostAddressPort& serverAddressPort, bool reconnect)
-	{
-		AUTO_LOCK(m_mutex)
-
-		m_serversAddressPort[0] = serverAddressPort;
-		m_serversAddressPort[1] = serverAddressPort;
-
-		selectFirstValidServer();
-
-		if (reconnect == true)
-		{
-			closeConnection();
 		}
 	}
 
@@ -1226,9 +1243,7 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex);
 
-		restartWatchdogTimer();
-
-		if (!isClearToSendRequest())
+		if (isClearToSendRequest() == false)
 		{
 			assert(false);
 			return false;
@@ -1239,8 +1254,6 @@ namespace Tcp
 			assert(false);
 			return false;
 		}
-
-		// qDebug() << "Send request" << requestID;
 
 		addRequest();
 
@@ -1289,7 +1302,9 @@ namespace Tcp
 			}
 		}
 
-		restartReplyTimeoutTimer();
+		startTimeoutTimer();
+
+		m_noRequestsTimeout = 0;
 
 		m_clientState = ClientState::WaitingForReply;
 		m_readState = ReadState::WaitingForHeader;
@@ -1318,11 +1333,54 @@ namespace Tcp
 		return sendRequest(requestID, m_protobufBuffer, messageSize);
 	}
 
-	void Client::onWatchdogTimerTimeout()
+	void Client::enableClientAliveRequest(bool enable)
 	{
-		SocketWorker::onWatchdogTimerTimeout();
+		AUTO_LOCK(m_mutex);
 
+		m_enableClientAliveRequest = enable;
+	}
+
+	void Client::onTimeoutTimer()
+	{
+		qDebug() << "Tcp::Client::onTimeoutTimer()";
+		onReplyTimeout();
 		closeConnection();
+	}
+
+	void Client::slot_onPeriodicTimer()
+	{
+		AUTO_LOCK(m_mutex);
+
+		if (isConnected() == false)
+		{
+			m_connectTimeout++;
+
+			if (m_connectTimeout >= 6 /* 6 * 0.5 sec == 3 sec */)
+			{
+				autoSwitchServer();
+				createSocket();
+				connectToServer();
+
+				m_connectTimeout = 0;
+				m_noRequestsTimeout = 0;
+			}
+
+			return;
+		}
+
+		//
+
+		m_noRequestsTimeout++;
+
+		if (m_noRequestsTimeout >= 6  /* 6 * 0.5 sec == 3 sec */)
+		{
+			bool res = sendClientAliveRequest();
+
+			if (res == true)
+			{
+				m_noRequestsTimeout = 0;
+			}
+		}
 	}
 
 	void Client::autoSwitchServer()
@@ -1408,16 +1466,10 @@ namespace Tcp
 
 		SocketWorker::onThreadStarted();
 
-		connect(&m_replyTimeoutTimer, &QTimer::timeout, this, &Client::onReplyTimeoutTimer);
-
-		m_replyTimeoutTimer.setSingleShot(true);
-
-		connect(&m_periodicTimer, &QTimer::timeout, this, &Client::onPeriodicTimer);
+		connect(&m_periodicTimer, &QTimer::timeout, this, &Client::slot_onPeriodicTimer);
 
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
 		m_periodicTimer.start();
-
-		restartWatchdogTimer();
 
 		connectToServer();
 	}
@@ -1448,7 +1500,7 @@ namespace Tcp
 			return;
 		}
 
-		restartWatchdogTimer();
+		stopTimeoutTimer();
 
 		if (m_header.id != m_sentRequestHeader.id ||
 			m_header.numerator != m_sentRequestHeader.numerator)
@@ -1461,17 +1513,15 @@ namespace Tcp
 		switch(m_header.type)
 		{
 		case Header::Type::Ack:
-			restartReplyTimeoutTimer();
-
 			onAck(m_header.id, m_receiveDataBuffer, m_header.dataSize);
 
 			m_readState = ReadState::WaitingForHeader;
 
+			startTimeoutTimer();
+
 			break;
 
 		case Header::Type::Reply:
-			stopReplyTimeoutTimer();
-
 			initReadStatusVariables();
 
 			addReply();
@@ -1501,39 +1551,54 @@ namespace Tcp
 		m_connectTimeout = 0;
 	}
 
-	void Client::restartReplyTimeoutTimer()
-	{
-		m_replyTimeoutTimer.start(TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT);
-	}
-
-
-	void Client::stopReplyTimeoutTimer()
-	{
-		m_replyTimeoutTimer.stop();
-	}
-
-	void Client::onPeriodicTimer()
+	bool Client::sendClientAliveRequest()
 	{
 		AUTO_LOCK(m_mutex);
 
-		if (isConnected() == false)
+		if (m_enableClientAliveRequest == false)
 		{
-			m_connectTimeout++;
-
-			if (m_connectTimeout >= TCP_CONNECT_TIMEOUT)
-			{
-				autoSwitchServer();
-				createSocket();
-				connectToServer();
-
-				m_connectTimeout = 0;
-			}
+			return true;
 		}
-	}
 
-	void Client::onReplyTimeoutTimer()
-	{
-		onReplyTimeout();
-		closeConnection();
+		if (isClearToSendRequest() == false)
+		{
+			return false;
+		}
+
+		if (m_tcpSocket == nullptr)
+		{
+			return false;
+		}
+
+		// Request TCP_CLIENT_ALIVE is not require reply
+		// so, the state of socket will not change
+		//
+		Header clientAlive;
+
+		clientAlive.type = Header::Type::Request;
+		clientAlive.id = TCP_CLIENT_ALIVE;
+		clientAlive.numerator = m_requestNumerator;
+		clientAlive.dataSize = 0;
+		clientAlive.calcCRC();
+
+		m_requestNumerator++;
+
+		qint64 written = socketWrite(clientAlive);
+
+		if (written == -1)
+		{
+			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+			return false;
+		}
+
+		if (written < static_cast<qint64>(sizeof(m_sentRequestHeader)))
+		{
+			assert(false);
+			return false;
+		}
+
+		qDebug() << "Tcp::Client::sendClientAliveRequest()";
+
+		return true;
 	}
 }

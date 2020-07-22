@@ -159,6 +159,8 @@ quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc);
 
 quint32 CRC32(quint32 initialValue, int value, bool finishCalc);
 
+const quint32 TCP_CLIENT_ALIVE = 0xFEDC;
+
 // ConfigurationService specific request IDs
 //
 const quint32	CFGS_GET_SERVICE_STATE = 0x1100,

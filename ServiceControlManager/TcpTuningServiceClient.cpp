@@ -113,8 +113,6 @@ void TcpTuningServiceClient::init()
 
 void TcpTuningServiceClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
-	restartWatchdogTimer();
-
 	switch(requestID)
 	{
 	// Static data
