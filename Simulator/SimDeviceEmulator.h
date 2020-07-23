@@ -33,6 +33,8 @@
 	#endif
 #endif
 
+class SimCommandTest_LM5_LM6;
+
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
 //
@@ -150,6 +152,8 @@ namespace Sim
     class DeviceEmulator : public QObject, protected Output
 	{
 		Q_OBJECT
+
+		friend SimCommandTest_LM5_LM6;
 
 	public:
 		DeviceEmulator();

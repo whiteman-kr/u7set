@@ -1053,7 +1053,13 @@ namespace Sim
 			return nullptr;
 		}
 
-		return &m_memoryAreas[index];
+		RamArea* ma = &m_memoryAreas[index];
+		if (ma->contains(offsetW) == false)		// If offset is too high then map::upper_bound returns the last area
+		{										// So this check helps to prevent it
+			ma = nullptr;
+		}
+
+		return ma;
 	}
 
 	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
@@ -1089,7 +1095,13 @@ namespace Sim
 			return nullptr;
 		}
 
-		return &m_memoryAreas[index];
+		const RamArea* ma = &m_memoryAreas[index];
+		if (ma->contains(offsetW) == false)		// If offset is too high then map::upper_bound returns the last area
+		{										// So this check helps to prevent it
+			ma = nullptr;
+		}
+
+		return ma;
 	}
 
 	void Ram::updateOverrideData(const QString& lmEquipmentId, const OverrideSignals* overrideSignals)
