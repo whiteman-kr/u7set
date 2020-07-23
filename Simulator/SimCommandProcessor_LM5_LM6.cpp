@@ -57,21 +57,7 @@ namespace Sim
 
 		for (DeviceCommand& command : *commands)
 		{
-			auto it = m_nameToFuncCommand.find(command.m_command.simulationFunc);
-			if (it == m_nameToFuncCommand.end())
-			{
-				SimCommandFuncCast pcast;
-				pcast.pmember = &CommandProcessor_LM5_LM6::command_not_implemented;
-
-				command.m_commandFuncPtr = pcast.pvoid;
-			}
-			else
-			{
-				SimCommandFuncCast pcast;
-				pcast.pmember = it->second;
-
-				command.m_commandFuncPtr = pcast.pvoid;
-			}
+			setCommandFuncPtr(&command);
 		}
 
 		return;
@@ -137,6 +123,29 @@ namespace Sim
 		(this->*func)(command);
 
 		return true;
+	}
+
+	void CommandProcessor_LM5_LM6::setCommandFuncPtr(DeviceCommand* command) const
+	{
+		static_assert(sizeof(SimCommandFuncCast::pmember) <= sizeof(SimCommandFuncCast::pvoid));
+
+		auto it = m_nameToFuncCommand.find(command->m_command.simulationFunc);
+		if (it == m_nameToFuncCommand.end())
+		{
+			SimCommandFuncCast pcast;
+			pcast.pmember = &CommandProcessor_LM5_LM6::command_not_implemented;
+
+			command->m_commandFuncPtr = pcast.pvoid;
+		}
+		else
+		{
+			SimCommandFuncCast pcast;
+			pcast.pmember = it->second;
+
+			command->m_commandFuncPtr = pcast.pvoid;
+		}
+
+		return;
 	}
 
 	void CommandProcessor_LM5_LM6::command_not_implemented(const DeviceCommand& command)
@@ -306,8 +315,8 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2
-		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1
+		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2 - dst
+		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1 - src
 		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
 
 		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
@@ -661,9 +670,9 @@ namespace Sim
 
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);						// Word0 - data to comapare with
+		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data to comapare with
 
 		// Checks
 		//

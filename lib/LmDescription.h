@@ -7,6 +7,8 @@
 #include "../lib/Hash.h"
 #include "../VFrame30/Afb.h"
 
+class SimCommandTest_LM5_LM6;
+
 namespace Hardware
 {
 	class DeviceModule;
@@ -38,6 +40,8 @@ class LmDescription : public QObject
 	Q_PROPERTY(quint32 Memory_TxDiagDataSize READ (m_memory.txDiagDataSize))
 	Q_PROPERTY(quint32 OptoInterface_OptoPortCount READ (m_optoInterface.optoPortCount))
 	Q_PROPERTY(int Lan_ControllerCount READ (m_lan.lanControllerCount))
+
+	friend SimCommandTest_LM5_LM6;
 
 public:
 	explicit LmDescription(QObject* parent = nullptr);

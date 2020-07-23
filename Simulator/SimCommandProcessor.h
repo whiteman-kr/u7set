@@ -1,11 +1,12 @@
-#ifndef SIMCOMMANDPROCESSOR_H
-#define SIMCOMMANDPROCESSOR_H
+#pragma once
 #include <map>
 #include <functional>
 #include "QtCore"
 #include "SimOutput.h"
 #include "SimDeviceEmulator.h"
 #include "SimException.h"
+
+class SimCommandTest_LM5_LM6;
 
 namespace Sim
 {
@@ -22,6 +23,8 @@ namespace Sim
 	class CommandProcessor : public QObject, protected Output
 	{
 		Q_OBJECT
+
+		friend SimCommandTest_LM5_LM6;
 
 	protected:
 		explicit CommandProcessor(DeviceEmulator* device);
@@ -64,7 +67,7 @@ namespace Sim
 		//
 		void checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, const QString& paramName) const;
 
-		// Memory sanitizer
+		// Memory sanitizer, checks for reading uninitialized memry
 		//
 		void sanitizerWrite(quint32 address, quint32 wordCount);
 		void sanitizerCheck(quint32 address, quint32 wordCount) const;
@@ -95,4 +98,3 @@ namespace Sim
 	};
 }
 
-#endif // SIMCOMMANDPROCESSOR_H

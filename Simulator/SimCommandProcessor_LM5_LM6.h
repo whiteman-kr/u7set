@@ -2,6 +2,8 @@
 #include <SimCommandProcessor.h>
 #include <SimDeviceEmulator.h>
 
+class SimCommandTest_LM5_LM6;
+
 namespace Sim
 {
 
@@ -24,6 +26,9 @@ namespace Sim
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime) override;
 
 		virtual bool runCommand(const DeviceCommand& command) override;
+
+	private:
+		void setCommandFuncPtr(DeviceCommand* command) const;
 
 	public slots:
 		void command_not_implemented(const DeviceCommand& command);
@@ -429,6 +434,8 @@ namespace Sim
 
 		static const int m_cycleDurationMs = 5;
 		qint64 m_blinkCounter = 0;
+
+		friend SimCommandTest_LM5_LM6;
 	};
 
 }

@@ -1,5 +1,6 @@
 #include <QtTest>
 #include <SimRamTests.h>
+#include <SimCommandTest_LM5_LM6.h>
 
 int main(int argc, char *argv[])
 {
@@ -8,6 +9,11 @@ int main(int argc, char *argv[])
 	{
 		SimRamTests tc;
 		status |= QTest::qExec(&tc, argc, argv);
+	}
+
+	{
+		SimCommandTest_LM5_LM6 csm;
+		status |= QTest::qExec(&csm, argc, argv);
 	}
 
 	return status;

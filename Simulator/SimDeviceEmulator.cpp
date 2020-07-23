@@ -153,7 +153,7 @@ namespace Sim
 			return DeviceError::NoCommandProcessor;
 		}
 
-		//--
+		// --
 		//
 		if (bool ok = m_afbComponents.init(m_lmDescription);
 			ok == false)

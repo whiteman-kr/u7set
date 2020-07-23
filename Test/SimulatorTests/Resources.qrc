@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="LM1_SF40.xml">../../u7/LogicModuleDescription/LM1_SF40.xml</file>
+    </qresource>
+</RCC>

@@ -26,6 +26,7 @@ unix {
 
 
 SOURCES +=  \
+    SimCommandTest_LM5_LM6.cpp \
     SimRamTests.cpp \
     main.cpp
 
@@ -68,4 +69,8 @@ unix {
 
 HEADERS += \
     ../../lib/PropertyObject.h \
+    SimCommandTest_LM5_LM6.h \
     SimRamTests.h
+
+RESOURCES += \
+    Resources.qrc
