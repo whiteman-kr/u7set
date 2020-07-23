@@ -163,6 +163,9 @@ public:
 
 	bool newFile(const QString& fileName);
 	void moveFile(int parentFileId);
+	void checkOutFileById(int fileId);
+	void checkInFileById(int fileId, bool* fileWasDeleted);
+	void undoChangesFileById(int fileId, bool* fileWasDeleted);
 
 	void setFileNameFilter(const QString& filterText);
 
@@ -176,9 +179,9 @@ public slots:
 	void editFile();
 	void renameFile();
 	void deleteFile();
-	void checkOutFile();
-	void checkInFile();
-	void undoChangesFile();
+	void checkOutSelectedFiles();
+	void checkInSelectedFiles();
+	void undoChangesSelectedFiles();
 	void showHistory();
 	void showCompare();
 	void getLatestVersion();
@@ -190,6 +193,9 @@ private:
 	bool expandAndSelect(const QModelIndex& mi, std::vector<int> expandedFileIds, std::vector<int> selectedFilesIds);
 
 	bool createFiles(std::vector<std::shared_ptr<DbFile> > files, bool createInParentFolder);
+	void checkOutFiles(QModelIndexList indexList);
+	void checkInFiles(QModelIndexList indexList);
+	void undoChangesFiles(QModelIndexList indexList);
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
 	void runFileEditor(bool viewOnly);
 

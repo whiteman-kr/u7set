@@ -19,12 +19,30 @@ private:
 
 };
 
-struct TestTabPageDocument
+class TestTabPageDocument
 {
-	IdeCodeEditor* codeEditor = nullptr;
-	bool modified = false;
-	QTreeWidgetItem* openFilesTreeWidgetItem = nullptr;
-	std::shared_ptr<DbFile> dbFile;
+private:
+	TestTabPageDocument() = delete;
+
+public:
+	TestTabPageDocument(const QString& fileName, IdeCodeEditor* codeEditor, QTreeWidgetItem* openFilesTreeWidgetItem);
+
+public:
+	QString fileName() const;
+	void setFileName(const QString& fileName);
+
+	bool modified() const;
+	void setModified(bool value);
+
+	IdeCodeEditor* codeEditor() const;
+
+	QTreeWidgetItem* openFilesTreeWidgetItem() const;
+
+private:
+	QString m_fileName;
+	IdeCodeEditor* m_codeEditor = nullptr;
+	bool m_modified = false;
+	QTreeWidgetItem* m_openFilesTreeWidgetItem = nullptr;
 };
 
 //
@@ -59,7 +77,7 @@ private slots:
 
 	void openFilesDoubleClicked(const QModelIndex &index);
 
-	// File operations
+	// Tests file tree slots
 
 	void newFile();
 	void openFile();
@@ -72,13 +90,18 @@ private slots:
 	void moveFile();
 	void refreshFileTree();
 
-	// Editor slots
+	// Code Editor slots
 
 	void filterChanged();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
-	void closeCurrentDocument();
 	void onGoToLine();
+
+	void checkInCurrentDocument();
+	void checkOutCurrentDocument();
+	void undoChangesCurrentDocument();
+	void saveCurrentDocument();
+	void closeCurrentDocument();
 
 	// Hotkeys
 
@@ -97,7 +120,9 @@ private slots:
 private:
 	void createUi();
 	void createActions();
-	void setActionState();
+
+	void setTestsTreeActionsState();
+	void setCodeEditorActionsState();
 
 	void saveSettings();
 	void restoreSettings();
@@ -106,8 +131,8 @@ private:
 
 	// Documents operations
 
-	bool documentIsOpen(int fileId);
-	bool documentIsModified(int fileId);
+	bool documentIsOpen(int fileId) const;
+	bool documentIsModified(int fileId) const;
 	void setCurrentDocument(int fileId);
 	void setDocumentReadOnly(int fileId, bool readOnly);
 	void saveDocument(int fileId);
@@ -176,6 +201,12 @@ private:
 	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_refreshAction = nullptr;
+
+	QAction* m_checkInCurrentDocumentAction = nullptr;
+	QAction* m_checkOutCurrentDocumentAction = nullptr;
+	QAction* m_undoChangesCurrentDocumentAction = nullptr;
+	QAction* m_saveCurrentDocumentAction = nullptr;
+	QAction* m_closeCurrentDocumentAction = nullptr;
 };
 
 

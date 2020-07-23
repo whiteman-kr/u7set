@@ -141,17 +141,17 @@ void FilesTabPage::createActions()
 	m_checkOutAction = new QAction(tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutAction->setEnabled(false);
-	connect(m_checkOutAction, &QAction::triggered, m_fileView, &FileTreeView::checkOutFile);
+	connect(m_checkOutAction, &QAction::triggered, m_fileView, &FileTreeView::checkOutSelectedFiles);
 
 	m_checkInAction = new QAction(tr("CheckIn"), this);
 	m_checkInAction->setStatusTip(tr("Check in changes"));
 	m_checkInAction->setEnabled(false);
-	connect(m_checkInAction, &QAction::triggered, m_fileView, &FileTreeView::checkInFile);
+	connect(m_checkInAction, &QAction::triggered, m_fileView, &FileTreeView::checkInSelectedFiles);
 
 	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
-	connect(m_undoChangesAction, &QAction::triggered, m_fileView, &FileTreeView::undoChangesFile);
+	connect(m_undoChangesAction, &QAction::triggered, m_fileView, &FileTreeView::undoChangesSelectedFiles);
 
 	m_historyAction = new QAction(tr("History..."), this);
 	m_historyAction->setStatusTip(tr("Show check in history"));

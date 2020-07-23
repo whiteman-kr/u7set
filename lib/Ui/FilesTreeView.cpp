@@ -1357,6 +1357,89 @@ void FileTreeView::moveFile(int parentFileId)
 	return;
 }
 
+void FileTreeView::checkOutFileById(int fileId)
+{
+	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+															  Qt::UserRole,
+															  QVariant::fromValue(fileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+	Q_ASSERT(matched.size() == 1);
+
+	if (matched.size() == 1)
+	{
+		checkOutFiles(matched);
+	}
+
+	return;
+}
+
+void FileTreeView::checkInFileById(int fileId, bool* fileWasDeleted)
+{
+	if (fileWasDeleted == nullptr)
+	{
+		Q_ASSERT(fileWasDeleted);
+		return;
+	}
+
+	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+															  Qt::UserRole,
+															  QVariant::fromValue(fileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+
+	if (matched.size() != 1)
+	{
+		Q_ASSERT(matched.size() == 1);
+		return;
+	}
+
+	checkInFiles(matched);
+
+	QModelIndexList matchedAfter = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+															  Qt::UserRole,
+															  QVariant::fromValue(fileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+
+	*fileWasDeleted = matchedAfter.empty() == true;
+
+	return;
+}
+
+void FileTreeView::undoChangesFileById(int fileId, bool* fileWasDeleted)
+{
+	if (fileWasDeleted == nullptr)
+	{
+		Q_ASSERT(fileWasDeleted);
+		return;
+	}
+
+	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+															  Qt::UserRole,
+															  QVariant::fromValue(fileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+
+	if (matched.size() != 1)
+	{
+		Q_ASSERT(matched.size() == 1);
+		return;
+	}
+
+	undoChangesFiles(matched);
+
+	QModelIndexList matchedAfter = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+															  Qt::UserRole,
+															  QVariant::fromValue(fileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+
+	*fileWasDeleted = matchedAfter.empty() == true;
+
+	return;
+}
+
 void FileTreeView::setFileNameFilter(const QString& filterText)
 {
 	m_proxyModel->setFilterFixedString(filterText);
@@ -1535,212 +1618,29 @@ void FileTreeView::deleteFile()
 	return;
 }
 
-void FileTreeView::checkOutFile()
+void FileTreeView::checkOutSelectedFiles()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();
 
-	if (selectedIndexList.isEmpty() == true)
-	{
-		return;
-	}
-
-	std::vector<DbFileInfo> files;
-	files.reserve(static_cast<size_t>(selectedIndexList.size()));
-
-	for (QModelIndex& mi : selectedIndexList)
-	{
-		if (mi.parent().isValid() == false)
-		{
-			// Forbid to check out root "folders"
-			//
-			continue;
-		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
-
-		if (f->state() == VcsState::CheckedOut)
-		{
-			continue;
-		}
-
-		files.push_back(*f);
-	}
-
-	if (files.empty() == true)
-	{
-		// Nothing to checkout
-		//
-		return;
-	}
-
-	// CheckOut from database
-	//
-	db()->checkOut(files, this);
-
-	// Update files state
-	//
-	for (const DbFileInfo& fi : files)
-	{
-		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
-			[&fi, this](QModelIndex& mi)
-			{
-				FileTreeModelItem* f = m_model->fileItem(mi);
-				assert(f);
-				return f->fileId() == fi.fileId();
-			});
-
-		assert(mipos != selectedIndexList.end());
-
-		if (mipos != selectedIndexList.end())
-		{
-			m_model->updateFile(*mipos, fi);
-		}
-	}
+	checkOutFiles(selectedIndexList);
 
 	return;
 }
 
-void FileTreeView::checkInFile()
+void FileTreeView::checkInSelectedFiles()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();
 
-	if (selectedIndexList.isEmpty() == true)
-	{
-		return;
-	}
-
-	std::vector<DbFileInfo> files;
-	files.reserve(static_cast<size_t>(selectedIndexList.size()));
-
-	for (QModelIndex& mi : selectedIndexList)
-	{
-		if (mi.parent().isValid() == false)
-		{
-			// Forbid to check in root "folders"
-			//
-			continue;
-		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
-
-		if (f->state() == VcsState::CheckedOut &&
-			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
-		{
-			files.push_back(*f);
-		}
-	}
-
-	if (files.empty() == true)
-	{
-		// Nothing to checkIn
-		//
-		return;
-	}
-
-	// CheckIn changes to the database
-	//
-	std::vector<DbFileInfo> checkedInFiles;
-
-	CheckInDialog::checkIn(files, false, &checkedInFiles, db(), this);
-
-	// Update files state
-	//
-	for (const DbFileInfo& fi : checkedInFiles)
-	{
-		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
-			[&fi, this](QModelIndex& mi)
-			{
-				FileTreeModelItem* f = m_model->fileItem(mi);
-				assert(f);
-				return f->fileId() == fi.fileId();
-			});
-
-		assert(mipos != selectedIndexList.end());
-
-		if (mipos != selectedIndexList.end())
-		{
-			m_model->updateFile(*mipos, fi);
-		}
-	}
+	checkInFiles(selectedIndexList);
 
 	return;
 }
 
-void FileTreeView::undoChangesFile()
+void FileTreeView::undoChangesSelectedFiles()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();
 
-	if (selectedIndexList.isEmpty() == true)
-	{
-		return;
-	}
-
-	std::vector<DbFileInfo> files;
-	files.reserve(static_cast<size_t>(selectedIndexList.size()));
-
-	for (QModelIndex& mi : selectedIndexList)
-	{
-		if (mi.parent().isValid() == false)
-		{
-			// Forbid any actions to root items
-			//
-			continue;
-		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
-
-		if (f->state() == VcsState::CheckedOut &&
-			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
-		{
-			files.push_back(*f);
-		}
-	}
-
-	if (files.empty() == true)
-	{
-		// Nothing to undo
-		//
-		return;
-	}
-
-	auto mb = QMessageBox::question(
-		this,
-		tr("Undo Changes"),
-		tr("Do you want to undo pending changes? All selected objects' changes will be lost!"));
-
-	if (mb == QMessageBox::No)
-	{
-		return;
-	}
-
-	// Undo changes
-	//
-	db()->undoChanges(files, this);
-
-	// Update files state
-	//
-	for (const DbFileInfo& fi : files)
-	{
-		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
-			[&fi, this](QModelIndex& mi)
-			{
-				FileTreeModelItem* f = m_model->fileItem(mi);
-				assert(f);
-				return f->fileId() == fi.fileId();
-			});
-
-		assert(mipos != selectedIndexList.end());
-
-		if (mipos != selectedIndexList.end())
-		{
-			m_model->updateFile(*mipos, fi);
-		}
-	}
-
-	setFocus();
+	undoChangesFiles(selectedIndexList);
 
 	return;
 }
@@ -2094,6 +1994,210 @@ bool FileTreeView::createFiles(std::vector<std::shared_ptr<DbFile>> files, bool 
 
 	return true;
 
+}
+
+void FileTreeView::checkOutFiles(QModelIndexList indexList)
+{
+	if (indexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(indexList.size()));
+
+	for (QModelIndex& mi : indexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid to check out root "folders"
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (f->state() == VcsState::CheckedOut)
+		{
+			continue;
+		}
+
+		files.push_back(*f);
+	}
+
+	if (files.empty() == true)
+	{
+		// Nothing to checkout
+		//
+		return;
+	}
+
+	// CheckOut from database
+	//
+	db()->checkOut(files, this);
+
+	// Update files state
+	//
+	for (const DbFileInfo& fi : files)
+	{
+		auto mipos = std::find_if(indexList.begin(), indexList.end(),
+			[&fi, this](QModelIndex& mi)
+			{
+				FileTreeModelItem* f = m_model->fileItem(mi);
+				assert(f);
+				return f->fileId() == fi.fileId();
+			});
+
+		assert(mipos != indexList.end());
+
+		if (mipos != indexList.end())
+		{
+			m_model->updateFile(*mipos, fi);
+		}
+	}
+
+	return;
+}
+
+void FileTreeView::checkInFiles(QModelIndexList indexList)
+{
+	if (indexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(indexList.size()));
+
+	for (QModelIndex& mi : indexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid to check in root "folders"
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (f->state() == VcsState::CheckedOut &&
+			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+		{
+			files.push_back(*f);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		// Nothing to checkIn
+		//
+		return;
+	}
+
+	// CheckIn changes to the database
+	//
+	std::vector<DbFileInfo> checkedInFiles;
+
+	CheckInDialog::checkIn(files, false, &checkedInFiles, db(), this);
+
+	// Update files state
+	//
+	for (const DbFileInfo& fi : checkedInFiles)
+	{
+		auto mipos = std::find_if(indexList.begin(), indexList.end(),
+			[&fi, this](QModelIndex& mi)
+			{
+				FileTreeModelItem* f = m_model->fileItem(mi);
+				assert(f);
+				return f->fileId() == fi.fileId();
+			});
+
+		assert(mipos != indexList.end());
+
+		if (mipos != indexList.end())
+		{
+			m_model->updateFile(*mipos, fi);
+		}
+	}
+
+	return;
+}
+
+void FileTreeView::undoChangesFiles(QModelIndexList indexList)
+{
+	if (indexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(indexList.size()));
+
+	for (QModelIndex& mi : indexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid any actions to root items
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (f->state() == VcsState::CheckedOut &&
+			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+		{
+			files.push_back(*f);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		// Nothing to undo
+		//
+		return;
+	}
+
+	auto mb = QMessageBox::question(
+				  this,
+				  tr("Undo Changes"),
+				  tr("Do you want to undo pending changes? All selected objects' changes will be lost!"));
+
+	if (mb == QMessageBox::No)
+	{
+		return;
+	}
+
+	// Undo changes
+	//
+	db()->undoChanges(files, this);
+
+	// Update files state
+	//
+	for (const DbFileInfo& fi : files)
+	{
+		auto mipos = std::find_if(indexList.begin(), indexList.end(),
+								  [&fi, this](QModelIndex& mi)
+		{
+			FileTreeModelItem* f = m_model->fileItem(mi);
+			assert(f);
+			return f->fileId() == fi.fileId();
+		});
+
+		assert(mipos != indexList.end());
+
+		if (mipos != indexList.end())
+		{
+			m_model->updateFile(*mipos, fi);
+		}
+	}
+
+	setFocus();
+
+	return;
 }
 
 bool FileTreeView::getLatestFileVersionRecursive(const DbFileInfo& f, const QString& dir)

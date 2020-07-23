@@ -34,6 +34,45 @@ QString TestsFileTreeModel::customColumnName(Columns column) const
 	return QObject::tr("Custom %1").arg(static_cast<int>(column));
 }
 
+
+TestTabPageDocument::TestTabPageDocument(const QString& fileName, IdeCodeEditor* codeEditor, QTreeWidgetItem* openFilesTreeWidgetItem):
+	m_fileName(fileName),
+	m_codeEditor(codeEditor),
+	m_openFilesTreeWidgetItem(openFilesTreeWidgetItem)
+{
+
+}
+
+QString TestTabPageDocument::fileName() const
+{
+	return m_fileName;
+}
+
+void TestTabPageDocument::setFileName(const QString& fileName)
+{
+	m_fileName = fileName;
+}
+
+bool TestTabPageDocument::modified() const
+{
+	return m_modified;
+}
+
+void TestTabPageDocument::setModified(bool value)
+{
+	m_modified = value;
+}
+
+IdeCodeEditor* TestTabPageDocument::codeEditor() const
+{
+	return m_codeEditor;
+}
+
+QTreeWidgetItem* TestTabPageDocument::openFilesTreeWidgetItem() const
+{
+	return m_openFilesTreeWidgetItem;
+}
+
 //
 // TestsTabPage
 //
@@ -82,7 +121,7 @@ bool TestsTabPage::hasUnsavedTests() const
 	{
 		const TestTabPageDocument& doc = it.second;
 
-		if (doc.modified == true)
+		if (doc.modified() == true)
 		{
 			return true;
 		}
@@ -103,7 +142,7 @@ void TestsTabPage::resetModified()
 	for (auto& it : m_openDocuments)
 	{
 		TestTabPageDocument& doc = it.second;
-		doc.modified = false;
+		doc.setModified(false);
 	}
 
 	return;
@@ -146,7 +185,7 @@ void TestsTabPage::testsTreeSelectionChanged(const QItemSelection& selected, con
 	Q_UNUSED(selected);
 	Q_UNUSED(deselected);
 
-	setActionState();
+	setTestsTreeActionsState();
 
 	return;
 }
@@ -158,14 +197,14 @@ void TestsTabPage::testsTreeModelDataChanged(const QModelIndex& topLeft,
 	Q_UNUSED(bottomRight);
 	Q_UNUSED(roles);
 
-	setActionState();
+	setTestsTreeActionsState();
 
 	return;
 }
 
 void TestsTabPage::testsTreeModelReset()
 {
-	setActionState();
+	setTestsTreeActionsState();
 
 	return;
 }
@@ -273,36 +312,47 @@ void TestsTabPage::openFile()
 		itemName += QObject::tr(" [Read-only]");
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << itemName);
-	item->setToolTip(0, f->fileName());
-	item->setData(0, Qt::UserRole, fileId);
-	item->setSelected(true);
+	QTreeWidgetItem* openFilesTreeWidgetItem = new QTreeWidgetItem(QStringList() << itemName);
+	openFilesTreeWidgetItem->setToolTip(0, f->fileName());
+	openFilesTreeWidgetItem->setData(0, Qt::UserRole, fileId);
+	openFilesTreeWidgetItem->setSelected(true);
 
-	m_openFilesTreeWidget->addTopLevelItem(item);
-	m_openFilesTreeWidget->setCurrentItem(item);
+	m_openFilesTreeWidget->addTopLevelItem(openFilesTreeWidgetItem);
+	m_openFilesTreeWidget->setCurrentItem(openFilesTreeWidgetItem);
 
 	// Create document
 
-	TestTabPageDocument& document = m_openDocuments[fileId];
+	IdeCodeEditor* codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
+	codeEditor->setText(dbFile->data());
+	codeEditor->setReadOnly(readOnly);
+	connect(codeEditor, &IdeCodeEditor::customContextMenuAboutToBeShown, this, &TestsTabPage::setCodeEditorActionsState, Qt::DirectConnection);
 
-	document.codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
-	document.codeEditor->setText(dbFile->data());
-	document.codeEditor->setReadOnly(readOnly);
+	QList<QAction*> customMenuActions;
+	customMenuActions.push_back(m_checkOutCurrentDocumentAction);
+	customMenuActions.push_back(m_checkInCurrentDocumentAction);
+	customMenuActions.push_back(m_undoChangesCurrentDocumentAction);
+	customMenuActions.push_back(m_SeparatorAction1);
+	customMenuActions.push_back(m_saveCurrentDocumentAction);
+	customMenuActions.push_back(m_closeCurrentDocumentAction);
 
-	connect(document.codeEditor, &IdeCodeEditor::textChanged, this, &TestsTabPage::textChanged);
-	connect(document.codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
-	connect(document.codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsTabPage::onCloseKeyPressed);
-	connect(document.codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsTabPage::onSaveKeyPressed);
-	connect(document.codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsTabPage::onCtrlTabKeyPressed);
-	m_editorLayout->addWidget(document.codeEditor);
+	codeEditor->setCustomMenuActions(customMenuActions);
 
-	document.openFilesTreeWidgetItem = item;
-	document.dbFile = dbFile;
+	connect(codeEditor, &IdeCodeEditor::textChanged, this, &TestsTabPage::textChanged);
+	connect(codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
+	connect(codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsTabPage::onCloseKeyPressed);
+	connect(codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsTabPage::onSaveKeyPressed);
+	connect(codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsTabPage::onCtrlTabKeyPressed);
+	m_editorLayout->addWidget(codeEditor);
 
 	m_openDocumentsCombo->blockSignals(true);
 	m_openDocumentsCombo->addItem(itemName, fileId);
 	m_openDocumentsCombo->model()->sort(0, Qt::AscendingOrder);
 	m_openDocumentsCombo->blockSignals(false);
+
+	// Add a document
+
+	TestTabPageDocument document(f->fileName(), codeEditor, openFilesTreeWidgetItem);
+	m_openDocuments.insert( std::map< int, TestTabPageDocument >::value_type ( fileId, document ) );
 
 	// Open file in editor
 
@@ -358,8 +408,21 @@ void TestsTabPage::renameFile()
 
 	m_testsTreeView->renameFile();
 
-	if (fileId != -1)
+	// Set new file name to document
+
+	if (documentIsOpen(fileId) == true)
 	{
+		TestTabPageDocument& document = m_openDocuments.at(f->fileId());
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		document.setFileName(fi.fileName());
+
 		updateOpenDocumentInfo(fileId);
 	}
 
@@ -386,7 +449,7 @@ void TestsTabPage::checkInFile()
 		}
 	}
 
-	m_testsTreeView->checkInFile();
+	m_testsTreeView->checkInSelectedFiles();
 
 	// Set editors to read-only
 	//
@@ -411,7 +474,7 @@ void TestsTabPage::checkInFile()
 
 void TestsTabPage::checkOutFile()
 {
-	m_testsTreeView->checkOutFile();
+	m_testsTreeView->checkOutSelectedFiles();
 
 	// Set editors to editable
 	//
@@ -453,7 +516,7 @@ void TestsTabPage::undoChangesFile()
 		}
 	}
 
-	m_testsTreeView->undoChangesFile();
+	m_testsTreeView->undoChangesSelectedFiles();
 
 	// Close documents that are deleted and re-read other
 
@@ -476,10 +539,23 @@ void TestsTabPage::undoChangesFile()
 				return;
 			}
 
-			TestTabPageDocument& document = m_openDocuments[f->fileId()];
+			if (documentIsOpen(f->fileId()) == false)
+			{
+				Q_ASSERT(false);
+				return;
+			}
 
-			document.codeEditor->setText(dbFile->data());
-			document.modified = false;
+			TestTabPageDocument& document = m_openDocuments.at(f->fileId());
+
+			IdeCodeEditor* codeEditor = document.codeEditor();
+			if (codeEditor == nullptr)
+			{
+				Q_ASSERT(codeEditor);
+				return;
+			}
+
+			codeEditor->setText(dbFile->data());
+			document.setModified(false);
 
 			setDocumentReadOnly(f->fileId(), true);
 
@@ -555,7 +631,7 @@ void TestsTabPage::refreshFileTree()
 {
 	m_testsTreeView->refreshFileTree();
 
-	setActionState();
+	setTestsTreeActionsState();
 
 	return;
 }
@@ -601,24 +677,19 @@ void TestsTabPage::filterChanged()
 
 void TestsTabPage::textChanged()
 {
-	if (m_openDocuments.find(m_currentFileId) == m_openDocuments.end())
+	if (documentIsOpen(m_currentFileId) == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	TestTabPageDocument& document = m_openDocuments[m_currentFileId];
-	if (document.openFilesTreeWidgetItem == nullptr)
-	{
-		Q_ASSERT(document.openFilesTreeWidgetItem);
-		return;
-	}
+	TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
 
-	if (document.modified == false)
+	if (document.modified() == false)
 	{
 		// Mark document as modified
 		//
-		document.modified = true;
+		document.setModified(true);
 		updateOpenDocumentInfo(m_currentFileId);
 	}
 
@@ -639,6 +710,124 @@ void TestsTabPage::cursorPositionChanged(int line, int index)
 	return;
 }
 
+void TestsTabPage::checkInCurrentDocument()
+{
+	if (documentIsOpen(m_currentFileId) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	// Save modified files
+	//
+	if (documentIsOpen(m_currentFileId) == true && documentIsModified(m_currentFileId) == true)
+	{
+		saveDocument(m_currentFileId);
+	}
+
+	bool fileWasDeleted = false;
+
+	m_testsTreeView->checkInFileById(m_currentFileId, &fileWasDeleted);
+
+	if (fileWasDeleted == true)
+	{
+		closeDocument(m_currentFileId, true/*force*/);
+	}
+	else
+	{
+		DbFileInfo fi;
+		if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		setDocumentReadOnly(m_currentFileId, fi.state() == VcsState::CheckedIn);
+	}
+
+	return;
+
+}
+
+void TestsTabPage::checkOutCurrentDocument()
+{
+	if (documentIsOpen(m_currentFileId) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_testsTreeView->checkOutFileById(m_currentFileId);
+
+	DbFileInfo fi;
+	if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Get file information error!");
+		return;
+	}
+
+	setDocumentReadOnly(m_currentFileId, fi.state() == VcsState::CheckedIn);
+
+	return;
+}
+
+void TestsTabPage::undoChangesCurrentDocument()
+{
+	bool fileWasDeleted = false;
+
+	m_testsTreeView->undoChangesFileById(m_currentFileId, &fileWasDeleted);
+
+	if (fileWasDeleted == true)
+	{
+		closeDocument(m_currentFileId, true/*force*/);
+	}
+	else
+	{
+		// Re-read file info and contents
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		std::shared_ptr<DbFile> dbFile;
+		if (db()->getLatestVersion(fi, &dbFile, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get latest version error!");
+			return;
+		}
+
+		if (documentIsOpen(m_currentFileId) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
+
+		document.setFileName(fi.fileName());
+		document.setModified(false);
+
+		IdeCodeEditor* codeEditor = document.codeEditor();
+		if (codeEditor == nullptr)
+		{
+			Q_ASSERT(codeEditor);
+			return;
+		}
+		codeEditor->setText(dbFile->data());
+
+		setDocumentReadOnly(m_currentFileId, true);
+	}
+}
+
+void TestsTabPage::saveCurrentDocument()
+{
+	saveDocument(m_currentFileId);
+	return;
+}
+
 void TestsTabPage::closeCurrentDocument()
 {
 	closeDocument(m_currentFileId, false/*force*/);
@@ -653,17 +842,17 @@ void TestsTabPage::onGoToLine()
 		return;
 	}
 
-	TestTabPageDocument& document = m_openDocuments[m_currentFileId];
+	TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
 
-	if (document.codeEditor == nullptr)
+	if (document.codeEditor() == nullptr)
 	{
-		Q_ASSERT(document.codeEditor);
+		Q_ASSERT(false);
 		return;
 	}
 
 	int line = 0;
 	int index = 0;
-	document.codeEditor->getCursorPosition(&line, &index);
+	document.codeEditor()->getCursorPosition(&line, &index);
 
 	bool ok = false;
 
@@ -673,14 +862,21 @@ void TestsTabPage::onGoToLine()
 		return;
 	}
 
-	int maxLine = document.codeEditor->lines();
+	IdeCodeEditor* codeEditor = document.codeEditor();
+	if (codeEditor == nullptr)
+	{
+		Q_ASSERT(codeEditor);
+		return;
+	}
+
+	int maxLine = codeEditor->lines();
 	if (newLine > maxLine)
 	{
 		newLine  = maxLine;
 	}
 
-	document.codeEditor->setCursorPosition(newLine - 1, 0);
-	document.codeEditor->activateEditor();
+	codeEditor->setCursorPosition(newLine - 1, 0);
+	codeEditor->activateEditor();
 
 	return;
 }
@@ -689,9 +885,9 @@ void TestsTabPage::onSaveKeyPressed()
 {
 	if (documentIsOpen(m_currentFileId) == true)
 	{
-		const TestTabPageDocument& document = m_openDocuments[m_currentFileId];
+		const TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
 
-		if (document.modified == true)
+		if (document.modified() == true)
 		{
 			saveDocument(m_currentFileId);
 		}
@@ -710,9 +906,16 @@ void TestsTabPage::onCtrlTabKeyPressed()
 {
 	if (documentIsOpen(m_currentFileId) == true)
 	{
-		const TestTabPageDocument& document = m_openDocuments[m_currentFileId];
+		const TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
 
-		int currentIndex = m_openFilesTreeWidget->indexOfTopLevelItem(document.openFilesTreeWidgetItem);
+		QTreeWidgetItem* openFilesTreeWidgetItem = document.openFilesTreeWidgetItem();
+		if (openFilesTreeWidgetItem == nullptr)
+		{
+			Q_ASSERT(openFilesTreeWidgetItem);
+			return;
+		}
+
+		int currentIndex = m_openFilesTreeWidget->indexOfTopLevelItem(openFilesTreeWidgetItem);
 
 		int openIndex = 0;
 
@@ -742,21 +945,15 @@ void TestsTabPage::onCtrlTabKeyPressed()
 	}
 }
 
-bool TestsTabPage::documentIsModified(int fileId)
+bool TestsTabPage::documentIsModified(int fileId) const
 {
 	if (documentIsOpen(fileId) == false)
 	{
 		return false;
 	}
 
-	TestTabPageDocument& document = m_openDocuments[fileId];
-	if (document.codeEditor == nullptr)
-	{
-		Q_ASSERT(document.codeEditor);
-		return false;
-	}
-
-	return document.modified;
+	const TestTabPageDocument& document = m_openDocuments.at(fileId);
+	return document.modified();
 }
 
 void TestsTabPage::setCurrentDocument(int fileId)
@@ -784,15 +981,16 @@ void TestsTabPage::setCurrentDocument(int fileId)
 		int docFileId = it.first;
 		TestTabPageDocument& document = it.second;
 
-		if (document.codeEditor == nullptr)
+		IdeCodeEditor* codeEditor = document.codeEditor();
+		if (codeEditor == nullptr)
 		{
-			Q_ASSERT(document.codeEditor);
+			Q_ASSERT(codeEditor);
 			return;
 		}
 
-		if (docFileId != fileId && document.codeEditor->isVisible())
+		if (docFileId != fileId && codeEditor->isVisible())
 		{
-			document.codeEditor->setVisible(false);
+			codeEditor->setVisible(false);
 		}
 	}
 
@@ -803,16 +1001,17 @@ void TestsTabPage::setCurrentDocument(int fileId)
 		int docFileId = it.first;
 		TestTabPageDocument& document = it.second;
 
-		if (document.codeEditor == nullptr)
+		IdeCodeEditor* codeEditor = document.codeEditor();
+		if (codeEditor == nullptr)
 		{
-			Q_ASSERT(document.codeEditor);
+			Q_ASSERT(codeEditor);
 			return;
 		}
 
 		if (docFileId == fileId)
 		{
-			document.codeEditor->setVisible(true);
-			document.codeEditor->activateEditor();
+			codeEditor->setVisible(true);
+			codeEditor->activateEditor();
 
 			if (m_cursorPosButton == nullptr)
 			{
@@ -822,7 +1021,7 @@ void TestsTabPage::setCurrentDocument(int fileId)
 
 			int line = 0;
 			int index = 0;
-			document.codeEditor->getCursorPosition(&line, &index);
+			codeEditor->getCursorPosition(&line, &index);
 
 			m_cursorPosButton->setText(tr(" Line: %1  Col: %2").arg(line + 1).arg(index + 1));
 		}
@@ -834,16 +1033,17 @@ void TestsTabPage::setCurrentDocument(int fileId)
 
 	// Select Open files tree widget item
 
-	const TestTabPageDocument& newFile = m_openDocuments[fileId];
+	const TestTabPageDocument& newFile = m_openDocuments.at(fileId);
 
-	if (newFile.openFilesTreeWidgetItem == nullptr)
+	QTreeWidgetItem* openFilesTreeWidgetItem = newFile.openFilesTreeWidgetItem();
+	if (openFilesTreeWidgetItem == nullptr)
 	{
-		Q_ASSERT(newFile.openFilesTreeWidgetItem);
+		Q_ASSERT(openFilesTreeWidgetItem);
 		return;
 	}
 
-	newFile.openFilesTreeWidgetItem->setSelected(true);
-	m_openFilesTreeWidget->setCurrentItem(newFile.openFilesTreeWidgetItem);
+	openFilesTreeWidgetItem->setSelected(true);
+	m_openFilesTreeWidget->setCurrentItem(openFilesTreeWidgetItem);
 
 
 	// Select combo box item
@@ -871,14 +1071,16 @@ void TestsTabPage::setDocumentReadOnly(int fileId, bool readOnly)
 		return;
 	}
 
-	TestTabPageDocument& document = m_openDocuments[fileId];
-	if (document.codeEditor == nullptr)
+	TestTabPageDocument& document = m_openDocuments.at(fileId);
+
+	IdeCodeEditor* codeEditor = document.codeEditor();
+	if (codeEditor == nullptr)
 	{
-		Q_ASSERT(document.codeEditor);
+		Q_ASSERT(codeEditor);
 		return;
 	}
 
-	document.codeEditor->setReadOnly(readOnly);
+	codeEditor->setReadOnly(readOnly);
 
 	updateOpenDocumentInfo(fileId);
 
@@ -1387,6 +1589,31 @@ void TestsTabPage::createActions()
 
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
+	//
+
+	m_checkInCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
+	m_checkInCurrentDocumentAction->setStatusTip(tr("Check in changes"));
+	m_checkInCurrentDocumentAction->setEnabled(false);
+	connect(m_checkInCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkInCurrentDocument);
+
+	m_checkOutCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
+	m_checkOutCurrentDocumentAction->setStatusTip(tr("Check out file for edit"));
+	m_checkOutCurrentDocumentAction->setEnabled(false);
+	connect(m_checkOutCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkOutCurrentDocument);
+
+	m_undoChangesCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
+	m_undoChangesCurrentDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
+	m_undoChangesCurrentDocumentAction->setEnabled(false);
+	connect(m_undoChangesCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesCurrentDocument);
+
+	m_saveCurrentDocumentAction = new QAction(tr("Save"), this);
+	m_saveCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
+	connect(m_saveCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::saveCurrentDocument);
+
+	m_closeCurrentDocumentAction = new QAction(tr("Close"), this);
+	m_closeCurrentDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
+	connect(m_closeCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::closeCurrentDocument);
+
 	// -----------------
 
 	m_testsTreeView->addAction(m_openFileAction);
@@ -1414,7 +1641,7 @@ void TestsTabPage::createActions()
 	return;
 }
 
-void TestsTabPage::setActionState()
+void TestsTabPage::setTestsTreeActionsState()
 {
 	// Disable all
 	//
@@ -1581,6 +1808,43 @@ void TestsTabPage::setActionState()
 	return;
 }
 
+void TestsTabPage::setCodeEditorActionsState()
+{
+	m_checkInCurrentDocumentAction->setEnabled(false);
+	m_checkOutCurrentDocumentAction->setEnabled(false);
+	m_undoChangesCurrentDocumentAction->setEnabled(false);
+	m_saveCurrentDocumentAction->setEnabled(false);
+
+	if (documentIsOpen(m_currentFileId) == false)
+	{
+		return;
+	}
+
+	const TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
+	m_saveCurrentDocumentAction->setEnabled(document.modified() == true);
+
+	DbFileInfo fi;
+	if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Get file information error!");
+		return;
+	}
+
+	if (fi.state() == VcsState::CheckedOut &&
+		(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+	{
+		m_checkInCurrentDocumentAction->setEnabled(true);
+		m_undoChangesCurrentDocumentAction->setEnabled(true);
+	}
+
+	if (fi.state() == VcsState::CheckedIn)
+	{
+		m_checkOutCurrentDocumentAction->setEnabled(true);
+	}
+
+	return;
+}
+
 void TestsTabPage::saveSettings()
 {
 	QSettings s;
@@ -1625,7 +1889,7 @@ void TestsTabPage::hideEditor()
 	m_currentFileId = -1;
 }
 
-bool TestsTabPage::documentIsOpen(int fileId)
+bool TestsTabPage::documentIsOpen(int fileId) const
 {
 	return m_openDocuments.find(fileId) != m_openDocuments.end();
 }
@@ -1638,30 +1902,50 @@ void TestsTabPage::saveDocument(int fileId)
 		return;
 	}
 
-	TestTabPageDocument& document = m_openDocuments[fileId];
+	TestTabPageDocument& document = m_openDocuments.at(fileId);
 
-	if (document.codeEditor == nullptr || document.openFilesTreeWidgetItem == nullptr)
-	{
-		Q_ASSERT(document.openFilesTreeWidgetItem);
-		Q_ASSERT(document.codeEditor);
-		return;
-	}
-
-	if (document.modified == false)
+	if (document.modified() == false)
 	{
 		// Fils is not modified
 		return;
 	}
 
-	document.dbFile->setData(document.codeEditor->text().toUtf8());
+	IdeCodeEditor* codeEditor = document.codeEditor();
+	if (codeEditor == nullptr)
+	{
+		Q_ASSERT(codeEditor);
+		return;
+	}
 
-	if (db()->setWorkcopy(document.dbFile, this) == false)
+	DbFileInfo fi;
+	if (db()->getFileInfo(fileId, &fi, this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Get file information error!");
+		return;
+	}
+
+	std::shared_ptr<DbFile> dbFile;
+	if (db()->getLatestVersion(fi, &dbFile, this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Get latest version error!");
+		return;
+	}
+
+	if (dbFile == nullptr)
+	{
+		Q_ASSERT(dbFile);
+		return;
+	}
+
+	dbFile->setData(codeEditor->text().toUtf8());
+
+	if (db()->setWorkcopy(dbFile, this) == false)
 	{
 		QMessageBox::critical(this, "Error", "Set work copy error!");
 		return;
 	}
 
-	document.modified = false;
+	document.setModified(false);
 
 	updateOpenDocumentInfo(fileId);
 
@@ -1685,26 +1969,27 @@ void TestsTabPage::closeDocument(int fileId, bool force)
 		return;
 	}
 
-	TestTabPageDocument& document = m_openDocuments[fileId];
+	TestTabPageDocument& document = m_openDocuments.at(fileId);
 
-	if (document.codeEditor == nullptr || document.openFilesTreeWidgetItem == nullptr)
+	IdeCodeEditor* codeEditor = document.codeEditor();
+	if (codeEditor == nullptr)
 	{
-		Q_ASSERT(document.openFilesTreeWidgetItem);
-		Q_ASSERT(document.codeEditor);
+		Q_ASSERT(codeEditor);
+		return;
+	}
+
+	QTreeWidgetItem* openFilesTreeWidgetItem = document.openFilesTreeWidgetItem();
+	if (openFilesTreeWidgetItem == nullptr)
+	{
+		Q_ASSERT(openFilesTreeWidgetItem);
 		return;
 	}
 
 	if (force == false)
 	{
-		if (document.modified == true)
+		if (document.modified() == true)
 		{
-			if (document.dbFile == nullptr)
-			{
-				Q_ASSERT(document.dbFile);
-				return;
-			}
-
-			QString fileName = document.dbFile->fileName();
+			QString fileName = document.fileName();
 
 			auto reply = QMessageBox::question(this,
 											   qAppName(),
@@ -1723,7 +2008,7 @@ void TestsTabPage::closeDocument(int fileId, bool force)
 
 	// Delete item from opened files list
 
-	int closeIndex = m_openFilesTreeWidget->indexOfTopLevelItem(document.openFilesTreeWidgetItem);
+	int closeIndex = m_openFilesTreeWidget->indexOfTopLevelItem(openFilesTreeWidgetItem);
 
 	// Delete item from combo box
 
@@ -1741,12 +2026,19 @@ void TestsTabPage::closeDocument(int fileId, bool force)
 
 	// Delete item from opened files list
 
-	m_openFilesTreeWidget->takeTopLevelItem(closeIndex);
-	delete document.openFilesTreeWidgetItem;
+	if (closeIndex == -1)
+	{
+		Q_ASSERT(false);
+	}
+	else
+	{
+		m_openFilesTreeWidget->takeTopLevelItem(closeIndex);
+		delete openFilesTreeWidgetItem;
+	}
 
 	// Delete item documents list
 
-	document.codeEditor->deleteLater();
+	codeEditor->deleteLater();
 	m_openDocuments.erase(fileId);
 
 	// Open another document
@@ -1792,7 +2084,14 @@ void TestsTabPage::closeAllDocuments()
 {
 	for (auto& it : m_openDocuments)
 	{
-		delete it.second.codeEditor;
+		IdeCodeEditor* codeEditor =  it.second.codeEditor();
+		if (codeEditor == nullptr)
+		{
+			Q_ASSERT(codeEditor);
+			return;
+		}
+
+		delete codeEditor;
 	}
 
 	m_openDocuments.clear();
@@ -1809,34 +2108,29 @@ void TestsTabPage::updateOpenDocumentInfo(int fileId)
 		return;
 	}
 
-	const TestTabPageDocument& document = m_openDocuments[fileId];
+	const TestTabPageDocument& document = m_openDocuments.at(fileId);
 
-	if (document.openFilesTreeWidgetItem == nullptr)
+	QTreeWidgetItem* openFilesTreeWidgetItem = document.openFilesTreeWidgetItem();
+	if (openFilesTreeWidgetItem == nullptr)
 	{
-		Q_ASSERT(document.openFilesTreeWidgetItem);
+		Q_ASSERT(openFilesTreeWidgetItem);
 		return;
 	}
 
-	if (document.dbFile == nullptr)
-	{
-		Q_ASSERT(document.dbFile);
-		return;
-	}
+	QString itemName = document.fileName();
 
-	QString itemName = document.dbFile->fileName();
-
-	if (document.codeEditor->readOnly() == true)
+	if (document.codeEditor()->readOnly() == true)
 	{
 		itemName += QObject::tr(" [Read-only]");
 	}
-	if (document.modified == true)
+	if (document.modified() == true)
 	{
 		itemName += QObject::tr(" *");
 	}
 
 	// Update status on OpenFilesTreeWidget
 
-	document.openFilesTreeWidgetItem->setText(0, itemName);
+	openFilesTreeWidgetItem->setText(0, itemName);
 
 	// Update combo box item
 

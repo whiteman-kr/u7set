@@ -98,6 +98,26 @@ private:
 	static bool m_caseSensitive;
 };
 
+class IdeQsciScintilla : public QsciScintilla
+{
+	Q_OBJECT
+public:
+	IdeQsciScintilla();
+	virtual ~IdeQsciScintilla();
+
+	void setCustomMenuActions(QList<QAction*> actions);
+
+private:
+	virtual void contextMenuEvent (QContextMenuEvent *e) override;
+
+signals:
+	void customContextMenuAboutToBeShown();
+
+private:
+	QList<QAction*> m_customMenuActions;
+
+};
+
 //
 // IdeCodeEditor
 //
@@ -127,6 +147,7 @@ public:
 	virtual void setReadOnly(bool value) override;
 
 	void activateEditor();
+	void setCustomMenuActions(QList<QAction*> actions);
 
 public slots:
 	void findFirst(QString findText, bool caseSensitive);
@@ -135,22 +156,23 @@ public slots:
 	void replaceAll(QString findText, QString replaceText, bool caseSensitive);
 
 signals:
+	void customContextMenuAboutToBeShown();
 	void cursorPositionChanged(int line, int index);
 	void textChanged();
 	void saveKeyPressed();
 	void closeKeyPressed();
 	void ctrlTabKeyPressed();
 
-
 private:
     bool eventFilter(QObject* obj, QEvent* event);
 
 private slots:
+	void onCustomContextMenuAboutToBeShown();
 	void onCursorPositionChanged(int line, int index);
 	void onTextChanged();
 
 private:
-    QsciScintilla* m_textEdit = nullptr;
+	IdeQsciScintilla* m_textEdit = nullptr;
 
 	LexerJavaScript m_lexerJavaScript;
 	LexerXML m_lexerXml;

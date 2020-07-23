@@ -281,6 +281,39 @@ void DialogFindReplace::saveCompleters()
 }
 
 //
+// IdeQsciScintilla
+//
+IdeQsciScintilla::IdeQsciScintilla():
+	QsciScintilla()
+{
+
+}
+
+IdeQsciScintilla::~IdeQsciScintilla()
+{
+
+}
+
+void IdeQsciScintilla::setCustomMenuActions(QList<QAction*> actions)
+{
+	m_customMenuActions = actions;
+}
+
+void IdeQsciScintilla::contextMenuEvent (QContextMenuEvent *e)
+{
+	QMenu* menu = createStandardContextMenu();
+
+	if (m_customMenuActions.empty() == false)
+	{
+		emit customContextMenuAboutToBeShown();
+
+		menu->addSeparator();
+		menu->addActions(m_customMenuActions);
+	}
+	menu->exec(e->globalPos());
+}
+
+//
 // IdeCodeEditor
 //
 
@@ -292,9 +325,15 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     PropertyTextEditor(parent),
     m_parent(parent)
 {
-    m_textEdit = new QsciScintilla();
+	m_textEdit = new IdeQsciScintilla();
 
     m_textEdit->setUtf8(true);
+	m_textEdit->setCaretLineVisible(true);
+	m_textEdit->setCaretLineBackgroundColor("#f0f0f0");
+	m_textEdit->setCaretWidth(2);
+
+	connect(m_textEdit, &IdeQsciScintilla::customContextMenuAboutToBeShown, this, &IdeCodeEditor::onCustomContextMenuAboutToBeShown, Qt::DirectConnection);
+
 
     m_textEdit->installEventFilter(this);
 
@@ -407,6 +446,12 @@ void IdeCodeEditor::activateEditor()
 	m_textEdit->setFocus();
 }
 
+
+void IdeCodeEditor::setCustomMenuActions(QList<QAction*> actions)
+{
+	m_textEdit->setCustomMenuActions(actions);
+	return;
+}
 
 void IdeCodeEditor::findFirst(QString findText, bool caseSensitive)
 {
@@ -581,6 +626,11 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 
 	// pass the event on to the parent class
 	return PropertyTextEditor::eventFilter(obj, event);
+}
+
+void IdeCodeEditor::onCustomContextMenuAboutToBeShown()
+{
+	emit customContextMenuAboutToBeShown();
 }
 
 void IdeCodeEditor::onCursorPositionChanged(int line, int index)
