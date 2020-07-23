@@ -62,6 +62,22 @@ SimpleAppSignalStatesQueue::SimpleAppSignalStatesQueue(int queueSize) :
 {
 }
 
+SimpleAppSignalStatesQueue::~SimpleAppSignalStatesQueue()
+{
+}
+
+void SimpleAppSignalStatesQueue::afterPush()
+{
+	m_afterPushCtr++;
+
+	if (m_afterPushCtr > 50)
+	{
+		m_afterPushCtr = 0;
+
+		emit queueNotEmpty();
+	}
+}
+
 // ---------------------------------------------------------------------------------------------------------
 //
 // SimpleAppSignalStatesArchiveQueue class implementation

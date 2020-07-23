@@ -216,9 +216,7 @@ const int TDS_TUNING_MAX_WRITE_RECORDS = 1000;
 
 // ArchivingService and AppData Service communications, Port PORT_ARCHIVING_SERVICE_APP_DATA
 //
-const quint32 ARCHS_CONNECTION_ALIVE = 0x1601;
 const quint32 ARCHS_SAVE_APP_SIGNALS_STATES = 0x1602;
-
 
 // Monitor (and other clients) and ArchivingService communications, Port PORT_ARCHIVING_SERVICE_CLIENT_REQUEST
 //

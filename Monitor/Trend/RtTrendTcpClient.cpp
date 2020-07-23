@@ -12,7 +12,6 @@ RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController) :
 	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";
 
 	setObjectName("RtTrendTcpClient");
-	enableWatchdogTimer(true);
 
 	return;
 }

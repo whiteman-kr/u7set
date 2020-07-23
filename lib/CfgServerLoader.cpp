@@ -194,12 +194,6 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 	}
 
 	changeApp(softwareInfo.equipmentID(), appInstance);
-
-	// DELETE after periodic CFG requests to be added
-	//
-	enableWatchdogTimer(false);
-	//
-	// DELETE after periodic CFG requests to be added
 }
 
 void CfgLoader::onClientThreadStarted()

@@ -28,10 +28,22 @@ struct SimpleAppSignalState
 	void print() const;
 };
 
-class SimpleAppSignalStatesQueue : public FastThreadSafeQueue<SimpleAppSignalState>
+class SimpleAppSignalStatesQueue : public QObject, public FastThreadSafeQueue<SimpleAppSignalState>
 {
+	Q_OBJECT
+
 public:
 	SimpleAppSignalStatesQueue(int queueSize);
+	virtual ~SimpleAppSignalStatesQueue();
+
+signals:
+	void queueNotEmpty();
+
+private:
+	virtual void afterPush() override;
+
+private:
+	int m_afterPushCtr = 0;
 };
 
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;

@@ -816,7 +816,7 @@ namespace Tcp
 			// Wow! Client still alive!
 			// nothing to do, only restart timeout timer
 			//
-			qDebug() << "receive TCP_CLIENT_ALIVE";
+			//qDebug() << "receive TCP_CLIENT_ALIVE";
 
 			// reply on TCP_CLIENT_ALIVE request is not required
 			//
@@ -1597,7 +1597,7 @@ namespace Tcp
 			return false;
 		}
 
-		qDebug() << "Tcp::Client::sendClientAliveRequest()";
+//		qDebug() << "Tcp::Client::sendClientAliveRequest()";
 
 		return true;
 	}
