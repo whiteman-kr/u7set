@@ -721,7 +721,8 @@ void SignalSetProvider::showErrors(const QVector<ObjectState>& states)
 void SignalSetProvider::initLazyLoadSignals()
 {
 	loadUsers();
-	emit usersLoaded();
+
+	m_propertyManager.reloadPropertyBehaviour();
 
 	QVector<ID_AppSignalID> signalIds;
 	dbController()->getSignalsIDAppSignalID(&signalIds, m_parentWidget);

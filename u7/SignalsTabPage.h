@@ -103,14 +103,8 @@ public:
 
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
 
-signals:
-	void aboutToClearSignals();
-	void signalsRestored(int focusedSignalId = -1);
-	void signalsLoadingFinished();
-	void updateColumnList();
 
 public slots:
-	void updateSignalsPropertyBehaviour();
 	void updateSignal(int signalIndex);
 	void changeRowCount();
 	void changeColumnCount();
@@ -141,7 +135,7 @@ public:
 	void setIdFilterField(int field);
 
 signals:
-	void aboutToSort();
+	void aboutToSort();	// Before sorting or filtering signals should be fully loaded
 	void aboutToFilter();
 
 protected:
@@ -275,8 +269,8 @@ public:
 	FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent = nullptr);
 	void notifyThatSignalSetHasChanged();
 
-	bool reopen() { return m_reopen; }
-	void setReopen() { m_reopen = true; }
+	bool shouldReopen() { return m_shouldReopen; }
+	void allowReopen() { m_shouldReopen = true; }
 
 signals:
 	void signalSelected(int signalId);
@@ -358,7 +352,7 @@ private:
 	QRegExp m_regExp4Id;
 	int m_currentUserId = -1;
 	bool m_currentUserIsAdmin = false;
-	bool m_reopen = true;
+	bool m_shouldReopen = true;
 };
 
 
@@ -383,17 +377,13 @@ protected:
 	virtual void closeEvent(QCloseEvent*) override;
 	virtual void keyPressEvent(QKeyEvent *e) override;
 
-signals:
-	void setSignalActionsVisibility(bool state);
-	void setCheckedoutSignalActionsVisibility(bool state);
-
 public slots:
 	void projectOpened();
 	void projectClosed();
 
 	void onTabPageChanged();
-	void stopLoadingSignals();
 
+	void loadSignals();
 	void addSignal();
 	void editSignal();
 	void cloneSignal();
@@ -405,8 +395,6 @@ public slots:
 	void checkIn();
 	void viewSignalHistory();
 
-	void changeSignalActionsVisibility();
-	void changeCheckedoutSignalActionsVisibility();
 	void changeLazySignalLoadingSequence();
 
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
@@ -429,8 +417,6 @@ private:
 	SignalsModel* m_signalsModel = nullptr;
 	SignalSetProvider* m_signalSetProvider = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
-	QTabWidget* m_tabWidget = nullptr;
-	QTimer* m_loadSignalsTimer = nullptr;
 	QTableView* m_signalsView = nullptr;
 	TableDataVisibilityController* m_signalsColumnVisibilityController = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
@@ -440,7 +426,6 @@ private:
 	QStringList m_filterHistory;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
-	bool m_changingSelectionManualy = false;
 	FindSignalDialog* m_findSignalDialog = nullptr;
 
 	QVector<int> m_selectedRowsSignalID;

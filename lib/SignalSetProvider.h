@@ -175,7 +175,6 @@ public:
 
 signals:
 	void error(const QString& message) const;	// for throwing message boxes
-	void usersLoaded() const;
 	void signalCountChanged() const;	// for reloading entire signal model content
 	void signalUpdated(int signalIndex) const;	// for updating row in signal view (throwing models DataChanged signal)
 	void signalPropertiesChanged(const Signal& signal) const; // for updating property list if new properties exist in signal

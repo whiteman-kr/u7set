@@ -559,11 +559,6 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
-void SignalsModel::updateSignalsPropertyBehaviour()
-{
-	m_signalSetProvider->signalPropertyManager().reloadPropertyBehaviour();
-}
-
 void SignalsModel::updateSignal(int signalIndex)
 {
 	assert(signalIndex < m_rowCount);
@@ -724,14 +719,9 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, this, &SignalsTabPage::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
-	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
 	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeLazySignalLoadingSequence);
 
 	connect(signalSetProvider, &SignalSetProvider::error, this, &SignalsTabPage::showError);
-	connect(signalSetProvider, &SignalSetProvider::usersLoaded, m_signalsModel, &SignalsModel::updateSignalsPropertyBehaviour);
-
-	connect(m_signalsModel, &SignalsModel::aboutToClearSignals, this, &SignalsTabPage::saveSelection);
-	connect(m_signalsModel, &SignalsModel::signalsRestored, this, &SignalsTabPage::restoreSelection);
 
 	// Create Actions
 	//
@@ -976,7 +966,6 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaOpen.svg"), tr("Edit properties"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
-	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -988,14 +977,12 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaClone.svg"), tr("Clone signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::cloneSignal);
-	//connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
 	action = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete signal"), this);
 	action->setShortcut(Qt::Key_Delete);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
-	//connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -1003,13 +990,11 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("Check in signal(s)"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::checkIn);
-	//connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
 	action = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo changes"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignalChanges);
-	//connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -1022,7 +1007,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
 	action->setShortcut(QKeySequence::StandardKey::Refresh);
-	connect(action, &QAction::triggered, m_signalSetProvider, &SignalSetProvider::loadSignals);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::loadSignals);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -1031,8 +1016,6 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	connect(action, &QAction::triggered, this, &SignalsTabPage::findAndReplaceSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
-
-	changeSignalActionsVisibility();
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -1085,6 +1068,7 @@ void SignalsTabPage::projectClosed()
 	{
 		m_findSignalDialog->close();
 		delete m_findSignalDialog;
+		m_findSignalDialog = nullptr;
 	}
 }
 
@@ -1104,7 +1088,7 @@ void SignalsTabPage::onTabPageChanged()
 
 	if (m_findSignalDialog != nullptr)
 	{
-		if (tabWidget->currentWidget() == this && m_findSignalDialog->reopen() == true)
+		if (tabWidget->currentWidget() == this && m_findSignalDialog->shouldReopen() == true)
 		{
 			findAndReplaceSignal();
 		}
@@ -1113,39 +1097,13 @@ void SignalsTabPage::onTabPageChanged()
 			m_findSignalDialog->hide();
 		}
 	}
-
-	if (m_loadSignalsTimer == nullptr)
-	{
-		m_tabWidget = tabWidget;
-		/*disconnect(tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);*/
-		return;
-	}
-
-	if (tabWidget->currentWidget() == this)
-	{
-		m_loadSignalsTimer->start(100);
-	}
-	else
-	{
-		m_loadSignalsTimer->stop();
-	}
 }
 
-void SignalsTabPage::stopLoadingSignals()
+void SignalsTabPage::loadSignals()
 {
-	// if loading already stopped
-	//
-	if (m_loadSignalsTimer == nullptr)
-	{
-		return;
-	}
-
-	disconnect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals);
-
-	m_loadSignalsTimer->deleteLater();
-	m_loadSignalsTimer = nullptr;
-
-	updateFindOrReplaceDialog();
+	saveSelection();
+	m_signalSetProvider->loadSignals();
+	restoreSelection();
 }
 
 void SignalsTabPage::addSignal()
@@ -1278,8 +1236,6 @@ void SignalsTabPage::addSignal()
 			m_signalsModel->changeRowCount();
 		}
 	}
-
-	emit setCheckedoutSignalActionsVisibility(true);
 }
 
 void SignalsTabPage::editSignal()
@@ -1354,7 +1310,6 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 		}
 
 		m_signalSetProvider->loadSignalSet(ids);
-		changeCheckedoutSignalActionsVisibility();
 		return true;
 	}
 
@@ -1366,7 +1321,6 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 	if (dlg.hasEditedSignals())
 	{
 		m_signalSetProvider->loadSignalSet(ids);	//Signal could be checked out but not changed
-		changeCheckedoutSignalActionsVisibility();
 	}
 	return false;
 }
@@ -1433,7 +1387,7 @@ void SignalsTabPage::findAndReplaceSignal()
 
 		connect(m_findSignalDialog, &FindSignalDialog::signalSelected, this, &SignalsTabPage::restoreSelection);
 	}
-	m_findSignalDialog->setReopen();
+	m_findSignalDialog->allowReopen();
 	m_findSignalDialog->show();
 	m_findSignalDialog->activateWindow();
 	m_findSignalDialog->raise();
@@ -1498,45 +1452,6 @@ void SignalsTabPage::viewSignalHistory()
 	dlg.exec();
 }
 
-void SignalsTabPage::changeSignalActionsVisibility()
-{
-	if (m_changingSelectionManualy)
-	{
-		return;
-	}
-	if (!m_signalsView->selectionModel()->hasSelection())
-	{
-		emit setSignalActionsVisibility(false);
-	}
-	else
-	{
-		QModelIndexList&& selection = m_signalsView->selectionModel()->selectedRows();
-		for (int i = 0; i < selection.count(); i++)
-		{
-			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
-			if (m_signalSetProvider->isEditableSignal(row))
-			{
-				emit setSignalActionsVisibility(true);
-				return;
-			}
-		}
-		emit setSignalActionsVisibility(false);
-	}
-}
-
-void SignalsTabPage::changeCheckedoutSignalActionsVisibility()
-{
-	for (int i = 0; i < m_signalSetProvider->signalCount(); i++)
-	{
-		if (m_signalSetProvider->isCheckinableSignalForMe(i))
-		{
-			emit setCheckedoutSignalActionsVisibility(true);
-			return;
-		}
-	}
-	emit setCheckedoutSignalActionsVisibility(false);
-}
-
 void SignalsTabPage::changeLazySignalLoadingSequence()
 {
 	m_signalSetProvider->setMiddleVisibleSignalIndex(getMiddleVisibleRow());
@@ -1588,8 +1503,6 @@ void SignalsTabPage::saveSelection()
 
 void SignalsTabPage::restoreSelection(int focusedSignalId)
 {
-	m_changingSelectionManualy = true;
-
 	if (focusedSignalId != -1)
 	{
 		m_focusedCellSignalID = focusedSignalId;
@@ -1606,9 +1519,6 @@ void SignalsTabPage::restoreSelection(int focusedSignalId)
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 
 	m_signalsView->scrollTo(currentProxyIndex);
-
-	m_changingSelectionManualy = false;
-	changeSignalActionsVisibility();
 }
 
 void SignalsTabPage::changeSignalTypeFilter(int selectedType)
@@ -2181,6 +2091,8 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 	m_sourceModel(sourceModel)
 {
 	m_signalSetProvider = SignalSetProvider::getInstance();
+	connect(this, &SignalsProxyModel::aboutToSort, m_signalSetProvider, &SignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
+	connect(this, &SignalsProxyModel::aboutToFilter, m_signalSetProvider, &SignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
 	setSourceModel(sourceModel);
 }
 
@@ -2604,7 +2516,7 @@ void FindSignalDialog::notifyThatSignalSetHasChanged()
 void FindSignalDialog::closeEvent(QCloseEvent* event)
 {
 	saveDialogGeometry();
-	m_reopen = false;
+	m_shouldReopen = false;
 
 	QDialog::closeEvent(event);
 }
