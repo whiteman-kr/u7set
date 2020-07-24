@@ -510,6 +510,7 @@ namespace Builder
 		bool isCompatible(const UalSignal* ualSignal, IssueLogger* log) const;
 		bool isCanBeConnectedTo(const UalSignal* destSignal, IssueLogger* log) const;
 
+		bool isAutoSignal() const { return m_isAutoSignal; }
 		bool isInput() const { return m_isInput; }
 		bool isTunable() const { return m_isTunable; }
 
@@ -588,6 +589,7 @@ namespace Builder
 		void setHeapPlaced();
 		void resetHeapPlaced();
 		int expectedHeapReadsCount() const;
+		void setAutoSignal(bool autoSignal);
 
 	private:
 		bool m_isHeapPlaced = false;
@@ -617,12 +619,12 @@ namespace Builder
 
 		BusShared m_bus;
 
+		bool m_isAutoSignal = false;
+
 		bool m_isInput = false;							// signal sources
 		bool m_isTunable = false;
 		bool m_isOptoSignal = false;
 		QString m_receivedOptoAppSignalID;
-
-		Signal* m_optoSignalNativeCopy = nullptr;		// delete this!
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
