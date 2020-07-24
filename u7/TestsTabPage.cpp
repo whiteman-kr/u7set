@@ -34,6 +34,10 @@ QString TestsFileTreeModel::customColumnName(Columns column) const
 	return QObject::tr("Custom %1").arg(static_cast<int>(column));
 }
 
+//
+// TestTabPageDocument
+//
+
 
 TestTabPageDocument::TestTabPageDocument(const QString& fileName, IdeCodeEditor* codeEditor, QTreeWidgetItem* openFilesTreeWidgetItem):
 	m_fileName(fileName),
@@ -1311,6 +1315,8 @@ void TestsTabPage::setCurrentDocument(int fileId)
 
 	// Select Open files tree widget item
 
+	m_openFilesTreeWidget->clearSelection();
+
 	const TestTabPageDocument& newFile = m_openDocuments.at(fileId);
 
 	QTreeWidgetItem* openFilesTreeWidgetItem = newFile.openFilesTreeWidgetItem();
@@ -1321,8 +1327,6 @@ void TestsTabPage::setCurrentDocument(int fileId)
 	}
 
 	openFilesTreeWidgetItem->setSelected(true);
-	m_openFilesTreeWidget->setCurrentItem(openFilesTreeWidgetItem);
-
 
 	// Select combo box item
 
@@ -1801,8 +1805,8 @@ void TestsTabPage::createActions()
 	connect(m_newFolderAction, &QAction::triggered, this, &TestsTabPage::newFolder);
 	toolbarActions.push_back(m_newFolderAction);
 
-	m_addFileAction = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("Add file..."), this);
-	m_addFileAction->setStatusTip(tr("Add file..."));
+	m_addFileAction = new QAction(tr("Add File..."), this);
+	m_addFileAction->setStatusTip(tr("Add File..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::addFileToFolder);
 	//toolbarActions.push_back(m_addFileAction);
@@ -2070,7 +2074,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	m_newFolderAction->setEnabled(selectedIndexList.size() == 1);
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
 	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
-	m_moveFileAction->setEnabled(canAnyBeCheckedIn);
+	m_moveFileAction->setEnabled(canAnyBeCheckedIn && folderSelected == false);
 
 	// Delete Items action
 	//
@@ -2444,10 +2448,8 @@ void TestsTabPage::updateOpenDocumentInfo(int fileId)
 	int comboRenameIndex = m_openDocumentsCombo->findData(fileId, Qt::UserRole);
 	if (comboRenameIndex != -1)
 	{
-		int comboCurrentIndex = m_openDocumentsCombo->currentIndex();
-
 		m_openDocumentsCombo->blockSignals(true);
-		m_openDocumentsCombo->setItemText(comboCurrentIndex, itemName);
+		m_openDocumentsCombo->setItemText(comboRenameIndex, itemName);
 		m_openDocumentsCombo->model()->sort(0, Qt::AscendingOrder);
 		m_openDocumentsCombo->blockSignals(false);
 	}
