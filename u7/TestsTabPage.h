@@ -83,11 +83,11 @@ private slots:
 	void openFile();
 	void newFolder();
 	void renameFile();
-	void checkInFile();
-	void checkOutFile();
-	void undoChangesFile();
-	void deleteFile();
-	void moveFile();
+	void checkInSelectedFiles();
+	void checkOutSelectedFiles();
+	void undoChangesSelectedFiles();
+	void deleteSelectedFiles();
+	void moveSelectedFiles();
 	void refreshFileTree();
 
 	// Code Editor slots
@@ -97,11 +97,21 @@ private slots:
 	void cursorPositionChanged(int line, int index);
 	void onGoToLine();
 
-	void checkInCurrentDocument();
-	void checkOutCurrentDocument();
-	void undoChangesCurrentDocument();
-	void saveCurrentDocument();
-	void closeCurrentDocument();
+	void checkInCurrentFile();
+	void checkOutCurrentFile();
+	void undoChangesCurrentFile();
+	void saveCurrentFile();
+	void closeCurrentFile();
+
+	// Open Files slots
+
+	void openFilesMenuRequested(const QPoint &pos);
+
+	void checkInOpenFile();
+	void checkOutOpenFile();
+	void undoChangesOpenFile();
+	void saveOpenFile();
+	void closeOpenFile();
 
 	// Hotkeys
 
@@ -133,6 +143,11 @@ private:
 
 	bool documentIsOpen(int fileId) const;
 	bool documentIsModified(int fileId) const;
+
+	void checkInDocument(std::vector<int> fileIds);
+	void checkOutDocument(std::vector<int> fileIds);
+	void undoChangesDocument(std::vector<int> fileIds);
+
 	void setCurrentDocument(int fileId);
 	void setDocumentReadOnly(int fileId, bool readOnly);
 	void saveDocument(int fileId);
@@ -140,6 +155,7 @@ private:
 	void closeDocument(int fileId, bool force);
 	void closeAllDocuments();
 	void updateOpenDocumentInfo(int fileId);
+
 
 	// Override functions
 private:
@@ -180,33 +196,40 @@ private:
 	QSplitter* m_leftSplitter = nullptr;
 	QSplitter* m_verticalSplitter = nullptr;
 
-	//Actions
-	//
+	// Tests file tree actions
+
 	QAction* m_newFileAction = nullptr;
 	QAction* m_SeparatorAction1 = nullptr;
-
 	QAction* m_addFileAction = nullptr;
 	QAction* m_newFolderAction = nullptr;
 	QAction* m_openFileAction = nullptr;
 	QAction* m_renameFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;
 	QAction* m_moveFileAction = nullptr;
-	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
 	QAction* m_compareAction = nullptr;
-	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_refreshAction = nullptr;
+
+	// Editor context menu actions
 
 	QAction* m_checkInCurrentDocumentAction = nullptr;
 	QAction* m_checkOutCurrentDocumentAction = nullptr;
 	QAction* m_undoChangesCurrentDocumentAction = nullptr;
 	QAction* m_saveCurrentDocumentAction = nullptr;
 	QAction* m_closeCurrentDocumentAction = nullptr;
+
+	// Open documents list actions
+
+	QAction* m_checkInOpenDocumentAction = nullptr;
+	QAction* m_checkOutOpenDocumentAction = nullptr;
+	QAction* m_undoChangesOpenDocumentAction = nullptr;
+	QAction* m_saveOpenDocumentAction = nullptr;
+	QAction* m_closeOpenDocumentAction = nullptr;
 };
 
 

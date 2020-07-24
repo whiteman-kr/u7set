@@ -655,6 +655,14 @@ bool FileTreeModel::hasChildren(const QModelIndex& parentIndex) const
 		return false;
 	}
 
+	if (m_addFileInProgress == true &&
+		hasChildren == true &&
+		file->childrenCount() == 0)
+	{
+		// seems that file has been added to filesystem but not yet added to child array
+		return false;
+	}
+
 	return hasChildren;
 }
 
@@ -901,9 +909,13 @@ void FileTreeModel::addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeMo
 		return;
 	}
 
+	m_addFileInProgress = true;
+
 	beginInsertRows(parentIndex, parentFile->childrenCount(), parentFile->childrenCount());
 	parentFile->addChild(file);
 	endInsertRows();
+
+	m_addFileInProgress = false;
 
 	return;
 }
@@ -1357,85 +1369,131 @@ void FileTreeView::moveFile(int parentFileId)
 	return;
 }
 
-void FileTreeView::checkOutFileById(int fileId)
+void FileTreeView::checkOutFilesById(std::vector<int> fileIds)
 {
-	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+	QModelIndexList indexList;
+
+	for (int fileId : fileIds)
+	{
+		QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
 															  Qt::UserRole,
 															  QVariant::fromValue(fileId),
 															  1,
 															  Qt::MatchExactly | Qt::MatchRecursive);
-	Q_ASSERT(matched.size() == 1);
+		Q_ASSERT(matched.size() == 1);
 
-	if (matched.size() == 1)
+		if (matched.size() == 1)
+		{
+			indexList.push_back(matched.front());
+		}
+	}
+
+	if (indexList.empty() == true)
 	{
-		checkOutFiles(matched);
+		return;
+	}
+
+	checkOutFiles(indexList);
+
+	return;
+}
+
+void FileTreeView::checkInFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds)
+{
+	if (deletedFileIds == nullptr)
+	{
+		Q_ASSERT(deletedFileIds);
+		return;
+	}
+
+	QModelIndexList indexList;
+
+	for (int fileId : fileIds)
+	{
+		QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+												 Qt::UserRole,
+												 QVariant::fromValue(fileId),
+												 1,
+												 Qt::MatchExactly | Qt::MatchRecursive);
+		Q_ASSERT(matched.size() == 1);
+
+		if (matched.size() == 1)
+		{
+			indexList.push_back(matched.front());
+		}
+	}
+
+	if (indexList.empty() == true)
+	{
+		return;
+	}
+
+	checkInFiles(indexList);
+
+	for (int fileId : fileIds)
+	{
+		QModelIndexList matchedAfter = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+													  Qt::UserRole,
+													  QVariant::fromValue(fileId),
+													  1,
+													  Qt::MatchExactly | Qt::MatchRecursive);
+
+		if (matchedAfter.empty() == true)
+		{
+			deletedFileIds->push_back(fileId);
+
+		}
 	}
 
 	return;
 }
 
-void FileTreeView::checkInFileById(int fileId, bool* fileWasDeleted)
+void FileTreeView::undoChangesFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds)
 {
-	if (fileWasDeleted == nullptr)
+	if (deletedFileIds == nullptr)
 	{
-		Q_ASSERT(fileWasDeleted);
+		Q_ASSERT(deletedFileIds);
 		return;
 	}
 
-	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
-															  Qt::UserRole,
-															  QVariant::fromValue(fileId),
-															  1,
-															  Qt::MatchExactly | Qt::MatchRecursive);
+	QModelIndexList indexList;
 
-	if (matched.size() != 1)
+	for (int fileId : fileIds)
 	{
+		QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+												 Qt::UserRole,
+												 QVariant::fromValue(fileId),
+												 1,
+												 Qt::MatchExactly | Qt::MatchRecursive);
 		Q_ASSERT(matched.size() == 1);
-		return;
+
+		if (matched.size() == 1)
+		{
+			indexList.push_back(matched.front());
+		}
 	}
 
-	checkInFiles(matched);
-
-	QModelIndexList matchedAfter = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
-															  Qt::UserRole,
-															  QVariant::fromValue(fileId),
-															  1,
-															  Qt::MatchExactly | Qt::MatchRecursive);
-
-	*fileWasDeleted = matchedAfter.empty() == true;
-
-	return;
-}
-
-void FileTreeView::undoChangesFileById(int fileId, bool* fileWasDeleted)
-{
-	if (fileWasDeleted == nullptr)
+	if (indexList.empty() == true)
 	{
-		Q_ASSERT(fileWasDeleted);
 		return;
 	}
 
-	QModelIndexList matched = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
-															  Qt::UserRole,
-															  QVariant::fromValue(fileId),
-															  1,
-															  Qt::MatchExactly | Qt::MatchRecursive);
+	undoChangesFiles(indexList);
 
-	if (matched.size() != 1)
+	for (int fileId : fileIds)
 	{
-		Q_ASSERT(matched.size() == 1);
-		return;
+		QModelIndexList matchedAfter = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
+													  Qt::UserRole,
+													  QVariant::fromValue(fileId),
+													  1,
+													  Qt::MatchExactly | Qt::MatchRecursive);
+
+		if (matchedAfter.empty() == true)
+		{
+			deletedFileIds->push_back(fileId);
+
+		}
 	}
-
-	undoChangesFiles(matched);
-
-	QModelIndexList matchedAfter = m_model->match(m_model->childIndex(0, 0, QModelIndex()),
-															  Qt::UserRole,
-															  QVariant::fromValue(fileId),
-															  1,
-															  Qt::MatchExactly | Qt::MatchRecursive);
-
-	*fileWasDeleted = matchedAfter.empty() == true;
 
 	return;
 }

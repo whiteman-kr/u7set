@@ -429,7 +429,7 @@ void TestsTabPage::renameFile()
 	return;
 }
 
-void TestsTabPage::checkInFile()
+void TestsTabPage::checkInSelectedFiles()
 {
 	// Save modified files
 	//
@@ -472,7 +472,7 @@ void TestsTabPage::checkInFile()
 	return;
 }
 
-void TestsTabPage::checkOutFile()
+void TestsTabPage::checkOutSelectedFiles()
 {
 	m_testsTreeView->checkOutSelectedFiles();
 
@@ -495,7 +495,7 @@ void TestsTabPage::checkOutFile()
 	}
 }
 
-void TestsTabPage::undoChangesFile()
+void TestsTabPage::undoChangesSelectedFiles()
 {
 	// Remember the list of open documents to undo
 
@@ -573,7 +573,7 @@ void TestsTabPage::undoChangesFile()
 	return;
 }
 
-void TestsTabPage::deleteFile()
+void TestsTabPage::deleteSelectedFiles()
 {
 	// Close documents before deleting
 
@@ -599,7 +599,7 @@ void TestsTabPage::deleteFile()
 	m_testsTreeView->deleteFile();
 }
 
-void TestsTabPage::moveFile()
+void TestsTabPage::moveSelectedFiles()
 {
 	// Close documents before deleting
 
@@ -710,125 +710,37 @@ void TestsTabPage::cursorPositionChanged(int line, int index)
 	return;
 }
 
-void TestsTabPage::checkInCurrentDocument()
+void TestsTabPage::checkInCurrentFile()
 {
-	if (documentIsOpen(m_currentFileId) == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	// Save modified files
-	//
-	if (documentIsOpen(m_currentFileId) == true && documentIsModified(m_currentFileId) == true)
-	{
-		saveDocument(m_currentFileId);
-	}
-
-	bool fileWasDeleted = false;
-
-	m_testsTreeView->checkInFileById(m_currentFileId, &fileWasDeleted);
-
-	if (fileWasDeleted == true)
-	{
-		closeDocument(m_currentFileId, true/*force*/);
-	}
-	else
-	{
-		DbFileInfo fi;
-		if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
-		{
-			QMessageBox::critical(this, "Error", "Get file information error!");
-			return;
-		}
-
-		setDocumentReadOnly(m_currentFileId, fi.state() == VcsState::CheckedIn);
-	}
-
-	return;
-
-}
-
-void TestsTabPage::checkOutCurrentDocument()
-{
-	if (documentIsOpen(m_currentFileId) == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_testsTreeView->checkOutFileById(m_currentFileId);
-
-	DbFileInfo fi;
-	if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
-	{
-		QMessageBox::critical(this, "Error", "Get file information error!");
-		return;
-	}
-
-	setDocumentReadOnly(m_currentFileId, fi.state() == VcsState::CheckedIn);
-
+	std::vector<int> fileIds;
+	fileIds.push_back(m_currentFileId);
+	checkInDocument(fileIds);
 	return;
 }
 
-void TestsTabPage::undoChangesCurrentDocument()
+void TestsTabPage::checkOutCurrentFile()
 {
-	bool fileWasDeleted = false;
-
-	m_testsTreeView->undoChangesFileById(m_currentFileId, &fileWasDeleted);
-
-	if (fileWasDeleted == true)
-	{
-		closeDocument(m_currentFileId, true/*force*/);
-	}
-	else
-	{
-		// Re-read file info and contents
-
-		DbFileInfo fi;
-		if (db()->getFileInfo(m_currentFileId, &fi, this) == false)
-		{
-			QMessageBox::critical(this, "Error", "Get file information error!");
-			return;
-		}
-
-		std::shared_ptr<DbFile> dbFile;
-		if (db()->getLatestVersion(fi, &dbFile, this) == false)
-		{
-			QMessageBox::critical(this, "Error", "Get latest version error!");
-			return;
-		}
-
-		if (documentIsOpen(m_currentFileId) == false)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
-
-		document.setFileName(fi.fileName());
-		document.setModified(false);
-
-		IdeCodeEditor* codeEditor = document.codeEditor();
-		if (codeEditor == nullptr)
-		{
-			Q_ASSERT(codeEditor);
-			return;
-		}
-		codeEditor->setText(dbFile->data());
-
-		setDocumentReadOnly(m_currentFileId, true);
-	}
+	std::vector<int> fileIds;
+	fileIds.push_back(m_currentFileId);
+	checkOutDocument(fileIds);
+	return;
 }
 
-void TestsTabPage::saveCurrentDocument()
+void TestsTabPage::undoChangesCurrentFile()
+{
+	std::vector<int> fileIds;
+	fileIds.push_back(m_currentFileId);
+	undoChangesDocument(fileIds);
+	return;
+}
+
+void TestsTabPage::saveCurrentFile()
 {
 	saveDocument(m_currentFileId);
 	return;
 }
 
-void TestsTabPage::closeCurrentDocument()
+void TestsTabPage::closeCurrentFile()
 {
 	closeDocument(m_currentFileId, false/*force*/);
 	return;
@@ -877,6 +789,237 @@ void TestsTabPage::onGoToLine()
 
 	codeEditor->setCursorPosition(newLine - 1, 0);
 	codeEditor->activateEditor();
+
+	return;
+}
+
+void TestsTabPage::openFilesMenuRequested(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+	if (selectedItems.empty() == true)
+	{
+		return;
+	}
+
+	m_checkInOpenDocumentAction->setEnabled(false);
+	m_checkOutOpenDocumentAction->setEnabled(false);
+	m_undoChangesOpenDocumentAction->setEnabled(false);
+	m_saveOpenDocumentAction->setEnabled(false);
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		if (documentIsOpen(fileId) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		const TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
+
+		if (document.modified() == true)
+		{
+			m_saveOpenDocumentAction->setEnabled(true);
+		}
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		if (fi.state() == VcsState::CheckedOut &&
+			(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		{
+			m_checkInOpenDocumentAction->setEnabled(true);
+			m_undoChangesOpenDocumentAction->setEnabled(true);
+		}
+
+		if (fi.state() == VcsState::CheckedIn)
+		{
+			m_checkOutOpenDocumentAction->setEnabled(true);
+		}
+	}
+
+	QMenu menu;
+	menu.addAction(m_checkInOpenDocumentAction);
+	menu.addAction(m_checkOutOpenDocumentAction);
+	menu.addAction(m_undoChangesOpenDocumentAction);
+	menu.addSeparator();
+	menu.addAction(m_saveOpenDocumentAction);
+	menu.addAction(m_closeOpenDocumentAction);
+
+	menu.exec(QCursor::pos());
+}
+
+
+void TestsTabPage::checkInOpenFile()
+{
+	std::vector<int> fileIds;
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		if (fi.state() == VcsState::CheckedOut &&
+			(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		{
+			fileIds.push_back(fileId);
+		}
+	}
+
+	checkInDocument(fileIds);
+}
+
+void TestsTabPage::checkOutOpenFile()
+{
+	std::vector<int> fileIds;
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		if (fi.state() == VcsState::CheckedIn)
+		{
+			fileIds.push_back(fileId);
+		}
+	}
+
+	checkOutDocument(fileIds);
+}
+
+void TestsTabPage::undoChangesOpenFile()
+{
+	std::vector<int> fileIds;
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		if (fi.state() == VcsState::CheckedOut &&
+			(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		{
+			fileIds.push_back(fileId);
+		}
+	}
+
+	undoChangesDocument(fileIds);
+}
+
+void TestsTabPage::saveOpenFile()
+{
+	std::vector<int> fileIds;
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		if (documentIsOpen(fileId) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		const TestTabPageDocument& document = m_openDocuments.at(fileId);
+
+		if (document.modified() == true)
+		{
+			fileIds.push_back(fileId);
+		}
+	}
+
+	for (int fileId : fileIds)
+	{
+		saveDocument(fileId);
+	}
+}
+
+void TestsTabPage::closeOpenFile()
+{
+	std::vector<int> fileIds;
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		fileIds.push_back(fileId);
+	}
+
+	for (int fileId : fileIds)
+	{
+		closeDocument(fileId, false/*force*/);
+	}
 
 	return;
 }
@@ -954,6 +1097,141 @@ bool TestsTabPage::documentIsModified(int fileId) const
 
 	const TestTabPageDocument& document = m_openDocuments.at(fileId);
 	return document.modified();
+}
+
+void TestsTabPage::checkInDocument(std::vector<int> fileIds)
+{
+	if (fileIds.empty() == true)
+	{
+		return;
+	}
+
+	for (int fileId : fileIds)
+	{
+		if (documentIsOpen(fileId) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		// Save modified files
+		//
+		if (documentIsOpen(fileId) == true && documentIsModified(fileId) == true)
+		{
+			saveDocument(fileId);
+		}
+
+	}
+
+	std::vector<int> deletedFileIds;
+
+	m_testsTreeView->checkInFilesById(fileIds, &deletedFileIds);
+
+	for (int fileId : fileIds)
+	{
+		if (std::find(deletedFileIds.begin(), deletedFileIds.end(), fileId) != deletedFileIds.end())
+		{
+			// File was deleted
+			closeDocument(fileId, true/*force*/);
+		}
+		else
+		{
+			DbFileInfo fi;
+			if (db()->getFileInfo(fileId, &fi, this) == false)
+			{
+				QMessageBox::critical(this, "Error", "Get file information error!");
+				return;
+			}
+
+			setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+		}
+	}
+
+	return;
+}
+
+void TestsTabPage::checkOutDocument(std::vector<int> fileIds)
+{
+	if (fileIds.empty() == true)
+	{
+		return;
+	}
+
+	m_testsTreeView->checkOutFilesById(fileIds);
+
+	for (int fileId : fileIds)
+	{
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+	}
+
+	return;
+}
+
+void TestsTabPage::undoChangesDocument(std::vector<int> fileIds)
+{
+	if (fileIds.empty() == true)
+	{
+		return;
+	}
+
+	std::vector<int> deletedFileIds;
+
+	m_testsTreeView->undoChangesFilesById(fileIds, &deletedFileIds);
+
+	for (int fileId : fileIds)
+	{
+		if (std::find(deletedFileIds.begin(), deletedFileIds.end(), fileId) != deletedFileIds.end())
+		{
+			// File was deleted
+			closeDocument(fileId, true/*force*/);
+		}
+		else
+		{
+			// Re-read file info and contents
+
+			DbFileInfo fi;
+			if (db()->getFileInfo(fileId, &fi, this) == false)
+			{
+				QMessageBox::critical(this, "Error", "Get file information error!");
+				return;
+			}
+
+			std::shared_ptr<DbFile> dbFile;
+			if (db()->getLatestVersion(fi, &dbFile, this) == false)
+			{
+				QMessageBox::critical(this, "Error", "Get latest version error!");
+				return;
+			}
+
+			if (documentIsOpen(fileId) == false)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			TestTabPageDocument& document = m_openDocuments.at(fileId);
+
+			document.setFileName(fi.fileName());
+			document.setModified(false);
+
+			IdeCodeEditor* codeEditor = document.codeEditor();
+			if (codeEditor == nullptr)
+			{
+				Q_ASSERT(codeEditor);
+				return;
+			}
+			codeEditor->setText(dbFile->data());
+
+			setDocumentReadOnly(fileId, true);
+		}
+	}
 }
 
 void TestsTabPage::setCurrentDocument(int fileId)
@@ -1358,7 +1636,10 @@ void TestsTabPage::createUi()
 	m_openFilesTreeWidget->setColumnCount(header.size());
 	m_openFilesTreeWidget->setHeaderHidden(true);
 	m_openFilesTreeWidget->setSortingEnabled(true);
+	m_openFilesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_openFilesTreeWidget->sortByColumn(0, Qt::AscendingOrder);
+	m_openFilesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	connect(m_openFilesTreeWidget, &QTreeWidget::customContextMenuRequested, this, &TestsTabPage::openFilesMenuRequested);
 	filesLayout->addWidget(m_openFilesTreeWidget);
 
 	// Editor layout
@@ -1426,7 +1707,7 @@ void TestsTabPage::createUi()
 	closeButton->setFlat(true);
 	closeButton->setStyleSheet(toolbarButtonStyle);
 	closeButton->setFixedSize(toolbarButtonSize, toolbarButtonSize);
-	connect(closeButton, &QPushButton::clicked, this, &TestsTabPage::closeCurrentDocument);
+	connect(closeButton, &QPushButton::clicked, this, &TestsTabPage::closeCurrentFile);
 
 	m_editorToolBar->addWidget(closeButton);
 
@@ -1495,6 +1776,8 @@ void TestsTabPage::createActions()
 
 	QList<QAction*> toolbarActions;
 
+	// Tests file tree actions
+
 	m_openFileAction = new QAction(QIcon(":/Images/Images/SchemaOpen.svg"), tr("Open File"), this);
 	m_openFileAction->setStatusTip(tr("Open File..."));
 	m_openFileAction->setEnabled(false);
@@ -1533,13 +1816,13 @@ void TestsTabPage::createActions()
 	m_deleteFileAction->setStatusTip(tr("Delete"));
 	m_deleteFileAction->setEnabled(false);
 	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
-	connect(m_deleteFileAction, &QAction::triggered, this, &TestsTabPage::deleteFile);
+	connect(m_deleteFileAction, &QAction::triggered, this, &TestsTabPage::deleteSelectedFiles);
 	toolbarActions.push_back(m_deleteFileAction);
 
 	m_moveFileAction = new QAction(tr("Move File..."), this);
 	m_moveFileAction->setStatusTip(tr("Move"));
 	m_moveFileAction->setEnabled(false);
-	connect(m_moveFileAction, &QAction::triggered, this, &TestsTabPage::moveFile);
+	connect(m_moveFileAction, &QAction::triggered, this, &TestsTabPage::moveSelectedFiles);
 
 	//----------------------------------
 	m_SeparatorAction2 = new QAction(this);
@@ -1549,19 +1832,19 @@ void TestsTabPage::createActions()
 	m_checkOutAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutAction->setEnabled(false);
-	connect(m_checkOutAction, &QAction::triggered, this, &TestsTabPage::checkOutFile);
+	connect(m_checkOutAction, &QAction::triggered, this, &TestsTabPage::checkOutSelectedFiles);
 	toolbarActions.push_back(m_checkOutAction);
 
 	m_checkInAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
 	m_checkInAction->setStatusTip(tr("Check in changes"));
 	m_checkInAction->setEnabled(false);
-	connect(m_checkInAction, &QAction::triggered, this, &TestsTabPage::checkInFile);
+	connect(m_checkInAction, &QAction::triggered, this, &TestsTabPage::checkInSelectedFiles);
 	toolbarActions.push_back(m_checkInAction);
 
 	m_undoChangesAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
-	connect(m_undoChangesAction, &QAction::triggered, this, &TestsTabPage::undoChangesFile);
+	connect(m_undoChangesAction, &QAction::triggered, this, &TestsTabPage::undoChangesSelectedFiles);
 	toolbarActions.push_back(m_undoChangesAction);
 
 	m_historyAction = new QAction(QIcon(":/Images/Images/SchemaHistory.svg"), tr("History"), this);
@@ -1589,33 +1872,6 @@ void TestsTabPage::createActions()
 
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-	//
-
-	m_checkInCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
-	m_checkInCurrentDocumentAction->setStatusTip(tr("Check in changes"));
-	m_checkInCurrentDocumentAction->setEnabled(false);
-	connect(m_checkInCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkInCurrentDocument);
-
-	m_checkOutCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
-	m_checkOutCurrentDocumentAction->setStatusTip(tr("Check out file for edit"));
-	m_checkOutCurrentDocumentAction->setEnabled(false);
-	connect(m_checkOutCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkOutCurrentDocument);
-
-	m_undoChangesCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
-	m_undoChangesCurrentDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
-	m_undoChangesCurrentDocumentAction->setEnabled(false);
-	connect(m_undoChangesCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesCurrentDocument);
-
-	m_saveCurrentDocumentAction = new QAction(tr("Save"), this);
-	m_saveCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
-	connect(m_saveCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::saveCurrentDocument);
-
-	m_closeCurrentDocumentAction = new QAction(tr("Close"), this);
-	m_closeCurrentDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
-	connect(m_closeCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::closeCurrentDocument);
-
-	// -----------------
-
 	m_testsTreeView->addAction(m_openFileAction);
 	m_testsTreeView->addAction(m_SeparatorAction1);
 
@@ -1637,6 +1893,57 @@ void TestsTabPage::createActions()
 	m_testsTreeView->addAction(m_refreshAction);
 
 	m_testsToolbar->addActions(toolbarActions);
+
+	// Editor context menu actions
+
+	m_checkInCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
+	m_checkInCurrentDocumentAction->setStatusTip(tr("Check in changes"));
+	m_checkInCurrentDocumentAction->setEnabled(false);
+	connect(m_checkInCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkInCurrentFile);
+
+	m_checkOutCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
+	m_checkOutCurrentDocumentAction->setStatusTip(tr("Check out file for edit"));
+	m_checkOutCurrentDocumentAction->setEnabled(false);
+	connect(m_checkOutCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkOutCurrentFile);
+
+	m_undoChangesCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
+	m_undoChangesCurrentDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
+	m_undoChangesCurrentDocumentAction->setEnabled(false);
+	connect(m_undoChangesCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesCurrentFile);
+
+	m_saveCurrentDocumentAction = new QAction(tr("Save"), this);
+	m_saveCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
+	connect(m_saveCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::saveCurrentFile);
+
+	m_closeCurrentDocumentAction = new QAction(tr("Close"), this);
+	m_closeCurrentDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
+	connect(m_closeCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::closeCurrentFile);
+
+	// Open documents list actions
+
+	m_checkInOpenDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
+	m_checkInOpenDocumentAction->setStatusTip(tr("Check in changes"));
+	m_checkInOpenDocumentAction->setEnabled(false);
+	connect(m_checkInOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::checkInOpenFile);
+
+	m_checkOutOpenDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
+	m_checkOutOpenDocumentAction->setStatusTip(tr("Check out file for edit"));
+	m_checkOutOpenDocumentAction->setEnabled(false);
+	connect(m_checkOutOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::checkOutOpenFile);
+
+	m_undoChangesOpenDocumentAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
+	m_undoChangesOpenDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
+	m_undoChangesOpenDocumentAction->setEnabled(false);
+	connect(m_undoChangesOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesOpenFile);
+
+	m_saveOpenDocumentAction = new QAction(tr("Save"), this);
+	m_saveOpenDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
+	m_saveOpenDocumentAction->setEnabled(false);
+	connect(m_saveOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::saveOpenFile);
+
+	m_closeOpenDocumentAction = new QAction(tr("Close"), this);
+	m_closeOpenDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
+	connect(m_closeOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::closeOpenFile);
 
 	return;
 }

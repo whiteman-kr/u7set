@@ -146,6 +146,8 @@ private:
 	QString m_rootFilePath;
 	int m_rootFileId = -1;
 
+	bool m_addFileInProgress = false;
+
 	std::shared_ptr<FileTreeModelItem> m_root;
 
 	std::vector<Columns> m_columns;
@@ -163,9 +165,9 @@ public:
 
 	bool newFile(const QString& fileName);
 	void moveFile(int parentFileId);
-	void checkOutFileById(int fileId);
-	void checkInFileById(int fileId, bool* fileWasDeleted);
-	void undoChangesFileById(int fileId, bool* fileWasDeleted);
+	void checkOutFilesById(std::vector<int> fileIds);
+	void checkInFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds);
+	void undoChangesFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds);
 
 	void setFileNameFilter(const QString& filterText);
 
