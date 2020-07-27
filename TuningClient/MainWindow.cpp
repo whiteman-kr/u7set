@@ -261,6 +261,38 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 }
 
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+	if (m_schemasWorkspace != nullptr && m_schemasWorkspace->isVisible() == true)
+	{
+		if (event->matches(QKeySequence::ZoomIn))
+		{
+			m_schemasWorkspace->zoomIn();
+			return;
+		}
+		if (event->matches(QKeySequence::ZoomOut))
+		{
+			m_schemasWorkspace->zoomOut();
+			return;
+		}
+		if (event->key() == Qt::Key_Asterisk && (event->modifiers() & Qt::ControlModifier))
+		{
+			m_schemasWorkspace->zoom100();
+			return;
+		}
+		if (event->key() == Qt::Key_Slash && (event->modifiers() & Qt::ControlModifier))
+		{
+			m_schemasWorkspace->zoomToFit();
+			return;
+		}
+	}
+
+	QWidget::keyPressEvent(event);
+
+}
+
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	if (m_tuningWorkspace != nullptr && m_tuningWorkspace->hasPendingChanges() == true)
@@ -454,7 +486,6 @@ void MainWindow::createWorkspace()
 			{
 				// Show both Workspaces
 				//
-
 				m_tabWidget = new QTabWidget();
 				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
 				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));

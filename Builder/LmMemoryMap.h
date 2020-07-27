@@ -3,7 +3,6 @@
 #include "../lib/Address16.h"
 #include "../lib/Signal.h"
 #include "../lib/OutputLog.h"
-#include "../lib/LmLimits.h"
 #include "IssueLogger.h"
 
 
@@ -102,9 +101,11 @@ namespace Builder
 	public:
 		LmMemoryMap(IssueLogger* log);
 
-		bool init(	int appMemorySize,
-					const MemoryArea& moduleData,
+		bool init(int appMemorySize,
+					const MemoryArea& ioModuleData,
+					int ioModulesCount,
 					const MemoryArea& optoInterfaceData,
+					int optoInterfaceCount,
 					const MemoryArea& appLogicBitData,
 					const MemoryArea& tuningData,
 					const MemoryArea& appLogicWordData);
@@ -166,7 +167,7 @@ namespace Builder
 		bool appendAcquiredDiscreteStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-//		bool appendAcquiredDiscreteBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 
 		bool appendAcquiredDiscreteTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
@@ -176,13 +177,14 @@ namespace Builder
 		bool appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-//		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
-													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
+		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogConstSignalsInRegBuf(const QMultiHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
+													  const QMultiHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
 
 		bool appendAcquiredInputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredOutputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredInternalBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredBusChildBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredOptoBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 
 		bool appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals);
@@ -226,14 +228,14 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			MemoryArea module[MODULES_COUNT];
+			std::vector<MemoryArea> module;
 		} m_modules;
 
 		struct
 		{
 			MemoryArea memory;
 
-			MemoryArea channel[OPTO_INTERFACE_COUNT];
+			std::vector<MemoryArea> channel;
 			MemoryArea reserv;
 
 		} m_optoInterface;
@@ -271,20 +273,21 @@ namespace Builder
 			MemoryArea acquiredAnalogOutputSignals;
 			MemoryArea acquiredAnalogInternalSignals;
 			MemoryArea acquiredAnalogOptoSignals;
-//			MemoryArea acquiredAnalogBusChildSignals;				// Child signals of Input, Output and Internal busses
+			MemoryArea acquiredAnalogBusChildSignals;				// Child signals of Input, Output and Internal busses
 			MemoryArea acquiredAnalogTuningSignals;
 			MemoryArea acquiredAnalogConstSignals;
 
 			MemoryArea acquiredInputBuses;
 			MemoryArea acquiredOutputBuses;
 			MemoryArea acquiredInternalBuses;
+			MemoryArea acquiredBusChildBuses;
 			MemoryArea acquiredOptoBuses;
 
 			MemoryArea acquiredDiscreteInputSignals;
 			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
 			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
 			MemoryArea acquiredDiscreteOptoSignals;
-//			MemoryArea acquiredDiscreteBusChildSignals;
+			MemoryArea acquiredDiscreteBusChildSignals;
 			MemoryArea acquiredDiscreteTuningSignals;
 			MemoryArea acquiredDiscreteConstSignals;
 

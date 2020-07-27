@@ -20,18 +20,6 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		m_columns.resize(2);
-
-		Column& c0 = m_columns[0];
-		c0.width = 80;
-		c0.data = E::ColumnData::AppSignalID;
-		c0.horzAlign = E::HorzAlign::AlignLeft;
-
-		Column& c1 = m_columns[1];
-		c1.width = 20;
-		c1.data = E::ColumnData::State;
-		c1.horzAlign = E::HorzAlign::AlignHCenter;
-
 		Property* prop = nullptr;
 
 		prop = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
@@ -490,16 +478,15 @@ namespace VFrame30
 		}
 
 		QPainter* painter = drawParam->painter();
-		QRectF rect = itemRectPinIndent(drawParam);
 
-		// Get signakls and siognal states
-		//
-		//const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
+		QRectF rect = itemRectPinIndent(drawParam);
+		rect.setTopRight(drawParam->gridToDpi(rect.topRight()));
+		rect.setBottomLeft(drawParam->gridToDpi(rect.bottomLeft()));
 
 		// Get AppSignals
 		//
-		const QStringList& signalIds = appSignalIdList();
-		if (signalIds.size() == 0)
+		QStringList signalIds = appSignalIdList();
+		if (signalIds.empty() == true)
 		{
 			return;
 		}
@@ -522,13 +509,12 @@ namespace VFrame30
 			{
 				// Get signal description/state
 				//
-
 				if (drawParam->schema()->isUfbSchema() == true)
 				{
 					appSignals[signalIndex] = AppSignalParam();
 					appSignalStates[signalIndex] = AppSignalState();
 
-					appSignals[signalIndex].setAppSignalId(id);		// If signal tot found it allows to show AppSignalID at least
+					appSignals[signalIndex].setAppSignalId(id);		// If signal is not found it allows to show AppSignalID at least
 				}
 				else
 				{
@@ -542,8 +528,8 @@ namespace VFrame30
 
 		// Get ImpactAppSignals
 		//
-		const QStringList& impactSignalIds = impactAppSignalIdList();
-		if (signalIds.size() == 0)
+		QStringList impactSignalIds = impactAppSignalIdList();
+		if (signalIds.empty() == true)
 		{
 			return;
 		}
@@ -595,7 +581,7 @@ namespace VFrame30
 		}
 		else
 		{
-			columntHeight = minLineHeight;
+			columntHeight = rect.height();
 		}
 
 		int lineCount = signalIds.size();
@@ -604,11 +590,48 @@ namespace VFrame30
 			lineCount = 1;
 		}
 
-		for (int i = 0; i < lineCount; i++)
+		// Calc cell rects
+		//
+		struct CellDrawParam
 		{
-			double top = rect.top() + i * columntHeight;
+			CellDrawParam(int cellRow,
+						  int cellColumn,
+						  const QRectF& cellRect,
+						  const QString& cellText,
+						  const QColor& cellFillColor,
+						  const QColor& cellTextColor,
+						  int cellTextDrawFlags,
+						  double cellTextIndent) :
+				row(cellRow),
+				column(cellColumn),
+				rect(cellRect),
+				text(cellText),
+				fillColor(cellFillColor),
+				textColor(cellTextColor),
+				textDrawFlags(cellTextDrawFlags),
+				textIndent(cellTextIndent)
+			{
+			}
+
+			int row;
+			int column;
+			QRectF rect;
+			QString text;
+			QColor fillColor;
+			QColor textColor;
+			int textDrawFlags;
+			double textIndent;
+		};
+
+		std::vector<CellDrawParam> cells;
+		cells.reserve(m_columns.size() * lineCount);		// It will be expanded more if is singleline and has [impact]states
+
+		for (int row = 0; row < lineCount; row++)
+		{
+			double top = drawParam->gridToDpiY(rect.top() + row * columntHeight);
 			double startOffset = 0;
 
+			int cellColumnIndex = 0;		// Differs from text columnIndex as state column can have several column states
 			for (size_t columnIndex = 0; columnIndex < m_columns.size(); columnIndex++)
 			{
 				const Column& column = m_columns[columnIndex];
@@ -621,7 +644,14 @@ namespace VFrame30
 					columnWidth = rect.width() - startOffset;
 				}
 
-				double left = rect.left() + startOffset;
+				double left = drawParam->gridToDpiY(rect.left() + startOffset);
+
+				if (left + columnWidth > rect.right())
+				{
+					// Limit width with the item rectangle
+					//
+					columnWidth = rect.right() - left;
+				}
 
 				if (multiLine() == false &&
 					(column.data == E::ColumnData::State || column.data == E::ColumnData::ImpactState))
@@ -634,26 +664,36 @@ namespace VFrame30
 
 						for (int f = 0; f < signalIds.size(); f++)
 						{
-							QString text = getCoulumnText(drawParam,
-														  this,
-														  column.data,
-														  appSignals[f],
-														  appSignalStates[f],
-														  AppSignalParam{},
-														  AppSignalState{},
-														  m_analogFormat,
-														  m_precision);
+							QString text;
 
-							QRectF textRect(left + subColumnWidth * f, top, subColumnWidth, columntHeight);
-							textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
-							textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
-
-							if (textRect.width() > m_font.drawSize() / 8.0)
+							if (QString overridenText = cellText(row, cellColumnIndex);
+								overridenText.isNull() == false)
 							{
-								painter->setPen(textColor());
-								QRectF boundingRect = rect.intersected(textRect);
-								DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+								text = overridenText;
 							}
+							else
+							{
+								text = getCoulumnText(drawParam,
+													  this,
+													  column.data,
+													  appSignals[f],
+													  appSignalStates[f],
+													  AppSignalParam{},
+													  AppSignalState{},
+													  m_analogFormat,
+													  m_precision);
+							}
+
+							cells.emplace_back(row,
+											   cellColumnIndex,
+											   QRectF{left + subColumnWidth * f, top, subColumnWidth, columntHeight},
+											   text,
+											   cellFillColor(row, cellColumnIndex),
+											   cellTextColor(row, cellColumnIndex),
+											   column.horzAlign | Qt::AlignVCenter,
+											   m_font.drawSize() / 8.0);
+
+							cellColumnIndex ++;
 						}
 					}
 					else
@@ -664,51 +704,73 @@ namespace VFrame30
 
 						for (int f = 0; f < impactSignalIds.size(); f++)
 						{
-							QString text = getCoulumnText(drawParam,
-														  this,
-														  column.data,
-														  AppSignalParam{},
-														  AppSignalState{},
-														  impactAppSignals[f],
-														  impactAppSignalStates[f],
-														  m_analogFormat,
-														  m_precision);
+							QString text;
 
-							QRectF textRect(left + subColumnWidth * f, top, subColumnWidth, columntHeight);
-							textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
-							textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
-
-							if (textRect.width() > m_font.drawSize() / 8.0)
+							if (QString overridenText = cellText(row, cellColumnIndex);
+								overridenText.isNull() == false)
 							{
-								painter->setPen(textColor());
-								QRectF boundingRect = rect.intersected(textRect);
-								DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+								text = overridenText;
 							}
+							else
+							{
+								text = getCoulumnText(drawParam,
+													  this,
+													  column.data,
+													  AppSignalParam{},
+													  AppSignalState{},
+													  impactAppSignals[f],
+													  impactAppSignalStates[f],
+													  m_analogFormat,
+													  m_precision);
+							}
+
+							cells.emplace_back(row,
+											   cellColumnIndex,
+											   QRectF{left + subColumnWidth * f, top, subColumnWidth, columntHeight},
+											   text,
+											   cellFillColor(row, cellColumnIndex),
+											   cellTextColor(row, cellColumnIndex),
+											   column.horzAlign | Qt::AlignVCenter,
+											   m_font.drawSize() / 8.0);
+
+							cellColumnIndex ++;
 						}
 					}
 				}
 				else
 				{
-					QString text = getCoulumnText(drawParam,
-												  this,
-												  column.data,
-												  appSignals[i],
-												  appSignalStates[i],
-												  impactAppSignals[i],
-												  impactAppSignalStates[i],
-												  m_analogFormat,
-												  m_precision);
+					// Multiline == true
+					//
+					QString text;
 
-					QRectF textRect(left, top, columnWidth, columntHeight);
-					textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
-					textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
-
-					if (textRect.width() > m_font.drawSize() / 4.0)
+					if (QString overridenText = cellText(row, cellColumnIndex);
+						overridenText.isNull() == false)
 					{
-						painter->setPen(textColor());
-						QRectF boundingRect = rect.intersected(textRect);
-						DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+						text = overridenText;
 					}
+					else
+					{
+						text = getCoulumnText(drawParam,
+											  this,
+											  column.data,
+											  appSignals[row],
+											  appSignalStates[row],
+											  impactAppSignals[row],
+											  impactAppSignalStates[row],
+											  m_analogFormat,
+											  m_precision);
+					}
+
+					cells.emplace_back(row,
+									   cellColumnIndex,
+									   QRectF{left, top, columnWidth, columntHeight},
+									   text,
+									   cellFillColor(row, cellColumnIndex),
+									   cellTextColor(row, cellColumnIndex),
+									   column.horzAlign | Qt::AlignVCenter,
+									   m_font.drawSize() / 4.0);
+
+					cellColumnIndex ++;
 				}
 
 				// --
@@ -719,6 +781,42 @@ namespace VFrame30
 				{
 					break;
 				}
+			}
+		}
+
+		// Fill rects
+		//
+		bool someCellsAreFilled = false;
+		for (const CellDrawParam& cell : cells)
+		{
+			if (cell.fillColor.isValid() == false)
+			{
+				continue;
+			}
+
+			painter->fillRect(cell.rect, cell.fillColor);
+			someCellsAreFilled = true;
+		}
+
+		// Draw Text
+		//
+		for (const CellDrawParam& cell : cells)
+		{
+			if (cell.text.isEmpty() == true)
+			{
+				continue;
+			}
+
+			QRectF textRect = cell.rect;
+			textRect.setLeft(textRect.left() + cell.textIndent);
+			textRect.setRight(textRect.right() - cell.textIndent);
+
+			if (textRect.width() > cell.textIndent)
+			{
+				painter->setPen(cell.textColor.isValid() ? cell.textColor : textColor());
+
+				QRectF boundingRect = rect.intersected(textRect);
+				DrawHelper::drawText(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
 			}
 		}
 
@@ -812,6 +910,15 @@ namespace VFrame30
 			painter->drawLine(pt1, pt2);
 		}
 
+		if (someCellsAreFilled == true)
+		{
+			// Fill rect for separate cell can override already drawn rect (in FblItemRect), so we need to draw
+			// the rect again
+			//
+			painter->setPen(linePen);
+			painter->drawRect(rect);
+		}
+
 		return;
 	}
 
@@ -828,12 +935,14 @@ namespace VFrame30
 		QPainter* painter = drawParam->painter();
 
 		QRectF rect = itemRectPinIndent(drawParam);
+		rect.setTopRight(drawParam->gridToDpi(rect.topRight()));
+		rect.setBottomLeft(drawParam->gridToDpi(rect.bottomLeft()));
 
 		double startOffset = 0;
 
 		// Get AppSignal
 		//
-		QString appSignalId = appSignalIds();
+		QString appSignalId = appSignalIds();	// One signal is here as it is singlechannel item
 
 		AppSignalParam signal;
 		signal.setAppSignalId(appSignalId);
@@ -845,10 +954,6 @@ namespace VFrame30
 		{
 			if (drawParam->schema()->isUfbSchema() == true)
 			{
-				//signal = AppSignalParam();
-				//signalState = AppSignalState();
-
-				signal.setAppSignalId(appSignalId);		// If signal tot found it allows to show AppSignalID at least
 			}
 			else
 			{
@@ -875,63 +980,116 @@ namespace VFrame30
 
 		// --
 		//
-		for (size_t i = 0; i < m_columns.size(); i++)
+		const int row = 0;
+		std::vector<QRectF> cells;
+		cells.reserve(m_columns.size());
+
+		for (size_t columnIndex = 0; columnIndex < m_columns.size(); columnIndex++)
 		{
-			const Column& c = m_columns[i];
+			const Column& c = m_columns[columnIndex];
 
 			double width = rect.width() * (c.width / 100.0);
-			if (i == m_columns.size() - 1)
+			if (columnIndex == m_columns.size() - 1)
 			{
 				width = rect.width() - startOffset; // if this is the last column, give all rest width to it
 			}
 
-			// Draw data
-			//
-			QString text = getCoulumnText(drawParam,
-										  this,
-										  c.data,
-										  signal,
-										  signalState,
-										  impactSignal,
-										  impactSignalState,
-										  m_analogFormat,
-										  m_precision);
-
-			QRectF textRect(rect.left() + startOffset, rect.top(), width, rect.height());
-			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
-			textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
-
-			if (textRect.width() > 0)
+			QRectF& cellRect = cells.emplace_back(rect.left() + startOffset, rect.top(), width, rect.height());
+			if (cellRect.right() > rect.right())
 			{
-				painter->setPen(textColor());
-				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+				cellRect.setRight(rect.right());
 			}
 
-			// --
-			//
 			startOffset += width;
 
 			if (startOffset >= rect.width())
 			{
 				break;
 			}
+		}
 
-			// Draw vertical line devider from othe columns
-			//
-			if (i < m_columns.size() - 1)	// For all columns exceprt last
+		// Fill cells and draw vertical line devider from othe columns
+		//
+		bool someCellsAreFilled = false;
+
+		for (size_t columnIndex = 0; columnIndex < cells.size(); columnIndex++)
+		{
+			QColor fillColor = cellFillColor(0, static_cast<int>(columnIndex));
+
+			if (fillColor.isValid() == true)
 			{
-				painter->setPen(linePen);
+				const QRectF& cellRect = cells[columnIndex];
+				painter->fillRect(cellRect, fillColor);
 
-				painter->drawLine(drawParam->gridToDpi(rect.left() + startOffset, rect.top()),
-								  drawParam->gridToDpi(rect.left() + startOffset, rect.bottom()));
+				someCellsAreFilled = true;
 			}
+		}
+
+		// Draw text
+		//
+		for (size_t columnIndex = 0; columnIndex < cells.size(); columnIndex++)
+		{
+			const Column& c = m_columns[columnIndex];
+
+			QString text;
+
+			if (QString overridenText = cellText(0, static_cast<int>(columnIndex));
+				overridenText.isNull() == false)
+			{
+				text = overridenText;
+			}
+			else
+			{
+				text = getCoulumnText(drawParam,
+									  this,
+									  c.data,
+									  signal,
+									  signalState,
+									  impactSignal,
+									  impactSignalState,
+									  m_analogFormat,
+									  m_precision);
+			}
+
+			QRectF textRect = cells[columnIndex];
+
+			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+			textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+			if (textRect.width() > 0)
+			{
+				QColor tc = cellTextColor(row, static_cast<int>(columnIndex));
+				painter->setPen(tc.isValid() ? tc : textColor());
+
+				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+			}
+		}
+
+		// Draw vertical dividers
+		//
+		painter->setPen(linePen);
+		for (size_t columnIndex = 0; columnIndex < cells.size(); columnIndex++)
+		{
+			const QRectF& cellRect = cells[columnIndex];
+
+			if (columnIndex < m_columns.size() - 1)	// For all columns exceprt last
+			{
+				painter->drawLine(drawParam->gridToDpi(cellRect.topRight()),
+								  drawParam->gridToDpi(cellRect.bottomRight()));
+			}
+		}
+
+		if (someCellsAreFilled == true)
+		{
+			// Fill rect for separate cell can override already drawn rect (in FblItemRect), so we need to draw
+			// the rect again
+			//
+			painter->setPen(linePen);
+			painter->drawRect(rect);
 		}
 
 		return;
 	}
-
-
-
 
 	void SchemaItemSignal::createColumnProperties()
 	{
@@ -1390,6 +1548,90 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return false;
 	}
 
+	QString SchemaItemSignal::cellText(int row, int column) const
+	{
+		QString result;
+		Cell cell{row, column, Qt::ItemDataRole::DisplayRole};
+
+		auto it = m_runtimeCellMod.find(cell);
+		if (it != m_runtimeCellMod.end())
+		{
+			result = it->second.toString();
+		}
+
+		return result;
+	}
+
+	void SchemaItemSignal::setCellText(int row, int column, QString text)
+	{
+		Cell cell{row, column, Qt::ItemDataRole::DisplayRole};
+
+		if (text.isNull() == true)
+		{
+			m_runtimeCellMod.erase(cell);
+		}
+		else
+		{
+			m_runtimeCellMod[cell] = text;
+		}
+	}
+
+	QColor SchemaItemSignal::cellFillColor(int row, int column) const
+	{
+		QColor result;
+		Cell cell{row, column, Qt::ItemDataRole::BackgroundRole};
+
+		auto it = m_runtimeCellMod.find(cell);
+		if (it != m_runtimeCellMod.end())
+		{
+			result = it->second.value<QRgb>();
+		}
+
+		return result;
+	}
+
+	void SchemaItemSignal::setCellFillColor(int row, int column, QColor color)
+	{
+		Cell cell{row, column, Qt::ItemDataRole::BackgroundRole};
+
+		if (color.isValid() == false)
+		{
+			m_runtimeCellMod.erase(cell);
+		}
+		else
+		{
+			m_runtimeCellMod[cell] = color.rgba();
+		}
+	}
+
+	QColor SchemaItemSignal::cellTextColor(int row, int column) const
+	{
+		QColor result;
+		Cell cell{row, column, Qt::ItemDataRole::ForegroundRole};
+
+		auto it = m_runtimeCellMod.find(cell);
+		if (it != m_runtimeCellMod.end())
+		{
+			result = it->second.value<QRgb>();
+		}
+
+		return result;
+	}
+
+	void SchemaItemSignal::setCellTextColor(int row, int column, QColor color)
+	{
+		Cell cell{row, column, Qt::ItemDataRole::ForegroundRole};
+
+		if (color.isValid() == false)
+		{
+			m_runtimeCellMod.erase(cell);
+		}
+		else
+		{
+			m_runtimeCellMod[cell] = color.rgba();
+		}
+	}
+
 	//
 	// CSchemaItemInputSignal
 	//
@@ -1403,6 +1645,18 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	SchemaItemInput::SchemaItemInput(SchemaUnit unit) :
 		SchemaItemSignal(unit)
 	{
+		m_columns.resize(2);
+
+		Column& c0 = m_columns[0];
+		c0.width = 80;
+		c0.data = E::ColumnData::AppSignalID;
+		c0.horzAlign = E::HorzAlign::AlignLeft;
+
+		Column& c1 = m_columns[1];
+		c1.width = 20;
+		c1.data = E::ColumnData::State;
+		c1.horzAlign = E::HorzAlign::AlignHCenter;
+
 		addOutput();
 		setAppSignalIds("#IN_STRID");
 	}
@@ -1493,6 +1747,18 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	SchemaItemOutput::SchemaItemOutput(SchemaUnit unit) :
 		SchemaItemSignal(unit)
 	{
+		m_columns.resize(2);
+
+		Column& c0 = m_columns[0];
+		c0.width = 20;
+		c0.data = E::ColumnData::State;
+		c0.horzAlign = E::HorzAlign::AlignHCenter;
+
+		Column& c1 = m_columns[1];
+		c1.width = 80;
+		c1.data = E::ColumnData::AppSignalID;
+		c1.horzAlign = E::HorzAlign::AlignLeft;
+
 		addInput();
 		setAppSignalIds("#OUT_STRID");
 	}

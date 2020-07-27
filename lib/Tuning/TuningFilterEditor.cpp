@@ -322,7 +322,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 			{
 				if (asp.appSignalId().contains(filterText, Qt::CaseInsensitive) == true
 						||asp.customSignalId().contains(filterText, Qt::CaseInsensitive) == true
-						||asp.equipmentId().contains(filterText, Qt::CaseInsensitive) == true
+						||asp.lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true
 						||asp.caption().contains(filterText, Qt::CaseInsensitive) == true )
 				{
 					filterResult = true;
@@ -347,7 +347,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 				break;
 			case FilterType::EquipmentID:
 			{
-				if (asp.equipmentId().contains(filterText, Qt::CaseInsensitive) == true)
+				if (asp.lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true)
 				{
 					filterResult = true;
 				}

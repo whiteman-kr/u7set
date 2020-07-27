@@ -36,8 +36,9 @@ namespace Builder
 
 		bool result = true;
 
-		result &= DeviceHelper::getIpPortProperty(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, CfgServiceSettings::PROP_CLIENT_REQUEST_PORT, &settings.clientRequestIP, false, "", 0, m_log);
-		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK, &settings.clientRequestNetmask, false, "", m_log);
+		result &= DeviceHelper::getIpPortProperty(m_software, EquipmentPropNames::CLIENT_REQUEST_IP,
+		                                          EquipmentPropNames::CLIENT_REQUEST_PORT, &settings.clientRequestIP, false, "", 0, m_log);
+		result &= DeviceHelper::getIPv4Property(m_software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &settings.clientRequestNetmask, false, "", m_log);
 
 		result &= buildClientsList(&settings);
 
@@ -72,17 +73,16 @@ namespace Builder
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
 
-		QString buildDir = QString("%1-%2/build")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildResultWriter->buildInfo().typeStr());
+		QString buildDir = QString("%1/build")
+		        .arg(m_dbController->currentProject().projectName());
 
 		content += " -b=" + appDataPath + "/" + buildDir;
 
 		HostAddressPort clientRequestIP;
 
 		if (DeviceHelper::getIpPortProperty(m_software,
-											CfgServiceSettings::PROP_CLIENT_REQUEST_IP,
-											CfgServiceSettings::PROP_CLIENT_REQUEST_PORT,
+		                                    EquipmentPropNames::CLIENT_REQUEST_IP,
+		                                    EquipmentPropNames::CLIENT_REQUEST_PORT,
 											&clientRequestIP,
 											false,
 											"", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
@@ -119,17 +119,16 @@ namespace Builder
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
 
-		QString buildDir = QString("%1-%2/build")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildResultWriter->buildInfo().typeStr());
+		QString buildDir = QString("%1/build")
+		        .arg(m_dbController->currentProject().projectName());
 
 		content += " -b=" + appDataPath + "/" + buildDir;
 
 		HostAddressPort clientRequestIP;
 
 		if (DeviceHelper::getIpPortProperty(m_software,
-											CfgServiceSettings::PROP_CLIENT_REQUEST_IP,
-											CfgServiceSettings::PROP_CLIENT_REQUEST_PORT,
+		                                    EquipmentPropNames::CLIENT_REQUEST_IP,
+		                                    EquipmentPropNames::CLIENT_REQUEST_PORT,
 											&clientRequestIP,
 											false,
 											"", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
@@ -151,8 +150,8 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-		const QString PROP_CFG_SERVICE_ID1(ServiceSettings::PROP_CFG_SERVICE_ID1);
-		const QString PROP_CFG_SERVICE_ID2(ServiceSettings::PROP_CFG_SERVICE_ID2);
+		const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
+		const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
 
 		bool result = true;
 

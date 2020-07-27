@@ -285,6 +285,7 @@ namespace ExtWidgets
 		~PropertyEditCellWidget();
 
 		virtual void setValue(std::shared_ptr<Property> property, bool readOnly);
+		virtual void setInitialText(const QString& text);
 
 	signals:
 		void valueChanged(QVariant value);
@@ -478,6 +479,8 @@ namespace ExtWidgets
 
 		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
+		void setInitialText(const QString& text) override;
+
 	public slots:
 		void onTextEdited(const QString &text);
 		void onEditingFinished();
@@ -647,6 +650,8 @@ namespace ExtWidgets
 		void setSplitterPosition(int pos);
 
 		void autoAdjustSplitterPosition();
+
+		bool isPropertyExists(const QString& propertyName) const;
 
 	public slots:
 		void updatePropertiesValues();

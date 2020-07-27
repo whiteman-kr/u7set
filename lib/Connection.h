@@ -27,6 +27,8 @@ namespace Hardware
 		};
 		Q_ENUM(SerialMode)
 
+		static const char* mimeType; // = "application/x-radiyconnection";
+
 	public:
 		Connection();
 
@@ -35,7 +37,7 @@ namespace Hardware
 	public:
 		friend Proto::ObjectSerialization<Connection>;	// for call CreateObject from Proto::ObjectSerialization
 
-	protected:
+	public:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
 		virtual bool SaveData(Proto::Envelope* message) const override;

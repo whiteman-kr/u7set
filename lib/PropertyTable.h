@@ -57,12 +57,11 @@ namespace ExtWidgets
 		explicit PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableProxyModel* proxyModel);
 
 		virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-
 		virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-
 		virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-
 		virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+		void setInitText(const QString& text);
 
 	private slots:
 		void onValueChanged(QVariant value);
@@ -75,6 +74,8 @@ namespace ExtWidgets
 		PropertyTableProxyModel* m_proxyModel = nullptr;
 
 		mutable PropertyEditCellWidget *m_cellEditor = nullptr;
+
+		mutable QString m_initText;
 	};
 
 	class PropertyTableProxyModel : public QSortFilterProxyModel
@@ -88,7 +89,7 @@ namespace ExtWidgets
 		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
 
 	protected:
-		//bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+		bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 	};
 
 	class PropertyTableModel : public QAbstractTableModel
@@ -135,6 +136,7 @@ namespace ExtWidgets
 
 	signals:
 		void editKeyPressed();
+		void symbolKeyPressed(QString key);
 		void spaceKeyPressed();
 	};
 
@@ -150,8 +152,8 @@ namespace ExtWidgets
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
-		QString propertyMask() const;
-		void setPropertyMask(const QString& propertyMask);
+		QString propertyFilter() const;
+		void setPropertyFilter(const QString& propertyFilter);
 
 		// Settings to store
 		//
@@ -175,9 +177,10 @@ namespace ExtWidgets
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
 		void onCellEditKeyPressed();
+		void onCellSymbolKeyPressed(QString key);
 		void onCellToggleKeyPressed();
 		void onShowErrorMessage (QString message);
-		void onPropertyMaskChanged();
+		void onPropertyFilterChanged();
 		void onTableContextMenuRequested(const QPoint &pos);
 		void onGroupByCategoryToggled(bool value);
 
@@ -217,7 +220,7 @@ namespace ExtWidgets
 
 		PropertyTableView* m_tableView = nullptr;
 
-		QLineEdit* m_editPropertyMask = nullptr;
+		QLineEdit* m_editPropertyFilter = nullptr;
 
 		QPushButton* m_buttonGroupByCategory = nullptr;
 
@@ -231,7 +234,7 @@ namespace ExtWidgets
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
 
-		QStringList m_propertyMasks;
+		QStringList m_propertyFilters;
 
 		bool m_expandValuesToAllRows = true;
 

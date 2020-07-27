@@ -26,11 +26,13 @@ namespace Builder
 
 	void BuildWorkerThread::run()
 	{
-		m_context = std::make_unique<Context>(m_log, buildOutputPath(), debug(), expertMode());
+		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode());
 		std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 			{
 				this->m_context.reset();		// this will release m_context on leaving run()
 			});
+
+		m_context->m_progress = 0;
 
 		assert(m_context->m_log);
 
@@ -81,7 +83,7 @@ namespace Builder
 		// --
 		//
 		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>();
-		m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, release(), 0 /* Load correct ChangesetID */);
+		m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
 
 		do
 		{
@@ -95,24 +97,17 @@ namespace Builder
 				break;
 			}
 
+			int to_do_thre_are_two_places_in_build_checking_checked_out_objects;
 			int checkedOutCount = 0;
 			ok = m_context->m_db.isAnyCheckedOut(&checkedOutCount);
-
 			if (ok == false)
 			{
 				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("isAnyCheckedOut Error."));
 				break;
 			}
 
-			if (release() == true && checkedOutCount > 0)
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined,
-						  tr("There are some checked out objects (%1). Please check in all objects before building release version.").arg(checkedOutCount));
-				break;
-			}
-
 			const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
-			m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.release == false, bi.changeset);
+			m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
 
 			//
 			// Get Equipment from the database
@@ -122,6 +117,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 5;			// Total progress 10
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -157,6 +154,8 @@ namespace Builder
 				break;
 			}
 
+			m_context->m_progress += 10;		// Total progress 20
+
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
@@ -170,6 +169,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 5;			// Total progress 25
 
 			//
 			// Loading subsystems
@@ -213,6 +214,9 @@ namespace Builder
 				break;
 			}
 
+			//m_context->m_progress is set inside parseApplicationLogic(); up to 25%
+			//m_context->m_progress += 25;		// Total progress 50
+
 			//
 			// Save LogicModule Descriptions
 			//
@@ -237,6 +241,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 10;		// Total progress 60
 
 			//
 			// Tuning parameters
@@ -275,6 +281,8 @@ namespace Builder
 			LmsUniqueIdMap lmsUniqueIdMap;
 			generateLmsUniqueID(*m_context->m_buildResultWriter, m_context->m_lmModules, lmsUniqueIdMap);
 
+			m_context->m_progress += 10;		// Total progress 70
+
 			//
 			// Generate MATS software configurations
 			//
@@ -285,6 +293,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 10;		// Total progress 80
 
 			//
 			// Write logic, configuration and tuning binary files
@@ -310,6 +320,8 @@ namespace Builder
 				break;
 			}
 
+			m_context->m_progress += 10;		// Total progress 90
+
 			//
 			// Write Firmware Statistics
 			//
@@ -321,6 +333,8 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_context->m_progress += 5;		// Total progress 95
 
 			LOG_SUCCESS(m_context->m_log, tr("Ok"));
 		}
@@ -348,6 +362,8 @@ namespace Builder
 		// We've done, exit
 		//
 		qDebug("Leave BuildWorkerThread::run()");
+
+		m_context->m_progress += 5;		// Total progress 100
 
 		// QThread::finished will be emitted, it should be counted as reasultReady
 		//
@@ -476,7 +492,6 @@ namespace Builder
 		bool ok = false;
 
 		// Get file list with checked out files,
-		// if this is release build, specific copies will be fetched later
 		//
 		ok = m_context->m_db.getFileList(&files, parent->fileInfo().fileId(), true, nullptr);
 
@@ -1612,21 +1627,6 @@ namespace Builder
 		m_buildOutputPath = value;
 	}
 
-	bool BuildWorkerThread::debug() const
-	{
-		return m_debug;
-	}
-
-	void BuildWorkerThread::setDebug(bool value)
-	{
-		m_debug = value;
-	}
-
-	bool BuildWorkerThread::release() const
-	{
-		return !m_debug;
-	}
-
 	bool BuildWorkerThread::expertMode() const
 	{
 		return m_expertMode;
@@ -1640,5 +1640,17 @@ namespace Builder
 	bool BuildWorkerThread::isInterruptRequested()
 	{
 		return QThread::currentThread()->isInterruptionRequested();
+	}
+
+	int BuildWorkerThread::progress() const
+	{
+		if (m_context != nullptr)
+		{
+			return m_context->m_progress;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 }

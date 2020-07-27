@@ -1835,6 +1835,12 @@ namespace ExtWidgets
 		return;
 	}
 
+	void PropertyEditCellWidget::setInitialText(const QString& text)
+	{
+		Q_UNUSED(text);
+		return;
+	}
+
 	//
 	// ------------ MultiFilePathEdit ------------
 	//
@@ -2626,6 +2632,18 @@ namespace ExtWidgets
 		}
 	}
 
+	void MultiTextEdit::setInitialText(const QString& text)
+	{
+		if (m_lineEdit == nullptr)
+		{
+			Q_ASSERT(m_lineEdit);
+			return;
+		}
+
+		m_lineEdit->setText(text);
+		m_textEdited = true;
+	}
+
 	void MultiTextEdit::onTextEdited(const QString &text)
 	{
 		Q_UNUSED(text);
@@ -3245,16 +3263,22 @@ namespace ExtWidgets
 
 	void PropertyTreeWidget::keyPressEvent(QKeyEvent *event)
 	{
-		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return)
+		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
 		{
-			emit editKeyPressed();
-			return;
+			if (selectedIndexes().size() > 0)
+			{
+				emit editKeyPressed();
+				return;
+			}
 		}
 
 		if (event->key() == Qt::Key_Space)
 		{
-			emit spaceKeyPressed();
-			return;
+			if (selectedIndexes().size() > 0)
+			{
+				emit spaceKeyPressed();
+				return;
+			}
 		}
 
 		QTreeWidget::keyPressEvent(event);
@@ -3399,6 +3423,11 @@ namespace ExtWidgets
 	void PropertyEditor::autoAdjustSplitterPosition()
 	{
 		m_treeWidget->resizeColumnToContents(static_cast<int>(PropertyEditorColumns::Caption));
+	}
+
+	bool PropertyEditor::isPropertyExists(const QString& propertyName) const
+	{
+		return m_treeObjects.find(propertyName) != m_treeObjects.end();
 	}
 
 	void PropertyEditor::updatePropertiesValues()

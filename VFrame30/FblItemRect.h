@@ -153,14 +153,14 @@ namespace VFrame30
 		double weight() const;
 		void setWeight(double weight);
 
-		QRgb lineColor() const;
-		void setLineColor(QRgb color);
+		QColor lineColor() const;
+		void setLineColor(QColor color);
 
-		QRgb fillColor() const;
-		void setFillColor(QRgb color);
+		QColor fillColor() const;
+		void setFillColor(QColor color);
 
-		QRgb textColor() const;
-		void setTextColor(QRgb color);
+		QColor textColor() const;
+		void setTextColor(QColor color);
 
 		DECLARE_FONT_PROPERTIES(Font)
 

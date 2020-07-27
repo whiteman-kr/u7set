@@ -134,6 +134,8 @@ class ComparatorSet;
 class MetrologySignalLocation;
 class MetrologySignal;
 class MetrologySignalSet;
+class SimOverrideSignal;
+class SimOverrideSignalWorkspace;
 
 enum SchemaUnit {
   Display = 0,
@@ -391,6 +393,13 @@ class qvariant : public ::google::protobuf::Message {
   inline bool boolvalue() const;
   inline void set_boolvalue(bool value);
 
+  // optional float floatValue = 6 [default = 0];
+  inline bool has_floatvalue() const;
+  inline void clear_floatvalue();
+  static const int kFloatValueFieldNumber = 6;
+  inline float floatvalue() const;
+  inline void set_floatvalue(float value);
+
   // @@protoc_insertion_point(class_scope:Proto.qvariant)
  private:
   inline void set_has_type();
@@ -403,6 +412,8 @@ class qvariant : public ::google::protobuf::Message {
   inline void clear_has_doublevalue();
   inline void set_has_boolvalue();
   inline void clear_has_boolvalue();
+  inline void set_has_floatvalue();
+  inline void clear_has_floatvalue();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -411,9 +422,10 @@ class qvariant : public ::google::protobuf::Message {
   double doublevalue_;
   ::google::protobuf::uint32 uintvalue_;
   bool boolvalue_;
+  float floatvalue_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -3869,6 +3881,13 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 vertalign() const;
   inline void set_vertalign(::google::protobuf::int32 value);
 
+  // optional bool wordWrap = 11 [default = false];
+  inline bool has_wordwrap() const;
+  inline void clear_wordwrap();
+  static const int kWordWrapFieldNumber = 11;
+  inline bool wordwrap() const;
+  inline void set_wordwrap(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemRect)
  private:
   inline void set_has_weight();
@@ -3891,6 +3910,8 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline void clear_has_horzalign();
   inline void set_has_vertalign();
   inline void clear_has_vertalign();
+  inline void set_has_wordwrap();
+  inline void clear_has_wordwrap();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3902,11 +3923,12 @@ class SchemaItemRect : public ::google::protobuf::Message {
   ::google::protobuf::uint32 textcolor_;
   bool fill_;
   bool drawrect_;
+  bool wordwrap_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6307,6 +6329,13 @@ class SchemaItemConst : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 vertalign() const;
   inline void set_vertalign(::google::protobuf::int32 value);
 
+  // optional int32 analogFormat = 8 [default = 102];
+  inline bool has_analogformat() const;
+  inline void clear_analogformat();
+  static const int kAnalogFormatFieldNumber = 8;
+  inline ::google::protobuf::int32 analogformat() const;
+  inline void set_analogformat(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemConst)
  private:
   inline void set_has_type();
@@ -6323,6 +6352,8 @@ class SchemaItemConst : public ::google::protobuf::Message {
   inline void clear_has_horzalign();
   inline void set_has_vertalign();
   inline void clear_has_vertalign();
+  inline void set_has_analogformat();
+  inline void clear_has_analogformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -6333,9 +6364,10 @@ class SchemaItemConst : public ::google::protobuf::Message {
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
+  ::google::protobuf::int32 analogformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -14186,6 +14218,235 @@ class MetrologySignalSet : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static MetrologySignalSet* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class SimOverrideSignal : public ::google::protobuf::Message {
+ public:
+  SimOverrideSignal();
+  virtual ~SimOverrideSignal();
+
+  SimOverrideSignal(const SimOverrideSignal& from);
+
+  inline SimOverrideSignal& operator=(const SimOverrideSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SimOverrideSignal& default_instance();
+
+  void Swap(SimOverrideSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  SimOverrideSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SimOverrideSignal& from);
+  void MergeFrom(const SimOverrideSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional bool enabled = 2;
+  inline bool has_enabled() const;
+  inline void clear_enabled();
+  static const int kEnabledFieldNumber = 2;
+  inline bool enabled() const;
+  inline void set_enabled(bool value);
+
+  // optional int32 index = 3;
+  inline bool has_index() const;
+  inline void clear_index();
+  static const int kIndexFieldNumber = 3;
+  inline ::google::protobuf::int32 index() const;
+  inline void set_index(::google::protobuf::int32 value);
+
+  // optional string appSignalId = 10;
+  inline bool has_appsignalid() const;
+  inline void clear_appsignalid();
+  static const int kAppSignalIdFieldNumber = 10;
+  inline const ::std::string& appsignalid() const;
+  inline void set_appsignalid(const ::std::string& value);
+  inline void set_appsignalid(const char* value);
+  inline void set_appsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalid();
+  inline ::std::string* release_appsignalid();
+  inline void set_allocated_appsignalid(::std::string* appsignalid);
+
+  // optional int32 overrideMethod = 30;
+  inline bool has_overridemethod() const;
+  inline void clear_overridemethod();
+  static const int kOverrideMethodFieldNumber = 30;
+  inline ::google::protobuf::int32 overridemethod() const;
+  inline void set_overridemethod(::google::protobuf::int32 value);
+
+  // optional .Proto.qvariant overrideValue = 40;
+  inline bool has_overridevalue() const;
+  inline void clear_overridevalue();
+  static const int kOverrideValueFieldNumber = 40;
+  inline const ::Proto::qvariant& overridevalue() const;
+  inline ::Proto::qvariant* mutable_overridevalue();
+  inline ::Proto::qvariant* release_overridevalue();
+  inline void set_allocated_overridevalue(::Proto::qvariant* overridevalue);
+
+  // optional string overrideScript = 50;
+  inline bool has_overridescript() const;
+  inline void clear_overridescript();
+  static const int kOverrideScriptFieldNumber = 50;
+  inline const ::std::string& overridescript() const;
+  inline void set_overridescript(const ::std::string& value);
+  inline void set_overridescript(const char* value);
+  inline void set_overridescript(const char* value, size_t size);
+  inline ::std::string* mutable_overridescript();
+  inline ::std::string* release_overridescript();
+  inline void set_allocated_overridescript(::std::string* overridescript);
+
+  // @@protoc_insertion_point(class_scope:Proto.SimOverrideSignal)
+ private:
+  inline void set_has_enabled();
+  inline void clear_has_enabled();
+  inline void set_has_index();
+  inline void clear_has_index();
+  inline void set_has_appsignalid();
+  inline void clear_has_appsignalid();
+  inline void set_has_overridemethod();
+  inline void clear_has_overridemethod();
+  inline void set_has_overridevalue();
+  inline void clear_has_overridevalue();
+  inline void set_has_overridescript();
+  inline void clear_has_overridescript();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  bool enabled_;
+  ::google::protobuf::int32 index_;
+  ::std::string* appsignalid_;
+  ::Proto::qvariant* overridevalue_;
+  ::std::string* overridescript_;
+  ::google::protobuf::int32 overridemethod_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SimOverrideSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SimOverrideSignalWorkspace : public ::google::protobuf::Message {
+ public:
+  SimOverrideSignalWorkspace();
+  virtual ~SimOverrideSignalWorkspace();
+
+  SimOverrideSignalWorkspace(const SimOverrideSignalWorkspace& from);
+
+  inline SimOverrideSignalWorkspace& operator=(const SimOverrideSignalWorkspace& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SimOverrideSignalWorkspace& default_instance();
+
+  void Swap(SimOverrideSignalWorkspace* other);
+
+  // implements Message ----------------------------------------------
+
+  SimOverrideSignalWorkspace* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SimOverrideSignalWorkspace& from);
+  void MergeFrom(const SimOverrideSignalWorkspace& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.SimOverrideSignal overrideSignals = 2;
+  inline int overridesignals_size() const;
+  inline void clear_overridesignals();
+  static const int kOverrideSignalsFieldNumber = 2;
+  inline const ::Proto::SimOverrideSignal& overridesignals(int index) const;
+  inline ::Proto::SimOverrideSignal* mutable_overridesignals(int index);
+  inline ::Proto::SimOverrideSignal* add_overridesignals();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::SimOverrideSignal >&
+      overridesignals() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::SimOverrideSignal >*
+      mutable_overridesignals();
+
+  // @@protoc_insertion_point(class_scope:Proto.SimOverrideSignalWorkspace)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::SimOverrideSignal > overridesignals_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SimOverrideSignalWorkspace* default_instance_;
+};
 // ===================================================================
 
 
@@ -14375,6 +14636,28 @@ inline bool qvariant::boolvalue() const {
 inline void qvariant::set_boolvalue(bool value) {
   set_has_boolvalue();
   boolvalue_ = value;
+}
+
+// optional float floatValue = 6 [default = 0];
+inline bool qvariant::has_floatvalue() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void qvariant::set_has_floatvalue() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void qvariant::clear_has_floatvalue() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void qvariant::clear_floatvalue() {
+  floatvalue_ = 0;
+  clear_has_floatvalue();
+}
+inline float qvariant::floatvalue() const {
+  return floatvalue_;
+}
+inline void qvariant::set_floatvalue(float value) {
+  set_has_floatvalue();
+  floatvalue_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -20173,6 +20456,28 @@ inline void SchemaItemRect::set_vertalign(::google::protobuf::int32 value) {
   vertalign_ = value;
 }
 
+// optional bool wordWrap = 11 [default = false];
+inline bool SchemaItemRect::has_wordwrap() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SchemaItemRect::set_has_wordwrap() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SchemaItemRect::clear_has_wordwrap() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void SchemaItemRect::clear_wordwrap() {
+  wordwrap_ = false;
+  clear_has_wordwrap();
+}
+inline bool SchemaItemRect::wordwrap() const {
+  return wordwrap_;
+}
+inline void SchemaItemRect::set_wordwrap(bool value) {
+  set_has_wordwrap();
+  wordwrap_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // SchemaItemLine
@@ -22819,6 +23124,28 @@ inline ::google::protobuf::int32 SchemaItemConst::vertalign() const {
 inline void SchemaItemConst::set_vertalign(::google::protobuf::int32 value) {
   set_has_vertalign();
   vertalign_ = value;
+}
+
+// optional int32 analogFormat = 8 [default = 102];
+inline bool SchemaItemConst::has_analogformat() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemConst::set_has_analogformat() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemConst::clear_has_analogformat() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemConst::clear_analogformat() {
+  analogformat_ = 102;
+  clear_has_analogformat();
+}
+inline ::google::protobuf::int32 SchemaItemConst::analogformat() const {
+  return analogformat_;
+}
+inline void SchemaItemConst::set_analogformat(::google::protobuf::int32 value) {
+  set_has_analogformat();
+  analogformat_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -34831,6 +35158,283 @@ MetrologySignalSet::metrologysignal() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >*
 MetrologySignalSet::mutable_metrologysignal() {
   return &metrologysignal_;
+}
+
+// -------------------------------------------------------------------
+
+// SimOverrideSignal
+
+// optional bool enabled = 2;
+inline bool SimOverrideSignal::has_enabled() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SimOverrideSignal::set_has_enabled() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SimOverrideSignal::clear_has_enabled() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SimOverrideSignal::clear_enabled() {
+  enabled_ = false;
+  clear_has_enabled();
+}
+inline bool SimOverrideSignal::enabled() const {
+  return enabled_;
+}
+inline void SimOverrideSignal::set_enabled(bool value) {
+  set_has_enabled();
+  enabled_ = value;
+}
+
+// optional int32 index = 3;
+inline bool SimOverrideSignal::has_index() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SimOverrideSignal::set_has_index() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SimOverrideSignal::clear_has_index() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SimOverrideSignal::clear_index() {
+  index_ = 0;
+  clear_has_index();
+}
+inline ::google::protobuf::int32 SimOverrideSignal::index() const {
+  return index_;
+}
+inline void SimOverrideSignal::set_index(::google::protobuf::int32 value) {
+  set_has_index();
+  index_ = value;
+}
+
+// optional string appSignalId = 10;
+inline bool SimOverrideSignal::has_appsignalid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SimOverrideSignal::set_has_appsignalid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SimOverrideSignal::clear_has_appsignalid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SimOverrideSignal::clear_appsignalid() {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalid_->clear();
+  }
+  clear_has_appsignalid();
+}
+inline const ::std::string& SimOverrideSignal::appsignalid() const {
+  return *appsignalid_;
+}
+inline void SimOverrideSignal::set_appsignalid(const ::std::string& value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void SimOverrideSignal::set_appsignalid(const char* value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void SimOverrideSignal::set_appsignalid(const char* value, size_t size) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SimOverrideSignal::mutable_appsignalid() {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  return appsignalid_;
+}
+inline ::std::string* SimOverrideSignal::release_appsignalid() {
+  clear_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = appsignalid_;
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SimOverrideSignal::set_allocated_appsignalid(::std::string* appsignalid) {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalid_;
+  }
+  if (appsignalid) {
+    set_has_appsignalid();
+    appsignalid_ = appsignalid;
+  } else {
+    clear_has_appsignalid();
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 overrideMethod = 30;
+inline bool SimOverrideSignal::has_overridemethod() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SimOverrideSignal::set_has_overridemethod() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SimOverrideSignal::clear_has_overridemethod() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SimOverrideSignal::clear_overridemethod() {
+  overridemethod_ = 0;
+  clear_has_overridemethod();
+}
+inline ::google::protobuf::int32 SimOverrideSignal::overridemethod() const {
+  return overridemethod_;
+}
+inline void SimOverrideSignal::set_overridemethod(::google::protobuf::int32 value) {
+  set_has_overridemethod();
+  overridemethod_ = value;
+}
+
+// optional .Proto.qvariant overrideValue = 40;
+inline bool SimOverrideSignal::has_overridevalue() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SimOverrideSignal::set_has_overridevalue() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SimOverrideSignal::clear_has_overridevalue() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SimOverrideSignal::clear_overridevalue() {
+  if (overridevalue_ != NULL) overridevalue_->::Proto::qvariant::Clear();
+  clear_has_overridevalue();
+}
+inline const ::Proto::qvariant& SimOverrideSignal::overridevalue() const {
+  return overridevalue_ != NULL ? *overridevalue_ : *default_instance_->overridevalue_;
+}
+inline ::Proto::qvariant* SimOverrideSignal::mutable_overridevalue() {
+  set_has_overridevalue();
+  if (overridevalue_ == NULL) overridevalue_ = new ::Proto::qvariant;
+  return overridevalue_;
+}
+inline ::Proto::qvariant* SimOverrideSignal::release_overridevalue() {
+  clear_has_overridevalue();
+  ::Proto::qvariant* temp = overridevalue_;
+  overridevalue_ = NULL;
+  return temp;
+}
+inline void SimOverrideSignal::set_allocated_overridevalue(::Proto::qvariant* overridevalue) {
+  delete overridevalue_;
+  overridevalue_ = overridevalue;
+  if (overridevalue) {
+    set_has_overridevalue();
+  } else {
+    clear_has_overridevalue();
+  }
+}
+
+// optional string overrideScript = 50;
+inline bool SimOverrideSignal::has_overridescript() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SimOverrideSignal::set_has_overridescript() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SimOverrideSignal::clear_has_overridescript() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SimOverrideSignal::clear_overridescript() {
+  if (overridescript_ != &::google::protobuf::internal::kEmptyString) {
+    overridescript_->clear();
+  }
+  clear_has_overridescript();
+}
+inline const ::std::string& SimOverrideSignal::overridescript() const {
+  return *overridescript_;
+}
+inline void SimOverrideSignal::set_overridescript(const ::std::string& value) {
+  set_has_overridescript();
+  if (overridescript_ == &::google::protobuf::internal::kEmptyString) {
+    overridescript_ = new ::std::string;
+  }
+  overridescript_->assign(value);
+}
+inline void SimOverrideSignal::set_overridescript(const char* value) {
+  set_has_overridescript();
+  if (overridescript_ == &::google::protobuf::internal::kEmptyString) {
+    overridescript_ = new ::std::string;
+  }
+  overridescript_->assign(value);
+}
+inline void SimOverrideSignal::set_overridescript(const char* value, size_t size) {
+  set_has_overridescript();
+  if (overridescript_ == &::google::protobuf::internal::kEmptyString) {
+    overridescript_ = new ::std::string;
+  }
+  overridescript_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SimOverrideSignal::mutable_overridescript() {
+  set_has_overridescript();
+  if (overridescript_ == &::google::protobuf::internal::kEmptyString) {
+    overridescript_ = new ::std::string;
+  }
+  return overridescript_;
+}
+inline ::std::string* SimOverrideSignal::release_overridescript() {
+  clear_has_overridescript();
+  if (overridescript_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = overridescript_;
+    overridescript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SimOverrideSignal::set_allocated_overridescript(::std::string* overridescript) {
+  if (overridescript_ != &::google::protobuf::internal::kEmptyString) {
+    delete overridescript_;
+  }
+  if (overridescript) {
+    set_has_overridescript();
+    overridescript_ = overridescript;
+  } else {
+    clear_has_overridescript();
+    overridescript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// SimOverrideSignalWorkspace
+
+// repeated .Proto.SimOverrideSignal overrideSignals = 2;
+inline int SimOverrideSignalWorkspace::overridesignals_size() const {
+  return overridesignals_.size();
+}
+inline void SimOverrideSignalWorkspace::clear_overridesignals() {
+  overridesignals_.Clear();
+}
+inline const ::Proto::SimOverrideSignal& SimOverrideSignalWorkspace::overridesignals(int index) const {
+  return overridesignals_.Get(index);
+}
+inline ::Proto::SimOverrideSignal* SimOverrideSignalWorkspace::mutable_overridesignals(int index) {
+  return overridesignals_.Mutable(index);
+}
+inline ::Proto::SimOverrideSignal* SimOverrideSignalWorkspace::add_overridesignals() {
+  return overridesignals_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::SimOverrideSignal >&
+SimOverrideSignalWorkspace::overridesignals() const {
+  return overridesignals_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::SimOverrideSignal >*
+SimOverrideSignalWorkspace::mutable_overridesignals() {
+  return &overridesignals_;
 }
 
 

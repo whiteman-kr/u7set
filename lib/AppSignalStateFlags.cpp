@@ -1,6 +1,41 @@
 #include "AppSignalStateFlags.h"
 #include <QString>
 
+// Sets the flag to 1 if 'on' is true, otherwise clears the flag
+//
+void AppSignalStateFlags::setFlag(E::AppSignalStateFlagType flagType, quint32 value)
+{
+	// set flagValue to corresponding flag
+	//
+	switch (flagType)
+	{
+	case E::AppSignalStateFlagType::Validity:
+		valid = value;
+		return;
+	case E::AppSignalStateFlagType::StateAvailable:
+		stateAvailable = value;
+		return;
+	case E::AppSignalStateFlagType::Simulated:
+		simulated  = value;
+		return;
+	case E::AppSignalStateFlagType::Blocked:
+		blocked = value;
+		return;
+	case E::AppSignalStateFlagType::Mismatch:
+		mismatch = value;
+		return;
+	case E::AppSignalStateFlagType::AboveHighLimit:
+		aboveHighLimit = value;
+		return;
+	case E::AppSignalStateFlagType::BelowLowLimit:
+		belowLowLimit = value;
+		return;
+	}
+
+	Q_ASSERT(false);
+	return;
+}
+
 void AppSignalStateFlags::clear()
 {
 	all = 0;

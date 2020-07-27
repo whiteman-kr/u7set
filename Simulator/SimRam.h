@@ -5,11 +5,14 @@
 #include <memory>
 #include <QByteArray>
 #include "../lib/Types.h"
-#include "SimOverrideSignals.h"
 
+class SimRamTests;
 
 namespace Sim
 {
+	struct OverrideRamRecord;
+	class OverrideSignals;
+
 
 	class RamAreaInfo
 	{
@@ -30,6 +33,11 @@ namespace Sim
 			return  offsetW >= m_offset &&
 					offsetW < (m_offset + m_size) &&
 					(static_cast<int>(m_access) & static_cast<int>(access)) != 0;
+		}
+
+		bool contains(quint32 offsetW) const noexcept
+		{
+			return  offsetW >= m_offset && offsetW < (m_offset + m_size);
 		}
 
 		bool overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const;
@@ -108,6 +116,8 @@ namespace Sim
 		bool m_clearOnStartCycle = false;					// Clear memory area on start of work cycle
 		QByteArray m_data;
 		std::vector<OverrideRamRecord> m_overrideData;
+
+		friend SimRamTests;
 	};
 
 
@@ -120,11 +130,11 @@ namespace Sim
 
 		Ram& operator=(const Ram& that);
 
-
 	public:
+		bool isNull() const;
 		void reset();
-		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 
+		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 		void updateFrom(const Ram& source);
 
 		QString dump(QString equipmnetId) const;
@@ -190,6 +200,8 @@ namespace Sim
 
 		std::map<quint32, size_t> m_readAreas;	// key is area offset, value is index
 		std::map<quint32, size_t> m_writeAreas;	// key is area offset, value is index
+
+		friend SimRamTests;
 	};
 }
 

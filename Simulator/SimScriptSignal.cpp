@@ -17,5 +17,4 @@ namespace Sim
 	{
 		m_signal = s;
 	}
-
 }

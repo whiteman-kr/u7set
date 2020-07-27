@@ -414,6 +414,8 @@ void IdeCodeEditor::setText(const QString& text)
 	m_textEdit->setText(text);
 
 	m_textEdit->blockSignals(false);
+
+	adjustMarginWidth();
 }
 
 int IdeCodeEditor::lines() const
@@ -479,6 +481,13 @@ void IdeCodeEditor::findFirst(QString findText, bool caseSensitive)
 	{
 		m_textEdit->selectAll(false);
 
+		result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+
+		m_findText = findText;
+	}
+
+	if (result == false)
+	{
 		QMessageBox::information(this, qAppName(), tr("Text was not found."));
 	}
 }
@@ -570,7 +579,6 @@ void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool caseS
 	QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
 }
 
-
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
@@ -641,6 +649,30 @@ void IdeCodeEditor::onCursorPositionChanged(int line, int index)
 void IdeCodeEditor::onTextChanged()
 {
 	emit textChanged();
+}
+
+void IdeCodeEditor::adjustMarginWidth()
+{
+	// Adjust margin field width
+	//
+	int linesCount = m_textEdit->lines();
+
+	int signCount = static_cast<int>(log10(linesCount) + 0.5);
+	if (signCount < 4)
+	{
+		signCount = 4;
+	}
+	signCount += 2;
+
+	QFontMetrics fm(m_textEdit->lexer()->defaultFont());
+
+	QString sample = QString().fill('0', signCount);
+
+	int marginWidth = static_cast<int>(fm.boundingRect(sample).width());
+
+	m_textEdit->setMarginWidth(0, marginWidth);
+
+	return;
 }
 
 //

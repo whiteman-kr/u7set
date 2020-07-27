@@ -26,44 +26,35 @@ FileHistoryDialog::FileHistoryDialog(QString title, DbController* db, const std:
 	//
 	ui->changesetList->setColumnCount(4);
 
-
 	QStringList headerLabels;
 
 	headerLabels << tr("Changeset") << tr("User") << tr("Date") << tr("Comment");
 
 	ui->changesetList->setHeaderLabels(headerLabels);
 
-	// Fill changeset list
+	// Fill users combo box
 	//
-	QList<QTreeWidgetItem*> items;
-	items.reserve(static_cast<int>(fileHistory.size()));
-
-	for (unsigned int i = 0; i < fileHistory.size(); i++)
 	{
-		const DbChangeset& ci = fileHistory[i];
+		ui->userComboBox->blockSignals(true);
 
-		QStringList itemTextList;
-		itemTextList << QString::number(ci.changeset());
-		itemTextList << ci.username();
-		itemTextList << ci.date().toString("dd MMM yyyy HH:mm:ss");
-		itemTextList << ci.comment();
+		std::vector<DbUser> users;
+		db->getUserList(&users, parent);
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(itemTextList);
+		for (const DbUser& user : users)
+		{
+			ui->userComboBox->addItem(user.username(), user.userId());
+		}
 
-		items.push_back(item);
+		ui->userComboBox->addItem(AllUsersText, AllUsersUserId);
+
+		ui->userComboBox->model()->sort(0, Qt::AscendingOrder);
+		ui->userComboBox->setCurrentText(AllUsersText);
+		ui->userComboBox->setCurrentIndex(ui->userComboBox->findText(AllUsersText));
+
+		ui->userComboBox->blockSignals(false);
 	}
 
-	ui->changesetList->insertTopLevelItems(0, items);
-
-	// Select the first item
-	//
-	if (items.isEmpty() == false)
-	{
-		QItemSelectionModel* sm = ui->changesetList->selectionModel();
-
-		QModelIndex mi = ui->changesetList->model()->index(0, 0);
-		sm->select(mi, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-	}
+	fillList();
 
 	return;
 }
@@ -100,6 +91,50 @@ void FileHistoryDialog::showEvent(QShowEvent*)
 		   static_cast<int>(screen.height() * 0.35));
 
 	move(screen.center() - rect().center());
+
+	return;
+}
+
+void FileHistoryDialog::fillList()
+{
+	int userId = ui->userComboBox->currentData().toInt();
+
+	ui->changesetList->clear();
+
+	// Fill changeset list
+	//
+	QList<QTreeWidgetItem*> items;
+	items.reserve(static_cast<int>(m_fileHistory.size()));
+
+	for (unsigned int i = 0; i < m_fileHistory.size(); i++)
+	{
+		const DbChangeset& ci = m_fileHistory[i];
+
+		if (userId == AllUsersUserId || userId == ci.userId())
+		{
+			QStringList itemTextList;
+			itemTextList << QString::number(ci.changeset());
+			itemTextList << ci.username();
+			itemTextList << ci.date().toString("dd MMM yyyy HH:mm:ss");
+			itemTextList << ci.comment();
+
+			QTreeWidgetItem* item = new QTreeWidgetItem(itemTextList);
+
+			items.push_back(item);
+		}
+	}
+
+	ui->changesetList->insertTopLevelItems(0, items);
+
+	// Select the first item
+	//
+	if (items.isEmpty() == false)
+	{
+		QItemSelectionModel* sm = ui->changesetList->selectionModel();
+
+		QModelIndex mi = ui->changesetList->model()->index(0, 0);
+		sm->select(mi, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	}
 
 	return;
 }
@@ -174,4 +209,9 @@ void FileHistoryDialog::changesetDetails(int changeset)
 void FileHistoryDialog::on_buttonBox_clicked(QAbstractButton* /*button*/)
 {
 	accept();
+}
+
+void FileHistoryDialog::on_userComboBox_currentIndexChanged(int /*index*/)
+{
+	fillList();
 }

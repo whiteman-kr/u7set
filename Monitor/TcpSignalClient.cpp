@@ -369,7 +369,7 @@ void TcpSignalClient::requestSignalStateChanges()
 {
 	Q_ASSERT(isClearToSendRequest());
 
-	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateChangesRequest);
+	sendRequest(ADS_GET_APP_SIGNAL_STATE_CHANGES, m_getSignalStateChangesRequest);
 
 	return;
 }
@@ -406,10 +406,8 @@ void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
 
 	for (int i = 0; i < signalStateCount; i++)
 	{
-		const ::Proto::AppSignalState& protoState = m_getSignalStateChangesReply.appsignalstates(i);
-		Q_ASSERT(protoState.hash() != 0);
-
-		states.emplace_back(protoState);
+		const AppSignalState& state = states.emplace_back(m_getSignalStateChangesReply.appsignalstates(i));
+		Q_ASSERT(state.hash() != 0);
 	}
 
 	theSignals.setState(states);
@@ -436,7 +434,7 @@ void TcpSignalClient::requestSignalState(int startIndex)
 {
 	Q_ASSERT(isClearToSendRequest());
 
-	if (startIndex >= m_signalList.size())
+	if (startIndex >= static_cast<int>(m_signalList.size()))
 	{
 		startIndex = 0;
 	}
@@ -447,7 +445,7 @@ void TcpSignalClient::requestSignalState(int startIndex)
 	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 	for (int i = startIndex;
-		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX && i < m_signalList.size();
+		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX && i < static_cast<int>(m_signalList.size());
 		 i++)
 	{
 		Hash signalHash = calcHash(m_signalList[i]);
@@ -484,10 +482,8 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 
 	for (int i = 0; i < signalStateCount; i++)
 	{
-		const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
-		Q_ASSERT(protoState.hash() != 0);
-
-		states.emplace_back(protoState);
+		const AppSignalState& state = states.emplace_back(m_getSignalStateReply.appsignalstates(i));
+		Q_ASSERT(state.m_hash != 0);
 	}
 
 	theSignals.setState(states);

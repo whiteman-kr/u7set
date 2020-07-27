@@ -39,9 +39,6 @@ protected:
 
 	// Methods
 	//
-public:
-	void signalContextMenu(const QStringList signalList);
-
 protected:
 
 	// Signals
@@ -52,6 +49,7 @@ signals:
 	//
 public slots:
 	void contextMenuRequested(const QPoint &pos);
+	void signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*> customMenu);
 
 protected slots:
 	void updateSchema();

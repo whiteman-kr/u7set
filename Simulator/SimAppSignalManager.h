@@ -1,23 +1,36 @@
-#ifndef SIMAPPSIGNALMANAGER_H
-#define SIMAPPSIGNALMANAGER_H
+#pragma once
 
-#include <memory>
-#include <map>
-#include <unordered_map>
-#include <optional>
-#include <QHash>
-#include <QReadWriteLock>
 #include "../lib/Signal.h"
 #include "../lib/AppSignalManager.h"
+#include "../TrendView/TrendSignal.h"
 #include "SimRam.h"
 #include "SimOutput.h"
-#include "../TrendView/TrendSignal.h"
 
 
 namespace Sim
 {
 	class Simulator;
 
+
+	struct FlagsReadStruct : Sim::Output
+	{
+		size_t flagCount = 0;
+		std::array<std::pair<E::AppSignalStateFlagType, Address16>, sizeof AppSignalStateFlags::all * 8> flagsSignalAddresses;
+
+		size_t flagConstsCount = 0;
+		std::array<std::pair<E::AppSignalStateFlagType, quint32>, sizeof AppSignalStateFlags::all * 8> flagsConsts;
+
+		bool create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams);
+
+		AppSignalStateFlags signalFlags(const Ram& ram) const;
+	};
+
+
+	//
+	//
+	//	AppSignalManager
+	//
+	//
 	class AppSignalManager : public QObject, public IAppSignalManager, protected Sim::Output
 	{
 		Q_OBJECT
@@ -47,9 +60,9 @@ namespace Sim
 		Hash customToAppSignal(Hash customSignalHash) const;
 
 		AppSignalState signalState(const QString& appSignalId, bool* found, bool applyOverride) const;
-		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;
+		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;			// <<<< GETTING STATE CODE HERE
 
-		bool getUpdateForRam(const QString equipmentId, Sim::Ram* ram) const;
+		bool getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const;
 
 	public:
 		// Implementing IAppSignalManager - AppSignals
@@ -96,9 +109,10 @@ namespace Sim
 
 		// SimRuntime data
 		//
-		mutable QReadWriteLock m_ramLock;
+		mutable QReadWriteLock m_ramLock{QReadWriteLock::Recursive};
 		std::map<Hash, Ram> m_ram;			// key is hash EquipmentID
 		std::map<Hash, Times> m_ramTimes;	// RAM memory update time - key is hash EquipmentID
+		std::unordered_map<Hash, FlagsReadStruct> m_flagsStruct;	// Signnal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
 
 		// Realtime trends data
 		//
@@ -124,6 +138,79 @@ namespace Sim
 		std::list<Trend> m_trends;
 	};
 
+
+	/*! \class ScriptAppSignalManager
+		\ingroup controllers
+		\brief This class is used to get signal parameters and states in simulation
+
+		This class is used to get signal parameters and states. It is accessed by global <b>signals</b> object.
+
+		\warning
+		It is highly recommended to check function return values, because errors can occur.
+
+		\n
+		<b>Example:</b>
+
+		\code
+		// Get static parameters of the signal "#SIGNALID_001"
+		//
+		var param = signals.signalParam("#SIGNALID_001");
+
+		// Get state of the signal "#SIGNALID_001"
+		//
+		var state = signals.signalState("#SIGNALID_001");
+
+		// Check for functions result
+		//
+		if  (param === undefined)
+		{
+			// Signal static parameters request failed
+			//
+			...
+			return;
+		}
+		if  (state === undefined)
+		{
+			// Signal state request failed
+			//
+			...
+			return;
+		}
+
+		// Further processing
+		//
+
+		if (state.Valid === true)
+		{
+			var text = param.Caption;
+			...
+		}
+		\endcode
+	*/
+	class ScriptAppSignalManager : public QObject
+	{
+		Q_OBJECT
+
+	public:
+		explicit ScriptAppSignalManager(const IAppSignalManager* appSignalManager, QObject* parent = nullptr);
+
+		// Script Interface
+		//
+	public slots:
+		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
+		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
+		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
+
+		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
+		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
+		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
+
+		// Data
+		//
+	private:
+		const IAppSignalManager* m_appSignalManager = nullptr;
+	};
+
 }
 
-#endif // SIMAPPSIGNALMANAGER_H
+

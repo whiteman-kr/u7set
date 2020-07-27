@@ -159,6 +159,8 @@ quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc);
 
 quint32 CRC32(quint32 initialValue, int value, bool finishCalc);
 
+const quint32 TCP_CLIENT_ALIVE = 0xFEDC;
+
 // ConfigurationService specific request IDs
 //
 const quint32	CFGS_GET_SERVICE_STATE = 0x1100,
@@ -214,9 +216,7 @@ const int TDS_TUNING_MAX_WRITE_RECORDS = 1000;
 
 // ArchivingService and AppData Service communications, Port PORT_ARCHIVING_SERVICE_APP_DATA
 //
-const quint32 ARCHS_CONNECTION_ALIVE = 0x1601;
 const quint32 ARCHS_SAVE_APP_SIGNALS_STATES = 0x1602;
-
 
 // Monitor (and other clients) and ArchivingService communications, Port PORT_ARCHIVING_SERVICE_CLIENT_REQUEST
 //

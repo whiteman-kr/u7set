@@ -87,28 +87,20 @@ namespace Proto
 	//
 	const QVariant Read(const Proto::qvariant& message)
 	{
-		switch (static_cast<QVariant::Type>(message.type()))
+		switch (static_cast<QMetaType::Type>(message.type()))
 		{
-		case QVariant::Int:
-		{
+		case QMetaType::Int:
 			return QVariant(message.intvalue());
-			break;
-		}
-		case QVariant::UInt:
-		{
+		case QMetaType::UInt:
 			return QVariant(message.uintvalue());
-			break;
-		}
-		case QVariant::Double:
-		{
+		case QMetaType::UShort:
+			return QVariant::fromValue<unsigned short>(static_cast<unsigned short>(message.uintvalue()));
+		case QMetaType::Float:
+			return QVariant::fromValue<float>(message.floatvalue());
+		case QMetaType::Double:
 			return QVariant(message.doublevalue());
-			break;
-		}
-		case QVariant::Bool:
-		{
+		case QMetaType::Bool:
 			return QVariant(message.boolvalue());
-			break;
-		}
 		default:
 			assert(false);
 		}
@@ -120,28 +112,26 @@ namespace Proto
 	{
 		pMessage->set_type(value.type());
 
-		switch (value.type())
+		switch (static_cast<QMetaType::Type>(value.type()))
 		{
-		case QVariant::Int:
-		{
+		case QMetaType::Int:
 			pMessage->set_intvalue(value.toInt());
 			break;
-		}
-		case QVariant::UInt:
-		{
+		case QMetaType::UInt:
 			pMessage->set_uintvalue(value.toUInt());
 			break;
-		}
-		case QVariant::Double:
-		{
+		case QMetaType::UShort:
+			pMessage->set_uintvalue(value.value<unsigned short>());
+			break;
+		case QMetaType::Float:
+			pMessage->set_floatvalue(value.toFloat());
+			break;
+		case QMetaType::Double:
 			pMessage->set_doublevalue(value.toDouble());
 			break;
-		}
-		case QVariant::Bool:
-		{
+		case QMetaType::Bool:
 			pMessage->set_boolvalue(value.toBool());
 			break;
-		}
 		default:
 			assert(false);
 		}

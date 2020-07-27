@@ -185,7 +185,7 @@ public slots:
 	void slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);
-	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs);
+	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs);
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
@@ -196,7 +196,7 @@ public slots:
 
     // Build management
     //
-    void slot_buildStart(QString workstation, bool release, int changeset, int* buildID);
+	void slot_buildStart(QString workstation, int changeset, int* buildID);
     void slot_buildFinish(int buildID, int errors, int warnings, QString buildLog);
 
     // Version Control

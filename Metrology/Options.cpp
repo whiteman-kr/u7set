@@ -41,7 +41,6 @@ void ProjectInfo::save()
 
 	s.setValue(QString("%1ProjectName").arg(PROJECT_INFO_KEY), m_projectName);
 	s.setValue(QString("%1ID").arg(PROJECT_INFO_KEY), m_id);
-	s.setValue(QString("%1Type").arg(PROJECT_INFO_KEY), m_release);
 	s.setValue(QString("%1Date").arg(PROJECT_INFO_KEY), m_date);
 	s.setValue(QString("%1Changeset").arg(PROJECT_INFO_KEY), m_changeset);
 	s.setValue(QString("%1User").arg(PROJECT_INFO_KEY), m_user);
@@ -66,7 +65,6 @@ bool ProjectInfo::readFromXml(const QByteArray& fileData)
 
 	result &= xml.readStringAttribute("Project", &m_projectName);
 	result &= xml.readIntAttribute("ID", &m_id);
-	result &= xml.readStringAttribute("Type", &m_release);
 	result &= xml.readStringAttribute("Date", &m_date);
 	result &= xml.readIntAttribute("Changeset", &m_changeset);
 	result &= xml.readStringAttribute("User", &m_user);
@@ -101,8 +99,7 @@ ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
 {
 	m_projectName = from.m_projectName;
 	m_id = from.m_id;
-	m_release = from.m_release;
-	m_date = from.m_release;
+	m_date = from.m_date;
 	m_changeset = from.m_changeset;
 	m_user = from.m_user;
 	m_workstation = from.m_workstation;
@@ -1259,6 +1256,11 @@ bool BackupOption::createBackup()
 {
 	QString sourcePath = theOptions.database().path() + QDir::separator() + DATABASE_NAME;
 
+	if (QFile::exists(sourcePath) == false)
+	{
+		return false;
+	}
+
 	QDateTime&& currentTime = QDateTime::currentDateTime();
 	QDate&& date = currentTime.date();
 	QTime&& time = currentTime.time();
@@ -1276,7 +1278,8 @@ bool BackupOption::createBackup()
 
 	if (QFile::copy(sourcePath, destPath) == false)
 	{
-		QMessageBox::critical(nullptr, tr("Backup"), tr("Error reserve copy database"));
+		QMessageBox::critical(nullptr, tr("Backup"), tr("Error reserved copy database (backup of measurements)"));
+		return false;
 	}
 
 	return true;
@@ -1306,14 +1309,11 @@ void BackupOption::createBackupOnExit()
 
 void BackupOption::load()
 {
-	QTemporaryDir tmpDir;
-	QString path = tmpDir.path().left(tmpDir.path().lastIndexOf(QDir::separator(), -1));
-
 	QSettings s;
 
 	m_onStart = s.value(QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), false).toBool();
 	m_onExit = s.value(QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), true).toBool();
-	m_path = s.value(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), path).toString();
+	m_path = s.value(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), QDir::tempPath()).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

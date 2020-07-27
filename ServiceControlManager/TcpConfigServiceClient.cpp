@@ -141,7 +141,6 @@ void TcpConfigServiceClient::onGetConfigurationServiceLoadedBuildInfoReply(const
 	m_buildInfo.project = QString::fromStdString(message.project());
 
 	m_buildInfo.id = message.id();
-	m_buildInfo.release = message.release();
 
 	m_buildInfo.date = QDateTime::fromMSecsSinceEpoch(message.date());
 

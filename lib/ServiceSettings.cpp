@@ -11,50 +11,6 @@
 
 const char* ServiceSettings::SETTINGS_SECTION = "Settings";
 
-const char* ServiceSettings::PROP_APP_DATA_RECEIVING_NETMASK = "AppDataReceivingNetmask";
-const char* ServiceSettings::PROP_APP_DATA_RECEIVING_IP = "AppDataReceivingIP";
-const char* ServiceSettings::PROP_APP_DATA_RECEIVING_PORT = "AppDataReceivingPort";
-
-const char* ServiceSettings::PROP_DIAG_DATA_RECEIVING_NETMASK = "DiagDataReceivingNetmask";
-const char* ServiceSettings::PROP_DIAG_DATA_RECEIVING_IP = "DiagDataReceivingIP";
-const char* ServiceSettings::PROP_DIAG_DATA_RECEIVING_PORT = "DiagDataReceivingPort";
-
-const char* ServiceSettings::PROP_TUNING_DATA_NETMASK = "TuningDataNetmask";
-const char* ServiceSettings::PROP_TUNING_DATA_IP = "TuningDataIP";
-const char* ServiceSettings::PROP_TUNING_DATA_PORT = "TuningDataPort";
-
-const char* ServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
-const char* ServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
-const char* ServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
-
-const char* ServiceSettings::PROP_RT_TRENDS_REQUEST_IP = "RtTrendsRequestIP";
-const char* ServiceSettings::PROP_RT_TRENDS_REQUEST_PORT = "RtTrendsRequestPort";
-
-const char* ServiceSettings::PROP_APP_DATA_SERVICE_ID = "AppDataServiceID";
-const char* ServiceSettings::PROP_APP_DATA_SERVICE_IP = "AppDataServiceIP";
-const char* ServiceSettings::PROP_APP_DATA_SERVICE_PORT = "AppDataServicePort";
-
-const char* ServiceSettings::PROP_DIAG_DATA_SERVICE_ID = "DiagDataServiceID";
-const char* ServiceSettings::PROP_DIAG_DATA_SERVICE_IP = "DiagDataServiceIP";
-const char* ServiceSettings::PROP_DIAG_DATA_SERVICE_PORT = "DiagDataServicePort";
-
-const char* ServiceSettings::PROP_ARCH_SERVICE_ID = "ArchiveServiceID";
-const char* ServiceSettings::PROP_ARCH_SERVICE_IP = "ArchiveServiceIP";
-const char* ServiceSettings::PROP_ARCH_SERVICE_PORT = "ArchiveServicePort";
-
-const char* ServiceSettings::PROP_TUNING_SERVICE_ID = "TuningServiceID";
-const char* ServiceSettings::PROP_TUNING_SERVICE_IP = "TuningServiceIP";
-const char* ServiceSettings::PROP_TUNING_SERVICE_PORT = "TuningServicePort";
-const char* ServiceSettings::PROP_TUNING_SOURCE_EQUIPMENT_ID = "TuningSourceEquipmentID";
-
-const char* ServiceSettings::PROP_CFG_SERVICE_ID1 = "ConfigurationServiceID1";
-const char* ServiceSettings::PROP_CFG_SERVICE_IP1 = "ConfigurationServiceIP1";
-const char* ServiceSettings::PROP_CFG_SERVICE_PORT1 = "ConfigurationServicePort1";
-
-const char* ServiceSettings::PROP_CFG_SERVICE_ID2 = "ConfigurationServiceID2";
-const char* ServiceSettings::PROP_CFG_SERVICE_IP2 = "ConfigurationServiceIP2";
-const char* ServiceSettings::PROP_CFG_SERVICE_PORT2 = "ConfigurationServicePort2";
-
 const char* ServiceSettings::ATTR_COUNT = "Count";
 const char* ServiceSettings::ATTR_EQUIIPMENT_ID = "EquipmentID";
 const char* ServiceSettings::ATTR_SOFTWARE_TYPE = "SoftwareType";
@@ -173,9 +129,9 @@ bool ServiceSettings::getCfgServiceConnection(	const Hardware::EquipmentSet *equ
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_CFG_SERVICE_ID1,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::CFG_SERVICE_ID1,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									cfgServiceID1,
 									cfgServiceAddrPort1,
 									true, Socket::IP_NULL,
@@ -184,9 +140,9 @@ bool ServiceSettings::getCfgServiceConnection(	const Hardware::EquipmentSet *equ
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_CFG_SERVICE_ID2,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::CFG_SERVICE_ID2,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									cfgServiceID2,
 									cfgServiceAddrPort2,
 									true, Socket::IP_NULL,
@@ -224,8 +180,10 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(SETTINGS_SECTION);
 
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
+
+	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -260,8 +218,10 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
+
+	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
 	result = xml.findElement(CLIENTS_SECTION);
 
@@ -321,8 +281,6 @@ QStringList CfgServiceSettings::knownClients()
 //
 // -------------------------------------------------------------------------------------
 
-const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInterval";
-
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
@@ -333,39 +291,44 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 	bool result = true;
 
 	result &= DeviceHelper::getIpPortProperty(software,
-											  PROP_APP_DATA_RECEIVING_IP,
-											  PROP_APP_DATA_RECEIVING_PORT,
+											  EquipmentPropNames::APP_DATA_RECEIVING_IP,
+											  EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 											  &appDataReceivingIP,
 											  false, "", 0, log);
 
-	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask, false, "", log);
+	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::APP_DATA_RECEIVING_NETMASK,
+											&appDataReceivingNetmask, false, "", log);
 
 	result &= DeviceHelper::getIpPortProperty(software,
-											  PROP_CLIENT_REQUEST_IP,
-											  PROP_CLIENT_REQUEST_PORT,
+											  EquipmentPropNames::CLIENT_REQUEST_IP,
+											  EquipmentPropNames::CLIENT_REQUEST_PORT,
 											  &clientRequestIP,
 											  false, "", 0, log);
 
 	int rtTrendsRequestPort = 0;
 
-	result &= DeviceHelper::getPortProperty(software, PROP_RT_TRENDS_REQUEST_PORT, &rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
+	result &= DeviceHelper::getPortProperty(software, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
+											&rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
 
 	rtTrendsRequestIP.setAddressPort(clientRequestIP.addressStr(), rtTrendsRequestPort);
 
-	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
+	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+											&clientRequestNetmask, false, "", log);
 
 	result &= getSoftwareConnection(equipment, software,
-									PROP_ARCH_SERVICE_ID,
-									PROP_APP_DATA_RECEIVING_IP,
-									PROP_APP_DATA_RECEIVING_PORT,
+									EquipmentPropNames::ARCH_SERVICE_ID,
+									EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 									&archServiceID,	&archServiceIP,
 									true, Socket::IP_NULL,
 									PORT_ARCHIVING_SERVICE_APP_DATA,
 									E::SoftwareType::ArchiveService, log);
 
-	result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1, &cfgServiceID2, &cfgServiceIP2, log);
+	result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
+									  &cfgServiceID2, &cfgServiceIP2, log);
 
-	result &= DeviceHelper::getIntProperty(software, PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, log);
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::AUTO_ARCHIVE_INTERVAL,
+										   &autoArchiveInterval, log);
 
 	return result;
 }
@@ -376,24 +339,30 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(SETTINGS_SECTION);
 
-	xml.writeStringElement(PROP_CFG_SERVICE_ID1, cfgServiceID1);
-	xml.writeHostAddressPort(PROP_CFG_SERVICE_IP1, PROP_CFG_SERVICE_PORT1, cfgServiceIP1);
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
 
-	xml.writeStringElement(PROP_CFG_SERVICE_ID2, cfgServiceID2);
-	xml.writeHostAddressPort(PROP_CFG_SERVICE_IP2, PROP_CFG_SERVICE_PORT2, cfgServiceIP2);
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
 
-	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
-	xml.writeHostAddress(PROP_APP_DATA_RECEIVING_NETMASK, appDataReceivingNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+							 EquipmentPropNames::APP_DATA_RECEIVING_PORT, appDataReceivingIP);
+	xml.writeHostAddress(EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, appDataReceivingNetmask);
 
-	xml.writeIntElement(PROP_AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
+	xml.writeIntElement(EquipmentPropNames::AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
 
-	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceID);
-	xml.writeHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, archServiceIP);
+	xml.writeStringElement(EquipmentPropNames::ARCH_SERVICE_ID, archServiceID);
+	xml.writeHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
+							 EquipmentPropNames::ARCH_SERVICE_PORT, archServiceIP);
 
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	xml.writeHostAddressPort(PROP_RT_TRENDS_REQUEST_IP, PROP_RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
+							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -411,24 +380,30 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	result &= xml.readStringElement(PROP_CFG_SERVICE_ID1, &cfgServiceID1, true);
-	result &= xml.readHostAddressPort(PROP_CFG_SERVICE_IP1, PROP_CFG_SERVICE_PORT1, &cfgServiceIP1);
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
 
-	result &= xml.readStringElement(PROP_CFG_SERVICE_ID2, &cfgServiceID2, true);
-	result &= xml.readHostAddressPort(PROP_CFG_SERVICE_IP2, PROP_CFG_SERVICE_PORT2, &cfgServiceIP2);
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
-	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
-	result &= xml.readHostAddress(PROP_APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									  EquipmentPropNames::APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
+	result &= xml.readHostAddress(EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask);
 
-	result &= xml.readIntElement(PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, true);
+	result &= xml.readIntElement(EquipmentPropNames::AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, true);
 
-	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceID, true);
-	result &= xml.readHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, &archServiceIP);
+	result &= xml.readStringElement(EquipmentPropNames::ARCH_SERVICE_ID, &archServiceID, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
+									  EquipmentPropNames::ARCH_SERVICE_PORT, &archServiceIP);
 
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
+	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
-	result &= xml.readHostAddressPort(PROP_RT_TRENDS_REQUEST_IP, PROP_RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
+									  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
 
 	return result;
 }
@@ -438,9 +413,6 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 // TuningServiceSettings class implementation
 //
 // -------------------------------------------------------------------------------------
-
-const char* TuningServiceSettings::PROP_SINGLE_LM_CONTROL = "SingleLmControl";
-const char* TuningServiceSettings::PROP_DISABLE_MODULES_TYPE_CHECKING = "DisableModulesTypeChecking";
 
 const char* TuningServiceSettings::TUNING_CLIENTS = "TuningClients";
 const char* TuningServiceSettings::TUNING_CLIENT = "TuningClient";
@@ -539,7 +511,8 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 
 			tc.equipmentID = tuningClient->equipmentIdTemplate();
 
-			result &= DeviceHelper::getStrListProperty(tuningClient, PROP_TUNING_SOURCE_EQUIPMENT_ID, &tc.sourcesIDs, log);
+			result &= DeviceHelper::getStrListProperty(tuningClient, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+													   &tc.sourcesIDs, log);
 
 			this->clients.append(tc);
 		}
@@ -553,23 +526,25 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 	bool result = true;
 
 	result &= DeviceHelper::getIpPortProperty(software,
-											  PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT,
+											  EquipmentPropNames::CLIENT_REQUEST_IP,
+											  EquipmentPropNames::CLIENT_REQUEST_PORT,
 											  &clientRequestIP, false, "", 0, log);
 
 	result &= DeviceHelper::getIPv4Property(software,
-											PROP_CLIENT_REQUEST_NETMASK,
+											EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 											&clientRequestNetmask, false, "", log);
 
 	result &= DeviceHelper::getIpPortProperty(software,
-											  PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT,
+											  EquipmentPropNames::TUNING_DATA_IP,
+											  EquipmentPropNames::TUNING_DATA_PORT,
 											  &tuningDataIP, false, "", 0, log);
 
 	result &= DeviceHelper::getIPv4Property(software,
-											PROP_TUNING_DATA_NETMASK,
+											EquipmentPropNames::TUNING_DATA_NETMASK,
 											&tuningDataNetmask, false, "", log);
 
-	result &= DeviceHelper::getBoolProperty(software, PROP_SINGLE_LM_CONTROL, &singleLmControl, log);
-	result &= DeviceHelper::getBoolProperty(software, PROP_DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
 
 	result &= fillTuningClientsInfo(software, singleLmControl, log);
 
@@ -580,13 +555,15 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(SETTINGS_SECTION);
 
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
-	xml.writeHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, tuningDataIP);
-	xml.writeHostAddress(PROP_TUNING_DATA_NETMASK, tuningDataNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
+							 EquipmentPropNames::TUNING_DATA_PORT, tuningDataIP);
+	xml.writeHostAddress(EquipmentPropNames::TUNING_DATA_NETMASK, tuningDataNetmask);
 
-	xml.writeBoolElement(PROP_SINGLE_LM_CONTROL, singleLmControl);
-	xml.writeBoolElement(PROP_DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
+	xml.writeBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, singleLmControl);
+	xml.writeBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -634,28 +611,30 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningDataIP);
-	result &= xml.readHostAddress(PROP_TUNING_DATA_NETMASK, &tuningDataNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
+	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
+									  EquipmentPropNames::TUNING_DATA_PORT, &tuningDataIP);
+	result &= xml.readHostAddress(EquipmentPropNames::TUNING_DATA_NETMASK, &tuningDataNetmask);
 
-	result = xml.findElement(PROP_SINGLE_LM_CONTROL);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readBoolElement(PROP_SINGLE_LM_CONTROL, &singleLmControl);
-
-	result = xml.findElement(PROP_DISABLE_MODULES_TYPE_CHECKING);
+	result = xml.findElement(EquipmentPropNames::SINGLE_LM_CONTROL);
 
 	if (result == false)
 	{
 		return false;
 	}
 
-	result &= xml.readBoolElement(PROP_DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking);
+	result &= xml.readBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl);
+
+	result = xml.findElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking);
 
 	if (result == false)
 	{
@@ -756,10 +735,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-const char* ArchivingServiceSettings::PROP_ARCHIVE_SHORT_TERM_PERIOD = "ShortTermArchivePeriod";
-const char* ArchivingServiceSettings::PROP_ARCHIVE_LONG_TERM_PERIOD = "LongTermArchivePeriod";;
-const char* ArchivingServiceSettings::PROP_ARCHIVE_LOCATION = "ArchiveLocation";
-
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
@@ -771,9 +746,9 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	int clientRequestPort = 0;
 	QString clientNetmaskStr;
 
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
 
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
 	clientRequestNetmask.setAddress(clientNetmaskStr);
@@ -784,9 +759,9 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	int appDataServiceRequestPort = 0;
 	QString appDataServiceNetmaskStr;
 
-	result &= DeviceHelper::getStrProperty(software, PROP_APP_DATA_RECEIVING_IP, &appDataServiceRequestIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_APP_DATA_RECEIVING_PORT, &appDataServiceRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_APP_DATA_RECEIVING_NETMASK, &appDataServiceNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::APP_DATA_RECEIVING_IP, &appDataServiceRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::APP_DATA_RECEIVING_PORT, &appDataServiceRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, &appDataServiceNetmaskStr, log);
 
 	appDataRecevingIP = HostAddressPort(appDataServiceRequestIPStr, appDataServiceRequestPort);
 	appDataReceivingNetmask.setAddress(appDataServiceNetmaskStr);
@@ -797,18 +772,18 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	int diagDataServiceRequestPort = 0;
 	QString diagDataServiceNetmaskStr;
 
-	result &= DeviceHelper::getStrProperty(software, PROP_DIAG_DATA_RECEIVING_IP, &diagDataServiceRequestIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataServiceRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_DIAG_DATA_RECEIVING_NETMASK, &diagDataServiceNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::DIAG_DATA_RECEIVING_IP, &diagDataServiceRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, &diagDataServiceRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK, &diagDataServiceNetmaskStr, log);
 
 	diagDataReceivingIP = HostAddressPort(diagDataServiceRequestIPStr, diagDataServiceRequestPort);
 	diagDataReceivingNetmask.setAddress(diagDataServiceNetmaskStr);
 
 	//
 
-	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_ARCHIVE_LOCATION, &archiveLocation, log);
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, log);
 
 	return result;
 }
@@ -822,7 +797,7 @@ bool ArchivingServiceSettings::checkSettings(Hardware::Software *software, Build
 
 	if (archiveLocation.isEmpty() == true)
 	{
-		log->wrnCFG3031(software->equipmentIdTemplate(), PROP_ARCHIVE_LOCATION);
+		log->wrnCFG3031(software->equipmentIdTemplate(), EquipmentPropNames::ARCHIVE_LOCATION);
 	}
 
 	return result;
@@ -834,18 +809,21 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(SETTINGS_SECTION);
 
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataRecevingIP);
-	xml.writeHostAddress(PROP_APP_DATA_RECEIVING_NETMASK, appDataReceivingNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+							 EquipmentPropNames::APP_DATA_RECEIVING_PORT, appDataRecevingIP);
+	xml.writeHostAddress(EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, appDataReceivingNetmask);
 
-	xml.writeHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, diagDataReceivingIP);
-	xml.writeHostAddress(PROP_DIAG_DATA_RECEIVING_NETMASK, diagDataReceivingNetmask);
+	xml.writeHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+							 EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, diagDataReceivingIP);
+	xml.writeHostAddress(EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK, diagDataReceivingNetmask);
 
-	xml.writeIntElement(PROP_ARCHIVE_SHORT_TERM_PERIOD, shortTermArchivePeriod);
-	xml.writeIntElement(PROP_ARCHIVE_LONG_TERM_PERIOD, longTermArchivePeriod);
-	xml.writeStringElement(PROP_ARCHIVE_LOCATION, archiveLocation);
+	xml.writeIntElement(EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, shortTermArchivePeriod);
+	xml.writeIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, longTermArchivePeriod);
+	xml.writeStringElement(EquipmentPropNames::ARCHIVE_LOCATION, archiveLocation);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -863,18 +841,21 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
+	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
-	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataRecevingIP);
-	result &= xml.readHostAddress(PROP_APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									  EquipmentPropNames::APP_DATA_RECEIVING_PORT, &appDataRecevingIP);
+	result &= xml.readHostAddress(EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask);
 
-	result &= xml.readHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataReceivingIP);
-	result &= xml.readHostAddress(PROP_DIAG_DATA_RECEIVING_NETMASK, &diagDataReceivingNetmask);
+	result &= xml.readHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+									  EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, &diagDataReceivingIP);
+	result &= xml.readHostAddress(EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK, &diagDataReceivingNetmask);
 
-	result &= xml.readIntElement(PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, true);
-	result &= xml.readIntElement(PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, true);
-	result &= xml.readStringElement(PROP_ARCHIVE_LOCATION, &archiveLocation, true);
+	result &= xml.readIntElement(EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, true);
+	result &= xml.readIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, true);
+	result &= xml.readStringElement(EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, true);
 
 	return result;
 }
@@ -900,12 +881,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_CFG_SERVICE_ID1,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::CFG_SERVICE_ID1,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									&cfgService1_equipmentID,
 									&cfgService1_clientRequestIP,
-									true, Socket::IP_NULL, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
+									true, Socket::IP_NULL,
+									PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::ConfigurationService, log);
 	if (result == false)
 	{
@@ -914,12 +896,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_CFG_SERVICE_ID2,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::CFG_SERVICE_ID2,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									&cfgService2_equipmentID,
 									&cfgService2_clientRequestIP,
-									true, Socket::IP_NULL, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
+									true, Socket::IP_NULL,
+									PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::ConfigurationService, log);
 	if (result == false)
 	{
@@ -938,12 +921,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_APP_DATA_SERVICE_ID,
-									PROP_APP_DATA_RECEIVING_IP,
-									PROP_APP_DATA_RECEIVING_PORT,
+									EquipmentPropNames::APP_DATA_SERVICE_ID,
+									EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 									&appDataService_equipmentID,
 									&appDataService_appDataReceivingIP,
-									false, Socket::IP_NULL, PORT_APP_DATA_SERVICE_DATA,
+									false, Socket::IP_NULL,
+									PORT_APP_DATA_SERVICE_DATA,
 									E::SoftwareType::AppDataService, log);
 	if (result == false)
 	{
@@ -952,12 +936,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_APP_DATA_SERVICE_ID,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::APP_DATA_SERVICE_ID,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									&appDataService_equipmentID,
 									&appDataService_clientRequestIP,
-									false, Socket::IP_NULL, PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
+									false, Socket::IP_NULL,
+									PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::AppDataService, log);
 	if (result == false)
 	{
@@ -976,12 +961,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									appDataService,
-									PROP_ARCH_SERVICE_ID,
-									PROP_APP_DATA_RECEIVING_IP,
-									PROP_APP_DATA_RECEIVING_PORT,
+									EquipmentPropNames::ARCH_SERVICE_ID,
+									EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 									&archService_equipmentID,
 									&archService_appDataReceivingIP,
-									false, Socket::IP_NULL, PORT_ARCHIVING_SERVICE_APP_DATA,
+									false, Socket::IP_NULL,
+									PORT_ARCHIVING_SERVICE_APP_DATA,
 									E::SoftwareType::ArchiveService, log);
 	if (result == false)
 	{
@@ -990,12 +976,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									appDataService,
-									PROP_ARCH_SERVICE_ID,
-									PROP_DIAG_DATA_RECEIVING_IP,
-									PROP_DIAG_DATA_RECEIVING_PORT,
+									EquipmentPropNames::ARCH_SERVICE_ID,
+									EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+									EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
 									&archService_equipmentID,
 									&archService_diagDataReceivingIP,
-									false, Socket::IP_NULL, PORT_ARCHIVING_SERVICE_DIAG_DATA,
+									false, Socket::IP_NULL,
+									PORT_ARCHIVING_SERVICE_DIAG_DATA,
 									E::SoftwareType::ArchiveService, log);
 	if (result == false)
 	{
@@ -1004,12 +991,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									appDataService,
-									PROP_ARCH_SERVICE_ID,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::ARCH_SERVICE_ID,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									&archService_equipmentID,
 									&archService_clientRequestIP,
-									false, Socket::IP_NULL, PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
+									false, Socket::IP_NULL,
+									PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::ArchiveService, log);
 	if (result == false)
 	{
@@ -1020,12 +1008,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_TUNING_SERVICE_ID,
-									PROP_TUNING_DATA_IP,
-									PROP_TUNING_DATA_PORT,
+									EquipmentPropNames::TUNING_SERVICE_ID,
+									EquipmentPropNames::TUNING_DATA_IP,
+									EquipmentPropNames::TUNING_DATA_PORT,
 									&tuningService_equipmentID,
 									&tuningService_tuningDataIP,
-									false, Socket::IP_NULL, PORT_TUNING_SERVICE_DATA,
+									false, Socket::IP_NULL,
+									PORT_TUNING_SERVICE_DATA,
 									E::SoftwareType::TuningService, log);
 	if (result == false)
 	{
@@ -1034,15 +1023,17 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_TUNING_SERVICE_ID,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::TUNING_SERVICE_ID,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									&tuningService_equipmentID,
 									&tuningService_clientRequestIP,
-									false, Socket::IP_NULL, PORT_TUNING_SERVICE_CLIENT_REQUEST,
+									false, Socket::IP_NULL,
+									PORT_TUNING_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::TuningService, log);
 
-	result &= DeviceHelper::getStrListProperty(software, PROP_TUNING_SOURCE_EQUIPMENT_ID, &tuningService_tuningSources, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+											   &tuningService_tuningSources, log);
 
 	if (result == false)
 	{
@@ -1053,12 +1044,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_DIAG_DATA_SERVICE_ID,
-									PROP_DIAG_DATA_RECEIVING_IP,
-									PROP_DIAG_DATA_RECEIVING_PORT,
+									EquipmentPropNames::DIAG_DATA_SERVICE_ID,
+									EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+									EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
 									&diagDataService_equipmentID,
 									&diagDataService_diagDataReceivingIP,
-									true, Socket::IP_NULL, PORT_DIAG_DATA_SERVICE_DATA,
+									true, Socket::IP_NULL,
+									PORT_DIAG_DATA_SERVICE_DATA,
 									E::SoftwareType::DiagDataService, log);
 	if (result == false)
 	{
@@ -1067,12 +1059,13 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 
 	result &= getSoftwareConnection(equipment,
 									software,
-									PROP_DIAG_DATA_SERVICE_ID,
-									PROP_CLIENT_REQUEST_IP,
-									PROP_CLIENT_REQUEST_PORT,
+									EquipmentPropNames::DIAG_DATA_SERVICE_ID,
+									EquipmentPropNames::CLIENT_REQUEST_IP,
+									EquipmentPropNames::CLIENT_REQUEST_PORT,
 									&diagDataService_equipmentID,
 									&diagDataService_clientRequestIP,
-									true, Socket::IP_NULL, PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST,
+									true, Socket::IP_NULL,
+									PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::DiagDataService, log);
 	return result;
 }
@@ -1085,50 +1078,61 @@ bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(CFG_SERVICE1_SECTION);
 	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, cfgService1_equipmentID);
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, cfgService1_clientRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, cfgService1_clientRequestIP);
 	xml.writeEndElement();	// </CgService1>
 
 	//
 
 	xml.writeStartElement(CFG_SERVICE2_SECTION);
 	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, cfgService2_equipmentID);
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, cfgService2_clientRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, cfgService2_clientRequestIP);
 	xml.writeEndElement();	// </CgService2>
 
 	//
 
 	xml.writeStartElement(APP_DATA_SERVICE_SECTION);
 	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, appDataService_equipmentID);
-	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataService_appDataReceivingIP);
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, appDataService_clientRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+							 EquipmentPropNames::APP_DATA_RECEIVING_PORT, appDataService_appDataReceivingIP);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, appDataService_clientRequestIP);
 	xml.writeEndElement();	// </AppDataService>
 
 	//
 
 	xml.writeStartElement(DIAG_DATA_SERVICE_SECTION);
 	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, diagDataService_equipmentID);
-	xml.writeHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, diagDataService_diagDataReceivingIP);
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, diagDataService_clientRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+							 EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, diagDataService_diagDataReceivingIP);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, diagDataService_clientRequestIP);
 	xml.writeEndElement();	// </DiagDataService>
 
 	//
 
 	xml.writeStartElement(ARCH_SERVICE_SECTION);
 	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, archService_equipmentID);
-	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, archService_appDataReceivingIP);
-	xml.writeHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, archService_diagDataReceivingIP);
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, archService_clientRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+							 EquipmentPropNames::APP_DATA_RECEIVING_PORT, archService_appDataReceivingIP);
+	xml.writeHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+							 EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, archService_diagDataReceivingIP);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, archService_clientRequestIP);
 	xml.writeEndElement();	// </ArchService>
 
 	//
 
 	xml.writeStartElement(TUNING_SERVICE_SECTION);
 	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, tuningService_equipmentID);
-	xml.writeHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, tuningService_tuningDataIP);
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, tuningService_clientRequestIP);
+	xml.writeHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
+							 EquipmentPropNames::TUNING_DATA_PORT, tuningService_tuningDataIP);
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT, tuningService_clientRequestIP);
 
 	QString tuningSources = tuningService_tuningSources.join(";");
-	xml.writeStringElement(PROP_TUNING_SOURCE_EQUIPMENT_ID, tuningSources);
+	xml.writeStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, tuningSources);
 
 	xml.writeEndElement();	// </TuingService>
 
@@ -1147,32 +1151,43 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.findElement(CFG_SERVICE1_SECTION);
 	result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &cfgService1_equipmentID);
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &cfgService1_clientRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &cfgService1_clientRequestIP);
 
 	result &= xml.findElement(CFG_SERVICE2_SECTION);
 	result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &cfgService2_equipmentID);
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &cfgService2_clientRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &cfgService2_clientRequestIP);
 
 	result &= xml.findElement(APP_DATA_SERVICE_SECTION);
 	result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &appDataService_equipmentID);
-	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataService_appDataReceivingIP);
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &appDataService_clientRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									  EquipmentPropNames::APP_DATA_RECEIVING_PORT, &appDataService_appDataReceivingIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataService_clientRequestIP);
 
 	result &= xml.findElement(DIAG_DATA_SERVICE_SECTION);
 	result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &diagDataService_equipmentID);
-	result &= xml.readHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataService_diagDataReceivingIP);
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &diagDataService_clientRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+									  EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, &diagDataService_diagDataReceivingIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &diagDataService_clientRequestIP);
 
 	result &= xml.findElement(ARCH_SERVICE_SECTION);
 	result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &archService_equipmentID);
-	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &archService_appDataReceivingIP);
-	result &= xml.readHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, &archService_diagDataReceivingIP);
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &archService_clientRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_RECEIVING_IP,
+									  EquipmentPropNames::APP_DATA_RECEIVING_PORT, &archService_appDataReceivingIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
+									  EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, &archService_diagDataReceivingIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &archService_clientRequestIP);
 
 	result &= xml.findElement(TUNING_SERVICE_SECTION);
 	result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &tuningService_equipmentID);
-	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningService_tuningDataIP);
-	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &tuningService_clientRequestIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
+									  EquipmentPropNames::TUNING_DATA_PORT, &tuningService_tuningDataIP);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningService_clientRequestIP);
 
 	return result;
 }

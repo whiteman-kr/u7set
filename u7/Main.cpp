@@ -8,6 +8,7 @@
 #include "../lib/TimeStamp.h"
 #include "../lib/LmDescription.h"
 #include "../lib/Configurator.h"
+#include "../lib/LogicModulesInfo.h"
 #include "../Builder/Builder.h"
 #include "../lib/Signal.h"
 #include <QList>

@@ -199,7 +199,7 @@ struct CONF_IDENTIFICATION_DATA_V2
 		uint64_t date;									// Configuration date and time
 		char host[24];									// Host name of the first configuration
 		uint32_t buildNo;								// Build number
-		char buildConfig[10];							// Configuraton name, Debug/Release
+		char buildConfig[10];							// OBSOLETE: Configuraton name, Debug/Release
 		char userName[32];								// User who had built the project
 	};
 

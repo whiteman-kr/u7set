@@ -1010,6 +1010,28 @@ int LmDescription::Lan::lanControllerPlace(int index, bool* ok) const
 	return m_lanControllers[index].m_place;
 }
 
+LmDescription::LanController LmDescription::Lan::lanController(int index, bool* ok) const
+{
+	if (index < 0 || index >= lanControllerCount())
+	{
+		Q_ASSERT(false);
+
+		if (ok != nullptr)
+		{
+			*ok = false;
+		}
+		return LanController();
+	}
+
+	if (ok != nullptr)
+	{
+		*ok = true;
+	}
+
+	return m_lanControllers[index];
+}
+
+
 bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)

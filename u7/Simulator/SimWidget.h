@@ -33,9 +33,9 @@ public:
 	void startTrends(const std::vector<AppSignalParam>& appSignals);
 
 public slots:
-	void signalContextMenu(const QStringList signalList);
+	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
-	void openSchemaTabPage(QString schemaId);
+	void openSchemaTabPage(QString schemaId, QStringList highlightIds);
 
 protected:
 	void createToolBar();
@@ -64,6 +64,8 @@ protected slots:
 	void runSimulation();
 	void pauseSimulation();
 	void stopSimulation(bool stopSimulationThread = false);
+
+	void allowRegDataToggled(bool state);
 
 	void showSnapshot();
 	void showFindSignal();
@@ -116,6 +118,8 @@ private:
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_allowRegData = nullptr;
 
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;

@@ -352,6 +352,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0332.sql", "Upgrade to version 332, AFB description update, HasRam added to Afb Components"},
 	{":/DatabaseUpgrade/Upgrade0333.sql", "Upgrade to version 333, Fixed TxDiagDataSize and DiagDataSize in few presets"},
 	{":/DatabaseUpgrade/Upgrade0334.sql", "Upgrade to version 334, Added folders $root$/Tests and $root$/Tests/SimTests"},
+	{":/DatabaseUpgrade/Upgrade0335.sql", "Upgrade to version 335, Added AFB mux (discrete multiplexor) for all LMs and MSO4_SR21"},
+	{":/DatabaseUpgrade/Upgrade0336.sql", "Upgrade to version 336, Updated schema templates, set default font to Arial"},
+	{":/DatabaseUpgrade/Upgrade0337.sql", "Upgrade to version 337, TuningClient preset update (StartSchemaID and ConfigurationArrivedScript added)"},
 };
 
 int DbWorker::counter = 0;
@@ -1054,6 +1057,13 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result = db_logIn(db, username, password, &errorMessage);
 	if (result == false)
 	{
+		if (errorMessage.contains("User does not exist or the password is incorrect.") == true)
+		{
+			// It clears extra debug info like context, and other db stuff
+			//
+			errorMessage = tr("User does not exist or the password is incorrect.");
+		}
+
 		emitError(db, errorMessage);
 		db.close();
 		return;
@@ -6138,7 +6148,7 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 	}
 }
 
-void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs)
+void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs)
 {
 	AUTO_COMPLETE
 
@@ -6194,7 +6204,7 @@ void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equi
 		{
 			int signalID = q.value(0).toInt();
 
-			signalIDs->insertMulti(equipmentID, signalID);
+			signalIDs->insert(equipmentID, signalID);
 		}
 	}
 }
@@ -6383,7 +6393,7 @@ void DbWorker::hasCheckedOutSignals(QSqlDatabase& db, bool* hasCheckedOut)
 // Build management
 //
 
-void DbWorker::slot_buildStart(QString workstation, bool release, int changeset, int* buildID)
+void DbWorker::slot_buildStart(QString workstation, int changeset, int* buildID)
 {
 	AUTO_COMPLETE
 
@@ -6405,8 +6415,7 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 
 	// Log action
 	//
-	QString logMessage = QString("slot_buildStart: Release %1, Changeset %2")
-						 .arg(release)
+	QString logMessage = QString("slot_buildStart: Changeset %1")
 						 .arg(changeset);
 
 	addLogRecord(db, logMessage);
@@ -6416,7 +6425,7 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 	QString request = QString("SELECT * FROM build_start(%1, '%2', cast(%3 as boolean), %4)")
 					  .arg(currentUser().userId())
 					  .arg(DbWorker::toSqlStr(workstation))
-					  .arg(release)
+					  .arg(true)
 					  .arg(changeset);
 
 	QSqlQuery q(db);

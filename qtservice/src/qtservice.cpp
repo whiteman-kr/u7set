@@ -439,10 +439,9 @@ QtServiceBase *QtServiceBasePrivate::instance = 0;
 
 QtServiceBasePrivate::QtServiceBasePrivate(const QString &name) :
     startupType(QtServiceController::ManualStartup),
-    serviceFlags(0),
     controller(name)
 {
-
+	serviceFlags = QtServiceBase::ServiceFlag::Default;
 }
 
 QtServiceBasePrivate::~QtServiceBasePrivate()
@@ -667,7 +666,7 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::sh
     d_ptr = new QtServiceBasePrivate(nm);
     d_ptr->q_ptr = this;
 
-    d_ptr->serviceFlags = 0;
+	d_ptr->serviceFlags = QtServiceBase::ServiceFlag::Default;
     d_ptr->sysd = 0;
 
     for (int i = 0; i < argc; ++i)

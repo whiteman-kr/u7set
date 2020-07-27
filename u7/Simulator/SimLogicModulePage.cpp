@@ -1,20 +1,35 @@
 #include "SimLogicModulePage.h"
+#include "SimSignalSnapshot.h"
+#include "SimWidget.h"
 
-
-SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
+SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::AppSignalController* appSignalController,
 									   QString equipmentId,
 									   QWidget* parent)
 	: SimBasePage(simulator, parent),
-	m_lmEquipmentId(equipmentId)
+	  m_lmEquipmentId(equipmentId),
+	  m_appSignalController(appSignalController)
 {
 	assert(m_simulator);
+	assert(m_appSignalController);
 	assert(m_lmEquipmentId.isEmpty() == false);
 
 	// --
 	//
+#if defined(Q_OS_WIN)
+		QFont font = QFont("Consolas");
+#else
+		QFont font = QFont("Courier");
+#endif
+	m_subsystemIdLabel->setFont(font);
+	m_equipmentIdLabel->setFont(font);
+	m_channelLabel->setFont(font);
+
 	m_subsystemIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	m_equipmentIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	m_channelLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+
+	m_disableButton->setCheckable(true);
+	m_disableButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
 	QStringList schemaListHeader;
 	schemaListHeader << tr("SchemaID");
@@ -47,20 +62,25 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 		QGridLayout* layout = new QGridLayout;
 		leftWidget->setLayout(layout);
 
-		layout->addWidget(m_subsystemIdLabel, 0, 0, 1, 3);
-		layout->addWidget(m_equipmentIdLabel, 1, 0, 1, 3);
-		layout->addWidget(m_channelLabel, 2, 0, 1, 3);
+		int row = 0;
+
+		layout->addWidget(m_subsystemIdLabel, row++, 0, 1, 3);
+		layout->addWidget(m_equipmentIdLabel, row++, 0, 1, 3);
+		layout->addWidget(m_channelLabel, row++, 0, 1, 3);
+
+		layout->addWidget(m_disableButton, row, 0, 1, 1);
+		layout->addWidget(m_stateLabel, row++, 1, 1, 1);
 
 		// Add spacer
 		//
 		QSpacerItem* spacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
-		layout->addItem(spacer, 3, 0, 1, 3);
+		layout->addItem(spacer, row++, 0, 1, 3);
 
 		// Buttons  Signals, Memory, Code
 		//
-		layout->addWidget(m_signalsButton, 4, 0, 1, 1);
-		layout->addWidget(m_memoryButton, 4, 1, 1, 1);
-		layout->addWidget(m_codeButton, 4, 2, 1, 1);
+		layout->addWidget(m_signalsButton, row, 0, 1, 1);
+		layout->addWidget(m_memoryButton, row, 1, 1, 1);
+		layout->addWidget(m_codeButton, row, 2, 1, 1);
 
 		m_splitter->addWidget(leftWidget);
 		m_splitter->setStretchFactor(0, 1);
@@ -95,6 +115,9 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 	//
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
 
+	connect(m_disableButton, &QPushButton::toggled, this, &SimLogicModulePage::powerOff);
+
+	connect(m_signalsButton, &QPushButton::clicked, this, &SimLogicModulePage::signalsButtonClicked);
 	connect(m_codeButton, &QPushButton::clicked, this, &SimLogicModulePage::codeButtonClicked);
 	connect(m_memoryButton, &QPushButton::clicked, this, &SimLogicModulePage::memoryButtonClicked);
 
@@ -102,6 +125,8 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator,
 
 	connect(m_schemasList, &QTreeWidget::customContextMenuRequested, this, &SimLogicModulePage::schemaContextMenuRequested);
 	connect(m_schemasList, &QTreeWidget::itemDoubleClicked, this, &SimLogicModulePage::schemaItemDoubleClicked);
+
+	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimLogicModulePage::updateModuleStates);
 
 	// --
 	//
@@ -163,7 +188,7 @@ void SimLogicModulePage::fillSchemaList()
 
 	// Get all schemas fro LM
 	//
-	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmnetId());
+	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmentId());
 
 	// Filter data
 	//
@@ -203,9 +228,49 @@ void SimLogicModulePage::projectUpdated()
 	return;
 }
 
+void SimLogicModulePage::powerOff(bool toPowerOff)
+{
+	if (auto lm = logicModule();
+		lm != nullptr && lm->isPowerOff() != toPowerOff)
+	{
+		lm->setPowerOff(toPowerOff);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::signalsButtonClicked()
+{
+	// Show snapshot with applied filter lmEquipmnetId()
+	//
+
+	SimWidget* simWidget = nullptr;
+
+	QWidget* pw = parentWidget();
+	while (pw != nullptr)
+	{
+		if (dynamic_cast<SimWidget*>(pw) != nullptr)
+		{
+			simWidget = dynamic_cast<SimWidget*>(pw);
+			break;
+		}
+		pw = pw->parentWidget();
+	}
+
+	if (simWidget == nullptr)
+	{
+		Q_ASSERT(simWidget);
+		return;
+	}
+
+	SimDialogSignalSnapshot::showDialog(m_simulator, m_appSignalController, equipmentId(), simWidget);
+
+	return;
+}
+
 void SimLogicModulePage::codeButtonClicked()
 {
-	emit openCodePageRequest(equipmnetId());
+	emit openCodePageRequest(equipmentId());
 	return;
 }
 
@@ -295,7 +360,7 @@ void SimLogicModulePage::openSelectedSchema()
 		return;
 	}
 
-	emit openSchemaRequest(schemaId);
+	emit openSchemaRequest(schemaId, {});
 
 	return;
 }
@@ -304,7 +369,7 @@ void SimLogicModulePage::updateFilterCompleter()
 {
 	// Get all schemas fro LM
 	//
-	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmnetId());
+	std::vector<VFrame30::SchemaDetails> schemas = m_simulator->schemasForLm(equipmentId());
 
 	QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_completer->model());
 
@@ -354,7 +419,92 @@ void SimLogicModulePage::updateFilterCompleter()
 	return;
 }
 
-QString SimLogicModulePage::equipmnetId() const
+void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
+{
+	auto it = std::find_if(std::begin(state.m_lmDeviceModes),
+						   std::end(state.m_lmDeviceModes),
+						   [this](const Sim::ControlStatus::LmMode& p)
+						   {
+								return p.lmEquipmentId == this->equipmentId();
+						   });
+
+	if (it == std::end(state.m_lmDeviceModes))
+	{
+		return;
+	}
+
+	const Sim::ControlStatus::LmMode& lmState = *it;
+
+	QColor color{Qt::black};
+
+	QString text;
+	text.reserve(64);
+
+	if (state.m_state == Sim::SimControlState::Pause)
+	{
+		text = QObject::tr("Pause - ");
+	}
+
+	if (state.m_state != Sim::SimControlState::Stop)
+	{
+		switch (lmState.deviceMode)
+		{
+		case Sim::DeviceMode::Off:
+			text += QStringLiteral("Off");
+			break;
+		case Sim::DeviceMode::Start:
+			text += QStringLiteral("Start");
+			break;
+		case Sim::DeviceMode::Fault:
+			text += QStringLiteral("Fault");
+			color = qRgb(0xD0, 0x00, 0x00);
+			break;
+		case Sim::DeviceMode::Operate:
+			text += QStringLiteral("Operate");
+			break;
+		default:
+			Q_ASSERT(false);
+			text += QStringLiteral("Unknown");
+			color = qRgb(0xD0, 0x00, 0x00);
+		}
+	}
+
+	bool disabled = false;
+
+	if (auto lm = logicModule();
+		lm != nullptr)
+	{
+		disabled = lm->isPowerOff();
+	}
+
+	if (m_disableButton->isChecked() != disabled)
+	{
+		// Update push button state
+		//
+		m_disableButton->setChecked(disabled);
+	}
+
+	// State
+	//
+	QString stateText;
+	if (m_simulator->isLoaded() == true)
+	{
+		if (m_simulator->isStopped() == true)
+		{
+			stateText = tr("State: Stopped");
+		}
+		else
+		{
+			stateText = text;
+		}
+	}
+
+	m_stateLabel->setText(stateText);
+
+	return;
+}
+
+QString SimLogicModulePage::equipmentId() const
 {
 	return m_lmEquipmentId;
 }

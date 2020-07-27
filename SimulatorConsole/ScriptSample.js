@@ -20,6 +20,9 @@ function initTestCase(sim)
 {
     console.log(sim.buildPath);
 
+    sim.unlockTimer = true;             // Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
+    sim.appDataTrasmittion = false;     // Allows or disables LogicModules' Application Data transmittion to AppDataSrv
+
     // Warm up all modules
     //
     sim.startForMs(5);

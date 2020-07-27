@@ -63,7 +63,11 @@ namespace Sim
 
         // initTestCase() - will be called before the first test function is executed.
         //
-        runScriptFunction("initTestCase");
+		m_result = runScriptFunction("initTestCase");
+		if (m_result == false)
+		{
+			return;
+		}
 
         // Call all functions which starts from 'test', like 'testAfbNot()'
         //
@@ -357,6 +361,27 @@ namespace Sim
 		return true;
 	}
 
+	QJSValue ScriptSimulator::signalState(QString appSignalId)
+	{
+		bool ok = false;
+		AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+
+		if (ok == false)
+		{
+			throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
+			return -1;
+		}
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return {};
+		}
+
+		return jsEngine->toScriptValue(state);
+	}
+
 	double ScriptSimulator::signalValue(QString appSignalId)
 	{
 		bool ok = false;
@@ -417,6 +442,37 @@ namespace Sim
 		return jsEngine->newQObject(slm);
 	}
 
+	QJSValue ScriptSimulator::connection(QString connectionID)
+	{
+		auto conn = m_simulator->connections().connection(connectionID);
+		if (conn == nullptr)
+		{
+			throwScriptException(this, tr("Connection %1 not found").arg(connectionID));
+			return {};
+		}
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return {};
+		}
+
+		ScriptConnection* sconn = new ScriptConnection{conn};
+		return jsEngine->newQObject(sconn);
+	}
+
+	void ScriptSimulator::connectionsSetEnabled(bool value)
+	{
+		auto connections = m_simulator->connections().connections();
+		for (auto c : connections)
+		{
+			c->setEnabled(value);
+		}
+
+		return;
+	}
+
 	bool ScriptSimulator::signalExists(QString appSignalId) const
 	{
 		return m_simulator->appSignalManager().signalExists(appSignalId);
@@ -451,6 +507,23 @@ namespace Sim
 		return scriptSignal;
 	}
 
+	ScriptLmDescription ScriptSimulator::scriptLmDescription(QString equipmentId)
+	{
+		ScriptLmDescription lmDesc;
+
+		std::shared_ptr<LogicModule> lm = m_simulator->logicModule(equipmentId);
+
+		if (lm == nullptr)
+		{
+			throwScriptException(this, tr("scriptLmDescription(%1), LM is not found.").arg(equipmentId));
+			return lmDesc;
+		}
+
+		lmDesc.setLogicModule(lm);
+
+		return lmDesc;
+	}
+
 	ScriptDevUtils ScriptSimulator::devUtils()
 	{
 		return ScriptDevUtils{m_simulator};
@@ -471,6 +544,23 @@ namespace Sim
 		m_executionTimeOut = value;
 	}
 
+	bool ScriptSimulator::unlockTimer() const
+	{
+		return m_simulator->control().unlockTimer();
+	}
 
+	void ScriptSimulator::setUnlockTimer(bool value)
+	{
+		m_simulator->control().setUnlockTimer(value);
+	}
 
+	bool ScriptSimulator::appDataTrasmittion() const
+	{
+		return m_simulator->appDataTransmitter().enabled();
+	}
+
+	void ScriptSimulator::setAppDataTrasmittion(bool value)
+	{
+		m_simulator->appDataTransmitter().setEnabled(value);
+	}
 }

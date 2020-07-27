@@ -59,9 +59,6 @@ void createTemplateFile(const QString& fileName)
 	writer.writeComment("Build result path, default current directory");
 	writer.writeTextElement("BuildOutputPath", "");
 
-	writer.writeComment("Build type, debug or release, default is debug");
-	writer.writeTextElement("BuildType", "debug");
-
 	writer.writeEndElement();	// ConsoleBuilderArguments
 	writer.writeEndDocument();
 
@@ -293,27 +290,6 @@ int startBuild(QString buildArgsFileName)
 	if (value.isEmpty() == false)
 	{
 		buildTask->setBuildOutputPath(value);
-	}
-	else
-	{
-		buildTask->setBuildType(".");
-	}
-
-	// BuildType
-	//
-	ok = getArgumentFromXml(docElem, "BuildType", &value);
-	if (ok == false)
-	{
-		std::cout << "Failed to read BuildType argument from file!" << std::endl;
-		return 1;
-	}
-	if (value.isEmpty() == false)
-	{
-		buildTask->setBuildType(value);
-	}
-	else
-	{
-		buildTask->setBuildType("debug");
 	}
 
 	// This will cause the application to exit when

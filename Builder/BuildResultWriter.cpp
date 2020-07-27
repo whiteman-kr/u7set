@@ -3,6 +3,7 @@
 #include "../u7/Settings.h"
 #include "../lib/DbController.h"
 #include "../lib/WUtils.h"
+#include "../lib/ConstStrings.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QCryptographicHash>
@@ -563,7 +564,7 @@ namespace Builder
 		m_buildFiles.clear();
 	}
 
-	bool BuildResultWriter::start(const QString& outputPath, DbController* db, IssueLogger* log, bool release, int changesetID)
+	bool BuildResultWriter::start(const QString& outputPath, DbController* db, IssueLogger* log, int changesetID)
 	{
 		m_dbController = db;
 		m_log = log;
@@ -578,7 +579,6 @@ namespace Builder
 
 		TEST_PTR_LOG_RETURN_FALSE(m_dbController, m_log);
 
-		m_buildInfo.release = release;
 		m_buildInfo.changeset = changesetID;
 
 		m_buildInfo.project = m_dbController->currentProject().projectName();
@@ -586,29 +586,19 @@ namespace Builder
 		m_buildInfo.workstation = QHostInfo::localHostName();
 		m_buildInfo.date = QDateTime::currentDateTime();
 
-		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
+		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		msg = QString(tr("%1 building #%2 was started. User - %3, host - %4, changeset - %5."))
-				.arg(m_buildInfo.release ? "RELEASE" : "DEBUG")
-				.arg(m_buildInfo.id).arg(m_dbController->currentUser().username())
-				.arg(QHostInfo::localHostName()).arg(m_buildInfo.changeset);
+		msg = QString(tr("Build #%1 was started. User - %2, host - %3, changeset - %4."))
+				.arg(m_buildInfo.id)
+				.arg(m_dbController->currentUser().username())
+				.arg(QHostInfo::localHostName())
+				.arg(m_buildInfo.changeset);
 
 		LOG_MESSAGE(log, msg);
-
-		if (m_buildInfo.release == true)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
-		}
-		else
-		{
-			// The workcopies of the checked out files will be compiled.
-			//
-			m_log->wrnPDB2000();
-		}
 
 		if (createBuildResults() == false)
 		{
@@ -630,9 +620,10 @@ namespace Builder
 		int errors = m_log->errorCount();
 		int warnings = m_log->warningCount();
 
-		msg = QString(tr("%1 build #%2 was finished. Errors - %3. Warnings - %4."))
-				.arg(m_buildInfo.release ? "RELEASE" : "DEBUG")
-				.arg(m_buildInfo.id).arg(errors).arg(warnings);
+		msg = QString(tr("Build #%1 was finished. Errors - %2. Warnings - %3."))
+		        .arg(m_buildInfo.id)
+		        .arg(errors)
+		        .arg(warnings);
 
 		if (errors)
 		{
@@ -899,16 +890,6 @@ namespace Builder
 		return false;
 	}
 
-	bool BuildResultWriter::isDebug() const
-	{
-		return !m_buildInfo.release;
-	}
-
-	bool BuildResultWriter::isRelease() const
-	{
-		return m_buildInfo.release;
-	}
-
 	QString BuildResultWriter::outputPath() const
 	{
 		return m_outputPath;
@@ -1043,13 +1024,9 @@ namespace Builder
 
 		bool result = true;
 
-		QString buildNoStr;
-
-		buildNoStr.sprintf("%06d", m_buildInfo.id);
-
-		QString buildDir = QString("%1-%2/build-%3")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
+		QString buildDir = QString("%1/build-%2").
+								arg(m_dbController->currentProject().projectName()).
+								arg(m_buildInfo.id, 6, 10, Latin1Char::ZERO);
 
 		QString buildFullPath = appDataPath + "/" + buildDir;
 
@@ -1057,9 +1034,8 @@ namespace Builder
 
 		// create build in fixed path
 		//
-		buildDir = QString("%1-%2/build")
-					.arg(m_dbController->currentProject().projectName())
-					.arg(m_buildInfo.typeStr());
+		buildDir = QString("%1/build")
+		            .arg(m_dbController->currentProject().projectName());
 
 		buildFullPath = appDataPath + "/" + buildDir;
 

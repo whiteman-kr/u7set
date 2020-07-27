@@ -6,8 +6,21 @@ TuningSchemaManager::TuningSchemaManager(ConfigController* configController, QOb
 {
 	assert(m_configController);
 
-	connect(m_configController, &ConfigController::globalScriptArrived, this, &TuningSchemaManager::globalScriptArrived);
+	setGlobalScript(theConfigSettings.globalScript);
+
+	setConfigurationArrivedScript(theConfigSettings.configurationArrivedScript);
+
 	return;
+}
+
+QString TuningSchemaManager::configurationArrivedScript() const
+{
+	return m_configurationArrivedScript;
+}
+
+void TuningSchemaManager::setConfigurationArrivedScript(const QString& script)
+{
+	m_configurationArrivedScript = script;
 }
 
 int TuningSchemaManager::schemaCount() const
@@ -61,11 +74,5 @@ std::shared_ptr<VFrame30::Schema> TuningSchemaManager::loadSchema(QString schema
 	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(data);
 
 	return schema;
-}
-
-void TuningSchemaManager::globalScriptArrived(QByteArray data)
-{
-	setGlobalScript(QString(data));
-	return;
 }
 

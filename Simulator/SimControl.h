@@ -36,25 +36,15 @@ namespace Sim
 		{
 		}
 
-		QFuture<bool> start(std::chrono::microseconds time)
+		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime)
 		{
 			bool reset = m_lastStartTime == 0us;
 
 			m_lastStartTime = time;
 			m_possibleToAdvanceTo = time;
 			m_cyclesCounter ++;
-			return m_lm->asyncRunCycle(time, m_cyclesCounter, reset);
+			return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset);
 		}
-
-		bool afterWorkCycleTask(AppSignalManager& appSignalManager, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime)
-		{
-			// Set LogicModule's RAM to Sim::AppSignalManager
-			//
-			appSignalManager.setData(equipmentId(), m_lm->ram(), plantTime, localTime, systemTime);
-
-			return true;
-		}
-
 
 		const QString& equipmentId() const
 		{
@@ -82,8 +72,9 @@ namespace Sim
 		std::vector<SimControlRunStruct> m_lms;			// LMs added to simulation
 		SimControlState m_state = SimControlState::Stop;
 
-		std::chrono::microseconds m_startTime = 0us;	// When simulation was started, it's computer time
-		std::chrono::microseconds m_currentTime = 0us;	// Current time in simulation
+		std::chrono::microseconds m_startTime = 0us;		// When simulation was started, computer time
+		std::chrono::microseconds m_sliceStartTime = 0us;	// When simulation was started for current 'slice' (duration)
+		std::chrono::microseconds m_currentTime = 0us;		// Current time in simulation
 
 		std::chrono::microseconds m_duration{0};		// Simulation is started for this time
 														// if time < 0 then no time limit
@@ -161,17 +152,21 @@ namespace Sim
 		std::chrono::microseconds duration() const;
 		std::chrono::microseconds leftTime() const;
 
+		bool unlockTimer() const;
+		void setUnlockTimer(bool value);
+
 	signals:
 		void stateChanged(SimControlState state);
 		void statusUpdate(ControlStatus state);
 
 	protected:
 		virtual void run() override;
-
 		bool processRun();
 
 	private:
 		Simulator* m_simulator = nullptr;
+
+		std::atomic<bool> m_unlockTimer{false};
 
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/

@@ -7548,12 +7548,75 @@ void EditSchemaWidget::editCopy()
 		QMimeData* mime = new QMimeData();
 		mime->setData(SchemaItemClipboardData::mimeType, ba);
 
-		// If selected one image, then copy to clipboard it also as image
+		// If selected one image some additional text copy can happen
 		//
-		if (selectedItems().size() == 1 && selectedItems().front()->isType<VFrame30::SchemaItemImage>() == true)
+		if (selectedItems().size() == 1)
 		{
-			VFrame30::SchemaItemImage* imageItem = selectedItems().front()->toType<VFrame30::SchemaItemImage>();
-			mime->setImageData(imageItem->image());
+			SchemaItemPtr si = selectedItems().front();
+
+			// If selected one image, then copy to clipboard it also as image
+			//
+			if (si->isType<VFrame30::SchemaItemImage>() == true)
+			{
+				VFrame30::SchemaItemImage* imageItem = si->toType<VFrame30::SchemaItemImage>();
+				mime->setImageData(imageItem->image());
+			}
+
+			// If selected one SchemaItemSignal, then copy to clipboard AppSignalID
+			//
+			if (VFrame30::SchemaItemSignal* itemSignal = si->toType<VFrame30::SchemaItemSignal>();
+				itemSignal != nullptr)
+			{
+				mime->setText(itemSignal->appSignalIds());
+			}
+
+			// If selected one SchemaItemRect, then copy to clipboard rect text
+			//
+			if (VFrame30::SchemaItemRect* itemRect = si->toType<VFrame30::SchemaItemRect>();
+				itemRect != nullptr && itemRect->text().isEmpty() == false)
+			{
+				mime->setText(itemRect->text());
+			}
+
+			// If selected one SchemaItemRect, then copy to clipboard rect text
+			//
+			if (VFrame30::SchemaItemLoopback* itemLoopback = si->toType<VFrame30::SchemaItemLoopback>();
+				itemLoopback != nullptr)
+			{
+				mime->setText(itemLoopback->loopbackId());
+			}
+
+			// If selected one SchemaItemLoopback, then copy to clipboard loopbackId
+			//
+			if (VFrame30::SchemaItemLoopback* itemLoopback = si->toType<VFrame30::SchemaItemLoopback>();
+				itemLoopback != nullptr)
+			{
+				mime->setText(itemLoopback->loopbackId());
+			}
+
+			// If selected one SchemaItemTransmitter, then copy to clipboard connectionId
+			//
+			if (VFrame30::SchemaItemTransmitter* itemTransmitter = si->toType<VFrame30::SchemaItemTransmitter>();
+				itemTransmitter != nullptr)
+			{
+				mime->setText(itemTransmitter->connectionIds());
+			}
+
+			// If selected one SchemaItemReceiver, then copy to clipboard appSignalIds
+			//
+			if (VFrame30::SchemaItemReceiver* itemReceiver = si->toType<VFrame30::SchemaItemReceiver>();
+				itemReceiver != nullptr)
+			{
+				mime->setText(itemReceiver->appSignalIds());
+			}
+
+			// If selected one SchemaItemBus, then copy to clipboard busTypeId
+			//
+			if (VFrame30::SchemaItemBus* itemBus = si->toType<VFrame30::SchemaItemBus>();
+				itemBus != nullptr)
+			{
+				mime->setText(itemBus->busTypeId());
+			}
 		}
 
 		// --
@@ -7561,6 +7624,10 @@ void EditSchemaWidget::editCopy()
 		clipboard->clear();
 		clipboard->setMimeData(mime);
 	}
+
+	// if selected one item, and it has some text data (like InputSchemaItem has appSignalID),
+	// then copy this data to clipboard as text
+	//
 
 	return;
 }

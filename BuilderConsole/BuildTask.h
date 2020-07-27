@@ -33,8 +33,6 @@ public:
 	void setProjectUserName(QString value);
 	void setProjectUserPassword(QString value);
 	void setBuildOutputPath(QString value);
-	void setBuildType(QString value);
-	void setBuildType(Builder::BuildType value);
 
 	// Data
 	//
@@ -49,7 +47,6 @@ private:
 	QString m_projectUserName{"Administrator"};
 	QString m_projectUserPassword{"Password"};
 	QString m_buildOutputPath{"."};
-	Builder::BuildType m_buildType = Builder::BuildType::Debug;
 };
 
 

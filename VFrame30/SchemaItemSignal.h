@@ -5,8 +5,10 @@
 
 namespace VFrame30
 {
-	// SchemaItemSignal
-	//
+	/*! \class SchemaItemSignal
+		\ingroup Application Logic Items
+		\brief This is functional item used for connection signal to AFB inputs/outputs, other signals etc
+	*/
 	class VFRAME30LIBSHARED_EXPORT SchemaItemSignal : public FblItemRect
 	{
 		Q_OBJECT
@@ -24,6 +26,30 @@ namespace VFrame30
 			double width = 20.0;
 			E::ColumnData data = E::ColumnData::AppSignalID;
 			E::HorzAlign horzAlign = E::HorzAlign::AlignLeft;
+		};
+
+		struct Cell
+		{
+			union
+			{
+				struct
+				{
+					qint16 row;
+					qint16 column;
+					Qt::ItemDataRole role;
+				};
+
+				quint64 id;
+			};
+
+			Cell(qint32 r, qint32 c, Qt::ItemDataRole rr) : row(static_cast<qint16>(r)), column(static_cast<qint16>(c)), role(rr)
+			{
+			}
+
+			bool operator < (const Cell& that) const
+			{
+				return this->id < that.id;
+			}
 		};
 
 		// Serialization
@@ -119,6 +145,25 @@ namespace VFrame30
 
 		bool hasImpactColumn() const;
 
+	public slots:
+		/// \brief Returns overriden (set with setCellText) cell text
+		QString cellText(int row, int column) const;
+
+		/// \brief Overrides cell text, to reset value to default pass undefines as argumnet
+		void setCellText(int row, int column, QString text);
+
+		/// \brief Returns background color for specified cell
+		QColor cellFillColor(int row, int column) const;
+
+		/// \brief Sets background color for specified cell
+		void setCellFillColor(int row, int column, QColor color);
+
+		/// \brief Returns text color for specified cell, to reset value to default pass "" as argumnet
+		QColor cellTextColor(int row, int column) const;
+
+		/// \brief Sets text color for specified cell
+		void setCellTextColor(int row, int column, QColor color);
+
 		// Data
 		//
 	protected:
@@ -141,6 +186,8 @@ namespace VFrame30
 		// Width, %		Format
 		// 80;
 		std::vector<Column> m_columns;
+
+		std::map<Cell, QVariant> m_runtimeCellMod;		// Cells, can be assigned by script in runtime only
 	};
 
 

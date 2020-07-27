@@ -1,5 +1,5 @@
-#ifndef EEPROM_H
-#define EEPROM_H
+#pragma once
+
 #include <vector>
 #include <QByteArray>
 #include <QString>
@@ -114,4 +114,3 @@ namespace Sim
 	};
 }
 
-#endif // EEPROM_H

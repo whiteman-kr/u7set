@@ -114,7 +114,7 @@ class SelectSchemaTable : public QTableView
 	Q_OBJECT
 
 public:
-	SelectSchemaTable(const std::vector<SelectSchemaItem>& schemas, QString defaultSchemaId, QWidget* parent = nullptr);
+	SelectSchemaTable(const std::vector<SelectSchemaItem>& schemas, QString defaultSchemaId, QWidget* parent);
 
 	void applyFilter(QString filter, QString defaultSchemaId);
 

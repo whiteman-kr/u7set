@@ -2124,7 +2124,7 @@ namespace TrendLib
 
 		painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
-		QFont f("Arial");
+		QFont f(QStringLiteral("Arial"));
 
 		double fontSize = 2.0 / 16.0;	// Font size is 2/16 in
 		if (dpiY > 120)

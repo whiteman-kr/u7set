@@ -23,5 +23,6 @@
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
         <file>Images/SchemaList.svg</file>
+        <file>Images/SchemaFolder.svg</file>
     </qresource>
 </RCC>

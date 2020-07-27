@@ -37,8 +37,6 @@ private:
 
 	QTimer m_timer;
 
-	int m_connectionKeepAliveCounter = 0;
-
 	qint64 m_saveAppSignalsStateErrorReplyCount = 0;
 };
 

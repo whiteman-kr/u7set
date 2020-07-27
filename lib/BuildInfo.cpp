@@ -16,7 +16,6 @@ namespace Builder
 
 		xmlWriter.writeAttribute("Project", project);
 		xmlWriter.writeAttribute("ID", QString::number(id));
-		xmlWriter.writeAttribute("Type", typeStr());
 		xmlWriter.writeAttribute("Date", dateStr());
 		xmlWriter.writeAttribute("Changeset", QString::number(changeset));
 		xmlWriter.writeAttribute("User", user);
@@ -36,8 +35,6 @@ namespace Builder
 
 		project = xmlReader.attributes().value("Project").toString();
 		id = xmlReader.attributes().value("ID").toInt();
-
-		release = xmlReader.attributes().value("Type").toString() == "release" ? true : false;
 
 		QString dateTimeStr = xmlReader.attributes().value("Date").toString();
 		date = QDateTime::fromString(dateTimeStr, "dd.MM.yyyy hh:mm:ss");

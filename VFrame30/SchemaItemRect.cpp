@@ -31,6 +31,7 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
 
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemRect::text, SchemaItemRect::setText);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::wordWrap, PropertyNames::textCategory, true, SchemaItemRect::wordWrap, SchemaItemRect::setWordWrap);
 
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
@@ -42,7 +43,7 @@ namespace VFrame30
 
 		// --
 		//
-		m_font.setName("Arial");
+		m_font.setName(QStringLiteral("Arial"));
 
 		switch (unit)
 		{
@@ -96,6 +97,8 @@ namespace VFrame30
 		rectMessage->set_textcolor(m_textColor.rgba());
 		m_font.SaveData(rectMessage->mutable_font());
 
+		rectMessage->set_wordwrap(m_wordWrap);
+
 		return true;
 	}
 
@@ -137,6 +140,8 @@ namespace VFrame30
 		m_vertAlign = static_cast<E::VertAlign>(rectMessage.vertalign());
 
 		m_font.LoadData(rectMessage.font());
+
+		m_wordWrap = rectMessage.wordwrap();
 
 		return true;
 	}
@@ -218,7 +223,12 @@ namespace VFrame30
 		// --
 		//
 		p->setPen(textColor());
-		DrawHelper::drawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
+		DrawHelper::drawText(p,
+							 m_font,
+							 itemUnit(),
+							 text,
+							 r,
+							 horzAlign() | vertAlign() | (wordWrap() ? Qt::TextWordWrap : 0));
 
 		return;
 	}
@@ -313,6 +323,16 @@ namespace VFrame30
 	void SchemaItemRect::setText(QString value)
 	{
 		m_text = value;
+	}
+
+	bool SchemaItemRect::wordWrap() const
+	{
+		return m_wordWrap;
+	}
+
+	void SchemaItemRect::setWordWrap(bool value)
+	{
+		m_wordWrap = value;
 	}
 
 	// Align propertis

@@ -4,6 +4,7 @@
 #include <SimOverrideSignals.h>
 #include <SimException.h>
 
+
 namespace Sim
 {
 
@@ -186,8 +187,7 @@ namespace Sim
 			qint32 wordsToOverride = data.size() / 2;
 			for (qint32 i = 0; i < wordsToOverride; i++)
 			{
-				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
-				dataPtr ++;
+				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
 			}
 		}
 
@@ -242,8 +242,7 @@ namespace Sim
 			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
 			for (quint32 i = 0; i < countW; i++)
 			{
-				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
-				dataPtr ++;
+				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
 			}
 		}
 
@@ -348,7 +347,7 @@ namespace Sim
 
 	bool RamArea::readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept
 	{
-		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
+		if (contains(offsetW) == false ||
 			bitNo >= 16 ||
 			data == nullptr)
 		{
@@ -466,6 +465,7 @@ namespace Sim
 			break;
 		default:
 			assert(false);
+			valueToWrite = {};
 		}
 
 		// Apply override to data
@@ -618,6 +618,11 @@ namespace Sim
 		}
 
 		return *this;
+	}
+
+	bool Ram::isNull() const
+	{
+		return m_memoryAreas.empty();
 	}
 
 	void Ram::reset()
@@ -1048,7 +1053,13 @@ namespace Sim
 			return nullptr;
 		}
 
-		return &m_memoryAreas[index];
+		RamArea* ma = &m_memoryAreas[index];
+		if (ma->contains(offsetW) == false)		// If offset is too high then map::upper_bound returns the last area
+		{										// So this check helps to prevent it
+			ma = nullptr;
+		}
+
+		return ma;
 	}
 
 	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
@@ -1084,7 +1095,13 @@ namespace Sim
 			return nullptr;
 		}
 
-		return &m_memoryAreas[index];
+		const RamArea* ma = &m_memoryAreas[index];
+		if (ma->contains(offsetW) == false)		// If offset is too high then map::upper_bound returns the last area
+		{										// So this check helps to prevent it
+			ma = nullptr;
+		}
+
+		return ma;
 	}
 
 	void Ram::updateOverrideData(const QString& lmEquipmentId, const OverrideSignals* overrideSignals)

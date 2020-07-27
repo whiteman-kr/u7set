@@ -1,5 +1,4 @@
-#ifndef OUTPUT_H
-#define OUTPUT_H
+#pragma once
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(u7sim)
@@ -44,4 +43,3 @@ namespace Sim
 
 }
 
-#endif // OUTPUT_H

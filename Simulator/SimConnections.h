@@ -81,6 +81,8 @@ namespace Sim
 		bool enabled() const;
 		void setEnabled(bool value);
 
+		bool timeout() const;
+
 		std::vector<char>* getPortReceiveBuffer(int portNo);
 		std::vector<char>* getPortSendBuffer(int portNo);
 
@@ -88,7 +90,8 @@ namespace Sim
 		::ConnectionInfo m_buildConnection;
 		std::vector<Sim::ConnectionPortPtr> m_ports;
 
-		std::atomic_bool m_enable = true;
+		std::atomic<bool> m_enable = true;
+		std::atomic<bool> m_timeout = false;
 
 		// Data sent by port 1, protected with a mutex
 		//

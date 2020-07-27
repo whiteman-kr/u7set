@@ -48,7 +48,7 @@ namespace Sim
 		}
 	}
 
-	bool CommandProcessor::updatePlatformInterfaceState(std::chrono::microseconds currentTime)
+	bool CommandProcessor::updatePlatformInterfaceState(const QDateTime& currentTime)
 	{
 		Q_UNUSED(currentTime);
 
@@ -74,7 +74,12 @@ namespace Sim
 		return ok;
 	}
 
-	void CommandProcessor::cacheCommands(std::vector<DeviceCommand>* /*commands*/)
+	void CommandProcessor::beforeAppLogicParse()
+	{
+		assert(false);
+	}
+
+	void CommandProcessor::afterAppLogicParse(std::vector<DeviceCommand>* /*commands*/)
 	{
 		// Implement in derived class
 		//
@@ -151,6 +156,38 @@ namespace Sim
 				SimException::raise(QString("Param %1 is not found.")
 										.arg(paramName));
 			}
+		}
+
+		return;
+	}
+
+	void CommandProcessor::sanitizerWrite(quint32 address, quint32 wordCount)
+	{
+		while (wordCount > 0)
+		{
+			m_parseMemorySanitizer.insert(address);
+
+			address++;
+			wordCount--;
+		}
+
+		return;
+	}
+
+	void CommandProcessor::sanitizerCheck(quint32 address, quint32 wordCount) const
+	{
+		while (wordCount > 0)
+		{
+			auto it = m_parseMemorySanitizer.find(address);
+			if (it == std::end(m_parseMemorySanitizer))
+			{
+				SimException::raise(QString("Read uninitialized memory detected, RAM address %1 (0x%2).")
+										.arg(address)
+										.arg(address, 0, 16, QChar('0')));
+			}
+
+			address++;
+			wordCount--;
 		}
 
 		return;

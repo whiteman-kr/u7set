@@ -172,6 +172,9 @@ private slots:
 	void onTextChanged();
 
 private:
+	void adjustMarginWidth();
+
+private:
 	IdeQsciScintilla* m_textEdit = nullptr;
 
 	LexerJavaScript m_lexerJavaScript;

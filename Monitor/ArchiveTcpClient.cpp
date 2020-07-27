@@ -18,8 +18,6 @@ ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController) :
 			<< configController->configuration().archiveService2.address().addressPortStr()
 			<< ");";
 
-	enableWatchdogTimer(false);
-
 	connect(this, &ArchiveTcpClient::signal_startRequest, this, &ArchiveTcpClient::slot_startRequest);
 	connect(this, &ArchiveTcpClient::signal_cancelRequest, this, &ArchiveTcpClient::slot_cancelRequest);
 

@@ -20,6 +20,9 @@ namespace Sim
 		/// \brief Check address validity
 		Q_PROPERTY(bool isValid READ isValid)
 
+		/// \brief RamAddress converted to bit address: m_offset * 16 + m_bit.
+		Q_PROPERTY(quint32 bitAddress READ bitAddress)
+
 	public:
 		Q_INVOKABLE RamAddress() = default;
 		Q_INVOKABLE RamAddress(const RamAddress&) = default;
@@ -43,6 +46,8 @@ namespace Sim
 
 		/// \brief Convert address to string representation.
 		Q_INVOKABLE QString toString() const;
+
+		quint32 bitAddress() const;
 
 	private:
 		quint32 m_offset = BadAddress;

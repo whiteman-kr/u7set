@@ -24,7 +24,7 @@ namespace VFrame30
 		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
 		setItemUnit(unit);
-		m_font.setName("Sans");
+		m_font.setName(QStringLiteral("Arial"));
 
 		switch (itemUnit())
 		{
@@ -51,6 +51,13 @@ namespace VFrame30
 	void FblItemRect::propertyDemand(const QString& prop)
 	{
 		PosRectImpl::propertyDemand(prop);
+
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, FblItemRect::weight, FblItemRect::setWeight);
+
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, FblItemRect::lineColor, FblItemRect::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, FblItemRect::fillColor, FblItemRect::setFillColor);
+
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, FblItemRect::textColor, FblItemRect::setTextColor);
 
 		addProperty<QString, FblItemRect, &FblItemRect::getFontName, &FblItemRect::setFontName>(PropertyNames::fontName, PropertyNames::appearanceCategory, true);
 		addProperty<double, FblItemRect, &FblItemRect::getFontSize, &FblItemRect::setFontSize>(PropertyNames::fontSize, PropertyNames::appearanceCategory, true);
@@ -657,7 +664,7 @@ namespace VFrame30
 			Q_ASSERT(false);
 		}
 
-		FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
 		p->setPen(Qt::darkGray);
 
 		DrawHelper::drawText(p, font, itemUnit(), label(), labelRect, Qt::TextDontClip | alignFlags);
@@ -674,7 +681,7 @@ namespace VFrame30
 		QRectF drawRect(r.right(), r.bottom(),
 						widthDocPt(), m_font.drawSize());
 
-		static FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		static FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
 		p->setPen(Qt::red);
 
 		QString str = QString("roi %1").arg(runOrderIndex);
@@ -1140,35 +1147,35 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb FblItemRect::lineColor() const
+	QColor FblItemRect::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void FblItemRect::setLineColor(QRgb color)
+	void FblItemRect::setLineColor(QColor color)
 	{
-		m_lineColor = color;
+		m_lineColor = color.rgba();
 	}
 
 	// FillColor propertie
 	//
-	QRgb FblItemRect::fillColor() const
+	QColor FblItemRect::fillColor() const
 	{
 		return m_fillColor;
 	}
 
-	void FblItemRect::setFillColor(QRgb color)
+	void FblItemRect::setFillColor(QColor color)
 	{
-		m_fillColor = color;
+		m_fillColor = color.rgba();
 	}
 
-	QRgb FblItemRect::textColor() const
+	QColor FblItemRect::textColor() const
 	{
 		return m_textColor;
 	}
-	void FblItemRect::setTextColor(QRgb color)
+	void FblItemRect::setTextColor(QColor color)
 	{
-		m_textColor = color;
+		m_textColor = color.rgba();
 	}
 
 	QString FblItemRect::userText() const

@@ -73,6 +73,7 @@
         <file>Images/CloseButtonWhite.svg</file>
         <file>Images/ComboDownArrow.svg</file>
         <file>Images/SchemaNewFile.svg</file>
+        <file>Images/SimAllowRegData.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
@@ -85,3 +86,4 @@
         <file>Simulator/Templates/DiscreteSeries.js</file>
     </qresource>
 </RCC>
+     

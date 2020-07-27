@@ -32,7 +32,7 @@ MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController
 							  QString projectName,
 							  QString softwareEquipmentId,
 							  QWidget *parent)
-	:DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
+    :DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
 	  m_configController(configController)
 {
 	if (m_configController == nullptr)

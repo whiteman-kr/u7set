@@ -139,15 +139,12 @@ namespace Builder
 		QString buildOutputPath() const;
 		void setBuildOutputPath(QString value);
 
-		bool debug() const;
-		void setDebug(bool value);
-
-		bool release() const;
-
 		bool expertMode() const;
 		void setExpertMode(bool value);
 
 		bool isInterruptRequested();
+
+		int progress() const;
 
 		// Data
 		//
@@ -166,10 +163,9 @@ namespace Builder
 
 		QString m_buildOutputPath;
 
-		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
 		bool m_expertMode = false;
 
-		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
+		IssueLogger* m_log = nullptr;		// Probably it's better to make it as shared_ptr
 
 		std::unique_ptr<Context> m_context;
 	};
