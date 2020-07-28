@@ -75,7 +75,7 @@ private slots:
 	void testsTreeModelReset();
 	void testsTreeDoubleClicked(const QModelIndex &index);
 
-	void openFilesDoubleClicked(const QModelIndex &index);
+	void openFilesClicked(const QModelIndex &index);
 
 	// Tests file tree slots
 

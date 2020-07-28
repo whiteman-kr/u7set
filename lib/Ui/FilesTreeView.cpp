@@ -1613,7 +1613,6 @@ void FileTreeView::renameFile()
 void FileTreeView::deleteFile()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();
-
 	if (selectedIndexList.isEmpty() == true)
 	{
 		return;
@@ -1672,6 +1671,13 @@ void FileTreeView::deleteFile()
 	}
 
 	setFocus();
+
+	// Select current index after deleting
+
+	if (currentIndex().isValid() == true)
+	{
+		selectionModel()->select(currentIndex(), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	}
 
 	return;
 }

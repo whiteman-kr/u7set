@@ -103,7 +103,7 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 	connect(m_testsTreeModel, &FileTreeModel::modelReset, this, &TestsTabPage::testsTreeModelReset);
 
 	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsTabPage::testsTreeDoubleClicked);
-	connect(m_openFilesTreeWidget, &QTreeWidget::doubleClicked, this, &TestsTabPage::openFilesDoubleClicked);
+	connect(m_openFilesTreeWidget, &QTreeWidget::clicked, this, &TestsTabPage::openFilesClicked);
 
 	// Evidently, project is not opened yet
 	//
@@ -162,7 +162,6 @@ void TestsTabPage::projectOpened()
 
 	return;
 }
-
 
 void TestsTabPage::projectClosed()
 {
@@ -225,7 +224,7 @@ void TestsTabPage::testsTreeDoubleClicked(const QModelIndex &index)
 	return;
 }
 
-void TestsTabPage::openFilesDoubleClicked(const QModelIndex &index)
+void TestsTabPage::openFilesClicked(const QModelIndex &index)
 {
 	Q_UNUSED(index);
 	QTreeWidgetItem* item = m_openFilesTreeWidget->currentItem();
@@ -255,6 +254,11 @@ void TestsTabPage::newFile()
 	if (fileName.isEmpty() == true)
 	{
 		return;
+	}
+
+	if (fileName.contains('.') == false)
+	{
+		fileName += ".js";
 	}
 
 	bool result = m_testsTreeView->newFile(fileName);
@@ -304,7 +308,6 @@ void TestsTabPage::openFile()
 	std::shared_ptr<DbFile> dbFile;
 	if (db()->getLatestVersion(*f, &dbFile, this) == false)
 	{
-		QMessageBox::critical(this, "Error", "Get latest version error!");
 		return;
 	}
 
@@ -492,9 +495,45 @@ void TestsTabPage::checkOutSelectedFiles()
 			return;
 		}
 
-		if (documentIsOpen(f->fileId()) == true && f->state() == VcsState::CheckedOut)
+		int fileId = f->fileId();
+
+		if (documentIsOpen(fileId) == true)
 		{
-			setDocumentReadOnly(f->fileId(), false);
+			// Re-read file info and contents
+
+			DbFileInfo fi;
+			if (db()->getFileInfo(fileId, &fi, this) == false)
+			{
+				QMessageBox::critical(this, "Error", "Get file information error!");
+				return;
+			}
+
+			std::shared_ptr<DbFile> dbFile;
+			if (db()->getLatestVersion(fi, &dbFile, this) == false)
+			{
+				return;
+			}
+
+			if (documentIsOpen(fileId) == false)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			TestTabPageDocument& document = m_openDocuments.at(fileId);
+
+			document.setFileName(fi.fileName());
+			document.setModified(false);
+
+			IdeCodeEditor* codeEditor = document.codeEditor();
+			if (codeEditor == nullptr)
+			{
+				Q_ASSERT(codeEditor);
+				return;
+			}
+			codeEditor->setText(dbFile->data());
+
+			setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
 		}
 	}
 }
@@ -539,7 +578,6 @@ void TestsTabPage::undoChangesSelectedFiles()
 
 			if (db()->getLatestVersion(*f, &dbFile, this) == false)
 			{
-				QMessageBox::critical(this, "Error", "Get latest version error!");
 				return;
 			}
 
@@ -1165,6 +1203,8 @@ void TestsTabPage::checkOutDocument(std::vector<int> fileIds)
 
 	for (int fileId : fileIds)
 	{
+		// Re-read file info and contents
+
 		DbFileInfo fi;
 		if (db()->getFileInfo(fileId, &fi, this) == false)
 		{
@@ -1172,7 +1212,33 @@ void TestsTabPage::checkOutDocument(std::vector<int> fileIds)
 			return;
 		}
 
+		std::shared_ptr<DbFile> dbFile;
+		if (db()->getLatestVersion(fi, &dbFile, this) == false)
+		{
+			return;
+		}
+
+		if (documentIsOpen(fileId) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		TestTabPageDocument& document = m_openDocuments.at(fileId);
+
+		document.setFileName(fi.fileName());
+		document.setModified(false);
+
+		IdeCodeEditor* codeEditor = document.codeEditor();
+		if (codeEditor == nullptr)
+		{
+			Q_ASSERT(codeEditor);
+			return;
+		}
+		codeEditor->setText(dbFile->data());
+
 		setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+
 	}
 
 	return;
@@ -1210,7 +1276,6 @@ void TestsTabPage::undoChangesDocument(std::vector<int> fileIds)
 			std::shared_ptr<DbFile> dbFile;
 			if (db()->getLatestVersion(fi, &dbFile, this) == false)
 			{
-				QMessageBox::critical(this, "Error", "Get latest version error!");
 				return;
 			}
 
@@ -1582,8 +1647,8 @@ void TestsTabPage::createUi()
 	m_testsTreeModel->setColumns(columns);
 
 	m_testsTreeView = new FileTreeView(db(), m_testsTreeModel);
-	m_testsTreeView->setExpandsOnDoubleClick(false);
 	m_testsTreeView->setSortingEnabled(true);
+	m_testsTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	connect(m_testsTreeView->header(), &QHeaderView::sortIndicatorChanged, [this](int index, Qt::SortOrder order)
 	{
 		m_testsTreeView->sortByColumn(index, order);
@@ -1642,7 +1707,7 @@ void TestsTabPage::createUi()
 	m_openFilesTreeWidget->setSortingEnabled(true);
 	m_openFilesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_openFilesTreeWidget->sortByColumn(0, Qt::AscendingOrder);
-	m_openFilesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_openFilesTreeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 	connect(m_openFilesTreeWidget, &QTreeWidget::customContextMenuRequested, this, &TestsTabPage::openFilesMenuRequested);
 	filesLayout->addWidget(m_openFilesTreeWidget);
 
@@ -1650,6 +1715,7 @@ void TestsTabPage::createUi()
 	//
 	QWidget* editorWidget = new QWidget();
 	m_editorLayout = new QVBoxLayout(editorWidget);
+	m_editorLayout->setContentsMargins(0, 0, 0, 0);
 
 	// Editor toolbar
 	//
@@ -1662,6 +1728,7 @@ void TestsTabPage::createUi()
 								   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060); }");
 
 	m_openDocumentsCombo = new QComboBox();
+
 	m_openDocumentsCombo->setStyleSheet(tr("QComboBox{\
 												border: 0px;\
 												color: white;\
@@ -1920,7 +1987,7 @@ void TestsTabPage::createActions()
 	connect(m_saveCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::saveCurrentFile);
 
 	m_closeCurrentDocumentAction = new QAction(tr("Close"), this);
-	m_closeCurrentDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
+	m_closeCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Close);
 	connect(m_closeCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::closeCurrentFile);
 
 	// Open documents list actions
@@ -2238,7 +2305,6 @@ void TestsTabPage::saveDocument(int fileId)
 	std::shared_ptr<DbFile> dbFile;
 	if (db()->getLatestVersion(fi, &dbFile, this) == false)
 	{
-		QMessageBox::critical(this, "Error", "Get latest version error!");
 		return;
 	}
 
@@ -2252,7 +2318,6 @@ void TestsTabPage::saveDocument(int fileId)
 
 	if (db()->setWorkcopy(dbFile, this) == false)
 	{
-		QMessageBox::critical(this, "Error", "Set work copy error!");
 		return;
 	}
 
@@ -2468,7 +2533,7 @@ void TestsTabPage::keyPressEvent(QKeyEvent* event)
 			onSaveKeyPressed();
 		}
 
-		if (event->key() == Qt::Key_W)
+		if (event->key() == Qt::Key_W || event->key() == Qt::Key_F4)
 		{
 			onCloseKeyPressed();
 		}

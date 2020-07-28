@@ -86,6 +86,7 @@ protected slots:
 
 private slots:
 	void projectOpened(DbProject project);
+	void projectAboutToBeClosed();
 	void projectClosed();
 
 	void buildStarted();

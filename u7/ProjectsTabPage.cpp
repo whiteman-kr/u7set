@@ -361,6 +361,7 @@ void ProjectsTabPage::closeProject()
 		return;
 	}
 
+	emit projectAboutToBeClosed();
 	dbController()->closeProject(this);
 	return;
 }

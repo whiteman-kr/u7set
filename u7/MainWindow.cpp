@@ -58,6 +58,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	// Add main tab pages
 	//
 	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
+	connect(m_projectsTab, &ProjectsTabPage::projectAboutToBeClosed, this, &MainWindow::projectAboutToBeClosed, Qt::DirectConnection);
+
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
 	m_signalsTab = new SignalsTabPage(dbController(), nullptr);
 
@@ -1070,6 +1072,17 @@ void MainWindow::projectOpened(DbProject project)
 	}
 
 	return;
+}
+
+void MainWindow::projectAboutToBeClosed()
+{
+	if (m_testsTabPage == nullptr)
+	{
+		Q_ASSERT(m_testsTabPage);
+		return;
+	}
+
+	m_testsTabPage->saveUnsavedTests();
 }
 
 void MainWindow::projectClosed()

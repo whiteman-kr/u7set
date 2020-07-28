@@ -129,9 +129,10 @@ void FilesTabPage::createActions()
     m_editFileAction->setEnabled(false);
     connect(m_editFileAction, &QAction::triggered, m_fileView, &FileTreeView::editFile);
 
-    m_deleteFileAction = new QAction(tr("Delete file"), this);
+	m_deleteFileAction = new QAction(tr("Delete file"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete file..."));
 	m_deleteFileAction->setEnabled(false);
+	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
 	connect(m_deleteFileAction, &QAction::triggered, m_fileView, &FileTreeView::deleteFile);
 
 	//----------------------------------
