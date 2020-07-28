@@ -2160,6 +2160,16 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 		return;
 	}
 
+	// As some rows can be deleted during update model,
+	// files must be sorted in FileID descending order,
+	// to delete first children and then their parents
+	//
+	std::sort(files.begin(), files.end(),
+		[](DbFileInfo& m1, DbFileInfo m2)
+		{
+			return m1.fileId() >= m2.fileId();
+		});
+
 	// CheckIn changes to the database
 	//
 	std::vector<DbFileInfo> checkedInFiles;

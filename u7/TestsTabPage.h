@@ -125,6 +125,8 @@ private slots:
 
 	// Other operations
 
+	void closeDocumentsForDeletedFiles();
+
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
 private:

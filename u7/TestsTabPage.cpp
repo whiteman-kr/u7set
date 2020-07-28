@@ -458,6 +458,10 @@ void TestsTabPage::checkInSelectedFiles()
 
 	m_testsTreeView->checkInSelectedFiles();
 
+	// Some folders could be deleted, so close their documents
+
+	closeDocumentsForDeletedFiles();
+
 	// Set editors to read-only
 	//
 	selectedIndexList = m_testsTreeView->selectedSourceRows();
@@ -1454,6 +1458,32 @@ void TestsTabPage::openDocumentsComboTextChanged(int index)
 	}
 
 	return;
+}
+
+void TestsTabPage::closeDocumentsForDeletedFiles()
+{
+	std::vector<int> documentsToClose;
+
+	for (auto& it : m_openDocuments)
+	{
+		int fileId = it.first;
+
+		QModelIndexList matched = m_testsTreeModel->match(m_testsTreeModel->childIndex(0, 0, QModelIndex()),
+														  Qt::UserRole,
+														  QVariant::fromValue(fileId),
+														  1,
+														  Qt::MatchExactly | Qt::MatchRecursive);
+
+		if (matched.size() == 0)
+		{
+			documentsToClose.push_back(fileId);
+		}
+	}
+
+	for (int fileId : documentsToClose)
+	{
+		closeDocument(fileId, true/*force*/);
+	}
 }
 
 void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
