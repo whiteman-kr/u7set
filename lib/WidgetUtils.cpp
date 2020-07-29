@@ -221,14 +221,14 @@ int TableDataVisibilityController::getColumnPosition(int index)
 {
 	QSettings settings;
 	int position = m_tableView->horizontalHeader()->visualIndex(index);
-	return settings.value((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position).toBool();
+	return settings.value((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position).toInt();
 }
 
 int TableDataVisibilityController::getColumnWidth(int index)
 {
 	QSettings settings;
 	int width = m_tableView->columnWidth(index);
-	return settings.value((m_settingBranchName + "/ColumnWidth/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), width).toBool();
+	return settings.value((m_settingBranchName + "/ColumnWidth/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), width).toInt();
 }
 
 void TableDataVisibilityController::showColumn(int index, bool visible)
