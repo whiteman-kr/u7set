@@ -105,6 +105,20 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 
 	setLayout(mainLayout);
 
+	// Shortcuts
+	//
+	QShortcut* removeShortcut = new QShortcut(QKeySequence(QKeySequence::Delete), this);
+	connect(removeShortcut, &QShortcut::activated, this, &DialogConnections::onRemoveShortcut);
+
+	QShortcut* copyShortcut = new QShortcut(QKeySequence(QKeySequence::Copy), this);
+	connect(copyShortcut, &QShortcut::activated, this, &DialogConnections::onCopyShortcut);
+
+	QShortcut* pasteShortcut = new QShortcut(QKeySequence(QKeySequence::Paste), this);
+	connect(pasteShortcut, &QShortcut::activated, this, &DialogConnections::onPasteShortcut);
+
+	QShortcut* refreshShortcut = new QShortcut(QKeySequence(QKeySequence::Refresh), this);
+	connect(refreshShortcut, &QShortcut::activated, this, &DialogConnections::onRefresh);
+
 	// Mask and completer
 	//
 	m_completer = new QCompleter(theSettings.m_connectionEditorMasks, this);
@@ -118,13 +132,25 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	//
 	m_addAction = new QAction(tr("Add"), this);
 	m_removeAction = new QAction(tr("Remove"), this);
+	m_removeAction->setShortcut(QKeySequence::Delete);
+
+	m_copyAction = new QAction(tr("Copy"), this);
+	m_copyAction->setShortcut(QKeySequence::Copy);
+
+	m_pasteAction = new QAction(tr("Paste"), this);
+	m_pasteAction->setShortcut(QKeySequence::Paste);
+
 	m_checkOutAction = new QAction(tr("Check Out"), this);
 	m_checkInAction = new QAction(tr("Check In"), this);
 	m_undoAction = new QAction(tr("Undo"), this);
+
 	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setShortcut(QKeySequence::Refresh);
 
 	connect(m_addAction, &QAction::triggered, this, &DialogConnections::onAdd);
 	connect(m_removeAction, &QAction::triggered, this, &DialogConnections::onRemove);
+	connect(m_copyAction, &QAction::triggered, this, &DialogConnections::onCopy);
+	connect(m_pasteAction, &QAction::triggered, this, &DialogConnections::onPaste);
 	connect(m_checkOutAction, &QAction::triggered, this, &DialogConnections::onCheckOut);
 	connect(m_checkInAction, &QAction::triggered, this, &DialogConnections::onCheckIn);
 	connect(m_undoAction, &QAction::triggered, this, &DialogConnections::onUndo);
@@ -133,6 +159,9 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	m_popupMenu = new QMenu(this);
 	m_popupMenu->addAction(m_addAction);
 	m_popupMenu->addAction(m_removeAction);
+	m_popupMenu->addSeparator();
+	m_popupMenu->addAction(m_copyAction);
+	m_popupMenu->addAction(m_pasteAction);
 	m_popupMenu->addSeparator();
 	m_popupMenu->addAction(m_checkOutAction);
 	m_popupMenu->addAction(m_checkInAction);
@@ -363,6 +392,41 @@ bool DialogConnections::addConnection(std::shared_ptr<Hardware::Connection> conn
 	item->setSelected(true);
 
 	return true;
+}
+
+bool DialogConnections::pasteConnection(std::shared_ptr<Hardware::Connection> connection)
+{
+	if (connection == nullptr)
+	{
+		assert(connection);
+		return false;
+	}
+
+	// Add connection, update UI
+	//
+	QString errorMessage;
+
+	m_connections.add(connection->uuid(), connection);
+
+	bool ok = m_connections.save(connection->uuid(), &errorMessage);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to save connection %1: %2").arg(connection->connectionID()).arg(errorMessage));
+		return false;
+	}
+
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+
+	item->setData(0, Qt::UserRole, connection->uuid());
+
+	m_connectionsTree->addTopLevelItem(item);
+
+	updateTreeItemText(item);
+
+	item->setSelected(true);
+
+	return true;
+
 }
 
 void DialogConnections::fillConnectionsList()
@@ -628,6 +692,116 @@ void DialogConnections::onRemove()
 	setPropertyEditorObjects();
 
 	return;
+}
+
+void DialogConnections::onCopy()
+{
+	QList<QTreeWidgetItem*> selectedItems = m_connectionsTree->selectedItems();
+	if (selectedItems.isEmpty() == true)
+	{
+		return;
+	}
+
+	Proto::EnvelopeSet envelopeSet;
+
+	for (auto item : selectedItems)
+	{
+		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+		std::shared_ptr<Hardware::Connection> connection = m_connections.get(uuid);
+		if (connection == nullptr)
+		{
+			assert(connection);
+			return;
+		}
+
+		Proto::Envelope* envelope = envelopeSet.add_items();
+		connection->SaveData(envelope);
+	}
+
+	QByteArray data;
+	data.resize(envelopeSet.ByteSize());
+
+	bool result = envelopeSet.SerializeToArray(data.data(), envelopeSet.ByteSize());
+	if (result == false)
+	{
+		Q_ASSERT(result);
+		return;
+	}
+
+	if (data.isEmpty() == false)
+	{
+		QMimeData* mime = new QMimeData();
+		mime->setData(Hardware::Connection::mimeType, data);
+
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->clear();
+		clipboard->setMimeData(mime);
+	}
+
+	return;
+}
+
+
+void DialogConnections::onPaste()
+{
+	QClipboard* clipboard = QApplication::clipboard();
+
+	const QMimeData *mimeData = clipboard->mimeData();
+	if (mimeData->hasFormat(Hardware::Connection::mimeType) == false)
+	{
+		return;
+	}
+
+	QByteArray data = mimeData->data(Hardware::Connection::mimeType);
+	if (data.isEmpty() == true)
+	{
+		return;
+	}
+
+	Proto::EnvelopeSet envelopeSet;
+	if (envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
+	{
+		return;
+	}
+
+	m_connectionsTree->clearSelection();
+
+	m_connectionsTree->blockSignals(true);
+
+	m_connectionPropertyEditor->clear();
+
+	for (int i = 0; i < envelopeSet.items_size(); i++)
+	{
+		const Proto::Envelope& envelope = envelopeSet.items(i);
+
+		if (envelope.has_connection() == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		std::shared_ptr<Hardware::Connection> connection = std::make_shared<Hardware::Connection>();
+
+		if (connection->LoadData(envelope) == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		connection->setUuid(QUuid::createUuid());
+		connection->setConnectionID(tr("%1 (Copy)").arg(connection->connectionID()));
+		pasteConnection(connection);
+	}
+
+	m_connectionsTree->blockSignals(false);
+
+	updateButtonsEnableState();
+
+	setPropertyEditorObjects();
+
+	return;
+
 }
 
 void DialogConnections::onCheckOut()
@@ -947,6 +1121,36 @@ void DialogConnections::onReport()
 	file.close();
 }
 
+void DialogConnections::onCopyShortcut()
+{
+	if (m_connectionsTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onCopy();
+}
+
+void DialogConnections::onPasteShortcut()
+{
+	if (m_connectionsTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onPaste();
+}
+
+void DialogConnections::onRemoveShortcut()
+{
+	if (m_connectionsTree->hasFocus() == false)
+	{
+		return;
+	}
+
+	onRemove();
+}
+
 void DialogConnections::onCustomContextMenuRequested(const QPoint &pos)
 {
 	Q_UNUSED(pos);
@@ -1027,6 +1231,8 @@ void DialogConnections::updateButtonsEnableState()
 
 	m_btnRemove->setEnabled(selectedCount > 0);
 	m_removeAction->setEnabled(selectedCount > 0);
+
+	m_copyAction->setEnabled(selectedCount > 0);
 
 	m_btnCheckOut->setEnabled(selectedCount > 0 && checkedInCount > 0);
 	m_checkOutAction->setEnabled(selectedCount > 0 && checkedInCount > 0);

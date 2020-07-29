@@ -217,7 +217,7 @@ void Settings::writeUserScope() const
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
 	s.setValue("SchemaItemPropertiesDialog/Splitter", m_schemaItemPropertiesSplitterPosition);
-	s.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_schemaItemPropertiesPropertyMask);
+	s.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_schemaItemPropertiesPropertyFilter);
 	s.setValue("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows);
 	s.setValue("SchemaItemPropertiesDialog/ColumnsWidth", QVariant::fromValue(m_schemaItemPropertiesColumnsWidth));
 	s.setValue("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory);
@@ -340,7 +340,7 @@ void Settings::loadUserScope()
 		m_schemaItemPropertiesSplitterPosition = 100;
 	}
 
-	m_schemaItemPropertiesPropertyMask = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
+	m_schemaItemPropertiesPropertyFilter = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
 	m_schemaItemPropertiesExpandValuesToAllRows = s.value("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows).toBool();
 	m_schemaItemPropertiesColumnsWidth = s.value("SchemaItemPropertiesDialog/ColumnsWidth").value<QMap<QString,int>>();
 	m_schemaItemPropertiesGroupByCategory = s.value("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory).toBool();

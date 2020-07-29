@@ -68,6 +68,7 @@ windows build job:
     - "copy %QT_BIN_DIR%\\bin\\Qt5Svg.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Test.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Widgets.dll \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy %QT_BIN_DIR%\\bin\\Qt5WinExtras.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Xml.dll \"%CI_PROJECT_DIR%/bin/release/\""
 # Copy Qt plugins
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/bearer\""
@@ -202,6 +203,7 @@ test job:
     - "rem               Run unit tests"
     - "rem ----------------------------------------------"
     - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorTests.exe"
 
 #Run Builder test
     - "rem ----------------------------------------------"
@@ -214,4 +216,10 @@ test job:
     - "rem ----------------------------------------------"
     - "rem               Run Simulator AFBs tests"
     - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v334\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v337\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+
+#Run ROVT to check configuration generation
+    - "rem ----------------------------------------------"
+    - "rem               Run ROVT tests"
+    - "rem ----------------------------------------------"
+    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v337\\build"

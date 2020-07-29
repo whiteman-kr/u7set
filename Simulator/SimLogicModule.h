@@ -1,5 +1,5 @@
-#ifndef LMMODEL_H
-#define LMMODEL_H
+#pragma once
+
 #include <memory>
 #include <QTextStream>
 #include <QByteArray>
@@ -12,6 +12,7 @@
 #include "SimCommandProcessor.h"
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
+#include "../lib/LogicModulesInfo.h"
 
 
 namespace Sim
@@ -37,7 +38,7 @@ namespace Sim
 
 		// Running LM
 		//
-		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, qint64 workcycle,  bool reset);				// Start running one cycle
+		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle,  bool reset);				// Start running one cycle
 
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);
 
@@ -59,6 +60,9 @@ namespace Sim
 		LmDescription& lmDescription();
 		const LmDescription& lmDescription() const;
 
+		const ::LogicModuleInfo& logicModuleExtraInfo() const;
+		void setLogicModuleExtraInfo(const ::LogicModuleInfo& value);
+
 		std::chrono::microseconds cycleDuration() const;
 
 		const std::vector<DeviceCommand>& appCommands() const;
@@ -72,6 +76,11 @@ namespace Sim
 		DeviceMode deviceMode() const;
 
 		void setOverrideSignals(OverrideSignals* overrideSignals);
+		void setAppSignalManager(AppSignalManager* appSignalManager);
+		void setAppDataTransmitter(AppDataTransmitter* appDataTransmitter);
+
+		bool isPowerOff() const;
+		void setPowerOff(bool value);
 
 	private:
 		// Loaded LM data
@@ -95,4 +104,3 @@ namespace Sim
 
 }
 
-#endif // LMMODEL_H

@@ -42,41 +42,10 @@ MonitorSchemaWidget::~MonitorSchemaWidget()
 
 void MonitorSchemaWidget::createActions()
 {
-	// New tab (duplicate this one)
-	//
-//	m_newTabAction = new QAction(tr("New Tab"), this);
-//	m_newTabAction->setEnabled(true);
-//	QList<QKeySequence> newTabShortcuts;
-//	newTabShortcuts << QKeySequence::AddTab;
-//	newTabShortcuts << QKeySequence::New;
-//	m_newTabAction->setShortcuts(newTabShortcuts);
-//	//m_newTabAction->setShortcutContext(Qt::WidgetShortcut);		// To avoid abigious with main menu same QAction
-//	addAction(m_newTabAction);
-
-//	connect(m_newTabAction, &QAction::triggered, this, [this](){ emit signal_newTab(this);});
-
-//	// Closet current tab
-//	//
-//	m_closeTabAction = new QAction(tr("Close Tab"), this);
-//	m_closeTabAction->setEnabled(true);
-//	//m_closeTabAction->setShortcuts(QKeySequence::Close);			// To avoid abigious with main menu same QAction
-//	addAction(m_closeTabAction);
-
-//	connect(m_closeTabAction, &QAction::triggered, this, [this](){ emit signal_closeTab(this);});
-
-	// --
-	//
-
 }
 
 void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
-	// Disable/enable actions
-	//
-
-	//m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
-
-
 	// Signals items
 	//
 	std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
@@ -88,7 +57,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 				schemaItemSignal != nullptr)
 			{
-				signalContextMenu(schemaItemSignal->appSignalIdList(), schemaItemSignal->impactAppSignalIdList());
+				signalContextMenu(schemaItemSignal->appSignalIdList(), schemaItemSignal->impactAppSignalIdList(), {});
 				break;
 			}
 
@@ -96,7 +65,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {});
+				signalContextMenu(signalList, {}, {});
 				break;
 			}
 
@@ -104,7 +73,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {});
+				signalContextMenu(signalList, {}, {});
 				break;
 			}
 
@@ -112,28 +81,24 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {});
+				signalContextMenu(signalList, {}, {});
 				break;
 			}
 
 			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 				schemaItemReceiver != nullptr)
 			{
-				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {});
+				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {}, {});
 				break;
 			}
 
 		}
 	}
 
-//
-//	actions << m_newTabAction;
-//	actions << m_closeTabAction;
-
 	return;
 }
 
-void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals)
+void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*> customMenu)
 {
 	// To set, it will sort list and exclude same ids
 	//
@@ -223,6 +188,16 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 		}
 	}
 
+	// Custom menus
+
+	if (customMenu.isEmpty() == false)
+	{
+		for (auto cm : customMenu)
+		{
+			menu.addActions(cm->actions());
+		}
+	}
+
 	// SignalInfo list
 	//
 	QAction* appSignalSeparator = menu.addSeparator();
@@ -273,6 +248,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 
 	// --
 	//
+
 	menu.exec(QCursor::pos());
 
 	return;

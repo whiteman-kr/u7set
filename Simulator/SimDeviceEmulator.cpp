@@ -2,6 +2,7 @@
 #include <QtEndian>
 #include "SimException.h"
 #include "SimCommandProcessor.h"
+#include "Simulator.h"
 
 namespace Sim
 {
@@ -96,6 +97,8 @@ namespace Sim
 		m_commandProcessor.reset();
 
 		m_lmDescription.clear();
+		m_logicModuleExtraInfo = {};
+
 		m_tuningEeprom.clear();
 		m_confEeprom.clear();
 		m_appLogicEeprom.clear();
@@ -116,12 +119,12 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
-							  const LmDescription& lmDescription,
-							  const Eeprom& tuningEeprom,
-							  const Eeprom& confEeprom,
-							  const Eeprom& appLogicEeprom,
-							  const Connections& connections)
+	DeviceError DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
+									 const LmDescription& lmDescription,
+									 const Eeprom& tuningEeprom,
+									 const Eeprom& confEeprom,
+									 const Eeprom& appLogicEeprom,
+									 const Connections& connections)
 	{
 		clear();
 
@@ -133,6 +136,7 @@ namespace Sim
 		setLogicModuleInfo(logicModuleInfo);
 
 		m_lmDescription = lmDescription;
+
 		m_tuningEeprom = tuningEeprom;
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
@@ -146,15 +150,15 @@ namespace Sim
 			writeWaning(QString("There is no simulation for %1, LmDescription.name = %2")
 							.arg(logicModuleInfo.equipmentId)
 							.arg(lmDescription.name()));
-			return false;
+			return DeviceError::NoCommandProcessor;
 		}
 
-		//--
+		// --
 		//
 		if (bool ok = m_afbComponents.init(m_lmDescription);
 			ok == false)
 		{
-			return false;
+			return DeviceError::AfbComponentNotFound;
 		}
 
 		// --
@@ -162,7 +166,7 @@ namespace Sim
 		if (bool ok = initEeprom();
 			ok == false)
 		{
-			return false;
+			return DeviceError::InitEepromError;
 		}
 
 		// Init RAM
@@ -179,49 +183,117 @@ namespace Sim
 		if (bool ok = parseAppLogicCode();
 			ok == false)
 		{
-			return false;
+			return DeviceError::ParsingAppLogicError;
 		}
 
+		return DeviceError::Ok;
+	}
+
+	bool DeviceEmulator::powerOff()
+	{
+		writeDebug(tr("Off"));
+		setCurrentMode(DeviceMode::Off);
 		return true;
 	}
 
 	bool DeviceEmulator::reset()
 	{
 		writeDebug(tr("Reset"));
-
 		setCurrentMode(DeviceMode::Start);
-
-		bool ok = initMemory();
-		if (ok == false)
-		{
-			writeError(tr("Init memory error."));
-			return false;
-		}
-
-		m_afbComponents.resetState();	// It will clear all AFBs' params
-
 		return true;
 	}
 
-	bool DeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, qint64 workcycle)
+	bool DeviceEmulator::runWorkcycle(std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle)
 	{
-		if (m_currentMode == DeviceMode::Start)
+		bool ok = false;
+
+		do
 		{
-			if (bool ok = processStartMode();
-				ok == false)
+			if (m_currentMode == DeviceMode::Start)
 			{
-				return false;
+				bool processStartOk = processStartMode();
+				if (processStartOk == false)
+				{
+					return false;
+				}
+			}
+
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				ok = processFaultMode();
+				break;
+			}
+			else
+			{
+				if (m_currentMode == DeviceMode::Off)
+				{
+					ok = processOffMode();
+				}
+				else
+				{
+					Q_ASSERT(m_currentMode == DeviceMode::Operate);
+					ok = processOperate(currentTime, currentDateTime, workcycle);
+				}
+				break;
 			}
 		}
+		while (false);
 
-		bool ok = false;
-		if (m_currentMode == DeviceMode::Fault)
+		// Perform post run cycle actions
+		//
+		if (m_appSignalManager == nullptr ||
+			m_appDataTransmitter == nullptr)
 		{
-			ok = processFaultMode();
+			Q_ASSERT(m_appSignalManager);
+			Q_ASSERT(m_appDataTransmitter);
+
+			return false;
 		}
-		else
+
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
+
+		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+		TimeStamp localTime{plantTime};
+		TimeStamp systemTime{ms.count()};
+
+		// Set LogicModule's RAM to Sim::AppSignalManager
+		//
+		m_appSignalManager->setData(equipmentId(), ram(), plantTime, localTime, systemTime);
+
+		// Send reg data to AppDataSrv
+		//
+		if (m_appDataTransmitter->enabled() == true && logicModuleExtraInfo().appDataEnable == true)
 		{
-			ok = processOperate(currentTime, workcycle);
+			QByteArray regData;
+
+			quint32 regDataOffsetW = m_lmDescription.memory().m_appLogicWordDataOffset;
+			quint32 regDataSizeW = m_logicModuleExtraInfo.appDataSizeBytes / 2;
+
+			if (regDataSizeW > m_lmDescription.memory().m_appLogicWordDataSize)
+			{
+				writeError(tr("Send reg data error, buffer size is too big. LM %1, OffsetW %2, SizeW %3, AppLogicWordDataSize %4.")
+						   .arg(equipmentId())
+						   .arg(regDataOffsetW)
+						   .arg(regDataSizeW)
+						   .arg(m_lmDescription.memory().m_appLogicWordDataSize));
+
+				setCurrentMode(DeviceMode::Fault);
+				return false;
+			}
+
+			bool readRegBufferOk = m_ram.readToBuffer(regDataOffsetW, E::LogicModuleRamAccess::Write, regDataSizeW, &regData, true);
+			if (readRegBufferOk == false)
+			{
+				writeError(tr("Error reading regBuffer for LM %1, OffsetW %2, SizeW %3.")
+						   .arg(equipmentId())
+						   .arg(regDataOffsetW)
+						   .arg(regDataSizeW));
+
+				setCurrentMode(DeviceMode::Fault);
+				return false;
+			}
+
+			m_appDataTransmitter->sendData(equipmentId(), std::move(regData), plantTime);
 		}
 
 		return ok;
@@ -370,12 +442,14 @@ namespace Sim
 		if (ramAreaSrc == nullptr)
 		{
 			SIM_FAULT(QString("Command movmem error, memory area src handle %1 not found").arg(memoryAreaHandleSrc));
+			return false;
 		}
 
 		RamArea* ramAreaDst = m_ram.memoryArea(memoryAreaHandleDst);
 		if (ramAreaDst == nullptr)
 		{
 			SIM_FAULT(QString("Command movmem error, memory area dst handle %1 not found").arg(memoryAreaHandleDst));
+			return false;
 		}
 
 		QByteArray buffer;
@@ -516,6 +590,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint16 data = 0;
@@ -608,6 +683,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint16 data = 0;
@@ -698,6 +774,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint32 data = 0;
@@ -1014,6 +1091,8 @@ namespace Sim
 			m_cacheMutex.unlock();
 		}
 
+		m_commandProcessor->beforeAppLogicParse();
+
 		bool ok = true;
 		int programCounter = 0;
 		const std::vector<LmCommand> commands = m_lmDescription.commandsAsVector();
@@ -1077,7 +1156,7 @@ namespace Sim
 
 		// Let command processor to make its' cache optimizations
 		//
-		m_commandProcessor->cacheCommands(&m_commands);
+		m_commandProcessor->afterAppLogicParse(&m_commands);
 
 		// This block is related to Mutex, it's not about pre do-while loop
 		//
@@ -1119,9 +1198,7 @@ namespace Sim
 
 		// --
 		//
-		m_commands.emplace_back(command);
-		DeviceCommand& deviceCommand = m_commands.back();
-
+		DeviceCommand& deviceCommand = m_commands.emplace_back(command);
 		deviceCommand.m_offset = programCounter;
 
 		try
@@ -1138,7 +1215,7 @@ namespace Sim
 						.arg(e.message())
 						.arg(e.where())
 						.arg(programCounter)
-						.arg(programCounter, 0, 16)
+						.arg(programCounter, 0, 16, QChar('0'))
 						.arg(deviceCommand.m_command.parseFunc));
 			return false;
 		}
@@ -1159,11 +1236,9 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, qint64 workcycle)
+	bool DeviceEmulator::processOperate(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 /*workcycle*/)
 	{
 		//qDebug() << "DeviceEmulator::processOperate " << equipmentId();
-
-		Q_UNUSED(workcycle);
 
 		// One LogicModule Cycle
 		//
@@ -1172,17 +1247,21 @@ namespace Sim
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
-		m_commandProcessor->updatePlatformInterfaceState(currentTime);
+		m_commandProcessor->updatePlatformInterfaceState(currentDateTime);
 
 		if (m_overrideSignals != nullptr)
 		{
 			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
 		}
+		else
+		{
+			Q_ASSERT(m_overrideSignals);
+		}
 
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
-		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 som emeory areas before start work cylce (like memory area for write i/o modules)
+		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some meory areas before start work cylce (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
 		// !!! receiveConnectionsData !!! was moved to Sim::Control,
@@ -1231,6 +1310,12 @@ namespace Sim
 				break;
 			}
 
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				result = true;
+				break;
+			}
+
 			// If ProgramCounter was not changed in runCommand (can be changed by APPSTART command), then
 			// incerement ProgramCounter to coommand size
 			//
@@ -1242,7 +1327,7 @@ namespace Sim
 
 		// Send data to fiber optic channels (LM, OCM)
 		//
-		result = sendConnectionsData(currentTime);
+		result &= sendConnectionsData(currentTime);
 
 		return result;
 	}
@@ -1278,10 +1363,26 @@ namespace Sim
 		return;
 	}
 
+	bool DeviceEmulator::processOffMode()
+	{
+		Q_ASSERT(m_currentMode == DeviceMode::Off);
+		return true;
+	}
+
 	bool DeviceEmulator::processStartMode()
 	{
 		Q_ASSERT(m_currentMode == DeviceMode::Start);
 		writeDebug(tr("Start mode"));
+
+		bool ok = initMemory();
+		if (ok == false)
+		{
+			writeError(tr("Init memory error."));
+			setCurrentMode(DeviceMode::Fault);
+			return false;
+		}
+
+		m_afbComponents.resetState();	// It will clear all AFBs' params
 
 		setCurrentMode(DeviceMode::Operate);
 
@@ -1330,6 +1431,11 @@ namespace Sim
 
 	bool DeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
+		if (m_currentMode == DeviceMode::Off)
+		{
+			return true;
+		}
+
 		for (ConnectionPtr& c : m_connections)
 		{
 			if (c->enabled() == false)
@@ -1402,7 +1508,7 @@ namespace Sim
 				if (receiveBuffer->empty() == true)
 				{
 					// If timeout not happened yet, but receiveBuffer is empty, wait mor time
-					// do not exit from function here, lated validity bit vill be written
+					// do not exit from function here, later validity bit will be written
 					//
 				}
 				else
@@ -1433,6 +1539,24 @@ namespace Sim
 								  .arg(portInfo.equipmentID));
 						return false;
 					}
+
+					// Check the DataID which is the part of the payload (first 4 bytes)
+					//
+					if (c->connectionInfo().disableDataIDControl == false)
+					{
+						quint32 receivedDataId = readRamDword(portInfo.rxBufferAbsAddr);
+
+						if (port->portInfo().rxDataID != receivedDataId)
+						{
+							SIM_FAULT(QString("Received DataID mismatch, received 0x%1, expected 0x%2, connection %3, port %4 (%5).")
+									  .arg(receivedDataId, 8, 16, QChar('0'))
+									  .arg(port->portInfo().rxDataID, 8, 16, QChar('0'))
+									  .arg(c->connectionId())
+									  .arg(portInfo.portNo)
+									  .arg(portInfo.equipmentID));
+							return false;
+						}
+					}
 				}
 			}
 
@@ -1461,6 +1585,11 @@ namespace Sim
 
 	bool DeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
 	{
+		if (m_currentMode == DeviceMode::Off)
+		{
+			return true;
+		}
+
 		for (ConnectionPtr& c : m_connections)
 		{
 			if (c->enabled() == false)
@@ -1582,6 +1711,16 @@ namespace Sim
 		return;
 	}
 
+	const ::LogicModuleInfo& DeviceEmulator::logicModuleExtraInfo() const
+	{
+		return m_logicModuleExtraInfo;
+	}
+
+	void DeviceEmulator::setLogicModuleExtraInfo(const ::LogicModuleInfo& value)
+	{
+		m_logicModuleExtraInfo = value;
+	}
+
 	const LmDescription& DeviceEmulator::lmDescription() const
 	{
 		return m_lmDescription;
@@ -1590,6 +1729,16 @@ namespace Sim
 	void DeviceEmulator::setOverrideSignals(OverrideSignals* overrideSignals)
 	{
 		m_overrideSignals = overrideSignals;
+	}
+
+	void DeviceEmulator::setAppSignalManager(AppSignalManager* appSignalManager)
+	{
+		m_appSignalManager = appSignalManager;
+	}
+
+	void DeviceEmulator::setAppDataTransmitter(AppDataTransmitter* appDataTransmitter)
+	{
+		m_appDataTransmitter = appDataTransmitter;
 	}
 
 	std::vector<DeviceCommand> DeviceEmulator::commands() const

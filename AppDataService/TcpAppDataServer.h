@@ -63,12 +63,12 @@ private:
 	//
 	int getSignalListPartCount(int signalCount);
 
-	const QVector<QString>& appSignalIDs() const;
+	const QVector<QString>& acquiredAppSignalIDs() const;
 	const AppSignals& appSignals() const;
 	const AppDataSourcesIP& appDataSources() const;
 
 	bool getAppSignalStateState(Hash hash, AppSignalState& state);
-//	bool getDataSourceState(Hash hash, AppSignalState& state);
+	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 	void getServerTimes(qint64* utc, qint64* local);
 
@@ -82,8 +82,8 @@ private:
 
 	// precalculated variables
 	//
-	int m_signalCount = 0;
-	int m_signalListPartCount = 0;
+	int m_acquiredSignalCount = 0;
+	int m_acquiredSignalListPartCount = 0;
 
 	// reused protobuf messages
 	//
@@ -132,8 +132,8 @@ public:
 							const AppDataServiceWorker& appDataServiceWorker,
 							std::shared_ptr<CircularLogger> logger);
 
-	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
-	int appSignalIDsCount() const { return m_appSignalIDs.count(); }
+	const QVector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
+	int acquiredAppSignalIDsCount() const { return m_acquiredAppSignalIDs.count(); }
 
 	const AppSignals& appSignals() const { return m_appSignals; }
 	const AppDataSourcesIP& appDataSources() const { return  m_appDataSources; }
@@ -151,7 +151,8 @@ private:
 	void buildAppSignalIDs();
 
 private:
-	QVector<QString> m_appSignalIDs;
+	QVector<QString> m_acquiredAppSignalIDs;
+
 	const AppDataSourcesIP& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_appSignalStates;

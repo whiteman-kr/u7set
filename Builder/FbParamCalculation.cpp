@@ -1850,6 +1850,15 @@ namespace Builder
 
 			if (mismatchWithRange == true)
 			{
+				if (i_lowlim == nullptr ||
+					i_highlim == nullptr ||
+					i_relvalue == nullptr ||
+					i_ust == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
 				CHECK_SIGNED_INT32(*i_lowlim);
 				CHECK_SIGNED_INT32(*i_highlim);
 				CHECK_FLOAT32(*i_relvalue);
@@ -1897,6 +1906,15 @@ namespace Builder
 
 			if (mismatchWithRange == true)
 			{
+				if (i_lowlim == nullptr ||
+					i_highlim == nullptr ||
+					i_relvalue == nullptr ||
+					i_ust == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
 				CHECK_FLOAT32(*i_lowlim);
 				CHECK_FLOAT32(*i_highlim);
 				CHECK_FLOAT32(*i_relvalue);

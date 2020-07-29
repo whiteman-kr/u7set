@@ -100,8 +100,10 @@ namespace Builder
 				result &= ds.getLmPropertiesFromDevice(lm, DataSource::DataType::App,
 				                                       lanController.m_place,
 				                                       lanController.m_type,
+													   *m_equipment,
 				                                       m_subsystemKeyMap,
-				                                       m_lmUniqueIdMap, m_log);
+													   m_lmUniqueIdMap,
+													   m_log);
 
 				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
 				{

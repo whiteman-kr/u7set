@@ -378,6 +378,8 @@ public:
 
 	void clear(const QThread* thread);
 
+	virtual void afterPush() {}
+
 private:
 	int checkQueueSize(int newSize) const;
 	void nonLockResizing(int newSize);
@@ -465,6 +467,8 @@ void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread, int* cur
 	{
 		*curMaxSize = m_maxSize;
 	}
+
+	afterPush();
 }
 
 template <typename T>
@@ -611,6 +615,8 @@ void FastThreadSafeQueue<T>::completePush(const QThread* thread, int* curSize, i
 	m_pushIsBegan = false;
 
 	m_mutex.unlock(thread);
+
+	afterPush();
 }
 
 template <typename T>

@@ -1,4 +1,5 @@
 #include "SimSchemaPage.h"
+#include "SimSchemaView.h"
 
 
 SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
@@ -46,6 +47,16 @@ void SimSchemaPage::controlStateChanged(Sim::SimControlState state)
 QString SimSchemaPage::schemaId() const
 {
 	return m_schemaWidget->schemaId();
+}
+
+const QStringList& SimSchemaPage::hightlightIds() const
+{
+	return m_schemaWidget->simSchemaView()->hightlightIds();
+}
+
+void SimSchemaPage::setHighlightIds(const QStringList& value)
+{
+	return m_schemaWidget->simSchemaView()->setHighlightIds(value);
 }
 
 SimSchemaWidget* SimSchemaPage::simSchemaWidget()

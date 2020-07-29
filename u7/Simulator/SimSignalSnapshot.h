@@ -13,14 +13,16 @@ class SimDialogSignalSnapshot : public DialogSignalSnapshot
 public:
 	static bool showDialog(SimIdeSimulator* simuator,
 						   VFrame30::AppSignalController* appSignalController,
+						   QString lmEquipmentId,
 						   SimWidget* simWidget);
 
 private:
 	explicit SimDialogSignalSnapshot(SimIdeSimulator* simuator,
-								  IAppSignalManager* appSignalManager,
-								  QString projectName,
-								  QString softwareEquipmentId,
-								  QWidget *parent);
+									 IAppSignalManager* appSignalManager,
+									 QString projectName,
+									 QString softwareEquipmentId,
+									 QString lmEquipmentId,
+									 QWidget *parent);
 
 private slots:
 	void projectUpdated();

@@ -3,7 +3,6 @@
 #include "../lib/Address16.h"
 #include "../lib/Signal.h"
 #include "../lib/OutputLog.h"
-#include "../lib/LmLimits.h"
 #include "IssueLogger.h"
 
 
@@ -102,9 +101,11 @@ namespace Builder
 	public:
 		LmMemoryMap(IssueLogger* log);
 
-		bool init(	int appMemorySize,
-					const MemoryArea& moduleData,
+		bool init(int appMemorySize,
+					const MemoryArea& ioModuleData,
+					int ioModulesCount,
 					const MemoryArea& optoInterfaceData,
+					int optoInterfaceCount,
 					const MemoryArea& appLogicBitData,
 					const MemoryArea& tuningData,
 					const MemoryArea& appLogicWordData);
@@ -177,8 +178,8 @@ namespace Builder
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
-													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
+		bool appendAcquiredAnalogConstSignalsInRegBuf(const QMultiHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
+													  const QMultiHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
 
 		bool appendAcquiredInputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredOutputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
@@ -227,14 +228,14 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			MemoryArea module[MODULES_COUNT];
+			std::vector<MemoryArea> module;
 		} m_modules;
 
 		struct
 		{
 			MemoryArea memory;
 
-			MemoryArea channel[OPTO_INTERFACE_COUNT];
+			std::vector<MemoryArea> channel;
 			MemoryArea reserv;
 
 		} m_optoInterface;

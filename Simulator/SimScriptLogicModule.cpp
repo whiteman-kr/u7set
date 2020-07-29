@@ -28,7 +28,7 @@ namespace Sim
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("get equipmentId error"));
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
 			return {};
 		}
 
@@ -39,7 +39,7 @@ namespace Sim
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("get equipmentId error"));
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
 			return {};
 		}
 
@@ -48,8 +48,35 @@ namespace Sim
 
 	quint32 ScriptLogicModule::regBufferSize() const
 	{
-		Q_ASSERT(false);		// not implemented yet
-		return 0xFFFFFFFF;
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->logicModuleExtraInfo().appDataSizeBytes / 2;
+	}
+
+	bool ScriptLogicModule::isPowerOff() const
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->isPowerOff();
+	}
+
+	void ScriptLogicModule::setPowerOff(bool value)
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return;
+		}
+
+		return m_logicModule->setPowerOff(value);
 	}
 
 	quint16 ScriptLogicModule::readRamBit(RamAddress address, E::LogicModuleRamAccess access)

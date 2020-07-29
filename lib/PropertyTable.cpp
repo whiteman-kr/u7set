@@ -161,7 +161,22 @@ namespace ExtWidgets
 			Q_ASSERT(cellEditor);
 			return;
 		}
-		cellEditor->setValue(p, p->readOnly() == true || m_propertyTable->isReadOnly() == true);
+
+		bool readOnly = p->readOnly() == true || m_propertyTable->isReadOnly() == true;
+
+		cellEditor->setValue(p, readOnly);
+
+		if (m_initText.isEmpty() == false)
+		{
+			if (readOnly == false)
+			{
+				cellEditor->setInitialText(m_initText);
+			}
+
+			m_initText.clear();
+		}
+
+		return;
 	}
 
 	void PropertyTableItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
@@ -179,6 +194,11 @@ namespace ExtWidgets
 	{
 		Q_UNUSED(index);
 		editor->setGeometry(option.rect);
+	}
+
+	void PropertyTableItemDelegate::setInitText(const QString& text)
+	{
+		m_initText = text;
 	}
 
 	void PropertyTableItemDelegate::onValueChanged(QVariant value)
@@ -218,6 +238,65 @@ namespace ExtWidgets
 		}
 
 		return sm->propertyByIndex(mapToSource(mi), propertyRow);
+	}
+
+	bool PropertyTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+	{
+		PropertyTableModel* sm = dynamic_cast<PropertyTableModel*>(sourceModel());
+		if (sm == nullptr)
+		{
+			Q_ASSERT(sm);
+			return false;
+		}
+
+		int leftPropertyRow = -1;
+		int rightPropertyRow = -1;
+
+		std::shared_ptr<Property> leftProperty = sm->propertyByIndex(left, &leftPropertyRow);
+		std::shared_ptr<Property> rightProperty = sm->propertyByIndex(right, &rightPropertyRow);
+
+		if (leftProperty == nullptr || rightProperty == nullptr)
+		{
+			Q_ASSERT(leftProperty);
+			Q_ASSERT(rightProperty);
+			return false;
+		}
+
+		QVariant lv = leftProperty->value();
+		QVariant rv = rightProperty->value();
+
+		if (leftProperty->isEnum() == true && rightProperty->isEnum() == true)
+		{
+			return leftProperty->value().toInt() < rightProperty->value().toInt();
+		}
+
+		if (lv.userType() != rv.userType())
+		{
+			Q_ASSERT(false);
+			return lv.userType() < rv.userType();
+		}
+
+		if (lv.userType() == TuningValue::tuningValueTypeId())
+		{
+			TuningValue tv1 = lv.value<TuningValue>();
+			TuningValue tv2 = rv.value<TuningValue>();
+
+			return tv1.toDouble() < tv2.toDouble();
+		}
+
+		switch(lv.userType())
+		{
+		case QVariant::Int:
+		case QVariant::UInt:
+		case QMetaType::Float:
+		case QVariant::Double:
+			{
+				return lv.toDouble() < rv.toDouble();
+				break;
+			}
+		default:
+			return lv.toString() < rv.toString();
+		}
 	}
 
 	//
@@ -538,19 +617,44 @@ namespace ExtWidgets
 
 	void PropertyTableView::keyPressEvent(QKeyEvent *event)
 	{
-		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return)
+		if (selectedIndexes().size() > 0)
 		{
-			emit editKeyPressed();
-			return;
-		}
+			if (event->key() == Qt::Key_Escape)
+			{
+				clearSelection();
+				return;
+			}
 
-		if (event->key() == Qt::Key_Space)
+			if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+			{
+				emit editKeyPressed();
+				return;
+			}
+
+			if (event->key() == Qt::Key_Space)
+			{
+				emit spaceKeyPressed();
+				return;
+			}
+
+			if (event->text().isEmpty() == false)
+			{
+				emit symbolKeyPressed(event->text());
+				return;
+			}
+
+		}
+		else
 		{
-			emit spaceKeyPressed();
-			return;
+			if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+			{
+				return;
+			}
+
 		}
 
 		QTableView::keyPressEvent(event);
+		return;
 	}
 
 	//
@@ -566,24 +670,37 @@ namespace ExtWidgets
 		mainLayout->setContentsMargins(1, 1, 1, 1);
 		mainLayout->setSpacing(2);
 
-		// Property Mask
+		// Property Filter
+		m_editPropertyFilter = new QLineEdit();
+		connect(m_editPropertyFilter, &QLineEdit::editingFinished, this, &PropertyTable::onPropertyFilterChanged);
 
-		m_editPropertyMask = new QLineEdit();
-		connect(m_editPropertyMask, &QLineEdit::editingFinished, this, &PropertyTable::onPropertyMaskChanged);
+		// Property Filter Help
+
+		m_editPropertyFilter->setToolTip(tr("To filter properties, enter a caption fragment. Multiple fragments can be separated by semicolons."));
+
+		QPushButton* filterHelpButton = new QPushButton("?");
+		filterHelpButton->setDefault(false);
+		filterHelpButton->setAutoDefault(false);
+		connect(filterHelpButton, &QPushButton::clicked, [this](){
+			QString filterHelp = tr("Property Filter\n\nTo filter properties, enter a caption fragment.\n\nMultiple fragments can be separated by semicolons.\n\nExample: Caption;Enable");
+			QMessageBox::information(this, qAppName(), filterHelp);
+		});
 
 		// GroupByCategory
 		m_buttonGroupByCategory = new QPushButton(tr("Group by Category"));
 		m_buttonGroupByCategory->setCheckable(true);
+		m_buttonGroupByCategory->setDefault(false);
+		m_buttonGroupByCategory->setAutoDefault(false);
 		connect(m_buttonGroupByCategory, &QPushButton::toggled, this, &PropertyTable::onGroupByCategoryToggled);
 
 		// Toolbar
 
 		QHBoxLayout* toolsLayout = new QHBoxLayout();
 
-		toolsLayout->addWidget(new QLabel(tr("Search:")));
-		toolsLayout->addWidget(m_editPropertyMask);
+		toolsLayout->addWidget(new QLabel(tr("Property Filter:")));
+		toolsLayout->addWidget(m_editPropertyFilter);
+		toolsLayout->addWidget(filterHelpButton);
 		toolsLayout->addStretch();
-
 		toolsLayout->addWidget(m_buttonGroupByCategory);
 
 		mainLayout->addLayout(toolsLayout);
@@ -611,6 +728,7 @@ namespace ExtWidgets
 		connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
 
 		connect(m_tableView, &PropertyTableView::editKeyPressed, this, &PropertyTable::onCellEditKeyPressed);
+		connect(m_tableView, &PropertyTableView::symbolKeyPressed, this, &PropertyTable::onCellSymbolKeyPressed);
 		connect(m_tableView, &PropertyTableView::spaceKeyPressed, this, &PropertyTable::onCellToggleKeyPressed);
 
 		// Edit Delegate
@@ -675,24 +793,24 @@ namespace ExtWidgets
 		return;
 	}
 
-	QString PropertyTable::propertyMask() const
+	QString PropertyTable::propertyFilter() const
 	{
-		return m_propertyMasks.join(';');
+		return m_propertyFilters.join(';');
 	}
 
-	void PropertyTable::setPropertyMask(const QString& propertyMask)
+	void PropertyTable::setPropertyFilter(const QString& propertyFilter)
 	{
-		if (m_editPropertyMask == nullptr)
+		if (m_editPropertyFilter == nullptr)
 		{
-			Q_ASSERT(m_editPropertyMask);
+			Q_ASSERT(m_editPropertyFilter);
 			return;
 		}
 
-		m_editPropertyMask->blockSignals(true);
-		m_editPropertyMask->setText(propertyMask);
-		m_editPropertyMask->blockSignals(false);
+		m_editPropertyFilter->blockSignals(true);
+		m_editPropertyFilter->setText(propertyFilter);
+		m_editPropertyFilter->blockSignals(false);
 
-		m_propertyMasks = propertyMask.split(';', Qt::SkipEmptyParts);
+		m_propertyFilters = propertyFilter.split(';', Qt::SkipEmptyParts);
 
 		fillProperties();
 	}
@@ -837,6 +955,16 @@ namespace ExtWidgets
 		}
 	}
 
+	void PropertyTable::onCellSymbolKeyPressed(QString key)
+	{
+		if (getSelectionType() != QVariant::Bool && isSelectionReadOnly() == false)
+		{
+			m_itemDelegate->setInitText(key);
+
+			startEditing();
+		}
+	}
+
 	void PropertyTable::onCellToggleKeyPressed()
 	{
 		if (getSelectionType() == QVariant::Bool)
@@ -850,11 +978,11 @@ namespace ExtWidgets
 		QMessageBox::warning(this, "Error", message);
 	}
 
-	void PropertyTable::onPropertyMaskChanged()
+	void PropertyTable::onPropertyFilterChanged()
 	{
-		QString str = m_editPropertyMask->text().trimmed();
+		QString str = m_editPropertyFilter->text().trimmed();
 
-		m_propertyMasks = str.split(';', Qt::SkipEmptyParts);
+		m_propertyFilters = str.split(';', Qt::SkipEmptyParts);
 
 		fillProperties();
 	}
@@ -1231,13 +1359,13 @@ namespace ExtWidgets
 
 					const QString& propertyCaption = p->caption();
 
-					if (m_propertyMasks.empty() == false)
+					if (m_propertyFilters.empty() == false)
 					{
 						bool maskMatch = false;
 
-						for (const QString& mask : m_propertyMasks)
+						for (const QString& filter : m_propertyFilters)
 						{
-							if (propertyCaption.contains(mask) == true)
+							if (propertyCaption.contains(filter) == true)
 							{
 								maskMatch = true;
 								break;

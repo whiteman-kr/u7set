@@ -1,6 +1,6 @@
 // This module implements the QsciLexerCPP class.
 //
-// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2020 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -132,22 +132,26 @@ QColor QsciLexerCPP::defaultColor(int style) const
         return QColor(0x3f, 0x70, 0x3f);
 
     case Number:
-        return QColor(0x00, 0x7f, 0x7f);
+		//return QColor(0x00, 0x7f, 0x7f);
+		return QColor(0x00, 0x00, 0x7f);
 
     case Keyword:
-        return QColor(0x00, 0x00, 0x7f);
+		//return QColor(0x00, 0x00, 0x7f);
+		return QColor(0x7f, 0x7f, 0x00);
 
     case DoubleQuotedString:
     case SingleQuotedString:
     case RawString:
-        return QColor(0x7f, 0x00, 0x7f);
+		//return QColor(0x7f, 0x00, 0x7f);
+		return QColor(0x00, 0x7f, 0x00);
 
     case PreProcessor:
-        return QColor(0x7f, 0x7f, 0x00);
+		//return QColor(0x7f, 0x7f, 0x00);
+		return QColor(0x00, 0x00, 0x7f);
 
     case Operator:
     case UnclosedString:
-        return QColor(0x00, 0x00, 0x00);
+		return QColor(0x00, 0x00, 0x00);
 
     case VerbatimString:
     case TripleQuotedVerbatimString:
@@ -187,7 +191,8 @@ QColor QsciLexerCPP::defaultColor(int style) const
         return QColor(0xd0, 0xd0, 0xd0);
 
     case InactiveKeyword:
-        return QColor(0x90, 0x90, 0xb0);
+		//return QColor(0x90, 0x90, 0xb0);
+		return QColor(0x7f, 0x7f, 0x00);
 
     case InactiveDoubleQuotedString:
     case InactiveSingleQuotedString:
@@ -198,6 +203,8 @@ QColor QsciLexerCPP::defaultColor(int style) const
         return QColor(0xb0, 0xb0, 0x90);
 
     case InactiveOperator:
+		return QColor(0x80, 0x80, 0x80);
+
     case InactiveIdentifier:
     case InactiveGlobalClass:
         return QColor(0xb0, 0xb0, 0xb0);
@@ -253,7 +260,7 @@ bool QsciLexerCPP::defaultEolFill(int style) const
 // Returns the font of the text for a style.
 QFont QsciLexerCPP::defaultFont(int style) const
 {
-    QFont f;
+	/*QFont f;
 
     switch (style)
     {
@@ -315,7 +322,9 @@ QFont QsciLexerCPP::defaultFont(int style) const
         f = QsciLexer::defaultFont(style);
     }
 
-    return f;
+	return f;*/
+
+	return QsciLexer::defaultFont(style);
 }
 
 
@@ -333,7 +342,7 @@ const char *QsciLexerCPP::keywords(int set) const
             "reinterpret_cast return short signed sizeof static "
             "static_cast struct switch template this throw true "
             "try typedef typeid typename union unsigned using "
-            "virtual void volatile wchar_t while xor xor_eq";
+			"var virtual void volatile wchar_t while xor xor_eq";
 
     if (set == 3)
         return

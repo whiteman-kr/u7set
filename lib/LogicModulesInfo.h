@@ -1,51 +1,77 @@
 #pragma once
 
-#ifdef IS_BUILDER
-
-#include "Connection.h"
-#include "../Builder/OptoModule.h"
-#include "XmlHelper.h"
-#include "WUtils.h"
-#include "ModuleLogicCompiler.h"
-
-#endif
-
 #include "Address16.h"
 #include "Types.h"
 #include "DomXmlHelper.h"
+#include "LanControllerInfo.h"
+
+#ifdef IS_BUILDER
+
+#include "XmlHelper.h"
+#include "WUtils.h"
+#include "ModuleLogicCompiler.h"
+#include "DeviceHelper.h"
+#include "LmDescription.h"
+#include "LanControllerInfoHelper.h"
+
+#endif
 
 class LogicModuleInfo
 {
 public:
 	QString equipmentID;
+	QString caption;
 
-	//std::vector<ConnectionPortInfo> ports;
+	QString subsystemID;
+	int lmNumber = 0;
+	QString subsystemChannel;
+
+	QString moduleFamily;
+	int moduleFamilyID = 0;
+	int moduleVersion = 0;
+
+	QString presetName;
+	QString lmDescriptionFile;
+
+	bool appDataEnable = false;
+	int appDataSizeBytes = 0;
+	quint32 appDataUID = 0;
+
+	bool diagDataEnable = false;
+	int diagDataSizeBytes = 0;
+	quint32 diagDataUID = 0;
+
+	std::vector<LanControllerInfo> lanControllers;
+
+	int moduleType() const { return (moduleFamilyID & 0xFF00) | (moduleVersion & 0x00FF); }
 };
 
 class LogicModulesInfo
 {
 public:
-	std::vector<LogicModuleInfo> logicModulesInfo;
+	std::vector<::LogicModuleInfo> logicModulesInfo;
 
 	bool load(const QString& fileName, QString* errMsg);
 	bool load(const QByteArray& xmlData, QString* errMsg);
 
 private:
-	bool load(LogicModuleInfo* lmi, const QDomNode& node, QString* errMsg);
-
-/*	bool load(ConnectionInfo* ci, const QDomNode& node, QString* errMsg);
-	bool load(ConnectionPortInfo* cpi, const QDomElement& connectionElement, int prtNo, QString* errMsg);
-	bool load(ConnectionTxRxSignal* cs, const QDomElement& txRxSignalElem, QString* errMsg);*/
+	bool load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QString* errMsg);
+	bool load(LanControllerInfo* lci, const QDomNode& lanControllerNode, QString* errMsg);
 
 protected:
 	static const QString ELEM_LOGIC_MODULES;
 	static const QString ELEM_LOGIC_MODULE;
 
-	static const QString ATTR_COUNT;
-	static const QString ATTR_ID;
-	static const QString ATTR_EQUIPMENT_ID;
-	static const QString ATTR_DATA_ID;
-	static const QString ATTR_HEX_DATA_ID;
+	static const QString ELEM_LAN_CONTROLLERS;
+	static const QString ELEM_LAN_CONTROLLER;
+
+	static const QString ELEM_TUNING_PARAMS;
+	static const QString ELEM_APP_DATA_PARAMS;
+	static const QString ELEM_DIAG_DATA_PARAMS;
+
+	static const QString ATTR_TUNING_PROVIDED;
+	static const QString ATTR_APP_DATA_PROVIDED;
+	static const QString ATTR_DIAG_DATA_PROVIDED;
 };
 
 #ifdef IS_BUILDER
@@ -53,28 +79,26 @@ protected:
 class LogicModulesInfoWriter : public LogicModulesInfo
 {
 public:
-	bool fill(const QVector<Builder::ModuleLogicCompiler*>& moduleCompilers);
+	LogicModulesInfoWriter(const QVector<Builder::ModuleLogicCompiler *>& moduleCompilers,
+						   const Hardware::EquipmentSet& equipmentSet);
+
+	bool fill();
 	void save(QByteArray* xmlFileData) const;
 
 private:
-	bool fill(LogicModuleInfo* lmInfo, const Builder::ModuleLogicCompiler& mc);
+	bool fill(LogicModuleInfo* lmInfo, Builder::ModuleLogicCompiler& mc);
 
-/*
-public:
-	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(QByteArray* xmlFileData) const;
+	bool save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const;
+
+	bool save(const LanControllerInfo& lci, XmlWriteHelper& xml) const;
 
 private:
-
-	bool fill(ConnectionInfo* ci, Hardware::SharedConnection connection, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(const ConnectionInfo& ci, XmlWriteHelper& xml) const;
-
-	bool fill(ConnectionPortInfo* cpi, Hardware::SharedConnection connection, int prtNo, const Hardware::OptoModuleStorage& optoModuleStorage);
-	void save(const ConnectionPortInfo& cpi, XmlWriteHelper& xml) const;
-
-	void save(const ConnectionTxRxSignal& cs, XmlWriteHelper& xml) const;*/
+	const QVector<Builder::ModuleLogicCompiler *>& m_moduleCompilers;
+	const Hardware::EquipmentSet& m_equipmentSet;
 };
 
 #endif
+
+//void testLogicModulesInfoLoad();
 
 

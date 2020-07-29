@@ -15,8 +15,6 @@ const QString ConnectionsInfo::ELEM_TX_RX_SIGNAL("TxRxSignal");
 const QString ConnectionsInfo::ELEM_RX("Rx");
 const QString ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL("RxValiditySignal");
 
-const QString ConnectionsInfo::ATTR_COUNT("Count");
-const QString ConnectionsInfo::ATTR_ID("ID");
 const QString ConnectionsInfo::ATTR_LINK_ID("LinkID");
 const QString ConnectionsInfo::ATTR_TYPE("Type");
 const QString ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS("EnableManualSettings");
@@ -33,8 +31,6 @@ const QString ConnectionsInfo::ATTR_ENABLE_DUPLEX("EnableDuplex");
 const QString ConnectionsInfo::ATTR_SERIAL_MODE("SerialMode");
 const QString ConnectionsInfo::ATTR_BUFFER_ABS_ADDR("BufferAbsAddr");
 const QString ConnectionsInfo::ATTR_DATA_SIZE_W("DataSizeW");
-const QString ConnectionsInfo::ATTR_DATA_ID("DataID");
-const QString ConnectionsInfo::ATTR_HEX_DATA_ID("HexDataID");
 const QString ConnectionsInfo::ATTR_ABS_ADDR("AbsAddr");
 const QString ConnectionsInfo::ATTR_ADDR_IN_BUF("AddrInBuf");
 
@@ -104,7 +100,7 @@ bool ConnectionsInfo::load(const QByteArray& xmlData, QString* errMsg)
 
 	int connectionsCount = 0;
 
-	result = DomXmlHelper::getIntAttribute(connectionsElem, ATTR_COUNT, &connectionsCount, errMsg);
+	result = DomXmlHelper::getIntAttribute(connectionsElem, XmlAttribute::COUNT, &connectionsCount, errMsg);
 
 	if (result == false)
 	{
@@ -152,7 +148,7 @@ bool ConnectionsInfo::load(ConnectionInfo* ci, const QDomNode& node, QString* er
 
 	bool result = true;
 
-	result &= DomXmlHelper::getStringAttribute(elem, ConnectionsInfo::ATTR_ID, &ci->ID, errMsg);
+	result &= DomXmlHelper::getStringAttribute(elem, XmlAttribute::ID, &ci->ID, errMsg);
 	result &= DomXmlHelper::getIntAttribute(elem, ConnectionsInfo::ATTR_LINK_ID, &ci->linkID, errMsg);
 	result &= DomXmlHelper::getStringAttribute(elem, ConnectionsInfo::ATTR_TYPE, &ci->type, errMsg);
 	result &= DomXmlHelper::getBoolAttribute(elem, ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS, &ci->enableManualSettings, errMsg);
@@ -271,7 +267,7 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 
 		result &= DomXmlHelper::getIntAttribute(txElem, ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, &cpi->txBufferAbsAddr, errMsg);
 		result &= DomXmlHelper::getIntAttribute(txElem, ConnectionsInfo::ATTR_DATA_SIZE_W, &cpi->txDataSizeW, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(txElem, ConnectionsInfo::ATTR_DATA_ID, &cpi->txDataID, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(txElem, XmlAttribute::DATA_ID, &cpi->txDataID, errMsg);
 
 		QDomNodeList txSignalsNodes = txElem.elementsByTagName(ConnectionsInfo::ELEM_TX_RX_SIGNAL);
 
@@ -306,7 +302,7 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 
 		result &= DomXmlHelper::getIntAttribute(rxElem, ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, &cpi->rxBufferAbsAddr, errMsg);
 		result &= DomXmlHelper::getIntAttribute(rxElem, ConnectionsInfo::ATTR_DATA_SIZE_W, &cpi->rxDataSizeW, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(rxElem,ConnectionsInfo::ATTR_DATA_ID, &cpi->rxDataID, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(rxElem, XmlAttribute::DATA_ID, &cpi->rxDataID, errMsg);
 
 		QDomElement rxValiditySignalElem;
 
@@ -347,7 +343,7 @@ bool ConnectionsInfo::load(ConnectionTxRxSignal* cs, const QDomElement& txRxSign
 
 	bool result = true;
 
-	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_ID, &cs->ID, errMsg);
+	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, XmlAttribute::ID, &cs->ID, errMsg);
 
 	QString signalTypeStr;
 
@@ -427,7 +423,7 @@ QString ConnectionsInfo::portTag(int portNo)
 		{
 			xml.writeStartElement(ConnectionsInfo::ELEM_CONNECTIONS);
 
-			xml.writeIntAttribute(ConnectionsInfo::ATTR_COUNT, static_cast<int>(connections.size()));
+			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(connections.size()));
 
 			for(const ConnectionInfo& connectionInfo : connections)
 			{
@@ -493,7 +489,7 @@ QString ConnectionsInfo::portTag(int portNo)
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_CONNECTION);
 
-		xml.writeStringAttribute(ConnectionsInfo::ATTR_ID, ci.ID);
+		xml.writeStringAttribute(XmlAttribute::ID, ci.ID);
 		xml.writeIntAttribute(ConnectionsInfo::ATTR_LINK_ID, ci.linkID);
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, ci.type);
 		xml.writeBoolAttribute(ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS, ci.enableManualSettings);
@@ -639,8 +635,8 @@ QString ConnectionsInfo::portTag(int portNo)
 
 			xml.writeIntAttribute(ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, cpi.txBufferAbsAddr);
 			xml.writeIntAttribute(ConnectionsInfo::ATTR_DATA_SIZE_W, cpi.txDataSizeW);
-			xml.writeUInt32Attribute(ConnectionsInfo::ATTR_DATA_ID, cpi.txDataID, false);
-			xml.writeUInt32Attribute(ConnectionsInfo::ATTR_HEX_DATA_ID, cpi.txDataID, true);
+			xml.writeUInt32Attribute(XmlAttribute::DATA_ID, cpi.txDataID, false);
+			xml.writeUInt32Attribute(XmlAttribute::HEX_DATA_ID, cpi.txDataID, true);
 
 			for(const ConnectionTxRxSignal& txSignal : cpi.txSignals)
 			{
@@ -655,8 +651,8 @@ QString ConnectionsInfo::portTag(int portNo)
 
 			xml.writeIntAttribute(ConnectionsInfo::ATTR_BUFFER_ABS_ADDR, cpi.rxBufferAbsAddr);
 			xml.writeIntAttribute(ConnectionsInfo::ATTR_DATA_SIZE_W, cpi.rxDataSizeW);
-			xml.writeUInt32Attribute(ConnectionsInfo::ATTR_DATA_ID, cpi.rxDataID, false);
-			xml.writeUInt32Attribute(ConnectionsInfo::ATTR_HEX_DATA_ID, cpi.rxDataID, true);
+			xml.writeUInt32Attribute(XmlAttribute::DATA_ID, cpi.rxDataID, false);
+			xml.writeUInt32Attribute(XmlAttribute::HEX_DATA_ID, cpi.rxDataID, true);
 
 			{
 				xml.writeStartElement(ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL);
@@ -682,7 +678,7 @@ QString ConnectionsInfo::portTag(int portNo)
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_TX_RX_SIGNAL);
 
-		xml.writeStringAttribute(ConnectionsInfo::ATTR_ID, cs.ID);
+		xml.writeStringAttribute(XmlAttribute::ID, cs.ID);
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, E::valueToString<E::SignalType>(cs.type));
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ADDR_IN_BUF, cs.addrInBuf);
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ABS_ADDR, cs.absAddr);

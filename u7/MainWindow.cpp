@@ -1101,8 +1101,9 @@ void MainWindow::projectClosed()
 
 void MainWindow::buildStarted()
 {
-	Q_ASSERT(m_taskBarButton);
 #ifdef Q_OS_WINDOWS
+	Q_ASSERT(m_taskBarButton);
+
 	m_taskBarButton->progress()->setRange(0, 100);
 	m_taskBarButton->progress()->show();
 

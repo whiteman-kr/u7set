@@ -23,6 +23,13 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 		return;
 	}
 
+	if (theConfigSettings.schemas.empty() == true)
+	{
+		return;
+	}
+
+	// Create schema widgets and navigation controls
+
 	QHBoxLayout* mainLayout = new QHBoxLayout(this);
 
 	if (theConfigSettings.showSchemasList == true)
@@ -38,8 +45,6 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 		m_schemasList->setColumnCount(headerLabels.size());
 		m_schemasList->setHeaderLabels(headerLabels);
 		m_schemasList->setSelectionMode(QAbstractItemView::SingleSelection);
-		m_schemasList->setSortingEnabled(true);
-		m_schemasList->sortByColumn(0, Qt::AscendingOrder);
 
 		for (const SchemaSettings& schemaID : theConfigSettings.schemas)
 		{
@@ -57,26 +62,56 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 			m_schemasList->addTopLevelItem(item);
 		}
 
+		m_schemasList->setSortingEnabled(true);
+		m_schemasList->sortByColumn(0, Qt::AscendingOrder);
 		m_schemasList->resizeColumnToContents(0);
 		m_schemasList->resizeColumnToContents(1);
 
-		if (m_schemasList->topLevelItemCount() == 0)
+		// Show start schema or first schema in the list
+
+		QTreeWidgetItem* startSchemaItem = nullptr;
+
+		int count = m_schemasList->topLevelItemCount();
+		for (int i = 0; i < count; i++)
 		{
+			QTreeWidgetItem* item = m_schemasList->topLevelItem(i);
+			if (item == nullptr)
+			{
+				Q_ASSERT(item);
+				return;
+			}
+
+			if (item->text(0) == theConfigSettings.startSchemaID)
+			{
+				startSchemaItem = item;
+				break;
+			}
+		}
+
+		if (startSchemaItem == nullptr)
+		{
+			// No startSchemaID was found, show first
+			if (m_schemasList->topLevelItemCount() == 0)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			startSchemaItem = m_schemasList->topLevelItem(0);
+		}
+
+		if (startSchemaItem == nullptr)
+		{
+			Q_ASSERT(startSchemaItem);
 			return;
 		}
 
-		QTreeWidgetItem* firstItem = m_schemasList->topLevelItem(0);
-		if (firstItem == nullptr)
-		{
-			Q_ASSERT(firstItem);
-			return;
-		}
+		startSchemaItem->setSelected(true);
 
-		firstItem->setSelected(true);
-
-		QString firstSchemaID = firstItem->text(0);
-		if (firstSchemaID.isEmpty() == true)
+		QString startSchemaID = startSchemaItem->text(0);
+		if (startSchemaID.isEmpty() == true)
 		{
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -84,7 +119,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 		//
 
-		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(firstSchemaID);
+		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(startSchemaID);
 		if (schema == nullptr)
 		{
 			assert(schema);
@@ -111,6 +146,12 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 			for (const SchemaSettings& schemaID : theConfigSettings.schemas)
 			{
+				if (schemaID.m_id.isEmpty() == true)
+				{
+					assert(false);
+					continue;
+				}
+
 				std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
 				TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
@@ -129,6 +170,13 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 				TuningSchemaWidget* schemaWidget = w.second;
 
 				m_tabWidget->addTab(schemaWidget, schemaWidget->caption());
+
+				if (w.first == theConfigSettings.startSchemaID)
+				{
+					// Set current tab to startSchemaID
+					//
+					m_tabWidget->setCurrentIndex(m_tabWidget->count() - 1);
+				}
 			}
 
 			mainLayout->addWidget(m_tabWidget);
@@ -137,7 +185,28 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 		{
 			// No tab
 
-			const SchemaSettings& schemaID = theConfigSettings.schemas[0];
+			SchemaSettings schemaID;
+
+			for (int i = 0; i < theConfigSettings.schemas.size(); i++)
+			{
+				if (theConfigSettings.schemas[i].m_id == theConfigSettings.startSchemaID)
+				{
+					schemaID = theConfigSettings.schemas[i];
+				}
+			}
+
+			if (schemaID.m_id.isEmpty() == true)
+			{
+				// No startSchemaID was found, show first
+
+				schemaID = theConfigSettings.schemas[0];
+
+				if (schemaID.m_id.isEmpty() == true)
+				{
+					assert(false);
+					return;
+				}
+			}
 
 			std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
@@ -179,7 +248,12 @@ void SchemasWorkspace::slot_itemSelectionChanged()
 	}
 
 	QString schemaId = selectedItem->text(0);
+
+	double zoom = m_schemaWidget->zoom();
+
 	m_schemaWidget->setSchema(schemaId, QStringList{});
+
+	m_schemaWidget->setZoom(zoom, true);
 
 }
 
@@ -254,4 +328,64 @@ void SchemasWorkspace::slot_schemaChanged(VFrame30::ClientSchemaWidget* widget, 
 	}
 
 	return;
+}
+
+void SchemasWorkspace::zoomIn()
+{
+	TuningSchemaWidget* w = activeSchemaWidget();
+	if (w == nullptr)
+	{
+		Q_ASSERT(w);
+		return;
+	}
+	w->zoomIn();
+}
+
+void SchemasWorkspace::zoomOut()
+{
+	TuningSchemaWidget* w = activeSchemaWidget();
+	if (w == nullptr)
+	{
+		Q_ASSERT(w);
+		return;
+	}
+	w->zoomOut();
+}
+
+void SchemasWorkspace::zoom100()
+{
+	TuningSchemaWidget* w = activeSchemaWidget();
+	if (w == nullptr)
+	{
+		Q_ASSERT(w);
+		return;
+	}
+	w->zoom100();
+}
+
+void SchemasWorkspace::zoomToFit()
+{
+	TuningSchemaWidget* w = activeSchemaWidget();
+	if (w == nullptr)
+	{
+		Q_ASSERT(w);
+		return;
+	}
+	w->zoomToFit();
+}
+
+TuningSchemaWidget* SchemasWorkspace::activeSchemaWidget()
+{
+	if (m_schemaWidget != nullptr)
+	{
+		return m_schemaWidget;
+	}
+
+	TuningSchemaWidget* w = dynamic_cast<TuningSchemaWidget*>(m_tabWidget->currentWidget());
+	if (w == nullptr)
+	{
+		Q_ASSERT(w);
+		return nullptr;
+	}
+	return w;
 }

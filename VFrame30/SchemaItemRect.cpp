@@ -43,7 +43,7 @@ namespace VFrame30
 
 		// --
 		//
-		m_font.setName("Arial");
+		m_font.setName(QStringLiteral("Arial"));
 
 		switch (unit)
 		{

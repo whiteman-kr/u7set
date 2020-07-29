@@ -19,10 +19,17 @@ private slots:
 	void onAdd();
 	void onRemove();
 	void onClone();
+	void onCopy();
+	void onPaste();
 	void onCheckOut();
 	void onCheckIn();
 	void onUndo();
 	void onRefresh();
+
+	void onCopyShortcut();
+	void onPasteShortcut();
+	void onAddShortcut();
+	void onRemoveShortcut();
 
 	void onSignalAdd();
 	void onSignalCreate(E::SignalType type);
@@ -43,6 +50,8 @@ private slots:
 	void onSignalCustomContextMenuRequested(const QPoint& pos);
 
 protected:
+	bool checkBusNames();
+
 	virtual void keyPressEvent(QKeyEvent *evt);
 	virtual void closeEvent(QCloseEvent* e);
 	virtual void reject();
@@ -52,7 +61,8 @@ private:
 	void fillBusProperties();
 	void fillBusSignals();
 
-	bool addBus(const std::shared_ptr<VFrame30::Bus> bus);
+	void addBus(const std::shared_ptr<VFrame30::Bus> bus);
+	void addBus(const std::vector<std::shared_ptr<VFrame30::Bus>> busses);
 
 	void updateButtonsEnableState();
 	void updateBusTreeItemText(QTreeWidgetItem* item);
@@ -87,6 +97,8 @@ private:
 	QAction* m_addAction = nullptr;
 	QAction* m_removeAction = nullptr;
 	QAction* m_cloneAction = nullptr;
+	QAction* m_copyAction = nullptr;
+	QAction* m_pasteAction = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoAction = nullptr;

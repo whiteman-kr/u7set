@@ -34,6 +34,7 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/CircularLogger.cpp \
+    ../lib/LanControllerInfoHelper.cpp \
     ../lib/MemLeaksDetection.cpp \
     ../lib/Service.cpp \
     ../lib/SocketIO.cpp \
@@ -82,6 +83,8 @@ HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/CfgServerLoader.h \
     ../lib/CircularLogger.h \
+    ../lib/LanControllerInfo.h \
+    ../lib/LanControllerInfoHelper.h \
     ../lib/MemLeaksDetection.h \
     ../lib/OrderedHash.h \
     ../lib/Service.h \

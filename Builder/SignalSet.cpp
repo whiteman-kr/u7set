@@ -452,7 +452,7 @@ namespace Builder
 		newSignal->setLm(busParentSignal.lm());
 
 		newSignal->setSignalType(busSignal.signalType);
-		newSignal->setInOutType(E::SignalInOutType::Internal);
+		newSignal->setInOutType(busParentSignal.inOutType());
 
 		newSignal->setByteOrder(E::ByteOrder::BigEndian);
 

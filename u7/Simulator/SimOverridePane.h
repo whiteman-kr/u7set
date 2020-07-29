@@ -37,6 +37,9 @@ protected slots:
 
 	void addSignal();
 
+	void saveWorkspace();
+	void restoreWorkspace();
+
 	void showSetValueDialog(QString appSignalId);
 	void setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value);
 

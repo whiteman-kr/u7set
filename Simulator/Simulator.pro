@@ -15,6 +15,7 @@ CONFIG += staticlib
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17
+win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
 
 # Optimization flags
 #
@@ -75,16 +76,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../lib/Address16.cpp \
+    ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
+	../lib/DataProtocols.cpp \
+    ../lib/DomXmlHelper.cpp \
+	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
+	../lib/LogicModulesInfo.cpp \
     ../lib/ProtoSerialization.cpp \
+	../lib/SimpleMutex.cpp \
+	../lib/SimpleThread.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
+	../lib/WUtils.cpp \
+    SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
+	SimScriptLmDescription.cpp \
     SimScriptLogicModule.cpp \
     SimScriptRamAddress.cpp \
     SimScriptSignal.cpp \
@@ -114,18 +126,30 @@ SOURCES += \
     SimCommandProcessor.cpp \
     SimException.cpp \
     SimOverrideSignals.cpp \
-    ../lib/SignalProperties.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp
+	../lib/SignalProperties.cpp \
+   ../Builder/IssueLogger.cpp \
+   ../lib/OutputLog.cpp
 
 HEADERS += \
     ../Builder/CfgFiles.h \
     ../lib/Address16.h \
+    ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
+	../lib/DataProtocols.h \
+    ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
+	../lib/LanControllerInfo.h \
+	../lib/LanControllerInfoHelper.h \
+	../lib/LogicModulesInfo.h \
+	../lib/SimpleMutex.h \
+	../lib/SimpleThread.h \
+	../lib/WUtils.h \
+    SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
+    SimScriptConnection.h \
     SimScriptDevUtils.h \
+	SimScriptLmDescription.h \
     SimScriptLogicModule.h \
     SimScriptRamAddress.h \
     SimScriptSignal.h \
@@ -165,9 +189,10 @@ HEADERS += \
     SimCommandProcessor.h \
     SimException.h \
     SimOverrideSignals.h \
-    ../lib/SignalProperties.h \
-    ../Builder/IssueLogger.h \
-    ../lib/OutputLog.h
+	../lib/SignalProperties.h \
+	../Builder/IssueLogger.h \
+	../lib/OutputLog.h
+
 
 ## VFrame30 library
 ## $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30

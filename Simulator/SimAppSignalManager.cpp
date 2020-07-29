@@ -6,6 +6,134 @@
 namespace Sim
 {
 
+	bool FlagsReadStruct::create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams)
+	{
+		auto flagIt = s.stateFlagsSignals().constBegin();
+
+		while (flagIt != s.stateFlagsSignals().constEnd())
+		{
+			E::AppSignalStateFlagType flagType = flagIt.key();
+			const QString& flagAppSignalId = flagIt.value();
+			Hash flagSignalHash = ::calcHash(flagAppSignalId);
+
+			if (auto flagSignalIt = signalParams.find(flagSignalHash);
+				flagSignalIt == signalParams.end())
+			{
+				// Error, flag signal is not found
+				//
+				writeError(QObject::tr("AppSignalManager::signalFlags(%1) cannot find flag signal %2")
+						   .arg(s.appSignalID())
+						   .arg(flagAppSignalId));
+
+				Q_ASSERT(flagSignalIt != signalParams.end());
+				return {};
+			}
+			else
+			{
+				const Signal& flagSignal = flagSignalIt->second;
+				Q_ASSERT(flagSignal.hash() == flagSignalHash);
+
+				if (flagSignal.isDiscrete() == false)
+				{
+					writeError(QObject::tr("AppSignalManager::signalFlags(%1) flag is not discrete signal, flag signal %2")
+							   .arg(s.appSignalID())
+							   .arg(flagAppSignalId));
+					Q_ASSERT(flagSignal.isDiscrete());
+					return {};
+				}
+
+				if (flagSignal.isConst() == true)
+				{
+					flagsConsts[flagConstsCount] = std::make_pair(flagType, static_cast<quint32>(flagSignal.constValue()));
+					flagConstsCount ++;
+				}
+				else
+				{
+					Address16 flagAddress = flagSignal.ualAddr();
+
+					if (flagAddress.isValid() == false)
+					{
+						writeError(QObject::tr("AppSignalManager::signalFlags(%1) invalid flag signal address, flag signal %2")
+								   .arg(s.appSignalID())
+								   .arg(flagAppSignalId));
+						Q_ASSERT(flagAddress.isValid());
+						return {};
+					}
+					else
+					{
+						flagsSignalAddresses[flagCount] = std::make_pair(flagType, flagAddress);
+						flagCount ++;
+					}
+				}
+			}
+
+			// --
+			//
+			++flagIt;
+		}
+
+		return true;
+	}
+
+	AppSignalStateFlags FlagsReadStruct::signalFlags(const Ram& ram) const
+	{
+		AppSignalStateFlags result{};
+		bool hasValidity = false;
+
+		// Read flags value from memory
+		//
+		for (size_t i = 0; i < flagCount; i++)
+		{
+			const auto& p = flagsSignalAddresses[i];
+			E::AppSignalStateFlagType flagType = p.first;
+			const Address16& flagAddress = p.second;
+
+			quint16 flagValue = 0;
+
+			if (bool readOk = ram.readBit(flagAddress.offset(), flagAddress.bit(), &flagValue, E::ByteOrder::BigEndian);
+				readOk == false)
+			{
+				writeError(QObject::tr("AppSignalManager::signalFlags error read flag signal by address %1")
+						   .arg(flagAddress.toString()));
+
+				Q_ASSERT(readOk);
+				return result;
+			}
+
+			result.setFlag(flagType, flagValue);
+
+			if (flagType == E::AppSignalStateFlagType::Validity)
+			{
+				hasValidity = true;
+			}
+		}
+
+		// Some flags can be constant values, write consts to flag
+		//
+		for (size_t i = 0; i < flagConstsCount; i++)
+		{
+			const auto& p = flagsConsts[i];
+			result.setFlag(p.first, p.second);
+
+			if (p.first == E::AppSignalStateFlagType::Validity)
+			{
+				hasValidity = true;
+			}
+		}
+
+		if (hasValidity == false)
+		{
+			result.valid = 1;		// All signals which do not have explicit validty signal are accounted as valid
+		}
+
+		return result;
+	}
+
+	//
+	//
+	//	AppSignalManager
+	//
+	//
 	AppSignalManager::AppSignalManager(Simulator* simulator, QObject* /*parent*/) :
 		Sim::Output("AppSignalManager"),
 		m_simulator(simulator)
@@ -44,11 +172,18 @@ namespace Sim
 
 	void AppSignalManager::resetSignalParam()
 	{
-		QWriteLocker wl(&m_signalParamLock);
+		{
+			QWriteLocker wl(&m_signalParamLock);
 
-		m_signalParams.clear();
-		m_signalParamsExt.clear();
-		m_customToAppSignalId.clear();
+			m_signalParams.clear();
+			m_signalParamsExt.clear();
+			m_customToAppSignalId.clear();
+		}
+
+		{
+			QWriteLocker wl(&m_ramLock);
+			m_flagsStruct.clear();
+		}
 
 		return;
 	}
@@ -93,6 +228,7 @@ namespace Sim
 		std::unordered_map<Hash, AppSignalParam> signalParams;
 		std::unordered_map<Hash, Signal> signalParamsExt;
 		std::unordered_map<Hash, Hash> customToAppSignalId;
+		std::unordered_map<Hash, FlagsReadStruct> flagsStruct;
 
 		signalParams.reserve(message.appsignal_size());
 		signalParamsExt.reserve(message.appsignal_size());
@@ -112,6 +248,11 @@ namespace Sim
 			customToAppSignalId[::calcHash(signalParams[hash].customSignalId())] = hash;
 		}
 
+		for (const auto&[h, s] : signalParamsExt)
+		{
+			flagsStruct[h].create(s, signalParamsExt);
+		}
+
 		if (ok == false)
 		{
 			writeError(QString("Cannot load Proto::AppSignal"));
@@ -128,6 +269,11 @@ namespace Sim
 			std::swap(customToAppSignalId, m_customToAppSignalId);
 		}
 
+		{
+			QWriteLocker wl(&m_ramLock);
+			std::swap(flagsStruct, m_flagsStruct);
+		}
+
 		return ok;
 	}
 
@@ -142,60 +288,69 @@ namespace Sim
 		{
 			QWriteLocker wl(&m_ramLock);
 
-			m_ram[lmHash].updateFrom(ram);
+			if (ram.isNull() == true)
+			{
+				m_ram.erase(lmHash);
+			}
+			else
+			{
+				m_ram[lmHash].updateFrom(ram);
+			}
 
 			Times tm;
 			tm.system = systemTime;
 			tm.local = localTime;
 			tm.plant = plantTime;
 
-			m_ramTimes[lmHash] = tm;
+			m_ramTimes[lmHash] = tm;		// keep record in m_ramTimes even for for null ram, as it is usefull for getting nonvalid point for trends
 		}
 
 		// Fetch data for realtime trends now, while this memory was not updated yet
 		// Later trend will fetch it itself
 		//
 		{
-			QDateTime currentTime = QDateTime::currentDateTime();
-
 			QMutexLocker ml(&m_trendMutex);
 
-			for (auto it = m_trends.begin(); it != m_trends.end();)
+			if (m_trends.empty() == false)
 			{
-				Trend& trend = *it;
+				qint64 currentTime = QDateTime::currentDateTime().toSecsSinceEpoch();
 
-				if (currentTime.toSecsSinceEpoch() - trend.lastAccess.toSecsSinceEpoch() >= 5)	// 5 seconds
+				for (auto it = m_trends.begin(); it != m_trends.end();)
 				{
-					// Remove this thend form obeserved, as it did not have fetched data for 5 seconds
-					//
-					it = m_trends.erase(it);
-					continue;
-				}
+					Trend& trend = *it;
 
-				for (TrendSignal& ts : trend.trendSignals)
-				{
-					if (ts.lmEquipmentIdHash == lmHash)
+					if (currentTime - trend.lastAccess.toSecsSinceEpoch() >= 10)	// 10 seconds
 					{
-						// Fetching appsignals states from ram is cause locking m_ramLock for read,
-						// so it is nested lock m_trendMutex -> m_trendMutex.
-						// Just keep it in mind and do not try to lock in other dirrection
+						// Remove this thend from obeserved, as it did not have fetched data for 10 seconds
 						//
+						it = m_trends.erase(it);
+						continue;
+					}
 
-						AppSignalState& addedState = ts.states.emplace_back(this->signalState(ts.appSignalHash, nullptr));
-
-						if (ts.states.size() > 3 &&
-							addedState.hasSameValue(ts.states[ts.states.size() - 2]) == true &&
-							addedState.hasSameValue(ts.states[ts.states.size() - 3]) == true)
+					for (TrendSignal& ts : trend.trendSignals)
+					{
+						if (ts.lmEquipmentIdHash == lmHash)
 						{
-							ts.states[ts.states.size() - 2] = addedState;
-							ts.states.resize(ts.states.size() - 1);		// If last 3 points have the same value, then extend 2nt to 3rd;
+							// Fetching appsignals states from ram is cause locking m_ramLock for read,
+							// so it is nested lock m_trendMutex -> m_trendMutex.
+							// Just keep it in mind and do not try to lock in other dirrection
+							//
+							AppSignalState& addedState = ts.states.emplace_back(this->signalState(ts.appSignalHash, nullptr));
+
+							if (ts.states.size() > 3 &&
+								addedState.hasSameValue(ts.states[ts.states.size() - 2]) == true &&
+								addedState.hasSameValue(ts.states[ts.states.size() - 3]) == true)
+							{
+								ts.states[ts.states.size() - 2] = addedState;
+								ts.states.resize(ts.states.size() - 1);		// If last 3 points have the same value, then extend 2nt to 3rd;
+							}
 						}
 					}
-				}
 
-				// Increment it here, as we erase some items in loop
-				//
-				++it;
+					// Increment it here, as we erase some items in loop
+					//
+					++it;
+				}
 			}
 		}
 
@@ -385,8 +540,9 @@ namespace Sim
 		bool isConst{};
 		double constValue{};
 
-		AppSignalState state;
+		Hash logicModuleHash = UNDEFINED_HASH;
 
+		AppSignalState state;
 		state.m_hash = signalHash;
 
 		{
@@ -417,6 +573,7 @@ namespace Sim
 
 			appSignalId = s.appSignalID();
 			logicModuleId = s.lmEquipmentID();
+			logicModuleHash = ::calcHash(logicModuleId);
 			ualAddress = s.ualAddr();
 			type = s.signalType();
 			byteOrder = s.byteOrder();
@@ -431,7 +588,17 @@ namespace Sim
 		{
 			QReadLocker rl(&m_ramLock);
 
-			auto ramIt = m_ram.find(::calcHash(logicModuleId));
+			// Get time for this ram
+			//
+			auto timeIt = m_ramTimes.find(logicModuleHash);
+			if (timeIt != m_ramTimes.end())
+			{
+				state.m_time = timeIt->second;
+			}
+
+			// Get ram
+			//
+			auto ramIt = m_ram.find(logicModuleHash);
 
 			if (found != nullptr)
 			{
@@ -445,28 +612,51 @@ namespace Sim
 
 			const Ram& ram = ramIt->second;
 
-			// Get time for this ram
+			// --
 			//
-			auto timeIt = m_ramTimes.find(::calcHash(logicModuleId));
-			if (timeIt != m_ramTimes.end())
+
+			if (m_simulator->logicModule(logicModuleId)->isPowerOff() == true)
 			{
-				state.m_time = timeIt->second;
+				// Time stamp is already set set
+				//
+				return state;
 			}
 
+			// Set flags
+			//
+			if (auto flagIt = m_flagsStruct.find(signalHash);
+				flagIt != m_flagsStruct.end())
+			{
+				state.m_flags = flagIt->second.signalFlags(ram);
+			}
+
+			if (m_simulator->isStopped() == true)
+			{
+				state.m_flags.all = 0;		// It resets stateAvailable and all othe flags
+			}
+			else
+			{
+				state.m_flags.stateAvailable = 1;
+			}
+
+			// If signal is optimized to const then just set its' value
+			//
 			if (isConst == true)
 			{
-				state.m_flags.valid = !m_simulator->isStopped();
 				state.m_value = constValue;
 				return state;
 			}
 
 			if (ualAddress.isValid() == false)
 			{
+				state.m_flags.all = 0;
 				// This is can be unused signal, in this case it has non valid addresses
 				//
 				return state;
 			}
 
+			// Read and set value
+			//
 			switch (type)
 			{
 			case E::SignalType::Analog:
@@ -493,7 +683,6 @@ namespace Sim
 									}
 									else
 									{
-										state.m_flags.valid = !m_simulator->isStopped();
 										state.m_value = data;
 									}
 								}
@@ -519,7 +708,6 @@ namespace Sim
 									}
 									else
 									{
-										state.m_flags.valid = !m_simulator->isStopped();;
 										state.m_value = data;
 									}
 								}
@@ -550,7 +738,6 @@ namespace Sim
 					}
 					else
 					{
-						state.m_flags.valid = !m_simulator->isStopped();
 						state.m_value = data;
 					}
 				}
@@ -566,9 +753,9 @@ namespace Sim
 		return state;
 	}
 
-	bool AppSignalManager::getUpdateForRam(const QString equipmentId, Sim::Ram* ram) const
+	bool AppSignalManager::getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const
 	{
-		assert(ram);
+		Q_ASSERT(ram);
 
 		Hash lmHash = ::calcHash(equipmentId);
 
@@ -726,7 +913,7 @@ static const AppSignalParam dummy;
 
 	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& /*appSignalId*/) const
 	{
-		int todo_setpointsByInputSignalId = 0;
+		//int todo_setpointsByInputSignalId = 0;
 		//Q_ASSERT(false);		// TO DO
 		return {};
 	}
@@ -739,6 +926,81 @@ static const AppSignalParam dummy;
 	Simulator* AppSignalManager::simulator()
 	{
 		return m_simulator;
+	}
+
+
+	//
+	//	ScriptAppSignalManager
+	//
+	ScriptAppSignalManager::ScriptAppSignalManager(const IAppSignalManager* appSignalManager, QObject* parent) :
+		QObject(parent),
+		m_appSignalManager(appSignalManager)
+	{
+		assert(m_appSignalManager);
+	}
+
+	QJSValue ScriptAppSignalManager::signalParam(QString signalId) const
+	{
+		return signalParam(::calcHash(signalId));
+	}
+
+	QJSValue ScriptAppSignalManager::signalParam(Hash signalHash) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+		AppSignalParam s = m_appSignalManager->signalParam(signalHash, &ok);
+
+		if (ok == false)
+		{
+			return {};
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return {};
+		}
+
+		return engine->toScriptValue(s);
+	}
+
+	QJSValue ScriptAppSignalManager::signalState(QString signalId) const
+	{
+		return signalState(::calcHash(signalId));
+	}
+
+	QJSValue ScriptAppSignalManager::signalState(Hash signalHash) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+		AppSignalState s = m_appSignalManager->signalState(signalHash, &ok);
+
+		if (ok == false)
+		{
+			return {};
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return {};
+		}
+
+		return engine->toScriptValue(s);
 	}
 
 

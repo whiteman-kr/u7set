@@ -107,12 +107,11 @@ void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
 	SimTrends::startTrendApp(m_simulator, appSignals, this);
 }
 
-void SimWidget::signalContextMenu(const QStringList signalList)
+void SimWidget::signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu)
 {
 	// Compose menu
 	//
 	QMenu menu(this);
-	QList<QAction*> actions;
 
 	for (const QString& s : signalList)
 	{
@@ -121,19 +120,25 @@ void SimWidget::signalContextMenu(const QStringList signalList)
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
-		QAction* a = new QAction(signalId, &menu);
-
 		auto f = [this, s]() -> void
 				 {
 					signalInfo(s);
 				 };
 
-		connect(a, &QAction::triggered, this, f);
-
-		actions << a;
+		menu.addAction(signalId, f);
 	}
 
-	menu.exec(actions, QCursor::pos(), 0, this);
+	if (customMenu.empty() == false)
+	{
+		menu.addSeparator();
+
+		for (auto cm : customMenu)
+		{
+			menu.addActions(cm->actions());
+		}
+	}
+
+	menu.exec(QCursor::pos());
 }
 
 void SimWidget::signalInfo(QString appSignalId)
@@ -143,7 +148,7 @@ void SimWidget::signalInfo(QString appSignalId)
 	return;
 }
 
-void SimWidget::openSchemaTabPage(QString schemaId)
+void SimWidget::openSchemaTabPage(QString schemaId, QStringList highlightIds)
 {
 	// Look for already opened schema, and activate it
 	//
@@ -155,6 +160,7 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 			if (sp != nullptr && sp->schemaId() == schemaId)
 			{
 				m_tabWidget->setCurrentIndex(i);
+				sp->setHighlightIds(highlightIds);
 				return;
 			}
 		}
@@ -180,6 +186,7 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 	m_tabWidget->setCurrentIndex(tabIndex);
 
 	page->simSchemaWidget()->setZoom(0, false);
+	page->setHighlightIds(highlightIds);
 
 	return;
 }
@@ -220,6 +227,11 @@ void SimWidget::createToolBar()
 	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
+	m_allowRegData = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"), tr("Allow LogicModules' Application Data transmittion to AppDataSrv"), this};
+	m_allowRegData->setCheckable(true);
+	m_allowRegData->setChecked(m_simulator->appDataTransmitter().enabled());
+	connect(m_allowRegData, &QAction::toggled, this, &SimWidget::allowRegDataToggled);
+
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
 	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
@@ -259,6 +271,9 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addWidget(m_timeIndicator);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_allowRegData);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_snapshotAction);
@@ -397,18 +412,13 @@ static bool firstEvent = true;
 			QVariant v = QSettings().value("SimWidget/state");
 			if (v.isValid() == true)
 			{
-				bool restoreOk = restoreState(v.toByteArray());
-				qDebug() << "SimWidget::showEvent: restoreStateOk = " << restoreOk;
+				restoreState(v.toByteArray());
 
-				//if (restoreOk == false)
+				QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
+				for (QDockWidget* dw : dockWidgets)
 				{
-					QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
-					for (QDockWidget* dw : dockWidgets)
-					{
-						qDebug() << "DockWidget objectname " << dw->objectName();
-						restoreDockWidget(dw);
-						dw->setVisible(true);
-					}
+					restoreDockWidget(dw);
+					dw->setVisible(true);
 				}
 			}
 
@@ -443,9 +453,11 @@ void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
 
 void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 {
+using namespace std::chrono;
+
 	Q_ASSERT(m_timeIndicator);
 
-	std::chrono::milliseconds durration = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_duration);
+	milliseconds durration = duration_cast<milliseconds>(state.m_duration);
 
 	qint64 days = durration.count() / 1_day;
 	qint64 hours = (durration.count() % 1_day)  / 1_hour;
@@ -453,7 +465,7 @@ void SimWidget::updateTimeIndicator(Sim::ControlStatus state)
 	qint64 seconds = (durration.count() % 1_min)  / 1_sec;
 //	qint64 millisecond = durration.count() % 1_sec;
 
-	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(state.m_currentTime);
+	auto ms = duration_cast<milliseconds>(state.m_currentTime);
 	QDateTime utcOffset = QDateTime::currentDateTime();
 	TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
 
@@ -711,6 +723,12 @@ void SimWidget::stopSimulation(bool stopSimulationThread)
 	return;
 }
 
+void SimWidget::allowRegDataToggled(bool state)
+{
+	m_simulator->appDataTransmitter().setEnabled(state);
+	return;
+}
+
 void SimWidget::showSnapshot()
 {
 	// 1. Use this->m_appSignalController for getting signal list and state
@@ -720,7 +738,7 @@ void SimWidget::showSnapshot()
 	//    it is guarantee will not be deleted
 	//
 
-	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, this);
+	SimDialogSignalSnapshot::showDialog(m_simulator.get(), m_appSignalController, QString(), this);
 
 	return;
 }
@@ -885,7 +903,7 @@ void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), lmEquipmentId, m_tabWidget};
+	SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), m_appSignalController, lmEquipmentId, m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimLogicModuleIcon.svg"}});

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../lib/DeviceHelper.h"
-#include "../lib/XmlHelper.h"
-#include "../lib/SocketIO.h"
+#include "ConstStrings.h"
+#include "DeviceHelper.h"
+#include "XmlHelper.h"
+#include "SocketIO.h"
 #include "../Builder/IssueLogger.h"
 
 
@@ -17,6 +18,7 @@ const char* const CFG_FILE_ID_TUNING_SIGNALS = "TUNING_SIGNALS";
 const char* const CFG_FILE_ID_TUNING_SCHEMAS_DETAILS = "TUNING_SCHEMAS_DETAILS";
 const char* const CFG_FILE_ID_TUNING_FILTERS = "TUNING_FILTERS";
 const char* const CFG_FILE_ID_TUNING_GLOBALSCRIPT = "TUNING_GLOBALSCRIPT";
+const char* const CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT = "TUNING_CONFIGARRIVEDSCRIPT";
 
 const char* const CFG_FILE_ID_BEHAVIOR = "CLIENT_BEHAVIOR";
 const char* const CFG_FILE_ID_LOGO = "LOGO";
@@ -31,7 +33,7 @@ public:
 	//
 	static const char* SETTINGS_SECTION;
 
-	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
+/*	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
 	static const char* PROP_APP_DATA_RECEIVING_IP;
 	static const char* PROP_APP_DATA_RECEIVING_PORT;
 
@@ -73,7 +75,7 @@ public:
 
 	static const char* PROP_CFG_SERVICE_ID2;
 	static const char* PROP_CFG_SERVICE_IP2;
-	static const char* PROP_CFG_SERVICE_PORT2;
+	static const char* PROP_CFG_SERVICE_PORT2;*/
 
 	static const char* ATTR_COUNT;
 	static const char* ATTR_EQUIIPMENT_ID;
@@ -122,9 +124,6 @@ public:
 
 class AppDataServiceSettings : public ServiceSettings
 {
-private:
-	static const char* PROP_AUTO_ARCHIVE_INTERVAL;
-
 public:
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
@@ -153,9 +152,6 @@ public:
 class TuningServiceSettings : public ServiceSettings
 {
 private:
-	static const char* PROP_SINGLE_LM_CONTROL;
-	static const char* PROP_DISABLE_MODULES_TYPE_CHECKING;
-
 	static const char* TUNING_CLIENTS;
 	static const char* TUNING_CLIENT;
 	static const char* TUNING_SOURCES;
@@ -191,6 +187,7 @@ class ArchivingServiceSettings : public ServiceSettings
 public:
 	static const char* PROP_ARCHIVE_DB_HOST_IP;
 	static const char* PROP_ARCHIVE_DB_HOST_PORT;
+
 	static const char* PROP_ARCHIVE_SHORT_TERM_PERIOD;
 	static const char* PROP_ARCHIVE_LONG_TERM_PERIOD;
 	static const char* PROP_ARCHIVE_LOCATION;

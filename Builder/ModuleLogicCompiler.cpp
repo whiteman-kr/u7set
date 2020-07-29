@@ -4,6 +4,7 @@
 #include "../lib/DataSource.h"
 #include "../lib/Crc.h"
 #include "../lib/Connection.h"
+#include "../lib/LanControllerInfoHelper.h"
 #include "../TuningIPEN/TuningIPENDataStorage.h"
 
 #include "SoftwareCfgGenerator.h"
@@ -103,6 +104,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInHeap),
 			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
 //			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
@@ -252,6 +254,13 @@ namespace Builder
 		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
 	}
 
+	std::shared_ptr<LmDescription> ModuleLogicCompiler::getLmDescription()
+	{
+		TEST_PTR_LOG_RETURN_NULLPTR(m_lmDescription, m_log);
+
+		return m_lmDescription;
+	}
+
 	BusShared ModuleLogicCompiler::getBusShared(const QString& busTypeID)
 	{
 		return m_signals->getBus(busTypeID);
@@ -283,7 +292,9 @@ namespace Builder
 
 		m_memoryMap.init(m_lmDescription->memory().m_appMemorySize,
 						 moduleData,
+						 m_lmDescription->memory().m_moduleCount,
 						 optoInterfaceData,
+						 m_lmDescription->optoInterface().m_optoPortCount,
 						 appLogicBitData,
 						 tuningData,
 						 appLogicWordData);
@@ -355,7 +366,7 @@ namespace Builder
 
 		// build Module structures array
 		//
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		for(int place = 1; place <= static_cast<int>(m_lmDescription->memory().m_moduleCount); place++)
 		{
 			Module m;
 
@@ -736,8 +747,6 @@ namespace Builder
 
 			result &= createUalSignalFromSignal(ualItem, 2);
 		}
-
-		result &= removeLoopbackSignalsFromHeap();
 
 		result &= checkBusProcessingItemsConnections();
 
@@ -2570,31 +2579,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::removeLoopbackSignalsFromHeap()
-	{
-		// loopback signals shouldn't be placed in heap!
-		//
-		bool result = true;
-
-		QList<const UalSignal*> loopbackSignals = m_loopbacks.getLoopbacksUalSignals();
-
-		for(const UalSignal* loopbackSignal : loopbackSignals)
-		{
-			TEST_PTR_CONTINUE(loopbackSignal);
-
-			if (loopbackSignal->isHeapPlaced() == false)
-			{
-				continue;
-			}
-
-			m_ualSignals.removeSignalFromHeap(*loopbackSignal);
-
-			const_cast<UalSignal*>(loopbackSignal)->resetHeapPlaced();
-		}
-
-		return result;
-	}
-
 	bool ModuleLogicCompiler::checkBusProcessingItemsConnections()
 	{
 		bool result = true;
@@ -2920,6 +2904,15 @@ namespace Builder
 
 			getNearestOutSignalIDs(*outPin, &outSignalIDs);
 
+			if (outSignalIDs.isEmpty() == true)
+			{
+				// Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2)
+				//
+				m_log->errALC5195(setFlagsItem->label(), setFlagsItem->guid(), setFlagsItem->schemaID());
+				result = false;
+				continue;
+			}
+
 			for(const QString& signalWithFlagsID : outSignalIDs)
 			{
 				bool flagIsSet = false;
@@ -3104,6 +3097,8 @@ namespace Builder
 
 		std::vector<E::AppSignalStateFlagType> flagTypes = E::values<E::AppSignalStateFlagType>();
 
+		m_signalsWithFlagsAndFlagSignals.clear();
+
 		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
 			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
@@ -3123,6 +3118,8 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			m_signalsWithFlagsAndFlagSignals.insert(ualSignalWithFlags);
 
 			bool signalWithFlagsIsAcquired = signalWithFlags->isAcquired();
 
@@ -3153,6 +3150,8 @@ namespace Builder
 					result = false;
 					continue;
 				}
+
+				m_signalsWithFlagsAndFlagSignals.insert(ualFlagSignal);
 
 				if (signalWithFlagsIsAcquired == true && ualFlagSignal->isAcquired() == false)
 				{
@@ -3684,6 +3683,9 @@ namespace Builder
 			switch(inPinParentItem->type())
 			{
 			case E::UalItemType::Afb:
+				readCount += getAfbInPinExpectedReadCount(inPinParentItem, inPinGuid);
+				break;
+
 			case E::UalItemType::BusComposer:
 
 				readCount++;
@@ -3726,6 +3728,58 @@ namespace Builder
 		}
 
 		return std::optional<int>(readCount);
+	}
+
+	int ModuleLogicCompiler::getAfbInPinExpectedReadCount(const UalItem* ualItem, const QUuid& inPinGuid)
+	{
+		if (ualItem == nullptr)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		if (ualItem->isSetFlagsItem() == false)
+		{
+			return 1;			// input pin of usual AFB item is produce 1 reads
+		}
+
+		// this is set_flags AFB
+		//
+		const LogicPin* inPin = ualItem->getPin(inPinGuid);
+
+		if (inPin == nullptr)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		Q_ASSERT(inPin->IsInput() == true);
+
+		if (inPin->caption() != UalAfb::IN_PIN_CAPTION)
+		{
+			return 0;			// input pins of set_falgs except "in" is not produce reads
+		}
+
+		// this is "in" pin of set_flags AFB
+		// calculation of all reads of pins connected to "out" pin is required
+		//
+		const std::vector<LogicPin>& outs = ualItem->outputs();
+
+		if (outs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return 0;
+		}
+
+		if (outs[0].caption() != UalAfb::OUT_PIN_CAPTION)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return 0;
+		}
+
+		std::optional<int> expReads = getOutPinExpectedReadCount(outs[0]);
+
+		return expReads.value_or(0);
 	}
 
 	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
@@ -4050,8 +4104,7 @@ namespace Builder
 			return true;
 		}
 
-		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
-							arg(tuningControllerNo);
+		QString suffix = LanControllerInfoHelper::getLanControllerSuffix(tuningControllerNo);
 
 		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
 
@@ -4061,7 +4114,7 @@ namespace Builder
 			return false;
 		}
 
-		if (DeviceHelper::isPropertyExists(adapter, DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE) == false)
+		if (DeviceHelper::isPropertyExists(adapter, EquipmentPropNames::TUNING_ENABLE) == false)
 		{
 			*tuningPropertyExists = false;
 			return true;
@@ -4070,10 +4123,17 @@ namespace Builder
 		*tuningPropertyExists = true;
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
-												 DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE,
+		                                         EquipmentPropNames::TUNING_ENABLE,
 												 tuningEnabled,
 												 m_log);
 		return res;
+	}
+
+	bool ModuleLogicCompiler::disposeSignalsInHeap()
+	{
+		m_ualSignals.disposeSignalsInHeaps(m_signalsWithFlagsAndFlagSignals);
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::createSignalLists()
@@ -4182,7 +4242,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == true &&
 				s->isDiscrete() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_acquiredDiscreteInputSignals.append(s);
 			}
@@ -4380,7 +4441,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_nonAcquiredDiscreteInputSignals.append(s);
 			}
@@ -4470,7 +4532,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == true &&
 				s->isAnalog() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_acquiredAnalogInputSignals.append(s);
 			}
@@ -4646,11 +4709,11 @@ namespace Builder
 			switch(ualSignal->analogSignalFormat())
 			{
 			case E::AnalogAppSignalFormat::SignedInt32:
-				m_acquiredAnalogConstIntSignals.insertMulti(ualSignal->constAnalogIntValue(), ualSignal);
+				m_acquiredAnalogConstIntSignals.insert(ualSignal->constAnalogIntValue(), ualSignal);
 				continue;
 
 			case E::AnalogAppSignalFormat::Float32:
-				m_acquiredAnalogConstFloatSignals.insertMulti(ualSignal->constAnalogFloatValue(), ualSignal);
+				m_acquiredAnalogConstFloatSignals.insert(ualSignal->constAnalogFloatValue(), ualSignal);
 				continue;
 
 			default:
@@ -4711,7 +4774,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool ModuleLogicCompiler::createNonAcquiredAnalogInputSignalsList()
 	{
 		m_nonAcquiredAnalogInputSignals.clear();
@@ -4731,7 +4793,8 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == false &&
 				s->isAnalog() == true &&
-				s->isInput() == true)
+				s->isInput() == true &&
+				s->isBusChild() == false)
 			{
 				m_nonAcquiredAnalogInputSignals.append(s);
 			}
@@ -7935,8 +7998,16 @@ namespace Builder
 			}
 			else
 			{
+				Address16 readUalAddr = m_ualSignals.getSignalReadAddress(*inUalSignal, true);
+
+				if (readUalAddr.isValid() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
 				cmd.writeFuncBlockBit(afbOpcode, afbInstance, afbSignalIndex,
-									  m_ualSignals.getSignalReadAddress(*inUalSignal, true),
+									  readUalAddr,
 									  afbCaption);
 				cmd.setComment(QString("%1.%2 <= %3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->appSignalID()));
 			}
@@ -7966,8 +8037,16 @@ namespace Builder
 			}
 			else
 			{
+				Address16 readUalAddr = m_ualSignals.getSignalReadAddress(*inUalSignal, true);
+
+				if (readUalAddr.isValid() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
 				cmd.writeFuncBlock32(afbOpcode, afbInstance, afbSignalIndex,
-									 m_ualSignals.getSignalReadAddress(*inUalSignal, true),
+									 readUalAddr,
 									 afbCaption);
 				cmd.setComment(QString("%1.%2 <= %3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->appSignalID()));
 			}
@@ -8065,6 +8144,8 @@ namespace Builder
 			return false;
 		}
 
+		bool result = true;
+
 		QString comment = QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
 
 		CodeItem cmd;
@@ -8095,8 +8176,15 @@ namespace Builder
 
 			bool decrementReadCount = bpStepInfo.isLastStep();
 
-			cmd.fill(Address16(wordAccAddr, 0), m_ualSignals.getSignalReadAddress(*inUalSignal, decrementReadCount));
+			Address16 readUalAddr = m_ualSignals.getSignalReadAddress(*inUalSignal, decrementReadCount);
 
+			if (readUalAddr.isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			cmd.fill(Address16(wordAccAddr, 0), readUalAddr);
 			code->append(cmd);
 
 			if (inputSize == SIZE_16BIT)
@@ -8117,7 +8205,7 @@ namespace Builder
 			code->append(cmd);
 		}
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
@@ -8154,6 +8242,12 @@ namespace Builder
 		}
 
 		Address16 inSignalUalAddr = m_ualSignals.getSignalReadAddress(*inUalSignal, bpStepInfo.isLastStep());
+
+		if (inSignalUalAddr.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
 		Q_ASSERT(inSignalUalAddr.bit() == 0);
 
@@ -8309,19 +8403,39 @@ namespace Builder
 		{
 		case E::SignalType::Discrete:
 
-			cmd.readFuncBlockBit(m_ualSignals.getSignalWriteAddress(*outUalSignal), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
-			cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+			{
+				Address16 writeUalAddr = m_ualSignals.getSignalWriteAddress(*outUalSignal);
 
-			code->append(cmd);
+				if (writeUalAddr.isValid() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				cmd.readFuncBlockBit(writeUalAddr, afbOpcode, afbInstance, afbSignalIndex, afbCaption);
+				cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+
+				code->append(cmd);
+			}
 
 			break;
 
 		case E::SignalType::Analog:
 
-			cmd.readFuncBlock32(m_ualSignals.getSignalWriteAddress(*outUalSignal), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
-			cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+			{
+				Address16 writeUalAddr = m_ualSignals.getSignalWriteAddress(*outUalSignal);
 
-			code->append(cmd);
+				if (writeUalAddr.isValid() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				cmd.readFuncBlock32(writeUalAddr, afbOpcode, afbInstance, afbSignalIndex, afbCaption);
+				cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+
+				code->append(cmd);
+			}
 
 			break;
 
@@ -8362,6 +8476,12 @@ namespace Builder
 		}
 
 		Address16 outUalSignalAddr = m_ualSignals.getSignalWriteAddress(*outUalSignal);
+
+		if (outUalSignalAddr.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
 		Q_ASSERT(outUalSignalAddr.bit() == 0);
 
@@ -8855,7 +8975,12 @@ namespace Builder
 		{
 			Address16 inputSignalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
 
-			Q_ASSERT(inputSignalAddr.isValid() == true);
+			if (inputSignalAddr.isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
 			Q_ASSERT(inputSignalAddr.bit() == 0);
 
 			cmd.mov32(busChildSignal->ualAddr().offset(), inputSignalAddr.offset());
@@ -8947,7 +9072,15 @@ namespace Builder
 		}
 		else
 		{
-			cmd.movBit(busChildSignal->ualAddr(), m_ualSignals.getSignalReadAddress(*inputSignal, true));
+			Address16 readUalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
+
+			if (readUalAddr.isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			cmd.movBit(busChildSignal->ualAddr(), readUalAddr);
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
 			code->append(cmd);
 		}
@@ -9016,6 +9149,12 @@ namespace Builder
 			int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
 
 			Address16 inputSignalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
+
+			if (inputSignalAddr.isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
 
 			cmd.fill(wordAccAddr, inputSignalAddr.offset(), inputSignalAddr.bit());
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignal->appSignalID()).arg(inputSignal->appSignalID()));
@@ -10277,7 +10416,7 @@ namespace Builder
 
 		if (sortedIntConsts.isEmpty() == false)
 		{
-			qSort(sortedIntConsts);
+			std::sort(sortedIntConsts.begin(), sortedIntConsts.end());
 
 			for(int intConst : sortedIntConsts)
 			{
@@ -10324,7 +10463,7 @@ namespace Builder
 
 		if (sortedFloatConsts.isEmpty() == false)
 		{
-			qSort(sortedFloatConsts);
+			std::sort(sortedFloatConsts.begin(), sortedFloatConsts.end());
 
 			for(float floatConst : sortedFloatConsts)
 			{
@@ -10993,7 +11132,7 @@ namespace Builder
 
 		bool result = true;
 
-		QHash<int, Signal*> writeAddressesMap;
+		QMultiHash<int, Signal*> writeAddressesMap;
 
 		for(Signal* s : m_ioSignals)
 		{
@@ -11013,7 +11152,7 @@ namespace Builder
 
 			if (ualSignal != nullptr)
 			{
-				writeAddressesMap.insertMulti(s->ioBufAddr().offset(), s);
+				writeAddressesMap.insert(s->ioBufAddr().offset(), s);
 			}
 		}
 
@@ -11026,7 +11165,7 @@ namespace Builder
 
 		QVector<int> sortedWriteAddress = QVector<int>::fromList(writeAddreses);
 
-		qSort(sortedWriteAddress);
+		std::sort(sortedWriteAddress.begin(), sortedWriteAddress.end());
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
@@ -11747,7 +11886,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		for(int place = 1; place <= static_cast<int>(m_lmDescription->memory().m_moduleCount); place++)
 		{
 			const Hardware::DeviceModule* module = DeviceHelper::getModuleOnPlace(m_lm, place);
 
@@ -12103,7 +12242,7 @@ namespace Builder
 
 		int count = 0;
 
-		QHash<int, Hardware::TxRxSignalShared> txDiscretes;
+		QMultiHash<int, Hardware::TxRxSignalShared> txDiscretes;
 
 		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
 		{
@@ -12114,7 +12253,7 @@ namespace Builder
 				continue;
 			}
 
-			txDiscretes.insertMulti(txSignal->addrInBuf().offset(), txSignal);
+			txDiscretes.insert(txSignal->addrInBuf().offset(), txSignal);
 
 			count++;
 		}
@@ -12126,7 +12265,7 @@ namespace Builder
 
 		QVector<int> offsets(QVector<int>::fromList(txDiscretes.uniqueKeys()));
 
-		qSort(offsets);
+		std::sort(offsets.begin(), offsets.end());
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
@@ -12329,7 +12468,7 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_SIZE,
+		                                    EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
@@ -12609,7 +12748,7 @@ namespace Builder
 		m_appLogicUniqueID = crc.result();
 
 		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID,
+		                                    EquipmentPropNames::LM_APP_LAN_DATA_UID,
 											crc.result32(),
 											m_log);
 	}
@@ -12634,7 +12773,7 @@ namespace Builder
 
 		quint64 uniqueID = m_tuningData->uniqueID();
 
-		file.append(s.sprintf("Unique data ID: %llu (0x%016llX)", uniqueID, uniqueID));
+		file.append(QString("Unique data ID: %1 (0x%2)").arg(uniqueID).arg(uniqueID, 16, 16, Latin1Char::ZERO));
 
 		const QVector<Signal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
@@ -12653,18 +12792,15 @@ namespace Builder
 					continue;
 				}
 
-				QString str;
-
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%f\t%f\t%f",
-								signal->tuningAbsAddr().offset(),
-								signal->tuningAbsAddr().bit(),
-								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->tuningAbsAddr().bit(),
-								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().toFloat(),
-								signal->tuningLowBound().floatValue(),
-								signal->tuningHighBound().floatValue());
-				file.append(str);
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
+							arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+							arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+							arg(signal->tuningDefaultValue().toFloat()).
+							arg(signal->tuningLowBound().floatValue()).
+							arg(signal->tuningHighBound().floatValue()));
 			}
 		}
 
@@ -12685,18 +12821,15 @@ namespace Builder
 					continue;
 				}
 
-				QString str;
-
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%d\t\t%d\t\t%d",
-								signal->tuningAbsAddr().offset(),
-								signal->tuningAbsAddr().bit(),
-								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->tuningAbsAddr().bit(),
-								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().int32Value(),
-								signal->tuningLowBound().int32Value(),
-								signal->tuningHighBound().int32Value());
-				file.append(str);
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t\t%8").
+								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+								arg(signal->tuningDefaultValue().int32Value()).
+								arg(signal->tuningLowBound().int32Value()).
+								arg(signal->tuningHighBound().int32Value()));
 			}
 		}
 
@@ -12739,16 +12872,15 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%d\t\t%d\t\t%d",
-								signal->tuningAbsAddr().offset(),
-								signal->tuningAbsAddr().bit(),
-								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->tuningAbsAddr().bit(),
-								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().discreteValue(),
-								0,
-								1);
-				file.append(str);
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
+								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+								arg(signal->tuningDefaultValue().discreteValue()).
+								arg(0).
+								arg(1));
 			}
 		}
 
@@ -12982,7 +13114,8 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(lmEquipmentID()));
 
-		str.sprintf("%.2f", percentOfUsedCodeMemory);
+		str.setNum(percentOfUsedCodeMemory, 'g', 2);
+
 		LOG_MESSAGE(m_log, QString(tr("Code memory - %1%")).arg(str));
 
 		if (percentOfUsedCodeMemory > 95)
@@ -13006,7 +13139,8 @@ namespace Builder
 
 		double percentOfUsedBitMemory = m_memoryMap.bitAddressedMemoryUsed();
 
-		str.sprintf("%.2f", percentOfUsedBitMemory);
+		str.setNum(percentOfUsedBitMemory, 'g', 2);
+
 		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory - %1%")).arg(str));
 
 		if (percentOfUsedBitMemory > 95)
@@ -13030,7 +13164,8 @@ namespace Builder
 
 		double percentOfUsedWordMemory = m_memoryMap.wordAddressedMemoryUsed();
 
-		str.sprintf("%.2f", percentOfUsedWordMemory);
+		str.setNum(percentOfUsedWordMemory, 'g', 2);
+
 		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory - %1%")).arg(str));
 
 		if (percentOfUsedWordMemory > 95)
@@ -13066,8 +13201,8 @@ namespace Builder
 			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
 
-		str_percent.sprintf("%.2f", static_cast<float>(idrPhaseTimeUsed));
-		str.sprintf("%.2f", static_cast<float>(idrPhaseTime * 1000000));
+		str_percent.setNum(static_cast<float>(idrPhaseTimeUsed), 'g', 2);
+		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'g', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 					arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
@@ -13101,8 +13236,8 @@ namespace Builder
 			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
 
-		str_percent.sprintf("%.2f", static_cast<float>(alpPhaseTimeUsed));
-		str.sprintf("%.2f", static_cast<float>(alpPhaseTime * 1000000));
+		str_percent.setNum(static_cast<float>(alpPhaseTimeUsed), 'g', 2);
+		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'g', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 					arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
@@ -13233,6 +13368,11 @@ namespace Builder
 		{
 			int componentOpCode = pair.first;
 			std::shared_ptr<Afb::AfbComponent> component = pair.second;
+
+			if (component->caption() == "SET_FLAGS")
+			{
+				continue;
+			}
 
 			AfblUsageInfo aui;
 
@@ -13534,7 +13674,7 @@ namespace Builder
 
 			strList.append(QString("%1;%2;%3;%4;%5;%6;%7").
 						   arg(ualSignal->refSignalIDsJoined()).
-						   arg(ualSignal->ualAddr().offset()).arg(ualSignal->ualAddr().bit()).
+						   arg(ualSignal->ualAddrWithoutChecks().offset()).arg(ualSignal->ualAddrWithoutChecks().bit()).
 						   arg(ualSignal->regBufAddr().offset()).arg(ualSignal->regBufAddr().bit()).
 						   arg(ualSignal->regValueAddr().offset()).arg(ualSignal->regValueAddr().bit()));
 		}

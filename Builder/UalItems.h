@@ -459,6 +459,7 @@ namespace Builder
 		QString appSignalID() const { return m_refSignals[0]->appSignalID(); }
 
 		Address16 ualAddr() const;
+		Address16 ualAddrWithoutChecks() const;
 		bool setUalAddr(Address16 ualAddr);
 
 		bool ualAddrIsValid() const;
@@ -491,8 +492,6 @@ namespace Builder
 		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
 		bool isBus() const { return m_refSignals[0]->isBus(); }
 
-		void setHeapPlaced() { m_isHeapPlaced = true; }
-		void resetHeapPlaced() { m_isHeapPlaced = false; }
 		bool isHeapPlaced() const { return m_isHeapPlaced; }
 
 		QString busTypeID() const { return m_refSignals[0]->busTypeID(); }
@@ -511,6 +510,7 @@ namespace Builder
 		bool isCompatible(const UalSignal* ualSignal, IssueLogger* log) const;
 		bool isCanBeConnectedTo(const UalSignal* destSignal, IssueLogger* log) const;
 
+		bool isAutoSignal() const { return m_isAutoSignal; }
 		bool isInput() const { return m_isInput; }
 		bool isTunable() const { return m_isTunable; }
 
@@ -584,7 +584,17 @@ namespace Builder
 		bool addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID, IssueLogger* log);
 
 	private:
+		void preliminarySetHeapPlaced(int expectedHeapReadsCount);
+		bool canBePlacedInHeap() const;
+		void setHeapPlaced();
+		void resetHeapPlaced();
+		int expectedHeapReadsCount() const;
+		void setAutoSignal(bool autoSignal);
+
+	private:
 		bool m_isHeapPlaced = false;
+		int m_expectedHeapReadsCount = 0;
+
 		const UalItem* m_ualItem = nullptr;
 
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
@@ -609,12 +619,12 @@ namespace Builder
 
 		BusShared m_bus;
 
+		bool m_isAutoSignal = false;
+
 		bool m_isInput = false;							// signal sources
 		bool m_isTunable = false;
 		bool m_isOptoSignal = false;
 		QString m_receivedOptoAppSignalID;
-
-		Signal* m_optoSignalNativeCopy = nullptr;		// delete this!
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
@@ -628,7 +638,7 @@ namespace Builder
 		Address16 m_regBufAddr;							// address in RegBuf (absolute in LM's memory)
 		Address16 m_regValueAddr;						// relative address from beginning of RegBuf ()
 
-		//QHash<E::AppSignalStateFlagType, UalSignal*> m_flagSignals;
+		friend class UalSignalsMap;
 	};
 
 	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>
@@ -685,7 +695,7 @@ namespace Builder
 		Address16 getSignalWriteAddress(const UalSignal& ualSignal);
 		Address16 getSignalReadAddress(const UalSignal& ualSignal, bool decrementReadCount);
 
-		void removeSignalFromHeap(const UalSignal& ualSignal);
+		void disposeSignalsInHeaps(const std::unordered_set<UalSignal*>& flagsSignals);
 
 		void finalizeHeaps();
 
@@ -715,7 +725,7 @@ namespace Builder
 
 		QHash<QString, UalSignal*> m_idToSignalMap;
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
-		QHash<UalSignal*, QUuid> m_signalToPinsMap;
+		QMultiHash<UalSignal*, QUuid> m_signalToPinsMap;
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
 
 		SignalsHeap m_discreteSignalsHeap;

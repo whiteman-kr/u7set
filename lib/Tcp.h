@@ -23,11 +23,15 @@
 namespace Tcp
 {
 	const int TCP_MAX_DATA_SIZE = 4 * 1024 * 1024;				// 4 Mb
-	const int TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT = 3000;		// 3 seconds
-	const int TCP_BYTES_WRITTEN_TIMEOUT = 1000;					// 1 second
-	const int TCP_PERIODIC_TIMER_INTERVAL = 1000;				// 1 second
-	const int TCP_AUTO_ACK_TIMER_INTERVAL = 1000;				// 1 second
-	const int TCP_CONNECT_TIMEOUT = 3;							// 3 seconds
+
+	// timouts in milliseconds
+	//
+	const int TCP_SERVER_REPLY_TIMEOUT = 3000;
+	const int TCP_CLIENT_REQUEST_TIMEOUT = 5000;
+
+	const int TCP_PERIODIC_TIMER_INTERVAL = 500;
+
+	const int TCP_AUTO_ACK_TIMER_INTERVAL = 500;
 
 	struct ConnectionState
 	{
@@ -87,7 +91,6 @@ namespace Tcp
 
 	public:
 		SocketWorker(const SoftwareInfo& softwareInfo);
-
 		virtual ~SocketWorker();
 
 		bool isConnected() const;
@@ -97,13 +100,11 @@ namespace Tcp
 		virtual void onConnection();
 		virtual void onDisconnection();
 
-		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
-		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
+		int watchdogTimerTimeout() const { return m_timeout; }
+		void setWatchdogTimerTimeout(int timeout_ms) { m_timeout = timeout_ms; }
 		void enableWatchdogTimer(bool enable);
 
 		HostAddressPort localAddressPort() const;
-
-		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState() const;
 
@@ -137,8 +138,11 @@ namespace Tcp
 		void setStateConnected(const HostAddressPort& peerAddr);
 		void setStateDisconnected();
 
+		void startTimeoutTimer();
+		void stopTimeoutTimer();
+
 	protected slots:
-		virtual void onWatchdogTimerTimeout();
+		virtual void onTimeoutTimer();
 
 	private:
 		int readHeader(int bytesAvailable);
@@ -169,9 +173,9 @@ namespace Tcp
 		mutable QMutex m_stateMutex;
 		mutable QMutex m_mutex;
 
-		QTimer m_watchdogTimer;
-		int m_watchdogTimerTimeout = 5000;			// ms
-		bool m_watchdogTimerEnable = true;
+		bool m_enableTimeoutTimer = true;
+		QTimer m_timeoutTimer;
+		int m_timeout = TCP_CLIENT_REQUEST_TIMEOUT;			// ms
 
 		// read-status variables
 		//
@@ -246,8 +250,11 @@ namespace Tcp
 
 		void onHeaderAndDataReady() final;
 
+		void processIntroduceMyselfRequest(const char* dataBuffer, int dataSize);
+
 	private slots:
 		void onAutoAckTimer();
+		void onTimeoutTimer() override;
 
 	private:
 		enum ServerState
@@ -306,7 +313,7 @@ namespace Tcp
 
 	public:
 		Listener(const HostAddressPort& listenAddressPort, Server* server, std::shared_ptr<CircularLogger> logger);
-		~Listener();
+		virtual ~Listener();
 
 		virtual void onListenerThreadStarted() {}
 		virtual void onListenerThreadFinished() {}
@@ -361,7 +368,7 @@ namespace Tcp
 					 std::shared_ptr<CircularLogger> logger);
 		ServerThread(Listener* listener);
 
-		~ServerThread();
+		virtual ~ServerThread();
 	};
 
 	// -------------------------------------------------------------------------------------
@@ -386,7 +393,6 @@ namespace Tcp
 
 		virtual ~Client() override;
 
-		void setServer(const HostAddressPort& serverAddressPort, bool reconnect);
 		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect);
 
 		QString equipmentID() const;
@@ -411,7 +417,6 @@ namespace Tcp
 		virtual void onTryConnectToServer(const HostAddressPort& serverAddr);
 
 		virtual void onAck(quint32 requestID, const char* replyData, quint32 replyDataSize);
-		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }
 
 		bool isClearToSendRequest() const;
 
@@ -421,9 +426,13 @@ namespace Tcp
 		bool sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage);
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
+		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }
 
-	protected slots:
-		virtual void onWatchdogTimerTimeout() override;
+		void enableClientAliveRequest(bool enable);
+
+	private slots:
+		void onTimeoutTimer() override;
+		void slot_onPeriodicTimer();
 
 	private:
 		void autoSwitchServer();
@@ -440,12 +449,7 @@ namespace Tcp
 
 		virtual void initReadStatusVariables() final;
 
-		void restartReplyTimeoutTimer();
-		void stopReplyTimeoutTimer();
-
-	private slots:
-		void onPeriodicTimer();
-		void onReplyTimeoutTimer();
+		bool sendClientAliveRequest();
 
 	private:
 		enum ClientState
@@ -461,15 +465,17 @@ namespace Tcp
 		int m_selectedServerIndex = 0;
 
 		QTimer m_periodicTimer;
-		QTimer m_replyTimeoutTimer;
+
+		int m_connectTimeout = 0;
+		int m_noRequestsTimeout = 0;
+
+		bool m_enableClientAliveRequest = true;
 
 		quint32 m_requestNumerator = 1;
 
 		Header m_sentRequestHeader;
 
 		bool m_autoSwitchServer = true;
-
-		int m_connectTimeout = 0;
 
 		ClientState m_clientState = ClientState::ClearToSendRequest;
 

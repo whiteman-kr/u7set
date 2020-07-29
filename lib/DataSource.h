@@ -28,66 +28,6 @@ public:
 		Tuning,
 	};
 
-	struct LmEthernetAdapterProperties
-	{
-		static const char* PROP_TUNING_ENABLE;
-		static const char* PROP_TUNING_IP;
-		static const char* PROP_TUNING_PORT;
-		static const char* PROP_TUNING_SERVICE_ID;
-
-		static const char* PROP_APP_DATA_ENABLE;
-		static const char* PROP_APP_DATA_IP;
-		static const char* PROP_APP_DATA_PORT;
-		static const char* PROP_APP_DATA_SERVICE_ID;
-		static const char* PROP_LM_APP_DATA_UID;
-		static const char* PROP_LM_APP_DATA_SIZE;
-
-		static const char* PROP_DIAG_DATA_ENABLE;
-		static const char* PROP_DIAG_DATA_IP;
-		static const char* PROP_DIAG_DATA_PORT;
-		static const char* PROP_DIAG_DATA_SERVICE_ID;
-		static const char* PROP_LM_DIAG_DATA_UID;
-		static const char* PROP_LM_DIAG_DATA_SIZE;
-
-		static const char* LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
-
-		int adapterNo = -1;		// LM_ETHERNET_ADAPTER* values
-		E::LanControllerType adapterType = E::LanControllerType::Unknown;
-		QString adapterID;
-
-		// only for adapterType == E::LanControllerType::Tuning
-		//
-		bool tuningEnable = true;
-		QString tuningIP;
-		int tuningPort = 0;
-		QString tuningServiceID;
-
-		// only for adapterType == E::LanControllerType::AppData or E::LanControllerType::AppAndDiagData
-		//
-		bool appDataEnable = true;
-		QString appDataIP;
-		int appDataPort = 0;
-		QString appDataServiceID;
-		quint32 appDataUID = 0;
-		int appDataSize = 0;
-		int appDataFramesQuantity = 0;
-
-		// only for adapterType == E::LanControllerType::DiagData or E::LanControllerType::AppAndDiagData
-		//
-		bool diagDataEnable = true;
-		QString diagDataIP;
-		int diagDataPort = 0;
-		QString diagDataServiceID;
-		quint32 diagDataUID = 0;
-		int diagDataSize = 0;
-		int diagDataFramesQuantity = 0;
-
-		bool getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm,
-												   int lanControllerNo,
-												   E::LanControllerType lanControllerType,
-												   Builder::IssueLogger* log);
-	};
-
 	static const char* const ELEMENT_DATA_SOURCES;
 	static const char* const ELEMENT_DATA_SOURCE;
 	static const char* const ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS;
@@ -134,6 +74,7 @@ public:
 								   DataType dataType,
 								   int adapterNo,
 								   E::LanControllerType adapterType,
+								   const Hardware::EquipmentSet& equipmentSet,
 								   const SubsystemKeyMap& subsystemKeyMap,
 								   const QHash<QString, quint64>& lmUniqueIdMap,
 								   Builder::IssueLogger* log);

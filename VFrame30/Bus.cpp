@@ -336,6 +336,8 @@ namespace VFrame30
 	//
 	// Bus
 	//
+	const char* Bus::mimeType = "application/x-radiybus";
+
 	Bus::Bus() :
 		PropertyObject(),
 		Proto::ObjectSerialization<Bus>(Proto::ProtoCompress::Never),

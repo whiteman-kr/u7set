@@ -1,12 +1,5 @@
 #pragma once
 
-//#ifdef Q_OS_WIN
-//#ifndef NOMINMAX		// To resolve min/max conflic "windows.h macros vs std::min/max"
-//	#define NOMINMAX
-//#endif
-//	#include <windows.h>
-//#endif
-
 #include "FontParam.h"
 #include "Session.h"
 #include "../lib/ClientBehavior.h"

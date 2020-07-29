@@ -29,7 +29,7 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
 
 	{ QStringLiteral("Caption"), [](const DataSource& source) { return source.lmCaption(); } },
 	{ QStringLiteral("Port"), [](const DataSource& source) { return source.lmPort(); } },
-	{ QStringLiteral("Part count"), [](const DataSource& source) { return source.lmRupFramesQuantity(); } },
+	{ QStringLiteral("RUP frames quantity"), [](const DataSource& source) { return source.lmRupFramesQuantity(); } },
 	{ QStringLiteral("Data type"), [](const DataSource& source) { return source.lmDataTypeStr(); } },
 	{ QStringLiteral("Module number"), [](const DataSource& source) { return source.lmNumber(); } },
 	{ QStringLiteral("Module type"), [](const DataSource& source) { return source.lmNumber(); } },
@@ -50,7 +50,7 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
 		} },
 
 	{ QStringLiteral("Received"), [](const DataSourceOnline& source) { return source.receivedDataSize(); } },
-	{ QStringLiteral("Speed"), [](const DataSourceOnline& source) { return source.dataReceivingRate(); } },
+	{ QStringLiteral("Speed, bytes/sec"), [](const DataSourceOnline& source) { return source.dataReceivingRate(); } },
 
 	{ QStringLiteral("Error Protocol version"), [](const DataSourceOnline& source) { return source.errorProtocolVersion(); } },
 	{ QStringLiteral("Error Frames quantity"), [](const DataSourceOnline& source) { return source.errorFramesQuantity(); } },

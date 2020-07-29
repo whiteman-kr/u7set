@@ -28,8 +28,8 @@
 		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>
 		<AppLogicWordDataSize>3570</AppLogicWordDataSize>
 		<ModuleDataOffset>0</ModuleDataOffset>
-		<ModuleDataSize>2560</ModuleDataSize>
-		<ModuleCount>14</ModuleCount>
+		<ModuleDataSize>64</ModuleDataSize>
+		<ModuleCount>72</ModuleCount>
 		<TuningDataOffset>46336</TuningDataOffset>
 		<TuningDataSize>7620</TuningDataSize>				<!--TuningDataFrameCount * TuningDataFramePayload-->
 		<TuningDataFrameCount>15</TuningDataFrameCount>

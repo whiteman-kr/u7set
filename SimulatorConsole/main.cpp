@@ -171,6 +171,8 @@ int main(int argc, char *argv[])
 	//
 	simulator.control().setRunList({});
 
+	bool ok = true;
+
 	if (args.size() > 2)
 	{
 		// Script must be run
@@ -178,22 +180,37 @@ int main(int argc, char *argv[])
 		QString scriptFileName = args[2];
 		qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
 
-		bool ok = runScript(scriptFileName, timeout, &simulator);
-
-        if (ok == false)
-        {
-            std::cout << "FAILED\n";
-        }
-
-		return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+		ok &= runScript(scriptFileName, timeout, &simulator);
 	}
 	else
 	{
 		// Start simulation
 		//
-		simulator.control().startSimulation(std::chrono::microseconds{-1});
+		ok &= simulator.control().startSimulation(std::chrono::microseconds{-1});
+		getchar();
 	}
 
-	getchar();
-	return EXIT_SUCCESS;
+	// Check if any LM after simulation is in failure mode
+	//
+	std::vector<std::shared_ptr<Sim::LogicModule>> lms = simulator.logicModules();
+
+	for (auto lm : lms)
+	{
+		if (lm->deviceMode() == Sim::DeviceMode::Fault)
+		{
+			QString message = QString("Simulation afterrun check: LogicModule %1 is in FAULT mode").arg(lm->equipmentId());
+			std::cout << message.toStdString() << "\n";
+			ok = false;
+			break;
+		}
+	}
+
+	// result
+	//
+	if (ok == false)
+	{
+		std::cout << "FAILED\n";
+	}
+
+	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

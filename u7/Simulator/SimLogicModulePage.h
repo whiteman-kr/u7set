@@ -2,6 +2,7 @@
 
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
+#include "../../VFrame30/AppSignalController.h"
 
 class SimLogicModulePage : public SimBasePage
 {
@@ -9,8 +10,9 @@ class SimLogicModulePage : public SimBasePage
 
 public:
 	SimLogicModulePage(SimIdeSimulator* simulator,
-				  QString equipmentId,
-				  QWidget* parent);
+					   VFrame30::AppSignalController* appSignalController,
+					   QString equipmentId,
+					   QWidget* parent);
 	virtual ~SimLogicModulePage();
 
 protected:
@@ -20,6 +22,8 @@ protected:
 protected slots:
 	void projectUpdated();
 
+	void powerOff(bool toPowerOff);
+	void signalsButtonClicked();
 	void codeButtonClicked();
 	void memoryButtonClicked();
 
@@ -31,12 +35,14 @@ protected slots:
 
 	void updateFilterCompleter();
 
+	void updateModuleStates(Sim::ControlStatus state);
+
 signals:
-	void openSchemaRequest(QString schemaId);
-	void openCodePageRequest(QString equipmnetId);
+	void openSchemaRequest(QString schemaId, QStringList highlightIds);
+	void openCodePageRequest(QString equipmentId);
 
 public:
-	QString equipmnetId() const;
+	QString equipmentId() const;
 
 private:
 	std::shared_ptr<Sim::LogicModule> logicModule();
@@ -48,6 +54,9 @@ private:
 	QLabel* m_subsystemIdLabel = new QLabel{this};
 	QLabel* m_equipmentIdLabel = new QLabel{this};
 	QLabel* m_channelLabel = new QLabel{this};
+
+	QPushButton* m_disableButton = new QPushButton{tr("Disable"), this};
+	QLabel* m_stateLabel = new QLabel{this};
 
 	QPushButton* m_signalsButton = new QPushButton{tr("Signals"), this};
 	QPushButton* m_memoryButton = new QPushButton{tr("Memory Dump"), this};
@@ -62,5 +71,6 @@ private:
 	// --
 	//
 	QString m_lmEquipmentId;
+	VFrame30::AppSignalController* m_appSignalController = nullptr;
 };
 

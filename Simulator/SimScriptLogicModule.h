@@ -4,8 +4,6 @@
 
 namespace Sim
 {
-	class Simulator;
-
 
 	class ScriptLogicModule : public QObject
 	{
@@ -15,6 +13,8 @@ namespace Sim
 
 		Q_PROPERTY(quint32 regBufferStartAddress READ regBufferStartAddress)
 		Q_PROPERTY(quint32 regBufferSize READ regBufferSize)
+
+		Q_PROPERTY(bool powerOff READ isPowerOff WRITE setPowerOff)
 
 	public:
 		ScriptLogicModule() = default;
@@ -30,6 +30,9 @@ namespace Sim
 
 		quint32 regBufferStartAddress() const;
 		quint32 regBufferSize() const;
+
+		bool isPowerOff() const;
+		void setPowerOff(bool value);
 
 		// Ram Access
 		//

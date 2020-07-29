@@ -1807,7 +1807,7 @@ QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const App
 		}
 		else
 		{
-			strValue = AppSignalState::toString(state.m_value, viewType, precision);
+			strValue = AppSignalState::toString(state.m_value, viewType, E::AnalogFormat::f_9, precision);
 		}
 	}
 

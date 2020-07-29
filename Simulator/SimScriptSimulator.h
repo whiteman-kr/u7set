@@ -7,6 +7,8 @@
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLogicModule.h"
+#include "SimScriptLmDescription.h"
+#include "SimScriptConnection.h"
 
 
 namespace Sim
@@ -65,6 +67,12 @@ namespace Sim
 		/// \brief Script execution timeout in milliseconds, if negative then timeout is not applied.
 		Q_PROPERTY(qint64 executionTimeOut READ executionTimeOut WRITE setExecutionTimeOut)
 
+		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
+		Q_PROPERTY(bool unlockTimer READ unlockTimer WRITE setUnlockTimer)
+
+		/// \brief Allows or disables LogicModules' Application Data transmittion to AppDataSrv
+		Q_PROPERTY(bool appDataTrasmittion READ appDataTrasmittion WRITE setAppDataTrasmittion)
+
 	public:
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
@@ -92,6 +100,9 @@ namespace Sim
 		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
 		bool reset();
 
+		/// \brief Get signal state, if signal is not found then exception is thrown.
+		QJSValue signalState(QString appSignalId);
+
 		/// \brief Get signal value, if signal is not found then exception is thrown.
 		/// <b>Note:</b> This function does not return full signal state with validity and other flags.
 		double signalValue(QString appSignalId);
@@ -108,7 +119,14 @@ namespace Sim
 		/// \brief Checks if a LogicModule exists.
 		bool logicModuleExists(QString equipmentId) const;
 
+		/// \brief Returns LogicModule (type ScriptLogicModule) or undefined if it is not exists.
 		QJSValue logicModule(QString equipmentId);
+
+		/// \brief Returns Connection by ID (type ScriptConnection) or undefined if it is not exists.
+		QJSValue connection(QString connectionID);
+
+		/// \brief Sets enable property to all connections.
+		void connectionsSetEnabled(bool value);
 
 		/// \brief Checks if a signal exists.
 		bool signalExists(QString appSignalId) const;
@@ -119,6 +137,9 @@ namespace Sim
 		/// \brief Get full signal description, if a signal is not found then exception is thrown.
 		ScriptSignal signalParamExt(QString appSignalId);
 
+		/// \brief Returns ScriptLmDescription for LM  with specified equipmentId, if LM is not found then exception is thrown.
+		ScriptLmDescription scriptLmDescription(QString equipmentId);
+
 		ScriptDevUtils devUtils();
 
 	public:
@@ -126,6 +147,13 @@ namespace Sim
 
 		qint64 executionTimeOut() const;
 		void setExecutionTimeOut(qint64 value);
+
+	private:
+		bool unlockTimer() const;
+		void setUnlockTimer(bool value);
+
+		bool appDataTrasmittion() const;
+		void setAppDataTrasmittion(bool value);
 
 		// Data
 		//

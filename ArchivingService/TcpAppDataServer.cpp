@@ -21,10 +21,6 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 {
 	switch(requestID)
 	{
-	case ARCHS_CONNECTION_ALIVE:
-		sendReply();
-		break;
-
 	case ARCHS_SAVE_APP_SIGNALS_STATES:
 		onSaveAppSignalsStatesToArchive(requestData, requestDataSize);
 		break;

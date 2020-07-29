@@ -13,6 +13,7 @@
 #include "SimOverrideSignals.h"
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
+#include "SimAppDataTransmitter.h"
 
 
 class QTextStream;
@@ -53,7 +54,7 @@ namespace Sim
 		bool loadAppSignals(QString buildPath);
 
 	signals:
-		void projectUpdated();	// Project was loaded or cleared
+		void projectUpdated();				// Project was loaded or cleared
 
 	public:
 		bool isLoaded() const;
@@ -65,8 +66,11 @@ namespace Sim
 		Sim::Connections& connections();
 
 		std::vector<std::shared_ptr<Subsystem>> subsystems() const;
-		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
-		std::vector<std::shared_ptr<LogicModule>> logicModules();
+		std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
+		std::vector<std::shared_ptr<LogicModule>> logicModules() const;
+
+		Sim::AppDataTransmitter& appDataTransmitter();
+		const Sim::AppDataTransmitter& appDataTransmitter() const;
 
 		Sim::AppSignalManager& appSignalManager();
 		const Sim::AppSignalManager& appSignalManager() const;
@@ -89,8 +93,11 @@ namespace Sim
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
 
+
 		// Signals Management
 		//
+		Sim::AppDataTransmitter m_appDataTransmitter{this};
+
 		Sim::AppSignalManager m_appSignalManager{this};
 		Sim::TuningSignalManager m_tuningSignalManager;
 

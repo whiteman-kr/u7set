@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
+#include "../lib/LogicModulesInfo.h"
 #include "../Builder/CfgFiles.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"
@@ -29,6 +30,7 @@ namespace Sim
 
 		qRegisterMetaType<Sim::RamAddress>("RamAddress");
 		qRegisterMetaType<Sim::ScriptSignal>("ScriptSignal");
+		qRegisterMetaType<Sim::ScriptLmDescription>("ScriptLmDescription");
 		qRegisterMetaType<Sim::ScriptLogicModule>("ScriptLogicModule");
 		qRegisterMetaType<Sim::ScriptDevUtils>("ScriptDevUtils");
 		qRegisterMetaType<E::LogicModuleRamAccess>("LogicModuleRamAccess");
@@ -141,6 +143,12 @@ namespace Sim
 
 	bool Simulator::loadFunc(QString buildPath)
 	{
+		buildPath = QDir::fromNativeSeparators(buildPath);
+		if (buildPath.endsWith(QChar('/')) == false)
+		{
+			buildPath.append(QChar('/'));
+		}
+
 		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
 
 		//--
@@ -255,6 +263,55 @@ namespace Sim
 			{
 				// Error must be reported in Subsystem::load
 				//
+				clearImpl();
+				return false;
+			}
+		}
+
+		// Load LogicModules info - /Common/LogicModules.xml
+		//
+		{
+			LogicModulesInfo lmsInfo;
+			QString loadLmsInfoErrorMessage;
+			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
+
+			ok = lmsInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
+			if (ok == false)
+			{
+				writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
+				clearImpl();
+				return false;
+			}
+
+			auto lms = this->logicModules();
+			for (auto lm : lms)
+			{
+				QString lmEquipmentId = lm->equipmentId();
+
+				auto fit = std::find_if(lmsInfo.logicModulesInfo.begin(), lmsInfo.logicModulesInfo.end(),
+							 [&lmEquipmentId](const ::LogicModuleInfo& lmi)
+							 {
+								return lmi.equipmentID == lmEquipmentId;
+							 });
+				if (fit == lmsInfo.logicModulesInfo.end())
+				{
+					writeError(tr("Information for LogicModule %1 is not found (file %2)")
+								.arg(lmEquipmentId)
+								.arg(lmsInfoFileName));
+					ok = false;
+				}
+				else
+				{
+					const ::LogicModuleInfo& lmi = *fit;
+					Q_ASSERT(lmi.equipmentID == lm->equipmentId());
+					Q_ASSERT(lmi.lmNumber == lm->logicModuleInfo().lmNumber);
+
+					lm->setLogicModuleExtraInfo(lmi);
+				}
+			}
+
+			if (ok == false)
+			{
 				clearImpl();
 				return false;
 			}
@@ -464,7 +521,7 @@ namespace Sim
 		return result;
 	}
 
-	std::shared_ptr<LogicModule> Simulator::logicModule(QString equipmentId)
+	std::shared_ptr<LogicModule> Simulator::logicModule(QString equipmentId) const
 	{
 		for (const auto&[key, ss] : m_subsystems)
 		{
@@ -480,7 +537,7 @@ namespace Sim
 		return std::shared_ptr<LogicModule>();
 	}
 
-	std::vector<std::shared_ptr<LogicModule>> Simulator::logicModules()
+	std::vector<std::shared_ptr<LogicModule>> Simulator::logicModules() const
 	{
 		std::vector<std::shared_ptr<LogicModule>> result;
 		result.reserve(m_subsystems.size() * 10);			// Just some number
@@ -494,6 +551,16 @@ namespace Sim
 		}
 
 		return result;
+	}
+
+	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
+	{
+		return m_appDataTransmitter;
+	}
+
+	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
+	{
+		return m_appDataTransmitter;
 	}
 
 	Sim::AppSignalManager& Simulator::appSignalManager()

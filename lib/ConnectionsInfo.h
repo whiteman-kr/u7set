@@ -9,6 +9,7 @@
 
 #endif
 
+#include "ConstStrings.h"
 #include "Address16.h"
 #include "Types.h"
 #include "DomXmlHelper.h"
@@ -99,8 +100,6 @@ protected:
 	static const QString ELEM_RX;
 	static const QString ELEM_RX_VALIDITY_SIGNAL;
 
-	static const QString ATTR_COUNT;
-	static const QString ATTR_ID;
 	static const QString ATTR_LINK_ID;
 	static const QString ATTR_TYPE;
 	static const QString ATTR_ENABLE_MANUAL_SETTINGS;
@@ -117,8 +116,6 @@ protected:
 	static const QString ATTR_SERIAL_MODE;
 	static const QString ATTR_BUFFER_ABS_ADDR;
 	static const QString ATTR_DATA_SIZE_W;
-	static const QString ATTR_DATA_ID;
-	static const QString ATTR_HEX_DATA_ID;
 	static const QString ATTR_ABS_ADDR;
 	static const QString ATTR_ADDR_IN_BUF;
 

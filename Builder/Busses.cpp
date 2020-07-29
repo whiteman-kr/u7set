@@ -952,7 +952,7 @@ namespace Builder
 			{
 				// Can't resolve bus interdependencies: %1
 				//
-				QStringList unresolvedBussesIDs = nonOrderedBusses.uniqueKeys();
+				QStringList unresolvedBussesIDs = nonOrderedBusses.keys();
 
 				m_log->errALC5132(unresolvedBussesIDs.join(", "));
 

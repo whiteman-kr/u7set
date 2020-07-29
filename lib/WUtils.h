@@ -84,7 +84,7 @@
 									}
 
 
-#define AUTO_LOCK(mutex) QMutexLocker m(&mutex);
+#define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 
 
 #define C_STR(qstring) qstring.toStdString().c_str()

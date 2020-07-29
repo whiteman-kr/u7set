@@ -264,7 +264,6 @@ namespace Builder
 
 		if (heapItem->readCount <= 0)
 		{
-			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("Extra read of heap item %1").arg(appSignalID));
 			return addrForRead;
 		}
@@ -425,11 +424,19 @@ namespace Builder
 
 			if (m_itemsInHeap.size() == 0)
 			{
-				m_heapLog.append(QString("Heap is clear on destruction - Ok."));
+				m_heapLog.append(QString("Heap is clear before destruction - Ok."));
 			}
 			else
 			{
-				m_heapLog.append(QString("ERROR! Heap contains %1 item(s) on destruction.").arg(m_itemsInHeap.size()));
+				m_heapLog.append(QString("ERROR! Heap contains %1 item(s) before destruction.\n").arg(m_itemsInHeap.size()));
+				m_heapLog.append(QString("Items in heap:\n"));
+
+				for(const std::pair<int, HeapItem*>& p : m_itemsInHeap)
+				{
+					TEST_PTR_CONTINUE(p.second);
+
+					m_heapLog.append(QString("%1\t%2").arg(p.first).arg(p.second->appSignalID));
+				}
 			}
 		}
 	}

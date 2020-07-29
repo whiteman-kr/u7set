@@ -2,6 +2,7 @@
 
 #include "DataProtocols.h"
 #include "WUtils.h"
+#include "ConstStrings.h"
 
 namespace Rup
 {
@@ -71,10 +72,10 @@ namespace Rup
 
 			if ((i % 16) == 0)
 			{
-				s += QString("%1").arg(static_cast<unsigned int>(i), 4, 16, QLatin1Char('0'));
+				s += QString("%1").arg(static_cast<unsigned int>(i), 4, 16, Latin1Char::ZERO);
 			}
 
-			s += QString("%1").arg(static_cast<unsigned int>(data[i]), 2, 16, QLatin1Char('0'));;
+			s += QString("%1").arg(static_cast<unsigned int>(data[i]), 2, 16, Latin1Char::ZERO);;
 
 			if (i > 0 && (i % 7) == 0)
 			{

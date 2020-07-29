@@ -224,9 +224,10 @@ namespace Builder
 
 			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
-				DataSource::LmEthernetAdapterProperties lmNetProperties;
+				LanControllerInfo lanControllerInfo;
 
-				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, lanController.m_place, lanController.m_type, log());
+				LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
+				                                 &lanControllerInfo, *equipmentSet(), log());
 
 				bool tuning = false;
 				bool appData = false;
@@ -243,63 +244,63 @@ namespace Builder
 
 				if (tuning == true)
 				{
-					if (lmNetProperties.tuningEnable == true)
+					if (lanControllerInfo.tuningEnable == true)
 					{
-						lmNetProperties.tuningIP = lmNetProperties.tuningIP.trimmed();
+						lanControllerInfo.tuningIP = lanControllerInfo.tuningIP.trimmed();
 
-						if (ip2Modules.contains(lmNetProperties.tuningIP) == true)
+						if (ip2Modules.contains(lanControllerInfo.tuningIP) == true)
 						{
-							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lanControllerInfo.tuningIP];
 
-							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.tuningIP, lm1->uuid(), lm->uuid());
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lanControllerInfo.tuningIP, lm1->uuid(), lm->uuid());
 
 							result = false;
 						}
 						else
 						{
-							ip2Modules.insert(lmNetProperties.tuningIP, lm);
+							ip2Modules.insert(lanControllerInfo.tuningIP, lm);
 						}
 					}
 				}
 
 				if (appData == true)
 				{
-					if (lmNetProperties.appDataEnable == true)
+					if (lanControllerInfo.appDataEnable == true)
 					{
-						lmNetProperties.appDataIP = lmNetProperties.appDataIP.trimmed();
+						lanControllerInfo.appDataIP = lanControllerInfo.appDataIP.trimmed();
 
-						if (ip2Modules.contains(lmNetProperties.appDataIP) == true)
+						if (ip2Modules.contains(lanControllerInfo.appDataIP) == true)
 						{
-							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lanControllerInfo.appDataIP];
 
-							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.appDataIP, lm1->uuid(), lm->uuid());
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lanControllerInfo.appDataIP, lm1->uuid(), lm->uuid());
 
 							result = false;
 						}
 						else
 						{
-							ip2Modules.insert(lmNetProperties.appDataIP, lm);
+							ip2Modules.insert(lanControllerInfo.appDataIP, lm);
 						}
 					}
 				}
 
 				if (diagData == true)
 				{
-					if (lmNetProperties.diagDataEnable == true)
+					if (lanControllerInfo.diagDataEnable == true)
 					{
-						lmNetProperties.diagDataIP = lmNetProperties.diagDataIP.trimmed();
+						lanControllerInfo.diagDataIP = lanControllerInfo.diagDataIP.trimmed();
 
-						if (ip2Modules.contains(lmNetProperties.diagDataIP) == true)
+						if (ip2Modules.contains(lanControllerInfo.diagDataIP) == true)
 						{
-							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lanControllerInfo.diagDataIP];
 
-							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.diagDataIP, lm1->uuid(), lm->uuid());
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lanControllerInfo.diagDataIP, lm1->uuid(), lm->uuid());
 
 							result = false;
 						}
 						else
 						{
-							ip2Modules.insert(lmNetProperties.diagDataIP, lm);
+							ip2Modules.insert(lanControllerInfo.diagDataIP, lm);
 						}
 					}
 				}
@@ -738,9 +739,9 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeLogicModulesInfoXml()
 	{
-		LogicModulesInfoWriter writer;
+		LogicModulesInfoWriter writer(m_moduleCompilers, *equipmentSet());
 
-		writer.fill(m_moduleCompilers);
+		writer.fill();
 
 		QByteArray xmlData;
 
@@ -874,7 +875,7 @@ namespace Builder
 		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
 		list.append(str);
 
-		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
+		str = QString("-- Rx data ID:\t\t%1 (0x%2)").arg(dataID).arg(dataID, 8, 16, Latin1Char::ZERO);
 		list.append(str);
 
 		list.append("--\n");
@@ -1053,7 +1054,7 @@ namespace Builder
 		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
 		list.append(str);
 
-		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
+		str = QString("-- Rx data ID:\t\t%u (0x%08X)").arg(dataID).arg(dataID, 8, 16, Latin1Char::ZERO);
 		list.append(str);
 
 		list.append("--\n");
@@ -1318,7 +1319,7 @@ namespace Builder
 			subsys.insert(subsystem->subsystemId(), subsystem);
 		}
 
-		QHash<QString, QString> subsystemModules;
+		QMultiHash<QString, QString> subsystemModules;
 		QHash<QString, const Hardware::DeviceModule*> modules;
 
 		for(const Hardware::DeviceModule* module : lmModules())
@@ -1350,7 +1351,7 @@ namespace Builder
 				continue;
 			}
 
-			subsystemModules.insertMulti(lmSubsystem, module->equipmentIdTemplate());
+			subsystemModules.insert(lmSubsystem, module->equipmentIdTemplate());
 		}
 
 		QByteArray data;
@@ -1364,7 +1365,7 @@ namespace Builder
 		xml.writeStartElement("Subsystems");
 		xml.writeIntAttribute("Count", subsystemsCount);
 
-		QStringList subsystemIDs = subsys.uniqueKeys();
+		QStringList subsystemIDs = subsys.keys();
 
 		subsystemIDs.sort();
 

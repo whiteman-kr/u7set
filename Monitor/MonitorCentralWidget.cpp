@@ -81,9 +81,16 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 
 	if (tabSchema == nullptr)
 	{
-		tabSchema = std::make_shared<VFrame30::MonitorSchema>();
-		tabSchema->setSchemaId("EMPTYSCHEMA");
-		tabSchema->setCaption("Empty Schema");
+		// If schema is not fount try to set StartSchemaID
+		//
+		tabSchema = m_schemaManager->schema(m_schemaManager->monitorConfigController()->configurationStartSchemaId());
+
+		if (tabSchema == nullptr)
+		{
+			tabSchema = std::make_shared<VFrame30::MonitorSchema>();
+			tabSchema->setSchemaId("EMPTYSCHEMA");
+			tabSchema->setCaption("Empty Schema");
+		}
 	}
 
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
@@ -160,13 +167,13 @@ void MonitorCentralWidget::slot_newSchemaTab(QString schemaId)
 	if (tabIndex != -1)
 	{
 		setCurrentIndex(tabIndex);
-		emit signal_schemaChanged(schemaId);
 
 		MonitorSchemaWidget* newTab = currentTab();
 		Q_ASSERT(newTab);
 
 		newTab->clientSchemaView()->setZoom(0, false);
 
+		emit signal_schemaChanged(newTab->schemaId());		// Different schema could be set, it can happen if schema does not exist
 		newTab->emitHistoryChanged();
 	}
 
@@ -337,9 +344,9 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 	return;
 }
 
-void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList)
+void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu)
 {
-	currentTab()->signalContextMenu(signalList, {});
+	currentTab()->signalContextMenu(signalList, {}, customMenu);
 }
 
 void MonitorCentralWidget::slot_signalInfo(QString signalId)

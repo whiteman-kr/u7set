@@ -65,8 +65,9 @@ union AppSignalStateFlags
 
 	quint32 all = 0;
 
-	void clear();
+	void setFlag(E::AppSignalStateFlagType flagType, quint32 value);
 
+	void clear();
 	void clearReasonsFlags();
 
 	bool hasArchivingReason() const;

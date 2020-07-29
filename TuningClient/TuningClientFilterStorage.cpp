@@ -85,7 +85,7 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 			if (filter->isSourceEquipment() == false)	// Skip equipment filters
 			{
-				Hash aspEquipmentHash = ::calcHash(asp.equipmentId());
+				Hash aspEquipmentHash = ::calcHash(asp.lmEquipmentId());
 				equipmentHashesMap[aspEquipmentHash] = 1;
 			}
 		}

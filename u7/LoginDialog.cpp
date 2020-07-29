@@ -9,6 +9,8 @@ LoginDialog::LoginDialog(const QStringList& loginCompleterList, QWidget *parent)
 {
 	ui->setupUi(this);
 
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+
 	QString defaultUsername = theSettings.loginDialog_defaultUsername;
 	ui->usernameEdit->setText(defaultUsername);
 

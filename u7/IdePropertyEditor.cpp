@@ -346,6 +346,140 @@ IdeCodeEditor::~IdeCodeEditor()
 {
 }
 
+void IdeCodeEditor::setText(const QString& text)
+{
+	m_textEdit->blockSignals(true);
+
+	m_textEdit->setText(text);
+
+	m_textEdit->blockSignals(false);
+
+	adjustMarginWidth();
+}
+
+QString IdeCodeEditor::text()
+{
+	return m_textEdit->text();
+}
+
+void IdeCodeEditor::setReadOnly(bool value)
+{
+	m_textEdit->setReadOnly(value);
+}
+
+void IdeCodeEditor::findFirst(QString findText)
+{
+	if (findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	bool result = false;
+
+	if (m_findText == findText)
+	{
+		result = m_textEdit->findNext();
+	}
+	else
+	{
+		result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+
+		m_findText = findText;
+	}
+
+	if (result == false)
+	{
+		QMessageBox::information(this, qAppName(), tr("Text was not found."));
+	}
+}
+
+void IdeCodeEditor::findNext()
+{
+	if (m_findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (m_findFirst == true)
+	{
+		m_findFirst = false;
+
+		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+
+		if (result == false)
+		{
+			QMessageBox::information(this, qAppName(), tr("Text was not found."));
+		}
+	}
+	else
+	{
+		m_textEdit->findNext();
+	}
+
+	return;
+}
+
+void IdeCodeEditor::replace(QString findText, QString replaceText)
+{
+	if (findText.isEmpty() || replaceText.isEmpty())
+	{
+		return;
+	}
+
+	if (findText == m_findText)
+	{
+		m_textEdit->replace(replaceText);
+		return;
+	}
+
+	m_findText = findText;
+
+	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	{
+		return;
+	}
+
+	m_textEdit->replace(replaceText);
+}
+
+void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
+{
+	if (findText.isEmpty() || replaceText.isEmpty())
+	{
+		return;
+	}
+
+	int counter = 0;
+
+	m_findText = findText;
+
+	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	{
+		return;
+	}
+
+	while (counter < 1000)
+	{
+		m_textEdit->replace(replaceText);
+
+		counter++;
+
+		if (m_textEdit->findNext() == false)
+		{
+			break;
+		}
+
+		if (counter >= 1000)
+		{
+			// for not to hang
+			assert(false);
+			break;
+		}
+	}
+
+	QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+}
+
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
@@ -387,137 +521,28 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
     return PropertyTextEditor::eventFilter(obj, event);
 }
 
-void IdeCodeEditor::setText(const QString& text)
+void IdeCodeEditor::adjustMarginWidth()
 {
-    m_textEdit->blockSignals(true);
+	// Adjust margin field width
+	//
+	int linesCount = m_textEdit->lines();
 
-    m_textEdit->setText(text);
-
-    m_textEdit->blockSignals(false);
-}
-
-QString IdeCodeEditor::text()
-{
-    return m_textEdit->text();
-}
-
-void IdeCodeEditor::setReadOnly(bool value)
-{
-    m_textEdit->setReadOnly(value);
-}
-
-
-void IdeCodeEditor::findFirst(QString findText)
-{
-	if (findText.isEmpty() == true)
-    {
-        return;
-    }
-
-    bool result = false;
-
-    if (m_findText == findText)
-    {
-        result = m_textEdit->findNext();
-    }
-    else
-    {
-        result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
-
-        m_findText = findText;
-    }
-
-    if (result == false)
-    {
-        QMessageBox::information(this, qAppName(), tr("Text was not found."));
-    }
-}
-
-void IdeCodeEditor::findNext()
-{
-	if (m_findText.isEmpty() == true)
+	int signCount = static_cast<int>(log10(linesCount) + 0.5);
+	if (signCount < 4)
 	{
-		return;
+		signCount = 4;
 	}
+	signCount += 2;
 
-	if (m_findFirst == true)
-	{
-		m_findFirst = false;
+	QFontMetrics fm(m_textEdit->lexer()->defaultFont());
 
-		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+	QString sample = QString().fill('0', signCount);
 
-		if (result == false)
-		{
-			QMessageBox::information(this, qAppName(), tr("Text was not found."));
-		}
-	}
-	else
-	{
-		m_textEdit->findNext();
-	}
+	int marginWidth = static_cast<int>(fm.boundingRect(sample).width());
+
+	m_textEdit->setMarginWidth(0, marginWidth);
 
 	return;
-}
-
-void IdeCodeEditor::replace(QString findText, QString replaceText)
-{
-    if (findText.isEmpty() || replaceText.isEmpty())
-    {
-        return;
-    }
-
-    if (findText == m_findText)
-    {
-        m_textEdit->replace(replaceText);
-        return;
-    }
-
-    m_findText = findText;
-
-    if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
-    {
-        return;
-    }
-
-    m_textEdit->replace(replaceText);
-}
-
-void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
-{
-    if (findText.isEmpty() || replaceText.isEmpty())
-    {
-        return;
-    }
-
-    int counter = 0;
-
-    m_findText = findText;
-
-    if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
-    {
-        return;
-    }
-
-    while (counter < 1000)
-    {
-        m_textEdit->replace(replaceText);
-
-        counter++;
-
-        if (m_textEdit->findNext() == false)
-        {
-            break;
-        }
-
-        if (counter >= 1000)
-        {
-            // for not to hang
-            assert(false);
-            break;
-        }
-    }
-
-    QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
 }
 
 //

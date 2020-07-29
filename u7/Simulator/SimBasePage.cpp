@@ -30,7 +30,6 @@ SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent)
 
 SimBasePage::~SimBasePage()
 {
-	qDebug() << "SimulatorBasePage::~SimulatorBasePage()";
 	m_pages.remove(this);
 }
 
@@ -55,7 +54,7 @@ SimLogicModulePage* SimBasePage::logicModulePage(QString lmEquipmnetId, QWidget*
 		SimLogicModulePage* cp = dynamic_cast<SimLogicModulePage*>(page);
 
 		if (cp != nullptr &&
-			cp->equipmnetId() == lmEquipmnetId &&
+			cp->equipmentId() == lmEquipmnetId &&
 			cp->property("SimParentObject") == parentValue)
 		{
 			return cp;

@@ -139,7 +139,7 @@ bool AppSignalState::hasSameValue(const AppSignalState& b) const
 		   m_hash == b.m_hash;
 }
 
-QString AppSignalState::toString(double value, E::ValueViewType viewType, int precision)
+QString AppSignalState::toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision)
 {
 	QString result;
 	result.reserve(32);
@@ -149,7 +149,7 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, int pr
 	switch (viewType)
 	{
 	case E::ValueViewType::Dec:
-		result = QString::number(value, 'f', precision);
+		result = QString::number(value, static_cast<char>(analogFormat), precision);
 		break;
 
 	case E::ValueViewType::Hex:
@@ -220,6 +220,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_customSignalId = s.customAppSignalID();
 	m_caption = s.caption();
 	m_equipmentId = s.equipmentID();
+	m_lmEquipmentId = s.lmEquipmentID();
 
 	m_channel = s.channel();
 	m_inOutType = s.inOutType();
@@ -272,6 +273,7 @@ void AppSignalParam::save(::Proto::AppSignal* message) const
 	message->set_customappsignalid(m_customSignalId.toStdString());
 	message->set_caption(m_caption.toStdString());
 	message->set_equipmentid(m_equipmentId.toStdString());
+	message->set_lmequipmentid(m_lmEquipmentId.toStdString());
 
 	message->set_channel(static_cast<int>(m_channel));
 	message->set_inouttype(static_cast<int>(m_inOutType));
@@ -354,6 +356,15 @@ void AppSignalParam::setEquipmentId(const QString& value)
 	m_equipmentId = value;
 }
 
+QString AppSignalParam::lmEquipmentId() const
+{
+	return m_lmEquipmentId;
+}
+
+void AppSignalParam::setLmEquipmentId(const QString& value)
+{
+	m_lmEquipmentId = value;
+}
 
 E::Channel AppSignalParam::channel() const
 {

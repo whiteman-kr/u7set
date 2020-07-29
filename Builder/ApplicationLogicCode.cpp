@@ -1,5 +1,6 @@
 #include "ApplicationLogicCode.h"
 #include "../VFrame30/Afb.h"
+#include "../lib/ConstStrings.h"
 
 namespace Builder
 {
@@ -1233,7 +1234,7 @@ namespace Builder
 
 		// print address of command
 		//
-		cmdStr.sprintf("%05X\t", m_address);
+		cmdStr = QString("%1\t").arg(m_address, 5, 16, Latin1Char::ZERO).toUpper();
 
 		if (printCmdCode == true)
 		{
@@ -1243,7 +1244,7 @@ namespace Builder
 			{
 				QString codeWordStr = getCodeWordStr(w);
 
-				cmdStr += QString("%1 ").arg(codeWordStr);
+				cmdStr += QString("%1 ").arg(codeWordStr).toUpper();
 			}
 
 			int tabLen = 32 - (cmdStr.length() - 1 + 3);
@@ -1670,7 +1671,7 @@ namespace Builder
 		lowByte &= 0x00FF;
 		highByte &= 0x00FF;
 
-		str.sprintf("%02X%02X", lowByte, highByte);
+		str = QString("%1%2").arg(lowByte, 2, 16, Latin1Char::ZERO).arg(highByte, 2, 16, Latin1Char::ZERO);
 
 		return str;
 	}
@@ -1921,9 +1922,7 @@ namespace Builder
 
 	QString CodeSnippetMetrics::codePercentStr() const
 	{
-		QString str;
-
-		return str.sprintf("%.2f%%", static_cast<float>(m_codePercent));
+		return QString("%1%%").arg(m_codePercent, 0, 'g', 2);
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -2179,7 +2178,7 @@ namespace Builder
 			{
 				if (i == 0)
 				{
-					str.sprintf("\t%04X : ", codeItem.address());
+					str = QString("\t%1 : ").arg(codeItem.address(), 4, 16, Latin1Char::ZERO);
 					codeStr = str;
 				}
 
@@ -2191,16 +2190,16 @@ namespace Builder
 				{
 					if (i == bytesCount-1)
 					{
-						str.sprintf("%02X;", b);
+						str = QString("%1;").arg(b, 2, 16, Latin1Char::ZERO);
 					}
 					else
 					{
-						str.sprintf("%02X ", b);
+						str = QString("%1 ").arg(b, 2, 16, Latin1Char::ZERO);
 					}
 				}
 				else
 				{
-					str.sprintf("%02X", b);
+					str = QString("%1").arg(b, 2, 16, Latin1Char::ZERO);
 				}
 
 				codeStr += str;
@@ -2261,7 +2260,7 @@ namespace Builder
 			{
 				isCommand = true;
 
-				address = QString().sprintf("%04X", codeItem.address());
+				address = QString("%1").arg(codeItem.address(), 4, 16, Latin1Char::ZERO);
 
 				QByteArray cmdBinCode;
 

@@ -22,6 +22,9 @@ public:
 public:
 	QString schemaId() const;
 
+	const QStringList& hightlightIds() const;
+	void setHighlightIds(const QStringList& value);
+
 protected slots:
 	void controlStateChanged(Sim::SimControlState state);
 
