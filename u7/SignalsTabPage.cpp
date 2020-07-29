@@ -2381,6 +2381,7 @@ const QString FindSignalDialog::replacedMessage("Yes - replaced");
 FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent) :
 	QDialog(parent, Qt::Dialog),
 	m_signalTable(parent),
+	m_signalSetProvider(SignalSetProvider::getInstance()),
 	m_findString(new QLineEdit(this)),
 	m_replaceString(new QLineEdit(this)),
 	m_searchInPropertyList(new QComboBox(this)),
