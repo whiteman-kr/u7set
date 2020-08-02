@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QClipboard>
+#include <QKeyEvent>
 
 #include "Options.h"
 #include "ObjectProperties.h"

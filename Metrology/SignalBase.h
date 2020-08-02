@@ -40,8 +40,8 @@ private:
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
-	double					m_percent = 0;
-	int						m_comparatorIndex = -1;
+	double					m_percent = 0;					// for measuring of linearity
+	int						m_comparatorIndex = -1;			// for measuring of comparators
 	bool					m_negativeRange = false;
 	double					m_tunSignalState = 0;			// for restore tun value after measuring
 

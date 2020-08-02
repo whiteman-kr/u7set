@@ -733,7 +733,7 @@ QString LinearityMeasurement::limitStr(int limitType) const
 	QString low = QString::number(m_lowLimit[limitType], 'f', m_limitPrecision[limitType]);
 	QString high = QString::number(m_highLimit[limitType], 'f', m_limitPrecision[limitType]);
 
-	return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);;
+	return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1114,15 +1114,15 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 		m_nominal[t] = from.m_nominal[t];
 		m_measure[t] = from.m_measure[t];
 
-		m_lowLimit[t] = from.m_lowLimit[t];;
-		m_highLimit[t] = from.m_highLimit[t];;
-		m_unit[t] = from.m_unit[t];;
+		m_lowLimit[t] = from.m_lowLimit[t];
+		m_highLimit[t] = from.m_highLimit[t];
+		m_unit[t] = from.m_unit[t];
 		m_limitPrecision[t] = from.m_limitPrecision[t];
 
 		for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
 		{
-			m_error[t][e] = from.m_error[t][e];;
-			m_errorLimit[t][e] = from.m_errorLimit[t][e];;
+			m_error[t][e] = from.m_error[t][e];
+			m_errorLimit[t][e] = from.m_errorLimit[t][e];
 		}
 
 		for(int m = 0; m < MAX_MEASUREMENT_IN_POINT; m++)
@@ -1139,7 +1139,7 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 
 	for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
 	{
-		m_additionalParam[a] = from.m_additionalParam[a];;
+		m_additionalParam[a] = from.m_additionalParam[a];
 	}
 
 	return *this;
@@ -1589,7 +1589,7 @@ QString ComparatorMeasurement::limitStr(int limitType) const
 	QString low = QString::number(m_lowLimit[limitType], 'f', m_limitPrecision[limitType]);
 	QString high = QString::number(m_highLimit[limitType], 'f', m_limitPrecision[limitType]);
 
-	return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);;
+	return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1801,15 +1801,15 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 		m_nominal[t] = from.m_nominal[t];
 		m_measure[t] = from.m_measure[t];
 
-		m_lowLimit[t] = from.m_lowLimit[t];;
-		m_highLimit[t] = from.m_highLimit[t];;
-		m_unit[t] = from.m_unit[t];;
+		m_lowLimit[t] = from.m_lowLimit[t];
+		m_highLimit[t] = from.m_highLimit[t];
+		m_unit[t] = from.m_unit[t];
 		m_limitPrecision[t] = from.m_limitPrecision[t];
 
 		for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
 		{
-			m_error[t][e] = from.m_error[t][e];;
-			m_errorLimit[t][e] = from.m_errorLimit[t][e];;
+			m_error[t][e] = from.m_error[t][e];
+			m_errorLimit[t][e] = from.m_errorLimit[t][e];
 		}
 	}
 
@@ -1837,43 +1837,32 @@ MeasureBase::MeasureBase(QObject *parent) :
 
 int MeasureBase::count() const
 {
-	int count = 0;
+	QMutexLocker locker(&m_measureMutex);
 
-	m_measureMutex.lock();
-
-		count = m_measureList.count();
-
-	m_measureMutex.unlock();
-
-	return count;
+	return m_measureList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MeasureBase::clear(bool removeData)
 {
-	m_measureMutex.lock();
+	QMutexLocker locker(&m_measureMutex);
 
-		if (removeData == true)
+	if (removeData == true)
+	{
+		for(Measurement* pMeasurement: m_measureList)
 		{
-			int count = m_measureList.count();
-			for(int i = count - 1; i >= 0; i--)
+			if (pMeasurement == nullptr)
 			{
-				Measurement* pMeasurement = m_measureList[i];
-				if (pMeasurement == nullptr)
-				{
-					continue;
-				}
-
-				delete pMeasurement;
+				continue;
 			}
+
+			delete pMeasurement;
 		}
+	}
 
-		m_measureList.clear();
-
-	m_measureMutex.unlock();
+	m_measureList.clear();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // each measurement is located in several tables,
@@ -2132,18 +2121,14 @@ int MeasureBase::append(Measurement* pMeasurement)
 
 Measurement* MeasureBase::measurement(int index) const
 {
-	Measurement *pMeasure = nullptr;
+	QMutexLocker locker(&m_measureMutex);
 
-	m_measureMutex.lock();
+	if (index < 0 || index >= m_measureList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 || index < m_measureList.count())
-		{
-			pMeasure = m_measureList[index];
-		}
-
-	m_measureMutex.unlock();
-
-	return pMeasure;
+	return m_measureList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

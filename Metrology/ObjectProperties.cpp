@@ -895,7 +895,7 @@ bool RackGroupPropertyDialog::foundDuplicateRacks()
 			else
 			{
 				int index = duplicateMap[hash];
-				if (index >= 0 || index < duplicateList.count())
+				if (index >= 0 && index < duplicateList.count())
 				{
 					Duplicate& duplicate = duplicateList[index];
 

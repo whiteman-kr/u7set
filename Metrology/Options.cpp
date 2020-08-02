@@ -1261,6 +1261,14 @@ bool BackupOption::createBackup()
 		return false;
 	}
 
+	if (QFile::exists(m_path) == false)
+	{
+		m_path = QDir::tempPath();
+
+		QSettings s;
+		s.setValue(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), m_path);
+	}
+
 	QDateTime&& currentTime = QDateTime::currentDateTime();
 	QDate&& date = currentTime.date();
 	QTime&& time = currentTime.time();
