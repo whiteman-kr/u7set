@@ -556,6 +556,32 @@ Signal* SignalSetProvider::getSignalByStrID(const QString signalStrID)
 	return m_signalSet.getSignal(signalStrID);
 }
 
+const Signal& SignalSetProvider::getLoadedSignal(int index)
+{
+	if (m_signalSet[index].isLoaded() == false)
+	{
+		int oldIndex = m_middleVisibleSignalIndex;
+		m_middleVisibleSignalIndex = index;
+
+		loadNextSignalsPortion();	// force loading this signal
+
+		m_middleVisibleSignalIndex = oldIndex;
+
+	}
+	return m_signalSet[index];
+}
+
+AppSignalParam SignalSetProvider::getAppSignalParam(int index)
+{
+	Signal signal = getLoadedSignal(index);
+	signal.cacheSpecPropValues();
+
+	AppSignalParam param;
+	param.load(signal);
+
+	return param;
+}
+
 QVector<int> SignalSetProvider::getSameChannelSignals(int index)
 {
 	QVector<int> sameChannelSignalRows;
@@ -987,7 +1013,7 @@ void SignalSetProvider::loadSignal(int signalId)
 	dbController()->getLatestSignal(signalId, &m_signalSet[index], m_parentWidget);
 
 	signalUpdated(index);
-	signalPropertiesChanged(signal(index));
+	signalPropertiesChanged(getLoadedSignal(index));
 }
 
 void SignalSetProvider::loadSignals()

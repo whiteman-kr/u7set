@@ -1,6 +1,5 @@
 #include "../lib/AppSignal.h"
 #include "../Proto/serialization.pb.h"
-#include "../lib/Signal.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
 
@@ -216,6 +215,14 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	s.cacheSpecPropValues();
 
 	m_hash = message.calcparam().hash();
+
+	load(s);
+
+	return true;
+}
+
+void AppSignalParam::load(const Signal& s)
+{
 	m_appSignalId = s.appSignalID();
 	m_customSignalId = s.customAppSignalID();
 	m_caption = s.caption();
@@ -255,9 +262,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_specPropStruct = s.specPropStruct();
 	m_specPropValues = s.protoSpecPropValues();
 
-	m_tags = std::move(s.tagsSet());
-
-	return true;
+	m_tags = s.tagsSet();
 }
 
 void AppSignalParam::save(::Proto::AppSignal* message) const

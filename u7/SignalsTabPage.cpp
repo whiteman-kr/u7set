@@ -45,7 +45,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
 	m_signalSetProvider->loadSignal(m_signalSetProvider->key(row));	// get current checkedOut state
 
-	const Signal& s = m_signalSetProvider->signal(row);
+	const Signal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	manager.reloadPropertyBehaviour();
@@ -167,7 +167,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	const Signal& s = m_signalSetProvider->signal(row);
+	const Signal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
@@ -239,7 +239,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	Signal s = m_signalSetProvider->signal(row);
+	Signal s = m_signalSetProvider->getLoadedSignal(row);
 
 	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
@@ -410,7 +410,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int col = index.column();
 
-	const Signal& signal = m_signalSetProvider->signal(row);
+	const Signal& signal = m_signalSetProvider->getLoadedSignal(row);
 
 	if (row == m_signalSetProvider->signalCount() || signal.isLoaded() == false)
 	{
@@ -514,7 +514,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		assert(row < m_signalSetProvider->signalCount());
 
-		Signal s = m_signalSetProvider->signal(row);
+		Signal s = m_signalSetProvider->getLoadedSignal(row);
 
 		propertyManager.setValue(&s, index.column(), value, theSettings.isExpertMode());
 
@@ -548,7 +548,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 	assert(row < m_signalSetProvider->signalCount());
 
-	const Signal& s = m_signalSetProvider->signal(row);
+	const Signal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	if (propertyManager.getBehaviour(s, index.column()) == E::PropertyBehaviourType::Write)
 	{
@@ -1037,7 +1037,7 @@ void SignalsTabPage::keyPressEvent(QKeyEvent* e)
 		for (int i = 0; i < selection.count(); i++)
 		{
 			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
-			selectedSignalIds.append(m_signalSetProvider->signal(row).appSignalID() + "\n");
+			selectedSignalIds.append(m_signalSetProvider->getLoadedSignal(row).appSignalID() + "\n");
 		}
 
 		QApplication::clipboard()->setText(selectedSignalIds);
@@ -1275,7 +1275,7 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 	for (int i = 0; i < ids.count(); i++)
 	{
 		int index = m_signalSetProvider->keyIndex(ids[i]);
-		Signal* signal = new Signal(m_signalSetProvider->signal(index));
+		Signal* signal = new Signal(m_signalSetProvider->getLoadedSignal(index));
 
 		if (!m_signalSetProvider->isEditableSignal(index))
 		{
@@ -1364,7 +1364,7 @@ void SignalsTabPage::deleteSignal()
 	for (int i = 0; i < selection.count(); i++)
 	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
-		int groupId = m_signalSetProvider->signal(row).signalGroupID();
+		int groupId = m_signalSetProvider->getLoadedSignal(row).signalGroupID();
 		if (groupId != 0)
 		{
 			QVector<int> ids = m_signalSetProvider->getChannelSignalsID(groupId);
@@ -1447,7 +1447,7 @@ void SignalsTabPage::viewSignalHistory()
 		return;
 	}
 
-	const Signal& signal = m_signalSetProvider->signal(row);
+	const Signal& signal = m_signalSetProvider->getLoadedSignal(row);
 	SignalHistoryDialog dlg(dbController(), signal.appSignalID(), signal.ID(), this);
 
 	dlg.exec();
@@ -2099,7 +2099,7 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 
 bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
 {
-	const Signal& currentSignal = m_signalSetProvider->signal(source_row);
+	const Signal& currentSignal = m_signalSetProvider->getLoadedSignal(source_row);
 	if (!(m_signalType == ST_ANY || m_signalType == currentSignal.signalTypeInt()))
 	{
 		return false;
@@ -2154,8 +2154,8 @@ bool SignalsProxyModel::lessThan(const QModelIndex &source_left, const QModelInd
 
 	if (l == r)
 	{
-		const Signal& sl = m_signalSetProvider->signal(source_left.row());
-		const Signal& sr = m_signalSetProvider->signal(source_right.row());
+		const Signal& sl = m_signalSetProvider->getLoadedSignal(source_left.row());
+		const Signal& sr = m_signalSetProvider->getLoadedSignal(source_right.row());
 
 		return sl.appSignalID() < sr.appSignalID();
 	}
@@ -2555,7 +2555,7 @@ void FindSignalDialog::generateListIfNeeded(bool throwWarning)
 	{
 		for (int i = 0; i < m_signalModel->rowCount(); i++)
 		{
-			addSignalIfNeeded(m_signalSetProvider->signal(i));
+			addSignalIfNeeded(m_signalSetProvider->getLoadedSignal(i));
 		}
 	}
 	else
@@ -2568,7 +2568,7 @@ void FindSignalDialog::generateListIfNeeded(bool throwWarning)
 		for (int i = 0; i < selection.count(); i++)
 		{
 			int row = m_signalProxyModel->mapToSource(selection[i]).row();
-			addSignalIfNeeded(m_signalSetProvider->signal(row));
+			addSignalIfNeeded(m_signalSetProvider->getLoadedSignal(row));
 		}
 	}
 
@@ -2607,7 +2607,7 @@ void FindSignalDialog::updateReplacement(int row)
 {
 	int signalId = getSignalId(row);
 	int signalIndex = m_signalSetProvider->keyIndex(signalId);
-	const Signal& signal = m_signalSetProvider->signal(signalIndex);
+	const Signal& signal = m_signalSetProvider->getLoadedSignal(signalIndex);
 
 	updateReplacement(signal, row);
 }
@@ -2899,7 +2899,7 @@ void FindSignalDialog::reloadCurrentIdsMap()
 
 	for (int i = 0; i < m_signalModel->rowCount(); i++)
 	{
-		QString id = getProperty(m_signalSetProvider->signal(i));
+		QString id = getProperty(m_signalSetProvider->getLoadedSignal(i));
 		if (m_signalIds.contains(id))
 		{
 			m_repeatedSignalIds.insert(id);

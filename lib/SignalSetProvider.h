@@ -7,6 +7,7 @@
 #define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())
 #define TOTAL_SIGNAL_TYPE_COUNT (SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT)
 
+
 class DbController;
 
 class SignalPropertyManager : public QObject
@@ -144,8 +145,10 @@ public:
 	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
 	int key(int index) const { return m_signalSet.key(index); }
 	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
-	const Signal& signal(int index) const { return m_signalSet[index]; }
 	QVector<int> getSameChannelSignals(int index);
+
+	const Signal& getLoadedSignal(int index);
+	AppSignalParam getAppSignalParam(int index);
 
 	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
 	bool isEditableSignal(const Signal& signal) const;
