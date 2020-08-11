@@ -118,8 +118,10 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 	switch (signalConnectionType)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam);	break;
-		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	fill_measure_output(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	fill_measure_internal(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	fill_measure_output(ioParam);	break;
 		default:									assert(0);
 	}
 }
@@ -260,10 +262,8 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		Metrology::SignalState signalState = theSignalBase.signalState(inParam.hash());
-
-		double elVal = conversion(signalState.value(), CT_ENGINEER_TO_ELECTRIC, inParam);
-		double enVal = signalState.value();
+		double enVal = theSignalBase.signalState(inParam.hash()).value();
+		double elVal = conversion(enVal, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
@@ -291,6 +291,139 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	// calc additional parameters
 	//
 	calcAdditionalParam(MEASURE_LIMIT_TYPE_ENGINEER);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
+{
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (outParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	//
+	//
+
+	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setSignalHash(outParam.hash());
+
+	// features
+	//
+
+	setAppSignalID(outParam.appSignalID());
+	setCustomAppSignalID(outParam.customAppSignalID());
+	setEquipmentID(outParam.equipmentID());
+	setCaption(outParam.caption());
+
+	if (inParam.location().moduleSerialNoID().isEmpty() == false)
+	{
+		Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
+		Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+		if (signalState.valid() == true)
+		{
+			inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+		}
+	}
+
+	setLocation(inParam.location());
+
+	// nominal
+	//
+
+	double engineering = (ioParam.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
+	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
+	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+
+	setPercent(ioParam.percent());
+
+	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
+	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
+
+	// measure
+	//
+
+	setSignalValid(theSignalBase.signalState(outParam.hash()).valid());
+
+	double averageElVal = 0;
+	double averagePhVal = 0;
+
+	int measureCount = theOptions.linearity().measureCountInPoint();
+
+	setMeasureCount(measureCount);
+
+	for(int index = 0; index < measureCount; index++)
+	{
+		double enVal = theSignalBase.signalState(outParam.hash()).value();
+		double enCalcVal = conversionCalcVal(enVal, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
+		double elVal = conversion(enCalcVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+
+		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
+		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
+
+		averageElVal += elVal;
+		averagePhVal += enVal;
+
+		QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount));
+	}
+
+	averageElVal /= measureCount;
+	averagePhVal /= measureCount;
+
+	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, averagePhVal);
+
+	// limits
+	//
+	outParam.setElectricLowLimit(inParam.electricLowLimit());
+	outParam.setElectricHighLimit(inParam.electricHighLimit());
+	outParam.setElectricUnitID(inParam.electricUnitID());
+	outParam.setElectricPrecision(inParam.electricPrecision());
+
+	setLimits(outParam);
+
+	// calc errors
+	//
+	calcError();
+
+	// calc additional parameters
+	//
+	calcAdditionalParam(MEASURE_LIMIT_TYPE_ELECTRIC);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1171,7 +1304,20 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam)
 		return;
 	}
 
-	fill_measure_input(ioParam);
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	switch (signalConnectionType)
+	{
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	fill_measure_internal(ioParam);	break;
+		default:									assert(0);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1317,6 +1463,128 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	// limits
 	//
 	setLimits(inParam);
+
+	// calc errors
+	//
+	calcError();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
+{
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (outParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	int comparatorIndex = ioParam.comparatorIndex();
+	if (comparatorIndex < 0 || comparatorIndex >= outParam.comparatorCount())
+	{
+		assert(false);
+		return;
+	}
+
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = outParam.comparator(comparatorIndex);
+	if (comparatorEx == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (comparatorEx->signalsIsValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	//
+	//
+
+	setMeasureType(MEASURE_TYPE_COMPARATOR);
+	setSignalHash(outParam.hash());
+
+	// features
+	//
+
+	setAppSignalID(outParam.appSignalID());
+	setCustomAppSignalID(outParam.customAppSignalID());
+	setEquipmentID(outParam.equipmentID());
+	setCaption(outParam.caption());
+
+	if (inParam.location().moduleSerialNoID().isEmpty() == false)
+	{
+		Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
+		Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+		if (signalState.valid() == true)
+		{
+			inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+		}
+	}
+
+	setLocation(inParam.location());
+
+	// nominal
+	//
+
+	setCmpType(comparatorEx->cmpType());
+
+	double engineering = comparatorEx->compareOnlineValue();
+	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
+	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, inParam);
+
+	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
+	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
+
+	// measure
+	//
+
+	setSignalValid(theSignalBase.signalState(outParam.hash()).valid());
+	setSignalValid(true);
+
+	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
+	engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
+	engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+
+	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
+
+	// limits
+	//
+	outParam.setElectricLowLimit(inParam.electricLowLimit());
+	outParam.setElectricHighLimit(inParam.electricHighLimit());
+	outParam.setElectricUnitID(inParam.electricUnitID());
+	outParam.setElectricPrecision(inParam.electricPrecision());
+
+	setLimits(outParam);
 
 	// calc errors
 	//

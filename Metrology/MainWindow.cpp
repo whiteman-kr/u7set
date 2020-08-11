@@ -998,7 +998,9 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 	switch (theOptions.toolBar().signalConnectionType())
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
-		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 			if (theCalibratorBase.connectedCalibratorsCount() == 0)
 			{
@@ -1013,7 +1015,7 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 			if (tuningSocketIsConnected() == false)
 			{
@@ -1675,7 +1677,7 @@ void MainWindow::tuningSocketDisconnected()
 {
 	if (m_measureThread.isRunning() == true)
 	{
-		if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_FROM_TUNING)
+		if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 		{
 			m_measureThread.stop();
 		}

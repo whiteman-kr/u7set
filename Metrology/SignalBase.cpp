@@ -458,6 +458,8 @@ QString IoSignalParam::electricRangeStr() const
 		switch(m_signalConnectionType)
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
+			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 				{
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
@@ -468,7 +470,7 @@ QString IoSignalParam::electricRangeStr() const
 
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 				{
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
@@ -492,7 +494,7 @@ QString IoSignalParam::electricRangeStr() const
 
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 				{
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (param.isValid() == true)
@@ -522,6 +524,8 @@ QString IoSignalParam::electricSensorStr() const
 		switch(m_signalConnectionType)
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
+			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 				{
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
@@ -532,7 +536,7 @@ QString IoSignalParam::electricSensorStr() const
 
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 				{
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
@@ -556,7 +560,7 @@ QString IoSignalParam::electricSensorStr() const
 
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 				{
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (param.isValid() == true)
@@ -638,7 +642,9 @@ QString IoSignalParam::engineeringRangeStr() const
 				}
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 				{
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
@@ -661,7 +667,7 @@ QString IoSignalParam::engineeringRangeStr() const
 				}
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 				{
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
@@ -1082,8 +1088,11 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 			}
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 			{
 				// find index of signal connection in the base by input signal
 				//
@@ -1775,7 +1784,9 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 			switch (signalConnectionType)
 			{
 				case SIGNAL_CONNECTION_TYPE_UNUSED:
-				case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+				case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 					if (param.isInput() == false)
 					{
@@ -1789,7 +1800,7 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+				case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 					if (param.isInternal() == false)
 					{
@@ -2058,7 +2069,9 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+				case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 					if (param.isInput() == false)
 					{
@@ -2082,7 +2095,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+				case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 					if (param.isInternal() == false)
 					{
@@ -2383,7 +2396,6 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 					m_requestStateList.append(comparatorEx->outputSignal()->param().hash());
 				}
-
 			}
 
 		m_stateMutex.unlock();
