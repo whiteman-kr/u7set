@@ -84,6 +84,9 @@ public:
 	bool excludeFromBuild() const { return m_excludeFromBuild; }
 	void setExcludeFromBuild(bool excludeFromBuild) { m_excludeFromBuild = excludeFromBuild; }
 
+	bool isAutoSignal() const { return m_isAutoSignal; }
+	void setAutoSignal(bool autoSignal) { m_isAutoSignal = autoSignal; }
+
 	// Signal type
 
 	E::SignalType signalType() const { return m_signalType; }
@@ -422,6 +425,8 @@ private:
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 	E::Channel m_channel = E::Channel::A;
 	bool m_excludeFromBuild = false;
+
+	bool m_isAutoSignal = false;
 
 	// Signal type
 	//

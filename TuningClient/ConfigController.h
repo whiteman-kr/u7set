@@ -44,7 +44,6 @@ signals:
 
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
-	void globalScriptArrived(QByteArray data);
 
 	void configurationArrived();
 
@@ -78,9 +77,6 @@ private:
 
 	HostAddressPort m_address1;
 	HostAddressPort m_address2;
-
-	QByteArray m_globalScriptData;
-
 
 	mutable QMutex m_mutex;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;

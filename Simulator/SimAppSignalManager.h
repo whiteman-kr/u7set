@@ -1,17 +1,10 @@
-#ifndef SIMAPPSIGNALMANAGER_H
-#define SIMAPPSIGNALMANAGER_H
+#pragma once
 
-#include <memory>
-#include <map>
-#include <unordered_map>
-#include <optional>
-#include <QHash>
-#include <QReadWriteLock>
 #include "../lib/Signal.h"
 #include "../lib/AppSignalManager.h"
+#include "../TrendView/TrendSignal.h"
 #include "SimRam.h"
 #include "SimOutput.h"
-#include "../TrendView/TrendSignal.h"
 
 
 namespace Sim
@@ -146,6 +139,78 @@ namespace Sim
 	};
 
 
+	/*! \class ScriptAppSignalManager
+		\ingroup controllers
+		\brief This class is used to get signal parameters and states in simulation
+
+		This class is used to get signal parameters and states. It is accessed by global <b>signals</b> object.
+
+		\warning
+		It is highly recommended to check function return values, because errors can occur.
+
+		\n
+		<b>Example:</b>
+
+		\code
+		// Get static parameters of the signal "#SIGNALID_001"
+		//
+		var param = signals.signalParam("#SIGNALID_001");
+
+		// Get state of the signal "#SIGNALID_001"
+		//
+		var state = signals.signalState("#SIGNALID_001");
+
+		// Check for functions result
+		//
+		if  (param === undefined)
+		{
+			// Signal static parameters request failed
+			//
+			...
+			return;
+		}
+		if  (state === undefined)
+		{
+			// Signal state request failed
+			//
+			...
+			return;
+		}
+
+		// Further processing
+		//
+
+		if (state.Valid === true)
+		{
+			var text = param.Caption;
+			...
+		}
+		\endcode
+	*/
+	class ScriptAppSignalManager : public QObject
+	{
+		Q_OBJECT
+
+	public:
+		explicit ScriptAppSignalManager(const IAppSignalManager* appSignalManager, QObject* parent = nullptr);
+
+		// Script Interface
+		//
+	public slots:
+		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
+		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
+		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
+
+		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
+		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
+		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
+
+		// Data
+		//
+	private:
+		const IAppSignalManager* m_appSignalManager = nullptr;
+	};
+
 }
 
-#endif // SIMAPPSIGNALMANAGER_H
+

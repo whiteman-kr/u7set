@@ -366,7 +366,7 @@ namespace Builder
 
 		// build Module structures array
 		//
-		for(int place = 1; place <= m_lmDescription->memory().m_moduleCount; place++)
+		for(int place = 1; place <= static_cast<int>(m_lmDescription->memory().m_moduleCount); place++)
 		{
 			Module m;
 
@@ -4709,11 +4709,11 @@ namespace Builder
 			switch(ualSignal->analogSignalFormat())
 			{
 			case E::AnalogAppSignalFormat::SignedInt32:
-				m_acquiredAnalogConstIntSignals.insertMulti(ualSignal->constAnalogIntValue(), ualSignal);
+				m_acquiredAnalogConstIntSignals.insert(ualSignal->constAnalogIntValue(), ualSignal);
 				continue;
 
 			case E::AnalogAppSignalFormat::Float32:
-				m_acquiredAnalogConstFloatSignals.insertMulti(ualSignal->constAnalogFloatValue(), ualSignal);
+				m_acquiredAnalogConstFloatSignals.insert(ualSignal->constAnalogFloatValue(), ualSignal);
 				continue;
 
 			default:
@@ -10416,7 +10416,7 @@ namespace Builder
 
 		if (sortedIntConsts.isEmpty() == false)
 		{
-			qSort(sortedIntConsts);
+			std::sort(sortedIntConsts.begin(), sortedIntConsts.end());
 
 			for(int intConst : sortedIntConsts)
 			{
@@ -10463,7 +10463,7 @@ namespace Builder
 
 		if (sortedFloatConsts.isEmpty() == false)
 		{
-			qSort(sortedFloatConsts);
+			std::sort(sortedFloatConsts.begin(), sortedFloatConsts.end());
 
 			for(float floatConst : sortedFloatConsts)
 			{
@@ -11132,7 +11132,7 @@ namespace Builder
 
 		bool result = true;
 
-		QHash<int, Signal*> writeAddressesMap;
+		QMultiHash<int, Signal*> writeAddressesMap;
 
 		for(Signal* s : m_ioSignals)
 		{
@@ -11152,7 +11152,7 @@ namespace Builder
 
 			if (ualSignal != nullptr)
 			{
-				writeAddressesMap.insertMulti(s->ioBufAddr().offset(), s);
+				writeAddressesMap.insert(s->ioBufAddr().offset(), s);
 			}
 		}
 
@@ -11165,7 +11165,7 @@ namespace Builder
 
 		QVector<int> sortedWriteAddress = QVector<int>::fromList(writeAddreses);
 
-		qSort(sortedWriteAddress);
+		std::sort(sortedWriteAddress.begin(), sortedWriteAddress.end());
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
@@ -11886,7 +11886,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(int place = 1; place <= m_lmDescription->memory().m_moduleCount; place++)
+		for(int place = 1; place <= static_cast<int>(m_lmDescription->memory().m_moduleCount); place++)
 		{
 			const Hardware::DeviceModule* module = DeviceHelper::getModuleOnPlace(m_lm, place);
 
@@ -12242,7 +12242,7 @@ namespace Builder
 
 		int count = 0;
 
-		QHash<int, Hardware::TxRxSignalShared> txDiscretes;
+		QMultiHash<int, Hardware::TxRxSignalShared> txDiscretes;
 
 		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
 		{
@@ -12253,7 +12253,7 @@ namespace Builder
 				continue;
 			}
 
-			txDiscretes.insertMulti(txSignal->addrInBuf().offset(), txSignal);
+			txDiscretes.insert(txSignal->addrInBuf().offset(), txSignal);
 
 			count++;
 		}
@@ -12265,7 +12265,7 @@ namespace Builder
 
 		QVector<int> offsets(QVector<int>::fromList(txDiscretes.uniqueKeys()));
 
-		qSort(offsets);
+		std::sort(offsets.begin(), offsets.end());
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
@@ -12773,7 +12773,7 @@ namespace Builder
 
 		quint64 uniqueID = m_tuningData->uniqueID();
 
-		file.append(s.sprintf("Unique data ID: %llu (0x%016llX)", uniqueID, uniqueID));
+		file.append(QString("Unique data ID: %1 (0x%2)").arg(uniqueID).arg(uniqueID, 16, 16, Latin1Char::ZERO));
 
 		const QVector<Signal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
@@ -12792,18 +12792,15 @@ namespace Builder
 					continue;
 				}
 
-				QString str;
-
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%f\t%f\t%f",
-								signal->tuningAbsAddr().offset(),
-								signal->tuningAbsAddr().bit(),
-								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->tuningAbsAddr().bit(),
-								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().toFloat(),
-								signal->tuningLowBound().floatValue(),
-								signal->tuningHighBound().floatValue());
-				file.append(str);
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
+							arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+							arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+							arg(signal->tuningDefaultValue().toFloat()).
+							arg(signal->tuningLowBound().floatValue()).
+							arg(signal->tuningHighBound().floatValue()));
 			}
 		}
 
@@ -12824,18 +12821,15 @@ namespace Builder
 					continue;
 				}
 
-				QString str;
-
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%d\t\t%d\t\t%d",
-								signal->tuningAbsAddr().offset(),
-								signal->tuningAbsAddr().bit(),
-								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->tuningAbsAddr().bit(),
-								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().int32Value(),
-								signal->tuningLowBound().int32Value(),
-								signal->tuningHighBound().int32Value());
-				file.append(str);
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t\t%8").
+								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+								arg(signal->tuningDefaultValue().int32Value()).
+								arg(signal->tuningLowBound().int32Value()).
+								arg(signal->tuningHighBound().int32Value()));
 			}
 		}
 
@@ -12878,16 +12872,15 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%05d:%02d\t%-48s\t%d\t\t%d\t\t%d",
-								signal->tuningAbsAddr().offset(),
-								signal->tuningAbsAddr().bit(),
-								signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(),
-								signal->tuningAbsAddr().bit(),
-								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().discreteValue(),
-								0,
-								1);
-				file.append(str);
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
+								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+								arg(signal->tuningDefaultValue().discreteValue()).
+								arg(0).
+								arg(1));
 			}
 		}
 
@@ -13121,7 +13114,8 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(lmEquipmentID()));
 
-		str.sprintf("%.2f", percentOfUsedCodeMemory);
+		str.setNum(percentOfUsedCodeMemory, 'g', 2);
+
 		LOG_MESSAGE(m_log, QString(tr("Code memory - %1%")).arg(str));
 
 		if (percentOfUsedCodeMemory > 95)
@@ -13145,7 +13139,8 @@ namespace Builder
 
 		double percentOfUsedBitMemory = m_memoryMap.bitAddressedMemoryUsed();
 
-		str.sprintf("%.2f", percentOfUsedBitMemory);
+		str.setNum(percentOfUsedBitMemory, 'g', 2);
+
 		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory - %1%")).arg(str));
 
 		if (percentOfUsedBitMemory > 95)
@@ -13169,7 +13164,8 @@ namespace Builder
 
 		double percentOfUsedWordMemory = m_memoryMap.wordAddressedMemoryUsed();
 
-		str.sprintf("%.2f", percentOfUsedWordMemory);
+		str.setNum(percentOfUsedWordMemory, 'g', 2);
+
 		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory - %1%")).arg(str));
 
 		if (percentOfUsedWordMemory > 95)
@@ -13205,8 +13201,8 @@ namespace Builder
 			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
 
-		str_percent.sprintf("%.2f", static_cast<float>(idrPhaseTimeUsed));
-		str.sprintf("%.2f", static_cast<float>(idrPhaseTime * 1000000));
+		str_percent.setNum(static_cast<float>(idrPhaseTimeUsed), 'g', 2);
+		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'g', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 					arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
@@ -13240,8 +13236,8 @@ namespace Builder
 			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
 
-		str_percent.sprintf("%.2f", static_cast<float>(alpPhaseTimeUsed));
-		str.sprintf("%.2f", static_cast<float>(alpPhaseTime * 1000000));
+		str_percent.setNum(static_cast<float>(alpPhaseTimeUsed), 'g', 2);
+		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'g', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 					arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));

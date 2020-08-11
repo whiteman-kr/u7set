@@ -26,6 +26,7 @@ message qvariant
 	optional uint32 uintValue = 3 [default = 0];
 	optional double doubleValue = 4 [default = 0];
 	optional bool boolValue = 5 [default = false];
+	optional float floatValue = 6 [default = 0];
 }
 
 //
@@ -1464,4 +1465,22 @@ message MetrologySignalSet
 }
 
 
+// Simulator
+//
+message SimOverrideSignal
+{
+    optional bool enabled = 2;
+	optional int32 index = 3;
+
+    optional string appSignalId = 10;
+	optional int32 overrideMethod = 30;
+
+    optional qvariant overrideValue = 40;
+	optional string overrideScript = 50;		// if method == OverrideSignalMethod::Script
+}
+
+message SimOverrideSignalWorkspace
+{
+    repeated SimOverrideSignal overrideSignals = 2;
+}
 

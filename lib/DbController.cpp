@@ -2454,7 +2454,7 @@ bool DbController::getSignalsIDsWithEquipmentID(const QString& equipmentID, QVec
 	return ok;
 }
 
-bool DbController::getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs, QWidget* parentWidget)
+bool DbController::getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
 	{

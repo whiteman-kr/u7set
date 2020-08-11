@@ -1085,11 +1085,6 @@ namespace Builder
 
 	UalSignal::~UalSignal()
 	{
-		if (m_optoSignalNativeCopy != nullptr)
-		{
-			delete m_optoSignalNativeCopy;
-		}
-
 		m_refSignals.clear();
 	}
 
@@ -1186,6 +1181,8 @@ namespace Builder
 
 		m_ualItem = ualItem;
 
+		m_isAutoSignal = true;
+
 		// analog or discrete auto UalSignal creation
 
 		Signal* autoSignal = *autoSignalPtr = new Signal;
@@ -1248,6 +1245,9 @@ namespace Builder
 			//
 			// in this case ualItem and outPinCaption should be initialized!
 			//
+
+			m_isAutoSignal = true;
+
 			TEST_PTR_RETURN_FALSE(ualItem);
 			Q_ASSERT(outPinCaption.isEmpty() == false);
 			TEST_PTR_RETURN_FALSE(autoSignalPtr);
@@ -1291,6 +1291,8 @@ namespace Builder
 			assert(false);
 			return false;
 		}
+
+		s->setAutoSignal(m_isAutoSignal);
 
 		for(Signal* pesentSignal : m_refSignals)
 		{
@@ -2218,6 +2220,7 @@ namespace Builder
 		}
 
 		ualSignal->setParentBusSignal(this);
+		ualSignal->setAutoSignal(m_isAutoSignal);
 
 		m_busChildSignals.insert(busSignalID, ualSignal);
 
@@ -2323,6 +2326,24 @@ namespace Builder
 		return m_expectedHeapReadsCount;
 	}
 
+	void UalSignal::setAutoSignal(bool autoSignal)
+	{
+		m_isAutoSignal = autoSignal;
+
+		for(UalSignal* busChildSignal : m_busChildSignals)
+		{
+			TEST_PTR_CONTINUE(busChildSignal);
+
+			busChildSignal->setAutoSignal(autoSignal);
+		}
+
+		for(Signal* refAppSignal : m_refSignals)
+		{
+			TEST_PTR_CONTINUE(refAppSignal);
+
+			refAppSignal->setAutoSignal(autoSignal);
+		}
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -3188,7 +3209,7 @@ namespace Builder
 		}
 
 		m_pinToSignalMap.insert(pinUuid, ualSignal);
-		m_signalToPinsMap.insertMulti(ualSignal, pinUuid);
+		m_signalToPinsMap.insert(ualSignal, pinUuid);
 	}
 
 	QString UalSignalsMap::getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin)

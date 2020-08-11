@@ -106,10 +106,9 @@ QStringList SimSignalInfo::schemasByAppSignalId(const QString& appSignalId)
 	return m_simuator->schemasByAppSignalId(appSignalId);
 }
 
-void SimSignalInfo::setSchema(QString schemaId, QStringList /*highlightIds*/)
+void SimSignalInfo::setSchema(QString schemaId, QStringList highlightIds)
 {
-	emit openSchema(schemaId);
-
+	emit openSchema(schemaId, highlightIds);
 	return;
 }
 

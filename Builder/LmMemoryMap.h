@@ -178,8 +178,8 @@ namespace Builder
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
-		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
-													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
+		bool appendAcquiredAnalogConstSignalsInRegBuf(const QMultiHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
+													  const QMultiHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
 
 		bool appendAcquiredInputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredOutputBusesInRegBuf(const QVector<UalSignal*>& ualSignals);

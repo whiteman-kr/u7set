@@ -565,7 +565,8 @@ namespace Sim
 
 					if (ahead > 0us)
 					{
-						QThread::usleep(ahead.count());
+						unsigned long usTimeToSleep = static_cast<unsigned long>(ahead.count());
+						QThread::usleep(usTimeToSleep);
 					}
 				}
 

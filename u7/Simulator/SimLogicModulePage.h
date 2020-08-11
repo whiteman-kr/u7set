@@ -38,7 +38,7 @@ protected slots:
 	void updateModuleStates(Sim::ControlStatus state);
 
 signals:
-	void openSchemaRequest(QString schemaId);
+	void openSchemaRequest(QString schemaId, QStringList highlightIds);
 	void openCodePageRequest(QString equipmentId);
 
 public:

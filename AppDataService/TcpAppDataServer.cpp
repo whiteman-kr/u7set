@@ -414,7 +414,7 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	ctr++;
 
-	if ((ctr % 1000) == 0)
+	if ((ctr % 100) == 0)
 	{
 		qDebug() << "Send states changes" << ctr;
 	}

@@ -20,9 +20,6 @@ void TcpArchiveClient::processReply(quint32 requestID, const char* replyData, qu
 		onSaveAppSignalsStatesReply(replyData, replyDataSize);
 		break;
 
-	case ARCHS_CONNECTION_ALIVE:
-		break;
-
 	default:
 		assert(false);
 	}
@@ -35,6 +32,8 @@ void TcpArchiveClient::onClientThreadStarted()
 
 	m_signalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
 
+	connect(m_signalStatesQueue.get(), &SimpleAppSignalStatesQueue::queueNotEmpty, this, &TcpArchiveClient::onSignalStatesQueueIsNotEmpty);
+
 	if (m_signalStatesProcessingThread != nullptr)
 	{
 		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, true, "TcpArchiveClient");
@@ -46,10 +45,8 @@ void TcpArchiveClient::onClientThreadStarted()
 
 	connect(&m_timer, &QTimer::timeout, this, &TcpArchiveClient::onTimer);
 
-	m_timer.setInterval(100);
+	m_timer.setInterval(2000);
 	m_timer.start();
-
-	setWatchdogTimerTimeout(10000);
 }
 
 void TcpArchiveClient::onClientThreadFinished()
@@ -76,7 +73,7 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 
 	const QThread* thread = QThread::currentThread();
 
-	if (sendNow == false && m_signalStatesQueue->size(thread) < 100)
+	if (sendNow == false && m_signalStatesQueue->size(thread) < 200)
 	{
 		return false;
 	}
@@ -117,11 +114,11 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 
 	request.set_clientequipmentid(equipmentID().toStdString());
 
+//	qDebug() << "ARCHS_SAVE_APP_SIGNALS_STATES = " << count;
+
 	sendRequest(ARCHS_SAVE_APP_SIGNALS_STATES, request);
 
-	m_connectionKeepAliveCounter = 0;
-
-//	qDebug() << "Send SaveSignalsToArchive count = " << count;
+	m_timer.start();
 
 	return true;
 }
@@ -151,37 +148,13 @@ void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint3
 
 void TcpArchiveClient::onTimer()
 {
-	bool requestHasBeenSent = sendSignalStatesToArchiveRequest(true);
-
-	if (requestHasBeenSent == true)
-	{
-		m_connectionKeepAliveCounter = 0;
-	}
-	else
-	{
-		m_connectionKeepAliveCounter++;
-
-		if (m_connectionKeepAliveCounter > 4 * 10)
-		{
-			if (isClearToSendRequest() == true)
-			{
-				sendRequest(ARCHS_CONNECTION_ALIVE);
-
-				qDebug() << "ARCHS_CONNECTION_ALIVE";
-
-				m_connectionKeepAliveCounter = 0;
-			}
-		}
-	}
+	sendSignalStatesToArchiveRequest(true);		// send any quantity of states every 2 seconds
 }
-
 
 void TcpArchiveClient::onSignalStatesQueueIsNotEmpty()
 {
 	sendSignalStatesToArchiveRequest(false);
 }
-
-
 
 TcpArchiveClientThread::TcpArchiveClientThread(TcpArchiveClient* tcpArchiveClient) :
 	SimpleThread(tcpArchiveClient),

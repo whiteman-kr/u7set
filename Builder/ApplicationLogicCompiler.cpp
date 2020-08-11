@@ -875,7 +875,7 @@ namespace Builder
 		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
 		list.append(str);
 
-		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
+		str = QString("-- Rx data ID:\t\t%1 (0x%2)").arg(dataID).arg(dataID, 8, 16, Latin1Char::ZERO);
 		list.append(str);
 
 		list.append("--\n");
@@ -1054,7 +1054,7 @@ namespace Builder
 		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
 		list.append(str);
 
-		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
+		str = QString("-- Rx data ID:\t\t%u (0x%08X)").arg(dataID).arg(dataID, 8, 16, Latin1Char::ZERO);
 		list.append(str);
 
 		list.append("--\n");
@@ -1319,7 +1319,7 @@ namespace Builder
 			subsys.insert(subsystem->subsystemId(), subsystem);
 		}
 
-		QHash<QString, QString> subsystemModules;
+		QMultiHash<QString, QString> subsystemModules;
 		QHash<QString, const Hardware::DeviceModule*> modules;
 
 		for(const Hardware::DeviceModule* module : lmModules())
@@ -1351,7 +1351,7 @@ namespace Builder
 				continue;
 			}
 
-			subsystemModules.insertMulti(lmSubsystem, module->equipmentIdTemplate());
+			subsystemModules.insert(lmSubsystem, module->equipmentIdTemplate());
 		}
 
 		QByteArray data;
@@ -1365,7 +1365,7 @@ namespace Builder
 		xml.writeStartElement("Subsystems");
 		xml.writeIntAttribute("Count", subsystemsCount);
 
-		QStringList subsystemIDs = subsys.uniqueKeys();
+		QStringList subsystemIDs = subsys.keys();
 
 		subsystemIDs.sort();
 

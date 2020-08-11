@@ -33,6 +33,8 @@
 	#endif
 #endif
 
+class SimCommandTest_LM5_LM6;
+
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
 //
@@ -83,6 +85,15 @@ namespace Sim
 
 			quint32 value = 0;
 		} flags;
+	};
+
+	enum class DeviceError
+	{
+		Ok,
+		NoCommandProcessor,
+		AfbComponentNotFound,
+		InitEepromError,
+		ParsingAppLogicError
 	};
 
 
@@ -142,18 +153,20 @@ namespace Sim
 	{
 		Q_OBJECT
 
+		friend SimCommandTest_LM5_LM6;
+
 	public:
 		DeviceEmulator();
 		virtual ~DeviceEmulator();
 
 	public:
 		bool clear();
-		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
-				  const LmDescription& lmDescription,
-				  const Eeprom& tuningEeprom,
-				  const Eeprom& confEeprom,
-				  const Eeprom& appLogicEeprom,
-				  const Connections& connections);
+		DeviceError init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
+						 const LmDescription& lmDescription,
+						 const Eeprom& tuningEeprom,
+						 const Eeprom& confEeprom,
+						 const Eeprom& appLogicEeprom,
+						 const Connections& connections);
 
 		bool powerOff();
 		bool reset();

@@ -51,10 +51,15 @@ namespace Sim
 
 			writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			if (bool ok = logicModule->load(lmInfo, lmDescription, firmware, connections);
-				ok == false)
+			bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections);
+			if (loadOk == false)
 			{
-				// There is no simulation for this file, or it's loading had errors
+				return false;
+			}
+
+			if (logicModule->appCommands().empty() == true)
+			{
+				// There is no simulation for this file
 				//
 				removeDevice(lmInfo.equipmentId);
 			}

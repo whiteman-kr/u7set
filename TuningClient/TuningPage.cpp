@@ -809,11 +809,11 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	// Filter controls
 	//
 	m_filterTypeCombo = new QComboBox();
-	m_filterTypeCombo->addItem(tr("All Text"), static_cast<int>(FilterType::All));
-	m_filterTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(FilterType::AppSignalID));
-	m_filterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(FilterType::CustomAppSignalID));
-	m_filterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(FilterType::EquipmentID));
-	m_filterTypeCombo->addItem(tr("Caption"), static_cast<int>(FilterType::Caption));
+	m_filterTypeCombo->addItem(tr("All Text"), static_cast<int>(FilterIDType::All));
+	m_filterTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(FilterIDType::AppSignalID));
+	m_filterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(FilterIDType::CustomAppSignalID));
+	m_filterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(FilterIDType::EquipmentID));
+	m_filterTypeCombo->addItem(tr("Caption"), static_cast<int>(FilterIDType::Caption));
 	m_bottomLayout->addWidget(m_filterTypeCombo);
 
 	connect(m_filterTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_FilterTypeIndexChanged(int)));
@@ -860,9 +860,10 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	m_bottomLayout->addWidget(l);
 
 	m_filterValueCombo = new QComboBox();
-	m_filterValueCombo->addItem(tr("Any Value"), static_cast<int>(FilterType::All));
-	m_filterValueCombo->addItem(tr("Discrete 0"), static_cast<int>(FilterType::Zero));
-	m_filterValueCombo->addItem(tr("Discrete 1"), static_cast<int>(FilterType::One));
+	m_filterValueCombo->addItem(tr("Any Value"), static_cast<int>(FilterValueType::All));
+	m_filterValueCombo->addItem(tr("Discrete 0"), static_cast<int>(FilterValueType::Zero));
+	m_filterValueCombo->addItem(tr("Discrete 1"), static_cast<int>(FilterValueType::One));
+	m_filterValueCombo->addItem(tr("Not Default"), static_cast<int>(FilterValueType::DefaultNotSet));
 	m_bottomLayout->addWidget(m_filterValueCombo);
 
 	connect(m_filterValueCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_FilterValueIndexChanged(int)));
@@ -1064,18 +1065,18 @@ void TuningPage::fillObjectsList()
 		m_filterTextCombo->setCurrentText(mask);
 	}
 
-	FilterType filterType = FilterType::All;
+	FilterIDType filterType = FilterIDType::All;
 	QVariant data = m_filterTypeCombo->currentData();
 	if (data.isValid() == true)
 	{
-		filterType = static_cast<FilterType>(data.toInt());
+		filterType = static_cast<FilterIDType>(data.toInt());
 	}
 
-	FilterType filterValue = FilterType::All;
+	FilterValueType filterValue = FilterValueType::All;
 	data = m_filterValueCombo->currentData();
 	if (data.isValid() == true)
 	{
-		filterValue = static_cast<FilterType>(data.toInt());
+		filterValue = static_cast<FilterValueType>(data.toInt());
 	}
 
 	bool ok = false;
@@ -1150,14 +1151,9 @@ void TuningPage::fillObjectsList()
 		// Value filter
 		//
 
-		if (filterValue != FilterType::All)
+		if (filterValue != FilterValueType::All)
 		{
-			if (asp.isAnalog() == true)
-			{
-				continue;
-			}
-
-			if (asp.isDiscrete() == true)
+			if (filterValue == FilterValueType::DefaultNotSet)
 			{
 				ok = false;
 
@@ -1168,14 +1164,42 @@ void TuningPage::fillObjectsList()
 					continue;
 				}
 
-				if (filterValue == FilterType::Zero && state.value().discreteValue() != 0)
+				TuningValue tvDefault(m_model->defaultValue(asp));
+				tvDefault.setType(asp.toTuningType());
+
+				if (tvDefault == state.value())
+				{
+					// Value is set to default
+					continue;
+				}
+			}
+			else
+			{
+				if (asp.isAnalog() == true)
 				{
 					continue;
 				}
 
-				if (filterValue == FilterType::One && state.value().discreteValue() != 1)
+				if (asp.isDiscrete() == true)
 				{
-					continue;
+					ok = false;
+
+					const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+					if (ok == false || state.valid() == false)
+					{
+						continue;
+					}
+
+					if (filterValue == FilterValueType::Zero && state.value().discreteValue() != 0)
+					{
+						continue;
+					}
+
+					if (filterValue == FilterValueType::One && state.value().discreteValue() != 1)
+					{
+						continue;
+					}
 				}
 			}
 		}
@@ -1190,7 +1214,7 @@ void TuningPage::fillObjectsList()
 
 			switch (filterType)
 			{
-			case FilterType::All:
+			case FilterIDType::All:
 				if (asp.appSignalId().contains(mask, Qt::CaseInsensitive) == true
 						|| asp.customSignalId().contains(mask, Qt::CaseInsensitive) == true
 						|| asp.lmEquipmentId().contains(mask, Qt::CaseInsensitive) == true
@@ -1199,25 +1223,25 @@ void TuningPage::fillObjectsList()
 					filterMatch = true;
 				}
 				break;
-			case FilterType::AppSignalID:
+			case FilterIDType::AppSignalID:
 				if (asp.appSignalId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
-			case FilterType::CustomAppSignalID:
+			case FilterIDType::CustomAppSignalID:
 				if (asp.customSignalId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
-			case FilterType::EquipmentID:
+			case FilterIDType::EquipmentID:
 				if (asp.lmEquipmentId().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
-			case FilterType::Caption:
+			case FilterIDType::Caption:
 				if (asp.caption().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
@@ -1606,14 +1630,14 @@ void TuningPage::slot_FilterTypeIndexChanged(int index)
 
 void TuningPage::slot_FilterValueIndexChanged(int index)
 {
-	FilterType filterValue = FilterType::All;
+	FilterValueType filterValue = FilterValueType::All;
 	QVariant data = m_filterValueCombo->currentData();
 	if (data.isValid() == true)
 	{
-		filterValue = static_cast<FilterType>(data.toInt());
+		filterValue = static_cast<FilterValueType>(data.toInt());
 	}
 
-	if (filterValue != FilterType::All)
+	if (filterValue != FilterValueType::All)
 	{
 		m_filterValueCombo->setStyleSheet("QComboBox { color: red }");
 	}

@@ -12,7 +12,6 @@ ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configCont
 	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";
 
 	setObjectName("ArchiveTrendTcpClient");
-	enableWatchdogTimer(false);
 
 	qRegisterMetaType<TrendLib::TrendStateItem>("TrendLib::TrendStateItem");
 	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("shared_ptr<TrendLib::OneHourData>>");

@@ -148,7 +148,7 @@ void SimWidget::signalInfo(QString appSignalId)
 	return;
 }
 
-void SimWidget::openSchemaTabPage(QString schemaId)
+void SimWidget::openSchemaTabPage(QString schemaId, QStringList highlightIds)
 {
 	// Look for already opened schema, and activate it
 	//
@@ -160,6 +160,7 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 			if (sp != nullptr && sp->schemaId() == schemaId)
 			{
 				m_tabWidget->setCurrentIndex(i);
+				sp->setHighlightIds(highlightIds);
 				return;
 			}
 		}
@@ -185,6 +186,7 @@ void SimWidget::openSchemaTabPage(QString schemaId)
 	m_tabWidget->setCurrentIndex(tabIndex);
 
 	page->simSchemaWidget()->setZoom(0, false);
+	page->setHighlightIds(highlightIds);
 
 	return;
 }

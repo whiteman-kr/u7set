@@ -119,12 +119,12 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
-							  const LmDescription& lmDescription,
-							  const Eeprom& tuningEeprom,
-							  const Eeprom& confEeprom,
-							  const Eeprom& appLogicEeprom,
-							  const Connections& connections)
+	DeviceError DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
+									 const LmDescription& lmDescription,
+									 const Eeprom& tuningEeprom,
+									 const Eeprom& confEeprom,
+									 const Eeprom& appLogicEeprom,
+									 const Connections& connections)
 	{
 		clear();
 
@@ -150,15 +150,15 @@ namespace Sim
 			writeWaning(QString("There is no simulation for %1, LmDescription.name = %2")
 							.arg(logicModuleInfo.equipmentId)
 							.arg(lmDescription.name()));
-			return false;
+			return DeviceError::NoCommandProcessor;
 		}
 
-		//--
+		// --
 		//
 		if (bool ok = m_afbComponents.init(m_lmDescription);
 			ok == false)
 		{
-			return false;
+			return DeviceError::AfbComponentNotFound;
 		}
 
 		// --
@@ -166,7 +166,7 @@ namespace Sim
 		if (bool ok = initEeprom();
 			ok == false)
 		{
-			return false;
+			return DeviceError::InitEepromError;
 		}
 
 		// Init RAM
@@ -183,10 +183,10 @@ namespace Sim
 		if (bool ok = parseAppLogicCode();
 			ok == false)
 		{
-			return false;
+			return DeviceError::ParsingAppLogicError;
 		}
 
-		return true;
+		return DeviceError::Ok;
 	}
 
 	bool DeviceEmulator::powerOff()
@@ -211,8 +211,8 @@ namespace Sim
 		{
 			if (m_currentMode == DeviceMode::Start)
 			{
-				if (bool ok = processStartMode();
-					ok == false)
+				bool processStartOk = processStartMode();
+				if (processStartOk == false)
 				{
 					return false;
 				}
@@ -442,12 +442,14 @@ namespace Sim
 		if (ramAreaSrc == nullptr)
 		{
 			SIM_FAULT(QString("Command movmem error, memory area src handle %1 not found").arg(memoryAreaHandleSrc));
+			return false;
 		}
 
 		RamArea* ramAreaDst = m_ram.memoryArea(memoryAreaHandleDst);
 		if (ramAreaDst == nullptr)
 		{
 			SIM_FAULT(QString("Command movmem error, memory area dst handle %1 not found").arg(memoryAreaHandleDst));
+			return false;
 		}
 
 		QByteArray buffer;
@@ -588,6 +590,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint16 data = 0;
@@ -680,6 +683,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint16 data = 0;
@@ -770,6 +774,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Read RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		quint32 data = 0;
@@ -1086,6 +1091,8 @@ namespace Sim
 			m_cacheMutex.unlock();
 		}
 
+		m_commandProcessor->beforeAppLogicParse();
+
 		bool ok = true;
 		int programCounter = 0;
 		const std::vector<LmCommand> commands = m_lmDescription.commandsAsVector();
@@ -1149,7 +1156,7 @@ namespace Sim
 
 		// Let command processor to make its' cache optimizations
 		//
-		m_commandProcessor->cacheCommands(&m_commands);
+		m_commandProcessor->afterAppLogicParse(&m_commands);
 
 		// This block is related to Mutex, it's not about pre do-while loop
 		//
@@ -1191,9 +1198,7 @@ namespace Sim
 
 		// --
 		//
-		m_commands.emplace_back(command);
-		DeviceCommand& deviceCommand = m_commands.back();
-
+		DeviceCommand& deviceCommand = m_commands.emplace_back(command);
 		deviceCommand.m_offset = programCounter;
 
 		try
@@ -1210,7 +1215,7 @@ namespace Sim
 						.arg(e.message())
 						.arg(e.where())
 						.arg(programCounter)
-						.arg(programCounter, 0, 16)
+						.arg(programCounter, 0, 16, QChar('0'))
 						.arg(deviceCommand.m_command.parseFunc));
 			return false;
 		}

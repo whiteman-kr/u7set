@@ -709,8 +709,8 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredAnalogBusChildSignals;			// acquired analog opto signals (unlike to opto signals may require conversion from inbus format)
 		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tunable signals, no matter used in UAL or not
 
-		QHash<int, UalSignal*> m_acquiredAnalogConstIntSignals;
-		QHash<float, UalSignal*> m_acquiredAnalogConstFloatSignals;
+		QMultiHash<int, UalSignal*> m_acquiredAnalogConstIntSignals;
+		QMultiHash<float, UalSignal*> m_acquiredAnalogConstFloatSignals;
 
 		QVector<UalSignal*> m_nonAcquiredAnalogInputSignals;			// non acquired analog input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogStrictOutputSignals;		// non acquired analog strict output signals, used in UAL

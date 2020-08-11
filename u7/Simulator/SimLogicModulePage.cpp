@@ -360,7 +360,7 @@ void SimLogicModulePage::openSelectedSchema()
 		return;
 	}
 
-	emit openSchemaRequest(schemaId);
+	emit openSchemaRequest(schemaId, {});
 
 	return;
 }

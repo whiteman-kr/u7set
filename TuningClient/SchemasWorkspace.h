@@ -24,6 +24,15 @@ private slots:
 	void slot_itemSelectionChanged();
 	void slot_schemaChanged(VFrame30::ClientSchemaWidget* widget, VFrame30::Schema* schema);
 
+public:
+	void zoomIn();
+	void zoomOut();
+	void zoom100();
+	void zoomToFit();
+
+private:
+	TuningSchemaWidget* activeSchemaWidget();
+
 private:
 	TuningClientTuningController m_tuningController;
 	TuningSignalManager* m_tuningSignalManager = nullptr;
@@ -34,7 +43,8 @@ private:
 
 	QSplitter* m_hSplitter = nullptr;				// This is used only with LIST mode!
 	QTreeWidget* m_schemasList = nullptr;			// This is used only with LIST mode!
-	TuningSchemaWidget* m_schemaWidget = nullptr;	// This is used only with LIST mode!
+
+	TuningSchemaWidget* m_schemaWidget = nullptr;	// This is used with LIST and NO_LIST_AND_TAB mode!
 };
 
 #endif // SCHEMASWORKSPACE_H

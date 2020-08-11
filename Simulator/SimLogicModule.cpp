@@ -45,12 +45,22 @@ namespace Sim
 
 		// Init DeviceEmulator
 		//
-		ok &= m_device.init(m_logicModuleInfo,
-							m_lmDescription,
-		                    m_tuningEeprom,
-		                    m_confEeprom,
-							m_appLogicEeprom,
-							connections);
+		DeviceError de = m_device.init(m_logicModuleInfo,
+									   m_lmDescription,
+									   m_tuningEeprom,
+									   m_confEeprom,
+									   m_appLogicEeprom,
+									   connections);
+
+		if (de == DeviceError::Ok || de == DeviceError::NoCommandProcessor)
+		{
+			// DeviceError::NoCommandProcessor is ok, as there are a lot of LM's which are not simulated
+			//
+		}
+		else
+		{
+			ok = false;
+		}
 
 		setAppCommands(ok);
 

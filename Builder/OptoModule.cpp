@@ -2,6 +2,7 @@
 #include <QQmlEngine>
 #include "../lib/LmDescription.h"
 #include "../lib/DeviceHelper.h"
+#include "../lib/ConstStrings.h"
 #include "../Builder/Context.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "UalItems.h"
@@ -1500,7 +1501,7 @@ namespace Hardware
 		                arg(format_02d(0)).
 		                arg(format_04d(0)).
 		                arg(format_02d(0)).
-		                arg((QString("%1").arg(txDataID(), 8, 16, QLatin1Char('0'))).toUpper()).
+						arg((QString("%1").arg(txDataID(), 8, 16, Latin1Char::ZERO)).toUpper()).
 		                arg(txDataID()) );
 
 		list.append("Tx raw signals:\n");
@@ -1636,7 +1637,7 @@ namespace Hardware
 		                arg(format_02d(0)).
 		                arg(format_04d(0)).
 		                arg(format_02d(0)).
-		                arg((QString("%1").arg(rxDataID(), 8, 16, QLatin1Char('0'))).toUpper()).
+						arg((QString("%1").arg(rxDataID(), 8, 16, Latin1Char::ZERO)).toUpper()).
 		                arg(rxDataID()) );
 
 		list.append("Rx raw signals:\n");
@@ -1977,12 +1978,12 @@ namespace Hardware
 
 	QString OptoPort::format_04d(int v) const
 	{
-		return QString("%1").arg(v, 4, 10, QLatin1Char('0'));
+		return QString("%1").arg(v, 4, 10, Latin1Char::ZERO);
 	}
 
 	QString OptoPort::format_02d(int v) const
 	{
-		return QString("%1").arg(v, 2, 10, QLatin1Char('0'));
+		return QString("%1").arg(v, 2, 10, Latin1Char::ZERO);
 	}
 
 	// --------------------------------------------------------------------------------------
