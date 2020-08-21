@@ -34,6 +34,9 @@
           <property name="editable">
            <bool>true</bool>
           </property>
+          <property name="duplicatesEnabled">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item row="1" column="0">
