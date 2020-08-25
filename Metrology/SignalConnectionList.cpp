@@ -362,7 +362,7 @@ void SignalConnectionItemDialog::createInterface()
 	int type = m_signalConnection.type() ;
 	if ((type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT) || type == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
-		type = SIGNAL_CONNECTION_TYPE_FROM_INPUT;
+		type = SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F;
 		m_signalConnection.setType(type);
 	}
 	m_pTypeList->setCurrentIndex(type - 1);

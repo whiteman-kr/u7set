@@ -33,50 +33,6 @@ public:
 	//
 	static const char* SETTINGS_SECTION;
 
-/*	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
-	static const char* PROP_APP_DATA_RECEIVING_IP;
-	static const char* PROP_APP_DATA_RECEIVING_PORT;
-
-	static const char* PROP_DIAG_DATA_RECEIVING_NETMASK;
-	static const char* PROP_DIAG_DATA_RECEIVING_IP;
-	static const char* PROP_DIAG_DATA_RECEIVING_PORT;
-
-	static const char* PROP_TUNING_DATA_NETMASK;
-	static const char* PROP_TUNING_DATA_IP;
-	static const char* PROP_TUNING_DATA_PORT;
-
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-
-	static const char* PROP_RT_TRENDS_REQUEST_IP;
-	static const char* PROP_RT_TRENDS_REQUEST_PORT;
-
-	static const char* PROP_APP_DATA_SERVICE_ID;
-	static const char* PROP_APP_DATA_SERVICE_IP;
-	static const char* PROP_APP_DATA_SERVICE_PORT;
-
-	static const char* PROP_DIAG_DATA_SERVICE_ID;
-	static const char* PROP_DIAG_DATA_SERVICE_IP;
-	static const char* PROP_DIAG_DATA_SERVICE_PORT;
-
-	static const char* PROP_ARCH_SERVICE_ID;
-	static const char* PROP_ARCH_SERVICE_IP;
-	static const char* PROP_ARCH_SERVICE_PORT;
-
-	static const char* PROP_TUNING_SERVICE_ID;
-	static const char* PROP_TUNING_SERVICE_IP;
-	static const char* PROP_TUNING_SERVICE_PORT;
-	static const char* PROP_TUNING_SOURCE_EQUIPMENT_ID;
-
-	static const char* PROP_CFG_SERVICE_ID1;
-	static const char* PROP_CFG_SERVICE_IP1;
-	static const char* PROP_CFG_SERVICE_PORT1;
-
-	static const char* PROP_CFG_SERVICE_ID2;
-	static const char* PROP_CFG_SERVICE_IP2;
-	static const char* PROP_CFG_SERVICE_PORT2;*/
-
 	static const char* ATTR_COUNT;
 	static const char* ATTR_EQUIIPMENT_ID;
 	static const char* ATTR_SOFTWARE_TYPE;
@@ -149,6 +105,29 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 };
 
+class DiagDataServiceSettings : public ServiceSettings
+{
+public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
+	HostAddressPort diagDataReceivingIP;
+	QHostAddress diagDataReceivingNetmask;
+
+	QString archServiceID;
+	HostAddressPort archServiceIP;
+
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
+
+	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
+	bool writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
+};
+
 class TuningServiceSettings : public ServiceSettings
 {
 private:
@@ -196,7 +175,7 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
-	HostAddressPort appDataRecevingIP;
+	HostAddressPort appDataReceivingIP;
 	QHostAddress appDataReceivingNetmask;
 
 	HostAddressPort diagDataReceivingIP;

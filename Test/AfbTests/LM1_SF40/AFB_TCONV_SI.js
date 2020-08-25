@@ -48,21 +48,41 @@ function cleanup(sim)
 
 
 
-function test_AFB_POLY(sim)
+function test_AFB_TCONV_SI(sim)
 {
 	
-	sim.overrideSignalValue("#TUN_DSCR1", 0);
+	sim.overrideSignalValue("#TUN_IN_SI1", 0);
 	sim.startForMs(5);
-	assert(sim.signalValue("#OUT_NOT") === 1);
+	assert(sim.signalValue("#OUT_TCONV_SI_FP1") === 0);
 	
-    sim.overrideSignalValue("#TUN_DSCR1", 1);
+    sim.overrideSignalValue("#TUN_IN_SI1", 1);
 	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_NOT") === 0);
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === 1);
     
-    sim.overrideSignalValue("#TUN_DSCR1", 0);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_NOT") === 1);
+    sim.overrideSignalValue("#TUN_IN_SI1", 10);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === 10);
     
+    sim.overrideSignalValue("#TUN_IN_SI1", 10000);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === 10000);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", 2541587);
+    sim.startForMs(5);
+    console.log(sim.signalValue("#OUT_TCONV_SI_FP1"));
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === 2541587);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", -1);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === -1);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", -100);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === -100);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", -19999);
+    sim.startForMs(5);
+    assert(sim.signalValue("#OUT_TCONV_SI_FP1") === -19999);
     return;
 }
 

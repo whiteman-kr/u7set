@@ -318,7 +318,7 @@ CalibratorManager* CalibratorBase::calibratorManager(int index) const
 
 	m_mutex.lock();
 
-		if (index >= 0 || index < m_calibratorManagerList.count())
+		if (index >= 0 && index < m_calibratorManagerList.count())
 		{
 			pCalibratorManager = m_calibratorManagerList[index];
 		}

@@ -23,15 +23,19 @@ const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
 const char* const			SignalConnectionType[] =
 {
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "No connections"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input -> Internal"),
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input -> Output"),
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Tuning -> Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input С -> F"),
 };
 
 const int					SIGNAL_CONNECTION_TYPE_COUNT = sizeof(SignalConnectionType)/sizeof(SignalConnectionType[0]);
 
-const int					SIGNAL_CONNECTION_TYPE_UNUSED		= 0,
-							SIGNAL_CONNECTION_TYPE_FROM_INPUT	= 1,
-							SIGNAL_CONNECTION_TYPE_FROM_TUNING	= 2;
+const int					SIGNAL_CONNECTION_TYPE_UNUSED			= 0,
+							SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL	= 1,
+							SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT		= 2,
+							SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT	= 3,
+							SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F		= 4;
 
 // ==============================================================================================
 

@@ -20,24 +20,27 @@
 
 const char* const			ComparatorListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (input)"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Signal type"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (Input/Internal)"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Value"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Hysteresis"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (output)"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (Discrete)"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Schema"),
 };
 
 const int					COMPARATOR_LIST_COLUMN_COUNT			= sizeof(ComparatorListColumn)/sizeof(ComparatorListColumn[0]);
 
-const int					COMPARATOR_LIST_COLUMN_INPUT			= 0,
-							COMPARATOR_LIST_COLUMN_VALUE			= 1,
-							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 2,
-							COMPARATOR_LIST_COLUMN_OUTPUT			= 3,
-							COMPARATOR_LIST_COLUMN_SCHEMA			= 4;
+const int					COMPARATOR_LIST_COLUMN_TYPE				= 0,
+							COMPARATOR_LIST_COLUMN_INPUT			= 1,
+							COMPARATOR_LIST_COLUMN_VALUE			= 2,
+							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 3,
+							COMPARATOR_LIST_COLUMN_OUTPUT			= 4,
+							COMPARATOR_LIST_COLUMN_SCHEMA			= 5;
 
 
 const int					ComparatorListColumnWidth[COMPARATOR_LIST_COLUMN_COUNT] =
 {
+							100,	// COMPARATOR_LIST_COLUMN_TYPE
 							250,	// COMPARATOR_LIST_COLUMN_INPUT
 							250,	// COMPARATOR_LIST_COLUMN_VALUE
 							250,	// COMPARATOR_LIST_COLUMN_HYSTERESIS
@@ -93,8 +96,6 @@ private:
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pComparatorMenu = nullptr;
 	QMenu*					m_pEditMenu = nullptr;
-	QMenu*					m_pViewMenu = nullptr;
-	QMenu*					m_pViewTypeIOMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 
 	QAction*				m_pExportAction = nullptr;
@@ -104,16 +105,12 @@ private:
 	QAction*				m_pSelectAllAction = nullptr;
 	QAction*				m_pSignalPropertyAction = nullptr;
 
-	QAction*				m_pTypeInputAction = nullptr;
-	QAction*				m_pTypeInternalAction = nullptr;
-
 	QTableView*				m_pView = nullptr;
 	ComparatorListTable		m_comparatorTable;
 
 	QAction*				m_pColumnAction[COMPARATOR_LIST_COLUMN_COUNT];
 	QMenu*					m_headerContextMenu = nullptr;
 
-	static E::SignalInOutType m_typeIO;
 	static int				m_currenIndex;
 
 	void					createInterface();
@@ -147,13 +144,6 @@ private slots:
 	void					copy();
 	void					selectAll() { m_pView->selectAll(); }
 	void					comparatorProperties();
-
-
-							// View
-							//
-	void					showTypeInput();
-	void					showTypeInternal();
-
 
 	void					onContextMenu(QPoint);
 

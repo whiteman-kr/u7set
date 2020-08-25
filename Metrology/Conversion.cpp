@@ -248,4 +248,88 @@ double conversionDegree(double val, int conversionType)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
+double conversionCalcVal(double val, int calcType, int connectionType, const IoSignalParam &ioParam)
+{
+	if (calcType < 0 || calcType >= CT_CALC_VAL_COUNT)
+	{
+		return val;
+	}
+
+	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		return val;
+	}
+
+	double retVal = val;
+
+	switch (calcType)
+	{
+		case CT_CALC_VAL_NORMAL:
+
+			switch (connectionType)
+			{
+				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+					{
+						const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+						if (inParam.isValid() == false)
+						{
+							break;
+						}
+
+						const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+						if (outParam.isValid() == false)
+						{
+							break;
+						}
+
+						retVal = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
+					}
+					break;
+
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+					{
+						retVal = conversionDegree(val, CT_DEGREE_C_TO_F);
+					}
+					break;
+			}
+
+			break;
+
+		case CT_CALC_VAL_INVERSION:
+
+			switch (connectionType)
+			{
+				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+					{
+						const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+						if (inParam.isValid() == false)
+						{
+							break;
+						}
+
+						const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+						if (outParam.isValid() == false)
+						{
+							break;
+						}
+
+						retVal = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
+					}
+					break;
+
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+					{
+						retVal = conversionDegree(val, CT_DEGREE_F_TO_C);
+					}
+					break;
+			}
+
+			break;
+	}
+
+	return retVal;
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------
+
 

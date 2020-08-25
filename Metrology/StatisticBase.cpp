@@ -162,7 +162,7 @@ Metrology::Signal* StatisticBase::signal(int index) const
 
 	m_signalMutex.lock();
 
-		if (index >= 0 || index < m_signalList.count())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			pSignal = m_signalList[index];
 		}

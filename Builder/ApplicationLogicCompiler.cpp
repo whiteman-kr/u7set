@@ -226,14 +226,21 @@ namespace Builder
 			{
 				LanControllerInfo lanControllerInfo;
 
-				LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
+				bool res = true;
+
+				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
 				                                 &lanControllerInfo, *equipmentSet(), log());
+				if (res == false)
+				{
+					result = false;
+					continue;
+				}
 
 				bool tuning = false;
 				bool appData = false;
 				bool diagData = false;
 
-				bool res = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
+				res = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
 
 				if (res == false)
 				{

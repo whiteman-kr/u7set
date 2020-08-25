@@ -276,7 +276,7 @@ bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
 
 bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 {
-	Q_UNUSED(fileVersion);
+	Q_UNUSED(fileVersion)
 
 	bool result = true;
 
@@ -328,7 +328,7 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
 bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion)
 {
-	Q_UNUSED(fileVersion);
+	Q_UNUSED(fileVersion)
 
 	bool result = true;
 

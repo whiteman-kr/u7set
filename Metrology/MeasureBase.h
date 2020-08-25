@@ -229,6 +229,7 @@ public:
 	void			virtual clear();
 
 	void			fill_measure_input(const IoSignalParam& ioParam);
+	void			fill_measure_internal(const IoSignalParam& ioParam);
 	void			fill_measure_output(const IoSignalParam& ioParam);
 
 	void			setLimits(const Metrology::SignalParam& param);
@@ -348,6 +349,7 @@ public:
 	void			virtual clear();
 
 	void			fill_measure_input(const IoSignalParam& ioParam);
+	void			fill_measure_internal(const IoSignalParam &ioParam);
 
 	void			setLimits(const Metrology::SignalParam& param);
 	void			calcError();

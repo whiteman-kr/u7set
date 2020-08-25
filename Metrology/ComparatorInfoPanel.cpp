@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QClipboard>
+#include <QKeyEvent>
 
 #include "Options.h"
 #include "ObjectProperties.h"
@@ -428,7 +429,19 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	{
 		IoSignalParam ioParam;
 
-		Metrology::Signal* pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);
+		Metrology::Signal* pSignal = nullptr;
+
+		switch (activeSignal.signalConnectionType())
+		{
+			case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);		break;
+			default:									pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(c);	break;
+		}
+
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
 		if (pSignal != nullptr && pSignal->param().isValid() == true)
 		{
 			if (maxComparatorCount < pSignal->param().comparatorCount())

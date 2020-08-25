@@ -130,6 +130,8 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		switch (theOptions.toolBar().signalConnectionType())
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
+			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 				if (pSignal->param().isOutput() == true)
 				{
@@ -138,8 +140,8 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 				break;
 
-			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 				if (pSignal->param().isInput() == true)
 				{
@@ -583,9 +585,11 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();		break;
-		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();		break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
 		default:									assert(0);																							break;
 	}
 
@@ -796,6 +800,8 @@ void StatisticPanel::selectSignalForMeasure()
 	switch (theOptions.toolBar().signalConnectionType())
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 			if (pMetrologySignal->param().isOutput() == true)
 			{
@@ -805,8 +811,8 @@ void StatisticPanel::selectSignalForMeasure()
 
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 			if (pMetrologySignal->param().isInput() == true)
 			{
