@@ -347,7 +347,7 @@ namespace VFrame30
 						ClientSchemaView* view = drawParam->clientSchemaView();
 						Q_ASSERT(view);
 
-						item->preDrawEvent(view->globalScript(), view->jsEngine());
+						item->preDrawEvent(view->jsEngine());
 					}
 
 					item->draw(drawParam, this, layer.get());	// Drawing item is here
@@ -889,7 +889,7 @@ namespace VFrame30
 	{
 		for (std::shared_ptr<VFrame30::SchemaLayer> layer : Layers)
 		{
-			for (const SchemaItemPtr& item : Layers)
+			for (const SchemaItemPtr& item : layer->Items)
 			{
 				if (dynamic_cast<SchemaItemType>(item) != nullptr)
 				{

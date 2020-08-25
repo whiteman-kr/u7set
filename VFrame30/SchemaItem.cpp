@@ -213,7 +213,7 @@ namespace VFrame30
 		qDebug() << "\tguid:" << guid();
 	}
 
-	void SchemaItem::clickEvent(QString globalScript, QJSEngine* engine,  QWidget* parentWidget)
+	void SchemaItem::clickEvent(QJSEngine* engine,  QWidget* parentWidget)
 	{
 		if (engine == nullptr ||
 			parentWidget == nullptr)
@@ -232,7 +232,7 @@ namespace VFrame30
 		//
 		if (m_jsClickScript.isUndefined() == true)
 		{
-			m_jsClickScript = evaluateScript(m_clickScript, globalScript, engine, parentWidget);
+			m_jsClickScript = evaluateScript(m_clickScript, engine, parentWidget);
 		}
 
 		if (m_jsClickScript.isError() == true ||
@@ -246,7 +246,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItem::preDrawEvent(QString globalScript, QJSEngine* engine)
+	bool SchemaItem::preDrawEvent(QJSEngine* engine)
 	{
 		if (engine == nullptr)
 		{
@@ -263,7 +263,7 @@ namespace VFrame30
 		//
 		if (m_jsPreDrawScript.isUndefined() == true)
 		{
-			m_jsPreDrawScript = evaluateScript(m_preDrawScript, globalScript, engine, nullptr);
+			m_jsPreDrawScript = evaluateScript(m_preDrawScript, engine, nullptr);
 		}
 
 		if (m_jsPreDrawScript.isError() == true ||
@@ -311,7 +311,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QJSValue SchemaItem::evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const
+	QJSValue SchemaItem::evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const
 	{
 		if (engine == nullptr)
 		{
@@ -320,7 +320,7 @@ namespace VFrame30
 			return QJSValue();
 		}
 
-		QJSValue result = engine->evaluate(globalScript + script);
+		QJSValue result = engine->evaluate(script);
 
 		if (result.isError() == true)
 		{
@@ -618,7 +618,10 @@ namespace VFrame30
 	//
 	bool SchemaItem::isIntersectRect(double x, double y, double width, double height) const
 	{
-		x = x; y = y; width = width; height = height;		// убираю unreferenced warning
+		Q_UNUSED(x);
+		Q_UNUSED(y);
+		Q_UNUSED(width);
+		Q_UNUSED(height);
 		assert(false);
 		return false;
 	};

@@ -21,12 +21,12 @@ var counter = 0;
     {
         delta = amplitude / ((time - 5) / 5);
     }
-	
-	counter --;
-	if (counter < 0)
-	{
-		counter = (time - 5) / 5;
-	}
+
+    counter --;
+    if (counter < 0)
+    {
+        counter = (time - 5) / 5;
+    }
 
     var result = base + delta * counter;
     return result;	// Return value for signal overriding

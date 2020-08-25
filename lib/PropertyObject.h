@@ -1060,11 +1060,7 @@ private:
 
 			bool less = false;
 
-#ifdef _MSC_VER
-    #pragma warning(push)
-    #pragma warning(disable : 4063)
-#endif
-			switch (m_value.type())
+			switch (static_cast<QMetaType::Type>(m_value.type()))
 			{
 			case QMetaType::Int:		//NOLINT
 				assert(m_value.canConvert<int>());
@@ -1110,10 +1106,8 @@ private:
 				less = false;
 				break;
 			}
-#ifdef _MSC_VER
-    #pragma warning(pop)
-#endif
-            if (less == true)
+
+			if (less == true)
 			{
 				m_value = m_lowLimit;
 			}
@@ -1131,11 +1125,7 @@ private:
 
 			bool gt = false;
 
-#ifdef _MSC_VER
-    #pragma warning(push)
-    #pragma warning(disable : 4063)
-#endif
-			switch (m_value.type())
+			switch (static_cast<QMetaType::Type>(m_value.type()))
 			{
 			case QMetaType::Int:
 				assert(m_value.canConvert<int>());
@@ -1181,9 +1171,7 @@ private:
 				gt = false;
 				break;
 			}
-#ifdef _MSC_VER
-    #pragma warning(pop)
-#endif
+
 			if (gt == true)
 			{
 				m_value = m_highLimit;

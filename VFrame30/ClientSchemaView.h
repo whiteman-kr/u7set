@@ -274,10 +274,11 @@ namespace VFrame30
 		QJSEngine* jsEngine();
 		QString globalScript() const;
 
-		bool runScript(QJSValue& evaluatedJs, bool reportError);
-		QJSValue evaluateScript(QString script, bool reportError);
-		QString formatSqriptError(const QJSValue& scriptValue) const;
-		void reportSqriptError(const QJSValue& scriptValue);
+		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
+		bool reEvaluateGlobalScript();
+		QJSValue evaluateScript(QString script, QString where, bool reportError);
+		QString formatScriptError(const QJSValue& scriptValue) const;
+		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		// Variables
 		//
