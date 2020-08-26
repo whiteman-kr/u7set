@@ -18,7 +18,9 @@ public:
 
 	virtual ServiceWorker* createInstance() const override
 	{
-		BaseServiceWorker* newInstance = new BaseServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
+		BaseServiceWorker* newInstance = new BaseServiceWorker(softwareInfo(),
+															   initialServiceName(),
+															   argc(), argv(), m_logger);
 
 		newInstance->init();
 

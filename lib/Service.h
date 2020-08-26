@@ -68,7 +68,7 @@ public:
 
 public:
 	ServiceWorker(const SoftwareInfo& softwareInfo,
-				  const QString& serviceName,
+				  const QString& serviceInstanceName,
 				  int& argc,
 				  char** argv,
 				  CircularLoggerShared logger);
@@ -81,7 +81,8 @@ public:
 	QString appPath() const;
 	QString cmdLine() const;
 
-	QString serviceName() const;
+	QString initialServiceName() const;
+	QString serviceInstanceName() const;
 
 	const SoftwareInfo& softwareInfo() const;
 	E::SoftwareType softwareType() const;
@@ -97,7 +98,7 @@ public:
 														//
 														// ServiceWorker* createInstance() const override
 														// {
-														//		DerivedServiceWorker* newInstance = new DerivedServiceWorker(serviceName(), argc(), argv());
+														//		DerivedServiceWorker* newInstance = new DerivedServiceWorker(initialServiceName(), argc(), argv());
 														//		newInstance->init();
 														//		return newInstance;
 														// }
@@ -144,7 +145,10 @@ private:
 	HostAddressPort m_cfgServiceIP2;
 
 	SoftwareInfo m_softwareInfo;
-	QString m_serviceName;
+
+	QString m_initialServiceName;
+	QString m_serviceInstanceName;
+
 	int& m_argc;
 	char** m_argv = nullptr;
 	CircularLoggerShared m_logger;
@@ -177,6 +181,7 @@ public:
 	void stop();
 
 	static QString getInstanceID(int argc, char* argv[]);
+	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
 
 signals:
 	void ackBaseRequest(UdpRequest request);

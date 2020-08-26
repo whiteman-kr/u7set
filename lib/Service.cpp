@@ -49,11 +49,12 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 char** argv,
 							 CircularLoggerShared logger) :
 	m_softwareInfo(softwareInfo),
-	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
 	m_logger(logger),
-	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
+	m_initialServiceName(serviceName),
+	m_serviceInstanceName(Service::getServiceInstanceName(serviceName, argc, argv)),
+	m_settings(QSettings::SystemScope, RADIY_ORG, m_serviceInstanceName, this),
 	m_cmdLineParser(argc, argv)
 {
 	TEST_PTR_RETURN(argv);
@@ -112,9 +113,14 @@ QString ServiceWorker::cmdLine() const
 	return cl.trimmed();
 }
 
-QString ServiceWorker::serviceName() const
+QString ServiceWorker::initialServiceName() const
 {
-	return m_serviceName;
+	return m_initialServiceName;
+}
+
+QString ServiceWorker::serviceInstanceName() const
+{
+	return m_serviceInstanceName;
 }
 
 const SoftwareInfo& ServiceWorker::softwareInfo() const
@@ -279,9 +285,7 @@ QString Service::getInstanceID(int argc, char* argv[])
 
 		QString arg(argv[i]);
 
-		arg = arg.trimmed().toLower();
-
-		if (arg.startsWith("-inst") == false)
+		if (arg.trimmed().toLower().startsWith("-inst") == false)
 		{
 			continue;
 		}
@@ -299,6 +303,18 @@ QString Service::getInstanceID(int argc, char* argv[])
 	}
 
 	return QString();
+}
+
+QString Service::getServiceInstanceName(const QString& serviceName, int argc, char* argv[])
+{
+	QString instanceID = Service::getInstanceID(argc, argv);
+
+	if (instanceID.isEmpty() == true)
+	{
+		return serviceName;
+	}
+
+	return QString("%1 (%2)").arg(serviceName).arg(instanceID);
 }
 
 void Service::onServiceWork()
@@ -469,7 +485,7 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 // -------------------------------------------------------------------------------------
 
 DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName(), logger),
+	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceInstanceName(), logger),
 	m_app(app),
 	m_serviceWorker(serviceWorker),
 	m_logger(logger)
@@ -531,7 +547,7 @@ ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWork
 	m_logger(logger)
 {
 	app.setOrganizationName(RADIY_ORG);
-	app.setApplicationName(serviceWorker.serviceName());
+	app.setApplicationName(serviceWorker.serviceInstanceName());
 }
 
 int ServiceStarter::exec()
@@ -618,7 +634,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		QString versionInfo =
 			QString("\nApplication:\t%1\nVersion:\t%2.%3.%4 (%5)\nCommit SHA:\t%6\n").
-				arg(m_serviceWorker.serviceName()).
+				arg(m_serviceWorker.serviceInstanceName()).
 				arg(si.majorVersion()).
 				arg(si.minorVersion()).
 				arg(si.commitNo()).
