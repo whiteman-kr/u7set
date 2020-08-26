@@ -8,6 +8,7 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
 #include "../lib/WidgetUtils.h"
+#include "../lib/SignalSetProvider.h"
 
 
 // Returns vector of pairs,
@@ -92,7 +93,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 				continue;
 			}
 			ObjectState state;
-			SignalsModel::trimSignalTextFields(*signalPtrVector[i]);
+			SignalSetProvider::trimSignalTextFields(*signalPtrVector[i]);
 			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
@@ -147,10 +148,6 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 void initNewSignal(Signal& signal)
 {
 	QSettings settings;
-	auto loader = [&settings](const QString& name, QVariant defaultValue = QVariant())
-	{
-		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, defaultValue);
-	};
 
 	switch (signal.signalType())
 	{
@@ -173,7 +170,7 @@ void initNewSignal(Signal& signal)
 
 	signal.initSpecificProperties();
 
-	SignalPropertyManager& propertyManager = SignalsModel::instance()->signalPropertyManager();
+	SignalPropertyManager& propertyManager = *SignalPropertyManager::getInstance();
 
 	auto setter = [&signal, &propertyManager](const QString& name, QVariant value) {
 		int index = propertyManager.index(name);
@@ -184,7 +181,7 @@ void initNewSignal(Signal& signal)
 
 		if (propertyManager.getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
 		{
-			propertyManager.setValue(&signal, index, value);
+			propertyManager.setValue(&signal, index, value, theSettings.isExpertMode());
 		}
 	};
 
@@ -206,14 +203,14 @@ void initNewSignal(Signal& signal)
 		}
 
 		QVariant::Type type = propertyManager.type(i);
-		if (type == QVariant::String && propertyManager.value(&signal, i).toString().isEmpty() == false)
+		if (type == QVariant::String && propertyManager.value(&signal, i, theSettings.isExpertMode()).toString().isEmpty() == false)
 		{
 			continue;
 		}
 
 		if (value.canConvert(type) && value.convert(type))
 		{
-			propertyManager.setValue(&signal, i, value);
+			propertyManager.setValue(&signal, i, value, theSettings.isExpertMode());
 		}
 	}
 
@@ -344,10 +341,10 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		int precision = appSignal.decimalPlaces();
 
-		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
+		SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
 		manager.detectNewProperties(appSignal);
-		manager.loadNotSpecificProperties(*signalProperties);
-		manager.reloadPropertyBehaviour(dbController, parent);
+		manager.loadNotSpecificProperties();
+		manager.reloadPropertyBehaviour();
 
 		for (auto property : signalProperties->properties())
 		{
@@ -369,7 +366,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 
 			E::PropertyBehaviourType behaviour = manager.getBehaviour(appSignal, propertyIndex);
-			if (manager.isHidden(behaviour))
+			if (manager.isHidden(behaviour, theSettings.isExpertMode()))
 			{
 				property->setVisible(false);
 			}
@@ -432,7 +429,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}
 	}
 
-	connect(this, &SignalPropertiesDialog::signalChanged, SignalsModel::instance(), &SignalsModel::loadSignal, Qt::QueuedConnection);
+	connect(this, &SignalPropertiesDialog::signalChanged, SignalSetProvider::getInstance(), &SignalSetProvider::loadSignal, Qt::QueuedConnection);
 
 	// Save
 	//
@@ -449,7 +446,10 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 		signalProperties->updateSpecPropValues();
 
-		signal = signalProperties->signal();
+		Signal& editedSignalCopy = signalProperties->signal();
+
+		signal.setTags(editedSignalCopy.tagsSet());	// Crashes here
+		signal = editedSignalCopy;
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
@@ -705,14 +705,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		return;
 	}
 
-	SignalsModel* model = SignalsModel::instance();
-
-	if (model == nullptr)
-	{
-		return;
-	}
-
-	SignalPropertyManager& manager = model->signalPropertyManager();
+	SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
 
 	const Signal& signal = *m_signalVector[0];
 
@@ -720,12 +713,12 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 
 	for (int i = 0; i < manager.count(); i++)
 	{
-		if (manager.isHidden(manager.getBehaviour(signal, i)))
+		if (manager.isHidden(manager.getBehaviour(signal, i), theSettings.isExpertMode()))
 		{
 			continue;
 		}
 
 		QString name = manager.name(i);
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i));
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i, theSettings.isExpertMode()));
 	}
 }

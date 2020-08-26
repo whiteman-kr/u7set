@@ -30,7 +30,7 @@
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 #include "../lib/LmDescription.h"
-#include "SignalsTabPage.h"
+#include "../lib/SignalSetProvider.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
@@ -6369,10 +6369,10 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	// QCompleter for signals
 	//
-	SignalsModel* signalModel = SignalsModel::instance();
-	Q_ASSERT(signalModel);
+	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+	Q_ASSERT(signalSetProvider);
 
-	QStringList appSignalIdsCompleterList = signalModel->signalSet().appSignalIdsList(true, true);
+	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
 
 	QCompleter* appSignalsCompleter = new QCompleter(appSignalIdsCompleterList, &d);
 	appSignalsCompleter->setFilterMode(Qt::MatchContains);
@@ -6804,10 +6804,10 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// QCompleter for signals
 	//
-	SignalsModel* signalModel = SignalsModel::instance();
-	Q_ASSERT(signalModel);
+	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+	Q_ASSERT(signalSetProvider);
 
-	QStringList appSignalIdsCompleterList = signalModel->signalSet().appSignalIdsList(true, true);
+	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
 
 	QCompleter* completer = new QCompleter(appSignalIdsCompleterList, &d);
 	completer->setFilterMode(Qt::MatchContains);
