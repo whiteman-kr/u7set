@@ -176,6 +176,8 @@ public:
 	void start();
 	void stop();
 
+	static QString getInstanceID(int argc, char* argv[]);
+
 signals:
 	void ackBaseRequest(UdpRequest request);
 

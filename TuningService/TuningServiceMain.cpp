@@ -9,13 +9,13 @@ int main(int argc, char *argv[])
 
 	CircularLoggerShared logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger);
+	LOGGER_INIT(logger, QString(), Service::getInstanceID(argc, argv));
 
 	logger->setLogCodeInfo(false);
 
 	CircularLoggerShared tuningLog = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT2(tuningLog, QString("Tuning"));
+	LOGGER_INIT(tuningLog, QString("Tuning"), Service::getInstanceID(argc, argv));
 
 	tuningLog->setLogCodeInfo(false);
 
