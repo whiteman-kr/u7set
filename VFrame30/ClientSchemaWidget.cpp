@@ -355,7 +355,7 @@ namespace VFrame30
 		horizontalScrollBar()->setValue(historyState.m_horzScrollValue);
 		verticalScrollBar()->setValue(historyState.m_vertScrollValue);
 
-		schemaView()->repaint();
+		schemaView()->update();
 
 		return;
 	}

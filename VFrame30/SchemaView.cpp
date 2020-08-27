@@ -518,7 +518,7 @@ namespace VFrame30
 
 		if (repaint == true)
 		{
-			this->repaint();
+			this->update();
 		}
 
 		return m_zoom;
