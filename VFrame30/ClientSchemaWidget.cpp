@@ -1,6 +1,7 @@
 #include "ClientSchemaWidget.h"
 #include "LogicSchema.h"
 #include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/PropertyNames.h"
 
 namespace VFrame30
 {
@@ -103,7 +104,28 @@ namespace VFrame30
 			}
 
 			schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInOut"));
-			break;
+			if (schemaItem != nullptr)
+			{
+				break;
+			}
+
+			schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemValue"));
+			if (schemaItem != nullptr)
+			{
+				break;
+			}
+
+			schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemImageValue"));
+			if (schemaItem != nullptr)
+			{
+				break;
+			}
+
+			schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemIndicator"));
+			if (schemaItem != nullptr)
+			{
+				break;
+			}
 		}
 
 		if (schemaItem == nullptr)
@@ -111,17 +133,21 @@ namespace VFrame30
 			return;
 		}
 
-		std::shared_ptr<VFrame30::SchemaItemSignal> schemaItemSignal = std::dynamic_pointer_cast<VFrame30::SchemaItemSignal>(schemaItem);
-		if (schemaItemSignal == nullptr)
-		{
-			Q_ASSERT(schemaItemSignal);
-			return;
-		}
-
 		// Save signals to protobufer
 		//
 		::Proto::AppSignalSet protoSetMessage;
-		QStringList appSignalIds = schemaItemSignal->appSignalIdList();
+
+		auto p = schemaItem->propertyByCaption(VFrame30::PropertyNames::appSignalIDs);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+		}
+
+		QStringList appSignalIds = p->value().toString().split(QChar::LineFeed, Qt::SkipEmptyParts);
+		if (appSignalIds.isEmpty() == true)
+		{
+			return;
+		}
 
 		AppSignalController* appSignalController = clientSchemaView()->appSignalController();
 		if (appSignalController == nullptr)

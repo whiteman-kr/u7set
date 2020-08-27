@@ -140,12 +140,12 @@ namespace VFrame30
 		static void dump(std::shared_ptr<SchemaItem> item);
 		virtual void dump() const;
 
-		virtual void clickEvent(QString globalScript, QJSEngine* engine,  QWidget* parentWidget);
-		virtual bool preDrawEvent(QString globalScript, QJSEngine* engine);
+		virtual void clickEvent(QJSEngine* engine,  QWidget* parentWidget);
+		virtual bool preDrawEvent(QJSEngine* engine);
 
 	protected:
 		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
-		QJSValue evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const;
+		QJSValue evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const;
 		QString formatSqriptError(const QJSValue& scriptValue) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 

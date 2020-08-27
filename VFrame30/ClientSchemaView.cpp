@@ -214,6 +214,8 @@ namespace VFrame30
 	{
 		assert(schemaManager);
 
+		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
+
 		startRepaintTimer();	// This is a main repaint timer, it fires on the edge of 250ms
 		startTimer(1000);		// This is a guard timer
 
@@ -393,13 +395,12 @@ namespace VFrame30
 
 					if (item == m_leftClickOverItem &&
 						item->acceptClick() == true &&
-						item->clickScript().trimmed().isEmpty() == false &&
 					    item->isIntersectPoint(x, y) == true &&
 						item->clickScript().isEmpty() == false)
 					{
 						// Run script
 						//
-						item->clickEvent(globalScript(), jsEngine(), this);
+						item->clickEvent(jsEngine(), this);
 
 						// --
 						//
@@ -546,26 +547,37 @@ namespace VFrame30
 			//
 			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this);
 
-			QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
-			QJSValue jsSchemaView = m_jsEngine.newQObject(m_scriptSchemaView.get());
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+			{
+				QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
+				QJSValue jsSchemaView = m_jsEngine.newQObject(m_scriptSchemaView.get());
+
+				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+			}
 
 			// create global variable "tuning"
 			//
-			QJSValue jsTuning = m_jsEngine.newQObject(m_tuningController);
-			QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+			{
+				QJSValue jsTuning = m_jsEngine.newQObject(m_tuningController);
+				QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
+
+				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+			}
 
 			// Create global variable "signals"
 			//
-			QJSValue jsSignals = m_jsEngine.newQObject(m_scriptAppSignalController.get());
-			qDebug() << "jsSignals";
-			qDebug() << jsSignals.isNull();
-			qDebug() << jsSignals.isUndefined();
+			{
+				QJSValue jsSignals = m_jsEngine.newQObject(m_scriptAppSignalController.get());
+				QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
 
-			QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
+				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
+			}
 
+			// Evaluate global script
+			//
+			reEvaluateGlobalScript();
+
+			// --
+			//
 			m_jsEngineGlobalsWereCreated = true;
 		}
 
@@ -577,7 +589,7 @@ namespace VFrame30
 		return m_schemaManager->globalScript();
 	}
 
-	bool ClientSchemaView::runScript(QJSValue& evaluatedJs, bool reportError)
+	bool ClientSchemaView::runScript(QJSValue& evaluatedJs, QString where, bool reportError)
 	{
 		if (evaluatedJs.isUndefined() == true ||
 			evaluatedJs.isError() == true)
@@ -592,7 +604,7 @@ namespace VFrame30
 		{
 			if (reportError == true)
 			{
-				reportSqriptError(jsResult);
+				reportScriptError(jsResult, where);
 			}
 
 			return false;
@@ -601,22 +613,31 @@ namespace VFrame30
 		return true;
 	}
 
-	QJSValue ClientSchemaView::evaluateScript(QString script, bool reportError)
+	bool ClientSchemaView::reEvaluateGlobalScript()
 	{
-		QJSValue result = jsEngine()->evaluate(globalScript() + script);
+		QJSValue result = m_jsEngine.evaluate(globalScript());
 
-		if (result.isError() == true)
+		if (result.isError())
 		{
-			if (reportError == true)
-			{
-				reportSqriptError(result);
-			}
+			formatScriptError(result);	// it will trace error, must not use any messageboxes here, it lead to exception on paint device
+		}
+
+		return result.isError() == false;
+	}
+
+	QJSValue ClientSchemaView::evaluateScript(QString script, QString where, bool reportError)
+	{
+		QJSValue result = jsEngine()->evaluate(script);
+
+		if (result.isError() == true && reportError == true)
+		{
+			reportScriptError(result, where);
 		}
 
 		return result;
 	}
 
-	QString ClientSchemaView::formatSqriptError(const QJSValue& scriptValue) const
+	QString ClientSchemaView::formatScriptError(const QJSValue& scriptValue) const
 	{
 		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
 		qDebug() << "\tClass: " << metaObject()->className();
@@ -635,18 +656,19 @@ namespace VFrame30
 		return str;
 	}
 
-	void ClientSchemaView::reportSqriptError(const QJSValue& scriptValue)
+	void ClientSchemaView::reportScriptError(const QJSValue& scriptValue, QString where)
 	{
 		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
 		qDebug() << "\tClass: " << metaObject()->className();
 		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
 		qDebug() << "\tMessage: " << scriptValue.toString();
 
-		QMessageBox::critical(this,
-							  QApplication::applicationDisplayName(),
-							  tr("Script uncaught exception at line %1:\n%2")
-								  .arg(scriptValue.property("lineNumber").toInt())
-								  .arg(scriptValue.toString()));
+		QString message = tr("Script (%1) uncaught exception at line %2:\n%3")
+						  .arg(where)
+						  .arg(scriptValue.property("lineNumber").toInt())
+						  .arg(scriptValue.toString());
+
+		QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
 
 		return;
 	}

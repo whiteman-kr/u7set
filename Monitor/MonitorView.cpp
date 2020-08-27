@@ -58,14 +58,16 @@ void MonitorView::configurationArrived(ConfigSettings configuration)
 		return ;
 	}
 
-	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, true);
+	reEvaluateGlobalScript();
+
+	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, "evaluate onConfigurationArrivedScript", true);
 	if (scriptValue.isError() == true ||
 		scriptValue.isUndefined() == true)
 	{
 		return;
 	}
 
-	runScript(scriptValue, true);
+	runScript(scriptValue, "run onConfigurationArrivedScript", true);
 
 	return;
 }

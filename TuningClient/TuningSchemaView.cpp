@@ -18,16 +18,14 @@ TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* 
 		return ;
 	}
 
-	QJSValue scriptValue = evaluateScript(schemaManager->configurationArrivedScript(), true);
+	QJSValue scriptValue = evaluateScript(schemaManager->configurationArrivedScript(), "evaluate configurationArrivedScript", true);
 	if (scriptValue.isError() == true ||
 		scriptValue.isUndefined() == true)
 	{
 		return;
 	}
 
-	runScript(scriptValue, true);
-
-
+	runScript(scriptValue, "run configurationArrivedScript", true);
 }
 
 TuningSchemaView::~TuningSchemaView()
