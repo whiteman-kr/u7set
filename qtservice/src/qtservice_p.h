@@ -49,7 +49,8 @@ class QtServiceControllerPrivate
     Q_DECLARE_PUBLIC(QtServiceController)
 public:
     QString serviceName;
-    QtServiceController *q_ptr;
+	QString serviceInstanceID;
+	QtServiceController* q_ptr = nullptr;
 };
 
 class QtServiceBasePrivate
@@ -57,7 +58,7 @@ class QtServiceBasePrivate
     Q_DECLARE_PUBLIC(QtServiceBase)
 public:
 
-    QtServiceBasePrivate(const QString &name);
+	QtServiceBasePrivate(const QString& serviceName, const QString& serviceInstanceID);
     ~QtServiceBasePrivate();
 
     QtServiceBase *q_ptr;
@@ -78,9 +79,12 @@ public:
     bool start();
 
     QString filePath() const;
+	QString filePathWithInstanceArg() const;
+
     bool sysInit();
     void sysSetPath();
     void sysCleanup();
+
     class QtServiceSysPrivate *sysd;
 };
 

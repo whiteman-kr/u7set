@@ -485,7 +485,12 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 // -------------------------------------------------------------------------------------
 
 DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceInstanceName(), logger),
+	QtService(serviceWorker.argc(),
+			  serviceWorker.argv(),
+			  &app,
+			  serviceWorker.initialServiceName(),
+			  Service::getInstanceID(serviceWorker.argc(), serviceWorker.argv()),
+			  logger),
 	m_app(app),
 	m_serviceWorker(serviceWorker),
 	m_logger(logger)

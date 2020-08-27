@@ -73,14 +73,17 @@ public:
 	    AutoStartup = 0, ManualStartup
     };
 
-    QtServiceController(const QString &name);
+	QtServiceController(const QString& serviceName, const QString& serviceInstanceID);
     virtual ~QtServiceController();
 
     bool isInstalled() const;
     bool isRunning() const;
 
     QString serviceName() const;
+	QString serviceNameWithInstanceID() const;
+	QString serviceInstanceID() const;
     QString serviceDescription() const;
+
     StartupType startupType() const;
     QString serviceFilePath() const;
 
@@ -121,7 +124,12 @@ public:
 
     Q_DECLARE_FLAGS(ServiceFlags, ServiceFlag)
 
-	QtServiceBase(int argc, char **argv, const QString &name, std::shared_ptr<CircularLogger> logger);
+	QtServiceBase(int argc,
+				  char **argv,
+				  const QString& serviceName,
+				  const QString& serviceInstanceID,
+				  std::shared_ptr<CircularLogger> logger);
+
     virtual ~QtServiceBase();
 
     QString serviceName() const;
@@ -172,7 +180,7 @@ private:
 	//
 
     friend class QtServiceSysPrivate;
-    QtServiceBasePrivate *d_ptr;
+	QtServiceBasePrivate* d_ptr = nullptr;
 
 	std::shared_ptr<CircularLogger> m_logger;
 };
@@ -181,8 +189,13 @@ private:
 class QtService : public QtServiceBase
 {
 public:
-	QtService(int argc, char** argv, QCoreApplication* app, const QString &name, std::shared_ptr<CircularLogger> logger)
-		: QtServiceBase(argc, argv, name, logger),
+	QtService(int argc,
+			  char** argv,
+			  QCoreApplication* app,
+			  const QString& serviceName,
+			  const QString& serviceInstanceID,
+			  std::shared_ptr<CircularLogger> logger)
+		: QtServiceBase(argc, argv, serviceName, serviceInstanceID, logger),
 		  m_app(app)
 	{
 	}

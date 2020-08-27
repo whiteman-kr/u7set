@@ -222,12 +222,13 @@ void qtServiceLogDebug(QtMsgType type, const char* msg)
     Creates a controller object for the service with the given
     \a name.
 */
-QtServiceController::QtServiceController(const QString &name)
+QtServiceController::QtServiceController(const QString& serviceName, const QString& serviceInstanceID)
  : d_ptr(new QtServiceControllerPrivate())
 {
     Q_D(QtServiceController);
     d->q_ptr = this;
-    d->serviceName = name;
+	d->serviceName = serviceName;
+	d->serviceInstanceID = serviceInstanceID;
 }
 /*!
     Destroys the service controller. This neither stops nor uninstalls
@@ -275,6 +276,25 @@ QString QtServiceController::serviceName() const
     Q_D(const QtServiceController);
     return d->serviceName;
 }
+
+QString QtServiceController::serviceNameWithInstanceID() const
+{
+	Q_D(const QtServiceController);
+
+	if (d->serviceInstanceID.isEmpty() == true)
+	{
+		return d->serviceName;
+	}
+
+	return QString("%1 (%2)").arg(d->serviceName).arg(d->serviceInstanceID);
+}
+
+QString QtServiceController::serviceInstanceID() const
+{
+	Q_D(const QtServiceController);
+	return d->serviceInstanceID;
+}
+
 /*!
     \fn QString QtServiceController::serviceDescription() const
 
@@ -437,9 +457,9 @@ private:
 
 QtServiceBase *QtServiceBasePrivate::instance = 0;
 
-QtServiceBasePrivate::QtServiceBasePrivate(const QString &name) :
+QtServiceBasePrivate::QtServiceBasePrivate(const QString& serviceName, const QString& serviceInstanceID) :
     startupType(QtServiceController::ManualStartup),
-    controller(name)
+	controller(serviceName, serviceInstanceID)
 {
 	serviceFlags = QtServiceBase::ServiceFlag::Default;
 }
@@ -638,7 +658,11 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
 
     \sa exec(), start(), QtServiceController::install()
 */
-QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::shared_ptr<CircularLogger> logger) :
+QtServiceBase::QtServiceBase(int argc,
+							 char **argv,
+							 const QString& serviceName,
+							 const QString& serviceInstanceID,
+							 std::shared_ptr<CircularLogger> logger) :
 	m_logger(logger)
 {
 #if defined(QTSERVICE_DEBUG)
@@ -649,7 +673,7 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::sh
     Q_ASSERT(!QtServiceBasePrivate::instance);
     QtServiceBasePrivate::instance = this;
 
-    QString nm(name);
+	QString nm(serviceName);
 
 	if (nm.length() > 255)
 	{
@@ -663,7 +687,7 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::sh
 		nm.replace((QChar)'\\', (QChar)'\0');
     }
 
-    d_ptr = new QtServiceBasePrivate(nm);
+	d_ptr = new QtServiceBasePrivate(nm, serviceInstanceID);
     d_ptr->q_ptr = this;
 
 	d_ptr->serviceFlags = QtServiceBase::ServiceFlag::Default;
@@ -780,21 +804,49 @@ int QtServiceBase::exec()
 {
 	if (d_ptr->args.size() > 1)
 	{
-		QString a =  d_ptr->args.at(1);
+		const int	UNKNOWN = 0,
+					INSTALL = 1,
+					UNINSTALL = 2,
+					TERMINATE = 3;
 
-		if (a == QLatin1String("-i"))
+		int action = UNKNOWN;
+
+		for(int i = 0; i < d_ptr->args.size(); i++)
 		{
+			QString arg(d_ptr->args.at(i));
+
+			if (arg == QString("-i"))
+			{
+				action = INSTALL;
+				break;
+			}
+
+			if (arg == QString("-u"))
+			{
+				action = UNINSTALL;
+				break;
+			}
+
+			if (arg == QString("-t"))
+			{
+				action = TERMINATE;
+				break;
+			}
+		}
+
+		switch(action)
+		{
+		case INSTALL:
 			return installService();
-		}
 
-		if (a == QLatin1String("-u"))
-		{
+		case UNINSTALL:
 			return uninstallService();
-		}
 
-		if (a == QLatin1String("-t"))
-		{
+		case TERMINATE:
 			return terminateService();
+
+		default:
+			;
 		}
 
 		DEBUG_LOG_WRN(m_logger, QString(tr("\nUnknown command line arguments of service.")));
