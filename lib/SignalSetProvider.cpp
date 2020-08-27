@@ -9,11 +9,7 @@ SignalPropertyManager::SignalPropertyManager(DbController* dbController, QWidget
 	m_parentWidget(parentWidget)
 {
 	assert (m_instance == nullptr);
-	for (size_t i = 0; i < m_propertyDescription.size(); i++)
-	{
-		m_propertyName2IndexMap[m_propertyDescription[i].name] = static_cast<int>(i);
-	}
-	loadNotSpecificProperties();
+	init();
 	m_instance = this;
 }
 
@@ -435,6 +431,22 @@ void SignalPropertyManager::reloadPropertyBehaviour()
 	}
 }
 
+void SignalPropertyManager::clear()
+{
+	m_propertyDescription = m_basicPropertyDescription;
+	m_propertyName2IndexMap.clear();
+}
+
+void SignalPropertyManager::init()
+{
+	clear();
+	for (size_t i = 0; i < m_propertyDescription.size(); i++)
+	{
+		m_propertyName2IndexMap[m_propertyDescription[i].name] = static_cast<int>(i);
+	}
+	loadNotSpecificProperties();
+}
+
 bool SignalPropertyManager::isNotCorrect(int propertyIndex) const
 {
 	if (propertyIndex < 0 || propertyIndex >= static_cast<int>(m_propertyDescription.size()))
@@ -488,10 +500,14 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 		assert(false);
 		return;
 	}
+	if (index(newProperty.name) != -1)
+	{
+		return;
+	}
 	int propertyIndex = static_cast<int>(m_propertyDescription.size());
 	m_propertyDescription.push_back(newProperty);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
-	emit propertyCountChanged();
+	emit propertyCountIncreased();
 
 	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
 	{
@@ -748,6 +764,7 @@ void SignalSetProvider::initLazyLoadSignals()
 {
 	loadUsers();
 
+	m_propertyManager.init();
 	m_propertyManager.reloadPropertyBehaviour();
 
 	QVector<ID_AppSignalID> signalIds;
@@ -1154,6 +1171,7 @@ void SignalSetProvider::clearSignals()
 	if (m_signalSet.count() != 0)
 	{
 		m_signalSet.clear();
+		m_propertyManager.clear();
 		emit signalCountChanged();
 	}
 }

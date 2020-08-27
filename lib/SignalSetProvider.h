@@ -26,7 +26,7 @@ public:
 	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
 
 signals:
-	void propertyCountChanged();
+	void propertyCountIncreased();
 
 public:
 	SignalPropertyManager(DbController* dbController, QWidget* parentWidget);
@@ -57,6 +57,8 @@ public:
 
 	void loadNotSpecificProperties();
 	void reloadPropertyBehaviour();
+	void clear();
+	void init();
 
 public slots:
 	void detectNewProperties(const Signal& signal);
@@ -82,7 +84,7 @@ private:
 
 	// is initialized by non specific properties
 	//
-	std::vector<SignalPropertyDescription> m_propertyDescription = {
+	std::vector<SignalPropertyDescription> m_basicPropertyDescription = {
 		{ SignalProperties::appSignalIDCaption,
 		  SignalProperties::appSignalIDCaption,
 		  QVariant::String, {},
@@ -119,6 +121,7 @@ private:
 		  [](const Signal* s){ return TO_INT(s->inOutType()); },
 		  [](Signal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
 	};
+	std::vector<SignalPropertyDescription> m_propertyDescription;
 };
 
 class SignalSetProvider : public QObject
