@@ -879,10 +879,13 @@ void SignalSetProvider::loadNextSignalsPortion()
 
 		dbController()->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, m_parentWidget);
 
-		for (const Signal& loadedSignal: signalsToLoad)
+		for (const Signal& loadedSignal : signalsToLoad)
 		{
 			m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
+		}
 
+		for (const Signal& loadedSignal : signalsToLoad)
+		{
 			emit signalUpdated(keyIndex(loadedSignal.ID()));
 			emit signalPropertiesChanged(loadedSignal);
 		}
