@@ -81,8 +81,7 @@ public:
 	QString appPath() const;
 	QString cmdLine() const;
 
-	QString initialServiceName() const;
-	QString serviceInstanceName() const;
+	QString serviceName() const;
 
 	const SoftwareInfo& softwareInfo() const;
 	E::SoftwareType softwareType() const;
@@ -98,7 +97,7 @@ public:
 														//
 														// ServiceWorker* createInstance() const override
 														// {
-														//		DerivedServiceWorker* newInstance = new DerivedServiceWorker(initialServiceName(), argc(), argv());
+														//		DerivedServiceWorker* newInstance = new DerivedServiceWorker(serviceName(), argc(), argv());
 														//		newInstance->init();
 														//		return newInstance;
 														// }
@@ -146,8 +145,7 @@ private:
 
 	SoftwareInfo m_softwareInfo;
 
-	QString m_initialServiceName;
-	QString m_serviceInstanceName;
+	QString m_serviceName;
 
 	int& m_argc;
 	char** m_argv = nullptr;
@@ -180,8 +178,11 @@ public:
 	void start();
 	void stop();
 
-	static QString getInstanceID(int argc, char* argv[]);
+	static QString getServiceInstanceName(const QString& serviceName, const QString& instanceID);
 	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
+
+	static QString getInstanceID(const QStringList& serviceArgs);
+	static QString getInstanceID(int argc, char* argv[]);
 
 signals:
 	void ackBaseRequest(UdpRequest request);

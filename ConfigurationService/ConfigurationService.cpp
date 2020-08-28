@@ -28,7 +28,7 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softw
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
 	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(softwareInfo(),
-																			 initialServiceName(),
+																			 serviceName(),
 																			 argc(), argv(), m_logger);
 
 	newInstance->init();

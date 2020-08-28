@@ -52,9 +52,8 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_argc(argc),
 	m_argv(argv),
 	m_logger(logger),
-	m_initialServiceName(serviceName),
-	m_serviceInstanceName(Service::getServiceInstanceName(serviceName, argc, argv)),
-	m_settings(QSettings::SystemScope, RADIY_ORG, m_serviceInstanceName, this),
+	m_serviceName(serviceName),
+	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv)
 {
 	TEST_PTR_RETURN(argv);
@@ -113,14 +112,9 @@ QString ServiceWorker::cmdLine() const
 	return cl.trimmed();
 }
 
-QString ServiceWorker::initialServiceName() const
+QString ServiceWorker::serviceName() const
 {
-	return m_initialServiceName;
-}
-
-QString ServiceWorker::serviceInstanceName() const
-{
-	return m_serviceInstanceName;
+	return m_serviceName;
 }
 
 const SoftwareInfo& ServiceWorker::softwareInfo() const
@@ -200,6 +194,7 @@ void ServiceWorker::init()
 	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
 	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
 	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("s", "Start (run) the service.");
 	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
 	m_cmdLineParser.addSimpleOption("inst", "Set service instance ID.");
 	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
@@ -277,15 +272,26 @@ void Service::stop()
 	stopServiceWorkerThread();
 }
 
-QString Service::getInstanceID(int argc, char* argv[])
+QString Service::getServiceInstanceName(const QString& serviceName, const QString& instanceID)
 {
-	for(int i = 0; i < argc; i++)
+	if (instanceID.isEmpty() == true)
 	{
-		TEST_PTR_CONTINUE(argv[i]);
+		return serviceName;
+	}
 
-		QString arg(argv[i]);
+	return QString("%1 (%2)").arg(serviceName).arg(instanceID);
+}
 
-		if (arg.trimmed().toLower().startsWith("-inst") == false)
+QString Service::getServiceInstanceName(const QString& serviceName, int argc, char* argv[])
+{
+	return getServiceInstanceName(serviceName, Service::getInstanceID(argc, argv));
+}
+
+QString Service::getInstanceID(const QStringList& serviceArgs)
+{
+	for(QString arg : serviceArgs)
+	{
+		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID) == false)
 		{
 			continue;
 		}
@@ -305,17 +311,24 @@ QString Service::getInstanceID(int argc, char* argv[])
 	return QString();
 }
 
-QString Service::getServiceInstanceName(const QString& serviceName, int argc, char* argv[])
+QString Service::getInstanceID(int argc, char* argv[])
 {
-	QString instanceID = Service::getInstanceID(argc, argv);
+	QStringList args;
 
-	if (instanceID.isEmpty() == true)
+	for(int i = 0; i < argc; i++)
 	{
-		return serviceName;
+		if (argv[i] == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		args.append(QString(argv[i]));
 	}
 
-	return QString("%1 (%2)").arg(serviceName).arg(instanceID);
+	return getInstanceID(args);
 }
+
 
 void Service::onServiceWork()
 {
@@ -488,8 +501,7 @@ DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker&
 	QtService(serviceWorker.argc(),
 			  serviceWorker.argv(),
 			  &app,
-			  serviceWorker.initialServiceName(),
-			  Service::getInstanceID(serviceWorker.argc(), serviceWorker.argv()),
+			  serviceWorker.serviceName(),
 			  logger),
 	m_app(app),
 	m_serviceWorker(serviceWorker),
@@ -552,7 +564,7 @@ ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWork
 	m_logger(logger)
 {
 	app.setOrganizationName(RADIY_ORG);
-	app.setApplicationName(serviceWorker.serviceInstanceName());
+	app.setApplicationName(serviceWorker.serviceName());
 }
 
 int ServiceStarter::exec()
@@ -639,7 +651,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		QString versionInfo =
 			QString("\nApplication:\t%1\nVersion:\t%2.%3.%4 (%5)\nCommit SHA:\t%6\n").
-				arg(m_serviceWorker.serviceInstanceName()).
+				arg(m_serviceWorker.serviceName()).
 				arg(si.majorVersion()).
 				arg(si.minorVersion()).
 				arg(si.commitNo()).

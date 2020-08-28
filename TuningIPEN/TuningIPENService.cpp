@@ -32,9 +32,8 @@ namespace TuningIPEN
 	ServiceWorker* TuningIPENServiceWorker::createInstance() const
 	{
 		TuningIPENServiceWorker* tuningIPENServiceWorker = new TuningIPENServiceWorker(softwareInfo(),
-																					   initialServiceName(),
+																					   serviceName(),
 																					   argc(), argv(), m_logger);
-
 		return tuningIPENServiceWorker;
 	}
 

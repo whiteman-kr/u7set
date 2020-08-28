@@ -17,7 +17,9 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::AppDataService, "", 1, 0);
 
-	AppDataServiceWorker appDataServiceWorker(si, "RPCT Application Data Service", argc, argv, logger);
+	AppDataServiceWorker appDataServiceWorker(si,
+											  Service::getServiceInstanceName("RPCT Application Data Service", argc, argv),
+											  argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, appDataServiceWorker, logger);
 

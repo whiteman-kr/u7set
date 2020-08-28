@@ -53,6 +53,8 @@
 #include <QWaitCondition>
 #include <QAbstractEventDispatcher>
 
+#include "../../lib/Service.h"
+
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable : 6011)
@@ -980,8 +982,8 @@ bool QtServiceBasePrivate::install(const QString& account, const QString& passwo
 
         // Create the service
 		SC_HANDLE hService = pCreateService(hSCM,
-											reinterpret_cast<const wchar_t *>(controller.serviceNameWithInstanceID().utf16()),
-											reinterpret_cast<const wchar_t *>(controller.serviceNameWithInstanceID().utf16()),
+											reinterpret_cast<const wchar_t *>(controller.serviceName().utf16()),
+											reinterpret_cast<const wchar_t *>(controller.serviceName().utf16()),
                                             SERVICE_ALL_ACCESS,
                                             dwServiceType, // QObject::inherits ( const char * className ) for no inter active ????
 											dwStartType,
@@ -1019,12 +1021,14 @@ QString QtServiceBasePrivate::filePath() const
 
 QString QtServiceBasePrivate::filePathWithInstanceArg() const
 {
-	if (controller.serviceInstanceID().isEmpty() == true)
+	QString serviceInstanceID = Service::getInstanceID(q_ptr->args());
+
+	if (serviceInstanceID.isEmpty() == true)
 	{
 		return filePath();
 	}
 
-	return QString("%1 -inst=%2").arg(filePath()).arg(controller.serviceInstanceID());
+	return QString("%1 %2=%3").arg(filePath()).arg(QtService::ARG_INSTANCE_ID).arg(serviceInstanceID);
 }
 
 bool QtServiceBasePrivate::sysInit()

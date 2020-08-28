@@ -73,15 +73,13 @@ public:
 	    AutoStartup = 0, ManualStartup
     };
 
-	QtServiceController(const QString& serviceName, const QString& serviceInstanceID);
+	QtServiceController(const QString& serviceName);
     virtual ~QtServiceController();
 
     bool isInstalled() const;
     bool isRunning() const;
 
     QString serviceName() const;
-	QString serviceNameWithInstanceID() const;
-	QString serviceInstanceID() const;
     QString serviceDescription() const;
 
     StartupType startupType() const;
@@ -127,7 +125,6 @@ public:
 	QtServiceBase(int argc,
 				  char **argv,
 				  const QString& serviceName,
-				  const QString& serviceInstanceID,
 				  std::shared_ptr<CircularLogger> logger);
 
     virtual ~QtServiceBase();
@@ -148,7 +145,10 @@ public:
     void logMessage(const QString &message, MessageType type = Success,
                 int id = 0, uint category = 0, const QByteArray &data = QByteArray());
 
-    static QtServiceBase *instance();
+	static QtServiceBase* instance();
+
+	int argc() const;
+	QStringList args() const;
 
 protected:
 
@@ -177,55 +177,38 @@ private:
 	int printHelp();
 	int startService();
 
-	//
-
-    friend class QtServiceSysPrivate;
+private:
 	QtServiceBasePrivate* d_ptr = nullptr;
 
 	std::shared_ptr<CircularLogger> m_logger;
-};
 
+	friend class QtServiceSysPrivate;
+};
 
 class QtService : public QtServiceBase
 {
+public:
+	static const QString ARG_INSTALL;
+	static const QString ARG_UNINSTALL;
+	static const QString ARG_TERMINATE;
+	static const QString ARG_INSTANCE_ID;
+
 public:
 	QtService(int argc,
 			  char** argv,
 			  QCoreApplication* app,
 			  const QString& serviceName,
-			  const QString& serviceInstanceID,
-			  std::shared_ptr<CircularLogger> logger)
-		: QtServiceBase(argc, argv, serviceName, serviceInstanceID, logger),
-		  m_app(app)
-	{
-	}
+			  std::shared_ptr<CircularLogger> logger);
 
-	~QtService()
-	{
-	}
+	virtual ~QtService();
 
 protected:
-	QCoreApplication* application() const
-	{
-		return m_app;
-	}
-
-	virtual void createApplication(int &argc, char **argv)
-	{
-		Q_UNUSED(argc);
-		Q_UNUSED(argv);
-		/*app = new Application(argc, argv);
-		QCoreApplication *a = app;
-		Q_UNUSED(a);*/
-	}
-
-	virtual int executeApplication()
-	{
-		return m_app->exec();
-	}
+	QCoreApplication* application() const;
+	virtual void createApplication(int &argc, char **argv) override;
+	virtual int executeApplication() override;
 
 private:
-	QCoreApplication* m_app;
+	QCoreApplication* m_app = nullptr;
 };
 
 /*template <typename Application>

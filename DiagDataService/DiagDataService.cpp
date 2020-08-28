@@ -29,9 +29,8 @@ DiagDataServiceWorker::~DiagDataServiceWorker()
 ServiceWorker* DiagDataServiceWorker::createInstance() const
 {
 	DiagDataServiceWorker* diagDataServiceWorker = new DiagDataServiceWorker(softwareInfo(),
-																			 initialServiceName(),
+																			 serviceName(),
 																			 argc(), argv(), m_logger);
-
 	diagDataServiceWorker->init();
 
 	return diagDataServiceWorker;

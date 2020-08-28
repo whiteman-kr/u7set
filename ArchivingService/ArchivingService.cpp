@@ -30,9 +30,8 @@ ArchivingService::~ArchivingService()
 ServiceWorker* ArchivingService::createInstance() const
 {
 	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(),
-															   initialServiceName(),
+															   serviceName(),
 															   argc(), argv(), logger());
-
 	archServiceWorker->init();
 
 	return archServiceWorker;
