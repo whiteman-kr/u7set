@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="MSO-4" DescriptionNumber="21" ConfigurationScriptFile="MSO4_SR21_Conf.js" Version="1.0002">
+<LogicModule Name="MSO-4" DescriptionNumber="21" ConfigurationScriptFile="MSO4_SR21_Conf.js" Version="1.0003">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -123,7 +123,7 @@
 			<Pin OpName="o_result"		OpIndex ="2"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="3"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="TCT"		OpCode="3"	HasRam="true"	ImpVersion="210"	VersionOpIndex="14"	MaxInstCount="1024" SimulationFunc="afb_tct_v210">
+		<AFBComponent Caption="TCT"		OpCode="3"	HasRam="true"	ImpVersion="210"	VersionOpIndex="14"	MaxInstCount="256" SimulationFunc="afb_tct_v210">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_counter"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_counter_dff"	OpIndex ="3"	PinType = "Input"/>
@@ -136,7 +136,7 @@
 			<Pin OpName="o_tct_edi"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  	HasRam="true"	ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="1024" SimulationFunc="afb_flipflop_v106">
+		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  	HasRam="true"	ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="256" SimulationFunc="afb_flipflop_v106">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_c_t_prev"	OpIndex ="2"	PinType = "Input"/>
@@ -269,7 +269,7 @@
 			<Pin OpName="o_bdec_edi"	OpIndex ="36"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="37"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="BCOMP"		OpCode="10"	HasRam="true"	ImpVersion="111"	VersionOpIndex="12"	MaxInstCount="512" SimulationFunc="afb_bcomp_v111">
+		<AFBComponent Caption="BCOMP"		OpCode="10"	HasRam="true"	ImpVersion="111"	VersionOpIndex="12"	MaxInstCount="256" SimulationFunc="afb_bcomp_v111">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_sp_s"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_sp_r"		OpIndex ="3"	PinType = "Param"/>
@@ -369,7 +369,7 @@
 			<Pin OpName="o_funct_edi"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DPCOMP"		OpCode="20"	HasRam="true"	ImpVersion="4"		VersionOpIndex="16"	MaxInstCount="512" SimulationFunc="afb_dpcomp_v4">
+		<AFBComponent Caption="DPCOMP"		OpCode="20"	HasRam="true"	ImpVersion="5"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_dpcomp_v5">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_hys"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="3"	PinType = "Input"/>
@@ -455,7 +455,7 @@
 			<Pin OpName="o_tconv_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INDICATION" 	OpCode="29" 	HasRam="true"	ImpVersion="1" VersionOpIndex="13" MaxInstCount="1024" SimulationFunc="afb_indication_v1">
+		<AFBComponent Caption="INDICATION" 	OpCode="29" 	HasRam="true"	ImpVersion="1" VersionOpIndex="13" MaxInstCount="256" SimulationFunc="afb_indication_v1">
 		    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_input"		OpIndex ="4"	PinType = "Input"/>
 			<Pin OpName="i_ack"		OpIndex ="5"	PinType = "Input"/>
