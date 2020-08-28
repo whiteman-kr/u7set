@@ -180,7 +180,7 @@ void TableDataVisibilityController::checkNewColumns()
 		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
 		if (columnWidth == -1)
 		{
-			m_tableView->resizeColumnToContents(i);
+			m_tableView->setColumnWidth(i, m_tableView->columnWidth(m_tableView->columnWidth(0)));
 		}
 		else
 		{
