@@ -570,6 +570,7 @@ void SignalsModel::changeRowCount()
 	{
 		beginResetModel();
 		m_rowCount = m_signalSetProvider->signalCount();
+		m_columnCount = m_signalSetProvider->signalPropertyManager().count();
 		endResetModel();
 	}
 }

@@ -1045,12 +1045,24 @@ void SignalSetProvider::loadSignals()
 	}
 	clearSignals();
 
+	m_propertyManager.init();
+	m_propertyManager.reloadPropertyBehaviour();
+
 	loadUsers();
 
-	if (!dbController()->getSignals(&m_signalSet, false, m_parentWidget))
+	SignalSet signalSetForReplacement;
+
+	if (!dbController()->getSignals(&signalSetForReplacement, false, m_parentWidget))
 	{
 		emit error(tr("Could not load signals"));
 	}
+
+	for (int i = 0; i < signalSetForReplacement.count(); i++)
+	{
+		m_propertyManager.detectNewProperties(signalSetForReplacement[i]);
+	}
+
+	std::swap(m_signalSet, signalSetForReplacement);
 
 	emit signalCountChanged();
 }
@@ -1066,6 +1078,8 @@ void SignalSetProvider::saveSignal(Signal& signal)
 	{
 		showError(state);
 	}
+
+	loadSignal(signal.ID());
 }
 
 void SignalSetProvider::saveSignals(QVector<Signal*> signalVector)
@@ -1078,6 +1092,8 @@ void SignalSetProvider::saveSignals(QVector<Signal*> signalVector)
 
 		dbController()->setSignalWorkcopy(signalVector[i], &state, m_parentWidget);
 		states.append(state);
+
+		loadSignal(signalVector[i]->ID());
 	}
 	showErrors(states);
 }
