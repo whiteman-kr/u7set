@@ -17,7 +17,7 @@ class ArchivingService : public ServiceWorker
 
 public:
 	ArchivingService(const SoftwareInfo& softwareInfo,
-						   const QString &serviceName,
+						   const QString &serviceInstanceName,
 						   int &argc,
 						   char **argv,
 						   std::shared_ptr<CircularLogger> logger);

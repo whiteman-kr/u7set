@@ -222,12 +222,12 @@ void qtServiceLogDebug(QtMsgType type, const char* msg)
     Creates a controller object for the service with the given
     \a name.
 */
-QtServiceController::QtServiceController(const QString &name)
+QtServiceController::QtServiceController(const QString& serviceName)
  : d_ptr(new QtServiceControllerPrivate())
 {
     Q_D(QtServiceController);
     d->q_ptr = this;
-    d->serviceName = name;
+	d->serviceName = serviceName;
 }
 /*!
     Destroys the service controller. This neither stops nor uninstalls
@@ -275,6 +275,7 @@ QString QtServiceController::serviceName() const
     Q_D(const QtServiceController);
     return d->serviceName;
 }
+
 /*!
     \fn QString QtServiceController::serviceDescription() const
 
@@ -437,9 +438,9 @@ private:
 
 QtServiceBase *QtServiceBasePrivate::instance = 0;
 
-QtServiceBasePrivate::QtServiceBasePrivate(const QString &name) :
+QtServiceBasePrivate::QtServiceBasePrivate(const QString& serviceName) :
     startupType(QtServiceController::ManualStartup),
-    controller(name)
+	controller(serviceName)
 {
 	serviceFlags = QtServiceBase::ServiceFlag::Default;
 }
@@ -638,7 +639,10 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
 
     \sa exec(), start(), QtServiceController::install()
 */
-QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::shared_ptr<CircularLogger> logger) :
+QtServiceBase::QtServiceBase(int argc,
+							 char **argv,
+							 const QString& serviceName,
+							 std::shared_ptr<CircularLogger> logger) :
 	m_logger(logger)
 {
 #if defined(QTSERVICE_DEBUG)
@@ -649,7 +653,7 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::sh
     Q_ASSERT(!QtServiceBasePrivate::instance);
     QtServiceBasePrivate::instance = this;
 
-    QString nm(name);
+	QString nm(serviceName);
 
 	if (nm.length() > 255)
 	{
@@ -663,7 +667,7 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::sh
 		nm.replace((QChar)'\\', (QChar)'\0');
     }
 
-    d_ptr = new QtServiceBasePrivate(nm);
+	d_ptr = new QtServiceBasePrivate(nm);
     d_ptr->q_ptr = this;
 
 	d_ptr->serviceFlags = QtServiceBase::ServiceFlag::Default;
@@ -696,9 +700,10 @@ QtServiceBase::~QtServiceBase()
 
     \sa QtServiceBase(), serviceDescription()
 */
+
 QString QtServiceBase::serviceName() const
 {
-    return d_ptr->controller.serviceName();
+	return d_ptr->controller.serviceName();
 }
 
 /*!
@@ -778,29 +783,70 @@ QtServiceBase::ServiceFlags QtServiceBase::serviceFlags() const
 */
 int QtServiceBase::exec()
 {
-	if (d_ptr->args.size() > 1)
+	const int	UNKNOWN = 0,
+				INSTALL = 1,
+				UNINSTALL = 2,
+				START = 3,
+				TERMINATE = 4;
+
+	int action = START;
+
+	for(QString arg : d_ptr->args)
 	{
-		QString a =  d_ptr->args.at(1);
-
-		if (a == QLatin1String("-i"))
+		if (arg == d_ptr->args.first())
 		{
-			return installService();
+			continue;	// skip service command line
 		}
 
-		if (a == QLatin1String("-u"))
+		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID))
 		{
-			return uninstallService();
+			continue;
 		}
 
-		if (a == QLatin1String("-t"))
+		if (arg == QtService::ARG_INSTALL)
 		{
-			return terminateService();
+			action = INSTALL;
+			break;
 		}
 
+		if (arg == QtService::ARG_UNINSTALL)
+		{
+			action = UNINSTALL;
+			break;
+		}
+
+		if (arg == QtService::ARG_TERMINATE)
+		{
+			action = TERMINATE;
+			break;
+		}
+
+		action = UNKNOWN;
+	}
+
+	switch(action)
+	{
+	case INSTALL:
+		return installService();
+
+	case UNINSTALL:
+		return uninstallService();
+
+	case START:
+		return startService();
+
+	case TERMINATE:
+		return terminateService();
+
+	default:
+		// UNKNOWN
 		DEBUG_LOG_WRN(m_logger, QString(tr("\nUnknown command line arguments of service.")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("Use -i, -u, -t keys to control service.")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("Use -h key to display available command line arguments of service.")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("Or use -e key to run service as a regular application with extended command line arguments.\n")));
+	}
+
+	return 1;
 
 /*		if (a == QLatin1String("-v") || a == QLatin1String("-version"))
 		{
@@ -831,11 +877,6 @@ int QtServiceBase::exec()
 		{
 			return printHelp();
 		}*/
-
-		return 1;
-	}
-
-	return startService();
 }
 
 
@@ -1165,10 +1206,33 @@ int QtServiceBase::startService()
     Returns a pointer to the current application's QtServiceBase
     instance.
 */
-QtServiceBase *QtServiceBase::instance()
+QtServiceBase* QtServiceBase::instance()
 {
     return QtServiceBasePrivate::instance;
 }
+
+int QtServiceBase::argc() const
+{
+	if (d_ptr == nullptr)
+	{
+		assert(false);
+		return 0;
+	}
+
+	return d_ptr->args.count();
+}
+
+QStringList QtServiceBase::args() const
+{
+	if (d_ptr == nullptr)
+	{
+		assert(false);
+		return QStringList();
+	}
+
+	return d_ptr->args;
+}
+
 
 /*!
     \fn void QtServiceBase::start()
@@ -1366,6 +1430,11 @@ void QtServiceBase::processCommand(int /*code*/)
     \sa QtServiceBase, QtServiceController
 */
 
+const QString QtService::ARG_INSTALL("-i");
+const QString QtService::ARG_UNINSTALL("-u");
+const QString QtService::ARG_TERMINATE("-t");
+const QString QtService::ARG_INSTANCE_ID("-inst");
+
 /*!
     \fn QtService::QtService(int argc, char **argv, const QString &name)
 
@@ -1378,17 +1447,36 @@ void QtServiceBase::processCommand(int /*code*/)
     \sa QtServiceBase()
 */
 
+QtService::QtService(	int argc,
+						char** argv,
+						QCoreApplication* app,
+						const QString& serviceName,
+						std::shared_ptr<CircularLogger> logger)	:
+	QtServiceBase(argc, argv, serviceName, logger),
+	m_app(app)
+{
+}
+
 /*!
     \fn QtService::~QtService()
 
     Destroys the service object.
 */
 
+QtService::~QtService()
+{
+}
+
+
 /*!
     \fn Application *QtService::application() const
 
     Returns a pointer to the application object.
 */
+QCoreApplication* QtService::application() const
+{
+	return m_app;
+}
 
 /*!
     \fn void QtService::createApplication(int &argc, char **argv)
@@ -1397,14 +1485,25 @@ void QtServiceBase::processCommand(int /*code*/)
     \a argv to its constructor.
 
     \reimp
-
 */
+void QtService::createApplication(int &argc, char **argv)
+{
+	Q_UNUSED(argc);
+	Q_UNUSED(argv);
+	/*app = new Application(argc, argv);
+	QCoreApplication *a = app;
+	Q_UNUSED(a);*/
+}
 
 /*!
     \fn int QtService::executeApplication()
 
     \reimp
 */
+int QtService::executeApplication()
+{
+	return m_app->exec();
+}
 
 
 

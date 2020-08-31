@@ -53,6 +53,8 @@
 #include <QWaitCondition>
 #include <QAbstractEventDispatcher>
 
+#include "../../lib/Service.h"
+
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable : 6011)
@@ -928,55 +930,84 @@ bool QtServiceBasePrivate::start()
     return true;
 }
 
-bool QtServiceBasePrivate::install(const QString &account, const QString &password)
+bool QtServiceBasePrivate::install(const QString& account, const QString& password)
 {
     bool result = false;
-    if (!winServiceInit())
+
+	if (winServiceInit() == false)
+	{
         return result;
+	}
 
     // Open the Service Control Manager
+	//
 	SC_HANDLE hSCM = pOpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
-    if (hSCM) {
+
+	if (hSCM)
+	{
         QString acc = account;
+
         DWORD dwStartType = startupType == QtServiceController::AutoStartup ? SERVICE_AUTO_START : SERVICE_DEMAND_START;
         DWORD dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+
 		const wchar_t *act = nullptr;
 		const wchar_t *pwd = nullptr;
-        if (!acc.isEmpty()) {
+
+		if (acc.isEmpty() == false)
+		{
             // The act string must contain a string of the format "Domain\UserName",
             // so if only a username was specified without a domain, default to the local machine domain.
-            if (!acc.contains(QChar('\\'))) {
+			if (!acc.contains(QChar('\\')))
+			{
                 acc.prepend(QLatin1String(".\\"));
             }
+
             if (!acc.endsWith(QLatin1String("\\LocalSystem")))
+			{
 				act = reinterpret_cast<const wchar_t*>(acc.utf16());
+			}
         }
-        if (!password.isEmpty() && act) {
+
+		if (!password.isEmpty() && act)
+		{
 			pwd = reinterpret_cast<const wchar_t*>(password.utf16());
         }
 
-        // Only set INTERACTIVE if act is LocalSystem. (and act should be 0 if it is LocalSystem).
-        if (!act) dwServiceType |= SERVICE_INTERACTIVE_PROCESS;
+		if (!act)
+		{
+			// Only set INTERACTIVE if act is LocalSystem. (and act should be 0 if it is LocalSystem).
+			//
+			dwServiceType |= SERVICE_INTERACTIVE_PROCESS;
+		}
 
         // Create the service
-		SC_HANDLE hService = pCreateService(hSCM, reinterpret_cast<const wchar_t *>(controller.serviceName().utf16()),
+		SC_HANDLE hService = pCreateService(hSCM,
+											reinterpret_cast<const wchar_t *>(controller.serviceName().utf16()),
 											reinterpret_cast<const wchar_t *>(controller.serviceName().utf16()),
                                             SERVICE_ALL_ACCESS,
                                             dwServiceType, // QObject::inherits ( const char * className ) for no inter active ????
-											dwStartType, SERVICE_ERROR_NORMAL, reinterpret_cast<const wchar_t *>(filePath().utf16()),
+											dwStartType,
+											SERVICE_ERROR_NORMAL,
+											reinterpret_cast<const wchar_t *>(filePathWithInstanceArg().utf16()),
 											nullptr, nullptr, nullptr,
                                             act, pwd);
-        if (hService) {
+		if (hService)
+		{
             result = true;
-            if (!serviceDescription.isEmpty()) {
+
+			if (!serviceDescription.isEmpty())
+			{
                 SERVICE_DESCRIPTION sdesc;
 				sdesc.lpDescription = const_cast<wchar_t *>(reinterpret_cast<const wchar_t *>(serviceDescription.utf16()));
                 pChangeServiceConfig2(hService, SERVICE_CONFIG_DESCRIPTION, &sdesc);
             }
+
             pCloseServiceHandle(hService);
         }
+
         pCloseServiceHandle(hSCM);
     }
+
     return result;
 }
 
@@ -987,25 +1018,37 @@ QString QtServiceBasePrivate::filePath() const
 	return QString::fromUtf16(reinterpret_cast<unsigned short*>(path));
 }
 
+
+QString QtServiceBasePrivate::filePathWithInstanceArg() const
+{
+	QString serviceInstanceID = Service::getInstanceID(q_ptr->args());
+
+	if (serviceInstanceID.isEmpty() == true)
+	{
+		return filePath();
+	}
+
+	return QString("%1 %2=%3").arg(filePath()).arg(QtService::ARG_INSTANCE_ID).arg(serviceInstanceID);
+}
+
 bool QtServiceBasePrivate::sysInit()
 {
     sysd = new QtServiceSysPrivate();
 
-	sysd->serviceStatus			    = nullptr;
-    sysd->status.dwServiceType		    = SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS;
-    sysd->status.dwCurrentState		    = SERVICE_STOPPED;
-    sysd->status.dwControlsAccepted         = sysd->serviceFlags(serviceFlags);
-    sysd->status.dwWin32ExitCode	    = NO_ERROR;
-    sysd->status.dwServiceSpecificExitCode  = 0;
-    sysd->status.dwCheckPoint		    = 0;
-    sysd->status.dwWaitHint		    = 0;
+	sysd->serviceStatus = nullptr;
+	sysd->status.dwServiceType = SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS;
+	sysd->status.dwCurrentState = SERVICE_STOPPED;
+	sysd->status.dwControlsAccepted = sysd->serviceFlags(serviceFlags);
+	sysd->status.dwWin32ExitCode = NO_ERROR;
+	sysd->status.dwServiceSpecificExitCode = 0;
+	sysd->status.dwCheckPoint = 0;
+	sysd->status.dwWaitHint = 0;
 
     return true;
 }
 
 void QtServiceBasePrivate::sysSetPath()
 {
-
 }
 
 void QtServiceBasePrivate::sysCleanup()

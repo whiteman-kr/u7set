@@ -268,7 +268,7 @@ CircularLogger::~CircularLogger()
 }
 
 
-bool CircularLogger::init(QString logName, int fileCount, int fileSizeInMB)
+bool CircularLogger::init(QString logName, QString instanceID, int fileCount, int fileSizeInMB)
 {
 	if (m_loggerInitialized == true)
 	{
@@ -293,7 +293,10 @@ bool CircularLogger::init(QString logName, int fileCount, int fileSizeInMB)
 		logName = fi.baseName();	// name log as app
 	}
 
-//	fi.setFile(logPath);
+	if (instanceID.isEmpty() == false)
+	{
+		logName.append(QString("_%1").arg(instanceID));
+	}
 
 	if (CircularLoggerWorker::writeFileCheck(logPath, logName) == false)
 	{
@@ -448,11 +451,15 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 }
 
 
-bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, const QString& logName, int fileCount, int fileSizeInMB)
+bool circularLoggerInit(std::shared_ptr<CircularLogger> logger,
+						const QString& logName,
+						const QString& instanceID,
+						int fileCount,
+						int fileSizeInMB)
 {
 	if (logger != nullptr)
 	{
-		return logger->init(logName, fileCount, fileSizeInMB);
+		return logger->init(logName, instanceID, fileCount, fileSizeInMB);
 	}
 	else
 	{
