@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::BaseService, "", 1, 0);			// EquipmentID will be set after command line args processing
 
-	BaseServiceWorker baseServiceWorker(si, "RPCT Base Service", argc, argv, logger);
+	BaseServiceWorker baseServiceWorker(si,
+										Service::getServiceInstanceName("RPCT Base Service", argc, argv),
+										argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, baseServiceWorker, logger);
 

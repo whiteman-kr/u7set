@@ -17,7 +17,9 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::DiagDataService, "", 0, 0);
 
-	DiagDataServiceWorker diagDataServiceWorker(si, "RPCT Diag Data Service", argc, argv, logger);
+	DiagDataServiceWorker diagDataServiceWorker(si,
+												Service::getServiceInstanceName("RPCT Diag Data Service", argc, argv),
+												argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, diagDataServiceWorker, logger);
 

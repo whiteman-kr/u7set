@@ -194,9 +194,8 @@ void ServiceWorker::init()
 	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
 	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
 	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("s", "Start (run) the service.");
 	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSimpleOption("inst", "Set service instance ID.");
+	m_cmdLineParser.addSingleValueOption("inst", "ServiceInstanceID", "Set service instance ID.", "InstanceID");
 	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
 
 	initCmdLineParser();

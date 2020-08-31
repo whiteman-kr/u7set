@@ -23,7 +23,9 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::TuningService, "", 1, 0);
 
-	Tuning::TuningServiceWorker tuningServiceWorker(si, "RPCT Tuning Service", argc, argv, logger, tuningLog);
+	Tuning::TuningServiceWorker tuningServiceWorker(si,
+													Service::getServiceInstanceName("RPCT Tuning Service", argc, argv),
+													argc, argv, logger, tuningLog);
 
 	ServiceStarter serviceStarter(app, tuningServiceWorker, logger);
 
