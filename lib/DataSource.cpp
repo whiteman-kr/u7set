@@ -440,11 +440,13 @@ DataSourceOnline::~DataSourceOnline()
 	}
 }
 
-bool DataSourceOnline::init()
+bool DataSourceOnline::initQueue()
 {
-	m_rupFrameTimeQueue.resize(lmRupFramesQuantity() * 200 * 5);			// 5 seconds queue
+	int queueSize = lmRupFramesQuantity() * 200 * 3;	// 3 seconds queue
 
-	setRupFramesQueueSize(m_rupFrameTimeQueue.queueSize(QThread::currentThread()));
+	m_rupFrameTimeQueue.resize(queueSize);
+
+	setRupFramesQueueSize(queueSize);
 
 	return true;
 }
@@ -745,9 +747,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					m_firstPacketSystemTime = 0;
 					m_lastPacketSystemTime = 0;
 
-					m_processedPacketCount = 0;
-					m_receivedDataSize = 0;
 					m_dataReceivingRate = 0;
+
 					m_prevCalcTime = -1;
 
 					updateUptime();
@@ -766,6 +767,23 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 		}
 
 		updateUptime();
+
+		if (m_state == E::DataSourceState::NoData)
+		{
+			m_receivedDataSize = 0;
+			m_receivedFramesCount = 0;
+			m_receivedPacketCount = 0;
+			m_lostPacketCount = 0;
+			m_processedPacketCount = 0;
+
+			m_errorProtocolVersion = 0;
+			m_errorFramesQuantity = 0;
+			m_errorFrameNo = 0;
+			m_errorDataID = 0;
+			m_errorFrameSize = 0;
+			m_errorDuplicatePlantTime = 0;
+			m_errorNonmonotonicPlantTime = 0;
+		}
 
 		m_state = E::DataSourceState::ReceiveData;
 

@@ -82,6 +82,7 @@ public:
 	// LM's properties
 	//
 	DataType lmDataType() const { return m_lmDataType; }
+	int lmDataTypeInt() const { return static_cast<int>(m_lmDataType); }
 	QString lmDataTypeStr() const { return dataTypeToString(m_lmDataType); }
 	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
 
@@ -218,10 +219,7 @@ public:
 	DataSourceOnline();
 	~DataSourceOnline();
 
-	bool init();
-
-//	void stop();
-//	void resume();
+	bool initQueue();
 
 	//
 
@@ -342,6 +340,7 @@ private:
 	qint64 m_rupFramePlantTime = 0;
 	quint16 m_rupFrameNumerator = 0;
 	bool m_dataReceives = false;
+
 	double m_dataReceivingRate = 0;
 	qint64 m_receivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
