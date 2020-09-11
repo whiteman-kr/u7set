@@ -789,7 +789,6 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 		m_dataRecevingTimeout = false;
 		m_dataReceives = true;
-		m_receivedFramesCount++;
 		m_receivedDataSize += sizeof(Rup::Frame);
 
 		calcDataReceivingRate();
