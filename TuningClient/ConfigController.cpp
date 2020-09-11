@@ -203,9 +203,10 @@ void ConfigController::start()
 
 void ConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
-	// Copy old settings to new settings
-
+	// Copy old settings to new settings, EXCEPT schemas information!
+	//
 	ConfigSettings readSettings = theConfigSettings;
+	readSettings.schemas.clear();
 
 	// Parse XML
 	//
@@ -284,6 +285,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool someFilesUpdated = false;
 
+	QStringList updateInformation;
+
 	QByteArray data;
 	QString errorStr;
 
@@ -344,6 +347,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			m_filesMD5Map[buildFileInfo.ID] = buildFileInfo.md5;
 
 			someFilesUpdated = true;
+
+			updateInformation.push_back(tr("New configuration: file '%1' updated").arg(buildFileInfo.pathFileName));
 
 			// Filters
 
@@ -465,6 +470,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.schemas.size() != readSettings.schemas.size()
 			)
 	{
+
+		updateInformation.push_back(tr("New configuration: appearance updated"));
 		apperanceUpdated = true;
 	}
 
@@ -474,10 +481,16 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	        theConfigSettings.autoApply != readSettings.autoApply ||
 	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode)
 	{
+		updateInformation.push_back(tr("New configuration: servers updated"));
 		serversUpdated = true;
 	}
 
 	theConfigSettings = readSettings;
+
+	for (const QString& str : updateInformation)
+	{
+		theLogFile->writeMessage(str);
+	}
 
 	// Emit signals to inform everybody about new configuration
 	//
@@ -489,6 +502,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
 	{
+
 		// Modify logon mode
 
 		theMainWindow->userManager()->setConfiguration(theConfigSettings.usersAccounts, theConfigSettings.logonMode, theConfigSettings.loginSessionLength);
