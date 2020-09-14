@@ -237,7 +237,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, true/*useMultipleUartProtocol*/, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 
 	// Start Timer
 	//
@@ -567,7 +567,7 @@ void UploadTabPage::settings()
 		return;
 	}
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, true/*useMultipleUartProtocol*/, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 }
 
 void UploadTabPage::disableControls()

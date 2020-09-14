@@ -255,7 +255,7 @@ protected:
 	// Slots
 	//
 public slots:
-	void setSettings(QString device, bool showDebugInfo, bool verify);
+	void setSettings(QString device, bool useMultipleUartProtocol, bool showDebugInfo, bool verify);
 
 	void readServiceInformation(int param);
 	void uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
@@ -286,6 +286,9 @@ public:
 	QString device() const;
 	void setDevice(const QString& device);
 
+	bool useMultipleUartProtocol() const;
+	void setUseMultipleUartProtocol(bool value);
+
 	bool showDebugInfo() const;
 	void setShowDebugInfo(bool showDebugInfo);
 
@@ -296,6 +299,7 @@ public:
 	//
 private:
 	QString m_device;
+	bool m_useMultipleUartProtocol = true;
 	bool m_showDebugInfo = false;
 	uint32_t m_configuratorfactoryNo = 0;
 

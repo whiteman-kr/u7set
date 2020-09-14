@@ -119,6 +119,10 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 
 	// ShowDebugInfo Check Box
 	//
+	m_pUseMultipleUartProtocol = new QCheckBox();
+	m_pUseMultipleUartProtocol->setText(tr("Use Multiple-UART Protocol if possible"));
+	m_pUseMultipleUartProtocol->setChecked(m_settings.useMultipleUartProtocol());
+
 	m_pShowDebugInfo = new QCheckBox();
 	m_pShowDebugInfo->setText(tr("Show debug information"));
 	m_pShowDebugInfo->setChecked(m_settings.showDebugInfo());
@@ -176,18 +180,19 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	pLeftGridLayout->addWidget(m_pSerialPortLabel, 0, 0);
 	pLeftGridLayout->addWidget(m_pSerialPort, 0, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pShowDebugInfo, 1, 0, 1, 3);
-	pLeftGridLayout->addWidget(m_pVerify, 2, 0, 1, 3);
-	pLeftGridLayout->addWidget(m_pExpertMode, 3, 0, 1, 3);
+	pLeftGridLayout->addWidget(m_pUseMultipleUartProtocol, 1, 0, 1, 3);
+	pLeftGridLayout->addWidget(m_pShowDebugInfo, 2, 0, 1, 3);
+	pLeftGridLayout->addWidget(m_pVerify, 3, 0, 1, 3);
+	pLeftGridLayout->addWidget(m_pExpertMode, 4, 0, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerLabel, 4, 0);
-	pLeftGridLayout->addWidget(m_pServer, 4, 1, 1, 3);
+	pLeftGridLayout->addWidget(m_pServerLabel, 5, 0);
+	pLeftGridLayout->addWidget(m_pServer, 5, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerUsernameLabel, 5, 0);
-	pLeftGridLayout->addWidget(m_pServerUsername, 5, 1, 1, 3);
+	pLeftGridLayout->addWidget(m_pServerUsernameLabel, 6, 0);
+	pLeftGridLayout->addWidget(m_pServerUsername, 6, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerPasswordLabel, 6, 0);
-	pLeftGridLayout->addWidget(m_pServerPassword, 6, 1, 1, 3);
+	pLeftGridLayout->addWidget(m_pServerPasswordLabel, 7, 0);
+	pLeftGridLayout->addWidget(m_pServerPassword, 7, 1, 1, 3);
 
 	pLeftLayout->addStretch();
 		
@@ -214,6 +219,7 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	connect(m_pCancelButton, &QPushButton::clicked, this, &QDialog::reject);
 	connect(m_pSerialPort, &QComboBox::currentTextChanged, this, &SettingsForm::currentSerialPortChanged);
 	
+	connect(m_pUseMultipleUartProtocol, &QCheckBox::stateChanged, this, &SettingsForm::useMultipleUartProtocolChanged);
 	connect(m_pShowDebugInfo, &QCheckBox::stateChanged, this, &SettingsForm::showDebugInfoChanged);
 	connect(m_pVerify, &QCheckBox::stateChanged, this, &SettingsForm::verifyChanged);
 	connect(m_pExpertMode, &QCheckBox::stateChanged, this, &SettingsForm::expertModeChanged);
@@ -234,6 +240,11 @@ const Settings& SettingsForm::settings() const
 void SettingsForm::currentSerialPortChanged(const QString & text)
 {
 	m_settings.setSerialPort(text);
+}
+
+void SettingsForm::useMultipleUartProtocolChanged(int state)
+{
+	m_settings.setUseMultipleUartProtocol(state == static_cast<int>(Qt::Checked));
 }
 
 void SettingsForm::showDebugInfoChanged(int state)

@@ -380,6 +380,16 @@ void Configurator::setDevice(const QString& device)
 	return;
 }
 
+bool Configurator::useMultipleUartProtocol() const
+{
+	return m_useMultipleUartProtocol;
+}
+
+void Configurator::setUseMultipleUartProtocol(bool value)
+{
+	m_useMultipleUartProtocol = value;
+}
+
 bool Configurator::showDebugInfo() const
 {
 	return m_showDebugInfo;
@@ -784,9 +794,10 @@ bool Configurator::send(int moduleUartId,
 	return true;
 }
 
-void Configurator::setSettings(QString device, bool showDebugInfo, bool verify)
+void Configurator::setSettings(QString device, bool useMultipleUartProtocol, bool showDebugInfo, bool verify)
 {
 	this->setDevice(device);
+	this->setUseMultipleUartProtocol(useMultipleUartProtocol);
 	this->setShowDebugInfo(showDebugInfo);
 	this->setVerify(verify);
 
@@ -885,304 +896,337 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 		return;
 	}
 
-	try
+	std::vector<UartPair> availableUarts = conf.uartList();
+
+	for (UartPair& uartPair : availableUarts)
 	{
-		//
-		// PING command
-		//
-		std::vector<quint8> nopReply;
-		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+		bool multipleUartProtocol = false;
 
-		if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
+		int availebleUartId = uartPair.first;
+
+		try
 		{
-			throw tr("Communication error.");
-		}
-
-		int protocolVersion = pingReceivedHeader.version;
-		int moduleUartId = 0;
-		uint16_t blockSize = 0;
-		int frameSize = 0;
-		int blockCount = 0;
-
-		switch (protocolVersion)
-		{
-		case 1:
-			{
-				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
-
-				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
-				blockSize = pingReplyVersioned.blockSize;
-				frameSize = pingReplyVersioned.frameSize;
-				blockCount = pingReplyVersioned.romSize / pingReplyVersioned.blockSize;
-
-				m_currentUartId = moduleUartId;
-
-				emit uartOperationStart(m_currentUartId, "Uploading");
-
-				m_Log->writeMessage(tr("UART ID is %1h").arg(QString::number(m_currentUartId, 16)));
-
-				// Check if firmware exists for current uart
-
-				if (conf.uartExists(m_currentUartId) == false)
-				{
-					throw tr("No firmware data exists for current UART ID.");
-				}
-
-				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf.eepromFramePayloadSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf.eepromFrameSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf.eepromFrameCount(m_currentUartId))));
-
-				int confFrameDataSize = conf.eepromFramePayloadSize(m_currentUartId);
-
-				if (pingReplyVersioned.frameSize < confFrameDataSize)
-				{
-					throw tr("EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.").arg(confFrameDataSize).arg(frameSize);
-				}
-
-				// Ignore Wrong moduleUartId flag
-				//
-				pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
-
-				// Check flags
-				//
-				if (pingReplyVersioned.flagStateSuccess() != true)
-				{
-					pingReplyVersioned.dumpFlagsState(m_Log);
-					throw tr("Communication error.");
-				}
-			}
-			break;
-		default:
-			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-			throw tr("Communication error.");
-		}
-
-		assert(protocolVersion != 0);
-		assert(moduleUartId != 0);
-		assert(blockSize != 0);
-
-		//
-		// READ IDENTIFICATION BLOCK
-		//
-		m_Log->writeMessage(tr("Read identification block."));
-
-		std::vector<uint8_t> identificationData;
-		switch (protocolVersion)
-		{
-		case 1:
-			{
-				CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
-
-				if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<uint8_t>(), &readReceivedHeader, &identificationData);
-					sendOk == false)
-				{
-					throw tr("Communication error.");
-				}
-
-				assert(protocolVersion == readReceivedHeader.version);
-
-				// Ignoring all flags, CRC, etc
-				//
-			}
-			break;
-		default:
-			assert(false);
-		}
-
-		//
-		// WRITE IDENTIFICATION BLOCK
-		//
-		if (identificationData.size() != blockSize)
-		{
-			identificationData.resize(blockSize);
-		}
-
-		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
-		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
-				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
-		{
-
-			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
-			{
-				m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
-									arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
-			}
-
-			if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
-			{
-				throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
-			}
-
-			memset(identificationData.data(), 0, identificationData.size());
-
-			// This is the first configuration
 			//
-			pReadIdentificationStruct->createFirstConfiguration(storage);
-
-		}
-		else
-		{
-			pReadIdentificationStruct->createNextConfiguration(storage);
-			//pReadIdentificationStruct->dump(m_Log);
-
-		}
-
-		// Set Crc to identificationData
-		//
-		Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
-
-		CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-		std::vector<uint8_t> replyData;
-		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
-		{
-			throw tr("Communication error.");
-		}
-
-		if (replyIdentificationHeader.version != 1)
-		{
-			throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyIdentificationHeader.version) + ".";
-		}
-
-		if (replyIdentificationHeader.flagStateSuccess() != true)
-		{
-			replyIdentificationHeader.dumpFlagsState(m_Log);
-			throw tr("Communication error.");
-		}
-
-		if (verify() == true)
-		{
-			// Verify the written identificationData
+			// PING command
 			//
+			std::vector<quint8> nopReply;
+			CONF_HEADER pingReceivedHeader = CONF_HEADER();
 
-			m_Log->writeMessage(tr("Verifying block %1").arg(IdentificationFrameIndex));
-
-			std::vector<quint8> readData;
-			CONF_HEADER readReceivedHeader = CONF_HEADER();
-
-			if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+			if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
 			{
 				throw tr("Communication error.");
 			}
 
-			if (identificationData.size() != readData.size())
+			int protocolVersion = pingReceivedHeader.version;
+			int moduleUartId = 0;
+			uint16_t blockSize = 0;
+			int frameSize = 0;
+			int blockCount = 0;
+
+			switch (protocolVersion)
 			{
-				throw(tr("Send identificationData size does not match received data size in frame %1.").arg(IdentificationFrameIndex));
-			}
-			for (int v = 0; v < identificationData.size(); v++)
-			{
-				if (readData[v] != identificationData[v])
+			case 1:
 				{
-					throw(tr("Sent identificationData does not match received data size in frame %1, offset %2.").arg(IdentificationFrameIndex).arg(v));
+					CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
+
+					protocolVersion = pingReplyVersioned.version;
+					moduleUartId = pingReplyVersioned.moduleUartId;
+					blockSize = pingReplyVersioned.blockSize;
+					frameSize = pingReplyVersioned.frameSize;
+					blockCount = pingReplyVersioned.romSize / pingReplyVersioned.blockSize;
+
+					if (useMultipleUartProtocol() == true)
+					{
+						if ((moduleUartId & 0x8000) != 0)
+						{
+							m_Log->writeMessage(tr("Module supports multi-UART protocol."));
+							multipleUartProtocol = true;
+							m_currentUartId = availebleUartId;
+						}
+						else
+						{
+							m_Log->writeMessage(tr("Module does not support multi-UART protocol."));
+							m_currentUartId = moduleUartId;
+						}
+					}
+					else
+					{
+						m_currentUartId = moduleUartId & (~0x8000);
+					}
+
+
+					emit uartOperationStart(m_currentUartId, "Uploading");
+
+					m_Log->writeMessage(tr("UART ID is %1h").arg(QString::number(m_currentUartId, 16)));
+
+					// Check if firmware exists for current uart
+
+					if (conf.uartExists(m_currentUartId) == false)
+					{
+						throw tr("No firmware data exists for current UART ID.");
+					}
+
+					m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf.eepromFramePayloadSize(m_currentUartId))));
+					m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf.eepromFrameSize(m_currentUartId))));
+					m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf.eepromFrameCount(m_currentUartId))));
+
+					int confFrameDataSize = conf.eepromFramePayloadSize(m_currentUartId);
+
+					if (pingReplyVersioned.frameSize < confFrameDataSize)
+					{
+						throw tr("EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.").arg(confFrameDataSize).arg(frameSize);
+					}
+
+					// Ignore Wrong moduleUartId flag
+					//
+					pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
+
+					// Check flags
+					//
+					if (pingReplyVersioned.flagStateSuccess() != true)
+					{
+						pingReplyVersioned.dumpFlagsState(m_Log);
+						throw tr("Communication error.");
+					}
+				}
+				break;
+			default:
+				m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+				throw tr("Communication error.");
+			}
+
+			assert(protocolVersion != 0);
+			assert(moduleUartId != 0);
+			assert(blockSize != 0);
+
+			//
+			// READ IDENTIFICATION BLOCK
+			//
+			m_Log->writeMessage(tr("Read identification block."));
+
+			std::vector<uint8_t> identificationData;
+			switch (protocolVersion)
+			{
+			case 1:
+				{
+					CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
+
+					if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<uint8_t>(), &readReceivedHeader, &identificationData);
+						sendOk == false)
+					{
+						throw tr("Communication error.");
+					}
+
+					assert(protocolVersion == readReceivedHeader.version);
+
+					// Ignoring all flags, CRC, etc
+					//
+				}
+				break;
+			default:
+				assert(false);
+			}
+
+			//
+			// WRITE IDENTIFICATION BLOCK
+			//
+			if (identificationData.size() != blockSize)
+			{
+				identificationData.resize(blockSize);
+			}
+
+			CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+			if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
+				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
+			{
+
+				if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+				{
+					m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
+										arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
+				}
+
+				if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
+				{
+					throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
+				}
+
+				memset(identificationData.data(), 0, identificationData.size());
+
+				// This is the first configuration
+				//
+				pReadIdentificationStruct->createFirstConfiguration(storage);
+
+			}
+			else
+			{
+				pReadIdentificationStruct->createNextConfiguration(storage);
+				//pReadIdentificationStruct->dump(m_Log);
+
+			}
+
+			// Set Crc to identificationData
+			//
+			Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
+
+			CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
+			std::vector<uint8_t> replyData;
+			if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
+			{
+				throw tr("Communication error.");
+			}
+
+			if (replyIdentificationHeader.version != 1)
+			{
+				throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyIdentificationHeader.version) + ".";
+			}
+
+			if (replyIdentificationHeader.flagStateSuccess() != true)
+			{
+				replyIdentificationHeader.dumpFlagsState(m_Log);
+				throw tr("Communication error.");
+			}
+
+			if (verify() == true)
+			{
+				// Verify the written identificationData
+				//
+
+				m_Log->writeMessage(tr("Verifying block %1").arg(IdentificationFrameIndex));
+
+				std::vector<quint8> readData;
+				CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+				if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+				{
+					throw tr("Communication error.");
+				}
+
+				if (identificationData.size() != readData.size())
+				{
+					throw(tr("Send identificationData size does not match received data size in frame %1.").arg(IdentificationFrameIndex));
+				}
+				for (int v = 0; v < identificationData.size(); v++)
+				{
+					if (readData[v] != identificationData[v])
+					{
+						throw(tr("Sent identificationData does not match received data size in frame %1, offset %2.").arg(IdentificationFrameIndex).arg(v));
+					}
 				}
 			}
-		}
 
-		//
-		// WRITE CONFIGURATION command
-		//
-		switch (protocolVersion)
-		{
-		case 1:
+			//
+			// WRITE CONFIGURATION command
+			//
+			switch (protocolVersion)
 			{
-				m_Log->writeMessage("Write configuration...");
-
-				for (uint16_t i = 0; i < conf.eepromFrameCount(m_currentUartId); i++)
+			case 1:
 				{
-					if (m_cancelFlag == true)
-					{
-						m_Log->writeMessage("Write configuration cancelled.");
-						break;
-					}
+					m_Log->writeMessage("Write configuration...");
 
-					uint16_t frameIndex = i;
-
-					if (frameIndex == IdentificationFrameIndex)
+					for (uint16_t i = 0; i < conf.eepromFrameCount(m_currentUartId); i++)
 					{
-						// Skip identifiaction frame
+						if (m_cancelFlag == true)
+						{
+							m_Log->writeMessage("Write configuration cancelled.");
+							break;
+						}
+
+						uint16_t frameIndex = i;
+
+						if (frameIndex == IdentificationFrameIndex)
+						{
+							// Skip identifiaction frame
+							//
+							continue;
+						}
+
+						m_Log->writeMessage(tr("Writing block %1").arg(frameIndex));
+
+						if (frameIndex >= blockCount)
+						{
+							throw tr("Wrong FrameIndex %1").arg(frameIndex);
+						}
+
+						const std::vector<quint8> frameData = conf.frame(m_currentUartId, i);
+
+						if (frameData.size() != blockSize)
+						{
+							throw tr("Frame %1 size (%2) does not match module's BlockSize (%3).").arg(i).arg(frameData.size()).arg(blockSize);
+						}
+
+						// Write data
 						//
-						continue;
-					}
+						CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
+						std::vector<uint8_t> replyBuffer;
+						bool sendResult = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyBuffer);
 
-					m_Log->writeMessage(tr("Writing block %1").arg(frameIndex));
-
-					if (frameIndex >= blockCount)
-					{
-						throw tr("Wrong FrameIndex %1").arg(frameIndex);
-					}
-
-					const std::vector<quint8> frameData = conf.frame(m_currentUartId, i);
-
-					if (frameData.size() != blockSize)
-					{
-						throw tr("Frame %1 size (%2) does not match module's BlockSize (%3).").arg(i).arg(frameData.size()).arg(blockSize);
-					}
-
-					// Write data
-					//
-					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					std::vector<uint8_t> replyBuffer;
-					bool sendResult = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyBuffer);
-
-					if (sendResult == false)
-					{
-						throw tr("Communication error.");
-					}
-
-					if (replyHeader.version != 1)
-					{
-						throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
-					}
-
-					if (replyHeader.flagStateSuccess() != true)
-					{
-						replyHeader.dumpFlagsState(m_Log);
-						throw tr("Communication error.");
-					}
-
-					if (verify() == true)
-					{
-						// Verify the written data
-						//
-
-						m_Log->writeMessage(tr("Verifying block %1").arg(frameIndex));
-
-						std::vector<quint8> readData;
-						CONF_HEADER readReceivedHeader = CONF_HEADER();
-
-						if (send(moduleUartId, Read, frameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+						if (sendResult == false)
 						{
 							throw tr("Communication error.");
 						}
 
-						if (frameData.size() != readData.size())
+						if (replyHeader.version != 1)
 						{
-							throw(tr("Send data size does not match received data size in frame %1.").arg(frameIndex));
+							throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
 						}
-						for (int v = 0; v < frameData.size(); v++)
+
+						if (replyHeader.flagStateSuccess() != true)
 						{
-							if (readData[v] != frameData[v])
+							replyHeader.dumpFlagsState(m_Log);
+							throw tr("Communication error.");
+						}
+
+						if (verify() == true)
+						{
+							// Verify the written data
+							//
+
+							m_Log->writeMessage(tr("Verifying block %1").arg(frameIndex));
+
+							std::vector<quint8> readData;
+							CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+							if (send(moduleUartId, Read, frameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
 							{
-								throw(tr("Send data does not match received data size in frame %1, offset %2.").arg(frameIndex).arg(v));
+								throw tr("Communication error.");
+							}
+
+							if (frameData.size() != readData.size())
+							{
+								throw(tr("Send data size does not match received data size in frame %1.").arg(frameIndex));
+							}
+							for (int v = 0; v < frameData.size(); v++)
+							{
+								if (readData[v] != frameData[v])
+								{
+									throw(tr("Send data does not match received data size in frame %1, offset %2.").arg(frameIndex).arg(v));
+								}
 							}
 						}
 					}
 				}
+				break;
+			default:
+				assert(false);
 			}
+
+			// --
+			//
+			m_Log->writeSuccess(tr("Successful."));
+
+			emit uploadFirmwareComplete(m_currentUartId);
+		}
+		catch (QString str)
+		{
+			m_Log->writeError(str);
 			break;
-		default:
-			assert(false);
 		}
 
-		// --
-		//
-		m_Log->writeSuccess(tr("Successful."));
-
-		emit uploadFirmwareComplete(m_currentUartId);
-	}
-	catch (QString str)
-	{
-		m_Log->writeError(str);
+		if (multipleUartProtocol == false)
+		{
+			break;
+		}
 	}
 
 	// Close connection

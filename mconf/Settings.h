@@ -13,6 +13,9 @@ public:
 	QString serialPort() const;
 	void setSerialPort(const QString& value);
 
+	bool useMultipleUartProtocol() const;
+	void setUseMultipleUartProtocol(bool value);
+
 	bool showDebugInfo() const;
 	void setShowDebugInfo(bool value);
 
@@ -33,6 +36,7 @@ public:
 
 private:
 	QString m_serialPort;
+	bool m_useMultipleUartProtocol;
 	bool m_showDebugInfo;
 	bool m_verify;
 	bool m_expertMode;

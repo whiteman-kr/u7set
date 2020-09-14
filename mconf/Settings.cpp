@@ -9,6 +9,7 @@ Settings::Settings(void) :
 #ifdef Q_OS_WIN32
 	m_serialPort("\\\\.\\COM3"),
 #endif
+	m_useMultipleUartProtocol(true),
 	m_showDebugInfo(false),
 	m_verify(true),
 	m_expertMode(false),
@@ -28,6 +29,7 @@ void Settings::save() const
 	QSettings s;
 
 	s.setValue("m_serialPort", m_serialPort);
+	s.setValue("m_useMultipleUartProtocol", m_useMultipleUartProtocol);
 	s.setValue("m_showDebugInfo", m_showDebugInfo);
 	s.setValue("m_verify", m_verify);
 	s.setValue("m_expertMode", m_expertMode);
@@ -44,6 +46,7 @@ void Settings::load()
 	QSettings s;
 
 	m_serialPort = s.value("m_serialPort").toString();
+	m_useMultipleUartProtocol = s.value("m_useMultipleUartProtocol", m_useMultipleUartProtocol).toBool();
 	m_showDebugInfo = s.value("m_showDebugInfo").toBool();
 	m_verify = s.value("m_verify").toBool();
 	m_expertMode = s.value("m_expertMode").toBool();
@@ -63,6 +66,16 @@ QString Settings::serialPort() const
 void Settings::setSerialPort(const QString& value)
 {
 	m_serialPort = value;
+}
+
+bool Settings::useMultipleUartProtocol() const
+{
+	return m_useMultipleUartProtocol;
+}
+
+void Settings::setUseMultipleUartProtocol(bool value)
+{
+	m_useMultipleUartProtocol = value;
 }
 
 bool Settings::showDebugInfo() const

@@ -35,7 +35,7 @@ protected slots:
 	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
 signals:
-	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
+	void setCommunicationSettings(QString device, bool useMultipleUartProtocol, bool showDebugInfo, bool verify);
 
 	void readConfiguration(int);
 	void readFirmware(QString fileName);

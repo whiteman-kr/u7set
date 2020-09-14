@@ -41,7 +41,7 @@ private slots:
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 signals:
-	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
+	void setCommunicationSettings(QString device, bool useMultipleUartProtocol, bool showDebugInfo, bool verify);
 	
 	void readServiceInformation(int);
 	void readFirmware(QString fileName);
