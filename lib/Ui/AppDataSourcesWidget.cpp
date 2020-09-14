@@ -214,6 +214,9 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemNumber("ProcessedPacketCount", ds.state.processedpacketcount());
 
 	QDateTime tm;
+
+	tm.setTimeSpec(Qt::UTC);
+
 	tm.setMSecsSinceEpoch(ds.state.lastpacketsystemtime());
 	setDataItemText("LastPacketSystemTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 

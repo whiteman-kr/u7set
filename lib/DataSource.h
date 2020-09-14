@@ -215,6 +215,8 @@ private:
 	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
 	static const int DATA_RECEIVING_RATE_CALC_PERIOD = 2000;
 
+	static const QString DATE_TIME_FORMAT_STR;
+
 public:
 	DataSourceOnline();
 	~DataSourceOnline();
@@ -243,6 +245,7 @@ public:
 	void setRupFramesQueueCurMaxSize(int size) { m_rupFramesQueueCurMaxSize = size; }
 
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
+	QString rupFramePlantTimeStr() const;
 	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
 
 	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
@@ -294,6 +297,7 @@ public:
 	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
 
 	qint64 lastPacketSystemTime() const { return m_lastPacketSystemTime; }
+	QString lastPacketSystemTimeStr() const;
 	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketSystemTime = sysTime; }
 
 	// Functions used by receiver thread
@@ -321,6 +325,8 @@ private:
 	bool reallocate(quint32 framesQuantity);
 
 	void calcDataReceivingRate();
+
+	QString getTimeStr(qint64 timeMs) const;
 
 private:
 	// static information
