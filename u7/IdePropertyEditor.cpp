@@ -150,7 +150,17 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
 
     connect(m_findButton, &QPushButton::clicked, this, &DialogFindReplace::onFind);
     connect(m_replaceButton, &QPushButton::clicked, this, &DialogFindReplace::onReplace);
-    connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAll);
+	connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAllButton);
+
+	// Replace menu
+
+	m_replaceSelectedAction = new QAction("Process Selected Text");
+	connect(m_replaceSelectedAction, &QAction::triggered, [this](){onReplaceAll(true/*selectedOnly*/);});
+	m_replaceMenu.addAction(m_replaceSelectedAction);
+
+	m_replaceAllAction = new QAction("Process All Text");
+	connect(m_replaceAllAction, &QAction::triggered, [this](){onReplaceAll(false/*selectedOnly*/);});
+	m_replaceMenu.addAction(m_replaceAllAction);
 
 	// Layout
 
@@ -213,23 +223,39 @@ void DialogFindReplace::onReplace()
     emit replace(textFind, textReplace);
 }
 
-void DialogFindReplace::onReplaceAll()
+void DialogFindReplace::onReplaceAllButton()
 {
-    QString textFind = m_findEdit->text();
-    if (textFind.isEmpty() == true)
-    {
-        return;
-    }
+	bool hasSelection = false;
 
-    QString textReplace = m_replaceEdit->text();
-    if (textReplace.isEmpty() == true)
-    {
-        return;
-    }
+	emit hasSelectedText(&hasSelection);
+
+	if (hasSelection == true)
+	{
+		m_replaceMenu.popup(QCursor::pos());
+	}
+	else
+	{
+		onReplaceAll(false/*selectedOnly*/);
+	}
+}
+
+void DialogFindReplace::onReplaceAll(bool selectedOnly)
+{
+	QString textFind = m_findEdit->text();
+	if (textFind.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString textReplace = m_replaceEdit->text();
+	if (textReplace.isEmpty() == true)
+	{
+		return;
+	}
 
 	saveCompleters();
 
-    emit replaceAll(textFind, textReplace);
+	emit replaceAll(textFind, textReplace, selectedOnly);
 }
 
 void DialogFindReplace::saveCompleters()
@@ -442,42 +468,56 @@ void IdeCodeEditor::replace(QString findText, QString replaceText)
 	m_textEdit->replace(replaceText);
 }
 
-void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
+void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool selectedOnly)
 {
 	if (findText.isEmpty() || replaceText.isEmpty())
 	{
 		return;
 	}
 
-	int counter = 0;
+	QString selectedText;
 
-	m_findText = findText;
-
-	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	if (selectedOnly == true)
 	{
+		selectedText = m_textEdit->selectedText();
+	}
+	else
+	{
+		selectedText = m_textEdit->text();
+	}
+
+	int counter = selectedText.count(findText);
+
+	if (counter == 0)
+	{
+		QMessageBox::information(this, qAppName(), tr("Text was not found."));
 		return;
 	}
 
-	while (counter < 1000)
+	selectedText.replace(findText, replaceText);
+
+	if (selectedOnly == true)
 	{
-		m_textEdit->replace(replaceText);
-
-		counter++;
-
-		if (m_textEdit->findNext() == false)
-		{
-			break;
-		}
-
-		if (counter >= 1000)
-		{
-			// for not to hang
-			assert(false);
-			break;
-		}
+		m_textEdit->replaceSelectedText(selectedText);
+	}
+	else
+	{
+		m_textEdit->setText(selectedText);
 	}
 
 	QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+}
+
+void IdeCodeEditor::hasSelectedText(bool* result)
+{
+	if (result == nullptr)
+	{
+		Q_ASSERT(result);
+		return;
+	}
+
+	*result = m_textEdit->hasSelectedText();
+	return;
 }
 
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
@@ -502,6 +542,7 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 					connect(m_findReplace, &DialogFindReplace::findFirst, this, &IdeCodeEditor::findFirst);
 					connect(m_findReplace, &DialogFindReplace::replace, this, &IdeCodeEditor::replace);
 					connect(m_findReplace, &DialogFindReplace::replaceAll, this, &IdeCodeEditor::replaceAll);
+					connect(m_findReplace, &DialogFindReplace::hasSelectedText, this, &IdeCodeEditor::hasSelectedText, Qt::DirectConnection);
 				}
 
 				m_findReplace->show();
