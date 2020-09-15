@@ -3349,7 +3349,7 @@ namespace Sim
 				result.mulFloatingPoint(*k1);
 				result.addFloatingPoint(*k2);
 
-				if (result.floatValue() > std::numeric_limits<qint32>().max())
+				if (result.floatValue() > static_cast<float>(std::numeric_limits<qint32>().max()))
 				{
 					// Overflow
 					//
@@ -3742,6 +3742,7 @@ namespace Sim
 		const int o_overflow = 10;		// Result
 		const int o_underflow = 11;		// Result
 		const int o_nan = 13;			// Any input FP param NaN
+		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
 
 		// Get params, throws exception in case of error
 		//
@@ -3755,6 +3756,16 @@ namespace Sim
 			qint32 settingValue = instance->param(i_setting)->signedIntValue();
 			qint32 inputValue = instance->param(i_data)->signedIntValue();
 			quint16 prevResult = 0;
+
+			if (hystValue < 0)
+			{
+				hystValue = 0;
+				instance->addParamWord(o_param_err, 1);
+			}
+			else
+			{
+				instance->addParamWord(o_param_err, 0);
+			}
 
 			switch (conf)
 			{
@@ -3848,7 +3859,18 @@ namespace Sim
 				instance->addParamWord(i_prev_result, 0);
 				instance->addParamWord(o_overflow, 0);
 				instance->addParamWord(o_underflow, 0);
+				instance->addParamWord(o_param_err, 0);
 				return;
+			}
+
+			if (hystValue < 0)
+			{
+				hystValue = 0;
+				instance->addParamWord(o_param_err, 1);
+			}
+			else
+			{
+				instance->addParamWord(o_param_err, 0);
 			}
 
 			// --
@@ -3965,6 +3987,8 @@ namespace Sim
 
 			return;
 		}
+
+
 
 		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
 		return;
