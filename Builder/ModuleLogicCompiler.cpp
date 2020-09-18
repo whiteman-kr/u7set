@@ -5254,7 +5254,7 @@ namespace Builder
 
 			if (setDiscreteAndBusInputSignalsUalAddresses() == false) break;
 
-			if (setTunableSignalsUalAddresses() == false) break;
+			if (disposeTunableSignalsUalAddresses() == false) break;
 
 			if (disposeDiscreteSignalsInBitMemory() == false) break;
 
@@ -5402,7 +5402,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setTunableSignalsUalAddresses()
+	bool ModuleLogicCompiler::disposeTunableSignalsUalAddresses()
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -5436,6 +5436,8 @@ namespace Builder
 			if (ualSignal != nullptr)
 			{
 				ualSignal->setUalAddr(s->tuningAbsAddr());
+
+				result &= m_memoryMap.appendTuningSignal(ualSignal);
 			}
 		}
 
