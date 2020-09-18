@@ -66,18 +66,21 @@ class DialogFindReplace : public QDialog
 {
     Q_OBJECT
 public:
-    DialogFindReplace(QWidget* parent);
+	DialogFindReplace(QWidget* parent);
 	~DialogFindReplace();
 
 signals:
     void findFirst(QString findText);
     void replace(QString findText, QString text);
-    void replaceAll(QString findText, QString replaceText);
+	void replaceAll(QString findText, QString replaceText, bool selectedOnly);
+
+	void hasSelectedText(bool* result);	// Use Qt::DirectConnection for this
 
 private slots:
     void onFind();
     void onReplace();
-    void onReplaceAll();
+	void onReplaceAllButton();
+	void onReplaceAll(bool selectedOnly);
 
 private:
 	void saveCompleters();
@@ -92,6 +95,11 @@ private:
 
 	QCompleter* m_findCompleter = nullptr;
 	QCompleter* m_replaceCompleter = nullptr;
+
+	QMenu m_replaceMenu;
+	QAction* m_replaceSelectedAction = nullptr;
+	QAction* m_replaceAllAction = nullptr;
+
 };
 
 //
@@ -118,10 +126,12 @@ public:
 	virtual void setReadOnly(bool value) override;
 
 public slots:
-    void findFirst(QString findText);
+	void findFirst(QString findText);
     void findNext();
-    void replace(QString findText, QString replaceText);
-    void replaceAll(QString findText, QString replaceText);
+	void replace(QString findText, QString replaceText);
+	void replaceAll(QString findText, QString replaceText, bool selectedOnly);
+
+	void hasSelectedText(bool* result);
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event);
