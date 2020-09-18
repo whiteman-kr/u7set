@@ -55,12 +55,31 @@ DSC_COUNT = 41;
 const int dataSourceStateColumn[] =
 {
 	DSC_STATE,
+	DSC_RECEIVES_DATA,
 	DSC_UPTIME,
+	DSC_RECEIVED_DATA_ID,
+	DSC_RUP_FRAME_PLANT_TIME,
+	DSC_RUP_FRAMES_QUEUE_SIZE,
+	DSC_RUP_FRAMES_QUEUE_MAX_SIZE,
 	DSC_RECEIVED,
 	DSC_SPEED,
+	DSC_RECEIVED_FRAMES_COUNT,
+	DSC_RECEIVED_PACKET_COUNT,
+	DSC_DATA_PROCESSING_ENABLED,
+	DSC_PROCESSED_PACKET_COUNT,
+	DSC_LAST_PACKET_SYSTEM_TIME,
+	DSC_RUP_FRAME_PLANT_TIME,
+	DSC_RUP_FRAME_NUMERATOR,
+	DSC_SIGNAL_STATES_QUEUE_SIZE,
+	DSC_SIGNAL_STATES_QUEUE_MAX_SIZE,
+	DSC_ACQUIRED_SIGNALS_COUNT,
 	DSC_ERROR_PROTOCOL_VERSION,
 	DSC_ERROR_FRAMES_QUANTITY,
 	DSC_ERROR_FRAME_NOMBER,
+	DSC_ERROR_DATA_ID,
+	DSC_ERROR_BAD_FRAME_SIZE,
+	DSC_ERROR_DUPLICATE_PLANT_TIME,
+	DSC_ERROR_NONMONOTONIC_PLANT_TIME,
 	DSC_LOST_PACKET_COUNT,
 };
 
@@ -163,7 +182,6 @@ SC_REG_VALIDITY_ADDR = 28,
 SC_LOW_VALID_RANGE = 29,
 SC_HIGH_VALID_RANGE = 30,
 
-SC_FIRST_STATE_COLUMN = 31,
 SC_VALUE = 31,
 SC_IS_VALID = 32,
 SC_IS_FINE_APERTURE = 33,
@@ -174,6 +192,22 @@ SC_SYSTEM_TIME = 37,
 SC_LOCAL_TIME = 38,
 SC_PLANT_TIME = 39,
 SC_COUNT = 40;
+
+const int signalStateColumn[] =
+{
+	SC_VALUE,
+	SC_IS_VALID,
+	SC_IS_FINE_APERTURE,
+	SC_IS_COARSE_APERTURE,
+	SC_IS_AUTO_POINT,
+	SC_IS_VALIDITY_CHANGE,
+	SC_SYSTEM_TIME,
+	SC_LOCAL_TIME,
+	SC_PLANT_TIME,
+};
+
+const int SIGNAL_STATE_COLUMN_COUNT = sizeof(signalStateColumn) / sizeof(signalStateColumn[0]);
+
 
 const char* const signalColumnStr[] =
 {
@@ -227,7 +261,6 @@ const QVector<int> defaultSignalColumnVisibility =
 {
 	SC_APP_SIGNAL_ID,
 	SC_CAPTION,
-	SC_FIRST_STATE_COLUMN,
 	SC_VALUE,
 	SC_IS_VALID,
 	SC_UNIT,
@@ -556,56 +589,41 @@ void AppDataServiceWidget::updateSignalInfo()
 void AppDataServiceWidget::updateSourceStateColumns()
 {
 	int firstVisibleRow = m_dataSourcesView->rowAt(0);
-	int lastVisibleRow = m_dataSourcesView->rowAt(m_signalsView->height());
+
+	int lastVisibleRow = m_dataSourcesView->rowAt(m_dataSourcesView->height());
 	if (lastVisibleRow == -1)
 	{
 		lastVisibleRow = m_dataSourcesStateModel->rowCount() - 1;
 	}
 
-	int firstVisibleColumn = m_dataSourcesView->columnAt(0);
-	int lastVisibleColumn = m_dataSourcesView->columnAt(m_dataSourcesView->width());
-	if (lastVisibleColumn == -1)
-	{
-		lastVisibleColumn = m_dataSourcesStateModel->columnCount() - 1;
-	}
-
 	for (int i = 0; i < DATA_SOURCE_STATE_COLUMN_COUNT; i++)
 	{
 		int currentColumn = dataSourceStateColumn[i];
-		if (currentColumn >= firstVisibleColumn && currentColumn <= lastVisibleColumn)
-		{
-			m_dataSourcesStateModel->updateData(firstVisibleRow,
-												lastVisibleRow,
-												currentColumn,
-												currentColumn);
-		}
+		m_dataSourcesStateModel->updateData(firstVisibleRow,
+											lastVisibleRow,
+											currentColumn,
+											currentColumn);
 	}
 }
 
 void AppDataServiceWidget::updateSignalStateColumns()
 {
 	int firstRow = m_signalsView->rowAt(0);
-	int lastColumn = m_signalsView->columnAt(m_signalsView->width());
-	if (lastColumn == -1)
-	{
-		lastColumn = m_signalStateModel->columnCount() - 1;
-	}
 
-	int firstColumn = m_signalsView->columnAt(0);
-	if (lastColumn < SC_FIRST_STATE_COLUMN)
-	{
-		return;
-	}
 	int lastRow = m_signalsView->rowAt(m_signalsView->height());
 	if (lastRow == -1)
 	{
 		lastRow = m_signalStateModel->rowCount() - 1;
 	}
 
-	m_signalStateModel->updateData(firstRow,
-								   lastRow,
-								   std::max(firstColumn, SC_FIRST_STATE_COLUMN),
-								   lastColumn);
+	for (int i = 0; i < SIGNAL_STATE_COLUMN_COUNT; i++)
+	{
+		int currentColumn = signalStateColumn[i];
+		m_signalStateModel->updateData(firstRow,
+									   lastRow,
+									   currentColumn,
+									   currentColumn);
+	}
 }
 
 void AppDataServiceWidget::updateClientsInfo()
