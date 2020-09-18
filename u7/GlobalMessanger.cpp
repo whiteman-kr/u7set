@@ -95,6 +95,11 @@ void GlobalMessanger::fireCompareObject(DbChangesetObject object, CompareData co
 	emit compareObject(object, compareData);
 }
 
+void GlobalMessanger::fireCompareProject(CompareData compareData)
+{
+	emit compareProject(compareData);
+}
+
 void GlobalMessanger::runOrderReady(Builder::RunOrder runOrder)
 {
 	QMutexLocker ml(&m_buildResultMutex);

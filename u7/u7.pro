@@ -90,11 +90,13 @@ SOURCES +=\
     DialogSettings.cpp \
     EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
+    Forms/DialogProjectDiff.cpp \
     LoginDialog.cpp \
     Main.cpp \
     MainTabPage.cpp \
     MainWindow.cpp \
     PasswordService.cpp \
+    ProjectDiffGenerator.cpp \
     Settings.cpp \
     Simulator/SimConnectionPage.cpp \
     Simulator/SimLogicModulePage.cpp \
@@ -242,10 +244,12 @@ HEADERS  += \
     DialogSettings.h \
     EditEngine/EditEngineNop.h \
     FilesTabPage.h \
+    Forms/DialogProjectDiff.h \
     LoginDialog.h \
     MainTabPage.h \
     MainWindow.h \
     PasswordService.h \
+    ProjectDiffGenerator.h \
     Settings.h \
     Simulator/SimConnectionPage.h \
     Simulator/SimLogicModulePage.h \
@@ -389,6 +393,7 @@ FORMS    += \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
+    Forms/DialogProjectDiff.ui \
     LoginDialog.ui \
     Simulator/SimSelectBuildDialog.ui \
     UserManagementDialog.ui \

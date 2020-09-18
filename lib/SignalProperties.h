@@ -190,7 +190,7 @@ public:
 	static const QString lastEditedSignalFieldValuePlace;
 
 public:
-	explicit SignalProperties(Signal& signal, bool savePropertyDescription = false);
+	explicit SignalProperties(const Signal& signal, bool savePropertyDescription = false);
 
 	Signal& signal() { return m_signal; }
 	void updateSpecPropValues();

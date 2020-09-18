@@ -78,6 +78,10 @@ public:
 	//
 	void fireCompareObject(DbChangesetObject object, CompareData compareData);
 
+	// CompareProject
+	//
+	void fireCompareProject(CompareData compareData);
+
 public slots:
 	void runOrderReady(Builder::RunOrder runOrder);
 
@@ -98,6 +102,7 @@ signals:
 	void changeCurrentTab(QWidget* tab);
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
+	void compareProject(CompareData compareData);
 
 public:
 	Builder::BuildIssues& buildIssues();

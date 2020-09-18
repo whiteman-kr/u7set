@@ -21,12 +21,15 @@
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/ProjectPropertiesForm.h"
 #include "Forms/PendingChangesDialog.h"
+#include "Forms/CompareDialog.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../VFrame30/VFrame30.h"
 #include "../lib/LogicModuleSet.h"
 #include "DialogShortcuts.h"
 #include "../lib/Ui/UiTools.h"
 #include "../lib/SignalSetProvider.h"
+#include "Forms/DialogProjectDiff.h"
+#include "ProjectDiffGenerator.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -86,6 +89,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
+
+	m_projectDiffGenerator = new ProjectDiffGenerator(dbController(), this);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareProject, m_projectDiffGenerator, &ProjectDiffGenerator::compareProject);
 
 	// --
 	//
@@ -345,6 +351,12 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
 
+	m_projectDifferenceAction = new QAction(tr("Project Diff..."), this);
+	m_projectDifferenceAction->setEnabled(false);
+	connect(m_projectDifferenceAction, &QAction::triggered, this, &MainWindow::projectDifference);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectDifferenceAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectDifferenceAction->setEnabled(false);});
+
 	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setEnabled(false);
 	connect(m_pendingChangesAction, &QAction::triggered, this, &MainWindow::pendingChanges);
@@ -374,6 +386,7 @@ void MainWindow::createMenus()
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
 	pProjectMenu->addAction(m_projectPropertiesAction);
+	pProjectMenu->addAction(m_projectDifferenceAction);
 	pProjectMenu->addAction(m_startBuildAction);
 	pProjectMenu->addAction(m_pendingChangesAction);
 
@@ -1021,6 +1034,27 @@ void MainWindow::projectProperties()
 	}
 
 	ProjectPropertiesForm::show(this, m_dbController);
+
+	return;
+}
+
+void MainWindow::projectDifference()
+{
+	if (m_dbController == nullptr)
+	{
+		assert(m_dbController);
+		return;
+	}
+
+	if (m_dbController->isProjectOpened() == false)
+	{
+		return;
+	}
+
+
+	DialogProjectDiff::showProjectDiff(db(), this);
+
+
 
 	return;
 }

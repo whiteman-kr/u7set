@@ -5,6 +5,10 @@
 #include <QDateTime>
 #include <QDesktopServices>
 
+//
+// UiTools
+//
+
 QIcon UiTools::drawColorBox(QColor color)
 {
 	const QStyle* style = QApplication::style();
@@ -84,3 +88,4 @@ void UiTools::openHelp(const QString& file, QWidget* parent)
 		QMessageBox::critical(parent, qAppName(), QObject::tr("Help file '%1' does not exist!").arg(file));
 	}
 }
+

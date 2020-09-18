@@ -136,7 +136,7 @@ const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
-SignalProperties::SignalProperties(Signal& signal, bool savePropertyDescription) :
+SignalProperties::SignalProperties(const Signal& signal, bool savePropertyDescription) :
 	m_signal(signal)
 {
 	initProperties(savePropertyDescription);
