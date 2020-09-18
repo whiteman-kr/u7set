@@ -29,7 +29,7 @@ TcpAppDataClient::~TcpAppDataClient()
 
 void TcpAppDataClient::clearDataSources()
 {
-	for(DataSource* source : m_appDataSources)
+	for(auto source : m_appDataSources)
 	{
 		delete source;
 	}
@@ -228,9 +228,7 @@ void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint
 
 	for(int i = 0; i < sourcesCount; i++)
 	{
-		AppDataSource* source = new AppDataSource();
-
-		source->setInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
+		AppDataSource* source = new AppDataSource(m_getDataSourcesInfoReply.datasourceinfo(i));
 
 		if (m_appDataSources.contains(source->ID()))
 		{
@@ -244,7 +242,6 @@ void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint
 
 	emit dataSourcesInfoLoaded();
 }
-
 
 void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {

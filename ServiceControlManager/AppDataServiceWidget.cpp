@@ -312,8 +312,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
 				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
 				case DSC_PROCESSED_PACKET_COUNT: return source.processedPacketCount();
-				case DSC_LAST_PACKET_SYSTEM_TIME: return QDateTime::fromMSecsSinceEpoch(source.lastPacketSystemTime());
-				case DSC_RUP_FRAME_PLANT_TIME: return QDateTime::fromMSecsSinceEpoch(source.rupFramePlantTime());
+				case DSC_LAST_PACKET_SYSTEM_TIME: return source.lastPacketSystemTimeStr();
+				case DSC_RUP_FRAME_PLANT_TIME: return source.rupFramePlantTimeStr();
 				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
 				case DSC_SIGNAL_STATES_QUEUE_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurSize()).arg(0.01 * source.signalStatesQueueCurSize() / source.signalStatesQueueSize());
 				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurMaxSize()).arg(0.01 * source.signalStatesQueueCurMaxSize() / source.signalStatesQueueSize());

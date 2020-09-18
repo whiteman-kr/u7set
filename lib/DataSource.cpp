@@ -422,6 +422,8 @@ quint64 DataSource::generateID() const
 //
 // -----------------------------------------------------------------------------
 
+const QString DataSourceOnline::DATE_TIME_FORMAT_STR("%1:%2:%3.%4 %5/%6/%7");
+
 DataSourceOnline::DataSourceOnline() :
 	m_rupFrameTimeQueue(10)
 {
@@ -440,11 +442,13 @@ DataSourceOnline::~DataSourceOnline()
 	}
 }
 
-bool DataSourceOnline::init()
+bool DataSourceOnline::initQueue()
 {
-	m_rupFrameTimeQueue.resize(lmRupFramesQuantity() * 200 * 5);			// 5 seconds queue
+	int queueSize = lmRupFramesQuantity() * 200 * 3;	// 3 seconds queue
 
-	setRupFramesQueueSize(m_rupFrameTimeQueue.queueSize(QThread::currentThread()));
+	m_rupFrameTimeQueue.resize(queueSize);
+
+	setRupFramesQueueSize(queueSize);
 
 	return true;
 }
@@ -459,6 +463,16 @@ void DataSourceOnline::updateUptime()
 	{
 		m_uptime = (m_lastPacketSystemTime - m_firstPacketSystemTime) / 1000;
 	}
+}
+
+QString DataSourceOnline::rupFramePlantTimeStr() const
+{
+	return getTimeStr(m_rupFramePlantTime);
+}
+
+QString DataSourceOnline::lastPacketSystemTimeStr() const
+{
+	return getTimeStr(m_lastPacketSystemTime);
 }
 
 bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
@@ -657,6 +671,22 @@ void DataSourceOnline::calcDataReceivingRate()
 	return;
 }
 
+QString DataSourceOnline::getTimeStr(qint64 timeMs) const
+{
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
+
+	QDate date = dt.date();
+	QTime time = dt.time();
+
+	return 	QString(DATE_TIME_FORMAT_STR).
+				arg(time.hour(), 2, 10, QLatin1Char('0')).
+				arg(time.minute(), 2, 10, QLatin1Char('0')).
+				arg(time.second(), 2, 10, QLatin1Char('0')).
+				arg(time.msec(), 3, 10, QLatin1Char('0')).
+				arg(date.day(), 2, 10, QLatin1Char('0')).
+				arg(date.month(), 2, 10, QLatin1Char('0')).
+				arg(date.year(), 4, 10, QLatin1Char('0'));
+}
 
 /*
 void DataSourceOnline::stop()
@@ -745,9 +775,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					m_firstPacketSystemTime = 0;
 					m_lastPacketSystemTime = 0;
 
-					m_processedPacketCount = 0;
-					m_receivedDataSize = 0;
 					m_dataReceivingRate = 0;
+
 					m_prevCalcTime = -1;
 
 					updateUptime();
@@ -767,11 +796,27 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 		updateUptime();
 
+		if (m_state == E::DataSourceState::NoData)
+		{
+			m_receivedDataSize = 0;
+			m_receivedFramesCount = 0;
+			m_receivedPacketCount = 0;
+			m_lostPacketCount = 0;
+			m_processedPacketCount = 0;
+
+			m_errorProtocolVersion = 0;
+			m_errorFramesQuantity = 0;
+			m_errorFrameNo = 0;
+			m_errorDataID = 0;
+			m_errorFrameSize = 0;
+			m_errorDuplicatePlantTime = 0;
+			m_errorNonmonotonicPlantTime = 0;
+		}
+
 		m_state = E::DataSourceState::ReceiveData;
 
 		m_dataRecevingTimeout = false;
 		m_dataReceives = true;
-		m_receivedFramesCount++;
 		m_receivedDataSize += sizeof(Rup::Frame);
 
 		calcDataReceivingRate();
