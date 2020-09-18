@@ -1234,11 +1234,14 @@ void SignalsTabPage::addSignal()
 
 		if (!resultSignalVector.isEmpty())
 		{
+			int addedSignalId = -1;
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
 				m_signalSetProvider->addSignal(resultSignalVector[i]);
+				addedSignalId = resultSignalVector[i].ID();
 			}
 			m_signalsModel->changeRowCount();
+			restoreSelection(addedSignalId);
 		}
 	}
 }
