@@ -229,6 +229,7 @@ bool MeasureThread::inputsOfmoduleIsSame()
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:			param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
 			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
@@ -388,6 +389,7 @@ bool MeasureThread::setCalibratorUnit()
 						case SIGNAL_CONNECTION_TYPE_UNUSED:
 						case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 						case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+						case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 						case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 							{
 								Metrology::SignalParam inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
@@ -676,6 +678,7 @@ void MeasureThread::measureLinearity()
 				case SIGNAL_CONNECTION_TYPE_UNUSED:
 				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 				case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 					{
 						// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)

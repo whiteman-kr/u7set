@@ -1000,6 +1000,7 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 			if (theCalibratorBase.connectedCalibratorsCount() == 0)
