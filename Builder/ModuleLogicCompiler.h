@@ -353,7 +353,7 @@ namespace Builder
 
 		bool calculateIoSignalsAddresses();
 
-		bool setTunableSignalsUalAddresses();
+		bool disposeTunableSignalsUalAddresses();
 
 		// disposing discrete signals in memory
 		//

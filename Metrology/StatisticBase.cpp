@@ -22,15 +22,13 @@ StatisticBase::StatisticBase(QObject *parent) :
 
 void StatisticBase::clear()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-		m_signalCount = 0;
+	m_signalList.clear();
+	m_signalCount = 0;
 
-		m_measuredCount = 0;
-		m_invalidMeasureCount = 0;
-
-	m_signalMutex.unlock();
+	m_measuredCount = 0;
+	m_invalidMeasureCount = 0;
 }
 
 
@@ -38,60 +36,58 @@ void StatisticBase::clear()
 
 void StatisticBase::createSignalList()
 {
+	QMutexLocker l(&m_signalMutex);
+
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	m_signalMutex.lock();
-
-		int count = theSignalBase.signalCount();
-		for(int i = 0; i < count; i++)
+	int count = theSignalBase.signalCount();
+	for(int i = 0; i < count; i++)
+	{
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
 		{
-			Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			Metrology::SignalParam& param = pSignal->param();
-			if (param.isValid() == false)
-			{
-				continue;
-			}
-
-			if (param.isAnalog() == false)
-			{
-				continue;
-			}
-
-			if (param.location().shownOnSchemas() == false)
-			{
-				continue;
-			}
-
-			if (param.isInternal() == true)
-			{
-				continue;
-			}
-
-			if (param.isInput() == true || param.isOutput() == true)
-			{
-				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
-				{
-					continue;
-				}
-			}
-
-			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-			{
-				continue;
-			}
-
-			m_signalList.append(pSignal);
+			continue;
 		}
 
-		m_signalCount = m_signalList.count();
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
 
-	m_signalMutex.unlock();
+		if (param.isAnalog() == false)
+		{
+			continue;
+		}
+
+		if (param.location().shownOnSchemas() == false)
+		{
+			continue;
+		}
+
+		if (param.isInternal() == true)
+		{
+			continue;
+		}
+
+		if (param.isInput() == true || param.isOutput() == true)
+		{
+			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			{
+				continue;
+			}
+		}
+
+		if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+		{
+			continue;
+		}
+
+		m_signalList.append(pSignal);
+	}
+
+	m_signalCount = m_signalList.count();
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
 }
@@ -100,55 +96,53 @@ void StatisticBase::createSignalList()
 
 void StatisticBase::createComparatorList()
 {
+	QMutexLocker l(&m_signalMutex);
+
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	m_signalMutex.lock();
-
-		int count = theSignalBase.signalCount();
-		for(int i = 0; i < count; i++)
+	int count = theSignalBase.signalCount();
+	for(int i = 0; i < count; i++)
+	{
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
 		{
-			Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			Metrology::SignalParam& param = pSignal->param();
-			if (param.isValid() == false || param.hasComparators() == false)
-			{
-				continue;
-			}
-
-			if (param.isAnalog() == false)
-			{
-				continue;
-			}
-
-			if (param.isOutput() == true)
-			{
-				continue;
-			}
-
-			if (param.isInput() == true)
-			{
-				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
-				{
-					continue;
-				}
-			}
-
-			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-			{
-				continue;
-			}
-
-			m_comparatorList.append(pSignal);
+			continue;
 		}
 
-		m_comparatorCount = m_comparatorList.count();
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false || param.hasComparators() == false)
+		{
+			continue;
+		}
 
-	m_signalMutex.unlock();
+		if (param.isAnalog() == false)
+		{
+			continue;
+		}
+
+		if (param.isOutput() == true)
+		{
+			continue;
+		}
+
+		if (param.isInput() == true)
+		{
+			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			{
+				continue;
+			}
+		}
+
+		if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+		{
+			continue;
+		}
+
+		m_comparatorList.append(pSignal);
+	}
+
+	m_comparatorCount = m_comparatorList.count();
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
 }
@@ -158,18 +152,14 @@ void StatisticBase::createComparatorList()
 
 Metrology::Signal* StatisticBase::signal(int index) const
 {
-	Metrology::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -187,9 +177,6 @@ void StatisticBase::updateSignalState(QTableView* pView, Hash signalHash)
 		return;
 	}
 
-	QElapsedTimer responseTime;
-	responseTime.start();
-
 	Metrology::Signal* pSignal = theSignalBase.signalPtr(signalHash);
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
@@ -199,32 +186,33 @@ void StatisticBase::updateSignalState(QTableView* pView, Hash signalHash)
 	Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pSignal->param().hash());
 	pSignal->setStatistic(ss);
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_measuredCount = 0;
-		m_invalidMeasureCount = 0;
+	QElapsedTimer responseTime;
+	responseTime.start();
 
-		int count = m_signalList.count();
-		for(int i = 0; i < count; i++)
+	m_measuredCount = 0;
+	m_invalidMeasureCount = 0;
+
+	int count = m_signalList.count();
+	for(int i = 0; i < count; i++)
+	{
+		pSignal = m_signalList[i];
+		if (pSignal == nullptr)
 		{
-			pSignal = m_signalList[i];
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			if (pSignal->statistic().isMeasured() == true)
-			{
-				m_measuredCount++;
-			}
-
-			if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
-			{
-				m_invalidMeasureCount ++;
-			}
+			continue;
 		}
 
-	m_signalMutex.unlock();
+		if (pSignal->statistic().isMeasured() == true)
+		{
+			m_measuredCount++;
+		}
+
+		if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
+		{
+			m_invalidMeasureCount ++;
+		}
+	}
 
 	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
 }
@@ -239,38 +227,36 @@ void StatisticBase::updateSignalsState(QTableView* pView)
 		return;
 	}
 
+	QMutexLocker l(&m_signalMutex);
+
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	m_signalMutex.lock();
+	m_measuredCount = 0;
+	m_invalidMeasureCount = 0;
 
-		m_measuredCount = 0;
-		m_invalidMeasureCount = 0;
-
-		int count = m_signalList.count();
-		for(int i = 0; i < count; i++)
+	int count = m_signalList.count();
+	for(int i = 0; i < count; i++)
+	{
+		Metrology::Signal* pSignal = m_signalList[i];
+		if (pSignal == nullptr)
 		{
-			Metrology::Signal* pSignal = m_signalList[i];
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pSignal->param().hash());
-			pSignal->setStatistic(ss);
-
-			if (pSignal->statistic().isMeasured() == true)
-			{
-				m_measuredCount++;
-			}
-
-			if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
-			{
-				m_invalidMeasureCount ++;
-			}
+			continue;
 		}
 
-	m_signalMutex.unlock();
+		Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pSignal->param().hash());
+		pSignal->setStatistic(ss);
+
+		if (pSignal->statistic().isMeasured() == true)
+		{
+			m_measuredCount++;
+		}
+
+		if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
+		{
+			m_invalidMeasureCount ++;
+		}
+	}
 
 	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
 }

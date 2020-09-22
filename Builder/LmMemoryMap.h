@@ -19,11 +19,11 @@ namespace Builder
 		public:
 			SignalAddress16() {}
 
-			SignalAddress16(const QString& strID, const Address16& address, int sizeW, bool isDiscrete) :
+			SignalAddress16(const QString& strID, const Address16& address, int sizeW, E::SignalType signalType) :
 				m_address(address),
 				m_signalID(strID),
 				m_sizeW(sizeW),
-				m_isDiscrete(isDiscrete)
+				m_signalType(signalType)
 			{
 			}
 
@@ -32,7 +32,7 @@ namespace Builder
 				m_signalID = sa.m_signalID;
 				m_address = sa.m_address;
 				m_sizeW = sa.m_sizeW;
-				m_isDiscrete = sa.m_isDiscrete;
+				m_signalType = sa.m_signalType;
 			}
 
 			void setSignalStrID(const QString& strID) { m_signalID = strID; }
@@ -46,14 +46,13 @@ namespace Builder
 			void setSizeW(int sizeW) { m_sizeW = sizeW; }
 			int sizeW() const { return m_sizeW; }
 
-			void setDiscrete(bool discrete) { m_isDiscrete = discrete; }
-			bool isDiscrete() const { return m_isDiscrete; }
+			bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
 
 		private:
 			Address16 m_address;
 			QString m_signalID;
 			int m_sizeW = 0;
-			bool m_isDiscrete = false;
+			E::SignalType m_signalType = E::SignalType::Discrete;
 		};
 
 	public:
@@ -75,6 +74,7 @@ namespace Builder
 		MemoryArea& operator = (const MemoryArea& ma);
 
 		Address16 appendSignal(const UalSignal* ualSignal, bool appendAcquiredOnly);
+		bool appendSignalWithFixedAddress(const UalSignal* ualSignal);
 
 		bool hasSignals() const { return m_signals.size() > 0; }
 
@@ -157,6 +157,7 @@ namespace Builder
 		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
 		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr);
 		bool appendRegAnalogConstSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
+		bool appendTuningSignal(const UalSignal* tuningSignal);
 
 		bool appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals);
