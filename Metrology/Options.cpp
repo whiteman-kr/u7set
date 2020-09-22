@@ -1474,26 +1474,24 @@ bool Options::readFromXml(const QByteArray& fileData)
 
 Options& Options::operator=(const Options& from)
 {
-	m_mutex.lock();
+	QMutexLocker l(&m_mutex);
 
-		for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
-		{
-			m_updateColumnView[type] = from.m_updateColumnView[type];
-		}
+	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	{
+		m_updateColumnView[type] = from.m_updateColumnView[type];
+	}
 
-		m_projectInfo = from.m_projectInfo;
-		m_toolBar = from.m_toolBar;
-		m_socket = from.m_socket;
-		m_measureView = from.m_measureView;
-		m_signalInfo = from.m_signalInfo;
-		m_comparatorInfo = from.m_comparatorInfo;
-		m_database = from.m_database;
-		m_linearity = from.m_linearity;
-		m_comparator = from.m_comparator;
-		m_module = from.m_module;
-		m_backup = from.m_backup;
-
-	m_mutex.unlock();
+	m_projectInfo = from.m_projectInfo;
+	m_toolBar = from.m_toolBar;
+	m_socket = from.m_socket;
+	m_measureView = from.m_measureView;
+	m_signalInfo = from.m_signalInfo;
+	m_comparatorInfo = from.m_comparatorInfo;
+	m_database = from.m_database;
+	m_linearity = from.m_linearity;
+	m_comparator = from.m_comparator;
+	m_module = from.m_module;
+	m_backup = from.m_backup;
 
 	return *this;
 }

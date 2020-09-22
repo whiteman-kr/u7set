@@ -11,6 +11,7 @@
 #include <QTableView>
 #include <QDialogButtonBox>
 #include <QClipboard>
+#include <QMutex>
 
 #include "../lib/Signal.h"
 

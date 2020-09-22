@@ -18,11 +18,9 @@ ComparatorListTable::ComparatorListTable(QObject*)
 
 ComparatorListTable::~ComparatorListTable()
 {
-	m_comparatorMutex.lock();
+	QMutexLocker l(&m_comparatorMutex);
 
-		m_comparatorList.clear();
-
-	m_comparatorMutex.unlock();
+	m_comparatorList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -145,7 +143,20 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		return QString();
 	}
 
+	bool visible = true;
+
+	QString signalTypeStr;
+
 	QString inputAppSignalID = comparatorEx->input().appSignalID();
+
+	if (inputAppSignalID.isEmpty() == false)
+	{
+		Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
+		if (pInSignal != nullptr)
+		{
+			signalTypeStr = E::valueToString<E::SignalInOutType>(pInSignal->param().inOutType());
+		}
+	}
 
 	int prevRow = row - 1;
 	if (prevRow >= 0 && prevRow < comparatorCount())
@@ -153,28 +164,19 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(prevRow);
 		if (prevComparatorEx != nullptr)
 		{
-
 			if (prevComparatorEx->input().appSignalID() == inputAppSignalID)
 			{
-				inputAppSignalID.clear();
+				visible = false;
 			}
 		}
-	}
-
-	QString type;
-
-	Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
-	if (pInSignal != nullptr)
-	{
-		type = E::valueToString<E::SignalInOutType>(pInSignal->param().inOutType());
 	}
 
 	QString result;
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = type;										break;
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;							break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = visible ? signalTypeStr : QString();		break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? inputAppSignalID : QString();	break;
 		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();	break;
 		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();	break;
 		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();		break;
@@ -189,33 +191,23 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 int ComparatorListTable::comparatorCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_comparatorMutex);
 
-	m_comparatorMutex.lock();
-
-		count = m_comparatorList.count();
-
-	m_comparatorMutex.unlock();
-
-	return count;
+	return m_comparatorList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 std::shared_ptr<Metrology::ComparatorEx> ComparatorListTable::comparator(int index) const
 {
-	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = nullptr;
+	QMutexLocker l(&m_comparatorMutex);
 
-	m_comparatorMutex.lock();
+	if (index < 0 || index >= m_comparatorList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_comparatorList.count())
-		{
-			 comparatorEx = m_comparatorList[index];
-		}
-
-	m_comparatorMutex.unlock();
-
-	return comparatorEx;
+	return m_comparatorList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -264,7 +256,7 @@ void ComparatorListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int					ComparatorListDialog::m_currenIndex = 0;
+int ComparatorListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -378,10 +370,10 @@ void ComparatorListDialog::createHeaderContexMenu()
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &ComparatorListDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &ComparatorListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -1106,11 +1106,6 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 				// take signal connection in the base by index
 				//
 				SignalConnection signalConnection = signalConnections.connection(index);
-				if (signalConnection.isValid() == false)
-				{
-					result = false;
-					break;
-				}
 
 				m_mutex.lock();
 
@@ -1900,6 +1895,7 @@ void SignalBase::initSignals()
 	updateRackParam();
 
 	m_signalConnectionBase.initSignals();
+	m_signalConnectionBase.sort();
 
 	m_tuningBase.Signals().createSignalList();
 

@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QtSql>
-#include <QMutex>
 
 #include "MeasureBase.h"
 

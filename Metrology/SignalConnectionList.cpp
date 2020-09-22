@@ -20,11 +20,9 @@ SignalConnectionTable::SignalConnectionTable(QObject*)
 
 SignalConnectionTable::~SignalConnectionTable()
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		m_connectionList.clear();
-
-	m_connectionMutex.unlock();
+	m_connectionList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -90,10 +88,6 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 	}
 
 	SignalConnection connection = at(row);
-	if (connection.isValid() == false)
-	{
-		return QVariant();
-	}
 
 	if (role == Qt::TextAlignmentRole)
 	{
@@ -150,18 +144,23 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 		return QString();
 	}
 
-	if (connection.isValid() == false)
+	bool visible = true;
+
+	if (row > 0 &&
+		m_connectionList[row - 1].id().type == connection.id().type &&
+		m_connectionList[row - 1].id().inputID == connection.id().inputID &&
+		m_connectionList[row - 1].id().inputID != 0 )
 	{
-		return QString();
+		visible = false;
 	}
 
 	QString result;
 
 	switch (column)
 	{
-		case SIGNAL_CONNECTION_COLUMN_TYPE:			result = connection.typeStr();									break;
-		case SIGNAL_CONNECTION_COLUMN_IN_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
-		case SIGNAL_CONNECTION_COLUMN_OUT_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+		case SIGNAL_CONNECTION_COLUMN_TYPE:			result = visible ? connection.typeStr() : QString();								break;
+		case SIGNAL_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT): QString();	break;
+		case SIGNAL_CONNECTION_COLUMN_OUT_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);						break;
 		default:									assert(0);
 	}
 
@@ -172,35 +171,23 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 
 int SignalConnectionTable::connectionCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_connectionMutex);
 
-	m_connectionMutex.lock();
-
-		count = m_connectionList.count();
-
-	m_connectionMutex.unlock();
-
-	return count;
+	return m_connectionList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalConnection SignalConnectionTable::at(int index) const
 {
-	if (index < 0 || index >= connectionCount())
+	QMutexLocker l(&m_connectionMutex);
+
+	if (index < 0 || index >= m_connectionList.count())
 	{
 		return SignalConnection();
 	}
 
-	SignalConnection signal;
-
-	m_connectionMutex.lock();
-
-		signal = m_connectionList[index];
-
-	m_connectionMutex.unlock();
-
-	return signal;
+	return m_connectionList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -281,7 +268,7 @@ void SignalConnectionItemDialog::createInterface()
 	setWindowFlags(Qt::Dialog);
 	setWindowIcon(QIcon(":/icons/Connection.png"));
 
-	if (m_signalConnection.isValid() == false)
+	if (m_signalConnection.id().uint64 == 0)
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
 		setWindowTitle(tr("Create connection"));
@@ -646,20 +633,12 @@ void SignalConnectionDialog::updateList()
 {
 	m_connectionTable.clear();
 
-	m_connectionBase.sort();
-
 	QVector<SignalConnection> connectionList;
 
 	int count = m_connectionBase.count();
 	for(int i = 0; i < count; i++)
 	{
-		SignalConnection signalConnection = m_connectionBase.connection(i);
-		if (signalConnection.isValid() == false)
-		{
-			continue;
-		}
-
-		connectionList.append(signalConnection);
+		connectionList.append(m_connectionBase.connection(i));
 	}
 
 	m_connectionTable.set(connectionList);
@@ -691,10 +670,15 @@ void SignalConnectionDialog::createConnection()
 	}
 
 	m_connectionBase.append(connection);
+	m_connectionBase.sort();
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_connectionTable.index(m_connectionBase.count() - 1, SIGNAL_CONNECTION_COLUMN_TYPE));
+	foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -722,11 +706,25 @@ void SignalConnectionDialog::editConnection()
 		return;
 	}
 
-	m_connectionBase.setSignal(index, connection);
+	int foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+
+		QMessageBox::information(this, windowTitle(), tr("Signal already exist!"));
+		return;
+	}
+
+	m_connectionBase.setConnection(index, connection);
+	m_connectionBase.sort();
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_connectionTable.index(index, SIGNAL_CONNECTION_COLUMN_TYPE));
+	foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -835,6 +833,11 @@ void SignalConnectionDialog::importConnections()
 			}
 
 			connection.initSignals();
+
+			if (connection.isValid() == false)
+			{
+				continue;
+			}
 
 			m_connectionBase.append(connection);
 		}
