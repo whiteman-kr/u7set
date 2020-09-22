@@ -114,6 +114,10 @@ namespace VFrame30
 			{
 				value = value.toInt() == 0 ? false : true;	// Discrete signals can be set by 0 or 1
 			}
+			if (appSignal.toTuningType() == TuningValueType::Float)
+			{
+				value = value.toFloat();
+			}
 			break;
 
 		case QMetaType::LongLong:
