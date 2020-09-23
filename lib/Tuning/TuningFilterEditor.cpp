@@ -539,7 +539,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 			{
 				value = fv.value();
 			}
-			value.setType(asp.toTuningType());
+			value.setType(asp.tuningType());
 
 			defaultValue = asp.tuningDefaultValue();
 
@@ -547,7 +547,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 		}
 		else
 		{
-			if (asp.toTuningType() != value.type())
+			if (asp.tuningType() != value.type())
 			{
 				QMessageBox::warning(this, tr("Filter Editor"), tr("Please select signals of same type (analog or discrete)."));
 				return;
