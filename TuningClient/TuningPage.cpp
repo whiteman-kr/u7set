@@ -99,7 +99,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		}
 
 		TuningValue tvDefault(defaultValue(asp));
-		tvDefault.setType(asp.toTuningType());
+		tvDefault.setType(asp.tuningType());
 
 		if (tvDefault != state.value())
 		{
@@ -469,7 +469,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 				return false;
 			}
 
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), v));
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), v));
 			return true;
 		}
 
@@ -480,12 +480,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
-				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 1));
+				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), 1));
 				return true;
 			}
 			else
 			{
-				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 0));
+				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), 0));
 				return true;
 			}
 		}
@@ -1165,7 +1165,7 @@ void TuningPage::fillObjectsList()
 				}
 
 				TuningValue tvDefault(m_model->defaultValue(asp));
-				tvDefault.setType(asp.toTuningType());
+				tvDefault.setType(asp.tuningType());
 
 				if (tvDefault == state.value())
 				{
@@ -1566,7 +1566,7 @@ void TuningPage::slot_setValue()
 			}
 			else
 			{
-				if (asp.toTuningType() != value.type())
+				if (asp.tuningType() != value.type())
 				{
 					QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
 					return;
