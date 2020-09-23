@@ -101,6 +101,14 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundRole)
 	{
+		if (column == SIGNAL_CONNECTION_COLUMN_TYPE)
+		{
+			if (connection.type() < 0 || connection.type() >= SIGNAL_CONNECTION_TYPE_COUNT)
+			{
+				return QColor(0xFF, 0xA0, 0xA0);
+			}
+		}
+
 		if (column == SIGNAL_CONNECTION_COLUMN_IN_ID)
 		{
 			Metrology::Signal* pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
@@ -158,7 +166,7 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 
 	switch (column)
 	{
-		case SIGNAL_CONNECTION_COLUMN_TYPE:			result = visible ? connection.typeStr() : QString();								break;
+		case SIGNAL_CONNECTION_COLUMN_TYPE:			result = visible ? connection.typeStr() : QString("");								break;
 		case SIGNAL_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT): QString();	break;
 		case SIGNAL_CONNECTION_COLUMN_OUT_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);						break;
 		default:									assert(0);
