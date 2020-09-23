@@ -821,6 +821,8 @@ void MeasureThread::measureComprators()
 	//
 	for (int cmp = startComparatorIndex; cmp < maxComparatorCount; cmp++)
 	{
+		bool goToNextComparator = false;
+
 		// phase of preparation started
 		// switching the all comparators to logical 0
 		//
@@ -1096,6 +1098,7 @@ void MeasureThread::measureComprators()
 			if (result == QMessageBox::No)
 			{
 				currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0;
+				goToNextComparator = true;
 				break;
 			}
 
@@ -1103,6 +1106,10 @@ void MeasureThread::measureComprators()
 		//
 		// phase of preparation is over
 
+		if (goToNextComparator == true)
+		{
+			continue;
+		}
 
 		// phase of measuring started
 		// Okey - go

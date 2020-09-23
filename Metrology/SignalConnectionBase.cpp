@@ -100,7 +100,7 @@ QString SignalConnection::typeStr() const
 {
 	if (m_id.type < 0 || m_id.type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
-		return QString();
+		return QString("???");
 	}
 
 	return SignalConnectionType[m_id.type];
