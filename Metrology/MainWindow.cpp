@@ -1525,7 +1525,27 @@ void MainWindow::calibratorConnectedChanged(int count)
 	else
 	{
 		m_statusCalibratorCount->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-		m_statusCalibratorCount->setToolTip(QString());
+
+		QString calibratorInfo;
+
+		int calibratorCount = theCalibratorBase.calibratorCount();
+		for(int i  = 0; i < calibratorCount; i++)
+		{
+			if (theCalibratorBase.calibratorManager(i) == nullptr)
+			{
+				continue;
+			}
+
+			Calibrator* pCalibrator = theCalibratorBase.calibratorManager(i)->calibrator();
+			if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
+			{
+				continue;
+			}
+
+			calibratorInfo.append(tr("Calibrator %1: %2, %3\n").arg(i+1).arg(pCalibrator->typeStr()).arg(pCalibrator->serialNo()));
+		}
+
+		m_statusCalibratorCount->setToolTip(calibratorInfo);
 	}
 }
 
