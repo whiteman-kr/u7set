@@ -299,33 +299,23 @@ void CalibratorBase::showInitDialog()
 
 int CalibratorBase::calibratorCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_mutex);
 
-	m_mutex.lock();
-
-		count = m_calibratorManagerList.count();
-
-	m_mutex.unlock();
-
-	return count;
+	return m_calibratorManagerList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 CalibratorManager* CalibratorBase::calibratorManager(int index) const
 {
-	CalibratorManager* pCalibratorManager = nullptr;
+	QMutexLocker l(&m_mutex);
 
-	m_mutex.lock();
+	if (index < 0 || index >= m_calibratorManagerList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_calibratorManagerList.count())
-		{
-			pCalibratorManager = m_calibratorManagerList[index];
-		}
-
-	m_mutex.unlock();
-
-	return pCalibratorManager;
+	return m_calibratorManagerList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -79,26 +79,18 @@ QString CalibratorManager::calibratorPort() const
 
 bool CalibratorManager::isReadyForManage() const
 {
-	bool ready = true;
+	QMutexLocker l(&m_mutex);
 
-	m_mutex.lock();
-
-		ready = m_readyForManage;
-
-	m_mutex.unlock();
-
-	return ready;
+	return m_readyForManage;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorManager::setReadyForManage(bool ready)
 {
-	m_mutex.lock();
+	QMutexLocker l(&m_mutex);
 
-		m_readyForManage = ready;
-
-	m_mutex.unlock();
+	m_readyForManage = ready;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

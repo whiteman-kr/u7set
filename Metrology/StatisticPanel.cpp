@@ -131,6 +131,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 				if (pSignal->param().isOutput() == true)
@@ -457,10 +458,10 @@ void StatisticPanel::createHeaderContexMenu()
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &StatisticPanel::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &StatisticPanel::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -587,6 +588,7 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();		break;
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
@@ -801,6 +803,7 @@ void StatisticPanel::selectSignalForMeasure()
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
 
 			if (pMetrologySignal->param().isOutput() == true)

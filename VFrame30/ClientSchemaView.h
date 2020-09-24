@@ -4,6 +4,7 @@
 #include "SchemaManager.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
+#include "LogController.h"
 #include "SchemaItem.h"
 #include "../lib/ClientBehavior.h"
 
@@ -269,6 +270,12 @@ namespace VFrame30
 		const AppSignalController* appSignalController() const;
 		void setAppSignalController(AppSignalController* value);
 
+		//  LogController
+		//
+		LogController* logController();
+		const LogController* logController() const;
+		void setLogController(LogController* value);
+
 		// --
 		//
 		QJSEngine* jsEngine();
@@ -306,6 +313,7 @@ namespace VFrame30
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
+		LogController* m_logController = nullptr;
 
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels

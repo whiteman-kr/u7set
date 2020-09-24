@@ -10,7 +10,8 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 								   TuningClientTcpClient* tuningTcpClient,
 								   QWidget* parent) :
 	QWidget(parent),
-	m_tuningController(tuningSignalManager, tuningTcpClient),
+    m_tuningController(tuningSignalManager, tuningTcpClient),
+    m_logController(theLogFile),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuninTcpClient(tuningTcpClient),
 	m_schemaManager(configController)
@@ -126,7 +127,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
+		m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, &m_logController, schema, &m_schemaManager, this);
 		connect(m_schemaWidget, &TuningSchemaWidget::signal_schemaChanged, this, &SchemasWorkspace::slot_schemaChanged);
 
 		m_hSplitter = new QSplitter(this);
@@ -154,7 +155,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 				std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
-				TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
+				TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, &m_logController,schema, &m_schemaManager, this);
 
 				connect(schemaWidget, &TuningSchemaWidget::signal_schemaChanged, this, &SchemasWorkspace::slot_schemaChanged);
 
@@ -210,7 +211,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 			std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
-			m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager, this);
+			m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, &m_logController, schema, &m_schemaManager, this);
 
 			mainLayout->addWidget(m_schemaWidget);
 		}

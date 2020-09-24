@@ -1031,7 +1031,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					signal->setIndex(query.value(field++).toInt());
 
 					signal->setType(query.value(field++).toInt());
-
 					signal->setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, query.value(field++).toString());
 					signal->setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, query.value(field++).toString());
 				}
@@ -1451,7 +1450,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, signal->index());
 
 					query.bindValue(field++, signal->type());
-
 					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
 					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
 				}

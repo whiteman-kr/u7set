@@ -104,14 +104,13 @@ public:
 	void writeTuningSignal(const TuningWriteCommand& data);
 	void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
 
-	// Apply states
-	//
-	void applyTuningSignals();
-
 	// ITuningTcpClient implementation
 	//
 public:
 	virtual bool writeTuningSignal(QString appSignalId, TuningValue value) override;
+	// Apply states
+	//
+	void applyTuningSignals() override;
 
 private:
 	virtual void onClientThreadStarted() override;

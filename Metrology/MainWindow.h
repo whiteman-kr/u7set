@@ -136,6 +136,7 @@ private:
 	ConfigSocket*			m_pConfigSocket = nullptr;
 	void					runConfigSocket();
 	void					stopConfigSocket();
+	QString					configSocketConnectedStateStr();
 
 	SignalSocket*			m_pSignalSocket = nullptr;
 	SimpleThread*			m_pSignalSocketThread = nullptr;
@@ -146,6 +147,7 @@ private:
 	SimpleThread*			m_pTuningSocketThread = nullptr;
 	void					runTuningSocket();
 	void					stopTuningSocket();
+	QString					tuningSocketConnectedStateStr();
 
 	MeasureThread			m_measureThread;
 	void					runMeasureThread();

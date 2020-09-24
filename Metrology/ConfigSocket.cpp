@@ -12,7 +12,6 @@ ConfigSocket::ConfigSocket(const SoftwareInfo& softwareInfo, const HostAddressPo
 	: m_softwareInfo(softwareInfo)
 	, m_serverAddressPort1(serverAddressPort)
 	, m_serverAddressPort2(HostAddressPort(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST))
-
 {
 }
 
@@ -43,6 +42,7 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
+
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
 											1,
 											m_serverAddressPort1,
@@ -77,7 +77,7 @@ void ConfigSocket::quit()
 
 	disconnect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
 
-	m_cfgLoaderThread->quit();
+	m_cfgLoaderThread->quitAndWait();
 	delete m_cfgLoaderThread;
 	m_cfgLoaderThread = nullptr;
 
@@ -402,13 +402,15 @@ void ConfigSocket::updateConnectionState()
 		return;
 	}
 
-	if (m_cfgLoaderThread->getConnectionState().isConnected != m_connected)
+	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+
+	if (state.isConnected != m_connected)
 	{
-		m_connected = m_cfgLoaderThread->getConnectionState().isConnected;
+		m_connected = state.isConnected;
 
 		if (m_connected == true)
 		{
-			m_address = m_cfgLoaderThread->getConnectionState().peerAddr;
+			m_address = state.peerAddr;
 
 			emit socketConnected();
 		}

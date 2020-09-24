@@ -178,15 +178,9 @@ IoSignalParam ComparatorInfoTable::signalParam(int index) const
 		return IoSignalParam();
 	}
 
-	IoSignalParam param;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		param = m_signalList[index];
-
-	m_signalMutex.unlock();
-
-	return param;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -242,21 +236,19 @@ void ComparatorInfoTable::updateSignalParam(const QString& appSignalID)
 		return;
 	}
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		int signalCount = m_signalList.count();
-		for(int c = 0; c < signalCount; c ++)
+	int signalCount = m_signalList.count();
+	for(int c = 0; c < signalCount; c ++)
+	{
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+			if (m_signalList[c].param(type).appSignalID() == appSignalID)
 			{
-				if (m_signalList[c].param(type).appSignalID() == appSignalID)
-				{
-					m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
-				}
+				m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
 			}
 		}
-
-	m_signalMutex.unlock();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

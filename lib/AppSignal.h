@@ -370,7 +370,7 @@ public:
 	E::SignalType type() const;
 	void setType(E::SignalType value);
 
-	TuningValueType toTuningType() const;
+	TuningValueType tuningType() const;
 
 	E::AnalogAppSignalFormat analogSignalFormat() const;
 	void setAnalogSignalFormat(E::AnalogAppSignalFormat value);

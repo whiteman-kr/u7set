@@ -426,7 +426,7 @@ void AppSignalParam::setType(E::SignalType value)
 	m_signalType = value;
 }
 
-TuningValueType AppSignalParam::toTuningType() const
+TuningValueType AppSignalParam::tuningType() const
 {
 	switch (m_signalType)
 	{

@@ -119,6 +119,7 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam);	break;
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	fill_measure_internal(ioParam);	break;
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	fill_measure_output(ioParam);	break;
@@ -1315,6 +1316,7 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam);	break;
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	fill_measure_internal(ioParam);	break;
 		default:									assert(0);
 	}

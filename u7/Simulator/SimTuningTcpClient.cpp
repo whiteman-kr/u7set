@@ -10,3 +10,9 @@ bool SimTuningTcpClient::writeTuningSignal(QString /*appSignalId*/, TuningValue 
 	assert(false);
 	return false;
 }
+
+void SimTuningTcpClient::applyTuningSignals()
+{
+	assert(false);
+	return;
+}

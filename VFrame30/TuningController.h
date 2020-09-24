@@ -26,6 +26,13 @@ namespace VFrame30
 		connection to TuningService can be down, or signal with specified identifier could not exist.<br>
 
 		\n
+		\warning It is highly recommended to check value types and signals types matching:
+		- Boolean vaulues should be written only to discrete signals, and number values only to analog signals;
+		- Fractional numbers should be written only to signals with floating-point type;
+		- Numbers should be in the correct range. For example, if signal type is 32-bit integer, writing <b>23e+12</b> value will cause an error.
+		<br>
+
+		\n
 		<b>Example:</b>
 
 		\code
@@ -87,6 +94,9 @@ namespace VFrame30
 
 		/// \brief Writes value of tuning signal. On success, returns true. Returns false if signal is not found, connection to TuningService is not established or value is out of range.
 		bool writeValue(QString appSignalId, QVariant value);
+
+		/// \brief Copies written values from <b>Tuning Mode Tuning Values</b> area to <b>Run Mode Tuning Values</b> area. Should be used in TuningClient scripts only when <b>AutoApply</b> property is set to <b>false</b>. Monitor always applies values automatically.
+		void apply();
 
 	protected:
 		virtual bool writingEnabled() const;
