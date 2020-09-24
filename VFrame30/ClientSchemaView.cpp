@@ -133,7 +133,7 @@ namespace VFrame30
 
 	bool ScriptSchemaView::questionMessageBox(QString text)
 	{
-		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text);
+		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text,  QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 		return result == QMessageBox::Yes;
 	}
 
