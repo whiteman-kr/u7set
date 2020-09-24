@@ -112,6 +112,13 @@ namespace Tuning
 		m_valid = false;
 	}
 
+	QString TuningSourceHandler::TuningSignal::tuningValueTypeStr() const
+	{
+		TuningValue tv(m_tuningValueType);
+
+		return tv.typeStr();
+	}
+
 	void TuningSourceHandler::TuningSignal::updateCurrentValue(bool valid, const TuningValue& value, qint64 time)
 	{
 		if (valid == true)
@@ -479,11 +486,22 @@ namespace Tuning
 
 		if (ts.tuningValueType() != newValue.type())
 		{
+			DEBUG_LOG_ERR(m_logger, QString("Tuning value type (%1) is not correspond to tuning signal %2 type (%3)").
+											arg(newValue.typeStr()).
+											arg(ts.appSignalID()).
+											arg(ts.tuningValueTypeStr()));
+
 			return NetworkError::WrongTuningValueType;
 		}
 
 		if (newValue < ts.lowBound() || newValue > ts.highBound())
 		{
+			DEBUG_LOG_ERR(m_logger, QString("New tuning value (%1) of tuning signal %2 is out of range (%3..%4)").
+											arg(newValue.doubleValue()).
+											arg(ts.appSignalID()).
+											arg(ts.lowBound().toString()).
+											arg(ts.highBound().toString()));
+
 			return NetworkError::TuningValueOutOfRange;
 		}
 

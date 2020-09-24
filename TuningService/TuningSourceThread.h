@@ -123,6 +123,7 @@ namespace Tuning
 			E::SignalType signalType() const { return m_signalType; }
 
 			TuningValueType tuningValueType() const { return m_tuningValueType; }
+			QString tuningValueTypeStr() const;
 
 			TuningValue currentValue() const { return m_currentValue; }
 			TuningValue readLowBound() const { return m_readLowBound; }
