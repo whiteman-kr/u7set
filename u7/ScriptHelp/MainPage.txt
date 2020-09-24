@@ -52,6 +52,9 @@ signal parameters (AppSignalParam) and values (AppSignalState) received from <b>
 - \ref VFrame30::TuningController "TuningController" class (<b>tuning</b> object) is used to access tunable 
 signal parameters (AppSignalParam), requesting and setting tunable values (TuningSignalState) using <b>TuningService</b>.
 
+- \ref VFrame30::LogController "LogController" class (<b>log</b> object) is used to write messages and alerts
+to application's log file.
+
 Script code error messages are displayed directly on appropriate schema item when script is executed.
 */
 

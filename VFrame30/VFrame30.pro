@@ -64,9 +64,11 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
+    ../lib/ILogFile.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \
+    LogController.h \
     SchemaItemFrame.h \
     SchemaItemIndicator.h \
     Stable.h \
@@ -155,6 +157,7 @@ SOURCES += \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \
+    LogController.cpp \
     SchemaItemFrame.cpp \
     SchemaItemIndicator.cpp \
     Settings.cpp \

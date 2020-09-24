@@ -64,12 +64,14 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
 	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, nullptr);
+	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
 																		  m_tuningController.get(),
+	                                                                      m_logController.get(),
 																		  this);
 	setCentralWidget(monitorCentralWidget);
 

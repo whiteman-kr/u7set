@@ -533,6 +533,22 @@ namespace VFrame30
 		return;
 	}
 
+	LogController* ClientSchemaView::logController()
+	{
+		return m_logController;
+	}
+
+	const LogController* ClientSchemaView::logController() const
+	{
+		return m_logController;
+	}
+
+	void ClientSchemaView::setLogController(LogController* value)
+	{
+		m_logController = value;
+		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+	}
+
 	QJSEngine* ClientSchemaView::jsEngine()
 	{
 		if (m_schemaManager == nullptr)
@@ -570,6 +586,15 @@ namespace VFrame30
 				QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
 
 				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
+			}
+
+			// Create global variable "log"
+			//
+			{
+				QJSValue jsLog = m_jsEngine.newQObject(m_logController);
+				QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
+
+				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
 			}
 
 			// Evaluate global script

@@ -128,6 +128,7 @@ private:
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::TuningController> m_tuningController;
+	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;			// +

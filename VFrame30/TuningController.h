@@ -26,6 +26,13 @@ namespace VFrame30
 		connection to TuningService can be down, or signal with specified identifier could not exist.<br>
 
 		\n
+		\warning It is highly recommended to check value types and signals types matching:
+		- Boolean vaulues should be written only to discrete signals, and number values only to analog signals;
+		- Fractional numbers should be written only to signals with floating-point type;
+		- Numbers should be in the correct range. For example, if signal type is 32-bit integer, writing <b>23e+12</b> value will cause an error.
+		<br>
+
+		\n
 		<b>Example:</b>
 
 		\code
