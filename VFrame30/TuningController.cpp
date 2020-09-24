@@ -209,6 +209,24 @@ namespace VFrame30
 		return ok;
 	}
 
+	void TuningController::apply()
+	{
+		if (m_tcpClient == nullptr)
+		{
+			qDebug() << "Warning: Attempt to write tuning value while m_tcpClient is not set.";
+			return;
+		}
+
+		if (writingEnabled() == false)
+		{
+			return;	// Access is denied, this is not an error
+		}
+
+		m_tcpClient->applyTuningSignals();
+
+		return;
+	}
+
 	bool TuningController::writingEnabled() const
 	{
 		return true;

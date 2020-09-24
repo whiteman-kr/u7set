@@ -9,6 +9,7 @@ public:
 
 public:
 	virtual bool writeTuningSignal(QString appSignalId, TuningValue value) override;
+	virtual void applyTuningSignals() override;
 };
 
 #endif // SIMTUNINGTCPCLIENT_H
