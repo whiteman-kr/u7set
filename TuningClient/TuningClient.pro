@@ -159,6 +159,7 @@ SOURCES +=\
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
+    ../lib/ILogFile.h \
     Stable.h \
     TuningPage.h \
     Settings.h \

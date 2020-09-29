@@ -21,8 +21,9 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::TuningController* tuningController,
+                                         VFrame30::LogController* logController,
 										 QWidget* parent) :
-	VFrame30::ClientSchemaWidget(new MonitorView{schemaManager, appSignalController, tuningController},
+    VFrame30::ClientSchemaWidget(new MonitorView{schemaManager, appSignalController, tuningController, logController},
 								 schema,
 								 schemaManager,
 								 parent)

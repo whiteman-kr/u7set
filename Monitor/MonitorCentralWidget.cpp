@@ -7,11 +7,13 @@
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
 										   VFrame30::TuningController* tuningController,
+                                           VFrame30::LogController* logController,
 										   QWidget* parent) :
 	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
-	m_tuningController(tuningController)
+    m_tuningController(tuningController),
+    m_logController(logController)
 {
 	Q_ASSERT(m_schemaManager);
 
@@ -97,6 +99,7 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 																m_schemaManager,
 																m_appSignalController,
 																m_tuningController,
+	                                                            m_logController,
 																this);
 	schemaWidget->clientSchemaView()->setVariables(variables);
 

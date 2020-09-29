@@ -294,4 +294,5 @@ QLineEdit:hover {
    const QString PropertyNames::scriptGlobalVariableView = {"view"};
    const QString PropertyNames::scriptGlobalVariableTuning = {"tuning"};
    const QString PropertyNames::scriptGlobalVariableSignals = {"signals"};
+   const QString PropertyNames::scriptGlobalVariableLog = {"log"};
 }

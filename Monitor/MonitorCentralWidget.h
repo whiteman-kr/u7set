@@ -16,6 +16,7 @@ public:
 	MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
+						 VFrame30::LogController* logController,
 						 QWidget* parent);
 	~MonitorCentralWidget();
 
@@ -73,6 +74,7 @@ private:
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
 	VFrame30::TuningController* m_tuningController = nullptr;
+	VFrame30::LogController* m_logController = nullptr;
 
 	int m_eventLoopTimerId = 0;				// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
 	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes

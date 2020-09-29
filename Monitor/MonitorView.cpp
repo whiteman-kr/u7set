@@ -13,11 +13,13 @@
 MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
+						 VFrame30::LogController* logController,
 						 QWidget* parent)
 	: VFrame30::ClientSchemaView(schemaManager, parent)
 {
 	setAppSignalController(appSignalController);
 	setTuningController(tuningController);
+	setLogController(logController);
 
 	qDebug() << Q_FUNC_INFO;
 

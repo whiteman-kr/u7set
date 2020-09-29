@@ -235,6 +235,7 @@ namespace VFrame30
 		static const QString scriptGlobalVariableView;
 		static const QString scriptGlobalVariableTuning;
 		static const QString scriptGlobalVariableSignals;
+		static const QString scriptGlobalVariableLog;
 	};
 
 }
