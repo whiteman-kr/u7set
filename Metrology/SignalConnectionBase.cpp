@@ -422,6 +422,43 @@ void SignalConnectionBase::remove(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+int SignalConnectionBase::findIndex(int ioType, Metrology::Signal* pSignal) const
+{
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	{
+		assert(0);
+		return -1;
+	}
+
+	if (pSignal == nullptr)
+	{
+		assert(0);
+		return -1;
+	}
+
+	int foundIndex = -1;
+
+	QMutexLocker l(&m_connectionMutex);
+
+	int count = m_connectionList.count();
+
+	for(int i = 0; i < count; i ++)
+	{
+		if (m_connectionList[i].signal(ioType) != pSignal)
+		{
+			continue;
+		}
+
+		foundIndex = i;
+
+		break;
+	}
+
+	return foundIndex;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalConnectionBase::findIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const
 {
 	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)

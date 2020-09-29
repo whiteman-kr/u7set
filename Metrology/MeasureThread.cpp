@@ -126,18 +126,43 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 	for(int ch = 0; ch < activeSignal.channelCount(); ch++)
 	{
 		Metrology::Signal* pMetrologySignal = signal.metrologySignal(ch);
-		if (pMetrologySignal == nullptr)
+		if (pMetrologySignal == nullptr || pMetrologySignal->param().isValid() == false)
 		{
 			continue;
 		}
 
-		if (pMetrologySignal->param().isValid() == false)
+		StatisticItem si;
+
+		switch (m_measureType)
 		{
-			continue;
+			case MEASURE_TYPE_LINEARITY:
+				{
+					si.setSignal(pMetrologySignal);
+				}
+				break;
+
+			case MEASURE_TYPE_COMPARATOR:
+				{
+					si.setSignal(pMetrologySignal);
+
+					int startComparatorIndex = theOptions.comparator().startComparatorIndex();
+					if (startComparatorIndex < 0 || startComparatorIndex >= pMetrologySignal->param().comparatorCount())
+					{
+						continue;
+					}
+
+					si.setComparator(pMetrologySignal->param().comparator(startComparatorIndex));
+				}
+
+				break;
+
+			default:
+				assert(0);
+				break;
 		}
 
-		Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pMetrologySignal->param().hash());
-		if (ss.isMeasured() == true)
+		pMeasureView->table().m_measureBase.updateStatistics(si);
+		if (si.isMeasured() == true)
 		{
 			signalID.append(pMetrologySignal->param().customAppSignalID() + "\n");
 

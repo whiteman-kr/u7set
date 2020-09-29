@@ -48,7 +48,7 @@ namespace Metrology
 
 	const int	InputCount	= 32;
 
-	const int	ComparatorCount	= 16;
+	const int	ComparatorCount	= 32;
 
 	// ==============================================================================================
 
@@ -320,40 +320,6 @@ namespace Metrology
 		void setValid(bool valid) { m_flags.valid = valid; }
 	};
 
-
-	// ==============================================================================================
-
-	class SignalStatistic
-	{
-	public:
-
-		SignalStatistic() {}
-		virtual ~SignalStatistic() {}
-
-		enum State
-		{
-			Failed,
-			Success,
-		};
-
-	private:
-
-		int m_measureCount = 0;
-		State m_state = State::Success;
-
-	public:
-
-		int measureCount() const { return m_measureCount; }
-		void setMeasureCount(int count) { m_measureCount = count; }
-		QString measureCountStr() const;
-
-		State state() const { return m_state; }
-		void setState(State state) { m_state = state; }
-		QString stateStr() const;
-
-		bool isMeasured() const { return m_measureCount != 0; }
-	};
-
 	// ==============================================================================================
 
 	class Signal
@@ -369,8 +335,6 @@ namespace Metrology
 		SignalParam m_param;
 		SignalState m_state;
 
-		SignalStatistic m_statistic;
-
 	public:
 
 		SignalParam& param() { return m_param; }
@@ -380,10 +344,6 @@ namespace Metrology
 		SignalState& state() { return m_state; }
 		const SignalState& state() const { return m_state; }
 		void setState(const Metrology::SignalState& state) { m_state = state; }
-
-		SignalStatistic& statistic() { return m_statistic; }
-		const SignalStatistic& statistic() const { return m_statistic; }
-		void setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
 	};
 
 	// ==============================================================================================

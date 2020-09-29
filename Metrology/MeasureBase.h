@@ -329,6 +329,8 @@ private:
 
 	Metrology::SignalLocation m_location;
 
+	QString			m_outputAppSignalID;
+
 	E::CmpType		m_cmpType = E::CmpType::Greate;
 
 	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
@@ -370,6 +372,9 @@ public:
 
 	Metrology::SignalLocation& location() { return m_location; }
 	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+
+	QString			outputAppSignalID() const { return m_outputAppSignalID; }
+	void			setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
 
 	E::CmpType		cmpType() const { return m_cmpType; }
 	int				cmpTypeInt() const { return TO_INT(m_cmpType); }
@@ -442,7 +447,7 @@ public:
 	Measurement*				measurement(int index) const;
 	bool						remove(int index, bool removeData = true);
 
-	Metrology::SignalStatistic	getSignalStatistic(const Hash& signalHash);
+	void						updateStatistics(StatisticItem& si);
 
 signals:
 

@@ -91,6 +91,12 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	Metrology::Signal* pInSignal = theSignalBase.signalPtr(comparatorEx->input().appSignalID());
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		return QVariant();
+	}
+
 	if (role == Qt::ForegroundRole)
 	{
 		if (comparatorEx->signalsIsValid()  == false)
@@ -111,6 +117,22 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	if (role == Qt::BackgroundRole)
+	{
+		if (column == COMPARATOR_LIST_COLUMN_EL_RANGE)
+		{
+			if (pInSignal->param().isInput() || pInSignal->param().isOutput() == true)
+			{
+				if (pInSignal->param().electricRangeIsValid() == false)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+			}
+		}
+
+		return QVariant();
+	}
+
 	if (role == Qt::FontRole)
 	{
 		return theOptions.measureView().font();
@@ -118,7 +140,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(row, column, comparatorEx);
+		return text(row, column, pInSignal, comparatorEx);
 	}
 
 	return QVariant();
@@ -126,7 +148,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
+QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
 {
 	if (row < 0 || row >= comparatorCount())
 	{
@@ -138,6 +160,17 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		return QString();
 	}
 
+	if (pInSignal == nullptr)
+	{
+		return QString();
+	}
+
+	const Metrology::SignalParam& param = pInSignal->param();
+	if (param.isValid() == false)
+	{
+		return QString();
+	}
+
 	if (comparatorEx == nullptr)
 	{
 		return QString();
@@ -145,26 +178,12 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 	bool visible = true;
 
-	QString signalTypeStr;
-
-	QString inputAppSignalID = comparatorEx->input().appSignalID();
-
-	if (inputAppSignalID.isEmpty() == false)
+	if (row > 0)
 	{
-		Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
-		if (pInSignal != nullptr)
-		{
-			signalTypeStr = E::valueToString<E::SignalInOutType>(pInSignal->param().inOutType());
-		}
-	}
-
-	int prevRow = row - 1;
-	if (prevRow >= 0 && prevRow < comparatorCount())
-	{
-		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(prevRow);
+		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(row - 1);
 		if (prevComparatorEx != nullptr)
 		{
-			if (prevComparatorEx->input().appSignalID() == inputAppSignalID)
+			if (prevComparatorEx->input().appSignalID() == param.appSignalID())
 			{
 				visible = false;
 			}
@@ -175,12 +194,14 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = visible ? signalTypeStr : QString();		break;
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? inputAppSignalID : QString();	break;
-		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();	break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();	break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();		break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();					break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = visible ? E::valueToString<E::SignalInOutType>(param.inOutType()) : QString();		break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();											break;
+		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();											break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();											break;
+		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = visible ? param.electricRangeStr() : QString();									break;
+		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = visible ? param.engineeringRangeStr() : QString();									break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();												break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();															break;
 		default:										assert(0);
 	}
 
@@ -558,8 +579,7 @@ void ComparatorListDialog::comparatorProperties()
 	}
 
 	ComparatorPropertyDialog dialog(*comparatorEx);
-	int result = dialog.exec();
-	if (result != QDialog::Accepted)
+	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}

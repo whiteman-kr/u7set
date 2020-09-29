@@ -539,6 +539,11 @@ namespace Metrology
 
 	QString SignalParam::electricSensorTypeStr() const
 	{
+		if (isInternal() == true)
+		{
+			return QString();
+		}
+
 		QString typeStr = QMetaEnum::fromType<E::SensorType>().key(m_electricSensorType);
 
 		switch(m_electricUnitID)
@@ -605,6 +610,11 @@ namespace Metrology
 
 	QString SignalParam::electricRangeStr() const
 	{
+		if (isInternal() == true)
+		{
+			return QString();
+		}
+
 		QString range, formatStr;
 
 		formatStr = QString::asprintf("%%.%df", m_electricPrecision);
@@ -799,41 +809,6 @@ namespace Metrology
 	{
 		m_comparatorList = comparators;
 		m_comparatorCount = m_comparatorList.count();
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------------------
-
-	QString SignalStatistic::measureCountStr() const
-	{
-		if (m_measureCount == 0)
-		{
-			return QString();
-		}
-
-		return QString::number(m_measureCount);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	QString SignalStatistic::stateStr() const
-	{
-		if (m_measureCount == 0)
-		{
-			return QString("Not measured");
-		}
-
-		QString state;
-
-		switch (m_state)
-		{
-			case State::Failed:		state = "Failed";	break;
-			case State::Success:	state = "Ok";		break;
-			default:				assert(0);			break;
-		}
-
-		return state;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

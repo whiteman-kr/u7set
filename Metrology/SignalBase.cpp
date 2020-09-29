@@ -1109,7 +1109,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 
 				// take signal connection in the base by index
 				//
-				SignalConnection signalConnection = signalConnections.connection(index);
+				const SignalConnection& signalConnection = signalConnections.connection(index);
 
 				m_mutex.lock();
 
@@ -1904,7 +1904,7 @@ void SignalBase::initSignals()
 
 	m_tuningBase.Signals().createSignalList();
 
-	m_statisticBase.createSignalList();
+	m_statisticBase.createStatisticSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2524,7 +2524,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					break;
 			}
 
-			if (metrologyComparatorList.count() >= theOptions.module().maxComparatorCount())
+			if (metrologyComparatorList.count() >= theOptions.comparator().maxComparatorCount())
 			{
 				break;
 			}
@@ -2533,7 +2533,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
 
-	//statistic().createComparatorList();
+	m_statisticBase.createStatisticComparatorList();
 
 	return true;
 }

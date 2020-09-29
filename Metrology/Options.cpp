@@ -1124,6 +1124,7 @@ void ComparatorOption::load()
 
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
+	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 
 	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
 }
@@ -1141,6 +1142,7 @@ void ComparatorOption::save()
 
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
+	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
 
 	s.setValue(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), m_showEngineeringValueColumn);
 }
@@ -1156,6 +1158,7 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
+	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
 
@@ -1196,7 +1199,6 @@ void ModuleOption::load()
 	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
-	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1210,7 +1212,6 @@ void ModuleOption::save()
 	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
 	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
-	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1222,7 +1223,6 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 	m_showNoValid = from.m_showNoValid;
 	m_suffixSN = from.m_suffixSN;
 	m_maxInputCount = from.m_maxInputCount;
-	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	return *this;
 }

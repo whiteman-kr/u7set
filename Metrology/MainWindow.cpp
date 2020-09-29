@@ -1203,6 +1203,9 @@ void MainWindow::showSignalConnectionList()
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
 		return;
 	}
+
+	theSignalBase.statistic().createStatisticSignalList();
+	theSignalBase.statistic().createStatisticComparatorList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

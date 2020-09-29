@@ -556,11 +556,15 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), theOptions.module().maxComparatorCount());
+					item->setAttribute(QLatin1String("maximum"), theOptions.comparator().maxComparatorCount());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
 
+					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_MAX_CMP_COUNT]);
+					item->setValue(m_options.comparator().maxComparatorCount());
+					appendProperty(item, page, CO_PARAM_MAX_CMP_COUNT);
+					permissionsGroup->addSubProperty(item);
 
 				QtProperty *showcolumnGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
 
@@ -605,11 +609,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Int, ModuleParamName[MO_PARAM_MAX_IMPUT_COUNT]);
 					item->setValue(m_options.module().maxInputCount());
 					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Int, ModuleParamName[MO_PARAM_MAX_CMP_COUNT]);
-					item->setValue(m_options.module().maxComparatorCount());
-					appendProperty(item, page, MO_PARAM_MAX_CMP_COUNT);
 					measuremoduleGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -1170,6 +1169,7 @@ void OptionsDialog::applyProperty()
 															m_options.m_updateColumnView[MEASURE_TYPE_COMPARATOR] = true;		break;
 					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
 					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);	break;
+					case CO_PARAM_MAX_CMP_COUNT:			m_options.comparator().setMaxComparatorCount(value.toInt());		break;
 					case CO_PARAM_SHOW_ENGINEERING_VALUE:	m_options.comparator().setShowPhyscalValueColumn(value.toBool());
 															m_options.m_updateColumnView[MEASURE_TYPE_COMPARATOR] = true;		break;
 					default:								assert(0);
@@ -1186,7 +1186,7 @@ void OptionsDialog::applyProperty()
 					case MO_PARAM_SHOW_NO_VALID:			m_options.module().setShowNoValid(value.toBool());					break;
 					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());					break;
-					case MO_PARAM_MAX_CMP_COUNT:			m_options.module().setMaxComparatorCount(value.toInt());			break;
+
 					default:								assert(0);
 				}
 			}

@@ -826,6 +826,7 @@ const char* const		ComparatorParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis"),
 						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
 						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
+						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
 };
 
 const int				CO_PARAM_COUNT					= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
@@ -836,7 +837,8 @@ const int				CO_PARAM_ERROR_LIMIT			= 0,
 						CO_PARAM_SHOW_ERROR_FROM_LIMIT	= 3,
 						CO_PARAM_ENABLE_HYSTERESIS		= 4,
 						CO_PARAM_COMPARATOR_INDEX		= 5,
-						CO_PARAM_SHOW_ENGINEERING_VALUE	= 6;
+						CO_PARAM_SHOW_ENGINEERING_VALUE	= 6,
+						CO_PARAM_MAX_CMP_COUNT			= 7;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -863,6 +865,8 @@ public:
 
 	bool				m_showEngineeringValueColumn = true;					// show columns of engineering values
 
+	int					m_maxComparatorCount = Metrology::ComparatorCount;		// Maximum number of comparators for signal
+
 public:
 
 	double				errorLimit() const { return m_errorLimit; }
@@ -886,6 +890,9 @@ public:
 	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
 	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
 
+	int					maxComparatorCount() const { return m_maxComparatorCount; }
+	void				setMaxComparatorCount(int count) { m_maxComparatorCount = count; }
+
 	void				load();
 	void				save();
 
@@ -905,7 +912,6 @@ const char* const		ModuleParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for mofule"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
 };
 
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
@@ -914,8 +920,7 @@ const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
 						MO_PARAM_WARN_IF_MEASURED		= 1,
 						MO_PARAM_SHOW_NO_VALID			= 2,
 						MO_PARAM_SUFFIX_SN				= 3,
-						MO_PARAM_MAX_IMPUT_COUNT		= 4,
-						MO_PARAM_MAX_CMP_COUNT			= 5;
+						MO_PARAM_MAX_IMPUT_COUNT		= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -936,7 +941,6 @@ private:
 	bool				m_showNoValid = false;										// show measuring value if signal is not valid
 	QString				m_suffixSN;													// suffix to identify the signal of module serial number
 	int					m_maxInputCount = Metrology::InputCount;					// Maximum number of inputs for mofule
-	int					m_maxComparatorCount = Metrology::ComparatorCount;			// Maximum number of comparators for signal
 
 public:
 
@@ -954,9 +958,6 @@ public:
 
 	int					maxInputCount() const { return m_maxInputCount; }
 	void				setMaxInputCount(int count) { m_maxInputCount = count; }
-
-	int					maxComparatorCount() const { return m_maxComparatorCount; }
-	void				setMaxComparatorCount(int count) { m_maxComparatorCount = count; }
 
 public:
 

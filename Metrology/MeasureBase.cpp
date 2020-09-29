@@ -1341,6 +1341,8 @@ void ComparatorMeasurement::clear()
 
 	m_location.clear();
 
+	m_outputAppSignalID.clear();
+
 	m_cmpType = E::CmpType::Greate;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
@@ -1438,6 +1440,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	setLocation(inParam.location());
+
+	setOutputAppSignalID(comparatorEx->output().appSignalID());
 
 	// nominal
 	//
@@ -1553,6 +1557,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	}
 
 	setLocation(inParam.location());
+
+	setOutputAppSignalID(comparatorEx->output().appSignalID());
 
 	// nominal
 	//
@@ -2064,6 +2070,8 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 
 	m_location = from.m_location;
 
+	m_outputAppSignalID = from.m_outputAppSignalID;
+
 	m_cmpType = from.m_cmpType;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
@@ -2436,95 +2444,120 @@ bool MeasureBase::remove(int index, bool removeData)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHash)
+void MeasureBase::updateStatistics(StatisticItem& si)
 {
+	Metrology::Signal* pSignal = si.signal();
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		return;
+	}
+
+	Hash signalHash = si.signal()->param().hash();
 	if (signalHash == UNDEFINED_HASH)
 	{
 		assert(signalHash != UNDEFINED_HASH);
-		return Metrology::SignalStatistic();
+		return;
 	}
 
 	int limitType = theOptions.linearity().showErrorFromLimit();
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
-		return Metrology::SignalStatistic();
+		return;
 	}
 
 	int errorType = theOptions.linearity().errorType();
 	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
 	{
 		assert(0);
-		return Metrology::SignalStatistic();
+		return;
 	}
 
-	Metrology::SignalStatistic si;
+	QMutexLocker l(&m_measureMutex);
 
-	m_measureMutex.lock();
+	si.setMeasureCount(0);
+	si.setState(StatisticItem::State::Success);
 
-		int measureCount = m_measureList.count();
-		for(int i = 0; i < measureCount; i ++)
+	int measureCount = m_measureList.count();
+	for(int i = 0; i < measureCount; i ++)
+	{
+		Measurement* pMeasurement = m_measureList[i];
+		if (pMeasurement == nullptr)
 		{
-			Measurement* pMeasurement = m_measureList[i];
-			if (pMeasurement == nullptr)
-			{
-				continue;
-			}
-
-			if (pMeasurement->signalHash() != signalHash)
-			{
-				continue;
-			}
-
-			switch(pMeasurement->measureType())
-			{
-				case MEASURE_TYPE_LINEARITY:
-					{
-						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
-						if (pLinearityMeasurement == nullptr)
-						{
-							break;
-						}
-
-						si.setMeasureCount(si.measureCount() + 1);
-
-						if (pLinearityMeasurement->error(limitType, errorType) > pLinearityMeasurement->errorLimit(limitType, errorType))
-						{
-							si.setState(Metrology::SignalStatistic::State::Failed);
-						}
-					}
-					break;
-
-				case MEASURE_TYPE_COMPARATOR:
-					{
-						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
-						if (pComparatorMeasurement == nullptr)
-						{
-							break;
-						}
-
-//						if (compareFloat(pComparatorMeasurement->nominal(limitType), cmpValue) == false)
-//						{
-//							break;
-//						}
-
-						si.setMeasureCount(si.measureCount() + 1);
-
-						if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
-						{
-							si.setState(Metrology::SignalStatistic::State::Failed);
-						}
-					}
-					break;
-
-				default:
-					assert(0);
-			}
+			continue;
 		}
 
-	m_measureMutex.unlock();
+		if (pMeasurement->signalHash() != signalHash)
+		{
+			continue;
+		}
 
-	return si;
+		switch(pMeasurement->measureType())
+		{
+			case MEASURE_TYPE_LINEARITY:
+			{
+				LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+				if (pLinearityMeasurement == nullptr)
+				{
+					break;
+				}
+
+				si.setMeasureCount(si.measureCount() + 1);
+
+				if (pLinearityMeasurement->error(limitType, errorType) > pLinearityMeasurement->errorLimit(limitType, errorType))
+				{
+					si.setState(StatisticItem::State::Failed);
+				}
+			}
+				break;
+
+			case MEASURE_TYPE_COMPARATOR:
+			{
+				ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+				if (pComparatorMeasurement == nullptr)
+				{
+					break;
+				}
+
+				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+				if (comparatorEx == nullptr)
+				{
+					break;
+				}
+
+				if (comparatorEx->cmpType() != pComparatorMeasurement->cmpType())
+				{
+					break;
+				}
+
+				if (comparatorEx->compare().isConst() == true)
+				{
+					if (compareDouble(comparatorEx->compareConstValue(), pComparatorMeasurement->nominal(MEASURE_LIMIT_TYPE_ENGINEER)) == false)
+					{
+						break;
+					}
+				}
+				else
+				{
+					if (comparatorEx->output().appSignalID() != pComparatorMeasurement->outputAppSignalID())
+					{
+						break;
+					}
+				}
+
+				si.setMeasureCount(si.measureCount() + 1);
+
+				if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
+				{
+					si.setState(StatisticItem::State::Failed);
+				}
+			}
+				break;
+
+			default:
+				assert(0);
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

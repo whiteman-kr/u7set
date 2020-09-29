@@ -181,6 +181,8 @@ int SqlFieldBase::init(int objectType, int)
 			append("Module",						QVariant::Int);
 			append("Place",							QVariant::Int);
 
+			append("OutputAppSignalID",				QVariant::String, 64);
+
 			append("CmpType",						QVariant::Int);
 
 			append("ElectricNominal",				QVariant::Double);
@@ -937,6 +939,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->location().setModule(query.value(field++).toInt());
 					measure->location().setPlace(query.value(field++).toInt());
 
+					measure->setOutputAppSignalID(query.value(field++).toString());
+
 					measure->setCmpTypeInt(query.value(field++).toInt());
 
 					measure->setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
@@ -1352,6 +1356,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->location().chassis());
 					query.bindValue(field++, measure->location().module());
 					query.bindValue(field++, measure->location().place());
+
+					query.bindValue(field++, measure->outputAppSignalID());
 
 					query.bindValue(field++, measure->cmpTypeInt());
 
