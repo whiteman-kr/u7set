@@ -810,7 +810,8 @@ void StatisticPanel::selectSignalForMeasure()
 
 		QString str;
 
-		str = tr("Signal %1 is \"%2\" signal.\nTo measure this signal you have to create connection with input signal.\nFor example, type of connection: \"Input\" -> \"%2\"")
+		str = tr("Signal %1 is \"%2\" signal.\nTo measure this signal you have to create connection with input signal.\nFor example, type of connection: \"Input\" -> \"%2\".\n\n"
+				 "To create a new connection between signals, select \"View\"->\"Signal connections...\"")
 				.arg(si.signal()->param().appSignalID())
 				.arg(E::valueToString<E::SignalInOutType>(si.signal()->param().inOutType()));
 
@@ -937,7 +938,7 @@ void StatisticPanel::selectSignalForMeasure()
 	int signalComboCount = theSignalBase.signalForMeasureCount();
 	for(int i = 0; i < signalComboCount; i++)
 	{
-		MeasureSignal measureSignal = theSignalBase.signalForMeasure(i);
+		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(i);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;

@@ -199,19 +199,19 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 
 	if (column == SIGNAL_INFO_COLUMN_STATE)
 	{
-		Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (inParam.isValid() == true)
 		{
-			Metrology::SignalState inState = theSignalBase.signalState(inParam.hash());
+			const Metrology::SignalState& inState = theSignalBase.signalState(inParam.hash());
 			stateStr = signalStateStr(inParam, inState);
 		}
 
 		if (ioParam.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
 		{
-			Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (outParam.isValid() == true)
 			{
-				Metrology::SignalState outState = theSignalBase.signalState(outParam.hash());
+				const Metrology::SignalState& outState = theSignalBase.signalState(outParam.hash());
 				stateStr += MULTI_TEXT_DEVIDER + signalStateStr(outParam, outState);
 			}
 		}

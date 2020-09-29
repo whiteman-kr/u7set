@@ -45,7 +45,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
 	theSignalBase.signalConnections().load();	// load signal connections base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
+	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
 	//
 	//
@@ -743,7 +743,7 @@ void MainWindow::updateRacksOnToolBar()
 			{
 				for(int r = 0; r < rackCount; r++)
 				{
-					Metrology::RackParam rack = theSignalBase.rackForMeasure(r);
+					const Metrology::RackParam& rack = theSignalBase.rackForMeasure(r);
 					if (rack.isValid() == false)
 					{
 						continue;
@@ -850,13 +850,13 @@ void MainWindow::updateSignalsOnToolBar()
 
 	for(int s = 0; s < signalCount; s++)
 	{
-		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
+		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(s);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;
 		}
 
-		MultiChannelSignal signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (signal.isEmpty() == true)
 		{
 			continue;
@@ -1406,7 +1406,7 @@ void MainWindow::setMeasureSignal(int index)
 		return;
 	}
 
-	MeasureSignal measureSignal = theSignalBase.signalForMeasure(signalIndex);
+	const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(signalIndex);
 	if (measureSignal.isEmpty() == true)
 	{
 		assert(false);
@@ -1416,7 +1416,7 @@ void MainWindow::setMeasureSignal(int index)
 
 	theSignalBase.setActiveSignal(measureSignal);
 
-	MultiChannelSignal signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -1693,8 +1693,8 @@ QString MainWindow::tuningSocketConnectedStateStr()
 
 	connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
-	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
-	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
+	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().sourceBase().count()));
+	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().signalBase().count()));
 
 	return connectedState;
 }
@@ -1707,7 +1707,7 @@ void MainWindow::tuningSocketConnected()
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToTuningServer->setToolTip(tuningSocketConnectedStateStr());
 
-	if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+	if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
 	{
 		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
 	}
@@ -1725,8 +1725,8 @@ void MainWindow::tuningSocketDisconnected()
 		}
 	}
 
-	theSignalBase.tuning().Sources().clear();
-	theSignalBase.tuning().Signals().setNovalid();
+	theSignalBase.tuning().sourceBase().clear();
+	theSignalBase.tuning().signalBase().setNovalid();
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
@@ -1742,7 +1742,7 @@ void MainWindow::tuningSignalsCreated()
 		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 
-		if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+		if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
 		{
 			m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
 		}
@@ -1868,7 +1868,7 @@ void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
 		return;
 	}
 
-	MeasureSignal nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
+	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure1(nextSignalIndex);
 	if (nextActiveSignal.isEmpty() == true)
 	{
 		return;

@@ -93,7 +93,7 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 	{
 		// get fresh state from base
 		//
-		 sourceState = theSignalBase.tuning().Sources().state(src.sourceID());
+		 sourceState = theSignalBase.tuning().sourceBase().state(src.sourceID());
 	}
 
 	if (role == Qt::TextAlignmentRole)
@@ -822,10 +822,10 @@ void TuningSignalListDialog::updateSourceList()
 
 	QVector<TuningSource> sourceList;
 
-	int souceCount = theSignalBase.tuning().Sources().count();
+	int souceCount = theSignalBase.tuning().sourceBase().count();
 	for(int i = 0; i < souceCount; i++)
 	{
-		TuningSource src = theSignalBase.tuning().Sources().source(i);
+		const TuningSource& src = theSignalBase.tuning().sourceBase().source(i);
 		if (src.sourceID() == 0)
 		{
 			continue;
@@ -849,10 +849,10 @@ void TuningSignalListDialog::updateSignalList()
 
 	QVector<Metrology::Signal*> signalList;
 
-	int signalCount = theSignalBase.tuning().Signals().count();
+	int signalCount = theSignalBase.tuning().signalBase().count();
 	for(int i = 0; i < signalCount; i++)
 	{
-		Metrology::Signal* pSignal = theSignalBase.tuning().Signals().signal(i);
+		Metrology::Signal* pSignal = theSignalBase.tuning().signalBase().signal(i);
 		if (pSignal == nullptr)
 		{
 			continue;

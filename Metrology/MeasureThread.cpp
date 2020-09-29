@@ -252,7 +252,7 @@ bool MeasureThread::inputsOfmoduleIsSame()
 
 		switch (theOptions.toolBar().signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:			param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_UNUSED:
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
 			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
@@ -409,68 +409,53 @@ bool MeasureThread::setCalibratorUnit()
 						continue;
 					}
 
-					switch (m_activeIoParamList[ch].signalConnectionType())
+					if (m_activeIoParamList[ch].signalConnectionType() == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 					{
-						case SIGNAL_CONNECTION_TYPE_UNUSED:
-						case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-						case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-						case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-						case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
-							{
-								Metrology::SignalParam inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-								if (inParam.isValid() == false)
-								{
-									continue;
-								}
+						const Metrology::SignalParam& outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+						if (outParam.isValid() == false)
+						{
+							continue;
+						}
 
-								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_SOURCE, inParam.electricUnitID(), inParam.electricHighLimit()) == false)
-								{
-									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->calibratorPort()));
-								}
+						if (outParam.isOutput() == false)
+						{
+							continue;
+						}
 
-								Metrology::SignalParam outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-								if (outParam.isValid() == false)
-								{
-									continue;
-								}
+						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
+						{
+							emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
+						}
+					}
+					else
+					{
+						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+						if (inParam.isValid() == false)
+						{
+							continue;
+						}
 
-								if (outParam.isOutput() == false)
-								{
-									continue;
-								}
+						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_SOURCE, inParam.electricUnitID(), inParam.electricHighLimit()) == false)
+						{
+							emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->calibratorPort()));
+						}
 
-								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
-								{
-									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
-								}
+						const Metrology::SignalParam& outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+						if (outParam.isValid() == false)
+						{
+							continue;
+						}
 
-							}
-							break;
+						if (outParam.isOutput() == false)
+						{
+							continue;
+						}
 
-						case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-							{
+						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
+						{
+							emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
+						}
 
-								Metrology::SignalParam outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-								if (outParam.isValid() == false)
-								{
-									continue;
-								}
-
-								if (outParam.isOutput() == false)
-								{
-									continue;
-								}
-
-								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
-								{
-									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
-								}
-							}
-
-							break;
-
-						default:
-							assert(0);
 					}
 				}
 			}
@@ -1313,7 +1298,7 @@ void MeasureThread::saveStateTunSignals()
 			continue;
 		}
 
-		Metrology::SignalParam tunParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		const Metrology::SignalParam& tunParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (tunParam.isValid() == false)
 		{
 			continue;
@@ -1340,7 +1325,7 @@ void MeasureThread::restoreStateTunSignals()
 			continue;
 		}
 
-		Metrology::SignalParam tunParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		const Metrology::SignalParam& tunParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (tunParam.isValid() == false)
 		{
 			continue;

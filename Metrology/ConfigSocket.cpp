@@ -355,17 +355,17 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 
 		result &= xml.readStringAttribute("EquipmentID", &equipmentID);
 
-		theSignalBase.tuning().Sources().sourceEquipmentID().append(equipmentID);
+		theSignalBase.tuning().sourceBase().sourceEquipmentID().append(equipmentID);
 	}
 
-	if (tuningSourceCount != theSignalBase.tuning().Sources().sourceEquipmentID().count())
+	if (tuningSourceCount != theSignalBase.tuning().sourceBase().sourceEquipmentID().count())
 	{
-		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count() << " from " << tuningSourceCount;
+		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count() << " from " << tuningSourceCount;
 		assert(false);
 		return false;
 	}
 
-	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count();
+	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count();
 
 	return result;
 }
