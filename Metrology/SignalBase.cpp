@@ -430,8 +430,8 @@ QString IoSignalParam::electricRangeStr() const
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 		{
 			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (param.isValid() == true)
@@ -443,6 +443,8 @@ QString IoSignalParam::electricRangeStr() const
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 		{
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
@@ -495,8 +497,8 @@ QString IoSignalParam::electricSensorStr() const
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 		{
 			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (param.isValid() == true)
@@ -508,6 +510,8 @@ QString IoSignalParam::electricSensorStr() const
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 		{
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
@@ -611,8 +615,10 @@ QString IoSignalParam::engineeringRangeStr() const
 
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 		{
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
@@ -1017,8 +1023,10 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 			{
 				// find index of signal connection in the base by input signal
 				//
@@ -1654,8 +1662,10 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 
 				if (param.isInput() == false)
 				{
@@ -1925,8 +1935,10 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 
 				if (param.isInput() == false)
 				{

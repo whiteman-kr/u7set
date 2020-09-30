@@ -260,6 +260,18 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 		return val;
 	}
 
+	const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
+	{
+		return val;
+	}
+
+	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (outParam.isValid() == false)
+	{
+		return val;
+	}
+
 	double retVal = val;
 
 	switch (calcType)
@@ -270,44 +282,38 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 			{
 				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 					{
-						const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-						if (inParam.isValid() == false)
-						{
-							break;
-						}
-
-						const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-						if (outParam.isValid() == false)
-						{
-							break;
-						}
-
 						retVal = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
+				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 					{
-						const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-						if (inParam.isValid() == false)
-						{
-							break;
-						}
-
-						const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-						if (outParam.isValid() == false)
-						{
-							break;
-						}
-
 						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
 						retVal = K * sqrt( val );
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+				{
+					val = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
+
+					double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+
+					retVal = K * sqrt( val );
+				}
+				break;
+
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 					{
+						retVal = conversionDegree(val, CT_DEGREE_C_TO_F);
+					}
+					break;
+
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+					{
+						val = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
+
 						retVal = conversionDegree(val, CT_DEGREE_C_TO_F);
 					}
 					break;
@@ -321,35 +327,21 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 			{
 				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 					{
-						const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-						if (inParam.isValid() == false)
-						{
-							break;
-						}
-
-						const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-						if (outParam.isValid() == false)
-						{
-							break;
-						}
-
 						retVal = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
+				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 					{
-						const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-						if (inParam.isValid() == false)
-						{
-							break;
-						}
+						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
-						const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-						if (outParam.isValid() == false)
-						{
-							break;
-						}
+						retVal = pow(val / K, 2);
+					}
+					break;
+
+				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+					{
+						val = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
 
 						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
@@ -357,8 +349,16 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 					{
+						retVal = conversionDegree(val, CT_DEGREE_F_TO_C);
+					}
+					break;
+
+				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+					{
+						val = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
+
 						retVal = conversionDegree(val, CT_DEGREE_F_TO_C);
 					}
 					break;

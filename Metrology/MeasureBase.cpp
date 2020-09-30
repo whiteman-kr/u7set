@@ -117,13 +117,15 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 
 	switch (signalConnectionType)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:					fill_measure_input(ioParam);	break;
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	fill_measure_internal(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:	fill_measure_internal(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	fill_measure_output(ioParam);	break;
-		default:									assert(0);
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:			fill_measure_output(ioParam);	break;
+		default:											assert(0);
 	}
 }
 
@@ -494,12 +496,13 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	//
 
 	double engineering = (ioParam.percent() * (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / 100) + outParam.lowEngineeringUnits();
-	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, outParam);
+	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, outParam);
 
 	setPercent(ioParam.percent());
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
+	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
 
 	// measure
 	//
@@ -1314,11 +1317,11 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam)
 
 	switch (signalConnectionType)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam);	break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:					fill_measure_input(ioParam);	break;
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	fill_measure_internal(ioParam);	break;
-		default:									assert(0);
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:	fill_measure_internal(ioParam);	break;
+		default:											assert(0);
 	}
 }
 

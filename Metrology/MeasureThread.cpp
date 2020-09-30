@@ -254,11 +254,13 @@ bool MeasureThread::inputsOfmoduleIsSame()
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
 			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
-			default:									assert(0);
+			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:			param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+			default:											assert(0);
 		}
 
 		if (eltalonIsFound == false)
@@ -681,38 +683,25 @@ void MeasureThread::measureLinearity()
 				continue;
 			}
 
-			// set electric value
+			// set electric value or tuning value
 			//
-			switch (m_activeIoParamList[ch].signalConnectionType())
+			if (m_activeIoParamList[ch].signalConnectionType() == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 			{
-				case SIGNAL_CONNECTION_TYPE_UNUSED:
-				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-				case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_F:
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
-					{
-						// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)
-						// then by engineering value we may get electric value
-						//
-						double engineeringVal = (point.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
-						double electricVal = conversion(engineeringVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+				double tuningVal = (point.percent() * (inParam.tuningHighBound().toDouble() - inParam.tuningLowBound().toDouble()) / 100) + inParam.tuningLowBound().toDouble();
 
-						polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
+				theSignalBase.tuning().appendCmdFowWrite(inParam.hash(), inParam.tuningValueType(), tuningVal);
+			}
+			else
+			{
+				// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)
+				// then by engineering value we may get electric value
+				//
+				double engineeringVal = (point.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
+				double electricVal = conversion(engineeringVal, CT_ENGINEER_TO_ELECTRIC, inParam);
 
-						pCalibratorManager->setValue(m_activeIoParamList[ch].isNegativeRange() ? -electricVal : electricVal);
-					}
-					break;
+				polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
 
-				case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-					{
-						double tuningVal = (point.percent() * (inParam.tuningHighBound().toDouble() - inParam.tuningLowBound().toDouble()) / 100) + inParam.tuningLowBound().toDouble();
-
-						theSignalBase.tuning().appendCmdFowWrite(inParam.hash(), inParam.tuningValueType(), tuningVal);
-					}
-					break;
-
-				default:
-					assert(0);
+				pCalibratorManager->setValue(m_activeIoParamList[ch].isNegativeRange() ? -electricVal : electricVal);
 			}
 		}
 
