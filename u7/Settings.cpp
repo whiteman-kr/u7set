@@ -396,6 +396,7 @@ void Settings::writeSystemScope() const
 
 	s.setValue("m_buildOutputPath", m_buildOutputPath);
 	s.setValue("m_configuratorSerialPort", m_configuratorSerialPort);
+	s.setValue("m_configuratorUseMultiUart", m_configuratorUseMultiUart);
 	s.setValue("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo);
 	s.setValue("m_configuratorVerify", m_configuratorVerify);
 
@@ -444,6 +445,7 @@ void Settings::loadSystemScope()
 
 	m_buildOutputPath = s.value("m_buildOutputPath", m_buildOutputPath).toString();
 	m_configuratorSerialPort = s.value("m_configuratorSerialPort", m_configuratorSerialPort).toString();
+	m_configuratorUseMultiUart = s.value("m_configuratorUseMultiUart", m_configuratorUseMultiUart).toBool();
 	m_configuratorShowDebugInfo = s.value("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo).toBool();
 	m_configuratorVerify = s.value("m_configuratorVerify", m_configuratorVerify).toBool();
 

@@ -52,6 +52,7 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
 		}
 	}
 
+	ui->useMultiUart->setChecked(theSettings.m_configuratorUseMultiUart);
 	ui->showDebugInfo->setChecked(theSettings.m_configuratorShowDebugInfo);
 	ui->verifyData->setChecked(theSettings.m_configuratorVerify);
 
@@ -66,6 +67,7 @@ DialogSettingsConfigurator::~DialogSettingsConfigurator()
 void DialogSettingsConfigurator::on_DialogSettingsConfigurator_accepted()
 {
 	theSettings.m_configuratorSerialPort = ui->serialPortCombo->currentText();
+	theSettings.m_configuratorUseMultiUart = (ui->useMultiUart->checkState() == Qt::Checked);
 	theSettings.m_configuratorShowDebugInfo = (ui->showDebugInfo->checkState() == Qt::Checked);
 	theSettings.m_configuratorVerify = (ui->verifyData->checkState() == Qt::Checked);
 

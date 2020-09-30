@@ -929,18 +929,23 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 				{
 					CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
+					bool multiUartSupport = (pingReplyVersioned.moduleUartId & ConfigurationMultiUartFlag) != 0;
+
 					protocolVersion = pingReplyVersioned.version;
-					moduleUartId = pingReplyVersioned.moduleUartId;
+					moduleUartId = pingReplyVersioned.moduleUartId & (~ConfigurationMultiUartFlag);
 					blockSize = pingReplyVersioned.blockSize;
 					frameSize = pingReplyVersioned.frameSize;
 					blockCount = pingReplyVersioned.romSize / pingReplyVersioned.blockSize;
 
 					if (useMultipleUartProtocol() == true)
 					{
-						if ((moduleUartId & 0x8000) != 0)
+						if (multiUartSupport == true)
 						{
-							m_Log->writeMessage(tr("Module supports multi-UART protocol."));
-							multipleUartProtocol = true;
+							if (multipleUartProtocol == false)
+							{
+								m_Log->writeMessage(tr("Module supports multi-UART protocol."));
+								multipleUartProtocol = true;
+							}
 							m_currentUartId = availebleUartId;
 						}
 						else
@@ -951,7 +956,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 					}
 					else
 					{
-						m_currentUartId = moduleUartId & (~0x8000);
+						m_currentUartId = moduleUartId;
 					}
 
 
@@ -1272,16 +1277,16 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 			{
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
+				protocolVersion = pingReplyVersioned.version;
+				moduleUartId = pingReplyVersioned.moduleUartId & (~ConfigurationMultiUartFlag);
+				blockSize = pingReplyVersioned.blockSize;
+
 				// Check if the connector in the configuartion UART
 				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
+				if ((moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
 				{
 					throw tr("Wrong UART, use configuration port.");
 				}
-
-				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
-				blockSize = pingReplyVersioned.blockSize;
 
 				// Ignore Wrong moduleUartId flag
 				//
@@ -1442,17 +1447,11 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 			{
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-				// Check if the connector in the configuartion UART
+				// Read any memory type!!!
 				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-				{
-					// Read any memomy type!!!
-					//
-					//throw tr("Wrong UART, use configuration port.");
-				}
 
 				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
+				moduleUartId = pingReplyVersioned.moduleUartId & (~ConfigurationMultiUartFlag);
 				eepromFrameSize = pingReplyVersioned.blockSize;
 				eepromSize = pingReplyVersioned.romSize;
 
@@ -1682,19 +1681,19 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
             {
                 CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-                // Check if the connector in the configuartion UART
-                //
-                if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-                {
-                    throw tr("Wrong UART, use configuration port.");
-                }
-
                 protocolVersion = pingReplyVersioned.version;
-                moduleUartId = pingReplyVersioned.moduleUartId;
+				moduleUartId = pingReplyVersioned.moduleUartId & (~ConfigurationMultiUartFlag);
                 blockSize = pingReplyVersioned.blockSize;
                 frameSize = pingReplyVersioned.frameSize;
 
-                // Ignore Wrong moduleUartId flag
+				// Check if the connector in the configuartion UART
+				//
+				if ((moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
+				{
+					throw tr("Wrong UART, use configuration port.");
+				}
+
+				// Ignore Wrong moduleUartId flag
                 //
                 pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
 
@@ -2080,17 +2079,11 @@ void Configurator::eraseFlashMemory(int)
 			{
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-				// Check if the connector in the configuartion UART
+				// Erase any memory type
 				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-				{
-					// Erase any memomy type
-					//
-					//throw tr("Wrong UART, use configuration port.");
-				}
 
 				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
+				moduleUartId = pingReplyVersioned.moduleUartId & (~ConfigurationMultiUartFlag);
 				blockSize = pingReplyVersioned.blockSize;
 				romSize = pingReplyVersioned.romSize;
 
