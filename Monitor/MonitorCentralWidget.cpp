@@ -119,48 +119,6 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 	return index;
 }
 
-void MonitorCentralWidget::slot_schemaList()
-{
-	// Activate tab it schema list already opened
-	//
-	for (int i = 0; i < this->count(); i++)
-	{
-		SchemaListWidget* w = dynamic_cast<SchemaListWidget*>(this->widget(i));
-		if (w != nullptr)
-		{
-			setCurrentIndex(i);
-			return;
-		}
-	}
-
-	// Schemal list is not opened yet, create it and add to tab control
-	//
-	SchemaListWidget* w = new SchemaListWidget{this};
-	w->setDetails(m_schemaManager->monitorConfigController()->schemasDetailsSet());
-
-	connect(w, &SchemaListWidget::openSchemaRequest, this, &MonitorCentralWidget::slot_newSchemaTab);
-
-	connect(m_schemaManager->monitorConfigController(), &MonitorConfigController::configurationUpdate, w,
-			[this, w]()
-			{
-				w->setDetails(m_schemaManager->monitorConfigController()->schemasDetailsSet());
-			});
-
-	int index = this->addTab(w, tr("Schemas"));
-
-	if (count() > 1 && tabsClosable() == false)
-	{
-		setTabsClosable(true);
-		setMovable(true);
-	}
-
-	setCurrentIndex(index);
-
-	emit signal_actionCloseTabUpdated(count() > 1);
-
-	return;
-}
-
 void MonitorCentralWidget::slot_newSchemaTab(QString schemaId)
 {
 	int tabIndex = addSchemaTabPage(schemaId, {});

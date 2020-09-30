@@ -155,10 +155,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 		{
 			auto f = [this, schemaId, &appSignals, &impactSignals]() -> void
 					 {
-						if (schemaId != this->schemaId())
-						{
-							setSchema(schemaId, appSignals + impactSignals);
-						}
+						setSchema(schemaId, appSignals + impactSignals);
 					 };
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
