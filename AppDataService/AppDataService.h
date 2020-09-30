@@ -32,7 +32,7 @@ public:
 
 public:
 	AppDataServiceWorker(const SoftwareInfo& softwareInfo,
-						 const QString& serviceName,
+						 const QString& serviceInstanceName,
 						 int& argc,
 						 char** argv,
 						 CircularLoggerShared logger);

@@ -35,8 +35,9 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(), serviceName(), argc(), argv(), logger());
-
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(),
+																 serviceName(),
+																 argc(), argv(), logger());
 	newInstance->init();
 
 	return newInstance;

@@ -231,7 +231,7 @@ bool Calibrator::send(QString cmd)
 		default:						assert(false);
 	}
 
-	QByteArray cmdData = cmd.toLocal8Bit();;
+	QByteArray cmdData = cmd.toLocal8Bit();
 
 	// send
 	//

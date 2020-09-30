@@ -66,18 +66,21 @@ class DialogFindReplace : public QDialog
 {
     Q_OBJECT
 public:
-    DialogFindReplace(QWidget* parent);
+	DialogFindReplace(QWidget* parent);
 	~DialogFindReplace();
 
 signals:
 	void findFirst(QString findText, bool caseSensitive);
 	void replace(QString findText, QString text, bool caseSensitive);
-	void replaceAll(QString findText, QString replaceText, bool caseSensitive);
+	void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
+
+	void hasSelectedText(bool* result);	// Use Qt::DirectConnection for this
 
 private slots:
     void onFind();
     void onReplace();
-    void onReplaceAll();
+	void onReplaceAllButton();
+	void onReplaceAll(bool selectedOnly);
 
 private:
 	void saveCompleters();
@@ -94,8 +97,11 @@ private:
 	QCompleter* m_replaceCompleter = nullptr;
 
 	QCheckBox* m_caseSensitiveCheck = nullptr;
-
 	static bool m_caseSensitive;
+
+	QMenu m_replaceMenu;
+	QAction* m_replaceSelectedAction = nullptr;
+	QAction* m_replaceAllAction = nullptr;
 };
 
 class IdeQsciScintilla : public QsciScintilla
@@ -115,6 +121,9 @@ signals:
 
 private:
 	QList<QAction*> m_customMenuActions;
+	QMenu m_replaceMenu;
+	QAction* m_replaceSelectedAction = nullptr;
+	QAction* m_replaceAllAction = nullptr;
 
 };
 
@@ -153,7 +162,9 @@ public slots:
 	void findFirst(QString findText, bool caseSensitive);
 	void findNext();
 	void replace(QString findText, QString replaceText, bool caseSensitive);
-	void replaceAll(QString findText, QString replaceText, bool caseSensitive);
+	void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
+
+	void hasSelectedText(bool* result);
 
 signals:
 	void customContextMenuAboutToBeShown();

@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QClipboard>
+#include <QKeyEvent>
 
 #include "Options.h"
 #include "ObjectProperties.h"
@@ -31,7 +32,7 @@ ComparatorInfoTable::~ComparatorInfoTable()
 
 int ComparatorInfoTable::columnCount(const QModelIndex&) const
 {
-	return theOptions.module().maxComparatorCount();
+	return theOptions.comparator().maxComparatorCount();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,7 +55,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < theOptions.module().maxComparatorCount())
+		if (section >= 0 && section < theOptions.comparator().maxComparatorCount())
 		{
 			result = QString("Comparator %1").arg(section + 1);
 		}
@@ -84,12 +85,12 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column >= theOptions.module().maxComparatorCount())
+	if (column < 0 || column >= theOptions.comparator().maxComparatorCount())
 	{
 		return QVariant();
 	}
 
-	Metrology::SignalParam inParam = signalParam(row).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = signalParam(row).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return QVariant();
@@ -165,7 +166,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, theOptions.module().maxComparatorCount() - 1), QVector<int>() << Qt::DisplayRole);
+	emit dataChanged(index(0, 0), index(m_signalCount - 1, theOptions.comparator().maxComparatorCount() - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -177,15 +178,9 @@ IoSignalParam ComparatorInfoTable::signalParam(int index) const
 		return IoSignalParam();
 	}
 
-	IoSignalParam param;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		param = m_signalList[index];
-
-	m_signalMutex.unlock();
-
-	return param;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -241,21 +236,19 @@ void ComparatorInfoTable::updateSignalParam(const QString& appSignalID)
 		return;
 	}
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		int signalCount = m_signalList.count();
-		for(int c = 0; c < signalCount; c ++)
+	int signalCount = m_signalList.count();
+	for(int c = 0; c < signalCount; c ++)
+	{
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+			if (m_signalList[c].param(type).appSignalID() == appSignalID)
 			{
-				if (m_signalList[c].param(type).appSignalID() == appSignalID)
-				{
-					m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
-				}
+				m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
 			}
 		}
-
-	m_signalMutex.unlock();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -298,7 +291,7 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < theOptions.module().maxComparatorCount(); column++)
+	for(int column = 0; column < theOptions.comparator().maxComparatorCount(); column++)
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
@@ -333,7 +326,7 @@ void ComparatorInfoPanel::createContextMenu()
 
 void ComparatorInfoPanel::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= theOptions.module().maxComparatorCount())
+	if (column < 0 || column >= theOptions.comparator().maxComparatorCount())
 	{
 		return;
 	}
@@ -428,7 +421,19 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	{
 		IoSignalParam ioParam;
 
-		Metrology::Signal* pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);
+		Metrology::Signal* pSignal = nullptr;
+
+		switch (activeSignal.signalConnectionType())
+		{
+			case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);		break;
+			default:									pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(c);	break;
+		}
+
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
 		if (pSignal != nullptr && pSignal->param().isValid() == true)
 		{
 			if (maxComparatorCount < pSignal->param().comparatorCount())
@@ -446,7 +451,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	m_comparatorTable.set(ioParamList);
 
-	for(int c = 0; c < theOptions.module().maxComparatorCount(); c ++)
+	for(int c = 0; c < theOptions.comparator().maxComparatorCount(); c ++)
 	{
 		if (c < maxComparatorCount)
 		{
@@ -489,7 +494,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	Metrology::SignalParam inParam = m_comparatorTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return;

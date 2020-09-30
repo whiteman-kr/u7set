@@ -18,7 +18,9 @@ public:
 
 	virtual ServiceWorker* createInstance() const override
 	{
-		BaseServiceWorker* newInstance = new BaseServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
+		BaseServiceWorker* newInstance = new BaseServiceWorker(softwareInfo(),
+															   serviceName(),
+															   argc(), argv(), m_logger);
 
 		newInstance->init();
 
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger);
+	LOGGER_INIT(logger, QString(), Service::getInstanceID(argc, argv));
 
 	logger->setLogCodeInfo(false);
 
@@ -71,7 +73,9 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::BaseService, "", 1, 0);			// EquipmentID will be set after command line args processing
 
-	BaseServiceWorker baseServiceWorker(si, "RPCT Base Service", argc, argv, logger);
+	BaseServiceWorker baseServiceWorker(si,
+										Service::getServiceInstanceName("RPCT Base Service", argc, argv),
+										argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, baseServiceWorker, logger);
 

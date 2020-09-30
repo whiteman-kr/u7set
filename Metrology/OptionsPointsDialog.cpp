@@ -155,11 +155,10 @@ void OptionsPointsDialog::setHeaderList()
 		{
 			m_pColumnAction[sensor]->setCheckable(true);
 			m_pColumnAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
-
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onColumnAction);
 
 	DoubleDelegate * delegate = new DoubleDelegate(this);
 	m_pointList->setItemDelegate(delegate);

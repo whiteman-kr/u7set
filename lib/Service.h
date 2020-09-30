@@ -68,7 +68,7 @@ public:
 
 public:
 	ServiceWorker(const SoftwareInfo& softwareInfo,
-				  const QString& serviceName,
+				  const QString& serviceInstanceName,
 				  int& argc,
 				  char** argv,
 				  CircularLoggerShared logger);
@@ -144,7 +144,9 @@ private:
 	HostAddressPort m_cfgServiceIP2;
 
 	SoftwareInfo m_softwareInfo;
+
 	QString m_serviceName;
+
 	int& m_argc;
 	char** m_argv = nullptr;
 	CircularLoggerShared m_logger;
@@ -175,6 +177,12 @@ public:
 
 	void start();
 	void stop();
+
+	static QString getServiceInstanceName(const QString& serviceName, const QString& instanceID);
+	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
+
+	static QString getInstanceID(const QStringList& serviceArgs);
+	static QString getInstanceID(int argc, char* argv[]);
 
 signals:
 	void ackBaseRequest(UdpRequest request);

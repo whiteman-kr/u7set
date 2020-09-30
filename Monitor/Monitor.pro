@@ -137,6 +137,7 @@ HEADERS  += \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
+    ../lib/ILogFile.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/SchemaListWidget.h \

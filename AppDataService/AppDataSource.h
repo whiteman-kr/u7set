@@ -21,8 +21,8 @@ public:
 class AppDataSource : public DataSourceOnline
 {
 public:
-	AppDataSource();
 	AppDataSource(const DataSource& dataSource);
+	AppDataSource(const Network::DataSourceInfo& proto);
 
 	void prepare(const AppSignals& appSignals, DynamicAppSignalStates* signalStates, int autoArchivingGroupsCount);
 

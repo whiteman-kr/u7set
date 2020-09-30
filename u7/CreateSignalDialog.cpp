@@ -4,6 +4,7 @@
 #include "SignalsTabPage.h"
 #include "SignalPropertiesDialog.h"
 #include "../lib/SignalProperties.h"
+#include "../lib/SignalSetProvider.h"
 
 void CreatingSignalDialogOptions::init(QString schemaId, QString schemaCaption, QStringList equipmentIds, QStringList proposedAppSignalIds)
 {
@@ -398,7 +399,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	for (Signal& signal : newSignals)
 	{
-		SignalsModel::trimSignalTextFields(signal);
+		SignalSetProvider::trimSignalTextFields(signal);
 	}
 
 	bool ok = dbc->addSignal(newSignals.front().signalType(), &newSignals, parent);
@@ -407,7 +408,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		return {};
 	}
 
-	SignalsModel* model = SignalsModel::instance();
+	SignalSetProvider* model = SignalSetProvider::getInstance();
 	model->loadSignals();
 
 	QVector<int> selectIdList(newSignals.size());
@@ -419,8 +420,6 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		resultAppSignalIds << signal.appSignalID();
 		selectIdList[currentIdIndex++] = signal.ID();
 	}
-
-	model->parentWindow()->setSelection(selectIdList);
 
 	return resultAppSignalIds;
 }

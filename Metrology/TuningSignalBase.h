@@ -169,7 +169,7 @@ public:
 	Metrology::Signal*		signal(const Hash& hash) const;
 	Metrology::Signal*		signal(int index) const;
 
-	Metrology::SignalState	state(const Hash& hash);
+	Metrology::SignalState	state(const Hash& hash) const;
 	void					setState(const Network::TuningSignalState& state);
 
 	void					setNovalid();
@@ -250,8 +250,8 @@ public:
 
 	// sources and signal
 	//
-	TuningSourceBase&		Sources() { return m_sourceBase; }
-	TuningSignalBase&		Signals() { return m_signalsBase; }
+	TuningSourceBase&		sourceBase() { return m_sourceBase; }
+	TuningSignalBase&		signalBase() { return m_signalsBase; }
 
 	// Commands for write
 	//

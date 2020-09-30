@@ -93,64 +93,110 @@ namespace VFrame30
 
 		bool ok = false;
 		AppSignalParam appSignal = signalParam(appSignalId, &ok);
-
 		if (ok == false)
 		{
 			return false;
 		}
 
-		switch (static_cast<QMetaType::Type>(value.type()))		// From help: Although this function is declared as returning QVariant::Type, the return value should be interpreted as QMetaType::Type. In particular, QVariant::UserType is returned here only if the value is equal or greater than QMetaType::User.
+		// Adjust value type to match signal type
+
+		QMetaType::Type valueType = static_cast<QMetaType::Type>(value.type());
+
+		if (valueType != QMetaType::Bool &&
+			valueType != QMetaType::Int &&
+			valueType != QMetaType::Double)
 		{
-		case QMetaType::Bool:
-			if (appSignal.toTuningType() != TuningValueType::Discrete)
+			qDebug() << "Error: Unsupported value type arrived from script.";
+			Q_ASSERT(false);
+			return false;
+		}
+
+		TuningValueType tuningType = appSignal.tuningType();
+
+		switch (tuningType)
+		{
+		case TuningValueType::Discrete:
 			{
-				assert(false);	// Bool is allowed only for discrete signals
+				if (valueType == QMetaType::Bool)
+				{
+					break;
+				}
+				if (valueType == QMetaType::Int)
+				{
+					value = value.toInt() == 0 ? false : true;
+					break;
+				}
+				if (valueType == QMetaType::Double)
+				{
+					value = value.toDouble() == 0 ? false : true;
+					break;
+				}
+				Q_ASSERT(false);
+			}
+			break;
+		case TuningValueType::SignedInt32:
+			{
+				if (valueType == QMetaType::Bool)
+				{
+					qDebug() << "Warning: Writing Bool value to Int32 signal type.";
+					value = value.toBool() == false ? static_cast<int>(0) : static_cast<int>(1);
+					Q_ASSERT(value.userType() == QMetaType::Int);
+					break;
+				}
+				if (valueType == QMetaType::Int)
+				{
+					break;
+				}
+				if (valueType == QMetaType::Double)
+				{
+					if (double valueDouble = value.toDouble();
+						valueDouble < std::numeric_limits<qint32>::min() || valueDouble > std::numeric_limits<qint32>::max())
+					{
+						qDebug() << "Error: Double value is out of Int32 signal range.";
+						Q_ASSERT(false);
+						return false;
+					}
+
+					value = value.toInt();
+					break;
+				}
+				Q_ASSERT(false);
+			}
+			break;
+		case TuningValueType::Float:
+			{
+				if (valueType == QMetaType::Bool)
+				{
+					qDebug() << "Warning: Writing Bool value to Float32 signal type.";
+					value = value.toBool() == false ? static_cast<float>(0) : static_cast<float>(1);
+					Q_ASSERT(value.userType() == QMetaType::Float);
+					break;
+				}
+				if (valueType == QMetaType::Int || valueType == QMetaType::Double)
+				{
+					value = value.toFloat();
+					break;
+				}
+				Q_ASSERT(false);
+			}
+			break;
+		case TuningValueType::SignedInt64:
+			{
+				Q_ASSERT(false);	// No signals of this type exist
 				return false;
 			}
-			break;
-
-		case QMetaType::Int:
-			if (appSignal.toTuningType() == TuningValueType::Discrete)
+		case TuningValueType::Double:
 			{
-				value = value.toInt() == 0 ? false : true;	// Discrete signals can be set by 0 or 1
+				Q_ASSERT(false);	// No signals of this type exist
+				return false;
 			}
-			break;
-
-		case QMetaType::LongLong:
-			assert(false);	// Must not arrive from script
-			return false;
-
-		case QMetaType::Float:
-			assert(false);	// Must not arrive from script
-			return false;
-
-		case QMetaType::Double:
-			if (appSignal.toTuningType() == TuningValueType::Discrete)
-			{
-				value = value.toBool();	// Discrete signals can be set by 0.0 or 1.0
-			}
-
-			if (appSignal.toTuningType() == TuningValueType::SignedInt32)
-			{
-				value = value.toInt();
-			}
-
-			if (appSignal.toTuningType() == TuningValueType::Float)
-			{
-				value = value.toFloat();
-			}
-			break;
-
-		default:
-			assert(false);	// Some unknown type arrived from script
-			return false;
 		}
 
 		TuningValue tuningValue(value);
 
 		// Check range for analog signal
 		//
-		if (appSignal.toTuningType() != TuningValueType::Discrete)
+		if (appSignal.tuningType() != TuningValueType::Discrete)
 		{
 			if (tuningValue < appSignal.tuningLowBound() || tuningValue > appSignal.tuningHighBound())
 			{
@@ -161,6 +207,24 @@ namespace VFrame30
 		ok = m_tcpClient->writeTuningSignal(appSignalId, tuningValue);
 
 		return ok;
+	}
+
+	void TuningController::apply()
+	{
+		if (m_tcpClient == nullptr)
+		{
+			qDebug() << "Warning: Attempt to write tuning value while m_tcpClient is not set.";
+			return;
+		}
+
+		if (writingEnabled() == false)
+		{
+			return;	// Access is denied, this is not an error
+		}
+
+		m_tcpClient->applyTuningSignals();
+
+		return;
 	}
 
 	bool TuningController::writingEnabled() const

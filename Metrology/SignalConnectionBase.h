@@ -23,15 +23,44 @@ const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
 const char* const			SignalConnectionType[] =
 {
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "No connections"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input -> Internal"),
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input -> Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input dP -> Internal F"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input dP -> Output F"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input °С -> Internal °F"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input °С -> Output °F"),
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Tuning -> Output"),
 };
 
 const int					SIGNAL_CONNECTION_TYPE_COUNT = sizeof(SignalConnectionType)/sizeof(SignalConnectionType[0]);
 
-const int					SIGNAL_CONNECTION_TYPE_UNUSED		= 0,
-							SIGNAL_CONNECTION_TYPE_FROM_INPUT	= 1,
-							SIGNAL_CONNECTION_TYPE_FROM_TUNING	= 2;
+const int					SIGNAL_CONNECTION_TYPE_UNDEFINED				= -1,
+							SIGNAL_CONNECTION_TYPE_UNUSED					= 0,
+							SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL			= 1,
+							SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT				= 2,
+							SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F	= 3,
+							SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F		= 4,
+							SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F	= 5,
+							SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F		= 6,
+							SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT			= 7;
+
+// ==============================================================================================
+
+#pragma pack(push, 1)
+
+	union SignalConnectionID
+	{
+		struct
+		{
+			quint64 outputID : 30;
+			quint64 inputID : 30;
+			quint64 type : 4;
+		};
+
+		quint64 uint64;
+	};
+
+#pragma pack(pop)
 
 // ==============================================================================================
 
@@ -45,40 +74,34 @@ public:
 
 private:
 
-	mutable QMutex			m_signalMutex;
-
 	int						m_index = -1;									// for database
 
+	SignalConnectionID		m_id;
 	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	Hash					m_hash = UNDEFINED_HASH;						// calcHash form m_appSignalID
-
-	int						m_type = SIGNAL_CONNECTION_TYPE_UNUSED;
-
 	Metrology::Signal*		m_pSignal[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
 public:
 
 	bool					isValid() const;
-	bool					signalsIsValid() const;
 	void					clear();
 
 	int						index() const { return m_index; }
 	void					setIndex(int index) { m_index = index; }
 
-	Hash					hash() const { return m_hash; }
-	void					setHash();
+	void					createID();
+	SignalConnectionID		id() const { return m_id; }
 
-	int						type() const { return m_type; }
+	int						type() const { return m_id.type; }
 	QString					typeStr() const;
-	void					setType(int type) { m_type = type; }
-	void					setType(const QString& typeStr);
+	void					setType(int type) { m_id.type = type; }
+	void					setType(const QString& typeStr);					// for import signals from CSV file
 
 	QString					appSignalID(int type) const;
 	void					setAppSignalID(int type, const QString& appSignalID);
 
 	Metrology::Signal*		signal(int type) const;
 	void					setSignal(int type, Metrology::Signal* pSignal);
-	bool					initSignals();										// set Metrology::Signal* from SignalBase by signalHash
+	void					initSignals();										// set Metrology::Signal* from SignalBase
 
 	SignalConnection&		operator=(const SignalConnection& from);
 };
@@ -108,18 +131,21 @@ public:
 	int						load();
 	bool					save();
 
-	void					initSignals();									// set all Metrology::Signal* from SignalBase by signalHash
+	void					initSignals();									// set all Metrology::Signal* from SignalBase
 	void					clearSignals();									// set all Metrology::Signal* value nullptr
 
 	int						append(const SignalConnection& connection);
 
 	SignalConnection		connection(int index) const;
-	void					setSignal(int index, const SignalConnection& connection);
+	void					setConnection(int index, const SignalConnection& connection);
 
 	void					remove(int index);
 
+	int						findIndex(int ioType, Metrology::Signal* pSignal) const;
 	int						findIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
 	int						findIndex(const SignalConnection& connection) const;
+
+	QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& appSignalID) const;
 
 	SignalConnectionBase&	operator=(const SignalConnectionBase& from);
 

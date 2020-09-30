@@ -22,11 +22,9 @@ SignalListTable::SignalListTable(QObject*)
 
 SignalListTable::~SignalListTable()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -257,33 +255,23 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 
 int SignalListTable::signalCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return m_signalList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Metrology::Signal* SignalListTable::signal(int index) const
 {
-	Metrology::Signal* signal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			 signal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return signal;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -504,10 +492,10 @@ void SignalListDialog::createHeaderContexMenu()
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #include "SchemaManager.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
+#include "LogController.h"
 #include "SchemaItem.h"
 #include "../lib/ClientBehavior.h"
 
@@ -269,15 +270,22 @@ namespace VFrame30
 		const AppSignalController* appSignalController() const;
 		void setAppSignalController(AppSignalController* value);
 
+		//  LogController
+		//
+		LogController* logController();
+		const LogController* logController() const;
+		void setLogController(LogController* value);
+
 		// --
 		//
 		QJSEngine* jsEngine();
 		QString globalScript() const;
 
-		bool runScript(QJSValue& evaluatedJs, bool reportError);
-		QJSValue evaluateScript(QString script, bool reportError);
-		QString formatSqriptError(const QJSValue& scriptValue) const;
-		void reportSqriptError(const QJSValue& scriptValue);
+		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
+		bool reEvaluateGlobalScript();
+		QJSValue evaluateScript(QString script, QString where, bool reportError);
+		QString formatScriptError(const QJSValue& scriptValue) const;
+		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		// Variables
 		//
@@ -305,6 +313,7 @@ namespace VFrame30
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
+		LogController* m_logController = nullptr;
 
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels

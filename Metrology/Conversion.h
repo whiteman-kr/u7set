@@ -38,4 +38,15 @@ double		conversionDegree(double val, int conversionType);
 
 // ==============================================================================================
 
+const int	CT_CALC_VAL_NORMAL			= 0,
+			CT_CALC_VAL_INVERSION		= 1;
+
+const int	CT_CALC_VAL_COUNT			= 2;
+
+// ==============================================================================================
+
+double		conversionCalcVal(double val, int calcType, int connectionType, const IoSignalParam& ioParam);
+
+// ==============================================================================================
+
 #endif // CONVERSION_H

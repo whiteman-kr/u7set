@@ -18,11 +18,9 @@ RackListTable::RackListTable(QObject*)
 
 RackListTable::~RackListTable()
 {
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		m_rackList.clear();
-
-	m_rackMutex.unlock();
+	m_rackList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -177,33 +175,23 @@ QString RackListTable::text(int row, int column, const Metrology::RackParam* pRa
 
 int RackListTable::rackCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
-
-		count = m_rackList.count();
-
-	m_rackMutex.unlock();
-
-	return count;
+	return m_rackList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Metrology::RackParam* RackListTable::rack(int index) const
 {
-	Metrology::RackParam* pRack = nullptr;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
+	if (index < 0 || index >= m_rackList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_rackList.count())
-		{
-			 pRack = m_rackList[index];
-		}
-
-	m_rackMutex.unlock();
-
-	return pRack;
+	return m_rackList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

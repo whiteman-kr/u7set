@@ -205,19 +205,6 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 	return;
 }
 
-// Apply states
-//
-void TuningTcpClient::applyTuningSignals()
-{
-	QMutexLocker l(&m_writeQueueMutex);
-
-	m_writeQueue.emplace(TuningWriteCommand(true));
-
-	writeLogSignalChange(tr("'Apply' command is sent."));
-
-	return;
-}
-
 bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
 {
 	if (m_simulationMode == false)
@@ -232,6 +219,19 @@ bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
 	writeTuningSignal(command);
 
 	return true;
+}
+
+// Apply states
+//
+void TuningTcpClient::applyTuningSignals()
+{
+	QMutexLocker l(&m_writeQueueMutex);
+
+	m_writeQueue.emplace(TuningWriteCommand(true));
+
+	writeLogSignalChange(tr("'Apply' command is sent."));
+
+	return;
 }
 
 void TuningTcpClient::onClientThreadStarted()

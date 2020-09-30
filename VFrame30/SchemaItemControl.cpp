@@ -194,7 +194,7 @@ namespace VFrame30
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
 
-		QJSValue result = SchemaItem::evaluateScript(script, schemaView->globalScript(), engine, schemaView);
+		QJSValue result = SchemaItem::evaluateScript(script, engine, schemaView);
 		return result;
 	}
 

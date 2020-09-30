@@ -34,24 +34,27 @@ namespace VFrame30
 		// The problem was, to get QWindow from widget it must be native window, as I don't want to make
 		// BaseSchemaWidget native, I have created this small invisible wiget
 		//
-		QWidget* dummyNativeWidget = new QWidget(this);
-		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
+		// UPDATE: Unfortuanatelly this native window makes flicking on moving slider of docking widget with schema
+		//         list while. So it is commented ((
+		//
 
-		if (dummyNativeWidget->windowHandle() != nullptr)
-		{
-			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
-		}
-		else
-		{
-			assert(dummyNativeWidget->windowHandle());
-		}
+//		QWidget* dummyNativeWidget = new QWidget(this);
+//		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
+
+//		if (dummyNativeWidget->windowHandle() != nullptr)
+//		{
+//			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
+//		}
+//		else
+//		{
+//			assert(dummyNativeWidget->windowHandle());
+//		}
 
 		return;
 	}
 
 	BaseSchemaWidget::~BaseSchemaWidget()
 	{
-
 	}
 
 	void BaseSchemaWidget::createActions()

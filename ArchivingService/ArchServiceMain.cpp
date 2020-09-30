@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger);
+	LOGGER_INIT(logger, QString(), Service::getInstanceID(argc, argv));
 
 	logger->setLogCodeInfo(false);
 
@@ -23,7 +23,9 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::ArchiveService, "", 1, 0);
 
-	ArchivingService archServiceWorker(si, "RPCT Archiving Service", argc, argv, logger);
+	ArchivingService archServiceWorker(si,
+									   Service::getServiceInstanceName("RPCT Archiving Service", argc, argv),
+									   argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, archServiceWorker, logger);
 

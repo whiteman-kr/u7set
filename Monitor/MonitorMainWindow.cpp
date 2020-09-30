@@ -3,14 +3,15 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
-#include "../lib/Ui/DialogSignalSearch.h"
 #include "MonitorSignalSnapshot.h"
 #include "MonitorArchive.h"
+#include "DialogDataSources.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
-#include "DialogDataSources.h"
+#include "../lib/Ui/DialogSignalSearch.h"
 #include "../lib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
+#include "../lib/Ui/SchemaListWidget.h"
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
 
@@ -64,12 +65,14 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
 	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, nullptr);
+	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
 																		  m_tuningController.get(),
+	                                                                      m_logController.get(),
 																		  this);
 	setCentralWidget(monitorCentralWidget);
 
@@ -117,6 +120,30 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	m_appInstanceSharedMemory.setKey(MonitorMainWindow::getInstanceKey());
 	m_appInstanceSharedMemory.attach();
+
+	// Create SchemaList dock widget
+	//
+	m_schemaListDock = new QDockWidget{"Schemas List", this};
+	m_schemaListDock->setObjectName("SchemaList");
+	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
+	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
+
+	SchemaListWidget* schemaListWidget = new SchemaListWidget{{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption}, m_schemaListDock};
+	m_schemaListDock->setWidget(schemaListWidget);
+
+	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
+
+	m_schemaListDock->setVisible(QSettings().value("m_schemaListAction.checked").toBool());
+
+	// SchemaListWidget
+	//
+	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+
+	connect(m_schemaManager.monitorConfigController(), &MonitorConfigController::configurationUpdate,
+				[this, schemaListWidget]()
+				{
+					schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
+				});
 
 	return;
 }
@@ -331,10 +358,12 @@ void MonitorMainWindow::createActions()
 	m_schemaListAction->setStatusTip(tr("Open schema list page..."));
 	m_schemaListAction->setIcon(QIcon(":/Images/Images/SchemaList.svg"));
 	m_schemaListAction->setEnabled(true);
+	m_schemaListAction->setCheckable(true);
+	m_schemaListAction->setChecked(QSettings().value("m_schemaListAction.checked").toBool());
 	m_schemaListAction->setShortcuts(QList<QKeySequence>{}
 									 <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
 									 <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde});
-	connect(m_schemaListAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_schemaList);
+	connect(m_schemaListAction, &QAction::toggled, this, &MonitorMainWindow::schemaTreeListToggled);
 
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
@@ -699,6 +728,21 @@ void MonitorMainWindow::showSoftwareConnection(const QString& caption, const QSt
 void MonitorMainWindow::exit()
 {
 	close();
+}
+
+void MonitorMainWindow::schemaTreeListToggled(bool checked)
+{
+	if (m_schemaListDock == nullptr)
+	{
+		Q_ASSERT(m_schemaListDock);
+		return;
+	}
+
+	m_schemaListDock->setVisible(checked);
+
+	QSettings().setValue("m_schemaListAction.checked", checked);
+
+	return;
 }
 
 void MonitorMainWindow::showLog()

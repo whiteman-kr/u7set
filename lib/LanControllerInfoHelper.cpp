@@ -53,8 +53,15 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::TUNING_ENABLE,
 												&lanControllerInfo->tuningEnable, log);
-		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::TUNING_IP,
-											   &lanControllerInfo->tuningIP, log);
+		QHostAddress tuningIP;
+
+		result &= DeviceHelper::getIPv4Property(deviceController, EquipmentPropNames::TUNING_IP,
+												&tuningIP, false, "", log);
+		if (result == true)
+		{
+			lanControllerInfo->tuningIP = tuningIP.toString();
+		}
+
 		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::TUNING_PORT,
 											   &lanControllerInfo->tuningPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::TUNING_SERVICE_ID,
@@ -93,8 +100,15 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::APP_DATA_ENABLE,
 												&lanControllerInfo->appDataEnable, log);
-		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::APP_DATA_IP,
-											   &lanControllerInfo->appDataIP, log);
+		QHostAddress appDataIP;
+
+		result &= DeviceHelper::getIPv4Property(deviceController, EquipmentPropNames::APP_DATA_IP,
+												&appDataIP, false, "", log);
+		if (result == true)
+		{
+			lanControllerInfo->appDataIP = appDataIP.toString();
+		}
+
 		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::APP_DATA_PORT,
 											   &lanControllerInfo->appDataPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::APP_DATA_SERVICE_ID,
@@ -148,8 +162,15 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::DIAG_DATA_ENABLE,
 												&lanControllerInfo->diagDataEnable, log);
-		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::DIAG_DATA_IP,
-											   &lanControllerInfo->diagDataIP, log);
+		QHostAddress diagDataIP;
+
+		result &= DeviceHelper::getIPv4Property(deviceController, EquipmentPropNames::DIAG_DATA_IP,
+												&diagDataIP, false, "", log);
+		if (result == true)
+		{
+			lanControllerInfo->diagDataIP = diagDataIP.toString();
+		}
+
 		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::DIAG_DATA_PORT,
 											   &lanControllerInfo->diagDataPort, log);
 		result &= DeviceHelper::getStrProperty(deviceController, EquipmentPropNames::DIAG_DATA_SERVICE_ID,

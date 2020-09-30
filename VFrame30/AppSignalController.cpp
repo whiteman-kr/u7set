@@ -235,4 +235,15 @@ namespace VFrame30
 		return engine->toScriptValue(s);
 	}
 
+	bool ScriptAppSignalController::signalExists(QString signalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		return m_appSignalManager->signalExists(::calcHash(signalId));
+	}
+
 }

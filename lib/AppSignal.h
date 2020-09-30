@@ -13,6 +13,7 @@
 #include "Types.h"
 #include "AppSignalStateFlags.h"
 #include "SimpleAppSignalState.h"
+#include "Signal.h"
 
 struct AppSignalParamMimeType
 {
@@ -331,6 +332,7 @@ public:
 	AppSignalParam(const AppSignalParam&) = default;
 
 	bool load(const Proto::AppSignal& message);
+	void load(const Signal& signal);
 	void save(::Proto::AppSignal* message) const;
 
 	// Properties
@@ -368,7 +370,7 @@ public:
 	E::SignalType type() const;
 	void setType(E::SignalType value);
 
-	TuningValueType toTuningType() const;
+	TuningValueType tuningType() const;
 
 	E::AnalogAppSignalFormat analogSignalFormat() const;
 	void setAnalogSignalFormat(E::AnalogAppSignalFormat value);

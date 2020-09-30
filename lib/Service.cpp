@@ -13,7 +13,6 @@ ServiceInfo::ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _
 {
 }
 
-
 ServicesInfo::ServicesInfo()
 {
 	const ServiceInfo serviceInfo[] =
@@ -31,7 +30,6 @@ ServicesInfo::ServicesInfo()
 		insert(sInfo.softwareType, sInfo);
 	}
 }
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -51,10 +49,10 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 char** argv,
 							 CircularLoggerShared logger) :
 	m_softwareInfo(softwareInfo),
-	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
 	m_logger(logger),
+	m_serviceName(serviceName),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv)
 {
@@ -63,23 +61,19 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_instanceNo++;
 }
 
-
 ServiceWorker::~ServiceWorker()
 {
 }
-
 
 int& ServiceWorker::argc() const
 {
 	return m_argc;
 }
 
-
 char** ServiceWorker::argv() const
 {
 	return m_argv;
 }
-
 
 QString ServiceWorker::appPath() const
 {
@@ -92,7 +86,6 @@ QString ServiceWorker::appPath() const
 
 	return QString(m_argv[0]);
 }
-
 
 QString ServiceWorker::cmdLine() const
 {
@@ -124,7 +117,6 @@ QString ServiceWorker::serviceName() const
 	return m_serviceName;
 }
 
-
 const SoftwareInfo& ServiceWorker::softwareInfo() const
 {
 	return m_softwareInfo;
@@ -134,7 +126,6 @@ E::SoftwareType ServiceWorker::softwareType() const
 {
 	return m_softwareInfo.softwareType();
 }
-
 
 void ServiceWorker::initAndProcessCmdLineSettings()
 {
@@ -154,25 +145,21 @@ void ServiceWorker::setService(Service* service)
 	m_service = service;
 }
 
-
 Service* ServiceWorker::service()
 {
 	assert(m_service != nullptr);
 	return m_service;
 }
 
-
 CommandLineParser& ServiceWorker::cmdLineParser()
 {
 	return m_cmdLineParser;
 }
 
-
 void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
 	Q_UNUSED(serviceInfo);
 }
-
 
 bool ServiceWorker::clearSettings()
 {
@@ -208,13 +195,13 @@ void ServiceWorker::init()
 	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
 	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
 	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
+	m_cmdLineParser.addSingleValueOption("inst", "ServiceInstanceID", "Set service instance ID.", "InstanceID");
 	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
 
 	initCmdLineParser();
 
 	m_cmdLineParser.parse();
 }
-
 
 void ServiceWorker::processCmdLineSettings()
 {
@@ -246,13 +233,11 @@ void ServiceWorker::onThreadStarted()
 	emit work();
 }
 
-
 void ServiceWorker::onThreadFinished()
 {
 	shutdown();
 	emit stopped();
 }
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -268,11 +253,9 @@ Service::Service(ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> l
 {
 }
 
-
 Service::~Service()
 {
 }
-
 
 void Service::start()
 {
@@ -281,12 +264,68 @@ void Service::start()
 	startBaseRequestSocketThread();
 }
 
-
 void Service::stop()
 {
 	stopBaseRequestSocketThread();
 
 	stopServiceWorkerThread();
+}
+
+QString Service::getServiceInstanceName(const QString& serviceName, const QString& instanceID)
+{
+	if (instanceID.isEmpty() == true)
+	{
+		return serviceName;
+	}
+
+	return QString("%1 (%2)").arg(serviceName).arg(instanceID);
+}
+
+QString Service::getServiceInstanceName(const QString& serviceName, int argc, char* argv[])
+{
+	return getServiceInstanceName(serviceName, Service::getInstanceID(argc, argv));
+}
+
+QString Service::getInstanceID(const QStringList& serviceArgs)
+{
+	for(QString arg : serviceArgs)
+	{
+		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID) == false)
+		{
+			continue;
+		}
+
+		// parse: -inst=InstanceID
+
+		QStringList vl = arg.split("=");
+
+		if (vl.count() != 2)
+		{
+			continue;
+		}
+
+		return vl[1].trimmed();
+	}
+
+	return QString();
+}
+
+QString Service::getInstanceID(int argc, char* argv[])
+{
+	QStringList args;
+
+	for(int i = 0; i < argc; i++)
+	{
+		if (argv[i] == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		args.append(QString(argv[i]));
+	}
+
+	return getInstanceID(args);
 }
 
 
@@ -295,12 +334,10 @@ void Service::onServiceWork()
 	m_state = ServiceState::Work;
 }
 
-
 void Service::onServiceStopped()
 {
 	m_state = ServiceState::Stopped;
 }
-
 
 void Service::onBaseRequest(UdpRequest request)
 {
@@ -345,7 +382,6 @@ void Service::onBaseRequest(UdpRequest request)
 	emit ackBaseRequest(ack);
 }
 
-
 void Service::startServiceWorkerThread()
 {
 	QMutexLocker locker(&m_mutex);
@@ -377,7 +413,6 @@ void Service::startServiceWorkerThread()
 	m_serviceWorkerThread->start();
 }
 
-
 void Service::stopServiceWorkerThread()
 {
 	QMutexLocker locker(&m_mutex);
@@ -400,7 +435,6 @@ void Service::stopServiceWorkerThread()
 	m_state = ServiceState::Stopped;
 }
 
-
 void Service::startBaseRequestSocketThread()
 {
 	ServiceInfo sInfo = servicesInfo.value(m_serviceWorkerFactory.softwareType());
@@ -415,14 +449,12 @@ void Service::startBaseRequestSocketThread()
 	m_baseRequestSocketThread->start();
 }
 
-
 void Service::stopBaseRequestSocketThread()
 {
 	m_baseRequestSocketThread->quitAndWait();
 
 	delete m_baseRequestSocketThread;
 }
-
 
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 {
@@ -458,7 +490,6 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 	}
 }
 
-
 // -------------------------------------------------------------------------------------
 //
 // DaemonServiceStarter class implementation
@@ -466,19 +497,21 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 // -------------------------------------------------------------------------------------
 
 DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName(), logger),
+	QtService(serviceWorker.argc(),
+			  serviceWorker.argv(),
+			  &app,
+			  serviceWorker.serviceName(),
+			  logger),
 	m_app(app),
 	m_serviceWorker(serviceWorker),
 	m_logger(logger)
 {
 }
 
-
 DaemonServiceStarter::~DaemonServiceStarter()
 {
 	stopAndDeleteService();
 }
-
 
 int DaemonServiceStarter::exec()
 {
@@ -489,7 +522,6 @@ int DaemonServiceStarter::exec()
 	return result;
 }
 
-
 void DaemonServiceStarter::start()
 {
 	LOG_CALL(m_logger);
@@ -499,14 +531,12 @@ void DaemonServiceStarter::start()
 	m_service->start();
 }
 
-
 void DaemonServiceStarter::stop()
 {
 	stopAndDeleteService();
 
 	LOG_CALL(m_logger);
 }
-
 
 void DaemonServiceStarter::stopAndDeleteService()
 {
@@ -520,7 +550,6 @@ void DaemonServiceStarter::stopAndDeleteService()
 	delete m_service;
 	m_service = nullptr;
 }
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -537,7 +566,6 @@ ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWork
 	app.setApplicationName(serviceWorker.serviceName());
 }
 
-
 int ServiceStarter::exec()
 {
 	LOG_MSG(m_logger, QString("Run: %1").arg(m_serviceWorker.cmdLine()));
@@ -550,7 +578,6 @@ int ServiceStarter::exec()
 
 	return result;
 }
-
 
 int ServiceStarter::privateRun()
 {
@@ -589,7 +616,6 @@ int ServiceStarter::privateRun()
 
 	return result;
 }
-
 
 // returns 'true' for application exit
 //
@@ -697,5 +723,3 @@ void ServiceStarter::KeyReaderThread::run()
 	std::cin >> c;
 	QCoreApplication::exit(0);
 }
-
-

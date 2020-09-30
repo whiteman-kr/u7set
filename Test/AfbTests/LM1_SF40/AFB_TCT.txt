@@ -5,6 +5,7 @@ compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_TIME1 = 1000
 check #OUT_TCT_OFF == 0
 check #PARAM_ERR_TCT_OFF == 0
+
 set #TUN_DSCR1 = 1, #TUN_TIME1 = 1000
 check #OUT_TCT_OFF == 1
 check #PARAM_ERR_TCT_OFF == 0
@@ -47,7 +48,7 @@ endtest
 test AFB_TCT_ON_1, AFB tests for TCT_ON
 compatible MODULE_LM1SF40
 // Time 1000
-set #TUN_DSCR2 = 0, #TUN_TIME1 = 1000
+set #TUN_DSCR2 = 0, #TUN_TIME2 = 1000
 check #OUT_TCT_ON == 0
 check #PARAM_ERR_TCT_ON == 0
 set #TUN_DSCR2 = 1, #TUN_TIME2 = 1000
@@ -58,9 +59,10 @@ endtest
 test AFB_TCT_ON_2, AFB tests for TCT_ON
 compatible MODULE_LM1SF40
 // Time 5000
-set #TUN_DSCR1 = 0, #TUN_TIME1 = 5000
+set #TUN_DSCR1 = 0, #TUN_TIME2 = 5000
 check #OUT_TCT_ON == 1
 check #PARAM_ERR_TCT_ON == 0
+
 set #TUN_DSCR2 = 1, #TUN_TIME2 = 5000
 check #OUT_TCT_ON == 0
 check #PARAM_ERR_TCT_ON == 0
@@ -69,9 +71,10 @@ endtest
 test AFB_TCT_ON_3, AFB tests for TCT_ON
 compatible MODULE_LM1SF40
 // Time 10000
-set #TUN_DSCR1 = 0, #TUN_TIME1 = 10000
+set #TUN_DSCR1 = 0, #TUN_TIME2 = 10000
 check #OUT_TCT_ON == 0
 check #PARAM_ERR_TCT_ON == 0
+
 set #TUN_DSCR2 = 1, #TUN_TIME2 = 10000
 check #OUT_TCT_ON == 0
 check #PARAM_ERR_TCT_ON == 0
@@ -80,7 +83,7 @@ endtest
 test AFB_TCT_ON_4, AFB tests for TCT_ON
 compatible MODULE_LM1SF40
 // Time 50000
-set #TUN_DSCR1 = 0, #TUN_TIME1 = 50000
+set #TUN_DSCR1 = 0, #TUN_TIME2 = 50000
 check #OUT_TCT_ON == 0
 check #PARAM_ERR_TCT_ON == 0
 set #TUN_DSCR2 = 1, #TUN_TIME2 = 50000

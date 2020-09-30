@@ -13,11 +13,13 @@
 MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
+						 VFrame30::LogController* logController,
 						 QWidget* parent)
 	: VFrame30::ClientSchemaView(schemaManager, parent)
 {
 	setAppSignalController(appSignalController);
 	setTuningController(tuningController);
+	setLogController(logController);
 
 	qDebug() << Q_FUNC_INFO;
 
@@ -58,14 +60,16 @@ void MonitorView::configurationArrived(ConfigSettings configuration)
 		return ;
 	}
 
-	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, true);
+	reEvaluateGlobalScript();
+
+	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, "evaluate onConfigurationArrivedScript", true);
 	if (scriptValue.isError() == true ||
 		scriptValue.isUndefined() == true)
 	{
 		return;
 	}
 
-	runScript(scriptValue, true);
+	runScript(scriptValue, "run onConfigurationArrivedScript", true);
 
 	return;
 }

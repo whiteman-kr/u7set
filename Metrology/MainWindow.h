@@ -136,6 +136,7 @@ private:
 	ConfigSocket*			m_pConfigSocket = nullptr;
 	void					runConfigSocket();
 	void					stopConfigSocket();
+	QString					configSocketConnectedStateStr();
 
 	SignalSocket*			m_pSignalSocket = nullptr;
 	SimpleThread*			m_pSignalSocketThread = nullptr;
@@ -146,6 +147,7 @@ private:
 	SimpleThread*			m_pTuningSocketThread = nullptr;
 	void					runTuningSocket();
 	void					stopTuningSocket();
+	QString					tuningSocketConnectedStateStr();
 
 	MeasureThread			m_measureThread;
 	void					runMeasureThread();
@@ -175,12 +177,14 @@ public:
 	void					updateRacksOnToolBar();
 	void					updateSignalsOnToolBar();
 
+	QComboBox*				signalConnectionTypeList() { return m_signalConnectionTypeList; }
 	QComboBox*				rackCombo() { return m_asRackCombo; }
 	QComboBox*				signalCombo() { return m_asSignalCombo; }
 
 	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
 	MeasureView*			measureView(int measureType);
 	void					appendMeasureView(int measureType, MeasureView* pView);
+	FindMeasurePanel*		findMeasurePanel() { return m_pFindMeasurePanel; }
 	StatisticPanel*			statisticPanel() { return m_pStatisticPanel; }
 
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }

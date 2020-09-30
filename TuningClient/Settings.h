@@ -85,34 +85,53 @@ struct ConfigSettings
 	LogonMode logonMode = LogonMode::Permanent;
 
 	bool showSignals = true;
-
 	bool showSchemas = true;
-
 	bool showSchemasList = true;
-
 	bool showSchemasTabs = true;
 
 	bool filterByEquipment = true;
-
 	bool filterBySchema = true;
 
 	QString startSchemaID;
 
 	LmStatusFlagMode lmStatusFlagMode = LmStatusFlagMode::SOR;
-
 	int loginSessionLength = 120;
-
 	QStringList usersAccounts;
 
 	std::vector<SchemaSettings> schemas;
 
 	BuildInfo buildInfo;
 
+	QString globalScript;
+	QString configurationArrivedScript;
+
 	QString errorMessage;				// Parsing error message, empty if no errors
 
-	QString globalScript;
+	// Warning! Add new values to copy operator!!!
 
-	QString configurationArrivedScript;
+	ConfigSettings& operator = (const ConfigSettings& That)
+	{
+		tuningServiceAddress = That.tuningServiceAddress;
+		autoApply = That.autoApply;
+		logonMode = That.logonMode;
+		showSignals = That.showSignals;
+		showSchemas = That.showSchemas;
+		showSchemasList = That.showSchemasList;
+		showSchemasTabs = That.showSchemasTabs;
+		filterByEquipment = That.filterByEquipment;
+		filterBySchema = That.filterBySchema;
+		startSchemaID = That.startSchemaID;
+		lmStatusFlagMode = That.lmStatusFlagMode;
+		loginSessionLength = That.loginSessionLength;
+		usersAccounts = That.usersAccounts;
+		schemas = That.schemas;
+		buildInfo = That.buildInfo;
+		globalScript = That.globalScript;
+		configurationArrivedScript = That.configurationArrivedScript;
+
+		//errorMessage = That.errorMessage;
+		return *this;
+	}
 
 };
 

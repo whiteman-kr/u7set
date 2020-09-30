@@ -23,18 +23,20 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Caption"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator value"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator No"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Rack"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Chassis"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Module"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Place"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "ADC range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric range"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Physical range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engineering range"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator value"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal type"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Connection"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Measure count"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "State"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal connection"),
+
 };
 
 const int					STATISTIC_COLUMN_COUNT				= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
@@ -43,18 +45,20 @@ const int					STATISTIC_COLUMN_APP_ID				= 0,
 							STATISTIC_COLUMN_CUSTOM_ID			= 1,
 							STATISTIC_COLUMN_EQUIPMENT_ID		= 2,
 							STATISTIC_COLUMN_CAPTION			= 3,
-							STATISTIC_COLUMN_RACK				= 4,
-							STATISTIC_COLUMN_CHASSIS			= 5,
-							STATISTIC_COLUMN_MODULE				= 6,
-							STATISTIC_COLUMN_PLACE				= 7,
-							STATISTIC_COLUMN_ADC				= 8,
-							STATISTIC_COLUMN_EL_RANGE			= 9,
-							STATISTIC_COLUMN_PH_RANGE			= 10,
-							STATISTIC_COLUMN_EN_RANGE			= 11,
-							STATISTIC_COLUMN_CMP_VALUE			= 12,
-							STATISTIC_COLUMN_MEASURE_COUNT		= 13,
-							STATISTIC_COLUMN_STATE				= 14,
-							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 15;
+							STATISTIC_COLUMN_CMP_VALUE			= 4,
+							STATISTIC_COLUMN_CMP_NO				= 5,
+							STATISTIC_COLUMN_RACK				= 6,
+							STATISTIC_COLUMN_CHASSIS			= 7,
+							STATISTIC_COLUMN_MODULE				= 8,
+							STATISTIC_COLUMN_PLACE				= 9,
+							STATISTIC_COLUMN_ADC				= 10,
+							STATISTIC_COLUMN_EL_RANGE			= 11,
+							STATISTIC_COLUMN_EN_RANGE			= 12,
+							STATISTIC_COLUMN_SIGNAL_TYPE		= 13,
+							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 14,
+							STATISTIC_COLUMN_MEASURE_COUNT		= 15,
+							STATISTIC_COLUMN_STATE				= 16;
+
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 {
@@ -62,18 +66,20 @@ const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 							250,	// STATISTIC_COLUMN_CUSTOM_ID
 							250,	// STATISTIC_COLUMN_EQUIPMENT_ID
 							150,	// STATISTIC_COLUMN_CAPTION
+							150,	// STATISTIC_COLUMN_CMP_VALUE
+							 50,	// STATISTIC_COLUMN_CMP_NO
 							100,	// STATISTIC_COLUMN_RACK
 							 60,	// STATISTIC_COLUMN_CHASSIS
 							 60,	// STATISTIC_COLUMN_MODULE
 							 60,	// STATISTIC_COLUMN_PLACE
 							100,	// STATISTIC_COLUMN_ADC
 							150,	// STATISTIC_COLUMN_IN_EL_RANGE
-							150,	// STATISTIC_COLUMN_IN_PH_RANGE
 							150,	// STATISTIC_COLUMN_IN_EN_RANGE
-							100,	// STATISTIC_COLUMN_CMP_VALUE
+							100,	// STATISTIC_COLUMN_SIGNAL_TYPE
+							100,	// STATISTIC_COLUMN_SIGNAL_CONNECTION
 							100,	// STATISTIC_COLUMN_MEASURE_COUNT
 							100,	// STATISTIC_COLUMN_MEASURE_STATE
-							100,	// STATISTIC_COLUMN_SIGNAL_CONNECTION
+
 };
 
 // ==============================================================================================
@@ -89,6 +95,8 @@ public:
 
 private:
 
+	int						m_statisticItemCount = 0;
+
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
 
@@ -100,7 +108,7 @@ public:
 	void					set();
 	void					clear();
 
-	QString					text(int row, int column, Metrology::Signal* pSignal) const;
+	QString					text(int row, int column, const StatisticItem& si) const;
 
 	void					updateSignal(Hash signalHash);
 };
@@ -131,7 +139,9 @@ private:
 	QMenu*					m_pContextMenu = nullptr;
 
 	QAction*				m_pExportAction = nullptr;
+
 	QAction*				m_pSelectSignalForMeasure = nullptr;
+	QAction*				m_pFindSignalInMeasureList = nullptr;
 
 	QAction*				m_pFindAction = nullptr;
 	QAction*				m_pCopyAction = nullptr;
@@ -185,13 +195,14 @@ private slots:
 							//
 	void					exportSignal();
 	void					selectSignalForMeasure();
+	void					findSignalInMeasureList();
 
 							// Edit
 							//
 	void					find();
 	void					copy();
 	void					selectAll();
-	void					signalProperty();
+	void					onProperty();
 
 							// View
 							//

@@ -40,11 +40,11 @@
 #include <QtWidgets>
 #include <QtNetwork>
 #include <QtConcurrent>
+#include <QtQml>
 
 #ifdef _MSC_VER
     #pragma warning(pop)
 #endif
-
 
 // Disable some warnings
 //

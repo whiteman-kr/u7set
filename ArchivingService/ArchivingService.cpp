@@ -29,8 +29,9 @@ ArchivingService::~ArchivingService()
 
 ServiceWorker* ArchivingService::createInstance() const
 {
-	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(), serviceName(), argc(), argv(), logger());
-
+	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(),
+															   serviceName(),
+															   argc(), argv(), logger());
 	archServiceWorker->init();
 
 	return archServiceWorker;
@@ -192,7 +193,7 @@ void ArchivingService::startTcpAppDataServerThread()
 
 	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_archive);
 
-	m_tcpAppDataServerThread = new Tcp::ServerThread(m_serviceSettings.appDataRecevingIP, server, logger());
+	m_tcpAppDataServerThread = new Tcp::ServerThread(m_serviceSettings.appDataReceivingIP, server, logger());
 	m_tcpAppDataServerThread->start();
 }
 

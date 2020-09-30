@@ -16,7 +16,6 @@
 
 class MonitorCentralWidget;
 class MonitorToolBar;
-class SchemaListWidget;
 class QLabel;
 class QComboBox;
 class DialogDataSources;
@@ -65,15 +64,15 @@ public:
 	MonitorCentralWidget* monitorCentralWidget();
 
 private:
-
 	void updateStatusBar();
-
 	void showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label);
 
 	// Commands
 	//
 protected slots:
 	void exit();
+
+	void schemaTreeListToggled(bool checked);
 
 	void showLog();
 	void showDataSources();
@@ -128,6 +127,7 @@ private:
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::TuningController> m_tuningController;
+	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;			// +
@@ -191,6 +191,8 @@ private:
 	// Controls
 	//
 	MonitorToolBar* m_toolBar = nullptr;
+
+	QDockWidget* m_schemaListDock = nullptr;
 
 	SelectSchemaWidget* m_selectSchemaWidget = nullptr;
 

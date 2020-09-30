@@ -18,11 +18,9 @@ ComparatorListTable::ComparatorListTable(QObject*)
 
 ComparatorListTable::~ComparatorListTable()
 {
-	m_comparatorMutex.lock();
+	QMutexLocker l(&m_comparatorMutex);
 
-		m_comparatorList.clear();
-
-	m_comparatorMutex.unlock();
+	m_comparatorList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,6 +91,12 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	Metrology::Signal* pInSignal = theSignalBase.signalPtr(comparatorEx->input().appSignalID());
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		return QVariant();
+	}
+
 	if (role == Qt::ForegroundRole)
 	{
 		if (comparatorEx->signalsIsValid()  == false)
@@ -113,6 +117,22 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	if (role == Qt::BackgroundRole)
+	{
+		if (column == COMPARATOR_LIST_COLUMN_EL_RANGE)
+		{
+			if (pInSignal->param().isInput() || pInSignal->param().isOutput() == true)
+			{
+				if (pInSignal->param().electricRangeIsValid() == false)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+			}
+		}
+
+		return QVariant();
+	}
+
 	if (role == Qt::FontRole)
 	{
 		return theOptions.measureView().font();
@@ -120,7 +140,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(row, column, comparatorEx);
+		return text(row, column, pInSignal, comparatorEx);
 	}
 
 	return QVariant();
@@ -128,7 +148,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
+QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
 {
 	if (row < 0 || row >= comparatorCount())
 	{
@@ -140,23 +160,32 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		return QString();
 	}
 
+	if (pInSignal == nullptr)
+	{
+		return QString();
+	}
+
+	const Metrology::SignalParam& param = pInSignal->param();
+	if (param.isValid() == false)
+	{
+		return QString();
+	}
+
 	if (comparatorEx == nullptr)
 	{
 		return QString();
 	}
 
-	QString inputAppSignalID = comparatorEx->input().appSignalID();
+	bool visible = true;
 
-	int prevRow = row - 1;
-	if (prevRow >= 0 && prevRow < comparatorCount())
+	if (row > 0)
 	{
-		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(prevRow);
+		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(row - 1);
 		if (prevComparatorEx != nullptr)
 		{
-
-			if (prevComparatorEx->input().appSignalID() == inputAppSignalID)
+			if (prevComparatorEx->input().appSignalID() == param.appSignalID())
 			{
-				inputAppSignalID.clear();
+				visible = false;
 			}
 		}
 	}
@@ -165,11 +194,14 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;							break;
-		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();	break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();	break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();		break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();					break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = visible ? E::valueToString<E::SignalInOutType>(param.inOutType()) : QString();		break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();											break;
+		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();											break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();											break;
+		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = visible ? param.electricRangeStr() : QString();									break;
+		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = visible ? param.engineeringRangeStr() : QString();									break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();												break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();															break;
 		default:										assert(0);
 	}
 
@@ -180,33 +212,23 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 int ComparatorListTable::comparatorCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_comparatorMutex);
 
-	m_comparatorMutex.lock();
-
-		count = m_comparatorList.count();
-
-	m_comparatorMutex.unlock();
-
-	return count;
+	return m_comparatorList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 std::shared_ptr<Metrology::ComparatorEx> ComparatorListTable::comparator(int index) const
 {
-	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = nullptr;
+	QMutexLocker l(&m_comparatorMutex);
 
-	m_comparatorMutex.lock();
+	if (index < 0 || index >= m_comparatorList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_comparatorList.count())
-		{
-			 comparatorEx = m_comparatorList[index];
-		}
-
-	m_comparatorMutex.unlock();
-
-	return comparatorEx;
+	return m_comparatorList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -255,8 +277,7 @@ void ComparatorListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-E::SignalInOutType	ComparatorListDialog::m_typeIO		= E::SignalInOutType::Input;
-int					ComparatorListDialog::m_currenIndex = 0;
+int ComparatorListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -286,14 +307,13 @@ void ComparatorListDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Comparator.png"));
 	setWindowTitle(tr("Comparators"));
-	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 850, 500);
+	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 750, 500);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);
 	m_pComparatorMenu = new QMenu(tr("&Comparator"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
-	m_pViewMenu = new QMenu(tr("&View"), this);
 
 	m_pExportAction = m_pComparatorMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
@@ -317,19 +337,8 @@ void ComparatorListDialog::createInterface()
 	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-	m_pViewTypeIOMenu = new QMenu(tr("Type In/Int"), this);
-	m_pTypeInputAction = m_pViewTypeIOMenu->addAction(tr("Input"));
-	m_pTypeInputAction->setCheckable(true);
-	m_pTypeInputAction->setChecked(m_typeIO == E::SignalInOutType::Input);
-	m_pTypeInternalAction = m_pViewTypeIOMenu->addAction(tr("Internal"));
-	m_pTypeInternalAction->setCheckable(true);
-	m_pTypeInternalAction->setChecked(m_typeIO == E::SignalInOutType::Internal);
-
-	m_pViewMenu->addMenu(m_pViewTypeIOMenu);
-
 	m_pMenuBar->addMenu(m_pComparatorMenu);
 	m_pMenuBar->addMenu(m_pEditMenu);
-	m_pMenuBar->addMenu(m_pViewMenu);
 
 	connect(m_pExportAction, &QAction::triggered, this, &ComparatorListDialog::exportComparator);
 
@@ -337,9 +346,6 @@ void ComparatorListDialog::createInterface()
 	connect(m_pCopyAction, &QAction::triggered, this, &ComparatorListDialog::copy);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &ComparatorListDialog::selectAll);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &ComparatorListDialog::comparatorProperties);
-
-	connect(m_pTypeInputAction, &QAction::triggered, this, &ComparatorListDialog::showTypeInput);
-	connect(m_pTypeInternalAction, &QAction::triggered, this, &ComparatorListDialog::showTypeInternal);
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_comparatorTable);
@@ -385,10 +391,10 @@ void ComparatorListDialog::createHeaderContexMenu()
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &ComparatorListDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &ComparatorListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -399,8 +405,6 @@ void ComparatorListDialog::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), this);
 
-	m_pContextMenu->addMenu(m_pViewTypeIOMenu);
-	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pSignalPropertyAction);
@@ -441,11 +445,6 @@ void ComparatorListDialog::updateList()
 			continue;
 		}
 
-		if (param.inOutType() != m_typeIO)
-		{
-			continue;
-		}
-
 		int comparatorCount = pSignal->param().comparatorCount();
 		for (int c = 0; c < comparatorCount; c++)
 		{
@@ -466,9 +465,6 @@ void ComparatorListDialog::updateList()
 
 void ComparatorListDialog::updateVisibleColunm()
 {
-	m_pTypeInputAction->setChecked(m_typeIO == E::SignalInOutType::Input);
-	m_pTypeInternalAction->setChecked(m_typeIO == E::SignalInOutType::Internal);
-
 	for(int c = 0; c < COMPARATOR_LIST_COLUMN_COUNT; c++)
 	{
 		hideColumn(c, false);
@@ -583,31 +579,12 @@ void ComparatorListDialog::comparatorProperties()
 	}
 
 	ComparatorPropertyDialog dialog(*comparatorEx);
-	int result = dialog.exec();
-	if (result != QDialog::Accepted)
+	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
 	*comparatorEx = dialog.comparator();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorListDialog::showTypeInput()
-{
-	m_typeIO = E::SignalInOutType::Input;
-
-	updateList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorListDialog::showTypeInternal()
-{
-	m_typeIO = E::SignalInOutType::Internal;
-
-	updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "TuningClientTcpClient.h"
 #include "TuningSchemaWidget.h"
-
+#include "../VFrame30/LogController.h"
 
 class SchemasWorkspace : public QWidget
 {
@@ -35,6 +35,7 @@ private:
 
 private:
 	TuningClientTuningController m_tuningController;
+	VFrame30::LogController m_logController;
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 	TuningClientTcpClient* m_tuninTcpClient = nullptr;
 	TuningSchemaManager m_schemaManager;

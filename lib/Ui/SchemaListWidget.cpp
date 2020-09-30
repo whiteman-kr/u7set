@@ -6,8 +6,9 @@
 //		SchemaListTreeWidget - Tree Widget
 //
 //
-SchemaListTreeWidget::SchemaListTreeWidget(QWidget* parent) :
-	QTreeWidget{parent}
+SchemaListTreeWidget::SchemaListTreeWidget(std::vector<SchemaListTreeColumns> columns, QWidget* parent) :
+	QTreeWidget{parent},
+	m_columns(columns)
 {
 	setUniformRowHeights(false);		// Helps to show multiline schema cations
 	setWordWrap(false);
@@ -19,14 +20,28 @@ SchemaListTreeWidget::SchemaListTreeWidget(QWidget* parent) :
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	QStringList columns;
+	QStringList columnList;
 
-	columns << tr("SchemaID");
-	columns << tr("Caption");
-	columns << tr("Tags");
-	columns << tr("Module(s)");
+	for (SchemaListTreeColumns c : m_columns)
+	{
+		switch (c)
+		{
+		case SchemaListTreeColumns::SchemaID:
+			columnList << tr("SchemaID");
+			break;
+		case SchemaListTreeColumns::Caption:
+			columnList << tr("Caption");
+			break;
+		case SchemaListTreeColumns::Tags:
+			columnList << tr("Tags");
+			break;
+		case SchemaListTreeColumns::Modules:
+			columnList << tr("Module(s)");
+			break;
+		}
+	}
 
-	setHeaderLabels(columns);
+	setHeaderLabels(columnList);
 
 	// --
 	//
@@ -214,10 +229,25 @@ static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 		}
 
 		QStringList sl;
-		sl << schema->m_schemaId;
-		sl << schema->m_caption;
-		sl << tags;
-		sl << schema->m_equipmentId;
+
+		for (SchemaListTreeColumns c : m_columns)
+		{
+			switch (c)
+			{
+			case SchemaListTreeColumns::SchemaID:
+				sl << schema->m_schemaId;
+				break;
+			case SchemaListTreeColumns::Caption:
+				sl << schema->m_caption;
+				break;
+			case SchemaListTreeColumns::Tags:
+				sl << tags;
+				break;
+			case SchemaListTreeColumns::Modules:
+				sl << schema->m_equipmentId;
+				break;
+			}
+		}
 
 		// --
 		//
@@ -452,16 +482,16 @@ void SchemaListTreeWidget::searchAndSelect(QString searchText)
 
 //
 //
-//		SchemaListWidget - Tab Page
+//		SchemaListWidget
 //
 //
-SchemaListWidget::SchemaListWidget(QWidget* parent) :
+SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, QWidget* parent) :
 	QWidget(parent)
 {
 	setAutoFillBackground(true);
 	setBackgroundRole(QPalette::Window);
 
-	m_treeWidget = new SchemaListTreeWidget{this};
+	m_treeWidget = new SchemaListTreeWidget{columns, this};
 	m_treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
 	m_searchAction = new QAction(tr("Edit Search"), this);

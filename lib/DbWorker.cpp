@@ -355,6 +355,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0335.sql", "Upgrade to version 335, Added AFB mux (discrete multiplexor) for all LMs and MSO4_SR21"},
 	{":/DatabaseUpgrade/Upgrade0336.sql", "Upgrade to version 336, Updated schema templates, set default font to Arial"},
 	{":/DatabaseUpgrade/Upgrade0337.sql", "Upgrade to version 337, TuningClient preset update (StartSchemaID and ConfigurationArrivedScript added)"},
+	{":/DatabaseUpgrade/Upgrade0338.sql", "Upgrade to version 338, Reduced number of AFBs instance counters for MSO4_SR21"},
 };
 
 int DbWorker::counter = 0;
@@ -5331,6 +5332,11 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	int readed = 0;
 
+	int errCount = 0;
+	int moreErrCount = 0;
+
+	QString resultErrMsg;
+
 	while(q.next() != false)
 	{
 		ObjectState os;
@@ -5345,15 +5351,32 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		signal.setCreated(QDateTime::currentDateTime());
 		signal.setInstanceCreated(QDateTime::currentDateTime());
 
-		QString errMsg;
 		ObjectState objectState;
+		QString errMsg;
 
 		result = setSignalWorkcopy(db, signal, objectState, errMsg);
 
 		if (result == false)
 		{
-			emitError(db, errMsg);
-			return false;
+			errCount++;
+
+			if (errCount > 5)
+			{
+				moreErrCount++;
+			}
+			else
+			{
+				resultErrMsg += errMsg + "\n";
+			}
+
+			QString delRequestStr = QString("SELECT * FROM delete_signal(%1, %2)")
+				.arg(currentUser().userId()).arg(signalID);
+
+			QSqlQuery delRequest(db);
+
+			result = delRequest.exec(delRequestStr);
+
+			continue;
 		}
 
 		QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
@@ -5378,11 +5401,21 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		i++;
 	}
 
+	if (errCount > 0)
+	{
+		if (moreErrCount > 0)
+		{
+			resultErrMsg += QString("\nAnd %1 other error(s)").arg(moreErrCount);
+		}
+
+		emitError(db, resultErrMsg);
+		return false;
+	}
+
 	assert(i == readed);
 
 	return true;
 }
-
 
 bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg)
 {

@@ -17,6 +17,7 @@ public:
 	explicit MonitorView(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
+						 VFrame30::LogController* logController,
 						 QWidget* parent = nullptr);
 	virtual ~MonitorView();
 

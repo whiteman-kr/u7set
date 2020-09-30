@@ -381,6 +381,13 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void FindMeasurePanel::setFindText(const QString& findText)
+{
+	m_findTextEdit->setText(findText);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void FindMeasurePanel::find()
 {
 	m_findText = m_findTextEdit->text();
