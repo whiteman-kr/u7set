@@ -384,6 +384,13 @@ namespace VFrame30
 		//
 		clientSchemaView()->setHighlightIds(highlightIds);
 
+		if (schemaId == this->schemaId())
+		{
+			// Highlighted signals already set
+			//
+			return;
+		}
+
 		// Save current state to the history
 		//
 		resetForwardHistory();

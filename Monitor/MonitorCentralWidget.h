@@ -38,7 +38,6 @@ signals:
 	// Slots
 	//
 public slots:
-	void slot_schemaList();
 	void slot_newSchemaTab(QString schemaId);
 	void slot_newTab();
 	void slot_closeCurrentTab();
