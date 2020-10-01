@@ -245,8 +245,6 @@ public:
 	QString			equipmentID() const { return m_equipmentID; }
 	void			setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
-	QString			signalID(int type) const;
-
 	QString			caption() const { return m_caption; }
 	void			setCaption(const QString& caption) { m_caption = caption; }
 
@@ -329,6 +327,7 @@ private:
 
 	Metrology::SignalLocation m_location;
 
+	QString			m_compareAppSignalID;
 	QString			m_outputAppSignalID;
 
 	E::CmpType		m_cmpType = E::CmpType::Greate;
@@ -365,13 +364,14 @@ public:
 	QString			equipmentID() const { return m_equipmentID; }
 	void			setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
-	QString			signalID(int type) const;
-
 	QString			caption() const { return m_caption; }
 	void			setCaption(const QString& caption) { m_caption = caption; }
 
 	Metrology::SignalLocation& location() { return m_location; }
 	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+
+	QString			compareAppSignalID() const { return m_compareAppSignalID; }
+	void			setCompareAppSignalID(const QString& appSignalID) { m_compareAppSignalID = appSignalID; }
 
 	QString			outputAppSignalID() const { return m_outputAppSignalID; }
 	void			setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }

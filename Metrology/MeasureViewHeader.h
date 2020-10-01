@@ -174,10 +174,12 @@ const int				MVC_CMN_C_INDEX				= 0,
 						MVC_CMN_C_EN_NOMINAL		= 14,
 						MVC_CMN_C_EL_MEASURE		= 15,
 						MVC_CMN_C_EN_MEASURE		= 16,
-						MVC_CMN_C_ERROR				= 17,
-						MVC_CMN_C_ERROR_LIMIT		= 18,
-						MVC_CMN_C_ERROR_RESULT		= 19,
-						MVC_CMN_C_MEASUREMENT_TIME	= 20;
+						MVC_CMN_C_CMP_ID			= 17,
+						MVC_CMN_C_OUT_ID			= 18,
+						MVC_CMN_C_ERROR				= 19,
+						MVC_CMN_C_ERROR_LIMIT		= 20,
+						MVC_CMN_C_ERROR_RESULT		= 21,
+						MVC_CMN_C_MEASUREMENT_TIME	= 22;
 
 // ==============================================================================================
 

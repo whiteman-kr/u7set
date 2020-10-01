@@ -162,11 +162,9 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 				}
 
 				break;
-
-			default:
-				return theOptions.measureView().font();
-				break;
 		}
+
+		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::ForegroundRole)
@@ -484,6 +482,9 @@ QString MeasureTable::textComparator(int row, int column) const
 
 		case MVC_CMN_C_EL_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
 	    case MVC_CMN_C_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
+
+		case MVC_CMN_C_CMP_ID:					result = m->compareAppSignalID(); break;
+		case MVC_CMN_C_OUT_ID:					result = m->outputAppSignalID(); break;
 
 		case MVC_CMN_C_ERROR:					result = m->errorStr(); break;
 		case MVC_CMN_C_ERROR_LIMIT:				result = m->errorLimitStr(); break;

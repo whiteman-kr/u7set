@@ -652,23 +652,6 @@ void LinearityMeasurement::calcAdditionalParam(int limitType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityMeasurement::signalID(int type) const
-{
-	QString strID;
-
-	switch (type)
-	{
-		case SIGNAL_ID_TYPE_APP:		strID = m_appSignalID;			break;
-		case SIGNAL_ID_TYPE_CUSTOM:		strID = m_customAppSignalID;	break;
-		case SIGNAL_ID_TYPE_EQUIPMENT:	strID = m_equipmentID;			break;
-		default:						assert(0);
-	}
-
-	return strID;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 double LinearityMeasurement::nominal(int limitType) const
 {
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -1344,6 +1327,7 @@ void ComparatorMeasurement::clear()
 
 	m_location.clear();
 
+	m_compareAppSignalID.clear();
 	m_outputAppSignalID.clear();
 
 	m_cmpType = E::CmpType::Greate;
@@ -1443,6 +1427,11 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	setLocation(inParam.location());
+
+	if (comparatorEx->compare().isConst() == false)
+	{
+		setCompareAppSignalID(comparatorEx->compare().appSignalID());
+	}
 
 	setOutputAppSignalID(comparatorEx->output().appSignalID());
 
@@ -1561,6 +1550,11 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	setLocation(inParam.location());
 
+	if (comparatorEx->compare().isConst() == false)
+	{
+		setCompareAppSignalID(comparatorEx->compare().appSignalID());
+	}
+
 	setOutputAppSignalID(comparatorEx->output().appSignalID());
 
 	// nominal
@@ -1631,23 +1625,6 @@ void ComparatorMeasurement::calcError()
 		setErrorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
 		setErrorLimit(limitType, MEASURE_ERROR_TYPE_REDUCE,		errorLimit);
 	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString ComparatorMeasurement::signalID(int type) const
-{
-	QString strID;
-
-	switch (type)
-	{
-		case SIGNAL_ID_TYPE_APP:		strID = m_appSignalID;			break;
-		case SIGNAL_ID_TYPE_CUSTOM:		strID = m_customAppSignalID;	break;
-		case SIGNAL_ID_TYPE_EQUIPMENT:	strID = m_equipmentID;			break;
-		default:						assert(0);
-	}
-
-	return strID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2073,6 +2050,7 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 
 	m_location = from.m_location;
 
+	m_compareAppSignalID = from.m_compareAppSignalID;
 	m_outputAppSignalID = from.m_outputAppSignalID;
 
 	m_cmpType = from.m_cmpType;

@@ -190,14 +190,28 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 		}
 	}
 
+	QString strCompareUnit;
+
+	if (comparatorEx->compare().isConst() == true)
+	{
+		strCompareUnit = " " + pInSignal->param().unit();
+	}
+
+	QString strHysteresisUnit;
+
+	if (comparatorEx->hysteresis().isConst() == true)
+	{
+		strHysteresisUnit = " " + pInSignal->param().unit();
+	}
+
 	QString result;
 
 	switch (column)
 	{
 		case COMPARATOR_LIST_COLUMN_TYPE:				result = visible ? E::valueToString<E::SignalInOutType>(param.inOutType()) : QString();		break;
 		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();											break;
-		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();											break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();											break;
+		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr() + strCompareUnit;							break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr() + strHysteresisUnit;						break;
 		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = visible ? param.electricRangeStr() : QString();									break;
 		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = visible ? param.engineeringRangeStr() : QString();									break;
 		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();												break;
