@@ -84,6 +84,6 @@
         <file>Simulator/Templates/SawtoothBack.js</file>
         <file>Simulator/Templates/DiscreteSquare.js</file>
         <file>Simulator/Templates/DiscreteSeries.js</file>
+        <file>Simulator/ScriptSample.js</file>
     </qresource>
 </RCC>
-     

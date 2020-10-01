@@ -252,6 +252,8 @@ void TestsTabPage::openFilesClicked(const QModelIndex &index)
 
 void TestsTabPage::newFile()
 {
+	// Get new file name
+	//
 	QString fileName = QInputDialog::getText(this, "New File", tr("Enter the file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
 	if (fileName.isEmpty() == true)
 	{
@@ -263,7 +265,23 @@ void TestsTabPage::newFile()
 		fileName += ".js";
 	}
 
-	bool result = m_testsTreeView->newFile(fileName);
+	// Read script template
+	//
+	QByteArray templateScript;
+	QFile rcFile{":/Simulator/ScriptSample.js"};
+
+	if (rcFile.open(QIODevice::ReadOnly) == false)
+	{
+		qDebug() << "TestsTabPage::newFile: " << rcFile.errorString();
+	}
+	else
+	{
+		templateScript = rcFile.readAll();
+	}
+
+	// Create file and open it
+	//
+	bool result = m_testsTreeView->newFile(fileName, templateScript);
 	if (result == true)
 	{
 		// addNewFile will select new document
