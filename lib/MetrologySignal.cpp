@@ -850,6 +850,9 @@ namespace Metrology
 		m_compareSignal = nullptr;
 		m_hysteresisSignal = nullptr;
 		m_outputSignal = nullptr;
+
+		m_compareValue = 0;
+		m_hysteresisValue = 0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -917,44 +920,23 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareOnlineValue() const
+	double ComparatorEx::compareOnlineValue()
 	{
-		//
-		//
-		double hysteresisValue = 0;
-
-		if (hysteresis().isConst() == true)
-		{
-			hysteresisValue = hysteresis().constValue();
-		}
-		else
-		{
-			if (m_hysteresisSignal != nullptr)
-			{
-				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
-				{
-					hysteresisValue = m_hysteresisSignal->state().value();
-				}
-			}
-		}
-
 		//
 		//
 		double deviation = 0;
 
 		switch (m_deviationType)
 		{
-			case DeviationType::Down:	deviation = -hysteresisValue / 2;	break;
-			case DeviationType::Up:		deviation = hysteresisValue / 2;	break;
+			case DeviationType::Down:	deviation = -hysteresisOnlineValue() / 2;	break;
+			case DeviationType::Up:		deviation = hysteresisOnlineValue() / 2;	break;
 		}
 
 		//
 		//
-		double value = 0;
-
 		if (compare().isConst() == true)
 		{
-			value = compare().constValue() + deviation;
+			m_compareValue = compare().constValue() + deviation;
 		}
 		else
 		{
@@ -962,24 +944,24 @@ namespace Metrology
 			{
 				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().valid() == true)
 				{
-					value = m_compareSignal->state().value() + deviation;
+					m_compareValue = m_compareSignal->state().value() + deviation;
 				}
 			}
 		}
 
-		return value;
+		return m_compareValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareOnlineValueStr() const
+	QString ComparatorEx::compareOnlineValueStr()
 	{
 		return QString::number(compareOnlineValue(), 'f', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareConstValue() const
+	double ComparatorEx::compareConstValue()
 	{
 		double value = 0;
 
@@ -997,7 +979,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareDefaultValueStr() const
+	QString ComparatorEx::compareDefaultValueStr()
 	{
 		QString value;
 
@@ -1017,13 +999,11 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::hysteresisOnlineValue() const
+	double ComparatorEx::hysteresisOnlineValue()
 	{
-		double value = 0;
-
 		if (hysteresis().isConst() == true)
 		{
-			value = hysteresis().constValue();
+			m_hysteresisValue = hysteresis().constValue();
 		}
 		else
 		{
@@ -1031,24 +1011,24 @@ namespace Metrology
 			{
 				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
 				{
-					value = m_hysteresisSignal->state().value();
+					m_hysteresisValue = m_hysteresisSignal->state().value();
 				}
 			}
 		}
 
-		return value;
+		return m_hysteresisValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisOnlineValueStr() const
+	QString ComparatorEx::hysteresisOnlineValueStr()
 	{
 		return QString::number(hysteresisOnlineValue(), 'f', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisDefaultValueStr() const
+	QString ComparatorEx::hysteresisDefaultValueStr()
 	{
 		QString value;
 
@@ -1074,17 +1054,17 @@ namespace Metrology
 
 	bool ComparatorEx::outputState() const
 	{
-		bool value = false;
-
-		if (m_outputSignal != nullptr)
+		if (m_outputSignal == nullptr)
 		{
-			if (m_outputSignal->param().isValid() == true && m_outputSignal->state().valid() == true)
-			{
-				value = m_outputSignal->state().value() != 0.0;
-			}
+			return false;
 		}
 
-		return value;
+		if (m_outputSignal->param().isValid() == false || m_outputSignal->state().valid() == false)
+		{
+			return false;
+		}
+
+		return m_outputSignal->state().value() != 0.0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

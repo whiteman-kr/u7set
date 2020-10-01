@@ -348,9 +348,6 @@ namespace Metrology
 
 	// ==============================================================================================
 
-
-
-	// ----------------------------------------------------------------------------------------------
 	class ComparatorEx : public ::Comparator
 	{
 	public:
@@ -376,6 +373,9 @@ namespace Metrology
 		Metrology::Signal* m_outputSignal = nullptr;
 
 		DeviationType m_deviationType = DeviationType::NoUsed;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
+
+		double m_compareValue = 0;
+		double m_hysteresisValue = 0;
 
 	public:
 
@@ -404,20 +404,19 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue() const;				// current online (run time) value
-		QString compareOnlineValueStr() const;			// str current oline (run time) value
-		double compareConstValue() const;				// default offine value
-		QString compareDefaultValueStr() const;			// str default offine value
+		double compareOnlineValue();					// current online (run time) value
+		QString compareOnlineValueStr();				// str current oline (run time) value
+		double compareConstValue();						// default offine value
+		QString compareDefaultValueStr();				// str default offine value
 
-		double hysteresisOnlineValue() const;			// current oline (run time) value
-		QString hysteresisOnlineValueStr() const;		// str current oline (run time) value
-		QString hysteresisDefaultValueStr() const;		// str default offine value
+		double hysteresisOnlineValue();					// current oline (run time) value
+		QString hysteresisOnlineValueStr();				// str current oline (run time) value
+		QString hysteresisDefaultValueStr();			// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;
 		QString outputStateStr(const QString& forTrue, const QString& forFalse) const;
 	};
-
 
 	// ==============================================================================================
 }
