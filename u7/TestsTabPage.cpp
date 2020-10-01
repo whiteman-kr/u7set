@@ -3,6 +3,8 @@
 #include "../lib/DbController.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
+#include "Simulator/SimSelectBuildDialog.h"
+
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>
 #endif
@@ -474,9 +476,9 @@ void TestsTabPage::checkInSelectedFiles()
 			return;
 		}
 
-		if (documentIsOpen(f->fileId()) == true && f->state() == VcsState::CheckedIn)
+		if (documentIsOpen(f->fileId()) == true)
 		{
-			setDocumentReadOnly(f->fileId(), true);
+			setDocumentReadOnly(f->fileId(), f->state() == VcsState::CheckedIn);
 		}
 	}
 
@@ -603,7 +605,7 @@ void TestsTabPage::undoChangesSelectedFiles()
 			codeEditor->setText(dbFile->data());
 			document.setModified(false);
 
-			setDocumentReadOnly(f->fileId(), true);
+			setDocumentReadOnly(f->fileId(), f->state() == VcsState::CheckedIn);
 
 			openUndoDocuments.removeOne(f->fileId());
 		}
@@ -1636,6 +1638,42 @@ void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 	return;
 }
 
+void TestsTabPage::selectBuild()
+{
+	QSettings settings;
+
+	QString project = db()->currentProject().projectName().toLower();
+	QString buildPath = settings.value("TestsTabPage/ProjectLastPath/" + project).toString();
+
+	SimSelectBuildDialog d(project, buildPath, this);
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		buildPath = d.resultBuildPath();
+
+
+		int load_build_is_here = 1;
+
+		/*if (m_simulator->isLoaded() == false)
+		{
+			m_buildLabel->setText(tr("Build: Not loaded"));
+		}
+		else
+		{
+			QString buildPath = m_simulator->buildPath();*/
+			m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
+		//}
+
+		/*bool ok = loadBuild(lastPath);
+
+		if (ok == true)
+		{
+			settings.setValue("TestsTabPage/ProjectLastPath/" + project, lastPath);
+		}*/
+	}
+}
+
 void TestsTabPage::createUi()
 {
 	// Set up default font
@@ -1648,18 +1686,22 @@ void TestsTabPage::createUi()
 	    m_editorFont = QFont("Courier");
 #endif
 
+	QWidget* leftWidget = new QWidget();
+	QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
+	leftLayout->setContentsMargins(0, 0, 0, 0);
+
 	// Tests tree and model
 	//
-	QWidget* testsWidget = new QWidget();
-
-	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
-	testsLayout->setContentsMargins(0, 0, 0, 0);
 
 	m_testsToolbar = new QToolBar();
-	m_testsToolbar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
-	m_testsToolbar->setIconSize(m_testsToolbar->iconSize() * 0.9);
+	//m_testsToolbar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
+	//m_testsToolbar->setIconSize(m_testsToolbar->iconSize() * 0.9);
 
-	testsLayout->addWidget(m_testsToolbar);
+	leftLayout->addWidget(m_testsToolbar);
+
+	QWidget* testsWidget = new QWidget();
+	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
+	testsLayout->setContentsMargins(6, 0, 6, 6);
 
 	m_testsTreeModel = new TestsFileTreeModel(db(), DbFileInfo::fullPathToFileName(Db::File::TestsFileName), this, this);
 
@@ -1713,6 +1755,7 @@ void TestsTabPage::createUi()
 	testsLayout->addLayout(filterLayout);
 
 	// Filter completer
+	//
 	QStringList completerStringList = QSettings{}.value("TestsTabPage/FilterCompleter").toStringList();
 	m_filterCompleter = new QCompleter(completerStringList, this);
 	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
@@ -1724,7 +1767,7 @@ void TestsTabPage::createUi()
 	QWidget* filesWidget = new QWidget();
 
 	QVBoxLayout* filesLayout = new QVBoxLayout(filesWidget);
-	filesLayout->setContentsMargins(0, 0, 0, 0);
+	//filesLayout->setContentsMargins(0, 0, 0, 0);
 
 	filesLayout->addWidget(new QLabel(tr("Open Files")));
 
@@ -1741,34 +1784,64 @@ void TestsTabPage::createUi()
 	connect(m_openFilesTreeWidget, &QTreeWidget::customContextMenuRequested, this, &TestsTabPage::openFilesMenuRequested);
 	filesLayout->addWidget(m_openFilesTreeWidget);
 
+	//	Right layout
+	//
+	QWidget* rightWidget = new QWidget();
+	m_rightLayout = new QVBoxLayout(rightWidget);
+	m_rightLayout->setContentsMargins(0, 0, 0, 0);
+
+	QHBoxLayout* buildToolBarLayout = new QHBoxLayout();
+	buildToolBarLayout->setContentsMargins(0, 0, 6, 0);
+
+	// Build toolbar
+	//
+	m_buildToolBar = new QToolBar();
+	//m_actionsToolBar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
+	//m_actionsToolBar->setIconSize(m_testsToolbar->iconSize() * 0.9);
+	buildToolBarLayout->addWidget(m_buildToolBar);
+
+	// Build label
+	//
+	m_buildLabel = new QLabel("Build: Not loaded");
+	m_buildLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
+	m_buildLabel->setTextFormat(Qt::RichText);
+	m_buildLabel->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
+	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_buildLabel->setOpenExternalLinks(true);
+	buildToolBarLayout->addWidget(m_buildLabel);
+
+	m_rightLayout->addLayout(buildToolBarLayout);
+
 	// Editor layout
 	//
 	QWidget* editorWidget = new QWidget();
+
 	m_editorLayout = new QVBoxLayout(editorWidget);
-	m_editorLayout->setContentsMargins(0, 0, 0, 0);
+	m_editorLayout->setContentsMargins(6, 0, 6, 6);
+	m_rightLayout->addWidget(editorWidget);
 
 	// Editor toolbar
 	//
-	const int toolbarButtonSize = static_cast<int>(0.25 * logicalDpiY());
+	const int editorToolbarButtonSize = static_cast<int>(0.25 * logicalDpiY());
 
 	m_editorToolBar = new QToolBar();
 	m_editorToolBar->setVisible(false);
 	m_editorToolBar->setAutoFillBackground(true);
 	m_editorToolBar->setStyleSheet("QToolBar{spacing:3px; \
-								   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060); }");
+								   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6c6c6c, stop: 1 #4b4b4b); }");
 
 	m_openDocumentsCombo = new QComboBox();
 
 	m_openDocumentsCombo->setStyleSheet(tr("QComboBox{\
 												border: 0px;\
 												color: white;\
-												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060);\
+												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6c6c6c, stop: 1 #4b4b4b);\
 											}\
 											QComboBox:hover {\
-												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #909090, stop: 1 #707070);\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #6c6c6c);\
 											}\
 											QComboBox:!editable:on, QComboBox::drop-down:editable:on {\
-												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #707070, stop: 1 #505050);\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6c6c6c, stop: 1 #4b4b4b);\
 											}\
 											QComboBox:on { \
 												padding-top: 3px;\
@@ -1781,9 +1854,9 @@ void TestsTabPage::createUi()
 													image: url(:/Images/Images/ComboDownArrow.svg);\
 													width: %1px;\
 													height: %1px;\
-											}").arg(toolbarButtonSize/3));
+											}").arg(editorToolbarButtonSize/3));
 
-	m_openDocumentsCombo->setFixedHeight(toolbarButtonSize);
+	m_openDocumentsCombo->setFixedHeight(editorToolbarButtonSize);
 	QString longFileName = QString().fill('0', 32);
 	m_openDocumentsCombo->setMinimumWidth(QFontMetrics(m_openDocumentsCombo->font()).horizontalAdvance(longFileName));
 	connect(m_openDocumentsCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestsTabPage::openDocumentsComboTextChanged);
@@ -1791,15 +1864,15 @@ void TestsTabPage::createUi()
 	m_editorToolBar->addWidget(m_openDocumentsCombo);
 
 	QString toolbarButtonStyle = "QPushButton {\
-												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #606060);\
+												background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6c6c6c, stop: 1 #4b4b4b);\
 												color: white;\
 											}\
 											QPushButton:hover {\
 												border-style: none;\
-												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #909090, stop: 1 #707070);\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #808080, stop: 1 #6c6c6c);\
 											}\
 											QPushButton:pressed {\
-												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #707070, stop: 1 #505050);\
+												background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6c6c6c, stop: 1 #4b4b4b);\
 											}";
 
 	// Close Button
@@ -1807,7 +1880,7 @@ void TestsTabPage::createUi()
 	QPushButton* closeButton = new QPushButton(QIcon(":/Images/Images/CloseButtonWhite.svg"), QString());
 	closeButton->setFlat(true);
 	closeButton->setStyleSheet(toolbarButtonStyle);
-	closeButton->setFixedSize(toolbarButtonSize, toolbarButtonSize);
+	closeButton->setFixedSize(editorToolbarButtonSize, editorToolbarButtonSize);
 	connect(closeButton, &QPushButton::clicked, this, &TestsTabPage::closeCurrentFile);
 
 	m_editorToolBar->addWidget(closeButton);
@@ -1826,7 +1899,7 @@ void TestsTabPage::createUi()
 
 	QString longCursorPos = "Line: 9999 Col: 9999";
 	m_cursorPosButton->setMinimumWidth(QFontMetrics(m_cursorPosButton->font()).horizontalAdvance(longCursorPos));
-	m_cursorPosButton->setFixedHeight(toolbarButtonSize);
+	m_cursorPosButton->setFixedHeight(editorToolbarButtonSize);
 	connect(m_cursorPosButton, &QPushButton::clicked, this, &TestsTabPage::onGoToLine);
 	m_editorToolBar->addWidget(m_cursorPosButton);
 
@@ -1835,6 +1908,8 @@ void TestsTabPage::createUi()
 	// Empty editor
 	//
 	m_editorEmptyLabel = new QLabel(tr("No open documents"));
+	m_editorEmptyLabel->setBackgroundRole(QPalette::Dark);
+	m_editorEmptyLabel->setAutoFillBackground(true);
 	m_editorEmptyLabel->setAlignment(Qt::AlignCenter);
 	m_editorLayout->addWidget(m_editorEmptyLabel);
 
@@ -1848,11 +1923,13 @@ void TestsTabPage::createUi()
 	m_leftSplitter->setCollapsible(0, false);
 	m_leftSplitter->setCollapsible(1, false);
 
+	leftLayout->addWidget(m_leftSplitter);
+
 	// Vertical splitter
 	//
 	m_verticalSplitter = new QSplitter(Qt::Horizontal);
-	m_verticalSplitter->addWidget(m_leftSplitter);
-	m_verticalSplitter->addWidget(editorWidget);
+	m_verticalSplitter->addWidget(leftWidget);
+	m_verticalSplitter->addWidget(rightWidget);
 	m_verticalSplitter->setStretchFactor(0, 1);
 	m_verticalSplitter->setStretchFactor(1, 4);
 	m_verticalSplitter->setCollapsible(0, false);
@@ -1861,6 +1938,7 @@ void TestsTabPage::createUi()
 	// Main layout
 	//
 	QHBoxLayout* mainLayout = new QHBoxLayout();
+	mainLayout->setContentsMargins(0, 6, 0, 0);
 	mainLayout->addWidget(m_verticalSplitter);
 	setLayout(mainLayout);
 
@@ -1875,7 +1953,7 @@ void TestsTabPage::createActions()
 		return;
 	}
 
-	QList<QAction*> toolbarActions;
+	QList<QAction*> testsToolbarActions;
 
 	// Tests file tree actions
 
@@ -1883,30 +1961,29 @@ void TestsTabPage::createActions()
 	m_openFileAction->setStatusTip(tr("Open File..."));
 	m_openFileAction->setEnabled(false);
 	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openFile);
-	toolbarActions.push_back(m_openFileAction);
+	testsToolbarActions.push_back(m_openFileAction);
 
 	m_SeparatorAction1 = new QAction(this);
 	m_SeparatorAction1->setSeparator(true);
-	toolbarActions.push_back(m_SeparatorAction1);
+	testsToolbarActions.push_back(m_SeparatorAction1);
 
 	m_newFileAction = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("New File..."), this);
 	m_newFileAction->setStatusTip(tr("New File..."));
 	m_newFileAction->setEnabled(false);
 	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
 	connect(m_newFileAction, &QAction::triggered, this, &TestsTabPage::newFile);
-	toolbarActions.push_back(m_newFileAction);
+	testsToolbarActions.push_back(m_newFileAction);
 
 	m_newFolderAction = new QAction(QIcon(":/Images/Images/SchemaAddFolder2.svg"), tr("New Folder..."), this);
 	m_newFolderAction->setStatusTip(tr("New Folder..."));
 	m_newFolderAction->setEnabled(false);
 	connect(m_newFolderAction, &QAction::triggered, this, &TestsTabPage::newFolder);
-	toolbarActions.push_back(m_newFolderAction);
+	testsToolbarActions.push_back(m_newFolderAction);
 
 	m_addFileAction = new QAction(tr("Add File..."), this);
 	m_addFileAction->setStatusTip(tr("Add File..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_testsTreeView, &FileTreeView::addFileToFolder);
-	//toolbarActions.push_back(m_addFileAction);
 
 	m_renameFileAction = new QAction(tr("Rename..."), this);
 	m_renameFileAction->setStatusTip(tr("Rename..."));
@@ -1918,7 +1995,7 @@ void TestsTabPage::createActions()
 	m_deleteFileAction->setEnabled(false);
 	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
 	connect(m_deleteFileAction, &QAction::triggered, this, &TestsTabPage::deleteSelectedFiles);
-	toolbarActions.push_back(m_deleteFileAction);
+	testsToolbarActions.push_back(m_deleteFileAction);
 
 	m_moveFileAction = new QAction(tr("Move File..."), this);
 	m_moveFileAction->setStatusTip(tr("Move"));
@@ -1928,25 +2005,25 @@ void TestsTabPage::createActions()
 	//----------------------------------
 	m_SeparatorAction2 = new QAction(this);
 	m_SeparatorAction2->setSeparator(true);
-	toolbarActions.push_back(m_SeparatorAction2);
+	testsToolbarActions.push_back(m_SeparatorAction2);
 
 	m_checkOutAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutAction->setEnabled(false);
 	connect(m_checkOutAction, &QAction::triggered, this, &TestsTabPage::checkOutSelectedFiles);
-	toolbarActions.push_back(m_checkOutAction);
+	testsToolbarActions.push_back(m_checkOutAction);
 
 	m_checkInAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
 	m_checkInAction->setStatusTip(tr("Check in changes"));
 	m_checkInAction->setEnabled(false);
 	connect(m_checkInAction, &QAction::triggered, this, &TestsTabPage::checkInSelectedFiles);
-	toolbarActions.push_back(m_checkInAction);
+	testsToolbarActions.push_back(m_checkInAction);
 
 	m_undoChangesAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
 	connect(m_undoChangesAction, &QAction::triggered, this, &TestsTabPage::undoChangesSelectedFiles);
-	toolbarActions.push_back(m_undoChangesAction);
+	testsToolbarActions.push_back(m_undoChangesAction);
 
 	m_historyAction = new QAction(QIcon(":/Images/Images/SchemaHistory.svg"), tr("History"), this);
 	m_historyAction->setStatusTip(tr("View History"));
@@ -1961,14 +2038,14 @@ void TestsTabPage::createActions()
 	//----------------------------------
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
-	toolbarActions.push_back(m_SeparatorAction3);
+	testsToolbarActions.push_back(m_SeparatorAction3);
 
 	m_refreshAction = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh Objects List"));
 	m_refreshAction->setEnabled(false);
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, this, &TestsTabPage::refreshFileTree);
-	toolbarActions.push_back(m_refreshAction);
+	testsToolbarActions.push_back(m_refreshAction);
 	addAction(m_refreshAction);
 
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -1993,7 +2070,7 @@ void TestsTabPage::createActions()
 
 	m_testsTreeView->addAction(m_refreshAction);
 
-	m_testsToolbar->addActions(toolbarActions);
+	m_testsToolbar->addActions(testsToolbarActions);
 
 	// Editor context menu actions
 
@@ -2045,6 +2122,19 @@ void TestsTabPage::createActions()
 	m_closeOpenDocumentAction = new QAction(tr("Close"), this);
 	m_closeOpenDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
 	connect(m_closeOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::closeOpenFile);
+
+	// Build toolbar actions
+
+	QWidget* spacer = new QWidget();
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_buildToolBar->addWidget(spacer);
+
+	m_selectBuildAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("New File..."), this);
+	m_selectBuildAction->setStatusTip(tr("Select Build..."));
+	//m_selectBuildAction->setEnabled(false);
+	connect(m_selectBuildAction, &QAction::triggered, this, &TestsTabPage::selectBuild);
+
+	m_buildToolBar->addAction(m_selectBuildAction);
 
 	return;
 }

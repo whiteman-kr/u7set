@@ -405,6 +405,8 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 		int width = static_cast<int>(fm.boundingRect("0000").width() * 1.2);
 
 		m_textEdit->setMarginWidth(0, width);
+		m_textEdit->setMarginsForegroundColor(QColor("#c0c0c0"));
+		m_textEdit->setMarginsBackgroundColor(QColor("#f0f0f0"));
     }
     else
     {

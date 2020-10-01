@@ -129,6 +129,10 @@ private slots:
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
+	// Build operations slots
+
+	void selectBuild();
+
 private:
 	void createUi();
 	void createActions();
@@ -187,6 +191,8 @@ private:
 
 	QTreeWidget* m_openFilesTreeWidget = nullptr;
 
+	QVBoxLayout* m_rightLayout = nullptr;
+
 	QVBoxLayout* m_editorLayout = nullptr;
 
 	QToolBar* m_editorToolBar = nullptr;
@@ -194,6 +200,9 @@ private:
 
 	QComboBox* m_openDocumentsCombo = nullptr;
 	QPushButton* m_cursorPosButton = nullptr;
+
+	QToolBar* m_buildToolBar = nullptr;
+	QLabel* m_buildLabel = nullptr;
 
 	QSplitter* m_leftSplitter = nullptr;
 	QSplitter* m_verticalSplitter = nullptr;
@@ -232,6 +241,10 @@ private:
 	QAction* m_undoChangesOpenDocumentAction = nullptr;
 	QAction* m_saveOpenDocumentAction = nullptr;
 	QAction* m_closeOpenDocumentAction = nullptr;
+
+	// Build toolbar actions
+
+	QAction* m_selectBuildAction = nullptr;
 };
 
 
