@@ -1232,7 +1232,7 @@ QModelIndexList FileTreeView::selectedSourceRows() const
 }
 
 
-bool FileTreeView::newFile(const QString& fileName)
+bool FileTreeView::newFile(const QString& fileName, const QByteArray& data)
 {
 	// Find parent file
 	//
@@ -1250,6 +1250,7 @@ bool FileTreeView::newFile(const QString& fileName)
 
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 	file->setFileName(fileName);
+	file->setData(data);
 
 	files.push_back(file);
 

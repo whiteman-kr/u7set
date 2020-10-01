@@ -163,7 +163,7 @@ public:
 
 	QModelIndexList selectedSourceRows() const;	// Returns selected rows mapped to source model
 
-	bool newFile(const QString& fileName);
+	bool newFile(const QString& fileName, const QByteArray& data);
 	void moveFile(int parentFileId);
 	void checkOutFilesById(std::vector<int> fileIds);
 	void checkInFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds);
