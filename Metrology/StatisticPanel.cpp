@@ -98,6 +98,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 			case STATISTIC_COLUMN_CAPTION:				result = Qt::AlignLeft;		break;
 			case STATISTIC_COLUMN_CMP_VALUE:			result = Qt::AlignLeft;		break;
 			case STATISTIC_COLUMN_CMP_NO:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_CMP_OUT_ID:			result = Qt::AlignLeft;		break;
 			case STATISTIC_COLUMN_RACK:					result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
@@ -226,6 +227,7 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 
 	QString comparatorNo;
 	QString comparatorValue;
+	QString comparatorOutputID;
 
 	if (theSignalBase.statistic().measureType() == MEASURE_TYPE_COMPARATOR)
 	{
@@ -234,6 +236,7 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 		{
 			comparatorValue = comparator->compareDefaultValueStr();
 			comparatorNo = QString::number(comparator->index() + 1);
+			comparatorOutputID = comparator->output().appSignalID();
 		}
 	}
 
@@ -254,6 +257,7 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 		case STATISTIC_COLUMN_CAPTION:				result = visible ? param.caption() : QString();											break;
 		case STATISTIC_COLUMN_CMP_VALUE:			result = comparatorValue;																break;
 		case STATISTIC_COLUMN_CMP_NO:				result = comparatorNo;																	break;
+		case STATISTIC_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;															break;
 		case STATISTIC_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();						break;
 		case STATISTIC_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();							break;
 		case STATISTIC_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();							break;
@@ -730,6 +734,7 @@ void StatisticPanel::updateVisibleColunm()
 	hideColumn(STATISTIC_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(STATISTIC_COLUMN_CMP_VALUE, m_measureType != MEASURE_TYPE_COMPARATOR);
 	hideColumn(STATISTIC_COLUMN_CMP_NO, m_measureType != MEASURE_TYPE_COMPARATOR);
+	hideColumn(STATISTIC_COLUMN_CMP_OUT_ID, true);
 	hideColumn(STATISTIC_COLUMN_CHASSIS, true);
 	hideColumn(STATISTIC_COLUMN_MODULE, true);
 	hideColumn(STATISTIC_COLUMN_PLACE, true);
@@ -1237,6 +1242,10 @@ void StatisticPanel::onHeaderContextMenu(QPoint)
 	{
 		return;
 	}
+
+	m_pColumnAction[STATISTIC_COLUMN_CMP_VALUE]->setDisabled(m_measureType != MEASURE_TYPE_COMPARATOR);
+	m_pColumnAction[STATISTIC_COLUMN_CMP_NO]->setDisabled(m_measureType != MEASURE_TYPE_COMPARATOR);
+	m_pColumnAction[STATISTIC_COLUMN_CMP_OUT_ID]->setDisabled(m_measureType != MEASURE_TYPE_COMPARATOR);
 
 	m_headerContextMenu->exec(QCursor::pos());
 }
