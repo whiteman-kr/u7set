@@ -115,6 +115,23 @@ namespace SimOverrideUI
 		return;
 	}
 
+	QDoubleValidatorEx::QDoubleValidatorEx(QObject* parent) :
+		QDoubleValidator(parent)
+	{
+
+	}
+
+	QDoubleValidatorEx::QDoubleValidatorEx(double bottom, double top, int decimals, QObject* parent) :
+		QDoubleValidator(bottom, top, decimals, parent)
+	{
+	}
+
+	QValidator::State QDoubleValidatorEx::validate(QString& str, int& npos) const
+	{
+		str.replace('.', QLocale{}.decimalPoint());
+		return QDoubleValidator::validate(str, npos);
+	}
+
 	//
 	// ValueMethodWidget
 	//
@@ -152,7 +169,7 @@ namespace SimOverrideUI
 						m_floatEdit->setAlignment(Qt::AlignRight);
 						m_floatEdit->setText(signal.valueString(m_currentBase, m_analogFormat, m_precision));
 
-						m_floatEditValidator = new QDoubleValidator{this};
+						m_floatEditValidator = new QDoubleValidatorEx{this};
 						m_floatEditValidator->setDecimals(m_precision);
 
 						m_floatEdit->setValidator(m_floatEditValidator);

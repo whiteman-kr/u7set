@@ -62,6 +62,17 @@ namespace SimOverrideUI
 		int m_precision = -1;											// Current procision for floating point signals
 	};
 
+	class QDoubleValidatorEx : public QDoubleValidator
+	{
+		Q_OBJECT
+
+	public:
+		explicit QDoubleValidatorEx(QObject* parent = nullptr);
+		QDoubleValidatorEx(double bottom, double top, int decimals, QObject* parent = nullptr);
+
+		virtual QValidator::State validate(QString &, int &) const override;
+	};
+
 	//
 	// ValueMethodWidget
 	//
@@ -91,7 +102,7 @@ namespace SimOverrideUI
 		QWidget* m_edit = nullptr;
 
 		QLineEdit* m_floatEdit = nullptr;
-		QDoubleValidator* m_floatEditValidator = nullptr;
+		QDoubleValidatorEx* m_floatEditValidator = nullptr;
 
 		QDoubleSpinBox* m_doubleSpinBox = nullptr;
 		QSpinBox* m_intSpinBox = nullptr;
