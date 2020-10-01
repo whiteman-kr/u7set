@@ -93,8 +93,14 @@ namespace TrendLib
 
 		message->set_app_signal_id(mapAppSignalId.toStdString());
 
-		for (std::pair<TimeStamp, std::shared_ptr<OneHourData>> p : m_hours)
+		for (const std::pair<TimeStamp, std::shared_ptr<OneHourData>>& p : m_hours)
 		{
+            if (p.second == nullptr)
+            {
+                Q_ASSERT(p.second);
+                continue;
+            }
+
 			ok &= p.second->save(p.first, message->add_hours());
 		}
 
@@ -1526,6 +1532,7 @@ namespace TrendLib
 				if (hourData.get() == nullptr)	// Just created
 				{
 					hourData = std::make_shared<TrendLib::OneHourData>();
+                    archive.m_hours[ts] = hourData;
 				}
 
 				lastHourTime = ts;
