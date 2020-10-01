@@ -25,6 +25,7 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Caption"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator value"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator No"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator Output ID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Rack"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Chassis"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Module"),
@@ -47,17 +48,18 @@ const int					STATISTIC_COLUMN_APP_ID				= 0,
 							STATISTIC_COLUMN_CAPTION			= 3,
 							STATISTIC_COLUMN_CMP_VALUE			= 4,
 							STATISTIC_COLUMN_CMP_NO				= 5,
-							STATISTIC_COLUMN_RACK				= 6,
-							STATISTIC_COLUMN_CHASSIS			= 7,
-							STATISTIC_COLUMN_MODULE				= 8,
-							STATISTIC_COLUMN_PLACE				= 9,
-							STATISTIC_COLUMN_ADC				= 10,
-							STATISTIC_COLUMN_EL_RANGE			= 11,
-							STATISTIC_COLUMN_EN_RANGE			= 12,
-							STATISTIC_COLUMN_SIGNAL_TYPE		= 13,
-							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 14,
-							STATISTIC_COLUMN_MEASURE_COUNT		= 15,
-							STATISTIC_COLUMN_STATE				= 16;
+							STATISTIC_COLUMN_CMP_OUT_ID			= 6,
+							STATISTIC_COLUMN_RACK				= 7,
+							STATISTIC_COLUMN_CHASSIS			= 8,
+							STATISTIC_COLUMN_MODULE				= 9,
+							STATISTIC_COLUMN_PLACE				= 10,
+							STATISTIC_COLUMN_ADC				= 11,
+							STATISTIC_COLUMN_EL_RANGE			= 12,
+							STATISTIC_COLUMN_EN_RANGE			= 13,
+							STATISTIC_COLUMN_SIGNAL_TYPE		= 14,
+							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 15,
+							STATISTIC_COLUMN_MEASURE_COUNT		= 16,
+							STATISTIC_COLUMN_STATE				= 17;
 
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
@@ -68,6 +70,7 @@ const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 							150,	// STATISTIC_COLUMN_CAPTION
 							150,	// STATISTIC_COLUMN_CMP_VALUE
 							 50,	// STATISTIC_COLUMN_CMP_NO
+							250,	// STATISTIC_COLUMN_CMP_OUT_ID
 							100,	// STATISTIC_COLUMN_RACK
 							 60,	// STATISTIC_COLUMN_CHASSIS
 							 60,	// STATISTIC_COLUMN_MODULE
