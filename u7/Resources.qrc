@@ -74,6 +74,8 @@
         <file>Images/ComboDownArrow.svg</file>
         <file>Images/SchemaNewFile.svg</file>
         <file>Images/SimAllowRegData.svg</file>
+        <file>Images/TestsRunAll.svg</file>
+        <file>Images/TestsRunSelected.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

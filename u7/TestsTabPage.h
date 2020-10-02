@@ -89,7 +89,8 @@ private slots:
 	void deleteSelectedFiles();
 	void moveSelectedFiles();
 	void refreshFileTree();
-	void runTestFiles();
+	void runAllTestFiles();
+	void runSelectedTestFiles();
 
 	// Code Editor slots
 
@@ -136,7 +137,7 @@ private slots:
 
 	void selectBuild();
 
-	void runSimTests(const QString& buildPath, const std::vector<std::shared_ptr<DbFile>>& files);
+	void runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files);
 
 private:
 	void createUi();
@@ -171,6 +172,8 @@ private:
 	// Override functions
 private:
 	virtual void keyPressEvent(QKeyEvent* event) override;
+
+	bool isEditableExtension(const QString& fileName);
 
 private:
 	// Data
@@ -208,7 +211,6 @@ private:
 	QComboBox* m_openDocumentsCombo = nullptr;
 	QPushButton* m_cursorPosButton = nullptr;
 
-	QToolBar* m_buildToolBar = nullptr;
 	QLabel* m_buildLabel = nullptr;
 
 	QSplitter* m_leftSplitter = nullptr;
@@ -217,32 +219,33 @@ private:
 	// Tests file tree actions
 
 	QAction* m_newFileAction = nullptr;
-	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_addFileAction = nullptr;
 	QAction* m_newFolderAction = nullptr;
 	QAction* m_openFileAction = nullptr;
 	QAction* m_renameFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;
 	QAction* m_moveFileAction = nullptr;
-	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
 	QAction* m_compareAction = nullptr;
-	QAction* m_SeparatorAction3 = nullptr;
-	QAction* m_runTestsAction = nullptr;
-	QAction* m_SeparatorAction4 = nullptr;
+	QAction* m_runAllTestsAction = nullptr;
+	QAction* m_runCurrentTestsAction = nullptr;
 	QAction* m_refreshAction = nullptr;
+
+	QAction* m_runSelectedTestsAction = nullptr;
 
 	// Editor context menu actions
 
 	QAction* m_checkInCurrentDocumentAction = nullptr;
 	QAction* m_checkOutCurrentDocumentAction = nullptr;
 	QAction* m_undoChangesCurrentDocumentAction = nullptr;
+	QAction* m_documentSeparatorAction1 = nullptr;
+	QAction* m_runTestCurrentDocumentAction = nullptr;
+	QAction* m_documentSeparatorAction2 = nullptr;
 	QAction* m_saveCurrentDocumentAction = nullptr;
 	QAction* m_closeCurrentDocumentAction = nullptr;
-	QAction* m_runTestCurrentDocumentAction = nullptr;
 
 	// Open documents list actions
 

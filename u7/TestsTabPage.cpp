@@ -373,13 +373,25 @@ void TestsTabPage::openFile()
 	codeEditor->setReadOnly(readOnly);
 	connect(codeEditor, &IdeCodeEditor::customContextMenuAboutToBeShown, this, &TestsTabPage::setCodeEditorActionsState, Qt::DirectConnection);
 
+	if (m_documentSeparatorAction1 == nullptr)
+	{
+		m_documentSeparatorAction1 = new QAction(this);
+		m_documentSeparatorAction1->setSeparator(true);
+	}
+
+	if (m_documentSeparatorAction2 == nullptr)
+	{
+		m_documentSeparatorAction2 = new QAction(this);
+		m_documentSeparatorAction2->setSeparator(true);
+	}
+
 	QList<QAction*> customMenuActions;
 	customMenuActions.push_back(m_checkOutCurrentDocumentAction);
 	customMenuActions.push_back(m_checkInCurrentDocumentAction);
 	customMenuActions.push_back(m_undoChangesCurrentDocumentAction);
-	customMenuActions.push_back(m_SeparatorAction1);
+	customMenuActions.push_back(m_documentSeparatorAction1);
 	customMenuActions.push_back(m_runTestCurrentDocumentAction);
-	customMenuActions.push_back(m_SeparatorAction2);
+	customMenuActions.push_back(m_documentSeparatorAction2);
 	customMenuActions.push_back(m_saveCurrentDocumentAction);
 	customMenuActions.push_back(m_closeCurrentDocumentAction);
 
@@ -723,7 +735,44 @@ void TestsTabPage::refreshFileTree()
 	return;
 }
 
-void TestsTabPage::runTestFiles()
+void TestsTabPage::runAllTestFiles()
+{
+	saveUnsavedTests();
+
+	// Find all files with scripts extention
+	DbFileTree testsTree;
+
+	bool ok = db()->getFileListTree(&testsTree, db()->testsFileId(), true, parentWidget());
+	if (ok == false)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> testsFiles = testsTree.toVectorIf([this](const DbFileInfo& f)
+	{
+		return isEditableExtension(f.fileName());
+	});
+
+	if (testsFiles.empty() == true)
+	{
+		QMessageBox::critical(parentWidget(), qAppName(), tr("No tests files found!"));
+		return;
+	}
+
+	if (m_buildPath.isEmpty() == true)
+	{
+		selectBuild();
+
+		if (m_buildPath.isEmpty() == true)
+		{
+			return;
+		}
+	}
+
+	runSimTests(m_buildPath, testsFiles);
+}
+
+void TestsTabPage::runSelectedTestFiles()
 {
 	std::vector<int> fileIds;
 
@@ -740,19 +789,7 @@ void TestsTabPage::runTestFiles()
 
 		// Check file extension
 		//
-		bool extFound = false;
-		QString fileName = f->fileName();
-
-		for (const QString& ext : m_editableExtensions)
-		{
-			if (fileName.endsWith(ext) == true)
-			{
-				extFound = true;
-				break;
-			}
-		}
-
-		if (extFound == true)
+		if (isEditableExtension(f->fileName()) == true)
 		{
 			fileIds.push_back(f->fileId());
 		}
@@ -879,6 +916,12 @@ void TestsTabPage::closeCurrentFile()
 
 void TestsTabPage::runTestCurrentFile()
 {
+	if (m_openDocuments.empty() == true || m_currentFileId == -1)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	std::vector<int> fileIds;
 	fileIds.push_back(m_currentFileId);
 	runTests(fileIds);
@@ -1535,6 +1578,10 @@ void TestsTabPage::setCurrentDocument(int fileId)
 		m_openDocumentsCombo->blockSignals(false);
 	}
 
+	//
+
+	m_runCurrentTestsAction->setEnabled(isEditableExtension(newFile.fileName()) == true);
+
 	return;
 }
 
@@ -1621,19 +1668,7 @@ void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 
 	// Check file extension
 	//
-	bool extFound = false;
-	QString fileName = object.name();
-
-	for (const QString& ext : m_editableExtensions)
-	{
-		if (fileName.endsWith(ext) == true)
-		{
-			extFound = true;
-			break;
-		}
-	}
-
-	if (extFound == false)
+	if (isEditableExtension(object.name()) == false)
 	{
 		return;
 	}
@@ -1779,15 +1814,15 @@ void TestsTabPage::selectBuild()
 	}
 }
 
-void TestsTabPage::runSimTests(const QString& buildPath, const std::vector<std::shared_ptr<DbFile> >& files)
+void TestsTabPage::runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files)
 {
 	int run_sim_tests_here = 1;
 
 	QStringList list;
 
-	for (std::shared_ptr<DbFile> file : files)
+	for (const DbFile& file : files)
 	{
-		list.push_back(tr("RunSimTests %1 %2").arg(buildPath).arg(file->fileName()));
+		list.push_back(tr("RunSimTests %1 %2").arg(buildPath).arg(file.fileName()));
 	}
 
 	QString allText = list.join(QChar::LineFeed);
@@ -1806,18 +1841,35 @@ void TestsTabPage::createUi()
 	    m_editorFont = QFont("Courier");
 #endif
 
-	QWidget* leftWidget = new QWidget();
-	QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
-	leftLayout->setContentsMargins(0, 0, 0, 0);
-
-	// Tests tree and model
+	// Main toolbar
 	//
 
 	m_testsToolbar = new QToolBar();
 	//m_testsToolbar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
 	//m_testsToolbar->setIconSize(m_testsToolbar->iconSize() * 0.9);
 
-	leftLayout->addWidget(m_testsToolbar);
+
+	// Build label
+	//
+	/*
+	m_buildLabel = new QLabel("Build: Not loaded");
+	m_buildLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
+	m_buildLabel->setTextFormat(Qt::RichText);
+	m_buildLabel->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
+	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_buildLabel->setOpenExternalLinks(true);
+	*/
+
+	QHBoxLayout* toolbarLayout = new QHBoxLayout();
+	toolbarLayout->addWidget(m_testsToolbar);
+	//toolbarLayout->addWidget(m_buildLabel);
+
+	// Tests tree and model
+	//
+
+	QWidget* leftWidget = new QWidget();
+	QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
+	leftLayout->setContentsMargins(0, 0, 0, 0);
 
 	QWidget* testsWidget = new QWidget();
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
@@ -1887,7 +1939,6 @@ void TestsTabPage::createUi()
 	QWidget* filesWidget = new QWidget();
 
 	QVBoxLayout* filesLayout = new QVBoxLayout(filesWidget);
-	//filesLayout->setContentsMargins(0, 0, 0, 0);
 
 	filesLayout->addWidget(new QLabel(tr("Open Files")));
 
@@ -1909,28 +1960,6 @@ void TestsTabPage::createUi()
 	QWidget* rightWidget = new QWidget();
 	m_rightLayout = new QVBoxLayout(rightWidget);
 	m_rightLayout->setContentsMargins(0, 0, 0, 0);
-
-	QHBoxLayout* buildToolBarLayout = new QHBoxLayout();
-	buildToolBarLayout->setContentsMargins(0, 0, 6, 0);
-
-	// Build toolbar
-	//
-	m_buildToolBar = new QToolBar();
-	//m_actionsToolBar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
-	//m_actionsToolBar->setIconSize(m_testsToolbar->iconSize() * 0.9);
-	buildToolBarLayout->addWidget(m_buildToolBar);
-
-	// Build label
-	//
-	m_buildLabel = new QLabel("Build: Not loaded");
-	m_buildLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
-	m_buildLabel->setTextFormat(Qt::RichText);
-	m_buildLabel->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
-	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	m_buildLabel->setOpenExternalLinks(true);
-	buildToolBarLayout->addWidget(m_buildLabel);
-
-	m_rightLayout->addLayout(buildToolBarLayout);
 
 	// Editor layout
 	//
@@ -2057,8 +2086,9 @@ void TestsTabPage::createUi()
 
 	// Main layout
 	//
-	QHBoxLayout* mainLayout = new QHBoxLayout();
-	mainLayout->setContentsMargins(0, 6, 0, 0);
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->setContentsMargins(0, 6, 6, 0);
+	mainLayout->addLayout(toolbarLayout);
 	mainLayout->addWidget(m_verticalSplitter);
 	setLayout(mainLayout);
 
@@ -2083,9 +2113,9 @@ void TestsTabPage::createActions()
 	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openFile);
 	testsToolbarActions.push_back(m_openFileAction);
 
-	m_SeparatorAction1 = new QAction(this);
-	m_SeparatorAction1->setSeparator(true);
-	testsToolbarActions.push_back(m_SeparatorAction1);
+	QAction* separatorAction1 = new QAction(this);
+	separatorAction1->setSeparator(true);
+	testsToolbarActions.push_back(separatorAction1);
 
 	m_newFileAction = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("New File..."), this);
 	m_newFileAction->setStatusTip(tr("New File..."));
@@ -2123,9 +2153,9 @@ void TestsTabPage::createActions()
 	connect(m_moveFileAction, &QAction::triggered, this, &TestsTabPage::moveSelectedFiles);
 
 	//----------------------------------
-	m_SeparatorAction2 = new QAction(this);
-	m_SeparatorAction2->setSeparator(true);
-	testsToolbarActions.push_back(m_SeparatorAction2);
+	QAction* separatorAction2 = new QAction(this);
+	separatorAction2->setSeparator(true);
+	testsToolbarActions.push_back(separatorAction2);
 
 	m_checkOutAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
@@ -2155,18 +2185,10 @@ void TestsTabPage::createActions()
 	m_compareAction->setEnabled(false);
 	connect(m_compareAction, &QAction::triggered, m_testsTreeView, &FileTreeView::showCompare);
 
-	m_runTestsAction = new QAction(tr("Run Test(s)..."), this);
-	m_runTestsAction->setStatusTip(tr("Run Test(s)"));
-	m_runTestsAction->setEnabled(false);
-	connect(m_runTestsAction, &QAction::triggered, this, &TestsTabPage::runTestFiles);
-
 	//----------------------------------
-	m_SeparatorAction3 = new QAction(this);
-	m_SeparatorAction3->setSeparator(true);
-	testsToolbarActions.push_back(m_SeparatorAction3);
-
-	m_SeparatorAction4 = new QAction(this);
-	m_SeparatorAction4->setSeparator(true);
+	QAction* separatorAction3 = new QAction(this);
+	separatorAction3->setSeparator(true);
+	testsToolbarActions.push_back(separatorAction3);
 
 	m_refreshAction = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh Objects List"));
@@ -2176,10 +2198,39 @@ void TestsTabPage::createActions()
 	testsToolbarActions.push_back(m_refreshAction);
 	addAction(m_refreshAction);
 
+	QAction* separatorAction4 = new QAction(this);
+	separatorAction4->setSeparator(true);
+	testsToolbarActions.push_back(separatorAction4);
+
+	m_runAllTestsAction = new QAction(QIcon(":/Images/Images/TestsRunAll.svg"), tr("Run All Tests..."), this);
+	m_runAllTestsAction->setStatusTip(tr("Run All Tests"));
+	connect(m_runAllTestsAction, &QAction::triggered, this, &TestsTabPage::runAllTestFiles);
+	testsToolbarActions.push_back(m_runAllTestsAction);
+
+	m_runSelectedTestsAction = new QAction(tr("Run Selected Test(s)..."), this);
+	m_runSelectedTestsAction->setStatusTip(tr("Run Selected Test(s)"));
+	m_runSelectedTestsAction->setEnabled(false);
+	connect(m_runSelectedTestsAction, &QAction::triggered, this, &TestsTabPage::runSelectedTestFiles);
+
+	m_runCurrentTestsAction = new QAction(QIcon(":/Images/Images/TestsRunSelected.svg"), tr("Run Current Test..."), this);
+	m_runCurrentTestsAction->setStatusTip(tr("Run Current Test"));
+	m_runCurrentTestsAction->setEnabled(false);
+	connect(m_runCurrentTestsAction, &QAction::triggered, this, &TestsTabPage::runTestCurrentFile);
+	testsToolbarActions.push_back(m_runCurrentTestsAction);
+
+	QAction* separatorAction5 = new QAction(this);
+	separatorAction5->setSeparator(true);
+	testsToolbarActions.push_back(separatorAction5);
+
+	m_selectBuildAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Select Build..."), this);
+	m_selectBuildAction->setStatusTip(tr("Select Build..."));
+	connect(m_selectBuildAction, &QAction::triggered, this, &TestsTabPage::selectBuild);
+	testsToolbarActions.push_back(m_selectBuildAction);
+
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_testsTreeView->addAction(m_openFileAction);
-	m_testsTreeView->addAction(m_SeparatorAction1);
+	m_testsTreeView->addAction(separatorAction1);
 
 	m_testsTreeView->addAction(m_newFileAction);
 	m_testsTreeView->addAction(m_newFolderAction);
@@ -2187,19 +2238,28 @@ void TestsTabPage::createActions()
 	m_testsTreeView->addAction(m_renameFileAction);
 	m_testsTreeView->addAction(m_deleteFileAction);
 	m_testsTreeView->addAction(m_moveFileAction);
-	m_testsTreeView->addAction(m_SeparatorAction2);
+	m_testsTreeView->addAction(separatorAction2);
 
 	m_testsTreeView->addAction(m_checkOutAction);
 	m_testsTreeView->addAction(m_checkInAction);
 	m_testsTreeView->addAction(m_undoChangesAction);
 	m_testsTreeView->addAction(m_historyAction);
 	m_testsTreeView->addAction(m_compareAction);
-	m_testsTreeView->addAction(m_SeparatorAction3);
-	m_testsTreeView->addAction(m_runTestsAction);
-	m_testsTreeView->addAction(m_SeparatorAction4);
+	m_testsTreeView->addAction(separatorAction3);
+	m_testsTreeView->addAction(m_runSelectedTestsAction);
+	m_testsTreeView->addAction(separatorAction4);
 	m_testsTreeView->addAction(m_refreshAction);
 
 	m_testsToolbar->addActions(testsToolbarActions);
+
+	m_buildLabel = new QLabel("Build: Not loaded");
+	m_buildLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
+	m_buildLabel->setTextFormat(Qt::RichText);
+	m_buildLabel->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
+	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_buildLabel->setOpenExternalLinks(true);
+
+	m_testsToolbar->addWidget(m_buildLabel);
 
 	// Editor context menu actions
 
@@ -2259,18 +2319,6 @@ void TestsTabPage::createActions()
 	m_closeOpenDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
 	connect(m_closeOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::closeOpenFile);
 
-	// Build toolbar actions
-
-	QWidget* spacer = new QWidget();
-	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_buildToolBar->addWidget(spacer);
-
-	m_selectBuildAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("New File..."), this);
-	m_selectBuildAction->setStatusTip(tr("Select Build..."));
-	connect(m_selectBuildAction, &QAction::triggered, this, &TestsTabPage::selectBuild);
-
-	m_buildToolBar->addAction(m_selectBuildAction);
-
 	return;
 }
 
@@ -2291,7 +2339,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	m_historyAction->setEnabled(false);
 	m_compareAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
-	m_runTestsAction->setEnabled(false);
+	m_runSelectedTestsAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -2341,8 +2389,7 @@ void TestsTabPage::setTestsTreeActionsState()
 			return;
 		}
 
-		QString ext = QFileInfo(file->fileName()).suffix();
-		if (m_editableExtensions.contains(ext))
+		if (isEditableExtension(file->fileName()) == true)
 		{
 			editableExtension = true;
 			break;
@@ -2398,7 +2445,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
 	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
 	m_moveFileAction->setEnabled(canAnyBeCheckedIn && folderSelected == false);
-	m_runTestsAction->setEnabled(editableExtension == true && folderSelected == false);
+	m_runSelectedTestsAction->setEnabled(editableExtension == true && folderSelected == false);
 
 	// Delete Items action
 	//
@@ -2522,6 +2569,8 @@ void TestsTabPage::hideEditor()
 	m_editorToolBar->setVisible(false);
 	m_editorEmptyLabel->setVisible(true);
 	m_currentFileId = -1;
+
+	m_runCurrentTestsAction->setEnabled(false);
 }
 
 bool TestsTabPage::documentIsOpen(int fileId) const
@@ -2798,7 +2847,7 @@ void TestsTabPage::runTests(std::vector<int> fileIds)
 		}
 	}
 
-	std::vector<std::shared_ptr<DbFile>> dbFiles;
+	std::vector<DbFileInfo> dbFiles;
 
 	for (int fileId : fileIds)
 	{
@@ -2814,13 +2863,7 @@ void TestsTabPage::runTests(std::vector<int> fileIds)
 			return;
 		}
 
-		std::shared_ptr<DbFile> dbFile;
-		if (db()->getLatestVersion(fi, &dbFile, this) == false)
-		{
-			return;
-		}
-
-		dbFiles.push_back(dbFile);
+		dbFiles.push_back(fi);
 	}
 
 	runSimTests(m_buildPath, dbFiles);
@@ -2847,4 +2890,17 @@ void TestsTabPage::keyPressEvent(QKeyEvent* event)
 			return;
 		}
 	}
+}
+
+bool TestsTabPage::isEditableExtension(const QString& fileName)
+{
+	for (const QString& ext : m_editableExtensions)
+	{
+		if (fileName.endsWith(ext) == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
