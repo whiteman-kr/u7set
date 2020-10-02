@@ -206,7 +206,7 @@ private:
 	QVBoxLayout* m_editorLayout = nullptr;
 
 	QToolBar* m_editorToolBar = nullptr;
-	QLabel* m_editorEmptyLabel = nullptr;
+	//QLabel* m_editorEmptyLabel = nullptr;
 
 	QComboBox* m_openDocumentsCombo = nullptr;
 	QPushButton* m_cursorPosButton = nullptr;

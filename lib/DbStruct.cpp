@@ -198,6 +198,10 @@ DbProjectProperties::DbProjectProperties()
 	p->setCategory("Build");
 	p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
 
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::RunSimTestsOnBuild, true, DbProjectProperties::runSimTestsOnBuild, DbProjectProperties::setRunSimTestsOnBuild);
+	p->setCategory("Build");
+	p->setDescription("Run simulator based tests on project build");
+
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::UppercaseAppSignalId, true, DbProjectProperties::uppercaseAppSignalId, DbProjectProperties::setUppercaseAppSignalId);
 	p->setCategory("Editor");
 	p->setDescription("Uppercase AppSignalIDs, to apply option reopen project is required");
@@ -273,6 +277,16 @@ void DbProjectProperties::setSuppressWarnings(const QString& value)
 	}
 
 	return;
+}
+
+bool DbProjectProperties::runSimTestsOnBuild() const
+{
+	return m_runSimTestsOnBuild;
+}
+
+void DbProjectProperties::setRunSimTestsOnBuild(bool value)
+{
+	m_runSimTestsOnBuild = value;
 }
 
 bool DbProjectProperties::uppercaseAppSignalId() const

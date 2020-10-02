@@ -26,6 +26,7 @@ namespace Db
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
 		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";		// Generate file AppSignals.xml on build
 		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";	// Generate extra debug information on build
+		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";	// Run simulator based tests on build project
 	};
 
 	class File
@@ -230,6 +231,9 @@ public:
 	QString suppressWarningsAsString() const;
 	void setSuppressWarnings(const QString& value);
 
+	bool runSimTestsOnBuild() const;
+	void setRunSimTestsOnBuild(bool value);
+
 	bool uppercaseAppSignalId() const;
 	void setUppercaseAppSignalId(bool value);
 
@@ -243,6 +247,7 @@ private:
 	QString m_description;
 	bool m_safetyProject = true;
 	std::vector<int> m_suppressWarnings;
+	bool m_runSimTestsOnBuild = true;
 	bool m_uppercaseAppSignalId = true;
 	bool m_generateAppSignalsXml = false;
 	bool m_generateExtraDebugInfo = false;
