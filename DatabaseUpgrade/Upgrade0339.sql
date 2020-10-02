@@ -1,0 +1,1 @@
+SELECT * FROM api.set_project_property('$(SessionKey)', 'Run Simulator Tests on Build', 'true');

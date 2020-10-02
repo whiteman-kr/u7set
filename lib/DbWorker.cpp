@@ -356,6 +356,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0336.sql", "Upgrade to version 336, Updated schema templates, set default font to Arial"},
 	{":/DatabaseUpgrade/Upgrade0337.sql", "Upgrade to version 337, TuningClient preset update (StartSchemaID and ConfigurationArrivedScript added)"},
 	{":/DatabaseUpgrade/Upgrade0338.sql", "Upgrade to version 338, Reduced number of AFBs instance counters for MSO4_SR21"},
+	{":/DatabaseUpgrade/Upgrade0339.sql", "Upgrade to version 339, Added project property -Run Simulator Tests on Build-"},
 };
 
 int DbWorker::counter = 0;

@@ -473,6 +473,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	QString description;
 	bool safetyProject = true;
 	QString suppressWarningsStr;
+	bool runSimTestsOnBuild = true;
 	bool uppercaseAppSignalId = true;
 	bool generateAppSignalXml = false;
 	bool generateExtarDebugInfo = false;
@@ -480,6 +481,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	ok &= getProjectProperty(Db::ProjectProperty::Description, &description, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SafetyProject, &safetyProject, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressWarningsStr, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, &runSimTestsOnBuild, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtarDebugInfo, parentWidget);
@@ -494,6 +496,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	out->setDescription(description);
 	out->setSafetyProject(safetyProject);
 	out->setSuppressWarnings(suppressWarningsStr);
+	out->setRunSimTestsOnBuild(runSimTestsOnBuild);
 	out->setUppercaseAppSignalId(uppercaseAppSignalId);
 	out->setGenerateAppSignalsXml(generateAppSignalXml);
 	out->setGenerateExtraDebugInfo(generateExtarDebugInfo);
@@ -513,6 +516,7 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 	ok &= setProjectProperty(Db::ProjectProperty::Description, in.description(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::SafetyProject, in.safetyProject(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::SuppressWarnings, in.suppressWarningsAsString(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, in.runSimTestsOnBuild(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, in.uppercaseAppSignalId(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, in.generateExtraDebugInfo(), parentWidget);

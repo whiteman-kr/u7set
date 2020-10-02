@@ -1494,8 +1494,7 @@ void TestsTabPage::setCurrentDocument(int fileId)
 	}
 
 	// Show Editor
-
-	m_editorEmptyLabel->setVisible(false);
+	// m_editorEmptyLabel->setVisible(false);
 	m_editorToolBar->setVisible(true);
 
 	// Hide current editor
@@ -2062,11 +2061,11 @@ void TestsTabPage::createUi()
 
 	// Empty editor
 	//
-	m_editorEmptyLabel = new QLabel(tr("No open documents"));
-	m_editorEmptyLabel->setBackgroundRole(QPalette::Dark);
-	m_editorEmptyLabel->setAutoFillBackground(true);
-	m_editorEmptyLabel->setAlignment(Qt::AlignCenter);
-	m_editorLayout->addWidget(m_editorEmptyLabel);
+	//	m_editorEmptyLabel = new QLabel(tr("No open documents"));
+	//	m_editorEmptyLabel->setBackgroundRole(QPalette::Dark);
+	//	m_editorEmptyLabel->setAutoFillBackground(true);
+	//	m_editorEmptyLabel->setAlignment(Qt::AlignCenter);
+	//	m_editorLayout->addWidget(m_editorEmptyLabel);
 
 	// Left splitter
 	//
@@ -2470,7 +2469,7 @@ void TestsTabPage::setTestsTreeActionsState()
 		assert(file);
 
 		if (file->state() == VcsState::CheckedIn/* &&
-			/*file->action() != VcsItemAction::Deleted*/)
+			file->action() != VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
@@ -2573,7 +2572,7 @@ void TestsTabPage::restoreSettings()
 void TestsTabPage::hideEditor()
 {
 	m_editorToolBar->setVisible(false);
-	m_editorEmptyLabel->setVisible(true);
+	// m_editorEmptyLabel->setVisible(true);
 	m_currentFileId = -1;
 
 	m_runCurrentTestsAction->setEnabled(false);
