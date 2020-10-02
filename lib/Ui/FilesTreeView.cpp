@@ -1449,12 +1449,14 @@ void FileTreeView::checkInFilesById(std::vector<int> fileIds, std::vector<int>* 
 	return;
 }
 
-void FileTreeView::undoChangesFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds)
+// Function returns false if user has clicked No on confirmation dialog
+//
+bool FileTreeView::undoChangesFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds)
 {
 	if (deletedFileIds == nullptr)
 	{
 		Q_ASSERT(deletedFileIds);
-		return;
+		return false;
 	}
 
 	QModelIndexList indexList;
@@ -1476,10 +1478,14 @@ void FileTreeView::undoChangesFilesById(std::vector<int> fileIds, std::vector<in
 
 	if (indexList.empty() == true)
 	{
-		return;
+		return true;
 	}
 
-	undoChangesFiles(indexList);
+	if (undoChangesFiles(indexList) == false)
+	{
+		return false;
+	}
+
 
 	for (int fileId : fileIds)
 	{
@@ -1496,7 +1502,7 @@ void FileTreeView::undoChangesFilesById(std::vector<int> fileIds, std::vector<in
 		}
 	}
 
-	return;
+	return true;
 }
 
 void FileTreeView::setFileNameFilter(const QString& filterText)
@@ -1701,13 +1707,13 @@ void FileTreeView::checkInSelectedFiles()
 	return;
 }
 
-void FileTreeView::undoChangesSelectedFiles()
+// Function returns false if user has clicked No on confirmation dialog
+//
+bool FileTreeView::undoChangesSelectedFiles()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();
 
-	undoChangesFiles(selectedIndexList);
-
-	return;
+	return undoChangesFiles(selectedIndexList);
 }
 
 void FileTreeView::showHistory()
@@ -2200,11 +2206,11 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 	return;
 }
 
-void FileTreeView::undoChangesFiles(QModelIndexList indexList)
+bool FileTreeView::undoChangesFiles(QModelIndexList indexList)
 {
 	if (indexList.isEmpty() == true)
 	{
-		return;
+		return true;
 	}
 
 	std::vector<DbFileInfo> files;
@@ -2233,7 +2239,7 @@ void FileTreeView::undoChangesFiles(QModelIndexList indexList)
 	{
 		// Nothing to undo
 		//
-		return;
+		return true;
 	}
 
 	auto mb = QMessageBox::question(
@@ -2243,7 +2249,7 @@ void FileTreeView::undoChangesFiles(QModelIndexList indexList)
 
 	if (mb == QMessageBox::No)
 	{
-		return;
+		return false;
 	}
 
 	// Undo changes
@@ -2272,7 +2278,7 @@ void FileTreeView::undoChangesFiles(QModelIndexList indexList)
 
 	setFocus();
 
-	return;
+	return true;
 }
 
 bool FileTreeView::getLatestFileVersionRecursive(const DbFileInfo& f, const QString& dir)

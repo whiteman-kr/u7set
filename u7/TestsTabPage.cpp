@@ -616,7 +616,10 @@ void TestsTabPage::undoChangesSelectedFiles()
 		}
 	}
 
-	m_testsTreeView->undoChangesSelectedFiles();
+	if (m_testsTreeView->undoChangesSelectedFiles() == false)
+	{
+		return;
+	}
 
 	// Close documents that are deleted and re-read other
 
@@ -1424,7 +1427,10 @@ void TestsTabPage::undoChangesDocument(std::vector<int> fileIds)
 
 	std::vector<int> deletedFileIds;
 
-	m_testsTreeView->undoChangesFilesById(fileIds, &deletedFileIds);
+	if (m_testsTreeView->undoChangesFilesById(fileIds, &deletedFileIds) == false)
+	{
+		return;
+	}
 
 	for (int fileId : fileIds)
 	{
@@ -1469,7 +1475,7 @@ void TestsTabPage::undoChangesDocument(std::vector<int> fileIds)
 			}
 			codeEditor->setText(dbFile->data());
 
-			setDocumentReadOnly(fileId, true);
+			setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
 		}
 	}
 }
