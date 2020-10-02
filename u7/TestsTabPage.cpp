@@ -162,11 +162,30 @@ void TestsTabPage::projectOpened()
 
 	m_testsTreeView->expandRecursively(QModelIndex(), 1);
 
+	// Restore build path
+	//
+	QSettings settings;
+
+	QString project = db()->currentProject().projectName().toLower();
+	m_buildPath = settings.value("TestsTabPage/ProjectLastPath/" + project).toString();
+
+	if (m_buildPath.isEmpty() == true)
+	{
+		m_buildLabel->setText(tr("Build: Not loaded"));
+	}
+	else
+	{
+		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(m_buildPath));
+	}
+
 	return;
 }
 
 void TestsTabPage::projectClosed()
 {
+	m_buildPath.clear();
+	m_buildLabel->setText(tr("Build: Not loaded"));
+
 	closeAllDocuments();
 
 	hideEditor();
@@ -359,6 +378,8 @@ void TestsTabPage::openFile()
 	customMenuActions.push_back(m_checkInCurrentDocumentAction);
 	customMenuActions.push_back(m_undoChangesCurrentDocumentAction);
 	customMenuActions.push_back(m_SeparatorAction1);
+	customMenuActions.push_back(m_runTestCurrentDocumentAction);
+	customMenuActions.push_back(m_SeparatorAction2);
 	customMenuActions.push_back(m_saveCurrentDocumentAction);
 	customMenuActions.push_back(m_closeCurrentDocumentAction);
 
@@ -702,6 +723,50 @@ void TestsTabPage::refreshFileTree()
 	return;
 }
 
+void TestsTabPage::runTestFiles()
+{
+	std::vector<int> fileIds;
+
+	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			continue;
+		}
+
+		FileTreeModelItem* f = m_testsTreeModel->fileItem(mi);
+		assert(f);
+
+		// Check file extension
+		//
+		bool extFound = false;
+		QString fileName = f->fileName();
+
+		for (const QString& ext : m_editableExtensions)
+		{
+			if (fileName.endsWith(ext) == true)
+			{
+				extFound = true;
+				break;
+			}
+		}
+
+		if (extFound == true)
+		{
+			fileIds.push_back(f->fileId());
+		}
+	}
+
+	if (fileIds.empty() == true)
+	{
+		return;
+	}
+
+	runTests(fileIds);
+	return;
+}
+
 void TestsTabPage::filterChanged()
 {
 	QString filterText = m_filterLineEdit->text().trimmed();
@@ -809,6 +874,14 @@ void TestsTabPage::saveCurrentFile()
 void TestsTabPage::closeCurrentFile()
 {
 	closeDocument(m_currentFileId, false/*force*/);
+	return;
+}
+
+void TestsTabPage::runTestCurrentFile()
+{
+	std::vector<int> fileIds;
+	fileIds.push_back(m_currentFileId);
+	runTests(fileIds);
 	return;
 }
 
@@ -921,6 +994,8 @@ void TestsTabPage::openFilesMenuRequested(const QPoint& pos)
 	menu.addAction(m_checkInOpenDocumentAction);
 	menu.addAction(m_checkOutOpenDocumentAction);
 	menu.addAction(m_undoChangesOpenDocumentAction);
+	menu.addSeparator();
+	menu.addAction(m_runTestOpenDocumentAction);
 	menu.addSeparator();
 	menu.addAction(m_saveOpenDocumentAction);
 	menu.addAction(m_closeOpenDocumentAction);
@@ -1089,6 +1164,35 @@ void TestsTabPage::closeOpenFile()
 
 	return;
 }
+
+void TestsTabPage::runTestOpenFile()
+{
+	std::vector<int> fileIds;
+
+	QList<QTreeWidgetItem*> selectedItems = m_openFilesTreeWidget->selectedItems();
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		bool ok = false;
+		int fileId = item->data(0, Qt::UserRole).toInt(&ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		fileIds.push_back(fileId);
+	}
+
+	if (fileIds.empty() == true)
+	{
+		return;
+	}
+
+	runTests(fileIds);
+	return;
+}
+
 
 void TestsTabPage::onSaveKeyPressed()
 {
@@ -1658,38 +1762,36 @@ void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 
 void TestsTabPage::selectBuild()
 {
-	QSettings settings;
-
 	QString project = db()->currentProject().projectName().toLower();
-	QString buildPath = settings.value("TestsTabPage/ProjectLastPath/" + project).toString();
 
-	SimSelectBuildDialog d(project, buildPath, this);
+	SimSelectBuildDialog d(project, m_buildPath, this);
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
 	{
-		buildPath = d.resultBuildPath();
+		m_buildPath = d.resultBuildPath();
+		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(m_buildPath));
 
-
-		int load_build_is_here = 1;
-
-		/*if (m_simulator->isLoaded() == false)
-		{
-			m_buildLabel->setText(tr("Build: Not loaded"));
-		}
-		else
-		{
-			QString buildPath = m_simulator->buildPath();*/
-			m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
-		//}
-
-		/*bool ok = loadBuild(lastPath);
-
-		if (ok == true)
-		{
-			settings.setValue("TestsTabPage/ProjectLastPath/" + project, lastPath);
-		}*/
+		// Save build path
+		//
+		QSettings settings;
+		settings.setValue("TestsTabPage/ProjectLastPath/" + project, m_buildPath);
 	}
+}
+
+void TestsTabPage::runSimTests(const QString& buildPath, const std::vector<std::shared_ptr<DbFile> >& files)
+{
+	int run_sim_tests_here = 1;
+
+	QStringList list;
+
+	for (std::shared_ptr<DbFile> file : files)
+	{
+		list.push_back(tr("RunSimTests %1 %2").arg(buildPath).arg(file->fileName()));
+	}
+
+	QString allText = list.join(QChar::LineFeed);
+	QMessageBox::information(parentWidget(), qAppName(), allText);
 }
 
 void TestsTabPage::createUi()
@@ -2053,10 +2155,18 @@ void TestsTabPage::createActions()
 	m_compareAction->setEnabled(false);
 	connect(m_compareAction, &QAction::triggered, m_testsTreeView, &FileTreeView::showCompare);
 
+	m_runTestsAction = new QAction(tr("Run Test(s)..."), this);
+	m_runTestsAction->setStatusTip(tr("Run Test(s)"));
+	m_runTestsAction->setEnabled(false);
+	connect(m_runTestsAction, &QAction::triggered, this, &TestsTabPage::runTestFiles);
+
 	//----------------------------------
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
 	testsToolbarActions.push_back(m_SeparatorAction3);
+
+	m_SeparatorAction4 = new QAction(this);
+	m_SeparatorAction4->setSeparator(true);
 
 	m_refreshAction = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh Objects List"));
@@ -2085,7 +2195,8 @@ void TestsTabPage::createActions()
 	m_testsTreeView->addAction(m_historyAction);
 	m_testsTreeView->addAction(m_compareAction);
 	m_testsTreeView->addAction(m_SeparatorAction3);
-
+	m_testsTreeView->addAction(m_runTestsAction);
+	m_testsTreeView->addAction(m_SeparatorAction4);
 	m_testsTreeView->addAction(m_refreshAction);
 
 	m_testsToolbar->addActions(testsToolbarActions);
@@ -2106,6 +2217,10 @@ void TestsTabPage::createActions()
 	m_undoChangesCurrentDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesCurrentDocumentAction->setEnabled(false);
 	connect(m_undoChangesCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesCurrentFile);
+
+	m_runTestCurrentDocumentAction = new QAction(tr("Run Test..."), this);
+	m_runTestCurrentDocumentAction->setStatusTip(tr("Run Test"));
+	connect(m_runTestCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::runTestCurrentFile);
 
 	m_saveCurrentDocumentAction = new QAction(tr("Save"), this);
 	m_saveCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
@@ -2132,9 +2247,12 @@ void TestsTabPage::createActions()
 	m_undoChangesOpenDocumentAction->setEnabled(false);
 	connect(m_undoChangesOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesOpenFile);
 
+	m_runTestOpenDocumentAction = new QAction(tr("Run Test..."), this);
+	m_runTestOpenDocumentAction->setStatusTip(tr("Run Test"));
+	connect(m_runTestOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::runTestOpenFile);
+
 	m_saveOpenDocumentAction = new QAction(tr("Save"), this);
 	m_saveOpenDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
-	m_saveOpenDocumentAction->setEnabled(false);
 	connect(m_saveOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::saveOpenFile);
 
 	m_closeOpenDocumentAction = new QAction(tr("Close"), this);
@@ -2149,7 +2267,6 @@ void TestsTabPage::createActions()
 
 	m_selectBuildAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("New File..."), this);
 	m_selectBuildAction->setStatusTip(tr("Select Build..."));
-	//m_selectBuildAction->setEnabled(false);
 	connect(m_selectBuildAction, &QAction::triggered, this, &TestsTabPage::selectBuild);
 
 	m_buildToolBar->addAction(m_selectBuildAction);
@@ -2174,6 +2291,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	m_historyAction->setEnabled(false);
 	m_compareAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
+	m_runTestsAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -2280,6 +2398,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
 	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
 	m_moveFileAction->setEnabled(canAnyBeCheckedIn && folderSelected == false);
+	m_runTestsAction->setEnabled(editableExtension == true && folderSelected == false);
 
 	// Delete Items action
 	//
@@ -2660,6 +2779,52 @@ void TestsTabPage::updateOpenDocumentInfo(int fileId)
 	{
 		Q_ASSERT(comboRenameIndex != -1);
 	}
+}
+
+void TestsTabPage::runTests(std::vector<int> fileIds)
+{
+	if (fileIds.empty() ==  true)
+	{
+		return;
+	}
+
+	if (m_buildPath.isEmpty() == true)
+	{
+		selectBuild();
+
+		if (m_buildPath.isEmpty() == true)
+		{
+			return;
+		}
+	}
+
+	std::vector<std::shared_ptr<DbFile>> dbFiles;
+
+	for (int fileId : fileIds)
+	{
+		if (documentIsOpen(fileId) == true)
+		{
+			saveDocument(fileId);
+		}
+
+		DbFileInfo fi;
+		if (db()->getFileInfo(fileId, &fi, this) == false)
+		{
+			QMessageBox::critical(this, "Error", "Get file information error!");
+			return;
+		}
+
+		std::shared_ptr<DbFile> dbFile;
+		if (db()->getLatestVersion(fi, &dbFile, this) == false)
+		{
+			return;
+		}
+
+		dbFiles.push_back(dbFile);
+	}
+
+	runSimTests(m_buildPath, dbFiles);
+	return;
 }
 
 void TestsTabPage::keyPressEvent(QKeyEvent* event)

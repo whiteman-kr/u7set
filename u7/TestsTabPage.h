@@ -89,6 +89,7 @@ private slots:
 	void deleteSelectedFiles();
 	void moveSelectedFiles();
 	void refreshFileTree();
+	void runTestFiles();
 
 	// Code Editor slots
 
@@ -102,6 +103,7 @@ private slots:
 	void undoChangesCurrentFile();
 	void saveCurrentFile();
 	void closeCurrentFile();
+	void runTestCurrentFile();
 
 	// Open Files slots
 
@@ -112,6 +114,7 @@ private slots:
 	void undoChangesOpenFile();
 	void saveOpenFile();
 	void closeOpenFile();
+	void runTestOpenFile();
 
 	// Hotkeys
 
@@ -132,6 +135,8 @@ private slots:
 	// Build operations slots
 
 	void selectBuild();
+
+	void runSimTests(const QString& buildPath, const std::vector<std::shared_ptr<DbFile>>& files);
 
 private:
 	void createUi();
@@ -161,7 +166,7 @@ private:
 	void closeDocument(int fileId, bool force);
 	void closeAllDocuments();
 	void updateOpenDocumentInfo(int fileId);
-
+	void runTests(std::vector<int> fileIds);
 
 	// Override functions
 private:
@@ -175,6 +180,8 @@ private:
 	QFont m_editorFont;
 
 	QStringList m_editableExtensions;
+
+	QString m_buildPath;
 
 	// Widgets
 	//
@@ -224,6 +231,8 @@ private:
 	QAction* m_historyAction = nullptr;
 	QAction* m_compareAction = nullptr;
 	QAction* m_SeparatorAction3 = nullptr;
+	QAction* m_runTestsAction = nullptr;
+	QAction* m_SeparatorAction4 = nullptr;
 	QAction* m_refreshAction = nullptr;
 
 	// Editor context menu actions
@@ -233,6 +242,7 @@ private:
 	QAction* m_undoChangesCurrentDocumentAction = nullptr;
 	QAction* m_saveCurrentDocumentAction = nullptr;
 	QAction* m_closeCurrentDocumentAction = nullptr;
+	QAction* m_runTestCurrentDocumentAction = nullptr;
 
 	// Open documents list actions
 
@@ -241,6 +251,7 @@ private:
 	QAction* m_undoChangesOpenDocumentAction = nullptr;
 	QAction* m_saveOpenDocumentAction = nullptr;
 	QAction* m_closeOpenDocumentAction = nullptr;
+	QAction* m_runTestOpenDocumentAction = nullptr;
 
 	// Build toolbar actions
 
