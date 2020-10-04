@@ -63,6 +63,7 @@ void IoSignalParam::clear()
 	m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	m_pCalibratorManager = nullptr;
+
 	m_percent = 0;
 	m_comparatorIndex = -1;
 	m_negativeRange = false;
@@ -695,6 +696,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 	m_signalConnectionType = from.m_signalConnectionType;
 
 	m_pCalibratorManager = from.m_pCalibratorManager;
+
 	m_percent = from.m_percent;
 	m_comparatorIndex = from.m_comparatorIndex;
 	m_negativeRange  = from.m_negativeRange;
@@ -818,8 +820,8 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 	switch(measureKind)
 	{
-		case MEASURE_KIND_ONE_RACK:		m_strID = param.customAppSignalID();																			break;
-		case MEASURE_KIND_ONE_MODULE:	m_strID = param.location().moduleID();																			break;
+		case MEASURE_KIND_ONE_RACK:		m_strID = param.appSignalID();																								break;
+		case MEASURE_KIND_ONE_MODULE:	m_strID = param.location().moduleID();																						break;
 		case MEASURE_KIND_MULTI_RACK:	m_strID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());	break;
 		default:						assert(false);
 	}
@@ -1635,10 +1637,9 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 
 	m_rackList.clear();
 
-	int signalCount = m_signalList.count();
-
 	// select racks that has signals, other racks ignore
 	//
+	int signalCount = m_signalList.count();
 	for(int i = 0; i < signalCount; i ++)
 	{
 		Metrology::SignalParam& param = m_signalList[i].param();
@@ -1647,12 +1648,12 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 			continue;
 		}
 
-		if (param.isAnalog() == false)
+		if (param.location().shownOnSchemas() == false)
 		{
 			continue;
 		}
 
-		if (param.location().chassis() == -1 || param.location().module() == -1)
+		if (param.isAnalog() == false)
 		{
 			continue;
 		}
@@ -1672,7 +1673,17 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 					continue;
 				}
 
-				if (param.location().place() == -1)
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+				{
+					continue;
+				}
+
+				if (param.electricRangeIsValid() == false)
+				{
+					continue;
+				}
+
+				if (param.electricSensorType() == E::SensorType::NoSensor)
 				{
 					continue;
 				}
@@ -1682,6 +1693,11 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 				if (param.isInternal() == false)
+				{
+					continue;
+				}
+
+				if (param.location().chassis() == -1 || param.location().module() == -1)
 				{
 					continue;
 				}
@@ -1707,10 +1723,9 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 		}
 	}
 
-	//
+	// sort by index
 	//
 	int rackCount = m_rackList.count();
-
 	for(int i = 0; i < rackCount - 1; i++)
 	{
 		for(int j = i+1; j < rackCount; j++)
@@ -1895,17 +1910,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 			continue;
 		}
 
-		if (param.isAnalog() == false)
-		{
-			continue;
-		}
-
 		if (param.location().shownOnSchemas() == false)
 		{
 			continue;
 		}
 
-		if (param.location().chassis() == -1 || param.location().module() == -1)
+		if (param.isAnalog() == false)
 		{
 			continue;
 		}
@@ -1921,12 +1931,17 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					continue;
 				}
 
-				if (param.location().place() == -1)
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
 				{
 					continue;
 				}
 
-				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+				if (param.electricRangeIsValid() == false)
+				{
+					continue;
+				}
+
+				if (param.electricSensorType() == E::SensorType::NoSensor)
 				{
 					continue;
 				}
@@ -1945,12 +1960,17 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					continue;
 				}
 
-				if (param.location().place() == -1)
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
 				{
 					continue;
 				}
 
-				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+				if (param.electricRangeIsValid() == false)
+				{
+					continue;
+				}
+
+				if (param.electricSensorType() == E::SensorType::NoSensor)
 				{
 					continue;
 				}
@@ -1965,6 +1985,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 				if (param.isInternal() == false)
+				{
+					continue;
+				}
+
+				if (param.location().chassis() == -1 || param.location().module() == -1)
 				{
 					continue;
 				}
@@ -2375,7 +2400,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					break;
 			}
 
-			if (metrologyComparatorList.count() >= theOptions.comparator().maxComparatorCount())
+			if (metrologyComparatorList.count() >= theOptions.module().maxComparatorCount())
 			{
 				break;
 			}

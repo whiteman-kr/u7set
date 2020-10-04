@@ -30,8 +30,8 @@ private:
 	QVariant			headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant			data(const QModelIndex &index, int role) const;
 
-	QString				textLinearity(int row, int column) const;
-	QString				textComparator(int row, int column) const;
+	QString				textLinearity(int row, int column, Measurement* pMeasurement) const;
+	QString				textComparator(int row, int column, Measurement* pMeasurement) const;
 
 public:
 
@@ -46,11 +46,12 @@ public:
 
 	bool				columnIsVisible(int column);
 
-	bool				append(Measurement* pMeasurement);
-	bool				remove(const QVector<int>& removeIndexList);
+	QColor				backgroundColor(int row, int column, Measurement* pMeasurement) const;
+	QString				text(int row, int column, Measurement* pMeasurement) const;
 
-	QColor				backgroundColor(int row, int column) const;
-	QString				text(int row, int column) const;
+	bool				append(Measurement* pMeasurement);
+	Measurement*		at(int index);
+	bool				remove(const QVector<int>& removeIndexList);
 };
 
 // ==============================================================================================

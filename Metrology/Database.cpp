@@ -184,6 +184,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("CompareAppSignalID",			QVariant::String, 64);
 			append("OutputAppSignalID",				QVariant::String, 64);
 
+			append("SetPointType",					QVariant::Int);
 			append("CmpType",						QVariant::Int);
 
 			append("ElectricNominal",				QVariant::Double);
@@ -214,14 +215,6 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("MeasureTime",					QVariant::String, 64);
 			break;
-
-		case SQL_TABLE_COMPARATOR_HYSTERESIS:
-
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
-
-			break;
-
 
 		case SQL_TABLE_COMPLEX_COMPARATOR:
 
@@ -943,6 +936,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCompareAppSignalID(query.value(field++).toString());
 					measure->setOutputAppSignalID(query.value(field++).toString());
 
+					measure->setSpType(query.value(field++).toInt());
 					measure->setCmpTypeInt(query.value(field++).toInt());
 
 					measure->setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
@@ -974,12 +968,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
 				}
 				break;
-
-			case SQL_TABLE_COMPARATOR_HYSTERESIS:
-				{
-				}
-				break;
-
 
 			case SQL_TABLE_COMPLEX_COMPARATOR:
 				{
@@ -1362,6 +1350,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->compareAppSignalID());
 					query.bindValue(field++, measure->outputAppSignalID());
 
+					query.bindValue(field++, measure->spType());
 					query.bindValue(field++, measure->cmpTypeInt());
 
 					query.bindValue(field++, measure->nominal(MEASURE_LIMIT_TYPE_ELECTRIC));
@@ -1395,12 +1384,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->measureTimeStr());
 				}
 				break;
-
-			case SQL_TABLE_COMPARATOR_HYSTERESIS:
-				{
-				}
-				break;
-
 
 			case SQL_TABLE_COMPLEX_COMPARATOR:
 				{

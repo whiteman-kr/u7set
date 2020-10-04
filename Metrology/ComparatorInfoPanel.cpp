@@ -32,7 +32,7 @@ ComparatorInfoTable::~ComparatorInfoTable()
 
 int ComparatorInfoTable::columnCount(const QModelIndex&) const
 {
-	return theOptions.comparator().maxComparatorCount();
+	return theOptions.module().maxComparatorCount();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < theOptions.comparator().maxComparatorCount())
+		if (section >= 0 && section < theOptions.module().maxComparatorCount())
 		{
 			result = QString("Comparator %1").arg(section + 1);
 		}
@@ -85,7 +85,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column >= theOptions.comparator().maxComparatorCount())
+	if (column < 0 || column >= theOptions.module().maxComparatorCount())
 	{
 		return QVariant();
 	}
@@ -166,7 +166,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, theOptions.comparator().maxComparatorCount() - 1), QVector<int>() << Qt::DisplayRole);
+	emit dataChanged(index(0, 0), index(m_signalCount - 1, theOptions.module().maxComparatorCount() - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < theOptions.comparator().maxComparatorCount(); column++)
+	for(int column = 0; column < theOptions.module().maxComparatorCount(); column++)
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
@@ -326,7 +326,7 @@ void ComparatorInfoPanel::createContextMenu()
 
 void ComparatorInfoPanel::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= theOptions.comparator().maxComparatorCount())
+	if (column < 0 || column >= theOptions.module().maxComparatorCount())
 	{
 		return;
 	}
@@ -451,7 +451,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	m_comparatorTable.set(ioParamList);
 
-	for(int c = 0; c < theOptions.comparator().maxComparatorCount(); c ++)
+	for(int c = 0; c < theOptions.module().maxComparatorCount(); c ++)
 	{
 		if (c < maxComparatorCount)
 		{

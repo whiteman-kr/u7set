@@ -336,6 +336,8 @@ private:
 
 	int					m_measureType = MEASURE_TYPE_UNKNOWN;						// current, active ViewID
 
+	bool				m_updateColumnView[MEASURE_TYPE_COUNT];						// determined the need to update the view after changing settings
+
 	QFont				m_font;
 	QFont				m_fontBold;
 
@@ -347,6 +349,9 @@ public:
 
 	int					measureType() const { return m_measureType; }
 	void				setMeasureType(int measureType) { m_measureType = measureType; }
+
+	bool				updateColumnView(int measureType) const;
+	void				setUpdateColumnView(int measureType, bool state);
 
 	QFont&				font() { return m_font; }
 	void				setFont(QFont font) { m_font = font; }
@@ -688,7 +693,6 @@ const char* const		LinearityParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
-						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
 };
 
 const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
@@ -703,8 +707,7 @@ const int				LO_PARAM_ERROR_LIMIT			= 0,
 						LO_PARAM_LOW_RANGE				= 7,
 						LO_PARAM_HIGH_RANGE				= 8,
 						LO_PARAM_VALUE_POINTS			= 9,
-						LO_PARAM_LIST_TYPE				= 10,
-						LO_PARAM_SHOW_ENGINEERING_VALUE	= 11;
+						LO_PARAM_LIST_TYPE				= 10;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -765,7 +768,6 @@ private:
 	double				m_highLimitRange = 100;										// high limit of the range for automatic division
 
 	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
-	bool				m_showEngineeringValueColumn = true;						// show columns of engineering values
 
 public:
 
@@ -798,9 +800,6 @@ public:
 	int					viewType() const { return m_viewType; }
 	void				setViewType(int type) { m_viewType = type; }
 
-	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
-
 public:
 
 	void				recalcPoints(int count = -1);
@@ -823,10 +822,8 @@ const char* const		ComparatorParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Error type"),
 						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
-						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis"),
 						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
-						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
+						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis of comparators"),
 };
 
 const int				CO_PARAM_COUNT					= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
@@ -835,10 +832,8 @@ const int				CO_PARAM_ERROR_LIMIT			= 0,
 						CO_PARAM_START_VALUE			= 1,
 						CO_PARAM_ERROR_TYPE				= 2,
 						CO_PARAM_SHOW_ERROR_FROM_LIMIT	= 3,
-						CO_PARAM_ENABLE_HYSTERESIS		= 4,
-						CO_PARAM_COMPARATOR_INDEX		= 5,
-						CO_PARAM_SHOW_ENGINEERING_VALUE	= 6,
-						CO_PARAM_MAX_CMP_COUNT			= 7;
+						CO_PARAM_COMPARATOR_INDEX		= 4,
+						CO_PARAM_ENABLE_HYSTERESIS		= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -860,12 +855,8 @@ public:
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;				// type of error absolute or reduced
 	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_ELECTRIC;		// type of displaing error denend on limit
 
-	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
 	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
-
-	bool				m_showEngineeringValueColumn = true;					// show columns of engineering values
-
-	int					m_maxComparatorCount = Metrology::ComparatorCount;		// Maximum number of comparators for signal
+	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
 
 public:
 
@@ -881,17 +872,11 @@ public:
 	int					showErrorFromLimit() const { return m_showErrorFromLimit; }
 	void				setShowErrorFromLimit(int type) { m_showErrorFromLimit = type; }
 
-	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
-	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
-
 	int					startComparatorIndex() const { return m_startComparatorIndex; }
 	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
 
-	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
-
-	int					maxComparatorCount() const { return m_maxComparatorCount; }
-	void				setMaxComparatorCount(int count) { m_maxComparatorCount = count; }
+	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
+	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
 
 	void				load();
 	void				save();
@@ -907,20 +892,22 @@ public:
 
 const char* const		ModuleParamName[] =
 {
+						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
 						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
-						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for mofule"),
+						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
 };
 
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
 
-const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
-						MO_PARAM_WARN_IF_MEASURED		= 1,
-						MO_PARAM_SHOW_NO_VALID			= 2,
-						MO_PARAM_SUFFIX_SN				= 3,
-						MO_PARAM_MAX_IMPUT_COUNT		= 4;
+const int				MO_PARAM_SUFFIX_SN				= 0,
+						MO_PARAM_MEASURE_ENTIRE_MODULE	= 1,
+						MO_PARAM_WARN_IF_MEASURED		= 2,
+						MO_PARAM_SHOW_NO_VALID			= 3,
+						MO_PARAM_MAX_IMPUT_COUNT		= 4,
+						MO_PARAM_MAX_CMP_COUNT			= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -936,13 +923,19 @@ public:
 
 private:
 
+	QString				m_suffixSN;													// suffix to identify the signal of module serial number
+
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
 	bool				m_showNoValid = false;										// show measuring value if signal is not valid
-	QString				m_suffixSN;													// suffix to identify the signal of module serial number
+
 	int					m_maxInputCount = Metrology::InputCount;					// Maximum number of inputs for mofule
+	int					m_maxComparatorCount = Metrology::ComparatorCount;			// Maximum number of comparators for signal
 
 public:
+
+	QString				suffixSN() const { return m_suffixSN; }
+	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
 
 	bool				measureEntireModule() const { return m_measureEntireModule; }
 	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
@@ -953,11 +946,11 @@ public:
 	bool				showNoValid() const { return m_showNoValid; }
 	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
 
-	QString				suffixSN() const { return m_suffixSN; }
-	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
-
 	int					maxInputCount() const { return m_maxInputCount; }
 	void				setMaxInputCount(int count) { m_maxInputCount = count; }
+
+	int					maxComparatorCount() const { return m_maxComparatorCount; }
+	void				setMaxComparatorCount(int count) { m_maxComparatorCount = count; }
 
 public:
 
@@ -1044,7 +1037,7 @@ public:
 
 public:
 
-	bool					m_updateColumnView[MEASURE_TYPE_COUNT];			 // determined the need to update the view after changing settings
+
 
 private:
 

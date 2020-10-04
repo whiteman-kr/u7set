@@ -118,19 +118,25 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	int indexRow = index.row();
-	if (indexRow < 0 || indexRow >= m_measureBase.count())
+	int rowIndex = index.row();
+	if (rowIndex < 0 || rowIndex >= m_measureBase.count())
 	{
 		return QVariant();
 	}
 
-	int indexColumn = index.column();
-	if (indexColumn < 0 || indexColumn > m_header.count())
+	Measurement* pMeasurement = m_measureBase.measurement(rowIndex);
+	if (pMeasurement == nullptr)
 	{
 		return QVariant();
 	}
 
-	MeasureViewColumn* pColumn = m_header.column(indexColumn);
+	int columnIndex = index.column();
+	if (columnIndex < 0 || columnIndex > m_header.count())
+	{
+		return QVariant();
+	}
+
+	MeasureViewColumn* pColumn = m_header.column(columnIndex);
 	if (pColumn == nullptr)
 	{
 		return QVariant();
@@ -147,7 +153,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		{
 			case MEASURE_TYPE_LINEARITY:
 
-				if (indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_ERROR_RESULT)
+				if (columnIndex == MVC_CMN_L_APP_ID || columnIndex == MVC_CMN_L_ERROR_RESULT)
 				{
 					return theOptions.measureView().fontBold();
 				}
@@ -156,7 +162,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 			case MEASURE_TYPE_COMPARATOR:
 
-				if (indexColumn == MVC_CMN_C_APP_ID || indexColumn == MVC_CMN_C_ERROR_RESULT)
+				if (columnIndex == MVC_CMN_C_APP_ID || columnIndex == MVC_CMN_C_ERROR_RESULT)
 				{
 					return theOptions.measureView().fontBold();
 				}
@@ -174,49 +180,37 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundRole)
 	{
-		switch(m_measureType)
-		{
-			case MEASURE_TYPE_LINEARITY:
-
-				if (indexColumn == MVC_CMN_L_ERROR_RESULT)
-				{
-					return backgroundColor(indexRow, indexColumn);
-				}
-
-				break;
-
-			case MEASURE_TYPE_COMPARATOR:
-
-				if (indexColumn == MVC_CMN_C_ERROR_RESULT)
-				{
-					return backgroundColor(indexRow, indexColumn);
-				}
-
-				break;
-
-			default:
-				return QVariant();
-		}
-
+		return backgroundColor(rowIndex, columnIndex, pMeasurement);
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(indexRow, indexColumn);
+		return text(rowIndex, columnIndex, pMeasurement);
 	}
 
 	return QVariant();
 }
+
 // -------------------------------------------------------------------------------------------------------------------
 
-QColor MeasureTable::backgroundColor(int row, int column) const
+QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurement) const
 {
-	QColor result = theOptions.measureView().colorNotError();
-
 	if (row < 0 || row >= m_measureBase.count())
 	{
-		return result;
+		return Qt::white;
 	}
+
+	if (column < 0 || column > m_header.count())
+	{
+		return Qt::white;
+	}
+
+	if (pMeasurement == nullptr)
+	{
+		return Qt::white;
+	}
+
+	QColor result = Qt::white;
 
 	switch(m_measureType)
 	{
@@ -227,7 +221,7 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 					break;
 				}
 
-				LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
+				LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (pMeasurement);
 				if (pLinearityMeasurement == nullptr)
 				{
 					break;
@@ -245,6 +239,7 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 					break;
 				}
 
+				result = theOptions.measureView().colorNotError();
 			}
 			break;
 
@@ -255,7 +250,7 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 					break;
 				}
 
-				ComparatorMeasurement* pComparatorMeasurement = static_cast<ComparatorMeasurement*> (m_measureBase.measurement(row));
+				ComparatorMeasurement* pComparatorMeasurement = static_cast<ComparatorMeasurement*> (pMeasurement);
 				if (pComparatorMeasurement == nullptr)
 				{
 					break;
@@ -273,6 +268,7 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 					break;
 				}
 
+				result = theOptions.measureView().colorNotError();
 			}
 			break;
 
@@ -285,13 +281,8 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureTable::text(int row, int column) const
+QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return QString();
-	}
-
 	if (row < 0 || row >= m_measureBase.count())
 	{
 		return QString();
@@ -302,12 +293,22 @@ QString MeasureTable::text(int row, int column) const
 		return QString();
 	}
 
+	if (pMeasurement == nullptr)
+	{
+		return QString();
+	}
+
+	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	{
+		return QString();
+	}
+
 	QString result;
 
 	switch(m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:			result = textLinearity(row, column);	break;
-		case MEASURE_TYPE_COMPARATOR:			result = textComparator(row, column);	break;
+		case MEASURE_TYPE_LINEARITY:			result = textLinearity(row, column, pMeasurement);	break;
+		case MEASURE_TYPE_COMPARATOR:			result = textComparator(row, column, pMeasurement);	break;
 		default:								result.clear();
 	}
 
@@ -317,7 +318,7 @@ QString MeasureTable::text(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureTable::textLinearity(int row, int column) const
+QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasurement) const
 {
 	if (row < 0 || row >= m_measureBase.count())
 	{
@@ -325,6 +326,11 @@ QString MeasureTable::textLinearity(int row, int column) const
 	}
 
 	if (column < 0 || column > m_header.count())
+	{
+		return QString();
+	}
+
+	if (pMeasurement == nullptr)
 	{
 		return QString();
 	}
@@ -335,7 +341,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 		return QString();
 	}
 
-	LinearityMeasurement* m = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
+	LinearityMeasurement* m = static_cast<LinearityMeasurement*> (pMeasurement);
 	if (m == nullptr)
 	{
 		return QString();
@@ -431,7 +437,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureTable::textComparator(int row, int column) const
+QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurement) const
 {
 	if (row < 0 || row >= m_measureBase.count())
 	{
@@ -443,13 +449,18 @@ QString MeasureTable::textComparator(int row, int column) const
 		return QString();
 	}
 
+	if (pMeasurement == nullptr)
+	{
+		return QString();
+	}
+
 	MeasureViewColumn* pColumn = m_header.column(column);
 	if (pColumn == nullptr)
 	{
 		return QString();
 	}
 
-	ComparatorMeasurement* m = static_cast<ComparatorMeasurement*> (m_measureBase.measurement(row));
+	ComparatorMeasurement* m = static_cast<ComparatorMeasurement*> (pMeasurement);
 	if (m == nullptr)
 	{
 		return QString();
@@ -472,6 +483,7 @@ QString MeasureTable::textComparator(int row, int column) const
 		case MVC_CMN_C_MODULE:					result = m->location().moduleStr(); break;
 		case MVC_CMN_C_PLACE:					result = m->location().placeStr(); break;
 
+		case MVC_CMN_C_SP_TYPE:					result = m->spTypeStr(); break;
 		case MVC_CMN_C_CMP_TYPE:				result = m->cmpTypeStr(); break;
 
 		case MVC_CMN_C_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
@@ -551,6 +563,18 @@ bool MeasureTable::append(Measurement* pMeasurement)
 	endInsertRows();
 
 	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Measurement* MeasureTable::at(int index)
+{
+	if (index < 0 || index >= m_measureBase.count())
+	{
+		return nullptr;
+	}
+
+	return m_measureBase.measurement(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

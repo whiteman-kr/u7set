@@ -30,8 +30,8 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Chassis"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Module"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Place"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "ADC range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric range"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric sensor"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engineering range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal type"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Connection"),
@@ -53,8 +53,8 @@ const int					STATISTIC_COLUMN_APP_ID				= 0,
 							STATISTIC_COLUMN_CHASSIS			= 8,
 							STATISTIC_COLUMN_MODULE				= 9,
 							STATISTIC_COLUMN_PLACE				= 10,
-							STATISTIC_COLUMN_ADC				= 11,
-							STATISTIC_COLUMN_EL_RANGE			= 12,
+							STATISTIC_COLUMN_EL_RANGE			= 11,
+							STATISTIC_COLUMN_EL_SENSOR			= 12,
 							STATISTIC_COLUMN_EN_RANGE			= 13,
 							STATISTIC_COLUMN_SIGNAL_TYPE		= 14,
 							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 15,
@@ -75,9 +75,9 @@ const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 							 60,	// STATISTIC_COLUMN_CHASSIS
 							 60,	// STATISTIC_COLUMN_MODULE
 							 60,	// STATISTIC_COLUMN_PLACE
-							100,	// STATISTIC_COLUMN_ADC
-							150,	// STATISTIC_COLUMN_IN_EL_RANGE
-							150,	// STATISTIC_COLUMN_IN_EN_RANGE
+							150,	// STATISTIC_COLUMN_EL_RANGE
+							100,	// STATISTIC_COLUMN_EL_SENSOR
+							150,	// STATISTIC_COLUMN_EN_RANGE
 							100,	// STATISTIC_COLUMN_SIGNAL_TYPE
 							100,	// STATISTIC_COLUMN_SIGNAL_CONNECTION
 							100,	// STATISTIC_COLUMN_MEASURE_COUNT

@@ -496,6 +496,30 @@ MeasureViewOption::~MeasureViewOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool MeasureViewOption::updateColumnView(int measureType) const
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return false;
+	}
+
+	return m_updateColumnView[measureType];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_updateColumnView[measureType] = state;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MeasureViewOption::init()
 {
 	MeasureViewHeader header;
@@ -579,6 +603,8 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 {
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
 	{
+		m_updateColumnView[type] = from.m_updateColumnView[type];
+
 		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 		{
 			m_column[type][column] = from.m_column[type][column];
@@ -1038,7 +1064,6 @@ void LinearityOption::load()
 	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
-	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1059,7 +1084,6 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngineeringValueColumn);
 
 	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
@@ -1082,7 +1106,6 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_highLimitRange = from.m_highLimitRange;
 
 	m_viewType = from.m_viewType;
-	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
 
 	return *this;
 }
@@ -1122,11 +1145,8 @@ void ComparatorOption::load()
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
 
-	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
-	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
-
-	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
+	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1140,11 +1160,8 @@ void ComparatorOption::save()
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
 	s.setValue(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), m_showErrorFromLimit);
 
-	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
-	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
-
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), m_showEngineeringValueColumn);
+	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1156,11 +1173,8 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 	m_errorType = from.m_errorType;
 	m_showErrorFromLimit = from.m_showErrorFromLimit;
 
-	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
-	m_maxComparatorCount = from.m_maxComparatorCount;
-
-	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
+	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 
 	return *this;
 }
@@ -1194,11 +1208,14 @@ void ModuleOption::load()
 {
 	QSettings s;
 
+	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
+
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
 	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
-	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
+
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
+	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1207,22 +1224,28 @@ void ModuleOption::save()
 {
 	QSettings s;
 
+	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
+
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
-	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
+
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
+	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
+	m_suffixSN = from.m_suffixSN;
+
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
 	m_showNoValid = from.m_showNoValid;
-	m_suffixSN = from.m_suffixSN;
+
 	m_maxInputCount = from.m_maxInputCount;
+	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	return *this;
 }
@@ -1475,11 +1498,6 @@ bool Options::readFromXml(const QByteArray& fileData)
 Options& Options::operator=(const Options& from)
 {
 	QMutexLocker l(&m_mutex);
-
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
-	{
-		m_updateColumnView[type] = from.m_updateColumnView[type];
-	}
 
 	m_projectInfo = from.m_projectInfo;
 	m_toolBar = from.m_toolBar;

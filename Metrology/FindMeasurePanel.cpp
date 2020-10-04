@@ -432,7 +432,17 @@ void FindMeasurePanel::find()
 				continue;
 			}
 
-			QString text = pMeasureView->table().text(row, column);
+			Measurement* pMeasurement = pMeasureView->table().at(row);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			QString text = pMeasureView->table().text(row, column, pMeasurement);
+			if (text.isEmpty() == true)
+			{
+				continue;
+			}
 
 			int pos = text.indexOf(m_findText);
 			if (pos == -1)

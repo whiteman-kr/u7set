@@ -218,12 +218,12 @@ void StatisticBase::createStatisticSignalList()
 			continue;
 		}
 
-		if (param.isAnalog() == false)
+		if (param.location().shownOnSchemas() == false)
 		{
 			continue;
 		}
 
-		if (param.location().shownOnSchemas() == false)
+		if (param.isAnalog() == false)
 		{
 			continue;
 		}
@@ -235,7 +235,12 @@ void StatisticBase::createStatisticSignalList()
 				continue;
 			}
 
-			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			if (pSignal->param().electricRangeIsValid() == false)
+			{
+				continue;
+			}
+
+			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
 			{
 				continue;
 			}
@@ -288,18 +293,22 @@ void StatisticBase::createStatisticComparatorList()
 			continue;
 		}
 
+		if (param.location().shownOnSchemas() == false)
+		{
+			continue;
+		}
+
 		if (param.isAnalog() == false)
 		{
 			continue;
 		}
 
-		int comparatorCount = param.comparatorCount();
-		if (comparatorCount == 0)
+		if (param.isOutput() == true)
 		{
 			continue;
 		}
 
-		if (param.isInput() || param.isOutput() == true)
+		if (param.isInput() == true)
 		{
 			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
 			{
@@ -310,6 +319,17 @@ void StatisticBase::createStatisticComparatorList()
 			{
 				continue;
 			}
+
+			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
+			{
+				continue;
+			}
+		}
+
+		int comparatorCount = param.comparatorCount();
+		if (comparatorCount == 0)
+		{
+			continue;
 		}
 
 		for(int с = 0; с < comparatorCount; с++)
@@ -317,7 +337,7 @@ void StatisticBase::createStatisticComparatorList()
 			StatisticItem si(pSignal, param.comparator(с));
 
 			/*
-			if (param.isInternal() == true || param.isOutput() == true)
+			if (param.isInternal() == true)
 			{
 				if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
 				{
@@ -398,7 +418,6 @@ void StatisticBase::updateStatistics(QTableView* pView)
 		StatisticItem& si = m_statisticList[m_measureType][i];
 
 		pMeasureView->table().m_measureBase.updateStatistics(si);
-
 		if (si.isMeasured() == true)
 		{
 			m_measuredCount++;

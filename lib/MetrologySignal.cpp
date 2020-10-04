@@ -961,7 +961,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareConstValue()
+	double ComparatorEx::compareConstValue() const
 	{
 		double value = 0;
 
@@ -969,7 +969,7 @@ namespace Metrology
 		//
 		switch (m_deviationType)
 		{
-			case DeviationType::NoUsed:	value = compare().constValue();									break;
+			case DeviationType::Unused:	value = compare().constValue();									break;
 			case DeviationType::Down:	value = compare().constValue() - hysteresis().constValue() / 2;	break;
 			case DeviationType::Up:		value= compare().constValue() + hysteresis().constValue() / 2;	break;
 		}
@@ -979,7 +979,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareDefaultValueStr()
+	QString ComparatorEx::compareDefaultValueStr() const
 	{
 		QString value;
 
@@ -1028,7 +1028,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisDefaultValueStr()
+	QString ComparatorEx::hysteresisDefaultValueStr() const
 	{
 		QString value;
 
@@ -1041,9 +1041,9 @@ namespace Metrology
 			value = hysteresis().appSignalID();
 		}
 
-		if (m_deviationType != DeviationType::NoUsed)
+		if (m_deviationType != DeviationType::Unused)
 		{
-			value.insert(0, "Not used - ");
+			value.insert(0, "Unused : ");
 		}
 
 		return value;

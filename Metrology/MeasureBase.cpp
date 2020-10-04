@@ -1318,7 +1318,7 @@ ComparatorMeasurement::~ComparatorMeasurement()
 
 void ComparatorMeasurement::clear()
 {
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(MEASURE_TYPE_COMPARATOR);
 
 	m_appSignalID.clear();
 	m_customAppSignalID.clear();
@@ -1330,6 +1330,7 @@ void ComparatorMeasurement::clear()
 	m_compareAppSignalID.clear();
 	m_outputAppSignalID.clear();
 
+	m_spType = SETPOINT_TYPE_COMP;
 	m_cmpType = E::CmpType::Greate;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
@@ -1389,6 +1390,13 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
+	int spType = ioParam.comparatorSpType();
+	if (spType < 0 || spType >= SETPOINT_TYPE_COUNT)
+	{
+		assert(false);
+		return;
+	}
+
 	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(comparatorIndex);
 	if (comparatorEx == nullptr)
 	{
@@ -1438,9 +1446,26 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	// nominal
 	//
 
+	setSpType(spType);
 	setCmpType(comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue();
+
+	if (spType == SETPOINT_TYPE_HYST)
+	{
+		switch (comparatorEx->cmpType())
+		{
+			case E::CmpType::Less:
+				setCmpType(E::CmpType::Greate);
+				engineering += comparatorEx->hysteresisOnlineValue();
+				break;
+			case E::CmpType::Greate:
+				setCmpType(E::CmpType::Less);
+				engineering -= comparatorEx->hysteresisOnlineValue();
+				break;
+		}
+	}
+
 	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -1511,6 +1536,13 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
+	int spType = ioParam.comparatorSpType();
+	if (spType < 0 || spType >= SETPOINT_TYPE_COUNT)
+	{
+		assert(false);
+		return;
+	}
+
 	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = outParam.comparator(comparatorIndex);
 	if (comparatorEx == nullptr)
 	{
@@ -1560,9 +1592,26 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	// nominal
 	//
 
+	setSpType(spType);
 	setCmpType(comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue();
+
+	if (spType == SETPOINT_TYPE_HYST)
+	{
+		switch (comparatorEx->cmpType())
+		{
+			case E::CmpType::Less:
+				setCmpType(E::CmpType::Greate);
+				engineering += comparatorEx->hysteresisOnlineValue();
+				break;
+			case E::CmpType::Greate:
+				setCmpType(E::CmpType::Less);
+				engineering -= comparatorEx->hysteresisOnlineValue();
+				break;
+		}
+	}
+
 	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
 	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, inParam);
 
@@ -1625,6 +1674,19 @@ void ComparatorMeasurement::calcError()
 		setErrorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
 		setErrorLimit(limitType, MEASURE_ERROR_TYPE_REDUCE,		errorLimit);
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString ComparatorMeasurement::spTypeStr() const
+{
+	if (m_spType < 0 || m_spType >= SETPOINT_TYPE_COUNT)
+	{
+		assert(0);
+		return QString("N/A");
+	}
+
+	return SetPointType[m_spType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2053,6 +2115,7 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 	m_compareAppSignalID = from.m_compareAppSignalID;
 	m_outputAppSignalID = from.m_outputAppSignalID;
 
+	m_spType = from.m_spType;
 	m_cmpType = from.m_cmpType;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
@@ -2238,7 +2301,6 @@ int MeasureBase::load(int measureType)
 						case SQL_TABLE_LINEARITY_20_EL:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);	break;
 						case SQL_TABLE_LINEARITY_20_EN:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);	break;
 						case SQL_TABLE_LINEARITY_ADD_VAL:		static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(pSubMeasure);							break;
-						//case SQL_TABLE_COMPARATOR_HYSTERESIS:	static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);								break;
 					}
 
 					break;
@@ -2496,6 +2558,11 @@ void MeasureBase::updateStatistics(StatisticItem& si)
 			{
 				ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
 				if (pComparatorMeasurement == nullptr)
+				{
+					break;
+				}
+
+				if (pComparatorMeasurement->spType() == SETPOINT_TYPE_HYST)
 				{
 					break;
 				}

@@ -1071,6 +1071,12 @@ void SignalPropertyDialog::createPropertyList()
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CAPTION);
 			signalIdGroup->addSubProperty(item);
 
+			item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
+			item->setValue(E::valueToString<E::SignalInOutType>(m_param.inOutType()));
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
+
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
 		// position group
@@ -1480,7 +1486,12 @@ void ComparatorPropertyDialog::createPropertyList()
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 
-				if (m_comparatorEx.inputSignal()->param().isInput() == true)
+				item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
+				item->setValue(E::valueToString<E::SignalInOutType>(m_comparatorEx.inputSignal()->param().inOutType()));
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+
+				if (m_comparatorEx.inputSignal()->param().isInput() == true && m_comparatorEx.inputSignal()->param().electricRangeIsValid() == true)
 				{
 					item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
 					item->setValue(m_comparatorEx.inputSignal()->param().electricRangeStr());
@@ -1508,14 +1519,15 @@ void ComparatorPropertyDialog::createPropertyList()
 
 			if (comparator().compare().isConst() == true)
 			{
-				if (m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true && m_comparatorEx.inputSignal()->param().isInput() == true)
+				if (	m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true &&
+						m_comparatorEx.inputSignal()->param().isInput() == true && m_comparatorEx.inputSignal()->param().electricRangeIsValid() == true)
 				{
 					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + m_comparatorEx.inputSignal()->param().electricUnitStr());
 					item->setValue(conversion(m_comparatorEx.compareConstValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
 					item->setAttribute(QLatin1String("decimals"), m_comparatorEx.inputSignal()->param().electricPrecision());
 					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE);
 					compareGroup->addSubProperty(item);
-					if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+					if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::Unused )
 					{
 						item->setAttribute(QLatin1String("readOnly"), true);
 					}
@@ -1526,7 +1538,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE);
 				compareGroup->addSubProperty(item);
-				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::Unused )
 				{
 					item->setAttribute(QLatin1String("readOnly"), true);
 				}
@@ -1587,7 +1599,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// hysteresis group
 
-		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis (deadband) - const") : tr("Hysteresis (deadband) - dynamic"));
+		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
 
 			if (comparator().hysteresis().isConst() == true)
 			{
@@ -1605,7 +1617,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE);
 				hysteresisGroup->addSubProperty(item);
-				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::Unused )
 				{
 					item->setAttribute(QLatin1String("readOnly"), true);
 				}
