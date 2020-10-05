@@ -22,21 +22,10 @@ MeasureTable::MeasureTable(QObject*)
 
 MeasureTable::~MeasureTable()
 {
-	m_measureBase.clear();
-}
+	QMutexLocker l(&m_measureMutex);
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureTable::setMeasureType(int measureType)
-{
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	m_measureType = measureType;
-	m_header.init(measureType);
-	m_measureBase.load(measureType);
+	m_measureList.clear();
+	m_measureCount = 0;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -73,7 +62,7 @@ int MeasureTable::columnCount(const QModelIndex&) const
 
 int MeasureTable::rowCount(const QModelIndex&) const
 {
-	return m_measureBase.count();
+	return m_measureCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -119,12 +108,12 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 	}
 
 	int rowIndex = index.row();
-	if (rowIndex < 0 || rowIndex >= m_measureBase.count())
+	if (rowIndex < 0 || rowIndex >= m_measureCount)
 	{
 		return QVariant();
 	}
 
-	Measurement* pMeasurement = m_measureBase.measurement(rowIndex);
+	Measurement* pMeasurement = m_measureList[rowIndex];
 	if (pMeasurement == nullptr)
 	{
 		return QVariant();
@@ -195,7 +184,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurement) const
 {
-	if (row < 0 || row >= m_measureBase.count())
+	if (row < 0 || row >= m_measureCount)
 	{
 		return Qt::white;
 	}
@@ -283,7 +272,7 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 
 QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 {
-	if (row < 0 || row >= m_measureBase.count())
+	if (row < 0 || row >= m_measureCount)
 	{
 		return QString();
 	}
@@ -320,7 +309,7 @@ QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 
 QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasurement) const
 {
-	if (row < 0 || row >= m_measureBase.count())
+	if (row < 0 || row >= m_measureCount)
 	{
 		return QString();
 	}
@@ -419,7 +408,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 
 	if (row > 0)
 	{
-		Measurement* prev_m = m_measureBase.measurement(row - 1);
+		Measurement* prev_m = m_measureList[row - 1];
 		if (prev_m != nullptr)
 		{
 			if (prev_m->signalHash() == m->signalHash())
@@ -439,7 +428,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 
 QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurement) const
 {
-	if (row < 0 || row >= m_measureBase.count())
+	if (row < 0 || row >= m_measureCount)
 	{
 		return QString();
 	}
@@ -509,7 +498,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 
 	if (row > 0)
 	{
-		Measurement* prev_m = m_measureBase.measurement(row - 1);
+		Measurement* prev_m = m_measureList[row - 1];
 		if (prev_m != nullptr)
 		{
 			if (prev_m->signalHash() == m->signalHash())
@@ -539,26 +528,18 @@ bool MeasureTable::append(Measurement* pMeasurement)
 		return false;
 	}
 
-	// append into database
-	//
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	if (thePtrDB->appendMeasure(pMeasurement) == false)
-	{
-		QMessageBox::critical(nullptr, tr("Append measurements"), tr("Error append measurements to database"));
-		return false;
-	}
-
 	// append into MeasureTable
 	//
-	int indexTable = m_measureBase.count();
+	int indexTable = m_measureCount;
 
 	beginInsertRows(QModelIndex(), indexTable, indexTable);
 
-		m_measureBase.append(pMeasurement);
+		m_measureMutex.lock();
+
+			m_measureList.append(pMeasurement);
+			m_measureCount = m_measureList.count();
+
+		m_measureMutex.unlock();
 
 	endInsertRows();
 
@@ -569,59 +550,28 @@ bool MeasureTable::append(Measurement* pMeasurement)
 
 Measurement* MeasureTable::at(int index)
 {
-	if (index < 0 || index >= m_measureBase.count())
+	QMutexLocker l(&m_measureMutex);
+
+	if (index < 0 || index >= m_measureCount)
 	{
 		return nullptr;
 	}
 
-	return m_measureBase.measurement(index);
+	return m_measureList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureTable::remove(const QVector<int>& removeIndexList)
+void MeasureTable::remove(const QVector<int>& removeIndexList)
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	QVector<int> keyList;
-
-	// remove from database
-	//
-	int count = removeIndexList.count();
-	for(int index = 0; index < count; index++)
-	{
-		int removeIndex = removeIndexList.at(index);
-
-		Measurement* pMeasuremet = m_measureBase.measurement(removeIndex);
-		if (pMeasuremet == nullptr)
-		{
-			continue;
-		}
-
-		if (pMeasuremet->measureType() != m_measureType)
-		{
-			continue;
-		}
-
-		keyList.append(pMeasuremet->measureID());
-	}
-
-	if (thePtrDB->removeMeasure(m_measureType, keyList) == false)
-	{
-		QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from database"));
-		return false;
-	}
-
 	// remove from MeasureTable
 	//
+	int count = removeIndexList.count();
 	for(int index = count-1; index >= 0; index--)
 	{
 		int removeIndex = removeIndexList.at(index);
 
-		Measurement* pMeasurement = m_measureBase.measurement(removeIndex);
+		Measurement* pMeasurement = at(removeIndex);
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -634,12 +584,59 @@ bool MeasureTable::remove(const QVector<int>& removeIndexList)
 
 		beginRemoveRows(QModelIndex(), removeIndex, removeIndex);
 
-			m_measureBase.remove(removeIndex);
+			m_measureMutex.lock();
+
+				m_measureList.remove(removeIndex);
+				m_measureCount = m_measureList.count();
+
+			m_measureMutex.unlock();
 
 		endRemoveRows();
 	}
+}
 
-	return true;
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureTable::set(const QVector<Measurement*>& list_add)
+{
+	int count = list_add.count();
+	if (count == 0)
+	{
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), 0, count - 1);
+
+		m_measureMutex.lock();
+
+			m_measureList = list_add;
+			m_measureCount = m_measureList.count();
+
+		m_measureMutex.unlock();
+
+	endInsertRows();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureTable::clear()
+{
+	int count = m_measureCount;
+	if (count == 0)
+	{
+		return;
+	}
+
+	beginRemoveRows(QModelIndex(), 0, count - 1);
+
+		m_measureMutex.lock();
+
+			m_measureList.clear();
+			m_measureCount = 0;
+
+		m_measureMutex.unlock();
+
+	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -651,16 +648,8 @@ MeasureView::MeasureView(int measureType, QWidget *parent) :
 	m_measureType(measureType)
 {
 	m_table.setMeasureType(measureType);
+	m_table.header().init(measureType);
 	setModel(&m_table);
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr)
-	{
-		if (pMainWindow->statisticPanel() != nullptr)
-		{
-			connect(&m_table.m_measureBase, &MeasureBase::updatedMeasureBase, pMainWindow->statisticPanel(), &StatisticPanel::updateSignalInList);
-		}
-	}
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setWordWrap(false);
@@ -725,6 +714,34 @@ void MeasureView::updateColumn()
 
 	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	verticalHeader()->setDefaultSectionSize(cellSize.height());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureView::loadMeasureList()
+{
+	m_table.clear();
+
+	QVector<Measurement*> measureList;
+
+	int measureCount = theMeasureBase.count();
+	for (int i = 0; i < measureCount; i++)
+	{
+		Measurement* pMeasurement = theMeasureBase.measurement(i);
+		if (pMeasurement == nullptr)
+		{
+			continue;
+		}
+
+		if (pMeasurement->measureType() != m_measureType)
+		{
+			continue;
+		}
+
+		measureList.append(pMeasurement);
+	}
+
+	m_table.set(measureList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -800,45 +817,75 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 		return;
 	}
 
+	// append into database
+	//
+	if (thePtrDB == nullptr)
+	{
+		return;
+	}
+
+	if (thePtrDB->appendMeasure(pMeasurement) == false)
+	{
+		QMessageBox::critical(this, tr("Append measurements"), tr("Error append measurements to database"));
+		return;
+	}
+
+	// append into MeasureBase
+	//
+	if (theMeasureBase.append(pMeasurement) == -1)
+	{
+		return;
+	}
+
+	// append into MeasureTable
+	//
 	if (m_table.append(pMeasurement) == false)
 	{
 		return;
 	}
 
-	setCurrentIndex(model()->index(model()->rowCount() - 1, MVC_CMN_L_APP_ID));
+	setCurrentIndex(model()->index(m_table.count() - 1, MVC_CMN_L_APP_ID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MeasureView::removeMeasure()
 {
-	int measureCount = m_table.count();
-	int columnCount = m_table.header().count();
-
-	if (measureCount == 0 || columnCount == 0)
+	if (thePtrDB == nullptr)
 	{
 		return;
 	}
 
-	bool removeMeasure;
+	int measureCount = m_table.count();
+	if (measureCount == 0)
+	{
+		return;
+	}
+
+	QVector<int> keyList;
 	QVector<int> removeIndexList;
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		removeMeasure = false;
-
-		for(int c = 0; c < columnCount; c++)
+		if (selectionModel()->isRowSelected(index, QModelIndex()) == false)
 		{
-			if (selectionModel()->isSelected(model()->index(index, c)) == true)
-			{
-				removeMeasure = true;
-			}
+			continue;
 		}
 
-		if (removeMeasure == true)
+		Measurement* pMeasuremet = m_table.at(index);
+		if (pMeasuremet == nullptr)
 		{
-			removeIndexList.append(index);
+			continue;
 		}
+
+		if (pMeasuremet->measureType() != m_measureType)
+		{
+			continue;
+		}
+
+		keyList.append(pMeasuremet->measureID());
+
+		removeIndexList.append(index);
 	}
 
 	if (removeIndexList.count() == 0)
@@ -851,10 +898,21 @@ void MeasureView::removeMeasure()
 		return;
 	}
 
-	if (m_table.remove(removeIndexList) == false)
+	// remove from database
+	//
+	if (thePtrDB->removeMeasure(m_measureType, keyList) == false)
 	{
+		QMessageBox::critical(this, tr("Delete measurements"), tr("Error remove measurements from database"));
 		return;
 	}
+
+	// remove from MeasureTable
+	//
+	m_table.remove(removeIndexList);
+
+	// remove from MesaureBase
+	//
+	theMeasureBase.remove(keyList);
 
 	QMessageBox::information(this, tr("Delete"), tr("Deleted %1 measurement(s)").arg(removeIndexList.count()));
 }

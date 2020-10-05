@@ -2144,6 +2144,10 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+MeasureBase theMeasureBase;
+
+// -------------------------------------------------------------------------------------------------------------------
+
 MeasureBase::MeasureBase(QObject *parent) :
 	QObject(parent)
 {
@@ -2483,6 +2487,35 @@ bool MeasureBase::remove(int index, bool removeData)
 	emit updatedMeasureBase(signalHash);
 
 	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::remove(const QVector<int>& keyList)
+{
+	int measureCount = count();
+	if (measureCount == 0)
+	{
+		return;
+	}
+
+	int keyCount = keyList.count();
+	for(int k = 0; k < keyCount; k++)
+	{
+		for(int i = measureCount - 1; i >= 0; i--)
+		{
+			Measurement* pMeasurement = measurement(i);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			if (pMeasurement->measureID() == keyList[k])
+			{
+				remove(i);
+			}
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

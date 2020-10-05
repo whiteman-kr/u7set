@@ -47,6 +47,13 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
+	// load measurement base
+	//
+	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	{
+		theMeasureBase.load(measureType);
+	}
+
 	//
 	//
 	createInterface();		// init interface
@@ -507,6 +514,7 @@ void MainWindow::createPanels()
 		m_pStatisticPanel->hide();
 
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
+		connect(&theMeasureBase, &MeasureBase::updatedMeasureBase, m_pStatisticPanel, &StatisticPanel::updateSignalInList, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
 		connect(this, &MainWindow::changedSignalConnectionType, m_pStatisticPanel, &StatisticPanel::changedSignalConnectionType, Qt::QueuedConnection);
@@ -570,6 +578,8 @@ void MainWindow::createMeasureViews()
 		{
 			continue;
 		}
+
+		pView->loadMeasureList();
 
 		m_pMainTab->addTab(pView, tr(MeasureType[measureType]));
 
@@ -2065,7 +2075,7 @@ void MainWindow::runMeasureThread()
 	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
-	m_measureThread.init(this);
+	connect(&theSignalBase, &SignalBase::updatedSignalParam, &m_measureThread, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
 	measureThreadStoped();
 }
@@ -2134,6 +2144,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	stopSignalSocket();
 	stopTuningSocket();
 
+	theMeasureBase.clear();
 	theSignalBase.clear();
 	theCalibratorBase.clear();
 

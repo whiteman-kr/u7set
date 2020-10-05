@@ -211,8 +211,6 @@ void StatisticTable::clear()
 
 QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 {
-	Q_UNUSED(row)
-
 	Metrology::Signal* pSignal = si.signal();
 	if (pSignal == nullptr)
 	{
@@ -635,32 +633,11 @@ void StatisticPanel::updateList()
 {
 	updateVisibleColunm();
 
-	// temporary solution
-	//
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	m_signalTable.clear();
 
-	theSignalBase.statistic().updateStatistics(pMeasureView);
+	theSignalBase.statistic().updateStatistics();
 
 	m_signalTable.set();
-	//
-	// temporary solution
 
 	updateStatusBar();
 }
@@ -674,30 +651,9 @@ void StatisticPanel::updateSignalInList(Hash signalHash)
 		return;
 	}
 
-	// temporary solution
-	//
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
-	theSignalBase.statistic().updateStatistics(pMeasureView, signalHash);
+	theSignalBase.statistic().updateStatistics(signalHash);
 
 	m_signalTable.updateSignal(signalHash);
-	//
-	// temporary solution
 
 	updateStatusBar();
 }

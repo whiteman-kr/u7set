@@ -24,6 +24,10 @@ private:
 
 	MeasureViewHeader	m_header;
 
+	mutable QMutex		m_measureMutex;
+	QVector<Measurement*> m_measureList;
+	int					m_measureCount = 0;
+
 	int					columnCount(const QModelIndex &parent) const;
 	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
 
@@ -35,15 +39,12 @@ private:
 
 public:
 
-	MeasureBase			m_measureBase;
-
 	int					measureType() const { return m_measureType; }
-	void				setMeasureType(int measureType);
+	void				setMeasureType(int measureType) { m_measureType = measureType; }
+
+	int					count() const { return m_measureCount; }
 
 	MeasureViewHeader&	header() { return m_header; }
-
-	int					count() const { return m_measureBase.count(); }
-
 	bool				columnIsVisible(int column);
 
 	QColor				backgroundColor(int row, int column, Measurement* pMeasurement) const;
@@ -51,7 +52,10 @@ public:
 
 	bool				append(Measurement* pMeasurement);
 	Measurement*		at(int index);
-	bool				remove(const QVector<int>& removeIndexList);
+	void				remove(const QVector<int>& removeIndexList);
+
+	void				set(const QVector<Measurement*>& list_add);
+	void				clear();
 };
 
 // ==============================================================================================
@@ -90,6 +94,8 @@ public slots:
 	void				onHeaderContextAction(QAction* action);
 
 	void				onColumnResized(int index, int, int width);
+
+	void				loadMeasureList();
 
 	void				appendMeasure(Measurement* pMeasurement);
 	void				removeMeasure();

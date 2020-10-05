@@ -1778,15 +1778,17 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 		SqlTable& table = m_table[type];
 
-		if (table.open() == true)
+		if (table.open() == false)
 		{
-			if (table.write(pMeasurement) == 1)
-			{
-				result = true;
-			}
-
-			table.close();
+			continue;
 		}
+
+		if (table.write(pMeasurement) == 1)
+		{
+			result = true;
+		}
+
+		table.close();
 	}
 
 	return result;
@@ -1807,15 +1809,17 @@ bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 
 		SqlTable& table = m_table[type];
 
-		if (table.open() == true)
+		if (table.open() == false)
 		{
-			if (table.remove(keyList.data(), keyList.count()) == keyList.count())
-			{
-				result = true;
-			}
-
-			table.close();
+			continue;
 		}
+
+		if (table.remove(keyList.data(), keyList.count()) == keyList.count())
+		{
+			result = true;
+		}
+
+		table.close();
 
 		break;
 	}

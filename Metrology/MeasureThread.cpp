@@ -1,10 +1,8 @@
 #include "MeasureThread.h"
 
 #include <assert.h>
-
 #include <QTime>
 
-#include "MainWindow.h"
 #include "Options.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
@@ -14,23 +12,13 @@
 MeasureThread::MeasureThread(QObject *parent) :
 	QThread(parent)
 {
+	connect(this, &MeasureThread::finished, this, &MeasureThread::stopMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 MeasureThread::~MeasureThread()
 {
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureThread::init(QWidget* parent)
-{
-	m_parent = parent;
-
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
-
-	connect(this, &MeasureThread::finished, this, &MeasureThread::stopMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -106,21 +94,6 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 		return false;
 	}
 
-	// temporary solution
-	// find signal in list of statistics
-	//
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_parent);
-	if (pMainWindow == nullptr)
-	{
-		return false;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return false;
-	}
-
 	bool isMeasured = false;
 
 	for(int ch = 0; ch < activeSignal.channelCount(); ch++)
@@ -161,7 +134,7 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 				break;
 		}
 
-		pMeasureView->table().m_measureBase.updateStatistics(si);
+		theMeasureBase.updateStatistics(si);
 		if (si.isMeasured() == true)
 		{
 			signalID.append(pMetrologySignal->param().appSignalID() + "\n");

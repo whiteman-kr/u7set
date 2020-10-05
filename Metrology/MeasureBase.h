@@ -464,6 +464,7 @@ public:
 	int							append(Measurement* pMeasurement);
 	Measurement*				measurement(int index) const;
 	bool						remove(int index, bool removeData = true);
+	void						remove(const QVector<int>& keyList);
 
 	void						updateStatistics(StatisticItem& si);
 
@@ -471,6 +472,10 @@ signals:
 
 	void						updatedMeasureBase(Hash signalHash);
 };
+
+// ==============================================================================================
+
+extern MeasureBase theMeasureBase;
 
 // ==============================================================================================
 

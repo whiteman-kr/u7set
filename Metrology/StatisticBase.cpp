@@ -1,13 +1,10 @@
 #include "StatisticBase.h"
 
 #include "SignalBase.h"
-#include "MeasureView.h"
-#include "Options.h"
+#include "MeasureBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 // -------------------------------------------------------------------------------------------------------------------
 
 StatisticItem::StatisticItem()
@@ -391,14 +388,8 @@ StatisticItem StatisticBase::item(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateStatistics(QTableView* pView)
+void StatisticBase::updateStatistics()
 {
-	MeasureView* pMeasureView = dynamic_cast<MeasureView*> (pView);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
@@ -417,7 +408,8 @@ void StatisticBase::updateStatistics(QTableView* pView)
 	{
 		StatisticItem& si = m_statisticList[m_measureType][i];
 
-		pMeasureView->table().m_measureBase.updateStatistics(si);
+		theMeasureBase.updateStatistics(si);
+
 		if (si.isMeasured() == true)
 		{
 			m_measuredCount++;
@@ -434,14 +426,8 @@ void StatisticBase::updateStatistics(QTableView* pView)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateStatistics(QTableView* pView, Hash signalHash)
+void StatisticBase::updateStatistics(Hash signalHash)
 {
-	MeasureView* pMeasureView = dynamic_cast<MeasureView*> (pView);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	if (signalHash == UNDEFINED_HASH)
 	{
 		return;
@@ -465,7 +451,7 @@ void StatisticBase::updateStatistics(QTableView* pView, Hash signalHash)
 
 		if (pSignal->param().hash() == signalHash)
 		{
-			pMeasureView->table().m_measureBase.updateStatistics(m_statisticList[m_measureType][i]);
+			theMeasureBase.updateStatistics(m_statisticList[m_measureType][i]);
 		}
 	}
 

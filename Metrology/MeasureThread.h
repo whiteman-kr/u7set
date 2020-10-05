@@ -32,8 +32,6 @@ public:
 
 private:
 
-	QWidget*				m_parent = nullptr;
-
 	int						m_measureType = MEASURE_TYPE_UNKNOWN;
 	bool					m_cmdStopMeasure = true;
 
@@ -61,8 +59,9 @@ private:
 
 public:
 
-	void					init(QWidget* parent = nullptr);
+	int						measureType() const { return m_measureType; }
 	void					setMeasureType(int measureType) { m_measureType = measureType; }
+
 	bool					enableMesureIsSignal();
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
@@ -89,8 +88,6 @@ public slots:
 
 	void					signalSocketDisconnected();
 	void					tuningSocketDisconnected();
-
-private slots:
 
 	void					updateSignalParam(const QString& appSignalID);
 
