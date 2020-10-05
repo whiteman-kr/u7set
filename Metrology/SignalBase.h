@@ -40,8 +40,11 @@ private:
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
+
 	double					m_percent = 0;					// for measuring of linearity
 	int						m_comparatorIndex = -1;			// for measuring of comparators
+	int						m_comparatorSpType = -1;			// for measuring of comparators
+
 	bool					m_negativeRange = false;
 	double					m_tunSignalState = 0;			// for restore tun value after measuring
 
@@ -78,6 +81,9 @@ public:
 
 	int						comparatorIndex() const { return m_comparatorIndex; }
 	void					setComparatorIndex(int index) { m_comparatorIndex = index; }
+
+	int						comparatorSpType() const { return m_comparatorSpType; }
+	void					setComparatorSpType(int type) { m_comparatorSpType = type; }
 
 
 	bool					isNegativeRange() const { return m_negativeRange; }

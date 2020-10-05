@@ -2,12 +2,13 @@
 
 #include <assert.h>
 #include <QMessageBox>
+#include <QFile>
 
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Database* thePtrDB = nullptr;
+Database theDatabase;
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -184,6 +185,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("CompareAppSignalID",			QVariant::String, 64);
 			append("OutputAppSignalID",				QVariant::String, 64);
 
+			append("SetPointType",					QVariant::Int);
 			append("CmpType",						QVariant::Int);
 
 			append("ElectricNominal",				QVariant::Double);
@@ -214,14 +216,6 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("MeasureTime",					QVariant::String, 64);
 			break;
-
-		case SQL_TABLE_COMPARATOR_HYSTERESIS:
-
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
-
-			break;
-
 
 		case SQL_TABLE_COMPLEX_COMPARATOR:
 
@@ -943,6 +937,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCompareAppSignalID(query.value(field++).toString());
 					measure->setOutputAppSignalID(query.value(field++).toString());
 
+					measure->setSpType(query.value(field++).toInt());
 					measure->setCmpTypeInt(query.value(field++).toInt());
 
 					measure->setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
@@ -974,12 +969,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
 				}
 				break;
-
-			case SQL_TABLE_COMPARATOR_HYSTERESIS:
-				{
-				}
-				break;
-
 
 			case SQL_TABLE_COMPLEX_COMPARATOR:
 				{
@@ -1362,6 +1351,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->compareAppSignalID());
 					query.bindValue(field++, measure->outputAppSignalID());
 
+					query.bindValue(field++, measure->spType());
 					query.bindValue(field++, measure->cmpTypeInt());
 
 					query.bindValue(field++, measure->nominal(MEASURE_LIMIT_TYPE_ELECTRIC));
@@ -1395,12 +1385,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->measureTimeStr());
 				}
 				break;
-
-			case SQL_TABLE_COMPARATOR_HYSTERESIS:
-				{
-				}
-				break;
-
 
 			case SQL_TABLE_COMPLEX_COMPARATOR:
 				{
@@ -1587,17 +1571,12 @@ SqlHistoryDatabase Database::m_history[] =
 Database::Database(QObject* parent) :
 	QObject(parent)
 {
-	for(int type = 0; type < SQL_TABLE_COUNT; type++)
-	{
-		m_table[type].init(type, &m_database);
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Database::~Database()
 {
-	close();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1611,6 +1590,8 @@ bool Database::open()
 		return false;
 	}
 
+	//
+	//
 	switch(theOptions.database().type())
 	{
 		case DATABASE_TYPE_SQLITE:
@@ -1636,6 +1617,8 @@ bool Database::open()
 		return false;
 	}
 
+	//
+	//
 	QSqlQuery query;
 
 	if (query.exec("PRAGMA foreign_keys=on") == false)
@@ -1648,9 +1631,27 @@ bool Database::open()
 		QMessageBox::critical(nullptr, tr("Database"), tr("Error set option of database: [synchronous=normal]"));
 	}
 
+	for(int type = 0; type < SQL_TABLE_COUNT; type++)
+	{
+		m_table[type].init(type, &m_database);
+	}
+
+	//
+	//
 	initVersion();
 	createTables();
 
+	//
+	//
+	theOptions.linearity().points().loadData(SQL_TABLE_LINEARITY_POINT);
+
+	if (theOptions.backup().onStart() == true)
+	{
+		createBackup();
+	}
+
+	//
+	//
 	return true;
 }
 
@@ -1658,6 +1659,11 @@ bool Database::open()
 
 void Database::close()
 {
+	if (theOptions.backup().onExit() == true)
+	{
+		createBackup();
+	}
+
 	for(int type = 0; type < SQL_TABLE_COUNT; type++)
 	{
 		if (m_table[type].isOpen() == true)
@@ -1771,6 +1777,51 @@ void Database::createTables()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool Database::createBackup()
+{
+	QString sourcePath = theOptions.database().path() + QDir::separator() + DATABASE_NAME;
+
+	if (QFile::exists(sourcePath) == false)
+	{
+		return false;
+	}
+
+	QString path = theOptions.backup().path();
+
+	if (QFile::exists(path) == false)
+	{
+		path = QDir::tempPath();
+
+		QSettings s;
+		s.setValue(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), path);
+	}
+
+	QDateTime&& currentTime = QDateTime::currentDateTime();
+	QDate&& date = currentTime.date();
+	QTime&& time = currentTime.time();
+
+	QString destPath = QString("%1%2%3%4%5%6%7%8%9")
+				.arg(path)
+				.arg(QDir::separator())
+				.arg(date.year(), 4, 10, QChar('0'))
+				.arg(date.month(), 2, 10, QChar('0'))
+				.arg(date.day(), 2, 10, QChar('0'))
+				.arg(time.hour(), 2, 10, QChar('0'))
+				.arg(time.minute(), 2, 10, QChar('0'))
+				.arg(time.second(), 2, 10, QChar('0'))
+				.arg(DATABASE_NAME);
+
+	if (QFile::copy(sourcePath, destPath) == false)
+	{
+		QMessageBox::critical(nullptr, tr("Backup"), tr("Error reserved copy database (backup of measurements)"));
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool Database::appendMeasure(Measurement* pMeasurement)
 {
 	if (pMeasurement == nullptr)
@@ -1795,15 +1846,17 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 		SqlTable& table = m_table[type];
 
-		if (table.open() == true)
+		if (table.open() == false)
 		{
-			if (table.write(pMeasurement) == 1)
-			{
-				result = true;
-			}
-
-			table.close();
+			continue;
 		}
+
+		if (table.write(pMeasurement) == 1)
+		{
+			result = true;
+		}
+
+		table.close();
 	}
 
 	return result;
@@ -1824,15 +1877,17 @@ bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 
 		SqlTable& table = m_table[type];
 
-		if (table.open() == true)
+		if (table.open() == false)
 		{
-			if (table.remove(keyList.data(), keyList.count()) == keyList.count())
-			{
-				result = true;
-			}
-
-			table.close();
+			continue;
 		}
+
+		if (table.remove(keyList.data(), keyList.count()) == keyList.count())
+		{
+			result = true;
+		}
+
+		table.close();
 
 		break;
 	}

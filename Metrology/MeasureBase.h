@@ -122,6 +122,19 @@ const int	MAX_MEASUREMENT_IN_POINT	= 20;
 
 // ==============================================================================================
 
+const char* const SetPointType[] =
+{
+			QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point"),
+			QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis"),
+};
+
+const int	SETPOINT_TYPE_COUNT		= sizeof(SetPointType)/sizeof(SetPointType[0]);
+
+const int	SETPOINT_TYPE_COMP		= 0,
+			SETPOINT_TYPE_HYST		= 1;
+
+// ==============================================================================================
+
 #define	 MEASURE_TIME_FORMAT			"dd-MM-yyyy hh:mm:ss"
 
 // ==============================================================================================
@@ -330,6 +343,7 @@ private:
 	QString			m_compareAppSignalID;
 	QString			m_outputAppSignalID;
 
+	int				m_spType = SETPOINT_TYPE_COMP;
 	E::CmpType		m_cmpType = E::CmpType::Greate;
 
 	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
@@ -375,6 +389,10 @@ public:
 
 	QString			outputAppSignalID() const { return m_outputAppSignalID; }
 	void			setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
+
+	int				spType() const { return m_spType; }
+	QString			spTypeStr() const;
+	void			setSpType(int type) { m_spType = type; }
 
 	E::CmpType		cmpType() const { return m_cmpType; }
 	int				cmpTypeInt() const { return TO_INT(m_cmpType); }
@@ -446,6 +464,7 @@ public:
 	int							append(Measurement* pMeasurement);
 	Measurement*				measurement(int index) const;
 	bool						remove(int index, bool removeData = true);
+	void						remove(const QVector<int>& keyList);
 
 	void						updateStatistics(StatisticItem& si);
 
@@ -456,5 +475,8 @@ signals:
 
 // ==============================================================================================
 
+extern MeasureBase theMeasureBase;
+
+// ==============================================================================================
 
 #endif // MEASUREBASE_H

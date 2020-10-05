@@ -345,7 +345,7 @@ bool FindMeasurePanel::event(QEvent* e)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			find();
 		}
@@ -432,7 +432,17 @@ void FindMeasurePanel::find()
 				continue;
 			}
 
-			QString text = pMeasureView->table().text(row, column);
+			Measurement* pMeasurement = pMeasureView->table().at(row);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			QString text = pMeasureView->table().text(row, column, pMeasurement);
+			if (text.isEmpty() == true)
+			{
+				continue;
+			}
 
 			int pos = text.indexOf(m_findText);
 			if (pos == -1)

@@ -46,7 +46,6 @@ const char* const		SqlTabletName[] =
 						QT_TRANSLATE_NOOP("Database.h", "LinearityPoint"),
 
 						QT_TRANSLATE_NOOP("Database.h", "ComparatorMeasure"),
-						QT_TRANSLATE_NOOP("Database.h", "ComparatorHysteresis"),
 
 						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorMeasure"),
 						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorHysteresis"),
@@ -69,14 +68,13 @@ const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_LINEARITY_20_EN				= 5,
 						SQL_TABLE_LINEARITY_POINT				= 6,
 						SQL_TABLE_COMPARATOR					= 7,
-						SQL_TABLE_COMPARATOR_HYSTERESIS			= 8,
-						SQL_TABLE_COMPLEX_COMPARATOR			= 9,
-						SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS	= 10,
-						SQL_TABLE_COMPLEX_COMPARATOR_POINT		= 11,
-						SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL		= 12,
-						SQL_TABLE_REPORT_HEADER					= 13,
-						SQL_TABLE_RACK_GROUP					= 14,
-						SQL_TABLE_SIGNAL_CONNECTION				= 15;
+						SQL_TABLE_COMPLEX_COMPARATOR			= 8,
+						SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS	= 9,
+						SQL_TABLE_COMPLEX_COMPARATOR_POINT		= 10,
+						SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL		= 11,
+						SQL_TABLE_REPORT_HEADER					= 12,
+						SQL_TABLE_RACK_GROUP					= 13,
+						SQL_TABLE_SIGNAL_CONNECTION				= 14;
 
 // ==============================================================================================
 
@@ -98,7 +96,6 @@ const int				SqlTableVersion[SQL_TABLE_COUNT] =
 						0,					//	SQL_TABLE_LINEARITY_POINT
 
 						0,					//	SQL_TABLE_COMPARATOR
-						0,					//	SQL_TABLE_COMPARATOR_HYSTERESIS
 
 						0,					//	SQL_TABLE_COMPLEX_COMPARATOR
 						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
@@ -131,7 +128,6 @@ const int				SqlObjectID[SQL_TABLE_COUNT] =
 						110,		//	SQL_TABLE_LINEARITY_POINT
 
 						200,		//	SQL_TABLE_COMPARATOR
-						201,		//	SQL_TABLE_COMPARATOR_HYSTERESIS
 
 						300,		//	SQL_TABLE_COMPLEX_COMPARATOR
 						301,		//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
@@ -163,7 +159,6 @@ const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_LINEARITY_POINT					// SQL_TABLE_CONFIG
 
 						MEASURE_TYPE_COMPARATOR,			//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
-						MEASURE_TYPE_COMPARATOR,			//	SQL_TABLE_COMPARATOR_HYSTERESIS				// SQL_TABLE_MEASURE_SUB
 
 						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_COMPLEX_COMPARATOR				// SQL_TABLE_MEASURE_MAIN
 						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS		// SQL_TABLE_MEASURE_SUB
@@ -189,7 +184,6 @@ const int				SqlTableAppointType[SQL_TABLE_COUNT] =
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_LINEARITY_POINT
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPARATOR
-						SQL_TABLE_IS_SUB,					//	SQL_TABLE_COMPARATOR_HYSTERESIS
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPLEX_COMPARATOR
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
@@ -355,6 +349,8 @@ private:
 
 	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
 
+	bool				createBackup();
+
 	void				initVersion();
 	void				createTables();
 
@@ -372,7 +368,7 @@ public:
 
 // ==============================================================================================
 
-extern Database*		thePtrDB;
+extern Database theDatabase;
 
 // ==============================================================================================
 

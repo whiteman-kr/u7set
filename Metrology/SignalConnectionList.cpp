@@ -313,7 +313,7 @@ void SignalConnectionItemDialog::createInterface()
 	pInputSignalLabel->setFixedWidth(70);
 	m_pInputSignalIDEdit->setFixedWidth(200);
 
-	m_pInputSignalIDEdit->setReadOnly(true);
+	//m_pInputSignalIDEdit->setReadOnly(true);
 	m_pInputSignalButton->setEnabled(theSignalBase.signalCount() != 0);
 
 	inputSignalLayout->addWidget(pInputSignalLabel);
@@ -331,7 +331,7 @@ void SignalConnectionItemDialog::createInterface()
 	pOutputSignalLabel->setFixedWidth(70);
 	m_pOutputSignalIDEdit->setFixedWidth(200);
 
-	m_pOutputSignalIDEdit->setReadOnly(true);
+	//m_pOutputSignalIDEdit->setReadOnly(true);
 	m_pOutputSignalButton->setEnabled(theSignalBase.signalCount() != 0);
 
 	outputSignalLayout->addWidget(pOutputSignalLabel);
@@ -390,10 +390,14 @@ void SignalConnectionItemDialog::updateSignals()
 		return;
 	}
 
+	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
+
 	m_pInputSignalIDEdit->setText(m_signalConnection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
 	m_pOutputSignalIDEdit->setText(m_signalConnection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
 }
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionItemDialog::selectedType(int)
@@ -451,9 +455,17 @@ void SignalConnectionItemDialog::selectSignal(int type)
 		return;
 	}
 
-	m_signalConnection.setSignal(type, pSignal);
+	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
 
-	updateSignals();
+	switch (type)
+	{
+		case MEASURE_IO_SIGNAL_TYPE_INPUT:	m_pInputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+		case MEASURE_IO_SIGNAL_TYPE_OUTPUT: m_pOutputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+		default:							assert(0);														break;
+	}
 }
 
 
@@ -469,21 +481,45 @@ void SignalConnectionItemDialog::onOk()
 		return;
 	}
 
-	Metrology::Signal* pInSignal = m_signalConnection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
+
+	QString inputAppSignalID = m_pInputSignalIDEdit->text();
+	if (inputAppSignalID.isEmpty() == true)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select input signal!"));
 		m_pInputSignalButton->setFocus();
 		return;
 	}
 
-	Metrology::Signal* pOutSignal = m_signalConnection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+	Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select input signal!").arg(inputAppSignalID));
+		m_pInputSignalButton->setFocus();
+		return;
+	}
+
+	QString outputAppSignalID = m_pOutputSignalIDEdit->text();
+	if (outputAppSignalID.isEmpty() == true)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select output signal!"));
+		m_pInputSignalButton->setFocus();
+		return;
+	}
+
+	Metrology::Signal* pOutSignal = theSignalBase.signalPtr(outputAppSignalID);
+	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select output signal!").arg(outputAppSignalID));
 		m_pOutputSignalButton->setFocus();
 		return;
 	}
+
+	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
+	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pOutSignal);
 
 	accept();
 }

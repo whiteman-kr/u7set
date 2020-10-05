@@ -117,7 +117,7 @@ namespace FotipV2
 
 	QString Frame::valueStr(bool reverseValue)
 	{
-		assert(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+		Q_ASSERT(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
 
 		switch(static_cast<FotipV2::DataType>(header.dataType))
 		{
@@ -161,6 +161,13 @@ namespace FotipV2
 			assert(false);
 			return QString("Unknown FotipV2::DataType");
 		}
+	}
+
+	bool Frame::isDiscreteData()
+	{
+		Q_ASSERT(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+
+		return static_cast<FotipV2::DataType>(header.dataType) == FotipV2::DataType::Discrete;
 	}
 }
 

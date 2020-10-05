@@ -103,8 +103,8 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 			case STATISTIC_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_ADC:					result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_EL_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_EL_SENSOR:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_EN_RANGE:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_SIGNAL_TYPE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
@@ -211,8 +211,6 @@ void StatisticTable::clear()
 
 QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 {
-	Q_UNUSED(row)
-
 	Metrology::Signal* pSignal = si.signal();
 	if (pSignal == nullptr)
 	{
@@ -225,8 +223,8 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 		return QString();
 	}
 
-	QString comparatorNo;
 	QString comparatorValue;
+	QString comparatorNo;
 	QString comparatorOutputID;
 
 	if (theSignalBase.statistic().measureType() == MEASURE_TYPE_COMPARATOR)
@@ -251,25 +249,24 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 
 	switch (column)
 	{
-		case STATISTIC_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();										break;
-		case STATISTIC_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();								break;
-		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = visible ? param.equipmentID() : QString();										break;
-		case STATISTIC_COLUMN_CAPTION:				result = visible ? param.caption() : QString();											break;
-		case STATISTIC_COLUMN_CMP_VALUE:			result = comparatorValue;																break;
-		case STATISTIC_COLUMN_CMP_NO:				result = comparatorNo;																	break;
-		case STATISTIC_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;															break;
-		case STATISTIC_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();						break;
-		case STATISTIC_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();							break;
-		case STATISTIC_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();							break;
-		case STATISTIC_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();								break;
-		case STATISTIC_COLUMN_ADC:					result = visible ? param.adcRangeStr(true) : QString();									break;
-		case STATISTIC_COLUMN_EL_RANGE:				result = visible ? param.electricRangeStr() : QString();								break;
-		case STATISTIC_COLUMN_EN_RANGE:				result = visible ? param.engineeringRangeStr() : QString();								break;
-		case STATISTIC_COLUMN_SIGNAL_TYPE:			result = visible ? E::valueToString<E::SignalInOutType>(param.inOutType()) : QString();	break;
-		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = si.signalConnectionTypeStr();													break;
-		case STATISTIC_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
-		case STATISTIC_COLUMN_STATE:				result = si.stateStr();																	break;
-
+		case STATISTIC_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();					break;
+		case STATISTIC_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();			break;
+		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = visible ? param.equipmentID() : QString();					break;
+		case STATISTIC_COLUMN_CAPTION:				result = visible ? param.caption() : QString();						break;
+		case STATISTIC_COLUMN_CMP_VALUE:			result = comparatorValue;											break;
+		case STATISTIC_COLUMN_CMP_NO:				result = comparatorNo;												break;
+		case STATISTIC_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;										break;
+		case STATISTIC_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();	break;
+		case STATISTIC_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();		break;
+		case STATISTIC_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();		break;
+		case STATISTIC_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();			break;
+		case STATISTIC_COLUMN_EL_RANGE:				result = param.electricRangeStr();									break;
+		case STATISTIC_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();								break;
+		case STATISTIC_COLUMN_EN_RANGE:				result = param.engineeringRangeStr();								break;
+		case STATISTIC_COLUMN_SIGNAL_TYPE:			result = E::valueToString<E::SignalInOutType>(param.inOutType());	break;
+		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = si.signalConnectionTypeStr();								break;
+		case STATISTIC_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();										break;
+		case STATISTIC_COLUMN_STATE:				result = si.stateStr();												break;
 		default:									assert(0);
 	}
 
@@ -534,7 +531,7 @@ bool StatisticPanel::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			selectSignalForMeasure();
 		}
@@ -636,32 +633,11 @@ void StatisticPanel::updateList()
 {
 	updateVisibleColunm();
 
-	// temporary solution
-	//
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	m_signalTable.clear();
 
-	theSignalBase.statistic().updateStatistics(pMeasureView);
+	theSignalBase.statistic().updateStatistics();
 
 	m_signalTable.set();
-	//
-	// temporary solution
 
 	updateStatusBar();
 }
@@ -675,30 +651,9 @@ void StatisticPanel::updateSignalInList(Hash signalHash)
 		return;
 	}
 
-	// temporary solution
-	//
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
-	theSignalBase.statistic().updateStatistics(pMeasureView, signalHash);
+	theSignalBase.statistic().updateStatistics(signalHash);
 
 	m_signalTable.updateSignal(signalHash);
-	//
-	// temporary solution
 
 	updateStatusBar();
 }
@@ -738,8 +693,8 @@ void StatisticPanel::updateVisibleColunm()
 	hideColumn(STATISTIC_COLUMN_CHASSIS, true);
 	hideColumn(STATISTIC_COLUMN_MODULE, true);
 	hideColumn(STATISTIC_COLUMN_PLACE, true);
-	hideColumn(STATISTIC_COLUMN_ADC, true);
 	hideColumn(STATISTIC_COLUMN_EL_RANGE, true);
+	hideColumn(STATISTIC_COLUMN_EL_SENSOR, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

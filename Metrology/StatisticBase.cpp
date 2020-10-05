@@ -1,13 +1,10 @@
 #include "StatisticBase.h"
 
 #include "SignalBase.h"
-#include "MeasureView.h"
-#include "Options.h"
+#include "MeasureBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 // -------------------------------------------------------------------------------------------------------------------
 
 StatisticItem::StatisticItem()
@@ -218,12 +215,12 @@ void StatisticBase::createStatisticSignalList()
 			continue;
 		}
 
-		if (param.isAnalog() == false)
+		if (param.location().shownOnSchemas() == false)
 		{
 			continue;
 		}
 
-		if (param.location().shownOnSchemas() == false)
+		if (param.isAnalog() == false)
 		{
 			continue;
 		}
@@ -235,7 +232,12 @@ void StatisticBase::createStatisticSignalList()
 				continue;
 			}
 
-			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			if (pSignal->param().electricRangeIsValid() == false)
+			{
+				continue;
+			}
+
+			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
 			{
 				continue;
 			}
@@ -288,18 +290,22 @@ void StatisticBase::createStatisticComparatorList()
 			continue;
 		}
 
+		if (param.location().shownOnSchemas() == false)
+		{
+			continue;
+		}
+
 		if (param.isAnalog() == false)
 		{
 			continue;
 		}
 
-		int comparatorCount = param.comparatorCount();
-		if (comparatorCount == 0)
+		if (param.isOutput() == true)
 		{
 			continue;
 		}
 
-		if (param.isInput() || param.isOutput() == true)
+		if (param.isInput() == true)
 		{
 			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
 			{
@@ -310,6 +316,17 @@ void StatisticBase::createStatisticComparatorList()
 			{
 				continue;
 			}
+
+			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
+			{
+				continue;
+			}
+		}
+
+		int comparatorCount = param.comparatorCount();
+		if (comparatorCount == 0)
+		{
+			continue;
 		}
 
 		for(int с = 0; с < comparatorCount; с++)
@@ -317,7 +334,7 @@ void StatisticBase::createStatisticComparatorList()
 			StatisticItem si(pSignal, param.comparator(с));
 
 			/*
-			if (param.isInternal() == true || param.isOutput() == true)
+			if (param.isInternal() == true)
 			{
 				if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
 				{
@@ -371,14 +388,8 @@ StatisticItem StatisticBase::item(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateStatistics(QTableView* pView)
+void StatisticBase::updateStatistics()
 {
-	MeasureView* pMeasureView = dynamic_cast<MeasureView*> (pView);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
@@ -397,7 +408,7 @@ void StatisticBase::updateStatistics(QTableView* pView)
 	{
 		StatisticItem& si = m_statisticList[m_measureType][i];
 
-		pMeasureView->table().m_measureBase.updateStatistics(si);
+		theMeasureBase.updateStatistics(si);
 
 		if (si.isMeasured() == true)
 		{
@@ -415,14 +426,8 @@ void StatisticBase::updateStatistics(QTableView* pView)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateStatistics(QTableView* pView, Hash signalHash)
+void StatisticBase::updateStatistics(Hash signalHash)
 {
-	MeasureView* pMeasureView = dynamic_cast<MeasureView*> (pView);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	if (signalHash == UNDEFINED_HASH)
 	{
 		return;
@@ -446,7 +451,7 @@ void StatisticBase::updateStatistics(QTableView* pView, Hash signalHash)
 
 		if (pSignal->param().hash() == signalHash)
 		{
-			pMeasureView->table().m_measureBase.updateStatistics(m_statisticList[m_measureType][i]);
+			theMeasureBase.updateStatistics(m_statisticList[m_measureType][i]);
 		}
 	}
 

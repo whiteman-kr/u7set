@@ -221,6 +221,8 @@ namespace FotipV2
 		// helper functions
 
 		QString valueStr(bool reverseValue);
+
+		bool isDiscreteData();
 	};
 }
 

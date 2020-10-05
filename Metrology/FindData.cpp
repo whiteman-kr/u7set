@@ -106,10 +106,6 @@ void FindData::findNext()
 	}
 
 	int startRow = m_pView->currentIndex().row();
-	if (startRow == 0)
-	{
-		startRow = -1;
-	}
 
 	int foundRow = find(startRow);
 	if (foundRow != -1)

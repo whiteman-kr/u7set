@@ -1,14 +1,65 @@
 #include "Options.h"
 
 #include <QSettings>
-#include <QTemporaryDir>
-#include <QMessageBox>
 
 #include "Database.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Options theOptions;
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::~DatabaseOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::load()
+{
+	QSettings s;
+
+	m_path = s.value(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
+	m_type = s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path);
+	s.setValue(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
+{
+	m_path = from.m_path;
+	m_type = from.m_type;
+
+	return *this;
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -496,8 +547,34 @@ MeasureViewOption::~MeasureViewOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewOption::init()
+bool MeasureViewOption::updateColumnView(int measureType) const
 {
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return false;
+	}
+
+	return m_updateColumnView[measureType];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_updateColumnView[measureType] = state;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::load()
+{
+	//
+	//
 	MeasureViewHeader header;
 
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
@@ -507,33 +584,33 @@ void MeasureViewOption::init()
 		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 		{
 			MeasureViewColumn* pColumn = header.column(column);
-			if (pColumn != nullptr)
+			if (pColumn == nullptr)
 			{
-				m_column[type][column] = *pColumn;
+				continue;
 			}
+
+			m_column[type][column] = *pColumn;
 		}
 	}
 
-	header.setMeasureType(MEASURE_TYPE_UNKNOWN);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureViewOption::load()
-{
+	//
+	//
 	QSettings s;
 
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
 	{
 		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 		{
-			MeasureViewColumn c = m_column[type][column];
+			const MeasureViewColumn& c = m_column[type][column];
 
-			if (c.title().isEmpty() == false)
+			if (c.title().isEmpty() == true)
 			{
-				m_column[type][column].setWidth(s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.width()).toInt());
-				m_column[type][column].setVisible(s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.enableVisible()).toBool());
+
 			}
+
+			m_column[type][column].setTitle(s.value(QString("%1/Header/%2/Column%3/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.title()).toString());
+			m_column[type][column].setWidth(s.value(QString("%1/Header/%2/Column%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.width()).toInt());
+			m_column[type][column].setVisible(s.value(QString("%1/Header/%2/Column%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.enableVisible()).toBool());
 		}
 	}
 
@@ -556,13 +633,16 @@ void MeasureViewOption::save()
 	{
 		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 		{
-			MeasureViewColumn c = m_column[type][column];
+			const MeasureViewColumn& c = m_column[type][column];
 
-			if (c.title().isEmpty() == false)
+			if (c.title().isEmpty() == true)
 			{
-				s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.width());
-				s.setValue(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.enableVisible());
+				continue;
 			}
+
+			s.setValue(QString("%1/Header/%2/Column%3/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.title());
+			s.setValue(QString("%1/Header/%2/Column%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.width());
+			s.setValue(QString("%1/Header/%2/Column%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.enableVisible());
 		}
 	}
 
@@ -579,6 +659,8 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 {
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
 	{
+		m_updateColumnView[type] = from.m_updateColumnView[type];
+
 		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 		{
 			m_column[type][column] = from.m_column[type][column];
@@ -751,14 +833,14 @@ ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(QObject *parent) :
+ModuleOption::ModuleOption(QObject *parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+ModuleOption::ModuleOption(const ModuleOption& from, QObject *parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -766,67 +848,54 @@ DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::~DatabaseOption()
+ModuleOption::~ModuleOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DatabaseOption::create()
-{
-	remove();
-
-	thePtrDB = new Database;
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	if (thePtrDB->open() == false)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DatabaseOption::remove()
-{
-	if (thePtrDB != nullptr)
-	{
-		thePtrDB->close();
-		delete thePtrDB;
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DatabaseOption::load()
+void ModuleOption::load()
 {
 	QSettings s;
 
-	m_path = s.value(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
-	m_type = s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
+	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
+
+	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
+	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
+	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
+
+	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
+	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DatabaseOption::save()
+void ModuleOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path);
-	s.setValue(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type);
+	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
+
+	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
+	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
+	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
+
+	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
+	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
+ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
-	m_path = from.m_path;
-	m_type = from.m_type;
+	m_suffixSN = from.m_suffixSN;
+
+	m_measureEntireModule = from.m_measureEntireModule;
+	m_warningIfMeasured = from.m_warningIfMeasured;
+	m_showNoValid = from.m_showNoValid;
+
+	m_maxInputCount = from.m_maxInputCount;
+	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	return *this;
 }
@@ -911,7 +980,7 @@ QString LinearityPointBase::text()
 void LinearityPointBase::initEmptyData(QVector<LinearityPoint> &data)
 {
 	const int valueCount = 7;
-	double value[valueCount] = {2, 20, 40, 50, 60, 80, 98};
+	double value[valueCount] = {5, 20, 40, 50, 60, 80, 95};
 
 	for(int index = 0; index < valueCount; index++)
 	{
@@ -1024,8 +1093,6 @@ void LinearityOption::load()
 {
 	QSettings s;
 
-	m_pointBase.loadData(SQL_TABLE_LINEARITY_POINT);
-
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
@@ -1034,11 +1101,10 @@ void LinearityOption::load()
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
 
 	m_rangeType = s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), LO_RANGE_TYPE_MANUAL).toInt();
-	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), 0).toDouble();
-	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
+	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), 5).toDouble();
+	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 95).toDouble();
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
-	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1059,7 +1125,6 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngineeringValueColumn);
 
 	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
@@ -1082,7 +1147,6 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_highLimitRange = from.m_highLimitRange;
 
 	m_viewType = from.m_viewType;
-	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
 
 	return *this;
 }
@@ -1122,11 +1186,8 @@ void ComparatorOption::load()
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
 
-	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
-	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
-
-	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
+	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1140,11 +1201,8 @@ void ComparatorOption::save()
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
 	s.setValue(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), m_showErrorFromLimit);
 
-	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
-	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
-
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), m_showEngineeringValueColumn);
+	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1156,73 +1214,8 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 	m_errorType = from.m_errorType;
 	m_showErrorFromLimit = from.m_showErrorFromLimit;
 
-	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
-	m_maxComparatorCount = from.m_maxComparatorCount;
-
-	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-ModuleOption::ModuleOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ModuleOption::ModuleOption(const ModuleOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ModuleOption::~ModuleOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ModuleOption::load()
-{
-	QSettings s;
-
-	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
-	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
-	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
-	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
-	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ModuleOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
-	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
-	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
-	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
-	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ModuleOption& ModuleOption::operator=(const ModuleOption& from)
-{
-	m_measureEntireModule = from.m_measureEntireModule;
-	m_warningIfMeasured = from.m_warningIfMeasured;
-	m_showNoValid = from.m_showNoValid;
-	m_suffixSN = from.m_suffixSN;
-	m_maxInputCount = from.m_maxInputCount;
+	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 
 	return *this;
 }
@@ -1248,69 +1241,6 @@ BackupOption::BackupOption(const BackupOption& from, QObject *parent) :
 
 BackupOption::~BackupOption()
 {
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool BackupOption::createBackup()
-{
-	QString sourcePath = theOptions.database().path() + QDir::separator() + DATABASE_NAME;
-
-	if (QFile::exists(sourcePath) == false)
-	{
-		return false;
-	}
-
-	if (QFile::exists(m_path) == false)
-	{
-		m_path = QDir::tempPath();
-
-		QSettings s;
-		s.setValue(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), m_path);
-	}
-
-	QDateTime&& currentTime = QDateTime::currentDateTime();
-	QDate&& date = currentTime.date();
-	QTime&& time = currentTime.time();
-
-	QString destPath = QString("%1%2%3%4%5%6%7%8%9")
-				.arg(m_path)
-				.arg(QDir::separator())
-				.arg(date.year(), 4, 10, QChar('0'))
-				.arg(date.month(), 2, 10, QChar('0'))
-				.arg(date.day(), 2, 10, QChar('0'))
-				.arg(time.hour(), 2, 10, QChar('0'))
-				.arg(time.minute(), 2, 10, QChar('0'))
-				.arg(time.second(), 2, 10, QChar('0'))
-				.arg(DATABASE_NAME);
-
-	if (QFile::copy(sourcePath, destPath) == false)
-	{
-		QMessageBox::critical(nullptr, tr("Backup"), tr("Error reserved copy database (backup of measurements)"));
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BackupOption::createBackupOnStart()
-{
-	if (m_onStart == true)
-	{
-		createBackup();
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BackupOption::createBackupOnExit()
-{
-	if (m_onExit == true)
-	{
-		createBackup();
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1382,59 +1312,41 @@ Options::~Options()
 
 void Options::load()
 {
-	m_toolBar.load();
-
+	m_database.load();
 	m_socket.load();
 
-	m_measureView.init();
+	m_toolBar.load();
 	m_measureView.load();
 
 	m_signalInfo.load();
 	m_comparatorInfo.load();
 
-	m_database.load();
-	m_database.create();
-
-
+	m_module.load();
 	m_linearity.load();
 	m_comparator.load();
-	m_module.load();
 
 	m_backup.load();
-	m_backup.createBackupOnStart();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Options::save()
 {
+	m_database.save();
+	m_socket.save();
 	m_projectInfo.save();
 
 	m_toolBar.save();
-
-	m_socket.save();
-
 	m_measureView.save();
 
 	m_signalInfo.save();
 	m_comparatorInfo.save();
 
-	m_database.save();
-
+	m_module.save();
 	m_linearity.save();
 	m_comparator.save();
-	m_module.save();
 
 	m_backup.save();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void Options::unload()
-{
-	m_backup.createBackupOnExit();
-
-	m_database.remove();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1476,21 +1388,20 @@ Options& Options::operator=(const Options& from)
 {
 	QMutexLocker l(&m_mutex);
 
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
-	{
-		m_updateColumnView[type] = from.m_updateColumnView[type];
-	}
-
-	m_projectInfo = from.m_projectInfo;
-	m_toolBar = from.m_toolBar;
 	m_socket = from.m_socket;
+	m_database = from.m_database;
+	m_projectInfo = from.m_projectInfo;
+
+	m_toolBar = from.m_toolBar;
 	m_measureView = from.m_measureView;
+
 	m_signalInfo = from.m_signalInfo;
 	m_comparatorInfo = from.m_comparatorInfo;
-	m_database = from.m_database;
+
+	m_module = from.m_module;
 	m_linearity = from.m_linearity;
 	m_comparator = from.m_comparator;
-	m_module = from.m_module;
+
 	m_backup = from.m_backup;
 
 	return *this;

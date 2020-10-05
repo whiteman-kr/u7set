@@ -269,15 +269,10 @@ void SignalConnectionBase::sort()
 
 int SignalConnectionBase::load()
 {
-	if (thePtrDB == nullptr)
-	{
-		return 0;
-	}
-
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_SIGNAL_CONNECTION);
 	if (table == nullptr)
 	{
 		return false;
@@ -304,12 +299,7 @@ int SignalConnectionBase::load()
 
 bool SignalConnectionBase::save()
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_SIGNAL_CONNECTION);
 	if (table == nullptr)
 	{
 		return false;

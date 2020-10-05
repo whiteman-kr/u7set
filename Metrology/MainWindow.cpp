@@ -34,6 +34,10 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
+	// open database
+	//
+	theDatabase.open();
+
 	// init calibration base
 	//
 	theCalibratorBase.init(this);
@@ -46,6 +50,13 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	theSignalBase.signalConnections().load();	// load signal connections base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
+
+	// load measurement base
+	//
+	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	{
+		theMeasureBase.load(measureType);
+	}
 
 	//
 	//
@@ -507,6 +518,7 @@ void MainWindow::createPanels()
 		m_pStatisticPanel->hide();
 
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
+		connect(&theMeasureBase, &MeasureBase::updatedMeasureBase, m_pStatisticPanel, &StatisticPanel::updateSignalInList, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
 		connect(this, &MainWindow::changedSignalConnectionType, m_pStatisticPanel, &StatisticPanel::changedSignalConnectionType, Qt::QueuedConnection);
@@ -570,6 +582,8 @@ void MainWindow::createMeasureViews()
 		{
 			continue;
 		}
+
+		pView->loadMeasureList();
 
 		m_pMainTab->addTab(pView, tr(MeasureType[measureType]));
 
@@ -1245,27 +1259,31 @@ void MainWindow::showCalculator()
 
 void MainWindow::showOptions()
 {
-	SocketClientOption sco = theOptions.socket().client(SOCKET_TYPE_CONFIG);
+	Options options(theOptions);
 
 	OptionsDialog dialog(this);
 	dialog.exec();
 
-	if (sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
-		sco.address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
+	// reconnect ConfigSocket
+	//
+	if (options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
+		options.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
 	{
 		stopSignalSocket();
 		stopTuningSocket();
 
 		if (m_pConfigSocket != nullptr)
 		{
-			sco = theOptions.socket().client(SOCKET_TYPE_CONFIG);
-			m_pConfigSocket->reconncect(sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY), sco.address(SOCKET_SERVER_TYPE_PRIMARY));
+			m_pConfigSocket->reconncect(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
+										theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY));
 		}
 	}
 
+	// update columns in the measure views
+	//
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 	{
-		if (theOptions.m_updateColumnView[type] == false)
+		if (theOptions.measureView().updateColumnView(type) == false)
 		{
 			continue;
 		}
@@ -1279,17 +1297,28 @@ void MainWindow::showOptions()
 		pView->updateColumn();
 	}
 
-	if (m_pSignalInfoPanel != nullptr)
+	// update timeouts
+	//
+	if (options.signalInfo().timeForUpdate() != theOptions.signalInfo().timeForUpdate())
 	{
-		m_pSignalInfoPanel->restartSignalStateTimer();
+		if (m_pSignalInfoPanel != nullptr)
+		{
+			m_pSignalInfoPanel->restartSignalStateTimer();
+		}
 	}
 
-	if (m_pComparatorInfoPanel != nullptr)
+	if (options.comparatorInfo().timeForUpdate() != theOptions.comparatorInfo().timeForUpdate())
 	{
-		m_pComparatorInfoPanel->restartComparatorStateTimer();
+		if (m_pComparatorInfoPanel != nullptr)
+		{
+			m_pComparatorInfoPanel->restartComparatorStateTimer();
+		}
 	}
 
-	if (m_pStatisticPanel != nullptr)
+	// if changed error type or limitType
+	//
+	if (options.linearity().errorType() != theOptions.linearity().errorType() || options.linearity().showErrorFromLimit() != theOptions.linearity().showErrorFromLimit() ||
+		options.comparator().errorType() != theOptions.comparator().errorType() || options.comparator().showErrorFromLimit() != theOptions.comparator().showErrorFromLimit())
 	{
 		m_pStatisticPanel->updateList();
 	}
@@ -2050,7 +2079,7 @@ void MainWindow::runMeasureThread()
 	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
-	m_measureThread.init(this);
+	connect(&theSignalBase, &SignalBase::updatedSignalParam, &m_measureThread, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
 	measureThreadStoped();
 }
@@ -2102,12 +2131,6 @@ void MainWindow::saveSettings()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-	if (m_pCalculator != nullptr)
-	{
-		delete m_pCalculator;
-		m_pCalculator = nullptr;
-	}
-
 	if (m_measureThread.isRunning() == true)
 	{
 		QMessageBox::critical(this, windowTitle(), m_statusMeasureThreadState->text());
@@ -2115,12 +2138,21 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		return;
 	}
 
+	if (m_pCalculator != nullptr)
+	{
+		delete m_pCalculator;
+		m_pCalculator = nullptr;
+	}
+
 	stopConfigSocket();
 	stopSignalSocket();
 	stopTuningSocket();
 
+	theMeasureBase.clear();
 	theSignalBase.clear();
 	theCalibratorBase.clear();
+
+	theDatabase.close();
 
 	saveSettings();
 

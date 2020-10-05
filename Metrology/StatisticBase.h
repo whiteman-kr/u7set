@@ -2,7 +2,6 @@
 #define STATISTICSIGNALBASE_H
 
 #include <QObject>
-#include <QTableView>
 
 #include "SignalConnectionBase.h"
 
@@ -112,8 +111,8 @@ public:
 
 	StatisticItem				item(int index) const;
 
-	void						updateStatistics(QTableView* pView);
-	void						updateStatistics(QTableView* pView, Hash signalHash);
+	void						updateStatistics();
+	void						updateStatistics(Hash signalHash);
 
 public slots:
 

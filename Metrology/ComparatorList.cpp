@@ -5,6 +5,7 @@
 #include "ExportData.h"
 #include "FindData.h"
 #include "ObjectProperties.h"
+#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -107,7 +108,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		{
 			if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
 			{
-				if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::NoUsed)
+				if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::Unused)
 				{
 					return QColor(Qt::lightGray);
 				}
@@ -119,11 +120,19 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundRole)
 	{
-		if (column == COMPARATOR_LIST_COLUMN_EL_RANGE)
+		if (pInSignal->param().isInput() == true)
 		{
-			if (pInSignal->param().isInput() || pInSignal->param().isOutput() == true)
+			if (column == COMPARATOR_LIST_COLUMN_EL_RANGE)
 			{
 				if (pInSignal->param().electricRangeIsValid() == false)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+			}
+
+			if (column == COMPARATOR_LIST_COLUMN_EL_SENSOR)
+			{
+				if (pInSignal->param().electricSensorType() == E::SensorType::NoSensor)
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
 				}
@@ -190,32 +199,63 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 		}
 	}
 
-	QString strCompareUnit;
+	//
+	//
+	QString strCompareValue;
 
 	if (comparatorEx->compare().isConst() == true)
 	{
-		strCompareUnit = " " + pInSignal->param().unit();
+		strCompareValue = comparatorEx->compareDefaultValueStr() + " " + pInSignal->param().unit();
+
+		if (pInSignal->param().electricRangeIsValid() == true && pInSignal->param().electricSensorType() != E::SensorType::NoSensor)
+		{
+			double electric = conversion(comparatorEx->compareConstValue(), CT_ENGINEER_TO_ELECTRIC, pInSignal->param());
+
+			strCompareValue += "  [" + QString::number(electric, 'f', pInSignal->param().electricPrecision()) + " " + pInSignal->param().electricUnitStr() + "]";
+		}
+	}
+	else
+	{
+		strCompareValue = comparatorEx->compareDefaultValueStr();
 	}
 
-	QString strHysteresisUnit;
+	//
+	//
+	QString strHysteresisValue;
+
+	if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::Unused)
+	{
+		strHysteresisValue = comparatorEx->hysteresisDefaultValueStr();
+	}
+	else
+	{
+		switch (comparatorEx->cmpType())
+		{
+			case E::CmpType::Less:		strHysteresisValue = "+ " + comparatorEx->hysteresisDefaultValueStr(); break;
+			case E::CmpType::Greate:	strHysteresisValue = "- " + comparatorEx->hysteresisDefaultValueStr(); break;
+		}
+	}
 
 	if (comparatorEx->hysteresis().isConst() == true)
 	{
-		strHysteresisUnit = " " + pInSignal->param().unit();
+		strHysteresisValue += " " + pInSignal->param().unit();
 	}
 
+	//
+	//
 	QString result;
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = visible ? E::valueToString<E::SignalInOutType>(param.inOutType()) : QString();		break;
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();											break;
-		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr() + strCompareUnit;							break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr() + strHysteresisUnit;						break;
-		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = visible ? param.electricRangeStr() : QString();									break;
-		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = visible ? param.engineeringRangeStr() : QString();									break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();												break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();															break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();					break;
+		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = strCompareValue;											break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = strHysteresisValue;										break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = E::valueToString<E::SignalInOutType>(param.inOutType());	break;
+		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();									break;
+		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();								break;
+		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();								break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();						break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();									break;
 		default:										assert(0);
 	}
 
@@ -484,6 +524,7 @@ void ComparatorListDialog::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
+	hideColumn(COMPARATOR_LIST_COLUMN_EL_SENSOR, true);
 	hideColumn(COMPARATOR_LIST_COLUMN_SCHEMA, true);
 }
 
@@ -516,7 +557,7 @@ bool ComparatorListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			comparatorProperties();
 		}
