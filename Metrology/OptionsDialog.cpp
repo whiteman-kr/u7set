@@ -1455,7 +1455,7 @@ bool OptionsDialog::event(QEvent * e)
 				{
 					QKeyEvent* keyEvent = static_cast<QKeyEvent *>(e);
 
-					if (keyEvent->key() == Qt::Key_Return)
+					if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 					{
 						applyProperty();
 					}

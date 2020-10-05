@@ -165,15 +165,10 @@ bool RackGroupBase::remove(int index)
 
 int RackGroupBase::load()
 {
-	if (thePtrDB == nullptr)
-	{
-		return 0;
-	}
-
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_RACK_GROUP);
 	if (table == nullptr)
 	{
 		return false;
@@ -200,12 +195,7 @@ int RackGroupBase::load()
 
 bool RackGroupBase::save()
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_RACK_GROUP);
 	if (table == nullptr)
 	{
 		return false;

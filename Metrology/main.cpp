@@ -49,9 +49,7 @@ int main(int argc, char *argv[])
 
 	delete pMainWindow;
 
-    theOptions.unload();
-
-    google::protobuf::ShutdownProtobufLibrary();
+	google::protobuf::ShutdownProtobufLibrary();
 
 	dumpMemoryLeaks();
 

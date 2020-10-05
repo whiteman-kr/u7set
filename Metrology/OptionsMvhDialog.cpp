@@ -140,7 +140,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 
 		m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
 
-		cell = new QTableWidgetItem(QString::number(column.width(), 'f', 0));
+		cell = new QTableWidgetItem(QString::number(column.width()));
 		cell->setTextAlignment(Qt::AlignHCenter);
 		if (visible == false)
 		{
@@ -215,9 +215,12 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	if (column == MVH_COLUMN_WIDTH)
+	switch(column)
 	{
-		m_header.m_column[m_measureType][row].setWidth(item->text().toInt());
+		case MVH_COLUMN_TITLE:		m_header.m_column[m_measureType][row].setTitle(item->text());			break;
+		case MVH_COLUMN_VISIBLE:	break;
+		case MVH_COLUMN_WIDTH:		m_header.m_column[m_measureType][row].setWidth(item->text().toInt());	break;
+		default:					assert(0);																break;
 	}
 
 	updateList();
@@ -269,6 +272,9 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 	switch(column)
 	{
 		case MVH_COLUMN_TITLE:
+			{
+				m_columnList->editItem(cell);
+			}
 			break;
 
 		case MVH_COLUMN_VISIBLE:
@@ -295,7 +301,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 
 void OptionsMeasureViewHeaderDialog::keyPressEvent(QKeyEvent *e)
 {
-	if (e->key() == Qt::Key_Return)
+	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{
 		int row = m_columnList->currentRow();
 		int column = m_columnList->currentColumn();

@@ -2202,11 +2202,6 @@ int MeasureBase::load(int measureType)
 		return -1;
 	}
 
-	if (thePtrDB == nullptr)
-	{
-		return -1;
-	}
-
 	m_measureType = measureType;
 
 	QElapsedTimer responseTime;
@@ -2227,7 +2222,7 @@ int MeasureBase::load(int measureType)
 	{
 		if (SqlTableByMeasureType[tableType] == measureType)
 		{
-			SqlTable* table = thePtrDB->openTable(tableType);
+			SqlTable* table = theDatabase.openTable(tableType);
 			if (table != nullptr)
 			{
 				rawTableData data;
@@ -2387,7 +2382,7 @@ int MeasureBase::load(int measureType)
 
 		// remove unnecessary measurement from sub table
 		//
-		SqlTable* table = thePtrDB->openTable(subTable.tableType);
+		SqlTable* table = theDatabase.openTable(subTable.tableType);
 		if (table != nullptr)
 		{
 			table->remove(removeKeyList.data(), removeKeyList.count());

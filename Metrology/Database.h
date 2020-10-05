@@ -349,6 +349,8 @@ private:
 
 	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
 
+	bool				createBackup();
+
 	void				initVersion();
 	void				createTables();
 
@@ -366,7 +368,7 @@ public:
 
 // ==============================================================================================
 
-extern Database*		thePtrDB;
+extern Database theDatabase;
 
 // ==============================================================================================
 

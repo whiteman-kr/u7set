@@ -819,12 +819,7 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 
 	// append into database
 	//
-	if (thePtrDB == nullptr)
-	{
-		return;
-	}
-
-	if (thePtrDB->appendMeasure(pMeasurement) == false)
+	if (theDatabase.appendMeasure(pMeasurement) == false)
 	{
 		QMessageBox::critical(this, tr("Append measurements"), tr("Error append measurements to database"));
 		return;
@@ -851,11 +846,6 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 
 void MeasureView::removeMeasure()
 {
-	if (thePtrDB == nullptr)
-	{
-		return;
-	}
-
 	int measureCount = m_table.count();
 	if (measureCount == 0)
 	{
@@ -900,7 +890,7 @@ void MeasureView::removeMeasure()
 
 	// remove from database
 	//
-	if (thePtrDB->removeMeasure(m_measureType, keyList) == false)
+	if (theDatabase.removeMeasure(m_measureType, keyList) == false)
 	{
 		QMessageBox::critical(this, tr("Delete measurements"), tr("Error remove measurements from database"));
 		return;

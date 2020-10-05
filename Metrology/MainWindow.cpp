@@ -34,6 +34,10 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
+	// open database
+	//
+	theDatabase.open();
+
 	// init calibration base
 	//
 	theCalibratorBase.init(this);
@@ -2127,17 +2131,17 @@ void MainWindow::saveSettings()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-	if (m_pCalculator != nullptr)
-	{
-		delete m_pCalculator;
-		m_pCalculator = nullptr;
-	}
-
 	if (m_measureThread.isRunning() == true)
 	{
 		QMessageBox::critical(this, windowTitle(), m_statusMeasureThreadState->text());
 		e->ignore();
 		return;
+	}
+
+	if (m_pCalculator != nullptr)
+	{
+		delete m_pCalculator;
+		m_pCalculator = nullptr;
 	}
 
 	stopConfigSocket();
@@ -2147,6 +2151,8 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	theMeasureBase.clear();
 	theSignalBase.clear();
 	theCalibratorBase.clear();
+
+	theDatabase.close();
 
 	saveSettings();
 
