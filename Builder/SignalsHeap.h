@@ -33,7 +33,7 @@ namespace Builder
 		void appendItem(const UalSignal &ualSignal, std::optional<int> expectedReadCount);
 		void removeItem(const UalSignal &ualSignal);
 
-		Address16 getAddressForWrite(const UalSignal& ualSignal);		// should be called only once for each appSignalID
+		Address16 getAddressForWrite(const UalSignal& ualSignal);
 		Address16 getAddressForRead(const UalSignal& ualSignal, bool decrementReadCount);
 
 		int getHeapUsedSizeW() const;
