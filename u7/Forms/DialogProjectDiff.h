@@ -2,6 +2,7 @@
 #define DIALOGPROJECTDIFF_H
 
 #include <QDialog>
+#include "GlobalMessanger.h"
 
 namespace Ui {
 	class DialogProjectDiff;
@@ -13,12 +14,11 @@ class DialogProjectDiff : public QDialog
 {
 	Q_OBJECT
 
-private:
-	explicit DialogProjectDiff(DbController* db, QWidget *parent = nullptr);
-
 public:
+	explicit DialogProjectDiff(DbController* db, QWidget *parent = nullptr);
 	~DialogProjectDiff();
-	static void showProjectDiff(DbController* db, QWidget* parent);
+
+	CompareData compareDataResult() const;
 
 protected:
 	virtual void showEvent(QShowEvent* event) override;
@@ -36,6 +36,8 @@ private:
 
 private:
 	Ui::DialogProjectDiff *ui;
+
+	CompareData m_compareDataResult;
 };
 
 #endif // DIALOGPROJECTDIFF_H

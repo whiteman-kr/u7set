@@ -78,10 +78,6 @@ public:
 	//
 	void fireCompareObject(DbChangesetObject object, CompareData compareData);
 
-	// CompareProject
-	//
-	void fireCompareProject(CompareData compareData);
-
 public slots:
 	void runOrderReady(Builder::RunOrder runOrder);
 

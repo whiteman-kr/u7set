@@ -2,7 +2,6 @@
 #include "ui_DialogProjectDiff.h"
 #include "../../lib/DbController.h"
 #include "SelectChangesetDialog.h"
-#include "GlobalMessanger.h"
 
 DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint),
@@ -46,20 +45,9 @@ DialogProjectDiff::~DialogProjectDiff()
 	delete ui;
 }
 
-void DialogProjectDiff::showProjectDiff(DbController* db, QWidget* parent)
+CompareData DialogProjectDiff::compareDataResult() const
 {
-	if (db == nullptr)
-	{
-		assert(db);
-		return;
-	}
-
-	DialogProjectDiff* dialog = new DialogProjectDiff(db, parent);
-
-	dialog->setAttribute(Qt::WA_DeleteOnClose);
-	dialog->show();
-
-	return;
+	return m_compareDataResult;
 }
 
 void DialogProjectDiff::showEvent(QShowEvent*)
@@ -233,34 +221,7 @@ void DialogProjectDiff::done(int r)
 		return;
 	}
 
-	/*
-	// Source changeset should be earlier than target
-	//
-	if (compareData.sourceVersionType != CompareVersionType::LatestVersion &&
-		compareData.targetVersionType != CompareVersionType::LatestVersion)
-	{
-		if (compareData.sourceChangeset > compareData.targetChangeset ||
-			compareData.sourceDate > compareData.sourceDate)
-		{
-			std::swap(compareData.sourceChangeset, compareData.targetChangeset);
-			std::swap(compareData.sourceDate, compareData.targetDate);
-			std::swap(compareData.sourceVersionType, compareData.targetVersionType);
-		}
-	}
-
-	// Latest version is always target
-	//
-	if (compareData.sourceVersionType == CompareVersionType::LatestVersion &&
-		compareData.targetVersionType != CompareVersionType::LatestVersion)
-	{
-		std::swap(compareData.sourceChangeset, compareData.targetChangeset);
-		std::swap(compareData.sourceDate, compareData.targetDate);
-		std::swap(compareData.sourceVersionType, compareData.targetVersionType);
-	}*/
-
-	// Emit signal
-	//
-	GlobalMessanger::instance().fireCompareProject(compareData);
+	m_compareDataResult = compareData;
 
 	QDialog::done(r);
 }

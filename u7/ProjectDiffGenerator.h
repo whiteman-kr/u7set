@@ -3,10 +3,21 @@
 
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
+#include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaView.h"
 
 #include <optional>
 
 class DbController;
+
+class PdfSchemaView : public VFrame30::SchemaView
+{
+public:
+	PdfSchemaView(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent);
+
+	void Adjust(QPainter* painter, double startX, double startY, double zoom) const;
+};
+
 
 class FileDiff
 {
@@ -51,15 +62,17 @@ class ProjectDiffGenerator : public QObject
 {
 	Q_OBJECT
 public:
-	ProjectDiffGenerator(DbController* dbc, QWidget* parent);
-
-
-public slots:
-	void compareProject(CompareData compareData);
+	static void run(const CompareData& compareData, DbController* dbc, QWidget* parent);
 
 private:
-	bool compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, QTextStream* textStream);
-	bool compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName, QTextStream* textStream);
+	ProjectDiffGenerator(const QString& fileName, DbController* dbc, QWidget* parent);
+public:
+	virtual ~ProjectDiffGenerator();
+
+private:
+	void compareProject(CompareData compareData);
+	bool compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData);
+	bool compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName);
 
 	std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
 												  const CompareVersionType versionType,
@@ -68,14 +81,14 @@ private:
 
 	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject> >* deviceObjectMap);
 
-	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream);
-	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const;
-	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const;
-	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const;
-	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const;
+	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
+	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile) const;
+	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
+	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
+	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
 
-	void compareSignal(const int signalID, const CompareData& compareData, QTextStream* textStream) const;
-	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, QTextStream* textStream) const;
+	void compareSignal(const int signalID, const CompareData& compareData);
+	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* result) const;
 
@@ -85,6 +98,15 @@ private:
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 
+	bool writePdf(const QTextDocument& doc, const QString& fileName) const;
+	virtual void generateHeader();
+	//bool exportToTextDocument(QTableView* tableView, QTextDocument* doc, bool onlySelectedRows);
+
+	void printSchema(std::shared_ptr<VFrame30::Schema> schema);
+
+	void newPage();
+	void flushDocument();
+
 private:
 	DbController* m_db = nullptr;
 	QWidget* m_parent = nullptr;
@@ -93,6 +115,11 @@ private:
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_targetDeviceObjectMap;
 
 	int m_filesTotal = 0;
+
+	QPdfWriter m_pdfWriter;
+	QPainter m_pdfPainter;
+	QTextDocument m_textDocument;
+	QTextCursor m_textCursor;
 
 };
 

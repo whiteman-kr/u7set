@@ -4,7 +4,20 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/Connection.h"
-#include "../VFrame30/Schema.h"
+#include "../VFrame30/DrawParam.h"
+#include "../lib/TypesAndEnums.h"
+
+#include <QPrinter>
+
+PdfSchemaView::PdfSchemaView(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent):
+	VFrame30::SchemaView(schema, parent)
+{
+}
+
+void PdfSchemaView::Adjust(QPainter* painter, double startX, double startY, double zoom) const
+{
+	Ajust(painter, startX, startY, zoom);
+}
 
 bool FileDiff::diff(const QByteArray& sourceData, const QByteArray& targetData, std::vector<FileLine>* sourceDiff, std::vector<FileLine>* targetDiff)
 {
@@ -176,39 +189,44 @@ template<typename T> void FileDiff::calculateLcs(const std::vector<T>& X, const 
 // ProjectDiffGenerator
 //
 
-ProjectDiffGenerator::ProjectDiffGenerator(DbController* dbc, QWidget* parent):
-	QObject(parent),
-	m_parent(parent),
-	m_db(dbc)
+void ProjectDiffGenerator::run(const CompareData& compareData, DbController* dbc, QWidget* parent)
 {
-
-}
-
-void ProjectDiffGenerator::compareProject(CompareData compareData)
-{
-	// Open file
+	// Get filename
 	//
 
-	QString fileName = QFileDialog::getSaveFileName(m_parent, tr("Diff Report"),
+	QString fileName = QFileDialog::getSaveFileName(parent, tr("Diff Report"),
 													"./",
-													tr("Text files (*.txt);; All files (*.*)"));
+													tr("PDF documents (*.pdf)"));
 
 	if (fileName.isNull() == true)
 	{
 		return;
 	}
 
-	QFile file(fileName);
+	ProjectDiffGenerator g(fileName, dbc, parent);
 
-	if (file.open(QFile::WriteOnly) == false)
-	{
-		QMessageBox::critical(m_parent, tr("Diff Report"), tr("Failed to create file %1!").arg(fileName));
-		return;
-	}
+	g.compareProject(compareData);
 
-	QTextStream textStream(&file);
+}
 
-	// Process files
+ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName, DbController* dbc, QWidget* parent):
+	QObject(parent),
+	m_parent(parent),
+	m_db(dbc),
+	m_pdfWriter(fileName),
+	m_textCursor(&m_textDocument)
+
+{
+}
+
+ProjectDiffGenerator::~ProjectDiffGenerator()
+{
+}
+
+void ProjectDiffGenerator::compareProject(CompareData compareData)
+{
+
+	// Get and count files
 	//
 	m_sourceDeviceObjectMap.clear();
 	m_targetDeviceObjectMap.clear();
@@ -239,13 +257,30 @@ void ProjectDiffGenerator::compareProject(CompareData compareData)
 		m_filesTotal += static_cast<int>(filesTree->files().size());
 	}
 
-	textStream << "Total files to compare: " << m_filesTotal << "\n";
+	// Init document
+
+	m_pdfWriter.setPageSize(QPageSize(QPageSize::A4));
+	m_pdfWriter.setPageOrientation(QPageLayout::Portrait);
+	m_pdfWriter.setResolution(300);
+
+	m_pdfPainter.begin(&m_pdfWriter);
+
+	QRect pageRectPixels = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
+	m_textDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+
+	QTextCharFormat charFormat = m_textCursor.charFormat();
+	charFormat.setFontPointSize(70);
+	m_textCursor.setCharFormat(charFormat);
+
+	generateHeader();
+
+	m_textCursor.insertText(tr("Total files to compare: %1\n").arg(m_filesTotal));
 
 	for (const DbFileTree& filesTree : filesTrees)
 	{
-		if (compareFile(filesTree, filesTree.rootFile(), compareData, &textStream) == false)
+		if (compareFile(filesTree, filesTree.rootFile(), compareData) == false)
 		{
-			textStream << "Could not compare file " << filesTree.rootFile()->fileName() << "\n";
+			m_textCursor.insertText(tr("Could not compare file : %1\n").arg(filesTree.rootFile()->fileName()));
 		}
 	}
 
@@ -257,24 +292,26 @@ void ProjectDiffGenerator::compareProject(CompareData compareData)
 
 	for (int signalID : signalIDs)
 	{
-		compareSignal(signalID, compareData, &textStream);
+		compareSignal(signalID, compareData);
 	}
 
 	// Close file
 	//
-	textStream.flush();
 
-	file.close();
+	flushDocument();
+
+	m_pdfPainter.end();
+
+	// Destroy document
 
 	return;
 }
 
-bool ProjectDiffGenerator::compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, QTextStream* textStream)
+bool ProjectDiffGenerator::compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData)
 {
-	if (fi == nullptr || textStream == nullptr)
+	if (fi == nullptr)
 	{
-		Q_ASSERT(false);
-		Q_ASSERT(textStream);
+		Q_ASSERT(fi);
 		return false;
 	}
 
@@ -380,7 +417,7 @@ bool ProjectDiffGenerator::compareFile(const DbFileTree& filesTree, const std::s
 
 	// Compare files
 
-	compareFileContents(sourceFile, targetFile, fileName, textStream);
+	compareFileContents(sourceFile, targetFile, fileName);
 
 	// Process children
 	//
@@ -396,16 +433,17 @@ bool ProjectDiffGenerator::compareFile(const DbFileTree& filesTree, const std::s
 			return false;
 		}
 
-		if (compareFile(filesTree, fiChild, compareData, textStream) == false)
+		if (compareFile(filesTree, fiChild, compareData) == false)
 		{
-			*textStream << "Could not compare file " << fiChild->fileName() << "\n";
+
+			m_textCursor.insertText(tr("Could not compare file : %1\n").arg(fiChild->fileName()));
 		}
 	}
 
 	return true;
 }
 
-bool ProjectDiffGenerator::compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName, QTextStream* textStream)
+bool ProjectDiffGenerator::compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName)
 {
 	// No files at all
 	//
@@ -428,7 +466,7 @@ bool ProjectDiffGenerator::compareFileContents(const std::shared_ptr<DbFile>& so
 	if ((sourceFile != nullptr && sourceFile->deleted() == true) ||
 		(targetFile != nullptr && targetFile->deleted() == true))
 	{
-		*textStream << "\n" << fileName << ": Deleted\n";
+		m_textCursor.insertText(tr("\n%1: Deleted\n").arg(fileName));
 		return false;
 	}
 
@@ -436,29 +474,29 @@ bool ProjectDiffGenerator::compareFileContents(const std::shared_ptr<DbFile>& so
 	//
 	if (isHardwareFile(fileName) == true)
 	{
-		compareDeviceObjects(sourceFile, targetFile, textStream);
+		compareDeviceObjects(sourceFile, targetFile);
 		return true;
 	}
 
 	if (isConnectionFile(fileName) == true)
 	{
-		compareConnections(sourceFile, targetFile, textStream);
+		compareConnections(sourceFile, targetFile);
 		return true;
 	}
 
 	if (isBusTypeFile(fileName) == true)
 	{
-		compareBusTypes(sourceFile, targetFile, textStream);
+		compareBusTypes(sourceFile, targetFile);
 		return true;
 	}
 
 	if (isSchemaFile(fileName) == true)
 	{
-		compareSchemas(sourceFile, targetFile, textStream);
+		compareSchemas(sourceFile, targetFile);
 		return true;
 	}
 
-	compareFilesData(sourceFile, targetFile, textStream);
+	compareFilesData(sourceFile, targetFile);
 	return true;
 }
 
@@ -564,15 +602,8 @@ std::shared_ptr<Hardware::DeviceObject> ProjectDiffGenerator::loadDeviceObject(c
 }
 
 void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile,
-												const std::shared_ptr<DbFile>& targetFile,
-												QTextStream* textStream)
+												const std::shared_ptr<DbFile>& targetFile)
 {
-	if (textStream == nullptr)
-	{
-		Q_ASSERT(textStream);
-		return;
-	}
-
 	// No Files
 	//
 	if (sourceFile == nullptr && targetFile == nullptr)
@@ -613,7 +644,8 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
 		auto singleObject = sourceObject != nullptr ? sourceObject : targetObject;
-		*textStream << "\n" << singleObject->equipmentId() << ": " << singleFile->action().text() << "\n";
+
+		m_textCursor.insertText(tr("\n%1: %2\n").arg(singleObject->equipmentId()).arg(singleFile->action().text()));
 		return;
 	}
 
@@ -625,7 +657,7 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 
 	if (diffs.empty() == false)
 	{
-		*textStream << "\n" << sourceObject->equipmentIdTemplate() << "\n";
+		m_textCursor.insertText(tr("\n%1\n").arg(sourceObject->equipmentId()));
 
 		for (const PropertyDiff& diff : diffs)
 		{
@@ -633,17 +665,17 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 			{
 			case PropertyDiff::Action::Added:
 				{
-					*textStream << diff.caption << ": property added\n";
+					m_textCursor.insertText(tr("%1: property added\n").arg(diff.caption));
 				}
 				break;
 			case PropertyDiff::Action::Removed:
 				{
-					*textStream << diff.caption << ": property removed\n";
+					m_textCursor.insertText(tr("%1: property removed\n").arg(diff.caption));
 				}
 				break;
 			case PropertyDiff::Action::Modified:
 				{
-					*textStream << diff.caption << ": property modified: " << diff.oldValueText << " -> " << diff.newValueText <<"\n";
+					m_textCursor.insertText(tr("%1: property modified: %2 -> %3\n").arg(diff.caption).arg(diff.oldValueText).arg(diff.newValueText));
 				}
 				break;
 			}
@@ -651,19 +683,13 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 	}
 }
 
-void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const
+void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile) const
 {
 
 }
 
-void ProjectDiffGenerator::compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const
+void ProjectDiffGenerator::compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile)
 {
-	if (textStream == nullptr)
-	{
-		Q_ASSERT(textStream);
-		return;
-	}
-
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
@@ -677,7 +703,7 @@ void ProjectDiffGenerator::compareSchemas(const std::shared_ptr<DbFile>& sourceF
 		(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
-		*textStream << "\n" << singleFile->fileName() << ": " << singleFile->action().text() << "\n";
+		m_textCursor.insertText(tr("\n%1: %2\n").arg(singleFile->fileName()).arg(singleFile->action().text()));
 		return;
 	}
 
@@ -687,57 +713,68 @@ void ProjectDiffGenerator::compareSchemas(const std::shared_ptr<DbFile>& sourceF
 	if (sourceSchema == nullptr)
 	{
 		Q_ASSERT(false);
-		*textStream << "\n" << sourceFile->fileName() << ": source schema loading failed\n";
+		m_textCursor.insertText(tr("\n%1: source schema loading failed\n").arg(sourceFile->fileName()));
 	}
 
 	std::shared_ptr<VFrame30::Schema> targetSchema = VFrame30::Schema::Create(targetFile->data());
 	if (targetSchema == nullptr)
 	{
 		Q_ASSERT(false);
-		*textStream << "\n" << targetFile->fileName() << ": target schema loading failed\n";
+		m_textCursor.insertText(tr("\n%1: target schema loading failed\n").arg(targetFile->fileName()));
 	}
 
 	std::vector<PropertyDiff> diffs;
 
 	comparePropertyObjects(*sourceSchema, *targetSchema, &diffs);
 
-	if (diffs.empty() == false)
+	if (diffs.empty() == true)
 	{
-		*textStream << "\n" << targetSchema->schemaId() << "\n";
-
-		for (const PropertyDiff& diff : diffs)
-		{
-			switch (diff.action)
-			{
-
-			case PropertyDiff::Action::Added:
-				{
-					*textStream << diff.caption << ": property added\n";
-				}
-				break;
-			case PropertyDiff::Action::Removed:
-				{
-					*textStream << diff.caption << ": property removed\n";
-				}
-				break;
-			case PropertyDiff::Action::Modified:
-				{
-					*textStream << diff.caption << ": property modified: " << diff.oldValueText << " -> " << diff.newValueText <<"\n";
-				}
-				break;
-			}
-		}
-	}
-}
-
-void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const
-{
-	if (textStream == nullptr)
-	{
-		Q_ASSERT(textStream);
 		return;
 	}
 
+	newPage();
+
+	m_textCursor.insertText(tr("\n%1\n").arg(targetSchema->schemaId()));
+
+	m_textCursor.insertText("Source schema:");
+
+	printSchema(sourceSchema);
+
+	newPage();
+
+	m_textCursor.insertText("Target schema:");
+
+	printSchema(targetSchema);
+
+	newPage();
+
+	for (const PropertyDiff& diff : diffs)
+	{
+		switch (diff.action)
+		{
+
+		case PropertyDiff::Action::Added:
+			{
+				m_textCursor.insertText(tr("%1: property added\n").arg(diff.caption));
+			}
+			break;
+		case PropertyDiff::Action::Removed:
+			{
+				m_textCursor.insertText(tr("%1: property removed\n").arg(diff.caption));
+			}
+			break;
+		case PropertyDiff::Action::Modified:
+			{
+				m_textCursor.insertText(tr("%1: property modified: %2 -> %3\n").arg(diff.caption).arg(diff.oldValueText).arg(diff.newValueText));
+			}
+			break;
+		}
+	}
+
+}
+
+void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile)
+{
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
@@ -774,7 +811,7 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
 		auto* singleConnection = sourceFile != nullptr ? &sourceConnection : &targetConnection;
-		*textStream << "\n" << singleConnection->connectionID() << ": " << singleFile->action().text() << "\n";
+		m_textCursor.insertText(tr("\n%1: %2\n").arg(singleConnection->connectionID()).arg(singleFile->action().text()));
 		return;
 	}
 
@@ -786,7 +823,7 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 
 	if (diffs.empty() == false)
 	{
-		*textStream << "\n" << targetConnection.connectionID() << "\n";
+		m_textCursor.insertText(tr("\n%1\n").arg(targetConnection.connectionID()));
 
 		for (const PropertyDiff& diff : diffs)
 		{
@@ -794,17 +831,17 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 			{
 			case PropertyDiff::Action::Added:
 				{
-					*textStream << diff.caption << ": property added\n";
+					m_textCursor.insertText(tr("%1: property added\n").arg(diff.caption));
 				}
 				break;
 			case PropertyDiff::Action::Removed:
 				{
-					*textStream << diff.caption << ": property removed\n";
+					m_textCursor.insertText(tr("%1: property removed\n").arg(diff.caption));
 				}
 				break;
 			case PropertyDiff::Action::Modified:
 				{
-					*textStream << diff.caption << ": property modified: " << diff.oldValueText << " -> " << diff.newValueText <<"\n";
+					m_textCursor.insertText(tr("%1: property modified: %2 -> %3\n").arg(diff.caption).arg(diff.oldValueText).arg(diff.newValueText));
 				}
 				break;
 			}
@@ -812,14 +849,8 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 	}
 }
 
-void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, QTextStream* textStream) const
+void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile)
 {
-	if (textStream == nullptr)
-	{
-		Q_ASSERT(textStream);
-		return;
-	}
-
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
@@ -833,7 +864,7 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 		(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
-		*textStream << "\n" << singleFile->fileName() << ": " << singleFile->action().text() << "\n";
+		m_textCursor.insertText(tr("\n%1: %2\n").arg(singleFile->fileName()).arg(singleFile->action().text()));
 		return;
 	}
 
@@ -851,25 +882,25 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 			return;
 		}
 
-		*textStream << "\n" << targetFile->fileName() << ":\n";
+		m_textCursor.insertText(tr("\n%1n").arg(targetFile->fileName()));
 		if (sourceDiff.empty() == false)
 		{
-			*textStream << "Source differences:\n";
+			m_textCursor.insertText(tr("Source differences:\n"));
 		}
 
 		for (const FileDiff::FileLine& fileLine : sourceDiff)
 		{
-			*textStream << tr("%1 %2").arg(fileLine.line).arg(fileLine.text) << "\n";
+			m_textCursor.insertText(tr("%1 %2\n").arg(fileLine.line).arg(fileLine.text));
 		}
 
 		if (targetDiff.empty() == false)
 		{
-			*textStream << "Target differences:\n";
+			m_textCursor.insertText(tr("Target differences:\n"));
 		}
 
 		for (const FileDiff::FileLine& fileLine : targetDiff)
 		{
-			*textStream << tr("%1 %2").arg(fileLine.line).arg(fileLine.text) << "\n";
+			m_textCursor.insertText(tr("%1 %2\n").arg(fileLine.line).arg(fileLine.text));
 		}
 	}
 	else
@@ -878,24 +909,18 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 		//
 		if (sourceFile->data() != targetFile->data())
 		{
-			*textStream << "\n" << targetFile->fileName() << ": Binary data changed\n";
+			m_textCursor.insertText(tr("\n%1: Binary data changed\n").arg(targetFile->fileName()));
 		}
 	}
 
 	if (sourceFile->data().size() != targetFile->data().size())
 	{
-		*textStream << "Size " << sourceFile->data().size() << " bytes ->" << targetFile->data().size() << " bytes\n";
+		m_textCursor.insertText(tr("Size %1 bytes -> %2 bytes\n").arg(sourceFile->data().size()).arg(targetFile->data().size()));
 	}
 }
 
-void ProjectDiffGenerator::compareSignal(const int signalID, const CompareData& compareData, QTextStream* textStream) const
+void ProjectDiffGenerator::compareSignal(const int signalID, const CompareData& compareData)
 {
-	if (textStream == nullptr)
-	{
-		Q_ASSERT(textStream);
-		return;
-	}
-
 	// Print signal ID
 	//
 	QString appSignalID;
@@ -1002,14 +1027,14 @@ void ProjectDiffGenerator::compareSignal(const int signalID, const CompareData& 
 	//
 	if (sourceSignal.has_value() == true && targetSignal.has_value() == false)
 	{
-		*textStream << "\n" << appSignalID << ": " << sourceSignal.value().instanceAction().text() << "\n";
+		m_textCursor.insertText(tr("\n%1: %2\n").arg(appSignalID).arg(sourceSignal.value().instanceAction().text()));
 	}
 
 	// Only target file exists
 	//
 	if (sourceSignal.has_value() == false && targetSignal.has_value() == true)
 	{
-		*textStream << "\n" <<appSignalID << ": " << targetSignal.value().instanceAction().text() << "\n";
+		m_textCursor.insertText(tr("\n%1: %2\n").arg(appSignalID).arg(targetSignal.value().instanceAction().text()));
 	}
 
 	// Both files exist
@@ -1022,7 +1047,7 @@ void ProjectDiffGenerator::compareSignal(const int signalID, const CompareData& 
 		//
 		if (sourceSignal.value().deleted() == true || targetSignal.value().deleted() == true)
 		{
-			*textStream << "\n" <<appSignalID << ": Deleted\n";
+			m_textCursor.insertText(tr("\n%1: Deleted\n").arg(appSignalID));
 		}
 		else
 		{
@@ -1052,21 +1077,15 @@ void ProjectDiffGenerator::compareSignal(const int signalID, const CompareData& 
 				std::swap(sourceSignal, targetSignal);
 			}
 
-			compareSignalContents(sourceSignal.value(), targetSignal.value(), textStream);
+			compareSignalContents(sourceSignal.value(), targetSignal.value());
 		}
 	}
 
 	return;
 }
 
-void ProjectDiffGenerator::compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, QTextStream* textStream) const
+void ProjectDiffGenerator::compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal)
 {
-	if (textStream == nullptr)
-	{
-		Q_ASSERT(textStream);
-		return;
-	}
-
 	SignalProperties sourceProperties(sourceSignal);
 	SignalProperties targetProperties(targetSignal);
 
@@ -1076,7 +1095,7 @@ void ProjectDiffGenerator::compareSignalContents(const Signal& sourceSignal, con
 
 	if (diffs.empty() == false)
 	{
-		*textStream << "\n" <<targetSignal.appSignalID() << "\n";
+		m_textCursor.insertText(tr("\n%1\n").arg(targetSignal.appSignalID()));
 
 		for (const PropertyDiff& diff : diffs)
 		{
@@ -1084,17 +1103,17 @@ void ProjectDiffGenerator::compareSignalContents(const Signal& sourceSignal, con
 			{
 			case PropertyDiff::Action::Added:
 				{
-					*textStream << diff.caption << ": property added\n";
+					m_textCursor.insertText(tr("%1: property added\n").arg(diff.caption));
 				}
 				break;
 			case PropertyDiff::Action::Removed:
 				{
-					*textStream << diff.caption << ": property removed\n";
+					m_textCursor.insertText(tr("%1: property removed\n").arg(diff.caption));
 				}
 				break;
 			case PropertyDiff::Action::Modified:
 				{
-					*textStream << diff.caption << ": property modified: " << diff.oldValueText << " -> " << diff.newValueText <<"\n";
+					m_textCursor.insertText(tr("%1: property modified: %2 -> %3\n").arg(diff.caption).arg(diff.oldValueText).arg(diff.newValueText));
 				}
 				break;
 			}
@@ -1301,4 +1320,155 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 	}
 
 	return false;
+}
+
+void ProjectDiffGenerator::generateHeader()
+{
+	DbProject project = m_db->currentProject();
+
+	QTextBlockFormat headerCenterFormat = m_textCursor.blockFormat();
+	headerCenterFormat.setAlignment(Qt::AlignHCenter);
+
+	QTextBlockFormat regularFormat = m_textCursor.blockFormat();
+	regularFormat.setAlignment(Qt::AlignLeft);
+
+	//QTextCharFormat headerCharFormat = cursor.charFormat();
+	//headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
+	//headerCharFormat.setFontPointSize(12.0);
+
+	//QTextCharFormat regularCharFormat = cursor.charFormat();
+	//headerCharFormat.setFontPointSize(10.0);
+
+	m_textCursor.setBlockFormat(headerCenterFormat);
+	//m_textCursor.setCharFormat(headerCharFormat);
+	m_textCursor.insertText(QObject::tr("Project Differtences - %1\n").arg(project.projectName()));
+	m_textCursor.insertText("\n");
+
+	m_textCursor.setBlockFormat(regularFormat);
+	//m_textCursor.setCharFormat(regularCharFormat);
+	m_textCursor.insertText(tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
+	//cursor.insertText(tr("RPCT: %1\n").arg(m_configuration->softwareEquipmentId));
+	m_textCursor.insertText("\n");
+
+	m_textCursor.insertText("\n");
+}
+
+void ProjectDiffGenerator::printSchema(std::shared_ptr<VFrame30::Schema> schema)
+{
+	// Calculate the upper schema offset
+
+	const QRect pageRect = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
+
+	QRect contentRect = QRect(QPoint(0, 0), m_textDocument.size().toSize());
+
+	int schemaLeft = 0;
+
+	int schemaTop = contentRect.height() % pageRect.height();
+
+	int schemaMaxHeight = pageRect.height() - schemaTop;
+
+	// Print the rest of the document
+
+	flushDocument();
+
+	// Calculate draw parameters
+
+	PdfSchemaView schemaView(schema, m_parent);
+
+	VFrame30::CDrawParam drawParam(&m_pdfPainter, schema.get(), &schemaView, schema->gridSize(), schema->pinGridStep());
+	drawParam.setInfoMode(false);
+	drawParam.session() = schemaView.session();
+
+	double schemaWidthInPixel = schema->GetDocumentWidth(m_pdfWriter.resolution(), 100.0);		// Export 100% zoom
+	double schemaHeightInPixel = schema->GetDocumentHeight(m_pdfWriter.resolution(), 100.0);		// Export 100% zoom
+
+	double zoom = pageRect.width() / schemaWidthInPixel;
+
+	double schemaHeightInPixelWZoomed = schemaHeightInPixel * zoom;
+
+	if (schemaHeightInPixelWZoomed > schemaMaxHeight)
+	{
+		// Reduce schema's height, it does not fit vertically
+
+		double yZoom =  schemaMaxHeight / schemaHeightInPixelWZoomed;
+
+		zoom *= yZoom;
+
+		// Center schema horizontally
+
+		int schemaWidthInPixelZoomed = static_cast<int>(schemaHeightInPixel * zoom + 0.5);
+
+		schemaLeft =  (pageRect.width() - schemaWidthInPixelZoomed) / 2;
+	}
+
+	// Draw rect
+
+	//m_pdfPainter.fillRect(QRectF(0, schemaTop, pageRect.width(), pageRect.height() - schemaTop), QColor(0xB0, 0xB0, 0xB0));
+
+	// Ajust QPainter
+	//
+
+	m_pdfPainter.save();
+
+	m_pdfPainter.setRenderHint(QPainter::Antialiasing);
+
+	schemaView.Adjust(&m_pdfPainter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom
+
+	// Draw Schema
+	//
+	QRectF clipRect(0, 0, schema->docWidth(), schema->docHeight());
+
+	schema->Draw(&drawParam, clipRect);
+
+	m_pdfPainter.restore();
+}
+
+
+void ProjectDiffGenerator::newPage()
+{
+	flushDocument();
+
+	m_pdfWriter.newPage();
+}
+
+void ProjectDiffGenerator::flushDocument()
+{
+	if (m_textDocument.isEmpty() == true)
+	{
+		return;
+	}
+
+	const QRect pageRect = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
+
+	// The total extent of the content (there are no page margin in this)
+	const QRect contentRect = QRect(QPoint(0, 0), m_textDocument.size().toSize());
+
+	// This is the part of the content we will drop on a page.  It's a sliding window on the content.
+	QRect currentRect(0, 0, pageRect.width(), pageRect.height());
+
+	while (currentRect.intersects(contentRect) == true)
+	{
+			m_pdfPainter.save();
+			m_pdfPainter.translate(0, -currentRect.y());
+			m_textDocument.drawContents(&m_pdfPainter, currentRect);  // draws part of the document
+			m_pdfPainter.restore();
+
+			// Translate the current rectangle to the area to be printed for the next page
+			currentRect.translate(0, currentRect.height());
+
+			//Inserting a new page if there is still area left to be printed
+			if (currentRect.intersects(contentRect))
+			{
+				m_pdfWriter.newPage();
+			}
+	}
+
+	// Clear text document
+
+	QTextCharFormat charFormat = m_textCursor.charFormat();
+	//charFormat.setFontPointSize(70);
+
+	m_textDocument.clear();
+
+	m_textCursor.setCharFormat(charFormat);
 }

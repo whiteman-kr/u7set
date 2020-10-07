@@ -145,8 +145,6 @@ private:
 	DbController* m_dbController = nullptr;
 	SignalSetProvider* m_signalSetProvider = nullptr;
 
-	ProjectDiffGenerator* m_projectDiffGenerator = nullptr;
-
 	DialogShortcuts* m_dialogShortcuts = nullptr;
 
 	int m_filesTabPageIndex = 0;

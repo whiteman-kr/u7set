@@ -90,9 +90,6 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
 
-	m_projectDiffGenerator = new ProjectDiffGenerator(dbController(), this);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareProject, m_projectDiffGenerator, &ProjectDiffGenerator::compareProject);
-
 	// --
 	//
 	connect(m_buildTabPage, &BuildTabPage::buildStarted, this, &MainWindow::buildStarted);
@@ -1051,10 +1048,12 @@ void MainWindow::projectDifference()
 		return;
 	}
 
+	DialogProjectDiff dialog(db(), this);
 
-	DialogProjectDiff::showProjectDiff(db(), this);
-
-
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		ProjectDiffGenerator::run(dialog.compareDataResult(), db(), this);
+	}
 
 	return;
 }
