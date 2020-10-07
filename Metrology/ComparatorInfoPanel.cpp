@@ -155,7 +155,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 	stateStr += comparatorEx->cmpTypeStr();
 	stateStr += " ";
-	stateStr += comparatorEx->compareOnlineValueStr();
+	stateStr += comparatorEx->compareOnlineValueStr(Metrology::CmpValueTypeSetPoint);
 	stateStr += " : ";
 	stateStr += comparatorEx->outputStateStr(theOptions.comparatorInfo().displayingStateTrue(), theOptions.comparatorInfo().displayingStateFalse());
 

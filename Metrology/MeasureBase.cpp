@@ -1330,7 +1330,7 @@ void ComparatorMeasurement::clear()
 	m_compareAppSignalID.clear();
 	m_outputAppSignalID.clear();
 
-	m_spType = SETPOINT_TYPE_COMP;
+	m_cmpValueType = Metrology::CmpValueTypeSetPoint;
 	m_cmpType = E::CmpType::Greate;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
@@ -1390,8 +1390,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int spType = ioParam.comparatorSpType();
-	if (spType < 0 || spType >= SETPOINT_TYPE_COUNT)
+	int cmpValueType = ioParam.comparatorValueType();
+	if (cmpValueType < 0 || cmpValueType >= Metrology::CmpValueTypeCount)
 	{
 		assert(false);
 		return;
@@ -1446,26 +1446,10 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	// nominal
 	//
 
-	setSpType(spType);
-	setCmpType(comparatorEx->cmpType());
+	setCmpValueType(cmpValueType);
+	setCmpType(cmpValueType, comparatorEx->cmpType());
 
-	double engineering = comparatorEx->compareOnlineValue();
-
-	if (spType == SETPOINT_TYPE_HYST)
-	{
-		switch (comparatorEx->cmpType())
-		{
-			case E::CmpType::Less:
-				setCmpType(E::CmpType::Greate);
-				engineering += comparatorEx->hysteresisOnlineValue();
-				break;
-			case E::CmpType::Greate:
-				setCmpType(E::CmpType::Less);
-				engineering -= comparatorEx->hysteresisOnlineValue();
-				break;
-		}
-	}
-
+	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
 	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -1536,8 +1520,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int spType = ioParam.comparatorSpType();
-	if (spType < 0 || spType >= SETPOINT_TYPE_COUNT)
+	int cmpValueType = ioParam.comparatorValueType();
+	if (cmpValueType < 0 || cmpValueType >= Metrology::CmpValueTypeCount)
 	{
 		assert(false);
 		return;
@@ -1592,26 +1576,10 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	// nominal
 	//
 
-	setSpType(spType);
-	setCmpType(comparatorEx->cmpType());
+	setCmpValueType(cmpValueType);
+	setCmpType(cmpValueType, comparatorEx->cmpType());
 
-	double engineering = comparatorEx->compareOnlineValue();
-
-	if (spType == SETPOINT_TYPE_HYST)
-	{
-		switch (comparatorEx->cmpType())
-		{
-			case E::CmpType::Less:
-				setCmpType(E::CmpType::Greate);
-				engineering += comparatorEx->hysteresisOnlineValue();
-				break;
-			case E::CmpType::Greate:
-				setCmpType(E::CmpType::Less);
-				engineering -= comparatorEx->hysteresisOnlineValue();
-				break;
-		}
-	}
-
+	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
 	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
 	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, inParam);
 
@@ -1678,15 +1646,15 @@ void ComparatorMeasurement::calcError()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorMeasurement::spTypeStr() const
+QString ComparatorMeasurement::cmpValueTypeStr() const
 {
-	if (m_spType < 0 || m_spType >= SETPOINT_TYPE_COUNT)
+	if (m_cmpValueType < 0 || m_cmpValueType >= Metrology::CmpValueTypeCount)
 	{
 		assert(0);
 		return QString("N/A");
 	}
 
-	return SetPointType[m_spType];
+	return Metrology::CmpValueType[m_cmpValueType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1702,6 +1670,40 @@ QString ComparatorMeasurement::cmpTypeStr() const
 	}
 
 	return typeStr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorMeasurement::setCmpType(int cmpValueType, E::CmpType cmpType)
+{
+	if (cmpValueType < 0 || cmpValueType >= Metrology::CmpValueTypeCount)
+	{
+		assert(0);
+		return;
+	}
+
+	switch (cmpValueType)
+	{
+		case Metrology::CmpValueTypeSetPoint:
+
+			m_cmpType = cmpType;
+
+			break;
+
+		case Metrology::CmpValueTypeHysteresis:
+
+			switch (cmpType)
+			{
+				case E::CmpType::Less:		m_cmpType = E::CmpType::Greate;	break;
+				case E::CmpType::Greate:	m_cmpType = E::CmpType::Less;	break;
+			}
+
+			break;
+
+		default:
+			assert(0);
+			break;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2115,7 +2117,7 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 	m_compareAppSignalID = from.m_compareAppSignalID;
 	m_outputAppSignalID = from.m_outputAppSignalID;
 
-	m_spType = from.m_spType;
+	m_cmpValueType = from.m_cmpValueType;
 	m_cmpType = from.m_cmpType;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
@@ -2486,15 +2488,25 @@ bool MeasureBase::remove(int index, bool removeData)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::remove(const QVector<int>& keyList)
+void MeasureBase::remove(int measureType, const QVector<int>& keyList)
 {
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	int keyCount = keyList.count();
+	if (keyCount == 0)
+	{
+		return;
+	}
+
 	int measureCount = count();
 	if (measureCount == 0)
 	{
 		return;
 	}
 
-	int keyCount = keyList.count();
 	for(int k = 0; k < keyCount; k++)
 	{
 		for(int i = measureCount - 1; i >= 0; i--)
@@ -2505,18 +2517,33 @@ void MeasureBase::remove(const QVector<int>& keyList)
 				continue;
 			}
 
-			if (pMeasurement->measureID() == keyList[k])
+			if (pMeasurement->measureType() != measureType)
 			{
-				remove(i);
+				continue;
 			}
+
+			if (pMeasurement->measureID() != keyList[k])
+			{
+				continue;
+			}
+
+			remove(i);
+
+			break;
 		}
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatistics(StatisticItem& si)
+void MeasureBase::updateStatistics(int measureType, StatisticItem& si)
 {
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
 	Metrology::Signal* pSignal = si.signal();
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
@@ -2558,12 +2585,17 @@ void MeasureBase::updateStatistics(StatisticItem& si)
 			continue;
 		}
 
+		if (pMeasurement->measureType() != measureType)
+		{
+			continue;
+		}
+
 		if (pMeasurement->signalHash() != signalHash)
 		{
 			continue;
 		}
 
-		switch(pMeasurement->measureType())
+		switch(measureType)
 		{
 			case MEASURE_TYPE_LINEARITY:
 			{
@@ -2580,7 +2612,8 @@ void MeasureBase::updateStatistics(StatisticItem& si)
 					si.setState(StatisticItem::State::Failed);
 				}
 			}
-				break;
+
+			break;
 
 			case MEASURE_TYPE_COMPARATOR:
 			{
@@ -2590,7 +2623,7 @@ void MeasureBase::updateStatistics(StatisticItem& si)
 					break;
 				}
 
-				if (pComparatorMeasurement->spType() == SETPOINT_TYPE_HYST)
+				if (pComparatorMeasurement->cmpValueType() == Metrology::CmpValueTypeHysteresis)
 				{
 					break;
 				}
@@ -2628,7 +2661,8 @@ void MeasureBase::updateStatistics(StatisticItem& si)
 					si.setState(StatisticItem::State::Failed);
 				}
 			}
-				break;
+
+			break;
 
 			default:
 				assert(0);

@@ -920,16 +920,45 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareOnlineValue()
+	double ComparatorEx::compareOnlineValue(int cmpValueType)
 	{
+		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		{
+			return 0.0;
+		}
+
+		double hysteresisValue = hysteresisOnlineValue();	// get hysteresis value
+
 		//
 		//
 		double deviation = 0;
 
 		switch (m_deviationType)
 		{
-			case DeviationType::Down:	deviation = -hysteresisOnlineValue() / 2;	break;
-			case DeviationType::Up:		deviation = hysteresisOnlineValue() / 2;	break;
+			case DeviationType::Unused:													// for comparators: Less and Greate
+
+				if (cmpValueType == CmpValueTypeHysteresis)
+				{
+					switch (cmpType())
+					{
+						case E::CmpType::Less:		deviation = hysteresisValue;	break;
+						case E::CmpType::Greate:	deviation -= hysteresisValue;	break;
+					}
+				}
+
+				break;
+
+			case DeviationType::Down:													// for comparators: Equal and NotEqual
+
+				deviation = -hysteresisValue / 2;
+
+				break;
+
+			case DeviationType::Up:														// for comparators: Equal and NotEqual
+
+				deviation = hysteresisValue / 2;
+
+				break;
 		}
 
 		//
@@ -954,9 +983,14 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareOnlineValueStr()
+	QString ComparatorEx::compareOnlineValueStr(int cmpValueType)
 	{
-		return QString::number(compareOnlineValue(), 'f', valuePrecision());
+		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		{
+			return QString();
+		}
+
+		return QString::number(compareOnlineValue(cmpValueType), 'f', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

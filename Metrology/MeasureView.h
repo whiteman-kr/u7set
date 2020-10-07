@@ -51,7 +51,7 @@ public:
 	QString				text(int row, int column, Measurement* pMeasurement) const;
 
 	bool				append(Measurement* pMeasurement);
-	Measurement*		at(int index);
+	Measurement*		at(int index) const;
 	void				remove(const QVector<int>& removeIndexList);
 
 	void				set(const QVector<Measurement*>& list_add);

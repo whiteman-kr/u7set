@@ -408,7 +408,7 @@ void StatisticBase::updateStatistics()
 	{
 		StatisticItem& si = m_statisticList[m_measureType][i];
 
-		theMeasureBase.updateStatistics(si);
+		theMeasureBase.updateStatistics(m_measureType, si);
 
 		if (si.isMeasured() == true)
 		{
@@ -451,7 +451,7 @@ void StatisticBase::updateStatistics(Hash signalHash)
 
 		if (pSignal->param().hash() == signalHash)
 		{
-			theMeasureBase.updateStatistics(m_statisticList[m_measureType][i]);
+			theMeasureBase.updateStatistics(m_measureType, m_statisticList[m_measureType][i]);
 		}
 	}
 

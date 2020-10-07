@@ -25,7 +25,6 @@ MeasureTable::~MeasureTable()
 	QMutexLocker l(&m_measureMutex);
 
 	m_measureList.clear();
-	m_measureCount = 0;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -113,8 +112,13 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	Measurement* pMeasurement = m_measureList[rowIndex];
+	Measurement* pMeasurement = at(rowIndex);
 	if (pMeasurement == nullptr)
+	{
+		return QVariant();
+	}
+
+	if (pMeasurement->measureType() != m_measureType)
 	{
 		return QVariant();
 	}
@@ -472,7 +476,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 		case MVC_CMN_C_MODULE:					result = m->location().moduleStr(); break;
 		case MVC_CMN_C_PLACE:					result = m->location().placeStr(); break;
 
-		case MVC_CMN_C_SP_TYPE:					result = m->spTypeStr(); break;
+		case MVC_CMN_C_SP_TYPE:					result = m->cmpValueTypeStr(); break;
 		case MVC_CMN_C_CMP_TYPE:				result = m->cmpTypeStr(); break;
 
 		case MVC_CMN_C_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
@@ -548,7 +552,7 @@ bool MeasureTable::append(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement* MeasureTable::at(int index)
+Measurement* MeasureTable::at(int index) const
 {
 	QMutexLocker l(&m_measureMutex);
 
@@ -632,7 +636,7 @@ void MeasureTable::clear()
 		m_measureMutex.lock();
 
 			m_measureList.clear();
-			m_measureCount = 0;
+			m_measureCount = m_measureList.count();
 
 		m_measureMutex.unlock();
 
@@ -902,7 +906,7 @@ void MeasureView::removeMeasure()
 
 	// remove from MesaureBase
 	//
-	theMeasureBase.remove(keyList);
+	theMeasureBase.remove(m_measureType, keyList);
 
 	QMessageBox::information(this, tr("Delete"), tr("Deleted %1 measurement(s)").arg(removeIndexList.count()));
 }

@@ -41,7 +41,7 @@ CalibratorManager::~CalibratorManager()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorManager::calibratorIsConnected()
+bool CalibratorManager::calibratorIsConnected() const
 {
 	if (m_pCalibrator == nullptr)
 	{
@@ -350,8 +350,6 @@ void CalibratorManager::onCalibratorConnect()
 	m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
 	enableInterface(true);
-
-	emit calibratorGetValue();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

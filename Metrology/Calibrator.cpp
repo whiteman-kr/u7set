@@ -98,6 +98,8 @@ bool Calibrator::open()
 
 	setConnected(true);
 
+	setRemoteControl(true);
+
 	return true;
 }
 
@@ -112,8 +114,6 @@ bool Calibrator::getIDN()
 		emit error(m_lastError);
 		return false;
 	}
-
-	setRemoteControl(true);
 
 	send(CALIBRATOR_IDN);
 	if (recv() == false)
@@ -872,6 +872,8 @@ bool Calibrator::setRemoteControl(bool enable)
 		{
 			send(CALYS75_MANUAL_CONTROL);
 		}
+
+		QThread::msleep(100);
 	}
 
 	return true;
@@ -1031,12 +1033,12 @@ void Calibrator::convert(double& val, int mode, int order)
 
 void Calibrator::close()
 {
-	setWaitResponse(false);
-
 	if (m_port.isOpen() == true)
 	{
 		setRemoteControl(false);
 	}
+
+	setWaitResponse(false);
 
 	clear();
 

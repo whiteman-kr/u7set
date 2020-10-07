@@ -134,7 +134,7 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 				break;
 		}
 
-		theMeasureBase.updateStatistics(si);
+		theMeasureBase.updateStatistics(m_measureType, si);
 		if (si.isMeasured() == true)
 		{
 			signalID.append(pMetrologySignal->param().appSignalID() + "\n");
@@ -270,6 +270,14 @@ bool MeasureThread::inputsOfmoduleIsSame()
 
 void MeasureThread::waitMeasureTimeout()
 {
+	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	{
+		if (getConnectedCalibrators() == 0)
+		{
+			stopMeasure();
+		}
+	}
+
 	// Timeout for Measure
 	//
 	int measureTimeout = theOptions.toolBar().measureTimeout();
@@ -691,6 +699,11 @@ void MeasureThread::measureLinearity()
 
 			while(pCalibratorManager->isReadyForManage() != true)
 			{
+				if (pCalibratorManager->calibratorIsConnected() == false)
+				{
+					break;
+				}
+
 				if (m_cmdStopMeasure == true)
 				{
 					break;
@@ -799,23 +812,23 @@ void MeasureThread::measureComprators()
 		// first pass to measure set point of comparator
 		// second pass to measure set point of hysteresis
 		//
-		for(int spType = 0; spType < SETPOINT_TYPE_COUNT; spType ++)
+		for(int cmpValueType = 0; cmpValueType < Metrology::CmpValueTypeCount; cmpValueType ++)
 		{
 			//
 			//
-			if (theOptions.comparator().enableMeasureHysteresis() == false && spType == SETPOINT_TYPE_HYST)
+			if (theOptions.comparator().enableMeasureHysteresis() == false && cmpValueType == Metrology::CmpValueTypeHysteresis)
 			{
-				break;
+				break;  // go to next comparator
 			}
 
 			// select active output state
 			//
 			bool activeOutputState = false;	// output state of comparator, denend from pass
 
-			switch (spType)
+			switch (cmpValueType)
 			{
-				case SETPOINT_TYPE_COMP:	activeOutputState = false;	break;
-				case SETPOINT_TYPE_HYST:	activeOutputState = true;	break;
+				case Metrology::CmpValueTypeSetPoint:	activeOutputState = false;	break;
+				case Metrology::CmpValueTypeHysteresis:	activeOutputState = true;	break;
 			}
 
 			// phase of preparation started
@@ -830,10 +843,10 @@ void MeasureThread::measureComprators()
 				//
 				for (int pr = 0; pr < MEASURE_THREAD_CMP_PREPARE_COUNT; pr++)
 				{
-					switch (spType)
+					switch (cmpValueType)
 					{
-						case SETPOINT_TYPE_COMP:	emit measureInfo(tr("Comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));					break;
-						case SETPOINT_TYPE_HYST:	emit measureInfo(tr("Hysteresis of comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));	break;
+						case Metrology::CmpValueTypeSetPoint:	emit measureInfo(tr("Comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));					break;
+						case Metrology::CmpValueTypeHysteresis:	emit measureInfo(tr("Hysteresis of comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));	break;
 					}
 
 					// set electric value on calibrators, depend from comparator value
@@ -873,8 +886,8 @@ void MeasureThread::measureComprators()
 
 						//
 						//
-						double compareVal = comparatorEx->compareOnlineValue();			// get compare value
-						double hysteresisVal = comparatorEx->hysteresisOnlineValue();	// get hysteresis value
+						double compareVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare value
+						double hysteresisVal = comparatorEx->hysteresisOnlineValue();			// get hysteresis value
 
 						// calc start value for comaprator
 						//
@@ -911,9 +924,9 @@ void MeasureThread::measureComprators()
 
 						double engineeringVal = 0;
 
-						switch (spType)
+						switch (cmpValueType)
 						{
-							case SETPOINT_TYPE_COMP:
+							case Metrology::CmpValueTypeSetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -924,7 +937,7 @@ void MeasureThread::measureComprators()
 
 								break;
 
-							case SETPOINT_TYPE_HYST:
+							case Metrology::CmpValueTypeHysteresis:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -936,9 +949,11 @@ void MeasureThread::measureComprators()
 								break;
 						}
 
+
 						double engineeringCalcVal = conversionCalcVal(engineeringVal, CT_CALC_VAL_INVERSION, m_activeIoParamList[ch].signalConnectionType(), m_activeIoParamList[ch]);
 
 						double electricVal = conversion(engineeringCalcVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+
 
 						if (electricVal < inParam.electricLowLimit())
 						{
@@ -967,6 +982,11 @@ void MeasureThread::measureComprators()
 
 						while(pCalibratorManager->isReadyForManage() != true)
 						{
+							if (pCalibratorManager->calibratorIsConnected() == false)
+							{
+								break;
+							}
+
 							if (m_cmdStopMeasure == true)
 							{
 								break;
@@ -986,10 +1006,10 @@ void MeasureThread::measureComprators()
 					//
 					if (pr == MEASURE_THREAD_CMP_PREAPRE_1)
 					{
-						switch (spType)
+						switch (cmpValueType)
 						{
-							case SETPOINT_TYPE_COMP:	emit measureInfo(tr("Comparator %1, additional delay").arg(cmp + 1));				break;
-							case SETPOINT_TYPE_HYST:	emit measureInfo(tr("Hysteresis of comparator %1, additional delay").arg(cmp + 1));	break;
+							case Metrology::CmpValueTypeSetPoint:	emit measureInfo(tr("Comparator %1, additional delay").arg(cmp + 1));				break;
+							case Metrology::CmpValueTypeHysteresis:	emit measureInfo(tr("Hysteresis of comparator %1, additional delay").arg(cmp + 1));	break;
 						}
 
 						int timeoutStep = theOptions.toolBar().measureTimeout() / 100;
@@ -1142,10 +1162,10 @@ void MeasureThread::measureComprators()
 
 			while (currentStateComparatorsInAllChannels != COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1)
 			{
-				switch (spType)
+				switch (cmpValueType)
 				{
-					case SETPOINT_TYPE_COMP:	emit measureInfo(tr("Comparator %1, Step %2").arg(cmp + 1).arg(step + 1));					break;
-					case SETPOINT_TYPE_HYST:	emit measureInfo(tr("Hysteresis of comparator %1, Step %2").arg(cmp + 1).arg(step + 1));	break;
+					case Metrology::CmpValueTypeSetPoint:	emit measureInfo(tr("Comparator %1, Step %2").arg(cmp + 1).arg(step + 1));					break;
+					case Metrology::CmpValueTypeHysteresis:	emit measureInfo(tr("Hysteresis of comparator %1, Step %2").arg(cmp + 1).arg(step + 1));	break;
 				}
 
 				currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0;
@@ -1185,9 +1205,9 @@ void MeasureThread::measureComprators()
 					//
 					if (comparatorEx->outputState() == activeOutputState)
 					{
-						switch (spType)
+						switch (cmpValueType)
 						{
-							case SETPOINT_TYPE_COMP:
+							case Metrology::CmpValueTypeSetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1198,7 +1218,7 @@ void MeasureThread::measureComprators()
 
 								break;
 
-							case SETPOINT_TYPE_HYST:
+							case Metrology::CmpValueTypeHysteresis:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1232,6 +1252,11 @@ void MeasureThread::measureComprators()
 
 					while(pCalibratorManager->isReadyForManage() != true)
 					{
+						if (pCalibratorManager->calibratorIsConnected() == false)
+						{
+							break;
+						}
+
 						if (m_cmdStopMeasure == true)
 						{
 							break;
@@ -1282,7 +1307,7 @@ void MeasureThread::measureComprators()
 				}
 
 				m_activeIoParamList[ch].setComparatorIndex(cmp);
-				m_activeIoParamList[ch].setComparatorSpType(spType);
+				m_activeIoParamList[ch].setComparatorValueType(cmpValueType);
 
 				ComparatorMeasurement* pMeasurement = new ComparatorMeasurement(m_activeIoParamList[ch]);
 				if (pMeasurement == nullptr)

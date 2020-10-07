@@ -12,7 +12,7 @@
 
 // ==============================================================================================
 
-const int		CALIBRATOR_TIMEOUT			= 10000,	// 10 seconds
+const int		CALIBRATOR_TIMEOUT			= 5000,		// 5 seconds
 				CALIBRATOR_TIMEOUT_STEP		= 10;		// 10 milliseconds
 
 // ----------------------------------------------------------------------------------------------
@@ -256,7 +256,7 @@ public:
 
 	int			channel() const{ return m_channel; }
 
-	bool		isOpenPort() const { return m_port.isOpen(); }
+	bool		portIsOpen() const { return m_port.isOpen(); }
 
 	QString		portName() const { return m_portName; }
 	void		setPortName(const QString& portName) { m_portName = portName; }

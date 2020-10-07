@@ -90,8 +90,6 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 
 void CalibratorBase::removeCalibrators()
 {
-	emit calibratorClose();
-
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
@@ -102,17 +100,33 @@ void CalibratorBase::removeCalibrators()
 		}
 
 		Calibrator* calibrator = manager->calibrator();
-		if (calibrator != nullptr)
+		if (calibrator == nullptr)
 		{
-			calibrator->setWaitResponse(false);
+			continue;
+		}
 
-			QThread *pThread = calibrator->thread();
-			if (pThread != nullptr)
+		if (calibrator->portIsOpen() == true)
+		{
+			int timeout = 0;
+
+			while (calibrator->portIsOpen() == true)
 			{
-				pThread->quit();
-				pThread->wait();
-				pThread->deleteLater();
+				QThread::msleep(CALIBRATOR_TIMEOUT_STEP);
+
+				timeout += CALIBRATOR_TIMEOUT_STEP;
+				if (timeout >= CALIBRATOR_TIMEOUT)
+				{
+					break;
+				}
 			}
+		}
+
+		QThread *pThread = calibrator->thread();
+		if (pThread != nullptr)
+		{
+			pThread->quit();
+			pThread->wait();
+			pThread->deleteLater();
 		}
 
 		delete manager;
@@ -670,6 +684,8 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
 
 void CalibratorBase::clear()
 {
+	emit calibratorClose();		// close all calibratirs
+
 	removeCalibrators();
 }
 

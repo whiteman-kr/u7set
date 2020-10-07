@@ -348,6 +348,19 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	const char* const CmpValueType[] =
+	{
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point"),
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis"),
+	};
+
+	const int	CmpValueTypeCount		= sizeof(CmpValueType)/sizeof(CmpValueType[0]);
+
+	const int	CmpValueTypeSetPoint		= 0,
+				CmpValueTypeHysteresis		= 1;
+
+	// ==============================================================================================
+
 	class ComparatorEx : public ::Comparator
 	{
 	public:
@@ -404,14 +417,14 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue();					// current online (run time) value
-		QString compareOnlineValueStr();				// str current oline (run time) value
-		double compareConstValue() const;				// default offine value
-		QString compareDefaultValueStr() const;			// str default offine value
+		double compareOnlineValue(int cmpValueType);			// current online (run time) value
+		QString compareOnlineValueStr(int cmpValueType);		// str current oline (run time) value
+		double compareConstValue() const;						// default offine value
+		QString compareDefaultValueStr() const;					// str default offine value
 
-		double hysteresisOnlineValue();					// current oline (run time) value
-		QString hysteresisOnlineValueStr();				// str current oline (run time) value
-		QString hysteresisDefaultValueStr() const;		// str default offine value
+		double hysteresisOnlineValue();							// current oline (run time) value
+		QString hysteresisOnlineValueStr();						// str current oline (run time) value
+		QString hysteresisDefaultValueStr() const;				// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;
