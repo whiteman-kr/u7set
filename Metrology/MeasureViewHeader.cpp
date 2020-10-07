@@ -33,6 +33,7 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Uncertainty"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Amount measuremets"), 80, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 1"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 2"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -58,7 +59,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -326,6 +326,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
 						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
+						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
 						{
@@ -345,6 +346,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, true);
 						setColumnVisible(MVC_CMN_L_SD, true);
 						setColumnVisible(MVC_CMN_L_BORDER, true);
+						setColumnVisible(MVC_CMN_L_UNCERTAINTY, true);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
 						{
@@ -365,6 +367,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
 						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
+						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
 						{

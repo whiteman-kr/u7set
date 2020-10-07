@@ -340,11 +340,20 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		return QString();
 	}
 
-	int detailLimitType = MEASURE_LIMIT_TYPE_ELECTRIC;
+	int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
 
-	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_ENGINEERING)
+	switch (theOptions.linearity().viewType())
 	{
-		detailLimitType = MEASURE_LIMIT_TYPE_ENGINEER;
+		case LO_VIEW_TYPE_SIMPLE:
+		case LO_VIEW_TYPE_EXTENDED:				limitType = theOptions.linearity().limitType();	break;
+		case LO_VIEW_TYPE_DETAIL_ELRCTRIC:		limitType = MEASURE_LIMIT_TYPE_ELECTRIC;		break;
+		case LO_VIEW_TYPE_DETAIL_ENGINEERING:	limitType = MEASURE_LIMIT_TYPE_ENGINEER;		break;
+		default:								return QString();
+	}
+
+	if (limitType == MEASURE_LIMIT_TYPE_UNDEFINED)
+	{
+		return QString();
 	}
 
 	QString result;
@@ -376,30 +385,31 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 	    case MVC_CMN_L_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureCount()); break;
-		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(detailLimitType, 0); break;
-		case MVC_CMN_L_VALUE_1:					result = m->measureItemStr(detailLimitType, 1); break;
-		case MVC_CMN_L_VALUE_2:					result = m->measureItemStr(detailLimitType, 2); break;
-		case MVC_CMN_L_VALUE_3:					result = m->measureItemStr(detailLimitType, 3); break;
-		case MVC_CMN_L_VALUE_4:					result = m->measureItemStr(detailLimitType, 4); break;
-		case MVC_CMN_L_VALUE_5:					result = m->measureItemStr(detailLimitType, 5); break;
-		case MVC_CMN_L_VALUE_6:					result = m->measureItemStr(detailLimitType, 6); break;
-		case MVC_CMN_L_VALUE_7:					result = m->measureItemStr(detailLimitType, 7); break;
-		case MVC_CMN_L_VALUE_8:					result = m->measureItemStr(detailLimitType, 8); break;
-		case MVC_CMN_L_VALUE_9:					result = m->measureItemStr(detailLimitType, 9); break;
-		case MVC_CMN_L_VALUE_10:				result = m->measureItemStr(detailLimitType, 10); break;
-		case MVC_CMN_L_VALUE_11:				result = m->measureItemStr(detailLimitType, 11); break;
-		case MVC_CMN_L_VALUE_12:				result = m->measureItemStr(detailLimitType, 12); break;
-		case MVC_CMN_L_VALUE_13:				result = m->measureItemStr(detailLimitType, 13); break;
-		case MVC_CMN_L_VALUE_14:				result = m->measureItemStr(detailLimitType, 14); break;
-		case MVC_CMN_L_VALUE_15:				result = m->measureItemStr(detailLimitType, 15); break;
-		case MVC_CMN_L_VALUE_16:				result = m->measureItemStr(detailLimitType, 16); break;
-		case MVC_CMN_L_VALUE_17:				result = m->measureItemStr(detailLimitType, 17); break;
-		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(detailLimitType, 18); break;
-		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(detailLimitType, 19); break;
+		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(limitType, 0); break;
+		case MVC_CMN_L_VALUE_1:					result = m->measureItemStr(limitType, 1); break;
+		case MVC_CMN_L_VALUE_2:					result = m->measureItemStr(limitType, 2); break;
+		case MVC_CMN_L_VALUE_3:					result = m->measureItemStr(limitType, 3); break;
+		case MVC_CMN_L_VALUE_4:					result = m->measureItemStr(limitType, 4); break;
+		case MVC_CMN_L_VALUE_5:					result = m->measureItemStr(limitType, 5); break;
+		case MVC_CMN_L_VALUE_6:					result = m->measureItemStr(limitType, 6); break;
+		case MVC_CMN_L_VALUE_7:					result = m->measureItemStr(limitType, 7); break;
+		case MVC_CMN_L_VALUE_8:					result = m->measureItemStr(limitType, 8); break;
+		case MVC_CMN_L_VALUE_9:					result = m->measureItemStr(limitType, 9); break;
+		case MVC_CMN_L_VALUE_10:				result = m->measureItemStr(limitType, 10); break;
+		case MVC_CMN_L_VALUE_11:				result = m->measureItemStr(limitType, 11); break;
+		case MVC_CMN_L_VALUE_12:				result = m->measureItemStr(limitType, 12); break;
+		case MVC_CMN_L_VALUE_13:				result = m->measureItemStr(limitType, 13); break;
+		case MVC_CMN_L_VALUE_14:				result = m->measureItemStr(limitType, 14); break;
+		case MVC_CMN_L_VALUE_15:				result = m->measureItemStr(limitType, 15); break;
+		case MVC_CMN_L_VALUE_16:				result = m->measureItemStr(limitType, 16); break;
+		case MVC_CMN_L_VALUE_17:				result = m->measureItemStr(limitType, 17); break;
+		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(limitType, 18); break;
+		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(limitType, 19); break;
 
-		case MVC_CMN_L_SYSTEM_ERROR:			result = m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR); break;
-		case MVC_CMN_L_SD:						result = m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_SD); break;
-		case MVC_CMN_L_BORDER:					result = tr("± ") + m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
+		case MVC_CMN_L_SYSTEM_ERROR:			result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR); break;
+		case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SD); break;
+		case MVC_CMN_L_BORDER:					result = tr("± ") + m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
+		case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY); break;
 
 		case MVC_CMN_L_ERROR:					result = m->errorStr(); break;
 		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(); break;

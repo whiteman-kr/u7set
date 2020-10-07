@@ -448,7 +448,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 						showErrorFromLimitList.append(MeasureLimitType[t]);
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
-					item->setValue(m_options.linearity().showErrorFromLimit());
+					item->setValue(m_options.linearity().limitType());
 					appendProperty(item, page, LO_PARAM_SHOW_ERROR_FROM_LIMIT);
 					errorGroup->addSubProperty(item);
 
@@ -584,7 +584,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 						showErrorFromLimitList.append(MeasureLimitType[t]);
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
-					item->setValue(m_options.comparator().showErrorFromLimit());
+					item->setValue(m_options.comparator().limitType());
 					appendProperty(item, page, CO_PARAM_SHOW_ERROR_FROM_LIMIT);
 					errorGroup->addSubProperty(item);
 
@@ -1141,7 +1141,7 @@ void OptionsDialog::applyProperty()
 					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());						break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
 															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY, true);	break;
-					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setShowErrorFromLimit(value.toInt());
+					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setLimitType(value.toInt());
 															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY, true);	break;
 					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());					break;
 					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());				break;
@@ -1171,7 +1171,7 @@ void OptionsDialog::applyProperty()
 					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());						break;
 					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());			break;
 					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());							break;
-					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setShowErrorFromLimit(value.toInt());
+					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setLimitType(value.toInt());
 															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_COMPARATOR, true);	break;
 					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);			break;
 					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());			break;
