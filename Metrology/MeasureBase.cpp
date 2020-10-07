@@ -1086,13 +1086,7 @@ void LinearityMeasurement::calcAdditionalParam(Calibrator* pCalibrator, E::Senso
 
 	for(int index = 0; index < measureCount(); index++)
 	{
-		qDebug() << measure(limitType);
-		qDebug() << measureItemArray(limitType, index);
-		qDebug() << pow(measure(limitType) - measureItemArray(limitType, index), 2);
-
 		sumDeviation += pow(measure(limitType) - measureItemArray(limitType, index), 2);		// 1. sum of deviations
-
-		qDebug() << sumDeviation;
 	}
 
 	sumDeviation /= static_cast<double>(measureCount() - 1);									// 2. divide on (count of measure - 1)
@@ -1863,7 +1857,42 @@ void MeasureBase::clear(bool removeData)
 				continue;
 			}
 
-			delete pMeasurement;
+			switch(pMeasurement->measureType())
+			{
+				case MEASURE_TYPE_LINEARITY:
+					{
+						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+						if (pLinearityMeasurement == nullptr)
+						{
+							assert(0);
+							delete pMeasurement;
+							break;
+						}
+
+						delete pLinearityMeasurement;
+					}
+					break;
+
+				case MEASURE_TYPE_COMPARATOR:
+					{
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							assert(0);
+							delete pMeasurement;
+							break;
+						}
+
+						delete pComparatorMeasurement;
+					}
+
+					break;
+
+				default:
+					assert(0);
+					delete pMeasurement;
+					break;
+			}
 		}
 	}
 
@@ -1922,13 +1951,25 @@ int MeasureBase::load(int measureType)
 					default:								assert(0);
 				}
 
-				// load data to memory
-
-				if (data.pMeasurement != nullptr)
+				if (data.pMeasurement == nullptr)
 				{
-					if (table->read(data.pMeasurement) == data.recordCount)
+					continue;
+				}
+
+				// load data to memory
+				//
+
+				if (table->read(data.pMeasurement) == data.recordCount)
+				{
+					loadedTablesInMemory.append(data);
+				}
+				else
+				{
+					switch(measureType)
 					{
-						loadedTablesInMemory.append(data);
+						case MEASURE_TYPE_LINEARITY:	delete [] static_cast<LinearityMeasurement*> (data.pMeasurement);	break;
+						case MEASURE_TYPE_COMPARATOR:	delete [] static_cast<ComparatorMeasurement*> (data.pMeasurement);	break;
+						default:						assert(0);
 					}
 				}
 
@@ -1936,6 +1977,7 @@ int MeasureBase::load(int measureType)
 			}
 		}
 	}
+
 
 	// if tables for current measureType is not exist, then exit
 	//
@@ -1973,18 +2015,49 @@ int MeasureBase::load(int measureType)
 
 				// update main measurement from sub measurement
 				//
-				if (pMainMeasure->measureID() == pSubMeasure->measureID())
+				if (pMainMeasure->measureID() != pSubMeasure->measureID())
 				{
-					switch(subTable.tableType)
-					{
-						case SQL_TABLE_LINEARITY_20_EL:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);		break;
-						case SQL_TABLE_LINEARITY_20_EN:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);		break;
-						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);	break;
-						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);	break;
-					}
-
-					break;
+					continue;
 				}
+
+				switch (pMainMeasure->measureType())
+				{
+					case MEASURE_TYPE_LINEARITY:
+						{
+							LinearityMeasurement* pSupMeasurement = dynamic_cast<LinearityMeasurement*>(pMainMeasure);
+							if (pSupMeasurement == nullptr)
+							{
+								continue;
+							}
+
+							switch(subTable.tableType)
+							{
+								case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pSupMeasurement->updateAdditionalParam(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);	break;
+								case SQL_TABLE_LINEARITY_ADD_VAL_EN:	pSupMeasurement->updateAdditionalParam(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);	break;
+								case SQL_TABLE_LINEARITY_20_EL:			pSupMeasurement->updateMeasureArray(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);		break;
+								case SQL_TABLE_LINEARITY_20_EN:			pSupMeasurement->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);		break;
+							}
+						}
+						break;
+
+					case MEASURE_TYPE_COMPARATOR:
+						{
+							ComparatorMeasurement* pSupMeasurement = dynamic_cast<ComparatorMeasurement*>(pMainMeasure);
+							if (pSupMeasurement == nullptr)
+							{
+								continue;
+							}
+						}
+
+						break;
+
+					default:
+						break;
+				}
+
+
+
+				break;
 			}
 		}
 	}

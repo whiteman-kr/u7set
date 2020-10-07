@@ -118,11 +118,6 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	if (pMeasurement->measureType() != m_measureType)
-	{
-		return QVariant();
-	}
-
 	int columnIndex = index.column();
 	if (columnIndex < 0 || columnIndex > m_header.count())
 	{

@@ -117,7 +117,6 @@ const int				SQL_OBJECT_ID_UNKNONW = -1;
 // ----------------------------------------------------------------------------------------------
 //
 // unique object ID in the database
-// x00 - measurements, x10 - points, x20 - signals, , x30 - racks
 //
 const int				SqlObjectID[SQL_TABLE_COUNT] =
 {
@@ -139,8 +138,10 @@ const int				SqlObjectID[SQL_TABLE_COUNT] =
 						320,		//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
 
 						400,		//	SQL_TABLE_REPORT_HEADER
-						530,		//	SQL_TABLE_RACK_GROUP
-						620,		//	SQL_TABLE_SIGNAL_CONNECTION
+
+						500,		//	SQL_TABLE_RACK_GROUP
+
+						600,		//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================

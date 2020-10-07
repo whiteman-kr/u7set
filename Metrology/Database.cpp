@@ -95,6 +95,33 @@ int SqlFieldBase::init(int objectType, int)
 
 			break;
 
+		case SQL_TABLE_LINEARITY_ADD_VAL_EL:
+		case SQL_TABLE_LINEARITY_ADD_VAL_EN:
+
+			append("ObjectID",						QVariant::Int);
+			append("MeasureID",						QVariant::Int);
+
+			append(QString("ValueCount"),			QVariant::Int);
+
+			append(QString("Value0"),				QVariant::Double);
+			append(QString("Value1"),				QVariant::Double);
+			append(QString("Value2"),				QVariant::Double);
+			append(QString("Value3"),				QVariant::Double);
+			append(QString("Value4"),				QVariant::Double);
+			append(QString("Value5"),				QVariant::Double);
+			append(QString("Value6"),				QVariant::Double);
+			append(QString("Value7"),				QVariant::Double);
+			append(QString("Value8"),				QVariant::Double);
+			append(QString("Value9"),				QVariant::Double);
+			append(QString("Value10"),				QVariant::Double);
+			append(QString("Value11"),				QVariant::Double);
+			append(QString("Value12"),				QVariant::Double);
+			append(QString("Value13"),				QVariant::Double);
+			append(QString("Value14"),				QVariant::Double);
+			append(QString("Value15"),				QVariant::Double);
+
+			break;
+
 		case SQL_TABLE_LINEARITY_20_EL:
 		case SQL_TABLE_LINEARITY_20_EN:
 
@@ -123,33 +150,6 @@ int SqlFieldBase::init(int objectType, int)
 			append(QString("Measurement17"),		QVariant::Double);
 			append(QString("Measurement18"),		QVariant::Double);
 			append(QString("Measurement19"),		QVariant::Double);
-
-			break;
-
-		case SQL_TABLE_LINEARITY_ADD_VAL_EL:
-		case SQL_TABLE_LINEARITY_ADD_VAL_EN:
-
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
-
-			append(QString("ValueCount"),			QVariant::Int);
-
-			append(QString("Value0"),				QVariant::Double);
-			append(QString("Value1"),				QVariant::Double);
-			append(QString("Value2"),				QVariant::Double);
-			append(QString("Value3"),				QVariant::Double);
-			append(QString("Value4"),				QVariant::Double);
-			append(QString("Value5"),				QVariant::Double);
-			append(QString("Value6"),				QVariant::Double);
-			append(QString("Value7"),				QVariant::Double);
-			append(QString("Value8"),				QVariant::Double);
-			append(QString("Value9"),				QVariant::Double);
-			append(QString("Value10"),				QVariant::Double);
-			append(QString("Value11"),				QVariant::Double);
-			append(QString("Value12"),				QVariant::Double);
-			append(QString("Value13"),				QVariant::Double);
-			append(QString("Value14"),				QVariant::Double);
-			append(QString("Value15"),				QVariant::Double);
 
 			break;
 
@@ -613,10 +613,10 @@ bool SqlTable::create()
 
 			switch(m_info.objectType())
 			{
-				case SQL_TABLE_LINEARITY_20_EL:
-				case SQL_TABLE_LINEARITY_20_EN:
 				case SQL_TABLE_LINEARITY_ADD_VAL_EL:
 				case SQL_TABLE_LINEARITY_ADD_VAL_EN:
+				case SQL_TABLE_LINEARITY_20_EL:
+				case SQL_TABLE_LINEARITY_20_EN:
 					request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARITY]));
 					break;
 			}
@@ -828,6 +828,41 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				}
 				break;
 
+			case SQL_TABLE_LINEARITY_ADD_VAL_EL:
+			case SQL_TABLE_LINEARITY_ADD_VAL_EN:
+				{
+					int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
+
+					switch(m_info.objectType())
+					{
+						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
+						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = MEASURE_LIMIT_TYPE_ENGINEER;	break;
+						default:								limitType = MEASURE_LIMIT_TYPE_UNDEFINED;	break;
+					}
+
+					if (limitType == MEASURE_LIMIT_TYPE_UNDEFINED)
+					{
+						break;
+					}
+
+					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
+					if (measure == nullptr)
+					{
+						break;
+					}
+
+					measure->setMeasureID(query.value(field++).toInt());
+
+					measure->setAdditionalParamCount(query.value(field++).toInt());
+
+					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY, query.value(field++).toDouble());
+				}
+				break;
+
 			case SQL_TABLE_LINEARITY_20_EL:
 			case SQL_TABLE_LINEARITY_20_EN:
 				{
@@ -875,41 +910,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setMeasureItemArray(limitType, 17, query.value(field++).toDouble());
 					measure->setMeasureItemArray(limitType, 18, query.value(field++).toDouble());
 					measure->setMeasureItemArray(limitType, 19, query.value(field++).toDouble());
-				}
-				break;
-
-			case SQL_TABLE_LINEARITY_ADD_VAL_EL:
-			case SQL_TABLE_LINEARITY_ADD_VAL_EN:
-				{
-					int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
-
-					switch(m_info.objectType())
-					{
-						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
-						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = MEASURE_LIMIT_TYPE_ENGINEER;	break;
-						default:								limitType = MEASURE_LIMIT_TYPE_UNDEFINED;	break;
-					}
-
-					if (limitType == MEASURE_LIMIT_TYPE_UNDEFINED)
-					{
-						break;
-					}
-
-					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
-					if (measure == nullptr)
-					{
-						break;
-					}
-
-					measure->setMeasureID(query.value(field++).toInt());
-
-					measure->setAdditionalParamCount(query.value(field++).toInt());
-
-					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY, query.value(field++).toDouble());
 				}
 				break;
 
@@ -1244,6 +1244,52 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				}
 				break;
 
+			case SQL_TABLE_LINEARITY_ADD_VAL_EL:
+			case SQL_TABLE_LINEARITY_ADD_VAL_EN:
+				{
+					int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
+
+					switch(m_info.objectType())
+					{
+						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
+						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = MEASURE_LIMIT_TYPE_ENGINEER;	break;
+						default:								limitType = MEASURE_LIMIT_TYPE_UNDEFINED;	break;
+					}
+
+					if (limitType == MEASURE_LIMIT_TYPE_UNDEFINED)
+					{
+						break;
+					}
+
+					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
+					if (measure == nullptr)
+					{
+						break;
+					}
+
+					query.bindValue(field++, measure->measureID());
+
+					query.bindValue(field++, measure->additionalParamCount());
+
+					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE));
+					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR));
+					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD));
+					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER));
+					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY));
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+					query.bindValue(field++, 0);
+				}
+				break;
+
 			case SQL_TABLE_LINEARITY_20_EL:
 			case SQL_TABLE_LINEARITY_20_EN:
 				{
@@ -1291,52 +1337,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->measureItemArray(limitType, 17));
 					query.bindValue(field++, measure->measureItemArray(limitType, 18));
 					query.bindValue(field++, measure->measureItemArray(limitType, 19));
-				}
-				break;
-
-			case SQL_TABLE_LINEARITY_ADD_VAL_EL:
-			case SQL_TABLE_LINEARITY_ADD_VAL_EN:
-				{
-					int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
-
-					switch(m_info.objectType())
-					{
-						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
-						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = MEASURE_LIMIT_TYPE_ENGINEER;	break;
-						default:								limitType = MEASURE_LIMIT_TYPE_UNDEFINED;	break;
-					}
-
-					if (limitType == MEASURE_LIMIT_TYPE_UNDEFINED)
-					{
-						break;
-					}
-
-					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
-					if (measure == nullptr)
-					{
-						break;
-					}
-
-					query.bindValue(field++, measure->measureID());
-
-					query.bindValue(field++, measure->additionalParamCount());
-
-					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE));
-					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR));
-					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD));
-					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER));
-					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY));
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
-					query.bindValue(field++, 0);
 				}
 				break;
 
