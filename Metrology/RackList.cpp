@@ -490,8 +490,7 @@ void RackListDialog::rackProperty()
 
 	if (m_rackBase.groups().count() == 0)
 	{
-		QMessageBox::information(this, windowTitle(), tr("No groups have been found.\n"
-														 "To create a group of racks, click menu \"Racks\" - \"Groups ...\""));
+		QMessageBox::information(this, windowTitle(), tr("No rack groups have been found.\nTo create a group of racks, click menu \"Racks\" - \"Groups ...\""));
 	}
 
 	RackPropertyDialog dialog(*pRack, m_rackBase);

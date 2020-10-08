@@ -223,22 +223,22 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 	//
 	QString strHysteresisValue;
 
-	if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::Unused)
-	{
-		strHysteresisValue = comparatorEx->hysteresisDefaultValueStr();
-	}
-	else
+	if (comparatorEx->deviation() == Metrology::ComparatorEx::DeviationType::Unused)
 	{
 		switch (comparatorEx->cmpType())
 		{
 			case E::CmpType::Less:		strHysteresisValue = "+ " + comparatorEx->hysteresisDefaultValueStr(); break;
 			case E::CmpType::Greate:	strHysteresisValue = "- " + comparatorEx->hysteresisDefaultValueStr(); break;
 		}
-	}
 
-	if (comparatorEx->hysteresis().isConst() == true)
+		if (comparatorEx->hysteresis().isConst() == true)
+		{
+			strHysteresisValue += " " + pInSignal->param().unit();
+		}
+	}
+	else
 	{
-		strHysteresisValue += " " + pInSignal->param().unit();
+		strHysteresisValue = comparatorEx->hysteresisDefaultValueStr();
 	}
 
 	//

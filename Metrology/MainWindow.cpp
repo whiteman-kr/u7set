@@ -236,7 +236,7 @@ void MainWindow::createMenu()
 	// View
 	//
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
-	m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
+	m_pViewPanelMenu = new QMenu(tr("&Panels"), m_pViewMenu);
 
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
 	m_pViewMenu->addSeparator();
@@ -1321,6 +1321,17 @@ void MainWindow::showOptions()
 		options.comparator().errorType() != theOptions.comparator().errorType() || options.comparator().limitType() != theOptions.comparator().limitType())
 	{
 		m_pStatisticPanel->updateList();
+	}
+
+	if(theOptions.language().languageType() == LANGUAGE_TYPE_RU)
+	{
+		QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
+		if (QFile::exists(languageFilePath) == false)
+		{
+			QMessageBox::information(this, windowTitle(), tr("Russian language could not be installed.\nFile of russian language: %1 - was not found!").arg(languageFilePath));
+			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
+			theOptions.language().save();
+		}
 	}
 }
 

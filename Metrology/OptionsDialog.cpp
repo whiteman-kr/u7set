@@ -263,7 +263,8 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_SIGNAL_INFO:
 		case OPTION_PAGE_COMPARATOR_INFO:
 		case OPTION_PAGE_DATABASE:
-		case OPTION_PAGE_BACKUP:				pPropertyPage = createPropertyList(page);	break;
+		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_LANGUAGE:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:	pPropertyPage = createPropertyDialog(page);	break;
 		default:								assert(nullptr);
@@ -812,6 +813,27 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			}
 			break;
 
+		case OPTION_PAGE_LANGUAGE:
+			{
+				QtProperty *languageGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Language of application "));
+
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LanguageParam[LNO_PARAM_LANGUAGE_TYPE]);
+					QStringList valueTypeList;
+					for(int t = 0; t < LANGUAGE_TYPE_COUNT; t++)
+					{
+						valueTypeList.append(LanguageTypeStr[t]);
+					}
+					item->setAttribute(QLatin1String("enumNames"), valueTypeList);
+					item->setValue(m_options.language().languageType());
+					appendProperty(item, page, LNO_PARAM_LANGUAGE_TYPE);
+					languageGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(languageGroup);
+			}
+			break;
+
 		default:
 			assert(nullptr);
 			break;
@@ -1250,6 +1272,16 @@ void OptionsDialog::applyProperty()
 					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());									break;
 					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());									break;
 					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());									break;
+					default:							assert(0);
+				}
+			}
+			break;
+
+		case OPTION_PAGE_LANGUAGE:
+			{
+				switch(param)
+				{
+					case LNO_PARAM_LANGUAGE_TYPE:		m_options.language().setLanguageType(value.toInt());							break;
 					default:							assert(0);
 				}
 			}

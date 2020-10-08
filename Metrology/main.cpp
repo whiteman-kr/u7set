@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "Options.h"
+
 #include "../lib/ProtoSerialization.h"
 #include "../lib/MemLeaksDetection.h"
 
@@ -23,15 +24,26 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("2.0.LOCALBUILD"));
 #endif
 
+	theOptions.load();
+
 	QTranslator translator;
-	if (translator.load("Metrology_ru.qm", QApplication::applicationDirPath() + "/translations") == false)
+	//
+	//
+	if (theOptions.language().languageType() == LANGUAGE_TYPE_RU)
 	{
-		qDebug() << "Options::loadLanguage() - didn't load language file";
+		if (translator.load(LANGUAGE_OPTIONS_FILE_RU, QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR) == true)
+		{
+			qApp->installTranslator(&translator);
+		}
+		else
+		{
+			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
+			QMessageBox::critical(nullptr, "Russian language", QString("Didn't found russian language file:\n%1").arg(languageFilePath));
+		}
 	}
-	qApp->installTranslator(&translator);
 
-    theOptions.load();
-
+	//
+	//
 	SoftwareInfo si;
 
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);

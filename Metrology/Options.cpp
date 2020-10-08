@@ -1280,6 +1280,57 @@ BackupOption& BackupOption::operator=(const BackupOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+LanguageOption::LanguageOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LanguageOption::LanguageOption(const LanguageOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LanguageOption::~LanguageOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LanguageOption::load()
+{
+	QSettings s;
+
+	m_languageType = s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), LANGUAGE_TYPE_EN).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LanguageOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), m_languageType);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LanguageOption& LanguageOption::operator=(const LanguageOption& from)
+{
+	m_languageType = from.m_languageType;
+
+	return *this;
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 bool compareDouble(double lDouble, double rDouble)
 {
 	return std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
@@ -1326,6 +1377,8 @@ void Options::load()
 	m_comparator.load();
 
 	m_backup.load();
+
+	m_language.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1347,6 +1400,8 @@ void Options::save()
 	m_comparator.save();
 
 	m_backup.save();
+
+	m_language.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1403,6 +1458,8 @@ Options& Options::operator=(const Options& from)
 	m_comparator = from.m_comparator;
 
 	m_backup = from.m_backup;
+
+	m_language = from.m_language;
 
 	return *this;
 }

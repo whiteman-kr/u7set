@@ -1266,7 +1266,7 @@ void TuningSignalStateDialog::onOk()
 
 		formatStr = QString::asprintf("%%.%df", m_param.decimalPlaces());
 
-		str = QString::asprintf("Failed input value: " + formatStr.toAscii(), state);
+		str = tr("Failed input value: %1").arg(QString::asprintf(formatStr.toAscii(), state));
 		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);

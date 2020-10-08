@@ -332,7 +332,7 @@ StatisticPanel::StatisticPanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Panel statistics (Checklist)");
+	setWindowTitle(tr("Panel statistics (Checklist)"));
 	setObjectName(windowTitle());
 
 	createInterface();

@@ -207,12 +207,8 @@ FORMS    +=
 RESOURCES += \
     Resources.qrc
 
-TRANSLATIONS = translations/Metrology_ru.ts \
-		translations/Metrology_uk.ts
-
-OTHER_FILES += \
-    translations/Metrology_ru.ts \
-    translations/Metrology_uk.ts
+TRANSLATIONS = languages/Metrology_ru.ts \
+    languages/Metrology_ru.qm
 
 # Q_DEBUG define
 #
@@ -240,4 +236,4 @@ unix {
 
 DISTFILES += \
     ../Proto/network.proto \
-    ../Proto/serialization.proto
+	../Proto/serialization.proto

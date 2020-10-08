@@ -27,6 +27,7 @@ const char* const				OptionGroupTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Panel information"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language"),
 };
 
 const int						OPTION_GROUP_COUNT			= sizeof(OptionGroupTitle)/sizeof(OptionGroupTitle[0]);
@@ -39,7 +40,8 @@ const int						OPTION_GROUP_UNKNOWN		= -1,
 								OPTION_GROUP_MEASURE_VIEW	= 4,
 								OPTION_GROUP_PANEL_INFO		= 5,
 								OPTION_GROUP_DATABASE		= 6,
-								OPTION_GROUP_BACKUP			= 7;
+								OPTION_GROUP_BACKUP			= 7,
+								OPTION_GROUP_LANGUAGE		= 8;
 
 // ==============================================================================================
 
@@ -58,6 +60,7 @@ const char* const				OptionPageTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying information of сomparators"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database settings"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language of application"),
 };
 
 const int						OPTION_PAGE_COUNT				= sizeof(OptionPageTitle)/sizeof(OptionPageTitle[0]);
@@ -75,7 +78,8 @@ const int						OPTION_PAGE_UNKNOWN				= -1,
 								OPTION_PAGE_SIGNAL_INFO			= 9,
 								OPTION_PAGE_COMPARATOR_INFO		= 10,
 								OPTION_PAGE_DATABASE			= 11,
-								OPTION_PAGE_BACKUP				= 12;
+								OPTION_PAGE_BACKUP				= 12,
+								OPTION_PAGE_LANGUAGE			= 13;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -94,6 +98,7 @@ const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparator information"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language"),
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -113,6 +118,7 @@ const int						OptionGroupPage[OPTION_PAGE_COUNT] =
 								OPTION_GROUP_PANEL_INFO,	// Group: Information of comparator --	Page : Displaying"),
 								OPTION_GROUP_DATABASE,		// Group: Database --					Page : Settings"),
 								OPTION_GROUP_BACKUP,		// Group: Backup measurements --		Page : Settings"),
+								OPTION_GROUP_LANGUAGE,		// Group: Language of application --	Page : Language"),
 };
 
 // ==============================================================================================

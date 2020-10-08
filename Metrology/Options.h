@@ -126,7 +126,7 @@ public:
 
 // ==============================================================================================
 
-#define					SOCKET_OPTIONS_KEY				"Options/Socket/"
+#define					SOCKET_OPTIONS_KEY				"Options/SocketConnection/"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -1009,6 +1009,66 @@ public:
 
 // ==============================================================================================
 
+#define					LANGUAGE_OPTIONS_REG_KEY			"Options/Language/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		LanguageParam[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Language"),
+};
+
+const int				LNO_PARAM_COUNT		= sizeof(LanguageParam)/sizeof(LanguageParam[0]);
+
+const int				LNO_PARAM_LANGUAGE_TYPE	= 0;
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		LanguageTypeStr[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "English"),
+						QT_TRANSLATE_NOOP("Options.h", "Russian"),
+};
+
+const int				LANGUAGE_TYPE_COUNT	= sizeof(LanguageTypeStr)/sizeof(LanguageTypeStr[0]);
+
+const int				LANGUAGE_TYPE_EN	= 0,
+						LANGUAGE_TYPE_RU	= 1;
+
+// ----------------------------------------------------------------------------------------------
+
+#define					LANGUAGE_OPTIONS_DIR		"/languages"
+#define					LANGUAGE_OPTIONS_FILE_RU	"Metrology_ru.qm"
+
+// ----------------------------------------------------------------------------------------------
+
+class LanguageOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit LanguageOption(QObject *parent = nullptr);
+	explicit LanguageOption(const LanguageOption& from, QObject *parent = nullptr);
+	virtual ~LanguageOption();
+
+private:
+
+	int					m_languageType = LANGUAGE_TYPE_EN;
+
+public:
+
+	int					languageType() const { return m_languageType; }
+	void				setLanguageType(int type) { m_languageType = type; }
+
+	void				load();
+	void				save();
+
+	LanguageOption&		operator=(const LanguageOption& from);
+};
+
+// ==============================================================================================
+
 bool compareDouble(double lDouble, double rDouble);
 
 // ==============================================================================================
@@ -1043,6 +1103,8 @@ private:
 
 	BackupOption			m_backup;
 
+	LanguageOption			m_language;
+
 public:
 
 	DatabaseOption&			database() { return m_database; }
@@ -1076,7 +1138,10 @@ public:
 	void					setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
 
 	BackupOption&			backup() { return m_backup; }
-	void					etBackup(const BackupOption& backup) { m_backup = backup; }
+	void					setBackup(const BackupOption& backup) { m_backup = backup; }
+
+	LanguageOption&			language() { return m_language; }
+	void					setLanguage(const LanguageOption& language) { m_language = language; }
 
 	void					load();
 	void					save();

@@ -1077,7 +1077,7 @@ namespace Metrology
 
 		if (m_deviationType != DeviationType::Unused)
 		{
-			value.insert(0, "Unused : ");
+			value = QT_TRANSLATE_NOOP("MetrologySignal.cpp", "Unused");
 		}
 
 		return value;

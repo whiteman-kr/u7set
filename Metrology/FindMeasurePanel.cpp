@@ -244,7 +244,7 @@ FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Search measurements panel");
+	setWindowTitle(tr("Search measurements panel"));
 	setObjectName(windowTitle());
 	loadSettings();
 
