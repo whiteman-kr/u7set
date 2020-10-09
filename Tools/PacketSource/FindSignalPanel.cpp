@@ -266,11 +266,12 @@ void FindSignalPanel::createInterface()
 	m_findColumnCombo = new QComboBox(findToolBar);
 	m_findTextEdit = new QLineEdit(m_findText, findToolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
-	m_findTextEdit->setClearButtonEnabled(true);
+	//m_findTextEdit->setClearButtonEnabled(true);
 
 	findToolBar->addWidget(m_findColumnCombo);
 	findToolBar->addWidget(m_findTextEdit);
-	QAction* action = findToolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	//QAction* action = findToolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	QAction* action = findToolBar->addAction(tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindSignalPanel::find);
 
 	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
