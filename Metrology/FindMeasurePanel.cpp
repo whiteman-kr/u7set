@@ -268,10 +268,11 @@ void FindMeasurePanel::createInterface()
 
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
-	m_findTextEdit->setClearButtonEnabled(true);
+	//m_findTextEdit->setClearButtonEnabled(true);
 
 	toolBar->addWidget(m_findTextEdit);
-	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	//QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	QAction* action = toolBar->addAction(tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindMeasurePanel::find);
 
 	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
