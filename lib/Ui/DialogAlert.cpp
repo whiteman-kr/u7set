@@ -3,12 +3,15 @@
 #include <QDialog>
 #include <QDateTime>
 #include <QDesktopWidget>
+#include <QScreen>
 
 #include "../lib/Ui/UiTools.h"
 
 DialogAlert::DialogAlert(QWidget* parent, QString title):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
+	Q_ASSERT(parent);
+
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	setLayout(mainLayout);
 
@@ -92,14 +95,43 @@ void DialogAlert::onAlertArrived(QString text)
 	{
 		m_text.clear();
 
-		UiTools::adjustDialogPlacement(this);
-
 		show();
 	}
 	else
 	{
 		raise();
 	}
+
+	// Move dialog to center of parent window's screen
+	//
+	QWidget* parent = parentWidget();
+	if (parent == nullptr)
+	{
+		Q_ASSERT(parent);
+	}
+	else
+	{
+		QDesktopWidget* desktop = QApplication::desktop();
+		if (desktop == nullptr)
+		{
+			Q_ASSERT(desktop);
+		}
+		else
+		{
+			int dialogScreen = desktop->screenNumber(this);
+			int appScreen = desktop->screenNumber(parentWidget());
+
+			if (dialogScreen != appScreen)
+			{
+				QRect appScreenRect = desktop->screenGeometry(parent);
+				move(appScreenRect.center() - rect().center());
+			}
+		}
+	}
+
+	//
+
+	UiTools::adjustDialogPlacement(this);
 
 	if (m_text.length() > 16384)
 	{
