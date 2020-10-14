@@ -353,7 +353,7 @@ bool MainWindow::createToolBars()
 
 		for(int k = 0; k < MEASURE_KIND_COUNT; k++)
 		{
-			m_measureKindList->addItem(MeasureKind[k]);
+			m_measureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[k]));
 		}
 
 		m_measureKindList->setCurrentIndex(theOptions.toolBar().measureKind());
@@ -384,7 +384,7 @@ bool MainWindow::createToolBars()
 
 		for(int s = 0; s < SIGNAL_CONNECTION_TYPE_COUNT; s++)
 		{
-			m_signalConnectionTypeList->addItem(SignalConnectionType[s]);
+			m_signalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[s]));
 		}
 
 		m_signalConnectionTypeList->setCurrentIndex(theOptions.toolBar().signalConnectionType());
@@ -585,7 +585,7 @@ void MainWindow::createMeasureViews()
 
 		pView->loadMeasureList();
 
-		m_pMainTab->addTab(pView, tr(MeasureType[measureType]));
+		m_pMainTab->addTab(pView, qApp->translate("MeasureBase.h", MeasureType[measureType]));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
@@ -1112,7 +1112,7 @@ void MainWindow::exportMeasure()
 		return;
 	}
 
-	ExportData* dialog = new ExportData(pMeasureView, MeasureFileName[m_measureType]);
+	ExportData* dialog = new ExportData(pMeasureView, false, MeasureFileName[m_measureType]);
 	dialog->exec();
 }
 
@@ -1371,7 +1371,7 @@ void MainWindow::setMeasureKind(int index)
 			QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
 															 "you need to combine several racks into groups."
 															 "Currently, no groups have been found.\n"
-															 "To create a group of racks, click menu \"Tool\" - \"Racks ...\" ."));
+															 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
 
 
 			return;

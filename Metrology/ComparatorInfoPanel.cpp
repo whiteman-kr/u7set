@@ -57,7 +57,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 	{
 		if (section >= 0 && section < theOptions.module().maxComparatorCount())
 		{
-			result = QString("Comparator %1").arg(section + 1);
+			result = tr("Comparator %1").arg(section + 1);
 		}
 	}
 
@@ -311,7 +311,7 @@ void ComparatorInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
 
-	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
+	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &ComparatorInfoPanel::comparatorProperty);

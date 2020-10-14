@@ -14,6 +14,10 @@
 
 // ==============================================================================================
 
+const char* const ErrorList = QT_TRANSLATE_NOOP("CalibratorManager.h", "Error list");
+
+// ==============================================================================================
+
 class CalibratorManager : public QDialog
 {
 	Q_OBJECT

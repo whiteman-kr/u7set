@@ -52,10 +52,9 @@ void ProjectPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
-
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
 
@@ -213,7 +212,7 @@ void RackPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(400, 180);
 	resize(400, 180);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
@@ -224,7 +223,7 @@ void RackPropertyDialog::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Properties - %1").arg(m_rack.caption()));
+	setWindowTitle(tr("Propertу - %1").arg(m_rack.caption()));
 
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -239,7 +238,7 @@ void RackPropertyDialog::createPropertyList()
 
 	//
 	//
-	QtProperty *rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Properties of the rack"));
+	QtProperty *rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Propertу of the rack"));
 
 		item = m_pManager->addProperty(QVariant::String, tr("Caption"));
 		item->setValue(m_rack.caption());
@@ -454,7 +453,7 @@ void RackGroupPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties - rack groups"));
+	setWindowTitle(tr("Propertу - rack groups"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
@@ -807,6 +806,7 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 		if (m_groupBase.group(i).caption() == caption)
 		{
 			QMessageBox::information(this, tr("Group caption"), tr("Group caption \"%1\" already exists!").arg(caption));
+			updateGroupList();
 			return;
 		}
 	}
@@ -836,7 +836,7 @@ void RackGroupPropertyDialog::groupSelected()
 		return;
 	}
 
-	setWindowTitle(tr("Properties - %1").arg(group.caption()));
+	setWindowTitle(tr("Propertу - %1").arg(group.caption()));
 
 	updateRackList();
 }
@@ -1013,7 +1013,7 @@ void SignalPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
@@ -1023,7 +1023,7 @@ void SignalPropertyDialog::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Properties - %1").arg(m_param.appSignalID()));
+	setWindowTitle(tr("Propertу - %1").arg(m_param.appSignalID()));
 
 	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 	QStringList electricUnitList;
@@ -1072,7 +1072,7 @@ void SignalPropertyDialog::createPropertyList()
 			signalIdGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
-			item->setValue(E::valueToString<E::SignalInOutType>(m_param.inOutType()));
+			item->setValue(m_param.signalTypeStr());
 			item->setAttribute(QLatin1String("readOnly"), true);
 			signalIdGroup->addSubProperty(item);
 
@@ -1107,7 +1107,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// electric range group
 
-		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE] + m_param.electricRangeStr());
+		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), qApp->translate("ObjectProperty.h", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) + m_param.electricRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.electricLowLimit());
@@ -1163,7 +1163,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// engineering range group
 
-		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engineeringRangeStr());
+		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), qApp->translate("ObjectProperty.h", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) + m_param.engineeringRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.lowEngineeringUnits());
@@ -1426,11 +1426,9 @@ void ComparatorPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
-
-	setWindowTitle(tr("Properties"));
 
 	QMetaEnum meu = QMetaEnum::fromType<E::CmpType>();
 	QStringList cmpTypeList;
@@ -1487,7 +1485,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				inputGroup->addSubProperty(item);
 
 				item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
-				item->setValue(E::valueToString<E::SignalInOutType>(m_comparatorEx.inputSignal()->param().inOutType()));
+				item->setValue(m_comparatorEx.inputSignal()->param().signalTypeStr());
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 

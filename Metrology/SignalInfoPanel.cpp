@@ -57,7 +57,7 @@ QVariant SignalInfoTable::headerData(int section, Qt::Orientation orientation, i
 	{
 		if (section >= 0 && section < SIGNAL_INFO_COLUMN_COUNT)
 		{
-			result = SignalInfoColumn[section];
+			result = qApp->translate("SignalInfoMeasure.h", SignalInfoColumn[section]);
 		}
 	}
 
@@ -249,9 +249,12 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 		return QString();
 	}
 
-	if (state.flags().valid == false)
+	if (theOptions.signalInfo().showNoValid() == false)
 	{
-		return tr("No valid");
+		if (state.flags().valid == false)
+		{
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+		}
 	}
 
 	QString stateStr = QString::number(state.value(), 'f', param.decimalPlaces());
@@ -467,7 +470,7 @@ void SignalInfoPanel::createHeaderContexMenu()
 
 	for(int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(SignalInfoColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("SignalInfoMeasure.h", SignalInfoColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -510,6 +513,10 @@ void SignalInfoPanel::createContextMenu()
 	//
 	m_pShowMenu = new QMenu(tr("Show"), m_pSignalInfoWindow);
 
+	m_pShowNoValidAction = m_pShowMenu->addAction(tr("State if signal is no valid"));
+	m_pShowNoValidAction->setCheckable(true);
+	m_pShowNoValidAction->setChecked(theOptions.signalInfo().showNoValid());
+
 	m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical state"));
 	m_pShowElectricValueAction->setCheckable(true);
 	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
@@ -524,9 +531,10 @@ void SignalInfoPanel::createContextMenu()
 
 	m_pContextMenu->addSeparator();
 
-	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
+	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
+	connect(m_pShowNoValidAction, &QAction::triggered, this, &SignalInfoPanel::showNoValid);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
 	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
@@ -809,6 +817,13 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 	signalForMeasure.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
 
 	theSignalBase.setActiveSignal(signalForMeasure);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showNoValid()
+{
+	theOptions.signalInfo().setShowNoValid(m_pShowNoValidAction->isChecked());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

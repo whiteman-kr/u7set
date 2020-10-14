@@ -39,7 +39,7 @@ void Calculator::createInterface()
 	QHBoxLayout *lin_inval_Layout = new QHBoxLayout;
 
 	m_pLinInRadio = new QRadioButton(this);
-	m_pLinInValEdit = new QLineEdit(tr("2.5"), this);
+	m_pLinInValEdit = new QLineEdit("2.5", this);
 	QLabel* pLinInValLabel = new QLabel(tr("In"), this);
 	pLinInValLabel->setFixedWidth(30);
 	m_pLinInValEdit->setFont(*m_digitFont);
@@ -52,7 +52,7 @@ void Calculator::createInterface()
 	QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
 
 	m_pLinOutRadio = new QRadioButton(this);
-	m_pLinOutValEdit = new QLineEdit(tr("0"), this);
+	m_pLinOutValEdit = new QLineEdit("0", this);
 	QLabel* pLinOutValLabel = new QLabel(tr("Out"), this);
 	pLinOutValLabel->setFixedWidth(30);
 	m_pLinOutValEdit->setFont(*m_digitFont);
@@ -64,8 +64,8 @@ void Calculator::createInterface()
 
 	QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
 
-	m_pLinInLowEdit = new QLineEdit(tr("0"), this);
-	m_pLinInHighEdit = new QLineEdit(tr("5"), this);
+	m_pLinInLowEdit = new QLineEdit("0", this);
+	m_pLinInHighEdit = new QLineEdit("5", this);
 
 	lin_inrange_Layout->addWidget(new QLabel(tr("min"), this));
 	lin_inrange_Layout->addWidget(m_pLinInLowEdit);
@@ -74,8 +74,8 @@ void Calculator::createInterface()
 
 	QHBoxLayout *lin_outrange_Layout = new QHBoxLayout;
 
-	m_pLinOutLowEdit = new QLineEdit(tr("0"), this);
-	m_pLinOutHighEdit = new QLineEdit(tr("100"), this);
+	m_pLinOutLowEdit = new QLineEdit("0", this);
+	m_pLinOutHighEdit = new QLineEdit("100", this);
 
 	lin_outrange_Layout->addWidget(new QLabel(tr("min"), this));
 	lin_outrange_Layout->addWidget(m_pLinOutLowEdit);
@@ -99,7 +99,7 @@ void Calculator::createInterface()
 	QHBoxLayout *tr_C_Layout = new QHBoxLayout;
 
 	m_pTrDegreeRadio = new QRadioButton(this);
-	m_pTrDegreeEdit = new QLineEdit(tr("100"), this);
+	m_pTrDegreeEdit = new QLineEdit("100", this);
 	QLabel* pTrDegreeLabel = new QLabel(tr("°C"), this);
 	pTrDegreeLabel->setFixedWidth(30);
 	m_pTrDegreeEdit->setFont(*m_digitFont);
@@ -125,7 +125,7 @@ void Calculator::createInterface()
 
 	m_tr_R0_Layout = new QHBoxLayout;
 
-	m_pTrR0Edit = new QLineEdit(tr("100"), this);
+	m_pTrR0Edit = new QLineEdit("100", this);
 	QLabel* pTrR0Label = new QLabel(tr(""), this);
 	pTrR0Label->setFixedWidth(30);
 	m_pTrR0Edit->setFont(*m_digitFont);
@@ -153,7 +153,7 @@ void Calculator::createInterface()
 	QHBoxLayout *tc_C_Layout = new QHBoxLayout;
 
 	m_pTcDegreeRadio = new QRadioButton(this);
-	m_pTcDegreeEdit = new QLineEdit(tr("400"), this);
+	m_pTcDegreeEdit = new QLineEdit("400", this);
 	QLabel* pTcDegreeLabel = new QLabel(tr("°C"), this);
 	pTcDegreeLabel->setFixedWidth(30);
 	m_pTcDegreeEdit->setFont(*m_digitFont);
@@ -190,7 +190,7 @@ void Calculator::createInterface()
 	QHBoxLayout *dpf_inval_Layout = new QHBoxLayout;
 
 	m_pDpfPRadio = new QRadioButton(this);
-	m_pDpfPValEdit = new QLineEdit(tr("2.5"), this);
+	m_pDpfPValEdit = new QLineEdit("2.5", this);
 	QLabel* pDpfInValLabel = new QLabel(tr("P"), this);
 	pDpfInValLabel->setFixedWidth(30);
 	m_pDpfPValEdit->setFont(*m_digitFont);
@@ -203,7 +203,7 @@ void Calculator::createInterface()
 	QHBoxLayout *dpf_outval_Layout = new QHBoxLayout;
 
 	m_pDpfFRadio = new QRadioButton(this);
-	m_pDpfFValEdit = new QLineEdit(tr("0"), this);
+	m_pDpfFValEdit = new QLineEdit("0", this);
 	QLabel* pDpfOutValLabel = new QLabel(tr("F"), this);
 	pDpfOutValLabel->setFixedWidth(30);
 	m_pDpfFValEdit->setFont(*m_digitFont);
@@ -215,8 +215,8 @@ void Calculator::createInterface()
 
 	QHBoxLayout *dpf_inrange_Layout = new QHBoxLayout;
 
-	m_pDpfPLowEdit = new QLineEdit(tr("0"), this);
-	m_pDpfPHighEdit = new QLineEdit(tr("10"), this);
+	m_pDpfPLowEdit = new QLineEdit("0", this);
+	m_pDpfPHighEdit = new QLineEdit("10", this);
 
 	dpf_inrange_Layout->addWidget(new QLabel(tr("min P"), this));
 	dpf_inrange_Layout->addWidget(m_pDpfPLowEdit);
@@ -225,8 +225,8 @@ void Calculator::createInterface()
 
 	QHBoxLayout *dpf_outrange_Layout = new QHBoxLayout;
 
-	m_pDpfFLowEdit = new QLineEdit(tr("0"), this);
-	m_pDpfFHighEdit = new QLineEdit(tr("100"), this);
+	m_pDpfFLowEdit = new QLineEdit("0", this);
+	m_pDpfFHighEdit = new QLineEdit("100", this);
 
 	dpf_outrange_Layout->addWidget(new QLabel(tr("min F"), this));
 	dpf_outrange_Layout->addWidget(m_pDpfFLowEdit);
@@ -248,7 +248,7 @@ void Calculator::createInterface()
 	QHBoxLayout *dr_C_Layout = new QHBoxLayout;
 
 	m_pDrСelsiusRadio = new QRadioButton(this);
-	m_pDrСelsiusEdit = new QLineEdit(tr("100"), this);
+	m_pDrСelsiusEdit = new QLineEdit("100", this);
 	QLabel* pDrСelsiusLabel = new QLabel(tr("°C"), this);
 	pDrСelsiusLabel->setFixedWidth(30);
 	m_pDrСelsiusEdit->setFont(*m_digitFont);

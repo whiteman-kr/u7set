@@ -97,8 +97,6 @@ private:
 	mutable QMutex			m_signalMutex;
 	QVector<Metrology::Signal*> m_signalList;
 
-	static bool				m_showADCInHex;
-
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
 
@@ -113,9 +111,6 @@ public:
 	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;
-
-	bool					showADCInHex() const { return m_showADCInHex; }
-	void					setShowADCInHex(bool show) { m_showADCInHex = show; }
 };
 
 // ==============================================================================================
@@ -137,7 +132,6 @@ private:
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewTypeADMenu = nullptr;
 	QMenu*					m_pViewTypeIOMenu = nullptr;
-	QMenu*					m_pViewShowMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 
 	QAction*				m_pExportAction = nullptr;
@@ -153,7 +147,6 @@ private:
 	QAction*				m_pTypeInputAction = nullptr;
 	QAction*				m_pTypeInternalAction = nullptr;
 	QAction*				m_pTypeOutputAction = nullptr;
-	QAction*				m_pShowADCInHexAction = nullptr;
 
 	QTableView*				m_pView = nullptr;
 	SignalListTable			m_signalTable;
@@ -215,8 +208,6 @@ private slots:
 	void					showTypeInput();
 	void					showTypeInternal();
 	void					showTypeOutput();
-
-	void					showADCInHex();
 
 	void					onContextMenu(QPoint);
 

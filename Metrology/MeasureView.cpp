@@ -215,10 +215,13 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 					break;
 				}
 
-				if (pLinearityMeasurement->isSignalValid() == false)
+				if (theOptions.measureView().showNoValid() == false)
 				{
-					result = theOptions.measureView().colorErrorLimit();
-					break;
+					if (pLinearityMeasurement->isSignalValid() == false)
+					{
+						result = theOptions.measureView().colorErrorLimit();
+						break;
+					}
 				}
 
 				if (pLinearityMeasurement->errorResult() != MEASURE_ERROR_RESULT_OK)
@@ -244,10 +247,13 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 					break;
 				}
 
-				if (pComparatorMeasurement->isSignalValid() == false)
+				if (theOptions.measureView().showNoValid() == false)
 				{
-					result = theOptions.measureView().colorErrorLimit();
-					break;
+					if (pComparatorMeasurement->isSignalValid() == false)
+					{
+						result = theOptions.measureView().colorErrorLimit();
+						break;
+					}
 				}
 
 				if (pComparatorMeasurement->errorResult() != MEASURE_ERROR_RESULT_OK)
@@ -403,7 +409,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 
 		case MVC_CMN_L_SYSTEM_ERROR:			result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR); break;
 		case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SD); break;
-		case MVC_CMN_L_BORDER:					result = tr("± ") + m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
+		case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
 		case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY); break;
 
 		case MVC_CMN_L_ERROR:					result = m->errorStr(); break;
@@ -656,8 +662,8 @@ MeasureView::MeasureView(int measureType, QWidget *parent) :
 	QTableView(parent),
 	m_measureType(measureType)
 {
-	m_table.setMeasureType(measureType);
 	m_table.header().init(measureType);
+	m_table.setMeasureType(measureType);
 	setModel(&m_table);
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -830,7 +836,7 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 	//
 	if (theDatabase.appendMeasure(pMeasurement) == false)
 	{
-		QMessageBox::critical(this, tr("Append measurements"), tr("Error append measurements to database"));
+		QMessageBox::critical(this, tr("Save measurements"), tr("Error saving measurements to database"));
 		return;
 	}
 

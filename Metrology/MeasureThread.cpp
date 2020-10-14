@@ -634,7 +634,7 @@ void MeasureThread::measureLinearity()
 	{
 		LinearityPoint point = theOptions.linearity().points().at(pt);
 
-		emit measureInfo(tr("Set point %1 / %2 ").arg(pt + 1).arg(pointCount));
+		emit measureInfo(tr("Point %1 / %2 ").arg(pt + 1).arg(pointCount));
 
 		// set electric value on calibrators, depend from point value
 		//

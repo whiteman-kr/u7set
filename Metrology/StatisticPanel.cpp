@@ -53,7 +53,7 @@ QVariant StatisticTable::headerData(int section, Qt::Orientation orientation, in
 	{
 		if (section >= 0 && section < STATISTIC_COLUMN_COUNT)
 		{
-			result = StatisticColumn[section];
+			result = qApp->translate("StatisticDialog.h", StatisticColumn[section]);
 		}
 	}
 
@@ -249,24 +249,24 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 
 	switch (column)
 	{
-		case STATISTIC_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();					break;
-		case STATISTIC_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();			break;
-		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = visible ? param.equipmentID() : QString();					break;
-		case STATISTIC_COLUMN_CAPTION:				result = visible ? param.caption() : QString();						break;
-		case STATISTIC_COLUMN_CMP_VALUE:			result = comparatorValue;											break;
-		case STATISTIC_COLUMN_CMP_NO:				result = comparatorNo;												break;
-		case STATISTIC_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;										break;
-		case STATISTIC_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();	break;
-		case STATISTIC_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();		break;
-		case STATISTIC_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();		break;
-		case STATISTIC_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();			break;
-		case STATISTIC_COLUMN_EL_RANGE:				result = param.electricRangeStr();									break;
-		case STATISTIC_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();								break;
-		case STATISTIC_COLUMN_EN_RANGE:				result = param.engineeringRangeStr();								break;
-		case STATISTIC_COLUMN_SIGNAL_TYPE:			result = E::valueToString<E::SignalInOutType>(param.inOutType());	break;
-		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = si.signalConnectionTypeStr();								break;
-		case STATISTIC_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();										break;
-		case STATISTIC_COLUMN_STATE:				result = si.stateStr();												break;
+		case STATISTIC_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();										break;
+		case STATISTIC_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();								break;
+		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = visible ? param.equipmentID() : QString();										break;
+		case STATISTIC_COLUMN_CAPTION:				result = visible ? param.caption() : QString();											break;
+		case STATISTIC_COLUMN_CMP_VALUE:			result = comparatorValue;																break;
+		case STATISTIC_COLUMN_CMP_NO:				result = comparatorNo;																	break;
+		case STATISTIC_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;															break;
+		case STATISTIC_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();						break;
+		case STATISTIC_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();							break;
+		case STATISTIC_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();							break;
+		case STATISTIC_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();								break;
+		case STATISTIC_COLUMN_EL_RANGE:				result = param.electricRangeStr();														break;
+		case STATISTIC_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();													break;
+		case STATISTIC_COLUMN_EN_RANGE:				result = param.engineeringRangeStr();													break;
+		case STATISTIC_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();															break;
+		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.signalConnectionTypeStr().toUtf8());	break;
+		case STATISTIC_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
+		case STATISTIC_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());					break;
 		default:									assert(0);
 	}
 
@@ -382,7 +382,7 @@ void StatisticPanel::createInterface()
 
 	m_pEditMenu->addSeparator();
 
-	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pEditMenu->addSeparator();
@@ -452,7 +452,7 @@ void StatisticPanel::createHeaderContexMenu()
 
 	for(int column = 0; column < STATISTIC_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(StatisticColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("StatisticDialog.h", StatisticColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -727,7 +727,7 @@ void StatisticPanel::hideColumn(int column, bool hide)
 
 void StatisticPanel::exportSignal()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Statistics"));
+	ExportData* dialog = new ExportData(m_pView, false, "Statistics");
 	dialog->exec();
 }
 
@@ -773,7 +773,7 @@ void StatisticPanel::selectSignalForMeasure()
 		str = tr("Signal %1 is \"%2\" signal.\nTo measure this signal you have to create connection with input signal.\nFor example, type of connection: \"Input\" -> \"%2\".\n\n"
 				 "To create a new connection between signals, select \"View\"->\"Signal connections...\"")
 				.arg(si.signal()->param().appSignalID())
-				.arg(E::valueToString<E::SignalInOutType>(si.signal()->param().inOutType()));
+				.arg(si.signal()->param().signalTypeStr());
 
 		QMessageBox::information(this, windowTitle(), str);
 

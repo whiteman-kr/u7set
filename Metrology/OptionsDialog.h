@@ -24,9 +24,9 @@ const char* const				OptionGroupTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Panel information"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Panels information"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language"),
 };
 
@@ -59,7 +59,7 @@ const char* const				OptionPageTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying information of signals"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying information of сomparators"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database settings"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup of measurements"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language of application"),
 };
 

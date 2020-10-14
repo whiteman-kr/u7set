@@ -36,26 +36,26 @@ public:
 
 const char* const		SqlTabletName[] =
 {
-						QT_TRANSLATE_NOOP("Database.h", "DatabaseInfo"),
-						QT_TRANSLATE_NOOP("Database.h", "History"),
+						"DatabaseInfo",
+						"History",
 
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasure"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasureAddValEl"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasureAddValEn"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasure20El"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasure20En"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityPoint"),
+						"LinearityMeasure",
+						"LinearityMeasureAddValEl",
+						"LinearityMeasureAddValEn",
+						"LinearityMeasure20El",
+						"LinearityMeasure20En",
+						"LinearityPoint",
 
-						QT_TRANSLATE_NOOP("Database.h", "ComparatorMeasure"),
+						"ComparatorMeasure",
 
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorMeasure"),
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorHysteresis"),
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorPoint"),
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorSignal"),
+						"ComplexComparatorMeasure",
+						"ComplexComparatorHysteresis",
+						"ComplexComparatorPoint",
+						"ComplexComparatorSignal",
 
-						QT_TRANSLATE_NOOP("Database.h", "ReportOption"),
-						QT_TRANSLATE_NOOP("Database.h", "RackGroup"),
-						QT_TRANSLATE_NOOP("Database.h", "SignalConnection"),
+						"ReportOption",
+						"RackGroup",
+						"SignalConnection",
 };
 
 const int				SQL_TABLE_COUNT							= sizeof(SqlTabletName)/sizeof(SqlTabletName[0]);

@@ -52,7 +52,7 @@ QVariant TuningSourceTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SOURCE_LIST_COLUMN_COUNT)
 		{
-			result = TuningSourceColumn[section];
+			result = qApp->translate("TuningSignalListDialog.h", TuningSourceColumn[section]);
 		}
 	}
 
@@ -326,7 +326,7 @@ QVariant TuningSignalTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SIGNAL_LIST_COLUMN_COUNT)
 		{
-			result = TuningSignalColumn[section];
+			result = qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[section]);
 		}
 	}
 
@@ -482,7 +482,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 	if (pSignal->state().valid() == false)
 	{
-		return tr("No valid");
+		return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 	}
 
 	QString stateStr, formatStr;
@@ -781,7 +781,7 @@ void TuningSignalListDialog::createHeaderContexMenu()
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(TuningSignalColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -1014,7 +1014,7 @@ void TuningSignalListDialog::setSignalState()
 
 void TuningSignalListDialog::exportSignal()
 {
-	ExportData* dialog = new ExportData(m_pSignalView, tr("Signals"));
+	ExportData* dialog = new ExportData(m_pSignalView, false, "TuningSignals");
 	dialog->exec();
 }
 

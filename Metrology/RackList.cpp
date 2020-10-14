@@ -52,7 +52,7 @@ QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int
 	{
 		if (section >= 0 && section < RACK_LIST_COLUMN_COUNT)
 		{
-			result = RackListColumn[section];
+			result = qApp->translate("RackListDialog.h", RackListColumn[section]);
 		}
 	}
 
@@ -302,7 +302,7 @@ void RackListDialog::createInterface()
 
 	m_pEditMenu->addSeparator();
 
-	m_pRackPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pRackPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pRackPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pMenuBar->addMenu(m_pRackMenu);
@@ -427,7 +427,7 @@ void RackListDialog::rackGroups()
 
 void RackListDialog::exportRacks()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Racks"));
+	ExportData* dialog = new ExportData(m_pView, false, "Racks");
 	dialog->exec();
 }
 

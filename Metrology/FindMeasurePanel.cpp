@@ -93,7 +93,7 @@ QVariant FindMeasureTable::headerData(int section, Qt::Orientation orientation, 
 	{
 		if (section >= 0 && section < FIND_MEASURE_COLUMN_COUNT)
 		{
-			result = FindMeasureColumn[section];
+			result = qApp->translate("FindMeasurePanel.h", FindMeasureColumn[section]);
 		}
 	}
 

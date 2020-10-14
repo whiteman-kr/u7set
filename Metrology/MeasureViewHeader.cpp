@@ -183,6 +183,13 @@ MeasureViewColumn::~MeasureViewColumn()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString MeasureViewColumn::title() const
+{
+	 return qApp->translate("MeasureViewHeader", m_title.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 MeasureViewColumn& MeasureViewColumn::operator=(const MeasureViewColumn& from)
 {
 	m_index = from.m_index;
@@ -215,17 +222,6 @@ MeasureViewHeader::MeasureViewHeader(QObject *parent) :
 
 MeasureViewHeader::~MeasureViewHeader()
 {
-//	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-//	{
-//		return;
-//	}
-
-//	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
-//	{
-//		theOptions.measureView().m_column[m_measureType][column] = m_column[m_measureType][column];
-//	}
-
-//	theOptions.measureView().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -241,37 +237,46 @@ void MeasureViewHeader::setMeasureType(int measureType)
 
 	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 	{
-		if (m_column[measureType][column].title().isEmpty() == true)
+		if (m_column[measureType][column].title().isEmpty() == false)
 		{
-			m_columnCount[measureType] = column;
-			break;
+			continue;
 		}
+
+		m_columnCount[measureType] = column;
+		break;
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::init(int type)
+void MeasureViewHeader::init(int measureType)
 {
-	if (type < 0 || type >= MEASURE_TYPE_COUNT)
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
 	}
 
-	setMeasureType(type);
+	int languageType = theOptions.language().languageType();
+	if (languageType < 0 || languageType >= LANGUAGE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	setMeasureType(measureType);
 
 	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 	{
-		MeasureViewColumn& c = m_column[type][column];
+		MeasureViewColumn& c = m_column[measureType][column];
 
 		if (c.title().isEmpty() == true)
 		{
 			continue;
 		}
 
-		c = theOptions.measureView().m_column[type][column];
+		c = theOptions.measureView().m_column[measureType][languageType][column];
 		c.setIndex(column);
 	}
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------

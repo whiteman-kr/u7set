@@ -509,6 +509,18 @@ namespace Metrology
 
 		return true;
 	}
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::signalTypeStr() const
+	{
+		int type = inOutTypeInt();
+		if (type < 0 || type >= SIGANL_TYPE_COUNT)
+		{
+			return QString();
+		}
+
+		return  qApp->translate("MeasureSignal.h", SignalTypeStr[type]);
+	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 

@@ -9,7 +9,7 @@
 
 SignalConnection::SignalConnection()
 {
-	m_id.uint64 = 0;
+	m_handle.uint64 = 0;
 	clear();
 }
 
@@ -24,7 +24,7 @@ SignalConnection::SignalConnection(const SignalConnection& from)
 
 bool SignalConnection::isValid() const
 {
-	if (m_id.type < 0 || m_id.type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (m_handle.type < 0 || m_handle.type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return false;
 	}
@@ -55,7 +55,7 @@ void SignalConnection::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnection::createID()
+void SignalConnection::createHandle()
 {
 	for (int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 	{
@@ -65,11 +65,11 @@ void SignalConnection::createID()
 
 				if (m_pSignal[type] == nullptr)
 				{
-					m_id.inputID = 0;
+					m_handle.inputID = 0;
 				}
 				else
 				{
-					m_id.inputID = static_cast<quint64>(m_pSignal[type]->param().ID());
+					m_handle.inputID = static_cast<quint64>(m_pSignal[type]->param().ID());
 				}
 
 				break;
@@ -78,11 +78,11 @@ void SignalConnection::createID()
 
 				if (m_pSignal[type] == nullptr)
 				{
-					m_id.outputID = 0;
+					m_handle.outputID = 0;
 				}
 				else
 				{
-					m_id.outputID = static_cast<quint64>(m_pSignal[type]->param().ID());
+					m_handle.outputID = static_cast<quint64>(m_pSignal[type]->param().ID());
 				}
 
 				break;
@@ -98,26 +98,12 @@ void SignalConnection::createID()
 
 QString SignalConnection::typeStr() const
 {
-	if (m_id.type < 0 || m_id.type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (m_handle.type < 0 || m_handle.type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return QString("???");
 	}
 
-	return SignalConnectionType[m_id.type];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalConnection::setType(const QString& typeStr)
-{
-	for (int type = 0; type < SIGNAL_CONNECTION_TYPE_COUNT; type++)
-	{
-		if (SignalConnectionType[type] == typeStr)
-		{
-			m_id.type = static_cast<quint64>(type);
-			break;
-		}
-	}
+	return qApp->translate("SignalConnectionBase.h", SignalConnectionType[m_handle.type]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -180,7 +166,7 @@ void SignalConnection::setSignal(int type, Metrology::Signal* pSignal)
 
 	m_pSignal[type] = pSignal;
 
-	createID();
+	createHandle();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -197,7 +183,7 @@ void SignalConnection::initSignals()
 		m_pSignal[type] = theSignalBase.signalPtr(m_appSignalID[type]);
 	}
 
-	createID();
+	createHandle();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -206,7 +192,7 @@ SignalConnection& SignalConnection::operator=(const SignalConnection& from)
 {
 	m_index = from.m_index;
 
-	m_id = from.m_id;
+	m_handle = from.m_handle;
 
 	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 	{
@@ -255,7 +241,7 @@ void SignalConnectionBase::sort()
 	{
 		for( int j = i+1; j < connectionCount; j++ )
 		{
-			if ( m_connectionList[i].id().uint64 > m_connectionList[j].id().uint64 )
+			if ( m_connectionList[i].handle().uint64 > m_connectionList[j].handle().uint64 )
 			{
 				SignalConnection connection = m_connectionList[i];
 				m_connectionList[i] = m_connectionList[j];
@@ -507,7 +493,7 @@ int SignalConnectionBase::findIndex(const SignalConnection& connection) const
 
 	for(int i = 0; i < count; i ++)
 	{
-		if (m_connectionList[i].id().uint64 == connection.id().uint64)
+		if (m_connectionList[i].handle().uint64 == connection.handle().uint64)
 		{
 			foundIndex = i;
 

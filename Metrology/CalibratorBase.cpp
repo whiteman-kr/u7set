@@ -143,7 +143,7 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 {
 	m_pInitDialog = new QDialog(parent);
 	m_pInitDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	m_pInitDialog->setFixedSize(500, 220);
+	m_pInitDialog->setFixedSize(520, 220);
 	m_pInitDialog->setWindowIcon(QIcon(":/icons/Calibrators.png"));
 	m_pInitDialog->setWindowTitle(tr("Calibrators initialization"));
 	m_pInitDialog->installEventFilter(this);
@@ -200,7 +200,7 @@ void CalibratorBase::setHeaderList()
 
 	for(int c = 0; c < CALIBRATOR_COLUMN_COUNT; c++)
 	{
-		horizontalHeaderLabels.append(CalibratorColumn[c]);
+		horizontalHeaderLabels.append(qApp->translate("CalibratorBase.h", CalibratorColumn[c]));
 	}
 
 	m_pCalibratorView->setColumnCount(CALIBRATOR_COLUMN_COUNT);
@@ -214,7 +214,7 @@ void CalibratorBase::setHeaderList()
 
 	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
-		verticalHeaderLabels.append(QString("Calibrator %1").arg(channel + 1));
+		verticalHeaderLabels.append(tr("Calibrator %1").arg(channel + 1));
 		m_pCalibratorView->setRowHeight(channel, 18);
 	}
 	m_pCalibratorView->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -542,7 +542,7 @@ void CalibratorBase::onSettings(int row, int)
 		//
 		QHBoxLayout *buttonLayout = new QHBoxLayout ;
 
-		QPushButton* okButton = new QPushButton(tr("OK"));
+		QPushButton* okButton = new QPushButton(tr("Ok"));
 		QPushButton* cancelButton = new QPushButton(tr("Cancel"));
 
 		connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);

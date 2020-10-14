@@ -45,7 +45,7 @@ public:
 	int					index() const { return m_index; }
 	void				setIndex(int index) { m_index = index; }
 
-	QString				title() const { return m_title; }
+	QString				title() const;
 	void				setTitle(const QString& title) { m_title = title; }
 
 	int					width() const { return m_width; }

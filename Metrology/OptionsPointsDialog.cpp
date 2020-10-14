@@ -19,7 +19,7 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
 	for(int t = 0; t < LO_RANGE_TYPE_COUNT; t++)
 	{
-		m_rangeTypeList->addItem(LinearityRangeTypeStr[t]);
+		m_rangeTypeList->addItem(qApp->translate("Options.h", LinearityRangeTypeStr[t]));
 	}
 
 	m_pointCountLabel = new QLabel;
@@ -113,7 +113,7 @@ void OptionsPointsDialog::setHeaderList()
 
 	for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
 	{
-		horizontalHeaderLabels.append(LinearityPointSensor[sensor]);
+		horizontalHeaderLabels.append(qApp->translate("Options.h", LinearityPointSensor[sensor]));
 	}
 
 	m_pointList->setColumnCount(horizontalHeaderLabels.count());
@@ -150,7 +150,7 @@ void OptionsPointsDialog::setHeaderList()
 			continue;
 		}
 
-		m_pColumnAction[sensor] = m_headerContextMenu->addAction(LinearityPointSensor[sensor]);
+		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("Options.h", LinearityPointSensor[sensor]));
 		if (m_pColumnAction[sensor] != nullptr)
 		{
 			m_pColumnAction[sensor]->setCheckable(true);
@@ -280,6 +280,8 @@ void OptionsPointsDialog::updateList()
 
 void OptionsPointsDialog::clearList()
 {
+	m_updatingList = true;
+
 	int columnCount = m_pointList->columnCount();
 	int rowCount = m_pointList->rowCount();
 
@@ -294,6 +296,8 @@ void OptionsPointsDialog::clearList()
 			}
 		}
 	}
+
+	m_updatingList = false;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -415,13 +419,26 @@ void OptionsPointsDialog::onEditPoint()
 
 void OptionsPointsDialog::onRemovePoint()
 {
-	int index = m_pointList->currentRow();
-	if (index < 0 || index >= m_linearity.points().count())
+	int pointCount = m_linearity.points().count();
+	for(int row = pointCount - 1; row >= 0; row --)
 	{
-		return;
-	}
+		bool removePt = false;
 
-	m_linearity.points().remove(index);
+		for(int column = 0; column < POINT_SENSOR_COUNT; column++)
+		{
+			if (m_pointList->item(row, column)->isSelected() == true)
+			{
+				removePt = true;
+			}
+		}
+
+		if (removePt == false)
+		{
+			continue;
+		}
+
+		m_linearity.points().remove(row);
+	}
 
 	updateList();
 

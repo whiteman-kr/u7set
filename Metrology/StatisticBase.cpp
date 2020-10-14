@@ -50,10 +50,10 @@ QString StatisticItem::signalConnectionTypeStr() const
 {
 	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
-		return QString("Input is not set");
+		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Input is not set");
 	}
 
-	return SignalConnectionType[m_signalConnectionType];
+	return qApp->translate("SignalConnectionBase.h", SignalConnectionType[m_signalConnectionType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -118,16 +118,16 @@ QString StatisticItem::stateStr() const
 {
 	if (m_measureCount == 0)
 	{
-		return QString("Not measured");
+		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Not measured");
 	}
 
 	QString state;
 
 	switch (m_state)
 	{
-		case State::Failed:		state = "Failed";	break;
-		case State::Success:	state = "Ok";		break;
-		default:				assert(0);			break;
+		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticBase.cpp", "Failed");	break;
+		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticBase.cpp", "Ok");		break;
+		default:				assert(0);													break;
 	}
 
 	return state;

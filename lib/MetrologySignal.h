@@ -182,6 +182,21 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	const char* const SignalTypeStr[] =
+	{
+		QT_TRANSLATE_NOOP("MeasureSignal.h", "Input"),
+		QT_TRANSLATE_NOOP("MeasureSignal.h", "Output"),
+		QT_TRANSLATE_NOOP("MeasureSignal.h", "Internal"),
+	};
+
+	const int	SIGANL_TYPE_COUNT	= sizeof(SignalTypeStr)/sizeof(SignalTypeStr[0]);
+
+	const int	SIGANL_TYPE_INPUT		= 0,
+				SIGANL_TYPE_OUTPUT		= 1,
+				SIGANL_TYPE_INTERNAL	= 2;
+
+	// ==============================================================================================
+
 	class SignalParam : public ::Signal
 	{
 	public:
@@ -217,6 +232,8 @@ namespace Metrology
 		void					setParam(const ::Signal& signal, const SignalLocation& location);
 
 		void					setAppSignalID(const QString& appSignalID);
+
+		QString					signalTypeStr() const;
 
 		SignalLocation&			location() { return m_location; }
 		SignalLocation			location() const { return m_location; }
@@ -290,6 +307,10 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	const char* const SignalNoValid		= QT_TRANSLATE_NOOP("MeasureSignal.h", "No valid");
+
+	// ==============================================================================================
+
 	class SignalState
 	{
 	public:
@@ -356,8 +377,8 @@ namespace Metrology
 
 	const int	CmpValueTypeCount		= sizeof(CmpValueType)/sizeof(CmpValueType[0]);
 
-	const int	CmpValueTypeSetPoint		= 0,
-				CmpValueTypeHysteresis		= 1;
+	const int	CmpValueTypeSetPoint	= 0,
+				CmpValueTypeHysteresis	= 1;
 
 	// ==============================================================================================
 

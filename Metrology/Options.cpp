@@ -12,158 +12,6 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-DatabaseOption::~DatabaseOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DatabaseOption::load()
-{
-	QSettings s;
-
-	m_path = s.value(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
-	m_type = s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DatabaseOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path);
-	s.setValue(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
-{
-	m_path = from.m_path;
-	m_type = from.m_type;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-ProjectInfo::ProjectInfo(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ProjectInfo::~ProjectInfo()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ProjectInfo::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1ProjectName").arg(PROJECT_INFO_KEY), m_projectName);
-	s.setValue(QString("%1ID").arg(PROJECT_INFO_KEY), m_id);
-	s.setValue(QString("%1Date").arg(PROJECT_INFO_KEY), m_date);
-	s.setValue(QString("%1Changeset").arg(PROJECT_INFO_KEY), m_changeset);
-	s.setValue(QString("%1User").arg(PROJECT_INFO_KEY), m_user);
-	s.setValue(QString("%1Workstation").arg(PROJECT_INFO_KEY), m_workstation);
-	s.setValue(QString("%1DatabaseVersion").arg(PROJECT_INFO_KEY), m_dbVersion);
-	s.setValue(QString("%1CfgFileVersion").arg(PROJECT_INFO_KEY), m_cfgFileVersion);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool ProjectInfo::readFromXml(const QByteArray& fileData)
-{
-	bool result = false;
-
-	XmlReadHelper xml(fileData);
-
-	result = xml.findElement("BuildInfo");
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readStringAttribute("Project", &m_projectName);
-	result &= xml.readIntAttribute("ID", &m_id);
-	result &= xml.readStringAttribute("Date", &m_date);
-	result &= xml.readIntAttribute("Changeset", &m_changeset);
-	result &= xml.readStringAttribute("User", &m_user);
-	result &= xml.readStringAttribute("Workstation", &m_workstation);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result = xml.findElement("DatabaseInfo");
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readIntAttribute("Version", &m_dbVersion);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	save();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
-{
-	m_projectName = from.m_projectName;
-	m_id = from.m_id;
-	m_date = from.m_date;
-	m_changeset = from.m_changeset;
-	m_user = from.m_user;
-	m_workstation = from.m_workstation;
-	m_dbVersion = from.m_dbVersion;
-	m_cfgFileVersion = from.m_cfgFileVersion;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 SocketClientOption::SocketClientOption()
 {
 }
@@ -468,71 +316,14 @@ SocketOption& SocketOption::operator=(const SocketOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ToolBarOption::ToolBarOption(QObject *parent) :
+ProjectInfo::ProjectInfo(QObject *parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ToolBarOption::ToolBarOption(const ToolBarOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-
-ToolBarOption::~ToolBarOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ToolBarOption::load()
-{
-	QSettings s;
-
-	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
-	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), SIGNAL_CONNECTION_TYPE_UNUSED).toInt();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ToolBarOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
-	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
-	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
-{
-	m_measureTimeout = from.m_measureTimeout;
-	m_measureKind = from.m_measureKind;
-	m_signalConnectionType = from.m_signalConnectionType;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-MeasureViewOption::MeasureViewOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject *parent) :
+ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject *parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -540,291 +331,82 @@ MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject *par
 
 // -------------------------------------------------------------------------------------------------------------------
 
-
-MeasureViewOption::~MeasureViewOption()
+ProjectInfo::~ProjectInfo()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureViewOption::updateColumnView(int measureType) const
+void ProjectInfo::save()
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	QSettings s;
+
+	s.setValue(QString("%1ProjectName").arg(PROJECT_INFO_KEY), m_projectName);
+	s.setValue(QString("%1ID").arg(PROJECT_INFO_KEY), m_id);
+	s.setValue(QString("%1Date").arg(PROJECT_INFO_KEY), m_date);
+	s.setValue(QString("%1Changeset").arg(PROJECT_INFO_KEY), m_changeset);
+	s.setValue(QString("%1User").arg(PROJECT_INFO_KEY), m_user);
+	s.setValue(QString("%1Workstation").arg(PROJECT_INFO_KEY), m_workstation);
+	s.setValue(QString("%1DatabaseVersion").arg(PROJECT_INFO_KEY), m_dbVersion);
+	s.setValue(QString("%1CfgFileVersion").arg(PROJECT_INFO_KEY), m_cfgFileVersion);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ProjectInfo::readFromXml(const QByteArray& fileData)
+{
+	bool result = false;
+
+	XmlReadHelper xml(fileData);
+
+	result = xml.findElement("BuildInfo");
+	if (result == false)
 	{
 		return false;
 	}
 
-	return m_updateColumnView[measureType];
-}
+	result &= xml.readStringAttribute("Project", &m_projectName);
+	result &= xml.readIntAttribute("ID", &m_id);
+	result &= xml.readStringAttribute("Date", &m_date);
+	result &= xml.readIntAttribute("Changeset", &m_changeset);
+	result &= xml.readStringAttribute("User", &m_user);
+	result &= xml.readStringAttribute("Workstation", &m_workstation);
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
-{
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (result == false)
 	{
-		return;
+		return false;
 	}
 
-	m_updateColumnView[measureType] = state;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureViewOption::load()
-{
-	//
-	//
-	MeasureViewHeader header;
-
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
+	result = xml.findElement("DatabaseInfo");
+	if (result == false)
 	{
-		header.setMeasureType(type);
-
-		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
-		{
-			MeasureViewColumn* pColumn = header.column(column);
-			if (pColumn == nullptr)
-			{
-				continue;
-			}
-
-			m_column[type][column] = *pColumn;
-		}
+		return false;
 	}
 
-	//
-	//
-	QSettings s;
+	result &= xml.readIntAttribute("Version", &m_dbVersion);
 
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
+	if (result == false)
 	{
-		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
-		{
-			const MeasureViewColumn& c = m_column[type][column];
-
-			if (c.title().isEmpty() == true)
-			{
-
-			}
-
-			m_column[type][column].setTitle(s.value(QString("%1/Header/%2/Column%3/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.title()).toString());
-			m_column[type][column].setWidth(s.value(QString("%1/Header/%2/Column%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.width()).toInt());
-			m_column[type][column].setVisible(s.value(QString("%1/Header/%2/Column%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.enableVisible()).toBool());
-		}
+		return false;
 	}
 
-	m_font.fromString(s.value(QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), "Segoe UI, 10").toString());
-	m_fontBold = m_font;
-	m_fontBold.setBold(true);
+	save();
 
-	m_colorNotError = s.value(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toUInt();
-	m_colorErrorLimit = s.value(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toUInt();
-	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toUInt();
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewOption::save()
+ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
 {
-	QSettings s;
-
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
-	{
-		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
-		{
-			const MeasureViewColumn& c = m_column[type][column];
-
-			if (c.title().isEmpty() == true)
-			{
-				continue;
-			}
-
-			s.setValue(QString("%1/Header/%2/Column%3/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.title());
-			s.setValue(QString("%1/Header/%2/Column%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.width());
-			s.setValue(QString("%1/Header/%2/Column%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(column), c.enableVisible());
-		}
-	}
-
-	s.setValue(QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
-
-	s.setValue(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorNotError.rgb());
-	s.setValue(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorLimit.rgb());
-	s.setValue(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorControl.rgb());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
-{
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
-	{
-		m_updateColumnView[type] = from.m_updateColumnView[type];
-
-		for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
-		{
-			m_column[type][column] = from.m_column[type][column];
-		}
-	}
-
-	m_font.fromString(from.m_font.toString());
-	m_fontBold = m_font;
-	m_fontBold.setBold(true);
-
-	m_colorNotError = from.m_colorNotError;
-	m_colorErrorLimit = from.m_colorErrorLimit;
-	m_colorErrorControl = from.m_colorErrorControl;
-
-	return *this;
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalInfoOption::SignalInfoOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-
-SignalInfoOption::~SignalInfoOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalInfoOption::load()
-{
-	QSettings s;
-
-	m_font.fromString(s.value(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
-
-	m_showElectricState = s.value(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
-
-	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toUInt();
-	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toUInt();
-	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toUInt();
-
-	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), 250).toInt();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalInfoOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), m_font.toString());
-
-	s.setValue(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showElectricState);
-
-	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
-	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
-	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
-
-	s.setValue(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), m_timeForUpdate);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
-{
-	m_font.fromString(from.m_font.toString());
-
-	m_showElectricState = from.m_showElectricState;
-
-	m_colorFlagValid = from.m_colorFlagValid;
-	m_colorFlagOverflow = from.m_colorFlagOverflow;
-	m_colorFlagUnderflow = from.m_colorFlagUnderflow;
-
-	m_timeForUpdate = from.m_timeForUpdate;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-ComparatorInfoOption::ComparatorInfoOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-
-ComparatorInfoOption::~ComparatorInfoOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoOption::load()
-{
-	QSettings s;
-
-	m_font.fromString(s.value(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
-
-	m_displayingStateFalse = s.value(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), "False").toString();
-	m_displayingStateTrue = s.value(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), "True").toString();
-
-	m_colorStateFalse = s.value(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_FALSE.rgb()).toUInt();
-	m_colorStateTrue = s.value(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_TRUE.rgb()).toUInt();
-
-	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), 250).toInt();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), m_font.toString());
-
-	s.setValue(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateFalse);
-	s.setValue(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateTrue);
-
-	s.setValue(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateFalse.rgb());
-	s.setValue(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateTrue.rgb());
-
-	s.setValue(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), m_timeForUpdate);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption& from)
-{
-	m_font.fromString(from.m_font.toString());
-
-	m_displayingStateFalse = from.m_displayingStateFalse;
-	m_displayingStateTrue = from.m_displayingStateTrue;
-
-	m_colorStateFalse = from.m_colorStateFalse;
-	m_colorStateTrue = from.m_colorStateTrue;
-
-	m_timeForUpdate = from.m_timeForUpdate;
+	m_projectName = from.m_projectName;
+	m_id = from.m_id;
+	m_date = from.m_date;
+	m_changeset = from.m_changeset;
+	m_user = from.m_user;
+	m_workstation = from.m_workstation;
+	m_dbVersion = from.m_dbVersion;
+	m_cfgFileVersion = from.m_cfgFileVersion;
 
 	return *this;
 }
@@ -862,7 +444,6 @@ void ModuleOption::load()
 
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
-	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
 
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
 	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
@@ -878,7 +459,6 @@ void ModuleOption::save()
 
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
-	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
 
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
 	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
@@ -892,7 +472,6 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
-	m_showNoValid = from.m_showNoValid;
 
 	m_maxInputCount = from.m_maxInputCount;
 	m_maxComparatorCount = from.m_maxComparatorCount;
@@ -1224,6 +803,450 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+ToolBarOption::ToolBarOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ToolBarOption::ToolBarOption(const ToolBarOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+ToolBarOption::~ToolBarOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ToolBarOption::load()
+{
+	QSettings s;
+
+	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
+	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
+	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), SIGNAL_CONNECTION_TYPE_UNUSED).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ToolBarOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
+	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
+	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
+{
+	m_measureTimeout = from.m_measureTimeout;
+	m_measureKind = from.m_measureKind;
+	m_signalConnectionType = from.m_signalConnectionType;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureViewOption::MeasureViewOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+MeasureViewOption::~MeasureViewOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureViewOption::updateColumnView(int measureType) const
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return false;
+	}
+
+	return m_updateColumnView[measureType];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_updateColumnView[measureType] = state;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::load()
+{
+	QSettings s;
+
+	// properties of columns
+	//
+	int languageType = theOptions.language().languageType();
+	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
+	{
+		// init
+		//
+		MeasureViewHeader header;
+
+		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		{
+			header.setMeasureType(measureType);
+
+			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			{
+				MeasureViewColumn* pColumn = header.column(column);
+				if (pColumn == nullptr)
+				{
+					continue;
+				}
+
+				m_column[measureType][languageType][column] = *pColumn;
+			}
+		}
+
+		// load
+		//
+		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		{
+			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			{
+				const MeasureViewColumn& c = m_column[measureType][languageType][column];
+				if (c.title().isEmpty() == true)
+				{
+					continue;
+				}
+
+				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/Column%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.title()).toString());
+				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/Column%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.width()).toInt());
+				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/Column%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.enableVisible()).toBool());
+			}
+		}
+	}
+
+	//
+	//
+	m_font.fromString(s.value(QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), "Segoe UI, 10").toString());
+	m_fontBold = m_font;
+	m_fontBold.setBold(true);
+
+	m_colorNotError = s.value(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toUInt();
+	m_colorErrorLimit = s.value(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toUInt();
+	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toUInt();
+
+	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::save()
+{
+	QSettings s;
+
+	// properties of columns
+	//
+	int languageType = theOptions.language().languageType();
+	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
+	{
+		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		{
+			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			{
+				const MeasureViewColumn& c = m_column[measureType][languageType][column];
+
+				if (c.title().isEmpty() == true)
+				{
+					continue;
+				}
+
+				s.setValue(QString("%1/Header/%2/%3/Column%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.title());
+				s.setValue(QString("%1/Header/%2/%3/Column%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.width());
+				s.setValue(QString("%1/Header/%2/%3/Column%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.enableVisible());
+			}
+		}
+	}
+
+	//
+	//
+	s.setValue(QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
+
+	s.setValue(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorNotError.rgb());
+	s.setValue(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorLimit.rgb());
+	s.setValue(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorControl.rgb());
+
+	s.setValue(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), m_showNoValid);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
+{
+	for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+	{
+		m_updateColumnView[measureType] = from.m_updateColumnView[measureType];
+
+		for(int languageType = 0; languageType < LANGUAGE_TYPE_COUNT; languageType ++)
+		{
+			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			{
+				m_column[measureType][languageType][column] = from.m_column[measureType][languageType][column];
+			}
+		}
+	}
+
+	m_font.fromString(from.m_font.toString());
+	m_fontBold = m_font;
+	m_fontBold.setBold(true);
+
+	m_colorNotError = from.m_colorNotError;
+	m_colorErrorLimit = from.m_colorErrorLimit;
+	m_colorErrorControl = from.m_colorErrorControl;
+
+	m_showNoValid = from.m_showNoValid;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalInfoOption::SignalInfoOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+SignalInfoOption::~SignalInfoOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoOption::load()
+{
+	QSettings s;
+
+	m_font.fromString(s.value(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
+
+	m_showNoValid = s.value(QString("%1ShowNoValid").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
+	m_showElectricState = s.value(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
+
+	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toUInt();
+	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toUInt();
+	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toUInt();
+
+	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), 250).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), m_font.toString());
+
+	s.setValue(QString("%1ShowNoValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_showNoValid);
+	s.setValue(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showElectricState);
+
+	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
+	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
+	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
+
+	s.setValue(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), m_timeForUpdate);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
+{
+	m_font.fromString(from.m_font.toString());
+
+	m_showNoValid = from.m_showNoValid;
+	m_showElectricState = from.m_showElectricState;
+
+	m_colorFlagValid = from.m_colorFlagValid;
+	m_colorFlagOverflow = from.m_colorFlagOverflow;
+	m_colorFlagUnderflow = from.m_colorFlagUnderflow;
+
+	m_timeForUpdate = from.m_timeForUpdate;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption::ComparatorInfoOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+ComparatorInfoOption::~ComparatorInfoOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoOption::load()
+{
+	QSettings s;
+
+	m_font.fromString(s.value(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
+
+	m_displayingStateFalse = s.value(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), "False").toString();
+	m_displayingStateTrue = s.value(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), "True").toString();
+
+	m_colorStateFalse = s.value(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_FALSE.rgb()).toUInt();
+	m_colorStateTrue = s.value(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_TRUE.rgb()).toUInt();
+
+	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), 250).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), m_font.toString());
+
+	s.setValue(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateFalse);
+	s.setValue(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateTrue);
+
+	s.setValue(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateFalse.rgb());
+	s.setValue(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateTrue.rgb());
+
+	s.setValue(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), m_timeForUpdate);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption& from)
+{
+	m_font.fromString(from.m_font.toString());
+
+	m_displayingStateFalse = from.m_displayingStateFalse;
+	m_displayingStateTrue = from.m_displayingStateTrue;
+
+	m_colorStateFalse = from.m_colorStateFalse;
+	m_colorStateTrue = from.m_colorStateTrue;
+
+	m_timeForUpdate = from.m_timeForUpdate;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::~DatabaseOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::load()
+{
+	QSettings s;
+
+	m_path = s.value(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
+	m_type = s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path);
+	s.setValue(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
+{
+	m_path = from.m_path;
+	m_type = from.m_type;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 BackupOption::BackupOption(QObject *parent) :
 	QObject(parent)
 {
@@ -1326,7 +1349,6 @@ LanguageOption& LanguageOption::operator=(const LanguageOption& from)
 	return *this;
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -1364,7 +1386,10 @@ Options::~Options()
 void Options::load()
 {
 	m_database.load();
+
 	m_socket.load();
+
+	m_language.load();
 
 	m_toolBar.load();
 	m_measureView.load();
@@ -1377,8 +1402,6 @@ void Options::load()
 	m_comparator.load();
 
 	m_backup.load();
-
-	m_language.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1386,8 +1409,11 @@ void Options::load()
 void Options::save()
 {
 	m_database.save();
+
 	m_socket.save();
 	m_projectInfo.save();
+
+	m_language.save();
 
 	m_toolBar.save();
 	m_measureView.save();
@@ -1400,8 +1426,6 @@ void Options::save()
 	m_comparator.save();
 
 	m_backup.save();
-
-	m_language.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1447,6 +1471,8 @@ Options& Options::operator=(const Options& from)
 	m_database = from.m_database;
 	m_projectInfo = from.m_projectInfo;
 
+	m_language = from.m_language;
+
 	m_toolBar = from.m_toolBar;
 	m_measureView = from.m_measureView;
 
@@ -1458,8 +1484,6 @@ Options& Options::operator=(const Options& from)
 	m_comparator = from.m_comparator;
 
 	m_backup = from.m_backup;
-
-	m_language = from.m_language;
 
 	return *this;
 }

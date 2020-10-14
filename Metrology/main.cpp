@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 		{
 			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
 			QMessageBox::critical(nullptr, "Russian language", QString("Didn't found russian language file:\n%1").arg(languageFilePath));
+			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
 		}
 	}
 

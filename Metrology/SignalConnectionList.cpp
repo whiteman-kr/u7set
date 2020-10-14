@@ -54,7 +54,7 @@ QVariant SignalConnectionTable::headerData(int section, Qt::Orientation orientat
 	{
 		if (section >= 0 && section < SIGNAL_CONNECTION_COLUMN_COUNT)
 		{
-			result = SignalConnectionColumn[section];
+			result = qApp->translate("SignalConnectionDialog.h", SignalConnectionColumn[section]);
 		}
 	}
 
@@ -155,9 +155,9 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 	bool visible = true;
 
 	if (row > 0 &&
-		m_connectionList[row - 1].id().type == connection.id().type &&
-		m_connectionList[row - 1].id().inputID == connection.id().inputID &&
-		m_connectionList[row - 1].id().inputID != 0 )
+		m_connectionList[row - 1].handle().type == connection.handle().type &&
+		m_connectionList[row - 1].handle().inputID == connection.handle().inputID &&
+		m_connectionList[row - 1].handle().inputID != 0 )
 	{
 		visible = false;
 	}
@@ -166,10 +166,11 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 
 	switch (column)
 	{
-		case SIGNAL_CONNECTION_COLUMN_TYPE:			result = visible ? connection.typeStr() : QString("");								break;
-		case SIGNAL_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT): QString();	break;
-		case SIGNAL_CONNECTION_COLUMN_OUT_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);						break;
-		default:									assert(0);
+		case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	result = visible ? QString::number(connection.type()) : QString("");				break;
+		case SIGNAL_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");								break;
+		case SIGNAL_CONNECTION_COLUMN_IN_ID:	result = visible ? connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT): QString();	break;
+		case SIGNAL_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);						break;
+		default:								assert(0);
 	}
 
 	return result;
@@ -276,7 +277,7 @@ void SignalConnectionItemDialog::createInterface()
 	setWindowFlags(Qt::Dialog);
 	setWindowIcon(QIcon(":/icons/Connection.png"));
 
-	if (m_signalConnection.id().uint64 == 0)
+	if (m_signalConnection.handle().uint64 == 0)
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
 		setWindowTitle(tr("Create connection"));
@@ -350,7 +351,7 @@ void SignalConnectionItemDialog::createInterface()
 	//
 	for (int type = 0; type < SIGNAL_CONNECTION_TYPE_COUNT; type++)
 	{
-		m_pTypeList->addItem(SignalConnectionType[type], type);
+		m_pTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[type]), type);
 	}
 	m_pTypeList->removeItem(SIGNAL_CONNECTION_TYPE_UNUSED);
 
@@ -560,27 +561,27 @@ void SignalConnectionDialog::createInterface()
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	m_pMenuBar = new QMenuBar(this);
-	m_pSignalMenu = new QMenu(tr("&Signal"), this);
+	m_pConnectionMenu = new QMenu(tr("&Connection"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
-	m_pCreateAction = m_pSignalMenu->addAction(tr("&Create ..."));
+	m_pCreateAction = m_pConnectionMenu->addAction(tr("&Create ..."));
 	m_pCreateAction->setIcon(QIcon(":/icons/Add.png"));
 	m_pCreateAction->setShortcut(Qt::Key_Insert);
 
-	m_pEditAction = m_pSignalMenu->addAction(tr("&Edit ..."));
+	m_pEditAction = m_pConnectionMenu->addAction(tr("&Edit ..."));
 	m_pEditAction->setIcon(QIcon(":/icons/Edit.png"));
 
-	m_pRemoveAction = m_pSignalMenu->addAction(tr("&Remove"));
+	m_pRemoveAction = m_pConnectionMenu->addAction(tr("&Remove"));
 	m_pRemoveAction->setIcon(QIcon(":/icons/Remove.png"));
 	m_pRemoveAction->setShortcut(Qt::Key_Delete);
 
-	m_pSignalMenu->addSeparator();
+	m_pConnectionMenu->addSeparator();
 
-	m_pImportAction = m_pSignalMenu->addAction(tr("&Import ..."));
+	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
 	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
 	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
-	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
+	m_pExportAction = m_pConnectionMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
 
@@ -598,7 +599,7 @@ void SignalConnectionDialog::createInterface()
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
-	m_pMenuBar->addMenu(m_pSignalMenu);
+	m_pMenuBar->addMenu(m_pConnectionMenu);
 	m_pMenuBar->addMenu(m_pEditMenu);
 
 	connect(m_pCreateAction, &QAction::triggered, this, &SignalConnectionDialog::createConnection);
@@ -621,6 +622,8 @@ void SignalConnectionDialog::createInterface()
 	{
 		m_pView->setColumnWidth(column, SignalConnectionColumnWidth[column]);
 	}
+
+	m_pView->hideColumn(SIGNAL_CONNECTION_COLUMN_TYPE_NO);
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
@@ -709,7 +712,7 @@ void SignalConnectionDialog::createConnection()
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
 
-		QMessageBox::information(this, windowTitle(), tr("Signal already exist!"));
+		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
 		return;
 	}
 
@@ -732,7 +735,7 @@ void SignalConnectionDialog::editConnection()
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_connectionTable.connectionCount())
 	{
-		QMessageBox::information(this, windowTitle(), tr("Please, select signal for edit!"));
+		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for edit!"));
 		return;
 	}
 
@@ -755,7 +758,7 @@ void SignalConnectionDialog::editConnection()
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
 
-		QMessageBox::information(this, windowTitle(), tr("Signal already exist!"));
+		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
 		return;
 	}
 
@@ -809,11 +812,6 @@ void SignalConnectionDialog::importConnections()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "SignalConnections.csv", "CSV files (*.csv);;All files (*.*)");
 	if (fileName.isEmpty() == true)
 	{
-		return;
-	}
-
-	if (fileName.isEmpty() == true)
-	{
 		QMessageBox::critical(this, tr("Error"), tr("Could not open file: Empty file name"));
 		return;
 	}
@@ -831,21 +829,6 @@ void SignalConnectionDialog::importConnections()
 		return;
 	}
 
-	// format header line for test header of file
-	//
-	QString headerLine;
-
-	int columnCount = m_pView->model()->columnCount();
-	for(int column = 0; column < columnCount; column++)
-	{
-		if (m_pView->isColumnHidden(column) == true)
-		{
-			continue;
-		}
-
-		headerLine.append(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit() + ";");
-	}
-
 	QVector<SignalConnection> connectionList;
 
 	// read data
@@ -853,13 +836,11 @@ void SignalConnectionDialog::importConnections()
 	QTextStream in(&file);
 	while (in.atEnd() == false)
 	{
-		if (in.pos() == 0)
+		if (in.pos() == 0) // first line is header
 		{
-			if (in.readLine() != headerLine)
-			{
-				QMessageBox::critical(this, tr("Error"), tr("Invalid file header!"));
-				break;
-			}
+			QString header = in.readLine();
+			qDebug() << header;
+			continue;
 		}
 		else
 		{
@@ -870,7 +851,7 @@ void SignalConnectionDialog::importConnections()
 			{
 				switch (column)
 				{
-					case SIGNAL_CONNECTION_COLUMN_TYPE:		connection.setType(line[column]);										break;
+					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	connection.setType(line[column].toInt());								break;
 					case SIGNAL_CONNECTION_COLUMN_IN_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);	break;
 					case SIGNAL_CONNECTION_COLUMN_OUT_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);	break;
 				}
@@ -896,7 +877,7 @@ void SignalConnectionDialog::importConnections()
 
 void SignalConnectionDialog::exportConnections()
 {
-	ExportData* dialog = new ExportData(m_pView, "SignalConnections");
+	ExportData* dialog = new ExportData(m_pView, true, "SignalConnections");
 	dialog->exec();
 }
 

@@ -159,11 +159,11 @@ double Measurement::measure(int limitType) const
 
 QString Measurement::measureStr(int limitType) const
 {
-	if (theOptions.module().showNoValid() == false)
+	if (theOptions.measureView().showNoValid() == false)
 	{
 		if (isSignalValid() == false)
 		{
-			return SignalNoValidStr;
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 		}
 	}
 
@@ -332,11 +332,11 @@ double Measurement::error(int limitType, int errotType) const
 
 QString Measurement::errorStr() const
 {
-	if (theOptions.module().showNoValid() == false)
+	if (theOptions.measureView().showNoValid() == false)
 	{
 		if (isSignalValid() == false)
 		{
-			return SignalNoValidStr;
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 		}
 	}
 
@@ -483,11 +483,11 @@ int Measurement::errorResult() const
 
 QString Measurement::errorResultStr() const
 {
-	if (theOptions.module().showNoValid() == false)
+	if (theOptions.measureView().showNoValid() == false)
 	{
 		if (isSignalValid() == false)
 		{
-			return SignalNoValidStr;
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 		}
 	}
 
@@ -497,7 +497,7 @@ QString Measurement::errorResultStr() const
 		return QString();
 	}
 
-	return ErrorResult[errResult];
+	return qApp->translate("MeasureBase.h", ErrorResult[errResult]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1214,11 +1214,11 @@ double LinearityMeasurement::measureItemArray(int limitType, int index) const
 
 QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 {
-	if (theOptions.module().showNoValid() == false)
+	if (theOptions.measureView().showNoValid() == false)
 	{
 		if (isSignalValid() == false)
 		{
-			return SignalNoValidStr;
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 		}
 	}
 
@@ -1286,11 +1286,11 @@ QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) c
 		return QString();
 	}
 
-	if (theOptions.module().showNoValid() == false)
+	if (theOptions.measureView().showNoValid() == false)
 	{
 		if (isSignalValid() == false)
 		{
-			return SignalNoValidStr;
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 		}
 	}
 
@@ -1300,7 +1300,14 @@ QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) c
 		return QString();
 	}
 
-	return QString::number(m_additionalParam[limitType][paramType], 'f', 2);
+	QString valueStr = QString::number(m_additionalParam[limitType][paramType], 'f', 2);
+
+	if (paramType == MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER)
+	{
+		valueStr.insert(0, "± ");
+	}
+
+	return valueStr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1749,7 +1756,7 @@ QString ComparatorMeasurement::cmpValueTypeStr() const
 		return QString("N/A");
 	}
 
-	return Metrology::CmpValueType[m_cmpValueType];
+	return qApp->translate("MetrologySignal.h", Metrology::CmpValueType[m_cmpValueType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -23,8 +23,8 @@ const int	MEASURE_TYPE_UNKNOWN	= -1,
 
 const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Linearity"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Comparators"),
+			"Linearity",
+			"Comparators",
 };
 
 // ==============================================================================================
@@ -125,10 +125,6 @@ const int	MAX_MEASUREMENT_IN_POINT	= 20;
 // ==============================================================================================
 
 #define	 MEASURE_TIME_FORMAT			"dd-MM-yyyy hh:mm:ss"
-
-// ==============================================================================================
-
-const char* const SignalNoValidStr		= QT_TRANSLATE_NOOP("MeasureBase.h", "No valid");
 
 // ==============================================================================================
 
