@@ -129,6 +129,7 @@ namespace SimOverrideUI
 	QValidator::State QDoubleValidatorEx::validate(QString& str, int& npos) const
 	{
 		str.replace('.', QLocale{}.decimalPoint());
+		str.replace('E', QLocale{}.exponential(), Qt::CaseInsensitive);
 		return QDoubleValidator::validate(str, npos);
 	}
 
