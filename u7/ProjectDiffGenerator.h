@@ -37,7 +37,7 @@ public:
 	static bool diff(const QByteArray& sourceData, const QByteArray& targetData, std::vector<FileLine>* sourceDiff, std::vector<FileLine>* targetDiff);
 	static void loadFileData(const QByteArray& fileData, std::vector<FileLine>* fileLines);
 	template<typename T> static void calculateLcs(const std::vector<T>& X, const std::vector<T>& Y, std::vector<T>* result);
-} ;
+};
 
 struct PropertyDiff
 {
@@ -58,6 +58,85 @@ struct PropertyDiff
 	QString newValueText;
 };
 
+class DiffReportTable
+{
+public:
+	DiffReportTable();
+
+	QString caption() const;
+	void setCaption(const QString& caption);
+
+	QStringList headerLabels();
+	void setHeaderLabels(const QStringList& headerLabels);
+
+	int columnCount() const;
+	int rowCount() const;
+
+	const QStringList& rowAt(int index) const;
+
+	void insertRow(const QStringList& row);
+
+	void render(QTextCursor& textCursor) const;
+	void clear();
+
+private:
+	QString m_caption;
+
+	QStringList m_headerLabels;
+	std::vector<QStringList> m_rows;
+};
+
+class DiffReportObject
+{
+public:
+	DiffReportObject(const QString& text);
+	DiffReportObject(const DiffReportTable& table);
+
+	bool isText() const;
+	bool isTable() const;
+
+	void render(QTextCursor& textCursor) const;
+
+private:
+	enum class DiffDataObjectType
+	{
+		Text,
+		Table
+	};
+
+	DiffDataObjectType m_type = DiffDataObjectType::Text;
+
+	// Data
+	//
+	QString m_text;
+	DiffReportTable m_table;
+
+};
+
+class DiffReportObjectSet
+{
+public:
+	bool empty() const;
+
+	QString caption() const;
+	void setCaption(const QString& caption);
+
+	DiffReportTable& headerTable();
+
+	void addText(const QString& text);
+	void addTable(const DiffReportTable& table);
+
+	void render(QTextCursor& textCursor) const;
+	void clear();
+
+private:
+	QString m_caption;
+
+	DiffReportTable m_headerTable;
+
+	std::vector<DiffReportObject> m_objects;
+};
+
 class ProjectDiffGenerator : public QObject
 {
 	Q_OBJECT
@@ -71,8 +150,8 @@ public:
 
 private:
 	void compareProject(CompareData compareData);
-	bool compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData);
-	bool compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName);
+	bool compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, DiffReportObjectSet& diffData);
+	bool compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName, DiffReportObjectSet& diffData);
 
 	std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
 												  const CompareVersionType versionType,
@@ -81,14 +160,14 @@ private:
 
 	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject> >* deviceObjectMap);
 
-	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
-	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile) const;
-	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
-	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
+	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData);
+	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData) const;
+	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData);
+	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData);
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
 
-	void compareSignal(const int signalID, const CompareData& compareData);
-	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal);
+	void compareSignal(const int signalID, const CompareData& compareData, DiffReportObjectSet& diffData);
+	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, DiffReportObjectSet& diffData);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* result) const;
 
@@ -99,13 +178,13 @@ private:
 	bool isSchemaFile(const QString& fileName) const;
 
 	bool writePdf(const QTextDocument& doc, const QString& fileName) const;
-	virtual void generateHeader();
-	//bool exportToTextDocument(QTableView* tableView, QTextDocument* doc, bool onlySelectedRows);
+	void generateTitlePage();
 
 	void printSchema(std::shared_ptr<VFrame30::Schema> schema);
 
 	void newPage();
 	void flushDocument();
+	void clearDocument();
 
 private:
 	DbController* m_db = nullptr;
@@ -120,6 +199,10 @@ private:
 	QPainter m_pdfPainter;
 	QTextDocument m_textDocument;
 	QTextCursor m_textCursor;
+
+	std::map<int, QString> m_filesTypesNamesMap;
+
+	bool m_openBlock = false;
 
 };
 
