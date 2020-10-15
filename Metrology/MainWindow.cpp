@@ -34,6 +34,10 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
+	// open database
+	//
+	theDatabase.open();
+
 	// init calibration base
 	//
 	theCalibratorBase.init(this);
@@ -45,7 +49,14 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
 	theSignalBase.signalConnections().load();	// load signal connections base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
+	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
+
+	// load measurement base
+	//
+	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	{
+		theMeasureBase.load(measureType);
+	}
 
 	//
 	//
@@ -225,7 +236,7 @@ void MainWindow::createMenu()
 	// View
 	//
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
-	m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
+	m_pViewPanelMenu = new QMenu(tr("&Panels"), m_pViewMenu);
 
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
 	m_pViewMenu->addSeparator();
@@ -342,7 +353,7 @@ bool MainWindow::createToolBars()
 
 		for(int k = 0; k < MEASURE_KIND_COUNT; k++)
 		{
-			m_measureKindList->addItem(MeasureKind[k]);
+			m_measureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[k]));
 		}
 
 		m_measureKindList->setCurrentIndex(theOptions.toolBar().measureKind());
@@ -373,7 +384,7 @@ bool MainWindow::createToolBars()
 
 		for(int s = 0; s < SIGNAL_CONNECTION_TYPE_COUNT; s++)
 		{
-			m_signalConnectionTypeList->addItem(SignalConnectionType[s]);
+			m_signalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[s]));
 		}
 
 		m_signalConnectionTypeList->setCurrentIndex(theOptions.toolBar().signalConnectionType());
@@ -507,6 +518,7 @@ void MainWindow::createPanels()
 		m_pStatisticPanel->hide();
 
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
+		connect(&theMeasureBase, &MeasureBase::updatedMeasureBase, m_pStatisticPanel, &StatisticPanel::updateSignalInList, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
 		connect(this, &MainWindow::changedSignalConnectionType, m_pStatisticPanel, &StatisticPanel::changedSignalConnectionType, Qt::QueuedConnection);
@@ -571,7 +583,9 @@ void MainWindow::createMeasureViews()
 			continue;
 		}
 
-		m_pMainTab->addTab(pView, tr(MeasureType[measureType]));
+		pView->loadMeasureList();
+
+		m_pMainTab->addTab(pView, qApp->translate("MeasureBase.h", MeasureType[measureType]));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
@@ -743,7 +757,7 @@ void MainWindow::updateRacksOnToolBar()
 			{
 				for(int r = 0; r < rackCount; r++)
 				{
-					Metrology::RackParam rack = theSignalBase.rackForMeasure(r);
+					const Metrology::RackParam& rack = theSignalBase.rackForMeasure(r);
 					if (rack.isValid() == false)
 					{
 						continue;
@@ -850,13 +864,13 @@ void MainWindow::updateSignalsOnToolBar()
 
 	for(int s = 0; s < signalCount; s++)
 	{
-		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
+		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(s);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;
 		}
 
-		MultiChannelSignal signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (signal.isEmpty() == true)
 		{
 			continue;
@@ -1000,7 +1014,10 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 
 			if (theCalibratorBase.connectedCalibratorsCount() == 0)
 			{
@@ -1095,7 +1112,7 @@ void MainWindow::exportMeasure()
 		return;
 	}
 
-	ExportData* dialog = new ExportData(pMeasureView, MeasureFileName[m_measureType]);
+	ExportData* dialog = new ExportData(pMeasureView, false, MeasureFileName[m_measureType]);
 	dialog->exec();
 }
 
@@ -1202,6 +1219,9 @@ void MainWindow::showSignalConnectionList()
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
 		return;
 	}
+
+	theSignalBase.statistic().createStatisticSignalList();
+	theSignalBase.statistic().createStatisticComparatorList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1239,27 +1259,31 @@ void MainWindow::showCalculator()
 
 void MainWindow::showOptions()
 {
-	SocketClientOption sco = theOptions.socket().client(SOCKET_TYPE_CONFIG);
+	Options options(theOptions);
 
 	OptionsDialog dialog(this);
 	dialog.exec();
 
-	if (sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
-		sco.address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
+	// reconnect ConfigSocket
+	//
+	if (options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
+		options.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
 	{
 		stopSignalSocket();
 		stopTuningSocket();
 
 		if (m_pConfigSocket != nullptr)
 		{
-			sco = theOptions.socket().client(SOCKET_TYPE_CONFIG);
-			m_pConfigSocket->reconncect(sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY), sco.address(SOCKET_SERVER_TYPE_PRIMARY));
+			m_pConfigSocket->reconncect(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
+										theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY));
 		}
 	}
 
+	// update columns in the measure views
+	//
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 	{
-		if (theOptions.m_updateColumnView[type] == false)
+		if (theOptions.measureView().updateColumnView(type) == false)
 		{
 			continue;
 		}
@@ -1273,19 +1297,41 @@ void MainWindow::showOptions()
 		pView->updateColumn();
 	}
 
-	if (m_pSignalInfoPanel != nullptr)
+	// update timeouts
+	//
+	if (options.signalInfo().timeForUpdate() != theOptions.signalInfo().timeForUpdate())
 	{
-		m_pSignalInfoPanel->restartSignalStateTimer();
+		if (m_pSignalInfoPanel != nullptr)
+		{
+			m_pSignalInfoPanel->restartSignalStateTimer();
+		}
 	}
 
-	if (m_pComparatorInfoPanel != nullptr)
+	if (options.comparatorInfo().timeForUpdate() != theOptions.comparatorInfo().timeForUpdate())
 	{
-		m_pComparatorInfoPanel->restartComparatorStateTimer();
+		if (m_pComparatorInfoPanel != nullptr)
+		{
+			m_pComparatorInfoPanel->restartComparatorStateTimer();
+		}
 	}
 
-	if (m_pStatisticPanel != nullptr)
+	// if changed error type or limitType
+	//
+	if (options.linearity().errorType() != theOptions.linearity().errorType() || options.linearity().limitType() != theOptions.linearity().limitType() ||
+		options.comparator().errorType() != theOptions.comparator().errorType() || options.comparator().limitType() != theOptions.comparator().limitType())
 	{
 		m_pStatisticPanel->updateList();
+	}
+
+	if(theOptions.language().languageType() == LANGUAGE_TYPE_RU)
+	{
+		QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
+		if (QFile::exists(languageFilePath) == false)
+		{
+			QMessageBox::information(this, windowTitle(), tr("Russian language could not be installed.\nFile of russian language: %1 - was not found!").arg(languageFilePath));
+			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
+			theOptions.language().save();
+		}
 	}
 }
 
@@ -1325,7 +1371,7 @@ void MainWindow::setMeasureKind(int index)
 			QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
 															 "you need to combine several racks into groups."
 															 "Currently, no groups have been found.\n"
-															 "To create a group of racks, click menu \"Tool\" - \"Racks ...\" ."));
+															 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
 
 
 			return;
@@ -1402,7 +1448,7 @@ void MainWindow::setMeasureSignal(int index)
 		return;
 	}
 
-	MeasureSignal measureSignal = theSignalBase.signalForMeasure(signalIndex);
+	const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(signalIndex);
 	if (measureSignal.isEmpty() == true)
 	{
 		assert(false);
@@ -1412,7 +1458,7 @@ void MainWindow::setMeasureSignal(int index)
 
 	theSignalBase.setActiveSignal(measureSignal);
 
-	MultiChannelSignal signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -1524,47 +1570,44 @@ void MainWindow::calibratorConnectedChanged(int count)
 	else
 	{
 		m_statusCalibratorCount->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-		m_statusCalibratorCount->setToolTip(QString());
+
+		QString calibratorInfo;
+
+		int calibratorCount = theCalibratorBase.calibratorCount();
+		for(int i  = 0; i < calibratorCount; i++)
+		{
+			if (theCalibratorBase.calibratorManager(i) == nullptr)
+			{
+				continue;
+			}
+
+			Calibrator* pCalibrator = theCalibratorBase.calibratorManager(i)->calibrator();
+			if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
+			{
+				continue;
+			}
+
+			calibratorInfo.append(tr("Calibrator %1: %2, %3\n").arg(i+1).arg(pCalibrator->typeStr()).arg(pCalibrator->serialNo()));
+		}
+
+		m_statusCalibratorCount->setToolTip(calibratorInfo);
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::configSocketConnected()
+QString MainWindow::configSocketConnectedStateStr()
 {
 	if (m_pConfigSocket == nullptr)
 	{
-		return;
+		return QString();
 	}
+
+	QString connectedState;
 
 	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
-	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
-	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToConfigServer->setToolTip(tr("Connected: %1 : %2\nLoaded files: 0").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port()));
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::configSocketDisconnected()
-{
-	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
-	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
-	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::configSocketConfigurationLoaded()
-{
-	if (m_pConfigSocket == nullptr)
-	{
-		return;
-	}
-
-	HostAddressPort configSocketAddress = m_pConfigSocket->address();
-
-	QString connectedState = tr("Connected: %1 : %2\n\n").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port());
+	connectedState = tr("Connected: %1 : %2\n\n").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port());
 
 	int filesCount = m_pConfigSocket->loadedFiles().count();
 
@@ -1585,9 +1628,41 @@ void MainWindow::configSocketConfigurationLoaded()
 								.arg(theOptions.projectInfo().cfgFileVersion()));
 	}
 
+	return connectedState;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketConnected()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	HostAddressPort configSocketAddress = m_pConfigSocket->address();
+
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToConfigServer->setToolTip(connectedState);
+	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketDisconnected()
+{
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketConfigurationLoaded()
+{
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
 
 	if (theSignalBase.signalCount() == 0)
 	{
@@ -1641,31 +1716,40 @@ void MainWindow::signalSocketDisconnected()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::tuningSocketConnected()
+QString MainWindow::tuningSocketConnectedStateStr()
 {
 	if (m_pTuningSocket == nullptr)
 	{
-		return;
+		return QString();
 	}
 
 	int serverType = m_pTuningSocket->selectedServerIndex();
 	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
 	{
-		return;
+		return QString();
 	}
+
+	QString connectedState;
 
 	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
 
-	QString connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
+	connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
-	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
-	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
+	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().sourceBase().count()));
+	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().signalBase().count()));
 
+	return connectedState;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::tuningSocketConnected()
+{
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToTuningServer->setToolTip(connectedState);
+	m_statusConnectToTuningServer->setToolTip(tuningSocketConnectedStateStr());
 
-	if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+	if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
 	{
 		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
 	}
@@ -1683,8 +1767,8 @@ void MainWindow::tuningSocketDisconnected()
 		}
 	}
 
-	theSignalBase.tuning().Sources().clear();
-	theSignalBase.tuning().Signals().setNovalid();
+	theSignalBase.tuning().sourceBase().clear();
+	theSignalBase.tuning().signalBase().setNovalid();
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
@@ -1695,30 +1779,12 @@ void MainWindow::tuningSocketDisconnected()
 
 void MainWindow::tuningSignalsCreated()
 {
-	if (m_pTuningSocket == nullptr)
-	{
-		return;
-	}
-
-	int serverType = m_pTuningSocket->selectedServerIndex();
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
-	{
-		return;
-	}
-
-	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
-
-	QString connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
-
-	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
-	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
-
 	if (m_pTuningSocket->isConnected() == true)
 	{
 		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 
-		if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+		if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
 		{
 			m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
 		}
@@ -1729,7 +1795,7 @@ void MainWindow::tuningSignalsCreated()
 		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	}
 
-	m_statusConnectToTuningServer->setToolTip(connectedState);
+	m_statusConnectToTuningServer->setToolTip(tuningSocketConnectedStateStr());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1844,7 +1910,7 @@ void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
 		return;
 	}
 
-	MeasureSignal nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
+	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure1(nextSignalIndex);
 	if (nextActiveSignal.isEmpty() == true)
 	{
 		return;
@@ -2024,7 +2090,7 @@ void MainWindow::runMeasureThread()
 	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
-	m_measureThread.init(this);
+	connect(&theSignalBase, &SignalBase::updatedSignalParam, &m_measureThread, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
 	measureThreadStoped();
 }
@@ -2076,12 +2142,6 @@ void MainWindow::saveSettings()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-	if (m_pCalculator != nullptr)
-	{
-		delete m_pCalculator;
-		m_pCalculator = nullptr;
-	}
-
 	if (m_measureThread.isRunning() == true)
 	{
 		QMessageBox::critical(this, windowTitle(), m_statusMeasureThreadState->text());
@@ -2089,12 +2149,21 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		return;
 	}
 
+	if (m_pCalculator != nullptr)
+	{
+		delete m_pCalculator;
+		m_pCalculator = nullptr;
+	}
+
 	stopConfigSocket();
 	stopSignalSocket();
 	stopTuningSocket();
 
+	theMeasureBase.clear();
 	theSignalBase.clear();
 	theCalibratorBase.clear();
+
+	theDatabase.close();
 
 	saveSettings();
 

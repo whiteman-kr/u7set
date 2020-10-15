@@ -93,7 +93,7 @@ QVariant FindMeasureTable::headerData(int section, Qt::Orientation orientation, 
 	{
 		if (section >= 0 && section < FIND_MEASURE_COLUMN_COUNT)
 		{
-			result = FindMeasureColumn[section];
+			result = qApp->translate("FindMeasurePanel.h", FindMeasureColumn[section]);
 		}
 	}
 
@@ -244,7 +244,7 @@ FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Search measurements panel");
+	setWindowTitle(tr("Search measurements panel"));
 	setObjectName(windowTitle());
 	loadSettings();
 
@@ -268,10 +268,11 @@ void FindMeasurePanel::createInterface()
 
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
-	m_findTextEdit->setClearButtonEnabled(true);
+	//m_findTextEdit->setClearButtonEnabled(true);
 
 	toolBar->addWidget(m_findTextEdit);
-	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	//QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	QAction* action = toolBar->addAction(tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindMeasurePanel::find);
 
 	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -345,7 +346,7 @@ bool FindMeasurePanel::event(QEvent* e)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			find();
 		}
@@ -377,6 +378,13 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 	}
 
 	return QDockWidget::eventFilter(object, e);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FindMeasurePanel::setFindText(const QString& findText)
+{
+	m_findTextEdit->setText(findText);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -425,7 +433,17 @@ void FindMeasurePanel::find()
 				continue;
 			}
 
-			QString text = pMeasureView->table().text(row, column);
+			Measurement* pMeasurement = pMeasureView->table().at(row);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			QString text = pMeasureView->table().text(row, column, pMeasurement);
+			if (text.isEmpty() == true)
+			{
+				continue;
+			}
 
 			int pos = text.indexOf(m_findText);
 			if (pos == -1)

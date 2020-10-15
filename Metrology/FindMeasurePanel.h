@@ -152,14 +152,17 @@ protected:
 	bool				event(QEvent* e);
 	bool				eventFilter(QObject* object, QEvent* e);
 
+public:
+
+	void				setFindText(const QString& findText);
+
 public slots:
 
 	void				clear()	{ m_table.clear(); m_statusLabel->setText(QString()); }
 
+	void				find();
 
 private slots:
-
-	void				find();
 
 	void				selectItemInMeasureView();
 

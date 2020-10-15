@@ -48,7 +48,7 @@ namespace Metrology
 
 	const int	InputCount	= 32;
 
-	const int	ComparatorCount	= 16;
+	const int	ComparatorCount	= 32;
 
 	// ==============================================================================================
 
@@ -182,6 +182,21 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	const char* const SignalTypeStr[] =
+	{
+		QT_TRANSLATE_NOOP("MeasureSignal.h", "Input"),
+		QT_TRANSLATE_NOOP("MeasureSignal.h", "Output"),
+		QT_TRANSLATE_NOOP("MeasureSignal.h", "Internal"),
+	};
+
+	const int	SIGANL_TYPE_COUNT	= sizeof(SignalTypeStr)/sizeof(SignalTypeStr[0]);
+
+	const int	SIGANL_TYPE_INPUT		= 0,
+				SIGANL_TYPE_OUTPUT		= 1,
+				SIGANL_TYPE_INTERNAL	= 2;
+
+	// ==============================================================================================
+
 	class SignalParam : public ::Signal
 	{
 	public:
@@ -217,6 +232,8 @@ namespace Metrology
 		void					setParam(const ::Signal& signal, const SignalLocation& location);
 
 		void					setAppSignalID(const QString& appSignalID);
+
+		QString					signalTypeStr() const;
 
 		SignalLocation&			location() { return m_location; }
 		SignalLocation			location() const { return m_location; }
@@ -290,6 +307,10 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	const char* const SignalNoValid		= QT_TRANSLATE_NOOP("MeasureSignal.h", "No valid");
+
+	// ==============================================================================================
+
 	class SignalState
 	{
 	public:
@@ -320,40 +341,6 @@ namespace Metrology
 		void setValid(bool valid) { m_flags.valid = valid; }
 	};
 
-
-	// ==============================================================================================
-
-	class SignalStatistic
-	{
-	public:
-
-		SignalStatistic() {}
-		virtual ~SignalStatistic() {}
-
-		enum State
-		{
-			Failed,
-			Success,
-		};
-
-	private:
-
-		int m_measureCount = 0;
-		State m_state = State::Success;
-
-	public:
-
-		int measureCount() const { return m_measureCount; }
-		void setMeasureCount(int count) { m_measureCount = count; }
-		QString measureCountStr() const;
-
-		State state() const { return m_state; }
-		void setState(State state) { m_state = state; }
-		QString stateStr() const;
-
-		bool isMeasured() const { return m_measureCount != 0; }
-	};
-
 	// ==============================================================================================
 
 	class Signal
@@ -369,8 +356,6 @@ namespace Metrology
 		SignalParam m_param;
 		SignalState m_state;
 
-		SignalStatistic m_statistic;
-
 	public:
 
 		SignalParam& param() { return m_param; }
@@ -380,17 +365,23 @@ namespace Metrology
 		SignalState& state() { return m_state; }
 		const SignalState& state() const { return m_state; }
 		void setState(const Metrology::SignalState& state) { m_state = state; }
-
-		SignalStatistic& statistic() { return m_statistic; }
-		const SignalStatistic& statistic() const { return m_statistic; }
-		void setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
 	};
 
 	// ==============================================================================================
 
+	const char* const CmpValueType[] =
+	{
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point"),
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis"),
+	};
 
+	const int	CmpValueTypeCount		= sizeof(CmpValueType)/sizeof(CmpValueType[0]);
 
-	// ----------------------------------------------------------------------------------------------
+	const int	CmpValueTypeSetPoint	= 0,
+				CmpValueTypeHysteresis	= 1;
+
+	// ==============================================================================================
+
 	class ComparatorEx : public ::Comparator
 	{
 	public:
@@ -401,7 +392,7 @@ namespace Metrology
 
 		enum DeviationType
 		{
-			NoUsed,
+			Unused,
 			Down,
 			Up,
 		};
@@ -415,7 +406,10 @@ namespace Metrology
 		Metrology::Signal* m_hysteresisSignal = nullptr;
 		Metrology::Signal* m_outputSignal = nullptr;
 
-		DeviationType m_deviationType = DeviationType::NoUsed;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
+		DeviationType m_deviationType = DeviationType::Unused;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
+
+		double m_compareValue = 0;
+		double m_hysteresisValue = 0;
 
 	public:
 
@@ -444,20 +438,19 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue() const;				// current online (run time) value
-		QString compareOnlineValueStr() const;			// str current oline (run time) value
-		double compareConstValue() const;				// default offine value
-		QString compareDefaultValueStr() const;			// str default offine value
+		double compareOnlineValue(int cmpValueType);			// current online (run time) value
+		QString compareOnlineValueStr(int cmpValueType);		// str current oline (run time) value
+		double compareConstValue() const;						// default offine value
+		QString compareDefaultValueStr() const;					// str default offine value
 
-		double hysteresisOnlineValue() const;			// current oline (run time) value
-		QString hysteresisOnlineValueStr() const;		// str current oline (run time) value
-		QString hysteresisDefaultValueStr() const;		// str default offine value
+		double hysteresisOnlineValue();							// current oline (run time) value
+		QString hysteresisOnlineValueStr();						// str current oline (run time) value
+		QString hysteresisDefaultValueStr() const;				// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;
 		QString outputStateStr(const QString& forTrue, const QString& forFalse) const;
 	};
-
 
 	// ==============================================================================================
 }

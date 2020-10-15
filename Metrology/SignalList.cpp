@@ -10,10 +10,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalListTable::m_showADCInHex = true;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 SignalListTable::SignalListTable(QObject*)
 {
 }
@@ -22,11 +18,9 @@ SignalListTable::SignalListTable(QObject*)
 
 SignalListTable::~SignalListTable()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -58,7 +52,7 @@ QVariant SignalListTable::headerData(int section, Qt::Orientation orientation, i
 	{
 		if (section >= 0 && section < SIGNAL_LIST_COLUMN_COUNT)
 		{
-			result = SignalListColumn[section];
+			result = qApp->translate("SignalListDialog.h", SignalListColumn[section]);
 		}
 	}
 
@@ -239,7 +233,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();			break;
 		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();			break;
 		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = param.location().shownOnSchemasStr();	break;
-		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(m_showADCInHex);		break;
+		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(true);				break;
 		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();				break;
 		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();			break;
 		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();				break;
@@ -257,33 +251,23 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 
 int SignalListTable::signalCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return m_signalList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Metrology::Signal* SignalListTable::signal(int index) const
 {
-	Metrology::Signal* signal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			 signal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return signal;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -393,7 +377,7 @@ void SignalListDialog::createInterface(bool hasButtons)
 
 	m_pEditMenu->addSeparator();
 
-	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pViewTypeADMenu = new QMenu(tr("Type A/D"), this);
@@ -418,15 +402,8 @@ void SignalListDialog::createInterface(bool hasButtons)
 	m_pTypeOutputAction->setCheckable(true);
 	m_pTypeOutputAction->setChecked(m_typeIO == E::SignalInOutType::Output);
 
-	m_pViewShowMenu = new QMenu(tr("Show"), this);
-	m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
-	m_pShowADCInHexAction->setCheckable(true);
-	m_pShowADCInHexAction->setChecked(m_signalTable.showADCInHex());
-
 	m_pViewMenu->addMenu(m_pViewTypeADMenu);
 	m_pViewMenu->addMenu(m_pViewTypeIOMenu);
-	m_pViewMenu->addSeparator();
-	m_pViewMenu->addMenu(m_pViewShowMenu);
 
 	m_pMenuBar->addMenu(m_pSignalMenu);
 	m_pMenuBar->addMenu(m_pEditMenu);
@@ -445,7 +422,6 @@ void SignalListDialog::createInterface(bool hasButtons)
 	connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::showTypeInput);
 	connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::showTypeInternal);
 	connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::showTypeOutput);
-	connect(m_pShowADCInHexAction, &QAction::triggered, this, &SignalListDialog::showADCInHex);
 
 
 	m_pView = new QTableView(this);
@@ -499,15 +475,15 @@ void SignalListDialog::createHeaderContexMenu()
 
 	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(SignalListColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("SignalListDialog.h", SignalListColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -679,7 +655,7 @@ bool SignalListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			if (m_buttonBox == nullptr)
 			{
@@ -699,7 +675,7 @@ bool SignalListDialog::eventFilter(QObject *object, QEvent *event)
 
 void SignalListDialog::exportSignal()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Signals"));
+	ExportData* dialog = new ExportData(m_pView, false, "Signals");
 	dialog->exec();
 }
 
@@ -823,15 +799,6 @@ void SignalListDialog::showTypeInternal()
 void SignalListDialog::showTypeOutput()
 {
 	m_typeIO = E::SignalInOutType::Output;
-
-	updateList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalListDialog::showADCInHex()
-{
-	m_signalTable.setShowADCInHex(m_pShowADCInHexAction->isChecked());
 
 	updateList();
 }

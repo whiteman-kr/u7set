@@ -12,7 +12,7 @@
 
 // ==============================================================================================
 
-const int		CALIBRATOR_TIMEOUT			= 10000,	// 10 seconds
+const int		CALIBRATOR_TIMEOUT			= 5000,		// 5 seconds
 				CALIBRATOR_TIMEOUT_STEP		= 10;		// 10 milliseconds
 
 // ----------------------------------------------------------------------------------------------
@@ -113,6 +113,37 @@ const int		CalibratorBaudRate[CALIBRATOR_TYPE_COUNT] =
 {
 				QSerialPort::Baud9600,
 				QSerialPort::Baud115200,
+};
+
+// ----------------------------------------------------------------------------------------------
+
+const int		CALIBRATION_TS_AC0			= 0,
+				CALIBRATION_TS_AC1			= 1,
+				CALIBRATION_TS_RANGE		= 2;
+
+const int		CALIBRATION_TS_COUNT		= 3;
+
+const double	CalibratorTS[CALIBRATOR_TYPE_COUNT][CALIBRATOR_UNIT_COUNT][CALIBRATION_TS_COUNT] =
+{
+	// CALIBRATION_TYPE_TRXII	= 0,
+	{
+		{0.01,	0.005,	100},		// CALIBRATION_UNIT_MV			= 0,
+		{0.01,	0.02,	24},		// CALIBRATION_UNIT_MA			= 1,
+		{0.01,	0.005,	12},		// CALIBRATION_UNIT_V			= 2,
+		{0.005,	0.000,	20000},		// CALIBRATION_UNIT_KHZ			= 3,
+		{0.005,	0.02,	400},		// CALIBRATION_UNIT_LOW_OHM		= 4,
+		{0.02,	0.015,	2000},		// CALIBRATION_UNIT_HIGH_OHM	= 5;
+	},
+
+	// CALIBRATION_TYPE_CALYS75	= 1,
+	{
+		{0.013,	0.003,	100},		// CALIBRATION_UNIT_MV			= 0,
+		{0.018,	0.002,	24},		// CALIBRATION_UNIT_MA			= 1,
+		{0.015,	0.004,	50},		// CALIBRATION_UNIT_V			= 2,
+		{0.005,	0.000,	10000},		// CALIBRATION_UNIT_KHZ			= 3,
+		{0.012,	0.0025,	400},		// CALIBRATION_UNIT_LOW_OHM		= 4,
+		{0.012,	0.0025,	4000},		// CALIBRATION_UNIT_HIGH_OHM	= 5;
+	},
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -256,7 +287,7 @@ public:
 
 	int			channel() const{ return m_channel; }
 
-	bool		isOpenPort() const { return m_port.isOpen(); }
+	bool		portIsOpen() const { return m_port.isOpen(); }
 
 	QString		portName() const { return m_portName; }
 	void		setPortName(const QString& portName) { m_portName = portName; }

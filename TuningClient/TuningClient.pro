@@ -18,6 +18,12 @@ gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
 
+
+#generate PDBs for release
+#
+win32:QMAKE_CXXFLAGS_RELEASE += /Zi
+win32:QMAKE_LFLAGS_RELEASE += /DEBUG
+
 # Warning level
 #
 gcc:CONFIG += warn_on
@@ -159,6 +165,7 @@ SOURCES +=\
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
+    ../lib/ILogFile.h \
     Stable.h \
     TuningPage.h \
     Settings.h \

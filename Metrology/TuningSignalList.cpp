@@ -18,11 +18,9 @@ TuningSourceTable::TuningSourceTable(QObject*)
 
 TuningSourceTable::~TuningSourceTable()
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		m_sourceIdList.clear();
-
-	m_sourceMutex.unlock();
+	m_sourceIdList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,7 +52,7 @@ QVariant TuningSourceTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SOURCE_LIST_COLUMN_COUNT)
 		{
-			result = TuningSourceColumn[section];
+			result = qApp->translate("TuningSignalListDialog.h", TuningSourceColumn[section]);
 		}
 	}
 
@@ -95,7 +93,7 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 	{
 		// get fresh state from base
 		//
-		 sourceState = theSignalBase.tuning().Sources().state(src.sourceID());
+		 sourceState = theSignalBase.tuning().sourceBase().state(src.sourceID());
 	}
 
 	if (role == Qt::TextAlignmentRole)
@@ -221,33 +219,23 @@ void TuningSourceTable::updateColumn(int column)
 
 int TuningSourceTable::sourceCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
-
-		count = m_sourceIdList.count();
-
-	m_sourceMutex.unlock();
-
-	return count;
+	return m_sourceIdList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSource TuningSourceTable::source(int index) const
 {
-	TuningSource param;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (index < 0 || index >= m_sourceIdList.count())
+	{
+		return TuningSource();
+	}
 
-		if (index >= 0 && index < m_sourceIdList.count())
-		{
-			 param = m_sourceIdList[index];
-		}
-
-	m_sourceMutex.unlock();
-
-	return param;
+	return m_sourceIdList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -304,11 +292,9 @@ TuningSignalTable::TuningSignalTable(QObject*)
 
 TuningSignalTable::~TuningSignalTable()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -340,7 +326,7 @@ QVariant TuningSignalTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SIGNAL_LIST_COLUMN_COUNT)
 		{
-			result = TuningSignalColumn[section];
+			result = qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[section]);
 		}
 	}
 
@@ -496,7 +482,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 	if (pSignal->state().valid() == false)
 	{
-		return tr("No valid");
+		return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 	}
 
 	QString stateStr, formatStr;
@@ -554,33 +540,23 @@ void TuningSignalTable::updateColumn(int column)
 
 int TuningSignalTable::signalCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return m_signalList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Metrology::Signal* TuningSignalTable::signal(int index) const
 {
-	Metrology::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			 pSignal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -805,15 +781,15 @@ void TuningSignalListDialog::createHeaderContexMenu()
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(TuningSignalColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &TuningSignalListDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &TuningSignalListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -846,10 +822,10 @@ void TuningSignalListDialog::updateSourceList()
 
 	QVector<TuningSource> sourceList;
 
-	int souceCount = theSignalBase.tuning().Sources().count();
+	int souceCount = theSignalBase.tuning().sourceBase().count();
 	for(int i = 0; i < souceCount; i++)
 	{
-		TuningSource src = theSignalBase.tuning().Sources().source(i);
+		const TuningSource& src = theSignalBase.tuning().sourceBase().source(i);
 		if (src.sourceID() == 0)
 		{
 			continue;
@@ -873,10 +849,10 @@ void TuningSignalListDialog::updateSignalList()
 
 	QVector<Metrology::Signal*> signalList;
 
-	int signalCount = theSignalBase.tuning().Signals().count();
+	int signalCount = theSignalBase.tuning().signalBase().count();
 	for(int i = 0; i < signalCount; i++)
 	{
-		Metrology::Signal* pSignal = theSignalBase.tuning().Signals().signal(i);
+		Metrology::Signal* pSignal = theSignalBase.tuning().signalBase().signal(i);
 		if (pSignal == nullptr)
 		{
 			continue;
@@ -994,7 +970,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			setSignalState();
 		}
@@ -1038,7 +1014,7 @@ void TuningSignalListDialog::setSignalState()
 
 void TuningSignalListDialog::exportSignal()
 {
-	ExportData* dialog = new ExportData(m_pSignalView, tr("Signals"));
+	ExportData* dialog = new ExportData(m_pSignalView, false, "TuningSignals");
 	dialog->exec();
 }
 
@@ -1290,7 +1266,7 @@ void TuningSignalStateDialog::onOk()
 
 		formatStr = QString::asprintf("%%.%df", m_param.decimalPlaces());
 
-		str = QString::asprintf("Failed input value: " + formatStr.toAscii(), state);
+		str = tr("Failed input value: %1").arg(QString::asprintf(formatStr.toAscii(), state));
 		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);

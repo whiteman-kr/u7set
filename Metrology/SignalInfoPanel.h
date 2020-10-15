@@ -123,8 +123,10 @@ private:
 	QTableView*				m_pView = nullptr;
 	SignalInfoTable			m_signalParamTable;
 
+	QVector<QAction*>		m_pConnectionActionList;
 	QMenu*					m_pShowMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
+	QAction*				m_pShowNoValidAction = nullptr;
 	QAction*				m_pShowElectricValueAction = nullptr;
 	QAction*				m_pCopyAction = nullptr;
 	QAction*				m_pSignalPropertyAction = nullptr;
@@ -132,9 +134,13 @@ private:
 	QAction*				m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
 	QMenu*					m_headerContextMenu = nullptr;
 
+	QVector<Metrology::Signal*> m_outputSignalsList;
+
 	void					createInterface();
 	void					createHeaderContexMenu();
+	void					initContextMenu();
 	void					createContextMenu();
+	void					appendSignalConnetionMenu();
 
 	void					hideColumn(int column, bool hide);
 
@@ -160,6 +166,8 @@ private slots:
 
 	// slots of menu
 	//
+	void					onConnectionAction(QAction* action);
+	void					showNoValid();
 	void					showElectricValue();
 	void					copy();
 	void					signalProperty();

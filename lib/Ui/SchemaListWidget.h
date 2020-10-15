@@ -7,6 +7,14 @@
 
 class TagSelectorWidget;
 
+enum class SchemaListTreeColumns
+{
+	SchemaID,
+	Caption,
+	Tags,
+	Modules
+};
+
 //
 //
 //		SimSchemaListView - Tree View
@@ -17,7 +25,7 @@ class SchemaListTreeWidget : public QTreeWidget
 	Q_OBJECT
 
 public:
-	SchemaListTreeWidget(QWidget* parent);
+	SchemaListTreeWidget(std::vector<SchemaListTreeColumns> columns, QWidget* parent);
 	virtual ~SchemaListTreeWidget();
 
 	void setDetails(VFrame30::SchemaDetailsSet details);
@@ -44,6 +52,7 @@ public:
 
 private:
 	VFrame30::SchemaDetailsSet m_details;
+	std::vector<SchemaListTreeColumns> m_columns;
 
 	QString m_filter;
 	QStringList m_tagFilter;
@@ -53,7 +62,7 @@ private:
 
 //
 //
-//		SchemaListWidget - Tab Page
+//		SchemaListWidget
 //
 //
 class SchemaListWidget : public QWidget
@@ -61,7 +70,7 @@ class SchemaListWidget : public QWidget
 	Q_OBJECT
 
 public:
-	SchemaListWidget(QWidget* parent);
+	SchemaListWidget(std::vector<SchemaListTreeColumns> columns, QWidget* parent);
 	virtual ~SchemaListWidget() = default;
 
 public:

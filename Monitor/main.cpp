@@ -107,13 +107,16 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	MonitorMainWindow w(si);
-	theMonitorMainWindow = &w;
-	w.show();
+	int result = 0;
+	{
+		MonitorMainWindow w(si);
+		theMonitorMainWindow = &w;
+		w.show();
 
-	// --
-	//
-	int result = a.exec();
+		// --
+		//
+		result = a.exec();
+	}
 
 	// Shutting down
 	//

@@ -14,6 +14,10 @@
 
 // ==============================================================================================
 
+const char* const ErrorList = QT_TRANSLATE_NOOP("CalibratorManager.h", "Error list");
+
+// ==============================================================================================
+
 class CalibratorManager : public QDialog
 {
 	Q_OBJECT
@@ -37,7 +41,7 @@ public:
 	Calibrator*		calibrator() const { return m_pCalibrator; }
 	void			setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator;	}
 
-	bool			calibratorIsConnected();
+	bool			calibratorIsConnected() const;
 	int				calibratorChannel() const;
 	QString			calibratorPort() const;
 

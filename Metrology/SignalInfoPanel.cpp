@@ -57,7 +57,7 @@ QVariant SignalInfoTable::headerData(int section, Qt::Orientation orientation, i
 	{
 		if (section >= 0 && section < SIGNAL_INFO_COLUMN_COUNT)
 		{
-			result = SignalInfoColumn[section];
+			result = qApp->translate("SignalInfoMeasure.h", SignalInfoColumn[section]);
 		}
 	}
 
@@ -199,19 +199,19 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 
 	if (column == SIGNAL_INFO_COLUMN_STATE)
 	{
-		Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (inParam.isValid() == true)
 		{
-			Metrology::SignalState inState = theSignalBase.signalState(inParam.hash());
+			const Metrology::SignalState& inState = theSignalBase.signalState(inParam.hash());
 			stateStr = signalStateStr(inParam, inState);
 		}
 
 		if (ioParam.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
 		{
-			Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (outParam.isValid() == true)
 			{
-				Metrology::SignalState outState = theSignalBase.signalState(outParam.hash());
+				const Metrology::SignalState& outState = theSignalBase.signalState(outParam.hash());
 				stateStr += MULTI_TEXT_DEVIDER + signalStateStr(outParam, outState);
 			}
 		}
@@ -249,9 +249,12 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 		return QString();
 	}
 
-	if (state.flags().valid == false)
+	if (theOptions.signalInfo().showNoValid() == false)
 	{
-		return tr("No valid");
+		if (state.flags().valid == false)
+		{
+			return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+		}
 	}
 
 	QString stateStr = QString::number(state.value(), 'f', param.decimalPlaces());
@@ -318,15 +321,9 @@ IoSignalParam SignalInfoTable::signalParam(int index) const
 		return IoSignalParam();
 	}
 
-	IoSignalParam ioParam;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		ioParam = m_ioParamList[index];
-
-	m_signalMutex.unlock();
-
-	return ioParam;
+	return m_ioParamList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -382,21 +379,19 @@ void SignalInfoTable::updateSignalParam(const QString& appSignalID)
 		return;
 	}
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		int signalCount = m_ioParamList.count();
-		for(int c = 0; c < signalCount; c ++)
+	int signalCount = m_ioParamList.count();
+	for(int c = 0; c < signalCount; c ++)
+	{
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+			if (m_ioParamList[c].param(type).appSignalID() == appSignalID)
 			{
-				if (m_ioParamList[c].param(type).appSignalID() == appSignalID)
-				{
-					m_ioParamList[c].setParam(type, theSignalBase.signalParam(appSignalID));
-				}
+				m_ioParamList[c].setParam(type, theSignalBase.signalParam(appSignalID));
 			}
 		}
-
-	m_signalMutex.unlock();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -411,7 +406,8 @@ SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 
 	createInterface();
 	createHeaderContexMenu();
-	createContextMenu();
+	initContextMenu();
+
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
 
@@ -474,30 +470,57 @@ void SignalInfoPanel::createHeaderContexMenu()
 
 	for(int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(SignalInfoColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("SignalInfoMeasure.h", SignalInfoColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalInfoPanel::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalInfoPanel::onColumnAction);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::initContextMenu()
+{
+	// init context menu
+	//
+	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &SignalInfoPanel::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalInfoPanel::createContextMenu()
 {
+	if (m_pContextMenu != nullptr)
+	{
+		delete m_pContextMenu;
+		m_pContextMenu = nullptr;
+	}
+
 	// create context menu
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pSignalInfoWindow);
 
+	// append signal connection items
+	//
+	appendSignalConnetionMenu();
+
+	//
+	//
 	m_pShowMenu = new QMenu(tr("Show"), m_pSignalInfoWindow);
+
+	m_pShowNoValidAction = m_pShowMenu->addAction(tr("State if signal is no valid"));
+	m_pShowNoValidAction->setCheckable(true);
+	m_pShowNoValidAction->setChecked(theOptions.signalInfo().showNoValid());
 
 	m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical state"));
 	m_pShowElectricValueAction->setCheckable(true);
 	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
+
 
 	m_pContextMenu->addMenu(m_pShowMenu);
 
@@ -508,17 +531,85 @@ void SignalInfoPanel::createContextMenu()
 
 	m_pContextMenu->addSeparator();
 
-	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
+	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
+	connect(m_pShowNoValidAction, &QAction::triggered, this, &SignalInfoPanel::showNoValid);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
 	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
+}
 
-	// init context menu
-	//
-	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &SignalInfoPanel::onContextMenu);
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::appendSignalConnetionMenu()
+{
+	int signalConnectionType = theOptions.toolBar().signalConnectionType();
+	if (signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
+	{
+		return;
+	}
+
+	if (m_pContextMenu == nullptr)
+	{
+		return;
+	}
+
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_signalParamTable.signalCount())
+	{
+		return;
+	}
+
+	m_pConnectionActionList.clear();
+	m_outputSignalsList.clear();
+
+	const IoSignalParam& ioParam = m_signalParamTable.signalParam(index);
+
+	const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+
+	if (inParam.isValid() == false || outParam.isValid() == false)
+	{
+		return;
+	}
+
+	m_outputSignalsList =  theSignalBase.signalConnections().getOutputSignals(signalConnectionType, inParam.appSignalID());
+
+	int outputSignalCount = m_outputSignalsList.count();
+	for (int s = 0; s < outputSignalCount; s++)
+	{
+		Metrology::Signal* pOutputSignal = m_outputSignalsList[s];
+		if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		QString strConnection = inParam.appSignalID() + " -> " + pOutputSignal->param().appSignalID();
+
+		QAction* pConnctionAction = m_pContextMenu->addAction(strConnection);
+		if (pConnctionAction != nullptr)
+		{
+			pConnctionAction->setCheckable(true);
+			pConnctionAction->setChecked(false);
+
+			if (outParam.appSignalID() == pOutputSignal->param().appSignalID())
+			{
+				pConnctionAction->setChecked(true);
+			}
+
+			m_pConnectionActionList.append(pConnctionAction);
+		}
+	}
+
+	if (m_pConnectionActionList.isEmpty() == true)
+	{
+		return;
+	}
+
+	connect(m_pContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalInfoPanel::onConnectionAction);
+
+	m_pContextMenu->addSeparator();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -577,7 +668,12 @@ void SignalInfoPanel::restartSignalStateTimer()
 
 void SignalInfoPanel::onContextMenu(QPoint)
 {
-	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
+	createContextMenu();
+
+	if (m_pContextMenu == nullptr)
+	{
+		return;
+	}
 
 	m_pContextMenu->exec(QCursor::pos());
 }
@@ -590,7 +686,7 @@ bool SignalInfoPanel::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			signalProperty();
 		}
@@ -666,6 +762,68 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 void SignalInfoPanel::updateSignalState()
 {
 	m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_STATE);
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::onConnectionAction(QAction* action)
+{
+	if (action == nullptr)
+	{
+		return;
+	}
+
+	int outputSignalIndex = -1;
+
+	int connectionActionCount = m_pConnectionActionList.count();
+	for(int i = 0; i < connectionActionCount; i++)
+	{
+		if (m_pConnectionActionList[i] == action)
+		{
+			action->setChecked(true);
+
+			outputSignalIndex = i;
+
+			break;
+		}
+	}
+
+	if (outputSignalIndex < 0 || outputSignalIndex >= m_outputSignalsList.count())
+	{
+		return;
+	}
+
+	Metrology::Signal* pOutputSignal = m_outputSignalsList[outputSignalIndex];
+	if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+	{
+		return;
+	}
+
+	int channel = m_pView->currentIndex().row();
+	if (channel < 0 || channel >= m_signalParamTable.signalCount())
+	{
+		return;
+	}
+
+	// update ActiveSignal
+	//
+	MeasureSignal signalForMeasure = theSignalBase.activeSignal();
+
+	MultiChannelSignal multiChannelSignal = signalForMeasure.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+
+	multiChannelSignal.setMetrologySignal(theOptions.toolBar().measureKind(), channel, pOutputSignal);
+
+	signalForMeasure.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+
+	theSignalBase.setActiveSignal(signalForMeasure);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showNoValid()
+{
+	theOptions.signalInfo().setShowNoValid(m_pShowNoValidAction->isChecked());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

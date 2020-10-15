@@ -52,10 +52,9 @@ void ProjectPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
-
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
 
@@ -213,7 +212,7 @@ void RackPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(400, 180);
 	resize(400, 180);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
@@ -224,7 +223,7 @@ void RackPropertyDialog::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Properties - %1").arg(m_rack.caption()));
+	setWindowTitle(tr("Propertу - %1").arg(m_rack.caption()));
 
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -239,7 +238,7 @@ void RackPropertyDialog::createPropertyList()
 
 	//
 	//
-	QtProperty *rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Properties of the rack"));
+	QtProperty *rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Propertу of the rack"));
 
 		item = m_pManager->addProperty(QVariant::String, tr("Caption"));
 		item->setValue(m_rack.caption());
@@ -454,7 +453,7 @@ void RackGroupPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties - rack groups"));
+	setWindowTitle(tr("Propertу - rack groups"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
@@ -807,6 +806,7 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 		if (m_groupBase.group(i).caption() == caption)
 		{
 			QMessageBox::information(this, tr("Group caption"), tr("Group caption \"%1\" already exists!").arg(caption));
+			updateGroupList();
 			return;
 		}
 	}
@@ -836,7 +836,7 @@ void RackGroupPropertyDialog::groupSelected()
 		return;
 	}
 
-	setWindowTitle(tr("Properties - %1").arg(group.caption()));
+	setWindowTitle(tr("Propertу - %1").arg(group.caption()));
 
 	updateRackList();
 }
@@ -1013,7 +1013,7 @@ void SignalPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
@@ -1023,7 +1023,7 @@ void SignalPropertyDialog::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Properties - %1").arg(m_param.appSignalID()));
+	setWindowTitle(tr("Propertу - %1").arg(m_param.appSignalID()));
 
 	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 	QStringList electricUnitList;
@@ -1071,6 +1071,12 @@ void SignalPropertyDialog::createPropertyList()
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CAPTION);
 			signalIdGroup->addSubProperty(item);
 
+			item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
+			item->setValue(m_param.signalTypeStr());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
+
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
 		// position group
@@ -1101,7 +1107,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// electric range group
 
-		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE] + m_param.electricRangeStr());
+		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), qApp->translate("ObjectProperty.h", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) + m_param.electricRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.electricLowLimit());
@@ -1157,7 +1163,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// engineering range group
 
-		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engineeringRangeStr());
+		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), qApp->translate("ObjectProperty.h", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) + m_param.engineeringRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.lowEngineeringUnits());
@@ -1420,11 +1426,9 @@ void ComparatorPropertyDialog::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Properties"));
+	setWindowTitle(tr("Propertу"));
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
-
-	setWindowTitle(tr("Properties"));
 
 	QMetaEnum meu = QMetaEnum::fromType<E::CmpType>();
 	QStringList cmpTypeList;
@@ -1480,7 +1484,12 @@ void ComparatorPropertyDialog::createPropertyList()
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 
-				if (m_comparatorEx.inputSignal()->param().isInput() == true)
+				item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
+				item->setValue(m_comparatorEx.inputSignal()->param().signalTypeStr());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+
+				if (m_comparatorEx.inputSignal()->param().isInput() == true && m_comparatorEx.inputSignal()->param().electricRangeIsValid() == true)
 				{
 					item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
 					item->setValue(m_comparatorEx.inputSignal()->param().electricRangeStr());
@@ -1508,14 +1517,15 @@ void ComparatorPropertyDialog::createPropertyList()
 
 			if (comparator().compare().isConst() == true)
 			{
-				if (m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true && m_comparatorEx.inputSignal()->param().isInput() == true)
+				if (	m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true &&
+						m_comparatorEx.inputSignal()->param().isInput() == true && m_comparatorEx.inputSignal()->param().electricRangeIsValid() == true)
 				{
 					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + m_comparatorEx.inputSignal()->param().electricUnitStr());
 					item->setValue(conversion(m_comparatorEx.compareConstValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
 					item->setAttribute(QLatin1String("decimals"), m_comparatorEx.inputSignal()->param().electricPrecision());
 					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE);
 					compareGroup->addSubProperty(item);
-					if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+					if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::Unused )
 					{
 						item->setAttribute(QLatin1String("readOnly"), true);
 					}
@@ -1526,7 +1536,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE);
 				compareGroup->addSubProperty(item);
-				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::Unused )
 				{
 					item->setAttribute(QLatin1String("readOnly"), true);
 				}
@@ -1587,7 +1597,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// hysteresis group
 
-		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis (deadband) - const") : tr("Hysteresis (deadband) - dynamic"));
+		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
 
 			if (comparator().hysteresis().isConst() == true)
 			{
@@ -1605,7 +1615,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE);
 				hysteresisGroup->addSubProperty(item);
-				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::NoUsed )
+				if (m_comparatorEx.deviation() != Metrology::ComparatorEx::DeviationType::Unused )
 				{
 					item->setAttribute(QLatin1String("readOnly"), true);
 				}

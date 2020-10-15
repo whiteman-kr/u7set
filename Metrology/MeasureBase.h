@@ -23,8 +23,8 @@ const int	MEASURE_TYPE_UNKNOWN	= -1,
 
 const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Linearity"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Comparators"),
+			"Linearity",
+			"Comparators",
 };
 
 // ==============================================================================================
@@ -103,6 +103,7 @@ const char* const MeasureAdditionalParam[] =
 			QT_TRANSLATE_NOOP("MeasureBase.h", "System error"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Standard deviation"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Low High border"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Uncertainty"),
 };
 
 const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/sizeof(MeasureAdditionalParam[0]);
@@ -111,10 +112,11 @@ const int	MEASURE_ADDITIONAL_PARAM_UNKNOWN			= -1,
 			MEASURE_ADDITIONAL_PARAM_MAX_VALUE			= 0,
 			MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR		= 1,
 			MEASURE_ADDITIONAL_PARAM_SD					= 2,
-			MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER	= 3;
+			MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER	= 3,
+			MEASURE_ADDITIONAL_PARAM_UNCERTAINTY		= 4;
 
 			// maximum 16 items (0 .. 15)
-			// now used 4 (0 .. 3)
+			// now used 4 (0 .. 4)
 
 // ==============================================================================================
 
@@ -123,10 +125,6 @@ const int	MAX_MEASUREMENT_IN_POINT	= 20;
 // ==============================================================================================
 
 #define	 MEASURE_TIME_FORMAT			"dd-MM-yyyy hh:mm:ss"
-
-// ==============================================================================================
-
-const char* const SignalNoValidStr		= QT_TRANSLATE_NOOP("MeasureBase.h", "No valid");
 
 // ==============================================================================================
 
@@ -151,9 +149,29 @@ private:
 	QDateTime		m_measureTime;									// measure time
 	int				m_reportType = -1;								// report type
 
+	QString			m_appSignalID;
+	QString			m_customAppSignalID;
+	QString			m_equipmentID;
+	QString			m_caption;
+
+	Metrology::SignalLocation m_location;
+
+	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
+
+	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
+	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
+	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
+
+	double			m_adjustment = 0;
+
+	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+
 public:
 
-	void			virtual clear() {}
+	void			virtual clear();
 
 	int				measureType() const { return m_measureType; }
 	void			setMeasureType(int type) { m_measureType = type; }
@@ -178,6 +196,58 @@ public:
 	int				reportType() const { return m_reportType; }
 	void			setReportType(int type) { m_reportType = type; }
 
+
+	QString			appSignalID() const { return m_appSignalID; }
+	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
+
+	QString			customAppSignalID() const { return m_customAppSignalID; }
+	void			setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
+
+	QString			equipmentID() const { return m_equipmentID; }
+	void			setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
+
+	QString			caption() const { return m_caption; }
+	void			setCaption(const QString& caption) { m_caption = caption; }
+
+	Metrology::SignalLocation& location() { return m_location; }
+	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+
+	void			setLimits(const Metrology::SignalParam& param);
+	void			calcError();
+
+	double			nominal(int limitType) const;
+	QString			nominalStr(int limitType) const;
+	void			setNominal(int limitType, double value);
+
+	double			measure(int limitType) const;
+	QString			measureStr(int limitType) const;
+	void			setMeasure(int limitType, double value);
+
+	double			lowLimit(int limitType) const;
+	void			setLowLimit(int limitType, double lowLimit);
+
+	double			highLimit(int limitType) const;
+	void			setHighLimit(int limitType, double highLimit);
+
+	QString			unit(int limitType) const;
+	void			setUnit(int limitType, QString unit);
+
+	int				limitPrecision(int limitType) const;
+	void			setLimitPrecision(int limitType, int precision);
+
+	QString			limitStr(int limitType) const;
+
+	double			error(int limitType, int errotType) const;
+	QString			errorStr() const;
+	void			setError(int limitType, int errotType, double value);
+
+	double			errorLimit(int limitType, int errotType) const;
+	QString			errorLimitStr() const;
+	void			setErrorLimit(int limitType, int errotType, double value);
+
+	int				errorResult() const;
+	QString			errorResultStr() const;
+
 	Measurement*	at(int index);
 
 	Measurement&	operator=(Measurement& from);
@@ -196,33 +266,13 @@ public:
 
 private:
 
-	QString			m_appSignalID;
-	QString			m_customAppSignalID;
-	QString			m_equipmentID;
-	QString			m_caption;
-
-	Metrology::SignalLocation m_location;
-
 	double			m_percent = 0;
-
-	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
-
-	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
-	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
-	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
-
-	double			m_adjustment = 0;
-
-	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
 
 	int				m_measureCount = 0;
 	double			m_measureArray[MEASURE_LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
 
 	int				m_additionalParamCount = 0;
-	double			m_additionalParam[MEASURE_ADDITIONAL_PARAM_COUNT];
+	double			m_additionalParam[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ADDITIONAL_PARAM_COUNT];
 
 public:
 
@@ -232,62 +282,10 @@ public:
 	void			fill_measure_internal(const IoSignalParam& ioParam);
 	void			fill_measure_output(const IoSignalParam& ioParam);
 
-	void			setLimits(const Metrology::SignalParam& param);
-	void			calcError();
-	void			calcAdditionalParam(int limitType);
-
-	QString			appSignalID() const { return m_appSignalID; }
-	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
-
-	QString			customAppSignalID() const { return m_customAppSignalID; }
-	void			setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
-
-	QString			equipmentID() const { return m_equipmentID; }
-	void			setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
-
-	QString			signalID(int type) const;
-
-	QString			caption() const { return m_caption; }
-	void			setCaption(const QString& caption) { m_caption = caption; }
-
-	Metrology::SignalLocation& location() { return m_location; }
-	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+	void			calcAdditionalParam(Calibrator* pCalibrator, E::SensorType sensorType, int limitType);
 
 	double			percent() const { return m_percent; }
 	void			setPercent(double percent) { m_percent = percent; }
-
-	double			nominal(int limitType) const;
-	QString			nominalStr(int limitType) const;
-	void			setNominal(int limitType, double value);
-
-	double			measure(int limitType) const;
-	QString			measureStr(int limitType) const;
-	void			setMeasure(int limitType, double value);
-
-	double			lowLimit(int limitType) const;
-	void			setLowLimit(int limitType, double lowLimit);
-
-	double			highLimit(int limitType) const;
-	void			setHighLimit(int limitType, double highLimit);
-
-	QString			unit(int limitType) const;
-	void			setUnit(int limitType, QString unit);
-
-	int				limitPrecision(int limitType) const;
-	void			setLimitPrecision(int limitType, int precision);
-
-	QString			limitStr(int limitType) const;
-
-	double			error(int limitType, int errotType) const;
-	QString			errorStr() const;
-	void			setError(int limitType, int errotType, double value);
-
-	double			errorLimit(int limitType, int errotType) const;
-	QString			errorLimitStr() const;
-	void			setErrorLimit(int limitType, int errotType, double value);
-
-	int				errorResult() const;
-	QString			errorResultStr() const;
 
 	int				measureCount() const { return m_measureCount; }
 	void			setMeasureCount(int count) { m_measureCount = count; }
@@ -299,12 +297,12 @@ public:
 	int				additionalParamCount() const { return m_additionalParamCount; }
 	void			setAdditionalParamCount(int count) { m_additionalParamCount = count; }
 
-	double			additionalParam(int paramType) const;
-	QString			additionalParamStr(int paramType) const;
-	void			setAdditionalParam(int paramType, double value);
+	double			additionalParam(int limitType, int paramType) const;
+	QString			additionalParamStr(int limitType, int paramType) const;
+	void			setAdditionalParam(int limitType, int paramType, double value);
 
 	void			updateMeasureArray(int limitType, Measurement* pMeasurement);
-	void			updateAdditionalParam(Measurement* pMeasurement);
+	void			updateAdditionalParam(int limitType, Measurement* pMeasurement);
 
 	LinearityMeasurement& operator=(const LinearityMeasurement& from);
 };
@@ -322,27 +320,11 @@ public:
 
 private:
 
-	QString			m_appSignalID;
-	QString			m_customAppSignalID;
-	QString			m_equipmentID;
-	QString			m_caption;
+	QString			m_compareAppSignalID;
+	QString			m_outputAppSignalID;
 
-	Metrology::SignalLocation m_location;
-
+	int				m_cmpValueType = Metrology::CmpValueTypeSetPoint;
 	E::CmpType		m_cmpType = E::CmpType::Greate;
-
-	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
-
-	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
-	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
-	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
-
-	double			m_adjustment = 0;
-
-	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
 
 public:
 
@@ -351,64 +333,21 @@ public:
 	void			fill_measure_input(const IoSignalParam& ioParam);
 	void			fill_measure_internal(const IoSignalParam &ioParam);
 
-	void			setLimits(const Metrology::SignalParam& param);
-	void			calcError();
+	QString			compareAppSignalID() const { return m_compareAppSignalID; }
+	void			setCompareAppSignalID(const QString& appSignalID) { m_compareAppSignalID = appSignalID; }
 
-	QString			appSignalID() const { return m_appSignalID; }
-	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
+	QString			outputAppSignalID() const { return m_outputAppSignalID; }
+	void			setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
 
-	QString			customAppSignalID() const { return m_customAppSignalID; }
-	void			setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
-
-	QString			equipmentID() const { return m_equipmentID; }
-	void			setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
-
-	QString			signalID(int type) const;
-
-	QString			caption() const { return m_caption; }
-	void			setCaption(const QString& caption) { m_caption = caption; }
-
-	Metrology::SignalLocation& location() { return m_location; }
-	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+	int				cmpValueType() const { return m_cmpValueType; }
+	QString			cmpValueTypeStr() const;
+	void			setCmpValueType(int type) { m_cmpValueType = type; }
 
 	E::CmpType		cmpType() const { return m_cmpType; }
 	int				cmpTypeInt() const { return TO_INT(m_cmpType); }
 	QString			cmpTypeStr() const;
-	void			setCmpType(E::CmpType cmpType) { m_cmpType = cmpType; }
+	void			setCmpType(int cmpValueType, E::CmpType cmpType);
 	void			setCmpTypeInt(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
-
-	double			nominal(int limitType) const;
-	QString			nominalStr(int limitType) const;
-	void			setNominal(int limitType, double value);
-
-	double			measure(int limitType) const;
-	QString			measureStr(int limitType) const;
-	void			setMeasure(int limitType, double value);
-
-	double			lowLimit(int limitType) const;
-	void			setLowLimit(int limitType, double lowLimit);
-
-	double			highLimit(int limitType) const;
-	void			setHighLimit(int limitType, double highLimit);
-
-	QString			unit(int limitType) const;
-	void			setUnit(int limitType, QString unit);
-
-	int				limitPrecision(int limitType) const;
-	void			setLimitPrecision(int limitType, int precision);
-
-	QString			limitStr(int limitType) const;
-
-	double			error(int limitType, int errotType) const;
-	QString			errorStr() const;
-	void			setError(int limitType, int errotType, double value);
-
-	double			errorLimit(int limitType, int errotType) const;
-	QString			errorLimitStr() const;
-	void			setErrorLimit(int limitType, int errotType, double value);
-
-	int				errorResult() const;
-	QString			errorResultStr() const;
 
 	ComparatorMeasurement& operator=(const ComparatorMeasurement& from);
 };
@@ -441,8 +380,9 @@ public:
 	int							append(Measurement* pMeasurement);
 	Measurement*				measurement(int index) const;
 	bool						remove(int index, bool removeData = true);
+	void						remove(int measureType, const QVector<int>& keyList);
 
-	Metrology::SignalStatistic	getSignalStatistic(const Hash& signalHash);
+	void						updateStatistics(int measureType, StatisticItem& si);
 
 signals:
 
@@ -451,5 +391,8 @@ signals:
 
 // ==============================================================================================
 
+extern MeasureBase theMeasureBase;
+
+// ==============================================================================================
 
 #endif // MEASUREBASE_H

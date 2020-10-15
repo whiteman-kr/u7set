@@ -18,11 +18,9 @@ RackListTable::RackListTable(QObject*)
 
 RackListTable::~RackListTable()
 {
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		m_rackList.clear();
-
-	m_rackMutex.unlock();
+	m_rackList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,7 +52,7 @@ QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int
 	{
 		if (section >= 0 && section < RACK_LIST_COLUMN_COUNT)
 		{
-			result = RackListColumn[section];
+			result = qApp->translate("RackListDialog.h", RackListColumn[section]);
 		}
 	}
 
@@ -177,33 +175,23 @@ QString RackListTable::text(int row, int column, const Metrology::RackParam* pRa
 
 int RackListTable::rackCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
-
-		count = m_rackList.count();
-
-	m_rackMutex.unlock();
-
-	return count;
+	return m_rackList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Metrology::RackParam* RackListTable::rack(int index) const
 {
-	Metrology::RackParam* pRack = nullptr;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
+	if (index < 0 || index >= m_rackList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_rackList.count())
-		{
-			 pRack = m_rackList[index];
-		}
-
-	m_rackMutex.unlock();
-
-	return pRack;
+	return m_rackList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -314,7 +302,7 @@ void RackListDialog::createInterface()
 
 	m_pEditMenu->addSeparator();
 
-	m_pRackPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pRackPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pRackPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pMenuBar->addMenu(m_pRackMenu);
@@ -408,7 +396,7 @@ bool RackListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			rackProperty();
 		}
@@ -439,7 +427,7 @@ void RackListDialog::rackGroups()
 
 void RackListDialog::exportRacks()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Racks"));
+	ExportData* dialog = new ExportData(m_pView, false, "Racks");
 	dialog->exec();
 }
 
@@ -502,8 +490,7 @@ void RackListDialog::rackProperty()
 
 	if (m_rackBase.groups().count() == 0)
 	{
-		QMessageBox::information(this, windowTitle(), tr("No groups have been found.\n"
-														 "To create a group of racks, click menu \"Racks\" - \"Groups ...\""));
+		QMessageBox::information(this, windowTitle(), tr("No rack groups have been found.\nTo create a group of racks, click menu \"Racks\" - \"Groups ...\""));
 	}
 
 	RackPropertyDialog dialog(*pRack, m_rackBase);

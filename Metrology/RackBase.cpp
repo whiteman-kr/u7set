@@ -84,26 +84,18 @@ RackGroupBase::RackGroupBase(QObject *parent) :
 
 void RackGroupBase::clear()
 {
-	m_groupMutex.lock();
+	QMutexLocker l(&m_groupMutex);
 
-		m_groupList.clear();
-
-	m_groupMutex.unlock();
+	m_groupList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int RackGroupBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_groupMutex);
 
-	m_groupMutex.lock();
-
-		count = m_groupList.count();
-
-	m_groupMutex.unlock();
-
-	return count;
+	return m_groupList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -116,89 +108,67 @@ int RackGroupBase::append(const RackGroup& group)
 		return -1;
 	}
 
-	int index = -1;
+	QMutexLocker l(&m_groupMutex);
 
-	m_groupMutex.lock();
+	m_groupList.append(group);
 
-		m_groupList.append(group);
-		index = m_groupList.count() - 1;
-
-	m_groupMutex.unlock();
-
-	return index;
+	return m_groupList.count() - 1;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 RackGroup RackGroupBase::group(int index) const
 {
-	RackGroup group;
+	QMutexLocker l(&m_groupMutex);
 
-	m_groupMutex.lock();
+	if (index < 0 || index >= m_groupList.count())
+	{
+		return RackGroup();
+	}
 
-		if (index >= 0 && index < m_groupList.count())
-		{
-			group = m_groupList[index];
-		}
-
-	m_groupMutex.unlock();
-
-	return group;
+	return m_groupList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool RackGroupBase::setGroup(int index, const RackGroup& group)
 {
-	bool result = false;
+	QMutexLocker l(&m_groupMutex);
 
-	m_groupMutex.lock();
+	if (index < 0 || index >= m_groupList.count())
+	{
+		return false;
+	}
 
-		if (index >= 0 && index < m_groupList.count())
-		{
-			m_groupList[index] = group;
+	m_groupList[index] = group;
 
-			result = true;
-		}
-
-	m_groupMutex.unlock();
-
-	return result;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool RackGroupBase::remove(int index)
 {
-	bool result = false;
+	QMutexLocker l(&m_groupMutex);
 
-	m_groupMutex.lock();
+	if (index < 0 || index >= m_groupList.count())
+	{
+		return false;
+	}
 
-		if (index >= 0 && index < m_groupList.count())
-		{
-			m_groupList.remove(index);
+	m_groupList.remove(index);
 
-			result = true;
-		}
-
-	m_groupMutex.unlock();
-
-	return result;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int RackGroupBase::load()
 {
-	if (thePtrDB == nullptr)
-	{
-		return 0;
-	}
-
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_RACK_GROUP);
 	if (table == nullptr)
 	{
 		return false;
@@ -225,12 +195,7 @@ int RackGroupBase::load()
 
 bool RackGroupBase::save()
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_RACK_GROUP);
 	if (table == nullptr)
 	{
 		return false;
@@ -266,11 +231,9 @@ bool RackGroupBase::save()
 
 RackGroupBase& RackGroupBase::operator=(const RackGroupBase& from)
 {
-	m_groupMutex.lock();
+	QMutexLocker l(&m_groupMutex);
 
-		m_groupList = from.m_groupList;
-
-	m_groupMutex.unlock();
+	m_groupList = from.m_groupList;
 
 	return *this;
 }
@@ -288,12 +251,10 @@ RackBase::RackBase(QObject *parent) :
 
 void RackBase::clear()
 {
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		m_rackHashMap.clear();
-		m_rackList.clear();
-
-	m_rackMutex.unlock();
+	m_rackHashMap.clear();
+	m_rackList.clear();
 }
 
 
@@ -301,15 +262,9 @@ void RackBase::clear()
 
 int RackBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
-
-		count = m_rackList.count();
-
-	m_rackMutex.unlock();
-
-	return count;
+	return m_rackList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -324,17 +279,15 @@ int RackBase::append(const Metrology::RackParam& rack)
 
 	int index = -1;
 
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		if (m_rackHashMap.contains(rack.hash()) == false)
-		{
-			m_rackList.append(rack);
-			index = m_rackList.count() - 1;
+	if (m_rackHashMap.contains(rack.hash()) == false)
+	{
+		m_rackList.append(rack);
+		index = m_rackList.count() - 1;
 
-			m_rackHashMap.insert(rack.hash(), index);
-		}
-
-	 m_rackMutex.unlock();
+		m_rackHashMap.insert(rack.hash(), index);
+	}
 
 	 return index;
 }
@@ -364,19 +317,17 @@ Metrology::RackParam* RackBase::rackPtr(const Hash& hash)
 
 	Metrology::RackParam* pRack = nullptr;
 
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		if (m_rackHashMap.contains(hash) == true)
+	if (m_rackHashMap.contains(hash) == true)
+	{
+		int index = m_rackHashMap[hash];
+
+		if (index >= 0 && index < m_rackList.count())
 		{
-			int index = m_rackHashMap[hash];
-
-			if (index >= 0 && index < m_rackList.count())
-			{
-				pRack = &m_rackList[index];
-			}
+			pRack = &m_rackList[index];
 		}
-
-	m_rackMutex.unlock();
+	}
 
 	return pRack;
 }
@@ -385,18 +336,14 @@ Metrology::RackParam* RackBase::rackPtr(const Hash& hash)
 
 Metrology::RackParam* RackBase::rackPtr(int index)
 {
-	Metrology::RackParam* pRack = nullptr;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
+	if (index < 0 || index >= m_rackList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_rackList.count())
-		{
-			pRack = &m_rackList[index];
-		}
-
-	m_rackMutex.unlock();
-
-	return pRack;
+	return &m_rackList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -445,18 +392,14 @@ Metrology::RackParam RackBase::rack(const Hash& hash)
 
 Metrology::RackParam RackBase::rack(int index)
 {
-	Metrology::RackParam rack;
+	QMutexLocker l(&m_rackMutex);
 
-	m_rackMutex.lock();
+	if (index < 0 || index >= m_rackList.count())
+	{
+		return Metrology::RackParam();
+	}
 
-		if (index >= 0 && index < m_rackList.count())
-		{
-			rack = m_rackList[index];
-		}
-
-	m_rackMutex.unlock();
-
-	return rack;
+	return m_rackList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -492,19 +435,17 @@ void RackBase::setRack(const Hash& hash, const Metrology::RackParam& rack)
 		return;
 	}
 
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		if (m_rackHashMap.contains(rack.hash()) == true)
+	if (m_rackHashMap.contains(rack.hash()) == true)
+	{
+		int index = m_rackHashMap[rack.hash()];
+
+		if (index >= 0 && index < m_rackList.count())
 		{
-			int index = m_rackHashMap[rack.hash()];
-
-			if (index >= 0 && index < m_rackList.count())
-			{
-				m_rackList[index] = rack;
-			}
+			m_rackList[index] = rack;
 		}
-
-	m_rackMutex.unlock();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -516,14 +457,14 @@ void RackBase::setRack(int index, const Metrology::RackParam& rack)
 		return;
 	}
 
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		if (index >= 0 && index < m_rackList.count())
-		{
-			m_rackList[index] = rack;
-		}
+	if (index < 0 || index >= m_rackList.count())
+	{
+		return;
+	}
 
-	m_rackMutex.unlock();
+	m_rackList[index] = rack;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -586,14 +527,12 @@ void RackBase::updateParamFromGroups()
 
 RackBase& RackBase::operator=(const RackBase& from)
 {
-	m_rackMutex.lock();
+	QMutexLocker l(&m_rackMutex);
 
-		m_rackHashMap = from.m_rackHashMap;
-		m_rackList = from.m_rackList;
+	m_rackHashMap = from.m_rackHashMap;
+	m_rackList = from.m_rackList;
 
-		m_groupBase = from.m_groupBase;
-
-	m_rackMutex.unlock();
+	m_groupBase = from.m_groupBase;
 
 	return *this;
 }

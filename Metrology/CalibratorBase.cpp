@@ -90,8 +90,6 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 
 void CalibratorBase::removeCalibrators()
 {
-	emit calibratorClose();
-
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
@@ -102,17 +100,33 @@ void CalibratorBase::removeCalibrators()
 		}
 
 		Calibrator* calibrator = manager->calibrator();
-		if (calibrator != nullptr)
+		if (calibrator == nullptr)
 		{
-			calibrator->setWaitResponse(false);
+			continue;
+		}
 
-			QThread *pThread = calibrator->thread();
-			if (pThread != nullptr)
+		if (calibrator->portIsOpen() == true)
+		{
+			int timeout = 0;
+
+			while (calibrator->portIsOpen() == true)
 			{
-				pThread->quit();
-				pThread->wait();
-				pThread->deleteLater();
+				QThread::msleep(CALIBRATOR_TIMEOUT_STEP);
+
+				timeout += CALIBRATOR_TIMEOUT_STEP;
+				if (timeout >= CALIBRATOR_TIMEOUT)
+				{
+					break;
+				}
 			}
+		}
+
+		QThread *pThread = calibrator->thread();
+		if (pThread != nullptr)
+		{
+			pThread->quit();
+			pThread->wait();
+			pThread->deleteLater();
 		}
 
 		delete manager;
@@ -129,7 +143,7 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 {
 	m_pInitDialog = new QDialog(parent);
 	m_pInitDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	m_pInitDialog->setFixedSize(500, 220);
+	m_pInitDialog->setFixedSize(520, 220);
 	m_pInitDialog->setWindowIcon(QIcon(":/icons/Calibrators.png"));
 	m_pInitDialog->setWindowTitle(tr("Calibrators initialization"));
 	m_pInitDialog->installEventFilter(this);
@@ -186,7 +200,7 @@ void CalibratorBase::setHeaderList()
 
 	for(int c = 0; c < CALIBRATOR_COLUMN_COUNT; c++)
 	{
-		horizontalHeaderLabels.append(CalibratorColumn[c]);
+		horizontalHeaderLabels.append(qApp->translate("CalibratorBase.h", CalibratorColumn[c]));
 	}
 
 	m_pCalibratorView->setColumnCount(CALIBRATOR_COLUMN_COUNT);
@@ -200,7 +214,7 @@ void CalibratorBase::setHeaderList()
 
 	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
-		verticalHeaderLabels.append(QString("Calibrator %1").arg(channel + 1));
+		verticalHeaderLabels.append(tr("Calibrator %1").arg(channel + 1));
 		m_pCalibratorView->setRowHeight(channel, 18);
 	}
 	m_pCalibratorView->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -299,33 +313,23 @@ void CalibratorBase::showInitDialog()
 
 int CalibratorBase::calibratorCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_mutex);
 
-	m_mutex.lock();
-
-		count = m_calibratorManagerList.count();
-
-	m_mutex.unlock();
-
-	return count;
+	return m_calibratorManagerList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 CalibratorManager* CalibratorBase::calibratorManager(int index) const
 {
-	CalibratorManager* pCalibratorManager = nullptr;
+	QMutexLocker l(&m_mutex);
 
-	m_mutex.lock();
+	if (index < 0 || index >= m_calibratorManagerList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_calibratorManagerList.count())
-		{
-			pCalibratorManager = m_calibratorManagerList[index];
-		}
-
-	m_mutex.unlock();
-
-	return pCalibratorManager;
+	return m_calibratorManagerList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -538,7 +542,7 @@ void CalibratorBase::onSettings(int row, int)
 		//
 		QHBoxLayout *buttonLayout = new QHBoxLayout ;
 
-		QPushButton* okButton = new QPushButton(tr("OK"));
+		QPushButton* okButton = new QPushButton(tr("Ok"));
 		QPushButton* cancelButton = new QPushButton(tr("Cancel"));
 
 		connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
@@ -664,7 +668,7 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			if (m_timeout == 0)
 			{
@@ -680,6 +684,8 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
 
 void CalibratorBase::clear()
 {
+	emit calibratorClose();		// close all calibratirs
+
 	removeCalibrators();
 }
 

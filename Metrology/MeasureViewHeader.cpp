@@ -12,7 +12,6 @@
 MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT] =
 {
 	// Measurements of linearity
-
 	{
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
@@ -34,6 +33,7 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Uncertainty"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Amount measuremets"), 80, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 1"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 2"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -77,7 +77,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
-		MeasureViewColumn(),
 	},
 
 	// Measurements of comparators
@@ -95,18 +94,18 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Place"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engineering range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Type"), 30, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value type"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Compare type"), 30, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engineering nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engineering measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "CompareAppSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "OutputAppSignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -184,6 +183,13 @@ MeasureViewColumn::~MeasureViewColumn()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString MeasureViewColumn::title() const
+{
+	 return qApp->translate("MeasureViewHeader", m_title.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 MeasureViewColumn& MeasureViewColumn::operator=(const MeasureViewColumn& from)
 {
 	m_index = from.m_index;
@@ -216,17 +222,6 @@ MeasureViewHeader::MeasureViewHeader(QObject *parent) :
 
 MeasureViewHeader::~MeasureViewHeader()
 {
-//	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-//	{
-//		return;
-//	}
-
-//	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
-//	{
-//		theOptions.measureView().m_column[m_measureType][column] = m_column[m_measureType][column];
-//	}
-
-//	theOptions.measureView().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -242,33 +237,46 @@ void MeasureViewHeader::setMeasureType(int measureType)
 
 	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 	{
-		if (m_column[measureType][column].title().isEmpty() == true)
+		if (m_column[measureType][column].title().isEmpty() == false)
 		{
-			m_columnCount[measureType] = column;
-			break;
+			continue;
 		}
+
+		m_columnCount[measureType] = column;
+		break;
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::init(int type)
+void MeasureViewHeader::init(int measureType)
 {
-	if (type < 0 || type >= MEASURE_TYPE_COUNT)
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
 	}
 
-	setMeasureType(type);
+	int languageType = theOptions.language().languageType();
+	if (languageType < 0 || languageType >= LANGUAGE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	setMeasureType(measureType);
 
 	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 	{
-		if (m_column[type][column].title().isEmpty() == false)
+		MeasureViewColumn& c = m_column[measureType][column];
+
+		if (c.title().isEmpty() == true)
 		{
-			m_column[type][column] = theOptions.measureView().m_column[type][column];
-			m_column[type][column].setIndex(column);
+			continue;
 		}
+
+		c = theOptions.measureView().m_column[measureType][languageType][column];
+		c.setIndex(column);
 	}
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -313,13 +321,6 @@ void MeasureViewHeader::updateColumnState()
 	{
 		case MEASURE_TYPE_LINEARITY:
 			{
-				// show columns of engineering value
-				//
-				bool visibleEngineering = theOptions.linearity().showEngineeringValueColumn();
-
-				setColumnVisible(MVC_CMN_L_EN_NOMINAL, visibleEngineering);
-				setColumnVisible(MVC_CMN_L_EN_MEASURE, visibleEngineering);
-
 				// list type
 				//
 				switch(theOptions.linearity().viewType())
@@ -330,6 +331,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
 						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
+						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
 						{
@@ -349,6 +351,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, true);
 						setColumnVisible(MVC_CMN_L_SD, true);
 						setColumnVisible(MVC_CMN_L_BORDER, true);
+						setColumnVisible(MVC_CMN_L_UNCERTAINTY, true);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
 						{
@@ -369,6 +372,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
 						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
+						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
 						{
@@ -390,12 +394,8 @@ void MeasureViewHeader::updateColumnState()
 
 		case MEASURE_TYPE_COMPARATOR:
 			{
-				// show columns of engineering value
+				// show  or hide columns
 				//
-				bool visibleEngineering = theOptions.comparator().showEngineeringValueColumn();
-
-				setColumnVisible(MVC_CMN_C_EN_NOMINAL, visibleEngineering);
-				setColumnVisible(MVC_CMN_C_EN_MEASURE, visibleEngineering);
 			}
 			break;
 

@@ -57,7 +57,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 	{
 		if (section >= 0 && section < theOptions.module().maxComparatorCount())
 		{
-			result = QString("Comparator %1").arg(section + 1);
+			result = tr("Comparator %1").arg(section + 1);
 		}
 	}
 
@@ -90,7 +90,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	Metrology::SignalParam inParam = signalParam(row).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = signalParam(row).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return QVariant();
@@ -155,7 +155,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 	stateStr += comparatorEx->cmpTypeStr();
 	stateStr += " ";
-	stateStr += comparatorEx->compareOnlineValueStr();
+	stateStr += comparatorEx->compareOnlineValueStr(Metrology::CmpValueTypeSetPoint);
 	stateStr += " : ";
 	stateStr += comparatorEx->outputStateStr(theOptions.comparatorInfo().displayingStateTrue(), theOptions.comparatorInfo().displayingStateFalse());
 
@@ -178,15 +178,9 @@ IoSignalParam ComparatorInfoTable::signalParam(int index) const
 		return IoSignalParam();
 	}
 
-	IoSignalParam param;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		param = m_signalList[index];
-
-	m_signalMutex.unlock();
-
-	return param;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -242,21 +236,19 @@ void ComparatorInfoTable::updateSignalParam(const QString& appSignalID)
 		return;
 	}
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		int signalCount = m_signalList.count();
-		for(int c = 0; c < signalCount; c ++)
+	int signalCount = m_signalList.count();
+	for(int c = 0; c < signalCount; c ++)
+	{
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+			if (m_signalList[c].param(type).appSignalID() == appSignalID)
 			{
-				if (m_signalList[c].param(type).appSignalID() == appSignalID)
-				{
-					m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
-				}
+				m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
 			}
 		}
-
-	m_signalMutex.unlock();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -319,7 +311,7 @@ void ComparatorInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
 
-	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
+	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &ComparatorInfoPanel::comparatorProperty);
@@ -395,7 +387,7 @@ bool ComparatorInfoPanel::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			comparatorProperty();
 		}
@@ -502,7 +494,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	Metrology::SignalParam inParam = m_comparatorTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return;

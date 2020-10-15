@@ -20,30 +20,39 @@
 
 const char* const			ComparatorListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Signal type"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (Input/Internal)"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Value"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Hysteresis"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (Discrete)"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Schema"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "AppSignalID (Input/Internal)"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Set point"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Hysteresis"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Signal type"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Electric range"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Electric sensor"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Engineering range"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "AppSignalID (Discrete)"),
+							QT_TRANSLATE_NOOP("ComparatorList.h", "Schema"),
 };
 
 const int					COMPARATOR_LIST_COLUMN_COUNT			= sizeof(ComparatorListColumn)/sizeof(ComparatorListColumn[0]);
 
-const int					COMPARATOR_LIST_COLUMN_TYPE				= 0,
-							COMPARATOR_LIST_COLUMN_INPUT			= 1,
-							COMPARATOR_LIST_COLUMN_VALUE			= 2,
-							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 3,
-							COMPARATOR_LIST_COLUMN_OUTPUT			= 4,
-							COMPARATOR_LIST_COLUMN_SCHEMA			= 5;
+const int					COMPARATOR_LIST_COLUMN_INPUT			= 0,
+							COMPARATOR_LIST_COLUMN_SETPOINT			= 1,
+							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 2,
+							COMPARATOR_LIST_COLUMN_TYPE				= 3,
+							COMPARATOR_LIST_COLUMN_EL_RANGE			= 4,
+							COMPARATOR_LIST_COLUMN_EL_SENSOR		= 5,
+							COMPARATOR_LIST_COLUMN_EN_RANGE			= 6,
+							COMPARATOR_LIST_COLUMN_OUTPUT			= 7,
+							COMPARATOR_LIST_COLUMN_SCHEMA			= 8;
 
 
 const int					ComparatorListColumnWidth[COMPARATOR_LIST_COLUMN_COUNT] =
 {
-							100,	// COMPARATOR_LIST_COLUMN_TYPE
 							250,	// COMPARATOR_LIST_COLUMN_INPUT
-							250,	// COMPARATOR_LIST_COLUMN_VALUE
+							250,	// COMPARATOR_LIST_COLUMN_SETPOINT
 							250,	// COMPARATOR_LIST_COLUMN_HYSTERESIS
+							100,	// COMPARATOR_LIST_COLUMN_TYPE
+							150,	// COMPARATOR_LIST_COLUMN_EL_RANGE
+							100,	// COMPARATOR_LIST_COLUMN_EL_SENSOR
+							150,	// COMPARATOR_LIST_COLUMN_EN_RANGE
 							250,	// COMPARATOR_LIST_COLUMN_OUTPUT
 							250,	// COMPARATOR_LIST_COLUMN_SCHEMA
 };
@@ -77,7 +86,7 @@ public:
 	void					set(const QVector<std::shared_ptr<Metrology::ComparatorEx> >& list_add);
 	void					clear();
 
-	QString					text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
+	QString					text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 };
 
 // ==============================================================================================

@@ -5,6 +5,7 @@
 #include "ExportData.h"
 #include "FindData.h"
 #include "ObjectProperties.h"
+#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -18,11 +19,9 @@ ComparatorListTable::ComparatorListTable(QObject*)
 
 ComparatorListTable::~ComparatorListTable()
 {
-	m_comparatorMutex.lock();
+	QMutexLocker l(&m_comparatorMutex);
 
-		m_comparatorList.clear();
-
-	m_comparatorMutex.unlock();
+	m_comparatorList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,7 +53,7 @@ QVariant ComparatorListTable::headerData(int section, Qt::Orientation orientatio
 	{
 		if (section >= 0 && section < COMPARATOR_LIST_COLUMN_COUNT)
 		{
-			result = ComparatorListColumn[section];
+			result = qApp->translate("ComparatorList.h", ComparatorListColumn[section]);
 		}
 	}
 
@@ -93,6 +92,12 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	Metrology::Signal* pInSignal = theSignalBase.signalPtr(comparatorEx->input().appSignalID());
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		return QVariant();
+	}
+
 	if (role == Qt::ForegroundRole)
 	{
 		if (comparatorEx->signalsIsValid()  == false)
@@ -103,9 +108,33 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		{
 			if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
 			{
-				if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::NoUsed)
+				if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::Unused)
 				{
 					return QColor(Qt::lightGray);
+				}
+			}
+		}
+
+		return QVariant();
+	}
+
+	if (role == Qt::BackgroundRole)
+	{
+		if (pInSignal->param().isInput() == true)
+		{
+			if (column == COMPARATOR_LIST_COLUMN_EL_RANGE)
+			{
+				if (pInSignal->param().electricRangeIsValid() == false)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+			}
+
+			if (column == COMPARATOR_LIST_COLUMN_EL_SENSOR)
+			{
+				if (pInSignal->param().electricSensorType() == E::SensorType::NoSensor)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
 				}
 			}
 		}
@@ -120,7 +149,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(row, column, comparatorEx);
+		return text(row, column, pInSignal, comparatorEx);
 	}
 
 	return QVariant();
@@ -128,7 +157,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
+QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
 {
 	if (row < 0 || row >= comparatorCount())
 	{
@@ -140,45 +169,93 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		return QString();
 	}
 
+	if (pInSignal == nullptr)
+	{
+		return QString();
+	}
+
+	const Metrology::SignalParam& param = pInSignal->param();
+	if (param.isValid() == false)
+	{
+		return QString();
+	}
+
 	if (comparatorEx == nullptr)
 	{
 		return QString();
 	}
 
-	QString inputAppSignalID = comparatorEx->input().appSignalID();
+	bool visible = true;
 
-	int prevRow = row - 1;
-	if (prevRow >= 0 && prevRow < comparatorCount())
+	if (row > 0)
 	{
-		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(prevRow);
+		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(row - 1);
 		if (prevComparatorEx != nullptr)
 		{
-
-			if (prevComparatorEx->input().appSignalID() == inputAppSignalID)
+			if (prevComparatorEx->input().appSignalID() == param.appSignalID())
 			{
-				inputAppSignalID.clear();
+				visible = false;
 			}
 		}
 	}
 
-	QString type;
+	//
+	//
+	QString strCompareValue;
 
-	Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
-	if (pInSignal != nullptr)
+	if (comparatorEx->compare().isConst() == true)
 	{
-		type = E::valueToString<E::SignalInOutType>(pInSignal->param().inOutType());
+		strCompareValue = comparatorEx->compareDefaultValueStr() + " " + pInSignal->param().unit();
+
+		if (pInSignal->param().electricRangeIsValid() == true && pInSignal->param().electricSensorType() != E::SensorType::NoSensor)
+		{
+			double electric = conversion(comparatorEx->compareConstValue(), CT_ENGINEER_TO_ELECTRIC, pInSignal->param());
+
+			strCompareValue += "  [" + QString::number(electric, 'f', pInSignal->param().electricPrecision()) + " " + pInSignal->param().electricUnitStr() + "]";
+		}
+	}
+	else
+	{
+		strCompareValue = comparatorEx->compareDefaultValueStr();
 	}
 
+	//
+	//
+	QString strHysteresisValue;
+
+	if (comparatorEx->deviation() == Metrology::ComparatorEx::DeviationType::Unused)
+	{
+		switch (comparatorEx->cmpType())
+		{
+			case E::CmpType::Less:		strHysteresisValue = "+ " + comparatorEx->hysteresisDefaultValueStr(); break;
+			case E::CmpType::Greate:	strHysteresisValue = "- " + comparatorEx->hysteresisDefaultValueStr(); break;
+		}
+
+		if (comparatorEx->hysteresis().isConst() == true)
+		{
+			strHysteresisValue += " " + pInSignal->param().unit();
+		}
+	}
+	else
+	{
+		strHysteresisValue = comparatorEx->hysteresisDefaultValueStr();
+	}
+
+	//
+	//
 	QString result;
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = type;										break;
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;							break;
-		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();	break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();	break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();		break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();					break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();												break;
+		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = strCompareValue;																		break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = qApp->translate("MetrologySignal.cpp", strHysteresisValue.toUtf8());					break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = param.signalTypeStr();																	break;
+		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();																break;
+		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();															break;
+		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();															break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();													break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();																break;
 		default:										assert(0);
 	}
 
@@ -189,33 +266,23 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 int ComparatorListTable::comparatorCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_comparatorMutex);
 
-	m_comparatorMutex.lock();
-
-		count = m_comparatorList.count();
-
-	m_comparatorMutex.unlock();
-
-	return count;
+	return m_comparatorList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 std::shared_ptr<Metrology::ComparatorEx> ComparatorListTable::comparator(int index) const
 {
-	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = nullptr;
+	QMutexLocker l(&m_comparatorMutex);
 
-	m_comparatorMutex.lock();
+	if (index < 0 || index >= m_comparatorList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_comparatorList.count())
-		{
-			 comparatorEx = m_comparatorList[index];
-		}
-
-	m_comparatorMutex.unlock();
-
-	return comparatorEx;
+	return m_comparatorList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -264,7 +331,7 @@ void ComparatorListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int					ComparatorListDialog::m_currenIndex = 0;
+int ComparatorListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -321,7 +388,7 @@ void ComparatorListDialog::createInterface()
 
 	m_pEditMenu->addSeparator();
 
-	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pMenuBar->addMenu(m_pComparatorMenu);
@@ -373,15 +440,15 @@ void ComparatorListDialog::createHeaderContexMenu()
 
 	for(int column = 0; column < COMPARATOR_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(ComparatorListColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("ComparatorList.h", ComparatorListColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
-
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &ComparatorListDialog::onColumnAction);
 		}
 	}
+
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &ComparatorListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -457,6 +524,7 @@ void ComparatorListDialog::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
+	hideColumn(COMPARATOR_LIST_COLUMN_EL_SENSOR, true);
 	hideColumn(COMPARATOR_LIST_COLUMN_SCHEMA, true);
 }
 
@@ -489,7 +557,7 @@ bool ComparatorListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			comparatorProperties();
 		}
@@ -502,7 +570,7 @@ bool ComparatorListDialog::eventFilter(QObject *object, QEvent *event)
 
 void ComparatorListDialog::exportComparator()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Comparators"));
+	ExportData* dialog = new ExportData(m_pView, false, "Comparators");
 	dialog->exec();
 }
 
@@ -566,8 +634,7 @@ void ComparatorListDialog::comparatorProperties()
 	}
 
 	ComparatorPropertyDialog dialog(*comparatorEx);
-	int result = dialog.exec();
-	if (result != QDialog::Accepted)
+	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}

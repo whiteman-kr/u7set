@@ -103,7 +103,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
 
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 	{
-		m_options.m_updateColumnView[type] = false;
+		m_options.measureView().setUpdateColumnView(type, false);
 	}
 
 	createInterface();
@@ -159,7 +159,7 @@ QHBoxLayout* OptionsDialog::createPages()
 	for(int group = 0; group < OPTION_GROUP_COUNT; group++)
 	{
 		QTreeWidgetItem* groupTreeItem = new QTreeWidgetItem;
-		groupTreeItem->setText(0, OptionGroupTitle[group]);
+		groupTreeItem->setText(0, qApp->translate("OptionsDialog.h", OptionGroupTitle[group]));
 		m_pPageTree->addTopLevelItem(groupTreeItem);
 
 		groupList.append(groupTreeItem);
@@ -176,7 +176,7 @@ QHBoxLayout* OptionsDialog::createPages()
 		QTreeWidgetItem* groupTreeItem = groupList.at(groupIndex);
 
 		QTreeWidgetItem* pageTreeItem = new QTreeWidgetItem;
-		pageTreeItem->setText(0, OptionPageShortTitle[page]);
+		pageTreeItem->setText(0, qApp->translate("OptionsDialog.h", OptionPageShortTitle[page]));
 		pageTreeItem->setData(0, Qt::UserRole, page);
 
 		groupTreeItem->addChild(pageTreeItem);
@@ -224,7 +224,7 @@ QHBoxLayout* OptionsDialog::createButtons()
 {
 	QHBoxLayout *buttonsLayout = new QHBoxLayout ;
 
-	QPushButton* okButton = new QPushButton(tr("OK"));
+	QPushButton* okButton = new QPushButton(tr("Ok"));
 	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
 	QPushButton* applyButton = new QPushButton(tr("Apply"));
 
@@ -263,7 +263,8 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_SIGNAL_INFO:
 		case OPTION_PAGE_COMPARATOR_INFO:
 		case OPTION_PAGE_DATABASE:
-		case OPTION_PAGE_BACKUP:				pPropertyPage = createPropertyList(page);	break;
+		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_LANGUAGE:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:	pPropertyPage = createPropertyDialog(page);	break;
 		default:								assert(nullptr);
@@ -317,17 +318,17 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server (primary)"));
 
-					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID1]);
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID1]));
 					item->setValue(sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
 					appendProperty(item, page, SOCKET_CLIENT_PARAM_EQUIPMENT_ID1);
 					serverGroup1->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP1]);
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP1]));
 					item->setValue(sco.serverIP(SOCKET_SERVER_TYPE_PRIMARY));
 					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_IP1);
 					serverGroup1->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Int, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT1]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT1]));
 					item->setValue(sco.serverPort(SOCKET_SERVER_TYPE_PRIMARY));
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), 65535);
@@ -337,7 +338,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server (reserve)"));
 
-					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID2]);
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID2]));
 					item->setValue(sco.equipmentID(SOCKET_SERVER_TYPE_RESERVE));
 					appendProperty(item, page, SOCKET_CLIENT_PARAM_EQUIPMENT_ID2);
 					serverGroup2->addSubProperty(item);
@@ -347,12 +348,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 						item->setAttribute(QLatin1String("readOnly"), true);
 					}
 
-					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP2]);
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP2]));
 					item->setValue(sco.serverIP(SOCKET_SERVER_TYPE_RESERVE));
 					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_IP2);
 					serverGroup2->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Int, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT2]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT2]));
 					item->setValue(sco.serverPort(SOCKET_SERVER_TYPE_RESERVE));
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), 65535);
@@ -372,42 +373,83 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			}
 			break;
 
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				QtProperty *identificationGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Identification of module"));
+
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", ModuleParamName[MO_PARAM_SUFFIX_SN]));
+					item->setValue(m_options.module().suffixSN());
+					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
+					identificationGroup->addSubProperty(item);
+
+				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
+
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]));
+					item->setValue(m_options.module().measureEntireModule());
+					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_WARN_IF_MEASURED]));
+					item->setValue(m_options.module().warningIfMeasured());
+					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
+					measuremoduleGroup->addSubProperty(item);
+
+				QtProperty *limitsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Limits"));
+
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_IMPUT_COUNT]));
+					item->setValue(m_options.module().maxInputCount());
+					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
+					limitsGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_CMP_COUNT]));
+					item->setValue(m_options.module().maxComparatorCount());
+					appendProperty(item, page, MO_PARAM_MAX_CMP_COUNT);
+					limitsGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(identificationGroup);
+				editor->addProperty(measuremoduleGroup);
+				editor->addProperty(limitsGroup);
+			}
+			break;
+
 		case OPTION_PAGE_LINEARITY_MEASURE:
 			{
 				QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
-					item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR_LIMIT]);
+					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", LinearityParamName[LO_PARAM_ERROR_LIMIT]));
 					item->setValue(m_options.linearity().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, LO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_ERROR_TYPE]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
 					for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
 					{
-						errorTypeList.append(MeasureErrorType[e]);
+						errorTypeList.append(qApp->translate("MeasureBase.h", MeasureErrorType[e]));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.linearity().errorType());
 					appendProperty(item, page, LO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_SHOW_ERROR_FROM_LIMIT]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_SHOW_ERROR_FROM_LIMIT]));
 					QStringList showErrorFromLimitList;
 					for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 					{
-						showErrorFromLimitList.append(MeasureLimitType[t]);
+						showErrorFromLimitList.append(qApp->translate("MeasureBase.h", MeasureLimitType[t]));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
-					item->setValue(m_options.linearity().showErrorFromLimit());
+					item->setValue(m_options.linearity().limitType());
 					appendProperty(item, page, LO_PARAM_SHOW_ERROR_FROM_LIMIT);
 					errorGroup->addSubProperty(item);
 
 				QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
 
-					item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_TIME]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_MEASURE_TIME]));
 					item->setValue(m_options.linearity().measureTimeInPoint());
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), 60);
@@ -415,7 +457,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_MEASURE_TIME);
 					measureGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_IN_POINT]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_MEASURE_IN_POINT]));
 					item->setValue(m_options.linearity().measureCountInPoint());
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), MAX_MEASUREMENT_IN_POINT);
@@ -425,18 +467,18 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *pointGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurement points"));
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_RANGE_TYPE]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_RANGE_TYPE]));
 					QStringList rangeTypeList;
 					for(int r = 0; r < LO_RANGE_TYPE_COUNT; r++)
 					{
-						rangeTypeList.append(LinearityRangeTypeStr[r]);
+						rangeTypeList.append(qApp->translate("Options.h", LinearityRangeTypeStr[r]));
 					}
 					item->setAttribute(QLatin1String("enumNames"), rangeTypeList);
 					item->setValue(m_options.linearity().rangeType());
 					appendProperty(item, page, LO_PARAM_RANGE_TYPE);
 					pointGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_POINT_COUNT]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_POINT_COUNT]));
 					item->setValue(m_options.linearity().points().count());
 					switch(m_options.linearity().rangeType())
 					{
@@ -447,7 +489,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_POINT_COUNT);
 					pointGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_LOW_RANGE]);
+					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", LinearityParamName[LO_PARAM_LOW_RANGE]));
 					item->setValue(m_options.linearity().lowLimitRange());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					item->setAttribute(QLatin1String("decimals"), 1);
@@ -460,7 +502,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_LOW_RANGE);
 					pointGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_HIGH_RANGE]);
+					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", LinearityParamName[LO_PARAM_HIGH_RANGE]));
 					item->setValue(m_options.linearity().highLimitRange());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					item->setAttribute(QLatin1String("decimals"), 1);
@@ -473,28 +515,23 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_HIGH_RANGE);
 					pointGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::String, LinearityParamName[LO_PARAM_VALUE_POINTS]);
-					item->setValue(m_options.linearity().points().text());
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", LinearityParamName[LO_PARAM_VALUE_POINTS]));
+					item->setValue(qApp->translate("Options.cpp", m_options.linearity().points().text().toUtf8()));
 					appendProperty(item, page, LO_PARAM_VALUE_POINTS);
 					pointGroup->addSubProperty(item);
 
 
 				QtProperty *showcolumnGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_LIST_TYPE]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_LIST_TYPE]));
 					QStringList listTypeList;
 					for(int r = 0; r < LO_VIEW_TYPE_COUNT; r++)
 					{
-						listTypeList.append(LinearityViewTypeStr[r]);
+						listTypeList.append(qApp->translate("Options.h", LinearityViewTypeStr[r]));
 					}
 					item->setAttribute(QLatin1String("enumNames"), listTypeList);
 					item->setValue(m_options.linearity().viewType());
 					appendProperty(item, page, LO_PARAM_LIST_TYPE);
-					showcolumnGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_ENGINEERING_VALUE]);
-					item->setValue(m_options.linearity().showEngineeringValueColumn());
-					appendProperty(item, page, LO_PARAM_SHOW_ENGINEERING_VALUE);
 					showcolumnGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -510,50 +547,45 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
-					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_ERROR_LIMIT]);
+					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ERROR_LIMIT]));
 					item->setValue(m_options.comparator().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_START_VALUE]);
+					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_START_VALUE]));
 					item->setValue(m_options.comparator().startValueForCompare());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_START_VALUE);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), ComparatorParamName[CO_PARAM_ERROR_TYPE]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
 					for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
 					{
-						errorTypeList.append(MeasureErrorType[e]);
+						errorTypeList.append(qApp->translate("MeasureBase.h", MeasureErrorType[e]));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.comparator().errorType());
 					appendProperty(item, page, CO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), ComparatorParamName[CO_PARAM_SHOW_ERROR_FROM_LIMIT]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_SHOW_ERROR_FROM_LIMIT]));
 					QStringList showErrorFromLimitList;
 					for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 					{
-						showErrorFromLimitList.append(MeasureLimitType[t]);
+						showErrorFromLimitList.append(qApp->translate("MeasureBase.h", MeasureLimitType[t]));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
-					item->setValue(m_options.comparator().showErrorFromLimit());
+					item->setValue(m_options.comparator().limitType());
 					appendProperty(item, page, CO_PARAM_SHOW_ERROR_FROM_LIMIT);
 					errorGroup->addSubProperty(item);
 
 				QtProperty *permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
 
-//					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]);
-//					item->setValue(m_options.comparator().enableMeasureHysteresis());
-//					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
-//					permissionsGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]));
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), theOptions.module().maxComparatorCount());
@@ -561,60 +593,15 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
 
-
-				QtProperty *showcolumnGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
-
-					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_SHOW_ENGINEERING_VALUE]);
-					item->setValue(m_options.comparator().showEngineeringValueColumn());
-					appendProperty(item, page, CO_PARAM_SHOW_ENGINEERING_VALUE);
-					showcolumnGroup->addSubProperty(item);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]));
+					item->setValue(m_options.comparator().enableMeasureHysteresis());
+					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
+					permissionsGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
 				editor->addProperty(permissionsGroup);
-				editor->addProperty(showcolumnGroup);
-			}
-			break;
-
-		case OPTION_PAGE_MODULE_MEASURE:
-			{
-				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]);
-					item->setValue(m_options.module().measureEntireModule());
-					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_WARN_IF_MEASURED]);
-					item->setValue(m_options.module().warningIfMeasured());
-					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
-					measuremoduleGroup->addSubProperty(item);
-
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_SHOW_NO_VALID]);
-					item->setValue(m_options.module().showNoValid());
-					appendProperty(item, page, MO_PARAM_SHOW_NO_VALID);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
-					item->setValue(m_options.module().suffixSN());
-					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Int, ModuleParamName[MO_PARAM_MAX_IMPUT_COUNT]);
-					item->setValue(m_options.module().maxInputCount());
-					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Int, ModuleParamName[MO_PARAM_MAX_CMP_COUNT]);
-					item->setValue(m_options.module().maxComparatorCount());
-					appendProperty(item, page, MO_PARAM_MAX_CMP_COUNT);
-					measuremoduleGroup->addSubProperty(item);
-
-				editor->setFactoryForManager(manager, factory);
-
-				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -622,32 +609,40 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
-					item = manager->addProperty(QVariant::Font, MeasureViewParam[MWO_PARAM_FONT]);
+					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_FONT]));
 					item->setValue(m_options.measureView().font());
 					appendProperty(item, page, MWO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
 				QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
-					item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_NOT_ERROR]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_COLOR_NOT_ERROR]));
 					item->setValue(m_options.measureView().colorNotError());
 					appendProperty(item, page, MWO_PARAM_COLOR_NOT_ERROR);
 					colorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_LIMIT_ERROR]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_COLOR_LIMIT_ERROR]));
 					item->setValue(m_options.measureView().colorErrorLimit());
 					appendProperty(item, page, MWO_PARAM_COLOR_LIMIT_ERROR);
 					colorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_CONTROL_ERROR]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_COLOR_CONTROL_ERROR]));
 					item->setValue(m_options.measureView().colorErrorControl());
 					appendProperty(item, page, MWO_PARAM_COLOR_CONTROL_ERROR);
 					colorGroup->addSubProperty(item);
+
+				QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements"));
+
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_SHOW_NO_VALID]));
+					item->setValue(m_options.measureView().showNoValid());
+					appendProperty(item, page, MWO_PARAM_SHOW_NO_VALID);
+					measureGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(fontGroup);
 				editor->addProperty(colorGroup);
+				editor->addProperty(measureGroup);
 
 				expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_FONT, false);
 				expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_NOT_ERROR, false);
@@ -660,38 +655,43 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
-					item = manager->addProperty(QVariant::Font, SignalInfoParam[SIO_PARAM_FONT]);
+					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_FONT]));
 					item->setValue(m_options.signalInfo().font());
 					appendProperty(item, page, SIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
 				QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying signal state"));
 
-					item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ELECTRIC_STATE]);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_SHOW_NO_VALID]));
+					item->setValue(m_options.signalInfo().showNoValid());
+					appendProperty(item, page, SIO_PARAM_SHOW_NO_VALID);
+					measureGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_ELECTRIC_STATE]));
 					item->setValue(m_options.signalInfo().showElectricState());
 					appendProperty(item, page, SIO_PARAM_ELECTRIC_STATE);
 					measureGroup->addSubProperty(item);
 
 				QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
-					item = manager->addProperty(QVariant::Color, SignalInfoParam[SIO_PARAM_COLOR_FLAG_VALID]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_VALID]));
 					item->setValue(m_options.signalInfo().colorFlagValid());
 					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_VALID);
 					colorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Color, SignalInfoParam[SIO_PARAM_COLOR_FLAG_OVERFLOW]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_OVERFLOW]));
 					item->setValue(m_options.signalInfo().colorFlagOverflow());
 					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_OVERFLOW);
 					colorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Color, SignalInfoParam[SIO_PARAM_COLOR_FLAG_UNDERFLOW]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_UNDERFLOW]));
 					item->setValue(m_options.signalInfo().colorFlagUnderflow());
 					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_UNDERFLOW);
 					colorGroup->addSubProperty(item);
 
 				QtProperty *timeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Time for updating"));
 
-					item = manager->addProperty(QVariant::Int, SignalInfoParam[SIO_PARAM_TIME_FOR_UPDATE]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_TIME_FOR_UPDATE]));
 					item->setValue(m_options.signalInfo().timeForUpdate());
 					appendProperty(item, page, SIO_PARAM_TIME_FOR_UPDATE);
 					timeGroup->addSubProperty(item);
@@ -715,39 +715,38 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
-					item = manager->addProperty(QVariant::Font, ComparatorInfoParam[CIO_PARAM_FONT]);
+					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_FONT]));
 					item->setValue(m_options.comparatorInfo().font());
 					appendProperty(item, page, CIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
 				QtProperty *stateGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying comparator state"));
 
-					item = manager->addProperty(QVariant::String, ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_FALSE]);
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_FALSE]));
 					item->setValue(m_options.comparatorInfo().displayingStateFalse());
 					appendProperty(item, page, CIO_PARAM_DISPLAYING_STATE_FALSE);
 					stateGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::String, ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_TRUE]);
+					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_TRUE]));
 					item->setValue(m_options.comparatorInfo().displayingStateTrue());
 					appendProperty(item, page, CIO_PARAM_DISPLAYING_STATE_TRUE);
 					stateGroup->addSubProperty(item);
 
-
 				QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
-					item = manager->addProperty(QVariant::Color, ComparatorInfoParam[CIO_PARAM_COLOR_STATE_FALSE]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_STATE_FALSE]));
 					item->setValue(m_options.comparatorInfo().colorStateFalse());
 					appendProperty(item, page, CIO_PARAM_COLOR_STATE_FALSE);
 					colorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Color, ComparatorInfoParam[CIO_PARAM_COLOR_STATE_TRUE]);
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_STATE_TRUE]));
 					item->setValue(m_options.comparatorInfo().colorStateTrue());
 					appendProperty(item, page, CIO_PARAM_COLOR_STATE_TRUE);
 					colorGroup->addSubProperty(item);
 
 				QtProperty *timeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Time for updating"));
 
-					item = manager->addProperty(QVariant::Int, ComparatorInfoParam[CIO_PARAM_TIME_FOR_UPDATE]);
+					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_TIME_FOR_UPDATE]));
 					item->setValue(m_options.comparatorInfo().timeForUpdate());
 					appendProperty(item, page, CIO_PARAM_TIME_FOR_UPDATE);
 					timeGroup->addSubProperty(item);
@@ -770,12 +769,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of Database"));
 
-					item = manager->addProperty(VariantManager::folerPathTypeId(), DatabaseParam[DBO_PARAM_PATH]);
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_PATH]));
 					item->setValue(m_options.database().path());
 					appendProperty(item, page, DBO_PARAM_PATH);
 					databaseGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), DatabaseParam[DBO_PARAM_TYPE]);
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_TYPE]));
 					QStringList valueTypeList;
 					for(int t = 0; t < DATABASE_TYPE_COUNT; t++)
 					{
@@ -796,19 +795,19 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *eventGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Events"));
 
-					item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_START]);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", BackupParam[BUO_PARAM_ON_START]));
 					item->setValue(m_options.backup().onStart());
 					appendProperty(item, page, BUO_PARAM_ON_START);
 					eventGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_EXIT]);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", BackupParam[BUO_PARAM_ON_EXIT]));
 					item->setValue(m_options.backup().onExit());
 					appendProperty(item, page, BUO_PARAM_ON_EXIT);
 					eventGroup->addSubProperty(item);
 
 				QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
-					item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_PATH]);
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", BackupParam[BUO_PARAM_PATH]));
 					item->setValue(m_options.backup().path());
 					appendProperty(item, page, BUO_PARAM_PATH);
 					pathGroup->addSubProperty(item);
@@ -817,6 +816,27 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				editor->addProperty(eventGroup);
 				editor->addProperty(pathGroup);
+			}
+			break;
+
+		case OPTION_PAGE_LANGUAGE:
+			{
+				QtProperty *languageGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Language of application "));
+
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LanguageParam[LNO_PARAM_LANGUAGE_TYPE]));
+					QStringList valueTypeList;
+					for(int t = 0; t < LANGUAGE_TYPE_COUNT; t++)
+					{
+						valueTypeList.append(qApp->translate("Options.h", LanguageTypeStr[t]));
+					}
+					item->setAttribute(QLatin1String("enumNames"), valueTypeList);
+					item->setValue(m_options.language().languageType());
+					appendProperty(item, page, LNO_PARAM_LANGUAGE_TYPE);
+					languageGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(languageGroup);
 			}
 			break;
 
@@ -872,7 +892,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 
 	if (pDialogPage != nullptr)
 	{
-		pDialogPage->setWindowTitle(OptionPageTitle[page]);
+		pDialogPage->setWindowTitle(qApp->translate("OptionsDialog.h", OptionPageTitle[page]));
 	}
 
 	return (new PropertyPage(pDialogPage));
@@ -978,7 +998,7 @@ bool OptionsDialog::setActivePage(int page)
 		QWidget* pWidget = pActivePage->getWidget();
 		if (pWidget != nullptr)
 		{
-			setWindowTitle(tr("Options - %1").arg(OptionPageTitle[page]));
+			setWindowTitle(tr("Options - %1").arg(qApp->translate("OptionsDialog.h", OptionPageTitle[page])));
 
 			m_pagesLayout->addWidget(pWidget);
 			pWidget->show();
@@ -1097,10 +1117,10 @@ void OptionsDialog::applyProperty()
 
 				switch (page)
 				{
-					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;											break;
-					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;											break;
-					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;											break;
-					default:						socketType = -1;															break;
+					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;													break;
+					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;													break;
+					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;													break;
+					default:						socketType = -1;																	break;
 				}
 
 				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
@@ -1112,12 +1132,12 @@ void OptionsDialog::applyProperty()
 
 				switch(param)
 				{
-					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID1:	sco.setEquipmentID(SOCKET_SERVER_TYPE_PRIMARY, value.toString());	break;
-					case SOCKET_CLIENT_PARAM_SERVER_IP1:	sco.setServerIP(SOCKET_SERVER_TYPE_PRIMARY, value.toString());		break;
-					case SOCKET_CLIENT_PARAM_SERVER_PORT1:	sco.setServerPort(SOCKET_SERVER_TYPE_PRIMARY, value.toInt());		break;
-					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(SOCKET_SERVER_TYPE_RESERVE, value.toString());	break;
-					case SOCKET_CLIENT_PARAM_SERVER_IP2:	sco.setServerIP(SOCKET_SERVER_TYPE_RESERVE, value.toString());		break;
-					case SOCKET_CLIENT_PARAM_SERVER_PORT2:	sco.setServerPort(SOCKET_SERVER_TYPE_RESERVE, value.toInt());		break;
+					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID1:	sco.setEquipmentID(SOCKET_SERVER_TYPE_PRIMARY, value.toString());			break;
+					case SOCKET_CLIENT_PARAM_SERVER_IP1:	sco.setServerIP(SOCKET_SERVER_TYPE_PRIMARY, value.toString());				break;
+					case SOCKET_CLIENT_PARAM_SERVER_PORT1:	sco.setServerPort(SOCKET_SERVER_TYPE_PRIMARY, value.toInt());				break;
+					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(SOCKET_SERVER_TYPE_RESERVE, value.toString());			break;
+					case SOCKET_CLIENT_PARAM_SERVER_IP2:	sco.setServerIP(SOCKET_SERVER_TYPE_RESERVE, value.toString());				break;
+					case SOCKET_CLIENT_PARAM_SERVER_PORT2:	sco.setServerPort(SOCKET_SERVER_TYPE_RESERVE, value.toInt());				break;
 					default:								assert(0);
 				}
 
@@ -1127,33 +1147,45 @@ void OptionsDialog::applyProperty()
 			}
 			break;
 
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				switch(param)
+				{
+					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());							break;
+					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());					break;
+					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
+					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
+					case MO_PARAM_MAX_CMP_COUNT:			m_options.module().setMaxComparatorCount(value.toInt());					break;
+					default:								assert(0);
+				}
+			}
+			break;
+
 		case OPTION_PAGE_LINEARITY_MEASURE:
 			{
 				switch(param)
 				{
-					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());				break;
+					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());						break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
-					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setShowErrorFromLimit(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
-					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());			break;
-					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());		break;
+															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY, true);	break;
+					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setLimitType(value.toInt());
+															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY, true);	break;
+					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());					break;
+					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());				break;
 					case LO_PARAM_RANGE_TYPE:				m_options.linearity().setRangeType(value.toInt());
 															m_options.linearity().recalcPoints();
-															updateLinearityPage(false);											break;
+															updateLinearityPage(false);													break;
 					case LO_PARAM_POINT_COUNT:				m_options.linearity().recalcPoints(value.toInt());
-															updateLinearityPage(false);											break;
+															updateLinearityPage(false);													break;
 					case LO_PARAM_LOW_RANGE:				m_options.linearity().setLowLimitRange(value.toDouble());
 															m_options.linearity().recalcPoints();
-															updateLinearityPage(false);											break;
+															updateLinearityPage(false);													break;
 					case LO_PARAM_HIGH_RANGE:				m_options.linearity().setHighLimitRange(value.toDouble());
 															m_options.linearity().recalcPoints();
-															updateLinearityPage(false);											break;
-					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);							break;
+															updateLinearityPage(false);													break;
+					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);									break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
-					case LO_PARAM_SHOW_ENGINEERING_VALUE:	m_options.linearity().setShowPhyscalValueColumn(value.toBool());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
+															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY,true);	break;
 					default:								assert(0);
 				}
 			}
@@ -1163,30 +1195,13 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());				break;
-					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());	break;
-					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());					break;
-					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setShowErrorFromLimit(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_COMPARATOR] = true;		break;
-					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
-					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);	break;
-					case CO_PARAM_SHOW_ENGINEERING_VALUE:	m_options.comparator().setShowPhyscalValueColumn(value.toBool());
-															m_options.m_updateColumnView[MEASURE_TYPE_COMPARATOR] = true;		break;
-					default:								assert(0);
-				}
-			}
-			break;
-
-		case OPTION_PAGE_MODULE_MEASURE:
-			{
-				switch(param)
-				{
-					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());			break;
-					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());			break;
-					case MO_PARAM_SHOW_NO_VALID:			m_options.module().setShowNoValid(value.toBool());					break;
-					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());					break;
-					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());					break;
-					case MO_PARAM_MAX_CMP_COUNT:			m_options.module().setMaxComparatorCount(value.toInt());			break;
+					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());						break;
+					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());			break;
+					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());							break;
+					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setLimitType(value.toInt());
+															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_COMPARATOR, true);	break;
+					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);			break;
+					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());			break;
 					default:								assert(0);
 				}
 			}
@@ -1196,16 +1211,17 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case MWO_PARAM_FONT:				m_options.measureView().font().fromString(value.toString());			break;
-					case MWO_PARAM_COLOR_NOT_ERROR:		m_options.measureView().setColorNotError(QColor(value.toString()));		break;
-					case MWO_PARAM_COLOR_LIMIT_ERROR:	m_options.measureView().setColorErrorLimit(QColor(value.toString()));	break;
-					case MWO_PARAM_COLOR_CONTROL_ERROR:	m_options.measureView().setColorErrorControl(QColor(value.toString()));	break;
+					case MWO_PARAM_FONT:				m_options.measureView().font().fromString(value.toString());					break;
+					case MWO_PARAM_COLOR_NOT_ERROR:		m_options.measureView().setColorNotError(QColor(value.toString()));				break;
+					case MWO_PARAM_COLOR_LIMIT_ERROR:	m_options.measureView().setColorErrorLimit(QColor(value.toString()));			break;
+					case MWO_PARAM_COLOR_CONTROL_ERROR:	m_options.measureView().setColorErrorControl(QColor(value.toString()));			break;
+					case MWO_PARAM_SHOW_NO_VALID:		m_options.measureView().setShowNoValid(value.toBool());							break;
 					default:							assert(0);
 				}
 
 				for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 				{
-					m_options.m_updateColumnView[type] = true;
+					m_options.measureView().setUpdateColumnView(type, true);
 				}
 			}
 			break;
@@ -1218,12 +1234,13 @@ void OptionsDialog::applyProperty()
 
 			switch(param)
 			{
-				case SIO_PARAM_FONT:					m_options.signalInfo().font().fromString(value.toString());				break;
-				case SIO_PARAM_ELECTRIC_STATE:			m_options.signalInfo().setShowElectricState(value.toBool());			break;
-				case SIO_PARAM_COLOR_FLAG_VALID:		m_options.signalInfo().setColorFlagValid(QColor(value.toString()));		break;
-				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));	break;
-				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));	break;
-				case SIO_PARAM_TIME_FOR_UPDATE:			m_options.signalInfo().setTimeForUpdate(value.toInt());					break;
+				case SIO_PARAM_FONT:					m_options.signalInfo().font().fromString(value.toString());						break;
+				case SIO_PARAM_SHOW_NO_VALID:			m_options.signalInfo().setShowNoValid(value.toBool());							break;
+				case SIO_PARAM_ELECTRIC_STATE:			m_options.signalInfo().setShowElectricState(value.toBool());					break;
+				case SIO_PARAM_COLOR_FLAG_VALID:		m_options.signalInfo().setColorFlagValid(QColor(value.toString()));				break;
+				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));			break;
+				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));			break;
+				case SIO_PARAM_TIME_FOR_UPDATE:			m_options.signalInfo().setTimeForUpdate(value.toInt());							break;
 				default:								assert(0);
 			}
 
@@ -1233,12 +1250,12 @@ void OptionsDialog::applyProperty()
 
 			switch(param)
 			{
-				case CIO_PARAM_FONT:					m_options.comparatorInfo().font().fromString(value.toString());			break;
-				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());	break;
-				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());	break;
-				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));break;
-				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));	break;
-				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());				break;
+				case CIO_PARAM_FONT:					m_options.comparatorInfo().font().fromString(value.toString());					break;
+				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());			break;
+				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());			break;
+				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));		break;
+				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));			break;
+				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());						break;
 				default:								assert(0);
 			}
 
@@ -1248,8 +1265,8 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case DBO_PARAM_PATH:				m_options.database().setPath(value.toString());							break;
-					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());							break;
+					case DBO_PARAM_PATH:				m_options.database().setPath(value.toString());									break;
+					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());									break;
 					default:							assert(0);
 				}
 			}
@@ -1259,9 +1276,19 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());							break;
-					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());							break;
-					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());							break;
+					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());									break;
+					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());									break;
+					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());									break;
+					default:							assert(0);
+				}
+			}
+			break;
+
+		case OPTION_PAGE_LANGUAGE:
+			{
+				switch(param)
+				{
+					case LNO_PARAM_LANGUAGE_TYPE:		m_options.language().setLanguageType(value.toInt());							break;
 					default:							assert(0);
 				}
 			}
@@ -1368,7 +1395,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_VALUE_POINTS));
 	if (property != nullptr)
 	{
-		property->setValue(m_options.linearity().points().text());
+		property->setValue(qApp->translate("Options.cpp", m_options.linearity().points().text().toUtf8()));
 	}
 }
 
@@ -1397,7 +1424,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 		int measureType = dialog->measureType();
 		if (measureType >= 0 && measureType < MEASURE_TYPE_COUNT)
 		{
-			m_options.m_updateColumnView[measureType] = true;
+			m_options.measureView().setUpdateColumnView(measureType, true);
 		}
 	}
 	else
@@ -1467,7 +1494,7 @@ bool OptionsDialog::event(QEvent * e)
 				{
 					QKeyEvent* keyEvent = static_cast<QKeyEvent *>(e);
 
-					if (keyEvent->key() == Qt::Key_Return)
+					if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 					{
 						applyProperty();
 					}

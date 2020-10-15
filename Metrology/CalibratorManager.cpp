@@ -41,7 +41,7 @@ CalibratorManager::~CalibratorManager()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorManager::calibratorIsConnected()
+bool CalibratorManager::calibratorIsConnected() const
 {
 	if (m_pCalibrator == nullptr)
 	{
@@ -79,26 +79,18 @@ QString CalibratorManager::calibratorPort() const
 
 bool CalibratorManager::isReadyForManage() const
 {
-	bool ready = true;
+	QMutexLocker l(&m_mutex);
 
-	m_mutex.lock();
-
-		ready = m_readyForManage;
-
-	m_mutex.unlock();
-
-	return ready;
+	return m_readyForManage;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorManager::setReadyForManage(bool ready)
 {
-	m_mutex.lock();
+	QMutexLocker l(&m_mutex);
 
-		m_readyForManage = ready;
-
-	m_mutex.unlock();
+	m_readyForManage = ready;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -164,7 +156,7 @@ void CalibratorManager::createManageDialog()
 
 	m_pRemoteControlCheck = new QCheckBox(tr("Remote control"), this);
 
-	m_pErrorsButton = new QPushButton(tr("List errors"), this);
+	m_pErrorsButton = new QPushButton(qApp->translate("CalibratorManager.h", ErrorList), this);
 
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -328,7 +320,7 @@ void CalibratorManager::onCalibratorError(QString text)
 	QString error = QTime::currentTime().toString("hh:mm:ss.zzz - ") + text;
 
 	m_pErrorList->append(error);
-	m_pErrorsButton->setText(QString("List errors (%1)").arg(m_pErrorList->document()->lineCount()));
+	m_pErrorsButton->setText(qApp->translate("CalibratorManager.h", ErrorList) + QString("(%1)").arg(m_pErrorList->document()->lineCount()));
 
 	if (isVisible() == false)
 	{
@@ -355,11 +347,9 @@ void CalibratorManager::onCalibratorConnect()
 
 	QString title = QString("c:%1 ").arg(channel + 1) + m_pCalibrator->caption() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
 	setWindowTitle(title);
-	m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
+	m_pErrorDialog->setWindowTitle(title + (" : ") + qApp->translate("CalibratorManager.h", ErrorList));
 
 	enableInterface(true);
-
-	emit calibratorGetValue();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -377,10 +367,10 @@ void CalibratorManager::onCalibratorDisconnect()
 		return;
 	}
 
-	QString title = QString("c:%1 (%2) - Disconnected").arg(channel + 1).arg(m_pCalibrator->portName()) ;
+	QString title = tr("c:%1 (%2) - Disconnected").arg(channel + 1).arg(m_pCalibrator->portName()) ;
 	setWindowTitle(title);
 
-	m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
+	m_pErrorDialog->setWindowTitle(title + (" : ") + qApp->translate("CalibratorManager.h", ErrorList));
 
 	enableInterface(false);
 

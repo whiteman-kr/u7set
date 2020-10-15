@@ -20,11 +20,9 @@ SignalConnectionTable::SignalConnectionTable(QObject*)
 
 SignalConnectionTable::~SignalConnectionTable()
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		m_connectionList.clear();
-
-	m_connectionMutex.unlock();
+	m_connectionList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -56,7 +54,7 @@ QVariant SignalConnectionTable::headerData(int section, Qt::Orientation orientat
 	{
 		if (section >= 0 && section < SIGNAL_CONNECTION_COLUMN_COUNT)
 		{
-			result = SignalConnectionColumn[section];
+			result = qApp->translate("SignalConnectionDialog.h", SignalConnectionColumn[section]);
 		}
 	}
 
@@ -90,10 +88,6 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 	}
 
 	SignalConnection connection = at(row);
-	if (connection.isValid() == false)
-	{
-		return QVariant();
-	}
 
 	if (role == Qt::TextAlignmentRole)
 	{
@@ -107,6 +101,14 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundRole)
 	{
+		if (column == SIGNAL_CONNECTION_COLUMN_TYPE)
+		{
+			if (connection.type() < 0 || connection.type() >= SIGNAL_CONNECTION_TYPE_COUNT)
+			{
+				return QColor(0xFF, 0xA0, 0xA0);
+			}
+		}
+
 		if (column == SIGNAL_CONNECTION_COLUMN_IN_ID)
 		{
 			Metrology::Signal* pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
@@ -150,19 +152,25 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 		return QString();
 	}
 
-	if (connection.isValid() == false)
+	bool visible = true;
+
+	if (row > 0 &&
+		m_connectionList[row - 1].handle().type == connection.handle().type &&
+		m_connectionList[row - 1].handle().inputID == connection.handle().inputID &&
+		m_connectionList[row - 1].handle().inputID != 0 )
 	{
-		return QString();
+		visible = false;
 	}
 
 	QString result;
 
 	switch (column)
 	{
-		case SIGNAL_CONNECTION_COLUMN_TYPE:			result = connection.typeStr();									break;
-		case SIGNAL_CONNECTION_COLUMN_IN_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
-		case SIGNAL_CONNECTION_COLUMN_OUT_ID:		result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
-		default:									assert(0);
+		case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	result = visible ? QString::number(connection.type()) : QString("");				break;
+		case SIGNAL_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");								break;
+		case SIGNAL_CONNECTION_COLUMN_IN_ID:	result = visible ? connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT): QString();	break;
+		case SIGNAL_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);						break;
+		default:								assert(0);
 	}
 
 	return result;
@@ -172,35 +180,23 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 
 int SignalConnectionTable::connectionCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_connectionMutex);
 
-	m_connectionMutex.lock();
-
-		count = m_connectionList.count();
-
-	m_connectionMutex.unlock();
-
-	return count;
+	return m_connectionList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalConnection SignalConnectionTable::at(int index) const
 {
-	if (index < 0 || index >= connectionCount())
+	QMutexLocker l(&m_connectionMutex);
+
+	if (index < 0 || index >= m_connectionList.count())
 	{
 		return SignalConnection();
 	}
 
-	SignalConnection signal;
-
-	m_connectionMutex.lock();
-
-		signal = m_connectionList[index];
-
-	m_connectionMutex.unlock();
-
-	return signal;
+	return m_connectionList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -281,7 +277,7 @@ void SignalConnectionItemDialog::createInterface()
 	setWindowFlags(Qt::Dialog);
 	setWindowIcon(QIcon(":/icons/Connection.png"));
 
-	if (m_signalConnection.isValid() == false)
+	if (m_signalConnection.handle().uint64 == 0)
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
 		setWindowTitle(tr("Create connection"));
@@ -318,7 +314,7 @@ void SignalConnectionItemDialog::createInterface()
 	pInputSignalLabel->setFixedWidth(70);
 	m_pInputSignalIDEdit->setFixedWidth(200);
 
-	m_pInputSignalIDEdit->setReadOnly(true);
+	//m_pInputSignalIDEdit->setReadOnly(true);
 	m_pInputSignalButton->setEnabled(theSignalBase.signalCount() != 0);
 
 	inputSignalLayout->addWidget(pInputSignalLabel);
@@ -336,7 +332,7 @@ void SignalConnectionItemDialog::createInterface()
 	pOutputSignalLabel->setFixedWidth(70);
 	m_pOutputSignalIDEdit->setFixedWidth(200);
 
-	m_pOutputSignalIDEdit->setReadOnly(true);
+	//m_pOutputSignalIDEdit->setReadOnly(true);
 	m_pOutputSignalButton->setEnabled(theSignalBase.signalCount() != 0);
 
 	outputSignalLayout->addWidget(pOutputSignalLabel);
@@ -355,14 +351,14 @@ void SignalConnectionItemDialog::createInterface()
 	//
 	for (int type = 0; type < SIGNAL_CONNECTION_TYPE_COUNT; type++)
 	{
-		m_pTypeList->addItem(SignalConnectionType[type], type);
+		m_pTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[type]), type);
 	}
 	m_pTypeList->removeItem(SIGNAL_CONNECTION_TYPE_UNUSED);
 
 	int type = m_signalConnection.type() ;
 	if ((type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT) || type == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
-		type = SIGNAL_CONNECTION_TYPE_INPUT_C_TO_F;
+		type = SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL;
 		m_signalConnection.setType(type);
 	}
 	m_pTypeList->setCurrentIndex(type - 1);
@@ -395,10 +391,14 @@ void SignalConnectionItemDialog::updateSignals()
 		return;
 	}
 
+	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
+
 	m_pInputSignalIDEdit->setText(m_signalConnection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
 	m_pOutputSignalIDEdit->setText(m_signalConnection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
 }
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionItemDialog::selectedType(int)
@@ -456,9 +456,17 @@ void SignalConnectionItemDialog::selectSignal(int type)
 		return;
 	}
 
-	m_signalConnection.setSignal(type, pSignal);
+	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
 
-	updateSignals();
+	switch (type)
+	{
+		case MEASURE_IO_SIGNAL_TYPE_INPUT:	m_pInputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+		case MEASURE_IO_SIGNAL_TYPE_OUTPUT: m_pOutputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+		default:							assert(0);														break;
+	}
 }
 
 
@@ -474,21 +482,45 @@ void SignalConnectionItemDialog::onOk()
 		return;
 	}
 
-	Metrology::Signal* pInSignal = m_signalConnection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
+
+	QString inputAppSignalID = m_pInputSignalIDEdit->text();
+	if (inputAppSignalID.isEmpty() == true)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select input signal!"));
 		m_pInputSignalButton->setFocus();
 		return;
 	}
 
-	Metrology::Signal* pOutSignal = m_signalConnection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+	Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select input signal!").arg(inputAppSignalID));
+		m_pInputSignalButton->setFocus();
+		return;
+	}
+
+	QString outputAppSignalID = m_pOutputSignalIDEdit->text();
+	if (outputAppSignalID.isEmpty() == true)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select output signal!"));
+		m_pInputSignalButton->setFocus();
+		return;
+	}
+
+	Metrology::Signal* pOutSignal = theSignalBase.signalPtr(outputAppSignalID);
+	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select output signal!").arg(outputAppSignalID));
 		m_pOutputSignalButton->setFocus();
 		return;
 	}
+
+	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
+	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pOutSignal);
 
 	accept();
 }
@@ -529,27 +561,27 @@ void SignalConnectionDialog::createInterface()
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	m_pMenuBar = new QMenuBar(this);
-	m_pSignalMenu = new QMenu(tr("&Signal"), this);
+	m_pConnectionMenu = new QMenu(tr("&Connection"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
-	m_pCreateAction = m_pSignalMenu->addAction(tr("&Create ..."));
+	m_pCreateAction = m_pConnectionMenu->addAction(tr("&Create ..."));
 	m_pCreateAction->setIcon(QIcon(":/icons/Add.png"));
 	m_pCreateAction->setShortcut(Qt::Key_Insert);
 
-	m_pEditAction = m_pSignalMenu->addAction(tr("&Edit ..."));
+	m_pEditAction = m_pConnectionMenu->addAction(tr("&Edit ..."));
 	m_pEditAction->setIcon(QIcon(":/icons/Edit.png"));
 
-	m_pRemoveAction = m_pSignalMenu->addAction(tr("&Remove"));
+	m_pRemoveAction = m_pConnectionMenu->addAction(tr("&Remove"));
 	m_pRemoveAction->setIcon(QIcon(":/icons/Remove.png"));
 	m_pRemoveAction->setShortcut(Qt::Key_Delete);
 
-	m_pSignalMenu->addSeparator();
+	m_pConnectionMenu->addSeparator();
 
-	m_pImportAction = m_pSignalMenu->addAction(tr("&Import ..."));
+	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
 	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
 	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
-	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
+	m_pExportAction = m_pConnectionMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
 
@@ -567,7 +599,7 @@ void SignalConnectionDialog::createInterface()
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
-	m_pMenuBar->addMenu(m_pSignalMenu);
+	m_pMenuBar->addMenu(m_pConnectionMenu);
 	m_pMenuBar->addMenu(m_pEditMenu);
 
 	connect(m_pCreateAction, &QAction::triggered, this, &SignalConnectionDialog::createConnection);
@@ -590,6 +622,8 @@ void SignalConnectionDialog::createInterface()
 	{
 		m_pView->setColumnWidth(column, SignalConnectionColumnWidth[column]);
 	}
+
+	m_pView->hideColumn(SIGNAL_CONNECTION_COLUMN_TYPE_NO);
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
@@ -646,20 +680,12 @@ void SignalConnectionDialog::updateList()
 {
 	m_connectionTable.clear();
 
-	m_connectionBase.sort();
-
 	QVector<SignalConnection> connectionList;
 
 	int count = m_connectionBase.count();
 	for(int i = 0; i < count; i++)
 	{
-		SignalConnection signalConnection = m_connectionBase.connection(i);
-		if (signalConnection.isValid() == false)
-		{
-			continue;
-		}
-
-		connectionList.append(signalConnection);
+		connectionList.append(m_connectionBase.connection(i));
 	}
 
 	m_connectionTable.set(connectionList);
@@ -686,15 +712,20 @@ void SignalConnectionDialog::createConnection()
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
 
-		QMessageBox::information(this, windowTitle(), tr("Signal already exist!"));
+		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
 		return;
 	}
 
 	m_connectionBase.append(connection);
+	m_connectionBase.sort();
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_connectionTable.index(m_connectionBase.count() - 1, SIGNAL_CONNECTION_COLUMN_TYPE));
+	foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -704,7 +735,7 @@ void SignalConnectionDialog::editConnection()
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_connectionTable.connectionCount())
 	{
-		QMessageBox::information(this, windowTitle(), tr("Please, select signal for edit!"));
+		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for edit!"));
 		return;
 	}
 
@@ -722,11 +753,25 @@ void SignalConnectionDialog::editConnection()
 		return;
 	}
 
-	m_connectionBase.setSignal(index, connection);
+	int foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+
+		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
+		return;
+	}
+
+	m_connectionBase.setConnection(index, connection);
+	m_connectionBase.sort();
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_connectionTable.index(index, SIGNAL_CONNECTION_COLUMN_TYPE));
+	foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -767,11 +812,6 @@ void SignalConnectionDialog::importConnections()
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "SignalConnections.csv", "CSV files (*.csv);;All files (*.*)");
 	if (fileName.isEmpty() == true)
 	{
-		return;
-	}
-
-	if (fileName.isEmpty() == true)
-	{
 		QMessageBox::critical(this, tr("Error"), tr("Could not open file: Empty file name"));
 		return;
 	}
@@ -789,21 +829,6 @@ void SignalConnectionDialog::importConnections()
 		return;
 	}
 
-	// format header line for test header of file
-	//
-	QString headerLine;
-
-	int columnCount = m_pView->model()->columnCount();
-	for(int column = 0; column < columnCount; column++)
-	{
-		if (m_pView->isColumnHidden(column) == true)
-		{
-			continue;
-		}
-
-		headerLine.append(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit() + ";");
-	}
-
 	QVector<SignalConnection> connectionList;
 
 	// read data
@@ -811,13 +836,11 @@ void SignalConnectionDialog::importConnections()
 	QTextStream in(&file);
 	while (in.atEnd() == false)
 	{
-		if (in.pos() == 0)
+		if (in.pos() == 0) // first line is header
 		{
-			if (in.readLine() != headerLine)
-			{
-				QMessageBox::critical(this, tr("Error"), tr("Invalid file header!"));
-				break;
-			}
+			QString header = in.readLine();
+			qDebug() << header;
+			continue;
 		}
 		else
 		{
@@ -828,13 +851,18 @@ void SignalConnectionDialog::importConnections()
 			{
 				switch (column)
 				{
-					case SIGNAL_CONNECTION_COLUMN_TYPE:		connection.setType(line[column]);										break;
+					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	connection.setType(line[column].toInt());								break;
 					case SIGNAL_CONNECTION_COLUMN_IN_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);	break;
 					case SIGNAL_CONNECTION_COLUMN_OUT_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);	break;
 				}
 			}
 
 			connection.initSignals();
+
+			if (connection.isValid() == false)
+			{
+				continue;
+			}
 
 			m_connectionBase.append(connection);
 		}
@@ -849,7 +877,7 @@ void SignalConnectionDialog::importConnections()
 
 void SignalConnectionDialog::exportConnections()
 {
-	ExportData* dialog = new ExportData(m_pView, "SignalConnections");
+	ExportData* dialog = new ExportData(m_pView, true, "SignalConnections");
 	dialog->exec();
 }
 

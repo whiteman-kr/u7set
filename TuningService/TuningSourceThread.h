@@ -123,6 +123,7 @@ namespace Tuning
 			E::SignalType signalType() const { return m_signalType; }
 
 			TuningValueType tuningValueType() const { return m_tuningValueType; }
+			QString tuningValueTypeStr() const;
 
 			TuningValue currentValue() const { return m_currentValue; }
 			TuningValue readLowBound() const { return m_readLowBound; }
@@ -259,7 +260,7 @@ namespace Tuning
 		void onNoReply();
 
 		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
-		void sendFotipRequest(RupFotipV2& request);
+		void sendFotipRequest(RupFotipV2& request, const QString& appSignalID);
 
 		bool initRupHeader(Rup::Header& rupHeader);
 		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
@@ -277,10 +278,12 @@ namespace Tuning
 
 		void invalidateAllSignals();
 
-		void logTuningRequest(const TuningCommand& cmd);
+		void logTuningRequest(const TuningCommand& cmd, QString* appSignalID);
 		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply);
 
 	private:
+//		bool m_STOP_SEND_REQUESTS = false;
+
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
@@ -323,6 +326,8 @@ namespace Tuning
 		QUdpSocket m_socket;
 
 		RupFotipV2 m_request;
+		QString m_requestAppSignalID;
+
 		RupFotipV2 m_reply;
 
 		int m_retryCount = 0;

@@ -40,8 +40,11 @@ private:
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
+
 	double					m_percent = 0;					// for measuring of linearity
 	int						m_comparatorIndex = -1;			// for measuring of comparators
+	int						m_comparatorValueType = -1;		// for measuring of comparators
+
 	bool					m_negativeRange = false;
 	double					m_tunSignalState = 0;			// for restore tun value after measuring
 
@@ -79,6 +82,8 @@ public:
 	int						comparatorIndex() const { return m_comparatorIndex; }
 	void					setComparatorIndex(int index) { m_comparatorIndex = index; }
 
+	int						comparatorValueType() const { return m_comparatorValueType; }
+	void					setComparatorValueType(int type) { m_comparatorValueType = type; }
 
 	bool					isNegativeRange() const { return m_negativeRange; }
 	void					setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }
@@ -165,7 +170,7 @@ public:
 	Metrology::Signal*		metrologySignal(int type, int channel) const;
 	bool					setMetrologySignal(int measureKind, const SignalConnectionBase& signalConnections, int signalConnectionType, int channel, Metrology::Signal* pSignal);
 
-	bool					contains(Metrology::Signal* pSignal);
+	bool					contains(Metrology::Signal* pSignal) const;
 
 	MeasureSignal&			operator=(const MeasureSignal& from);
 };
@@ -236,21 +241,21 @@ public:
 	Metrology::Signal*		signalPtr(const Hash& hash);
 	Metrology::Signal*		signalPtr(int index);
 
-	Metrology::Signal		signal(const QString& appSignalID);
-	Metrology::Signal		signal(const Hash& hash);
-	Metrology::Signal		signal(int index);
+	Metrology::Signal		signal(const QString& appSignalID) const;
+	Metrology::Signal		signal(const Hash& hash) const;
+	Metrology::Signal		signal(int index) const;
 
-	Metrology::SignalParam	signalParam(const QString& appSignalID);
-	Metrology::SignalParam	signalParam(const Hash& hash);
-	Metrology::SignalParam	signalParam(int index);
+	Metrology::SignalParam	signalParam(const QString& appSignalID) const;
+	Metrology::SignalParam	signalParam(const Hash& hash) const;
+	Metrology::SignalParam	signalParam(int index) const;
 
 	void					setSignalParam(const QString& appSignalID, const Metrology::SignalParam& param);
 	void					setSignalParam(const Hash& hash, const Metrology::SignalParam& param);
 	void					setSignalParam(int index, const Metrology::SignalParam& param);
 
-	Metrology::SignalState	signalState(const QString& appSignalID);
-	Metrology::SignalState	signalState(const Hash& hash);
-	Metrology::SignalState	signalState(int index);
+	Metrology::SignalState	signalState(const QString& appSignalID) const;
+	Metrology::SignalState	signalState(const Hash& hash) const;
+	Metrology::SignalState	signalState(int index) const;
 
 	void					setSignalState(const QString& appSignalID, const Metrology::SignalState& state);
 	void					setSignalState(const Hash& hash, const Metrology::SignalState& state);
@@ -269,7 +274,7 @@ public:
 	void					clearRackListForMeasure();
 
 	int						rackCountForMeasure() const;
-	Metrology::RackParam	rackForMeasure(int index);
+	Metrology::RackParam	rackForMeasure(int index) const;
 
 	// module
 	//
@@ -284,7 +289,7 @@ public:
 	void					clearSignalListForMeasure();
 
 	int						signalForMeasureCount() const;
-	MeasureSignal			signalForMeasure(int index);
+	MeasureSignal			signalForMeasure1(int index) const;
 
 	// main signal for measure
 	//

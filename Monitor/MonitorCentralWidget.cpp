@@ -7,11 +7,13 @@
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
 										   VFrame30::TuningController* tuningController,
+                                           VFrame30::LogController* logController,
 										   QWidget* parent) :
 	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
-	m_tuningController(tuningController)
+    m_tuningController(tuningController),
+    m_logController(logController)
 {
 	Q_ASSERT(m_schemaManager);
 
@@ -97,6 +99,7 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 																m_schemaManager,
 																m_appSignalController,
 																m_tuningController,
+	                                                            m_logController,
 																this);
 	schemaWidget->clientSchemaView()->setVariables(variables);
 
@@ -114,48 +117,6 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash&
 	emit signal_actionCloseTabUpdated(count() > 1);
 
 	return index;
-}
-
-void MonitorCentralWidget::slot_schemaList()
-{
-	// Activate tab it schema list already opened
-	//
-	for (int i = 0; i < this->count(); i++)
-	{
-		SchemaListWidget* w = dynamic_cast<SchemaListWidget*>(this->widget(i));
-		if (w != nullptr)
-		{
-			setCurrentIndex(i);
-			return;
-		}
-	}
-
-	// Schemal list is not opened yet, create it and add to tab control
-	//
-	SchemaListWidget* w = new SchemaListWidget{this};
-	w->setDetails(m_schemaManager->monitorConfigController()->schemasDetailsSet());
-
-	connect(w, &SchemaListWidget::openSchemaRequest, this, &MonitorCentralWidget::slot_newSchemaTab);
-
-	connect(m_schemaManager->monitorConfigController(), &MonitorConfigController::configurationUpdate, w,
-			[this, w]()
-			{
-				w->setDetails(m_schemaManager->monitorConfigController()->schemasDetailsSet());
-			});
-
-	int index = this->addTab(w, tr("Schemas"));
-
-	if (count() > 1 && tabsClosable() == false)
-	{
-		setTabsClosable(true);
-		setMovable(true);
-	}
-
-	setCurrentIndex(index);
-
-	emit signal_actionCloseTabUpdated(count() > 1);
-
-	return;
 }
 
 void MonitorCentralWidget::slot_newSchemaTab(QString schemaId)

@@ -100,7 +100,7 @@ void TuningSocket::requestTuningSourcesInfo()
 {
 	assert(isClearToSendRequest());
 
-	theSignalBase.tuning().Sources().clear();
+	theSignalBase.tuning().sourceBase().clear();
 
 	int serverType = selectedServerIndex();
 	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
@@ -153,12 +153,12 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 	for (int i = 0; i < sourceCount; i++)
 	{
 		const ::Network::DataSourceInfo& dsi = m_tuningDataSourcesInfoReply.datasourceinfo(i);
-		theSignalBase.tuning().Sources().append(TuningSource(dsi));
+		theSignalBase.tuning().sourceBase().append(TuningSource(dsi));
 
 		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubsystemID:" << dsi.lmsubsystemid().c_str() << ", EquipmentID:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str();
 	}
 
-	theSignalBase.tuning().Sources().sortByID();
+	theSignalBase.tuning().sourceBase().sortByID();
 
 	emit sourcesLoaded();
 
@@ -223,7 +223,7 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 	for (int i = 0; i < sourceCount; i++)
 	{
 		const ::Network::TuningSourceState& tss = m_tuningDataSourcesStatesReply.tuningsourcesstate(i);
-		theSignalBase.tuning().Sources().setState(tss.sourceid(), tss);
+		theSignalBase.tuning().sourceBase().setState(tss.sourceid(), tss);
 	}
 
 	requestReadTuningSignals();
@@ -250,7 +250,7 @@ void TuningSocket::requestReadTuningSignals()
 		return;
 	}
 
-	int signalForReadCount = theSignalBase.tuning().Signals().count();
+	int signalForReadCount = theSignalBase.tuning().signalBase().count();
 	if (signalForReadCount == 0)
 	{
 		requestWriteTuningSignals();
@@ -271,7 +271,7 @@ void TuningSocket::requestReadTuningSignals()
 			break;
 		}
 
-		Metrology::Signal* pSignal = theSignalBase.tuning().Signals().signal(i + startIndex);
+		Metrology::Signal* pSignal = theSignalBase.tuning().signalBase().signal(i + startIndex);
 		if (pSignal == nullptr)
 		{
 			continue;
@@ -323,7 +323,7 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 
 	for (int i = 0; i < readReplyCount; i++)
 	{
-		theSignalBase.tuning().Signals().setState(m_readTuningSignalsReply.tuningsignalstate(i));
+		theSignalBase.tuning().signalBase().setState(m_readTuningSignalsReply.tuningsignalstate(i));
 	}
 
 	requestWriteTuningSignals();

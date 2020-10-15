@@ -7,9 +7,9 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnection::SignalConnection() :
-	m_hash(0)
+SignalConnection::SignalConnection()
 {
+	m_handle.uint64 = 0;
 	clear();
 }
 
@@ -24,18 +24,11 @@ SignalConnection::SignalConnection(const SignalConnection& from)
 
 bool SignalConnection::isValid() const
 {
-	if (m_hash == UNDEFINED_HASH)
+	if (m_handle.type < 0 || m_handle.type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return false;
 	}
 
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool SignalConnection::signalsIsValid() const
-{
 	bool result = true;
 
 	for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
@@ -54,61 +47,63 @@ bool SignalConnection::signalsIsValid() const
 
 void SignalConnection::clear()
 {
-	m_signalMutex.lock();
-
-		for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
-		{
-			m_pSignal[t] = nullptr;
-		}
-
-	m_signalMutex.unlock();
+	for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
+	{
+		m_pSignal[t] = nullptr;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnection::setHash()
+void SignalConnection::createHandle()
 {
-	QString strID;
-
-	m_signalMutex.lock();
-
-		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+	for (int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+	{
+		switch (type)
 		{
-			strID.append(m_appSignalID[type]);
-		}
+			case MEASURE_IO_SIGNAL_TYPE_INPUT:
 
-		if (strID.isEmpty() == false)
-		{
-			m_hash = calcHash(strID);
-		}
+				if (m_pSignal[type] == nullptr)
+				{
+					m_handle.inputID = 0;
+				}
+				else
+				{
+					m_handle.inputID = static_cast<quint64>(m_pSignal[type]->param().ID());
+				}
 
-	m_signalMutex.unlock();
+				break;
+
+			case MEASURE_IO_SIGNAL_TYPE_OUTPUT:
+
+				if (m_pSignal[type] == nullptr)
+				{
+					m_handle.outputID = 0;
+				}
+				else
+				{
+					m_handle.outputID = static_cast<quint64>(m_pSignal[type]->param().ID());
+				}
+
+				break;
+
+			default:
+				assert(0);
+				break;
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 QString SignalConnection::typeStr() const
 {
-	if (m_type < 0 || m_type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (m_handle.type < 0 || m_handle.type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
-		return QString();
+		return QString("???");
 	}
 
-	return SignalConnectionType[m_type];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalConnection::setType(const QString& typeStr)
-{
-	for (int t = 0; t < SIGNAL_CONNECTION_TYPE_COUNT; t++)
-	{
-		if (SignalConnectionType[t] == typeStr)
-		{
-			m_type = t;
-			break;
-		}
-	}
+	return qApp->translate("SignalConnectionBase.h", SignalConnectionType[m_handle.type]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -120,15 +115,7 @@ QString SignalConnection::appSignalID(int type) const
 		return QString();
 	}
 
-	QString appSignalID;
-
-	m_signalMutex.lock();
-
-		appSignalID = m_appSignalID[type];
-
-	m_signalMutex.unlock();
-
-	return appSignalID;
+	return m_appSignalID[type];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -140,13 +127,7 @@ void SignalConnection::setAppSignalID(int type, const QString& appSignalID)
 		return;
 	}
 
-	m_signalMutex.lock();
-
-		m_appSignalID[type] = appSignalID;
-
-	m_signalMutex.unlock();
-
-	setHash();
+	m_appSignalID[type] = appSignalID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -158,15 +139,7 @@ Metrology::Signal* SignalConnection::signal(int type) const
 		return nullptr;
 	}
 
-	Metrology::Signal* pSignal = nullptr;
-
-	m_signalMutex.lock();
-
-		pSignal = m_pSignal[type];
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_pSignal[type];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -189,57 +162,43 @@ void SignalConnection::setSignal(int type, Metrology::Signal* pSignal)
 		return;
 	}
 
-	m_signalMutex.lock();
+	m_appSignalID[type] = param.appSignalID();
 
-		m_appSignalID[type] = param.appSignalID();
+	m_pSignal[type] = pSignal;
 
-		m_pSignal[type] = pSignal;
-
-	m_signalMutex.unlock();
-
-	setHash();
+	createHandle();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalConnection::initSignals()
+void SignalConnection::initSignals()
 {
-	m_signalMutex.lock();
-
-		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+	{
+		if (m_appSignalID[type].isEmpty() == true)
 		{
-			if (m_appSignalID[type].isEmpty() == true)
-			{
-				continue;
-			}
-
-			m_pSignal[type] = theSignalBase.signalPtr(m_appSignalID[type]);
+			continue;
 		}
 
-	m_signalMutex.unlock();
+		m_pSignal[type] = theSignalBase.signalPtr(m_appSignalID[type]);
+	}
 
-	return signalsIsValid();
+	createHandle();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalConnection& SignalConnection::operator=(const SignalConnection& from)
 {
-	m_signalMutex.lock();
+	m_index = from.m_index;
 
-		m_index = from.m_index;
+	m_handle = from.m_handle;
 
-		m_type = from.m_type;
-
-		m_hash = from.m_hash;
-
-		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
-		{
-			m_appSignalID[type] = from.m_appSignalID[type];
-			m_pSignal[type] = from.m_pSignal[type];
-		}
-
-	m_signalMutex.unlock();
+	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+	{
+		m_appSignalID[type] = from.m_appSignalID[type];
+		m_pSignal[type] = from.m_pSignal[type];
+	}
 
 	return *this;
 }
@@ -257,48 +216,49 @@ SignalConnectionBase::SignalConnectionBase(QObject *parent) :
 
 void SignalConnectionBase::clear()
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		m_connectionList.clear();
-
-	m_connectionMutex.unlock();
+	m_connectionList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int SignalConnectionBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_connectionMutex);
 
-	m_connectionMutex.lock();
-
-		count = m_connectionList.count();
-
-	m_connectionMutex.unlock();
-
-	return count;
+	return m_connectionList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionBase::sort()
 {
+	QMutexLocker l(&m_connectionMutex);
 
+	int connectionCount = m_connectionList.count();
+	for( int i = 0; i < connectionCount - 1; i++ )
+	{
+		for( int j = i+1; j < connectionCount; j++ )
+		{
+			if ( m_connectionList[i].handle().uint64 > m_connectionList[j].handle().uint64 )
+			{
+				SignalConnection connection = m_connectionList[i];
+				m_connectionList[i] = m_connectionList[j];
+				m_connectionList[j] = connection;
+			}
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int SignalConnectionBase::load()
 {
-	if (thePtrDB == nullptr)
-	{
-		return 0;
-	}
-
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_SIGNAL_CONNECTION);
 	if (table == nullptr)
 	{
 		return false;
@@ -325,12 +285,7 @@ int SignalConnectionBase::load()
 
 bool SignalConnectionBase::save()
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);
+	SqlTable* table = theDatabase.openTable(SQL_TABLE_SIGNAL_CONNECTION);
 	if (table == nullptr)
 	{
 		return false;
@@ -366,93 +321,116 @@ bool SignalConnectionBase::save()
 
 void SignalConnectionBase::initSignals()
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		int count = m_connectionList.count();
-		for(int i = 0; i < count; i++)
-		{
-			m_connectionList[i].initSignals();
-		}
-
-	m_connectionMutex.unlock();
+	int count = m_connectionList.count();
+	for(int i = 0; i < count; i++)
+	{
+		m_connectionList[i].initSignals();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionBase::clearSignals()
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		int count = m_connectionList.count();
-		for(int i = 0; i < count; i++)
-		{
-			m_connectionList[i].clear();
-		}
-
-	m_connectionMutex.unlock();
+	int count = m_connectionList.count();
+	for(int i = 0; i < count; i++)
+	{
+		m_connectionList[i].clear();
+	}
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int SignalConnectionBase::append(const SignalConnection& connection)
 {
-	int index = -1;
+	QMutexLocker l(&m_connectionMutex);
 
-	m_connectionMutex.lock();
+	m_connectionList.append(connection);
 
-		m_connectionList.append(connection);
-		index = m_connectionList.count() - 1;
-
-	m_connectionMutex.unlock();
-
-	return index;
+	return m_connectionList.count() - 1;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalConnection SignalConnectionBase::connection(int index) const
 {
-	SignalConnection signal;
+	QMutexLocker l(&m_connectionMutex);
 
-	m_connectionMutex.lock();
+	if (index < 0 || index >= m_connectionList.count())
+	{
+		return SignalConnection();
+	}
 
-		if (index >= 0 && index < m_connectionList.count())
-		{
-			signal = m_connectionList[index];
-		}
-
-	m_connectionMutex.unlock();
-
-	return signal;
+	return m_connectionList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionBase::setSignal(int index, const SignalConnection& connection)
+void SignalConnectionBase::setConnection(int index, const SignalConnection& connection)
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		if (index >= 0 && index < m_connectionList.count())
-		{
-			m_connectionList[index] = connection;
-		}
+	if (index < 0 || index >= m_connectionList.count())
+	{
+		return;
+	}
 
-	m_connectionMutex.unlock();
+	m_connectionList[index] = connection;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionBase::remove(int index)
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		if (index >= 0 && index < m_connectionList.count())
+	if (index < 0 || index >= m_connectionList.count())
+	{
+		return;
+	}
+
+	m_connectionList.remove(index);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int SignalConnectionBase::findIndex(int ioType, Metrology::Signal* pSignal) const
+{
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	{
+		assert(0);
+		return -1;
+	}
+
+	if (pSignal == nullptr)
+	{
+		assert(0);
+		return -1;
+	}
+
+	int foundIndex = -1;
+
+	QMutexLocker l(&m_connectionMutex);
+
+	int count = m_connectionList.count();
+
+	for(int i = 0; i < count; i ++)
+	{
+		if (m_connectionList[i].signal(ioType) != pSignal)
 		{
-			m_connectionList.remove(index);
+			continue;
 		}
 
-	m_connectionMutex.unlock();
+		foundIndex = i;
+
+		break;
+	}
+
+	return foundIndex;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -479,28 +457,26 @@ int SignalConnectionBase::findIndex(int connectionType, int ioType, Metrology::S
 
 	int foundIndex = -1;
 
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		int count = m_connectionList.count();
+	int count = m_connectionList.count();
 
-		for(int i = 0; i < count; i ++)
+	for(int i = 0; i < count; i ++)
+	{
+		if (m_connectionList[i].type() != connectionType)
 		{
-			if (m_connectionList[i].type() != connectionType)
-			{
-				continue;
-			}
-
-			if (m_connectionList[i].signal(ioType) != pSignal)
-			{
-				continue;
-			}
-
-			foundIndex = i;
-
-			break;
+			continue;
 		}
 
-	m_connectionMutex.unlock();
+		if (m_connectionList[i].signal(ioType) != pSignal)
+		{
+			continue;
+		}
+
+		foundIndex = i;
+
+		break;
+	}
 
 	return foundIndex;
 }
@@ -511,34 +487,74 @@ int SignalConnectionBase::findIndex(const SignalConnection& connection) const
 {
 	int foundIndex = -1;
 
-		m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		int count = m_connectionList.count();
+	int count = m_connectionList.count();
 
-		for(int i = 0; i < count; i ++)
+	for(int i = 0; i < count; i ++)
+	{
+		if (m_connectionList[i].handle().uint64 == connection.handle().uint64)
 		{
-			if (m_connectionList[i].hash() == connection.hash())
-			{
-				foundIndex = i;
+			foundIndex = i;
 
-				break;
-			}
-		 }
-
-	m_connectionMutex.unlock();
+			break;
+		}
+	}
 
 	return foundIndex;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QVector<Metrology::Signal*> SignalConnectionBase::getOutputSignals(int connectionType, const QString& appSignalID) const
+{
+	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		return QVector<Metrology::Signal*>();
+	}
+
+	if (appSignalID.isEmpty() == true)
+	{
+		return QVector<Metrology::Signal*>();
+	}
+
+	QVector<Metrology::Signal*> outputSignalsList;
+
+	QMutexLocker l(&m_connectionMutex);
+
+	int count = m_connectionList.count();
+
+	for(int i = 0; i < count; i ++)
+	{
+		const SignalConnection& connection = m_connectionList[i];
+
+		if (connection.type() != connectionType)
+		{
+			continue;
+		}
+
+		if (connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) == appSignalID)
+		{
+			Metrology::Signal* pOutputSignal = m_connectionList[i].signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+			{
+				continue;
+			}
+
+			outputSignalsList.append(pOutputSignal);
+		}
+	}
+
+	return outputSignalsList;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 SignalConnectionBase& SignalConnectionBase::operator=(const SignalConnectionBase& from)
 {
-	m_connectionMutex.lock();
+	QMutexLocker l(&m_connectionMutex);
 
-		m_connectionList = from.m_connectionList;
-
-	m_connectionMutex.unlock();
+	m_connectionList = from.m_connectionList;
 
 	return *this;
 }

@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "Options.h"
+
 #include "../lib/ProtoSerialization.h"
 #include "../lib/MemLeaksDetection.h"
 
@@ -18,20 +19,32 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain("radiy.com");
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("1.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
+	a.setApplicationVersion(QString("2.0.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
 #else
-	a.setApplicationVersion(QString("1.9.LOCALBUILD"));
+	a.setApplicationVersion(QString("2.0.LOCALBUILD"));
 #endif
 
+	theOptions.load();
+
 	QTranslator translator;
-	if (translator.load("Metrology_ru.qm", QApplication::applicationDirPath() + "/translations") == false)
+	//
+	//
+	if (theOptions.language().languageType() == LANGUAGE_TYPE_RU)
 	{
-		qDebug() << "Options::loadLanguage() - didn't load language file";
+		if (translator.load(LANGUAGE_OPTIONS_FILE_RU, QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR) == true)
+		{
+			qApp->installTranslator(&translator);
+		}
+		else
+		{
+			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
+			QMessageBox::critical(nullptr, "Russian language", QString("Didn't found russian language file:\n%1").arg(languageFilePath));
+			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
+		}
 	}
-	qApp->installTranslator(&translator);
 
-    theOptions.load();
-
+	//
+	//
 	SoftwareInfo si;
 
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
@@ -49,9 +62,7 @@ int main(int argc, char *argv[])
 
 	delete pMainWindow;
 
-    theOptions.unload();
-
-    google::protobuf::ShutdownProtobufLibrary();
+	google::protobuf::ShutdownProtobufLibrary();
 
 	dumpMemoryLeaks();
 

@@ -22,13 +22,15 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 
 	for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
 	{
-		m_measureTypeList->addItem(MeasureType[t]);
+		m_measureTypeList->addItem(qApp->translate("MeasureBase.h", MeasureType[t]));
 	}
 	m_measureTypeList->setCurrentIndex(m_measureType);
 
 	measureTypeLayout->addWidget(m_measureTypeLabel);
 	measureTypeLayout->addWidget(m_measureTypeList);
 	measureTypeLayout->addStretch();
+
+	m_languageType = theOptions.language().languageType();
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
@@ -62,7 +64,7 @@ void OptionsMeasureViewHeaderDialog::setHeaderList()
 
 	for(int c = 0; c < MVH_COLUMN_COUNT; c++)
 	{
-		horizontalHeaderLabels.append(MvhColumn[c]);
+		horizontalHeaderLabels.append(qApp->translate("OptionsMvhDialog.h", MvhColumn[c]));
 	}
 
 	m_columnList->setColumnCount(horizontalHeaderLabels.count());
@@ -93,11 +95,16 @@ void OptionsMeasureViewHeaderDialog::updateList()
 		return;
 	}
 
+	if (m_languageType < 0 || m_languageType >= LANGUAGE_TYPE_COUNT)
+	{
+		return;
+	}
+
 	int rowCount = 0;
 
 	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 	{
-		if (m_header.m_column[m_measureType][column].title().isEmpty() == true)
+		if (m_header.m_column[m_measureType][m_languageType][column].title().isEmpty() == true)
 		{
 			rowCount = column;
 			break;
@@ -118,7 +125,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 	{
 		verticalHeaderLabels.append(QString("%1").arg(index + 1));
 
-		MeasureViewColumn& column = m_header.m_column[m_measureType][index];
+		MeasureViewColumn& column = m_header.m_column[m_measureType][m_languageType][index];
 
 		bool visible = column.enableVisible();
 
@@ -140,7 +147,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 
 		m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
 
-		cell = new QTableWidgetItem(QString::number(column.width(), 'f', 0));
+		cell = new QTableWidgetItem(QString::number(column.width()));
 		cell->setTextAlignment(Qt::AlignHCenter);
 		if (visible == false)
 		{
@@ -204,6 +211,16 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 		return;
 	}
 
+	if (m_languageType < 0 || m_languageType >= LANGUAGE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	if (m_columnList == nullptr)
+	{
+		return;
+	}
+
 	if (row < 0 || row >= m_columnList->rowCount())
 	{
 		return;
@@ -215,9 +232,12 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	if (column == MVH_COLUMN_WIDTH)
+	switch(column)
 	{
-		m_header.m_column[m_measureType][row].setWidth(item->text().toInt());
+		case MVH_COLUMN_TITLE:		m_header.m_column[m_measureType][m_languageType][row].setTitle(item->text());			break;
+		case MVH_COLUMN_VISIBLE:	break;
+		case MVH_COLUMN_WIDTH:		m_header.m_column[m_measureType][m_languageType][row].setWidth(item->text().toInt());	break;
+		default:					assert(0);																				break;
 	}
 
 	updateList();
@@ -243,11 +263,6 @@ void OptionsMeasureViewHeaderDialog::currentCellChanged(int, int column, int, in
 
 void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
 	if (row < 0 || row >= m_columnList->rowCount())
 	{
 		return;
@@ -258,17 +273,35 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 		return;
 	}
 
+	if (m_columnList == nullptr)
+	{
+		return;
+	}
+
 	QTableWidgetItem* cell = m_columnList->item(row, column);
 	if (cell == nullptr)
 	{
 		return;
 	}
 
-	MeasureViewColumn& headerColumn = m_header.m_column[m_measureType][row];
+	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	if (m_languageType < 0 || m_languageType >= LANGUAGE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	MeasureViewColumn& headerColumn = m_header.m_column[m_measureType][m_languageType][row];
 
 	switch(column)
 	{
 		case MVH_COLUMN_TITLE:
+			{
+				m_columnList->editItem(cell);
+			}
 			break;
 
 		case MVH_COLUMN_VISIBLE:
@@ -295,7 +328,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 
 void OptionsMeasureViewHeaderDialog::keyPressEvent(QKeyEvent *e)
 {
-	if (e->key() == Qt::Key_Return)
+	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{
 		int row = m_columnList->currentRow();
 		int column = m_columnList->currentColumn();

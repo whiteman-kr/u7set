@@ -509,6 +509,18 @@ namespace Metrology
 
 		return true;
 	}
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::signalTypeStr() const
+	{
+		int type = inOutTypeInt();
+		if (type < 0 || type >= SIGANL_TYPE_COUNT)
+		{
+			return QString();
+		}
+
+		return  qApp->translate("MeasureSignal.h", SignalTypeStr[type]);
+	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
@@ -539,6 +551,11 @@ namespace Metrology
 
 	QString SignalParam::electricSensorTypeStr() const
 	{
+		if (isInternal() == true)
+		{
+			return QString();
+		}
+
 		QString typeStr = QMetaEnum::fromType<E::SensorType>().key(m_electricSensorType);
 
 		switch(m_electricUnitID)
@@ -605,6 +622,11 @@ namespace Metrology
 
 	QString SignalParam::electricRangeStr() const
 	{
+		if (isInternal() == true)
+		{
+			return QString();
+		}
+
 		QString range, formatStr;
 
 		formatStr = QString::asprintf("%%.%df", m_electricPrecision);
@@ -805,41 +827,6 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString SignalStatistic::measureCountStr() const
-	{
-		if (m_measureCount == 0)
-		{
-			return QString();
-		}
-
-		return QString::number(m_measureCount);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	QString SignalStatistic::stateStr() const
-	{
-		if (m_measureCount == 0)
-		{
-			return QString("Not measured");
-		}
-
-		QString state;
-
-		switch (m_state)
-		{
-			case State::Failed:		state = "Failed";	break;
-			case State::Success:	state = "Ok";		break;
-			default:				assert(0);			break;
-		}
-
-		return state;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------------------
-
 	Signal::Signal(const SignalParam& param)
 	{
 		setParam(param);
@@ -875,6 +862,9 @@ namespace Metrology
 		m_compareSignal = nullptr;
 		m_hysteresisSignal = nullptr;
 		m_outputSignal = nullptr;
+
+		m_compareValue = 0;
+		m_hysteresisValue = 0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -942,26 +932,14 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareOnlineValue() const
+	double ComparatorEx::compareOnlineValue(int cmpValueType)
 	{
-		//
-		//
-		double hysteresisValue = 0;
+		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		{
+			return 0.0;
+		}
 
-		if (hysteresis().isConst() == true)
-		{
-			hysteresisValue = hysteresis().constValue();
-		}
-		else
-		{
-			if (m_hysteresisSignal != nullptr)
-			{
-				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
-				{
-					hysteresisValue = m_hysteresisSignal->state().value();
-				}
-			}
-		}
+		double hysteresisValue = hysteresisOnlineValue();	// get hysteresis value
 
 		//
 		//
@@ -969,17 +947,37 @@ namespace Metrology
 
 		switch (m_deviationType)
 		{
-			case DeviationType::Down:	deviation = -hysteresisValue / 2;	break;
-			case DeviationType::Up:		deviation = hysteresisValue / 2;	break;
+			case DeviationType::Unused:													// for comparators: Less and Greate
+
+				if (cmpValueType == CmpValueTypeHysteresis)
+				{
+					switch (cmpType())
+					{
+						case E::CmpType::Less:		deviation = hysteresisValue;	break;
+						case E::CmpType::Greate:	deviation -= hysteresisValue;	break;
+					}
+				}
+
+				break;
+
+			case DeviationType::Down:													// for comparators: Equal and NotEqual
+
+				deviation = -hysteresisValue / 2;
+
+				break;
+
+			case DeviationType::Up:														// for comparators: Equal and NotEqual
+
+				deviation = hysteresisValue / 2;
+
+				break;
 		}
 
 		//
 		//
-		double value = 0;
-
 		if (compare().isConst() == true)
 		{
-			value = compare().constValue() + deviation;
+			m_compareValue = compare().constValue() + deviation;
 		}
 		else
 		{
@@ -987,19 +985,24 @@ namespace Metrology
 			{
 				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().valid() == true)
 				{
-					value = m_compareSignal->state().value() + deviation;
+					m_compareValue = m_compareSignal->state().value() + deviation;
 				}
 			}
 		}
 
-		return value;
+		return m_compareValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareOnlineValueStr() const
+	QString ComparatorEx::compareOnlineValueStr(int cmpValueType)
 	{
-		return QString::number(compareOnlineValue(), 'f', valuePrecision());
+		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		{
+			return QString();
+		}
+
+		return QString::number(compareOnlineValue(cmpValueType), 'f', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1012,7 +1015,7 @@ namespace Metrology
 		//
 		switch (m_deviationType)
 		{
-			case DeviationType::NoUsed:	value = compare().constValue();									break;
+			case DeviationType::Unused:	value = compare().constValue();									break;
 			case DeviationType::Down:	value = compare().constValue() - hysteresis().constValue() / 2;	break;
 			case DeviationType::Up:		value= compare().constValue() + hysteresis().constValue() / 2;	break;
 		}
@@ -1042,13 +1045,11 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::hysteresisOnlineValue() const
+	double ComparatorEx::hysteresisOnlineValue()
 	{
-		double value = 0;
-
 		if (hysteresis().isConst() == true)
 		{
-			value = hysteresis().constValue();
+			m_hysteresisValue = hysteresis().constValue();
 		}
 		else
 		{
@@ -1056,17 +1057,17 @@ namespace Metrology
 			{
 				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
 				{
-					value = m_hysteresisSignal->state().value();
+					m_hysteresisValue = m_hysteresisSignal->state().value();
 				}
 			}
 		}
 
-		return value;
+		return m_hysteresisValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisOnlineValueStr() const
+	QString ComparatorEx::hysteresisOnlineValueStr()
 	{
 		return QString::number(hysteresisOnlineValue(), 'f', valuePrecision());
 	}
@@ -1086,9 +1087,9 @@ namespace Metrology
 			value = hysteresis().appSignalID();
 		}
 
-		if (m_deviationType != DeviationType::NoUsed)
+		if (m_deviationType != DeviationType::Unused)
 		{
-			value.insert(0, "Not used - ");
+			value = QT_TRANSLATE_NOOP("MetrologySignal.cpp", "Unused");
 		}
 
 		return value;
@@ -1099,17 +1100,17 @@ namespace Metrology
 
 	bool ComparatorEx::outputState() const
 	{
-		bool value = false;
-
-		if (m_outputSignal != nullptr)
+		if (m_outputSignal == nullptr)
 		{
-			if (m_outputSignal->param().isValid() == true && m_outputSignal->state().valid() == true)
-			{
-				value = m_outputSignal->state().value() != 0.0;
-			}
+			return false;
 		}
 
-		return value;
+		if (m_outputSignal->param().isValid() == false || m_outputSignal->state().valid() == false)
+		{
+			return false;
+		}
+
+		return m_outputSignal->state().value() != 0.0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
