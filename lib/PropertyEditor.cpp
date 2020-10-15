@@ -3276,6 +3276,15 @@ namespace ExtWidgets
 			}
 		}
 
+		if ((event->key() == Qt::Key_Up ||
+			 event->key() == Qt::Key_Down ||
+			 event->key() == Qt::Key_PageUp ||
+			 event->key() == Qt::Key_PageDown)
+			&& indexWidget(currentIndex()) != nullptr)
+		{
+			return;
+		}
+
 		QTreeWidget::keyPressEvent(event);
 	}
 
