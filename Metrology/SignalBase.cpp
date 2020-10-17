@@ -676,10 +676,10 @@ QString IoSignalParam::calibratorStr() const
 {
 	if (m_pCalibratorManager == nullptr || m_pCalibratorManager->calibratorIsConnected() == false)
 	{
-		return QString("Not connected");
+		return qApp->translate("CalibratorManager.h", CalibratorNotConnected);
 	}
 
-	return QString("Calibrator %1 (%2)").arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
+	return QString("%1 %2 (%3)").arg(qApp->translate("CalibratorManager.h", CalibratorStr)).arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1683,11 +1683,6 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 					continue;
 				}
 
-				if (param.electricSensorType() == E::SensorType::NoSensor)
-				{
-					continue;
-				}
-
 				break;
 
 			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
@@ -1941,11 +1936,6 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					continue;
 				}
 
-				if (param.electricSensorType() == E::SensorType::NoSensor)
-				{
-					continue;
-				}
-
 				break;
 
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
@@ -1966,11 +1956,6 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 				}
 
 				if (param.electricRangeIsValid() == false)
-				{
-					continue;
-				}
-
-				if (param.electricSensorType() == E::SensorType::NoSensor)
 				{
 					continue;
 				}

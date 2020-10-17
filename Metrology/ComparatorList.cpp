@@ -207,7 +207,7 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 	{
 		strCompareValue = comparatorEx->compareDefaultValueStr() + " " + pInSignal->param().unit();
 
-		if (pInSignal->param().electricRangeIsValid() == true && pInSignal->param().electricSensorType() != E::SensorType::NoSensor)
+		if (pInSignal->param().electricRangeIsValid() == true)
 		{
 			double electric = conversion(comparatorEx->compareConstValue(), CT_ENGINEER_TO_ELECTRIC, pInSignal->param());
 

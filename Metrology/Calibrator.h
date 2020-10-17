@@ -12,7 +12,7 @@
 
 // ==============================================================================================
 
-const int		CALIBRATOR_TIMEOUT			= 5000,		// 5 seconds
+const int		CALIBRATOR_TIMEOUT			= 8000,		// 8 seconds
 				CALIBRATOR_TIMEOUT_STEP		= 10;		// 10 milliseconds
 
 // ----------------------------------------------------------------------------------------------
@@ -143,6 +143,29 @@ const double	CalibratorTS[CALIBRATOR_TYPE_COUNT][CALIBRATOR_UNIT_COUNT][CALIBRAT
 		{0.005,	0.000,	10000},		// CALIBRATION_UNIT_KHZ			= 3,
 		{0.012,	0.0025,	400},		// CALIBRATION_UNIT_LOW_OHM		= 4,
 		{0.012,	0.0025,	4000},		// CALIBRATION_UNIT_HIGH_OHM	= 5;
+	},
+};
+
+const double	CalibratorPrecision[CALIBRATOR_TYPE_COUNT][CALIBRATOR_UNIT_COUNT] =
+{
+	// CALIBRATION_TYPE_TRXII	= 0,
+	{
+		0.001,		// CALIBRATION_UNIT_MV			= 0,
+		0.001,		// CALIBRATION_UNIT_MA			= 1,
+		0.0001,		// CALIBRATION_UNIT_V			= 2,
+		0.001,		// CALIBRATION_UNIT_KHZ			= 3,
+		0.01,		// CALIBRATION_UNIT_LOW_OHM		= 4,
+		0.1,		// CALIBRATION_UNIT_HIGH_OHM	= 5;
+	},
+
+	// CALIBRATION_TYPE_CALYS75	= 1,
+	{
+		0.001,		// CALIBRATION_UNIT_MV			= 0,
+		0.001,		// CALIBRATION_UNIT_MA			= 1,
+		0.001,		// CALIBRATION_UNIT_V			= 2,
+		0.0001,		// CALIBRATION_UNIT_KHZ			= 3,
+		0.01,		// CALIBRATION_UNIT_LOW_OHM		= 4,
+		0.1,		// CALIBRATION_UNIT_HIGH_OHM	= 5;
 	},
 };
 

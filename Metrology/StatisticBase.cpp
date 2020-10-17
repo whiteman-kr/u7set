@@ -236,11 +236,6 @@ void StatisticBase::createStatisticSignalList()
 			{
 				continue;
 			}
-
-			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
-			{
-				continue;
-			}
 		}
 
 		StatisticItem si(pSignal);
@@ -313,11 +308,6 @@ void StatisticBase::createStatisticComparatorList()
 			}
 
 			if (pSignal->param().electricRangeIsValid() == false)
-			{
-				continue;
-			}
-
-			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
 			{
 				continue;
 			}

@@ -2025,6 +2025,16 @@
         <source>Error list</source>
         <translation>Список ошибок</translation>
     </message>
+    <message>
+        <location filename="../CalibratorManager.h" line="19"/>
+        <source>Not connected</source>
+        <translation>Не подключен</translation>
+    </message>
+    <message>
+        <location filename="../CalibratorManager.h" line="20"/>
+        <source>Calibrator</source>
+        <translation>Калибратор</translation>
+    </message>
 </context>
 <context>
     <name>CfgLoader</name>

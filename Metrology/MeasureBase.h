@@ -212,9 +212,6 @@ public:
 	Metrology::SignalLocation& location() { return m_location; }
 	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
 
-	void			setLimits(const Metrology::SignalParam& param);
-	void			calcError();
-
 	double			nominal(int limitType) const;
 	QString			nominalStr(int limitType) const;
 	void			setNominal(int limitType, double value);
@@ -222,6 +219,8 @@ public:
 	double			measure(int limitType) const;
 	QString			measureStr(int limitType) const;
 	void			setMeasure(int limitType, double value);
+
+	void			setLimits(const Metrology::SignalParam& param);
 
 	double			lowLimit(int limitType) const;
 	void			setLowLimit(int limitType, double lowLimit);
@@ -236,6 +235,8 @@ public:
 	void			setLimitPrecision(int limitType, int precision);
 
 	QString			limitStr(int limitType) const;
+
+	void			calcError();
 
 	double			error(int limitType, int errotType) const;
 	QString			errorStr() const;
@@ -282,7 +283,8 @@ public:
 	void			fill_measure_internal(const IoSignalParam& ioParam);
 	void			fill_measure_output(const IoSignalParam& ioParam);
 
-	void			calcAdditionalParam(Calibrator* pCalibrator, E::SensorType sensorType, int limitType);
+	void			calcAdditionalParam(const IoSignalParam &ioParam);
+	double			calcUcertainty(const IoSignalParam &ioParam, int limitType) const;
 
 	double			percent() const { return m_percent; }
 	void			setPercent(double percent) { m_percent = percent; }
