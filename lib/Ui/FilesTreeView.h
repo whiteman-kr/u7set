@@ -167,7 +167,7 @@ public:
 	void moveFile(int parentFileId);
 	void checkOutFilesById(std::vector<int> fileIds);
 	void checkInFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds);
-	void undoChangesFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds);
+	bool undoChangesFilesById(std::vector<int> fileIds, std::vector<int>* deletedFileIds);
 
 	void setFileNameFilter(const QString& filterText);
 
@@ -183,7 +183,7 @@ public slots:
 	void deleteFile();
 	void checkOutSelectedFiles();
 	void checkInSelectedFiles();
-	void undoChangesSelectedFiles();
+	bool undoChangesSelectedFiles();
 	void showHistory();
 	void showCompare();
 	void getLatestVersion();
@@ -197,7 +197,7 @@ private:
 	bool createFiles(std::vector<std::shared_ptr<DbFile> > files, bool createInParentFolder);
 	void checkOutFiles(QModelIndexList indexList);
 	void checkInFiles(QModelIndexList indexList);
-	void undoChangesFiles(QModelIndexList indexList);
+	bool undoChangesFiles(QModelIndexList indexList);
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
 	void runFileEditor(bool viewOnly);
 
