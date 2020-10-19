@@ -10,14 +10,191 @@
 
 class DbController;
 
-class PdfSchemaView : public VFrame30::SchemaView
+class ReportGenerator;
+
+//
+// ReportSchemaView
+//
+
+class ReportSchemaView : public VFrame30::SchemaView
 {
 public:
-	PdfSchemaView(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent);
+	ReportSchemaView(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent);
 
-	void Adjust(QPainter* painter, double startX, double startY, double zoom) const;
+	void adjust(QPainter* painter, double startX, double startY, double zoom) const;
 };
 
+//
+// ReportObject
+//
+
+class ReportObject
+{
+public:
+	ReportObject();	// New page constructor
+	virtual ~ReportObject();
+
+	bool isText() const;
+	bool isSchema() const;
+	bool isTable() const;
+	bool isNewPage() const;
+
+	virtual void render(ReportGenerator* reportGenerator, QTextCursor* textCursor) const = 0;
+};
+
+//
+// ReportBreak
+//
+
+class ReportBreak : public ReportObject
+{
+public:
+	ReportBreak();
+
+	void render(ReportGenerator* reportGenerator, QTextCursor* textCursor) const override;
+};
+//
+// ReportTable
+//
+
+class ReportTable : public ReportObject
+{
+public:
+	ReportTable();
+	ReportTable(const QStringList& headerLabels);
+
+	QStringList headerLabels() const;
+	void setHeaderLabels(const QStringList& headerLabels);
+
+	int columnCount() const;
+	int rowCount() const;
+
+	const QStringList& rowAt(int index) const;
+
+	void insertRow(const QStringList& row);
+
+	void render(ReportGenerator* reportGenerator, QTextCursor* textCursor) const override;
+
+private:
+
+	QStringList m_headerLabels;
+	std::vector<QStringList> m_rows;
+};
+
+//
+// ReportText
+//
+
+class ReportText : public ReportObject
+{
+public:
+	ReportText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
+
+	void render(ReportGenerator* reportGenerator, QTextCursor* textCursor) const override;
+
+private:
+	QString m_text;
+
+	// Format
+	//
+	QTextCharFormat m_charFormat;
+	QTextBlockFormat m_blockCharFormat;
+};
+
+//
+// ReportSchema
+//
+
+class ReportSchema : public ReportObject
+{
+public:
+	ReportSchema(std::shared_ptr<VFrame30::Schema> schema);
+
+	void render(ReportGenerator* reportGenerator, QTextCursor* textCursor) const override;
+
+private:
+	std::shared_ptr<VFrame30::Schema> m_schema;
+};
+
+//
+// ReportSection
+//
+
+class ReportSection
+{
+public:
+	ReportSection(ReportGenerator* reportGenerator, QTextCursor* textCursor);
+	virtual ~ReportSection();
+
+	bool isEmpty() const;
+
+	// Add object functions
+
+	void addText(const QString& text);
+	void addSchema(std::shared_ptr<VFrame30::Schema> schema);
+
+	void addTable(std::shared_ptr<ReportTable> table);
+	std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels);
+
+	void addNewPage();
+
+	// Formatting functions
+
+	void saveFormat();
+	void restoreFormat();
+
+	void setFont(const QFont& font);
+	void setTextForeground(const QBrush& brush);
+	void setTextBackground(const QBrush& brush);
+	void setTextAlignment(Qt::Alignment alignment);
+
+	// Render functions
+
+	void render() const;
+
+private:
+	std::vector<std::shared_ptr<ReportObject>> m_objects;
+
+	ReportGenerator* m_reportGenerator = nullptr;
+	QTextCursor* m_textCursor = nullptr;
+
+	QTextCharFormat m_currentCharFormat;
+	QTextBlockFormat m_currentBlockCharFormat;
+
+	QTextCharFormat m_currentCharFormatSaved;
+	QTextBlockFormat m_currentBlockCharFormatSaved;
+};
+
+//
+// ReportGenerator
+//
+
+class ReportGenerator : public QObject
+{
+public:
+	ReportGenerator(const QString& fileName, QWidget* parent);
+
+	QWidget* parentWidget() const;
+
+public:
+	void printSchema(std::shared_ptr<VFrame30::Schema> schema);
+	void newPage();
+	void flushDocument();
+	void clearDocument();
+
+protected:
+	QPdfWriter m_pdfWriter;
+	QPainter m_pdfPainter;
+	QTextDocument m_textDocument;
+	QTextCursor m_textCursor;
+
+private:
+	QWidget* m_parentWidget = nullptr;
+};
+
+//
+// FileDiff
+//
 
 class FileDiff
 {
@@ -39,6 +216,10 @@ public:
 	template<typename T> static void calculateLcs(const std::vector<T>& X, const std::vector<T>& Y, std::vector<T>* result);
 };
 
+//
+// PropertyDiff
+//
+
 struct PropertyDiff
 {
 	enum class Action
@@ -58,86 +239,11 @@ struct PropertyDiff
 	QString newValueText;
 };
 
-class DiffReportTable
-{
-public:
-	DiffReportTable();
+//
+// ProjectDiffGenerator
+//
 
-	QString caption() const;
-	void setCaption(const QString& caption);
-
-	QStringList headerLabels();
-	void setHeaderLabels(const QStringList& headerLabels);
-
-	int columnCount() const;
-	int rowCount() const;
-
-	const QStringList& rowAt(int index) const;
-
-	void insertRow(const QStringList& row);
-
-	void render(QTextCursor& textCursor) const;
-	void clear();
-
-private:
-	QString m_caption;
-
-	QStringList m_headerLabels;
-	std::vector<QStringList> m_rows;
-};
-
-class DiffReportObject
-{
-public:
-	DiffReportObject(const QString& text);
-	DiffReportObject(const DiffReportTable& table);
-
-	bool isText() const;
-	bool isTable() const;
-
-	void render(QTextCursor& textCursor) const;
-
-private:
-	enum class DiffDataObjectType
-	{
-		Text,
-		Table
-	};
-
-	DiffDataObjectType m_type = DiffDataObjectType::Text;
-
-	// Data
-	//
-	QString m_text;
-	DiffReportTable m_table;
-
-};
-
-class DiffReportObjectSet
-{
-public:
-	bool empty() const;
-
-	QString caption() const;
-	void setCaption(const QString& caption);
-
-	DiffReportTable& headerTable();
-
-	void addText(const QString& text);
-	void addTable(const DiffReportTable& table);
-
-	void render(QTextCursor& textCursor) const;
-	void clear();
-
-private:
-	QString m_caption;
-
-	DiffReportTable m_headerTable;
-
-	std::vector<DiffReportObject> m_objects;
-};
-
-class ProjectDiffGenerator : public QObject
+class ProjectDiffGenerator : public ReportGenerator
 {
 	Q_OBJECT
 public:
@@ -149,27 +255,36 @@ public:
 	virtual ~ProjectDiffGenerator();
 
 private:
-	void compareProject(CompareData compareData);
-	bool compareFile(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, DiffReportObjectSet& diffData);
-	bool compareFileContents(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, const QString& fileName, DiffReportObjectSet& diffData);
+	void compareProject(const CompareData& compareData);
+	bool compareFile(const DbFileTree& filesTree,
+					 const std::shared_ptr<DbFileInfo>& fi,
+					 const CompareData& compareData,
+					 ReportSection& diffDataSet,
+					 ReportTable* const headerTable);
+
+	bool compareFileContents(const std::shared_ptr<DbFile>& sourceFile,
+							 const std::shared_ptr<DbFile>& targetFile,
+							 const QString& fileName,
+							 ReportSection& diffDataSet,
+							 ReportTable* const headerTable);
 
 	std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
 												  const CompareVersionType versionType,
 												  const int compareChangeset,
 												  const QDateTime& compareDate) const;
 
-	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject> >* deviceObjectMap);
+	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap);
 
-	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData);
-	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData) const;
-	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData);
-	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, DiffReportObjectSet& diffData);
+	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
+	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
+	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
+	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
 
-	void compareSignal(const int signalID, const CompareData& compareData, DiffReportObjectSet& diffData);
-	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, DiffReportObjectSet& diffData);
+	void compareSignal(const int signalID, const CompareData& compareData, ReportSection& diffDataSet, ReportTable* const headerTable);
+	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportSection& diffDataSet, ReportTable* const headerTable);
 
-	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* result) const;
+	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const;
 
 	bool isHardwareFile(const QString& fileName) const;
 	bool isBusTypeFile(const QString& fileName) const;
@@ -177,33 +292,20 @@ private:
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 
-	bool writePdf(const QTextDocument& doc, const QString& fileName) const;
 	void generateTitlePage();
-
-	void printSchema(std::shared_ptr<VFrame30::Schema> schema);
-
-	void newPage();
-	void flushDocument();
-	void clearDocument();
 
 private:
 	DbController* m_db = nullptr;
-	QWidget* m_parent = nullptr;
+
+	QFont m_headerFont;
+	QFont m_normalFont;
 
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_sourceDeviceObjectMap;
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_targetDeviceObjectMap;
 
 	int m_filesTotal = 0;
 
-	QPdfWriter m_pdfWriter;
-	QPainter m_pdfPainter;
-	QTextDocument m_textDocument;
-	QTextCursor m_textCursor;
-
 	std::map<int, QString> m_filesTypesNamesMap;
-
-	bool m_openBlock = false;
-
 };
 
 #endif // PROJECTDIFFGENERATOR_H
