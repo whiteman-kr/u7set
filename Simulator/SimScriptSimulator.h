@@ -1,5 +1,4 @@
 #pragma once
-#include "SimOutput.h"
 #include <QQmlEngine>
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
@@ -17,7 +16,7 @@ namespace Sim
 	class LogicModule;
 
 
-	class ScriptWorkerThread : public QThread, protected Output
+	class ScriptWorkerThread : public QThread
 	{
 		Q_OBJECT
 
@@ -40,6 +39,7 @@ namespace Sim
 
 	private:
 		ScriptSimulator* m_scriptSimulator = nullptr;
+		ScopedLog m_log;
 
 		QString m_script;
 		QString m_testName;
@@ -57,7 +57,7 @@ namespace Sim
 		\ingroup simulator
 		\brief Represents class that runs all simulations on compiled project.
 	*/
-	class ScriptSimulator : public QObject, protected Output
+	class ScriptSimulator : public QObject
 	{
 		Q_OBJECT
 
@@ -143,6 +143,8 @@ namespace Sim
 		ScriptDevUtils devUtils();
 
 	public:
+		ScopedLog& log();
+
 		QString buildPath() const;
 
 		qint64 executionTimeOut() const;
@@ -159,6 +161,8 @@ namespace Sim
 		//
 	private:
 		Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
+
 		ScriptWorkerThread m_workerThread{this};
 
 		qint64 m_executionTimeOut = -1;		// Script execution timeout in milliseconds, negative means no timeout

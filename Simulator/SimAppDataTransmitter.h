@@ -2,20 +2,20 @@
 
 #include <queue>
 #include <QUdpSocket>
-
-#include "SimOutput.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/WUtils.h"
 #include "../lib/SimpleMutex.h"
+#include "../lib/ILogFile.h"
+#include "SimScopedLog.h"
 
 namespace Sim
 {
 	class Simulator;
 	class AppDataTransmitterThread;
 
-	class AppDataTransmitter : public QObject, protected Output
+	class AppDataTransmitter : public QObject
 	{
 		Q_OBJECT
 
@@ -40,10 +40,10 @@ namespace Sim
 
 	private:
 		Simulator* m_simulator;
+		mutable ScopedLog m_log;
 		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
 
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
-
 	};
 
 	//

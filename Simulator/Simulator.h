@@ -5,7 +5,7 @@
 #include <vector>
 #include "../lib/ModuleFirmware.h"
 #include "../lib/LmDescription.h"
-#include "SimOutput.h"
+#include "../lib/ILogFile.h"
 #include "SimSubsystem.h"
 #include "SimControl.h"
 #include "SimAppSignalManager.h"
@@ -14,6 +14,7 @@
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
 #include "SimAppDataTransmitter.h"
+#include "SimScopedLog.h"
 
 
 class QTextStream;
@@ -24,24 +25,30 @@ namespace Sim
 	class LogicModule;
 
 
-	class Simulator : public QObject, protected Output
+	class Simulator : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		explicit Simulator(QObject* parent = nullptr);
+		explicit Simulator(ILogFile* log, QObject* parent);		// if log is nullptr then log to console
 		virtual ~Simulator();
 
 	public:
 		bool load(QString buildPath);
 		void clear();
 
-		bool isRunning() const;
-		bool isPaused() const;
-		bool isStopped() const;
+		// Flow control
+		//
+		[[nodiscard]] bool isRunning() const;
+		[[nodiscard]] bool isPaused() const;
+		[[nodiscard]] bool isStopped() const;
 
-		bool runScript(QString script, QString testName);	// Starts script in separate thread and returns immediately
-		bool stopScript();									// Stops script if it is running
+		// Script Tests
+		//
+		//static bool runTestScript(QString buildPath, QString scriptName, QString script);
+
+		bool runScript(QString script, QString testName);		// Starts script in separate thread and returns immediately
+		bool stopScript();										// Stops script if it is running
 		bool waitScript(unsigned long msecs = ULONG_MAX);		// Wait script to stop
 		bool scriptResult();
 
@@ -57,10 +64,12 @@ namespace Sim
 		void projectUpdated();				// Project was loaded or cleared
 
 	public:
-		bool isLoaded() const;
-		QString buildPath() const;
+		[[nodiscard]] ScopedLog& log();
 
-		QString projectName() const;
+		[[nodiscard]] bool isLoaded() const;
+		[[nodiscard]] QString buildPath() const;
+
+		[[nodiscard]] QString projectName() const;
 
 		const Sim::Connections& connections() const;
 		Sim::Connections& connections();
@@ -81,10 +90,12 @@ namespace Sim
 		Sim::OverrideSignals& overrideSignals();
 		const Sim::OverrideSignals& overrideSignals() const;
 
-		Sim::Control& control();
-		const Sim::Control& control() const;
+		[[nodiscard]] Sim::Control& control();
+		[[nodiscard]] const Sim::Control& control() const;
 
 	private:
+		mutable ScopedLog m_log;
+
 		QString m_buildPath;
 		Hardware::ModuleFirmwareStorage m_firmwares;	// Loaded bts file
 

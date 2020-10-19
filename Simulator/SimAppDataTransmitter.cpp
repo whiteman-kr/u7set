@@ -8,8 +8,8 @@ namespace Sim
 {
 
 	AppDataTransmitter::AppDataTransmitter(Simulator* simulator) :
-		Output("AppDataTransmitter"),
-		m_simulator(simulator)
+		m_simulator(simulator),
+		m_log(m_simulator->log(), "AppDataTransmitter")
 	{
 		Q_ASSERT(m_simulator);
 

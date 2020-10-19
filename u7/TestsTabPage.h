@@ -5,6 +5,7 @@
 #include "IdePropertyEditor.h"
 #include "GlobalMessanger.h"
 #include "../lib/Ui/FilesTreeView.h"
+#include "../Simulator/Simulator.h"
 
 class TestsFileTreeModel : public FileTreeModel
 {
@@ -52,24 +53,25 @@ private:
 class TestsTabPage : public MainTabPage
 {
 	Q_OBJECT
+
 public:
 	explicit TestsTabPage(DbController* dbc, QWidget* parent);
 	virtual ~TestsTabPage();
 
+public:
 	bool hasUnsavedTests() const;
 	void saveUnsavedTests();
 	void resetModified();
 
 private slots:
-
 	// Project operations
-
+	//
 	void projectOpened();
 	void projectClosed();
 	void buildStarted();
 
 	// Tree controls operations
-
+	//
 	void testsTreeSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	void testsTreeModelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 	void testsTreeModelReset();
@@ -78,7 +80,7 @@ private slots:
 	void openFilesClicked(const QModelIndex &index);
 
 	// Tests file tree slots
-
+	//
 	void newFile();
 	void openFile();
 	void newFolder();
@@ -93,7 +95,7 @@ private slots:
 	void runSelectedTestFiles();
 
 	// Code Editor slots
-
+	//
 	void filterChanged();
 	void textChanged();
 	void cursorPositionChanged(int line, int index);
@@ -107,7 +109,7 @@ private slots:
 	void runTestCurrentFile();
 
 	// Open Files slots
-
+	//
 	void openFilesMenuRequested(const QPoint &pos);
 
 	void checkInOpenFile();
@@ -118,23 +120,23 @@ private slots:
 	void runTestOpenFile();
 
 	// Hotkeys
-
+	//
 	void onSaveKeyPressed();
 	void onCloseKeyPressed();
 	void onCtrlTabKeyPressed();
 
 	// Open documents combo operations
-
+	//
 	void openDocumentsComboTextChanged(int index);
 
 	// Other operations
-
+	//
 	void closeDocumentsForDeletedFiles();
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Build operations slots
-
+	//
 	void selectBuild();
 
 	void runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files);
@@ -188,7 +190,6 @@ private:
 
 	// Widgets
 	//
-
 	QToolBar* m_testsToolbar = nullptr;
 
 	FileTreeView* m_testsTreeView = nullptr;
@@ -217,7 +218,7 @@ private:
 	QSplitter* m_verticalSplitter = nullptr;
 
 	// Tests file tree actions
-
+	//
 	QAction* m_newFileAction = nullptr;
 	QAction* m_addFileAction = nullptr;
 	QAction* m_newFolderAction = nullptr;
@@ -237,7 +238,7 @@ private:
 	QAction* m_runSelectedTestsAction = nullptr;
 
 	// Editor context menu actions
-
+	//
 	QAction* m_checkInCurrentDocumentAction = nullptr;
 	QAction* m_checkOutCurrentDocumentAction = nullptr;
 	QAction* m_undoChangesCurrentDocumentAction = nullptr;
@@ -248,7 +249,7 @@ private:
 	QAction* m_closeCurrentDocumentAction = nullptr;
 
 	// Open documents list actions
-
+	//
 	QAction* m_checkInOpenDocumentAction = nullptr;
 	QAction* m_checkOutOpenDocumentAction = nullptr;
 	QAction* m_undoChangesOpenDocumentAction = nullptr;
@@ -257,8 +258,12 @@ private:
 	QAction* m_runTestOpenDocumentAction = nullptr;
 
 	// Build toolbar actions
-
+	//
 	QAction* m_selectBuildAction = nullptr;
+
+	// --
+	//
+	Sim::Simulator m_simulator{nullptr, nullptr};	// log to console, no parent
 };
 
 

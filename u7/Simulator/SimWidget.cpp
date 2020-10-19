@@ -19,14 +19,14 @@
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
-								 DbController* db,
-								 QWidget* parent /*= nullptr*/,
-								 Qt::WindowType windowType /*= Qt::Window*/,
-								 bool slaveWindow /*= false*/)
+					 DbController* db,
+					 QWidget* parent /*= nullptr*/,
+					 Qt::WindowType windowType /*= Qt::Window*/,
+					 bool slaveWindow /*= false*/)
 	: QMainWindow(parent),
 	  HasDbController(db),
 	  m_slaveWindow(slaveWindow),
-	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>()),
+	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(nullptr, nullptr)),
 	  m_schemaManager(m_simulator.get())
 {
 	// --
@@ -622,7 +622,7 @@ void SimWidget::runSimulation()
 	if (m_simulator->isLoaded() == false)
 	{
 		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
-		writeError("Cannot start simulation, project is not loaded.");
+		m_simulator->log().writeError("Cannot start simulation, project is not loaded.");
 		return;
 	}
 
@@ -660,7 +660,7 @@ void SimWidget::runSimulation()
 
 		if (equipmentIds.isEmpty() == true)
 		{
-			writeWaning(tr("Nothing to simulate, no LogicModules are found."));
+			m_simulator->log().writeWarning(tr("Nothing to simulate, no LogicModules are found."));
 			// Nothing to simulate
 			//
 			return;

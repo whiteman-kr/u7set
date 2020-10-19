@@ -6,8 +6,8 @@ namespace Sim
 
 	Control::Control(Simulator* simualtor, QObject* parent) :
 		QThread(parent),
-		Output("Controller"),
-		m_simulator(simualtor)
+		m_simulator(simualtor),
+		m_log(simualtor->log(), "Controller")
 	{
 		Q_ASSERT(m_simulator);
 
@@ -31,7 +31,7 @@ namespace Sim
 		if (bool ok = wait(10000);
 			ok == false)
 		{
-			writeError("Thread forced to terminate.");
+			m_log.writeError("Thread forced to terminate.");
 			setTerminationEnabled(true);
 			terminate();
 		}
@@ -39,7 +39,7 @@ namespace Sim
 
 	void Control::reset()
 	{
-		writeDebug(tr("Reset"));
+		m_log.writeDebug(tr("Reset"));
 
 		{
 			QWriteLocker wl(&m_controlDataLock);
@@ -66,18 +66,18 @@ namespace Sim
 
 			if (equipmentIds.isEmpty() == true)
 			{
-				writeWaning(tr("Nothing to simulate, no LogicModules are found."));
+				m_log.writeWarning(tr("Nothing to simulate, no LogicModules are found."));
 				return 0;
 			}
 		}
 
 		// --
 		//
-		writeDebug(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
+		m_log.writeDebug(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
 		if (state() == SimControlState::Run)
 		{
-			writeWaning(tr("Adding module to simulation while simulation running will not take effect till simulation is restarted."));
+			m_log.writeWarning(tr("Adding module to simulation while simulation running will not take effect till simulation is restarted."));
 		}
 
 		int addedModuleCount = 0;
@@ -89,7 +89,7 @@ namespace Sim
 			std::shared_ptr<LogicModule> lm = m_simulator->logicModule(id);
 			if (lm == nullptr)
 			{
-				writeError(QString("Module %1 not found or it does not have simultion ability.").arg(id));
+				m_log.writeError(QString("Module %1 not found or it does not have simultion ability.").arg(id));
 				continue;
 			}
 
@@ -156,7 +156,7 @@ namespace Sim
 
 	void Control::removeFromRunList(const QStringList& equipmentIds)
 	{
-		writeDebug(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
+		m_log.writeDebug(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
 		QWriteLocker wl(&m_controlDataLock);
 
@@ -176,7 +176,7 @@ namespace Sim
 	{
 		using namespace std::chrono;
 
-		writeDebug(tr("Start"));
+		m_log.writeDebug(tr("Start"));
 
 		QWriteLocker wl(&m_controlDataLock);
 
@@ -184,7 +184,7 @@ namespace Sim
 		{
 			// Nothing to run
 			//
-			writeWaning(tr("No selected modules to simulate."));
+			m_log.writeWarning(tr("No selected modules to simulate."));
 
 			m_controlData.m_state = SimControlState::Stop;
 
@@ -270,7 +270,7 @@ namespace Sim
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);
 
-		writeDebug(tr("Pause, left time %1, us").arg(leftTime.count()));
+		m_log.writeDebug(tr("Pause, left time %1, us").arg(leftTime.count()));
 		return;
 	}
 
@@ -292,7 +292,7 @@ namespace Sim
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);
 
-		writeDebug(tr("Stop, left cycle %1").arg(leftTime.count()));
+		m_log.writeDebug(tr("Stop, left cycle %1").arg(leftTime.count()));
 		return;
 	}
 
@@ -418,7 +418,7 @@ namespace Sim
 		if (lms.empty() == true)
 		{
 			assert(lms.empty() == false);
-			writeError(tr("processRun, No LogicModules to simulate."));
+			m_log.writeError(tr("processRun, No LogicModules to simulate."));
 			return false;
 		}
 
@@ -431,7 +431,7 @@ namespace Sim
 			if (simLm == nullptr)
 			{
 				Q_ASSERT(simLm);
-				writeError(tr("processRun, LogicModule %1 not found").arg(lm.equipmentId()));
+				m_log.writeError(tr("processRun, LogicModule %1 not found").arg(lm.equipmentId()));
 				result = false;
 				continue;
 			}
@@ -680,7 +680,7 @@ namespace Sim
 								.arg(perfRation);
 
 		//qDebug() << logMessage;
-		writeDebug(logMessage);
+		m_log.writeDebug(logMessage);
 
 		return result;
 	}

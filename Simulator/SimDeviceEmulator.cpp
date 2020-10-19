@@ -77,8 +77,8 @@ namespace Sim
 	//
 	// DeviceEmulator
 	//
-	DeviceEmulator::DeviceEmulator() :
-		Output("DeviceEmulator")
+	DeviceEmulator::DeviceEmulator(ScopedLog log) :
+		m_log(log, "DeviceEmulator")
 	{
 		m_offsetToCommand.reserve(32000);
 		return;
@@ -86,7 +86,7 @@ namespace Sim
 
 	DeviceEmulator::~DeviceEmulator()
 	{
-		writeDebug("~DeviceEmulator");
+		m_log.writeDebug("~DeviceEmulator");
 		return;
 	}
 
@@ -128,8 +128,8 @@ namespace Sim
 	{
 		clear();
 
-		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
-		writeDebug(tr("Init device."));
+		m_log.setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
+		m_log.writeDebug(tr("Init device."));
 
 		// --
 		//
@@ -147,9 +147,9 @@ namespace Sim
 
 		if (m_commandProcessor == nullptr)
 		{
-			writeWaning(QString("There is no simulation for %1, LmDescription.name = %2")
-							.arg(logicModuleInfo.equipmentId)
-							.arg(lmDescription.name()));
+			m_log.writeWarning(QString("There is no simulation for %1, LmDescription.name = %2")
+							   .arg(logicModuleInfo.equipmentId)
+							   .arg(lmDescription.name()));
 			return DeviceError::NoCommandProcessor;
 		}
 
@@ -191,14 +191,14 @@ namespace Sim
 
 	bool DeviceEmulator::powerOff()
 	{
-		writeDebug(tr("Off"));
+		m_log.writeDebug(tr("Off"));
 		setCurrentMode(DeviceMode::Off);
 		return true;
 	}
 
 	bool DeviceEmulator::reset()
 	{
-		writeDebug(tr("Reset"));
+		m_log.writeDebug(tr("Reset"));
 		setCurrentMode(DeviceMode::Start);
 		return true;
 	}
@@ -271,11 +271,11 @@ namespace Sim
 
 			if (regDataSizeW > m_lmDescription.memory().m_appLogicWordDataSize)
 			{
-				writeError(tr("Send reg data error, buffer size is too big. LM %1, OffsetW %2, SizeW %3, AppLogicWordDataSize %4.")
-						   .arg(equipmentId())
-						   .arg(regDataOffsetW)
-						   .arg(regDataSizeW)
-						   .arg(m_lmDescription.memory().m_appLogicWordDataSize));
+				m_log.writeError(tr("Send reg data error, buffer size is too big. LM %1, OffsetW %2, SizeW %3, AppLogicWordDataSize %4.")
+								 .arg(equipmentId())
+								 .arg(regDataOffsetW)
+								 .arg(regDataSizeW)
+								 .arg(m_lmDescription.memory().m_appLogicWordDataSize));
 
 				setCurrentMode(DeviceMode::Fault);
 				return false;
@@ -284,10 +284,10 @@ namespace Sim
 			bool readRegBufferOk = m_ram.readToBuffer(regDataOffsetW, E::LogicModuleRamAccess::Write, regDataSizeW, &regData, true);
 			if (readRegBufferOk == false)
 			{
-				writeError(tr("Error reading regBuffer for LM %1, OffsetW %2, SizeW %3.")
-						   .arg(equipmentId())
-						   .arg(regDataOffsetW)
-						   .arg(regDataSizeW));
+				m_log.writeError(tr("Error reading regBuffer for LM %1, OffsetW %2, SizeW %3.")
+								 .arg(equipmentId())
+								 .arg(regDataOffsetW)
+								 .arg(regDataSizeW));
 
 				setCurrentMode(DeviceMode::Fault);
 				return false;
@@ -944,7 +944,7 @@ namespace Sim
 
 	bool DeviceEmulator::initEeprom()
 	{
-		writeDebug(tr("Init EEPROM"));
+		m_log.writeDebug(tr("Init EEPROM"));
 
 		bool result = true;
 		bool ok = true;
@@ -952,21 +952,21 @@ namespace Sim
 		ok = m_tuningEeprom.parseAllocationFrame(m_lmDescription.flashMemory().m_maxConfigurationCount);
 		if (ok == false)
 		{
-			writeError(tr("Parse tuning EEPROM allocation frame error."));
+			m_log.writeError(tr("Parse tuning EEPROM allocation frame error."));
 			result = false;
 		}
 
 		ok = m_confEeprom.parseAllocationFrame(m_lmDescription.flashMemory().m_maxConfigurationCount);
 		if (ok == false)
 		{
-			writeError(tr("Parse configuration EEPROM allocation frame error."));
+			m_log.writeError(tr("Parse configuration EEPROM allocation frame error."));
 			result = false;
 		}
 
 		ok = m_appLogicEeprom.parseAllocationFrame(m_lmDescription.flashMemory().m_maxConfigurationCount);
 		if (ok == false)
 		{
-			writeError(tr("Parse application logic EEPROM allocation frame error."));
+			m_log.writeError(tr("Parse application logic EEPROM allocation frame error."));
 			result = false;
 		}
 
@@ -980,7 +980,7 @@ namespace Sim
 							.arg(m_tuningEeprom.subsystemKey())
 							.arg(m_confEeprom.subsystemKey())
 							.arg(m_appLogicEeprom.subsystemKey());
-			writeError(str);
+			m_log.writeError(str);
 			result = false;
 		}
 
@@ -994,7 +994,7 @@ namespace Sim
 							.arg(m_tuningEeprom.buildNo())
 							.arg(m_confEeprom.buildNo())
 							.arg(m_appLogicEeprom.buildNo());
-			writeError(str);
+			m_log.writeError(str);
 			result = false;
 		}
 
@@ -1008,7 +1008,7 @@ namespace Sim
 							.arg(m_tuningEeprom.configrationsCount())
 							.arg(m_confEeprom.configrationsCount())
 							.arg(m_appLogicEeprom.configrationsCount());
-			writeError(str);
+			m_log.writeError(str);
 			result = false;
 		}
 
@@ -1026,7 +1026,7 @@ namespace Sim
 			int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
 			if (startFrame == 0)
 			{
-				writeError(QString("Can't get start frame for logic number %1 in m_appLogicEeprom").arg(m_logicModuleInfo.lmNumber));
+				m_log.writeError(QString("Can't get start frame for logic number %1 in m_appLogicEeprom").arg(m_logicModuleInfo.lmNumber));
 				return false;
 			}
 
@@ -1053,7 +1053,7 @@ namespace Sim
 			int tuningStartFrame = m_tuningEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
 			if (tuningStartFrame == 0)
 			{
-				writeError(QString("Can't get start frame for logic number %1 in m_tuningEeprom").arg(m_logicModuleInfo.lmNumber));
+				m_log.writeError(QString("Can't get start frame for logic number %1 in m_tuningEeprom").arg(m_logicModuleInfo.lmNumber));
 				return false;
 			}
 
@@ -1132,7 +1132,7 @@ namespace Sim
 						QString str = tr("Parse command %1 error, ProgramCounter %2, returned command size is 0.\n")
 											.arg(c.caption)
 											.arg(programCounter);
-						writeError(str);
+						m_log.writeError(str);
 						return false;
 					}
 
@@ -1146,8 +1146,8 @@ namespace Sim
 			if (commandFound == false)
 			{
 				QString str = tr("Parse command error, command cannot be found for word 0x%1\n")
-									.arg(commandWord, 4, 16, QChar('0'));
-				writeError(str);
+							  .arg(commandWord, 4, 16, QChar('0'));
+				m_log.writeError(str);
 				return false;
 			}
 
@@ -1211,12 +1211,12 @@ namespace Sim
 		}
 		catch (SimException& e)
 		{
-			writeError(QString("Command parsing error: %1, %2. ProgrammCounter = %3 (0x%4), ParseFunction = %5")
-						.arg(e.message())
-						.arg(e.where())
-						.arg(programCounter)
-						.arg(programCounter, 0, 16, QChar('0'))
-						.arg(deviceCommand.m_command.parseFunc));
+			m_log.writeError(QString("Command parsing error: %1, %2. ProgrammCounter = %3 (0x%4), ParseFunction = %5")
+							 .arg(e.message())
+							 .arg(e.where())
+							 .arg(programCounter)
+							 .arg(programCounter, 0, 16, QChar('0'))
+							 .arg(deviceCommand.m_command.parseFunc));
 			return false;
 		}
 
@@ -1354,9 +1354,9 @@ namespace Sim
 		QString str3 = QString("\tReasone: %1")
 						.arg(reasone);
 
-		writeError(str1);
-		writeError(str2);
-		writeError(str3);
+		m_log.writeError(str1);
+		m_log.writeError(str2);
+		m_log.writeError(str3);
 
 		setCurrentMode(DeviceMode::Fault);
 
@@ -1372,12 +1372,12 @@ namespace Sim
 	bool DeviceEmulator::processStartMode()
 	{
 		Q_ASSERT(m_currentMode == DeviceMode::Start);
-		writeDebug(tr("Start mode"));
+		m_log.writeDebug(tr("Start mode"));
 
 		bool ok = initMemory();
 		if (ok == false)
 		{
-			writeError(tr("Init memory error."));
+			m_log.writeError(tr("Init memory error."));
 			setCurrentMode(DeviceMode::Fault);
 			return false;
 		}
@@ -1411,18 +1411,18 @@ namespace Sim
 		}
 		catch (SimException& e)
 		{
-			writeError(QString("Command run error: %1, %2. Offset = %3 (%4), SimFunction = %5")
-						.arg(e.message())
-						.arg(e.where())
-						.arg(deviceCommand.m_offset)
-						.arg(deviceCommand.m_offset, 0, 16)
-						.arg(deviceCommand.m_command.simulationFunc));
+			m_log.writeError(QString("Command run error: %1, %2. Offset = %3 (%4), SimFunction = %5")
+							 .arg(e.message())
+							 .arg(e.where())
+							 .arg(deviceCommand.m_offset)
+							 .arg(deviceCommand.m_offset, 0, 16)
+							 .arg(deviceCommand.m_command.simulationFunc));
 			return false;
 		}
 		catch (...)
 		{
-			writeError(QString("Call function %1 unknown exception")
-					   .arg(deviceCommand.m_command.simulationFunc));
+			m_log.writeError(QString("Call function %1 unknown exception")
+							 .arg(deviceCommand.m_command.simulationFunc));
 			return false;
 		}
 
@@ -1677,6 +1677,11 @@ namespace Sim
 
 		TYPE result = qFromBigEndian<TYPE>(m_plainAppLogic.constData() + eepromOffset);
 		return result;
+	}
+
+	ScopedLog& DeviceEmulator::log()
+	{
+		return m_log;
 	}
 
 	const QString& DeviceEmulator::equipmentId() const

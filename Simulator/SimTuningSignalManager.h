@@ -5,19 +5,21 @@
 #include <QMutex>
 
 #include "../lib/Tuning/TuningSignalManager.h"
-#include "SimOutput.h"
+#include "SimScopedLog.h"
 
 namespace Sim
 {
 
-	class TuningSignalManager : public ::TuningSignalManager, protected Output
+	class TuningSignalManager : public ::TuningSignalManager
 	{
 		Q_OBJECT
 
 	public:
-		explicit TuningSignalManager(QObject* parent = nullptr);
+		explicit TuningSignalManager(ScopedLog log, QObject* parent = nullptr);
 		virtual ~TuningSignalManager();
 
+	private:
+		ScopedLog m_log;
 	};
 
 }

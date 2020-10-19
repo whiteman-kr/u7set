@@ -4,8 +4,9 @@
 namespace Sim
 {
 
-	LogicModule::LogicModule() :
-		Output("LogicModule")
+	LogicModule::LogicModule(ScopedLog log) :
+		m_log(log, "LogicModule"),
+		m_device(log)
 	{
 	}
 
@@ -19,7 +20,7 @@ namespace Sim
 						   const Hardware::ModuleFirmware& firmware,
 						   const Connections& connections)
 	{
-		setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
+		m_log.setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
 
 		clear();
 
@@ -69,7 +70,7 @@ namespace Sim
 
 	void LogicModule::clear()
 	{
-		writeDebug(QObject::tr("Clear"));
+		m_log.writeDebug("Clear");
 
 		m_lmDescription.clear();
 
@@ -110,14 +111,14 @@ namespace Sim
 		const Hardware::ModuleFirmwareData& data = firmware.firmwareData(uartId, &ok);
 		if (ok == false)
 		{
-			writeError(QObject::tr("Loading eeprom data error, UartID = %1").arg(uartId));
+			m_log.writeError(tr("Loading eeprom data error, UartID = %1").arg(uartId));
 			return false;
 		}
 
 		ok = eeprom->init(data);
 		if (ok == false)
 		{
-			writeError(QObject::tr("LogicModule: Loading EEPROM error"));
+			m_log.writeError(tr("LogicModule: Loading EEPROM error"));
 			return false;
 		}
 

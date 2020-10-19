@@ -5,7 +5,6 @@
 #include <QByteArray>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
-#include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimDeviceEmulator.h"
 #include "SimTimeController.h"
@@ -20,12 +19,12 @@ namespace Sim
 	class Connections;
 
 
-	class LogicModule : public QObject, protected Output
+	class LogicModule : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		LogicModule();
+		LogicModule(ScopedLog log);
 		virtual ~LogicModule();
 
 	public:
@@ -83,6 +82,8 @@ namespace Sim
 		void setPowerOff(bool value);
 
 	private:
+		mutable ScopedLog m_log;
+
 		// Loaded LM data
 		//
 		Hardware::LogicModuleInfo m_logicModuleInfo;

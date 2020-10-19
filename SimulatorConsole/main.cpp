@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	Sim::Simulator simulator;
+	Sim::Simulator simulator{nullptr, nullptr};		// Log to console
 	QString buildPath = args[1];
 
 	if (bool ok = simulator.load(buildPath);

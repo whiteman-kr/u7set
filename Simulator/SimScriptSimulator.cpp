@@ -5,8 +5,9 @@
 namespace Sim
 {
 	ScriptWorkerThread::ScriptWorkerThread(ScriptSimulator* scriptSimulator) :
-		QThread(),
-		m_scriptSimulator{scriptSimulator}
+		QThread{},
+		m_scriptSimulator{scriptSimulator},
+		m_log{m_scriptSimulator->log()}
 	{
 		assert(m_scriptSimulator);
 
@@ -23,12 +24,12 @@ namespace Sim
 
 		if (m_scriptSimulator == nullptr)
 		{
-			writeError(tr("Internal error: m_scriptSimulator == nullptr"));
+			m_log.writeError(tr("Internal error: m_scriptSimulator == nullptr"));
 			m_result = false;
 			return;
 		}
 
-		writeMessage(tr("********** Start testing of %1 **********").arg(m_testName));
+		m_log.writeMessage(tr("********** Start testing of %1 **********").arg(m_testName));
 
         m_jsThis = m_jsEngine.newQObject(m_scriptSimulator);
         QQmlEngine::setObjectOwnership(m_scriptSimulator, QQmlEngine::CppOwnership);
@@ -39,14 +40,14 @@ namespace Sim
 
 		if (scriptValue.isError() == true)
 		{
-			writeError(tr("Script evaluate error at line %1\n"
-						 "\tClass: %2\n"
-						 "\tStack: %3\n"
-						 "\tMessage: %4")
-					  .arg(scriptValue.property("lineNumber").toInt())
-					  .arg(metaObject()->className())
-					  .arg(scriptValue.property("stack").toString())
-					  .arg(scriptValue.toString()));
+			m_log.writeError(tr("Script evaluate error at line %1\n"
+								"\tClass: %2\n"
+								"\tStack: %3\n"
+								"\tMessage: %4")
+							 .arg(scriptValue.property("lineNumber").toInt())
+							 .arg(metaObject()->className())
+							 .arg(scriptValue.property("stack").toString())
+							 .arg(scriptValue.toString()));
 
 			m_result = false;
 			return;
@@ -96,12 +97,12 @@ namespace Sim
 			if (bool testOk = runScriptFunction(testFunc);
 				testOk == true)
 			{
-				writeMessage(testFunc + ": ok");
+				m_log.writeMessage(testFunc + ": ok");
 			}
 			else
 			{
 				failed ++;
-				writeError(testFunc + ": FAILED");
+				m_log.writeError(testFunc + ": FAILED");
 			}
 
 			// cleanup() - called after every test function.
@@ -117,14 +118,14 @@ namespace Sim
 
 		if (failed != 0)
 		{
-			writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
+			m_log.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
 		}
 		else
 		{
-			writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
+			m_log.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
 		}
 
-		writeMessage(tr("********** Finished testing of %1 **********").arg(m_testName));
+		m_log.writeMessage(tr("********** Finished testing of %1 **********").arg(m_testName));
 
 		m_result = (failed == 0);
 		return;
@@ -140,7 +141,7 @@ namespace Sim
 
         if (funcProp.isCallable() == false)
         {
-            writeError(tr("%1 is callable function").arg(functionName));
+			m_log.writeError(tr("%1 is callable function").arg(functionName));
             return false;
         }
 
@@ -158,18 +159,18 @@ namespace Sim
 			{
 				// Assume that JS code must report about the error
 				//
-				writeError(tr("Error, stack trace: %1\n\tMessage: %2")
-						   .arg(result.property("stack").toString())
-						   .arg(result.toString()));
+				m_log.writeError(tr("Error, stack trace: %1\n\tMessage: %2")
+								 .arg(result.property("stack").toString())
+								 .arg(result.toString()));
 			}
 			else
 			{
-				writeError(tr("Error at line %1\n"
-							 "\tStack: %2\n"
-							 "\tMessage: %3")
-						  .arg(result.property("lineNumber").toInt())
-						  .arg(result.property("stack").toString())
-						  .arg(result.toString()));
+				m_log.writeError(tr("Error at line %1\n"
+									"\tStack: %2\n"
+									"\tMessage: %3")
+								 .arg(result.property("lineNumber").toInt())
+								 .arg(result.property("stack").toString())
+								 .arg(result.toString()));
 			}
 
             return false;
@@ -214,8 +215,8 @@ namespace Sim
 
 	ScriptSimulator::ScriptSimulator(Simulator* simulator, QObject* parent) :
 		QObject(parent),
-		Output(),
-		m_simulator(simulator)
+		m_simulator(simulator),
+		m_log(simulator->log())
 	{
 		assert(m_simulator);
 	}
@@ -234,7 +235,7 @@ namespace Sim
 
 		if (m_simulator->isLoaded() == false)
 		{
-			writeError(tr("Script start error: project is not loaded."));
+			m_log.writeError(tr("Script start error: project is not loaded."));
 			return false;
 		}
 
@@ -242,11 +243,11 @@ namespace Sim
 		{
 			// It is not an error, just warn user about empty script and return true
 			//
-			writeWaning(tr("Script is empty."));
+			m_log.writeWarning(tr("Script is empty."));
 			return true;
 		}
 
-		writeDebug(tr("Start script"));
+		m_log.writeDebug(tr("Start script"));
 
 		m_workerThread.setScript(script);
 		m_workerThread.setTestName(testName);
@@ -281,7 +282,7 @@ namespace Sim
 	{
 		if (isRunning() == true)
 		{
-			writeError("Cannot get script result, script is still running.");
+			m_log.writeError("Cannot get script result, script is still running.");
 			return false;
 		}
 
@@ -324,7 +325,7 @@ namespace Sim
 
 		if (m_simulator->isRunning() == true)
 		{
-			writeWaning(tr("Simulation already running"));
+			m_log.writeWarning(tr("Simulation already running"));
 			return false;
 		}
 
@@ -527,6 +528,11 @@ namespace Sim
 	ScriptDevUtils ScriptSimulator::devUtils()
 	{
 		return ScriptDevUtils{m_simulator};
+	}
+
+	ScopedLog& ScriptSimulator::log()
+	{
+		return m_log;
 	}
 
 	QString ScriptSimulator::buildPath() const

@@ -1,9 +1,8 @@
 #include "TestsTabPage.h"
 #include "GlobalMessanger.h"
-#include "../lib/DbController.h"
 #include "Forms/ComparePropertyObjectDialog.h"
-
 #include "Simulator/SimSelectBuildDialog.h"
+
 
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>
@@ -183,17 +182,17 @@ void TestsTabPage::projectOpened()
 
 void TestsTabPage::projectClosed()
 {
+	m_simulator.clear();
+
 	m_buildPath.clear();
 	m_buildLabel->setText(tr("Build: Not loaded"));
 
 	closeAllDocuments();
-
 	hideEditor();
 
 	m_openFilesTreeWidget->clear();
 
 	this->setEnabled(false);
-
 	return;
 }
 
@@ -1815,17 +1814,35 @@ void TestsTabPage::selectBuild()
 
 void TestsTabPage::runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files)
 {
-	int run_sim_tests_here = 1;
-
-	QStringList list;
-
-	for (const DbFile& file : files)
+	if (files.empty() == true)
 	{
-		list.push_back(tr("RunSimTests %1 %2").arg(buildPath).arg(file.fileName()));
+		return;
 	}
 
-	QString allText = list.join(QChar::LineFeed);
-	QMessageBox::information(parentWidget(), qAppName(), allText);
+	std::vector<std::shared_ptr<DbFile>> latestFiles;
+	bool ok = db()->getLatestVersion(files, &latestFiles, this);
+
+	// --
+	//
+	ok = m_simulator.load(buildPath);
+	if (ok == false)
+	{
+		return;
+	}
+
+	m_simulator.control().setRunList({});
+
+	for (const std::shared_ptr<DbFile>& file : latestFiles)
+	{
+		ok = m_simulator.runScript(file->data(), file->fileName());
+
+		if (ok == false)
+		{
+			break;
+		}
+	}
+
+	return;
 }
 
 void TestsTabPage::createUi()
