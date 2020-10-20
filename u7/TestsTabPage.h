@@ -46,6 +46,38 @@ private:
 	QTreeWidgetItem* m_openFilesTreeWidgetItem = nullptr;
 };
 
+class TestsWidget;
+
+//
+// TestsLogWidget
+//
+
+class TestsLogWidget : public ILogFile, public QTextEdit
+{
+public:
+	explicit TestsLogWidget(QWidget* parent);
+
+private:
+	virtual void timerEvent(QTimerEvent* event) override;
+	virtual void contextMenuEvent(QContextMenuEvent* event) override;
+	virtual void keyPressEvent(QKeyEvent*) override;
+
+	void write(QtMsgType type, const QString& msg);
+
+private:
+	// ILogFile implementation
+	//
+	bool writeAlert(const QString& text) override;
+	bool writeError(const QString& text)  override;
+	bool writeWarning(const QString& text) override;
+	bool writeMessage(const QString& text)  override;
+	bool writeText(const QString& text)  override;
+
+private:
+	QMutex m_mutex;
+	QStringList m_data;
+};
+
 //
 // TestsTabPage
 //
@@ -57,6 +89,34 @@ class TestsTabPage : public MainTabPage
 public:
 	explicit TestsTabPage(DbController* dbc, QWidget* parent);
 	virtual ~TestsTabPage();
+
+public:
+	bool hasUnsavedTests() const;
+	void saveUnsavedTests();
+	void resetModified();
+
+public slots:
+	void projectOpened();
+	void projectClosed();
+
+private:
+	TestsWidget* m_testsWidget = nullptr;
+};
+
+//
+// TestsWidget
+//
+
+class TestsWidget : public QMainWindow, HasDbController
+{
+	Q_OBJECT
+
+public:
+	TestsWidget(
+			DbController* db,
+			QWidget* parent);
+	virtual ~TestsWidget();
+
 
 public:
 	bool hasUnsavedTests() const;
@@ -107,6 +167,7 @@ private slots:
 	void saveCurrentFile();
 	void closeCurrentFile();
 	void runTestCurrentFile();
+	void stopTests();
 
 	// Open Files slots
 	//
@@ -140,9 +201,15 @@ private slots:
 	void selectBuild();
 
 	void runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files);
+	void stopSimTests();
+
+	void simStateChanged(Sim::SimControlState state);
 
 private:
-	void createUi();
+	void createToolbar();
+	void createTestsDock();
+	void createLogDock();
+	void createEditorWidget();
 	void createActions();
 
 	void setTestsTreeActionsState();
@@ -202,12 +269,8 @@ private:
 
 	QTreeWidget* m_openFilesTreeWidget = nullptr;
 
-	QVBoxLayout* m_rightLayout = nullptr;
-
 	QVBoxLayout* m_editorLayout = nullptr;
-
 	QToolBar* m_editorToolBar = nullptr;
-	//QLabel* m_editorEmptyLabel = nullptr;
 
 	QComboBox* m_openDocumentsCombo = nullptr;
 	QPushButton* m_cursorPosButton = nullptr;
@@ -215,7 +278,11 @@ private:
 	QLabel* m_buildLabel = nullptr;
 
 	QSplitter* m_leftSplitter = nullptr;
-	QSplitter* m_verticalSplitter = nullptr;
+
+	QDockWidget* m_testsDockWidget = nullptr;
+	QDockWidget* m_outputDockWidget = nullptr;
+
+	TestsLogWidget m_testsLogWidget;
 
 	// Tests file tree actions
 	//
@@ -233,6 +300,7 @@ private:
 	QAction* m_compareAction = nullptr;
 	QAction* m_runAllTestsAction = nullptr;
 	QAction* m_runCurrentTestsAction = nullptr;
+	QAction* m_stopTestsAction = nullptr;
 	QAction* m_refreshAction = nullptr;
 
 	QAction* m_runSelectedTestsAction = nullptr;
@@ -263,7 +331,7 @@ private:
 
 	// --
 	//
-	Sim::Simulator m_simulator{nullptr, nullptr};	// log to console, no parent
+	Sim::Simulator m_simulator{&m_testsLogWidget, nullptr};	// log to console, no parent
 };
 
 

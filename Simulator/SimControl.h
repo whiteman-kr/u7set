@@ -179,6 +179,7 @@ namespace Sim
 
 }
 
+Q_DECLARE_METATYPE(Sim::SimControlState);
 Q_DECLARE_METATYPE(Sim::ControlStatus);
 
 

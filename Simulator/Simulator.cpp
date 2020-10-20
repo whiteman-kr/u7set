@@ -26,6 +26,7 @@ namespace Sim
 	{
 		qRegisterMetaType<AppSignalParam>("AppSignalParam");
 
+		qRegisterMetaType<Sim::SimControlState>("SimControlState");
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
 		qRegisterMetaType<Sim::DeviceMode>("DeviceMode");

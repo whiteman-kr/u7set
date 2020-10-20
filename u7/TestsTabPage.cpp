@@ -79,32 +79,316 @@ QTreeWidgetItem* TestTabPageDocument::openFilesTreeWidgetItem() const
 }
 
 //
+// TestsLogWidget
+//
+
+TestsLogWidget::TestsLogWidget(QWidget* parent):
+	QTextEdit(parent)
+{
+	// Output windows
+	//
+	setReadOnly(true);
+	setLineWrapMode(QTextEdit::NoWrap);
+	setAutoFormatting(QTextEdit::AutoNone);
+	document()->setUndoRedoEnabled(false);
+
+	startTimer(25, Qt::PreciseTimer);
+
+	return;
+
+}
+
+void TestsLogWidget::write(QtMsgType type, const QString& msg)
+{
+	QString color;
+	switch (type)
+	{
+	case QtMsgType::QtDebugMsg:
+		color = "black";
+		break;
+	case QtMsgType::QtWarningMsg:
+		color = "#F87217";
+		break;
+	case QtMsgType::QtCriticalMsg:
+		color = "#D00000";
+		break;
+	case QtMsgType::QtFatalMsg:
+		color = "#D00000";
+		break;
+	case QtMsgType::QtInfoMsg:
+		color = "black";
+		break;
+	}
+
+	QString time = QTime::currentTime().toString(QLatin1String("hh:mm:ss.zzz"));
+
+	QString html = QString("<font face=\"Courier\" size=\"4\" color=#808080>%1 </font>"
+						   "<font face=\"Courier\" size=\"4\" color=%2>%3</font>")
+				   .arg(time)
+				   .arg(color)
+				   .arg(msg);
+
+	QMutexLocker l(&m_mutex);
+	m_data.push_back(html);
+
+	if (m_data.size() > 1000)
+	{
+		m_data.pop_front();
+	}
+
+	return;
+}
+
+void TestsLogWidget::timerEvent(QTimerEvent* /*event*/)
+{
+	QStringList data;
+	{
+		QMutexLocker l(&m_mutex);
+		m_data.swap(data);
+	}
+
+	QString outputMessagesBuffer;
+	outputMessagesBuffer.reserve(128000);
+
+	for (int i = 0; i < data.size(); i++)
+	{
+		const QString& str = data[i];
+		outputMessagesBuffer.append(str);
+
+		if (i != data.size() - 1)
+		{
+			outputMessagesBuffer += QLatin1String("<br>");
+		}
+	}
+
+	if (outputMessagesBuffer.isEmpty() == false)
+	{
+		this->append(outputMessagesBuffer);
+	}
+}
+
+void TestsLogWidget::contextMenuEvent(QContextMenuEvent* event)
+{
+	QMenu* menu = createStandardContextMenu();
+	menu->addSeparator();
+
+	QAction* clearAction = menu->addAction(tr("Clear"));
+
+	QAction* selectedAction = menu->exec(event->globalPos());
+
+	if (selectedAction == clearAction)
+	{
+		this->clear();
+	}
+
+	delete menu;
+	return;
+}
+
+void TestsLogWidget::keyPressEvent(QKeyEvent* e)
+{
+	if (e->matches(QKeySequence::Delete) == true)
+	{
+		QTextCursor cursor = this->textCursor();
+		cursor.removeSelectedText();
+		this->setTextCursor(cursor);
+
+		e->accept();
+		return;
+	}
+
+	if (e->matches(QKeySequence::SelectAll) == true)
+	{
+		this->selectAll();
+
+		e->accept();
+		return;
+	}
+
+	if (e->matches(QKeySequence::Cut) == true)
+	{
+		this->copy();		// this->cut() does not work
+
+		QTextCursor cursor = this->textCursor();
+		cursor.removeSelectedText();
+		this->setTextCursor(cursor);
+
+		e->accept();
+		return;
+	}
+
+	QTextEdit::keyPressEvent(e);
+	return;
+}
+
+bool TestsLogWidget::writeAlert(const QString& text)
+{
+	write(QtMsgType::QtFatalMsg, text);
+	return true;
+}
+
+bool TestsLogWidget::writeError(const QString& text)
+{
+	write(QtMsgType::QtCriticalMsg, text);
+	return true;
+}
+
+bool TestsLogWidget::writeWarning(const QString& text)
+{
+	write(QtMsgType::QtWarningMsg, text);
+	return true;
+}
+
+bool TestsLogWidget::writeMessage(const QString& text)
+{
+	write(QtMsgType::QtInfoMsg, text);
+	return true;
+}
+
+bool TestsLogWidget::writeText(const QString& text)
+{
+	write(QtMsgType::QtDebugMsg, text);
+	return true;
+}
+
+	//
 // TestsTabPage
 //
 
 TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
-	MainTabPage(dbc, parent)
+	MainTabPage(dbc, parent)//,
 {
+	assert(dbc != nullptr);
+
+	// Controls
+	//
+	m_testsWidget = new TestsWidget(dbc, this);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+	setLayout(layout);
+
+	layout->setContentsMargins(0, 6, 0, 0);
+	layout->addWidget(m_testsWidget);
+
+	// --
+	//
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &TestsTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &TestsTabPage::projectClosed);
+
+	// Evidently, project is not opened yet
+	//
+
+	//int do_not_forget_to_uncommnet_the_next_line;
+	this->setEnabled(false);
+
+	return;
+}
+
+TestsTabPage::~TestsTabPage()
+{
+}
+
+bool TestsTabPage::hasUnsavedTests() const
+{
+	if (m_testsWidget == nullptr)
+	{
+		Q_ASSERT(m_testsWidget);
+		return false;
+	}
+
+	return m_testsWidget->hasUnsavedTests();
+}
+
+void TestsTabPage::saveUnsavedTests()
+{
+	if (m_testsWidget == nullptr)
+	{
+		Q_ASSERT(m_testsWidget);
+		return;
+	}
+
+	m_testsWidget->saveUnsavedTests();
+}
+
+void TestsTabPage::resetModified()
+{
+	if (m_testsWidget == nullptr)
+	{
+		Q_ASSERT(m_testsWidget);
+		return;
+	}
+
+	m_testsWidget->resetModified();
+}
+
+void TestsTabPage::projectOpened()
+{
+	this->setEnabled(true);
+	return;
+}
+
+void TestsTabPage::projectClosed()
+{
+	this->setEnabled(false);
+	return;
+}
+
+//
+// TestsWidget
+//
+
+TestsWidget::TestsWidget(DbController* dbc, QWidget* parent) :
+	QMainWindow(parent),
+	HasDbController(dbc),
+	m_testsLogWidget(this)
+{
+
+	setWindowFlags(Qt::Widget);
+	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
+
+	setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
+	setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
+	//setCorner(Qt::Corner::TopRightCorner, Qt::DockWidgetArea::RightDockWidgetArea);
+
+
 	m_editableExtensions << tr("js");
 
-	createUi();
+	// Set up default font
+	//
+#if defined(Q_OS_WIN)
+		m_editorFont = QFont("Consolas");
+#elif defined(Q_OS_MAC)
+		m_editorFont = QFont("Courier");
+#else
+		m_editorFont = QFont("Courier");
+#endif
+
+	createToolbar();
+
+	createTestsDock();
+
+	createLogDock();
+
+	createEditorWidget();
 
 	createActions();
 
 	restoreSettings();
 
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &TestsTabPage::projectOpened);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &TestsTabPage::projectClosed);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &TestsTabPage::saveAllDocuments);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &TestsWidget::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &TestsWidget::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &TestsWidget::saveAllDocuments);
 
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &TestsTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &TestsWidget::compareObject);
 
-	connect(m_testsTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &TestsTabPage::testsTreeSelectionChanged);
-	connect(m_testsTreeModel, &FileTreeModel::dataChanged, this, &TestsTabPage::testsTreeModelDataChanged);
-	connect(m_testsTreeModel, &FileTreeModel::modelReset, this, &TestsTabPage::testsTreeModelReset);
+	connect(m_testsTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &TestsWidget::testsTreeSelectionChanged);
+	connect(m_testsTreeModel, &FileTreeModel::dataChanged, this, &TestsWidget::testsTreeModelDataChanged);
+	connect(m_testsTreeModel, &FileTreeModel::modelReset, this, &TestsWidget::testsTreeModelReset);
 
-	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsTabPage::testsTreeDoubleClicked);
-	connect(m_openFilesTreeWidget, &QTreeWidget::clicked, this, &TestsTabPage::openFilesClicked);
+	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsWidget::testsTreeDoubleClicked);
+	connect(m_openFilesTreeWidget, &QTreeWidget::clicked, this, &TestsWidget::openFilesClicked);
+
+	connect(&m_simulator.control(), &Sim::Control::stateChanged, this, &TestsWidget::simStateChanged);
 
 	// Evidently, project is not opened yet
 	//
@@ -113,14 +397,14 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 	return;
 }
 
-TestsTabPage::~TestsTabPage()
+TestsWidget::~TestsWidget()
 {
 	saveSettings();
 
 	return;
 }
 
-bool TestsTabPage::hasUnsavedTests() const
+bool TestsWidget::hasUnsavedTests() const
 {
 	for (auto& it : m_openDocuments)
 	{
@@ -135,14 +419,14 @@ bool TestsTabPage::hasUnsavedTests() const
 	return false;
 }
 
-void TestsTabPage::saveUnsavedTests()
+void TestsWidget::saveUnsavedTests()
 {
 	saveAllDocuments();
 
 	return;
 }
 
-void TestsTabPage::resetModified()
+void TestsWidget::resetModified()
 {
 	for (auto& it : m_openDocuments)
 	{
@@ -153,7 +437,7 @@ void TestsTabPage::resetModified()
 	return;
 }
 
-void TestsTabPage::projectOpened()
+void TestsWidget::projectOpened()
 {
 	this->setEnabled(true);
 
@@ -180,7 +464,7 @@ void TestsTabPage::projectOpened()
 	return;
 }
 
-void TestsTabPage::projectClosed()
+void TestsWidget::projectClosed()
 {
 	m_simulator.clear();
 
@@ -196,14 +480,14 @@ void TestsTabPage::projectClosed()
 	return;
 }
 
-void TestsTabPage::buildStarted()
+void TestsWidget::buildStarted()
 {
 	saveAllDocuments();
 
 	return;
 }
 
-void TestsTabPage::testsTreeSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void TestsWidget::testsTreeSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
 	Q_UNUSED(selected);
 	Q_UNUSED(deselected);
@@ -213,7 +497,7 @@ void TestsTabPage::testsTreeSelectionChanged(const QItemSelection& selected, con
 	return;
 }
 
-void TestsTabPage::testsTreeModelDataChanged(const QModelIndex& topLeft,
+void TestsWidget::testsTreeModelDataChanged(const QModelIndex& topLeft,
 									const QModelIndex& bottomRight, const QVector<int>& roles /*= QVector<int>()*/)
 {
 	Q_UNUSED(topLeft);
@@ -225,14 +509,14 @@ void TestsTabPage::testsTreeModelDataChanged(const QModelIndex& topLeft,
 	return;
 }
 
-void TestsTabPage::testsTreeModelReset()
+void TestsWidget::testsTreeModelReset()
 {
 	setTestsTreeActionsState();
 
 	return;
 }
 
-void TestsTabPage::testsTreeDoubleClicked(const QModelIndex &index)
+void TestsWidget::testsTreeDoubleClicked(const QModelIndex &index)
 {
 	Q_UNUSED(index);
 
@@ -244,7 +528,7 @@ void TestsTabPage::testsTreeDoubleClicked(const QModelIndex &index)
 	return;
 }
 
-void TestsTabPage::openFilesClicked(const QModelIndex &index)
+void TestsWidget::openFilesClicked(const QModelIndex &index)
 {
 	Q_UNUSED(index);
 	QTreeWidgetItem* item = m_openFilesTreeWidget->currentItem();
@@ -268,7 +552,7 @@ void TestsTabPage::openFilesClicked(const QModelIndex &index)
 	return;
 }
 
-void TestsTabPage::newFile()
+void TestsWidget::newFile()
 {
 	// Get new file name
 	//
@@ -310,7 +594,7 @@ void TestsTabPage::newFile()
 	return;
 }
 
-void TestsTabPage::openFile()
+void TestsWidget::openFile()
 {
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
 	if (selectedIndexList.size() != 1)
@@ -370,7 +654,7 @@ void TestsTabPage::openFile()
 	IdeCodeEditor* codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
 	codeEditor->setText(dbFile->data());
 	codeEditor->setReadOnly(readOnly);
-	connect(codeEditor, &IdeCodeEditor::customContextMenuAboutToBeShown, this, &TestsTabPage::setCodeEditorActionsState, Qt::DirectConnection);
+	connect(codeEditor, &IdeCodeEditor::customContextMenuAboutToBeShown, this, &TestsWidget::setCodeEditorActionsState, Qt::DirectConnection);
 
 	if (m_documentSeparatorAction1 == nullptr)
 	{
@@ -396,11 +680,11 @@ void TestsTabPage::openFile()
 
 	codeEditor->setCustomMenuActions(customMenuActions);
 
-	connect(codeEditor, &IdeCodeEditor::textChanged, this, &TestsTabPage::textChanged);
-	connect(codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsTabPage::cursorPositionChanged);
-	connect(codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsTabPage::onCloseKeyPressed);
-	connect(codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsTabPage::onSaveKeyPressed);
-	connect(codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsTabPage::onCtrlTabKeyPressed);
+	connect(codeEditor, &IdeCodeEditor::textChanged, this, &TestsWidget::textChanged);
+	connect(codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsWidget::cursorPositionChanged);
+	connect(codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsWidget::onCloseKeyPressed);
+	connect(codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsWidget::onSaveKeyPressed);
+	connect(codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsWidget::onCtrlTabKeyPressed);
 	m_editorLayout->addWidget(codeEditor);
 
 	m_openDocumentsCombo->blockSignals(true);
@@ -421,7 +705,7 @@ void TestsTabPage::openFile()
 }
 
 
-void TestsTabPage::newFolder()
+void TestsWidget::newFolder()
 {
 	QString folderName = QInputDialog::getText(this, "New Folder", tr("Enter the folder name:"), QLineEdit::Normal, tr("FOLDER_%1").arg(db()->nextCounterValue()));
 	if (folderName.isEmpty() == true)
@@ -434,7 +718,7 @@ void TestsTabPage::newFolder()
 	return;
 }
 
-void TestsTabPage::renameFile()
+void TestsWidget::renameFile()
 {
 	// Save modified files
 	//
@@ -488,7 +772,7 @@ void TestsTabPage::renameFile()
 	return;
 }
 
-void TestsTabPage::checkInSelectedFiles()
+void TestsWidget::checkInSelectedFiles()
 {
 	// Save modified files
 	//
@@ -535,7 +819,7 @@ void TestsTabPage::checkInSelectedFiles()
 	return;
 }
 
-void TestsTabPage::checkOutSelectedFiles()
+void TestsWidget::checkOutSelectedFiles()
 {
 	m_testsTreeView->checkOutSelectedFiles();
 
@@ -594,7 +878,7 @@ void TestsTabPage::checkOutSelectedFiles()
 	}
 }
 
-void TestsTabPage::undoChangesSelectedFiles()
+void TestsWidget::undoChangesSelectedFiles()
 {
 	// Remember the list of open documents to undo
 
@@ -674,7 +958,7 @@ void TestsTabPage::undoChangesSelectedFiles()
 	return;
 }
 
-void TestsTabPage::deleteSelectedFiles()
+void TestsWidget::deleteSelectedFiles()
 {
 	// Close documents before deleting
 
@@ -700,7 +984,7 @@ void TestsTabPage::deleteSelectedFiles()
 	m_testsTreeView->deleteFile();
 }
 
-void TestsTabPage::moveSelectedFiles()
+void TestsWidget::moveSelectedFiles()
 {
 	// Close documents before deleting
 
@@ -728,7 +1012,7 @@ void TestsTabPage::moveSelectedFiles()
 	m_testsTreeView->moveFile(db()->testsFileId());
 }
 
-void TestsTabPage::refreshFileTree()
+void TestsWidget::refreshFileTree()
 {
 	m_testsTreeView->refreshFileTree();
 
@@ -737,7 +1021,7 @@ void TestsTabPage::refreshFileTree()
 	return;
 }
 
-void TestsTabPage::runAllTestFiles()
+void TestsWidget::runAllTestFiles()
 {
 	saveUnsavedTests();
 
@@ -774,7 +1058,7 @@ void TestsTabPage::runAllTestFiles()
 	runSimTests(m_buildPath, testsFiles);
 }
 
-void TestsTabPage::runSelectedTestFiles()
+void TestsWidget::runSelectedTestFiles()
 {
 	std::vector<int> fileIds;
 
@@ -806,7 +1090,7 @@ void TestsTabPage::runSelectedTestFiles()
 	return;
 }
 
-void TestsTabPage::filterChanged()
+void TestsWidget::filterChanged()
 {
 	QString filterText = m_filterLineEdit->text().trimmed();
 
@@ -845,7 +1129,7 @@ void TestsTabPage::filterChanged()
 	return;
 }
 
-void TestsTabPage::textChanged()
+void TestsWidget::textChanged()
 {
 	if (documentIsOpen(m_currentFileId) == false)
 	{
@@ -867,7 +1151,7 @@ void TestsTabPage::textChanged()
 
 }
 
-void TestsTabPage::cursorPositionChanged(int line, int index)
+void TestsWidget::cursorPositionChanged(int line, int index)
 {
 	if (m_cursorPosButton == nullptr)
 	{
@@ -880,7 +1164,7 @@ void TestsTabPage::cursorPositionChanged(int line, int index)
 	return;
 }
 
-void TestsTabPage::checkInCurrentFile()
+void TestsWidget::checkInCurrentFile()
 {
 	std::vector<int> fileIds;
 	fileIds.push_back(m_currentFileId);
@@ -888,7 +1172,7 @@ void TestsTabPage::checkInCurrentFile()
 	return;
 }
 
-void TestsTabPage::checkOutCurrentFile()
+void TestsWidget::checkOutCurrentFile()
 {
 	std::vector<int> fileIds;
 	fileIds.push_back(m_currentFileId);
@@ -896,7 +1180,7 @@ void TestsTabPage::checkOutCurrentFile()
 	return;
 }
 
-void TestsTabPage::undoChangesCurrentFile()
+void TestsWidget::undoChangesCurrentFile()
 {
 	std::vector<int> fileIds;
 	fileIds.push_back(m_currentFileId);
@@ -904,19 +1188,19 @@ void TestsTabPage::undoChangesCurrentFile()
 	return;
 }
 
-void TestsTabPage::saveCurrentFile()
+void TestsWidget::saveCurrentFile()
 {
 	saveDocument(m_currentFileId);
 	return;
 }
 
-void TestsTabPage::closeCurrentFile()
+void TestsWidget::closeCurrentFile()
 {
 	closeDocument(m_currentFileId, false/*force*/);
 	return;
 }
 
-void TestsTabPage::runTestCurrentFile()
+void TestsWidget::runTestCurrentFile()
 {
 	if (m_openDocuments.empty() == true || m_currentFileId == -1)
 	{
@@ -930,7 +1214,12 @@ void TestsTabPage::runTestCurrentFile()
 	return;
 }
 
-void TestsTabPage::onGoToLine()
+void TestsWidget::stopTests()
+{
+	stopSimTests();
+}
+
+void TestsWidget::onGoToLine()
 {
 	if (documentIsOpen(m_currentFileId) == false)
 	{
@@ -977,7 +1266,7 @@ void TestsTabPage::onGoToLine()
 	return;
 }
 
-void TestsTabPage::openFilesMenuRequested(const QPoint& pos)
+void TestsWidget::openFilesMenuRequested(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
@@ -1023,7 +1312,7 @@ void TestsTabPage::openFilesMenuRequested(const QPoint& pos)
 		}
 
 		if (fi.state() == VcsState::CheckedOut &&
-			(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			m_checkInOpenDocumentAction->setEnabled(true);
 			m_undoChangesOpenDocumentAction->setEnabled(true);
@@ -1049,7 +1338,7 @@ void TestsTabPage::openFilesMenuRequested(const QPoint& pos)
 }
 
 
-void TestsTabPage::checkInOpenFile()
+void TestsWidget::checkInOpenFile()
 {
 	std::vector<int> fileIds;
 
@@ -1073,7 +1362,7 @@ void TestsTabPage::checkInOpenFile()
 		}
 
 		if (fi.state() == VcsState::CheckedOut &&
-			(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			fileIds.push_back(fileId);
 		}
@@ -1082,7 +1371,7 @@ void TestsTabPage::checkInOpenFile()
 	checkInDocument(fileIds);
 }
 
-void TestsTabPage::checkOutOpenFile()
+void TestsWidget::checkOutOpenFile()
 {
 	std::vector<int> fileIds;
 
@@ -1114,7 +1403,7 @@ void TestsTabPage::checkOutOpenFile()
 	checkOutDocument(fileIds);
 }
 
-void TestsTabPage::undoChangesOpenFile()
+void TestsWidget::undoChangesOpenFile()
 {
 	std::vector<int> fileIds;
 
@@ -1138,7 +1427,7 @@ void TestsTabPage::undoChangesOpenFile()
 		}
 
 		if (fi.state() == VcsState::CheckedOut &&
-			(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			fileIds.push_back(fileId);
 		}
@@ -1147,7 +1436,7 @@ void TestsTabPage::undoChangesOpenFile()
 	undoChangesDocument(fileIds);
 }
 
-void TestsTabPage::saveOpenFile()
+void TestsWidget::saveOpenFile()
 {
 	std::vector<int> fileIds;
 
@@ -1183,7 +1472,7 @@ void TestsTabPage::saveOpenFile()
 	}
 }
 
-void TestsTabPage::closeOpenFile()
+void TestsWidget::closeOpenFile()
 {
 	std::vector<int> fileIds;
 
@@ -1210,7 +1499,7 @@ void TestsTabPage::closeOpenFile()
 	return;
 }
 
-void TestsTabPage::runTestOpenFile()
+void TestsWidget::runTestOpenFile()
 {
 	std::vector<int> fileIds;
 
@@ -1239,7 +1528,7 @@ void TestsTabPage::runTestOpenFile()
 }
 
 
-void TestsTabPage::onSaveKeyPressed()
+void TestsWidget::onSaveKeyPressed()
 {
 	if (documentIsOpen(m_currentFileId) == true)
 	{
@@ -1252,7 +1541,7 @@ void TestsTabPage::onSaveKeyPressed()
 	}
 }
 
-void TestsTabPage::onCloseKeyPressed()
+void TestsWidget::onCloseKeyPressed()
 {
 	if (documentIsOpen(m_currentFileId) == true)
 	{
@@ -1260,7 +1549,7 @@ void TestsTabPage::onCloseKeyPressed()
 	}
 }
 
-void TestsTabPage::onCtrlTabKeyPressed()
+void TestsWidget::onCtrlTabKeyPressed()
 {
 	if (documentIsOpen(m_currentFileId) == true)
 	{
@@ -1303,7 +1592,7 @@ void TestsTabPage::onCtrlTabKeyPressed()
 	}
 }
 
-bool TestsTabPage::documentIsModified(int fileId) const
+bool TestsWidget::documentIsModified(int fileId) const
 {
 	if (documentIsOpen(fileId) == false)
 	{
@@ -1314,7 +1603,7 @@ bool TestsTabPage::documentIsModified(int fileId) const
 	return document.modified();
 }
 
-void TestsTabPage::checkInDocument(std::vector<int> fileIds)
+void TestsWidget::checkInDocument(std::vector<int> fileIds)
 {
 	if (fileIds.empty() == true)
 	{
@@ -1365,7 +1654,7 @@ void TestsTabPage::checkInDocument(std::vector<int> fileIds)
 	return;
 }
 
-void TestsTabPage::checkOutDocument(std::vector<int> fileIds)
+void TestsWidget::checkOutDocument(std::vector<int> fileIds)
 {
 	if (fileIds.empty() == true)
 	{
@@ -1417,7 +1706,7 @@ void TestsTabPage::checkOutDocument(std::vector<int> fileIds)
 	return;
 }
 
-void TestsTabPage::undoChangesDocument(std::vector<int> fileIds)
+void TestsWidget::undoChangesDocument(std::vector<int> fileIds)
 {
 	if (fileIds.empty() == true)
 	{
@@ -1479,7 +1768,7 @@ void TestsTabPage::undoChangesDocument(std::vector<int> fileIds)
 	}
 }
 
-void TestsTabPage::setCurrentDocument(int fileId)
+void TestsWidget::setCurrentDocument(int fileId)
 {
 	if (m_currentFileId == fileId)
 	{
@@ -1493,7 +1782,6 @@ void TestsTabPage::setCurrentDocument(int fileId)
 	}
 
 	// Show Editor
-	// m_editorEmptyLabel->setVisible(false);
 	m_editorToolBar->setVisible(true);
 
 	// Hide current editor
@@ -1589,7 +1877,7 @@ void TestsTabPage::setCurrentDocument(int fileId)
 	return;
 }
 
-void TestsTabPage::setDocumentReadOnly(int fileId, bool readOnly)
+void TestsWidget::setDocumentReadOnly(int fileId, bool readOnly)
 {
 	if (documentIsOpen(fileId) == false)
 	{
@@ -1613,7 +1901,7 @@ void TestsTabPage::setDocumentReadOnly(int fileId, bool readOnly)
 	return;
 }
 
-void TestsTabPage::openDocumentsComboTextChanged(int index)
+void TestsWidget::openDocumentsComboTextChanged(int index)
 {
 	if (index < 0 || index >= m_openDocumentsCombo->count())
 	{
@@ -1635,7 +1923,7 @@ void TestsTabPage::openDocumentsComboTextChanged(int index)
 	return;
 }
 
-void TestsTabPage::closeDocumentsForDeletedFiles()
+void TestsWidget::closeDocumentsForDeletedFiles()
 {
 	std::vector<int> documentsToClose;
 
@@ -1661,7 +1949,7 @@ void TestsTabPage::closeDocumentsForDeletedFiles()
 	}
 }
 
-void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
+void TestsWidget::compareObject(DbChangesetObject object, CompareData compareData)
 {
 	// Can compare only files which are EquipmentObjects
 	//
@@ -1799,7 +2087,7 @@ void TestsTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 	return;
 }
 
-void TestsTabPage::selectBuild()
+void TestsWidget::selectBuild()
 {
 	QString project = db()->currentProject().projectName().toLower();
 
@@ -1818,12 +2106,23 @@ void TestsTabPage::selectBuild()
 	}
 }
 
-void TestsTabPage::runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files)
+void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files)
 {
 	if (files.empty() == true)
 	{
 		return;
 	}
+
+	if (m_outputDockWidget == nullptr)
+	{
+		Q_ASSERT(m_outputDockWidget);
+	}
+	else
+	{
+		m_outputDockWidget->setVisible(true);
+	}
+
+	m_testsLogWidget.clear();
 
 	std::vector<std::shared_ptr<DbFile>> latestFiles;
 	bool ok = db()->getLatestVersion(files, &latestFiles, this);
@@ -1851,41 +2150,28 @@ void TestsTabPage::runSimTests(const QString& buildPath, const std::vector<DbFil
 	return;
 }
 
-void TestsTabPage::createUi()
+void TestsWidget::stopSimTests()
 {
-	// Set up default font
-	//
-#if defined(Q_OS_WIN)
-	    m_editorFont = QFont("Consolas");
-#elif defined(Q_OS_MAC)
-	    m_editorFont = QFont("Courier");
-#else
-	    m_editorFont = QFont("Courier");
-#endif
+	m_simulator.control().stop();
+}
 
-	// Main toolbar
-	//
+void TestsWidget::simStateChanged(Sim::SimControlState state)
+{
+	m_stopTestsAction->setEnabled(state == Sim::SimControlState::Run);
+}
 
-	m_testsToolbar = new QToolBar();
-	//m_testsToolbar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
-	//m_testsToolbar->setIconSize(m_testsToolbar->iconSize() * 0.9);
+void TestsWidget::createToolbar()
+{
+	m_testsToolbar = addToolBar("Toolbar");
 
+	m_testsToolbar->setMovable(false);
+	m_testsToolbar->toggleViewAction()->setDisabled(true);
 
-	// Build label
-	//
-	/*
-	m_buildLabel = new QLabel("Build: Not loaded");
-	m_buildLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
-	m_buildLabel->setTextFormat(Qt::RichText);
-	m_buildLabel->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
-	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	m_buildLabel->setOpenExternalLinks(true);
-	*/
+	return;
+}
 
-	QHBoxLayout* toolbarLayout = new QHBoxLayout();
-	toolbarLayout->addWidget(m_testsToolbar);
-	//toolbarLayout->addWidget(m_buildLabel);
-
+void TestsWidget::createTestsDock()
+{
 	// Tests tree and model
 	//
 
@@ -1931,11 +2217,11 @@ void TestsTabPage::createUi()
 	m_filterLineEdit->setPlaceholderText(tr("Filter File Name"));
 	m_filterLineEdit->setClearButtonEnabled(true);
 
-	connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &TestsTabPage::filterChanged);
+	connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &TestsWidget::filterChanged);
 	filterLayout->addWidget(m_filterLineEdit);
 
 	m_filterSetButton = new QPushButton(tr("Filter"));
-	connect(m_filterSetButton, &QPushButton::clicked, this, &TestsTabPage::filterChanged);
+	connect(m_filterSetButton, &QPushButton::clicked, this, &TestsWidget::filterChanged);
 	filterLayout->addWidget(m_filterSetButton);
 
 	m_filterResetButton = new QPushButton(tr("Reset Filter"));
@@ -1974,22 +2260,56 @@ void TestsTabPage::createUi()
 	m_openFilesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_openFilesTreeWidget->sortByColumn(0, Qt::AscendingOrder);
 	m_openFilesTreeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-	connect(m_openFilesTreeWidget, &QTreeWidget::customContextMenuRequested, this, &TestsTabPage::openFilesMenuRequested);
+	connect(m_openFilesTreeWidget, &QTreeWidget::customContextMenuRequested, this, &TestsWidget::openFilesMenuRequested);
 	filesLayout->addWidget(m_openFilesTreeWidget);
 
-	//	Right layout
+	// Left splitter
 	//
-	QWidget* rightWidget = new QWidget();
-	m_rightLayout = new QVBoxLayout(rightWidget);
-	m_rightLayout->setContentsMargins(0, 0, 0, 0);
+	m_leftSplitter = new QSplitter(Qt::Vertical);
+	m_leftSplitter->addWidget(testsWidget);
+	m_leftSplitter->addWidget(filesWidget);
+	m_leftSplitter->setStretchFactor(0, 2);
+	m_leftSplitter->setStretchFactor(1, 1);
+	m_leftSplitter->setCollapsible(0, false);
+	m_leftSplitter->setCollapsible(1, false);
 
+	leftLayout->addWidget(m_leftSplitter);
+
+	// Left Dock Widget
+
+	m_testsDockWidget = new QDockWidget(tr("Project Tests"), this);
+	m_testsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea |
+								Qt::RightDockWidgetArea);
+	m_testsDockWidget->setWidget(m_leftSplitter);
+	m_testsDockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+
+	addDockWidget(Qt::LeftDockWidgetArea, m_testsDockWidget);
+
+	return;
+}
+
+void TestsWidget::createLogDock()
+{
+	// Log Dock Widget
+
+	m_outputDockWidget = new QDockWidget(tr("Output"), this);
+	m_outputDockWidget->setAllowedAreas(Qt::BottomDockWidgetArea);
+	m_outputDockWidget->setWidget(&m_testsLogWidget);
+	//logDockWidget->setFeatures(QDockWidget::DockWidgetClosable);
+
+	addDockWidget(Qt::BottomDockWidgetArea, m_outputDockWidget);
+
+	return;
+}
+
+void TestsWidget::createEditorWidget()
+{
 	// Editor layout
 	//
 	QWidget* editorWidget = new QWidget();
 
 	m_editorLayout = new QVBoxLayout(editorWidget);
-	m_editorLayout->setContentsMargins(6, 0, 6, 6);
-	m_rightLayout->addWidget(editorWidget);
+	m_editorLayout->setContentsMargins(0, 0, 0, 0);
 
 	// Editor toolbar
 	//
@@ -2030,7 +2350,7 @@ void TestsTabPage::createUi()
 	m_openDocumentsCombo->setFixedHeight(editorToolbarButtonSize);
 	QString longFileName = QString().fill('0', 32);
 	m_openDocumentsCombo->setMinimumWidth(QFontMetrics(m_openDocumentsCombo->font()).horizontalAdvance(longFileName));
-	connect(m_openDocumentsCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestsTabPage::openDocumentsComboTextChanged);
+	connect(m_openDocumentsCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestsWidget::openDocumentsComboTextChanged);
 
 	m_editorToolBar->addWidget(m_openDocumentsCombo);
 
@@ -2052,7 +2372,7 @@ void TestsTabPage::createUi()
 	closeButton->setFlat(true);
 	closeButton->setStyleSheet(toolbarButtonStyle);
 	closeButton->setFixedSize(editorToolbarButtonSize, editorToolbarButtonSize);
-	connect(closeButton, &QPushButton::clicked, this, &TestsTabPage::closeCurrentFile);
+	connect(closeButton, &QPushButton::clicked, this, &TestsWidget::closeCurrentFile);
 
 	m_editorToolBar->addWidget(closeButton);
 
@@ -2071,53 +2391,22 @@ void TestsTabPage::createUi()
 	QString longCursorPos = "Line: 9999 Col: 9999";
 	m_cursorPosButton->setMinimumWidth(QFontMetrics(m_cursorPosButton->font()).horizontalAdvance(longCursorPos));
 	m_cursorPosButton->setFixedHeight(editorToolbarButtonSize);
-	connect(m_cursorPosButton, &QPushButton::clicked, this, &TestsTabPage::onGoToLine);
+	connect(m_cursorPosButton, &QPushButton::clicked, this, &TestsWidget::onGoToLine);
 	m_editorToolBar->addWidget(m_cursorPosButton);
 
 	m_editorLayout->addWidget(m_editorToolBar);
 
-	// Empty editor
-	//
-	//	m_editorEmptyLabel = new QLabel(tr("No open documents"));
-	//	m_editorEmptyLabel->setBackgroundRole(QPalette::Dark);
-	//	m_editorEmptyLabel->setAutoFillBackground(true);
-	//	m_editorEmptyLabel->setAlignment(Qt::AlignCenter);
-	//	m_editorLayout->addWidget(m_editorEmptyLabel);
+	// CentralWidget
 
-	// Left splitter
-	//
-	m_leftSplitter = new QSplitter(Qt::Vertical);
-	m_leftSplitter->addWidget(testsWidget);
-	m_leftSplitter->addWidget(filesWidget);
-	m_leftSplitter->setStretchFactor(0, 2);
-	m_leftSplitter->setStretchFactor(1, 1);
-	m_leftSplitter->setCollapsible(0, false);
-	m_leftSplitter->setCollapsible(1, false);
+	setCentralWidget(editorWidget);
 
-	leftLayout->addWidget(m_leftSplitter);
-
-	// Vertical splitter
-	//
-	m_verticalSplitter = new QSplitter(Qt::Horizontal);
-	m_verticalSplitter->addWidget(leftWidget);
-	m_verticalSplitter->addWidget(rightWidget);
-	m_verticalSplitter->setStretchFactor(0, 1);
-	m_verticalSplitter->setStretchFactor(1, 4);
-	m_verticalSplitter->setCollapsible(0, false);
-	m_verticalSplitter->setCollapsible(1, false);
-
-	// Main layout
-	//
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->setContentsMargins(0, 6, 6, 0);
-	mainLayout->addLayout(toolbarLayout);
-	mainLayout->addWidget(m_verticalSplitter);
-	setLayout(mainLayout);
+	centralWidget()->setBackgroundRole(QPalette::Dark);
+	centralWidget()->setAutoFillBackground(true);
 
 	return;
 }
 
-void TestsTabPage::createActions()
+void TestsWidget::createActions()
 {
 	if (m_testsTreeView == nullptr)
 	{
@@ -2132,7 +2421,7 @@ void TestsTabPage::createActions()
 	m_openFileAction = new QAction(QIcon(":/Images/Images/SchemaOpen.svg"), tr("Open File"), this);
 	m_openFileAction->setStatusTip(tr("Open File..."));
 	m_openFileAction->setEnabled(false);
-	connect(m_openFileAction, &QAction::triggered, this, &TestsTabPage::openFile);
+	connect(m_openFileAction, &QAction::triggered, this, &TestsWidget::openFile);
 	testsToolbarActions.push_back(m_openFileAction);
 
 	QAction* separatorAction1 = new QAction(this);
@@ -2143,13 +2432,13 @@ void TestsTabPage::createActions()
 	m_newFileAction->setStatusTip(tr("New File..."));
 	m_newFileAction->setEnabled(false);
 	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
-	connect(m_newFileAction, &QAction::triggered, this, &TestsTabPage::newFile);
+	connect(m_newFileAction, &QAction::triggered, this, &TestsWidget::newFile);
 	testsToolbarActions.push_back(m_newFileAction);
 
 	m_newFolderAction = new QAction(QIcon(":/Images/Images/SchemaAddFolder2.svg"), tr("New Folder..."), this);
 	m_newFolderAction->setStatusTip(tr("New Folder..."));
 	m_newFolderAction->setEnabled(false);
-	connect(m_newFolderAction, &QAction::triggered, this, &TestsTabPage::newFolder);
+	connect(m_newFolderAction, &QAction::triggered, this, &TestsWidget::newFolder);
 	testsToolbarActions.push_back(m_newFolderAction);
 
 	m_addFileAction = new QAction(tr("Add File..."), this);
@@ -2160,19 +2449,19 @@ void TestsTabPage::createActions()
 	m_renameFileAction = new QAction(tr("Rename..."), this);
 	m_renameFileAction->setStatusTip(tr("Rename..."));
 	m_renameFileAction->setEnabled(false);
-	connect(m_renameFileAction, &QAction::triggered, this, &TestsTabPage::renameFile);
+	connect(m_renameFileAction, &QAction::triggered, this, &TestsWidget::renameFile);
 
 	m_deleteFileAction = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete"));
 	m_deleteFileAction->setEnabled(false);
 	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
-	connect(m_deleteFileAction, &QAction::triggered, this, &TestsTabPage::deleteSelectedFiles);
+	connect(m_deleteFileAction, &QAction::triggered, this, &TestsWidget::deleteSelectedFiles);
 	testsToolbarActions.push_back(m_deleteFileAction);
 
 	m_moveFileAction = new QAction(tr("Move File..."), this);
 	m_moveFileAction->setStatusTip(tr("Move"));
 	m_moveFileAction->setEnabled(false);
-	connect(m_moveFileAction, &QAction::triggered, this, &TestsTabPage::moveSelectedFiles);
+	connect(m_moveFileAction, &QAction::triggered, this, &TestsWidget::moveSelectedFiles);
 
 	//----------------------------------
 	QAction* separatorAction2 = new QAction(this);
@@ -2182,19 +2471,19 @@ void TestsTabPage::createActions()
 	m_checkOutAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutAction->setEnabled(false);
-	connect(m_checkOutAction, &QAction::triggered, this, &TestsTabPage::checkOutSelectedFiles);
+	connect(m_checkOutAction, &QAction::triggered, this, &TestsWidget::checkOutSelectedFiles);
 	testsToolbarActions.push_back(m_checkOutAction);
 
 	m_checkInAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
 	m_checkInAction->setStatusTip(tr("Check in changes"));
 	m_checkInAction->setEnabled(false);
-	connect(m_checkInAction, &QAction::triggered, this, &TestsTabPage::checkInSelectedFiles);
+	connect(m_checkInAction, &QAction::triggered, this, &TestsWidget::checkInSelectedFiles);
 	testsToolbarActions.push_back(m_checkInAction);
 
 	m_undoChangesAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
-	connect(m_undoChangesAction, &QAction::triggered, this, &TestsTabPage::undoChangesSelectedFiles);
+	connect(m_undoChangesAction, &QAction::triggered, this, &TestsWidget::undoChangesSelectedFiles);
 	testsToolbarActions.push_back(m_undoChangesAction);
 
 	m_historyAction = new QAction(QIcon(":/Images/Images/SchemaHistory.svg"), tr("History"), this);
@@ -2216,7 +2505,7 @@ void TestsTabPage::createActions()
 	m_refreshAction->setStatusTip(tr("Refresh Objects List"));
 	m_refreshAction->setEnabled(false);
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
-	connect(m_refreshAction, &QAction::triggered, this, &TestsTabPage::refreshFileTree);
+	connect(m_refreshAction, &QAction::triggered, this, &TestsWidget::refreshFileTree);
 	testsToolbarActions.push_back(m_refreshAction);
 	addAction(m_refreshAction);
 
@@ -2226,19 +2515,25 @@ void TestsTabPage::createActions()
 
 	m_runAllTestsAction = new QAction(QIcon(":/Images/Images/TestsRunAll.svg"), tr("Run All Tests..."), this);
 	m_runAllTestsAction->setStatusTip(tr("Run All Tests"));
-	connect(m_runAllTestsAction, &QAction::triggered, this, &TestsTabPage::runAllTestFiles);
+	connect(m_runAllTestsAction, &QAction::triggered, this, &TestsWidget::runAllTestFiles);
 	testsToolbarActions.push_back(m_runAllTestsAction);
 
 	m_runSelectedTestsAction = new QAction(tr("Run Selected Test(s)..."), this);
 	m_runSelectedTestsAction->setStatusTip(tr("Run Selected Test(s)"));
 	m_runSelectedTestsAction->setEnabled(false);
-	connect(m_runSelectedTestsAction, &QAction::triggered, this, &TestsTabPage::runSelectedTestFiles);
+	connect(m_runSelectedTestsAction, &QAction::triggered, this, &TestsWidget::runSelectedTestFiles);
 
 	m_runCurrentTestsAction = new QAction(QIcon(":/Images/Images/TestsRunSelected.svg"), tr("Run Current Test..."), this);
 	m_runCurrentTestsAction->setStatusTip(tr("Run Current Test"));
 	m_runCurrentTestsAction->setEnabled(false);
-	connect(m_runCurrentTestsAction, &QAction::triggered, this, &TestsTabPage::runTestCurrentFile);
+	connect(m_runCurrentTestsAction, &QAction::triggered, this, &TestsWidget::runTestCurrentFile);
 	testsToolbarActions.push_back(m_runCurrentTestsAction);
+
+	m_stopTestsAction = new QAction(QIcon(":/Images/Images/SimStop.svg"), tr("Stop Testing"), this);
+	m_stopTestsAction->setStatusTip(tr("Stop testing"));
+	m_stopTestsAction->setEnabled(false);
+	connect(m_stopTestsAction, &QAction::triggered, this, &TestsWidget::stopTests);
+	testsToolbarActions.push_back(m_stopTestsAction);
 
 	QAction* separatorAction5 = new QAction(this);
 	separatorAction5->setSeparator(true);
@@ -2246,7 +2541,7 @@ void TestsTabPage::createActions()
 
 	m_selectBuildAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Select Build..."), this);
 	m_selectBuildAction->setStatusTip(tr("Select Build..."));
-	connect(m_selectBuildAction, &QAction::triggered, this, &TestsTabPage::selectBuild);
+	connect(m_selectBuildAction, &QAction::triggered, this, &TestsWidget::selectBuild);
 	testsToolbarActions.push_back(m_selectBuildAction);
 
 	m_testsTreeView->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -2288,63 +2583,63 @@ void TestsTabPage::createActions()
 	m_checkInCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
 	m_checkInCurrentDocumentAction->setStatusTip(tr("Check in changes"));
 	m_checkInCurrentDocumentAction->setEnabled(false);
-	connect(m_checkInCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkInCurrentFile);
+	connect(m_checkInCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::checkInCurrentFile);
 
 	m_checkOutCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutCurrentDocumentAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutCurrentDocumentAction->setEnabled(false);
-	connect(m_checkOutCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::checkOutCurrentFile);
+	connect(m_checkOutCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::checkOutCurrentFile);
 
 	m_undoChangesCurrentDocumentAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
 	m_undoChangesCurrentDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesCurrentDocumentAction->setEnabled(false);
-	connect(m_undoChangesCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesCurrentFile);
+	connect(m_undoChangesCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::undoChangesCurrentFile);
 
 	m_runTestCurrentDocumentAction = new QAction(tr("Run Test..."), this);
 	m_runTestCurrentDocumentAction->setStatusTip(tr("Run Test"));
-	connect(m_runTestCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::runTestCurrentFile);
+	connect(m_runTestCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::runTestCurrentFile);
 
 	m_saveCurrentDocumentAction = new QAction(tr("Save"), this);
 	m_saveCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
-	connect(m_saveCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::saveCurrentFile);
+	connect(m_saveCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::saveCurrentFile);
 
 	m_closeCurrentDocumentAction = new QAction(tr("Close"), this);
 	m_closeCurrentDocumentAction->setShortcut(QKeySequence::StandardKey::Close);
-	connect(m_closeCurrentDocumentAction, &QAction::triggered, this, &TestsTabPage::closeCurrentFile);
+	connect(m_closeCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::closeCurrentFile);
 
 	// Open documents list actions
 
 	m_checkInOpenDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("CheckIn"), this);
 	m_checkInOpenDocumentAction->setStatusTip(tr("Check in changes"));
 	m_checkInOpenDocumentAction->setEnabled(false);
-	connect(m_checkInOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::checkInOpenFile);
+	connect(m_checkInOpenDocumentAction, &QAction::triggered, this, &TestsWidget::checkInOpenFile);
 
 	m_checkOutOpenDocumentAction = new QAction(QIcon(":/Images/Images/SchemaCheckOut.svg"), tr("CheckOut"), this);
 	m_checkOutOpenDocumentAction->setStatusTip(tr("Check out file for edit"));
 	m_checkOutOpenDocumentAction->setEnabled(false);
-	connect(m_checkOutOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::checkOutOpenFile);
+	connect(m_checkOutOpenDocumentAction, &QAction::triggered, this, &TestsWidget::checkOutOpenFile);
 
 	m_undoChangesOpenDocumentAction = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo Changes"), this);
 	m_undoChangesOpenDocumentAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesOpenDocumentAction->setEnabled(false);
-	connect(m_undoChangesOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::undoChangesOpenFile);
+	connect(m_undoChangesOpenDocumentAction, &QAction::triggered, this, &TestsWidget::undoChangesOpenFile);
 
 	m_runTestOpenDocumentAction = new QAction(tr("Run Test..."), this);
 	m_runTestOpenDocumentAction->setStatusTip(tr("Run Test"));
-	connect(m_runTestOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::runTestOpenFile);
+	connect(m_runTestOpenDocumentAction, &QAction::triggered, this, &TestsWidget::runTestOpenFile);
 
 	m_saveOpenDocumentAction = new QAction(tr("Save"), this);
 	m_saveOpenDocumentAction->setShortcut(QKeySequence::StandardKey::Save);
-	connect(m_saveOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::saveOpenFile);
+	connect(m_saveOpenDocumentAction, &QAction::triggered, this, &TestsWidget::saveOpenFile);
 
 	m_closeOpenDocumentAction = new QAction(tr("Close"), this);
 	m_closeOpenDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
-	connect(m_closeOpenDocumentAction, &QAction::triggered, this, &TestsTabPage::closeOpenFile);
+	connect(m_closeOpenDocumentAction, &QAction::triggered, this, &TestsWidget::closeOpenFile);
 
 	return;
 }
 
-void TestsTabPage::setTestsTreeActionsState()
+void TestsWidget::setTestsTreeActionsState()
 {
 	// Disable all
 	//
@@ -2363,7 +2658,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	m_refreshAction->setEnabled(false);
 	m_runSelectedTestsAction->setEnabled(false);
 
-	if (dbController()->isProjectOpened() == false)
+	if (db()->isProjectOpened() == false)
 	{
 		return;
 	}
@@ -2440,7 +2735,7 @@ void TestsTabPage::setTestsTreeActionsState()
 		}
 
 		if (file->state() == VcsState::CheckedOut &&
-			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
@@ -2493,7 +2788,7 @@ void TestsTabPage::setTestsTreeActionsState()
 		}
 
 		if (file->state() == VcsState::CheckedOut &&
-			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
+			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator())
 			/*&& file->action() != VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
@@ -2512,7 +2807,7 @@ void TestsTabPage::setTestsTreeActionsState()
 	return;
 }
 
-void TestsTabPage::setCodeEditorActionsState()
+void TestsWidget::setCodeEditorActionsState()
 {
 	m_checkInCurrentDocumentAction->setEnabled(false);
 	m_checkOutCurrentDocumentAction->setEnabled(false);
@@ -2535,7 +2830,7 @@ void TestsTabPage::setCodeEditorActionsState()
 	}
 
 	if (fi.state() == VcsState::CheckedOut &&
-		(fi.userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 	{
 		m_checkInCurrentDocumentAction->setEnabled(true);
 		m_undoChangesCurrentDocumentAction->setEnabled(true);
@@ -2549,32 +2844,33 @@ void TestsTabPage::setCodeEditorActionsState()
 	return;
 }
 
-void TestsTabPage::saveSettings()
+void TestsWidget::saveSettings()
 {
 	QSettings s;
+	s.setValue("TestsTabPage/dockState", saveState());
 	s.setValue("TestsTabPage/leftSplitterState", m_leftSplitter->saveState());
-	s.setValue("TestsTabPage/verticalSplitterState", m_verticalSplitter->saveState());
 	s.setValue("TestsTabPage/testsHeaderState", m_testsTreeView->header()->saveState());
 
 	return;
 }
 
-void TestsTabPage::restoreSettings()
+void TestsWidget::restoreSettings()
 {
 	// Restore settings
 
 	QSettings s;
 
-	QByteArray data = s.value("TestsTabPage/leftSplitterState").toByteArray();
+	QByteArray data = s.value("TestsTabPage/dockState").toByteArray();
+	if (data.isEmpty() == false)
+	{
+		s.setValue("TestsTabPage/dockState", saveState());
+		restoreState(data);
+	}
+
+	data = s.value("TestsTabPage/leftSplitterState").toByteArray();
 	if (data.isEmpty() == false)
 	{
 		m_leftSplitter->restoreState(data);
-	}
-
-	data = s.value("TestsTabPage/verticalSplitterState").toByteArray();
-	if (data.isEmpty() == false)
-	{
-		m_verticalSplitter->restoreState(data);
 	}
 
 	QByteArray headerState = s.value("TestsTabPage/testsHeaderState").toByteArray();
@@ -2586,7 +2882,7 @@ void TestsTabPage::restoreSettings()
 	return;
 }
 
-void TestsTabPage::hideEditor()
+void TestsWidget::hideEditor()
 {
 	m_editorToolBar->setVisible(false);
 	// m_editorEmptyLabel->setVisible(true);
@@ -2595,12 +2891,12 @@ void TestsTabPage::hideEditor()
 	m_runCurrentTestsAction->setEnabled(false);
 }
 
-bool TestsTabPage::documentIsOpen(int fileId) const
+bool TestsWidget::documentIsOpen(int fileId) const
 {
 	return m_openDocuments.find(fileId) != m_openDocuments.end();
 }
 
-void TestsTabPage::saveDocument(int fileId)
+void TestsWidget::saveDocument(int fileId)
 {
 	if (documentIsOpen(fileId) == false)
 	{
@@ -2657,7 +2953,7 @@ void TestsTabPage::saveDocument(int fileId)
 
 }
 
-void TestsTabPage::saveAllDocuments()
+void TestsWidget::saveAllDocuments()
 {
 	for (auto& it : m_openDocuments)
 	{
@@ -2665,7 +2961,7 @@ void TestsTabPage::saveAllDocuments()
 	}
 }
 
-void TestsTabPage::closeDocument(int fileId, bool force)
+void TestsWidget::closeDocument(int fileId, bool force)
 {
 	if (documentIsOpen(fileId) == false)
 	{
@@ -2784,7 +3080,7 @@ void TestsTabPage::closeDocument(int fileId, bool force)
 	return;
 }
 
-void TestsTabPage::closeAllDocuments()
+void TestsWidget::closeAllDocuments()
 {
 	for (auto& it : m_openDocuments)
 	{
@@ -2804,7 +3100,7 @@ void TestsTabPage::closeAllDocuments()
 	return;
 }
 
-void TestsTabPage::updateOpenDocumentInfo(int fileId)
+void TestsWidget::updateOpenDocumentInfo(int fileId)
 {
 	if (documentIsOpen(fileId) == false)
 	{
@@ -2852,7 +3148,7 @@ void TestsTabPage::updateOpenDocumentInfo(int fileId)
 	}
 }
 
-void TestsTabPage::runTests(std::vector<int> fileIds)
+void TestsWidget::runTests(std::vector<int> fileIds)
 {
 	if (fileIds.empty() ==  true)
 	{
@@ -2892,7 +3188,7 @@ void TestsTabPage::runTests(std::vector<int> fileIds)
 	return;
 }
 
-void TestsTabPage::keyPressEvent(QKeyEvent* event)
+void TestsWidget::keyPressEvent(QKeyEvent* event)
 {
 	if (event->modifiers() & Qt::ControlModifier)
 	{
@@ -2914,7 +3210,7 @@ void TestsTabPage::keyPressEvent(QKeyEvent* event)
 	}
 }
 
-bool TestsTabPage::isEditableExtension(const QString& fileName)
+bool TestsWidget::isEditableExtension(const QString& fileName)
 {
 	for (const QString& ext : m_editableExtensions)
 	{
