@@ -337,105 +337,92 @@ namespace Metrology
 			UnitsConvertResult qpl;
 			UnitsConvertResult qph;
 
-			switch (signal.inOutType())
+			if (signal.isInput() == true || signal.isOutput() == true)
 			{
-				case E::SignalInOutType::Input:
-
-					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-					{
-						break;
-					}
-
+				if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true && signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
+				{
 					m_electricLowLimit = signal.electricLowLimit();
 					m_electricHighLimit = signal.electricHighLimit();
 					m_electricPrecision = 4;
+				}
 
-					if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
-					{
-						break;
-					}
-
+				if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
+				{
 					m_electricUnitID = signal.electricUnit();
+				}
+
+				if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == true)
+				{
 					m_electricSensorType = signal.sensorType();
+				}
 
-					switch (signal.electricUnit())
-					{
-						case E::ElectricUnit::V:
+				switch (signal.inOutType())
+				{
+					case E::SignalInOutType::Input:
 
-							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
-							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+						switch (m_electricUnitID)
+						{
+							case E::ElectricUnit::V:
 
-							break;
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
 
-						case E::ElectricUnit::mA:
-
-							if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
-							{
 								break;
-							}
 
-							m_electricRLoad = signal.rload_Ohm();
+							case E::ElectricUnit::mA:
 
-							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
-							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID,m_electricSensorType, m_electricRLoad);
+								if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == true)
+								{
+									m_electricRLoad = signal.rload_Ohm();
+								}
 
-							break;
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID,m_electricSensorType, m_electricRLoad);
 
-						case E::ElectricUnit::mV:
+								break;
 
-							qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
-							qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
+							case E::ElectricUnit::mV:
 
-							break;
+								qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
+								qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
 
-						case E::ElectricUnit::Ohm:
+								break;
 
-							if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
-							{
-								m_electricR0 = signal.r0_Ohm();
-							}
+							case E::ElectricUnit::Ohm:
 
-							qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
-							qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
+								m_electricR0 = uc.r0_from_signal(signal);
 
-							break;
-					}
+								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
+								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
 
-					break;
+								break;
+						}
 
-				case E::SignalInOutType::Output:
-
-					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-					{
 						break;
-					}
 
-					m_electricLowLimit = signal.electricLowLimit();
-					m_electricHighLimit = signal.electricHighLimit();
-					m_electricPrecision = 4;
+					case E::SignalInOutType::Output:
 
-					if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
-					{
+						if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+						{
+							break;
+						}
+
+						qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
+						qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
+
 						break;
-					}
-
-					m_electricUnitID = signal.electricUnit();
-
-					if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
-					{
-						break;
-					}
-
-					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
-					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
-
-					break;
+				}
 			}
 
 			if (qpl.ok() == true && qph.ok() == true)
 			{
 				m_physicalLowLimit = qpl.toDouble();
 				m_physicalHighLimit = qph.toDouble();
+			}
+			else
+			{
+				m_physicalLowLimit = m_electricLowLimit;
+				m_physicalHighLimit = m_electricHighLimit;
 			}
 		}
 	}
@@ -571,7 +558,8 @@ namespace Metrology
 
 			case E::ElectricUnit::Ohm:
 
-				if (m_electricSensorType != E::SensorType::Ohm_Raw)
+				if (	m_electricSensorType != E::SensorType::NoSensor && m_electricSensorType != E::SensorType::Ohm_Raw &&
+						m_electricSensorType != E::SensorType::Ohm_Pt21 && m_electricSensorType != E::SensorType::Ohm_Cu23)
 				{
 					typeStr += " " + electricR0Str();
 				}

@@ -105,6 +105,8 @@ void CalibratorBase::removeCalibrators()
 			continue;
 		}
 
+		calibrator->setWaitResponse(false);
+
 		if (calibrator->portIsOpen() == true)
 		{
 			int timeout = 0;
