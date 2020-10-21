@@ -144,6 +144,7 @@ private:
 	QAction*				m_pExportAction = nullptr;
 
 	QAction*				m_pSelectSignalForMeasure = nullptr;
+	QAction*				m_pFindSignalInStatisticsList = nullptr;
 	QAction*				m_pFindSignalInMeasureList = nullptr;
 
 	QAction*				m_pFindAction = nullptr;
@@ -198,6 +199,7 @@ private slots:
 							//
 	void					exportSignal();
 	void					selectSignalForMeasure();
+	void					findSignalInStatisticsList();
 	void					findSignalInMeasureList();
 
 							// Edit

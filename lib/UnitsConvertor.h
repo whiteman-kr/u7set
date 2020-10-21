@@ -58,7 +58,7 @@ const UnitsConvertorLimit UnitsConvertorLimits[] =
 	{ E::ElectricUnit::mV,		E::SensorType::mV_L_TXK,			-9.488,		66.466 },	// -200 .. 800		// module non ptaform
 	{ E::ElectricUnit::mV,		E::SensorType::mV_N_THH,			-4.345,		47.513 },	// -270 .. 1300		// module non ptaform
 
-	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_B,			 0.304,		13.763 },	// -255 .. 1815		// module TIM
+    { E::ElectricUnit::mV,		E::SensorType::mV_Type_B,			 0.304,		13.763 },	//  255 .. 1815		// module TIM
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_E,			-8.696,		75.997 },	// -195 .. 995		// module TIM
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_J,			-7.996,		69.267 },	// -205 .. 1195		// module TIM
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_K,			-5.813,		54.717 },	// -195 .. 1367		// module TIM

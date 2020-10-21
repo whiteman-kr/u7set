@@ -4,7 +4,6 @@
 #include <QHeaderView>
 
 #include "MainWindow.h"
-#include "Delegate.h"
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
@@ -482,7 +481,11 @@ void StatisticPanel::createContextMenu()
 	m_pContextMenu = new QMenu(tr(""), m_pStatisticWindow);
 
 	m_pSelectSignalForMeasure = m_pContextMenu->addAction(tr("&Select signal for measuring"));
-	m_pFindSignalInMeasureList = m_pContextMenu->addAction(tr("&Find signal in the measure list"));
+	m_pContextMenu->addSeparator();
+	m_pFindSignalInStatisticsList = m_pContextMenu->addAction(tr("&Find signal in the statistics list ..."));
+	m_pFindSignalInStatisticsList->setIcon(QIcon(":/icons/Find.png"));
+	m_pFindSignalInMeasureList = m_pContextMenu->addAction(tr("&Find signal in the measure list ..."));
+	m_pFindSignalInMeasureList->setIcon(QIcon(":/icons/Find.png"));
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
 	m_pContextMenu->addSeparator();
@@ -494,6 +497,7 @@ void StatisticPanel::createContextMenu()
 	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &StatisticPanel::onContextMenu);
 
 	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &StatisticPanel::selectSignalForMeasure);
+	connect(m_pFindSignalInStatisticsList, &QAction::triggered, this, &StatisticPanel::findSignalInStatisticsList);
 	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &StatisticPanel::findSignalInMeasureList);
 }
 
@@ -941,6 +945,13 @@ void StatisticPanel::selectSignalForMeasure()
 	//
 	//
 	pMainWindow->signalCombo()->setCurrentIndex(signalComboIndex);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticPanel::findSignalInStatisticsList()
+{
+	find();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

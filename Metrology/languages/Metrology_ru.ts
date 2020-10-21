@@ -1634,32 +1634,57 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Builder/IssueLogger.cpp" line="7674"/>
-        <source>Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.</source>
+        <location filename="../../Builder/IssueLogger.cpp" line="7675"/>
+        <source>Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Builder/IssueLogger.cpp" line="7699"/>
-        <source>Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.</source>
+        <location filename="../../Builder/IssueLogger.cpp" line="7702"/>
+        <source>Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Builder/IssueLogger.cpp" line="7722"/>
+        <location filename="../../Builder/IssueLogger.cpp" line="7726"/>
         <source>Signal %1 has wrong R0 (ThermoResistor).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Builder/IssueLogger.cpp" line="7744"/>
+        <location filename="../../Builder/IssueLogger.cpp" line="7747"/>
+        <source>Signal %1 has wrong RLoad (mA).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../Builder/IssueLogger.cpp" line="7772"/>
+        <source>Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../Builder/IssueLogger.cpp" line="7801"/>
+        <source>Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../Builder/IssueLogger.cpp" line="7830"/>
+        <source>Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../Builder/IssueLogger.cpp" line="7859"/>
+        <source>Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../Builder/IssueLogger.cpp" line="7884"/>
         <source>Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project-&gt;Project Properties...-&gt;Safety Project.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Builder/IssueLogger.cpp" line="7764"/>
+        <location filename="../../Builder/IssueLogger.cpp" line="7904"/>
         <source>TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project-&gt;Project Properties...-&gt;Safety Project.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Builder/IssueLogger.cpp" line="7786"/>
+        <location filename="../../Builder/IssueLogger.cpp" line="7926"/>
         <source>Client behavior %1 specified in %2.BehaviorID does not exist. </source>
         <translation type="unfinished"></translation>
     </message>
@@ -1667,113 +1692,121 @@
 <context>
     <name>Calculator</name>
     <message>
-        <location filename="../Calculator.cpp" line="36"/>
+        <location filename="../Calculator.cpp" line="38"/>
         <source>Linearity</source>
         <translation>Линейность</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="43"/>
+        <location filename="../Calculator.cpp" line="45"/>
         <source>In</source>
         <translation>In</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="56"/>
+        <location filename="../Calculator.cpp" line="58"/>
         <source>Out</source>
         <translation>Out</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="70"/>
-        <location filename="../Calculator.cpp" line="80"/>
+        <location filename="../Calculator.cpp" line="72"/>
+        <location filename="../Calculator.cpp" line="82"/>
         <source>min</source>
         <translation>мин</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="72"/>
-        <location filename="../Calculator.cpp" line="82"/>
+        <location filename="../Calculator.cpp" line="74"/>
+        <location filename="../Calculator.cpp" line="84"/>
         <source>max</source>
         <translation>макс</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="94"/>
+        <location filename="../Calculator.cpp" line="96"/>
         <source>Thermistor - GOST 6651-2009</source>
         <translation>Терморезисторы - ГОСТ 6651-2009</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="103"/>
-        <location filename="../Calculator.cpp" line="157"/>
-        <location filename="../Calculator.cpp" line="252"/>
+        <location filename="../Calculator.cpp" line="105"/>
+        <location filename="../Calculator.cpp" line="159"/>
+        <location filename="../Calculator.cpp" line="254"/>
         <source>°C</source>
         <translation>°C</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="116"/>
+        <location filename="../Calculator.cpp" line="118"/>
         <source>Ohm</source>
         <translation>Ом</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="133"/>
+        <location filename="../Calculator.cpp" line="135"/>
         <source>R0</source>
         <translation>R0</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="148"/>
+        <location filename="../Calculator.cpp" line="150"/>
         <source>Thermocouple - GOST 8.585-2001</source>
         <translation>Термопары - ГОСТ 8.585-2001</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="170"/>
+        <location filename="../Calculator.cpp" line="172"/>
         <source>mV</source>
         <translation>мВ</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="187"/>
+        <location filename="../Calculator.cpp" line="189"/>
         <source>Pressure -&gt; Flow</source>
-        <translation type="unfinished">Перепад Давления - &gt; Расход</translation>
+        <translation>Перепад Давления - &gt; Расход</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="194"/>
+        <location filename="../Calculator.cpp" line="196"/>
         <source>P</source>
         <translation>P</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="207"/>
+        <location filename="../Calculator.cpp" line="209"/>
         <source>F</source>
         <translation>F</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="221"/>
+        <location filename="../Calculator.cpp" line="223"/>
         <source>min P</source>
         <translation>мин P</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="223"/>
+        <location filename="../Calculator.cpp" line="225"/>
         <source>max P</source>
         <translation>макс P</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="231"/>
+        <location filename="../Calculator.cpp" line="233"/>
         <source>min F</source>
         <translation>мин F</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="233"/>
+        <location filename="../Calculator.cpp" line="235"/>
         <source>max F</source>
         <translation>макс F</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="245"/>
+        <location filename="../Calculator.cpp" line="247"/>
         <source>Degree</source>
         <translation>Градусы</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="265"/>
+        <location filename="../Calculator.cpp" line="267"/>
         <source>°F</source>
         <translation>°F</translation>
     </message>
     <message>
-        <location filename="../Calculator.cpp" line="306"/>
+        <location filename="../Calculator.cpp" line="308"/>
         <source>Metrological calculator</source>
         <translation>Метрологический калькулятор</translation>
+    </message>
+    <message>
+        <location filename="../Calculator.cpp" line="525"/>
+        <location filename="../Calculator.cpp" line="543"/>
+        <location filename="../Calculator.cpp" line="592"/>
+        <location filename="../Calculator.cpp" line="611"/>
+        <source>Out of range: %1 .. %2</source>
+        <translation>Вне диапазона: %1 .. %2</translation>
     </message>
 </context>
 <context>
@@ -1862,87 +1895,87 @@
 <context>
     <name>CalibratorBase</name>
     <message>
-        <location filename="../CalibratorBase.cpp" line="148"/>
+        <location filename="../CalibratorBase.cpp" line="150"/>
         <source>Calibrators initialization</source>
         <translation>Инициализация калибраторов</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="152"/>
+        <location filename="../CalibratorBase.cpp" line="154"/>
         <source>&amp;Calibrators</source>
         <translation>&amp;Калибраторы</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="154"/>
+        <location filename="../CalibratorBase.cpp" line="156"/>
         <source>&amp;Initialization</source>
         <translation>&amp;Инициализация</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="160"/>
+        <location filename="../CalibratorBase.cpp" line="162"/>
         <source>&amp;Manage ...</source>
         <translation>&amp;Управление ...</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="164"/>
+        <location filename="../CalibratorBase.cpp" line="166"/>
         <source>&amp;Settings ...</source>
         <translation>&amp;Настройки ...</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="168"/>
+        <location filename="../CalibratorBase.cpp" line="170"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="217"/>
+        <location filename="../CalibratorBase.cpp" line="219"/>
         <source>Calibrator %1</source>
         <translation>Калибратор %1</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="271"/>
+        <location filename="../CalibratorBase.cpp" line="273"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="271"/>
+        <location filename="../CalibratorBase.cpp" line="273"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="445"/>
+        <location filename="../CalibratorBase.cpp" line="447"/>
         <source>Please, select calibrator for manage!</source>
         <translation>Выберите калибратор для управления!</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="466"/>
+        <location filename="../CalibratorBase.cpp" line="468"/>
         <source>Please, select calibrator for edit settings!</source>
         <translation>Выберите калибратор для редактирования настроек!</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="501"/>
+        <location filename="../CalibratorBase.cpp" line="503"/>
         <source>Settings calibrator %1</source>
         <translation>Настройки калибратора %1</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="509"/>
+        <location filename="../CalibratorBase.cpp" line="511"/>
         <source>Serial port:</source>
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="528"/>
+        <location filename="../CalibratorBase.cpp" line="530"/>
         <source>Calibrator type:</source>
         <translation>Тип калибратора:</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="545"/>
+        <location filename="../CalibratorBase.cpp" line="547"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="546"/>
+        <location filename="../CalibratorBase.cpp" line="548"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="585"/>
+        <location filename="../CalibratorBase.cpp" line="587"/>
         <source>Please, select calibrator!</source>
         <translation>Выберите калибратор!</translation>
     </message>
@@ -2316,46 +2349,46 @@
 <context>
     <name>Database</name>
     <message>
-        <location filename="../Database.cpp" line="1622"/>
-        <location filename="../Database.cpp" line="1649"/>
-        <location filename="../Database.cpp" line="1659"/>
-        <location filename="../Database.cpp" line="1664"/>
-        <location filename="../Database.cpp" line="1804"/>
+        <location filename="../Database.cpp" line="1640"/>
+        <location filename="../Database.cpp" line="1667"/>
+        <location filename="../Database.cpp" line="1677"/>
+        <location filename="../Database.cpp" line="1682"/>
+        <location filename="../Database.cpp" line="1822"/>
         <source>Database</source>
         <translation>База данных</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1622"/>
+        <location filename="../Database.cpp" line="1640"/>
         <source>Invalid path!</source>
         <translation>Не верный путь!</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1649"/>
+        <location filename="../Database.cpp" line="1667"/>
         <source>Cannot open database</source>
         <translation>Невозможно открыть базу данных</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1659"/>
+        <location filename="../Database.cpp" line="1677"/>
         <source>Error set option of database: [foreign keys=on]</source>
         <translation>Ошибка настройки базы данных: [foreign keys=on]</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1664"/>
+        <location filename="../Database.cpp" line="1682"/>
         <source>Error set option of database: [synchronous=normal]</source>
         <translation>Ошибка настройки базы данных: [synchronous=normal]</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1804"/>
+        <location filename="../Database.cpp" line="1822"/>
         <source>Cannot create table: %1</source>
         <translation>Невозможно создать таблицу : %1</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1849"/>
+        <location filename="../Database.cpp" line="1867"/>
         <source>Backup</source>
         <translation>Резервная копия</translation>
     </message>
     <message>
-        <location filename="../Database.cpp" line="1849"/>
+        <location filename="../Database.cpp" line="1867"/>
         <source>Error reserved copy database (backup of measurements)</source>
         <translation>Ошибка резервного копирования базы данных (резервная копия измерений)</translation>
     </message>
@@ -3049,7 +3082,7 @@ Tuning signals: %1</source>
         <translation>Внутренний</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="310"/>
+        <location filename="../../lib/MetrologySignal.h" line="313"/>
         <source>No valid</source>
         <translation>Не валидный</translation>
     </message>
@@ -3177,37 +3210,37 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MeasureView</name>
     <message>
-        <location filename="../MeasureView.cpp" line="839"/>
+        <location filename="../MeasureView.cpp" line="843"/>
         <source>Save measurements</source>
         <translation>Сохранение измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="839"/>
+        <location filename="../MeasureView.cpp" line="843"/>
         <source>Error saving measurements to database</source>
         <translation>Ошибка при сохранении измерений в базе данных</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="901"/>
+        <location filename="../MeasureView.cpp" line="905"/>
         <source>Do you want delete %1 measurement(s)?</source>
         <translation>Вы хотите удалить %1 измерений?</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="910"/>
+        <location filename="../MeasureView.cpp" line="914"/>
         <source>Delete measurements</source>
         <translation>Удаление измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="910"/>
+        <location filename="../MeasureView.cpp" line="914"/>
         <source>Error remove measurements from database</source>
         <translation>Ошибка при удалении измерений из базы данных</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="922"/>
+        <location filename="../MeasureView.cpp" line="926"/>
         <source>Delete</source>
         <translation>Удаление</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="922"/>
+        <location filename="../MeasureView.cpp" line="926"/>
         <source>Deleted %1 measurement(s)</source>
         <translation>Удалено %1 измерений</translation>
     </message>
@@ -3229,258 +3262,270 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../MeasureViewHeader.cpp" line="18"/>
         <location filename="../MeasureViewHeader.cpp" line="87"/>
-        <source>AppSignalID</source>
-        <translation>AppSignalID</translation>
+        <source>ConnectAppSignalID</source>
+        <translation>ConnectAppSignalID</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="19"/>
         <location filename="../MeasureViewHeader.cpp" line="88"/>
-        <source>CustomAppSignalID</source>
-        <translation>CustomAppSignalID</translation>
+        <source>ConnectType</source>
+        <translation>Тип соединения</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="20"/>
         <location filename="../MeasureViewHeader.cpp" line="89"/>
-        <source>EquipmentID</source>
-        <translation>EquipmentID</translation>
+        <source>AppSignalID</source>
+        <translation>AppSignalID</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="21"/>
         <location filename="../MeasureViewHeader.cpp" line="90"/>
-        <source>Caption</source>
-        <translation>Наименование</translation>
+        <source>CustomAppSignalID</source>
+        <translation>CustomAppSignalID</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="22"/>
         <location filename="../MeasureViewHeader.cpp" line="91"/>
-        <source>Rack</source>
-        <translation>Шкаф</translation>
+        <source>EquipmentID</source>
+        <translation>EquipmentID</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="23"/>
         <location filename="../MeasureViewHeader.cpp" line="92"/>
-        <source>Chassis</source>
-        <translation>Корзина</translation>
+        <source>Caption</source>
+        <translation>Наименование</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="24"/>
         <location filename="../MeasureViewHeader.cpp" line="93"/>
-        <source>Module</source>
-        <translation>Модуль</translation>
+        <source>Rack</source>
+        <translation>Шкаф</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="25"/>
         <location filename="../MeasureViewHeader.cpp" line="94"/>
-        <source>Place</source>
-        <translation>Место</translation>
+        <source>Chassis</source>
+        <translation>Корзина</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="26"/>
         <location filename="../MeasureViewHeader.cpp" line="95"/>
-        <source>Electric range</source>
-        <translation>Электрический диапазон</translation>
+        <source>Module</source>
+        <translation>Модуль</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="27"/>
         <location filename="../MeasureViewHeader.cpp" line="96"/>
+        <source>Place</source>
+        <translation>Место</translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="28"/>
+        <location filename="../MeasureViewHeader.cpp" line="97"/>
+        <source>Electric range</source>
+        <translation>Электрический диапазон</translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="29"/>
+        <location filename="../MeasureViewHeader.cpp" line="98"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="28"/>
-        <location filename="../MeasureViewHeader.cpp" line="99"/>
+        <location filename="../MeasureViewHeader.cpp" line="30"/>
+        <location filename="../MeasureViewHeader.cpp" line="101"/>
         <source>Electric nominal</source>
         <translation>Электрический номинал</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="29"/>
-        <location filename="../MeasureViewHeader.cpp" line="100"/>
+        <location filename="../MeasureViewHeader.cpp" line="31"/>
+        <location filename="../MeasureViewHeader.cpp" line="102"/>
         <source>Engineering nominal</source>
         <translation>Физический номинал</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="30"/>
+        <location filename="../MeasureViewHeader.cpp" line="32"/>
         <source>Value to %</source>
         <translation>Значение в %</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="31"/>
-        <location filename="../MeasureViewHeader.cpp" line="101"/>
+        <location filename="../MeasureViewHeader.cpp" line="33"/>
+        <location filename="../MeasureViewHeader.cpp" line="103"/>
         <source>Electric measure</source>
         <translation>Электрическое измеренное</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="32"/>
-        <location filename="../MeasureViewHeader.cpp" line="102"/>
+        <location filename="../MeasureViewHeader.cpp" line="34"/>
+        <location filename="../MeasureViewHeader.cpp" line="104"/>
         <source>Engineering measure</source>
         <translation>Физическое  измеренное</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="33"/>
+        <location filename="../MeasureViewHeader.cpp" line="35"/>
         <source>System error</source>
         <translation>Системная ошибка</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="34"/>
+        <location filename="../MeasureViewHeader.cpp" line="36"/>
         <source>Standard deviation</source>
         <translation>СКО</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="35"/>
+        <location filename="../MeasureViewHeader.cpp" line="37"/>
         <source>Borders</source>
         <translation>В/Н границы</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="36"/>
+        <location filename="../MeasureViewHeader.cpp" line="38"/>
         <source>Uncertainty</source>
         <translation>Неопределенность</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="37"/>
+        <location filename="../MeasureViewHeader.cpp" line="39"/>
         <source>Amount measuremets</source>
         <translation>Количество измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="38"/>
+        <location filename="../MeasureViewHeader.cpp" line="40"/>
         <source>Value 1</source>
         <translation>Значение 1</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="39"/>
+        <location filename="../MeasureViewHeader.cpp" line="41"/>
         <source>Value 2</source>
         <translation>Значение 2</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="40"/>
+        <location filename="../MeasureViewHeader.cpp" line="42"/>
         <source>Value 3</source>
         <translation>Значение 3</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="41"/>
+        <location filename="../MeasureViewHeader.cpp" line="43"/>
         <source>Value 4</source>
         <translation>Значение 4</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="42"/>
+        <location filename="../MeasureViewHeader.cpp" line="44"/>
         <source>Value 5</source>
         <translation>Значение 5</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="43"/>
+        <location filename="../MeasureViewHeader.cpp" line="45"/>
         <source>Value 6</source>
         <translation>Значение 6</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="44"/>
+        <location filename="../MeasureViewHeader.cpp" line="46"/>
         <source>Value 7</source>
         <translation>Значение 7</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="45"/>
+        <location filename="../MeasureViewHeader.cpp" line="47"/>
         <source>Value 8</source>
         <translation>Значение 8</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="46"/>
+        <location filename="../MeasureViewHeader.cpp" line="48"/>
         <source>Value 9</source>
         <translation>Значение 9</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="47"/>
+        <location filename="../MeasureViewHeader.cpp" line="49"/>
         <source>Value 10</source>
         <translation>Значение 10</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="48"/>
+        <location filename="../MeasureViewHeader.cpp" line="50"/>
         <source>Value 11</source>
         <translation>Значение 11</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="49"/>
+        <location filename="../MeasureViewHeader.cpp" line="51"/>
         <source>Value 12</source>
         <translation>Значение 12</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="50"/>
+        <location filename="../MeasureViewHeader.cpp" line="52"/>
         <source>Value 13</source>
         <translation>Значение 13</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="51"/>
+        <location filename="../MeasureViewHeader.cpp" line="53"/>
         <source>Value 14</source>
         <translation>Значение 14</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="52"/>
+        <location filename="../MeasureViewHeader.cpp" line="54"/>
         <source>Value 15</source>
         <translation>Значение 15</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="53"/>
+        <location filename="../MeasureViewHeader.cpp" line="55"/>
         <source>Value 16</source>
         <translation>Значение 16</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="54"/>
+        <location filename="../MeasureViewHeader.cpp" line="56"/>
         <source>Value 17</source>
         <translation>Значение 17</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="55"/>
+        <location filename="../MeasureViewHeader.cpp" line="57"/>
         <source>Value 18</source>
         <translation>Значение 18</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="56"/>
+        <location filename="../MeasureViewHeader.cpp" line="58"/>
         <source>Value 19</source>
         <translation>Значение 19</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="57"/>
+        <location filename="../MeasureViewHeader.cpp" line="59"/>
         <source>Value 20</source>
         <translation>Значение 20</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="58"/>
-        <location filename="../MeasureViewHeader.cpp" line="105"/>
+        <location filename="../MeasureViewHeader.cpp" line="60"/>
+        <location filename="../MeasureViewHeader.cpp" line="107"/>
         <source>Error</source>
         <translation>Погрешность</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="59"/>
-        <location filename="../MeasureViewHeader.cpp" line="106"/>
+        <location filename="../MeasureViewHeader.cpp" line="61"/>
+        <location filename="../MeasureViewHeader.cpp" line="108"/>
         <source>Limit of error</source>
         <translation>Допуск</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="60"/>
-        <location filename="../MeasureViewHeader.cpp" line="107"/>
+        <location filename="../MeasureViewHeader.cpp" line="62"/>
+        <location filename="../MeasureViewHeader.cpp" line="109"/>
         <source>Result</source>
         <translation>Результат</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="61"/>
-        <location filename="../MeasureViewHeader.cpp" line="108"/>
+        <location filename="../MeasureViewHeader.cpp" line="63"/>
+        <location filename="../MeasureViewHeader.cpp" line="110"/>
         <source>Measurement time</source>
         <translation>Время измерения</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="97"/>
+        <location filename="../MeasureViewHeader.cpp" line="99"/>
         <source>Value type</source>
         <translation>Тип значения</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="98"/>
+        <location filename="../MeasureViewHeader.cpp" line="100"/>
         <source>Compare type</source>
         <translation>Тип сравнения</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="103"/>
+        <location filename="../MeasureViewHeader.cpp" line="105"/>
         <source>CompareAppSignalID</source>
         <translation>CompareAppSignalID</translation>
     </message>
     <message>
-        <location filename="../MeasureViewHeader.cpp" line="104"/>
+        <location filename="../MeasureViewHeader.cpp" line="106"/>
         <source>OutputAppSignalID</source>
         <translation>OutputAppSignalID</translation>
     </message>
@@ -3488,7 +3533,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologySignal.cpp</name>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="1092"/>
+        <location filename="../../lib/MetrologySignal.cpp" line="1093"/>
         <source>Unused</source>
         <translation>Не используется</translation>
     </message>
@@ -3496,12 +3541,12 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologySignal.h</name>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="374"/>
+        <location filename="../../lib/MetrologySignal.h" line="377"/>
         <source>Set point</source>
         <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="375"/>
+        <location filename="../../lib/MetrologySignal.h" line="378"/>
         <source>Hysteresis</source>
         <translation>Зона возврата</translation>
     </message>
@@ -5844,87 +5889,96 @@ Please, select output signal!</source>
 <context>
     <name>StatisticPanel</name>
     <message>
-        <location filename="../StatisticPanel.cpp" line="335"/>
+        <location filename="../StatisticPanel.cpp" line="334"/>
         <source>Panel statistics (Checklist)</source>
         <translation>Панель статистики (чек-лист)</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="364"/>
+        <location filename="../StatisticPanel.cpp" line="363"/>
         <source>&amp;Results</source>
         <translation>&amp;Результаты</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="365"/>
+        <location filename="../StatisticPanel.cpp" line="364"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="366"/>
+        <location filename="../StatisticPanel.cpp" line="365"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="368"/>
+        <location filename="../StatisticPanel.cpp" line="367"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="371"/>
+        <location filename="../StatisticPanel.cpp" line="370"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="376"/>
+        <location filename="../StatisticPanel.cpp" line="375"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="380"/>
+        <location filename="../StatisticPanel.cpp" line="379"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="385"/>
+        <location filename="../StatisticPanel.cpp" line="384"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="390"/>
+        <location filename="../StatisticPanel.cpp" line="389"/>
         <source>Go to next</source>
         <translation>Перейти к следующему</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="391"/>
+        <location filename="../StatisticPanel.cpp" line="390"/>
         <source>Not measured</source>
         <translation>Не измеренному</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="392"/>
+        <location filename="../StatisticPanel.cpp" line="391"/>
         <source>Invalid</source>
         <translation>Плохому</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="484"/>
+        <location filename="../StatisticPanel.cpp" line="483"/>
         <source>&amp;Select signal for measuring</source>
         <translation>&amp;Выбрать сигнал для измерения</translation>
     </message>
     <message>
         <location filename="../StatisticPanel.cpp" line="485"/>
-        <source>&amp;Find signal in the measure list</source>
-        <translation>&amp;Найти сигнал в списке измерений</translation>
+        <source>&amp;Find signal in the statistics list ...</source>
+        <translation>Найти сигнал в списке &amp;статистики ...</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="665"/>
+        <location filename="../StatisticPanel.cpp" line="486"/>
+        <source>&amp;Find signal in the measure list ...</source>
+        <translation>Найти сигнал в списке &amp;измерений ...</translation>
+    </message>
+    <message>
+        <source>&amp;Find signal in the measure list</source>
+        <translation type="vanished">&amp;Найти сигнал в списке измерений</translation>
+    </message>
+    <message>
+        <location filename="../StatisticPanel.cpp" line="667"/>
         <source> Invalid: %1</source>
         <translation> Плохих: %1</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="666"/>
+        <location filename="../StatisticPanel.cpp" line="668"/>
         <source> Measured: %1 / %2</source>
         <translation> Измеренных: %1 / %2</translation>
     </message>
     <message>
-        <location filename="../StatisticPanel.cpp" line="773"/>
+        <location filename="../StatisticPanel.cpp" line="775"/>
         <source>Signal %1 is &quot;%2&quot; signal.
 To measure this signal you have to create connection with input signal.
 For example, type of connection: &quot;Input&quot; -&gt; &quot;%2&quot;.
@@ -6272,72 +6326,57 @@ Range of signal: %1</source>
 <context>
     <name>UnitsConvertor</name>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="113"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="185"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="230"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="453"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="447"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="552"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="601"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="646"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="673"/>
         <source>Function argument is out of range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="150"/>
-        <source>Unknown SensorType for V</source>
+        <location filename="../../lib/UnitsConvertor.cpp" line="456"/>
+        <source>Unknown SensorType for %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="163"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="579"/>
         <source>Rload_Ohm argument is out of range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="170"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="586"/>
         <source>Unknown SensorType for mA</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="178"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="594"/>
         <source>Unknown unitID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="203"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="619"/>
         <source>Unknown OutputMode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="218"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="634"/>
         <source>Incorrect electric unit: &quot;%1&quot; for mode: &quot;%2&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="235"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="651"/>
         <source>Incorrect unitID for mV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="243"/>
-        <source>Unknown SensorType for mv</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="443"/>
-        <source>Unknown SensorType for mV</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="458"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="678"/>
         <source>Incorrect unitID for Ohm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="471"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="683"/>
         <source>Incorrect R0 for Ohm</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="486"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="580"/>
-        <source>Unknown SensorType for Ohm</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

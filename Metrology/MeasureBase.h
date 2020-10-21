@@ -149,6 +149,9 @@ private:
 	QDateTime		m_measureTime;									// measure time
 	int				m_reportType = -1;								// report type
 
+	QString			m_connectionAppSignalID;
+	int				m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+
 	QString			m_appSignalID;
 	QString			m_customAppSignalID;
 	QString			m_equipmentID;
@@ -196,6 +199,12 @@ public:
 	int				reportType() const { return m_reportType; }
 	void			setReportType(int type) { m_reportType = type; }
 
+	QString			connectionAppSignalID() const { return m_connectionAppSignalID; }
+	void			setConnectionAppSignalID(const QString& appSignalID) { m_connectionAppSignalID = appSignalID; setSignalHash(m_appSignalID); }
+
+	int				connectionType() const { return m_connectionType; }
+	QString			connectionTypeStr() const;
+	void			setConnectionType(int type) { m_connectionType = type; }
 
 	QString			appSignalID() const { return m_appSignalID; }
 	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
@@ -220,7 +229,7 @@ public:
 	QString			measureStr(int limitType) const;
 	void			setMeasure(int limitType, double value);
 
-	void			setLimits(const Metrology::SignalParam& param);
+	void			setLimits(const IoSignalParam &ioParam);
 
 	double			lowLimit(int limitType) const;
 	void			setLowLimit(int limitType, double lowLimit);

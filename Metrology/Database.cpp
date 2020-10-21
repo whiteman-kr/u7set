@@ -50,6 +50,9 @@ int SqlFieldBase::init(int objectType, int)
 			append("Filter",						QVariant::Bool);
 			append("Valid",							QVariant::Bool);
 
+			append("ConnectAppSignalID",			QVariant::String, 64);
+			append("ConnectType",					QVariant::Int);
+
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
 			append("EquipmentID",					QVariant::String, 256);
@@ -169,6 +172,9 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("Filter",						QVariant::Bool);
 			append("Valid",							QVariant::Bool);
+
+			append("ConnectAppSignalID",			QVariant::String, 64);
+			append("ConnectType",					QVariant::Int);
 
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
@@ -783,6 +789,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setFilter(query.value(field++).toBool());
 					measure->setSignalValid(query.value(field++).toBool());
 
+					measure->setConnectionAppSignalID(query.value(field++).toString());
+					measure->setConnectionType(query.value(field++).toInt());
+
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
 					measure->setEquipmentID(query.value(field++).toString());
@@ -938,6 +947,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setFilter(query.value(field++).toBool());
 					measure->setSignalValid(query.value(field++).toBool());
+
+					measure->setConnectionAppSignalID(query.value(field++).toString());
+					measure->setConnectionType(query.value(field++).toInt());
 
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
@@ -1197,6 +1209,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->filter());
 					query.bindValue(field++, measure->isSignalValid());
 
+					query.bindValue(field++, measure->connectionAppSignalID());
+					query.bindValue(field++, measure->connectionType());
+
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
 					query.bindValue(field++, measure->equipmentID());
@@ -1367,6 +1382,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->filter());
 					query.bindValue(field++, measure->isSignalValid());
+
+					query.bindValue(field++, measure->connectionAppSignalID());
+					query.bindValue(field++, measure->connectionType());
 
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());

@@ -1,7 +1,7 @@
 #include "Calibrator.h"
 
 #include <assert.h>
-#include <QSettings>
+#include <QThread>
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -520,6 +520,7 @@ bool Calibrator::setValue(double value)
 		return false;
 	}
 
+	int precesion = CalibratorPrecision[m_type][m_sourceUnit];
 
 	convert(value, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
 
@@ -527,8 +528,8 @@ bool Calibrator::setValue(double value)
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		cmdSetValue = QString("%1%2").arg(TRXII_SET_VALUE, QString::number(value, 'f', 3));		break;
-		case CALIBRATOR_TYPE_CALYS75:	cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 'f', 5));	break;
+		case CALIBRATOR_TYPE_TRXII:		cmdSetValue = QString("%1%2").arg(TRXII_SET_VALUE, QString::number(value, 'f', precesion));		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 'f', precesion));	break;
 		default:						assert(false);
 	}
 
@@ -583,6 +584,11 @@ bool Calibrator::stepDown()
 		return false;
 	}
 
+	int precesion = CalibratorPrecision[m_type][m_sourceUnit];
+
+	//double stepSize = 1 / pow(10.0, precesion);
+	//m_sourceValue -= stepSize;
+
 	switch(m_sourceUnit)
 	{
 		case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue -= 0.01;	break;
@@ -596,8 +602,8 @@ bool Calibrator::stepDown()
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		cmdKeyDown = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 'f', 3));	break;
-		case CALIBRATOR_TYPE_CALYS75:	cmdKeyDown = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 'f', 5));	break;
+		case CALIBRATOR_TYPE_TRXII:		cmdKeyDown = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 'f', precesion));	break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdKeyDown = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 'f', precesion));	break;
 		default:						assert(false);
 	}
 
@@ -652,6 +658,11 @@ bool Calibrator::stepUp()
 		return false;
 	}
 
+	int precesion = CalibratorPrecision[m_type][m_sourceUnit];
+
+	//double stepSize = 1 / pow(10.0, precesion);
+	//m_sourceValue += stepSize;
+
 	switch(m_sourceUnit)
 	{
 		case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue += 0.01;	break;
@@ -665,8 +676,8 @@ bool Calibrator::stepUp()
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		cmdKeyUp = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 'f', 3));		break;
-		case CALIBRATOR_TYPE_CALYS75:	cmdKeyUp = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 'f', 5));	break;
+		case CALIBRATOR_TYPE_TRXII:		cmdKeyUp = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 'f', precesion));		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdKeyUp = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 'f', precesion));	break;
 		default:						assert(false);
 	}
 

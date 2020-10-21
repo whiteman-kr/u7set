@@ -272,6 +272,9 @@ namespace Metrology
 		bool					electricRangeIsValid() const;
 		QString					electricRangeStr() const;
 
+		bool					isLinearRange() const;
+		bool					isNotLinearRange() const { return !isLinearRange(); }
+
 		double					physicalLowLimit() const { return m_physicalLowLimit; }
 		void					setPhysicalLowLimit(double lowLimit) { m_physicalLowLimit = lowLimit; }
 

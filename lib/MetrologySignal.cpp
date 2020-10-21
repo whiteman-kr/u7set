@@ -633,6 +633,19 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool SignalParam::isLinearRange() const
+	{
+		if (	(m_electricUnitID == E::ElectricUnit::mV && m_electricSensorType != E::SensorType::mV_Raw_Mul_8 && m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
+				(m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw) )
+		{
+			return false;	// for non-linear
+		}
+
+		return true;		// for linear
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	bool SignalParam::physicalRangeIsValid() const
 	{
 		if (m_physicalLowLimit == 0.0 && m_physicalHighLimit == 0.0)
