@@ -143,13 +143,16 @@ bool OutputDockLog::writeText(const QString& text)
 void OutputDockLog::write(QtMsgType type, const QString& msg)
 {
 	QString color;
+	QString prefix;
 	switch (type)
 	{
 	case QtMsgType::QtWarningMsg:
 		color = "#F87217";
+		prefix = "WRN ";
 		break;
 	case QtMsgType::QtCriticalMsg:
 		color = "#D00000";
+		prefix = "ERR ";
 		break;
 	case QtMsgType::QtInfoMsg:
 		color = "black";
@@ -159,9 +162,10 @@ void OutputDockLog::write(QtMsgType type, const QString& msg)
 	QString time = QTime::currentTime().toString(QLatin1String("hh:mm:ss.zzz"));
 
 	QString html = QString("<font face=\"Courier\" size=\"4\" color=#808080>%1 </font>"
-						   "<font face=\"Courier\" size=\"4\" color=%2>%3</font>")
+						   "<font face=\"Courier\" size=\"4\" color=%2>%3%4</font>")
 				   .arg(time)
 				   .arg(color)
+				   .arg(prefix)
 				   .arg(msg);
 
 	QMutexLocker l(&m_mutex);
@@ -404,6 +408,146 @@ void OutputDockWidget::floatingChanged(bool floating)
 	m_floatButton->setVisible(floating == false);
 }
 
+void OutputDockWidget::prevIssue(const QLatin1String& prefix)
+{
+	assert(m_logTextEdit);
+
+	//15:46:41.438 ERR
+
+	QString regExpVal(tr("(\\d){2}:(\\d){2}:(\\d){2}.(\\d){3} %1 ").arg(prefix));
+
+	//  --
+	//
+	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) &&
+		m_logTextEdit->textCursor() == m_lastNavCursor)
+	{
+		m_lastNavCursor.movePosition(QTextCursor::StartOfLine);
+		m_logTextEdit->setTextCursor(m_lastNavCursor);
+	}
+
+	// Find issue
+	//
+	QRegExp rx(regExpVal);
+	bool found = m_logTextEdit->find(rx, QTextDocument::FindBackward);
+
+	if (found == false)
+	{
+		// Try to find one more time from the end
+		//
+		QTextCursor textCursor = m_logTextEdit->textCursor();
+		textCursor.movePosition(QTextCursor::End);
+		m_logTextEdit->setTextCursor(textCursor);
+
+		found = m_logTextEdit->find(rx, QTextDocument::FindBackward);
+	}
+
+	if (found == true)
+	{
+		// Set cursor int middle of the word, as now it is after selected word and backward find will give the same result
+		//
+		QTextCursor textCursor = m_logTextEdit->textCursor();
+		textCursor.movePosition(QTextCursor::PreviousCharacter);
+		m_logTextEdit->setTextCursor(textCursor);
+
+		// Hightlight the line
+		//
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_logTextEdit->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground(Qt::yellow);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+
+		m_logTextEdit->setExtraSelections(extras);
+
+		// Save this search data
+		//
+		m_lastNavIsPrevIssue = true;
+		m_lastNavIsNextIssue = false;
+		m_lastNavCursor = m_logTextEdit->textCursor();
+	}
+	else
+	{
+		QTextCursor textCursor = m_logTextEdit->textCursor();
+		textCursor.clearSelection();
+		m_logTextEdit->setTextCursor(textCursor);
+
+		m_logTextEdit->setExtraSelections({});
+	}
+
+	return;
+}
+
+void OutputDockWidget::nextIssue(const QLatin1String& prefix)
+{
+	assert(m_logTextEdit);
+
+	QString regExpVal(tr("(\\d){2}:(\\d){2}:(\\d){2}.(\\d){3} %1 ").arg(prefix));
+
+	//  --
+	//
+	if (m_lastNavIsPrevIssue == true &&
+		m_logTextEdit->textCursor() == m_lastNavCursor)
+	{
+		m_lastNavCursor.movePosition(QTextCursor::EndOfLine);
+		m_logTextEdit->setTextCursor(m_lastNavCursor);
+	}
+
+	// Find Issue
+	//
+	QRegExp rx(regExpVal);
+	bool found = m_logTextEdit->find(rx);
+
+	if (found == false)
+	{
+		// Try to find one more time from the beginning
+		//
+		QTextCursor textCursor = m_logTextEdit->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+		m_logTextEdit->setTextCursor(textCursor);
+
+		found = m_logTextEdit->find(rx);
+	}
+
+	if (found == true)
+	{
+		// Set cursor int middle of the word, as now it is after selected word and backward find will give the same result
+		//
+		QTextCursor textCursor = m_logTextEdit->textCursor();
+		textCursor.clearSelection();
+		m_logTextEdit->setTextCursor(textCursor);
+
+		// Hightlight the line
+		//
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_logTextEdit->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground(Qt::yellow);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+
+		m_logTextEdit->setExtraSelections(extras);
+
+		// Save this search data
+		//
+		m_lastNavIsPrevIssue = false;
+		m_lastNavIsNextIssue = true;
+		m_lastNavCursor = m_logTextEdit->textCursor();
+	}
+	else
+	{
+		QTextCursor textCursor = m_logTextEdit->textCursor();
+		textCursor.clearSelection();
+		m_logTextEdit->setTextCursor(textCursor);
+
+		m_logTextEdit->setExtraSelections({});
+	}
+
+	return;
+}
+
 void OutputDockWidget::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
@@ -463,18 +607,6 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 	{
 		const QString& str = data[i];
 		outputMessagesBuffer.append(str);
-
-		/*
-		if (str.contains("color=#D00000"))
-		{
-			m_errorLines.push_back(linesCount + i);
-			qDebug() << "Error line: " << linesCount + i;
-		}
-		if (str.contains("color=#F87217"))
-		{
-			m_warningLines.push_back(linesCount + i);
-			qDebug() << "Warning line: " << linesCount + i;
-		}*/
 
 		if (i != data.size() - 1)
 		{
@@ -541,35 +673,26 @@ void OutputDockWidget::createToolbar()
 	QHBoxLayout* l = new QHBoxLayout(outputDockPanelWidget);
 	l->setContentsMargins(pixelsWide + margin * 2, 0, margin, 0);
 
-
-	OutputDockWidgetTitleButton* b = new OutputDockWidgetTitleButton(this, true);
-	QIcon icon = QIcon(":/Images/Images/ClearLog.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
-		clear();
-	});
-
 	m_errorLabel = new QLabel(tr("E: 0000"));
 	l->addWidget(m_errorLabel);
 
-	b = new OutputDockWidgetTitleButton(this, true);
-	b->setEnabled(false);
-	icon = QIcon(":/Images/Images/PreviousIssue.svg");
+	OutputDockWidgetTitleButton* b = new OutputDockWidgetTitleButton(this, true);
+	QIcon icon = QIcon(":/Images/Images/PreviousIssue.svg");
 	b->setIcon( icon );
 	l->addWidget(b);
 	connect(b, &QPushButton::clicked, [this](){
-		//nextError();
+		prevIssue(QLatin1String("ERR"));
 	});
 
 	b = new OutputDockWidgetTitleButton(this, true);
-	b->setEnabled(false);
 	icon = QIcon(":/Images/Images/NextIssue.svg");
 	b->setIcon( icon );
 	l->addWidget(b);
 	connect(b, &QPushButton::clicked, [this](){
-		//nextError();
+		nextIssue(QLatin1String("ERR"));
 	});
+
+	l->addSpacerItem(new QSpacerItem(margin * 2, margin * 2));
 
 	m_warningLabel = new QLabel(tr("W: 0000"));
 	l->addWidget(m_warningLabel);
@@ -577,22 +700,22 @@ void OutputDockWidget::createToolbar()
 	b = new OutputDockWidgetTitleButton(this, true);
 
 	icon = QIcon(":/Images/Images/PreviousIssue.svg");
-	b->setEnabled(false);
 	b->setIcon( icon );
 	l->addWidget(b);
 	connect(b, &QPushButton::clicked, [this](){
-		//nextError();
+		prevIssue(QLatin1String("WRN"));
 
 	});
 
 	b = new OutputDockWidgetTitleButton(this, true);
-	b->setEnabled(false);
 	icon = QIcon(":/Images/Images/NextIssue.svg");
 	b->setIcon( icon );
 	l->addWidget(b);
 	connect(b, &QPushButton::clicked, [this](){
-		//nextError();
+		nextIssue(QLatin1String("WRN"));
 	});
+
+	l->addSpacerItem(new QSpacerItem(margin * 2, margin * 2));
 
 	m_findEdit = new QLineEdit();
 	m_findEdit->setClearButtonEnabled(true);

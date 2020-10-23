@@ -130,6 +130,9 @@ public:
 private slots:
 	void floatingChanged(bool floating);
 
+	void prevIssue(const QLatin1String& prefix);
+	void nextIssue(const QLatin1String& prefix);
+
 private:
 	virtual void paintEvent(QPaintEvent *event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -151,6 +154,13 @@ private:
 
 	int m_errorCount = 0;
 	int m_warningCount = 0;
+
+	// Issue navigation
+	//
+	QTextCursor m_lastNavCursor;
+	bool m_lastNavIsPrevIssue = false;
+	bool m_lastNavIsNextIssue = false;
+
 };
 
 //
