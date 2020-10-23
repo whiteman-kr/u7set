@@ -49,20 +49,15 @@ private:
 class TestsWidget;
 
 //
-// TestsLogWidget
+// OutputLogWidget
 //
 
-class TestsLogWidget : public ILogFile, public QTextEdit
+class OutputDockLog : public ILogFile
 {
 public:
-	explicit TestsLogWidget(QWidget* parent);
+	OutputDockLog();
 
-private:
-	virtual void timerEvent(QTimerEvent* event) override;
-	virtual void contextMenuEvent(QContextMenuEvent* event) override;
-	virtual void keyPressEvent(QKeyEvent*) override;
-
-	void write(QtMsgType type, const QString& msg);
+	void swapData(QStringList* data, int* errorCount, int* warningCount);
 
 private:
 	// ILogFile implementation
@@ -73,9 +68,89 @@ private:
 	bool writeMessage(const QString& text)  override;
 	bool writeText(const QString& text)  override;
 
+	void write(QtMsgType type, const QString& msg);
+
 private:
 	QMutex m_mutex;
 	QStringList m_data;
+
+	int m_errorCount = 0;
+	int m_warningCount = 0;
+};
+
+class OutputLogTextEdit : public QTextEdit
+{
+public:
+	OutputLogTextEdit(QWidget* parent);
+
+private:
+	virtual void contextMenuEvent(QContextMenuEvent* event) override;
+	virtual void keyPressEvent(QKeyEvent*) override;
+};
+
+//
+// OutputDockWidget
+//
+
+class OutputDockWidgetTitleButton : public QAbstractButton
+{
+	Q_OBJECT
+
+public:
+	OutputDockWidgetTitleButton(QDockWidget *dockWidget, bool drawActualIconSizeOnWindows);
+
+	QSize sizeHint() const override;
+	QSize minimumSizeHint() const override
+	{ return sizeHint(); }
+
+	void enterEvent(QEvent* event) override;
+	void leaveEvent(QEvent *event) override;
+	void paintEvent(QPaintEvent *event) override;
+
+protected:
+	bool event(QEvent *event) override;
+
+private:
+	QSize dockButtonIconSize() const;
+
+	mutable int m_iconSize = -1;
+	bool m_drawActualIconSizeOnWindows = false;
+};
+
+class OutputDockWidget : public QDockWidget
+{
+	Q_OBJECT
+public:
+	OutputDockWidget(const QString& title, OutputDockLog* log, QWidget* parent);
+
+	void clear();
+
+	void setWidget(QWidget *widget);
+
+private slots:
+	void floatingChanged(bool floating);
+
+private:
+	virtual void paintEvent(QPaintEvent *event) override;
+	virtual void timerEvent(QTimerEvent* event) override;
+
+	void createToolbar();
+
+	OutputLogTextEdit* m_logTextEdit = nullptr;
+
+	QLabel* m_errorLabel = nullptr;
+	QLabel* m_warningLabel = nullptr;
+
+	QLineEdit* m_findEdit = nullptr;
+	QPushButton* m_findButton = nullptr;
+
+	OutputDockWidgetTitleButton* m_floatButton = nullptr;
+	OutputDockWidgetTitleButton* m_closeButton = nullptr;
+
+	OutputDockLog* m_log = nullptr;
+
+	int m_errorCount = 0;
+	int m_warningCount = 0;
 };
 
 //
@@ -112,11 +187,8 @@ class TestsWidget : public QMainWindow, HasDbController
 	Q_OBJECT
 
 public:
-	TestsWidget(
-			DbController* db,
-			QWidget* parent);
+	TestsWidget(DbController* db, QWidget* parent);
 	virtual ~TestsWidget();
-
 
 public:
 	bool hasUnsavedTests() const;
@@ -240,6 +312,7 @@ private:
 
 	// Override functions
 private:
+	virtual void showEvent(QShowEvent* e) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
 
 	bool isEditableExtension(const QString& fileName);
@@ -280,9 +353,7 @@ private:
 	QSplitter* m_leftSplitter = nullptr;
 
 	QDockWidget* m_testsDockWidget = nullptr;
-	QDockWidget* m_outputDockWidget = nullptr;
-
-	TestsLogWidget m_testsLogWidget;
+	OutputDockWidget m_outputDockWidget;
 
 	// Tests file tree actions
 	//
@@ -331,7 +402,9 @@ private:
 
 	// --
 	//
-	Sim::Simulator m_simulator{&m_testsLogWidget, nullptr};	// log to console, no parent
+	OutputDockLog m_log;
+
+	Sim::Simulator m_simulator{&m_log, nullptr};	// log to OutputLog, no parent
 };
 
 

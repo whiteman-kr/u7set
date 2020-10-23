@@ -82,37 +82,73 @@ QTreeWidgetItem* TestTabPageDocument::openFilesTreeWidgetItem() const
 // TestsLogWidget
 //
 
-TestsLogWidget::TestsLogWidget(QWidget* parent):
-	QTextEdit(parent)
+OutputDockLog::OutputDockLog()
 {
-	// Output windows
-	//
-	setReadOnly(true);
-	setLineWrapMode(QTextEdit::NoWrap);
-	setAutoFormatting(QTextEdit::AutoNone);
-	document()->setUndoRedoEnabled(false);
-
-	startTimer(25, Qt::PreciseTimer);
-
-	return;
-
 }
 
-void TestsLogWidget::write(QtMsgType type, const QString& msg)
+void OutputDockLog::swapData(QStringList* data, int* errorCount, int* warningCount)
+{
+	if (data == nullptr || errorCount == nullptr || warningCount == nullptr)
+	{
+		Q_ASSERT(data);
+		Q_ASSERT(errorCount);
+		Q_ASSERT(warningCount);
+		return;
+	}
+
+	{
+		QMutexLocker l(&m_mutex);
+		m_data.swap(*data);
+
+		*errorCount = m_errorCount;
+		*warningCount = m_warningCount;
+
+		m_errorCount = 0;
+		m_warningCount = 0;
+	}
+
+	return;
+}
+
+bool OutputDockLog::writeAlert(const QString& text)
+{
+	write(QtMsgType::QtCriticalMsg, text);
+	return true;
+}
+
+bool OutputDockLog::writeError(const QString& text)
+{
+	write(QtMsgType::QtCriticalMsg, text);
+	return true;
+}
+
+bool OutputDockLog::writeWarning(const QString& text)
+{
+	write(QtMsgType::QtWarningMsg, text);
+	return true;
+}
+
+bool OutputDockLog::writeMessage(const QString& text)
+{
+	write(QtMsgType::QtInfoMsg, text);
+	return true;
+}
+
+bool OutputDockLog::writeText(const QString& text)
+{
+	write(QtMsgType::QtInfoMsg, text);
+	return true;
+}
+
+void OutputDockLog::write(QtMsgType type, const QString& msg)
 {
 	QString color;
 	switch (type)
 	{
-	case QtMsgType::QtDebugMsg:
-		color = "black";
-		break;
 	case QtMsgType::QtWarningMsg:
 		color = "#F87217";
 		break;
 	case QtMsgType::QtCriticalMsg:
-		color = "#D00000";
-		break;
-	case QtMsgType::QtFatalMsg:
 		color = "#D00000";
 		break;
 	case QtMsgType::QtInfoMsg:
@@ -131,6 +167,18 @@ void TestsLogWidget::write(QtMsgType type, const QString& msg)
 	QMutexLocker l(&m_mutex);
 	m_data.push_back(html);
 
+	if (type == QtMsgType::QtWarningMsg)
+	{
+		m_warningCount++;
+	}
+	else
+	{
+		if (type == QtMsgType::QtCriticalMsg)
+		{
+			m_errorCount++;
+		}
+	}
+
 	if (m_data.size() > 1000)
 	{
 		m_data.pop_front();
@@ -139,37 +187,22 @@ void TestsLogWidget::write(QtMsgType type, const QString& msg)
 	return;
 }
 
-void TestsLogWidget::timerEvent(QTimerEvent* /*event*/)
+//
+// OutputLogWidget
+//
+
+OutputLogTextEdit::OutputLogTextEdit(QWidget* parent):
+	QTextEdit(parent)
 {
-	QStringList data;
-	{
-		QMutexLocker l(&m_mutex);
-		m_data.swap(data);
-	}
-
-	QString outputMessagesBuffer;
-	outputMessagesBuffer.reserve(128000);
-
-	for (int i = 0; i < data.size(); i++)
-	{
-		const QString& str = data[i];
-		outputMessagesBuffer.append(str);
-
-		if (i != data.size() - 1)
-		{
-			outputMessagesBuffer += QLatin1String("<br>");
-		}
-	}
-
-	if (outputMessagesBuffer.isEmpty() == false)
-	{
-		this->append(outputMessagesBuffer);
-	}
+	setReadOnly(true);
+	setLineWrapMode(QTextEdit::NoWrap);
+	setAutoFormatting(QTextEdit::AutoNone);
+	document()->setUndoRedoEnabled(false);
 }
 
-void TestsLogWidget::contextMenuEvent(QContextMenuEvent* event)
+void OutputLogTextEdit::contextMenuEvent(QContextMenuEvent* event)
 {
-	QMenu* menu = createStandardContextMenu();
+	QMenu* menu = this->createStandardContextMenu();
 	menu->addSeparator();
 
 	QAction* clearAction = menu->addAction(tr("Clear"));
@@ -178,14 +211,14 @@ void TestsLogWidget::contextMenuEvent(QContextMenuEvent* event)
 
 	if (selectedAction == clearAction)
 	{
-		this->clear();
+		clear();
 	}
 
 	delete menu;
 	return;
 }
 
-void TestsLogWidget::keyPressEvent(QKeyEvent* e)
+void OutputLogTextEdit::keyPressEvent(QKeyEvent* e)
 {
 	if (e->matches(QKeySequence::Delete) == true)
 	{
@@ -221,37 +254,387 @@ void TestsLogWidget::keyPressEvent(QKeyEvent* e)
 	return;
 }
 
-bool TestsLogWidget::writeAlert(const QString& text)
+//
+// OutputDockWidget
+//
+
+
+
+OutputDockWidgetTitleButton::OutputDockWidgetTitleButton(QDockWidget *dockWidget, bool drawActualIconSizeOnWindows)
+	: QAbstractButton(dockWidget),
+	  m_drawActualIconSizeOnWindows(drawActualIconSizeOnWindows)
 {
-	write(QtMsgType::QtFatalMsg, text);
-	return true;
+	setFocusPolicy(Qt::NoFocus);
 }
 
-bool TestsLogWidget::writeError(const QString& text)
+bool OutputDockWidgetTitleButton::event(QEvent *event)
 {
-	write(QtMsgType::QtCriticalMsg, text);
-	return true;
+	switch (event->type()) {
+	case QEvent::StyleChange:
+	case QEvent::ScreenChangeInternal:
+		m_iconSize = -1;
+		break;
+	default:
+		break;
+	}
+	return QAbstractButton::event(event);
 }
 
-bool TestsLogWidget::writeWarning(const QString& text)
+static inline bool isWindowsStyle(const QStyle *style)
 {
-	write(QtMsgType::QtWarningMsg, text);
-	return true;
+	// Note: QStyleSheetStyle inherits QWindowsStyle
+	const QStyle *effectiveStyle = style;
+
+	if (style->inherits("QProxyStyle"))
+	  effectiveStyle = static_cast<const QProxyStyle *>(style)->baseStyle();
+
+	return effectiveStyle->inherits("QWindowsStyle");
 }
 
-bool TestsLogWidget::writeMessage(const QString& text)
+QSize OutputDockWidgetTitleButton::dockButtonIconSize() const
 {
-	write(QtMsgType::QtInfoMsg, text);
-	return true;
+	if (m_iconSize < 0) {
+		m_iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, this);
+		// Dock Widget title buttons on Windows where historically limited to size 10
+		// (from small icon size 16) since only a 10x10 XPM was provided.
+		// Adding larger pixmaps to the icons thus caused the icons to grow; limit
+		// this to qpiScaled(10) here.
+		if (m_drawActualIconSizeOnWindows == false && isWindowsStyle(style()))
+			m_iconSize = qMin((10 * logicalDpiX()) / 96, m_iconSize);
+	}
+	return QSize(m_iconSize, m_iconSize);
 }
 
-bool TestsLogWidget::writeText(const QString& text)
+QSize OutputDockWidgetTitleButton::sizeHint() const
 {
-	write(QtMsgType::QtDebugMsg, text);
-	return true;
+	ensurePolished();
+
+	int size = 2*style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin, nullptr, this);
+	if (!icon().isNull()) {
+		const QSize sz = icon().actualSize(dockButtonIconSize());
+		size += qMax(sz.width(), sz.height());
+	}
+
+	return QSize(size, size);
 }
 
+void OutputDockWidgetTitleButton::enterEvent(QEvent* event)
+{
+	if (isEnabled()) update();
+	QAbstractButton::enterEvent(event);
+}
+
+void OutputDockWidgetTitleButton::leaveEvent(QEvent *event)
+{
+	if (isEnabled()) update();
+	QAbstractButton::leaveEvent(event);
+}
+
+void OutputDockWidgetTitleButton::paintEvent(QPaintEvent *)
+{
+	QPainter p(this);
+
+	QStyleOptionToolButton opt;
+	opt.initFrom(this);
+	opt.state |= QStyle::State_AutoRaise;
+
+	if (style()->styleHint(QStyle::SH_DockWidget_ButtonsHaveFrame, nullptr, this))
+	{
+		if (isEnabled() && underMouse() && !isChecked() && !isDown())
+			opt.state |= QStyle::State_Raised;
+		if (isChecked())
+			opt.state |= QStyle::State_On;
+		if (isDown())
+			opt.state |= QStyle::State_Sunken;
+		style()->drawPrimitive(QStyle::PE_PanelButtonTool, &opt, &p, this);
+	}
+
+	opt.icon = icon();
+	opt.subControls = { };
+	opt.activeSubControls = { };
+	opt.features = QStyleOptionToolButton::None;
+	opt.arrowType = Qt::NoArrow;
+	opt.iconSize = dockButtonIconSize();
+	style()->drawComplexControl(QStyle::CC_ToolButton, &opt, &p, this);
+}
+
+OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWidget* parent):
+	QDockWidget(title, parent),
+	m_log(log)
+{
+	// Output window
 	//
+	m_logTextEdit = new OutputLogTextEdit(this);
+	QDockWidget::setWidget(m_logTextEdit);
+
+	createToolbar();
+
+	connect(this, &QDockWidget::topLevelChanged, this, &OutputDockWidget::floatingChanged);
+
+	startTimer(25, Qt::PreciseTimer);
+
+	setBackgroundRole(QPalette::Light);
+	setAutoFillBackground(true);
+
+	return;
+}
+
+void OutputDockWidget::clear()
+{
+	m_logTextEdit->clear();
+
+	m_errorLabel->setText("E: 0000");
+	m_errorLabel->setStyleSheet(QString());
+	m_warningLabel->setText("W: 0000");
+	m_warningLabel->setStyleSheet(QString());
+
+	m_errorCount = 0;
+	m_warningCount = 0;
+}
+
+void OutputDockWidget::setWidget(QWidget *widget)
+{
+	Q_UNUSED(widget);
+	Q_ASSERT(false);	// Widget is set in constructor
+	return;
+}
+
+void OutputDockWidget::floatingChanged(bool floating)
+{
+	m_floatButton->setVisible(floating == false);
+}
+
+void OutputDockWidget::paintEvent(QPaintEvent *event)
+{
+	Q_UNUSED(event);
+
+	if (isFloating() == false)
+	{
+		QStylePainter p(this);
+
+		QStyleOptionDockWidget titleOpt;
+		initStyleOption(&titleOpt);
+
+		p.drawControl(QStyle::CE_DockWidgetTitle, titleOpt);
+	}
+	else
+	{
+		QPainter p(this);
+
+		QStyleOptionDockWidget titleOpt;
+		initStyleOption(&titleOpt);
+
+		bool normalColorGroup = isActiveWindow() == true && isEnabled() == true;
+
+		QColor color = palette().color(normalColorGroup ? QPalette::Normal : QPalette::Disabled, QPalette::Text);
+
+		p.setPen(color);
+
+		int margin = style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin, nullptr, this);
+
+		QRect textRect = titleOpt.rect;
+		textRect.moveLeft(margin * 2);
+
+		p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, windowTitle());
+
+	}
+
+	return;
+}
+
+void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
+{
+	QStringList data;
+
+	int errorCount = 0;
+	int warningCount = 0;
+
+	m_log->swapData(&data, &errorCount, &warningCount);
+
+	if (data.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString outputMessagesBuffer;
+	outputMessagesBuffer.reserve(128000);
+
+	for (int i = 0; i < data.size(); i++)
+	{
+		const QString& str = data[i];
+		outputMessagesBuffer.append(str);
+
+		/*
+		if (str.contains("color=#D00000"))
+		{
+			m_errorLines.push_back(linesCount + i);
+			qDebug() << "Error line: " << linesCount + i;
+		}
+		if (str.contains("color=#F87217"))
+		{
+			m_warningLines.push_back(linesCount + i);
+			qDebug() << "Warning line: " << linesCount + i;
+		}*/
+
+		if (i != data.size() - 1)
+		{
+			outputMessagesBuffer += QLatin1String("<br>");
+		}
+	}
+
+	if (outputMessagesBuffer.isEmpty() == false)
+	{
+		m_logTextEdit->append(outputMessagesBuffer);
+	}
+
+	errorCount += m_errorCount;
+	warningCount += m_warningCount;
+
+	if (m_errorCount > 9999)
+	{
+		m_errorCount = 9999;
+	}
+	if (m_warningCount > 9999)
+	{
+		m_warningCount = 9999;
+	}
+
+	if (m_errorCount != errorCount)
+	{
+		if (m_errorCount == 0)
+		{
+			m_errorLabel->setStyleSheet("QLabel { color : #D00000; }");
+		}
+		m_errorLabel->setText(tr("E: %1").arg(QString::number(errorCount).rightJustified(4, '0')));
+	}
+
+	if (m_warningCount == 0 && warningCount > 0)
+	{
+		if (m_warningCount == 0)
+		{
+			m_warningLabel->setStyleSheet("QLabel { color : #F87217; }");
+		}
+		m_warningLabel->setText(tr("W: %1").arg(QString::number(warningCount).rightJustified(4, '0')));
+	}
+
+	m_errorCount = errorCount;
+	m_warningCount = warningCount;
+
+	return;
+}
+
+void OutputDockWidget::createToolbar()
+{
+	// Create Dock Panel Widget
+
+	QWidget* outputDockPanelWidget = new QWidget(this);
+
+	// Calculate left layout offset
+
+	int margin = style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin, nullptr, this);
+
+	// Create layouts and controls
+
+	QFontMetrics fm(font());
+	int pixelsWide = fm.horizontalAdvance(windowTitle());
+
+	QHBoxLayout* l = new QHBoxLayout(outputDockPanelWidget);
+	l->setContentsMargins(pixelsWide + margin * 2, 0, margin, 0);
+
+
+	OutputDockWidgetTitleButton* b = new OutputDockWidgetTitleButton(this, true);
+	QIcon icon = QIcon(":/Images/Images/ClearLog.svg");
+	b->setIcon( icon );
+	l->addWidget(b);
+	connect(b, &QPushButton::clicked, [this](){
+		clear();
+	});
+
+	m_errorLabel = new QLabel(tr("E: 0000"));
+	l->addWidget(m_errorLabel);
+
+	b = new OutputDockWidgetTitleButton(this, true);
+	b->setEnabled(false);
+	icon = QIcon(":/Images/Images/PreviousIssue.svg");
+	b->setIcon( icon );
+	l->addWidget(b);
+	connect(b, &QPushButton::clicked, [this](){
+		//nextError();
+	});
+
+	b = new OutputDockWidgetTitleButton(this, true);
+	b->setEnabled(false);
+	icon = QIcon(":/Images/Images/NextIssue.svg");
+	b->setIcon( icon );
+	l->addWidget(b);
+	connect(b, &QPushButton::clicked, [this](){
+		//nextError();
+	});
+
+	m_warningLabel = new QLabel(tr("W: 0000"));
+	l->addWidget(m_warningLabel);
+
+	b = new OutputDockWidgetTitleButton(this, true);
+
+	icon = QIcon(":/Images/Images/PreviousIssue.svg");
+	b->setEnabled(false);
+	b->setIcon( icon );
+	l->addWidget(b);
+	connect(b, &QPushButton::clicked, [this](){
+		//nextError();
+
+	});
+
+	b = new OutputDockWidgetTitleButton(this, true);
+	b->setEnabled(false);
+	icon = QIcon(":/Images/Images/NextIssue.svg");
+	b->setIcon( icon );
+	l->addWidget(b);
+	connect(b, &QPushButton::clicked, [this](){
+		//nextError();
+	});
+
+	m_findEdit = new QLineEdit();
+	m_findEdit->setClearButtonEnabled(true);
+	m_findEdit->setPlaceholderText(tr("Find Text"));
+	l->addWidget(m_findEdit);
+
+	m_findButton = new QPushButton("Find");
+	l->addWidget(m_findButton);
+	connect(m_findButton, &QPushButton::clicked, [this](){
+		QString text = m_findEdit->text();
+		if (text.isEmpty() == false)
+		{
+			bool result = m_logTextEdit->find(text);
+			if (result == false)
+			{
+				QMessageBox::warning(this, qAppName(), tr("Text was not found."));
+			}
+		}
+	});
+
+	l->addStretch();
+
+	m_floatButton = new OutputDockWidgetTitleButton(this, false);
+	icon = outputDockPanelWidget->style()->standardIcon(QStyle::SP_TitleBarNormalButton, 0, outputDockPanelWidget);
+	m_floatButton->setIcon( icon );
+	l->addWidget(m_floatButton);
+	connect(m_floatButton, &QPushButton::clicked, [this](){
+		setFloating(true);
+	});
+
+	m_closeButton = new OutputDockWidgetTitleButton(this, false);
+	icon = outputDockPanelWidget->style()->standardIcon(QStyle::SP_TitleBarCloseButton, 0, outputDockPanelWidget);
+	m_closeButton->setIcon( icon );
+	l->addWidget(m_closeButton);
+	connect(m_closeButton, &QPushButton::clicked, [this](){
+		setVisible(false);
+	});
+
+	setTitleBarWidget(outputDockPanelWidget);
+}
+
+//
 // TestsTabPage
 //
 
@@ -340,9 +723,8 @@ void TestsTabPage::projectClosed()
 TestsWidget::TestsWidget(DbController* dbc, QWidget* parent) :
 	QMainWindow(parent),
 	HasDbController(dbc),
-	m_testsLogWidget(this)
+	m_outputDockWidget(tr("Output"), &m_log, this)
 {
-
 	setWindowFlags(Qt::Widget);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
@@ -2113,16 +2495,9 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 		return;
 	}
 
-	if (m_outputDockWidget == nullptr)
-	{
-		Q_ASSERT(m_outputDockWidget);
-	}
-	else
-	{
-		m_outputDockWidget->setVisible(true);
-	}
+	m_outputDockWidget.setVisible(true);
 
-	m_testsLogWidget.clear();
+	m_outputDockWidget.clear();
 
 	std::vector<std::shared_ptr<DbFile>> latestFiles;
 	bool ok = db()->getLatestVersion(files, &latestFiles, this);
@@ -2163,6 +2538,7 @@ void TestsWidget::simStateChanged(Sim::SimControlState state)
 void TestsWidget::createToolbar()
 {
 	m_testsToolbar = addToolBar("Toolbar");
+	m_testsToolbar->setObjectName("TestsToolBar");
 
 	m_testsToolbar->setMovable(false);
 	m_testsToolbar->toggleViewAction()->setDisabled(true);
@@ -2278,6 +2654,8 @@ void TestsWidget::createTestsDock()
 	// Left Dock Widget
 
 	m_testsDockWidget = new QDockWidget(tr("Project Tests"), this);
+	m_testsDockWidget->setObjectName("TestsDockWidget");
+
 	m_testsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea |
 								Qt::RightDockWidgetArea);
 	m_testsDockWidget->setWidget(m_leftSplitter);
@@ -2291,13 +2669,9 @@ void TestsWidget::createTestsDock()
 void TestsWidget::createLogDock()
 {
 	// Log Dock Widget
-
-	m_outputDockWidget = new QDockWidget(tr("Output"), this);
-	m_outputDockWidget->setAllowedAreas(Qt::BottomDockWidgetArea);
-	m_outputDockWidget->setWidget(&m_testsLogWidget);
-	//logDockWidget->setFeatures(QDockWidget::DockWidgetClosable);
-
-	addDockWidget(Qt::BottomDockWidgetArea, m_outputDockWidget);
+	m_outputDockWidget.setObjectName("OutputDockWidget");
+	m_outputDockWidget.setAllowedAreas(Qt::BottomDockWidgetArea);
+	addDockWidget(Qt::BottomDockWidgetArea, &m_outputDockWidget);
 
 	return;
 }
@@ -3185,6 +3559,27 @@ void TestsWidget::runTests(std::vector<int> fileIds)
 	}
 
 	runSimTests(m_buildPath, dbFiles);
+	return;
+}
+
+void TestsWidget::showEvent(QShowEvent* e)
+{
+	QMainWindow::showEvent(e);
+	e->ignore();
+
+static bool firstEvent = true;
+
+	if (firstEvent == true)
+	{
+		QList<QDockWidget*> dockWidgets = findChildren<QDockWidget*>();
+		for (QDockWidget* dw : dockWidgets)
+		{
+			restoreDockWidget(dw);
+			dw->setVisible(true);
+		}
+		firstEvent = false;
+	}
+
 	return;
 }
 

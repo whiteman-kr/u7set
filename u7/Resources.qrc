@@ -76,6 +76,9 @@
         <file>Images/SimAllowRegData.svg</file>
         <file>Images/TestsRunAll.svg</file>
         <file>Images/TestsRunSelected.svg</file>
+        <file>Images/NextIssue.svg</file>
+        <file>Images/PreviousIssue.svg</file>
+        <file>Images/ClearLog.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
