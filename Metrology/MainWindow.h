@@ -9,10 +9,10 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QComboBox>
-#include <QClipboard>
 
 #include "../lib/SimpleThread.h"
 
+#include "SelectSignalWidget.h"
 #include "MeasureView.h"
 #include "ConfigSocket.h"
 #include "SignalSocket.h"
@@ -47,6 +47,8 @@ private:
 	QAction*				m_pStartMeasureAction = nullptr;
 	QAction*				m_pStopMeasureAction = nullptr;
 	QAction*				m_pExportMeasureAction = nullptr;
+	QAction*				m_pPreviousSignalAction = nullptr;
+	QAction*				m_pNextSignalAction = nullptr;
 
 							// menu - Edit
 							//
@@ -100,11 +102,8 @@ private:
 	QComboBox*				m_measureKindList = nullptr;
 	QComboBox*				m_signalConnectionTypeList = nullptr;
 
-	QComboBox*				m_asRackCombo = nullptr;
-	QComboBox*				m_asSignalCombo = nullptr;
-	QComboBox*				m_asChassisCombo = nullptr;
-	QComboBox*				m_asModuleCombo = nullptr;
-	QComboBox*				m_asPlaceCombo = nullptr;
+	QComboBox*				m_rackCombo = nullptr;
+	SelectSignalWidget*		m_selectSignalWidget = nullptr;
 
 	// Elements of interface - Pages of Tab
 	//
@@ -177,9 +176,7 @@ public:
 	void					updateRacksOnToolBar();
 	void					updateSignalsOnToolBar();
 
-	QComboBox*				signalConnectionTypeList() { return m_signalConnectionTypeList; }
-	QComboBox*				rackCombo() { return m_asRackCombo; }
-	QComboBox*				signalCombo() { return m_asSignalCombo; }
+public:
 
 	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
 	MeasureView*			measureView(int measureType);
@@ -262,11 +259,10 @@ private slots:
 	// Slots of analog signal toolbar
 	//
 	void					setRack(int index);
-	void					setMeasureSignal(int index);
-	void					setChassis(int index);
-	void					setModule(int index);
-	void					setPlace(int index);
-	void					setMetrologySignalByPosition(int index);
+	void					setAcitiveMeasureSignal(int index);
+	void					previousMeasureSignal();
+	void					nextMeasureSignal();
+	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
 
 	// Slots of contex menu
 	//
@@ -306,6 +302,7 @@ private slots:
 	// Slots for enable measuring
 	//
 	void					updateStartStopActions();
+	void					updatePrevNextSignalActions(int signalIndex);
 };
 
 // ==============================================================================================

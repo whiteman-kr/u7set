@@ -1,9 +1,10 @@
 #include "TuningSignalList.h"
 
 #include "MainWindow.h"
-#include "Options.h"
-#include "ExportData.h"
+#include "CopyData.h"
 #include "FindData.h"
+#include "ExportData.h"
+#include "Options.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1030,33 +1031,8 @@ void TuningSignalListDialog::find()
 
 void TuningSignalListDialog::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pSignalView->model()->rowCount();
-	int columnCount = m_pSignalView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pSignalView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pSignalView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pSignalView->model()->data(m_pSignalView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pSignalView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -5,13 +5,13 @@
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
-#include <QClipboard>
 #include <QKeyEvent>
 
-#include "Options.h"
-#include "ObjectProperties.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
+#include "CopyData.h"
+#include "Options.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -574,7 +574,7 @@ void SignalInfoPanel::appendSignalConnetionMenu()
 		return;
 	}
 
-	m_outputSignalsList =  theSignalBase.signalConnections().getOutputSignals(signalConnectionType, inParam.appSignalID());
+	m_outputSignalsList = theSignalBase.signalConnections().getOutputSignals(signalConnectionType, inParam.appSignalID());
 
 	int outputSignalCount = m_outputSignalsList.count();
 	for (int s = 0; s < outputSignalCount; s++)
@@ -806,17 +806,7 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 		return;
 	}
 
-	// update ActiveSignal
-	//
-	MeasureSignal signalForMeasure = theSignalBase.activeSignal();
-
-	MultiChannelSignal multiChannelSignal = signalForMeasure.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-
-	multiChannelSignal.setMetrologySignal(theOptions.toolBar().measureKind(), channel, pOutputSignal);
-
-	signalForMeasure.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
-
-	theSignalBase.setActiveSignal(signalForMeasure);
+	emit updateActiveOutputSignal(channel, pOutputSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -837,33 +827,8 @@ void SignalInfoPanel::showElectricValue()
 
 void SignalInfoPanel::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

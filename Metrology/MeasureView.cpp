@@ -3,12 +3,10 @@
 #include <QApplication>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QClipboard>
 
 #include "Database.h"
+#include "CopyData.h"
 #include "Options.h"
-
-#include "MainWindow.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -930,33 +928,8 @@ void MeasureView::removeMeasure()
 
 void MeasureView::copy()
 {
-	QString textClipboard;
-
-	int rowCount = model()->rowCount();
-	int columnCount = model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(model()->data(model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(this, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

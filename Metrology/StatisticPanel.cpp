@@ -1,12 +1,10 @@
 #include "StatisticPanel.h"
 
-#include <QClipboard>
-#include <QHeaderView>
-
 #include "MainWindow.h"
-#include "Options.h"
-#include "ExportData.h"
+#include "CopyData.h"
 #include "FindData.h"
+#include "ExportData.h"
+#include "Options.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -739,17 +737,6 @@ void StatisticPanel::exportSignal()
 
 void StatisticPanel::selectSignalForMeasure()
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	if (pMainWindow->rackCombo() == nullptr || pMainWindow->signalCombo() == nullptr)
-	{
-		return;
-	}
-
 	if (m_pView == nullptr)
 	{
 		return;
@@ -805,31 +792,7 @@ void StatisticPanel::selectSignalForMeasure()
 					break;
 				}
 
-				Metrology::Signal* pInputSignal = comparatorEx->inputSignal();
-				if (pInputSignal == nullptr || pInputSignal->param().isValid() == false)
-				{
-					break;
-				}
-
-				if (pInputSignal->param().isInput() == true)
-				{
-					pSignal = pInputSignal;
-					break;
-				}
-
-				int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pInputSignal);
-				if (connectionIndex == -1)
-				{
-					break;
-				}
-
-				const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
-				if (connection.isValid() == false)
-				{
-					break;
-				}
-
-				pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				pSignal = comparatorEx->inputSignal();
 			}
 			break;
 
@@ -843,35 +806,64 @@ void StatisticPanel::selectSignalForMeasure()
 		return;
 	}
 
-	if (theOptions.toolBar().signalConnectionType() != si.signalConnectionType())
+	if (pSignal->param().isInput() == false)
 	{
-		pMainWindow->signalConnectionTypeList()->setCurrentIndex(si.signalConnectionType());
+		int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+		if (connectionIndex == -1)
+		{
+			return;
+		}
+
+		const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+		if (connection.isValid() == false)
+		{
+			return;
+		}
+
+		pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			return;
+		}
 	}
 
+	// set SignalConnectionType
 	//
-	//
-	int rackComboIndex = -1;
-
-	int rackComboCount = pMainWindow->rackCombo()->count();
-	for(int i = 0; i < rackComboCount; i++)
+	if (theOptions.toolBar().signalConnectionType() != si.signalConnectionType())
 	{
+		emit setSignalConnectionType(si.signalConnectionType());
+	}
+
+	// find Rack
+	//
+	int rackIndex = -1;
+
+	int rackCount = theSignalBase.rackForMeasureCount();
+	for(int i = 0; i < rackCount; i++)
+	{
+		const Metrology::RackParam& rack = theSignalBase.rackForMeasure(i);
+		if (rack.isValid() == false)
+		{
+			continue;
+		}
+
 		switch (theOptions.toolBar().measureKind())
 		{
 			case MEASURE_KIND_ONE_RACK:
 			case MEASURE_KIND_ONE_MODULE:
 
-				if (pMainWindow->rackCombo()->itemData(i).toInt() == pSignal->param().location().rack().index())
+				if (rack.index() == pSignal->param().location().rack().index())
 				{
-					rackComboIndex = i;
+					rackIndex = i;
 				}
 
 				break;
 
 			case MEASURE_KIND_MULTI_RACK:
 
-				if (pMainWindow->rackCombo()->itemData(i).toInt() == pSignal->param().location().rack().groupIndex())
+				if (rack.index() == pSignal->param().location().rack().groupIndex())
 				{
-					rackComboIndex = i;
+					rackIndex = i;
 				}
 
 				break;
@@ -880,29 +872,29 @@ void StatisticPanel::selectSignalForMeasure()
 				assert(0);
 		}
 
-		if (rackComboIndex != -1)
+		if (rackIndex != -1)
 		{
 			break;
 		}
 	}
 
-	if (rackComboIndex == -1)
+	if (rackIndex == -1)
 	{
 		return;
 	}
 
+	// set Rack
 	//
-	//
-	pMainWindow->rackCombo()->setCurrentIndex(rackComboIndex);
+	emit setRack(rackIndex);
 
-	//
+	// find Signal
 	//
 	int measureSignalIndex = -1;
 
-	int signalComboCount = theSignalBase.signalForMeasureCount();
-	for(int i = 0; i < signalComboCount; i++)
+	int measureSignalCount = theSignalBase.signalForMeasureCount();
+	for(int i = 0; i < measureSignalCount; i++)
 	{
-		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(i);
+		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure(i);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;
@@ -923,28 +915,7 @@ void StatisticPanel::selectSignalForMeasure()
 		return;
 	}
 
-	//
-	//
-	int signalComboIndex = -1;
-
-	signalComboCount = pMainWindow->signalCombo()->count();
-	for(int i = 0; i < signalComboCount; i++)
-	{
-		if (pMainWindow->signalCombo()->itemData(i).toInt() ==  measureSignalIndex)
-		{
-			signalComboIndex = i;
-			break;
-		}
-	}
-
-	if (signalComboIndex == -1)
-	{
-		return;
-	}
-
-	//
-	//
-	pMainWindow->signalCombo()->setCurrentIndex(signalComboIndex);
+	emit setMeasureSignal(measureSignalIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1008,38 +979,8 @@ void StatisticPanel::find()
 
 void StatisticPanel::copy()
 {
-	if (m_pView == nullptr)
-	{
-		return;
-	}
-
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

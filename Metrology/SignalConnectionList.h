@@ -15,7 +15,6 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDialogButtonBox>
-#include <QClipboard>
 
 #include "../lib/Signal.h"
 

@@ -8,6 +8,7 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QVBoxLayout>
+#include <QHeaderView>
 #include <QTableView>
 #include <QTableWidget>
 #include <QLabel>
@@ -180,6 +181,12 @@ private:
 protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
+
+signals:
+
+	void					setSignalConnectionType(int index);
+	void					setRack(int index);
+	void					setMeasureSignal(int index);
 
 public slots:
 

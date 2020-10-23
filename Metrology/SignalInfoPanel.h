@@ -157,6 +157,10 @@ protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
+signals:
+
+	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
+
 public slots:
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected

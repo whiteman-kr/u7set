@@ -25,13 +25,14 @@ public:
 
 	MeasureViewColumn();
 	MeasureViewColumn(const MeasureViewColumn& from);
-	MeasureViewColumn(const QString& title, int width, bool visible, int alignment, bool duplicate);
+	MeasureViewColumn(const QString& uniqueTitle, const QString& title, int width, bool visible, int alignment, bool duplicate);
 	virtual ~MeasureViewColumn();
 
 private:
 
 	int					m_index = -1;
 
+	QString				m_uniqueTitle;
 	QString				m_title;
 	int					m_width = 100;
 	bool				m_enableVisible = MVC_CMN_SHOW;
@@ -44,6 +45,9 @@ public:
 
 	int					index() const { return m_index; }
 	void				setIndex(int index) { m_index = index; }
+
+	QString				uniqueTitle() const { return m_uniqueTitle; }
+	void				setUniqueTitle(const QString& title) { m_uniqueTitle = title; }
 
 	QString				title() const;
 	void				setTitle(const QString& title) { m_title = title; }

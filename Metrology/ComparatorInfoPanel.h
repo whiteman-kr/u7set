@@ -77,6 +77,7 @@ private:
 	ComparatorInfoTable		m_comparatorTable;
 
 	QMenu*					m_pContextMenu = nullptr;
+	QAction*				m_pCopyAction = nullptr;
 	QAction*				m_pComparatorPropertyAction = nullptr;
 
 	void					createInterface();
@@ -106,6 +107,7 @@ private slots:
 
 	// slots of menu
 	//
+	void					copy();
 	void					comparatorProperty();
 
 	void					onContextMenu(QPoint);

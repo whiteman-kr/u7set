@@ -5,13 +5,13 @@
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
-#include <QClipboard>
 #include <QKeyEvent>
 
-#include "Options.h"
-#include "ObjectProperties.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
+#include "CopyData.h"
+#include "Options.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -311,9 +311,15 @@ void ComparatorInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
 
+//	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
+//	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+
+//	m_pContextMenu->addSeparator();
+
 	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
+//	connect(m_pCopyAction, &QAction::triggered, this, &ComparatorInfoPanel::copy);
 	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &ComparatorInfoPanel::comparatorProperty);
 
 	// init context menu
@@ -482,6 +488,14 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 void ComparatorInfoPanel::updateComparatorState()
 {
 	m_comparatorTable.updateState();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoPanel::copy()
+{
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -5,7 +5,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDialogButtonBox>
-#include <QClipboard>
 
 #if __has_include("../../gitlabci_version.h")
 #	include "../../gitlabci_version.h"

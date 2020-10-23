@@ -6,11 +6,11 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QStatusBar>
-#include <QClipboard>
 #include <QTableWidget>
 
 #include "MainWindow.h"
 #include "MeasureView.h"
+#include "CopyData.h"
 #include "Options.h"
 #include "Delegate.h"
 
@@ -31,7 +31,6 @@ FindItem::FindItem(int row, int column, const QString& text, int beginPos, int e
 	m_beginPos (beginPos) ,
 	m_endPos (endPos)
 {
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -271,8 +270,7 @@ void FindMeasurePanel::createInterface()
 	//m_findTextEdit->setClearButtonEnabled(true);
 
 	toolBar->addWidget(m_findTextEdit);
-	//QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
-	QAction* action = toolBar->addAction(tr("Find text"));
+	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindMeasurePanel::find);
 
 	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -445,7 +443,7 @@ void FindMeasurePanel::find()
 				continue;
 			}
 
-			int pos = text.indexOf(m_findText);
+			int pos = text.indexOf(m_findText, 0, Qt::CaseInsensitive);
 			if (pos == -1)
 			{
 				continue;
@@ -527,33 +525,8 @@ void FindMeasurePanel::onContextMenu(QPoint)
 
 void FindMeasurePanel::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

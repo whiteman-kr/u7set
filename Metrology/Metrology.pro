@@ -44,12 +44,14 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
+    CopyData.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
     OptionsDialog.cpp \
     Options.cpp \
     OptionsPointsDialog.cpp \
+    SelectSignalWidget.cpp \
     main.cpp \
     MeasureThread.cpp \
     CalibratorManager.cpp \
@@ -120,6 +122,7 @@ SOURCES += \
 HEADERS  += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
+    CopyData.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
@@ -136,6 +139,7 @@ HEADERS  += \
     Database.h \
     Conversion.h \
     Calculator.h \
+    SelectSignalWidget.h \
     Stable.h \
     ObjectVector.h \
     ../lib/Signal.h \

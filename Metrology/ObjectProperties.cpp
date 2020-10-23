@@ -660,7 +660,7 @@ void RackGroupPropertyDialog::updateRackList()
 
 void RackGroupPropertyDialog::appendGroup()
 {
-	QString caption = tr("Rack group %1").arg(m_groupBase.count() + 1);
+	QString caption = QString("Rack group %1").arg(m_groupBase.count() + 1);
 
 	RackGroup group;
 

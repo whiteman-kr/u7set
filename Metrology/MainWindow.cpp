@@ -120,6 +120,18 @@ void MainWindow::createActions()
 	m_pExportMeasureAction->setToolTip(tr("Export measurements"));
 	connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
 
+	m_pPreviousSignalAction = new QAction(tr("Previous signal"), this);
+	m_pPreviousSignalAction->setShortcut(Qt::CTRL + Qt::Key_Left);
+	m_pPreviousSignalAction->setIcon(QIcon(":/icons/PreviousSignal.png"));
+	m_pPreviousSignalAction->setToolTip(tr("Select previous signal"));
+	connect(m_pPreviousSignalAction, &QAction::triggered, this, &MainWindow::previousMeasureSignal);
+
+	m_pNextSignalAction = new QAction(tr("Next signal"), this);
+	m_pNextSignalAction->setShortcut(Qt::CTRL + Qt::Key_Right);
+	m_pNextSignalAction->setIcon(QIcon(":/icons/NextSignal.png"));
+	m_pNextSignalAction->setToolTip(tr("Select next signal"));
+	connect(m_pNextSignalAction, &QAction::triggered, this, &MainWindow::nextMeasureSignal);
+
 	// Edit
 	//
 	m_pCopyMeasureAction = new QAction(tr("&Copy"), this);
@@ -408,57 +420,29 @@ bool MainWindow::createToolBars()
 		asRackLabel->setText(tr(" Rack "));
 		asRackLabel->setEnabled(false);
 
-		m_asRackCombo = new QComboBox(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(m_asRackCombo);
-		m_asRackCombo->setEnabled(false);
-		m_asRackCombo->setFixedWidth(100);
-		connect(m_asRackCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setRack);
+		m_rackCombo = new QComboBox(m_pAnalogSignalToolBar);
+		m_pAnalogSignalToolBar->addWidget(m_rackCombo);
+		m_rackCombo->setEnabled(false);
+		m_rackCombo->setFixedWidth(100);
+		connect(m_rackCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setRack);
+
+		m_pAnalogSignalToolBar->addSeparator();
 
 		QLabel* asSignalLabel = new QLabel(m_pAnalogSignalToolBar);
 		m_pAnalogSignalToolBar->addWidget(asSignalLabel);
 		asSignalLabel->setText(tr(" Signal "));
 		asSignalLabel->setEnabled(false);
 
-		m_asSignalCombo = new QComboBox(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(m_asSignalCombo);
-		m_asSignalCombo->setEnabled(false);
-		m_asSignalCombo->setFixedWidth(250);
-		connect(m_asSignalCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureSignal);
+		m_selectSignalWidget = new SelectSignalWidget(this);
+		m_pAnalogSignalToolBar->addWidget(m_selectSignalWidget);
+		m_selectSignalWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		m_selectSignalWidget->setEnabled(false);
+		m_selectSignalWidget->setFixedWidth(530);
+		connect(m_selectSignalWidget, &SelectSignalWidget::selectionChanged, this, &MainWindow::setAcitiveMeasureSignal);
+		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_selectSignalWidget, &SelectSignalWidget::activeSignalChanged, Qt::QueuedConnection);
 
-		m_pAnalogSignalToolBar->addSeparator();
-
-		QLabel* asChassisLabel = new QLabel(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(asChassisLabel);
-		asChassisLabel->setText(tr(" Chassis "));
-		asChassisLabel->setEnabled(false);
-
-		m_asChassisCombo = new QComboBox(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(m_asChassisCombo);
-		m_asChassisCombo->setEnabled(false);
-		m_asChassisCombo->setFixedWidth(60);
-		connect(m_asChassisCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setChassis);
-
-		QLabel* asModuleLabel = new QLabel(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(asModuleLabel);
-		asModuleLabel->setText(tr(" Module "));
-		asModuleLabel->setEnabled(false);
-
-		m_asModuleCombo = new QComboBox(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(m_asModuleCombo);
-		m_asModuleCombo->setEnabled(false);
-		m_asModuleCombo->setFixedWidth(60);
-		connect(m_asModuleCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setModule);
-
-		QLabel* asPlaceLabel = new QLabel(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(asPlaceLabel);
-		asPlaceLabel->setText(tr(" Place "));
-		asPlaceLabel->setEnabled(false);
-
-		m_asPlaceCombo = new QComboBox(m_pAnalogSignalToolBar);
-		m_pAnalogSignalToolBar->addWidget(m_asPlaceCombo);
-		m_asPlaceCombo->setEnabled(false);
-		m_asPlaceCombo->setFixedWidth(60);
-		connect(m_asPlaceCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setPlace);
+		m_pAnalogSignalToolBar->addAction(m_pPreviousSignalAction);
+		m_pAnalogSignalToolBar->addAction(m_pNextSignalAction);
 	}
 
 	return true;
@@ -522,6 +506,10 @@ void MainWindow::createPanels()
 
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
 		connect(this, &MainWindow::changedSignalConnectionType, m_pStatisticPanel, &StatisticPanel::changedSignalConnectionType, Qt::QueuedConnection);
+
+		connect(m_pStatisticPanel, &StatisticPanel::setSignalConnectionType, m_signalConnectionTypeList, &QComboBox::setCurrentIndex);
+		connect(m_pStatisticPanel, &StatisticPanel::setRack, m_rackCombo, &QComboBox::setCurrentIndex);
+		connect(m_pStatisticPanel, &StatisticPanel::setMeasureSignal, this, &MainWindow::setAcitiveMeasureSignal);
 	}
 
 
@@ -547,6 +535,8 @@ void MainWindow::createPanels()
 		}
 
 		m_pSignalInfoPanel->hide();
+
+		connect(m_pSignalInfoPanel, &SignalInfoPanel::updateActiveOutputSignal, this, &MainWindow::updateActiveOutputSignal, Qt::QueuedConnection);
 	}
 
 	// Panel comparator information
@@ -725,8 +715,13 @@ void MainWindow::createContextMenu()
 
 void MainWindow::updateRacksOnToolBar()
 {
-	m_asRackCombo->clear();
-	m_asRackCombo->setEnabled(false);
+	if (m_rackCombo == nullptr)
+	{
+		return;
+	}
+
+	m_rackCombo->clear();
+	m_rackCombo->setEnabled(false);
 
 	int measureKind = theOptions.toolBar().measureKind();
 	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
@@ -740,92 +735,56 @@ void MainWindow::updateRacksOnToolBar()
 		return;
 	}
 
-	int rackCount = theSignalBase.createRackListForMeasure(signalConnectionType);
+	int rackCount = theSignalBase.createRackListForMeasure(measureKind, signalConnectionType);
 	if (rackCount == 0)
 	{
 		return;
 	}
 
+	int currentRackIndex = 0;
+
 	// fill racks or rackGroups on Tool bar
 	//
-	m_asRackCombo->blockSignals(true);
+	m_rackCombo->blockSignals(true);
 
-	switch (measureKind)
+	for(int r = 0; r < rackCount; r++)
 	{
-		case MEASURE_KIND_ONE_RACK:
-		case MEASURE_KIND_ONE_MODULE:
-			{
-				for(int r = 0; r < rackCount; r++)
-				{
-					const Metrology::RackParam& rack = theSignalBase.rackForMeasure(r);
-					if (rack.isValid() == false)
-					{
-						continue;
-					}
+		const Metrology::RackParam& rack = theSignalBase.rackForMeasure(r);
+		if (rack.isValid() == false)
+		{
+			continue;
+		}
 
-					QString caption = rack.caption();
-					if (caption.isEmpty() == true)
-					{
-						continue;
-					}
+		QString caption = rack.caption();
+		if (caption.isEmpty() == true)
+		{
+			continue;
+		}
 
-					// append rack index
-					//
-					m_asRackCombo->addItem(caption, rack.index());
-				}
-			}
-			break;
+		if (caption == theOptions.toolBar().defaultRack())
+		{
+			currentRackIndex = r;
+		}
 
-		case MEASURE_KIND_MULTI_RACK:
-			{
-				int rackGroupCount = theSignalBase.racks().groups().count();
-
-				for(int g = 0; g < rackGroupCount; g++)
-				{
-					RackGroup group = theSignalBase.racks().groups().group(g);
-					if (group.isValid() == false)
-					{
-						continue;
-					}
-
-					QString caption = group.caption();
-					if (caption.isEmpty() == true)
-					{
-						continue;
-					}
-
-					// append rack group index
-					//
-					m_asRackCombo->addItem(caption, group.Index());
-				}
-			}
-			break;
-
-		default:
-			assert(0);
+		// append rack index
+		//
+		m_rackCombo->addItem(caption, rack.index());
 	}
 
-	m_asRackCombo->blockSignals(false);
+	m_rackCombo->blockSignals(false);
 
-	m_asRackCombo->setCurrentIndex(0);
-	m_asRackCombo->setEnabled(true);
+	m_rackCombo->setCurrentIndex(currentRackIndex);
+	m_rackCombo->setEnabled(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::updateSignalsOnToolBar()
 {
-	m_asSignalCombo->clear();
-	m_asSignalCombo->setEnabled(false);
-
-	m_asChassisCombo->clear();
-	m_asChassisCombo->setEnabled(false);
-
-	m_asModuleCombo->clear();
-	m_asModuleCombo->setEnabled(false);
-
-	m_asPlaceCombo->clear();
-	m_asPlaceCombo->setEnabled(false);
+	if (m_rackCombo == nullptr || m_selectSignalWidget == nullptr)
+	{
+		return;
+	}
 
 	int measureKind = theOptions.toolBar().measureKind();
 	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
@@ -841,93 +800,36 @@ void MainWindow::updateSignalsOnToolBar()
 
 	// get rackIndex or rackGroupIndex, it depend from measureKind
 	//
-	int rackIndex = m_asRackCombo->currentData().toInt();
+	int rackIndex = m_rackCombo->currentData().toInt();
 	if (rackIndex == -1)
 	{
 		return;
 	}
 
-	int signalCount = theSignalBase.createSignalListForMeasure(measureKind, signalConnectionType, rackIndex);
-	if (signalCount == 0)
-	{
-		return;
-	}
-
-	QMap<int, int> chassisMap;
-	QMap<int, int> moduleMap;
-	QMap<int, int> placeMap;
-
-
 	// fill signal on Tool bar
 	//
-	m_asSignalCombo->blockSignals(true);
+	std::vector<SelectSignalItem> signalList;
 
-	for(int s = 0; s < signalCount; s++)
+	int signalCount = theSignalBase.createSignalListForMeasure(measureKind, signalConnectionType, rackIndex);
+	for(int index = 0; index < signalCount; index++)
 	{
-		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(s);
+		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure(index);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;
 		}
 
-		const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-		if (signal.isEmpty() == true)
+		SelectSignalItem signal(index, signalConnectionType, measureSignal);
+		if (signal.isValid() == false)
 		{
 			continue;
 		}
 
-		if (signal.strID().isEmpty() == true)
-		{
-			continue;
-		}
-
-		// add StrID of input signal into ComboBox
-		// index of signal in ComboBox and in array signalForMeasure may not match due to sorting
-		//
-		m_asSignalCombo->addItem(signal.strID(), s);
-
-
-		if (chassisMap.contains(signal.location().chassis()) == false)
-		{
-			chassisMap.insert(signal.location().chassis(), s);
-
-			m_asChassisCombo->addItem(QString::number(signal.location().chassis()).rightJustified(2, '0'), signal.location().chassis());
-		}
-
-		if (moduleMap.contains(signal.location().module()) == false)
-		{
-			moduleMap.insert(signal.location().module(), s);
-
-			m_asModuleCombo->addItem(QString::number(signal.location().module()).rightJustified(2, '0'), signal.location().module());
-		}
-
-		if (placeMap.contains(signal.location().place()) == false)
-		{
-			placeMap.insert(signal.location().place(), s);
-
-			m_asPlaceCombo->addItem(QString::number(signal.location().place()).rightJustified(2, '0'), signal.location().place());
-		}
+		signalList.push_back(signal);
 	}
 
-	m_asSignalCombo->blockSignals(false);
-
-	if (m_asSignalCombo->count() == 0)
-	{
-		return;
-	}
-
-	m_asSignalCombo->model()->sort(0);
-	m_asSignalCombo->setEnabled(true);
-	m_asSignalCombo->setCurrentIndex(0);
-
-	m_asChassisCombo->model()->sort(0);
-	m_asChassisCombo->setEnabled(false);
-	m_asModuleCombo->model()->sort(0);
-	m_asModuleCombo->setEnabled(false);
-	m_asPlaceCombo->model()->sort(0);
-	m_asPlaceCombo->setEnabled(false);
-
-	setMeasureSignal(0);
+	int currentSignalID = m_selectSignalWidget->setSignalList(signalList, theOptions.toolBar().defaultSignalId());
+	setAcitiveMeasureSignal(currentSignalID);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1220,6 +1122,8 @@ void MainWindow::showSignalConnectionList()
 		return;
 	}
 
+	updateSignalsOnToolBar();
+
 	theSignalBase.statistic().createStatisticSignalList();
 	theSignalBase.statistic().createStatisticComparatorList();
 }
@@ -1423,32 +1327,45 @@ void MainWindow::setSignalConnectionType(int index)
 
 void MainWindow::setRack(int index)
 {
-	if (index < 0 || index >= theSignalBase.rackCountForMeasure())
+	if (index < 0 || index >= theSignalBase.rackForMeasureCount())
 	{
 		return;
 	}
 
+	// set
+	//
 	updateSignalsOnToolBar();
+
+	// save
+	//
+	const Metrology::RackParam& rack = theSignalBase.rackForMeasure(index);
+	if (rack.isValid() == false)
+	{
+		return;
+	}
+
+	if (rack.caption().isEmpty() == true)
+	{
+		return;
+	}
+
+	theOptions.toolBar().setDefaultRack(rack.caption());
+	theOptions.toolBar().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setMeasureSignal(int index)
+void MainWindow::setAcitiveMeasureSignal(int index)
 {
-	if (index < 0 || index >= m_asSignalCombo->count())
+	updatePrevNextSignalActions(index);
+
+	if (index < 0 || index >= theSignalBase.signalForMeasureCount())
 	{
 		theSignalBase.clearActiveSignal();
 		return;
 	}
 
-	int signalIndex = m_asSignalCombo->currentData().toInt();
-	if (signalIndex < 0 || signalIndex >= theSignalBase.signalForMeasureCount())
-	{
-		theSignalBase.clearActiveSignal();
-		return;
-	}
-
-	const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(signalIndex);
+	const MeasureSignal& measureSignal = theSignalBase.signalForMeasure(index);
 	if (measureSignal.isEmpty() == true)
 	{
 		assert(false);
@@ -1456,92 +1373,156 @@ void MainWindow::setMeasureSignal(int index)
 		return;
 	}
 
+	// set
+	//
 	theSignalBase.setActiveSignal(measureSignal);
 
+	// save
+	//
 	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (signal.isEmpty() == true)
 	{
 		return;
 	}
 
-	m_asChassisCombo->setCurrentText(QString::number(signal.location().chassis()).rightJustified(2, '0'));
-	m_asModuleCombo->setCurrentText(QString::number(signal.location().module()).rightJustified(2, '0'));
-	m_asPlaceCombo->setCurrentText(QString::number(signal.location().place()).rightJustified(2, '0'));
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::setChassis(int index)
-{
-	if (index == -1)
+	if (signal.signalID().isEmpty() == true)
 	{
 		return;
 	}
 
-//	MeasureSignal activeSgnal = theSignalBase.activeSignal();
-//	if (activeSgnal.isEmpty() == true)
-//	{
-//		return;
-//	}
-
-//	MetrologyMultiSignal signal = activeSgnal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-//	if (signal.isEmpty()  == true)
-//	{
-//		return;
-//	}
-
-
-//	updateModuleOnToolBar(signal.location());
+	theOptions.toolBar().setDefaultSignalId(signal.signalID());
+	theOptions.toolBar().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setModule(int index)
+void MainWindow::previousMeasureSignal()
 {
-	if (index == -1)
+	if (m_selectSignalWidget == nullptr)
 	{
 		return;
 	}
 
-//	MeasureSignal activeSgnal = theSignalBase.activeSignal();
-//	if (activeSgnal.isEmpty() == true)
-//	{
-//		return;
-//	}
+	int currentASignalIndex = m_selectSignalWidget->currentSignalIndex();
+	if (currentASignalIndex < 0 || currentASignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
 
-//	MetrologyMultiSignal signal = activeSgnal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-//	if (signal.isEmpty()  == true)
-//	{
-//		return;
-//	}
+	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentASignalIndex);
+	if (currentActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
 
-//	updatePlaceOnToolBar(signal.location());
+	int previousSignalIndex = currentASignalIndex - 1;
+	if (previousSignalIndex < 0 || previousSignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	const MeasureSignal& previousActiveSignal = theSignalBase.signalForMeasure(previousSignalIndex);
+	if (previousActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	setAcitiveMeasureSignal(previousSignalIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setPlace(int index)
+void MainWindow::nextMeasureSignal()
 {
-	if (index == -1)
+	if (m_selectSignalWidget == nullptr)
 	{
 		return;
 	}
 
-//	int chassis = m_asChassisCombo->currentData().toInt();
-//	int module = m_asModuleCombo->currentData().toInt();
-//	int place = m_asPlaceCombo->currentData().toInt();
+	int currentASignalIndex = m_selectSignalWidget->currentSignalIndex();
+	if (currentASignalIndex < 0 || currentASignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
 
-//	qDebug() << "setMetrologySignalByPosition: C" << caseNo << " - S" << chassis << " - B" << module << " - E" << place;
+	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentASignalIndex);
+	if (currentActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	int nextSignalIndex = currentASignalIndex + 1;
+	if (nextSignalIndex < 0 || nextSignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
+	if (nextActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	setAcitiveMeasureSignal(nextSignalIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::MainWindow::setMetrologySignalByPosition(int index)
+void MainWindow::updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal)
 {
-	if (index == -1)
+	if (m_selectSignalWidget == nullptr)
 	{
 		return;
 	}
+
+	int index = m_selectSignalWidget->currentSignalIndex();
+	if(index < 0 || index > theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	MeasureSignal measureSignal = theSignalBase.signalForMeasure(index);
+	if (measureSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	int measureKind = theOptions.toolBar().measureKind();
+	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	if (channel < 0 || channel >= measureSignal.channelCount())
+	{
+		return;
+	}
+
+	if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+	{
+		return;
+	}
+
+	// change
+	//
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+
+	multiChannelSignal.setMetrologySignal(measureKind, channel, pOutputSignal);
+
+	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+
+	// set
+	//
+	bool result = theSignalBase.setSignalForMeasure(index, measureSignal);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	m_selectSignalWidget->updateActiveOutputSignal(measureSignal);
+
+	setAcitiveMeasureSignal(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1640,6 +1621,11 @@ void MainWindow::configSocketConnected()
 		return;
 	}
 
+	if (m_statusConnectToConfigServer == nullptr)
+	{
+		return;
+	}
+
 	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
@@ -1651,6 +1637,11 @@ void MainWindow::configSocketConnected()
 
 void MainWindow::configSocketDisconnected()
 {
+	if (m_statusConnectToConfigServer == nullptr)
+	{
+		return;
+	}
+
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
@@ -1660,6 +1651,11 @@ void MainWindow::configSocketDisconnected()
 
 void MainWindow::configSocketConfigurationLoaded()
 {
+	if (m_statusConnectToConfigServer == nullptr)
+	{
+		return;
+	}
+
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
@@ -1687,6 +1683,11 @@ void MainWindow::signalSocketConnected()
 		return;
 	}
 
+	if (m_statusConnectToAppDataServer == nullptr)
+	{
+		return;
+	}
+
 	int serverType = m_pSignalSocket->selectedServerIndex();
 	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
 	{
@@ -1704,6 +1705,11 @@ void MainWindow::signalSocketConnected()
 
 void MainWindow::signalSocketDisconnected()
 {
+	if (m_statusConnectToAppDataServer == nullptr)
+	{
+		return;
+	}
+
 	if (m_measureThread.isRunning() == true)
 	{
 		m_measureThread.stop();
@@ -1745,6 +1751,11 @@ QString MainWindow::tuningSocketConnectedStateStr()
 
 void MainWindow::tuningSocketConnected()
 {
+	if (m_statusConnectToTuningServer == nullptr)
+	{
+		return;
+	}
+
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToTuningServer->setToolTip(tuningSocketConnectedStateStr());
@@ -1759,6 +1770,11 @@ void MainWindow::tuningSocketConnected()
 
 void MainWindow::tuningSocketDisconnected()
 {
+	if (m_statusConnectToTuningServer == nullptr)
+	{
+		return;
+	}
+
 	if (m_measureThread.isRunning() == true)
 	{
 		if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
@@ -1779,6 +1795,16 @@ void MainWindow::tuningSocketDisconnected()
 
 void MainWindow::tuningSignalsCreated()
 {
+	if (m_pTuningSocket == nullptr)
+	{
+		return;
+	}
+
+	if (m_statusConnectToTuningServer == nullptr)
+	{
+		return;
+	}
+
 	if (m_pTuningSocket->isConnected() == true)
 	{
 		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
@@ -1892,25 +1918,30 @@ void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
 {
 	signalIsSelected = false;
 
-	int nextComboIndex = m_asSignalCombo->currentIndex() + 1;
-	if (nextComboIndex < 0 || nextComboIndex >= m_asSignalCombo->count())
+	if (m_selectSignalWidget == nullptr)
 	{
 		return;
 	}
 
-	int nextSignalIndex = m_asSignalCombo->itemData(nextComboIndex).toInt();
+	int currentASignalIndex = m_selectSignalWidget->currentSignalIndex();
+	if (currentASignalIndex < 0 || currentASignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentASignalIndex);
+	if (currentActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	int nextSignalIndex = currentASignalIndex + 1;
 	if (nextSignalIndex < 0 || nextSignalIndex >= theSignalBase.signalForMeasureCount())
 	{
 		return;
 	}
 
-	MeasureSignal currActiveSignal = theSignalBase.activeSignal();
-	if (currActiveSignal.isEmpty() == true)
-	{
-		return;
-	}
-
-	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure1(nextSignalIndex);
+	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
 	if (nextActiveSignal.isEmpty() == true)
 	{
 		return;
@@ -1918,13 +1949,13 @@ void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
 
 	// if module numbers not equal then disabling selection of next input
 	//
-	if (	currActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
-			currActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	if (	currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
+			currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
 	{
 		return;
 	}
 
-	m_asSignalCombo->setCurrentIndex(nextComboIndex);
+	setAcitiveMeasureSignal(nextSignalIndex);
 
 	signalIsSelected = true;
 }
@@ -1951,6 +1982,16 @@ void MainWindow::measureComplite(Measurement* pMeasurement)
 
 void MainWindow::updateStartStopActions()
 {
+	if (m_selectSignalWidget == nullptr)
+	{
+		return;
+	}
+
+	if (m_pStartMeasureAction == nullptr || m_pStopMeasureAction == nullptr)
+	{
+		return;
+	}
+
 	m_pStartMeasureAction->setEnabled(false);
 	m_pStopMeasureAction->setEnabled(false);
 
@@ -1969,7 +2010,19 @@ void MainWindow::updateStartStopActions()
 		return;
 	}
 
-	if (theSignalBase.activeSignal().isEmpty() == true)
+	if (m_selectSignalWidget == nullptr)
+	{
+		return;
+	}
+
+	int currentSignalIndex = m_selectSignalWidget->currentSignalIndex();
+	if (currentSignalIndex < 0 || currentSignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	MeasureSignal activeSignal = theSignalBase.signalForMeasure(currentSignalIndex);
+	if (activeSignal.isEmpty() == true)
 	{
 		return;
 	}
@@ -1983,6 +2036,44 @@ void MainWindow::updateStartStopActions()
 	{
 		m_pStartMeasureAction->setEnabled(false);
 		m_pStopMeasureAction->setEnabled(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updatePrevNextSignalActions(int signalIndex)
+{
+	if(m_selectSignalWidget == nullptr)
+	{
+		return;
+	}
+
+	if (m_pPreviousSignalAction == nullptr || m_pNextSignalAction == nullptr)
+	{
+		return;
+	}
+
+	if (m_selectSignalWidget->count() == 0)
+	{
+		m_selectSignalWidget->setEnabled(false);
+		m_pPreviousSignalAction->setEnabled(false);
+		m_pNextSignalAction->setEnabled(false);
+
+		return;
+	}
+
+	m_selectSignalWidget->setEnabled(true);
+	m_pPreviousSignalAction->setEnabled(true);
+	m_pNextSignalAction->setEnabled(true);
+
+	if (signalIndex == 0)
+	{
+		m_pPreviousSignalAction->setEnabled(false);
+	}
+
+	if (signalIndex == m_selectSignalWidget->count() - 1)
+	{
+		m_pNextSignalAction->setEnabled(false);
 	}
 }
 

@@ -608,6 +608,9 @@ private:
 	int					m_measureKind = MEASURE_KIND_ONE_RACK;					// measure kind: each channel separately - 0 or for all channels together - 1
 	int					m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;	// selected type of connection
 
+	QString				m_defaultRack;
+	QString				m_defaultSignalId;
+
 public:
 
 	int					measureTimeout() const { return m_measureTimeout; }
@@ -619,6 +622,11 @@ public:
 	int					signalConnectionType() const { return m_signalConnectionType; }
 	void				setSignalConnectionType(int type) { m_signalConnectionType = type; }
 
+	QString				defaultRack() const { return m_defaultRack; }
+	void				setDefaultRack(const QString& rack) { m_defaultRack = rack; }
+
+	QString				defaultSignalId() const { return m_defaultSignalId; }
+	void				setDefaultSignalId(const QString& signalId) { m_defaultSignalId = signalId; }
 
 	void				load();
 	void				save();
