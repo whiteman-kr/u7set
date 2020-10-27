@@ -60,8 +60,7 @@ public:
 class ReportTable : public ReportObject
 {
 public:
-	ReportTable();
-	ReportTable(const QStringList& headerLabels);
+	ReportTable(const QStringList& headerLabels, const QTextCharFormat& charFormat);
 
 	QStringList headerLabels() const;
 	void setHeaderLabels(const QStringList& headerLabels);
@@ -79,6 +78,10 @@ private:
 
 	QStringList m_headerLabels;
 	std::vector<QStringList> m_rows;
+
+	// Format
+	//
+	QTextCharFormat m_charFormat;
 };
 
 //
@@ -165,6 +168,28 @@ private:
 	QTextBlockFormat m_currentBlockCharFormatSaved;
 };
 
+// ReportPageFooter
+
+class ReportMarginItem
+{
+public:
+	ReportMarginItem(const QString& text, int pageFrom, int pageTo, Qt::Alignment alignment, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
+
+public:
+	int m_pageFrom = -1;
+	int m_pageTo = -1;
+
+	QString m_text;
+
+	Qt::Alignment m_alignment = Qt::AlignTop | Qt::AlignHCenter;
+
+	// Format
+	//
+	QTextCharFormat m_charFormat;
+	QTextBlockFormat m_blockFormat;
+
+};
+
 //
 // ReportGenerator
 //
@@ -183,13 +208,23 @@ public:
 	void clearDocument();
 
 protected:
+	void addMarginItem(const ReportMarginItem& item);
+
+private:
+	void drawMarginItems(int page, QPainter& painter);
+
+protected:
 	QPdfWriter m_pdfWriter;
 	QPainter m_pdfPainter;
 	QTextDocument m_textDocument;
 	QTextCursor m_textCursor;
 
+	int m_currentPage = 1;
+
 private:
 	QWidget* m_parentWidget = nullptr;
+
+	std::vector<ReportMarginItem> m_marginItems;
 };
 
 //
@@ -294,11 +329,16 @@ private:
 
 	void generateTitlePage();
 
+	QString changesetString(const std::shared_ptr<DbFile>& file);
+	QString changesetString(const Signal& signal);
+
 private:
 	DbController* m_db = nullptr;
 
 	QFont m_headerFont;
 	QFont m_normalFont;
+	QFont m_tableFont;
+	QFont m_marginFont;
 
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_sourceDeviceObjectMap;
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_targetDeviceObjectMap;
