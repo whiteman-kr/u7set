@@ -18,7 +18,7 @@
 
 // ==============================================================================================
 
-const char* const			StatisticColumn[] =
+const char* const			StatisticsColumn[] =
 {
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "AppSignalID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "CustomSignalID"),
@@ -41,65 +41,65 @@ const char* const			StatisticColumn[] =
 
 };
 
-const int					STATISTIC_COLUMN_COUNT				= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
+const int					STATISTICS_COLUMN_COUNT				= sizeof(StatisticsColumn)/sizeof(StatisticsColumn[0]);
 
-const int					STATISTIC_COLUMN_APP_ID				= 0,
-							STATISTIC_COLUMN_CUSTOM_ID			= 1,
-							STATISTIC_COLUMN_EQUIPMENT_ID		= 2,
-							STATISTIC_COLUMN_CAPTION			= 3,
-							STATISTIC_COLUMN_CMP_VALUE			= 4,
-							STATISTIC_COLUMN_CMP_NO				= 5,
-							STATISTIC_COLUMN_CMP_OUT_ID			= 6,
-							STATISTIC_COLUMN_RACK				= 7,
-							STATISTIC_COLUMN_CHASSIS			= 8,
-							STATISTIC_COLUMN_MODULE				= 9,
-							STATISTIC_COLUMN_PLACE				= 10,
-							STATISTIC_COLUMN_EL_RANGE			= 11,
-							STATISTIC_COLUMN_EL_SENSOR			= 12,
-							STATISTIC_COLUMN_EN_RANGE			= 13,
-							STATISTIC_COLUMN_SIGNAL_TYPE		= 14,
-							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 15,
-							STATISTIC_COLUMN_MEASURE_COUNT		= 16,
-							STATISTIC_COLUMN_STATE				= 17;
+const int					STATISTICS_COLUMN_APP_ID				= 0,
+							STATISTICS_COLUMN_CUSTOM_ID			= 1,
+							STATISTICS_COLUMN_EQUIPMENT_ID		= 2,
+							STATISTICS_COLUMN_CAPTION			= 3,
+							STATISTICS_COLUMN_CMP_VALUE			= 4,
+							STATISTICS_COLUMN_CMP_NO				= 5,
+							STATISTICS_COLUMN_CMP_OUT_ID			= 6,
+							STATISTICS_COLUMN_RACK				= 7,
+							STATISTICS_COLUMN_CHASSIS			= 8,
+							STATISTICS_COLUMN_MODULE				= 9,
+							STATISTICS_COLUMN_PLACE				= 10,
+							STATISTICS_COLUMN_EL_RANGE			= 11,
+							STATISTICS_COLUMN_EL_SENSOR			= 12,
+							STATISTICS_COLUMN_EN_RANGE			= 13,
+							STATISTICS_COLUMN_SIGNAL_TYPE		= 14,
+							STATISTICS_COLUMN_SIGNAL_CONNECTION	= 15,
+							STATISTICS_COLUMN_MEASURE_COUNT		= 16,
+							STATISTICS_COLUMN_STATE				= 17;
 
 
-const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
+const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
 {
-							250,	// STATISTIC_COLUMN_APP_ID
-							250,	// STATISTIC_COLUMN_CUSTOM_ID
-							250,	// STATISTIC_COLUMN_EQUIPMENT_ID
-							150,	// STATISTIC_COLUMN_CAPTION
-							150,	// STATISTIC_COLUMN_CMP_VALUE
-							 50,	// STATISTIC_COLUMN_CMP_NO
-							250,	// STATISTIC_COLUMN_CMP_OUT_ID
-							100,	// STATISTIC_COLUMN_RACK
-							 60,	// STATISTIC_COLUMN_CHASSIS
-							 60,	// STATISTIC_COLUMN_MODULE
-							 60,	// STATISTIC_COLUMN_PLACE
-							150,	// STATISTIC_COLUMN_EL_RANGE
-							100,	// STATISTIC_COLUMN_EL_SENSOR
-							150,	// STATISTIC_COLUMN_EN_RANGE
-							100,	// STATISTIC_COLUMN_SIGNAL_TYPE
-							100,	// STATISTIC_COLUMN_SIGNAL_CONNECTION
-							100,	// STATISTIC_COLUMN_MEASURE_COUNT
-							100,	// STATISTIC_COLUMN_MEASURE_STATE
+							250,	// STATISTICS_COLUMN_APP_ID
+							250,	// STATISTICS_COLUMN_CUSTOM_ID
+							250,	// STATISTICS_COLUMN_EQUIPMENT_ID
+							150,	// STATISTICS_COLUMN_CAPTION
+							150,	// STATISTICS_COLUMN_CMP_VALUE
+							 50,	// STATISTICS_COLUMN_CMP_NO
+							250,	// STATISTICS_COLUMN_CMP_OUT_ID
+							100,	// STATISTICS_COLUMN_RACK
+							 60,	// STATISTICS_COLUMN_CHASSIS
+							 60,	// STATISTICS_COLUMN_MODULE
+							 60,	// STATISTICS_COLUMN_PLACE
+							150,	// STATISTICS_COLUMN_EL_RANGE
+							100,	// STATISTICS_COLUMN_EL_SENSOR
+							150,	// STATISTICS_COLUMN_EN_RANGE
+							100,	// STATISTICS_COLUMN_SIGNAL_TYPE
+							100,	// STATISTICS_COLUMN_SIGNAL_CONNECTION
+							100,	// STATISTICS_COLUMN_MEASURE_COUNT
+							100,	// STATISTICS_COLUMN_MEASURE_STATE
 
 };
 
 // ==============================================================================================
 
-class StatisticTable : public QAbstractTableModel
+class StatisticsTable : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
 
-	explicit StatisticTable(QObject* parent = nullptr);
-	virtual ~StatisticTable();
+	explicit StatisticsTable(QObject* parent = nullptr);
+	virtual ~StatisticsTable();
 
 private:
 
-	int						m_statisticItemCount = 0;
+	int						m_statisticsItemCount = 0;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -112,28 +112,28 @@ public:
 	void					set();
 	void					clear();
 
-	QString					text(int row, int column, const StatisticItem& si) const;
+	QString					text(int row, int column, const StatisticsItem& si) const;
 
 	void					updateSignal(Hash signalHash);
 };
 
 // ==============================================================================================
 
-class StatisticPanel : public QDockWidget
+class StatisticsPanel : public QDockWidget
 {
 	Q_OBJECT
 
 public:
 
-	explicit StatisticPanel(QWidget* parent = nullptr);
-	virtual ~StatisticPanel();
+	explicit StatisticsPanel(QWidget* parent = nullptr);
+	virtual ~StatisticsPanel();
 
 private:
 
 	// elements of interface
 	//
 	QMainWindow*			m_pMainWindow = nullptr;
-	QMainWindow*			m_pStatisticWindow = nullptr;
+	QMainWindow*			m_pStatisticsWindow = nullptr;
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pSignalMenu = nullptr;
@@ -162,12 +162,14 @@ private:
 	QLabel*					m_statusMeasured = nullptr;
 
 	QTableView*				m_pView = nullptr;
-	StatisticTable			m_signalTable;
+	StatisticsTable			m_signalTable;
 
-	QAction*				m_pColumnAction[STATISTIC_COLUMN_COUNT];
+	QAction*				m_pColumnAction[STATISTICS_COLUMN_COUNT];
 	QMenu*					m_headerContextMenu = nullptr;
 
 	static int				m_measureType;
+	static int				m_measureKind;
+	static int				m_signalConnectionType;
 
 	void					createInterface();
 	void					createHeaderContexMenu();
@@ -190,8 +192,9 @@ signals:
 
 public slots:
 
-	void					changedMeasureType(int type);
-	void					changedSignalConnectionType(int type);
+	void					measureTypeChanged(int type);
+	void					measureKindChanged(int kind);
+	void					signalConnectionTypeChanged(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 

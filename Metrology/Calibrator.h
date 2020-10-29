@@ -25,7 +25,7 @@ const char* const CalibratorType[] =
 
 const int		CALIBRATOR_TYPE_COUNT			= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
 
-const int		CALIBRATOR_TYPE_UNKNOWN		= -1,
+const int		CALIBRATOR_TYPE_UNDEFINED	= -1,
 				CALIBRATOR_TYPE_TRXII		= 0,
 				CALIBRATOR_TYPE_CALYS75		= 1;
 
@@ -39,7 +39,7 @@ const char* const CalibratorMode[] =
 
 const int		CALIBRATOR_MODE_COUNT			= sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
 
-const int		CALIBRATOR_MODE_UNKNOWN		= -1,
+const int		CALIBRATOR_MODE_UNDEFINED	= -1,
 				CALIBRATOR_MODE_MEASURE		= 0,
 				CALIBRATOR_MODE_SOURCE		= 1;
 
@@ -57,13 +57,18 @@ const char* const CalibratorUnit[] =
 
 const int		CALIBRATOR_UNIT_COUNT		= sizeof(CalibratorUnit)/sizeof(CalibratorUnit[0]);
 
-const int		CALIBRATOR_UNIT_UNKNOWN		= -1,
+const int		CALIBRATOR_UNIT_UNDEFINED	= -1,
 				CALIBRATOR_UNIT_MV			= 0,
 				CALIBRATOR_UNIT_MA			= 1,
 				CALIBRATOR_UNIT_V			= 2,
 				CALIBRATOR_UNIT_KHZ			= 3,
 				CALIBRATOR_UNIT_LOW_OHM		= 4,
 				CALIBRATOR_UNIT_HIGH_OHM	= 5;
+
+// ----------------------------------------------------------------------------------------------
+// Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
+//
+const double	CALIBRATOR_MINIMAL_RANGE_OHM	= 400;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -75,7 +80,7 @@ const char* const CalibratorStep[] =
 
 const int		CALIBRATOR_STEP_COUNT			= sizeof(CalibratorStep)/sizeof(CalibratorStep[0]);
 
-const int		CALIBRATOR_STEP_UNKNOWN		= -1,
+const int		CALIBRATOR_STEP_UNDEFINED	= -1,
 				CALIBRATOR_STEP_DOWN		= 0,
 				CALIBRATOR_STEP_UP			= 1;
 
@@ -89,7 +94,7 @@ const char* const CalibratorReset[] =
 
 const int		CALIBRATOR_RESET_COUNT		  = sizeof(CalibratorStep)/sizeof(CalibratorReset[0]);
 
-const int		CALIBRATOR_RESET_UNKNOWN	= -1,
+const int		CALIBRATOR_RESET_UNDEFINED	= -1,
 				CALIBRATOR_RESET_HARD		= 0,
 				CALIBRATOR_RESET_SOFT		= 1;
 
@@ -271,13 +276,13 @@ private:
 	QSerialPort m_port;																	// object serial port for management of the calibrator
 
 	QString		m_portName;																// string containing the name of the serial port
-	int			m_type = CALIBRATOR_TYPE_UNKNOWN;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
+	int			m_type = CALIBRATOR_TYPE_UNDEFINED;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
 	QString		m_caption;																// name of calibrator
 	QString		m_serialNo;																// serial number of calibrator
 
 	int			m_timeout = 0;															// time counter waits for a response from the calibrator
 
-	int			m_mode = CALIBRATOR_MODE_UNKNOWN;										// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
+	int			m_mode = CALIBRATOR_MODE_UNDEFINED;										// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
 	int			m_measureUnit = 0;														// measure unit: mA, mV and etc.
 	int			m_sourceUnit = 0;														// source unit: mA, mV and etc.
 

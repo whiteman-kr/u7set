@@ -161,6 +161,11 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
+		if (pMeasurement->foundInStatistics() == false)
+		{
+			return QColor(Qt::lightGray);
+		}
+
 		return QVariant();
 	}
 
@@ -417,6 +422,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		case MVC_CMN_L_ERROR_RESULT:			result = m->errorResultStr(); break;
 
 		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
+		case MVC_CMN_L_CALIBRATOR:				result = m->calibrator(); break;
 
 		default:								result.clear(); break;
 	}
@@ -509,6 +515,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 		case MVC_CMN_C_ERROR_RESULT:			result = m->errorResultStr(); break;
 
 		case MVC_CMN_C_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
+		case MVC_CMN_C_CALIBRATOR:				result = m->calibrator(); break;
 
 		default:								result.clear(); break;
 	}

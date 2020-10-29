@@ -9,10 +9,10 @@
 #include <QFont>
 #include <QColor>
 
+#include "../lib/SocketIO.h"
+
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
-
-#include "../lib/SocketIO.h"
 
 // ==============================================================================================
 
@@ -292,10 +292,10 @@ public:
 	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
 
 	int					maxInputCount() const { return m_maxInputCount; }
-	void				setMaxInputCount(int count) { m_maxInputCount = count; }
+	void				setMaxInputCount(int count);
 
 	int					maxComparatorCount() const { return m_maxComparatorCount; }
-	void				setMaxComparatorCount(int count) { m_maxComparatorCount = count; }
+	void				setMaxComparatorCount(int count);
 
 public:
 
@@ -322,7 +322,7 @@ const char* const		LinearityPointSensor[] =
 
 const int				POINT_SENSOR_COUNT			= sizeof(LinearityPointSensor)/sizeof(LinearityPointSensor[0]);
 
-const int				POINT_SENSOR_UNKNOWN		= -1,
+const int				POINT_SENSOR_UNDEFINED		= -1,
 						POINT_SENSOR_PERCENT		= 0,
 						POINT_SENSOR_U_0_5_V		= 1,
 						POINT_SENSOR_U_m10_10_V		= 2,
@@ -436,7 +436,7 @@ const char* const		LinearityViewTypeStr[] =
 
 const int				LO_VIEW_TYPE_COUNT				= sizeof(LinearityViewTypeStr)/sizeof(LinearityViewTypeStr[0]);
 
-const int				LO_VIEW_TYPE_UNKNOWN			= -1,
+const int				LO_VIEW_TYPE_UNDEFINED			= -1,
 						LO_VIEW_TYPE_SIMPLE				= 0,
 						LO_VIEW_TYPE_EXTENDED			= 1,
 						LO_VIEW_TYPE_DETAIL_ELRCTRIC	= 2,
@@ -709,7 +709,7 @@ public:
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_UNKNOWN;						// current, active ViewID
+	int					m_measureType = MEASURE_TYPE_UNDEFINED;						// current, active ViewID
 
 	bool				m_updateColumnView[MEASURE_TYPE_COUNT];						// determined the need to update the view after changing settings
 
@@ -730,11 +730,11 @@ public:
 	bool				updateColumnView(int measureType) const;
 	void				setUpdateColumnView(int measureType, bool state);
 
-	QFont&				font() { return m_font; }
-	void				setFont(QFont font) { m_font = font; }
+	QFont				font() const { return m_font; }
+	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
 
 	QFont				fontBold() const { return m_fontBold; }
-	void				setFontBold(QFont font) { m_fontBold = font; }
+	void				setFontBold(const QString& fontStr) { m_fontBold.fromString(fontStr); }
 
 	QColor				colorNotError() const { return m_colorNotError; }
 	void				setColorNotError(QColor color) { m_colorNotError = color; }
@@ -814,8 +814,8 @@ private:
 
 public:
 
-	QFont&				font() { return m_font; }
-	void				setFont(QFont font) { m_font = font; }
+	QFont				font() const { return m_font; }
+	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
 
 	bool				showNoValid() const { return m_showNoValid; }
 	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
@@ -897,8 +897,8 @@ private:
 
 public:
 
-	QFont&				font() { return m_font; }
-	void				setFont(QFont font) { m_font = font; }
+	QFont				font() const { return m_font; }
+	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
 
 	QString				displayingStateFalse() const { return m_displayingStateFalse; }
 	void				setDisplayingStateFalse(const QString& state) { m_displayingStateFalse = state; }

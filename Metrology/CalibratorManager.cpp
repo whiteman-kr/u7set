@@ -240,7 +240,7 @@ void CalibratorManager::initDialog()
 	{
 		case CALIBRATOR_MODE_MEASURE:	m_pUnitList->setCurrentIndex(m_pCalibrator->measureUnit());	break;
 		case CALIBRATOR_MODE_SOURCE:	m_pUnitList->setCurrentIndex(m_pCalibrator->sourceUnit());	break;
-		default:						m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNKNOWN);
+		default:						m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNDEFINED);
 	}
 
 	m_pRemoteControlCheck->setLayoutDirection(Qt::RightToLeft);
@@ -300,7 +300,7 @@ void CalibratorManager::enableInterface(bool enable)
 	m_pUnitList->setEnabled(enable);
 	m_pRemoteControlCheck->setEnabled(enable);
 
-	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNKNOWN)
+	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNDEFINED)
 	{
 		m_pSetValueButton->setEnabled(false);
 		m_pStepDownButton->setEnabled(false);

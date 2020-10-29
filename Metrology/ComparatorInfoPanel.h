@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 
 #include "SignalBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -31,6 +32,9 @@ public:
 
 private:
 
+	int						m_maxComparatorCount = 0;
+	ComparatorInfoOption	m_comparatorInfo;
+
 	mutable QMutex			m_signalMutex;
 	int						m_signalCount = 0;
 	QVector<IoSignalParam>	m_signalList;
@@ -42,6 +46,9 @@ private:
 	QVariant				data(const QModelIndex &index, int role) const;
 
 public:
+
+	void					setMaxComparatorCount(int count);
+	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
 
 	int						signalCount() const { return m_signalCount; }
 	IoSignalParam			signalParam(int index) const;
@@ -65,7 +72,7 @@ class ComparatorInfoPanel : public QDockWidget
 
 public:
 
-	explicit ComparatorInfoPanel(QWidget* parent = nullptr);
+	explicit ComparatorInfoPanel(const ComparatorInfoOption& comparatorInfo, QWidget* parent = nullptr);
 	virtual ~ComparatorInfoPanel();
 
 private:
@@ -86,19 +93,30 @@ private:
 	void					hideColumn(int column, bool hide);
 
 	QTimer*					m_updateComparatorStateTimer = nullptr;
-	void					startComparatorStateTimer();
+	void					startComparatorStateTimer(int timeout);
 	void					stopComparatorStateTimer();
+
+	//
+	//
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int						m_maxComparatorCount = 0;
+	ComparatorInfoOption	m_comparatorInfo;
 
 public:
 
 	void					clear() { m_comparatorTable.clear(); }
-	void					restartComparatorStateTimer();
+	void					restartComparatorStateTimer(int timeout);
+
+	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
+	void					setMaxComparatorCount(int count);
 
 protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
 public slots:
+
+	void					signalConnectionTypeChanged(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateComparatorState();									// slot informs that signal for measure has updated his state

@@ -36,9 +36,9 @@ void Calibrator::clear()
 
 	m_timeout = 0;
 
-	m_mode = CALIBRATOR_MODE_UNKNOWN;
-	m_measureUnit = CALIBRATOR_UNIT_UNKNOWN;
-	m_sourceUnit = CALIBRATOR_UNIT_UNKNOWN;
+	m_mode = CALIBRATOR_MODE_UNDEFINED;
+	m_measureUnit = CALIBRATOR_UNIT_UNDEFINED;
+	m_sourceUnit = CALIBRATOR_UNIT_UNDEFINED;
 
 	m_measureValue = 0;
 	m_sourceValue = 0;

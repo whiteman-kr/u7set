@@ -1213,7 +1213,7 @@ void SignalBase::clearSignalList()
 	m_rackBase.clear();
 	m_signalConnectionBase.clearSignals();		// set all signal of connection in nullptr, but don't remove these signals
 	m_tuningBase.clear();
-	m_statisticBase.clear();
+	m_statisticsBase.clear();
 
 	m_signalHashMap.clear();
 	m_signalList.clear();
@@ -1871,7 +1871,7 @@ void SignalBase::initSignals()
 
 	m_tuningBase.signalBase().createSignalList();
 
-	m_statisticBase.createStatisticSignalList();
+	m_statisticsBase.createSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2248,11 +2248,11 @@ MeasureSignal SignalBase::activeSignal() const
 
 void SignalBase::setActiveSignal(const MeasureSignal& signal)
 {
-	QMutexLocker l(&m_activeSignalMutex);
+	QMutexLocker la(&m_activeSignalMutex);
 
 	m_activeSignal = signal;
 
-	m_stateMutex.lock();
+	QMutexLocker ls(&m_stateMutex);
 
 	m_requestStateList.clear();
 
@@ -2362,8 +2362,6 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 		}
 	}
 
-	m_stateMutex.unlock();
-
 	emit activeSignalChanged(m_activeSignal);
 }
 
@@ -2386,6 +2384,13 @@ void SignalBase::clearActiveSignal()
 
 bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 {
+	int maxComparatorCount = Metrology::ComparatorCount;
+
+	if (theOptions.module().maxComparatorCount() > maxComparatorCount)
+	{
+		maxComparatorCount = theOptions.module().maxComparatorCount();
+	}
+
 	QStringList appSignalIDList = comparatorSet.inputSignalIDs();
 
 	for(const QString& appSignalID : appSignalIDList)
@@ -2480,7 +2485,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					break;
 			}
 
-			if (metrologyComparatorList.count() >= theOptions.module().maxComparatorCount())
+			if (metrologyComparatorList.count() >= maxComparatorCount)
 			{
 				break;
 			}
@@ -2489,7 +2494,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
 
-	m_statisticBase.createStatisticComparatorList();
+	m_statisticsBase.createComparatorList();
 
 	return true;
 }

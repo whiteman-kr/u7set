@@ -32,7 +32,7 @@ const char* const				OptionGroupTitle[] =
 
 const int						OPTION_GROUP_COUNT			= sizeof(OptionGroupTitle)/sizeof(OptionGroupTitle[0]);
 
-const int						OPTION_GROUP_UNKNOWN		= -1,
+const int						OPTION_GROUP_UNDEFINED		= -1,
 								OPTION_GROUP_SERVER			= 0,
 								OPTION_GROUP_MODULE			= 1,
 								OPTION_GROUP_LINEARITY		= 2,
@@ -65,7 +65,7 @@ const char* const				OptionPageTitle[] =
 
 const int						OPTION_PAGE_COUNT				= sizeof(OptionPageTitle)/sizeof(OptionPageTitle[0]);
 
-const int						OPTION_PAGE_UNKNOWN				= -1,
+const int						OPTION_PAGE_UNDEFINED			= -1,
 								OPTION_PAGE_CONFIG_SOCKET		= 0,
 								OPTION_PAGE_SIGNAL_SOCKET		= 1,
 								OPTION_PAGE_TUNING_SOCKET		= 2,
@@ -123,11 +123,11 @@ const int						OptionGroupPage[OPTION_PAGE_COUNT] =
 
 // ==============================================================================================
 
-const int						PROPERTY_PAGE_TYPE_UNKNOWN	= -1,
-								PROPERTY_PAGE_TYPE_LIST		= 0,
-								PROPERTY_PAGE_TYPE_DIALOG	= 1;
+const int						PROPERTY_PAGE_TYPE_UNDEFINED	= -1,
+								PROPERTY_PAGE_TYPE_LIST			= 0,
+								PROPERTY_PAGE_TYPE_DIALOG		= 1;
 
-const int						PROPERTY_PAGE_TYPE_COUNT	= 2;
+const int						PROPERTY_PAGE_TYPE_COUNT		= 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ public:
 
 private:
 
-	int							m_type = PROPERTY_PAGE_TYPE_UNKNOWN;
+	int							m_type = PROPERTY_PAGE_TYPE_UNDEFINED;
 
 	QWidget*					m_pWidget = nullptr;
 
@@ -162,7 +162,7 @@ public:
 	QWidget*					getWidget() { return m_pWidget; }
 	int							type() const { return m_type; }
 
-	int							m_page = OPTION_PAGE_UNKNOWN;
+	int							m_page = OPTION_PAGE_UNDEFINED;
 	QTreeWidgetItem*			m_pTreeWidgetItem = nullptr;
 
 	QtTreePropertyBrowser*		treeEditor() { return m_pEditor; }

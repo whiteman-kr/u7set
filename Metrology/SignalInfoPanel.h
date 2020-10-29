@@ -7,6 +7,7 @@
 #include <QTableView>
 
 #include "SignalBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -77,6 +78,8 @@ public:
 
 private:
 
+	SignalInfoOption		m_signalInfo;
+
 	mutable QMutex			m_signalMutex;
 	int						m_signalCount = 0;
 	QVector<IoSignalParam>	m_ioParamList;
@@ -88,6 +91,8 @@ private:
 	QVariant				data(const QModelIndex &index, int role) const;
 
 public:
+
+	void					setSignalInfo(const SignalInfoOption& signalInfo);
 
 	int						signalCount() const { return m_signalCount; }
 	IoSignalParam			signalParam(int index) const;
@@ -112,7 +117,7 @@ class SignalInfoPanel : public QDockWidget
 
 public:
 
-	explicit SignalInfoPanel(QWidget* parent = nullptr);
+	explicit SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* parent = nullptr);
 	virtual ~SignalInfoPanel();
 
 private:
@@ -134,8 +139,6 @@ private:
 	QAction*				m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
 	QMenu*					m_headerContextMenu = nullptr;
 
-	QVector<Metrology::Signal*> m_outputSignalsList;
-
 	void					createInterface();
 	void					createHeaderContexMenu();
 	void					initContextMenu();
@@ -145,13 +148,22 @@ private:
 	void					hideColumn(int column, bool hide);
 
 	QTimer*					m_updateSignalStateTimer = nullptr;
-	void					startSignalStateTimer();
+	void					startSignalStateTimer(int timeout);
 	void					stopSignalStateTimer();
+
+	//
+	//
+	QVector<Metrology::Signal*> m_outputSignalsList;
+
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	SignalInfoOption		m_signalInfo;
 
 public:
 
 	void					clear() { m_signalParamTable.clear(); }
-	void					restartSignalStateTimer();
+	void					restartSignalStateTimer(int timeout);
+
+	void					setSignalInfo(const SignalInfoOption& signalInfo);
 
 protected:
 
@@ -162,6 +174,8 @@ signals:
 	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
 
 public slots:
+
+	void					signalConnectionTypeChanged(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateSignalState();										// slot informs that signal for measure has updated his state

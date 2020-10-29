@@ -12,7 +12,6 @@
 #include <QKeyEvent>
 
 #include "CopyData.h"
-#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -368,9 +367,14 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 
 CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 {
+	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	{
+		return nullptr;
+	}
+
 	CalibratorManager* pManager = nullptr;
 
-	switch(theOptions.toolBar().measureKind())
+	switch(m_measureKind)
 	{
 		case MEASURE_KIND_ONE_RACK:
 		case MEASURE_KIND_ONE_MODULE:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
@@ -416,6 +420,18 @@ void CalibratorBase::onInitialization()
 
 	m_timeout = 0;
 	m_timer.start(CALIBRATOR_TIMEOUT_STEP);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorBase::measureKindChanged(int kind)
+{
+	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	m_measureKind = kind;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

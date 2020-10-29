@@ -436,6 +436,30 @@ ModuleOption::~ModuleOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void ModuleOption::setMaxInputCount(int count)
+{
+	if (count == 0)
+	{
+		count = 1;
+	}
+
+	m_maxInputCount = count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ModuleOption::setMaxComparatorCount(int count)
+{
+	if (count == 0)
+	{
+		count = 1;
+	}
+
+	m_maxComparatorCount = count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void ModuleOption::load()
 {
 	QSettings s;
@@ -461,7 +485,7 @@ void ModuleOption::save()
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
-	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
+	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1186,7 +1210,7 @@ void ComparatorInfoOption::save()
 
 ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption& from)
 {
-	m_font.fromString(from.m_font.toString());
+	m_font = from.m_font;
 
 	m_displayingStateFalse = from.m_displayingStateFalse;
 	m_displayingStateTrue = from.m_displayingStateTrue;

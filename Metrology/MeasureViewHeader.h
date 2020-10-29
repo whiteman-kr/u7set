@@ -90,7 +90,7 @@ private:
 
 	static MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
-	int					m_measureType = MEASURE_TYPE_UNKNOWN;
+	int					m_measureType = MEASURE_TYPE_UNDEFINED;
 
 	int					m_columnCount[MEASURE_TYPE_COUNT];
 
@@ -159,7 +159,8 @@ const int				MVC_CMN_L_INDEX				= 0,
 						MVC_CMN_L_ERROR				= 44,
 						MVC_CMN_L_ERROR_LIMIT		= 45,
 						MVC_CMN_L_ERROR_RESULT		= 46,
-						MVC_CMN_L_MEASUREMENT_TIME	= 47;
+						MVC_CMN_L_MEASUREMENT_TIME	= 47,
+						MVC_CMN_L_CALIBRATOR		= 48;
 
 // ==============================================================================================
 // MEASURE_TYPE_COMPARATOR
@@ -189,7 +190,8 @@ const int				MVC_CMN_C_INDEX				= 0,
 						MVC_CMN_C_ERROR				= 22,
 						MVC_CMN_C_ERROR_LIMIT		= 23,
 						MVC_CMN_C_ERROR_RESULT		= 24,
-						MVC_CMN_C_MEASUREMENT_TIME	= 25;
+						MVC_CMN_C_MEASUREMENT_TIME	= 25,
+						MVC_CMN_C_CALIBRATOR		= 26;
 
 // ==============================================================================================
 

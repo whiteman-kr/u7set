@@ -7,7 +7,6 @@
 #include "../lib/Types.h"
 #include "../lib/UnitsConvertorTable.h"
 
-
 #include "SignalBase.h"
 
 // ==============================================================================================

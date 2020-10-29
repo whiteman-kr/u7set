@@ -1,8 +1,8 @@
 #include "Calculator.h"
 
-#include "Conversion.h"
-
 #include "../lib/UnitsConvertor.h"
+
+#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

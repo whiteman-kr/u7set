@@ -9,7 +9,7 @@
 #include "RackBase.h"
 #include "SignalConnectionBase.h"
 #include "TuningSignalBase.h"
-#include "StatisticBase.h"
+#include "StatisticsBase.h"
 
 // ==============================================================================================
 // IoSignalParam for :
@@ -229,7 +229,7 @@ private:
 
 	SignalConnectionBase	m_signalConnectionBase;	// signal connections
 	TuningBase				m_tuningBase;			// sources and signals of tuning
-	StatisticBase			m_statisticBase;		// statistics of measured signals
+	StatisticsBase			m_statisticsBase;		// statistics of measured signals
 
 public:
 
@@ -307,7 +307,7 @@ public:
 	//
 	SignalConnectionBase&	signalConnections() { return m_signalConnectionBase; }	// signal connections
 	TuningBase&				tuning() { return m_tuningBase; }						// sources and signals of tuning
-	StatisticBase&			statistic() { return m_statisticBase; }					// statistics of measured signals
+	StatisticsBase&			statistics() { return m_statisticsBase; }				// statistics of measured signals
 	
 	// comparators
 	//

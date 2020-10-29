@@ -58,7 +58,7 @@ bool MeasureThread::enableMesureIsSignal()
 	// if we check in single module mode
 	// all module inputs must be the same
 	//
-	if (theOptions.toolBar().measureKind() == MEASURE_KIND_ONE_MODULE)
+	if (m_measureKind == MEASURE_KIND_ONE_MODULE)
 	{
 		if (inputsOfmoduleIsSame() == false)
 		{
@@ -83,7 +83,7 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 {
 	MultiChannelSignal signal;
 
-	switch (theOptions.toolBar().signalConnectionType())
+	switch (m_signalConnectionType)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:			signal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);		break;
 		default:									signal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
@@ -104,7 +104,7 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 			continue;
 		}
 
-		StatisticItem si;
+		StatisticsItem si;
 
 		switch (m_measureType)
 		{
@@ -223,7 +223,7 @@ bool MeasureThread::inputsOfmoduleIsSame()
 			continue;
 		}
 
-		switch (theOptions.toolBar().signalConnectionType())
+		switch (m_signalConnectionType)
 		{
 			case SIGNAL_CONNECTION_TYPE_UNUSED:
 			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
@@ -270,7 +270,7 @@ bool MeasureThread::inputsOfmoduleIsSame()
 
 void MeasureThread::waitMeasureTimeout()
 {
-	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 	{
 		if (getConnectedCalibrators() == 0)
 		{
@@ -280,9 +280,7 @@ void MeasureThread::waitMeasureTimeout()
 
 	// Timeout for Measure
 	//
-	int measureTimeout = theOptions.toolBar().measureTimeout();
-
-	for(int t = 0; t <= measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP)
+	for(int t = 0; t <= m_measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP)
 	{
 		if (m_cmdStopMeasure == true)
 		{
@@ -374,7 +372,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				int channelCount = m_activeIoParamList.count();
 
-				if (theOptions.toolBar().measureKind() == MEASURE_KIND_ONE_MODULE)
+				if (m_measureKind == MEASURE_KIND_ONE_MODULE)
 				{
 					channelCount = 1;
 				}
@@ -466,7 +464,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		return false;
 	}
 
-	int calibratorUnit = CALIBRATOR_UNIT_UNKNOWN;
+	int calibratorUnit = CALIBRATOR_UNIT_UNDEFINED;
 
 	switch(signalUnit)
 	{
@@ -477,7 +475,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 			{
 				// Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
 				//
-				if (electricHighLimit <= 400)
+				if (electricHighLimit <= CALIBRATOR_MINIMAL_RANGE_OHM)
 				{
 					calibratorUnit = CALIBRATOR_UNIT_LOW_OHM;
 				}
@@ -640,7 +638,7 @@ void MeasureThread::measureLinearity()
 		//
 		int channelCount = m_activeIoParamList.count();
 
-		if (theOptions.toolBar().measureKind() == MEASURE_KIND_ONE_MODULE)
+		if (m_measureKind == MEASURE_KIND_ONE_MODULE)
 		{
 			channelCount = 1;
 		}
@@ -1012,7 +1010,7 @@ void MeasureThread::measureComprators()
 							case Metrology::CmpValueTypeHysteresis:	emit measureInfo(tr("Hysteresis of comparator %1, additional delay").arg(cmp + 1));	break;
 						}
 
-						int timeoutStep = theOptions.toolBar().measureTimeout() / 100;
+						int timeoutStep = m_measureTimeout / 100;
 
 						currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1;
 
@@ -1336,7 +1334,7 @@ void MeasureThread::signalSocketDisconnected()
 
 void MeasureThread::tuningSocketDisconnected()
 {
-	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 	{
 		return;
 	}
@@ -1348,7 +1346,7 @@ void MeasureThread::tuningSocketDisconnected()
 
 void MeasureThread::saveStateTunSignals()
 {
-	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 	{
 		return;
 	}
@@ -1375,7 +1373,7 @@ void MeasureThread::saveStateTunSignals()
 
 void MeasureThread::restoreStateTunSignals()
 {
-	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 	{
 		return;
 	}
@@ -1396,6 +1394,49 @@ void MeasureThread::restoreStateTunSignals()
 
 		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), tunParam.tuningValueType(), m_activeIoParamList[ch].tunSignalState());
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::measureTypeChanged(int type)
+{
+	if (type < 0 || type >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_measureType = type;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::measureKindChanged(int kind)
+{
+	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	m_measureKind = kind;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::signalConnectionTypeChanged(int type)
+{
+	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_signalConnectionType = type;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::measureTimeoutChanged(int timeout)
+{
+	m_measureTimeout = timeout;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1425,7 +1466,6 @@ void MeasureThread::updateSignalParam(const QString& appSignalID)
 
 void MeasureThread::stopMeasure()
 {
-	setMeasureType(MEASURE_TYPE_UNKNOWN);
 	m_cmdStopMeasure = true;
 }
 
