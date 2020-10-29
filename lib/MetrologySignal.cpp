@@ -1,4 +1,5 @@
 #include "../lib/MetrologySignal.h"
+#include "../lib/UnitsConvertor.h"
 
 namespace Metrology
 {

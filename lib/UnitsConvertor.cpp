@@ -111,8 +111,6 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 {
 	double retVal = 0;
 
-	double r0 = r0_from_signal(signal);
-
 	switch(conversionType)
 	{
 		case UnitsConvertType::PhysicalToElectric:
@@ -124,9 +122,37 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 					switch(signal.sensorType())
 					{
 						case E::SensorType::NoSensor:
-						case E::SensorType::Ohm_Raw:			retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();	break;
+						case E::SensorType::Ohm_Raw:
 
-						default:								retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType(), r0); break;
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType(), r0_from_signal(signal));
+
+							break;
 					}
 
 					break;
@@ -137,10 +163,37 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 					{
 						case E::SensorType::NoSensor:
 						case E::SensorType::mV_Raw_Mul_8:
-						case E::SensorType::mV_Raw_Mul_32:		retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit(); break;
+						case E::SensorType::mV_Raw_Mul_32:
 
-						default:								retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType()); break;
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
 
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType());
+
+							break;
 					}
 
 					break;
@@ -148,6 +201,16 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
+
+					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+					{
+						break;
+					}
+
+					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					{
+						break;
+					}
 
 					retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
 
@@ -168,9 +231,37 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 					switch(signal.sensorType())
 					{
 						case E::SensorType::NoSensor:
-						case E::SensorType::Ohm_Raw:			retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();	break;
+						case E::SensorType::Ohm_Raw:
 
-						default:								retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType(), r0); break;
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType(), r0_from_signal(signal));
+
+							break;
 					}
 
 					break;
@@ -181,10 +272,37 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 					{
 						case E::SensorType::NoSensor:
 						case E::SensorType::mV_Raw_Mul_8:
-						case E::SensorType::mV_Raw_Mul_32:		retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();	break;
+						case E::SensorType::mV_Raw_Mul_32:
 
-						default:								retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType());	break;
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
 
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType());
+
+							break;
 					}
 
 					break;
@@ -193,6 +311,16 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 
+					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+					{
+						break;
+					}
+
+					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					{
+						break;
+					}
+
 					retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
 
 					break;
@@ -200,6 +328,18 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				default:
 					assert(0);
 			}
+
+			break;
+
+		case UnitsConvertType::CelsiusToFahrenheit:
+
+			retVal = conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
+
+			break;
+
+		case UnitsConvertType::FahrenheitToCelsius:
+
+			retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
 
 			break;
 
@@ -360,9 +500,35 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 			}
 			break;
 
+		case UnitsConvertType::CelsiusToFahrenheit:
+
+			retVal = conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
+
+			break;
+
+		case UnitsConvertType::FahrenheitToCelsius:
+
+			retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
+
+			break;
+
 		default:
 
 			assert(0);
+	}
+
+	return retVal;
+}
+
+double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conversionType)
+{
+	double retVal = 0;
+
+	switch (conversionType)
+	{
+		case UnitsConvertType::CelsiusToFahrenheit:	retVal = (val * (9.0 / 5.0)) + 32;		break;
+		case UnitsConvertType::FahrenheitToCelsius:	retVal = ((val - 32) * (5.0 / 9.0));	break;
+		default:									assert(0);
 	}
 
 	return retVal;

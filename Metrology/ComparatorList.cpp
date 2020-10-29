@@ -6,7 +6,6 @@
 #include "FindData.h"
 #include "ExportData.h"
 #include "ObjectProperties.h"
-#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -210,7 +209,8 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 
 		if (pInSignal->param().electricRangeIsValid() == true)
 		{
-			double electric = conversion(comparatorEx->compareConstValue(), CT_ENGINEER_TO_ELECTRIC, pInSignal->param());
+			UnitsConvertor uc;
+			double electric = uc.conversion(comparatorEx->compareConstValue(), UnitsConvertType::PhysicalToElectric, pInSignal->param());
 
 			strCompareValue += "  [" + QString::number(electric, 'f', pInSignal->param().electricPrecision()) + " " + pInSignal->param().electricUnitStr() + "]";
 		}

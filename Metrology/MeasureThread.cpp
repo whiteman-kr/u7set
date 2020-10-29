@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <QTime>
 
+#include "../lib/UnitsConvertor.h"
+
 #include "Options.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
@@ -625,6 +627,8 @@ void MeasureThread::measureLinearity()
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	saveStateTunSignals();
 
 	int pointCount = theOptions.linearity().points().count();
@@ -676,7 +680,7 @@ void MeasureThread::measureLinearity()
 				// then by engineering value we may get electric value
 				//
 				double engineeringVal = (point.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
-				double electricVal = conversion(engineeringVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+				double electricVal = uc.conversion(engineeringVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 				polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
 
@@ -795,6 +799,8 @@ void MeasureThread::measureComprators()
 		emit msgBox(QMessageBox::Information, tr("Selected signal has no comparators"));
 		return;
 	}
+
+	UnitsConvertor uc;
 
 	// starting from startComparatorIndex
 	//
@@ -948,9 +954,9 @@ void MeasureThread::measureComprators()
 						}
 
 
-						double engineeringCalcVal = conversionCalcVal(engineeringVal, CT_CALC_VAL_INVERSION, m_activeIoParamList[ch].signalConnectionType(), m_activeIoParamList[ch]);
+						double engineeringCalcVal = conversionCalcVal(engineeringVal, ConversionCalcType::Inversion, m_activeIoParamList[ch].signalConnectionType(), m_activeIoParamList[ch]);
 
-						double electricVal = conversion(engineeringCalcVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+						double electricVal = uc.conversion(engineeringCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 
 						if (electricVal < inParam.electricLowLimit())

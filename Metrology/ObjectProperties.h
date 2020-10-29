@@ -21,8 +21,8 @@
 #include "../qtpropertybrowser/src/qtvariantproperty.h"
 #include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
-#include "Options.h"
 #include "SignalBase.h"
+#include "Options.h"
 
 // Project property
 //

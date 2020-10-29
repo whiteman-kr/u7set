@@ -1,9 +1,5 @@
 #include "Calculator.h"
 
-#include "../lib/UnitsConvertor.h"
-
-#include "Conversion.h"
-
 // -------------------------------------------------------------------------------------------------------------------
 
 Calculator::Calculator(QWidget* parent) :
@@ -491,11 +487,9 @@ void Calculator::conversionTr()
 
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
 
-	UnitsConvertor uc;
-
 	UnitsConvertorLimit electricLimit;
 
-	if(uc.getElectricLimit(unit, sensorType, electricLimit) == false)
+	if(m_uc.getElectricLimit(unit, sensorType, electricLimit) == false)
 	{
 		return;
 	}
@@ -517,8 +511,8 @@ void Calculator::conversionTr()
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double degreeLowLimit = uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
-		double degreeHighLimit = uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
 
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
@@ -527,7 +521,7 @@ void Calculator::conversionTr()
 		}
 		else
 		{
-			double val = conversion(degreeVal, CT_PHYSICAL_TO_ELECTRIC, unit, sensorType, r0);
+			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType, r0);
 
 			m_pTrElectricEdit->setText(QString::number(val, 'f', 4));
 		}
@@ -545,7 +539,7 @@ void Calculator::conversionTr()
 		}
 		else
 		{
-			double val = conversion(electricVal, CT_ELECTRIC_TO_PHYSICAL, unit, sensorType, r0);
+			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
 
 			m_pTrDegreeEdit->setText(QString::number(val, 'f', 4));
 		}
@@ -569,11 +563,9 @@ void Calculator::conversionTc()
 
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
 
-	UnitsConvertor uc;
-
 	UnitsConvertorLimit electricLimit;
 
-	if(uc.getElectricLimit(unit, sensorType, electricLimit) == false)
+	if(m_uc.getElectricLimit(unit, sensorType, electricLimit) == false)
 	{
 		return;
 	}
@@ -584,8 +576,8 @@ void Calculator::conversionTc()
 
 	if (m_pTcDegreeRadio->isChecked() == true)
 	{
-		double degreeLowLimit = uc.conversionDegree(electricLimit.lowLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
-		double degreeHighLimit = uc.conversionDegree(electricLimit.highLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
 
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
@@ -594,7 +586,7 @@ void Calculator::conversionTc()
 		}
 		else
 		{
-			double val = conversion(degreeVal, CT_PHYSICAL_TO_ELECTRIC, unit, sensorType);
+			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType);
 
 			m_pTcElectricEdit->setText(QString::number(val, 'f', 4));
 		}
@@ -613,7 +605,7 @@ void Calculator::conversionTc()
 		}
 		else
 		{
-			double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, unit, sensorType);
+			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType);
 
 			m_pTcDegreeEdit->setText(QString::number(val, 'f', 4));
 		}
@@ -660,7 +652,7 @@ void Calculator::conversionDr()
 {
 	if (m_pDrСelsiusRadio->isChecked() == true)
 	{
-		double val = conversionDegree(m_pDrСelsiusEdit->text().toDouble(), CT_DEGREE_C_TO_F);
+		double val = m_uc.conversionDegree(m_pDrСelsiusEdit->text().toDouble(), UnitsConvertType::CelsiusToFahrenheit);
 
 		m_pDrСelsiusEdit->setFocus();
 		m_pDrСelsiusEdit->setReadOnly(false);
@@ -670,7 +662,7 @@ void Calculator::conversionDr()
 
 	if (m_pDrFahrenheitRadio->isChecked() == true)
 	{
-		double val = conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), CT_DEGREE_F_TO_C);
+		double val = m_uc.conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), UnitsConvertType::FahrenheitToCelsius);
 
 		m_pDrFahrenheitEdit->setFocus();
 		m_pDrFahrenheitEdit->setReadOnly(false);

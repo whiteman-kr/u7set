@@ -4,7 +4,6 @@
 #include "../lib/AppSignal.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
-#include "../lib/UnitsConvertor.h"
 #include "../lib/ComparatorSet.h"
 #include "../lib/SignalProperties.h"
 #include "../Builder/CfgFiles.h"

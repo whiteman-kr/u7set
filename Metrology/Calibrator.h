@@ -37,7 +37,7 @@ const char* const CalibratorMode[] =
 				QT_TRANSLATE_NOOP("Calibrator.h", "Source"),
 };
 
-const int		CALIBRATOR_MODE_COUNT			= sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
+const int		CALIBRATOR_MODE_COUNT		= sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
 
 const int		CALIBRATOR_MODE_UNDEFINED	= -1,
 				CALIBRATOR_MODE_MEASURE		= 0,

@@ -2,6 +2,8 @@
 
 #include <QThread>
 
+#include "../lib/UnitsConvertor.h"
+
 #include "Database.h"
 #include "Options.h"
 #include "Conversion.h"
@@ -959,6 +961,8 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
@@ -993,7 +997,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	//
 
 	double electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	double engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
+	double engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
 
 	setPercent(((engineering - inParam.lowEngineeringUnits()) * 100)/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()));
 
@@ -1015,7 +1019,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	for(int index = 0; index < measureCount; index++)
 	{
 		double enVal = theSignalBase.signalState(inParam.hash()).value();
-		double elVal = conversion(enVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+		double elVal = uc.conversion(enVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
@@ -1089,6 +1093,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
@@ -1123,8 +1129,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	//
 
 	double engineering = (ioParam.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
-	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
-	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
 
 	setPercent(ioParam.percent());
 
@@ -1146,8 +1152,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	for(int index = 0; index < measureCount; index++)
 	{
 		double enVal = theSignalBase.signalState(outParam.hash()).value();
-		double enCalcVal = conversionCalcVal(enVal, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
-		double elVal = conversion(enCalcVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+		double enCalcVal = conversionCalcVal(enVal, ConversionCalcType::Inversion, ioParam.signalConnectionType(), ioParam);
+		double elVal = uc.conversion(enCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
@@ -1221,6 +1227,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
@@ -1255,8 +1263,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	//
 
 	double engineering = (ioParam.percent() * (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / 100) + outParam.lowEngineeringUnits();
-	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
-	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, outParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
+	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, outParam);
 
 	setPercent(ioParam.percent());
 
@@ -2049,6 +2057,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
@@ -2093,7 +2103,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	setCmpType(cmpValueType, comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
-	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
+	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
@@ -2105,7 +2115,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	setSignalValid(true);
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
+	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
@@ -2190,6 +2200,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
@@ -2234,8 +2246,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	setCmpType(cmpValueType, comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
-	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
-	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, inParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Inversion, ioParam.signalConnectionType(), ioParam);
+	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
@@ -2247,8 +2259,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	setSignalValid(true);
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
-	engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
+	engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);

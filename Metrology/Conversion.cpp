@@ -1,19 +1,16 @@
 ﻿#include "Conversion.h"
 
+#include "../lib/UnitsConvertor.h"
+
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, int conversionType, const Metrology::SignalParam& param)
+double conversion(double val, ConversionType conversionType, const Metrology::SignalParam& param)
 {
-	if (conversionType < 0 || conversionType > CT_COUNT)
-	{
-		return 0;
-	}
-
 	double retVal = 0;
 
 	switch(conversionType)
 	{
-		case CT_PHYSICAL_TO_ELECTRIC:
+		case ConversionType::PhysicalToElectric:
 
 			switch(param.electricUnitID())
 			{
@@ -94,7 +91,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 			break;
 
-		case CT_ELECTRIC_TO_PHYSICAL:
+		case ConversionType::ElectricToPhysical:
 
 			switch(param.electricUnitID())
 			{
@@ -175,16 +172,16 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 			break;
 
-		case CT_ENGINEER_TO_ELECTRIC:
+		case ConversionType::EnginnerToElectric:
 			{
 				double phVal = (val - param.lowEngineeringUnits())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.highEngineeringUnits() - param.lowEngineeringUnits()) + param.physicalLowLimit();
-				retVal = conversion(phVal, CT_PHYSICAL_TO_ELECTRIC, param);
+				retVal = conversion(phVal, ConversionType::PhysicalToElectric, param);
 			}
 			break;
 
-		case CT_ELECTRIC_TO_ENGINEER:
+		case ConversionType::ElectricToEnginner:
 			{
-				double phVal = conversion(val, CT_ELECTRIC_TO_PHYSICAL, param);
+				double phVal = conversion(val, ConversionType::ElectricToPhysical, param);
 				retVal = (phVal - param.physicalLowLimit())*(param.highEngineeringUnits() - param.lowEngineeringUnits())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.lowEngineeringUnits();
 			}
 			break;
@@ -198,13 +195,8 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType, double r0)
+double conversion(double val, ConversionType conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType, double r0)
 {
-	if (conversionType < 0 || conversionType > CT_COUNT)
-	{
-		return 0;
-	}
-
 	Metrology::SignalParam param;
 
 	param.setElectricUnitID(unitID);
@@ -216,34 +208,8 @@ double conversion(double val, int conversionType, const E::ElectricUnit unitID, 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversionDegree(double val, int conversionType)
+double conversionCalcVal(double val, ConversionCalcType calcType, int connectionType, const IoSignalParam &ioParam)
 {
-	if (conversionType < 0 || conversionType > CT_DEGREE_COUNT)
-	{
-		return 0;
-	}
-
-	double retVal = 0;
-
-	switch (conversionType)
-	{
-		case CT_DEGREE_C_TO_F:		retVal = (val * (9.0 / 5.0)) + 32;		break;
-		case CT_DEGREE_F_TO_C:		retVal = ((val - 32) * (5.0 / 9.0));	break;
-		default:					assert(0);
-	}
-
-	return retVal;
-}
-
-// -------------------------------------------------------------------------------------------------------------------------------------------------
-
-double conversionCalcVal(double val, int calcType, int connectionType, const IoSignalParam &ioParam)
-{
-	if (calcType < 0 || calcType >= CT_CALC_VAL_COUNT)
-	{
-		return val;
-	}
-
 	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return val;
@@ -255,17 +221,29 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 		return val;
 	}
 
+	if (inParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || inParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	{
+		return val;
+	}
+
 	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 	if (outParam.isValid() == false)
 	{
 		return val;
 	}
 
+	if (outParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || outParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	{
+		return val;
+	}
+
+	UnitsConvertor uc;
+
 	double retVal = val;
 
 	switch (calcType)
 	{
-		case CT_CALC_VAL_NORMAL:
+		case ConversionCalcType::Normal:
 
 			switch (connectionType)
 			{
@@ -295,7 +273,7 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 					{
-						retVal = conversionDegree(val, CT_DEGREE_C_TO_F);
+						retVal = uc.conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
 					}
 					break;
 
@@ -303,14 +281,14 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 					{
 						val = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
 
-						retVal = conversionDegree(val, CT_DEGREE_C_TO_F);
+						retVal = uc.conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
 					}
 					break;
 			}
 
 			break;
 
-		case CT_CALC_VAL_INVERSION:
+		case ConversionCalcType::Inversion:
 
 			switch (connectionType)
 			{
@@ -340,7 +318,7 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 					{
-						retVal = conversionDegree(val, CT_DEGREE_F_TO_C);
+						retVal = uc.conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
 					}
 					break;
 
@@ -348,7 +326,7 @@ double conversionCalcVal(double val, int calcType, int connectionType, const IoS
 					{
 						val = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
 
-						retVal = conversionDegree(val, CT_DEGREE_F_TO_C);
+						retVal = uc.conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
 					}
 					break;
 			}

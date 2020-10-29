@@ -44,11 +44,11 @@ const UnitsConvertorLimit UnitsConvertorLimits[] =
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21,			 7.95,		153.30 },	// -200 .. 650		// module non ptaform
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23,			41.71,		 93.64 },	//  -50 .. 180		// module non ptaform
 
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_391,		17.24,		395.16 },	// -200 .. 850		// module RIM
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_385,		18.52,		390.48 },	// -200 .. 850		// module RIM
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_428,		20.53,		185.60 },	// -180 .. 200		// module RIM
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_426,		78.70,		185.20 },	//  -50 .. 200		// module RIM
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni_a_617,		64.83,		223.21 },	//  -70 .. 180		// module RIM
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_391,		17.24,		395.16 },	// -200 .. 850		// module RIM and R0
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_385,		18.52,		390.48 },	// -200 .. 850		// module RIM and R0
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_428,		20.53,		185.60 },	// -180 .. 200		// module RIM and R0
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_426,		78.70,		185.20 },	//  -50 .. 200		// module RIM and R0
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni_a_617,		64.83,		223.21 },	//  -70 .. 180		// module RIM and R0
 
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Raw,				 0.00,		1500 },							// module RIM
 
@@ -161,13 +161,19 @@ enum class UnitsConvertModule
 	RIM = 4,
 };
 
+Q_DECLARE_METATYPE(UnitsConvertModule)
+
 // ==============================================================================================
 
 enum class UnitsConvertType
 {
 	ElectricToPhysical = 0,
 	PhysicalToElectric = 1,
+	CelsiusToFahrenheit = 2,
+	FahrenheitToCelsius = 3,
 };
+
+Q_DECLARE_METATYPE(UnitsConvertType)
 
 // ==============================================================================================
 // class UnitsConvertor
@@ -186,6 +192,7 @@ public:
 
 	double conversion(double val, const UnitsConvertType& conversionType, const Signal& signal);																				// universal conversion from electrical to physical and vice versa
 	double conversionDegree(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0 = 0);					// conversion only ThermoCouple and ThermoResistor
+	double conversionDegree(double val, const UnitsConvertType& conversionType);																								// conversion only Celsius to Fahrenheit and vice versa
 
 	double r0_from_signal(const Signal& signal);																																// for signals of module RIM
 	bool r0_is_use(int sensorType);																																				// for signals of module RIM

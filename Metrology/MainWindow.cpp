@@ -34,6 +34,10 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
+		const int	ChannelCount1	= QMetaEnum::fromType<E::Channel>().keyCount();
+
+	int nnn  = ChannelCount1;
+
 	// open database
 	//
 	theDatabase.open();
