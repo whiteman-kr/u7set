@@ -87,6 +87,7 @@ SOURCES +=\
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogClientBehavior.cpp \
+    Forms/DialogProjectDiffProgress.cpp \
     DialogSettings.cpp \
     EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
@@ -241,6 +242,7 @@ HEADERS  += \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogClientBehavior.h \
+    Forms/DialogProjectDiffProgress.h \
     DialogSettings.h \
     EditEngine/EditEngineNop.h \
     FilesTabPage.h \
@@ -392,6 +394,7 @@ FORMS    += \
     ../lib/Ui/DialogSignalInfo.ui \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
+    Forms/DialogProjectDiffProgress.ui \
     DialogSettings.ui \
     Forms/DialogProjectDiff.ui \
     LoginDialog.ui \

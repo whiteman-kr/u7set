@@ -1052,7 +1052,12 @@ void MainWindow::projectDifference()
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		ProjectDiffGenerator::run(dialog.compareDataResult(), db(), this);
+		ProjectDiffGenerator::run(dialog.compareDataResult(),
+								  dialog.fileTypesMap(),
+								  db()->currentProject().projectName(),
+								  db()->currentUser().username(),
+								  db()->currentUser().password(),
+								  this);
 	}
 
 	return;

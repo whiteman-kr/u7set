@@ -2,6 +2,7 @@
 #include "ui_DialogProjectDiff.h"
 #include "../../lib/DbController.h"
 #include "SelectChangesetDialog.h"
+#include "../ProjectDiffGenerator.h"
 
 DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint),
@@ -36,6 +37,19 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	connect(ui->sourceTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogProjectDiff::versionTypeChanged);
 	connect(ui->targetTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogProjectDiff::versionTypeChanged);
 
+	//
+
+	std::map<int, QString> filesTypesNamesMap = ProjectDiffGenerator::filesTypesNamesMap(db);
+
+	for (auto it : filesTypesNamesMap)
+	{
+		QListWidgetItem* item = new QListWidgetItem(tr("%1 - %2").arg(it.first).arg(it.second));
+		item->setData(Qt::UserRole, it.first);
+		item->setCheckState(Qt::Checked);
+
+		ui->categoriesList->insertItem(ui->categoriesList->count(), item);
+	}
+
 	return;
 
 }
@@ -48,6 +62,11 @@ DialogProjectDiff::~DialogProjectDiff()
 CompareData DialogProjectDiff::compareDataResult() const
 {
 	return m_compareDataResult;
+}
+
+std::map<int, QString> DialogProjectDiff::fileTypesMap() const
+{
+	return m_fileTypesMapResult;
 }
 
 void DialogProjectDiff::showEvent(QShowEvent*)
@@ -223,5 +242,39 @@ void DialogProjectDiff::done(int r)
 
 	m_compareDataResult = compareData;
 
+	m_fileTypesMapResult.clear();
+	for (int i = 0; i < ui->categoriesList->count(); i++)
+	{
+		QListWidgetItem* item = ui->categoriesList->item(i);
+		if (item->checkState() == Qt::Checked)
+		{
+			m_fileTypesMapResult[item->data(Qt::UserRole).toInt()] = item->text();
+		}
+	}
+
+	if (m_fileTypesMapResult.empty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please select at least one file category!"));
+		return;
+	}
+
 	QDialog::done(r);
+}
+
+void DialogProjectDiff::on_buttonSelectAll_clicked()
+{
+	for (int i = 0; i < ui->categoriesList->count(); i++)
+	{
+		QListWidgetItem* item = ui->categoriesList->item(i);
+		item->setCheckState(Qt::Checked);
+	}
+}
+
+void DialogProjectDiff::on_buttonSelectNone_clicked()
+{
+	for (int i = 0; i < ui->categoriesList->count(); i++)
+	{
+		QListWidgetItem* item = ui->categoriesList->item(i);
+		item->setCheckState(Qt::Unchecked);
+	}
 }
