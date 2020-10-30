@@ -32,7 +32,11 @@ public:
 
 private:
 
-	int						m_measureType = MEASURE_TYPE_UNKNOWN;
+	int						m_measureType = MEASURE_TYPE_UNDEFINED;
+	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int						m_measureTimeout = 0;
+
 	bool					m_cmdStopMeasure = true;
 
 	QVector<IoSignalParam>	m_activeIoParamList;
@@ -58,9 +62,6 @@ private:
 	void					restoreStateTunSignals();
 
 public:
-
-	int						measureType() const { return m_measureType; }
-	void					setMeasureType(int measureType) { m_measureType = measureType; }
 
 	bool					enableMesureIsSignal();
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
@@ -88,6 +89,11 @@ public slots:
 
 	void					signalSocketDisconnected();
 	void					tuningSocketDisconnected();
+
+	void					measureTypeChanged(int type);
+	void					measureKindChanged(int kind);
+	void					signalConnectionTypeChanged(int type);
+	void					measureTimeoutChanged(int timeout);
 
 	void					updateSignalParam(const QString& appSignalID);
 

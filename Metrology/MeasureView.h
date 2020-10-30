@@ -20,7 +20,7 @@ public:
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_UNKNOWN;
+	int					m_measureType = MEASURE_TYPE_UNDEFINED;
 
 	MeasureViewHeader	m_header;
 
@@ -71,7 +71,7 @@ public:
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_UNKNOWN;
+	int					m_measureType = MEASURE_TYPE_UNDEFINED;
 	MeasureTable		m_table;
 
 	QMenu*				m_headerContextMenu = nullptr;

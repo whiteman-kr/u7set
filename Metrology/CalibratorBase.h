@@ -19,6 +19,7 @@
 
 #include "Calibrator.h"
 #include "CalibratorManager.h"
+#include "MeasureBase.h"
 
 // ==============================================================================================
 
@@ -54,6 +55,8 @@ public:
 	virtual ~CalibratorBase();
 
 private:
+
+	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 
 	QTimer					m_timer;
 	int						m_timeout = 0;
@@ -115,6 +118,8 @@ signals:
 	void					calibratorConnectedChanged(int);
 
 public slots:
+
+	void					measureKindChanged(int kind);
 
 	void					timeoutInitialization();				// Slot of timer
 

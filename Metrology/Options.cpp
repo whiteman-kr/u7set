@@ -436,6 +436,30 @@ ModuleOption::~ModuleOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void ModuleOption::setMaxInputCount(int count)
+{
+	if (count == 0)
+	{
+		count = 1;
+	}
+
+	m_maxInputCount = count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ModuleOption::setMaxComparatorCount(int count)
+{
+	if (count == 0)
+	{
+		count = 1;
+	}
+
+	m_maxComparatorCount = count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void ModuleOption::load()
 {
 	QSettings s;
@@ -461,7 +485,7 @@ void ModuleOption::save()
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
-	s.setValue(QString("%1MaxComparatorCount").arg(COMPARATOR_OPTIONS_KEY), m_maxComparatorCount);
+	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -832,6 +856,9 @@ void ToolBarOption::load()
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
 	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
 	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), SIGNAL_CONNECTION_TYPE_UNUSED).toInt();
+
+	m_defaultRack = s.value(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), "RACK").toString();
+	m_defaultSignalId = s.value(QString("%1DefaultSignalId").arg(TOOLBAR_OPTIONS_KEY), "SIGNAL_ID").toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -843,6 +870,9 @@ void ToolBarOption::save()
 	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
 	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
 	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
+
+	s.setValue(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), m_defaultRack);
+	s.setValue(QString("%1DefaultSignalId").arg(TOOLBAR_OPTIONS_KEY), m_defaultSignalId);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -852,6 +882,9 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 	m_measureTimeout = from.m_measureTimeout;
 	m_measureKind = from.m_measureKind;
 	m_signalConnectionType = from.m_signalConnectionType;
+
+	m_defaultRack = from.m_defaultRack;
+	m_defaultSignalId = from.m_defaultSignalId;
 
 	return *this;
 }
@@ -947,9 +980,9 @@ void MeasureViewOption::load()
 					continue;
 				}
 
-				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/Column%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.title()).toString());
-				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/Column%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.width()).toInt());
-				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/Column%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.enableVisible()).toBool());
+				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title()).toString());
+				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width()).toInt());
+				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -989,9 +1022,9 @@ void MeasureViewOption::save()
 					continue;
 				}
 
-				s.setValue(QString("%1/Header/%2/%3/Column%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.title());
-				s.setValue(QString("%1/Header/%2/%3/Column%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.width());
-				s.setValue(QString("%1/Header/%2/%3/Column%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(LanguageTypeStr[languageType]).arg(column), c.enableVisible());
+				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title());
+				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width());
+				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible());
 			}
 		}
 	}
@@ -1177,7 +1210,7 @@ void ComparatorInfoOption::save()
 
 ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption& from)
 {
-	m_font.fromString(from.m_font.toString());
+	m_font = from.m_font;
 
 	m_displayingStateFalse = from.m_displayingStateFalse;
 	m_displayingStateTrue = from.m_displayingStateTrue;

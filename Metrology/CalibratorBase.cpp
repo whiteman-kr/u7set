@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QMessageBox>
-#include <QClipboard>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -12,7 +11,7 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QKeyEvent>
 
-#include "Options.h"
+#include "CopyData.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -105,6 +104,8 @@ void CalibratorBase::removeCalibrators()
 			continue;
 		}
 
+		calibrator->setWaitResponse(false);
+
 		if (calibrator->portIsOpen() == true)
 		{
 			int timeout = 0;
@@ -165,8 +166,11 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 		m_pSettingsAction->setIcon(QIcon(":/icons/Settings.png"));
 		m_pSettingsAction->setShortcut(Qt::CTRL + Qt::Key_S);
 
-		m_pCopyAction = new QAction(tr("&Copy"), m_pInitDialog);
+		m_pCalibratorMenu->addSeparator();
+
+		m_pCopyAction = m_pCalibratorMenu->addAction(tr("&Copy"));
 		m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+		m_pSettingsAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 		m_pMenuBar->addMenu(m_pCalibratorMenu);
 
@@ -179,6 +183,7 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 		mainLayout->setMenuBar(m_pMenuBar);
 
 		m_pCalibratorView = new QTableWidget(m_pInitDialog);
+		m_pCalibratorView->setSelectionBehavior(QAbstractItemView::SelectRows);
 		m_pCalibratorProgress = new QProgressBar(m_pInitDialog);
 
 		QVBoxLayout *listLayout = new QVBoxLayout;
@@ -362,9 +367,14 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 
 CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 {
+	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	{
+		return nullptr;
+	}
+
 	CalibratorManager* pManager = nullptr;
 
-	switch(theOptions.toolBar().measureKind())
+	switch(m_measureKind)
 	{
 		case MEASURE_KIND_ONE_RACK:
 		case MEASURE_KIND_ONE_MODULE:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
@@ -410,6 +420,18 @@ void CalibratorBase::onInitialization()
 
 	m_timeout = 0;
 	m_timer.start(CALIBRATOR_TIMEOUT_STEP);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorBase::measureKindChanged(int kind)
+{
+	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	m_measureKind = kind;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -579,29 +601,9 @@ void CalibratorBase::onSettings(int row, int)
 
 void CalibratorBase::onCopy()
 {
-	int index = m_pCalibratorView->currentRow();
-	if (index < 0 || index >= calibratorCount())
-	{
-		QMessageBox::information(m_pInitDialog, m_pInitDialog->windowTitle(), tr("Please, select calibrator!"));
-		return;
-	}
-
-	CalibratorManager* manager = calibratorManager(index);
-	if (manager == nullptr)
-	{
-		return;
-	}
-
-	Calibrator* calibrator = manager->calibrator();
-	if (calibrator == nullptr)
-	{
-		return;
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(calibrator->typeStr() + " " + calibrator->serialNo());
+	CopyData copyData(m_pCalibratorView, false);
+	copyData.exec();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -611,24 +613,8 @@ void CalibratorBase::onContextMenu(QPoint)
 
 	menu->addAction(m_pManageAction);
 	menu->addAction(m_pSettingsAction);
-
-	int index = m_pCalibratorView->currentRow();
-	if (index >= 0 && index < calibratorCount())
-	{
-		CalibratorManager* manager = calibratorManager(index);
-		if (manager != nullptr)
-		{
-			Calibrator* calibrator = manager->calibrator();
-			if (calibrator != nullptr)
-			{
-				if (calibrator->isConnected() == true)
-				{
-					menu->addSeparator();
-					menu->addAction(m_pCopyAction);
-				}
-			}
-		}
-	}
+	menu->addSeparator();
+	menu->addAction(m_pCopyAction);
 
 	menu->exec(QCursor::pos());
 }

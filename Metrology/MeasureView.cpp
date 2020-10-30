@@ -3,12 +3,10 @@
 #include <QApplication>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QClipboard>
 
 #include "Database.h"
+#include "CopyData.h"
 #include "Options.h"
-
-#include "MainWindow.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -163,6 +161,11 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
+		if (pMeasurement->foundInStatistics() == false)
+		{
+			return QColor(Qt::lightGray);
+		}
+
 		return QVariant();
 	}
 
@@ -364,6 +367,8 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
 		case MVC_CMN_L_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
+		case MVC_CMN_L_CONNECT_APP_ID:			result = m->connectionAppSignalID(); break;
+		case MVC_CMN_L_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 		case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
 		case MVC_CMN_L_EQUIPMENT_ID:			result = m->equipmentID(); break;
@@ -417,6 +422,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		case MVC_CMN_L_ERROR_RESULT:			result = m->errorResultStr(); break;
 
 		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
+		case MVC_CMN_L_CALIBRATOR:				result = m->calibrator(); break;
 
 		default:								result.clear(); break;
 	}
@@ -477,6 +483,8 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 		case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
 		case MVC_CMN_C_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
+		case MVC_CMN_C_CONNECT_APP_ID:			result = m->connectionAppSignalID(); break;
+		case MVC_CMN_C_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 		case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_C_CUSTOM_ID:				result = m->customAppSignalID(); break;
 		case MVC_CMN_C_EQUIPMENT_ID:			result = m->equipmentID(); break;
@@ -507,6 +515,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 		case MVC_CMN_C_ERROR_RESULT:			result = m->errorResultStr(); break;
 
 		case MVC_CMN_C_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
+		case MVC_CMN_C_CALIBRATOR:				result = m->calibrator(); break;
 
 		default:								result.clear(); break;
 	}
@@ -926,33 +935,8 @@ void MeasureView::removeMeasure()
 
 void MeasureView::copy()
 {
-	QString textClipboard;
-
-	int rowCount = model()->rowCount();
-	int columnCount = model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(model()->data(model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(this, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

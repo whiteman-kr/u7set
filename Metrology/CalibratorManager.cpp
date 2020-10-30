@@ -240,7 +240,7 @@ void CalibratorManager::initDialog()
 	{
 		case CALIBRATOR_MODE_MEASURE:	m_pUnitList->setCurrentIndex(m_pCalibrator->measureUnit());	break;
 		case CALIBRATOR_MODE_SOURCE:	m_pUnitList->setCurrentIndex(m_pCalibrator->sourceUnit());	break;
-		default:						m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNKNOWN);
+		default:						m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNDEFINED);
 	}
 
 	m_pRemoteControlCheck->setLayoutDirection(Qt::RightToLeft);
@@ -300,7 +300,7 @@ void CalibratorManager::enableInterface(bool enable)
 	m_pUnitList->setEnabled(enable);
 	m_pRemoteControlCheck->setEnabled(enable);
 
-	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNKNOWN)
+	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNDEFINED)
 	{
 		m_pSetValueButton->setEnabled(false);
 		m_pStepDownButton->setEnabled(false);
@@ -469,6 +469,17 @@ void CalibratorManager::onValueChanged()
 
 void CalibratorManager::updateValue()
 {
+	if (m_pCalibrator == nullptr)
+	{
+		return;
+	}
+
+	int calibratorType = m_pCalibrator->type();
+	if (calibratorType < 0 || calibratorType >= CALIBRATOR_TYPE_COUNT)
+	{
+		return;
+	}
+
 	int measureUnit = m_pCalibrator->measureUnit();
 	int sourceUnit = m_pCalibrator->sourceUnit();
 
@@ -480,7 +491,9 @@ void CalibratorManager::updateValue()
 	}
 	else
 	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', 3) + " " + CalibratorUnit[ measureUnit ];
+		int precision = CalibratorPrecision[calibratorType][measureUnit];
+
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', precision) + " " + CalibratorUnit[measureUnit];
 	}
 
 	if (sourceUnit < 0 || sourceUnit >= CALIBRATOR_UNIT_COUNT)
@@ -489,7 +502,9 @@ void CalibratorManager::updateValue()
 	}
 	else
 	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', 3) + " " + CalibratorUnit[ sourceUnit ];
+		int precision = CalibratorPrecision[calibratorType][sourceUnit];
+
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', precision) + " " + CalibratorUnit[sourceUnit];
 	}
 
 	m_pMeasureEdit->setText(measureValue);

@@ -44,12 +44,16 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
+    CopyData.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
     OptionsDialog.cpp \
     Options.cpp \
     OptionsPointsDialog.cpp \
+    SelectSignalWidget.cpp \
+    StatisticsBase.cpp \
+    StatisticsPanel.cpp \
     main.cpp \
     MeasureThread.cpp \
     CalibratorManager.cpp \
@@ -107,8 +111,6 @@ SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
-    StatisticBase.cpp \
-    StatisticPanel.cpp \
     ../lib/ComparatorSet.cpp \
     ComparatorList.cpp \
     ComparatorInfoPanel.cpp \
@@ -120,6 +122,7 @@ SOURCES += \
 HEADERS  += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
+    CopyData.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
@@ -136,6 +139,7 @@ HEADERS  += \
     Database.h \
     Conversion.h \
     Calculator.h \
+    SelectSignalWidget.h \
     Stable.h \
     ObjectVector.h \
     ../lib/Signal.h \
@@ -164,6 +168,8 @@ HEADERS  += \
     SignalInfoPanel.h \
     ExportData.h \
     FindData.h \
+    StatisticsBase.h \
+    StatisticsPanel.h \
     TuningSocket.h \
     TuningSignalBase.h \
     TuningSignalList.h \
@@ -191,8 +197,6 @@ HEADERS  += \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
 #../lib/ExcelHelper.h
-    StatisticBase.h \
-    StatisticPanel.h \
     ../lib/ComparatorSet.h \
     ComparatorList.h \
     ComparatorInfoPanel.h \

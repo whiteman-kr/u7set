@@ -5,13 +5,12 @@
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
-#include <QClipboard>
 #include <QKeyEvent>
 
-#include "Options.h"
-#include "ObjectProperties.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
+#include "CopyData.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -30,9 +29,40 @@ ComparatorInfoTable::~ComparatorInfoTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void ComparatorInfoTable::setMaxComparatorCount(int count)
+{
+	if (m_maxComparatorCount == count)
+	{
+		return;
+	}
+
+	if (m_maxComparatorCount != 0)
+	{
+		beginRemoveColumns(QModelIndex(), 0, m_maxComparatorCount - 1);
+		endRemoveColumns();
+	}
+
+	m_maxComparatorCount = count;
+
+	if (m_maxComparatorCount != 0)
+	{
+		beginInsertColumns(QModelIndex(), 0, m_maxComparatorCount - 1);
+		endInsertColumns();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoTable::setComparatorInfo(const ComparatorInfoOption& comparatorInfo)
+{
+	m_comparatorInfo = comparatorInfo;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int ComparatorInfoTable::columnCount(const QModelIndex&) const
 {
-	return theOptions.module().maxComparatorCount();
+	return m_maxComparatorCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -55,7 +85,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < theOptions.module().maxComparatorCount())
+		if (section >= 0 && section < m_maxComparatorCount)
 		{
 			result = tr("Comparator %1").arg(section + 1);
 		}
@@ -85,7 +115,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column >= theOptions.module().maxComparatorCount())
+	if (column < 0 || column >= m_maxComparatorCount)
 	{
 		return QVariant();
 	}
@@ -114,18 +144,18 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::FontRole)
 	{
-		return theOptions.comparatorInfo().font();
+		return m_comparatorInfo.font();
 	}
 
 	if (role == Qt::BackgroundRole)
 	{
 		if (comparatorEx->outputState() == true)
 		{
-			return theOptions.comparatorInfo().colorStateTrue();
+			return m_comparatorInfo.colorStateTrue();
 		}
 		else
 		{
-			return theOptions.comparatorInfo().colorStateFalse();
+			return m_comparatorInfo.colorStateFalse();
 		}
 	}
 
@@ -157,7 +187,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 	stateStr += " ";
 	stateStr += comparatorEx->compareOnlineValueStr(Metrology::CmpValueTypeSetPoint);
 	stateStr += " : ";
-	stateStr += comparatorEx->outputStateStr(theOptions.comparatorInfo().displayingStateTrue(), theOptions.comparatorInfo().displayingStateFalse());
+	stateStr += comparatorEx->outputStateStr(m_comparatorInfo.displayingStateTrue(), m_comparatorInfo.displayingStateFalse());
 
 	return stateStr;
 }
@@ -166,7 +196,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, theOptions.module().maxComparatorCount() - 1), QVector<int>() << Qt::DisplayRole);
+	emit dataChanged(index(0, 0), index(m_signalCount - 1, m_maxComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -255,8 +285,9 @@ void ComparatorInfoTable::updateSignalParam(const QString& appSignalID)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoPanel::ComparatorInfoPanel(QWidget* parent) :
-	QDockWidget(parent)
+ComparatorInfoPanel::ComparatorInfoPanel(const ComparatorInfoOption& comparatorInfo, QWidget* parent) :
+	QDockWidget(parent),
+	m_comparatorInfo(comparatorInfo)
 {
 	setWindowTitle(tr("Panel comparator information"));
 	setObjectName(windowTitle());
@@ -266,7 +297,7 @@ ComparatorInfoPanel::ComparatorInfoPanel(QWidget* parent) :
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &ComparatorInfoPanel::activeSignalChanged, Qt::QueuedConnection);
 
-	startComparatorStateTimer();
+	startComparatorStateTimer(m_comparatorInfo.timeForUpdate());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -284,14 +315,17 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pComparatorInfoWindow->installEventFilter(this);
 
+	m_comparatorTable.setComparatorInfo(m_comparatorInfo);
+	m_comparatorTable.setMaxComparatorCount(m_maxComparatorCount);
+
 	m_pView = new QTableView(m_pComparatorInfoWindow);
 	m_pView->setModel(&m_comparatorTable);
-	QSize cellSize = QFontMetrics(theOptions.comparatorInfo().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < theOptions.module().maxComparatorCount(); column++)
+	for(int column = 0; column < m_maxComparatorCount; column++)
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
@@ -311,9 +345,15 @@ void ComparatorInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
 
+//	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
+//	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+
+//	m_pContextMenu->addSeparator();
+
 	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
+//	connect(m_pCopyAction, &QAction::triggered, this, &ComparatorInfoPanel::copy);
 	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &ComparatorInfoPanel::comparatorProperty);
 
 	// init context menu
@@ -326,7 +366,7 @@ void ComparatorInfoPanel::createContextMenu()
 
 void ComparatorInfoPanel::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= theOptions.module().maxComparatorCount())
+	if (column < 0 || column >= m_maxComparatorCount)
 	{
 		return;
 	}
@@ -343,7 +383,7 @@ void ComparatorInfoPanel::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::startComparatorStateTimer()
+void ComparatorInfoPanel::startComparatorStateTimer(int timeout)
 {
 	if (m_updateComparatorStateTimer == nullptr)
 	{
@@ -351,7 +391,7 @@ void ComparatorInfoPanel::startComparatorStateTimer()
 		connect(m_updateComparatorStateTimer, &QTimer::timeout, this, &ComparatorInfoPanel::updateComparatorState);
 	}
 
-	m_updateComparatorStateTimer->start(theOptions.comparatorInfo().timeForUpdate());
+	m_updateComparatorStateTimer->start(timeout);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -366,10 +406,53 @@ void ComparatorInfoPanel::stopComparatorStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::restartComparatorStateTimer()
+void ComparatorInfoPanel::restartComparatorStateTimer(int timeout)
 {
+	if (m_updateComparatorStateTimer != nullptr)
+	{
+		if(m_updateComparatorStateTimer->interval() == timeout)
+		{
+			return;
+		}
+	}
+
 	stopComparatorStateTimer();
-	startComparatorStateTimer();
+	startComparatorStateTimer(timeout);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoPanel::setMaxComparatorCount(int count)
+{
+	if (m_maxComparatorCount == count)
+	{
+		return;
+	}
+
+	m_maxComparatorCount = count;
+
+	m_comparatorTable.setMaxComparatorCount(m_maxComparatorCount);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoPanel::signalConnectionTypeChanged(int type)
+{
+	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_signalConnectionType = type;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoPanel::setComparatorInfo(const ComparatorInfoOption& comparatorInfo)
+{
+	m_comparatorInfo = comparatorInfo;
+	m_comparatorTable.setComparatorInfo(m_comparatorInfo);
+	restartComparatorStateTimer(m_comparatorInfo.timeForUpdate());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -451,7 +534,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	m_comparatorTable.set(ioParamList);
 
-	for(int c = 0; c < theOptions.module().maxComparatorCount(); c ++)
+	for(int c = 0; c < m_maxComparatorCount; c ++)
 	{
 		if (c < maxComparatorCount)
 		{
@@ -465,7 +548,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	//
 	//
-	QSize cellSize = QFontMetrics(theOptions.comparatorInfo().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 
 	if (activeSignal.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
@@ -482,6 +565,14 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 void ComparatorInfoPanel::updateComparatorState()
 {
 	m_comparatorTable.updateState();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoPanel::copy()
+{
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

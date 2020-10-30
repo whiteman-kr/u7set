@@ -9,7 +9,7 @@
 #include "RackBase.h"
 #include "SignalConnectionBase.h"
 #include "TuningSignalBase.h"
-#include "StatisticBase.h"
+#include "StatisticsBase.h"
 
 // ==============================================================================================
 // IoSignalParam for :
@@ -112,7 +112,9 @@ private:
 	QVector<Metrology::Signal*>	m_pSignalList;
 
 	Metrology::SignalLocation	m_location;
-	QString						m_strID;		// depend from SignalLocation and measureKind
+
+	QString						m_signalID;		// depend from SignalLocation and measureKind
+	QString						m_caption;		// depend from SignalLocation and measureKind
 
 public:
 
@@ -124,10 +126,13 @@ public:
 
 	Metrology::Signal*			metrologySignal(int channel) const;
 	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
+
 	Metrology::Signal*			firstMetrologySignal() const;
 
 	Metrology::SignalLocation	location() const { return m_location; }
-	QString						strID() const { return m_strID; }
+
+	QString						signalID() const { return m_signalID; }
+	QString						caption() const { return m_caption; }
 
 	MultiChannelSignal&			operator=(const MultiChannelSignal& from);
 };
@@ -224,7 +229,7 @@ private:
 
 	SignalConnectionBase	m_signalConnectionBase;	// signal connections
 	TuningBase				m_tuningBase;			// sources and signals of tuning
-	StatisticBase			m_statisticBase;		// statistics of measured signals
+	StatisticsBase			m_statisticsBase;		// statistics of measured signals
 
 public:
 
@@ -270,10 +275,10 @@ public:
 	//
 	RackBase&				racks() { return m_rackBase; }
 
-	int						createRackListForMeasure(int signalConnectionType);
+	int						createRackListForMeasure(int measureKind, int signalConnectionType);
 	void					clearRackListForMeasure();
 
-	int						rackCountForMeasure() const;
+	int						rackForMeasureCount() const;
 	Metrology::RackParam	rackForMeasure(int index) const;
 
 	// module
@@ -289,7 +294,8 @@ public:
 	void					clearSignalListForMeasure();
 
 	int						signalForMeasureCount() const;
-	MeasureSignal			signalForMeasure1(int index) const;
+	MeasureSignal			signalForMeasure(int index) const;
+	bool					setSignalForMeasure(int index, const MeasureSignal& signal);
 
 	// main signal for measure
 	//
@@ -301,7 +307,7 @@ public:
 	//
 	SignalConnectionBase&	signalConnections() { return m_signalConnectionBase; }	// signal connections
 	TuningBase&				tuning() { return m_tuningBase; }						// sources and signals of tuning
-	StatisticBase&			statistic() { return m_statisticBase; }					// statistics of measured signals
+	StatisticsBase&			statistics() { return m_statisticsBase; }				// statistics of measured signals
 	
 	// comparators
 	//

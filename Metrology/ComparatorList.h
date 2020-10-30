@@ -10,7 +10,6 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QDialogButtonBox>
-#include <QClipboard>
 
 #include "../lib/Signal.h"
 

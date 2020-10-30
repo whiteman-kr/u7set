@@ -1,7 +1,5 @@
 #include "Calculator.h"
 
-#include "Conversion.h"
-
 // -------------------------------------------------------------------------------------------------------------------
 
 Calculator::Calculator(QWidget* parent) :
@@ -485,7 +483,16 @@ void Calculator::conversionTr()
 		return;
 	}
 
+	E::ElectricUnit unit = E::ElectricUnit::Ohm;
+
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
+
+	UnitsConvertorLimit electricLimit;
+
+	if(m_uc.getElectricLimit(unit, sensorType, electricLimit) == false)
+	{
+		return;
+	}
 
 	switch (sensorType)
 	{
@@ -497,21 +504,47 @@ void Calculator::conversionTr()
 		default:							m_pTrR0Edit->setEnabled(false);		break;
 	}
 
+	double degreeVal = m_pTrDegreeEdit->text().toDouble();
+	double electricVal = m_pTrElectricEdit->text().toDouble();
+
+	double r0 = m_pTrR0Edit->text().toDouble();
+
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+
+		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
+		{
+			m_pTrElectricEdit->setText(tr("Out of range: %1 .. %2").arg(QString::number(degreeLowLimit, 'f', 4)).arg(QString::number(degreeHighLimit, 'f', 4)));
+			m_pTrElectricEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType, r0);
+
+			m_pTrElectricEdit->setText(QString::number(val, 'f', 4));
+		}
 
 		m_pTrDegreeEdit->setReadOnly(false);
-		m_pTrElectricEdit->setText(QString::number(val, 'f', 4));
 		m_pTrElectricEdit->setReadOnly(true);
 	}
 
 	if (m_pTrElectricRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
+		if (electricVal < electricLimit.lowLimit * r0 / 100 || electricVal > electricLimit.highLimit * r0 / 100)
+		{
+			m_pTrDegreeEdit->setText(tr("Out of range: %1 .. %2").arg(QString::number(electricLimit.lowLimit, 'f', 4)).arg(QString::number(electricLimit.highLimit, 'f', 4)));
+			m_pTrDegreeEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+
+			m_pTrDegreeEdit->setText(QString::number(val, 'f', 4));
+		}
 
 		m_pTrElectricEdit->setReadOnly(false);
-		m_pTrDegreeEdit->setText(QString::number(val, 'f', 4));
 		m_pTrDegreeEdit->setReadOnly(true);
 	}
 }
@@ -526,25 +559,59 @@ void Calculator::conversionTc()
 		return;
 	}
 
+	E::ElectricUnit unit = E::ElectricUnit::mV;
+
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
+
+	UnitsConvertorLimit electricLimit;
+
+	if(m_uc.getElectricLimit(unit, sensorType, electricLimit) == false)
+	{
+		return;
+	}
+
+	double degreeVal = m_pTcDegreeEdit->text().toDouble();
+	double electricVal = m_pTcElectricEdit->text().toDouble();
+
 
 	if (m_pTcDegreeRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::mV, sensorType);
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+
+		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
+		{
+			m_pTcElectricEdit->setText(tr("Out of range: %1 .. %2").arg(QString::number(degreeLowLimit, 'f', 4)).arg(QString::number(degreeHighLimit, 'f', 4)));
+			m_pTcElectricEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType);
+
+			m_pTcElectricEdit->setText(QString::number(val, 'f', 4));
+		}
 
 		m_pTcDegreeEdit->setFocus();
 		m_pTcDegreeEdit->setReadOnly(false);
-		m_pTcElectricEdit->setText(QString::number(val, 'f', 4));
 		m_pTcElectricEdit->setReadOnly(true);
 	}
 
 	if (m_pTcElectricRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::mV, sensorType);
+		if (electricVal < electricLimit.lowLimit || electricVal > electricLimit.highLimit)
+		{
+			m_pTcDegreeEdit->setText(tr("Out of range: %1 .. %2").arg(QString::number(electricLimit.lowLimit, 'f', 4)).arg(QString::number(electricLimit.highLimit, 'f', 4)));
+			m_pTcDegreeEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+
+			m_pTcDegreeEdit->setText(QString::number(val, 'f', 4));
+		}
 
 		m_pTcElectricEdit->setFocus();
 		m_pTcElectricEdit->setReadOnly(false);
-		m_pTcDegreeEdit->setText(QString::number(val, 'f', 4));
 		m_pTcDegreeEdit->setReadOnly(true);
 	}
 }
@@ -585,7 +652,7 @@ void Calculator::conversionDr()
 {
 	if (m_pDrСelsiusRadio->isChecked() == true)
 	{
-		double val = conversionDegree(m_pDrСelsiusEdit->text().toDouble(), CT_DEGREE_C_TO_F);
+		double val = m_uc.conversionDegree(m_pDrСelsiusEdit->text().toDouble(), UnitsConvertType::CelsiusToFahrenheit);
 
 		m_pDrСelsiusEdit->setFocus();
 		m_pDrСelsiusEdit->setReadOnly(false);
@@ -595,7 +662,7 @@ void Calculator::conversionDr()
 
 	if (m_pDrFahrenheitRadio->isChecked() == true)
 	{
-		double val = conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), CT_DEGREE_F_TO_C);
+		double val = m_uc.conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), UnitsConvertType::FahrenheitToCelsius);
 
 		m_pDrFahrenheitEdit->setFocus();
 		m_pDrFahrenheitEdit->setReadOnly(false);

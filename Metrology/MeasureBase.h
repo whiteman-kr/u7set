@@ -2,6 +2,7 @@
 #define MEASUREBASE_H
 
 #include "../lib/Hash.h"
+#include "../lib/MetrologySignal.h"
 
 #include "SignalBase.h"
 
@@ -15,7 +16,7 @@ const char* const MeasureType[] =
 
 const int	MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
 
-const int	MEASURE_TYPE_UNKNOWN	= -1,
+const int	MEASURE_TYPE_UNDEFINED	= -1,
 			MEASURE_TYPE_LINEARITY	= 0,
 			MEASURE_TYPE_COMPARATOR	= 1;
 
@@ -47,7 +48,7 @@ const char* const	MeasureKind[] =
 
 const int	MEASURE_KIND_COUNT		= sizeof(MeasureKind)/sizeof(MeasureKind[0]);
 
-const int	MEASURE_KIND_UNKNOWN	= -1,
+const int	MEASURE_KIND_UNDEFINED	= -1,
 			MEASURE_KIND_ONE_RACK	= 0,
 			MEASURE_KIND_ONE_MODULE	= 1,
 			MEASURE_KIND_MULTI_RACK	= 2;
@@ -68,6 +69,10 @@ const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 
 // ==============================================================================================
 
+const int	DEFAULT_ECLECTRIC_PRECESION		= 4;
+
+// ==============================================================================================
+
 const char* const MeasureErrorType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
@@ -76,9 +81,9 @@ const char* const MeasureErrorType[] =
 
 const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(MeasureErrorType)/sizeof(MeasureErrorType[0]);
 
-const int	MEASURE_ERROR_TYPE_UNKNOWN	= -1,
-			MEASURE_ERROR_TYPE_ABSOLUTE	= 0,
-			MEASURE_ERROR_TYPE_REDUCE	= 1;
+const int	MEASURE_ERROR_TYPE_UNDEFINED	= -1,
+			MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
+			MEASURE_ERROR_TYPE_REDUCE		= 1;
 
 
 // ==============================================================================================
@@ -91,7 +96,7 @@ const char* const ErrorResult[] =
 
 const int	MEASURE_ERROR_RESULT_COUNT	= sizeof(ErrorResult)/sizeof(ErrorResult[0]);
 
-const int	MEASURE_ERROR_RESULT_UNKNOWN		= -1,
+const int	MEASURE_ERROR_RESULT_UNDEFINED		= -1,
 			MEASURE_ERROR_RESULT_OK				= 0,
 			MEASURE_ERROR_RESULT_FAILED			= 1;
 
@@ -108,7 +113,7 @@ const char* const MeasureAdditionalParam[] =
 
 const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/sizeof(MeasureAdditionalParam[0]);
 
-const int	MEASURE_ADDITIONAL_PARAM_UNKNOWN			= -1,
+const int	MEASURE_ADDITIONAL_PARAM_UNDEFINED			= -1,
 			MEASURE_ADDITIONAL_PARAM_MAX_VALUE			= 0,
 			MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR		= 1,
 			MEASURE_ADDITIONAL_PARAM_SD					= 2,
@@ -133,21 +138,21 @@ class Measurement
 
 public:
 
-	explicit Measurement(int measureType = MEASURE_TYPE_UNKNOWN);
+	explicit Measurement(int measureType = MEASURE_TYPE_UNDEFINED);
 	virtual ~Measurement();
 
 private:
 
-	int				m_measureType = MEASURE_TYPE_UNKNOWN;			// measure type
-	Hash			m_signalHash = UNDEFINED_HASH;					// hash calced from AppSignalID by function calcHash()
+	int				m_measureType = MEASURE_TYPE_UNDEFINED;					// measure type
+	Hash			m_signalHash = UNDEFINED_HASH;							// hash calced from AppSignalID by function calcHash()
 
-	int				m_measureID = -1;								// primary key of record in SQL table
-	bool			m_filter = false;								// filter for record, if "true" - hide record
+	int				m_measureID = -1;										// primary key of record in SQL table
+	bool			m_filter = false;										// filter for record, if "true" - hide record
 
-	bool			m_signalValid = true;							// signal is valid during the measurement
+	bool			m_signalValid = true;									// signal is valid during the measurement
 
-	QDateTime		m_measureTime;									// measure time
-	int				m_reportType = -1;								// report type
+	QString			m_connectionAppSignalID;
+	int				m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 	QString			m_appSignalID;
 	QString			m_customAppSignalID;
@@ -155,6 +160,8 @@ private:
 	QString			m_caption;
 
 	Metrology::SignalLocation m_location;
+
+	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_PRECESION;	// precision of electric range of calibrator
 
 	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
 	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
@@ -168,6 +175,12 @@ private:
 
 	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
 	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+
+	QDateTime		m_measureTime;											// measure time
+	QString			m_calibrator;											// calibrator name and calibrator SN
+	int				m_reportType = -1;										// report type
+
+	bool			m_foundInStatistics = true;								// after loading find signal in the statistics list
 
 public:
 
@@ -189,13 +202,12 @@ public:
 	bool			isSignalValid() const { return m_signalValid; }
 	void			setSignalValid(bool valid) { m_signalValid = valid; }
 
-	QDateTime		measureTime() const { return m_measureTime; }
-	QString			measureTimeStr() const;
-	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
+	QString			connectionAppSignalID() const;
+	void			setConnectionAppSignalID(const QString& appSignalID) { m_connectionAppSignalID = appSignalID; }
 
-	int				reportType() const { return m_reportType; }
-	void			setReportType(int type) { m_reportType = type; }
-
+	int				connectionType() const { return m_connectionType; }
+	QString			connectionTypeStr() const;
+	void			setConnectionType(int type) { m_connectionType = type; }
 
 	QString			appSignalID() const { return m_appSignalID; }
 	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
@@ -212,8 +224,8 @@ public:
 	Metrology::SignalLocation& location() { return m_location; }
 	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
 
-	void			setLimits(const Metrology::SignalParam& param);
-	void			calcError();
+	int				calibratorPrecision() const { return m_calibratorPrecision; }
+	void			setCalibratorPrecision(int precision) { m_calibratorPrecision = precision; }
 
 	double			nominal(int limitType) const;
 	QString			nominalStr(int limitType) const;
@@ -222,6 +234,8 @@ public:
 	double			measure(int limitType) const;
 	QString			measureStr(int limitType) const;
 	void			setMeasure(int limitType, double value);
+
+	void			setLimits(const IoSignalParam &ioParam);
 
 	double			lowLimit(int limitType) const;
 	void			setLowLimit(int limitType, double lowLimit);
@@ -237,6 +251,8 @@ public:
 
 	QString			limitStr(int limitType) const;
 
+	void			calcError();
+
 	double			error(int limitType, int errotType) const;
 	QString			errorStr() const;
 	void			setError(int limitType, int errotType, double value);
@@ -247,6 +263,21 @@ public:
 
 	int				errorResult() const;
 	QString			errorResultStr() const;
+
+	QDateTime		measureTime() const { return m_measureTime; }
+	QString			measureTimeStr() const;
+	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
+
+	QString			calibrator() const { return m_calibrator; }
+	void			setCalibrator(const QString& calibrator) { m_calibrator = calibrator; }
+
+	void			setCalibratorData(const IoSignalParam &ioParam);
+
+	int				reportType() const { return m_reportType; }
+	void			setReportType(int type) { m_reportType = type; }
+
+	bool			foundInStatistics() const { return m_foundInStatistics; }
+	void			setFoundInStatistics(int signalIsfound) { m_foundInStatistics = signalIsfound; }
 
 	Measurement*	at(int index);
 
@@ -282,7 +313,8 @@ public:
 	void			fill_measure_internal(const IoSignalParam& ioParam);
 	void			fill_measure_output(const IoSignalParam& ioParam);
 
-	void			calcAdditionalParam(Calibrator* pCalibrator, E::SensorType sensorType, int limitType);
+	void			calcAdditionalParam(const IoSignalParam &ioParam);
+	double			calcUcertainty(const IoSignalParam &ioParam, int limitType) const;
 
 	double			percent() const { return m_percent; }
 	void			setPercent(double percent) { m_percent = percent; }
@@ -365,28 +397,32 @@ public:
 
 private:
 
-	int							m_measureType = MEASURE_TYPE_UNKNOWN;
+	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 
-	mutable QMutex				m_measureMutex;
-	QVector<Measurement*>		m_measureList;
+	mutable QMutex			m_measureMutex;
+	QVector<Measurement*>	m_measureList;
 
 public:
 
-	int							count() const;
-	void						clear(bool removeData = true);
+	int						count() const;
+	void					clear(bool removeData = true);
 
-	int							load(int measureType);
+	int						load(int measureType);
 
-	int							append(Measurement* pMeasurement);
-	Measurement*				measurement(int index) const;
-	bool						remove(int index, bool removeData = true);
-	void						remove(int measureType, const QVector<int>& keyList);
+	int						append(Measurement* pMeasurement);
+	Measurement*			measurement(int index) const;
+	bool					remove(int index, bool removeData = true);
+	void					remove(int measureType, const QVector<int>& keyList);
 
-	void						updateStatistics(int measureType, StatisticItem& si);
+	void					updateStatistics(int measureType, StatisticsItem& si);
 
 signals:
 
-	void						updatedMeasureBase(Hash signalHash);
+	void					updatedMeasureBase(Hash signalHash);
+
+public slots:
+
+	void					signalLoaded();
 };
 
 // ==============================================================================================

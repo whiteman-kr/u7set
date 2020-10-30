@@ -127,7 +127,7 @@ private:
 
 	QMainWindow*		m_pMainWindow = nullptr;
 
-	int					m_measureType = MEASURE_TYPE_UNKNOWN;
+	int					m_measureType = MEASURE_TYPE_UNDEFINED;
 
 	QString				m_findText;
 

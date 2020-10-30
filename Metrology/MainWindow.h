@@ -9,17 +9,17 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QComboBox>
-#include <QClipboard>
 
 #include "../lib/SimpleThread.h"
 
+#include "SelectSignalWidget.h"
 #include "MeasureView.h"
 #include "ConfigSocket.h"
 #include "SignalSocket.h"
 #include "TuningSocket.h"
 #include "MeasureThread.h"
 #include "FindMeasurePanel.h"
-#include "StatisticPanel.h"
+#include "StatisticsPanel.h"
 #include "SignalInfoPanel.h"
 #include "ComparatorInfoPanel.h"
 #include "Calculator.h"
@@ -36,7 +36,10 @@ public:
 
 private:
 
-	int						m_measureType = MEASURE_TYPE_UNKNOWN;
+	int						m_measureType = MEASURE_TYPE_UNDEFINED;
+	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int						m_measureTimeout = 0;
 
 	QMap<int, MeasureView*> m_measureViewMap;
 
@@ -47,6 +50,8 @@ private:
 	QAction*				m_pStartMeasureAction = nullptr;
 	QAction*				m_pStopMeasureAction = nullptr;
 	QAction*				m_pExportMeasureAction = nullptr;
+	QAction*				m_pPreviousSignalAction = nullptr;
+	QAction*				m_pNextSignalAction = nullptr;
 
 							// menu - Edit
 							//
@@ -61,7 +66,7 @@ private:
 	QAction*				m_pShowComparatorsListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
 	QAction*				m_pShowSignalConnectionListAction = nullptr;
-	QAction*				m_pShowStatisticAction = nullptr;
+	QAction*				m_pShowStatisticsAction = nullptr;
 
 							// menu - Tools
 							//
@@ -90,21 +95,18 @@ private:
 	// Elements of interface - ToolBar
 	//
 	QToolBar*				m_pMeasureControlToolBar = nullptr;
-	QToolBar*				m_pMeasureTimeout = nullptr;
-	QToolBar*				m_pMeasureKind = nullptr;
+	QToolBar*				m_pMeasureTimeoutToolBar = nullptr;
+	QToolBar*				m_pMeasureKindToolBar = nullptr;
 	QToolBar*				m_pSignalConnectionToolBar = nullptr;
 	QToolBar*				m_pAnalogSignalToolBar = nullptr;
 
 	// Elements of interface - Items of ToolBars
 	//
-	QComboBox*				m_measureKindList = nullptr;
-	QComboBox*				m_signalConnectionTypeList = nullptr;
+	QComboBox*				m_pMeasureKindList = nullptr;
+	QComboBox*				m_pSignalConnectionTypeList = nullptr;
 
-	QComboBox*				m_asRackCombo = nullptr;
-	QComboBox*				m_asSignalCombo = nullptr;
-	QComboBox*				m_asChassisCombo = nullptr;
-	QComboBox*				m_asModuleCombo = nullptr;
-	QComboBox*				m_asPlaceCombo = nullptr;
+	QComboBox*				m_pRackCombo = nullptr;
+	SelectSignalWidget*		m_pSelectSignalWidget = nullptr;
 
 	// Elements of interface - Pages of Tab
 	//
@@ -113,7 +115,7 @@ private:
 	// Elements of interface - Panels
 	//
 	FindMeasurePanel*		m_pFindMeasurePanel = nullptr;
-	StatisticPanel*			m_pStatisticPanel = nullptr;
+	StatisticsPanel*		m_pStatisticsPanel = nullptr;
 	SignalInfoPanel*		m_pSignalInfoPanel = nullptr;
 	ComparatorInfoPanel*	m_pComparatorInfoPanel = nullptr;
 	QTableView*				m_pComparatorInfoView = nullptr;
@@ -160,9 +162,7 @@ private:
 	void					loadSettings();
 	void					saveSettings();
 
-public:
-
-	int						measureType() const { return m_measureType; }
+private:
 
 	bool					createInterface();
 
@@ -174,25 +174,34 @@ public:
 	void					createStatusBar();
 	void					createContextMenu();
 
-	void					updateRacksOnToolBar();
-	void					updateSignalsOnToolBar();
+	void					loadRacksOnToolBar();
+	void					loadSignalsOnToolBar();
 
-	QComboBox*				signalConnectionTypeList() { return m_signalConnectionTypeList; }
-	QComboBox*				rackCombo() { return m_asRackCombo; }
-	QComboBox*				signalCombo() { return m_asSignalCombo; }
+public:
 
+	int						measureType() const { return m_measureType; }
+
+	// Views
+	//
 	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
 	MeasureView*			measureView(int measureType);
 	void					appendMeasureView(int measureType, MeasureView* pView);
-	FindMeasurePanel*		findMeasurePanel() { return m_pFindMeasurePanel; }
-	StatisticPanel*			statisticPanel() { return m_pStatisticPanel; }
 
+	// Panels
+	//
+	FindMeasurePanel*		findMeasurePanel() { return m_pFindMeasurePanel; }
+	StatisticsPanel*		statisticsPanel() { return m_pStatisticsPanel; }
+
+	// Sockets
+	//
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }
 	SignalSocket*			signalSocket() { return m_pSignalSocket; }
 	bool					signalSocketIsConnected();
 	TuningSocket*			tuningSocket() { return m_pTuningSocket; }
 	bool					tuningSocketIsConnected();
 
+	// Threads
+	//
 	MeasureThread&			measureThread() { return m_measureThread; }
 
 	bool					signalSourceIsValid(bool showMsg);
@@ -203,10 +212,12 @@ protected:
 
 signals:
 
-
+	// from ToolBars
 	//
-	void					changedMeasureType(int type);			// appear when changing the type of measurement
-	void					changedSignalConnectionType(int type);	// appear when changing the SignalConnectionType
+	void					measureTypeChanged(int type);			// appear when changing the type of measurement
+	void					measureKindChanged(int kind);			// appear when changing the kind of measurement
+	void					signalConnectionTypeChanged(int type);	// appear when changing the SignalConnectionType
+	void					measureTimeoutChanged(int timeout);		// appear when changing the timeout of measuring
 
 	// from measureComplite
 	//
@@ -236,7 +247,7 @@ private slots:
 	void					showComparatorsList();
 	void					showTuningSignalList();
 	void					showSignalConnectionList();
-	void					showStatistic();
+	void					showStatistics();
 
 	// menu - Tools
 	//
@@ -255,18 +266,17 @@ private slots:
 
 	// Slots of control panels
 	//
-	void					setMeasureKind(int index);
 	void					setMeasureTimeout(QString value);
+	void					setMeasureKind(int index);
 	void					setSignalConnectionType(int index);
 
 	// Slots of analog signal toolbar
 	//
 	void					setRack(int index);
-	void					setMeasureSignal(int index);
-	void					setChassis(int index);
-	void					setModule(int index);
-	void					setPlace(int index);
-	void					setMetrologySignalByPosition(int index);
+	void					setAcitiveMeasureSignal(int index);
+	void					previousMeasureSignal();
+	void					nextMeasureSignal();
+	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
 
 	// Slots of contex menu
 	//
@@ -306,6 +316,7 @@ private slots:
 	// Slots for enable measuring
 	//
 	void					updateStartStopActions();
+	void					updatePrevNextSignalActions(int signalIndex);
 };
 
 // ==============================================================================================

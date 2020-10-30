@@ -2,9 +2,9 @@
 
 #include <assert.h>
 
-#include "SignalBase.h"
-
 #include "../lib/ServiceSettings.h"
+
+#include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

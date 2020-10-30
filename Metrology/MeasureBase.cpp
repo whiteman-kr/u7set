@@ -2,6 +2,8 @@
 
 #include <QThread>
 
+#include "../lib/UnitsConvertor.h"
+
 #include "Database.h"
 #include "Options.h"
 #include "Conversion.h"
@@ -26,12 +28,27 @@ Measurement::~Measurement()
 
 void Measurement::clear()
 {
+	m_measureType = MEASURE_TYPE_UNDEFINED;
+	m_signalHash = UNDEFINED_HASH;
+
+	m_measureID = -1;
+	m_filter = false;
+
+	m_signalValid = true;
+
+	//
+	//
+	m_connectionAppSignalID.clear();
+	m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+
 	m_appSignalID.clear();
 	m_customAppSignalID.clear();
 	m_equipmentID.clear();
 	m_caption.clear();
 
 	m_location.clear();
+
+	m_calibratorPrecision = DEFAULT_ECLECTRIC_PRECESION;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 	{
@@ -51,6 +68,14 @@ void Measurement::clear()
 	}
 
 	m_adjustment = 0;
+
+	//
+	//
+	m_measureTime.setTime_t(0);
+	m_calibrator.clear();
+	m_reportType = -1;
+
+	m_foundInStatistics = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -74,33 +99,32 @@ QString Measurement::measureTimeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Measurement::setLimits(const Metrology::SignalParam& param)
+QString Measurement::connectionAppSignalID() const
 {
-	setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
-	setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
-	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
-	setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
+	if (m_connectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
+	{
+		return QString();
+	}
 
-	setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.lowEngineeringUnits());
-	setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.highEngineeringUnits());
-	setUnit(MEASURE_LIMIT_TYPE_ENGINEER, param.unit());
-	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, param.decimalPlaces());
+	return m_connectionAppSignalID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Measurement::calcError()
+QString Measurement::connectionTypeStr() const
 {
-	double errorLimit = theOptions.linearity().errorLimit();
-
-	for(int limitType = 0; limitType < MEASURE_LIMIT_TYPE_COUNT; limitType++)
+	if (m_connectionType < 0 || m_connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
-		setError(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,		std::abs(nominal(limitType)-measure(limitType)));
-		setError(limitType, MEASURE_ERROR_TYPE_REDUCE,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
-
-		setErrorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
-		setErrorLimit(limitType, MEASURE_ERROR_TYPE_REDUCE,		errorLimit);
+		assert(0);
+		return QString("???");
 	}
+
+	if (m_connectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
+	{
+		return QString();
+	}
+
+	return qApp->translate("SignalConnectionBase.h", SignalConnectionType[m_connectionType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -120,13 +144,22 @@ double Measurement::nominal(int limitType) const
 
 QString Measurement::nominalStr(int limitType) const
 {
+	int precision = DEFAULT_ECLECTRIC_PRECESION;
+
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
 		return QString();
 	}
 
-	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', m_limitPrecision[limitType])).arg(m_unit[limitType]);
+	precision = limitPrecision(limitType);
+
+	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	{
+		precision = calibratorPrecision();
+	}
+
+	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', precision)).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -167,13 +200,22 @@ QString Measurement::measureStr(int limitType) const
 		}
 	}
 
+	int precision = DEFAULT_ECLECTRIC_PRECESION;
+
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
 		return QString();
 	}
 
-	return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', m_limitPrecision[limitType])).arg(m_unit[limitType]);
+	precision = limitPrecision(limitType);
+
+	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	{
+		precision = calibratorPrecision();
+	}
+
+	return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', precision)).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -187,6 +229,119 @@ void Measurement::setMeasure(int limitType, double value)
 	}
 
 	m_measure[limitType] = value;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Measurement::setLimits(const IoSignalParam& ioParam)
+{
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	switch (signalConnectionType)
+	{
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
+			{
+				const Metrology::SignalParam& param = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				if (param.isValid() == false)
+				{
+					assert(false);
+					break;
+				}
+
+				setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
+				setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
+				setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
+				setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
+
+				setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.lowEngineeringUnits());
+				setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.highEngineeringUnits());
+				setUnit(MEASURE_LIMIT_TYPE_ENGINEER, param.unit());
+				setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, param.decimalPlaces());
+			}
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+			{
+				const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				if (inParam.isValid() == false)
+				{
+					assert(false);
+					break;
+				}
+
+				const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+				if (outParam.isValid() == false)
+				{
+					assert(false);
+					break;
+				}
+
+				setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricLowLimit());
+				setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricHighLimit());
+				setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricUnitStr());
+				setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricPrecision());
+
+				setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, outParam.lowEngineeringUnits());
+				setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, outParam.highEngineeringUnits());
+				setUnit(MEASURE_LIMIT_TYPE_ENGINEER, outParam.unit());
+				setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, outParam.decimalPlaces());
+			}
+			break;
+
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+			{
+				const Metrology::SignalParam& param = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+				if (param.isValid() == false)
+				{
+					assert(false);
+					break;
+				}
+
+				setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
+				setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
+				setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
+				setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
+
+				setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.lowEngineeringUnits());
+				setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.highEngineeringUnits());
+				setUnit(MEASURE_LIMIT_TYPE_ENGINEER, param.unit());
+				setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, param.decimalPlaces());
+			}
+			break;
+
+		default:
+			assert(0);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -311,6 +466,22 @@ QString Measurement::limitStr(int limitType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void Measurement::calcError()
+{
+	double errorLimit = theOptions.linearity().errorLimit();
+
+	for(int limitType = 0; limitType < MEASURE_LIMIT_TYPE_COUNT; limitType++)
+	{
+		setError(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,		std::abs(nominal(limitType)-measure(limitType)));
+		setError(limitType, MEASURE_ERROR_TYPE_REDUCE,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
+
+		setErrorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
+		setErrorLimit(limitType, MEASURE_ERROR_TYPE_REDUCE,		errorLimit);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 double Measurement::error(int limitType, int errotType) const
 {
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -340,11 +511,20 @@ QString Measurement::errorStr() const
 		}
 	}
 
+	int precision = DEFAULT_ECLECTRIC_PRECESION;
+
 	int limitType = theOptions.linearity().limitType();
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
 		return QString();
+	}
+
+	precision = limitPrecision(limitType);
+
+	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	{
+		precision = calibratorPrecision();
 	}
 
 	int errorType = theOptions.linearity().errorType();
@@ -358,8 +538,8 @@ QString Measurement::errorStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;												break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
 		default:							assert(0);
 	}
 
@@ -461,14 +641,14 @@ int Measurement::errorResult() const
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
-		return MEASURE_ERROR_RESULT_UNKNOWN;
+		return MEASURE_ERROR_RESULT_UNDEFINED;
 	}
 
 	int errorType = theOptions.linearity().errorType();
 	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
 	{
 		assert(0);
-		return MEASURE_ERROR_RESULT_UNKNOWN;
+		return MEASURE_ERROR_RESULT_UNDEFINED;
 	}
 
 	if (m_error[limitType][errorType] > m_errorLimit[limitType][errorType])
@@ -502,6 +682,87 @@ QString Measurement::errorResultStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void Measurement::setCalibratorData(const IoSignalParam &ioParam)
+{
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	int calibratorType = pCalibrator->type();
+	if (calibratorType < 0 || calibratorType >= CALIBRATOR_TYPE_COUNT)
+	{
+		return;
+	}
+
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	int precision = DEFAULT_ECLECTRIC_PRECESION;
+
+	switch (signalConnectionType)
+	{
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+			{
+				int sourceUnit = pCalibrator->sourceUnit();
+				if (sourceUnit < 0 || sourceUnit >= CALIBRATOR_UNIT_COUNT)
+				{
+					break;
+				}
+
+				precision = CalibratorPrecision[calibratorType][sourceUnit];
+			}
+			break;
+
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+			{
+				int measureUnit = pCalibrator->measureUnit();
+				if (measureUnit < 0 || measureUnit >= CALIBRATOR_UNIT_COUNT)
+				{
+					break;
+				}
+
+				precision = CalibratorPrecision[calibratorType][measureUnit];
+			}
+			break;
+
+		default:
+			assert(0);
+	}
+
+	setCalibratorPrecision(precision);
+
+	QString calibratorDescription = pCalibrator->typeStr() + ", " + pCalibrator->serialNo();
+	setCalibrator(calibratorDescription);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 Measurement* Measurement::at(int index)
 {
 	Measurement* pMeasurement = nullptr;
@@ -528,8 +789,10 @@ Measurement& Measurement::operator=(Measurement& from)
 
 	m_signalValid = from.m_signalValid;
 
-	m_measureTime = from.m_measureTime;
-	m_reportType = from.m_reportType;
+	//
+	//
+	m_connectionAppSignalID = from.m_connectionAppSignalID;
+	m_connectionType = from.m_connectionType;
 
 	m_appSignalID = from.m_appSignalID;
 	m_customAppSignalID = from.m_customAppSignalID;
@@ -537,6 +800,8 @@ Measurement& Measurement::operator=(Measurement& from)
 	m_caption = from.m_caption;
 
 	m_location = from.m_location;
+
+	m_calibratorPrecision = from.m_calibratorPrecision;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 	{
@@ -557,6 +822,16 @@ Measurement& Measurement::operator=(Measurement& from)
 
 	m_adjustment = from.m_adjustment;
 
+	//
+	//
+	m_measureTime = from.m_measureTime;
+	m_calibrator = from.m_calibrator;
+	m_reportType = from.m_reportType;
+
+	m_foundInStatistics = from.m_foundInStatistics;
+
+	//
+	//
 	switch(m_measureType)
 	{
 		case MEASURE_TYPE_LINEARITY:	*static_cast<LinearityMeasurement*> (this) = *static_cast <LinearityMeasurement*> (&from);		break;
@@ -672,6 +947,13 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
 	const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
@@ -679,14 +961,18 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
 	setMeasureType(MEASURE_TYPE_LINEARITY);
-	setSignalHash(inParam.hash());
 
 	// features
 	//
+
+	setConnectionAppSignalID(inParam.appSignalID());
+	setConnectionType(signalConnectionType);
 
 	setAppSignalID(inParam.appSignalID());
 	setCustomAppSignalID(inParam.customAppSignalID());
@@ -705,11 +991,13 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	setLocation(inParam.location());
 
+	setCalibratorData(ioParam);
+
 	// nominal
 	//
 
 	double electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	double engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
+	double engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
 
 	setPercent(((engineering - inParam.lowEngineeringUnits()) * 100)/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()));
 
@@ -731,7 +1019,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	for(int index = 0; index < measureCount; index++)
 	{
 		double enVal = theSignalBase.signalState(inParam.hash()).value();
-		double elVal = conversion(enVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+		double elVal = uc.conversion(enVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
@@ -750,7 +1038,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	// limits
 	//
-	setLimits(inParam);
+	setLimits(ioParam);
 
 	// calc errors
 	//
@@ -758,8 +1046,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	// calc additional parameters
 	//
-	calcAdditionalParam(pCalibrator, inParam.electricSensorType(), MEASURE_LIMIT_TYPE_ELECTRIC);
-	calcAdditionalParam(pCalibrator, inParam.electricSensorType(), MEASURE_LIMIT_TYPE_ENGINEER);
+	calcAdditionalParam(ioParam);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -799,21 +1086,25 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 	if (outParam.isValid() == false)
 	{
 		assert(false);
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
 	setMeasureType(MEASURE_TYPE_LINEARITY);
-	setSignalHash(outParam.hash());
 
 	// features
 	//
+
+	setConnectionAppSignalID(inParam.appSignalID());
+	setConnectionType(signalConnectionType);
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -832,12 +1123,14 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	setLocation(inParam.location());
 
+	setCalibratorData(ioParam);
+
 	// nominal
 	//
 
 	double engineering = (ioParam.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
-	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
-	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
 
 	setPercent(ioParam.percent());
 
@@ -859,8 +1152,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	for(int index = 0; index < measureCount; index++)
 	{
 		double enVal = theSignalBase.signalState(outParam.hash()).value();
-		double enCalcVal = conversionCalcVal(enVal, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
-		double elVal = conversion(enCalcVal, CT_ENGINEER_TO_ELECTRIC, inParam);
+		double enCalcVal = conversionCalcVal(enVal, ConversionCalcType::Inversion, ioParam.signalConnectionType(), ioParam);
+		double elVal = uc.conversion(enCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
@@ -879,12 +1172,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	// limits
 	//
-	outParam.setElectricLowLimit(inParam.electricLowLimit());
-	outParam.setElectricHighLimit(inParam.electricHighLimit());
-	outParam.setElectricUnitID(inParam.electricUnitID());
-	outParam.setElectricPrecision(inParam.electricPrecision());
-
-	setLimits(outParam);
+	setLimits(ioParam);
 
 	// calc errors
 	//
@@ -892,8 +1180,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	// calc additional parameters
 	//
-	calcAdditionalParam(pCalibrator, inParam.electricSensorType(), MEASURE_LIMIT_TYPE_ELECTRIC);
-	calcAdditionalParam(pCalibrator, inParam.electricSensorType(), MEASURE_LIMIT_TYPE_ENGINEER);
+	calcAdditionalParam(ioParam);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -926,6 +1213,13 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		return;
 	}
 
+	const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
 	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 	if (outParam.isValid() == false)
 	{
@@ -933,14 +1227,18 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
 	setMeasureType(MEASURE_TYPE_LINEARITY);
-	setSignalHash(outParam.hash());
 
 	// features
 	//
+
+	setConnectionAppSignalID(inParam.appSignalID());
+	setConnectionType(signalConnectionType);
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -959,12 +1257,14 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 
 	setLocation(outParam.location());
 
+	setCalibratorData(ioParam);
+
 	// nominal
 	//
 
 	double engineering = (ioParam.percent() * (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / 100) + outParam.lowEngineeringUnits();
-	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
-	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, outParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
+	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, outParam);
 
 	setPercent(ioParam.percent());
 
@@ -1013,7 +1313,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 
 	// limits
 	//
-	setLimits(outParam);
+	setLimits(ioParam);
 
 	// calc errors
 	//
@@ -1021,166 +1321,364 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 
 	// calc additional parameters
 	//
-	calcAdditionalParam(pCalibrator, outParam.electricSensorType(), MEASURE_LIMIT_TYPE_ELECTRIC);
-	calcAdditionalParam(pCalibrator, outParam.electricSensorType(), MEASURE_LIMIT_TYPE_ENGINEER);
+	calcAdditionalParam(ioParam);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::calcAdditionalParam(Calibrator* pCalibrator, E::SensorType sensorType, int limitType)
+void LinearityMeasurement::calcAdditionalParam(const IoSignalParam &ioParam)
 {
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	//
+	//
+
+	for(int limitType = 0; limitType < MEASURE_LIMIT_TYPE_COUNT; limitType ++)
+	{
+		// calc additional parameters
+		//
+
+		setAdditionalParamCount(MEASURE_ADDITIONAL_PARAM_COUNT);
+
+			// max deviation
+			//
+		double maxDeviation = 0;
+		int maxDeviationIndex = 0;
+
+		for(int index = 0; index < measureCount(); index++)
+		{
+			if (maxDeviation < std::abs(measure(limitType) - measureItemArray(limitType, index)))
+			{
+				maxDeviation = std::abs(measure(limitType) - measureItemArray(limitType, index));
+				maxDeviationIndex = index;
+			}
+		}
+
+		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE, measureItemArray(limitType, maxDeviationIndex));
+
+
+			// according to GOST 8.508-84 paragraph 3.4.1 formula 42
+			//
+		double systemError = std::abs(measure(limitType) - nominal(limitType));
+
+		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, systemError);
+
+
+			// according to GOST 8.736-2011 paragraph 5.3 formula 3
+			//
+		double sumDeviation = 0;
+
+		for(int index = 0; index < measureCount(); index++)
+		{
+			sumDeviation += pow(measure(limitType) - measureItemArray(limitType, index), 2);		// 1. sum of deviations
+		}
+
+		sumDeviation /= static_cast<double>(measureCount() - 1);									// 2. divide on (count of measure - 1)
+		double sco = sqrt(sumDeviation);															// 3. sqrt
+
+		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD, sco);
+
+
+			// according to GOST 8.207-76 paragraph 2.4
+			//
+		double estimateSCO = sco / sqrt(static_cast<double>(measureCount()));
+
+			// Student's rate according to GOST 27.202 on P = 0.95
+			// or GOST 8.207-76 application 2 (last page)
+			//
+		double k_student = studentK(measureCount(), CT_PROPABILITY_95);
+
+
+			// according to GOST 8.207-76 paragraph 3.2
+			//
+		double border = k_student * estimateSCO;
+
+		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, border);
+
+
+			// Uncertainty of measurement to Document: EA-04/02 M:2013
+			//
+		double uncertainty = calcUcertainty(ioParam, limitType);
+
+		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY, uncertainty);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int limitType) const
+{
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return 0;
+	}
+
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return 0;
+	}
+
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
 	if (pCalibrator == nullptr)
 	{
-		return;
+		assert(false);
+		return 0;
 	}
 
-	int сalibratorType = pCalibrator->type();
-	if (сalibratorType < 0 || сalibratorType >= CALIBRATOR_TYPE_COUNT)
+	int calibratorType = pCalibrator->type();
+	if (calibratorType < 0 || calibratorType >= CALIBRATOR_TYPE_COUNT)
 	{
-		return;
+		return 0;
 	}
 
-	int сalibratorSiurceUnit = pCalibrator->sourceUnit();
-	if (сalibratorSiurceUnit < 0 || сalibratorSiurceUnit >= CALIBRATOR_UNIT_COUNT)
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
-		return;
+		assert(0);
+		return 0;
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
-		return;
+		assert(false);
+		return 0;
 	}
 
-	// calc additional parameters
+	// sco
 	//
+	double sco = additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD);
 
-	setAdditionalParamCount(MEASURE_ADDITIONAL_PARAM_COUNT);
-
-		// max deviation
-		//
-	double maxDeviation = 0;
-	int maxDeviationIndex = 0;
-
-	for(int index = 0; index < measureCount(); index++)
-	{
-		if (maxDeviation < std::abs(measure(limitType) - measureItemArray(limitType, index)))
-		{
-			maxDeviation = std::abs(measure(limitType) - measureItemArray(limitType, index));
-			maxDeviationIndex = index;
-		}
-	}
-
-	setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE, measureItemArray(limitType, maxDeviationIndex));
-
-
-		// according to GOST 8.508-84 paragraph 3.4.1 formula 42
-		//
-	double systemError = std::abs(measure(limitType) - nominal(limitType));
-
-	setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, systemError);
-
-
-		// according to GOST 8.736-2011 paragraph 5.3 formula 3
-		//
-	double sumDeviation = 0;
-
-	for(int index = 0; index < measureCount(); index++)
-	{
-		sumDeviation += pow(measure(limitType) - measureItemArray(limitType, index), 2);		// 1. sum of deviations
-	}
-
-	sumDeviation /= static_cast<double>(measureCount() - 1);									// 2. divide on (count of measure - 1)
-	double sco = sqrt(sumDeviation);															// 3. sqrt
-
-	setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD, sco);
-
-
-		// according to GOST 8.207-76 paragraph 2.4
-		//
-	double estimateSCO = sco / sqrt(static_cast<double>(measureCount()));
-
-		// Student's rate according to GOST 27.202 on P = 0.95
-		// or GOST 8.207-76 application 2 (last page)
-		//
-	double k_student = studentK(measureCount(), CT_PROPABILITY_95);
-
-
-		// according to GOST 8.207-76 paragraph 3.2
-		//
-	double border = k_student * estimateSCO;
-
-	setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, border);
-
-
-		// Uncertainty of measurement to Document: EA-04/02 M:2013
-		//
+	// Uncertainty of measurement to Document: EA-04/02 M:2013
+	//
 	double uncertainty = 0;
 
-	switch (limitType)
+	switch (signalConnectionType)
 	{
-		case MEASURE_LIMIT_TYPE_ELECTRIC:
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 			{
+				// this measurement have only electric input and have not electric output
+				//
+
+				int calibratorSourceUnit = pCalibrator->sourceUnit();
+				if (calibratorSourceUnit < 0 || calibratorSourceUnit >= CALIBRATOR_UNIT_COUNT)
+				{
+					return 0;
+				}
+
+				const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				if (inParam.isValid() == false)
+				{
+					assert(false);
+					return 0;
+				}
+
 				double Kox = 2;
 
-				double Kx = 0;
+				double dEj = (	CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC0] * pCalibrator->sourceValue() +
+								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC1] *
+								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_RANGE]) / 100.0;
 
-				if ( (сalibratorSiurceUnit == CALIBRATOR_UNIT_MV  &&  (sensorType == E::SensorType::mV_Raw_Mul_8 || sensorType == E::SensorType::mV_Raw_Mul_32)) ||
-					((сalibratorSiurceUnit == CALIBRATOR_UNIT_LOW_OHM || сalibratorSiurceUnit == CALIBRATOR_UNIT_HIGH_OHM)  &&  sensorType == E::SensorType::Ohm_Raw) )
+				switch (limitType)
 				{
-					// for non-linear electrical ranges (mV and ohms) Kx is calculated differently
-					//
-					Kx = nominal(MEASURE_LIMIT_TYPE_ENGINEER) / nominal(MEASURE_LIMIT_TYPE_ELECTRIC);
+					case MEASURE_LIMIT_TYPE_ELECTRIC:		// input electric
+						{
+							double MPe = 1 / pow(10.0, CalibratorPrecision[calibratorType][calibratorSourceUnit]);
+
+							// this is formula for case 2 from documet about uncertainty
+							//
+							uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dEj,2) / 3) + (pow(MPe,2) / 3) );
+						}
+						break;
+
+					case MEASURE_LIMIT_TYPE_ENGINEER:
+						{
+							double Kxj = 0;
+
+							if (inParam.isLinearRange() == true)
+							{
+								// for linear electrical ranges (mA and V) Kxj is calculated differently
+								//
+								Kxj = (highLimit(MEASURE_LIMIT_TYPE_ENGINEER) - lowLimit(MEASURE_LIMIT_TYPE_ENGINEER)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
+							}
+							else
+							{
+								// for non-linear electrical ranges (mV and Ohms) Kxj is calculated differently
+								//
+								Kxj = measure(MEASURE_LIMIT_TYPE_ENGINEER) / pCalibrator->sourceValue();
+							}
+
+							double MPx = 1 / pow(10.0, limitPrecision(MEASURE_LIMIT_TYPE_ENGINEER));
+
+							// this is formula for case 1 from documet about uncertainty
+							//
+							uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
+						}
+
+						break;
+
+					default:
+						assert(0);
+						break;
 				}
-				else
-				{
-					// for linear electrical ranges (mA and V) Kx is calculated differently
-					//
-					Kx = (highLimit(MEASURE_LIMIT_TYPE_ENGINEER) - lowLimit(MEASURE_LIMIT_TYPE_ENGINEER)) / (highLimit(MEASURE_LIMIT_TYPE_ELECTRIC) - lowLimit(MEASURE_LIMIT_TYPE_ELECTRIC));
-				}
 
-				double dI = (	CalibratorTS[сalibratorType][сalibratorSiurceUnit][CALIBRATION_TS_AC0] * nominal(MEASURE_LIMIT_TYPE_ELECTRIC) +
-								CalibratorTS[сalibratorType][сalibratorSiurceUnit][CALIBRATION_TS_AC1] *
-								CalibratorTS[сalibratorType][сalibratorSiurceUnit][CALIBRATION_TS_RANGE]) / 100.0;
-
-				double MPx = 1 / pow(10.0, limitPrecision(MEASURE_LIMIT_TYPE_ENGINEER));
-
-				//
-				//
-				uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kx,2) * pow(dI,2) / 3) + (pow(MPx,2) / 3) );
 			}
 			break;
 
-		case MEASURE_LIMIT_TYPE_ENGINEER:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 			{
+				// this measurement have electric input and have electric output
+				//
+
+				int calibratorSourceUnit = pCalibrator->sourceUnit();
+				if (calibratorSourceUnit < 0 || calibratorSourceUnit >= CALIBRATOR_UNIT_COUNT)
+				{
+					return 0;
+				}
+
+				const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				if (inParam.isValid() == false)
+				{
+					assert(false);
+					return 0;
+				}
+
+				Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+				if (outParam.isValid() == false)
+				{
+					assert(false);
+					return 0;
+				}
+
 				double Kox = 2;
 
-				double Kx = 0;
+				double dEj = (	CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC0] * pCalibrator->sourceValue()  +
+								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC1] *
+								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_RANGE]) / 100.0;
 
-				if ( (сalibratorSiurceUnit == CALIBRATOR_UNIT_MV  &&  (sensorType == E::SensorType::mV_Raw_Mul_8 || sensorType == E::SensorType::mV_Raw_Mul_32)) ||
-					((сalibratorSiurceUnit == CALIBRATOR_UNIT_LOW_OHM || сalibratorSiurceUnit == CALIBRATOR_UNIT_HIGH_OHM)  &&  sensorType == E::SensorType::Ohm_Raw) )
+				int сalibratorMeasureUnit = pCalibrator->measureUnit();
+				if (сalibratorMeasureUnit < 0 || сalibratorMeasureUnit >= CALIBRATOR_UNIT_COUNT)
 				{
-					// for non-linear electrical ranges (mV and ohms) Kx is calculated differently
-					//
-					Kx = nominal(MEASURE_LIMIT_TYPE_ENGINEER) / nominal(MEASURE_LIMIT_TYPE_ELECTRIC);
-				}
-				else
-				{
-					// for linear electrical ranges (mA and V) Kx is calculated differently
-					//
-					Kx = (highLimit(MEASURE_LIMIT_TYPE_ENGINEER) - lowLimit(MEASURE_LIMIT_TYPE_ENGINEER)) / (highLimit(MEASURE_LIMIT_TYPE_ELECTRIC) - lowLimit(MEASURE_LIMIT_TYPE_ELECTRIC));
+					return 0;
 				}
 
-				double dI = (	CalibratorTS[сalibratorType][сalibratorSiurceUnit][CALIBRATION_TS_AC0] * nominal(MEASURE_LIMIT_TYPE_ELECTRIC) +
-								CalibratorTS[сalibratorType][сalibratorSiurceUnit][CALIBRATION_TS_AC1] *
-								CalibratorTS[сalibratorType][сalibratorSiurceUnit][CALIBRATION_TS_RANGE]) / 100.0;
+				double dIj = (	CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC0] * measure(MEASURE_LIMIT_TYPE_ELECTRIC) +
+								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC1] *
+								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_RANGE]) / 100.0;
 
-				double MPx = 1 / pow(10.0, limitPrecision(MEASURE_LIMIT_TYPE_ENGINEER));
+				switch (limitType)
+				{
+					case MEASURE_LIMIT_TYPE_ELECTRIC:		// output electric
+						{
+							double Kij = 0;
 
-				//
-				//
-				uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kx,2) * pow(dI,2) / 3) + (pow(MPx,2) / 3) );
+							if (inParam.isLinearRange() == true)
+							{
+								// for linear electrical ranges (mA and V) Kij is calculated differently
+								// Output limit mA or V / Input limit mA or V
+								//
+								Kij = (outParam.electricHighLimit() - outParam.electricLowLimit()) / (inParam.electricHighLimit() - inParam.electricLowLimit());
+							}
+							else
+							{
+								// for non-linear electrical ranges (mV and Ohms) Kij is calculated differently
+								// Output measure avg mA or V / Input source mV or Ohms
+								//
+								Kij = measure(MEASURE_LIMIT_TYPE_ELECTRIC) / pCalibrator->sourceValue();
+
+							}
+
+							double MPi = 1 / pow(10.0, CalibratorPrecision[calibratorType][сalibratorMeasureUnit]);
+
+							// this is formula for case 3 from documet about uncertainty
+							//
+							uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kij,2) * pow(dEj,2) / 3) + (pow(dIj,2) / 3) + (pow(MPi,2) / 12) );
+						}
+						break;
+
+					case MEASURE_LIMIT_TYPE_ENGINEER:
+						{
+							double Kxj = 0;
+
+							if (inParam.isLinearRange() == true)
+							{
+								// for linear electrical ranges (mA and V) Kxj is calculated differently
+								//
+								Kxj = (highLimit(MEASURE_LIMIT_TYPE_ENGINEER) - lowLimit(MEASURE_LIMIT_TYPE_ENGINEER)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
+							}
+							else
+							{
+								// for non-linear electrical ranges (mV and Ohms) Kxj is calculated differently
+								// Output measure avg ENGINEER / Input source mV or Ohms
+								//
+								Kxj = measure(MEASURE_LIMIT_TYPE_ENGINEER) / pCalibrator->sourceValue();
+							}
+
+							double MPx = 1 / pow(10.0, limitPrecision(MEASURE_LIMIT_TYPE_ENGINEER));
+
+							// this is formula for case 1 from documet about uncertainty
+							//
+							uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
+						}
+
+						break;
+
+					default:
+						assert(0);
+						break;
+				}
+
 			}
+			break;
 
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+			{
+				// this measurement have not electric input and have only electric output
+				//
+
+				double Kox = 2;
+
+				int сalibratorMeasureUnit = pCalibrator->measureUnit();
+				if (сalibratorMeasureUnit < 0 || сalibratorMeasureUnit >= CALIBRATOR_UNIT_COUNT)
+				{
+					return 0;
+				}
+
+				double dIj = (	CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC0] * measure(MEASURE_LIMIT_TYPE_ELECTRIC) +
+								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC1] *
+								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_RANGE]) / 100.0;
+
+				switch (limitType)
+				{
+					case MEASURE_LIMIT_TYPE_ELECTRIC:		// output electric
+					case MEASURE_LIMIT_TYPE_ENGINEER:		// because we have not input therefore uncertainty we will be calc by electric
+						{
+							// this is formula for case 4 from documet about uncertainty
+							//
+							double MPi = 1 / pow(10.0, CalibratorPrecision[calibratorType][сalibratorMeasureUnit]);
+
+							// this is formula for case 4 from documet about uncertainty
+							//
+							uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dIj,2) / 3) + (pow(MPi,2) / 3) );
+						}
+
+						break;
+
+					default:
+						assert(0);
+						break;
+				}
+			}
 			break;
 
 		default:
@@ -1188,7 +1686,7 @@ void LinearityMeasurement::calcAdditionalParam(Calibrator* pCalibrator, E::Senso
 			break;
 	}
 
-	setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY, uncertainty);
+	return uncertainty;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1222,10 +1720,19 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 		}
 	}
 
+	int precision = DEFAULT_ECLECTRIC_PRECESION;
+
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
 		return QString();
+	}
+
+	precision = limitPrecision(limitType);
+
+	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	{
+		precision = calibratorPrecision();
 	}
 
 	if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT)
@@ -1234,7 +1741,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 		return QString();
 	}
 
-	return QString::number(m_measureArray[limitType][index], 'f', limitPrecision(limitType));
+	return QString::number(m_measureArray[limitType][index], 'f', precision);
 }
 
 
@@ -1300,7 +1807,7 @@ QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) c
 		return QString();
 	}
 
-	QString valueStr = QString::number(m_additionalParam[limitType][paramType], 'f', 2);
+	QString valueStr = QString::number(m_additionalParam[limitType][paramType], 'f', 4);
 
 	if (paramType == MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER)
 	{
@@ -1490,8 +1997,7 @@ void ComparatorMeasurement::clear()
 
 void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 {
-	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
-	if (pCalibrator == nullptr)
+	if (ioParam.isValid() == false)
 	{
 		assert(false);
 		return;
@@ -1503,9 +2009,17 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	if (ioParam.isValid() == false)
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
 	{
 		assert(false);
+		return;
+	}
+
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
 		return;
 	}
 
@@ -1543,14 +2057,18 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
 	setMeasureType(MEASURE_TYPE_COMPARATOR);
-	setSignalHash(inParam.hash());
 
 	// features
 	//
+
+	setConnectionAppSignalID(inParam.appSignalID());
+	setConnectionType(signalConnectionType);
 
 	setAppSignalID(inParam.appSignalID());
 	setCustomAppSignalID(inParam.customAppSignalID());
@@ -1569,6 +2087,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	setLocation(inParam.location());
 
+	setCalibratorData(ioParam);
+
 	if (comparatorEx->compare().isConst() == false)
 	{
 		setCompareAppSignalID(comparatorEx->compare().appSignalID());
@@ -1583,7 +2103,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	setCmpType(cmpValueType, comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
-	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
+	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
@@ -1595,14 +2115,14 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	setSignalValid(true);
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
+	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
 
 	// limits
 	//
-	setLimits(inParam);
+	setLimits(ioParam);
 
 	// calc errors
 	//
@@ -1613,8 +2133,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 {
-	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
-	if (pCalibrator == nullptr)
+	if (ioParam.isValid() == false)
 	{
 		assert(false);
 		return;
@@ -1626,9 +2145,17 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	if (ioParam.isValid() == false)
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
 	{
 		assert(false);
+		return;
+	}
+
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		assert(0);
 		return;
 	}
 
@@ -1639,7 +2166,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 	if (outParam.isValid() == false)
 	{
 		assert(false);
@@ -1673,14 +2200,18 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	//
 	//
 
 	setMeasureType(MEASURE_TYPE_COMPARATOR);
-	setSignalHash(outParam.hash());
 
 	// features
 	//
+
+	setConnectionAppSignalID(inParam.appSignalID());
+	setConnectionType(signalConnectionType);
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -1699,6 +2230,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	setLocation(inParam.location());
 
+	setCalibratorData(ioParam);
+
 	if (comparatorEx->compare().isConst() == false)
 	{
 		setCompareAppSignalID(comparatorEx->compare().appSignalID());
@@ -1713,8 +2246,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	setCmpType(cmpValueType, comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
-	double engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_INVERSION, ioParam.signalConnectionType(), ioParam);
-	double electric = conversion(engineeringCalc, CT_ENGINEER_TO_ELECTRIC, inParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Inversion, ioParam.signalConnectionType(), ioParam);
+	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
@@ -1726,20 +2259,15 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	setSignalValid(true);
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
-	engineeringCalc = conversionCalcVal(engineering, CT_CALC_VAL_NORMAL, ioParam.signalConnectionType(), ioParam);
+	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
+	engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
 
 	// limits
 	//
-	outParam.setElectricLowLimit(inParam.electricLowLimit());
-	outParam.setElectricHighLimit(inParam.electricHighLimit());
-	outParam.setElectricUnitID(inParam.electricUnitID());
-	outParam.setElectricPrecision(inParam.electricPrecision());
-
-	setLimits(outParam);
+	setLimits(ioParam);
 
 	// calc errors
 	//
@@ -2177,6 +2705,99 @@ int MeasureBase::load(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MeasureBase::signalLoaded()
+{
+	QMutexLocker l(&m_measureMutex);
+
+	int measureCount = m_measureList.count();
+	for (int m = 0; m < measureCount; m++)
+	{
+		Measurement* pMeasurement = m_measureList[m];
+		if (pMeasurement == nullptr)
+		{
+			continue;
+		}
+
+		int measureType = pMeasurement->measureType();
+		if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+		{
+			continue;
+		}
+
+		pMeasurement->setFoundInStatistics(false);
+
+		int count = theSignalBase.statistics().count(measureType);
+		for(int s = 0; s < count; s++)
+		{
+			const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
+
+			Metrology::Signal* pSignal = si.signal();
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
+			{
+				continue;
+			}
+
+			bool measurementIsFound = false;
+
+			switch (measureType)
+			{
+				case MEASURE_TYPE_LINEARITY:
+					{
+						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+						if (pLinearityMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						if (pLinearityMeasurement->appSignalID() != pSignal->param().appSignalID())
+						{
+							continue;
+						}
+
+						measurementIsFound = true;
+					}
+					break;
+
+				case MEASURE_TYPE_COMPARATOR:
+					{
+						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+						if (comparatorEx == nullptr)
+						{
+							continue;
+						}
+
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						if (pComparatorMeasurement->appSignalID() != pSignal->param().appSignalID())
+						{
+							continue;
+						}
+
+						if (pComparatorMeasurement->outputAppSignalID() != comparatorEx->output().appSignalID())
+						{
+							continue;
+						}
+
+						measurementIsFound = true;
+					}
+					break;
+
+				default:
+					assert(0);
+					break;
+			}
+
+			pMeasurement->setFoundInStatistics(measurementIsFound);
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int MeasureBase::append(Measurement* pMeasurement)
 {
 	if (pMeasurement == nullptr)
@@ -2295,7 +2916,7 @@ void MeasureBase::remove(int measureType, const QVector<int>& keyList)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatistics(int measureType, StatisticItem& si)
+void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
 {
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
@@ -2333,7 +2954,7 @@ void MeasureBase::updateStatistics(int measureType, StatisticItem& si)
 	QMutexLocker l(&m_measureMutex);
 
 	si.setMeasureCount(0);
-	si.setState(StatisticItem::State::Success);
+	si.setState(StatisticsItem::State::Success);
 
 	int measureCount = m_measureList.count();
 	for(int i = 0; i < measureCount; i ++)
@@ -2368,7 +2989,7 @@ void MeasureBase::updateStatistics(int measureType, StatisticItem& si)
 
 				if (pLinearityMeasurement->error(limitType, errorType) > pLinearityMeasurement->errorLimit(limitType, errorType))
 				{
-					si.setState(StatisticItem::State::Failed);
+					si.setState(StatisticsItem::State::Failed);
 				}
 			}
 
@@ -2417,7 +3038,7 @@ void MeasureBase::updateStatistics(int measureType, StatisticItem& si)
 
 				if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
 				{
-					si.setState(StatisticItem::State::Failed);
+					si.setState(StatisticsItem::State::Failed);
 				}
 			}
 

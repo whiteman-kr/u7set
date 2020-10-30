@@ -1,6 +1,6 @@
 #include "ObjectProperties.h"
 
-#include "Conversion.h"
+#include "../lib/UnitsConvertor.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -660,7 +660,7 @@ void RackGroupPropertyDialog::updateRackList()
 
 void RackGroupPropertyDialog::appendGroup()
 {
-	QString caption = tr("Rack group %1").arg(m_groupBase.count() + 1);
+	QString caption = QString("Rack group %1").arg(m_groupBase.count() + 1);
 
 	RackGroup group;
 
@@ -1430,6 +1430,8 @@ void ComparatorPropertyDialog::createPropertyList()
 	setMinimumSize(600, 300);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
+	UnitsConvertor uc;
+
 	QMetaEnum meu = QMetaEnum::fromType<E::CmpType>();
 	QStringList cmpTypeList;
 	for(int u = 0; u < meu.keyCount(); u++)
@@ -1521,7 +1523,7 @@ void ComparatorPropertyDialog::createPropertyList()
 						m_comparatorEx.inputSignal()->param().isInput() == true && m_comparatorEx.inputSignal()->param().electricRangeIsValid() == true)
 				{
 					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + m_comparatorEx.inputSignal()->param().electricUnitStr());
-					item->setValue(conversion(m_comparatorEx.compareConstValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+					item->setValue(uc.conversion(m_comparatorEx.compareConstValue(), UnitsConvertType::PhysicalToElectric, m_comparatorEx.inputSignal()->param()));
 					item->setAttribute(QLatin1String("decimals"), m_comparatorEx.inputSignal()->param().electricPrecision());
 					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE);
 					compareGroup->addSubProperty(item);
@@ -1604,7 +1606,7 @@ void ComparatorPropertyDialog::createPropertyList()
 //				if (m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true && m_comparatorEx.inputSignal()->param().isInput() == true)
 //				{
 //					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + m_comparatorEx.inputSignal()->param().electricUnitStr());
-//					item->setValue(conversion(m_comparator.hysteresisOnlineValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+//					item->setValue(m_uc.conversion(m_comparator.hysteresisOnlineValue(), UnitsConvertType::PhysicalToElectric, m_comparatorEx.inputSignal()->param()));
 //					item->setAttribute(QLatin1String("decimals"), m_comparatorEx.inputSignal()->param().electricPrecision());
 //					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE);
 //					hysteresisGroup->addSubProperty(item);
@@ -1771,6 +1773,8 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 		return;
 	}
 
+	UnitsConvertor uc;
+
 	int groupIndex = -1;
 
 	switch(index)
@@ -1786,7 +1790,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 
 		case COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE:
 			{
-				m_comparatorEx.compare().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGINEER, m_comparatorEx.inputSignal()->param()));
+				m_comparatorEx.compare().setConstValue(uc.conversion(value.toDouble(), UnitsConvertType::ElectricToPhysical, m_comparatorEx.inputSignal()->param()));
 				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
 
 				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
@@ -1808,7 +1812,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
 					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
-					propertyEl->setValue(conversion(m_comparatorEx.compare().constValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+					propertyEl->setValue(uc.conversion(m_comparatorEx.compare().constValue(), UnitsConvertType::PhysicalToElectric, m_comparatorEx.inputSignal()->param()));
 					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 				}
 			}
@@ -1824,7 +1828,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 		//
 		case COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE:
 			{
-				m_comparatorEx.hysteresis().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGINEER, m_comparatorEx.inputSignal()->param()));
+				m_comparatorEx.hysteresis().setConstValue(uc.conversion(value.toDouble(), UnitsConvertType::ElectricToPhysical, m_comparatorEx.inputSignal()->param()));
 				groupIndex = COMPARATOR_PROPERTY_GROUP_HYSTERESIS;
 
 				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
@@ -1846,7 +1850,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
 					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
-					propertyEl->setValue(conversion(m_comparatorEx.hysteresis().constValue(), CT_ENGINEER_TO_ELECTRIC, m_comparatorEx.inputSignal()->param()));
+					propertyEl->setValue(uc.conversion(m_comparatorEx.hysteresis().constValue(), UnitsConvertType::PhysicalToElectric, m_comparatorEx.inputSignal()->param()));
 					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
 				}
 			}

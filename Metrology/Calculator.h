@@ -12,6 +12,7 @@
 #include <QComboBox>
 
 #include "../lib/Types.h"
+#include "../lib/UnitsConvertor.h"
 
 // ==============================================================================================
 
@@ -107,6 +108,7 @@ private:
 
 	QFont*			m_digitFont = nullptr;
 
+	UnitsConvertor	m_uc;
 
 	void			conversionLin();
 	void			conversionTr();

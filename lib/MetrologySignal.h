@@ -4,7 +4,6 @@
 #include "../lib/AppSignal.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
-#include "../lib/UnitsConvertor.h"
 #include "../lib/ComparatorSet.h"
 #include "../lib/SignalProperties.h"
 #include "../Builder/CfgFiles.h"
@@ -26,23 +25,19 @@ namespace Metrology
 {
 	// ==============================================================================================
 
-	const char* const ChannelLetter [] = {"A", "B", "C", "D", "E", "F"};
+	const char* const ChannelLetter [] = {"A", "B", "C", "D"};
 
 	const int	ChannelCount	= sizeof(ChannelLetter)/sizeof(ChannelLetter[0]);
 
 	const int	Channel_A		= 0,
 				Channel_B		= 1,
 				Channel_C		= 2,
-				Channel_D		= 3,
-				Channel_E		= 4,
-				Channel_F		= 5;
+	            Channel_D		= 3;
 
 	const int	Channel_0		= 0,
 				Channel_1		= 1,
 				Channel_2		= 2,
-				Channel_3		= 3,
-				Channel_4		= 4,
-				Channel_5		= 5;
+	            Channel_3		= 3;
 
 	// ==============================================================================================
 
@@ -271,6 +266,9 @@ namespace Metrology
 
 		bool					electricRangeIsValid() const;
 		QString					electricRangeStr() const;
+
+		bool					isLinearRange() const;
+		bool					isNotLinearRange() const { return !isLinearRange(); }
 
 		double					physicalLowLimit() const { return m_physicalLowLimit; }
 		void					setPhysicalLowLimit(double lowLimit) { m_physicalLowLimit = lowLimit; }

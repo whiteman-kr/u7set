@@ -12,7 +12,6 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QHeaderView>
-#include <QClipboard>
 
 #include "TuningSignalBase.h"
 

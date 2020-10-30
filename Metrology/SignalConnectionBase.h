@@ -14,9 +14,9 @@ const char* const			MeasureIoSignalType[] =
 
 const int					MEASURE_IO_SIGNAL_TYPE_COUNT = sizeof(MeasureIoSignalType)/sizeof(MeasureIoSignalType[0]);
 
-const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
-							MEASURE_IO_SIGNAL_TYPE_INPUT	= 0,
-							MEASURE_IO_SIGNAL_TYPE_OUTPUT	= 1;
+const int					MEASURE_IO_SIGNAL_TYPE_UNDEFINED	= -1,
+							MEASURE_IO_SIGNAL_TYPE_INPUT		= 0,
+							MEASURE_IO_SIGNAL_TYPE_OUTPUT		= 1;
 
 // ==============================================================================================
 

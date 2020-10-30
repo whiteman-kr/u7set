@@ -1,20 +1,20 @@
-#include "StatisticBase.h"
+#include "StatisticsBase.h"
 
-#include "SignalBase.h"
 #include "MeasureBase.h"
+#include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem::StatisticItem()
+StatisticsItem::StatisticsItem()
 {
 	clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem::StatisticItem(Metrology::Signal* pSignal)
+StatisticsItem::StatisticsItem(Metrology::Signal* pSignal)
 {
 	clear();
 	setSignal(pSignal);
@@ -22,7 +22,7 @@ StatisticItem::StatisticItem(Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem::StatisticItem(Metrology::Signal* pSignal, std::shared_ptr<Metrology::ComparatorEx> pComparator)
+StatisticsItem::StatisticsItem(Metrology::Signal* pSignal, std::shared_ptr<Metrology::ComparatorEx> pComparator)
 {
 	clear();
 	setSignal(pSignal);
@@ -31,13 +31,13 @@ StatisticItem::StatisticItem(Metrology::Signal* pSignal, std::shared_ptr<Metrolo
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem::~StatisticItem()
+StatisticsItem::~StatisticsItem()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticItem::setSignal(Metrology::Signal* pSignal)
+void StatisticsItem::setSignal(Metrology::Signal* pSignal)
 {
 	m_pSignal = pSignal;
 
@@ -46,7 +46,7 @@ void StatisticItem::setSignal(Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticItem::signalConnectionTypeStr() const
+QString StatisticsItem::signalConnectionTypeStr() const
 {
 	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
@@ -58,7 +58,7 @@ QString StatisticItem::signalConnectionTypeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticItem::setSignalConnectionType(Metrology::Signal* pSignal)
+void StatisticsItem::setSignalConnectionType(Metrology::Signal* pSignal)
 {
 	m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
@@ -90,7 +90,7 @@ void StatisticItem::setSignalConnectionType(Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticItem::measureCountStr() const
+QString StatisticsItem::measureCountStr() const
 {
 	if (m_measureCount == 0)
 	{
@@ -102,7 +102,7 @@ QString StatisticItem::measureCountStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticItem::clear()
+void StatisticsItem::clear()
 {
 	m_pSignal = nullptr;
 	m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
@@ -114,7 +114,7 @@ void StatisticItem::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticItem::stateStr() const
+QString StatisticsItem::stateStr() const
 {
 	if (m_measureCount == 0)
 	{
@@ -137,7 +137,7 @@ QString StatisticItem::stateStr() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticBase::StatisticBase(QObject *parent) :
+StatisticsBase::StatisticsBase(QObject *parent) :
 	QObject(parent)
 {
 	QMutexLocker l(&m_signalMutex);
@@ -147,13 +147,13 @@ StatisticBase::StatisticBase(QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
- StatisticBase::~StatisticBase()
+ StatisticsBase::~StatisticsBase()
  {
  }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::clear()
+void StatisticsBase::clear()
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -163,16 +163,13 @@ void StatisticBase::clear()
 		m_statisticList[i].clear();
 	}
 
-	m_signalList.clear();
-	m_signalCount = 0;
-
 	m_measuredCount = 0;
 	m_invalidMeasureCount = 0;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int StatisticBase::count() const
+int StatisticsBase::count() const
 {
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
 	{
@@ -186,7 +183,22 @@ int StatisticBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::createStatisticSignalList()
+int StatisticsBase::count(int measureType) const
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return 0;
+	}
+
+	QMutexLocker l(&m_signalMutex);
+
+	return m_statisticList[measureType].count();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsBase::createSignalList()
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -236,14 +248,9 @@ void StatisticBase::createStatisticSignalList()
 			{
 				continue;
 			}
-
-			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
-			{
-				continue;
-			}
 		}
 
-		StatisticItem si(pSignal);
+		StatisticsItem si(pSignal);
 
 		if (param.isInternal() == true /*|| param.isOutput() == true */)
 		{
@@ -261,7 +268,7 @@ void StatisticBase::createStatisticSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::createStatisticComparatorList()
+void StatisticsBase::createComparatorList()
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -316,11 +323,6 @@ void StatisticBase::createStatisticComparatorList()
 			{
 				continue;
 			}
-
-			if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
-			{
-				continue;
-			}
 		}
 
 		int comparatorCount = param.comparatorCount();
@@ -331,7 +333,7 @@ void StatisticBase::createStatisticComparatorList()
 
 		for(int с = 0; с < comparatorCount; с++)
 		{
-			StatisticItem si(pSignal, param.comparator(с));
+			StatisticsItem si(pSignal, param.comparator(с));
 
 			/*
 			if (param.isInternal() == true)
@@ -352,7 +354,7 @@ void StatisticBase::createStatisticComparatorList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateConnections()
+void StatisticsBase::updateConnections()
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -369,18 +371,18 @@ void StatisticBase::updateConnections()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem StatisticBase::item(int index) const
+StatisticsItem StatisticsBase::item(int index) const
 {
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
 	{
-		return StatisticItem();
+		return StatisticsItem();
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
 	if (index < 0 || index >= m_statisticList[m_measureType].count())
 	{
-		return StatisticItem();
+		return StatisticsItem();
 	}
 
 	return m_statisticList[m_measureType][index];
@@ -388,7 +390,26 @@ StatisticItem StatisticBase::item(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateStatistics()
+StatisticsItem StatisticsBase::item(int measureType, int index) const
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return StatisticsItem();
+	}
+
+	QMutexLocker l(&m_signalMutex);
+
+	if (index < 0 || index >= m_statisticList[measureType].count())
+	{
+		return StatisticsItem();
+	}
+
+	return m_statisticList[measureType][index];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsBase::updateStatistics()
 {
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
 	{
@@ -406,7 +427,7 @@ void StatisticBase::updateStatistics()
 	int count = m_statisticList[m_measureType].count();
 	for(int i = 0; i < count; i++)
 	{
-		StatisticItem& si = m_statisticList[m_measureType][i];
+		StatisticsItem& si = m_statisticList[m_measureType][i];
 
 		theMeasureBase.updateStatistics(m_measureType, si);
 
@@ -415,7 +436,7 @@ void StatisticBase::updateStatistics()
 			m_measuredCount++;
 		}
 
-		if (si.state() == StatisticItem::State::Failed)
+		if (si.state() == StatisticsItem::State::Failed)
 		{
 			m_invalidMeasureCount ++;
 		}
@@ -426,7 +447,7 @@ void StatisticBase::updateStatistics()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateStatistics(Hash signalHash)
+void StatisticsBase::updateStatistics(Hash signalHash)
 {
 	if (signalHash == UNDEFINED_HASH)
 	{
@@ -464,14 +485,14 @@ void StatisticBase::updateStatistics(Hash signalHash)
 	count = m_statisticList[m_measureType].count();
 	for(int i = 0; i < count; i++)
 	{
-		StatisticItem& si = m_statisticList[m_measureType][i];
+		StatisticsItem& si = m_statisticList[m_measureType][i];
 
 		if (si.isMeasured() == true)
 		{
 			m_measuredCount++;
 		}
 
-		if (si.state() == StatisticItem::State::Failed)
+		if (si.state() == StatisticsItem::State::Failed)
 		{
 			m_invalidMeasureCount ++;
 		}

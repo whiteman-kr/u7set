@@ -2,10 +2,10 @@
 
 #include "MainWindow.h"
 #include "Options.h"
-#include "ExportData.h"
+#include "CopyData.h"
 #include "FindData.h"
+#include "ExportData.h"
 #include "ObjectProperties.h"
-#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -207,9 +207,10 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 	{
 		strCompareValue = comparatorEx->compareDefaultValueStr() + " " + pInSignal->param().unit();
 
-		if (pInSignal->param().electricRangeIsValid() == true && pInSignal->param().electricSensorType() != E::SensorType::NoSensor)
+		if (pInSignal->param().electricRangeIsValid() == true)
 		{
-			double electric = conversion(comparatorEx->compareConstValue(), CT_ENGINEER_TO_ELECTRIC, pInSignal->param());
+			UnitsConvertor uc;
+			double electric = uc.conversion(comparatorEx->compareConstValue(), UnitsConvertType::PhysicalToElectric, pInSignal->param());
 
 			strCompareValue += "  [" + QString::number(electric, 'f', pInSignal->param().electricPrecision()) + " " + pInSignal->param().electricUnitStr() + "]";
 		}
@@ -586,33 +587,8 @@ void ComparatorListDialog::find()
 
 void ComparatorListDialog::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

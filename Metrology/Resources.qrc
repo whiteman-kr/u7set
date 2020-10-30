@@ -4,7 +4,6 @@
         <file>icons/About Application.png</file>
         <file>icons/Calculator.png</file>
         <file>icons/Calibrators.png</file>
-        <file>icons/Cut.png</file>
         <file>icons/Find.png</file>
         <file>icons/Import.png</file>
         <file>icons/Options.png</file>
@@ -15,12 +14,10 @@
         <file>icons/Start.png</file>
         <file>icons/Statistics.png</file>
         <file>icons/Stop.png</file>
-        <file>icons/OutRange.png</file>
         <file>icons/Metrology.ico</file>
         <file>icons/Settings.png</file>
         <file>icons/Manage.png</file>
         <file>icons/Export.png</file>
-        <file>icons/Save.png</file>
         <file>icons/Search.png</file>
         <file>icons/Preview.png</file>
         <file>icons/clbCalys75.png</file>
@@ -40,5 +37,7 @@
         <file>icons/Tuning.png</file>
         <file>icons/Rack.png</file>
         <file>icons/Signal.png</file>
+        <file>icons/NextSignal.png</file>
+        <file>icons/PreviousSignal.png</file>
     </qresource>
 </RCC>

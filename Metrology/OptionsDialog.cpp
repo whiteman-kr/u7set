@@ -82,8 +82,8 @@ PropertyPage::~PropertyPage()
 			break;
 	}
 
-	m_type = PROPERTY_PAGE_TYPE_UNKNOWN;
-	m_page = OPTION_PAGE_UNKNOWN;
+	m_type = PROPERTY_PAGE_TYPE_UNDEFINED;
+	m_page = OPTION_PAGE_UNDEFINED;
 
 	m_pWidget = nullptr;
 }
@@ -397,11 +397,13 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *limitsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Limits"));
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_IMPUT_COUNT]));
+					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setValue(m_options.module().maxInputCount());
 					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
 					limitsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_CMP_COUNT]));
+					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setValue(m_options.module().maxComparatorCount());
 					appendProperty(item, page, MO_PARAM_MAX_CMP_COUNT);
 					limitsGroup->addSubProperty(item);
@@ -610,7 +612,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
 					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_FONT]));
-					item->setValue(m_options.measureView().font());
+					item->setValue(m_options.measureView().font().toString());
 					appendProperty(item, page, MWO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
@@ -656,7 +658,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
 					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_FONT]));
-					item->setValue(m_options.signalInfo().font());
+					item->setValue(m_options.signalInfo().font().toString());
 					appendProperty(item, page, SIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
@@ -716,7 +718,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
 					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_FONT]));
-					item->setValue(m_options.comparatorInfo().font());
+					item->setValue(m_options.comparatorInfo().font().toString());
 					appendProperty(item, page, CIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
@@ -1211,7 +1213,7 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case MWO_PARAM_FONT:				m_options.measureView().font().fromString(value.toString());					break;
+					case MWO_PARAM_FONT:				m_options.measureView().setFont(value.toString());								break;
 					case MWO_PARAM_COLOR_NOT_ERROR:		m_options.measureView().setColorNotError(QColor(value.toString()));				break;
 					case MWO_PARAM_COLOR_LIMIT_ERROR:	m_options.measureView().setColorErrorLimit(QColor(value.toString()));			break;
 					case MWO_PARAM_COLOR_CONTROL_ERROR:	m_options.measureView().setColorErrorControl(QColor(value.toString()));			break;
@@ -1234,7 +1236,7 @@ void OptionsDialog::applyProperty()
 
 			switch(param)
 			{
-				case SIO_PARAM_FONT:					m_options.signalInfo().font().fromString(value.toString());						break;
+				case SIO_PARAM_FONT:					m_options.signalInfo().setFont(value.toString());								break;
 				case SIO_PARAM_SHOW_NO_VALID:			m_options.signalInfo().setShowNoValid(value.toBool());							break;
 				case SIO_PARAM_ELECTRIC_STATE:			m_options.signalInfo().setShowElectricState(value.toBool());					break;
 				case SIO_PARAM_COLOR_FLAG_VALID:		m_options.signalInfo().setColorFlagValid(QColor(value.toString()));				break;
@@ -1250,7 +1252,7 @@ void OptionsDialog::applyProperty()
 
 			switch(param)
 			{
-				case CIO_PARAM_FONT:					m_options.comparatorInfo().font().fromString(value.toString());					break;
+				case CIO_PARAM_FONT:					m_options.comparatorInfo().setFont(value.toString());							break;
 				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());			break;
 				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());			break;
 				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));		break;

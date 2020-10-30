@@ -50,6 +50,9 @@ int SqlFieldBase::init(int objectType, int)
 			append("Filter",						QVariant::Bool);
 			append("Valid",							QVariant::Bool);
 
+			append("ConnectAppSignalID",			QVariant::String, 64);
+			append("ConnectType",					QVariant::Int);
+
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
 			append("EquipmentID",					QVariant::String, 256);
@@ -62,6 +65,8 @@ int SqlFieldBase::init(int objectType, int)
 			append("Chassis",						QVariant::Int);
 			append("Module",						QVariant::Int);
 			append("Place",							QVariant::Int);
+
+			append("CalibratorPrecision",			QVariant::Int);
 
 			append("PrecentFormLimit",				QVariant::Double);
 
@@ -92,6 +97,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("EngineeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
+			append("Calibrator",					QVariant::String, 64);
 
 			break;
 
@@ -170,6 +176,9 @@ int SqlFieldBase::init(int objectType, int)
 			append("Filter",						QVariant::Bool);
 			append("Valid",							QVariant::Bool);
 
+			append("ConnectAppSignalID",			QVariant::String, 64);
+			append("ConnectType",					QVariant::Int);
+
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
 			append("EquipmentID",					QVariant::String, 256);
@@ -182,6 +191,8 @@ int SqlFieldBase::init(int objectType, int)
 			append("Chassis",						QVariant::Int);
 			append("Module",						QVariant::Int);
 			append("Place",							QVariant::Int);
+
+			append("CalibratorPrecision",			QVariant::Int);
 
 			append("CompareAppSignalID",			QVariant::String, 64);
 			append("OutputAppSignalID",				QVariant::String, 64);
@@ -216,6 +227,8 @@ int SqlFieldBase::init(int objectType, int)
 			append("EngineeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
+			append("Calibrator",					QVariant::String, 64);
+
 			break;
 
 		case SQL_TABLE_COMPLEX_COMPARATOR:
@@ -783,6 +796,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setFilter(query.value(field++).toBool());
 					measure->setSignalValid(query.value(field++).toBool());
 
+					measure->setConnectionAppSignalID(query.value(field++).toString());
+					measure->setConnectionType(query.value(field++).toInt());
+
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
 					measure->setEquipmentID(query.value(field++).toString());
@@ -795,6 +811,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->location().setChassis(query.value(field++).toInt());
 					measure->location().setModule(query.value(field++).toInt());
 					measure->location().setPlace(query.value(field++).toInt());
+
+					measure->setCalibratorPrecision(query.value(field++).toInt());
 
 					measure->setPercent(query.value(field++).toDouble());
 
@@ -825,6 +843,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
 
 					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
+					measure->setCalibrator(query.value(field++).toString());
 				}
 				break;
 
@@ -939,6 +958,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setFilter(query.value(field++).toBool());
 					measure->setSignalValid(query.value(field++).toBool());
 
+					measure->setConnectionAppSignalID(query.value(field++).toString());
+					measure->setConnectionType(query.value(field++).toInt());
+
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
 					measure->setEquipmentID(query.value(field++).toString());
@@ -951,6 +973,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->location().setChassis(query.value(field++).toInt());
 					measure->location().setModule(query.value(field++).toInt());
 					measure->location().setPlace(query.value(field++).toInt());
+
+					measure->setCalibratorPrecision(query.value(field++).toInt());
 
 					measure->setCompareAppSignalID(query.value(field++).toString());
 					measure->setOutputAppSignalID(query.value(field++).toString());
@@ -985,6 +1009,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
 
 					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
+					measure->setCalibrator(query.value(field++).toString());
 				}
 				break;
 
@@ -1028,8 +1053,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					group->setRackID(Metrology::Channel_1, query.value(field++).toString());
 					group->setRackID(Metrology::Channel_2, query.value(field++).toString());
 					group->setRackID(Metrology::Channel_3, query.value(field++).toString());
-					group->setRackID(Metrology::Channel_4, query.value(field++).toString());
-					group->setRackID(Metrology::Channel_5, query.value(field++).toString());
+					//group->setRackID(Metrology::Channel_4, query.value(field++).toString());
+					//group->setRackID(Metrology::Channel_5, query.value(field++).toString());
 				}
 				break;
 
@@ -1197,6 +1222,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->filter());
 					query.bindValue(field++, measure->isSignalValid());
 
+					query.bindValue(field++, measure->connectionAppSignalID());
+					query.bindValue(field++, measure->connectionType());
+
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
 					query.bindValue(field++, measure->equipmentID());
@@ -1209,6 +1237,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->location().chassis());
 					query.bindValue(field++, measure->location().module());
 					query.bindValue(field++, measure->location().place());
+
+					query.bindValue(field++, measure->calibratorPrecision());
 
 					query.bindValue(field++, measure->percent());
 
@@ -1241,6 +1271,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
 					query.bindValue(field++, measure->measureTimeStr());
+					query.bindValue(field++, measure->calibrator());
 				}
 				break;
 
@@ -1368,6 +1399,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->filter());
 					query.bindValue(field++, measure->isSignalValid());
 
+					query.bindValue(field++, measure->connectionAppSignalID());
+					query.bindValue(field++, measure->connectionType());
+
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
 					query.bindValue(field++, measure->equipmentID());
@@ -1380,6 +1414,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->location().chassis());
 					query.bindValue(field++, measure->location().module());
 					query.bindValue(field++, measure->location().place());
+
+					query.bindValue(field++, measure->calibratorPrecision());
 
 					query.bindValue(field++, measure->compareAppSignalID());
 					query.bindValue(field++, measure->outputAppSignalID());
@@ -1416,6 +1452,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
 					query.bindValue(field++, measure->measureTimeStr());
+					query.bindValue(field++, measure->calibratorPrecision());
 				}
 				break;
 
@@ -1459,8 +1496,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, group->rackID(Metrology::Channel_1));
 					query.bindValue(field++, group->rackID(Metrology::Channel_2));
 					query.bindValue(field++, group->rackID(Metrology::Channel_3));
-					query.bindValue(field++, group->rackID(Metrology::Channel_4));
-					query.bindValue(field++, group->rackID(Metrology::Channel_5));
+					//query.bindValue(field++, group->rackID(Metrology::Channel_4));
+					//query.bindValue(field++, group->rackID(Metrology::Channel_5));
 				}
 				break;
 

@@ -267,15 +267,17 @@ public:
 	{
 		NoSensor = 0,
 
+		// for non platform module
+
 		Ohm_Pt50_W1391 = 1,
 		Ohm_Pt100_W1391 = 2,
 		Ohm_Pt50_W1385 = 3,
 		Ohm_Pt100_W1385 = 4,
 
-		Ohm_Cu_50_W1428 = 5,
-		Ohm_Cu_100_W1428 = 6,
-		Ohm_Cu_50_W1426 = 7,
-		Ohm_Cu_100_W1426 = 8,
+		Ohm_Cu50_W1428 = 5,
+		Ohm_Cu100_W1428 = 6,
+		Ohm_Cu50_W1426 = 7,
+		Ohm_Cu100_W1426 = 8,
 
 		Ohm_Pt21 = 9,
 		Ohm_Cu23 = 10,
@@ -284,7 +286,7 @@ public:
 		mV_L_TXK = 12,
 		mV_N_THH = 13,
 
-        //
+		// for platform module
 
         mV_Type_B = 14,
         mV_Type_E = 15,

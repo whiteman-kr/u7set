@@ -14,7 +14,10 @@
 
 // ==============================================================================================
 
-const char* const ErrorList = QT_TRANSLATE_NOOP("CalibratorManager.h", "Error list");
+const char* const ErrorList					= QT_TRANSLATE_NOOP("CalibratorManager.h", "Error list");
+
+const char* const CalibratorNotConnected	= QT_TRANSLATE_NOOP("CalibratorManager.h", "Not connected");
+const char* const CalibratorStr				= QT_TRANSLATE_NOOP("CalibratorManager.h", "Calibrator");
 
 // ==============================================================================================
 
