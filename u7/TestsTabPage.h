@@ -147,6 +147,12 @@ private:
 	QLineEdit* m_findEdit = nullptr;
 	QPushButton* m_findButton = nullptr;
 
+	OutputDockWidgetTitleButton* m_prevWarningButton = nullptr;
+	OutputDockWidgetTitleButton* m_nextWarningButton = nullptr;
+
+	OutputDockWidgetTitleButton* m_prevErrorButton = nullptr;
+	OutputDockWidgetTitleButton* m_nextErrorButton = nullptr;
+
 	OutputDockWidgetTitleButton* m_floatButton = nullptr;
 	OutputDockWidgetTitleButton* m_closeButton = nullptr;
 

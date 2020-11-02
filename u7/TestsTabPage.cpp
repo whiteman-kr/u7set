@@ -392,6 +392,11 @@ void OutputDockWidget::clear()
 	m_warningLabel->setText("W: 0000");
 	m_warningLabel->setStyleSheet(QString());
 
+	m_prevErrorButton->setEnabled(false);
+	m_nextErrorButton->setEnabled(false);
+	m_prevWarningButton->setEnabled(false);
+	m_nextWarningButton->setEnabled(false);
+
 	m_errorCount = 0;
 	m_warningCount = 0;
 }
@@ -635,6 +640,9 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 	{
 		if (m_errorCount == 0)
 		{
+			m_prevErrorButton->setEnabled(true);
+			m_nextErrorButton->setEnabled(true);
+
 			m_errorLabel->setStyleSheet("QLabel { color : #D00000; }");
 		}
 		m_errorLabel->setText(tr("E: %1").arg(QString::number(errorCount).rightJustified(4, '0')));
@@ -644,6 +652,9 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 	{
 		if (m_warningCount == 0)
 		{
+			m_prevWarningButton->setEnabled(true);
+			m_nextWarningButton->setEnabled(true);
+
 			m_warningLabel->setStyleSheet("QLabel { color : #F87217; }");
 		}
 		m_warningLabel->setText(tr("W: %1").arg(QString::number(warningCount).rightJustified(4, '0')));
@@ -671,24 +682,26 @@ void OutputDockWidget::createToolbar()
 	int pixelsWide = fm.horizontalAdvance(windowTitle());
 
 	QHBoxLayout* l = new QHBoxLayout(outputDockPanelWidget);
-	l->setContentsMargins(pixelsWide + margin * 2, 0, margin, 0);
+	l->setContentsMargins(pixelsWide + margin * 4, 0, margin, 0);
 
 	m_errorLabel = new QLabel(tr("E: 0000"));
 	l->addWidget(m_errorLabel);
 
-	OutputDockWidgetTitleButton* b = new OutputDockWidgetTitleButton(this, true);
+	m_prevErrorButton = new OutputDockWidgetTitleButton(this, true);
+	m_prevErrorButton->setEnabled(false);
 	QIcon icon = QIcon(":/Images/Images/PreviousIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_prevErrorButton->setIcon( icon );
+	l->addWidget(m_prevErrorButton);
+	connect(m_prevErrorButton, &QPushButton::clicked, [this](){
 		prevIssue(QLatin1String("ERR"));
 	});
 
-	b = new OutputDockWidgetTitleButton(this, true);
+	m_nextErrorButton = new OutputDockWidgetTitleButton(this, true);
+	m_nextErrorButton->setEnabled(false);
 	icon = QIcon(":/Images/Images/NextIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_nextErrorButton->setIcon( icon );
+	l->addWidget(m_nextErrorButton);
+	connect(m_nextErrorButton, &QPushButton::clicked, [this](){
 		nextIssue(QLatin1String("ERR"));
 	});
 
@@ -697,21 +710,22 @@ void OutputDockWidget::createToolbar()
 	m_warningLabel = new QLabel(tr("W: 0000"));
 	l->addWidget(m_warningLabel);
 
-	b = new OutputDockWidgetTitleButton(this, true);
-
+	m_prevWarningButton = new OutputDockWidgetTitleButton(this, true);
+	m_prevWarningButton->setEnabled(false);
 	icon = QIcon(":/Images/Images/PreviousIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_prevWarningButton->setIcon( icon );
+	l->addWidget(m_prevWarningButton);
+	connect(m_prevWarningButton, &QPushButton::clicked, [this](){
 		prevIssue(QLatin1String("WRN"));
 
 	});
 
-	b = new OutputDockWidgetTitleButton(this, true);
+	m_nextWarningButton = new OutputDockWidgetTitleButton(this, true);
+	m_nextWarningButton->setEnabled(false);
 	icon = QIcon(":/Images/Images/NextIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_nextWarningButton->setIcon( icon );
+	l->addWidget(m_nextWarningButton);
+	connect(m_nextWarningButton, &QPushButton::clicked, [this](){
 		nextIssue(QLatin1String("WRN"));
 	});
 
@@ -2614,6 +2628,11 @@ void TestsWidget::selectBuild()
 void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files)
 {
 	if (files.empty() == true)
+	{
+		return;
+	}
+
+	if (m_simulator.control().isRunning() == true)
 	{
 		return;
 	}
