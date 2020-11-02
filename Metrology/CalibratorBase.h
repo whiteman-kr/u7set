@@ -20,6 +20,7 @@
 #include "Calibrator.h"
 #include "CalibratorManager.h"
 #include "MeasureBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -56,6 +57,7 @@ public:
 
 private:
 
+	CalibratorsOption		m_calibratorsOption;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 
 	QTimer					m_timer;
@@ -94,7 +96,7 @@ private:
 
 public:
 
-	void					init(QWidget* parent = nullptr);
+	void					init(const CalibratorsOption& calibratorsOption, QWidget* parent = nullptr);
 	void					showInitDialog();
 
 	int						calibratorCount() const;

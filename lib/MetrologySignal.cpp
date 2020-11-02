@@ -530,9 +530,65 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setElectricLowLimit(double lowLimit)
+	{
+		m_electricLowLimit = lowLimit;
+
+		if (isSpecPropExists(SignalProperties::electricLowLimitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricLowLimit(lowLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricHighLimit(double highLimit)
+	{
+		m_electricHighLimit = highLimit;
+
+		if (isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricHighLimit(highLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricUnitID(E::ElectricUnit unitID)
+	{
+		m_electricUnitID = unitID;
+
+		if (isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricUnit(unitID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::electricUnitStr() const
 	{
 		return QMetaEnum::fromType<E::ElectricUnit>().key(m_electricUnitID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricSensorType(E::SensorType sensorType)
+	{
+		m_electricSensorType = sensorType;
+
+		if (isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setSensorType(sensorType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -574,11 +630,39 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setElectricRLoad(double rload)
+	{
+		m_electricRLoad = rload;
+
+		if (isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setRload_Ohm(rload);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::electricRLoadStr() const
 	{
 		QString r0;
 		r0 = QString::asprintf("R=%0.0f", m_electricRLoad);
 		return r0;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricR0(double r0)
+	{
+		m_electricR0 = r0;
+
+		if (isSpecPropExists(SignalProperties::R0_OhmCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setR0_Ohm(r0);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

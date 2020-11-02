@@ -387,30 +387,18 @@ bool MeasureThread::setCalibratorUnit()
 					}
 
 					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
-					if (calibratorIsValid(pCalibratorManager) == false)
+					if (pCalibratorManager == nullptr)
 					{
 						continue;
 					}
 
-					if (m_activeIoParamList[ch].signalConnectionType() == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+					Calibrator*	pCalibrator = pCalibratorManager->calibrator();
+					if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 					{
-						const Metrology::SignalParam& outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-						if (outParam.isValid() == false)
-						{
-							continue;
-						}
-
-						if (outParam.isOutput() == false)
-						{
-							continue;
-						}
-
-						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
-						{
-							emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
-						}
+						return false;
 					}
-					else
+
+					if (m_activeIoParamList[ch].signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 					{
 						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 						if (inParam.isValid() == false)
@@ -420,7 +408,8 @@ bool MeasureThread::setCalibratorUnit()
 
 						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_SOURCE, inParam.electricUnitID(), inParam.electricHighLimit()) == false)
 						{
-							emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->calibratorPort()));
+							emit msgBox(QMessageBox::Information, tr("Calibrator: %1 - %2 can not set source mode.").arg(pCalibrator->typeStr()).arg(pCalibrator->portName()));
+							m_activeIoParamList[ch].setCalibratorManager(nullptr);
 						}
 
 						const Metrology::SignalParam& outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
@@ -436,9 +425,28 @@ bool MeasureThread::setCalibratorUnit()
 
 						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
 						{
-							emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
+							emit msgBox(QMessageBox::Information, tr("Calibrator: %1 - %2 can not set measure mode.").arg(pCalibrator->typeStr()).arg(pCalibrator->portName()));
+							m_activeIoParamList[ch].setCalibratorManager(nullptr);
+						}
+					}
+					else
+					{
+						const Metrology::SignalParam& outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+						if (outParam.isValid() == false)
+						{
+							continue;
 						}
 
+						if (outParam.isOutput() == false)
+						{
+							continue;
+						}
+
+						if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
+						{
+							emit msgBox(QMessageBox::Information, tr("Calibrator: %1 - %2 can not set measure mode.").arg(pCalibrator->typeStr()).arg(pCalibrator->portName()));
+							m_activeIoParamList[ch].setCalibratorManager(nullptr);
+						}
 					}
 				}
 			}
@@ -455,7 +463,13 @@ bool MeasureThread::setCalibratorUnit()
 
 bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit)
 {
-	if (calibratorIsValid(pCalibratorManager) == false)
+	if (pCalibratorManager == nullptr)
+	{
+		return false;
+	}
+
+	Calibrator*	pCalibrator = pCalibratorManager->calibrator();
+	if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 	{
 		return false;
 	}
@@ -499,14 +513,25 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		return false;
 	}
 
-	emit measureInfo(QString("Prepare calibrator: %1 ").arg(pCalibratorManager->calibratorPort()));
+	CalibratorLimit limit = pCalibrator->getLimit(calibratorMode, calibratorUnit);
+	if (limit.isValid() == false)
+	{
+		emit msgBox(QMessageBox::Critical,	tr("Calibrator: %1 - %2 can not set unit \"%3\".").
+											arg(pCalibrator->typeStr()).
+											arg(pCalibrator->portName()).
+											arg(qApp->translate("Calibrator.h", CalibratorUnit[calibratorUnit])));
+		return false;
+	}
+
+	emit measureInfo(tr("Prepare calibrator: %1 %2").arg(pCalibrator->typeStr()).arg(pCalibrator->portName()));
 
 	bool result =  pCalibratorManager->setUnit(calibratorMode, calibratorUnit);
 
-	switch (pCalibratorManager->calibrator()->type())
+	switch (pCalibrator->type())
 	{
 		case CALIBRATOR_TYPE_TRXII:		QThread::msleep(1000);	break;
 		case CALIBRATOR_TYPE_CALYS75:	QThread::msleep(500);	break;
+		case CALIBRATOR_TYPE_KTHL6221:	QThread::msleep(500);	break;
 		default: assert(0); break;
 	}
 
@@ -668,13 +693,7 @@ void MeasureThread::measureLinearity()
 
 			// set electric value or tuning value
 			//
-			if (m_activeIoParamList[ch].signalConnectionType() == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
-			{
-				double tuningVal = (point.percent() * (inParam.tuningHighBound().toDouble() - inParam.tuningLowBound().toDouble()) / 100) + inParam.tuningLowBound().toDouble();
-
-				theSignalBase.tuning().appendCmdFowWrite(inParam.hash(), inParam.tuningValueType(), tuningVal);
-			}
-			else
+			if (m_activeIoParamList[ch].signalConnectionType() != SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 			{
 				// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)
 				// then by engineering value we may get electric value
@@ -685,6 +704,12 @@ void MeasureThread::measureLinearity()
 				polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
 
 				pCalibratorManager->setValue(m_activeIoParamList[ch].isNegativeRange() ? -electricVal : electricVal);
+			}
+			else
+			{
+				double tuningVal = (point.percent() * (inParam.tuningHighBound().toDouble() - inParam.tuningLowBound().toDouble()) / 100) + inParam.tuningLowBound().toDouble();
+
+				theSignalBase.tuning().appendCmdFowWrite(inParam.hash(), inParam.tuningValueType(), tuningVal);
 			}
 		}
 

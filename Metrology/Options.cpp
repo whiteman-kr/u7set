@@ -12,6 +12,132 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+CalibratorOption::CalibratorOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorOption::CalibratorOption(const QString& port, int type) :
+	m_port(port),
+	m_type(type)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool CalibratorOption::isValid() const
+{
+	if (m_port.isEmpty() == true)
+	{
+		return false;
+	}
+
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption::CalibratorsOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption::CalibratorsOption(const CalibratorsOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption::~CalibratorsOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorOption CalibratorsOption::calibrator(int channel) const
+{
+	if (channel < 0 || channel >= Metrology::ChannelCount)
+	{
+		assert(0);
+		return CalibratorOption();
+	}
+
+	return m_calibrator[channel];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+void CalibratorsOption::setCalibrator(int channel, const CalibratorOption& сalibrator)
+{
+	if (channel < 0 || channel >= Metrology::ChannelCount)
+	{
+		assert(0);
+		return;
+	}
+
+	m_calibrator[channel] = сalibrator;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorsOption::load()
+{
+	QSettings s;
+
+	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	{
+		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
+
+		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
+		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CALIBRATOR_TYPE_CALYS75).toInt();
+
+		m_calibrator[c].setPort(port);
+		m_calibrator[c].setType(type);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorsOption::save()
+{
+	QSettings s;
+
+	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	{
+		s.setValue(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), m_calibrator[c].port());
+		s.setValue(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), m_calibrator[c].type());
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption& CalibratorsOption::operator=(const CalibratorsOption& from)
+{
+	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	{
+		m_calibrator[c] = from.m_calibrator[c];
+	}
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 SocketClientOption::SocketClientOption()
 {
 }
@@ -998,6 +1124,7 @@ void MeasureViewOption::load()
 	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toUInt();
 
 	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
+	m_precesionByCalibrator = s.value(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1038,6 +1165,7 @@ void MeasureViewOption::save()
 	s.setValue(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorControl.rgb());
 
 	s.setValue(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), m_showNoValid);
+	s.setValue(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), m_precesionByCalibrator);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1066,6 +1194,7 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 	m_colorErrorControl = from.m_colorErrorControl;
 
 	m_showNoValid = from.m_showNoValid;
+	m_precesionByCalibrator = from.m_precesionByCalibrator;
 
 	return *this;
 }
@@ -1418,6 +1547,7 @@ Options::~Options()
 
 void Options::load()
 {
+	m_calibrators.load();
 	m_database.load();
 
 	m_socket.load();
@@ -1441,6 +1571,7 @@ void Options::load()
 
 void Options::save()
 {
+	m_calibrators.save();
 	m_database.save();
 
 	m_socket.save();
@@ -1499,6 +1630,8 @@ bool Options::readFromXml(const QByteArray& fileData)
 Options& Options::operator=(const Options& from)
 {
 	QMutexLocker l(&m_mutex);
+
+	m_calibrators = from.m_calibrators;
 
 	m_socket = from.m_socket;
 	m_database = from.m_database;

@@ -640,6 +640,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, MWO_PARAM_SHOW_NO_VALID);
 					measureGroup->addSubProperty(item);
 
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_PRECESION_BY_CALIBRATOR]));
+					item->setValue(m_options.measureView().precesionByCalibrator());
+					appendProperty(item, page, MWO_PARAM_PRECESION_BY_CALIBRATOR);
+					measureGroup->addSubProperty(item);
+
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(fontGroup);
@@ -1213,12 +1218,13 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case MWO_PARAM_FONT:				m_options.measureView().setFont(value.toString());								break;
-					case MWO_PARAM_COLOR_NOT_ERROR:		m_options.measureView().setColorNotError(QColor(value.toString()));				break;
-					case MWO_PARAM_COLOR_LIMIT_ERROR:	m_options.measureView().setColorErrorLimit(QColor(value.toString()));			break;
-					case MWO_PARAM_COLOR_CONTROL_ERROR:	m_options.measureView().setColorErrorControl(QColor(value.toString()));			break;
-					case MWO_PARAM_SHOW_NO_VALID:		m_options.measureView().setShowNoValid(value.toBool());							break;
-					default:							assert(0);
+					case MWO_PARAM_FONT:					m_options.measureView().setFont(value.toString());							break;
+					case MWO_PARAM_COLOR_NOT_ERROR:			m_options.measureView().setColorNotError(QColor(value.toString()));			break;
+					case MWO_PARAM_COLOR_LIMIT_ERROR:		m_options.measureView().setColorErrorLimit(QColor(value.toString()));		break;
+					case MWO_PARAM_COLOR_CONTROL_ERROR:		m_options.measureView().setColorErrorControl(QColor(value.toString()));		break;
+					case MWO_PARAM_SHOW_NO_VALID:			m_options.measureView().setShowNoValid(value.toBool());						break;
+					case MWO_PARAM_PRECESION_BY_CALIBRATOR:	m_options.measureView().setPrecesionByCalibrator(value.toBool());			break;
+					default:								assert(0);
 				}
 
 				for(int type = 0; type < MEASURE_TYPE_COUNT; type++)

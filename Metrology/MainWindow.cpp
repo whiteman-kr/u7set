@@ -34,17 +34,13 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
-		const int	ChannelCount1	= QMetaEnum::fromType<E::Channel>().keyCount();
-
-	int nnn  = ChannelCount1;
-
 	// open database
 	//
 	theDatabase.open();
 
 	// init calibration base
 	//
-	theCalibratorBase.init(this);
+	theCalibratorBase.init(theOptions.calibrators(), this);
 	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
 	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
@@ -1963,6 +1959,12 @@ void MainWindow::measureThreadMsgBox(int type, QString text, int* result)
 		case QMessageBox::Information:
 
 			QMessageBox::information(this, windowTitle(), text);
+
+			break;
+
+		case QMessageBox::Critical:
+
+			QMessageBox::critical(this, windowTitle(), text);
 
 			break;
 

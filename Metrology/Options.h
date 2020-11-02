@@ -18,6 +18,64 @@
 
 #define					WINDOW_GEOMETRY_OPTIONS_KEY		"Options/Window/"
 
+// ==============================================================================================
+
+#define					CALIBRATOR_OPTIONS_KEY			"Options/Calibrators/"
+
+// ----------------------------------------------------------------------------------------------
+
+class CalibratorOption
+{
+
+public:
+
+	CalibratorOption();
+	CalibratorOption(const QString& port, int type);
+	virtual ~CalibratorOption() {}
+
+private:
+
+	QString				m_port;
+	int					m_type = CALIBRATOR_TYPE_CALYS75;
+
+public:
+
+	bool				isValid() const;
+
+	QString				port() const { return m_port; }
+	void				setPort(const QString& port) { m_port = port; }
+
+	int					type() const { return m_type; }
+	void				setType(int type) { m_type = type; }
+};
+
+// ----------------------------------------------------------------------------------------------
+
+class CalibratorsOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit CalibratorsOption(QObject *parent = nullptr);
+	explicit CalibratorsOption(const CalibratorsOption& from, QObject *parent = nullptr);
+	virtual ~CalibratorsOption();
+
+private:
+
+	CalibratorOption	m_calibrator[Metrology::ChannelCount];
+
+public:
+
+	CalibratorOption	calibrator(int channel) const;
+	void				setCalibrator(int channel, const CalibratorOption& calibrator);
+
+	void				load();
+	void				save();
+
+	CalibratorsOption&	operator=(const CalibratorsOption& from);
+};
+
 
 // ==============================================================================================
 
@@ -660,15 +718,17 @@ const char* const		MeasureViewParam[] =
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over limit error"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over control error"),
 						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
+						QT_TRANSLATE_NOOP("Options.h", "Show accuracy for measure value and nominal value from calibrator"),
 };
 
-const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
+const int				MWO_PARAM_COUNT						= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
 
-const int				MWO_PARAM_FONT					= 0,
-						MWO_PARAM_COLOR_NOT_ERROR		= 1,
-						MWO_PARAM_COLOR_LIMIT_ERROR		= 2,
-						MWO_PARAM_COLOR_CONTROL_ERROR	= 3,
-						MWO_PARAM_SHOW_NO_VALID			= 4;
+const int				MWO_PARAM_FONT						= 0,
+						MWO_PARAM_COLOR_NOT_ERROR			= 1,
+						MWO_PARAM_COLOR_LIMIT_ERROR			= 2,
+						MWO_PARAM_COLOR_CONTROL_ERROR		= 3,
+						MWO_PARAM_SHOW_NO_VALID				= 4,
+						MWO_PARAM_PRECESION_BY_CALIBRATOR	= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -721,6 +781,7 @@ private:
 	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
 
 	bool				m_showNoValid = false;										// show measuring value if signal is not valid
+	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
 
 public:
 
@@ -747,6 +808,9 @@ public:
 
 	bool				showNoValid() const { return m_showNoValid; }
 	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
+
+	bool				precesionByCalibrator() const { return m_precesionByCalibrator; }
+	void				setPrecesionByCalibrator(bool enable) { m_precesionByCalibrator = enable; }
 
 	void				load();
 	void				save();
@@ -1102,6 +1166,8 @@ private:
 
 	QMutex					m_mutex;
 
+	CalibratorsOption		m_calibrators;
+
 	SocketOption			m_socket;
 	ProjectInfo				m_projectInfo;
 
@@ -1123,6 +1189,9 @@ private:
 
 
 public:
+
+	CalibratorsOption&		calibrators() { return m_calibrators; }
+	void					setCalibrators(const CalibratorsOption& calibrators) { m_calibrators = calibrators; }
 
 	SocketOption&			socket() { return m_socket; }
 	void					setSocket(const SocketOption& socket) { m_socket = socket; }

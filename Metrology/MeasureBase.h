@@ -69,10 +69,6 @@ const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 
 // ==============================================================================================
 
-const int	DEFAULT_ECLECTRIC_PRECESION		= 4;
-
-// ==============================================================================================
-
 const char* const MeasureErrorType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
@@ -161,7 +157,7 @@ private:
 
 	Metrology::SignalLocation m_location;
 
-	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_PRECESION;	// precision of electric range of calibrator
+	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;	// precision of electric range of calibrator
 
 	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
 	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];

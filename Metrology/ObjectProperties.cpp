@@ -1141,14 +1141,35 @@ void SignalPropertyDialog::createPropertyList()
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR);
 			electricRangeGroup->addSubProperty(item);
 
-			if (m_param.electricUnitID() == E::ElectricUnit::Ohm)
+
+			switch (m_param.electricUnitID())
 			{
-				item = m_pManager->addProperty(QVariant::Double, tr("R0"));
-				item->setValue(m_param.electricR0());
-				item->setAttribute(QLatin1String("singleStep"), 1);
-				item->setAttribute(QLatin1String("decimals"), 2);
-				m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
-				electricRangeGroup->addSubProperty(item);
+				case E::ElectricUnit::mA:
+
+					if (m_param.sensorType() != E::SensorType::V_0_5)
+					{
+						break;
+					}
+
+					item = m_pManager->addProperty(QVariant::Double, tr("RLoad"));
+					item->setValue(m_param.electricRLoad());
+					item->setAttribute(QLatin1String("singleStep"), 1);
+					item->setAttribute(QLatin1String("decimals"), 2);
+					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD);
+					electricRangeGroup->addSubProperty(item);
+
+					break;
+
+				case E::ElectricUnit::Ohm:
+
+					item = m_pManager->addProperty(QVariant::Double, tr("R0"));
+					item->setValue(m_param.electricR0());
+					item->setAttribute(QLatin1String("singleStep"), 1);
+					item->setAttribute(QLatin1String("decimals"), 2);
+					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
+					electricRangeGroup->addSubProperty(item);
+
+					break;
 			}
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
@@ -1290,6 +1311,7 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH:		m_param.setElectricHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(value.toInt()));				groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD:		m_param.setElectricRLoad(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 

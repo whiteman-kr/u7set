@@ -88,6 +88,32 @@ double UnitsConvertResult::expectedHighValidRange() const
 
 // -------------------------------------------------------------------------------------------------------------------
 //
+// SignalElectricLimit struct implementation
+//
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalElectricLimit::isValid()
+{
+	if (lowLimit == 0.0 && highLimit == 0.0)
+	{
+		return false;
+	}
+
+	if (unit == E::ElectricUnit::NoUnit)
+	{
+		return false;
+	}
+
+	if (sensorType == E::SensorType::NoSensor)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//
 // UnitsConvert class implementation
 //
 // -------------------------------------------------------------------------------------------------------------------
@@ -578,13 +604,13 @@ bool UnitsConvertor::r0_is_use(int sensorType)
 	return true;
 }
 
-bool UnitsConvertor::getElectricLimit(int unitID, int sensorType, UnitsConvertorLimit& unitLimit)
+SignalElectricLimit UnitsConvertor::getElectricLimit(int unitID, int sensorType)
 {
-	bool limitIsFound = false;
+	SignalElectricLimit limit;
 
-	for(int i = 0; i < UnitsConvertorLimitCount; i++)
+	for(int i = 0; i < SignalElectricLimitCount; i++)
 	{
-		const UnitsConvertorLimit& ul = UnitsConvertorLimits[i];
+		const SignalElectricLimit& ul = SignalElectricLimits[i];
 
 		if (ul.unit != unitID)
 		{
@@ -596,14 +622,12 @@ bool UnitsConvertor::getElectricLimit(int unitID, int sensorType, UnitsConvertor
 			continue;
 		}
 
-		unitLimit = ul;
-
-		limitIsFound = true;
+		limit = ul;
 
 		break;
 	}
 
-	return limitIsFound;
+	return limit;
 }
 
 UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0)
@@ -613,17 +637,16 @@ UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double ele
 		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Function argument is out of range"));
 	}
 
-	UnitsConvertorLimit ul;
-
-	if(getElectricLimit(unitID, sensorType, ul) == false)
+	SignalElectricLimit el = getElectricLimit(unitID, sensorType);
+	if(el.isValid() == false)
 	{
 		assert(false);
 		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for %1").arg(meu.key(unitID)));
 	}
 
-	double lowLimit = ul.lowLimit;
-	double highLimit = ul.highLimit;
+	double lowLimit = el.lowLimit;
+	double highLimit = el.highLimit;
 
 	if (unitID == E::ElectricUnit::Ohm && r0_is_use(sensorType) == true)
 	{
@@ -740,12 +763,12 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 			{
 				case E::SensorType::V_0_5:
 
-					if (rload < RLOAD_LOW_LIMIT || rload > RLOAD_HIGH_LIMIT)
+					if (rload < RLOAD_OHM_LOW_LIMIT || rload > RLOAD_OHM_HIGH_LIMIT)
 					{
 						return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Rload_Ohm argument is out of range"));
 					}
 
-					return  UnitsConvertResult(elVal * (rload / RLOAD_HIGH_LIMIT));
+					return  UnitsConvertResult(elVal * (rload / RLOAD_OHM_HIGH_LIMIT));
 
 				default:
 
