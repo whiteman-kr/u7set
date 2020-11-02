@@ -45,26 +45,51 @@ void DialogProjectDiffProgress::onTimer()
 		return;
 	}
 
-	if (m_worker->totalFiles() == 0)
-	{
-		ui->labelFilesCount->setText(tr("Counting..."));
-	}
-	else
-	{
-		ui->labelFilesCount->setText(tr("Files: %1 / %2, Signals: %3 / %4")
-									 .arg(m_worker->currentFileIndex()).arg(m_worker->totalFiles())
-									 .arg(m_worker->currentSignalIndex()).arg(m_worker->totalSignals()));
-	}
 
-	ui->labelCurrentGroup->setText(tr("%1").arg(m_worker->currentSection()));
+	ProjectDiffWorker::WorkerStatus status = m_worker->currentStatus();
 
-	QString objectName = m_worker->currentObjectName();
-	if (objectName.length() > 64)
+	switch (status)
 	{
-		objectName = "..." + objectName.right(64);
-	}
+	case ProjectDiffWorker::WorkerStatus::Idle:
+		{
+			ui->labelCurrentGroup->setText(tr("Idle"));
+			ui->labelFilesCount->setText(QString());
+			ui->labelCurrentFile->setText(QString());
+		}
+		break;
+	case ProjectDiffWorker::WorkerStatus::Analyzing:
+		{
+			ui->labelCurrentGroup->setText(tr("Analyzing: %1").arg(m_worker->currentSection()));
+			ui->labelFilesCount->setText(tr("Files: %1 / %2, Signals: %3 / %4")
+										 .arg(m_worker->fileIndex()).arg(m_worker->filesCount())
+										 .arg(m_worker->signalIndex()).arg(m_worker->signalsCount()));
 
-	ui->labelCurrentFile->setText(tr("%1").arg(objectName));
+			QString objectName = m_worker->currentObjectName();
+			if (objectName.length() > 48)
+			{
+				objectName = "..." + objectName.right(48);
+			}
+
+			ui->labelCurrentFile->setText(tr("%1").arg(objectName));
+		}
+		break;
+	case ProjectDiffWorker::WorkerStatus::Rendering:
+		{
+			ui->labelCurrentGroup->setText(tr("Creating report..."));
+			ui->labelFilesCount->setText(tr("Section: %1 / %2")
+										 .arg(m_worker->sectionIndex()).arg(m_worker->sectionCount()));
+			ui->labelCurrentFile->setText(QString());
+		}
+		break;
+	case ProjectDiffWorker::WorkerStatus::Printing:
+		{
+			ui->labelCurrentGroup->setText(tr("Saving report..."));
+			ui->labelFilesCount->setText(tr("Page: %1 / %2")
+										 .arg(m_worker->pageIndex()).arg(m_worker->pagesCount()));
+			ui->labelCurrentFile->setText(QString());
+		}
+		break;
+	}
 
 	return;
 }

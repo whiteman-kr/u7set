@@ -37,39 +37,14 @@ ReportObject::~ReportObject()
 {
 }
 
-bool ReportObject::isNewPage() const
-{
-	return dynamic_cast<const ReportBreak*>(this) != nullptr;
-}
-
 bool ReportObject::isText() const
 {
 	return dynamic_cast<const ReportText*>(this) != nullptr;
 }
 
-bool ReportObject::isSchema() const
-{
-	return dynamic_cast<const ReportSchema*>(this) != nullptr;
-}
-
 bool ReportObject::isTable() const
 {
 	return dynamic_cast<const ReportTable*>(this) != nullptr;
-}
-
-//
-// ReportBreak
-//
-
-ReportBreak::ReportBreak()
-	:ReportObject()
-{
-
-}
-
-void ReportBreak::render(const ReportObjectContext& context) const
-{
-	context.reportGenerator->newPage(context.textDocument, context.painter);
 }
 
 //
@@ -253,42 +228,11 @@ void ReportText::render(const ReportObjectContext& context) const
 }
 
 //
-// ReportSchema
-//
-
-ReportSchema::ReportSchema(std::shared_ptr<VFrame30::Schema> schema):
-	m_schema(schema)
-{
-}
-
-void ReportSchema::render(const ReportObjectContext& context) const
-{
-	context.reportGenerator->printSchema(context.textDocument, context.painter, context.schemaView, m_schema);
-}
-
-//
 // ReportSection
 //
 
-ReportSection::ReportSection(const ReportObjectContext& context):
-	m_context(context)
+ReportSection::ReportSection()
 {
-	if (context.reportGenerator == nullptr ||
-		context.textDocument == nullptr ||
-		context.painter == nullptr ||
-		context.textCursor == nullptr ||
-		context.schemaView == nullptr
-		)
-	{
-		Q_ASSERT(context.reportGenerator);
-		Q_ASSERT(context.textDocument);
-		Q_ASSERT(context.painter);
-		Q_ASSERT(context.textCursor);
-		Q_ASSERT(context.schemaView);
-	}
-
-	m_currentBlockFormat = context.textCursor->blockFormat();
-	m_currentCharFormat = context.textCursor->charFormat();
 }
 
 ReportSection::~ReportSection()
@@ -297,17 +241,12 @@ ReportSection::~ReportSection()
 
 bool ReportSection::isEmpty() const
 {
-	return m_objects.empty() == true;
+	return m_objects.empty() == true && m_schema == nullptr;
 }
 
-void ReportSection::addText(const QString& text)
+void ReportSection::addText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat)
 {
-	m_objects.push_back(std::make_shared<ReportText>(text, m_currentCharFormat, m_currentBlockFormat));
-}
-
-void ReportSection::addSchema(std::shared_ptr<VFrame30::Schema> schema)
-{
-	m_objects.push_back(std::make_shared<ReportSchema>(schema));
+	m_objects.push_back(std::make_shared<ReportText>(text, charFormat, blockFormat));
 }
 
 void ReportSection::addTable(std::shared_ptr<ReportTable> table)
@@ -315,54 +254,46 @@ void ReportSection::addTable(std::shared_ptr<ReportTable> table)
 	m_objects.push_back(table);
 }
 
-std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels)
+std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels, const QTextCharFormat& charFormat)
 {
-	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, m_currentCharFormat);
+	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, charFormat);
 	m_objects.push_back(table);
 
 	return table;
 }
 
-void ReportSection::addNewPage()
+void ReportSection::setSchema(std::shared_ptr<VFrame30::Schema> schema)
 {
-	m_objects.push_back(std::make_shared<ReportBreak>());
+	m_schema = schema;
 }
 
-void ReportSection::saveFormat()
+std::shared_ptr<VFrame30::Schema> ReportSection::schema() const
 {
-	m_currentCharFormatSaved = m_currentCharFormat;
-	m_currentBlockFormatSaved = m_currentBlockFormat;
+	return m_schema;
 }
 
-void ReportSection::restoreFormat()
+void ReportSection::render(QSizeF pageSize)
 {
-	m_currentCharFormat = m_currentCharFormatSaved;
-	m_currentBlockFormat = m_currentBlockFormatSaved;
-}
+	if (m_objects.empty() == true)
+	{
+		if (m_schema != nullptr)
+		{
+			// Document has only schema
+			m_pageCount = 1;
+		}
 
-void ReportSection::setFont(const QFont& font)
-{
-	m_currentCharFormat.setFont(font);
-}
+		return;
+	}
 
-void ReportSection::setTextForeground(const QBrush& brush)
-{
-	m_currentCharFormat.setForeground(brush);
-}
+	// Document has content
 
-void ReportSection::setTextBackground(const QBrush& brush)
-{
-	m_currentCharFormat.setBackground(brush);
-}
+	m_textDocument.setPageSize(pageSize);
 
-void ReportSection::setTextAlignment(Qt::Alignment alignment)
-{
-	m_currentBlockFormat.setAlignment(alignment);
-}
+	QTextCursor textCursor(&m_textDocument);
 
-void ReportSection::render() const
-{
-	// Other objects
+	QTextCharFormat charFormat = textCursor.charFormat();
+	charFormat.setFontPointSize(40);
+	textCursor.setCharFormat(charFormat);
 
 	for (const std::shared_ptr<ReportObject> object : m_objects)
 	{
@@ -371,9 +302,32 @@ void ReportSection::render() const
 			Q_ASSERT(object);
 			return;
 		}
-		object->render(m_context);
+
+		ReportObjectContext context;
+		context.textDocument = &m_textDocument;
+		context.textCursor = &textCursor;
+
+		object->render(context);
 	}
+
+	m_pageCount = m_textDocument.pageCount();
+
+	return;
 }
+
+int ReportSection::pageCount() const
+{
+	return m_pageCount;
+}
+
+QTextDocument* ReportSection::textDocument()
+{
+	return &m_textDocument;
+}
+
+//
+// ReportMarginItem
+//
 
 ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo, Qt::Alignment alignment, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat):
 	m_text(text),
@@ -398,13 +352,79 @@ ReportGenerator::ReportGenerator(const QString& fileName, std::shared_ptr<Report
 
 }
 
+void ReportGenerator::addMarginItem(const ReportMarginItem& item)
+{
+	m_marginItems.push_back(item);
+}
+
+void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter)
+{
+	if (pdfWriter == nullptr || textDocument == nullptr || painter == nullptr)
+	{
+		Q_ASSERT(pdfWriter);
+		Q_ASSERT(textDocument);
+		Q_ASSERT(painter);
+		return;
+	}
+
+	if (textDocument->isEmpty() == true)
+	{
+		return;
+	}
+
+	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriter->resolution());
+
+	// The total extent of the content (there are no page margin in this)
+	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
+
+	// This is the part of the content we will drop on a page.  It's a sliding window on the content.
+	QRect currentRect(0, 0, pageRect.width(), pageRect.height());
+
+	while (currentRect.intersects(contentRect) == true)
+	{
+		painter->save();
+		painter->translate(0, -currentRect.y());
+		textDocument->drawContents(painter, currentRect);  // draws part of the document
+		painter->restore();
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			int page = m_pageIndex;
+			l.unlock();
+
+			drawMarginItems(page, painter);
+		}
+
+		// Translate the current rectangle to the area to be printed for the next page
+		currentRect.translate(0, currentRect.height());
+
+		//Inserting a new page if there is still area left to be printed
+		if (currentRect.intersects(contentRect))
+		{
+			pdfWriter->newPage();
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_pageIndex++;
+			}
+		}
+	}
+
+	return;
+}
+
 void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema)
 {
-	if (textDocument == nullptr || painter == nullptr || schemaView == nullptr || schema == nullptr)
+	if (textDocument == nullptr || painter == nullptr || schemaView == nullptr)
 	{
 		Q_ASSERT(textDocument);
 		Q_ASSERT(painter);
 		Q_ASSERT(schemaView);
+		return;
+	}
+
+	if (schema == nullptr)
+	{
 		Q_ASSERT(schema);
 		return;
 	}
@@ -413,17 +433,13 @@ void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter
 
 	const QRect pageRect = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
 
-	QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
+	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
+
+	const int schemaTop = contentRect.height() % pageRect.height();
 
 	int schemaLeft = 0;
 
-	int schemaTop = contentRect.height() % pageRect.height();
-
-	int schemaMaxHeight = pageRect.height() - schemaTop;
-
-	// Print the rest of the document
-
-	flushDocument(textDocument, painter);
+	const int schemaMaxHeight = pageRect.height() - schemaTop;
 
 	// Calculate draw parameters
 
@@ -479,94 +495,36 @@ void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter
 	return;
 }
 
-void ReportGenerator::newPage(QTextDocument* textDocument, QPainter* painter)
+void ReportGenerator::saveFormat()
 {
-	if (textDocument == nullptr || painter == nullptr)
-	{
-		Q_ASSERT(textDocument);
-		Q_ASSERT(painter);
-		return;
-	}
-
-	flushDocument(textDocument, painter);
-
-	m_currentPage++;
-
-	m_pdfWriter.newPage();
+	m_currentCharFormatSaved = m_currentCharFormat;
+	m_currentBlockFormatSaved = m_currentBlockFormat;
 }
 
-
-void ReportGenerator::flushDocument(QTextDocument* textDocument, QPainter* painter)
+void ReportGenerator::restoreFormat()
 {
-	if (textDocument == nullptr || painter == nullptr)
-	{
-		Q_ASSERT(textDocument);
-		Q_ASSERT(painter);
-		return;
-	}
-
-	if (textDocument->isEmpty() == true)
-	{
-		return;
-	}
-
-	const QRect pageRect = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
-
-	// The total extent of the content (there are no page margin in this)
-	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
-
-	// This is the part of the content we will drop on a page.  It's a sliding window on the content.
-	QRect currentRect(0, 0, pageRect.width(), pageRect.height());
-
-	while (currentRect.intersects(contentRect) == true)
-	{
-			painter->save();
-			painter->translate(0, -currentRect.y());
-			textDocument->drawContents(painter, currentRect);  // draws part of the document
-			painter->restore();
-
-			drawMarginItems(m_currentPage, painter);
-
-			// Translate the current rectangle to the area to be printed for the next page
-			currentRect.translate(0, currentRect.height());
-
-			//Inserting a new page if there is still area left to be printed
-			if (currentRect.intersects(contentRect))
-			{
-				m_currentPage++;
-
-				m_pdfWriter.newPage();
-			}
-	}
-
-	clearDocument(textDocument);
-
-	return;
+	m_currentCharFormat = m_currentCharFormatSaved;
+	m_currentBlockFormat = m_currentBlockFormatSaved;
 }
 
-void ReportGenerator::clearDocument(QTextDocument* textDocument)
+void ReportGenerator::setFont(const QFont& font)
 {
-	if (textDocument == nullptr)
-	{
-		Q_ASSERT(textDocument);
-		return;
-	}
-
-	if (textDocument->isEmpty() == true)
-	{
-		return;
-	}
-
-	// Clear text document
-
-	textDocument->clear();
-
-	return;
+	m_currentCharFormat.setFont(font);
 }
 
-void ReportGenerator::addMarginItem(const ReportMarginItem& item)
+void ReportGenerator::setTextForeground(const QBrush& brush)
 {
-	m_marginItems.push_back(item);
+	m_currentCharFormat.setForeground(brush);
+}
+
+void ReportGenerator::setTextBackground(const QBrush& brush)
+{
+	m_currentCharFormat.setBackground(brush);
+}
+
+void ReportGenerator::setTextAlignment(Qt::Alignment alignment)
+{
+	m_currentBlockFormat.setAlignment(alignment);
 }
 
 void ReportGenerator::drawMarginItems(int page, QPainter* painter)
@@ -613,7 +571,10 @@ void ReportGenerator::drawMarginItems(int page, QPainter* painter)
 
 		if (text == "%PAGE%")
 		{
-			text = tr("Page %1").arg(page);
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				text = tr("Page %1 of %2").arg(page).arg(m_pagesCount);
+			}
 		}
 
 		//painter.fillRect(topRect, Qt::green);
@@ -934,34 +895,64 @@ void ProjectDiffWorker::stop()
 	m_stop = true;
 }
 
-int ProjectDiffWorker::totalSignals() const
+ProjectDiffWorker::WorkerStatus ProjectDiffWorker::currentStatus() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_currentStatus;
+}
+
+int ProjectDiffWorker::signalsCount() const
 {
 	QMutexLocker l(&m_statisticsMutex);
 	return m_signalsCount;
 }
 
-int ProjectDiffWorker::currentSignalIndex() const
+int ProjectDiffWorker::signalIndex() const
 {
 	QMutexLocker l(&m_statisticsMutex);
-	return m_currentSignalIndex;
+	return m_signalIndex;
 }
 
-int ProjectDiffWorker::totalFiles() const
+int ProjectDiffWorker::filesCount() const
 {
 	QMutexLocker l(&m_statisticsMutex);
 	return m_filesCount;
 }
 
-int ProjectDiffWorker::currentFileIndex() const
+int ProjectDiffWorker::fileIndex() const
 {
 	QMutexLocker l(&m_statisticsMutex);
-	return m_currentFileIndex;
+	return m_fileIndex;
+}
+
+int ProjectDiffWorker::sectionCount() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_sectionCount;
+}
+
+int ProjectDiffWorker::sectionIndex() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_sectionIndex;
+}
+
+int ProjectDiffWorker::pagesCount() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_pagesCount;
+}
+
+int ProjectDiffWorker::pageIndex() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_pageIndex;
 }
 
 QString ProjectDiffWorker::currentSection() const
 {
 	QMutexLocker l(&m_statisticsMutex);
-	return m_currentSection;
+	return m_currentSectionName;
 }
 
 QString ProjectDiffWorker::currentObjectName() const
@@ -977,6 +968,11 @@ DbController* const ProjectDiffWorker::db()
 
 void ProjectDiffWorker::compareProject()
 {
+	{
+		QMutexLocker l(&m_statisticsMutex);
+		m_currentStatus = WorkerStatus::Analyzing;
+	}
+
 	db()->disableProgress();
 
 	db()->setHost(theSettings.serverIpAddress());
@@ -1010,9 +1006,9 @@ void ProjectDiffWorker::compareProject()
 		QMutexLocker l(&m_statisticsMutex);
 		m_filesCount = 0;
 		m_signalsCount = 0;
-		m_currentSection.clear();
+		m_currentSectionName.clear();
 		m_currentObjectName.clear();
-		m_currentPage = 1;
+		m_pageIndex = 1;
 	}
 
 
@@ -1032,8 +1028,7 @@ void ProjectDiffWorker::compareProject()
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSection = rootFile.fileName();
-			qDebug() << m_currentSection;
+			m_currentSectionName = rootFile.fileName();
 		}
 
 		filesTrees.push_back({});
@@ -1090,22 +1085,35 @@ void ProjectDiffWorker::compareProject()
 
 	QPainter painter(&m_pdfWriter);
 
-	QTextDocument textDocument;
+	// Create title page and margins
+	{
+		QTextDocument textDocument;
 
-	QRect pageRectPixels = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
-	textDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+		QRect pageRectPixels = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
+		textDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
 
-	QTextCursor textCursor(&textDocument);
+		QTextCursor textCursor(&textDocument);
 
-	QTextCharFormat charFormat = textCursor.charFormat();
-	charFormat.setFontPointSize(40);
-	textCursor.setCharFormat(charFormat);
+		m_currentCharFormat = textCursor.charFormat();
+		m_currentBlockFormat = textCursor.blockFormat();
 
-	// Generate title page
+		QTextCharFormat charFormat = textCursor.charFormat();
+		charFormat.setFontPointSize(40);
+		textCursor.setCharFormat(charFormat);
 
-	generateTitlePage(&textCursor);
+		// Generate title page
 
-	createMarginItems(&textCursor);
+		generateTitlePage(&textCursor);
+
+		createMarginItems(&textCursor);
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_pageIndex = 1;
+		}
+
+		printDocument(&m_pdfWriter, &textDocument, &painter);
+	}
 
 	// Process Files
 
@@ -1133,43 +1141,36 @@ void ProjectDiffWorker::compareProject()
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSection = sectionName;
+			m_currentSectionName = sectionName;
 		}
 
-		ReportObjectContext context;
-		context.reportGenerator = this;
-		context.textDocument = &textDocument;
-		context.painter = &painter;
-		context.textCursor = &textCursor;
-		context.schemaView = m_schemaView.get();
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
 
-		ReportSection section(context);
-		section.setFont(m_normalFont);
+		setFont(m_normalFont);
 
-		section.saveFormat();
-		section.setTextAlignment(Qt::AlignHCenter);
-		section.setFont(m_headerFont);
-		section.addText(tr("%1\n\n").arg(sectionName));
-		section.restoreFormat();
+		saveFormat();
+		setTextAlignment(Qt::AlignHCenter);
+		setFont(m_headerFont);
+		section->addText(tr("%1\n\n").arg(sectionName), m_currentCharFormat, m_currentBlockFormat);
+		restoreFormat();
 
-		section.addText(tr("Objects with Differences\n"));
+		section->addText(tr("Objects with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
 
-		section.saveFormat();
-		section.setFont(m_tableFont);
-		std::shared_ptr<ReportTable> headerTable = section.addTable({tr("Object"), tr("Status"), tr("Latest Changeset")});
-		section.restoreFormat();
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> headerTable = section->addTable({tr("Object"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
+		restoreFormat();
 
 		// Compare files
 
-		compareFilesRecursive(filesTree, filesTree.rootFile(), m_compareData, section, headerTable.get());
+		compareFilesRecursive(filesTree, filesTree.rootFile(), m_compareData, headerTable.get());
 
-		// Render results
+		// Remove header if no data
 
-		if (headerTable->rowCount() > 0)
+		if (headerTable->rowCount() == 0)
 		{
-			newPage(&textDocument, &painter);
-
-			section.render();
+			m_sections.pop_back();
 		}
 	}
 
@@ -1181,34 +1182,29 @@ void ProjectDiffWorker::compareProject()
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSection = tr("Application Signals");
+			m_currentSectionName = tr("Application Signals");
 			m_currentObjectName.clear();
 		}
 
-		ReportObjectContext context;
-		context.reportGenerator = this;
-		context.textDocument = &textDocument;
-		context.painter = &painter;
-		context.textCursor = &textCursor;
-		context.schemaView = m_schemaView.get();
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
 
-		ReportSection signalsSection(context);
-		signalsSection.setFont(m_normalFont);
+		setFont(m_normalFont);
 
-		signalsSection.saveFormat();
-		signalsSection.setTextAlignment(Qt::AlignHCenter);
-		signalsSection.setTextForeground(QBrush(Qt::red));
-		signalsSection.setTextBackground(QBrush(Qt::black));
-		signalsSection.setFont(m_headerFont);
-		signalsSection.addText(tr("Application Signals\n\n"));
-		signalsSection.restoreFormat();
+		saveFormat();
+		setTextAlignment(Qt::AlignHCenter);
+		setTextForeground(QBrush(Qt::red));
+		setTextBackground(QBrush(Qt::black));
+		setFont(m_headerFont);
+		section->addText(tr("Application Signals\n\n"), m_currentCharFormat, m_currentBlockFormat);
+		restoreFormat();
 
-		signalsSection.addText(tr("Signals with Differences\n"));
+		section->addText(tr("Signals with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
 
-		signalsSection.saveFormat();
-		signalsSection.setFont(m_tableFont);
-		std::shared_ptr<ReportTable> headerTable = signalsSection.addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")});
-		signalsSection.restoreFormat();
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> headerTable = section->addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
+		restoreFormat();
 
 		for (int signalID : signalIDs)
 		{
@@ -1217,28 +1213,86 @@ void ProjectDiffWorker::compareProject()
 				return;
 			}
 
-			compareSignal(signalID, m_compareData, signalsSection, headerTable.get());
+			compareSignal(signalID, m_compareData, headerTable.get());
 		}
 
-		if (headerTable->rowCount() > 0)
+		if (headerTable->rowCount() == 0)
 		{
-			newPage(&textDocument, &painter);
-
-			signalsSection.render();
+			m_sections.pop_back();
 		}
 	}
 
-	// Close file
+	{
+		QMutexLocker l(&m_statisticsMutex);
+		m_pagesCount = 1;	// + title page
+	}
+
+	// Render all objects to documents
 	//
+	{
+		QMutexLocker l(&m_statisticsMutex);
+		m_currentStatus = WorkerStatus::Rendering;
 
-	flushDocument(&textDocument, &painter);
+		m_sectionCount = static_cast<int>(m_sections.size());
+	}
 
-	// Destroy document
+	for (std::shared_ptr<ReportSection> section : m_sections)
+	{
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_sectionIndex++;
+		}
+
+		QRect pageRectPixels = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
+
+		section->render(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_pagesCount += section->pageCount();
+		}
+	}
+
+	// Print PDF
+
+	{
+		QMutexLocker l(&m_statisticsMutex);
+		m_currentStatus = WorkerStatus::Printing;
+
+		m_sectionCount = m_pagesCount;
+	}
+
+	for (std::shared_ptr<ReportSection> section : m_sections)
+	{
+		// Print Text Document
+
+		m_pdfWriter.newPage();
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_pageIndex++;
+		}
+
+		printDocument(&m_pdfWriter, section->textDocument(), &painter);
+
+		// Print Schemas
+
+		std::shared_ptr<VFrame30::Schema> schema = section->schema();
+		if (schema != nullptr)
+		{
+			printSchema(section->textDocument(), &painter, m_schemaView.get(), schema);
+		}
+
+		// Clear text document
+
+		section->textDocument()->clear();
+
+	}
 
 	return;
 }
 
-void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, ReportSection& diffDataSet, ReportTable* const headerTable)
+void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, ReportTable* const headerTable)
 {
 	if (m_stop == true)
 	{
@@ -1257,7 +1311,7 @@ void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const
 		return;
 	}
 
-	compareFile(filesTree, fi, compareData, diffDataSet, headerTable);
+	compareFile(filesTree, fi, compareData, headerTable);
 
 	// Process children
 	//
@@ -1273,7 +1327,7 @@ void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const
 			return;
 		}
 
-		compareFilesRecursive(filesTree, fiChild, compareData, diffDataSet, headerTable);
+		compareFilesRecursive(filesTree, fiChild, compareData, headerTable);
 	}
 
 	return;
@@ -1282,7 +1336,6 @@ void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const
 void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 				 const std::shared_ptr<DbFileInfo>& fi,
 				 const CompareData& compareData,
-				 ReportSection& section,
 				 ReportTable* const headerTable)
 {
 	// Print file name
@@ -1307,7 +1360,7 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 	{
 		QMutexLocker l(&m_statisticsMutex);
 		m_currentObjectName = fileName;
-		m_currentFileIndex++;
+		m_fileIndex++;
 	}
 
 	// Get file history
@@ -1345,11 +1398,7 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 
 	if (ok == false)
 	{
-		section.saveFormat();
-		section.setFont(m_errorFont);
-		section.setTextForeground(QBrush(Qt::red));
-		section.addText(tr("Get source file copy for %1 failed.").arg(fi->fileName()));
-		section.restoreFormat();
+		headerTable->insertRow({fi->fileName(), tr("Get source copy failed"), QString()});
 		return;
 	}
 
@@ -1377,11 +1426,7 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 
 	if (ok == false)
 	{
-		section.saveFormat();
-		section.setFont(m_errorFont);
-		section.setTextForeground(QBrush(Qt::red));
-		section.addText(tr("Get target file copy for %1 failed.").arg(fi->fileName()));
-		section.restoreFormat();
+		headerTable->insertRow({fi->fileName(), tr("Get target copy failed"), QString()});
 		return;
 	}
 
@@ -1409,7 +1454,7 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 
 	// Compare files
 
-	compareFileContents(sourceFile, targetFile, fileName, section, headerTable);
+	compareFileContents(sourceFile, targetFile, fileName, headerTable);
 
 	return;
 }
@@ -1417,7 +1462,6 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 void ProjectDiffWorker::compareFileContents(const std::shared_ptr<DbFile>& sourceFile,
 											   const std::shared_ptr<DbFile>& targetFile,
 											   const QString& fileName,
-											   ReportSection& diffDataSet,
 											   ReportTable* const headerTable)
 {
 	if (headerTable == nullptr)
@@ -1508,25 +1552,25 @@ void ProjectDiffWorker::compareFileContents(const std::shared_ptr<DbFile>& sourc
 	//
 	if (hardwareObject == true)
 	{
-		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, diffDataSet, headerTable);
+		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable);
 		return;
 	}
 
 	if (isConnectionFile(fileName) == true)
 	{
-		compareConnections(sourceFile, targetFile, diffDataSet, headerTable);
+		compareConnections(sourceFile, targetFile, headerTable);
 		return;
 	}
 
 	if (isBusTypeFile(fileName) == true)
 	{
-		compareBusTypes(sourceFile, targetFile, diffDataSet, headerTable);
+		compareBusTypes(sourceFile, targetFile, headerTable);
 		return;
 	}
 
 	if (isSchemaFile(fileName) == true)
 	{
-		compareSchemas(sourceFile, targetFile, diffDataSet, headerTable);
+		compareSchemas(sourceFile, targetFile, headerTable);
 		return;
 	}
 
@@ -1652,7 +1696,6 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 											 const std::shared_ptr<DbFile>& targetFile,
 											 const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
 											 const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-											 ReportSection& section,
 											 ReportTable* const headerTable)
 {
 	if (headerTable == nullptr)
@@ -1707,14 +1750,15 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 	{
 		headerTable->insertRow({tr("%1").arg(targetObject->equipmentId()), targetFile->action().text(),  changesetString(targetFile)});
 
-		section.addNewPage();
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
 
-		section.addText(targetObject->equipmentId());
+		section->addText(targetObject->equipmentId(), m_currentCharFormat, m_currentBlockFormat);
 
-		section.saveFormat();
-		section.setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section.addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")});
-		section.restoreFormat();
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		restoreFormat();
 
 		for (const PropertyDiff& diff : diffs)
 		{
@@ -1737,17 +1781,19 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 				break;
 			}
 		}
+
+
 	}
 
 	return;
 }
 
-void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable)
+void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
 {
 
 }
 
-void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& section, ReportTable* const headerTable)
+void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
 {
 	if (headerTable == nullptr)
 	{
@@ -1778,14 +1824,16 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 	if (sourceSchema == nullptr)
 	{
 		Q_ASSERT(false);
-		section.addText(tr("\n%1: source schema loading failed\n").arg(sourceFile->fileName()));
+		headerTable->insertRow({sourceFile->fileName(), tr("Loading failed"),  QString()});
+		return;
 	}
 
 	std::shared_ptr<VFrame30::Schema> targetSchema = VFrame30::Schema::Create(targetFile->data());
 	if (targetSchema == nullptr)
 	{
 		Q_ASSERT(false);
-		section.addText(tr("\n%1: target schema loading failed\n").arg(targetFile->fileName()));
+		headerTable->insertRow({targetFile->fileName(), tr("Loading failed"),  QString()});
+		return;
 	}
 
 	std::vector<PropertyDiff> diffs;
@@ -1794,16 +1842,17 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 
 	if (diffs.empty() == false)
 	{
-		section.addNewPage();
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
 
-		section.addText(targetFile->fileName());
+		section->addText(targetFile->fileName(), m_currentCharFormat, m_currentBlockFormat);
 
 		headerTable->insertRow({targetFile->fileName(), targetFile->action().text(),  changesetString(targetFile)});
 
-		section.saveFormat();
-		section.setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section.addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")});
-		section.restoreFormat();
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		restoreFormat();
 
 		for (const PropertyDiff& diff : diffs)
 		{
@@ -1828,22 +1877,22 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 			}
 		}
 
-		section.addNewPage();
+		std::shared_ptr<ReportSection> sourceSection = std::make_shared<ReportSection>();
+		m_sections.push_back(sourceSection);
 
-		section.addText("Source schema:\n");
+		sourceSection->addText("Source schema:\n", m_currentCharFormat, m_currentBlockFormat);
+		sourceSection->setSchema(sourceSchema);
 
-		section.addSchema(sourceSchema);
+		std::shared_ptr<ReportSection> targetSection = std::make_shared<ReportSection>();
+		m_sections.push_back(targetSection);
 
-		section.addNewPage();
-
-		section.addText("Target schema:\n");
-
-		section.addSchema(targetSchema);
+		targetSection->addText("Target schema:\n", m_currentCharFormat, m_currentBlockFormat);
+		targetSection->setSchema(targetSchema);
 	}
 
 }
 
-void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& section, ReportTable* const headerTable)
+void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
 {
 	if (headerTable == nullptr)
 	{
@@ -1899,15 +1948,17 @@ void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& source
 
 	if (diffs.empty() == false)
 	{
-		section.addNewPage();
-		section.addText(targetConnection.connectionID());
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
+
+		section->addText(targetConnection.connectionID(), m_currentCharFormat, m_currentBlockFormat);
 
 		headerTable->insertRow({targetConnection.connectionID(), targetFile->action().text(),  changesetString(targetFile)});
 
-		section.saveFormat();
-		section.setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section.addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")});
-		section.restoreFormat();
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		restoreFormat();
 
 		for (const PropertyDiff& diff : diffs)
 		{
@@ -2003,7 +2054,7 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 	}*/
 }
 
-void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& compareData, ReportSection& diffDataSet, ReportTable* const headerTable)
+void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable)
 {
 	if (headerTable == nullptr)
 	{
@@ -2025,14 +2076,14 @@ void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& com
 		}
 		else
 		{
-			diffDataSet.addText(tr("getLatestSignal for signal %1 failed.").arg(signalID));
+			headerTable->insertRow({QString::number(signalID), tr("getLatestSignal failed"),  QString()});
 			return;
 		}
 	}
 
 	{
 		QMutexLocker l(&m_statisticsMutex);
-		m_currentSignalIndex++;
+		m_signalIndex++;
 		m_currentObjectName = appSignalID;
 	}
 
@@ -2088,7 +2139,7 @@ void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& com
 
 	if (ok == false)
 	{
-		diffDataSet.addText(tr("getLatestSignal for source signal %1 failed.").arg(appSignalID));
+		headerTable->insertRow({appSignalID, tr("getSpecificSignal for source failed"),  QString()});
 		return;
 	}
 
@@ -2133,7 +2184,7 @@ void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& com
 
 	if (ok == false)
 	{
-		diffDataSet.addText(tr("getLatestSignal for target signal %1 failed.").arg(appSignalID));
+		headerTable->insertRow({appSignalID, tr("getSpecificSignal for target failed"),  QString()});
 		return;
 	}
 
@@ -2197,14 +2248,15 @@ void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& com
 					std::swap(sourceSignal, targetSignal);
 				}
 
-				compareSignalContents(sourceSignal.value(), targetSignal.value(), diffDataSet, headerTable);			}
+				compareSignalContents(sourceSignal.value(), targetSignal.value(), headerTable);
+			}
 		}
 	}
 
 	return;
 }
 
-void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportSection& section, ReportTable* const headerTable)
+void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable)
 {
 	if (headerTable == nullptr)
 	{
@@ -2221,15 +2273,17 @@ void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal, const 
 
 	if (diffs.empty() == false)
 	{
-		section.addNewPage();
-		section.addText(targetSignal.appSignalID());
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
+
+		section->addText(targetSignal.appSignalID(), m_currentCharFormat, m_currentBlockFormat);
 
 		headerTable->insertRow({targetSignal.appSignalID(), targetSignal.instanceAction().text(), changesetString(targetSignal)});
 
-		section.saveFormat();
-		section.setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section.addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")});
-		section.restoreFormat();
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		restoreFormat();
 
 		for (const PropertyDiff& diff : diffs)
 		{

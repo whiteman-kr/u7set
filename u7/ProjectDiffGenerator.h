@@ -17,11 +17,8 @@ class ReportSchemaView;
 
 struct ReportObjectContext
 {
-	ReportGenerator* reportGenerator = nullptr;
 	QTextDocument* textDocument = nullptr;
-	QPainter* painter = nullptr;
 	QTextCursor* textCursor = nullptr;
-	ReportSchemaView* schemaView = nullptr;
 };
 
 //
@@ -54,17 +51,6 @@ public:
 	virtual void render(const ReportObjectContext& context) const = 0;
 };
 
-//
-// ReportBreak
-//
-
-class ReportBreak : public ReportObject
-{
-public:
-	ReportBreak();
-
-	void render(const ReportObjectContext& context) const override;
-};
 //
 // ReportTable
 //
@@ -117,66 +103,45 @@ private:
 };
 
 //
-// ReportSchema
-//
-
-class ReportSchema : public ReportObject
-{
-public:
-	ReportSchema(std::shared_ptr<VFrame30::Schema> schema);
-
-	void render(const ReportObjectContext& context) const override;
-
-private:
-	std::shared_ptr<VFrame30::Schema> m_schema;
-};
-
-//
 // ReportSection
 //
 
 class ReportSection
 {
 public:
-	ReportSection(const ReportObjectContext& context);
+	ReportSection();
 	virtual ~ReportSection();
 
 	bool isEmpty() const;
 
 	// Add object functions
 
-	void addText(const QString& text);
-	void addSchema(std::shared_ptr<VFrame30::Schema> schema);
+	void addText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
 
 	void addTable(std::shared_ptr<ReportTable> table);
-	std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels);
+	std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels, const QTextCharFormat& charFormat);
 
-	void addNewPage();
+	// Schema functions
 
-	// Formatting functions
-
-	void saveFormat();
-	void restoreFormat();
-
-	void setFont(const QFont& font);
-	void setTextForeground(const QBrush& brush);
-	void setTextBackground(const QBrush& brush);
-	void setTextAlignment(Qt::Alignment alignment);
+	std::shared_ptr<VFrame30::Schema> schema() const;
+	void setSchema(std::shared_ptr<VFrame30::Schema> schema);
 
 	// Render functions
 
-	void render() const;
+	void render(QSizeF pageSize);
+
+	int pageCount() const;	// filled after render()!!!
+
+	QTextDocument* textDocument();
 
 private:
 	std::vector<std::shared_ptr<ReportObject>> m_objects;
 
-	ReportObjectContext m_context;
+	std::shared_ptr<VFrame30::Schema> m_schema;
 
-	QTextCharFormat m_currentCharFormat;
-	QTextBlockFormat m_currentBlockFormat;
+	QTextDocument m_textDocument;
 
-	QTextCharFormat m_currentCharFormatSaved;
-	QTextBlockFormat m_currentBlockFormatSaved;
+	int m_pageCount = 0; // filled after render()!!!
 };
 
 // ReportPageFooter
@@ -210,14 +175,24 @@ class ReportGenerator : public QObject
 public:
 	ReportGenerator(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView);
 
-public:
-	void printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema);
-	void newPage(QTextDocument* textDocument, QPainter* painter);
-	void flushDocument(QTextDocument* textDocument, QPainter* painter);
-	void clearDocument(QTextDocument* textDocument);
 
 protected:
 	void addMarginItem(const ReportMarginItem& item);
+
+	// Rendering functions
+
+	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter);
+	void printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schemas);
+
+	// Formatting functions
+
+	void saveFormat();
+	void restoreFormat();
+
+	void setFont(const QFont& font);
+	void setTextForeground(const QBrush& brush);
+	void setTextBackground(const QBrush& brush);
+	void setTextAlignment(Qt::Alignment alignment);
 
 private:
 	void drawMarginItems(int page, QPainter* painter);
@@ -226,11 +201,22 @@ protected:
 	QPdfWriter m_pdfWriter;
 	std::shared_ptr<ReportSchemaView> m_schemaView;
 
+	QTextCharFormat m_currentCharFormat;
+	QTextBlockFormat m_currentBlockFormat;
 
-	int m_currentPage = 1;
+	QTextCharFormat m_currentCharFormatSaved;
+	QTextBlockFormat m_currentBlockFormatSaved;
+
+	std::vector<std::shared_ptr<ReportSection>> m_sections;
+
+	mutable QMutex m_statisticsMutex;
+
+	int m_pagesCount = 0;	// Calculated after text rendering
+	int m_pageIndex = 0;
 
 private:
 	std::vector<ReportMarginItem> m_marginItems;
+
 };
 
 //
@@ -319,11 +305,30 @@ public slots:
 	void stop();
 
 public:
+
+	enum class WorkerStatus
+	{
+		Idle,
+		Analyzing,
+		Rendering,
+		Printing
+	};
+
 	// Statistics
-	int totalSignals() const;
-	int currentSignalIndex() const;
-	int totalFiles() const;
-	int currentFileIndex() const;
+	WorkerStatus currentStatus() const;
+
+	int signalsCount() const;
+	int signalIndex() const;
+
+	int filesCount() const;
+	int fileIndex() const;
+
+	int sectionCount() const;
+	int sectionIndex() const;
+
+	int pagesCount() const;
+	int pageIndex() const;
+
 	QString currentSection() const;
 	QString currentObjectName() const;
 
@@ -337,19 +342,16 @@ private:
 	void compareFilesRecursive(const DbFileTree& filesTree,
 					 const std::shared_ptr<DbFileInfo>& fi,
 					 const CompareData& compareData,
-					 ReportSection& diffDataSet,
 					 ReportTable* const headerTable);
 
 	void compareFile(const DbFileTree& filesTree,
 					 const std::shared_ptr<DbFileInfo>& fi,
 					 const CompareData& compareData,
-					 ReportSection& diffDataSet,
 					 ReportTable* const headerTable);
 
 	void compareFileContents(const std::shared_ptr<DbFile>& sourceFile,
 							 const std::shared_ptr<DbFile>& targetFile,
 							 const QString& fileName,
-							 ReportSection& diffDataSet,
 							 ReportTable* const headerTable);
 
 	std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
@@ -361,14 +363,14 @@ private:
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
 							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject, const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-							  ReportSection& diffDataSet, ReportTable* const headerTable);
-	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
-	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
-	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportSection& diffDataSet, ReportTable* const headerTable);
+							  ReportTable* const headerTable);
+	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
+	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
+	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
 
-	void compareSignal(const int signalID, const CompareData& compareData, ReportSection& diffDataSet, ReportTable* const headerTable);
-	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportSection& diffDataSet, ReportTable* const headerTable);
+	void compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable);
+	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const;
 
@@ -404,15 +406,21 @@ private:
 
 	// Statistics data
 	//
-	mutable QMutex m_statisticsMutex;
+
+	WorkerStatus m_currentStatus = WorkerStatus::Idle;
+
 	int m_signalsCount = 0;
-	int m_currentSignalIndex = 0;
+	int m_signalIndex = 0;
 
 	int m_filesCount = 0;
-	int m_currentFileIndex = 0;
+	int m_fileIndex = 0;
 
-	QString m_currentSection;
+	int m_sectionCount = 0;
+	int m_sectionIndex = 0;
+
+	QString m_currentSectionName;
 	QString m_currentObjectName;
+
 
 	bool m_stop = false;	// Stop processing flag, set by stop()
 
