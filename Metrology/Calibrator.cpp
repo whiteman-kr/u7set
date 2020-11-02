@@ -449,6 +449,12 @@ bool Calibrator::send(QString cmd)
 		return false;
 	}
 
+	CalibratorParam param = getParam(m_type);
+	if (param.isValid() == false)
+	{
+		return false;
+	}
+
 	if (cmd.isEmpty() == true)
 	{
 		m_lastError = QString("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
@@ -457,15 +463,7 @@ bool Calibrator::send(QString cmd)
 		return false;
 	}
 
-	// add ending
-	//
-	switch(m_type)
-	{
-		case CALIBRATOR_TYPE_TRXII:		cmd.append("\n\r"); break;
-		case CALIBRATOR_TYPE_CALYS75:	cmd.append("\r\r"); break;
-		case CALIBRATOR_TYPE_KTHL6221:	cmd.append("\n\r"); break;
-		default:						assert(false);
-	}
+	cmd.append(param.terminamtor);	// add ending
 
 	QByteArray cmdData = cmd.toLocal8Bit();
 
@@ -644,13 +642,13 @@ bool Calibrator::setUnit(int mode, int unit)
 	{
 		case CALIBRATOR_MODE_MEASURE:
 
-			m_mode = CALIBRATOR_MODE_MEASURE;
+			m_mode = mode;
 			m_measureUnit = unit;
 			break;
 
 		case CALIBRATOR_MODE_SOURCE:
 
-			m_mode = CALIBRATOR_MODE_SOURCE;
+			m_mode = mode;
 			m_sourceUnit = unit;
 			break;
 
