@@ -254,6 +254,17 @@ void OutputLogTextEdit::keyPressEvent(QKeyEvent* e)
 		return;
 	}
 
+	if (e->matches(QKeySequence::Find) == true)
+	{
+
+		QTextCursor cursor = this->textCursor();
+
+		emit findKeyEvent(cursor.selectedText());
+
+		e->accept();
+		return;
+	}
+
 	QTextEdit::keyPressEvent(e);
 	return;
 }
@@ -366,10 +377,15 @@ OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWi
 	QDockWidget(title, parent),
 	m_log(log)
 {
+	QSettings settings;
+	m_findCompleterStrings = settings.value("TestsTabPage/OutputFindCompleter").toStringList();
+
 	// Output window
 	//
 	m_logTextEdit = new OutputLogTextEdit(this);
 	QDockWidget::setWidget(m_logTextEdit);
+
+	connect(m_logTextEdit, &OutputLogTextEdit::findKeyEvent, this, &OutputDockWidget::findKeyEvent);
 
 	createToolbar();
 
@@ -381,6 +397,12 @@ OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWi
 	setAutoFillBackground(true);
 
 	return;
+}
+
+OutputDockWidget::~OutputDockWidget()
+{
+	QSettings settings;
+	settings.setValue("TestsTabPage/OutputFindCompleter", m_findCompleterStrings);
 }
 
 void OutputDockWidget::clear()
@@ -549,6 +571,69 @@ void OutputDockWidget::nextIssue(const QLatin1String& prefix)
 
 		m_logTextEdit->setExtraSelections({});
 	}
+
+	return;
+}
+
+void OutputDockWidget::findEvent()
+{
+	QString text = m_findEdit->text();
+	if (text.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Save completer
+
+	QString findText = m_findEdit->text();
+
+	if (findText.isEmpty() == false && m_findCompleterStrings.contains(findText) == false)
+	{
+		m_findCompleterStrings.append(findText);
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(m_findCompleterStrings);
+		}
+		while (m_findCompleterStrings.size() > 100)
+		{
+			m_findCompleterStrings.pop_front();
+		}
+	}
+
+	// Find
+
+	bool result = m_logTextEdit->find(text);
+	if (result == true)
+	{
+		return;
+	}
+
+	// Try to move cursor to the beginning and repeat
+
+	QTextCursor textCursor = m_logTextEdit->textCursor();
+	textCursor.movePosition(QTextCursor::Start);
+	m_logTextEdit->setTextCursor(textCursor);
+
+	result = m_logTextEdit->find(text);
+	if (result == false)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Text was not found."));
+	}
+
+	return;
+}
+
+void OutputDockWidget::findKeyEvent(const QString& selectedText)
+{
+	if (selectedText.isEmpty() == false)
+	{
+		m_findEdit->setText(selectedText);
+	}
+
+	m_findEdit->selectAll();
+	m_findEdit->setFocus();
 
 	return;
 }
@@ -734,21 +819,18 @@ void OutputDockWidget::createToolbar()
 	m_findEdit = new QLineEdit();
 	m_findEdit->setClearButtonEnabled(true);
 	m_findEdit->setPlaceholderText(tr("Find Text"));
+	connect(m_findEdit, &QLineEdit::returnPressed, this, &OutputDockWidget::findEvent);
 	l->addWidget(m_findEdit);
+
+	m_findCompleter = new QCompleter(m_findCompleterStrings, this);
+	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_findEdit->setCompleter(m_findCompleter);
+	connect(m_findEdit, &QLineEdit::textEdited, [this](){m_findCompleter->complete();});
+	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findEdit, &QLineEdit::setText);
 
 	m_findButton = new QPushButton("Find");
 	l->addWidget(m_findButton);
-	connect(m_findButton, &QPushButton::clicked, [this](){
-		QString text = m_findEdit->text();
-		if (text.isEmpty() == false)
-		{
-			bool result = m_logTextEdit->find(text);
-			if (result == false)
-			{
-				QMessageBox::warning(this, qAppName(), tr("Text was not found."));
-			}
-		}
-	});
+	connect(m_findButton, &QPushButton::clicked, this, &OutputDockWidget::findEvent);
 
 	l->addStretch();
 
@@ -989,6 +1071,8 @@ void TestsWidget::projectClosed()
 
 	m_buildPath.clear();
 	m_buildLabel->setText(tr("Build: Not loaded"));
+
+	m_outputDockWidget.clear();
 
 	closeAllDocuments();
 	hideEditor();
@@ -2970,7 +3054,6 @@ void TestsWidget::createActions()
 	m_deleteFileAction = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete"));
 	m_deleteFileAction->setEnabled(false);
-	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
 	connect(m_deleteFileAction, &QAction::triggered, this, &TestsWidget::deleteSelectedFiles);
 	testsToolbarActions.push_back(m_deleteFileAction);
 
@@ -3745,6 +3828,17 @@ void TestsWidget::keyPressEvent(QKeyEvent* event)
 			return;
 		}
 	}
+
+	if (event->key() == Qt::Key_Delete &&
+		m_testsTreeView->hasFocus() == true &&
+		m_deleteFileAction->isEnabled() == true)
+	{
+		deleteSelectedFiles();
+		return;
+	}
+
+	QWidget::keyPressEvent(event);
+	return;
 }
 
 bool TestsWidget::isEditableExtension(const QString& fileName)
