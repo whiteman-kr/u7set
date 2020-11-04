@@ -13,6 +13,9 @@ namespace Sim
 
 		setObjectName("Sim::ScriptWorkerThread");
 
+		connect(this, &QThread::started, scriptSimulator->simulator(), &Simulator::scriptStarted);
+		connect(this, &QThread::finished, scriptSimulator->simulator(), &Simulator::scriptFinished);
+
 		return;
 	}
 
@@ -144,6 +147,7 @@ namespace Sim
 		}
 		catch(...)
 		{
+			m_log.writeText(tr("Interrupted..."));
 			m_result = false;
 		}
 
@@ -287,7 +291,6 @@ namespace Sim
 		// Set script and start thread
 		//
 		m_workerThread.setScripts(scripts);
-
 		m_workerThread.start();
 
 		return true;

@@ -62,6 +62,9 @@ namespace Sim
 	signals:
 		void projectUpdated();				// Project was loaded or cleared
 
+		void scriptStarted();
+		void scriptFinished();
+
 	public:
 		[[nodiscard]] ScopedLog& log();
 

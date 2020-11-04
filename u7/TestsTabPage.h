@@ -302,8 +302,6 @@ private slots:
 	void runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files);
 	void stopSimTests();
 
-	void simStateChanged(Sim::SimControlState state);
-
 private:
 	void createToolbar();
 	void createTestsDock();

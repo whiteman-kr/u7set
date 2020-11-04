@@ -998,8 +998,6 @@ TestsWidget::TestsWidget(DbController* dbc, QWidget* parent) :
 	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsWidget::testsTreeDoubleClicked);
 	connect(m_openFilesTreeWidget, &QTreeWidget::clicked, this, &TestsWidget::openFilesClicked);
 
-	connect(&m_simulator.control(), &Sim::Control::stateChanged, this, &TestsWidget::simStateChanged);
-
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
@@ -2825,11 +2823,6 @@ void TestsWidget::stopSimTests()
 	m_simulator.stopScript();
 }
 
-void TestsWidget::simStateChanged(Sim::SimControlState state)
-{
-	m_stopTestsAction->setEnabled(state == Sim::SimControlState::Run);
-}
-
 void TestsWidget::createToolbar()
 {
 	m_testsToolbar = addToolBar("Toolbar");
@@ -3178,23 +3171,29 @@ void TestsWidget::createActions()
 	m_runAllTestsAction = new QAction(QIcon(":/Images/Images/TestsRunAll.svg"), tr("Run All Tests..."), this);
 	m_runAllTestsAction->setStatusTip(tr("Run All Tests"));
 	connect(m_runAllTestsAction, &QAction::triggered, this, &TestsWidget::runAllTestFiles);
+	connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_runAllTestsAction]()	{ action->setEnabled(false);	});
+	connect(&m_simulator, &Sim::Simulator::scriptFinished, [action=m_runAllTestsAction]()	{ action->setEnabled(true);		});
 	testsToolbarActions.push_back(m_runAllTestsAction);
 
 	m_runSelectedTestsAction = new QAction(tr("Run Selected Test(s)..."), this);
 	m_runSelectedTestsAction->setStatusTip(tr("Run Selected Test(s)"));
 	m_runSelectedTestsAction->setEnabled(false);
 	connect(m_runSelectedTestsAction, &QAction::triggered, this, &TestsWidget::runSelectedTestFiles);
+	//connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_runSelectedTestsAction]()	{ action->setEnabled(false);	});
 
 	m_runCurrentTestsAction = new QAction(QIcon(":/Images/Images/TestsRunSelected.svg"), tr("Run Current Test..."), this);
 	m_runCurrentTestsAction->setStatusTip(tr("Run Current Test"));
 	m_runCurrentTestsAction->setEnabled(false);
 	connect(m_runCurrentTestsAction, &QAction::triggered, this, &TestsWidget::runTestCurrentFile);
+	//connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_runCurrentTestsAction]()	{ action->setEnabled(false);	});
 	testsToolbarActions.push_back(m_runCurrentTestsAction);
 
 	m_stopTestsAction = new QAction(QIcon(":/Images/Images/SimStop.svg"), tr("Stop Testing"), this);
 	m_stopTestsAction->setStatusTip(tr("Stop testing"));
 	m_stopTestsAction->setEnabled(false);
 	connect(m_stopTestsAction, &QAction::triggered, this, &TestsWidget::stopTests);
+	connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_stopTestsAction]()	{ action->setEnabled(true);		});
+	connect(&m_simulator, &Sim::Simulator::scriptFinished, [action=m_stopTestsAction]()	{ action->setEnabled(false);	});
 	testsToolbarActions.push_back(m_stopTestsAction);
 
 	QAction* separatorAction5 = new QAction(this);
