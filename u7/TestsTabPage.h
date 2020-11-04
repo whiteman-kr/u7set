@@ -80,8 +80,13 @@ private:
 
 class OutputLogTextEdit : public QTextEdit
 {
+	Q_OBJECT
 public:
 	OutputLogTextEdit(QWidget* parent);
+
+signals:
+	void findKeyEvent(const QString& selectedText);
+	void textIsEmpty();
 
 private:
 	virtual void contextMenuEvent(QContextMenuEvent* event) override;
@@ -122,6 +127,7 @@ class OutputDockWidget : public QDockWidget
 	Q_OBJECT
 public:
 	OutputDockWidget(const QString& title, OutputDockLog* log, QWidget* parent);
+	virtual ~OutputDockWidget();
 
 	void clear();
 
@@ -132,6 +138,9 @@ private slots:
 
 	void prevIssue(const QLatin1String& prefix);
 	void nextIssue(const QLatin1String& prefix);
+
+	void findEvent();
+	void findKeyEvent(const QString& selectedText);
 
 private:
 	virtual void paintEvent(QPaintEvent *event) override;
@@ -145,7 +154,16 @@ private:
 	QLabel* m_warningLabel = nullptr;
 
 	QLineEdit* m_findEdit = nullptr;
+	QCompleter* m_findCompleter = nullptr;
+	QStringList m_findCompleterStrings;
+
 	QPushButton* m_findButton = nullptr;
+
+	OutputDockWidgetTitleButton* m_prevWarningButton = nullptr;
+	OutputDockWidgetTitleButton* m_nextWarningButton = nullptr;
+
+	OutputDockWidgetTitleButton* m_prevErrorButton = nullptr;
+	OutputDockWidgetTitleButton* m_nextErrorButton = nullptr;
 
 	OutputDockWidgetTitleButton* m_floatButton = nullptr;
 	OutputDockWidgetTitleButton* m_closeButton = nullptr;
@@ -160,7 +178,6 @@ private:
 	QTextCursor m_lastNavCursor;
 	bool m_lastNavIsPrevIssue = false;
 	bool m_lastNavIsNextIssue = false;
-
 };
 
 //

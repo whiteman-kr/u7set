@@ -230,6 +230,11 @@ void OutputLogTextEdit::keyPressEvent(QKeyEvent* e)
 		cursor.removeSelectedText();
 		this->setTextCursor(cursor);
 
+		if (this->toPlainText().isEmpty() == true)
+		{
+			emit textIsEmpty();
+		}
+
 		e->accept();
 		return;
 	}
@@ -249,6 +254,17 @@ void OutputLogTextEdit::keyPressEvent(QKeyEvent* e)
 		QTextCursor cursor = this->textCursor();
 		cursor.removeSelectedText();
 		this->setTextCursor(cursor);
+
+		e->accept();
+		return;
+	}
+
+	if (e->matches(QKeySequence::Find) == true)
+	{
+
+		QTextCursor cursor = this->textCursor();
+
+		emit findKeyEvent(cursor.selectedText());
 
 		e->accept();
 		return;
@@ -366,10 +382,19 @@ OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWi
 	QDockWidget(title, parent),
 	m_log(log)
 {
+	QSettings settings;
+	m_findCompleterStrings = settings.value("TestsTabPage/OutputFindCompleter").toStringList();
+
 	// Output window
 	//
 	m_logTextEdit = new OutputLogTextEdit(this);
 	QDockWidget::setWidget(m_logTextEdit);
+
+	connect(m_logTextEdit, &OutputLogTextEdit::findKeyEvent, this, &OutputDockWidget::findKeyEvent);
+	connect(m_logTextEdit, &OutputLogTextEdit::textIsEmpty, [this]()
+	{
+		clear();
+	});
 
 	createToolbar();
 
@@ -383,6 +408,12 @@ OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWi
 	return;
 }
 
+OutputDockWidget::~OutputDockWidget()
+{
+	QSettings settings;
+	settings.setValue("TestsTabPage/OutputFindCompleter", m_findCompleterStrings);
+}
+
 void OutputDockWidget::clear()
 {
 	m_logTextEdit->clear();
@@ -391,6 +422,11 @@ void OutputDockWidget::clear()
 	m_errorLabel->setStyleSheet(QString());
 	m_warningLabel->setText("W: 0000");
 	m_warningLabel->setStyleSheet(QString());
+
+	m_prevErrorButton->setEnabled(false);
+	m_nextErrorButton->setEnabled(false);
+	m_prevWarningButton->setEnabled(false);
+	m_nextWarningButton->setEnabled(false);
 
 	m_errorCount = 0;
 	m_warningCount = 0;
@@ -548,6 +584,69 @@ void OutputDockWidget::nextIssue(const QLatin1String& prefix)
 	return;
 }
 
+void OutputDockWidget::findEvent()
+{
+	QString text = m_findEdit->text();
+	if (text.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Save completer
+
+	QString findText = m_findEdit->text();
+
+	if (findText.isEmpty() == false && m_findCompleterStrings.contains(findText) == false)
+	{
+		m_findCompleterStrings.append(findText);
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(m_findCompleterStrings);
+		}
+		while (m_findCompleterStrings.size() > 100)
+		{
+			m_findCompleterStrings.pop_front();
+		}
+	}
+
+	// Find
+
+	bool result = m_logTextEdit->find(text);
+	if (result == true)
+	{
+		return;
+	}
+
+	// Try to move cursor to the beginning and repeat
+
+	QTextCursor textCursor = m_logTextEdit->textCursor();
+	textCursor.movePosition(QTextCursor::Start);
+	m_logTextEdit->setTextCursor(textCursor);
+
+	result = m_logTextEdit->find(text);
+	if (result == false)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Text was not found."));
+	}
+
+	return;
+}
+
+void OutputDockWidget::findKeyEvent(const QString& selectedText)
+{
+	if (selectedText.isEmpty() == false)
+	{
+		m_findEdit->setText(selectedText);
+	}
+
+	m_findEdit->selectAll();
+	m_findEdit->setFocus();
+
+	return;
+}
+
 void OutputDockWidget::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
@@ -635,6 +734,9 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 	{
 		if (m_errorCount == 0)
 		{
+			m_prevErrorButton->setEnabled(true);
+			m_nextErrorButton->setEnabled(true);
+
 			m_errorLabel->setStyleSheet("QLabel { color : #D00000; }");
 		}
 		m_errorLabel->setText(tr("E: %1").arg(QString::number(errorCount).rightJustified(4, '0')));
@@ -644,6 +746,9 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 	{
 		if (m_warningCount == 0)
 		{
+			m_prevWarningButton->setEnabled(true);
+			m_nextWarningButton->setEnabled(true);
+
 			m_warningLabel->setStyleSheet("QLabel { color : #F87217; }");
 		}
 		m_warningLabel->setText(tr("W: %1").arg(QString::number(warningCount).rightJustified(4, '0')));
@@ -671,24 +776,26 @@ void OutputDockWidget::createToolbar()
 	int pixelsWide = fm.horizontalAdvance(windowTitle());
 
 	QHBoxLayout* l = new QHBoxLayout(outputDockPanelWidget);
-	l->setContentsMargins(pixelsWide + margin * 2, 0, margin, 0);
+	l->setContentsMargins(pixelsWide + margin * 4, 0, margin, 0);
 
 	m_errorLabel = new QLabel(tr("E: 0000"));
 	l->addWidget(m_errorLabel);
 
-	OutputDockWidgetTitleButton* b = new OutputDockWidgetTitleButton(this, true);
+	m_prevErrorButton = new OutputDockWidgetTitleButton(this, true);
+	m_prevErrorButton->setEnabled(false);
 	QIcon icon = QIcon(":/Images/Images/PreviousIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_prevErrorButton->setIcon( icon );
+	l->addWidget(m_prevErrorButton);
+	connect(m_prevErrorButton, &QPushButton::clicked, [this](){
 		prevIssue(QLatin1String("ERR"));
 	});
 
-	b = new OutputDockWidgetTitleButton(this, true);
+	m_nextErrorButton = new OutputDockWidgetTitleButton(this, true);
+	m_nextErrorButton->setEnabled(false);
 	icon = QIcon(":/Images/Images/NextIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_nextErrorButton->setIcon( icon );
+	l->addWidget(m_nextErrorButton);
+	connect(m_nextErrorButton, &QPushButton::clicked, [this](){
 		nextIssue(QLatin1String("ERR"));
 	});
 
@@ -697,21 +804,22 @@ void OutputDockWidget::createToolbar()
 	m_warningLabel = new QLabel(tr("W: 0000"));
 	l->addWidget(m_warningLabel);
 
-	b = new OutputDockWidgetTitleButton(this, true);
-
+	m_prevWarningButton = new OutputDockWidgetTitleButton(this, true);
+	m_prevWarningButton->setEnabled(false);
 	icon = QIcon(":/Images/Images/PreviousIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_prevWarningButton->setIcon( icon );
+	l->addWidget(m_prevWarningButton);
+	connect(m_prevWarningButton, &QPushButton::clicked, [this](){
 		prevIssue(QLatin1String("WRN"));
 
 	});
 
-	b = new OutputDockWidgetTitleButton(this, true);
+	m_nextWarningButton = new OutputDockWidgetTitleButton(this, true);
+	m_nextWarningButton->setEnabled(false);
 	icon = QIcon(":/Images/Images/NextIssue.svg");
-	b->setIcon( icon );
-	l->addWidget(b);
-	connect(b, &QPushButton::clicked, [this](){
+	m_nextWarningButton->setIcon( icon );
+	l->addWidget(m_nextWarningButton);
+	connect(m_nextWarningButton, &QPushButton::clicked, [this](){
 		nextIssue(QLatin1String("WRN"));
 	});
 
@@ -720,21 +828,18 @@ void OutputDockWidget::createToolbar()
 	m_findEdit = new QLineEdit();
 	m_findEdit->setClearButtonEnabled(true);
 	m_findEdit->setPlaceholderText(tr("Find Text"));
+	connect(m_findEdit, &QLineEdit::returnPressed, this, &OutputDockWidget::findEvent);
 	l->addWidget(m_findEdit);
+
+	m_findCompleter = new QCompleter(m_findCompleterStrings, this);
+	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_findEdit->setCompleter(m_findCompleter);
+	connect(m_findEdit, &QLineEdit::textEdited, [this](){m_findCompleter->complete();});
+	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findEdit, &QLineEdit::setText);
 
 	m_findButton = new QPushButton("Find");
 	l->addWidget(m_findButton);
-	connect(m_findButton, &QPushButton::clicked, [this](){
-		QString text = m_findEdit->text();
-		if (text.isEmpty() == false)
-		{
-			bool result = m_logTextEdit->find(text);
-			if (result == false)
-			{
-				QMessageBox::warning(this, qAppName(), tr("Text was not found."));
-			}
-		}
-	});
+	connect(m_findButton, &QPushButton::clicked, this, &OutputDockWidget::findEvent);
 
 	l->addStretch();
 
@@ -977,6 +1082,8 @@ void TestsWidget::projectClosed()
 
 	m_buildPath.clear();
 	m_buildLabel->setText(tr("Build: Not loaded"));
+
+	m_outputDockWidget.clear();
 
 	closeAllDocuments();
 	hideEditor();
@@ -1467,9 +1574,59 @@ void TestsWidget::undoChangesSelectedFiles()
 
 void TestsWidget::deleteSelectedFiles()
 {
-	// Close documents before deleting
+	int selectedFilesCount = 0;
+	int selectedFoldersCount = 0;
 
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid root items deleting
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = m_testsTreeModel->fileItem(mi);
+		assert(f);
+
+		if (f->isFolder() == true)
+		{
+			selectedFoldersCount++;
+		}
+		else
+		{
+			selectedFilesCount++;
+		}
+	}
+
+	QString filesText;
+
+	if (selectedFilesCount > 0)
+	{
+		filesText = tr("file(s)");
+	}
+
+	if (selectedFoldersCount > 0)
+	{
+		if (selectedFilesCount > 0)
+		{
+			filesText += tr("/");
+		}
+
+		filesText += tr("folder(s)");
+	}
+
+
+	QString warningMessage = tr("Are you sure you want to delete selected %1?").arg(filesText);
+
+	if (QMessageBox::warning(this, qAppName(), warningMessage, QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
+	// Close documents before deleting
+
 	for (QModelIndex& mi : selectedIndexList)
 	{
 		if (mi.parent().isValid() == false)
@@ -2620,6 +2777,11 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 		return;
 	}
 
+	if (m_simulator.control().isRunning() == true)
+	{
+		return;
+	}
+
 	m_outputDockWidget.setVisible(true);
 
 	m_outputDockWidget.clear();
@@ -2683,10 +2845,6 @@ void TestsWidget::createTestsDock()
 {
 	// Tests tree and model
 	//
-
-	QWidget* leftWidget = new QWidget();
-	QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
-	leftLayout->setContentsMargins(0, 0, 0, 0);
 
 	QWidget* testsWidget = new QWidget();
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
@@ -2781,8 +2939,6 @@ void TestsWidget::createTestsDock()
 	m_leftSplitter->setStretchFactor(1, 1);
 	m_leftSplitter->setCollapsible(0, false);
 	m_leftSplitter->setCollapsible(1, false);
-
-	leftLayout->addWidget(m_leftSplitter);
 
 	// Left Dock Widget
 
@@ -2961,7 +3117,6 @@ void TestsWidget::createActions()
 	m_deleteFileAction = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete"));
 	m_deleteFileAction->setEnabled(false);
-	m_deleteFileAction->setShortcut(QKeySequence::StandardKey::Delete);
 	connect(m_deleteFileAction, &QAction::triggered, this, &TestsWidget::deleteSelectedFiles);
 	testsToolbarActions.push_back(m_deleteFileAction);
 
@@ -3736,6 +3891,17 @@ void TestsWidget::keyPressEvent(QKeyEvent* event)
 			return;
 		}
 	}
+
+	if (event->key() == Qt::Key_Delete &&
+		m_testsTreeView->hasFocus() == true &&
+		m_deleteFileAction->isEnabled() == true)
+	{
+		deleteSelectedFiles();
+		return;
+	}
+
+	QWidget::keyPressEvent(event);
+	return;
 }
 
 bool TestsWidget::isEditableExtension(const QString& fileName)
