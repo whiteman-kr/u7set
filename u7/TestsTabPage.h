@@ -86,6 +86,7 @@ public:
 
 signals:
 	void findKeyEvent(const QString& selectedText);
+	void textIsEmpty();
 
 private:
 	virtual void contextMenuEvent(QContextMenuEvent* event) override;

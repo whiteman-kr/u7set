@@ -230,6 +230,11 @@ void OutputLogTextEdit::keyPressEvent(QKeyEvent* e)
 		cursor.removeSelectedText();
 		this->setTextCursor(cursor);
 
+		if (this->toPlainText().isEmpty() == true)
+		{
+			emit textIsEmpty();
+		}
+
 		e->accept();
 		return;
 	}
@@ -386,6 +391,10 @@ OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWi
 	QDockWidget::setWidget(m_logTextEdit);
 
 	connect(m_logTextEdit, &OutputLogTextEdit::findKeyEvent, this, &OutputDockWidget::findKeyEvent);
+	connect(m_logTextEdit, &OutputLogTextEdit::textIsEmpty, [this]()
+	{
+		clear();
+	});
 
 	createToolbar();
 
@@ -1563,9 +1572,59 @@ void TestsWidget::undoChangesSelectedFiles()
 
 void TestsWidget::deleteSelectedFiles()
 {
-	// Close documents before deleting
+	int selectedFilesCount = 0;
+	int selectedFoldersCount = 0;
 
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid root items deleting
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = m_testsTreeModel->fileItem(mi);
+		assert(f);
+
+		if (f->isFolder() == true)
+		{
+			selectedFoldersCount++;
+		}
+		else
+		{
+			selectedFilesCount++;
+		}
+	}
+
+	QString filesText;
+
+	if (selectedFilesCount > 0)
+	{
+		filesText = tr("file(s)");
+	}
+
+	if (selectedFoldersCount > 0)
+	{
+		if (selectedFilesCount > 0)
+		{
+			filesText += tr("/");
+		}
+
+		filesText += tr("folder(s)");
+	}
+
+
+	QString warningMessage = tr("Are you sure you want to delete selected %1?").arg(filesText);
+
+	if (QMessageBox::warning(this, qAppName(), warningMessage, QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
+	// Close documents before deleting
+
 	for (QModelIndex& mi : selectedIndexList)
 	{
 		if (mi.parent().isValid() == false)
@@ -2777,10 +2836,6 @@ void TestsWidget::createTestsDock()
 	// Tests tree and model
 	//
 
-	QWidget* leftWidget = new QWidget();
-	QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
-	leftLayout->setContentsMargins(0, 0, 0, 0);
-
 	QWidget* testsWidget = new QWidget();
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
 	testsLayout->setContentsMargins(6, 0, 6, 6);
@@ -2874,8 +2929,6 @@ void TestsWidget::createTestsDock()
 	m_leftSplitter->setStretchFactor(1, 1);
 	m_leftSplitter->setCollapsible(0, false);
 	m_leftSplitter->setCollapsible(1, false);
-
-	leftLayout->addWidget(m_leftSplitter);
 
 	// Left Dock Widget
 
