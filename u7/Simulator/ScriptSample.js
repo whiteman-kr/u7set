@@ -68,5 +68,9 @@ function test1(sim)
     // Clear override signal list:
     //      sim.overridesReset();
 
+    // Write message to console:
+    //      log.writeText("Log Text");
+    //      log.writeWarning("Log Text");
+
     return;
 }

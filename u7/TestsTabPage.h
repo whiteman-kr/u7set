@@ -303,7 +303,7 @@ private:
 	void hideEditor();
 
 	// Documents operations
-
+	//
 	bool documentIsOpen(int fileId) const;
 	bool documentIsModified(int fileId) const;
 
@@ -321,7 +321,8 @@ private:
 	void runTests(std::vector<int> fileIds);
 
 	// Override functions
-private:
+	//
+protected:
 	virtual void showEvent(QShowEvent* e) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
 

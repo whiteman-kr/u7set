@@ -5,6 +5,11 @@ Q_LOGGING_CATEGORY(u7sim, "u7.sim")
 
 namespace Sim
 {
+	ScopedLog::ScopedLog(const ScopedLog& src) :
+		m_log(src.m_log),
+		m_scope(src.m_scope)
+	{
+	}
 
 	ScopedLog::ScopedLog(ILogFile* log, QString scope) :
 		m_log(log),
@@ -24,7 +29,7 @@ namespace Sim
 	{
 		if (m_scope.isEmpty() == false)
 		{
-			writeText("Instance created.");
+			writeDebug("Instance created.");
 		}
 
 		return;
@@ -34,13 +39,13 @@ namespace Sim
 	{
 		if (m_scope.isEmpty() == false)
 		{
-			writeText("Instance destroyed.");
+			writeDebug("Instance destroyed.");
 		}
 
 		return;
 	}
 
-	bool ScopedLog::writeAlert(const QString& text)
+	bool ScopedLog::writeAlert(QString text)
 	{
 		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
@@ -57,7 +62,7 @@ namespace Sim
 		return ok;
 	}
 
-	bool ScopedLog::writeError(const QString& text)
+	bool ScopedLog::writeError(QString text)
 	{
 		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
@@ -74,7 +79,7 @@ namespace Sim
 		return ok;
 	}
 
-	bool ScopedLog::writeWarning(const QString& text)
+	bool ScopedLog::writeWarning(QString text)
 	{
 		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
@@ -91,7 +96,7 @@ namespace Sim
 		return ok;
 	}
 
-	bool ScopedLog::writeMessage(const QString& text)
+	bool ScopedLog::writeMessage(QString text)
 	{
 		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
@@ -108,7 +113,7 @@ namespace Sim
 		return ok;
 	}
 
-	bool ScopedLog::writeText(const QString& text)
+	bool ScopedLog::writeText(QString text)
 	{
 		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
@@ -125,9 +130,11 @@ namespace Sim
 		return ok;
 	}
 
-	bool ScopedLog::writeDebug(const QString& text)
+	bool ScopedLog::writeDebug(QString text)
 	{
-		return writeText(text);
+		// ScopedLog is used for tests, to prevent from rubishing script output writeDebug is disabled
+		//return writeText(text);
+		return true;
 	}
 
 	const QString& ScopedLog::outputScope() const

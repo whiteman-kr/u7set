@@ -45,11 +45,10 @@ namespace Sim
 
 		// Script Tests
 		//
-		//static bool runTestScript(QString buildPath, QString scriptName, QString script);
-
-		bool runScript(QString script, QString testName);		// Starts script in separate thread and returns immediately
-		bool stopScript();										// Stops script if it is running
-		bool waitScript(unsigned long msecs = ULONG_MAX);		// Wait script to stop
+		bool runScript(const SimScriptItem& script);				// Starts one script in separate thread and returns immediately
+		bool runScripts(const std::vector<SimScriptItem>& scripts);	// Starts a pack of scripts in separate thread and returns immediately
+		bool stopScript();											// Stops script if it is running
+		bool waitScript(unsigned long msecs = ULONG_MAX);			// Wait script to stop
 		bool scriptResult();
 
 	private:
@@ -71,24 +70,24 @@ namespace Sim
 
 		[[nodiscard]] QString projectName() const;
 
-		const Sim::Connections& connections() const;
-		Sim::Connections& connections();
+		[[nodiscard]] const Sim::Connections& connections() const;
+		[[nodiscard]] Sim::Connections& connections();
 
-		std::vector<std::shared_ptr<Subsystem>> subsystems() const;
-		std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
-		std::vector<std::shared_ptr<LogicModule>> logicModules() const;
+		[[nodiscard]] std::vector<std::shared_ptr<Subsystem>> subsystems() const;
+		[[nodiscard]] std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<LogicModule>> logicModules() const;
 
-		Sim::AppDataTransmitter& appDataTransmitter();
-		const Sim::AppDataTransmitter& appDataTransmitter() const;
+		[[nodiscard]] Sim::AppDataTransmitter& appDataTransmitter();
+		[[nodiscard]] const Sim::AppDataTransmitter& appDataTransmitter() const;
 
-		Sim::AppSignalManager& appSignalManager();
-		const Sim::AppSignalManager& appSignalManager() const;
+		[[nodiscard]] Sim::AppSignalManager& appSignalManager();
+		[[nodiscard]] const Sim::AppSignalManager& appSignalManager() const;
 
-		Sim::TuningSignalManager& tuningSignalManager();
-		const Sim::TuningSignalManager& tuningSignalManager() const;
+		[[nodiscard]] Sim::TuningSignalManager& tuningSignalManager();
+		[[nodiscard]] const Sim::TuningSignalManager& tuningSignalManager() const;
 
-		Sim::OverrideSignals& overrideSignals();
-		const Sim::OverrideSignals& overrideSignals() const;
+		[[nodiscard]] Sim::OverrideSignals& overrideSignals();
+		[[nodiscard]] const Sim::OverrideSignals& overrideSignals() const;
 
 		[[nodiscard]] Sim::Control& control();
 		[[nodiscard]] const Sim::Control& control() const;

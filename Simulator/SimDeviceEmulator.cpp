@@ -207,37 +207,31 @@ namespace Sim
 	{
 		bool ok = false;
 
-		do
+		if (m_currentMode == DeviceMode::Start)
 		{
-			if (m_currentMode == DeviceMode::Start)
+			bool processStartOk = processStartMode();
+			if (processStartOk == false)
 			{
-				bool processStartOk = processStartMode();
-				if (processStartOk == false)
-				{
-					return false;
-				}
+				return false;
 			}
+		}
 
-			if (m_currentMode == DeviceMode::Fault)
+		if (m_currentMode == DeviceMode::Fault)
+		{
+			ok = processFaultMode();
+		}
+		else
+		{
+			if (m_currentMode == DeviceMode::Off)
 			{
-				ok = processFaultMode();
-				break;
+				ok = processOffMode();
 			}
 			else
 			{
-				if (m_currentMode == DeviceMode::Off)
-				{
-					ok = processOffMode();
-				}
-				else
-				{
-					Q_ASSERT(m_currentMode == DeviceMode::Operate);
-					ok = processOperate(currentTime, currentDateTime, workcycle);
-				}
-				break;
+				Q_ASSERT(m_currentMode == DeviceMode::Operate);
+				ok = processOperate(currentTime, currentDateTime, workcycle);
 			}
 		}
-		while (false);
 
 		// Perform post run cycle actions
 		//
@@ -1300,12 +1294,6 @@ namespace Sim
 				ok == false && m_currentMode != DeviceMode::Fault)
 			{
 				SIM_FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
-				result = false;
-				break;
-			}
-
-			if (m_currentMode == DeviceMode::Fault)
-			{
 				result = false;
 				break;
 			}

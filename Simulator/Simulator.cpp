@@ -102,51 +102,19 @@ namespace Sim
 		return m_control.state() == SimControlState::Stop;
 	}
 
-//	bool Simulator::runTestScript(QString buildPath, QString scriptName, QString script)
-//	{
-//		Sim::Simulator simulator;
+	bool Simulator::runScript(const SimScriptItem& script)
+	{
+		return runScripts({script});
+	}
 
-//		if (bool ok = simulator.load(buildPath);
-//			ok == false)
-//		{
-//			return false;
-//		}
-
-//		// Add all modules to simulation
-//		//
-//		simulator.control().setRunList({});
-
-//		bool ok = simulator.runScript(script, scriptName);
-//		if (ok == false)
-//		{
-//			return false;
-//		}
-
-//		const qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
-
-//		ok = simulator.waitScript(timeout);
-//		if (ok == false)
-//		{
-//			return false;
-//		}
-
-//		ok = simulator.scriptResult();
-//		return ok;
-//	}
-
-	bool Simulator::runScript(QString script, QString testName)
+	bool Simulator::runScripts(const std::vector<SimScriptItem>& scripts)
 	{
 		if (m_scriptSimulator.isRunning() == true)
 		{
-			bool ok = m_scriptSimulator.stopScript();
-			if (ok == false)
-			{
-				m_log.writeError(tr("RunScript error: cannot stop already running script."));
-				return false;
-			}
+			m_scriptSimulator.stopScript();
 		}
 
-		return m_scriptSimulator.runScript(script, testName);
+		return m_scriptSimulator.runScripts(scripts);
 	}
 
 	bool Simulator::stopScript()
@@ -166,6 +134,7 @@ namespace Sim
 
 	void Simulator::clearImpl()
 	{
+		m_control.reset();
 		m_buildPath.clear();
 		m_firmwares.clear();
 		m_lmDescriptions.clear();
@@ -178,6 +147,10 @@ namespace Sim
 
 	bool Simulator::loadFunc(QString buildPath)
 	{
+		clearImpl();
+
+		// --
+		//
 		buildPath = QDir::fromNativeSeparators(buildPath);
 		if (buildPath.endsWith(QChar('/')) == false)
 		{

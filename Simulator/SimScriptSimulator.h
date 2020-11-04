@@ -16,6 +16,13 @@ namespace Sim
 	class LogicModule;
 
 
+	struct SimScriptItem
+	{
+		QString script;
+		QString scriptCaption;
+	};
+
+
 	class ScriptWorkerThread : public QThread
 	{
 		Q_OBJECT
@@ -34,18 +41,17 @@ namespace Sim
 
 		bool result() const;
 
-		void setScript(QString value);
-		void setTestName(QString value);
+		void setScripts(const std::vector<SimScriptItem>& scripts);
 
 	private:
 		ScriptSimulator* m_scriptSimulator = nullptr;
 		ScopedLog m_log;
 
-		QString m_script;
-		QString m_testName;
+		std::vector<SimScriptItem> m_scripts;
 
-        QJSEngine m_jsEngine;
+		std::unique_ptr<QJSEngine> m_jsEngine;
         QJSValue m_jsThis;
+		QJSValue m_jsLog;
 
         std::atomic_bool m_result{true};
 	};
@@ -77,7 +83,7 @@ namespace Sim
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
 
-		bool runScript(QString script, QString testName);
+		bool runScripts(const std::vector<SimScriptItem>& scripts);
 		bool stopScript();
 
 		bool isRunning() const;
@@ -143,18 +149,21 @@ namespace Sim
 		ScriptDevUtils devUtils();
 
 	public:
-		ScopedLog& log();
+		[[nodiscard]] ScopedLog& log();
 
 		QString buildPath() const;
 
 		qint64 executionTimeOut() const;
 		void setExecutionTimeOut(qint64 value);
 
+		[[nodiscard]] Simulator* simulator();
+		[[nodiscard]] const Simulator* simulator() const;
+
 	private:
-		bool unlockTimer() const;
+		[[nodiscard]] bool unlockTimer() const;
 		void setUnlockTimer(bool value);
 
-		bool appDataTrasmittion() const;
+		[[nodiscard]] bool appDataTrasmittion() const;
 		void setAppDataTrasmittion(bool value);
 
 		// Data

@@ -375,7 +375,7 @@ OutputDockWidget::OutputDockWidget(const QString& title, OutputDockLog* log, QWi
 
 	connect(this, &QDockWidget::topLevelChanged, this, &OutputDockWidget::floatingChanged);
 
-	startTimer(25, Qt::PreciseTimer);
+	startTimer(25, Qt::CoarseTimer);
 
 	setBackgroundRole(QPalette::Light);
 	setAutoFillBackground(true);
@@ -905,6 +905,8 @@ TestsWidget::TestsWidget(DbController* dbc, QWidget* parent) :
 TestsWidget::~TestsWidget()
 {
 	saveSettings();
+
+	m_simulator.stopScript();
 
 	return;
 }
@@ -2625,32 +2627,40 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 	std::vector<std::shared_ptr<DbFile>> latestFiles;
 	bool ok = db()->getLatestVersion(files, &latestFiles, this);
 
-	// --
+	// Load project in the main thread
 	//
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	ok = m_simulator.load(buildPath);
+	QApplication::restoreOverrideCursor();
+
 	if (ok == false)
 	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simultaion. For details see Output window."));
 		return;
 	}
 
+	// Run simualtion for all LogicModule(s)
+	//
 	m_simulator.control().setRunList({});
+
+	// Start tests
+	//
+	std::vector<Sim::SimScriptItem> scripts;
+	scripts.reserve(latestFiles.size());
 
 	for (const std::shared_ptr<DbFile>& file : latestFiles)
 	{
-		ok = m_simulator.runScript(file->data(), file->fileName());
-
-		if (ok == false)
-		{
-			break;
-		}
+		scripts.emplace_back(Sim::SimScriptItem{file->data(), file->fileName()});
 	}
+
+	m_simulator.runScripts(scripts);
 
 	return;
 }
 
 void TestsWidget::stopSimTests()
 {
-	m_simulator.control().stop();
+	m_simulator.stopScript();
 }
 
 void TestsWidget::simStateChanged(Sim::SimControlState state)
