@@ -895,6 +895,18 @@ namespace Builder
 		return m_outputPath;
 	}
 
+	QStringList BuildResultWriter::fullOutputPathes() const
+	{
+		QStringList result;
+
+		for (const BuildResult& br : m_buildResults)
+		{
+			result.push_back(br.fullPath());
+		}
+
+		return result;
+	}
+
 	QString BuildResultWriter::checkOutputPath(QString outputPath)
 	{
 		QString usedPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);

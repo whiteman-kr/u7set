@@ -8,9 +8,9 @@
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 #include <QMutex>
-#include <SimLogicModule.h>
-#include <SimTimeController.h>
-#include <SimAppSignalManager.h>
+#include "SimLogicModule.h"
+#include "SimTimeController.h"
+#include "SimAppSignalManager.h"
 
 namespace Sim
 {

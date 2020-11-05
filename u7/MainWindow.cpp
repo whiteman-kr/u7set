@@ -382,9 +382,11 @@ void MainWindow::createMenus()
 	//
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
-	pProjectMenu->addAction(m_projectPropertiesAction);
-	pProjectMenu->addAction(m_startBuildAction);
 	pProjectMenu->addAction(m_pendingChangesAction);
+	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_startBuildAction);
+	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_projectPropertiesAction);
 
 	// Tools
 	//

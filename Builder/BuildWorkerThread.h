@@ -105,6 +105,10 @@ namespace Builder
 								 const std::vector<Hardware::DeviceModule *>& lmModules,
 								 LmsUniqueIdMap& lmsUniqueIdMap);
 
+		// Run simulator-based script tests
+		//
+		bool runSimTests();
+
 	signals:
 		void runOrderReady(RunOrder runOrder);
 
@@ -125,8 +129,6 @@ namespace Builder
 
 		QString serverPassword() const;
 		void setServerPassword(QString value);
-
-		DbProjectProperties projectProperties() const;
 
 		void setIssueLog(IssueLogger* value);
 
@@ -158,8 +160,6 @@ namespace Builder
 
 		QString m_projectUserName;
 		QString m_projectUserPassword;
-
-		DbProjectProperties m_projectProperties;
 
 		QString m_buildOutputPath;
 

@@ -1173,13 +1173,13 @@ void TestsWidget::newFile()
 {
 	// Get new file name
 	//
-	QString fileName = QInputDialog::getText(this, "New File", tr("Enter the file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
+	QString fileName = QInputDialog::getText(this, "New File", tr("Enter file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
 
-	if (fileName.contains('.') == false)
+	if (fileName.endsWith(".js") == false)
 	{
 		fileName += ".js";
 	}

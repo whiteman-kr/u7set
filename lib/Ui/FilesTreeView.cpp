@@ -1600,10 +1600,15 @@ void FileTreeView::renameFile()
 		return;
 	}
 
-	QString newFileName = QInputDialog::getText(this, qAppName(), tr("Enter the file name:"), QLineEdit::Normal, files[0].fileName());
+	QString newFileName = QInputDialog::getText(this, qAppName(), tr("Enter file name:"), QLineEdit::Normal, files[0].fileName());
 	if (newFileName.isEmpty() == true || newFileName == files[0].fileName())
 	{
 		return;
+	}
+
+	if (newFileName.endsWith(".js") == false)
+	{
+		newFileName += ".js";
 	}
 
 	DbFileInfo newFi;
