@@ -30,6 +30,24 @@ namespace Sim
 			return;
 		}
 
+		// Run watchdog thread
+		//
+		QtConcurrent::run(
+					[waitThread = this,
+					timeout = this->m_scriptSimulator->executionTimeout(),
+					log = ScopedLog{m_log}]
+					() mutable
+					{
+						bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
+						if (ok == false)
+						{
+							log.writeError("Script execution timeout.");
+							waitThread->interruptScript();
+						}
+					});
+
+		// --
+		//
 		int totalFailed = 0;
 
 		try		// runScriptFunction() can throw an expception in case of script interruption
@@ -222,6 +240,8 @@ namespace Sim
 
 	bool ScriptWorkerThread::interruptScript()
 	{
+		qDebug() << "ScriptWorkerThread::interruptScript()";
+
 		m_jsEngine->setInterrupted(true);
 
 		// Wait for thread finishing
@@ -579,14 +599,14 @@ namespace Sim
 		return m_simulator->buildPath();
 	}
 
-	qint64 ScriptSimulator::executionTimeOut() const
+	qint64 ScriptSimulator::executionTimeout() const
 	{
-		return m_executionTimeOut;
+		return m_executionTimeout;
 	}
 
-	void ScriptSimulator::setExecutionTimeOut(qint64 value)
+	void ScriptSimulator::setExecutionTimeout(qint64 value)
 	{
-		m_executionTimeOut = value;
+		m_executionTimeout = value;
 	}
 
 	Simulator* ScriptSimulator::simulator()

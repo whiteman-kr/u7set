@@ -2808,6 +2808,14 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 	std::vector<std::shared_ptr<DbFile>> latestFiles;
 	bool ok = db()->getLatestVersion(files, &latestFiles, this);
 
+	DbProjectProperties projectProperties;
+	ok &= db()->getProjectProperties(&projectProperties, this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
 	// Load project in the main thread
 	//
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -2834,7 +2842,7 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 		scripts.emplace_back(Sim::SimScriptItem{file->data(), file->fileName()});
 	}
 
-	m_simulator.runScripts(scripts);
+	m_simulator.runScripts(scripts, projectProperties.simTestsTimeout());
 
 	return;
 }

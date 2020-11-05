@@ -45,10 +45,10 @@ namespace Sim
 
 		// Script Tests
 		//
-		bool runScript(const SimScriptItem& script);				// Starts one script in separate thread and returns immediately
-		bool runScripts(const std::vector<SimScriptItem>& scripts);	// Starts a pack of scripts in separate thread and returns immediately
-		bool stopScript();											// Stops script if it is running
-		bool waitScript(unsigned long msecs = ULONG_MAX);			// Wait script to stop
+		bool runScript(const SimScriptItem& script, qint64 timeout);				// Starts one script in separate thread and returns immediately
+		bool runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout);// Starts a pack of scripts in separate thread and returns immediately
+		bool stopScript();														// Stops script if it is running
+		bool waitScript(unsigned long msecs = ULONG_MAX);						// Wait script to stop
 		bool scriptResult();
 
 	private:

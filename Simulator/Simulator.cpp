@@ -102,17 +102,19 @@ namespace Sim
 		return m_control.state() == SimControlState::Stop;
 	}
 
-	bool Simulator::runScript(const SimScriptItem& script)
+	bool Simulator::runScript(const SimScriptItem& script, qint64 timeout)
 	{
-		return runScripts({script});
+		return runScripts({script}, timeout);
 	}
 
-	bool Simulator::runScripts(const std::vector<SimScriptItem>& scripts)
+	bool Simulator::runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout)
 	{
 		if (m_scriptSimulator.isRunning() == true)
 		{
 			m_scriptSimulator.stopScript();
 		}
+
+		m_scriptSimulator.setExecutionTimeout(timeout);
 
 		return m_scriptSimulator.runScripts(scripts);
 	}

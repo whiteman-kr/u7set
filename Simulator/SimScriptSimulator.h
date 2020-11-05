@@ -70,8 +70,8 @@ namespace Sim
 		/// \brief Loaded project build directory, if empty then project is not loaded.
 		Q_PROPERTY(QString buildPath READ buildPath)
 
-		/// \brief Script execution timeout in milliseconds, if negative then timeout is not applied.
-		Q_PROPERTY(qint64 executionTimeOut READ executionTimeOut WRITE setExecutionTimeOut)
+		/// \brief Script execution timeout in milliseconds, if -1 then timeout is not applied.
+		Q_PROPERTY(qint64 executionTimeout READ executionTimeout WRITE setExecutionTimeout)
 
 		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
 		Q_PROPERTY(bool unlockTimer READ unlockTimer WRITE setUnlockTimer)
@@ -153,8 +153,8 @@ namespace Sim
 
 		QString buildPath() const;
 
-		qint64 executionTimeOut() const;
-		void setExecutionTimeOut(qint64 value);
+		qint64 executionTimeout() const;
+		void setExecutionTimeout(qint64 value);
 
 		[[nodiscard]] Simulator* simulator();
 		[[nodiscard]] const Simulator* simulator() const;
@@ -174,7 +174,7 @@ namespace Sim
 
 		ScriptWorkerThread m_workerThread{this};
 
-		qint64 m_executionTimeOut = -1;		// Script execution timeout in milliseconds, negative means no timeout
+		qint64 m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
 	};
 
 }

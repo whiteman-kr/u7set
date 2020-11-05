@@ -103,7 +103,7 @@ bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator
 
 	QString script = file.readAll();
 
-	bool ok = simulator->runScript({script, QFileInfo(file).baseName()});
+	bool ok = simulator->runScript({script, QFileInfo(file).baseName()}, timeout);
 	if (ok == false)
 	{
 		return false;

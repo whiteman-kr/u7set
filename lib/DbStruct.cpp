@@ -194,13 +194,11 @@ DbProjectProperties::DbProjectProperties()
 	p->setCategory("Project");
 	p->setDescription("Safety Propject");
 
+	// --
+	//
 	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::SuppressWarnings, true, DbProjectProperties::suppressWarningsAsString, DbProjectProperties::setSuppressWarnings);
 	p->setCategory("Build");
 	p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
-
-	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::RunSimTestsOnBuild, true, DbProjectProperties::runSimTestsOnBuild, DbProjectProperties::setRunSimTestsOnBuild);
-	p->setCategory("Build");
-	p->setDescription("Run simulator based tests on project build");
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::UppercaseAppSignalId, true, DbProjectProperties::uppercaseAppSignalId, DbProjectProperties::setUppercaseAppSignalId);
 	p->setCategory("Editor");
@@ -213,6 +211,16 @@ DbProjectProperties::DbProjectProperties()
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
 	p->setCategory("Build");
 	p->setDescription("Generate extra debug information on build");
+
+	// --
+	//
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::RunSimTestsOnBuild, true, DbProjectProperties::runSimTestsOnBuild, DbProjectProperties::setRunSimTestsOnBuild);
+	p->setCategory("Tests");
+	p->setDescription("Run simulator based tests on project build");
+
+	p = ADD_PROPERTY_GETTER_SETTER(int, Db::ProjectProperty::SimulatorTestsTimeout, true, DbProjectProperties::simTestsTimeout, DbProjectProperties::setSimTestsTimeout);
+	p->setCategory("Tests");
+	p->setDescription("Timeout (in ms) for running simulator based script tests, -1 no timeout");
 
 	return;
 }
@@ -287,6 +295,16 @@ bool DbProjectProperties::runSimTestsOnBuild() const
 void DbProjectProperties::setRunSimTestsOnBuild(bool value)
 {
 	m_runSimTestsOnBuild = value;
+}
+
+int DbProjectProperties::simTestsTimeout() const
+{
+	return m_simTestsTimeout;
+}
+
+void DbProjectProperties::setSimTestsTimeout(int value)
+{
+	m_simTestsTimeout = value;
 }
 
 bool DbProjectProperties::uppercaseAppSignalId() const
