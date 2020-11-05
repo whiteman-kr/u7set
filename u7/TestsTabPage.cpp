@@ -998,6 +998,9 @@ TestsWidget::TestsWidget(DbController* dbc, QWidget* parent) :
 	connect(m_testsTreeView, &QTreeWidget::doubleClicked, this, &TestsWidget::testsTreeDoubleClicked);
 	connect(m_openFilesTreeWidget, &QTreeWidget::clicked, this, &TestsWidget::openFilesClicked);
 
+	connect(&m_simulator, &Sim::Simulator::scriptStarted, this, &TestsWidget::scriptStarted);
+	connect(&m_simulator, &Sim::Simulator::scriptFinished, this, &TestsWidget::scriptFinished);
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
@@ -1082,6 +1085,8 @@ void TestsWidget::projectClosed()
 	m_buildLabel->setText(tr("Build: Not loaded"));
 
 	m_outputDockWidget.clear();
+
+	m_scriptIsRunning = false;
 
 	closeAllDocuments();
 	hideEditor();
@@ -1575,6 +1580,8 @@ void TestsWidget::deleteSelectedFiles()
 	int selectedFilesCount = 0;
 	int selectedFoldersCount = 0;
 
+	QStringList deleteFiles;
+
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
 	for (QModelIndex& mi : selectedIndexList)
 	{
@@ -1596,6 +1603,8 @@ void TestsWidget::deleteSelectedFiles()
 		{
 			selectedFilesCount++;
 		}
+
+		deleteFiles.push_back(f->fileName());
 	}
 
 	QString filesText;
@@ -1615,10 +1624,22 @@ void TestsWidget::deleteSelectedFiles()
 		filesText += tr("folder(s)");
 	}
 
+	// Ask user to confirm operation
+	//
+	QMessageBox mb(this);
 
-	QString warningMessage = tr("Are you sure you want to delete selected %1?").arg(filesText);
+	mb.setWindowTitle(qApp->applicationName());
+	mb.setText(tr("Are you sure you want to delete selected %1 %2?").arg(selectedFilesCount + selectedFoldersCount).arg(filesText));
+	mb.setInformativeText(tr("If files have not been checked in before they will be deleted permanently.\nIf files were checked in at least one time they will be marked as deleted, to confirm operation perform Check In."));
 
-	if (QMessageBox::warning(this, qAppName(), warningMessage, QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+	QString detailedText = deleteFiles.join('\n');
+	mb.setDetailedText(detailedText.trimmed());
+
+	mb.setIcon(QMessageBox::Question);
+	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+	if (int mbResult = mb.exec();
+		mbResult == QMessageBox::Cancel)
 	{
 		return;
 	}
@@ -2507,9 +2528,9 @@ void TestsWidget::setCurrentDocument(int fileId)
 
 	m_openFilesTreeWidget->clearSelection();
 
-	const TestTabPageDocument& newFile = m_openDocuments.at(fileId);
+	const TestTabPageDocument& openFile = m_openDocuments.at(fileId);
 
-	QTreeWidgetItem* openFilesTreeWidgetItem = newFile.openFilesTreeWidgetItem();
+	QTreeWidgetItem* openFilesTreeWidgetItem = openFile.openFilesTreeWidgetItem();
 	if (openFilesTreeWidgetItem == nullptr)
 	{
 		Q_ASSERT(openFilesTreeWidgetItem);
@@ -2534,7 +2555,7 @@ void TestsWidget::setCurrentDocument(int fileId)
 
 	//
 
-	m_runCurrentTestsAction->setEnabled(isEditableExtension(newFile.fileName()) == true);
+	setRunTestsActionsState();
 
 	return;
 }
@@ -2823,6 +2844,20 @@ void TestsWidget::stopSimTests()
 	m_simulator.stopScript();
 }
 
+void TestsWidget::scriptStarted()
+{
+	m_scriptIsRunning = true;
+
+	setRunTestsActionsState();
+}
+
+void TestsWidget::scriptFinished()
+{
+	m_scriptIsRunning = false;
+
+	setRunTestsActionsState();
+}
+
 void TestsWidget::createToolbar()
 {
 	m_testsToolbar = addToolBar("Toolbar");
@@ -2966,6 +3001,7 @@ void TestsWidget::createEditorWidget()
 
 	m_editorLayout = new QVBoxLayout(editorWidget);
 	m_editorLayout->setContentsMargins(0, 0, 0, 0);
+	m_editorLayout->setSpacing(0);
 
 	// Editor toolbar
 	//
@@ -3171,29 +3207,23 @@ void TestsWidget::createActions()
 	m_runAllTestsAction = new QAction(QIcon(":/Images/Images/TestsRunAll.svg"), tr("Run All Tests..."), this);
 	m_runAllTestsAction->setStatusTip(tr("Run All Tests"));
 	connect(m_runAllTestsAction, &QAction::triggered, this, &TestsWidget::runAllTestFiles);
-	connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_runAllTestsAction]()	{ action->setEnabled(false);	});
-	connect(&m_simulator, &Sim::Simulator::scriptFinished, [action=m_runAllTestsAction]()	{ action->setEnabled(true);		});
 	testsToolbarActions.push_back(m_runAllTestsAction);
 
 	m_runSelectedTestsAction = new QAction(tr("Run Selected Test(s)..."), this);
 	m_runSelectedTestsAction->setStatusTip(tr("Run Selected Test(s)"));
 	m_runSelectedTestsAction->setEnabled(false);
 	connect(m_runSelectedTestsAction, &QAction::triggered, this, &TestsWidget::runSelectedTestFiles);
-	//connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_runSelectedTestsAction]()	{ action->setEnabled(false);	});
 
 	m_runCurrentTestsAction = new QAction(QIcon(":/Images/Images/TestsRunSelected.svg"), tr("Run Current Test..."), this);
 	m_runCurrentTestsAction->setStatusTip(tr("Run Current Test"));
 	m_runCurrentTestsAction->setEnabled(false);
 	connect(m_runCurrentTestsAction, &QAction::triggered, this, &TestsWidget::runTestCurrentFile);
-	//connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_runCurrentTestsAction]()	{ action->setEnabled(false);	});
 	testsToolbarActions.push_back(m_runCurrentTestsAction);
 
 	m_stopTestsAction = new QAction(QIcon(":/Images/Images/SimStop.svg"), tr("Stop Testing"), this);
 	m_stopTestsAction->setStatusTip(tr("Stop testing"));
 	m_stopTestsAction->setEnabled(false);
 	connect(m_stopTestsAction, &QAction::triggered, this, &TestsWidget::stopTests);
-	connect(&m_simulator, &Sim::Simulator::scriptStarted, [action=m_stopTestsAction]()	{ action->setEnabled(true);		});
-	connect(&m_simulator, &Sim::Simulator::scriptFinished, [action=m_stopTestsAction]()	{ action->setEnabled(false);	});
 	testsToolbarActions.push_back(m_stopTestsAction);
 
 	QAction* separatorAction5 = new QAction(this);
@@ -3258,6 +3288,7 @@ void TestsWidget::createActions()
 
 	m_runTestCurrentDocumentAction = new QAction(tr("Run Test..."), this);
 	m_runTestCurrentDocumentAction->setStatusTip(tr("Run Test"));
+	m_runTestCurrentDocumentAction->setEnabled(false);
 	connect(m_runTestCurrentDocumentAction, &QAction::triggered, this, &TestsWidget::runTestCurrentFile);
 
 	m_saveCurrentDocumentAction = new QAction(tr("Save"), this);
@@ -3287,6 +3318,7 @@ void TestsWidget::createActions()
 
 	m_runTestOpenDocumentAction = new QAction(tr("Run Test..."), this);
 	m_runTestOpenDocumentAction->setStatusTip(tr("Run Test"));
+	m_runTestOpenDocumentAction->setEnabled(false);
 	connect(m_runTestOpenDocumentAction, &QAction::triggered, this, &TestsWidget::runTestOpenFile);
 
 	m_saveOpenDocumentAction = new QAction(tr("Save"), this);
@@ -3317,7 +3349,6 @@ void TestsWidget::setTestsTreeActionsState()
 	m_historyAction->setEnabled(false);
 	m_compareAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
-	m_runSelectedTestsAction->setEnabled(false);
 
 	if (db()->isProjectOpened() == false)
 	{
@@ -3328,51 +3359,14 @@ void TestsWidget::setTestsTreeActionsState()
 	//
 	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
 
-	bool folderSelected = true;
 
 	// Folder is selected
 	//
-	for (const QModelIndex& mi : selectedIndexList)
-	{
-		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
-		if (file == nullptr)
-		{
-			assert(file);
-			return;
-		}
-
-		if (file->isFolder() == false)
-		{
-			folderSelected = false;
-			break;
-		}
-	}
+	bool folderSelected = false;
 
 	// Enable edit only files with several extensions!
 	//
 	bool editableExtension = false;
-	for (const QModelIndex& mi : selectedIndexList)
-	{
-		if (mi.parent().isValid() == false)
-		{
-			// Forbid root items processing
-			//
-			continue;
-		}
-
-		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
-		if (file == nullptr)
-		{
-			assert(file);
-			return;
-		}
-
-		if (isEditableExtension(file->fileName()) == true)
-		{
-			editableExtension = true;
-			break;
-		}
-	}
 
 	// CheckIn, CheckOut, Undo, Get/set Workcopy
 	//
@@ -3383,8 +3377,10 @@ void TestsWidget::setTestsTreeActionsState()
 	{
 		if (mi.parent().isValid() == false)
 		{
-			// Forbid root items processing
+			// Forbid root folders processing
 			//
+			folderSelected = true;
+
 			continue;
 		}
 
@@ -3393,6 +3389,16 @@ void TestsWidget::setTestsTreeActionsState()
 		{
 			assert(file);
 			return;
+		}
+
+		if (file->isFolder() == true)
+		{
+			folderSelected = true;
+		}
+
+		if (isEditableExtension(file->fileName()) == true)
+		{
+			editableExtension = true;
 		}
 
 		if (file->state() == VcsState::CheckedOut &&
@@ -3406,13 +3412,6 @@ void TestsWidget::setTestsTreeActionsState()
 			canAnyBeCheckedOut = true;
 		}
 
-		// Don't need to go further
-		//
-		if (canAnyBeCheckedIn == true &&
-			canAnyBeCheckedOut == true )
-		{
-			break;
-		}
 	}
 
 	// Enable Actions
@@ -3423,7 +3422,6 @@ void TestsWidget::setTestsTreeActionsState()
 	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
 	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
 	m_moveFileAction->setEnabled(canAnyBeCheckedIn && folderSelected == false);
-	m_runSelectedTestsAction->setEnabled(editableExtension == true && folderSelected == false);
 
 	// Delete Items action
 	//
@@ -3465,6 +3463,8 @@ void TestsWidget::setTestsTreeActionsState()
 
 	m_refreshAction->setEnabled(true);
 
+	setRunTestsActionsState();
+
 	return;
 }
 
@@ -3503,6 +3503,75 @@ void TestsWidget::setCodeEditorActionsState()
 	}
 
 	return;
+}
+
+void TestsWidget::setRunTestsActionsState()
+{
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	//
+
+	QModelIndexList selectedIndexList = m_testsTreeView->selectedSourceRows();
+
+	bool folderSelected = false;
+	bool editableExtensionSelected = false;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid root folders processing
+			//
+			folderSelected = true;
+
+			continue;
+		}
+
+		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
+		if (file == nullptr)
+		{
+			assert(file);
+			return;
+		}
+
+		if (file->isFolder() == true)
+		{
+			folderSelected = true;
+		}
+
+		if (isEditableExtension(file->fileName()) == true)
+		{
+			editableExtensionSelected = true;
+		}
+	}
+
+	m_runSelectedTestsAction->setEnabled(m_scriptIsRunning == false &&
+										 selectedIndexList.isEmpty() == false &&
+										 editableExtensionSelected == true &&
+										 folderSelected == false);
+
+	//
+
+	bool editableExtentionCurrent = false;
+
+	if (documentIsOpen(m_currentFileId) == true)
+	{
+		const TestTabPageDocument& document = m_openDocuments.at(m_currentFileId);
+		editableExtentionCurrent = isEditableExtension(document.fileName());
+	}
+
+	m_runCurrentTestsAction->setEnabled(m_scriptIsRunning == false && editableExtentionCurrent == true);
+
+	//
+
+	m_runAllTestsAction->setEnabled(m_scriptIsRunning == false);
+	m_runTestCurrentDocumentAction->setEnabled(m_scriptIsRunning == false);
+	m_runTestOpenDocumentAction->setEnabled(m_scriptIsRunning == false);
+
+	m_stopTestsAction->setEnabled(m_scriptIsRunning == true);
 }
 
 void TestsWidget::saveSettings()
@@ -3549,7 +3618,7 @@ void TestsWidget::hideEditor()
 	// m_editorEmptyLabel->setVisible(true);
 	m_currentFileId = -1;
 
-	m_runCurrentTestsAction->setEnabled(false);
+	setRunTestsActionsState();
 }
 
 bool TestsWidget::documentIsOpen(int fileId) const

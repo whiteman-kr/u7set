@@ -1009,8 +1009,10 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 
 	*(static_cast<DbFileInfo*>(childFile)) = file;
 
+	QModelIndex leftIndex = this->index(parentFile->childIndex(childFile), 0, parentIndex);
 	QModelIndex rightIndex = this->index(parentFile->childIndex(childFile), static_cast<int>(m_columns.size()) - 1, parentIndex);
-	emit dataChanged(index, rightIndex);
+
+	emit dataChanged(leftIndex, rightIndex);
 
 	return;
 }

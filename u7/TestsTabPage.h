@@ -302,6 +302,9 @@ private slots:
 	void runSimTests(const QString& buildPath, const std::vector<DbFileInfo>& files);
 	void stopSimTests();
 
+	void scriptStarted();
+	void scriptFinished();
+
 private:
 	void createToolbar();
 	void createTestsDock();
@@ -311,6 +314,7 @@ private:
 
 	void setTestsTreeActionsState();
 	void setCodeEditorActionsState();
+	void setRunTestsActionsState();
 
 	void saveSettings();
 	void restoreSettings();
@@ -429,6 +433,8 @@ private:
 	// --
 	//
 	OutputDockLog m_log;
+
+	bool m_scriptIsRunning = false;
 
 	Sim::Simulator m_simulator{&m_log, nullptr};	// log to OutputLog, no parent
 };
