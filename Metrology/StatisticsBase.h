@@ -2,22 +2,21 @@
 #define STATISTICSIGNALBASE_H
 
 #include <QObject>
-#include <QTableView>
-
-#include "SignalConnectionBase.h"
 
 #include "../lib/MetrologySignal.h"
 
+#include "SignalConnectionBase.h"
+
 // ==============================================================================================
 
-class StatisticItem
+class StatisticsItem
 {
 public:
 
-	StatisticItem();
-	explicit StatisticItem(Metrology::Signal* pSignal);
-	StatisticItem(Metrology::Signal* pSignal, std::shared_ptr<Metrology::ComparatorEx> pComparator);
-	virtual ~StatisticItem();
+	StatisticsItem();
+	explicit StatisticsItem(Metrology::Signal* pSignal);
+	StatisticsItem(Metrology::Signal* pSignal, std::shared_ptr<Metrology::ComparatorEx> pComparator);
+	virtual ~StatisticsItem();
 
 	enum State
 	{
@@ -62,32 +61,25 @@ public:
 
 // ==============================================================================================
 
-typedef QVector<StatisticItem> StatisticList;
+typedef QVector<StatisticsItem> StatisticList;
 
 // ==============================================================================================
 
-class StatisticBase : public QObject
+class StatisticsBase : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit StatisticBase(QObject *parent = nullptr);
-	virtual ~StatisticBase();
+	explicit StatisticsBase(QObject *parent = nullptr);
+	virtual ~StatisticsBase();
 
 private:
 
 	int							m_measureType = 0;			// measure type
 
 	mutable QMutex				m_signalMutex;
-	QVector<Metrology::Signal*>	m_signalList;
-	int							m_signalCount = 0;
-
-	QVector<Metrology::Signal*>	m_comparatorList;
-	int							m_comparatorCount = 0;
-
 	QVector<StatisticList>		m_statisticList;
-	int							m_statisticCount = 0;
 
 	int							m_measuredCount = 0;
 	int							m_invalidMeasureCount = 0;
@@ -96,6 +88,7 @@ public:
 
 	void						clear();
 	int							count() const;
+	int							count(int measureType) const;
 
 	int							measureType() const { return m_measureType; }
 	void						setMeasureType(int type) { m_measureType = type; }
@@ -106,14 +99,15 @@ public:
 	int							invalidMeasureCount() const { return m_invalidMeasureCount; }
 	void						setInvalidMeasureCount(int count) { m_invalidMeasureCount = count; }
 
-	void						createStatisticSignalList();
-	void						createStatisticComparatorList();
+	void						createSignalList();
+	void						createComparatorList();
 	void						updateConnections();
 
-	StatisticItem				item(int index) const;
+	StatisticsItem				item(int index) const;
+	StatisticsItem				item(int measureType, int index) const;
 
-	void						updateStatistics(QTableView* pView);
-	void						updateStatistics(QTableView* pView, Hash signalHash);
+	void						updateStatistics();
+	void						updateStatistics(Hash signalHash);
 
 public slots:
 

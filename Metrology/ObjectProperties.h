@@ -21,8 +21,8 @@
 #include "../qtpropertybrowser/src/qtvariantproperty.h"
 #include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
-#include "Options.h"
 #include "SignalBase.h"
+#include "Options.h"
 
 // Project property
 //
@@ -30,9 +30,9 @@
 
 const char* const				ProjectPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Project"),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Host"),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "File version"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Project"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Host"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "File version"),
 };
 
 const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
@@ -40,7 +40,6 @@ const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/siz
 const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
 								PROJECT_PROPERTY_GROUP_HOST				= 1,
 								PROJECT_PROPERTY_GROUP_VERSION			= 2;
-
 
 // ----------------------------------------------------------------------------------------------
 
@@ -225,10 +224,10 @@ private slots:
 
 const char* const				SignalPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Signal ID"),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Position"),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Engineering range: "),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Signal ID"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Position"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Electric range: "),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Engineering range: "),
 };
 
 const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
@@ -247,15 +246,16 @@ const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID			= 0,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH		= 3,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT		= 4,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 5,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 6,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 7,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD		= 6,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 7,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 8,
 
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 8,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 9,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 10,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 11;
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 9,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 10,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 11,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 12;
 
-const int						SIGNAL_PROPERTY_ITEM_COUNT				= 12;
+const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -313,10 +313,10 @@ private slots:
 
 const char* const				ComparatorPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Signal ID"),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Position"),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Engineering range: "),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Signal ID"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Position"),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Electric range: "),
+								QT_TRANSLATE_NOOP("ObjectProperty.h", "Engineering range: "),
 };
 
 const int						COMPARATOR_PROPERTY_GROUP_COUNT				= sizeof(ComparatorPropertyGroup)/sizeof(ComparatorPropertyGroup[0]);

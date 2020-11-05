@@ -3,9 +3,9 @@
 
 // This class is designed to receive signals from CfgSrv
 
-#include "Options.h"
-
 #include "../lib/CfgServerLoader.h"
+
+#include "Options.h"
 
 // ==============================================================================================
 

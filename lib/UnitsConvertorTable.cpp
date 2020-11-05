@@ -1,4 +1,5 @@
 ﻿#include "UnitsConvertorTable.h"
+#include <limits>
 
 double findConversionVal(double val, const double* pArray, int size, bool isDegree)
 {
@@ -8,7 +9,7 @@ double findConversionVal(double val, const double* pArray, int size, bool isDegr
 	{
 		if (isDegree == true)
 		{
-			if (val == pArray[i])
+			if ((std::nextafter(val, std::numeric_limits<double>::lowest()) <= pArray[i] && std::nextafter(val, std::numeric_limits<double>::max()) >= pArray[i]) == true)
 			{
 				retVal = pArray[i+1];
 				break;
@@ -22,7 +23,7 @@ double findConversionVal(double val, const double* pArray, int size, bool isDegr
 		}
 		else
 		{
-			if (val == pArray[i+1])
+			if ((std::nextafter(val, std::numeric_limits<double>::lowest()) <= pArray[i+1] && std::nextafter(val, std::numeric_limits<double>::max()) >= pArray[i+1]) == true)
 			{
 				retVal = pArray[i];
 				break;
@@ -33,7 +34,6 @@ double findConversionVal(double val, const double* pArray, int size, bool isDegr
 				retVal = ((pArray[i+2] - pArray[i])*(val-pArray[i+1]))/(pArray[i+3]-pArray[i+1])+pArray[i];
 				break;
 			}
-
 		}
 	}
 

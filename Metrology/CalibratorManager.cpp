@@ -20,8 +20,6 @@ CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
 {
 	setReadyForManage(true);
 
-	loadSettings(pCalibrator);
-
 	createManageDialog();
 }
 
@@ -41,7 +39,7 @@ CalibratorManager::~CalibratorManager()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorManager::calibratorIsConnected()
+bool CalibratorManager::calibratorIsConnected() const
 {
 	if (m_pCalibrator == nullptr)
 	{
@@ -156,7 +154,7 @@ void CalibratorManager::createManageDialog()
 
 	m_pRemoteControlCheck = new QCheckBox(tr("Remote control"), this);
 
-	m_pErrorsButton = new QPushButton(tr("List errors"), this);
+	m_pErrorsButton = new QPushButton(qApp->translate("CalibratorManager.h", ErrorList), this);
 
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -224,25 +222,6 @@ void CalibratorManager::initDialog()
 
 	delete font;
 
-	for (int m = 0; m < CALIBRATOR_MODE_COUNT; m++)
-	{
-		m_pModeList->addItem(CalibratorMode[m]);
-	}
-	m_pModeList->setCurrentIndex(m_pCalibrator->mode());
-
-
-	for (int u = 0; u < CALIBRATOR_UNIT_COUNT; u++)
-	{
-		m_pUnitList->addItem(CalibratorUnit[u]);
-	}
-
-	switch(m_pCalibrator->mode())
-	{
-		case CALIBRATOR_MODE_MEASURE:	m_pUnitList->setCurrentIndex(m_pCalibrator->measureUnit());	break;
-		case CALIBRATOR_MODE_SOURCE:	m_pUnitList->setCurrentIndex(m_pCalibrator->sourceUnit());	break;
-		default:						m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNKNOWN);
-	}
-
 	m_pRemoteControlCheck->setLayoutDirection(Qt::RightToLeft);
 	m_pRemoteControlCheck->setChecked(true);
 
@@ -266,8 +245,8 @@ void CalibratorManager::initDialog()
 	connect(m_pStepUpButton, &QPushButton::clicked, this, &CalibratorManager::onStepUp);
 	connect(this, &CalibratorManager::calibratorStepUp, m_pCalibrator, &Calibrator::stepUp, Qt::QueuedConnection);
 
-	connect(m_pModeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CalibratorManager::onModeUnitList);
-	connect(m_pUnitList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CalibratorManager::onModeUnitList);
+	connect(m_pModeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CalibratorManager::onSetMode);
+	connect(m_pUnitList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CalibratorManager::onSetUnit);
 	connect(this, &CalibratorManager::calibratorSetUnit, m_pCalibrator, &Calibrator::setUnit, Qt::QueuedConnection);
 
 	connect(m_pErrorsButton, &QPushButton::clicked, this, &CalibratorManager::onErrorList);
@@ -278,18 +257,58 @@ void CalibratorManager::initDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::enableInterface(bool enable)
+void CalibratorManager::setWindowCaption()
 {
 	if (m_pCalibrator == nullptr)
+	{
+		setWindowTitle(QString());
+		return;
+	}
+
+	int channel = m_pCalibrator->channel();
+	if (channel < 0 || channel >= Metrology::ChannelCount)
+	{
+		setWindowTitle(QString());
+		return;
+	}
+
+	//
+	//
+
+	QString title;
+
+	if (m_pCalibrator->isConnected() == true)
+	{
+		title = QString("c:%1 ").arg(channel + 1) + m_pCalibrator->typeStr() + " " + m_pCalibrator->serialNo();
+	}
+	else
+	{
+		title = tr("c:%1 (%2) - Disconnected").arg(channel + 1).arg(m_pCalibrator->portName()) ;
+	}
+
+	setWindowTitle(title);
+
+	//
+	//
+	if (m_pErrorDialog == nullptr)
 	{
 		return;
 	}
 
-	if (enable == true && m_pCalibrator->isConnected() == false)
+	m_pErrorDialog->setWindowTitle(title + " : " + qApp->translate("CalibratorManager.h", ErrorList));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::enableInterface(bool enable)
+{
+	if (calibratorIsConnected() == false)
 	{
 		enable = false;
 	}
 
+	//
+	//
 	m_pMeasureEdit->setEnabled(enable);
 	m_pSourceEdit->setEnabled(enable);
 	m_pValueEdit->setEnabled(enable);
@@ -300,95 +319,250 @@ void CalibratorManager::enableInterface(bool enable)
 	m_pUnitList->setEnabled(enable);
 	m_pRemoteControlCheck->setEnabled(enable);
 
-	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNKNOWN)
+	//
+	//
+	if (m_pCalibrator == nullptr)
+	{
+		return;
+	}
+
+	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNDEFINED)
 	{
 		m_pSetValueButton->setEnabled(false);
 		m_pStepDownButton->setEnabled(false);
 		m_pStepUpButton->setEnabled(false);
 	}
 
-	m_pRemoteControlCheck->setVisible(m_pCalibrator->type() == CALIBRATOR_TYPE_CALYS75);
+	//
+	//
+	m_pRemoteControlCheck->setVisible(false);
+
+	switch (m_pCalibrator->type())
+	{
+		case CALIBRATOR_TYPE_CALYS75:
+			m_pRemoteControlCheck->setText(tr("Remote control"));
+			m_pRemoteControlCheck->setVisible(true);
+			break;
+		case CALIBRATOR_TYPE_KTHL6221:
+			m_pRemoteControlCheck->setText(tr("Output ON/OFF"));
+			m_pRemoteControlCheck->setVisible(true);
+			break;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::onCalibratorError(QString text)
+void CalibratorManager::updateModeList()
 {
-	QTime time;
-	time.currentTime();
+	if (calibratorIsConnected() == false)
+	{
+		m_pModeList->clear();
+		m_pUnitList->clear();
+		return;
+	}
 
-	QString error = QTime::currentTime().toString("hh:mm:ss.zzz - ") + text;
+	int currentModeIndex = -1;
 
-	m_pErrorList->append(error);
-	m_pErrorsButton->setText(QString("List errors (%1)").arg(m_pErrorList->document()->lineCount()));
+	m_pModeList->blockSignals(true);
 
-	if (isVisible() == false)
+	for (int l = 0; l < CalibratorLimitCount; l++)
+	{
+		const CalibratorLimit& cl = CalibratorLimits[l];
+		if (cl.isValid() == false)
+		{
+			continue;
+		}
+
+		if (cl.type != m_pCalibrator->type())
+		{
+			continue;
+		}
+
+		if (cl.mode < 0 || cl.mode > CALIBRATOR_MODE_COUNT)
+		{
+			continue;
+		}
+
+		if (m_pModeList->findText(qApp->translate("Calibrator.h", CalibratorMode[cl.mode])) != -1)
+		{
+			continue;
+		}
+
+		m_pModeList->addItem(qApp->translate("Calibrator.h", CalibratorMode[cl.mode]), cl.mode);
+
+		if (cl.mode == m_pCalibrator->mode())
+		{
+			currentModeIndex = m_pModeList->count() - 1;
+		}
+	}
+
+	m_pModeList->blockSignals(false);
+
+	if (m_pModeList->count() == 0)
 	{
 		return;
 	}
 
-	QMessageBox::critical(this, windowTitle(), text);
+	m_pModeList->setCurrentIndex(currentModeIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::onCalibratorConnect()
-{
-	if (m_pCalibrator == nullptr)
-	{
-		return;
-	}
-
-	int channel = m_pCalibrator->channel();
-	if (channel < 0 || channel >= Metrology::ChannelCount)
-	{
-		return;
-	}
-
-	QString title = QString("c:%1 ").arg(channel + 1) + m_pCalibrator->caption() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
-	setWindowTitle(title);
-	m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
-
-	enableInterface(true);
-
-	emit calibratorGetValue();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::onCalibratorDisconnect()
-{
-	if (m_pCalibrator == nullptr)
-	{
-		return;
-	}
-
-	int channel = m_pCalibrator->channel();
-	if (channel < 0 || channel >= Metrology::ChannelCount)
-	{
-		return;
-	}
-
-	QString title = QString("c:%1 (%2) - Disconnected").arg(channel + 1).arg(m_pCalibrator->portName()) ;
-	setWindowTitle(title);
-
-	m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
-
-	enableInterface(false);
-
-	setReadyForManage(false);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::onUnitChanged()
+void CalibratorManager::updateUnitList(int mode)
 {
 	if (calibratorIsConnected() == false)
 	{
 		return;
 	}
 
-	updateValue();
+	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	{
+		return;
+	}
+
+	int currentUnit = CALIBRATOR_UNIT_UNDEFINED;
+	int selectedUnitIndex = -1;
+
+	switch(mode)
+	{
+		case CALIBRATOR_MODE_MEASURE:	currentUnit = m_pCalibrator->measureUnit();	break;
+		case CALIBRATOR_MODE_SOURCE:	currentUnit = m_pCalibrator->sourceUnit();	break;
+	}
+
+	m_pUnitList->clear();
+
+	m_pUnitList->blockSignals(true);
+
+	for (int l = 0; l < CalibratorLimitCount; l++)
+	{
+		const CalibratorLimit& cl = CalibratorLimits[l];
+		if (cl.isValid() == false)
+		{
+			continue;
+		}
+
+		if (cl.type != m_pCalibrator->type())
+		{
+			continue;
+		}
+
+		if (cl.mode != mode)
+		{
+			continue;
+		}
+
+		if (m_pUnitList->findText(qApp->translate("Calibrator.h", CalibratorUnit[cl.unit])) != -1)
+		{
+			continue;
+		}
+
+		m_pUnitList->addItem(qApp->translate("Calibrator.h", CalibratorUnit[cl.unit]), cl.unit);
+
+		if (cl.unit == currentUnit)
+		{
+			selectedUnitIndex = m_pUnitList->count() - 1;
+		}
+	}
+
+	m_pUnitList->blockSignals(false);
+
+	if (m_pUnitList->count() == 0)
+	{
+		return;
+	}
+
+	m_pUnitList->setCurrentIndex(selectedUnitIndex);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::updateValue()
+{
+	if (m_pCalibrator == nullptr)
+	{
+		return;
+	}
+
+	// Measure
+	//
+
+	QString measureValue;
+	CalibratorLimit measureLimit = m_pCalibrator->currentMeasureLimit();
+
+	if (measureLimit.isValid() == false)
+	{
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION);
+	}
+	else
+	{
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', measureLimit.precesion) + " " + CalibratorUnit[measureLimit.unit];
+	}
+
+	m_pMeasureEdit->setText(measureValue);
+	m_pMeasureEdit->setCursorPosition(0);
+
+	// Source
+	//
+
+	QString sourceValue;
+	CalibratorLimit sourceLimit = m_pCalibrator->currentSourceLimit();
+
+	if (sourceLimit.isValid() == false)
+	{
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION);
+	}
+	else
+	{
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', sourceLimit.precesion) + " " + CalibratorUnit[sourceLimit.unit];
+	}
+
+	m_pSourceEdit->setText(sourceValue);
+	m_pSourceEdit->setCursorPosition(0);
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::onCalibratorError(QString errorText)
+{
+	QTime time;
+	time.currentTime();
+
+	QString error = QTime::currentTime().toString("hh:mm:ss.zzz - ") + errorText;
+
+	m_pErrorList->append(error);
+	m_pErrorsButton->setText(qApp->translate("CalibratorManager.h", ErrorList) + QString("(%1)").arg(m_pErrorList->document()->lineCount()));
+
+	if (isVisible() == false)
+	{
+		return;
+	}
+
+	QMessageBox::critical(this, windowTitle(), errorText);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::onCalibratorConnect()
+{
+	setWindowCaption();
+
+	enableInterface(true);
+
+	updateModeList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::onCalibratorDisconnect()
+{
+	setWindowCaption();
+
+	enableInterface(false);
+
+	updateModeList();
+
+	setReadyForManage(false);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -419,16 +593,58 @@ bool CalibratorManager::setUnit(int mode, int unit)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::onModeUnitList(int)
+void CalibratorManager::onSetMode(int modeIndex)
 {
 	m_pSetValueButton->setEnabled(false);
 	m_pStepDownButton->setEnabled(false);
 	m_pStepUpButton->setEnabled(false);
 
-	int mode = m_pModeList->currentIndex();
-	int unit = m_pUnitList->currentIndex();
+	if (modeIndex == -1)
+	{
+		return;
+	}
 
-	if (setUnit(mode, unit) == false)
+	int mode = m_pModeList->itemData(modeIndex).toInt();
+	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	{
+		return;
+	}
+
+	updateUnitList(mode);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::onSetUnit(int unitIndex)
+{
+	m_pSetValueButton->setEnabled(false);
+	m_pStepDownButton->setEnabled(false);
+	m_pStepUpButton->setEnabled(false);
+
+	int modeIndex = m_pModeList->currentIndex();
+	if (modeIndex == -1)
+	{
+		return;
+	}
+
+	int mode = m_pModeList->itemData(modeIndex).toInt();
+	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	{
+		return;
+	}
+
+	if (unitIndex == -1)
+	{
+		return;
+	}
+
+	int unit = m_pUnitList->itemData(unitIndex).toInt();
+	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	{
+		return;
+	}
+
+	if (calibratorIsConnected() == false)
 	{
 		return;
 	}
@@ -440,20 +656,16 @@ void CalibratorManager::onModeUnitList(int)
 		m_pStepUpButton->setEnabled(true);
 	}
 
+	setReadyForManage(true);
+
+	emit calibratorSetUnit(mode, unit);
+
 	emit calibratorGetValue();
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::onValueChanging()
-{
-	enableInterface(false);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::onValueChanged()
+void CalibratorManager::onUnitChanged()
 {
 	if (calibratorIsConnected() == false)
 	{
@@ -461,48 +673,11 @@ void CalibratorManager::onValueChanged()
 	}
 
 	updateValue();
-
-	enableInterface(true);
-
-	setReadyForManage(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::updateValue()
-{
-	int measureUnit = m_pCalibrator->measureUnit();
-	int sourceUnit = m_pCalibrator->sourceUnit();
-
-	QString measureValue, sourceValue;
-
-	if (measureUnit < 0 || measureUnit >= CALIBRATOR_UNIT_COUNT)
-	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', 3);
-	}
-	else
-	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', 3) + " " + CalibratorUnit[ measureUnit ];
-	}
-
-	if (sourceUnit < 0 || sourceUnit >= CALIBRATOR_UNIT_COUNT)
-	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', 3);
-	}
-	else
-	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', 3) + " " + CalibratorUnit[ sourceUnit ];
-	}
-
-	m_pMeasureEdit->setText(measureValue);
-	m_pMeasureEdit->setCursorPosition(0);
-	m_pSourceEdit->setText(sourceValue);
-	m_pSourceEdit->setCursorPosition(0);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::value()
+void CalibratorManager::getValue()
 {
 	if (calibratorIsConnected() == false)
 	{
@@ -587,6 +762,29 @@ void CalibratorManager::onStepUp()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorManager::onValueChanging()
+{
+	enableInterface(false);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::onValueChanged()
+{
+	if (calibratorIsConnected() == false)
+	{
+		return;
+	}
+
+	updateValue();
+
+	enableInterface(true);
+
+	setReadyForManage(true);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorManager::onErrorList()
 {
 	if (m_pErrorDialog == nullptr)
@@ -603,51 +801,6 @@ void CalibratorManager::onErrorList()
 void CalibratorManager::onRemoveControl()
 {
 	emit calibratorRemoveControl(m_pRemoteControlCheck->isChecked());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::loadSettings(Calibrator* pCalibrator)
-{
-	if (pCalibrator == nullptr)
-	{
-		return;
-	}
-
-	int channel = pCalibrator->channel();
-	if (channel == INVALID_CALIBRATOR_CHANNEL)
-	{
-		return;
-	}
-
-	QSettings s;
-
-	QString	portName	= s.value(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), QString("COM%1").arg(channel + 1)).toString();
-	int		type		= s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), CALIBRATOR_TYPE_CALYS75).toInt();
-
-	pCalibrator->setPortName(portName);
-	pCalibrator->setType(type);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::saveSettings(Calibrator* pCalibrator)
-{
-	if (pCalibrator == nullptr)
-	{
-		return;
-	}
-
-	int channel = pCalibrator->channel();
-	if (channel == INVALID_CALIBRATOR_CHANNEL)
-	{
-		return;
-	}
-
-	QSettings s;
-
-	s.setValue(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), pCalibrator->portName());
-	s.setValue(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), pCalibrator->type());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

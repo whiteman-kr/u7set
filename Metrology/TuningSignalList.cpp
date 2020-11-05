@@ -1,9 +1,10 @@
 #include "TuningSignalList.h"
 
 #include "MainWindow.h"
-#include "Options.h"
-#include "ExportData.h"
+#include "CopyData.h"
 #include "FindData.h"
+#include "ExportData.h"
+#include "Options.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -52,7 +53,7 @@ QVariant TuningSourceTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SOURCE_LIST_COLUMN_COUNT)
 		{
-			result = TuningSourceColumn[section];
+			result = qApp->translate("TuningSignalListDialog.h", TuningSourceColumn[section]);
 		}
 	}
 
@@ -326,7 +327,7 @@ QVariant TuningSignalTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SIGNAL_LIST_COLUMN_COUNT)
 		{
-			result = TuningSignalColumn[section];
+			result = qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[section]);
 		}
 	}
 
@@ -482,7 +483,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 	if (pSignal->state().valid() == false)
 	{
-		return tr("No valid");
+		return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
 	}
 
 	QString stateStr, formatStr;
@@ -781,7 +782,7 @@ void TuningSignalListDialog::createHeaderContexMenu()
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(TuningSignalColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -970,7 +971,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			setSignalState();
 		}
@@ -1014,7 +1015,7 @@ void TuningSignalListDialog::setSignalState()
 
 void TuningSignalListDialog::exportSignal()
 {
-	ExportData* dialog = new ExportData(m_pSignalView, tr("Signals"));
+	ExportData* dialog = new ExportData(m_pSignalView, false, "TuningSignals");
 	dialog->exec();
 }
 
@@ -1030,33 +1031,8 @@ void TuningSignalListDialog::find()
 
 void TuningSignalListDialog::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pSignalView->model()->rowCount();
-	int columnCount = m_pSignalView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pSignalView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pSignalView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pSignalView->model()->data(m_pSignalView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pSignalView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1266,7 +1242,7 @@ void TuningSignalStateDialog::onOk()
 
 		formatStr = QString::asprintf("%%.%df", m_param.decimalPlaces());
 
-		str = QString::asprintf("Failed input value: " + formatStr.toAscii(), state);
+		str = tr("Failed input value: %1").arg(QString::asprintf(formatStr.toAscii(), state));
 		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);

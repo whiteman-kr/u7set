@@ -1,4 +1,5 @@
 #include "../lib/MetrologySignal.h"
+#include "../lib/UnitsConvertor.h"
 
 namespace Metrology
 {
@@ -337,105 +338,92 @@ namespace Metrology
 			UnitsConvertResult qpl;
 			UnitsConvertResult qph;
 
-			switch (signal.inOutType())
+			if (signal.isInput() == true || signal.isOutput() == true)
 			{
-				case E::SignalInOutType::Input:
-
-					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-					{
-						break;
-					}
-
+				if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true && signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
+				{
 					m_electricLowLimit = signal.electricLowLimit();
 					m_electricHighLimit = signal.electricHighLimit();
 					m_electricPrecision = 4;
+				}
 
-					if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
-					{
-						break;
-					}
-
+				if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
+				{
 					m_electricUnitID = signal.electricUnit();
+				}
+
+				if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == true)
+				{
 					m_electricSensorType = signal.sensorType();
+				}
 
-					switch (signal.electricUnit())
-					{
-						case E::ElectricUnit::V:
+				switch (signal.inOutType())
+				{
+					case E::SignalInOutType::Input:
 
-							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
-							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+						switch (m_electricUnitID)
+						{
+							case E::ElectricUnit::V:
 
-							break;
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
 
-						case E::ElectricUnit::mA:
-
-							if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
-							{
 								break;
-							}
 
-							m_electricRLoad = signal.rload_Ohm();
+							case E::ElectricUnit::mA:
 
-							qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
-							qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID,m_electricSensorType, m_electricRLoad);
+								if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == true)
+								{
+									m_electricRLoad = signal.rload_Ohm();
+								}
 
-							break;
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID,m_electricSensorType, m_electricRLoad);
 
-						case E::ElectricUnit::mV:
+								break;
 
-							qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
-							qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
+							case E::ElectricUnit::mV:
 
-							break;
+								qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
+								qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType);
 
-						case E::ElectricUnit::Ohm:
+								break;
 
-							if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
-							{
-								m_electricR0 = signal.r0_Ohm();
-							}
+							case E::ElectricUnit::Ohm:
 
-							qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
-							qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
+								m_electricR0 = uc.r0_from_signal(signal);
 
-							break;
-					}
+								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
+								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
 
-					break;
+								break;
+						}
 
-				case E::SignalInOutType::Output:
-
-					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-					{
 						break;
-					}
 
-					m_electricLowLimit = signal.electricLowLimit();
-					m_electricHighLimit = signal.electricHighLimit();
-					m_electricPrecision = 4;
+					case E::SignalInOutType::Output:
 
-					if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
-					{
+						if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+						{
+							break;
+						}
+
+						qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
+						qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
+
 						break;
-					}
-
-					m_electricUnitID = signal.electricUnit();
-
-					if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
-					{
-						break;
-					}
-
-					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
-					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
-
-					break;
+				}
 			}
 
 			if (qpl.ok() == true && qph.ok() == true)
 			{
 				m_physicalLowLimit = qpl.toDouble();
 				m_physicalHighLimit = qph.toDouble();
+			}
+			else
+			{
+				m_physicalLowLimit = m_electricLowLimit;
+				m_physicalHighLimit = m_electricHighLimit;
 			}
 		}
 	}
@@ -509,6 +497,18 @@ namespace Metrology
 
 		return true;
 	}
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::signalTypeStr() const
+	{
+		int type = inOutTypeInt();
+		if (type < 0 || type >= SIGANL_TYPE_COUNT)
+		{
+			return QString();
+		}
+
+		return  qApp->translate("MeasureSignal.h", SignalTypeStr[type]);
+	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
@@ -530,9 +530,65 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setElectricLowLimit(double lowLimit)
+	{
+		m_electricLowLimit = lowLimit;
+
+		if (isSpecPropExists(SignalProperties::electricLowLimitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricLowLimit(lowLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricHighLimit(double highLimit)
+	{
+		m_electricHighLimit = highLimit;
+
+		if (isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricHighLimit(highLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricUnitID(E::ElectricUnit unitID)
+	{
+		m_electricUnitID = unitID;
+
+		if (isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricUnit(unitID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::electricUnitStr() const
 	{
 		return QMetaEnum::fromType<E::ElectricUnit>().key(m_electricUnitID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricSensorType(E::SensorType sensorType)
+	{
+		m_electricSensorType = sensorType;
+
+		if (isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setSensorType(sensorType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -559,7 +615,8 @@ namespace Metrology
 
 			case E::ElectricUnit::Ohm:
 
-				if (m_electricSensorType != E::SensorType::Ohm_Raw)
+				if (	m_electricSensorType != E::SensorType::NoSensor && m_electricSensorType != E::SensorType::Ohm_Raw &&
+						m_electricSensorType != E::SensorType::Ohm_Pt21 && m_electricSensorType != E::SensorType::Ohm_Cu23)
 				{
 					typeStr += " " + electricR0Str();
 				}
@@ -573,11 +630,39 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setElectricRLoad(double rload)
+	{
+		m_electricRLoad = rload;
+
+		if (isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setRload_Ohm(rload);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::electricRLoadStr() const
 	{
 		QString r0;
 		r0 = QString::asprintf("R=%0.0f", m_electricRLoad);
 		return r0;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricR0(double r0)
+	{
+		m_electricR0 = r0;
+
+		if (isSpecPropExists(SignalProperties::R0_OhmCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setR0_Ohm(r0);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -629,6 +714,19 @@ namespace Metrology
 		}
 
 		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool SignalParam::isLinearRange() const
+	{
+		if (	(m_electricUnitID == E::ElectricUnit::mV && m_electricSensorType != E::SensorType::mV_Raw_Mul_8 && m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
+				(m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw) )
+		{
+			return false;	// for non-linear
+		}
+
+		return true;		// for linear
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -850,6 +948,9 @@ namespace Metrology
 		m_compareSignal = nullptr;
 		m_hysteresisSignal = nullptr;
 		m_outputSignal = nullptr;
+
+		m_compareValue = 0;
+		m_hysteresisValue = 0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -917,26 +1018,14 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::compareOnlineValue() const
+	double ComparatorEx::compareOnlineValue(int cmpValueType)
 	{
-		//
-		//
-		double hysteresisValue = 0;
+		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		{
+			return 0.0;
+		}
 
-		if (hysteresis().isConst() == true)
-		{
-			hysteresisValue = hysteresis().constValue();
-		}
-		else
-		{
-			if (m_hysteresisSignal != nullptr)
-			{
-				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
-				{
-					hysteresisValue = m_hysteresisSignal->state().value();
-				}
-			}
-		}
+		double hysteresisValue = hysteresisOnlineValue();	// get hysteresis value
 
 		//
 		//
@@ -944,17 +1033,37 @@ namespace Metrology
 
 		switch (m_deviationType)
 		{
-			case DeviationType::Down:	deviation = -hysteresisValue / 2;	break;
-			case DeviationType::Up:		deviation = hysteresisValue / 2;	break;
+			case DeviationType::Unused:													// for comparators: Less and Greate
+
+				if (cmpValueType == CmpValueTypeHysteresis)
+				{
+					switch (cmpType())
+					{
+						case E::CmpType::Less:		deviation = hysteresisValue;	break;
+						case E::CmpType::Greate:	deviation -= hysteresisValue;	break;
+					}
+				}
+
+				break;
+
+			case DeviationType::Down:													// for comparators: Equal and NotEqual
+
+				deviation = -hysteresisValue / 2;
+
+				break;
+
+			case DeviationType::Up:														// for comparators: Equal and NotEqual
+
+				deviation = hysteresisValue / 2;
+
+				break;
 		}
 
 		//
 		//
-		double value = 0;
-
 		if (compare().isConst() == true)
 		{
-			value = compare().constValue() + deviation;
+			m_compareValue = compare().constValue() + deviation;
 		}
 		else
 		{
@@ -962,19 +1071,24 @@ namespace Metrology
 			{
 				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().valid() == true)
 				{
-					value = m_compareSignal->state().value() + deviation;
+					m_compareValue = m_compareSignal->state().value() + deviation;
 				}
 			}
 		}
 
-		return value;
+		return m_compareValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareOnlineValueStr() const
+	QString ComparatorEx::compareOnlineValueStr(int cmpValueType)
 	{
-		return QString::number(compareOnlineValue(), 'f', valuePrecision());
+		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		{
+			return QString();
+		}
+
+		return QString::number(compareOnlineValue(cmpValueType), 'f', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -987,7 +1101,7 @@ namespace Metrology
 		//
 		switch (m_deviationType)
 		{
-			case DeviationType::NoUsed:	value = compare().constValue();									break;
+			case DeviationType::Unused:	value = compare().constValue();									break;
 			case DeviationType::Down:	value = compare().constValue() - hysteresis().constValue() / 2;	break;
 			case DeviationType::Up:		value= compare().constValue() + hysteresis().constValue() / 2;	break;
 		}
@@ -1017,13 +1131,11 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double ComparatorEx::hysteresisOnlineValue() const
+	double ComparatorEx::hysteresisOnlineValue()
 	{
-		double value = 0;
-
 		if (hysteresis().isConst() == true)
 		{
-			value = hysteresis().constValue();
+			m_hysteresisValue = hysteresis().constValue();
 		}
 		else
 		{
@@ -1031,17 +1143,17 @@ namespace Metrology
 			{
 				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
 				{
-					value = m_hysteresisSignal->state().value();
+					m_hysteresisValue = m_hysteresisSignal->state().value();
 				}
 			}
 		}
 
-		return value;
+		return m_hysteresisValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisOnlineValueStr() const
+	QString ComparatorEx::hysteresisOnlineValueStr()
 	{
 		return QString::number(hysteresisOnlineValue(), 'f', valuePrecision());
 	}
@@ -1061,9 +1173,9 @@ namespace Metrology
 			value = hysteresis().appSignalID();
 		}
 
-		if (m_deviationType != DeviationType::NoUsed)
+		if (m_deviationType != DeviationType::Unused)
 		{
-			value.insert(0, "Not used - ");
+			value = QT_TRANSLATE_NOOP("MetrologySignal.cpp", "Unused");
 		}
 
 		return value;
@@ -1074,17 +1186,17 @@ namespace Metrology
 
 	bool ComparatorEx::outputState() const
 	{
-		bool value = false;
-
-		if (m_outputSignal != nullptr)
+		if (m_outputSignal == nullptr)
 		{
-			if (m_outputSignal->param().isValid() == true && m_outputSignal->state().valid() == true)
-			{
-				value = m_outputSignal->state().value() != 0.0;
-			}
+			return false;
 		}
 
-		return value;
+		if (m_outputSignal->param().isValid() == false || m_outputSignal->state().valid() == false)
+		{
+			return false;
+		}
+
+		return m_outputSignal->state().value() != 0.0;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

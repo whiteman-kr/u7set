@@ -2,9 +2,9 @@
 
 #include <assert.h>
 
-#include "SignalBase.h"
-
 #include "../lib/ServiceSettings.h"
+
+#include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -175,7 +175,7 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 {
 	bool result = theOptions.readFromXml(fileData);
 
-	qDebug() << __FUNCTION__ << (result == true ? "OK" : "ERROR!");
+	qDebug() << __FUNCTION__ << (result == true ? "Ok" : "Error!");
 
 	return result;
 }

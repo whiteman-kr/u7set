@@ -63,6 +63,7 @@ void IoSignalParam::clear()
 	m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	m_pCalibratorManager = nullptr;
+
 	m_percent = 0;
 	m_comparatorIndex = -1;
 	m_negativeRange = false;
@@ -675,10 +676,10 @@ QString IoSignalParam::calibratorStr() const
 {
 	if (m_pCalibratorManager == nullptr || m_pCalibratorManager->calibratorIsConnected() == false)
 	{
-		return QString("Not connected");
+		return qApp->translate("CalibratorManager.h", CalibratorNotConnected);
 	}
 
-	return QString("Calibrator %1 (%2)").arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
+	return QString("%1 %2 (%3)").arg(qApp->translate("CalibratorManager.h", CalibratorStr)).arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -695,6 +696,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 	m_signalConnectionType = from.m_signalConnectionType;
 
 	m_pCalibratorManager = from.m_pCalibratorManager;
+
 	m_percent = from.m_percent;
 	m_comparatorIndex = from.m_comparatorIndex;
 	m_negativeRange  = from.m_negativeRange;
@@ -727,7 +729,7 @@ void MultiChannelSignal::clear()
 
 	m_pSignalList.fill(nullptr, m_channelCount);
 	m_location.clear();
-	m_strID.clear();
+	m_signalID.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -818,10 +820,48 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 	switch(measureKind)
 	{
-		case MEASURE_KIND_ONE_RACK:		m_strID = param.customAppSignalID();																			break;
-		case MEASURE_KIND_ONE_MODULE:	m_strID = param.location().moduleID();																			break;
-		case MEASURE_KIND_MULTI_RACK:	m_strID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());	break;
-		default:						assert(false);
+		case MEASURE_KIND_ONE_RACK:
+			m_signalID = param.appSignalID();
+			m_caption = param.caption();
+			break;
+
+		case MEASURE_KIND_ONE_MODULE:
+			m_signalID = param.location().moduleID();
+			m_caption.clear();
+			break;
+
+		case MEASURE_KIND_MULTI_RACK:
+
+			switch (param.inOutType())
+			{
+				case E::SignalInOutType::Input:
+				case E::SignalInOutType::Output:
+
+					m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());
+
+					break;
+
+				case E::SignalInOutType::Internal:
+
+					if (param.enableTuning() == true)
+					{
+						m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());
+					}
+					else
+					{
+						m_signalID = QString::asprintf("CH %02d _ MD %02d", m_location.chassis(), m_location.module());
+					}
+
+					break;
+
+				default:
+					assert(0);
+					break;
+			}
+			break;
+
+		default:
+			assert(false);
 	}
 
 	return true;
@@ -856,7 +896,8 @@ MultiChannelSignal& MultiChannelSignal::operator=(const MultiChannelSignal& from
 	m_channelCount = from.m_channelCount;
 	m_pSignalList = from.m_pSignalList;
 	m_location = from.m_location;
-	m_strID = from.m_strID;
+	m_signalID = from.m_signalID;
+	m_caption = from.m_caption;
 
 	return *this;
 }
@@ -1172,7 +1213,7 @@ void SignalBase::clearSignalList()
 	m_rackBase.clear();
 	m_signalConnectionBase.clearSignals();		// set all signal of connection in nullptr, but don't remove these signals
 	m_tuningBase.clear();
-	m_statisticBase.clear();
+	m_statisticsBase.clear();
 
 	m_signalHashMap.clear();
 	m_signalList.clear();
@@ -1546,7 +1587,7 @@ Hash SignalBase::hashForRequestState(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::rackCountForMeasure() const
+int SignalBase::rackForMeasureCount() const
 {
 	QMutexLocker l(&m_rackMutex);
 
@@ -1619,8 +1660,14 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::createRackListForMeasure(int signalConnectionType)
+int SignalBase::createRackListForMeasure(int measureKind, int signalConnectionType)
 {
+	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	{
+		assert(false);
+		return 0;
+	}
+
 	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		assert(false);
@@ -1635,96 +1682,141 @@ int SignalBase::createRackListForMeasure(int signalConnectionType)
 
 	m_rackList.clear();
 
-	int signalCount = m_signalList.count();
-
-	// select racks that has signals, other racks ignore
-	//
-	for(int i = 0; i < signalCount; i ++)
+	switch (measureKind)
 	{
-		Metrology::SignalParam& param = m_signalList[i].param();
-		if (param.isValid() == false)
-		{
-			continue;
-		}
-
-		if (param.isAnalog() == false)
-		{
-			continue;
-		}
-
-		if (param.location().chassis() == -1 || param.location().module() == -1)
-		{
-			continue;
-		}
-
-		switch (signalConnectionType)
-		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:
-			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-
-				if (param.isInput() == false)
-				{
-					continue;
-				}
-
-				if (param.location().place() == -1)
-				{
-					continue;
-				}
-
-				break;
-
-			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-
-				if (param.isInternal() == false)
-				{
-					continue;
-				}
-
-				break;
-
-			default:
-				assert(0);
-				continue;
-		}
-
-		Hash rackHash = param.location().rack().hash();
-		if (rackHash == UNDEFINED_HASH)
-		{
-			continue;
-		}
-
-		if (rackHashMap.contains(rackHash) == false)
-		{
-			rackHashMap.insert(rackHash, param.location().rack().index());
-
-			m_rackList.append(param.location().rack());
-		}
-	}
-
-	//
-	//
-	int rackCount = m_rackList.count();
-
-	for(int i = 0; i < rackCount - 1; i++)
-	{
-		for(int j = i+1; j < rackCount; j++)
-		{
-			if (m_rackList[i].index() > m_rackList[j].index())
+		case MEASURE_KIND_ONE_RACK:
+		case MEASURE_KIND_ONE_MODULE:
 			{
-				Metrology::RackParam rack	= m_rackList[ i ];
-				m_rackList[ i ]				= m_rackList[ j ];
-				m_rackList[ j ]				= rack;
+				// select racks that has signals, other racks ignore
+				//
+				int signalCount = m_signalList.count();
+				for(int i = 0; i < signalCount; i ++)
+				{
+					Metrology::SignalParam& param = m_signalList[i].param();
+					if (param.isValid() == false)
+					{
+						continue;
+					}
+
+					if (param.location().shownOnSchemas() == false)
+					{
+						continue;
+					}
+
+					if (param.isAnalog() == false)
+					{
+						continue;
+					}
+
+					switch (signalConnectionType)
+					{
+						case SIGNAL_CONNECTION_TYPE_UNUSED:
+						case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+						case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+						case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+						case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+						case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+						case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+
+							if (param.isInput() == false)
+							{
+								continue;
+							}
+
+							if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+							{
+								continue;
+							}
+
+							if (param.electricRangeIsValid() == false)
+							{
+								continue;
+							}
+
+							break;
+
+						case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+
+							if (param.isInternal() == false)
+							{
+								continue;
+							}
+
+							if (param.location().chassis() == -1 || param.location().module() == -1)
+							{
+								continue;
+							}
+
+							break;
+
+						default:
+							assert(0);
+							continue;
+					}
+
+					Hash rackHash = param.location().rack().hash();
+					if (rackHash == UNDEFINED_HASH)
+					{
+						continue;
+					}
+
+					if (rackHashMap.contains(rackHash) == false)
+					{
+						rackHashMap.insert(rackHash, param.location().rack().index());
+
+						m_rackList.append(param.location().rack());
+					}
+				}
+
+				// sort by index
+				//
+				int rackCount = m_rackList.count();
+				for(int i = 0; i < rackCount - 1; i++)
+				{
+					for(int j = i+1; j < rackCount; j++)
+					{
+						if (m_rackList[i].index() > m_rackList[j].index())
+						{
+							Metrology::RackParam rack	= m_rackList[ i ];
+							m_rackList[ i ]				= m_rackList[ j ];
+							m_rackList[ j ]				= rack;
+						}
+					}
+				}
 			}
-		}
+			break;
+
+		case MEASURE_KIND_MULTI_RACK:
+			{
+				int rackGroupCount = racks().groups().count();
+
+				for(int g = 0; g < rackGroupCount; g++)
+				{
+					RackGroup group = racks().groups().group(g);
+					if (group.isValid() == false)
+					{
+						continue;
+					}
+
+					QString caption = group.caption();
+					if (caption.isEmpty() == true)
+					{
+						continue;
+					}
+
+					Metrology::RackParam rack(g, QString("GROUP_%1").arg(g), group.caption());
+
+					m_rackList.append(rack);
+				}
+			}
+			break;
+
+		default:
+			assert(0);
 	}
 
-	return rackCount;
+
+	return m_rackList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1779,7 +1871,7 @@ void SignalBase::initSignals()
 
 	m_tuningBase.signalBase().createSignalList();
 
-	m_statisticBase.createStatisticSignalList();
+	m_statisticsBase.createSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1824,7 +1916,7 @@ int SignalBase::signalForMeasureCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureSignal SignalBase::signalForMeasure1(int index) const
+MeasureSignal SignalBase::signalForMeasure(int index) const
 {
 	QMutexLocker l(&m_signalMesaureMutex);
 
@@ -1834,6 +1926,22 @@ MeasureSignal SignalBase::signalForMeasure1(int index) const
 	}
 
 	return m_signalMeasureList[index];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalBase::setSignalForMeasure(int index, const MeasureSignal& signal)
+{
+	QMutexLocker l(&m_signalMesaureMutex);
+
+	if (index < 0 || index >= m_signalMeasureList.count())
+	{
+		return false;
+	}
+
+	m_signalMeasureList[index] = signal;
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1895,17 +2003,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 			continue;
 		}
 
-		if (param.isAnalog() == false)
-		{
-			continue;
-		}
-
 		if (param.location().shownOnSchemas() == false)
 		{
 			continue;
 		}
 
-		if (param.location().chassis() == -1 || param.location().module() == -1)
+		if (param.isAnalog() == false)
 		{
 			continue;
 		}
@@ -1921,12 +2024,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					continue;
 				}
 
-				if (param.location().place() == -1)
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
 				{
 					continue;
 				}
 
-				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+				if (param.electricRangeIsValid() == false)
 				{
 					continue;
 				}
@@ -1945,12 +2048,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					continue;
 				}
 
-				if (param.location().place() == -1)
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
 				{
 					continue;
 				}
 
-				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+				if (param.electricRangeIsValid() == false)
 				{
 					continue;
 				}
@@ -1965,6 +2068,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 
 				if (param.isInternal() == false)
+				{
+					continue;
+				}
+
+				if (param.location().chassis() == -1 || param.location().module() == -1)
 				{
 					continue;
 				}
@@ -1986,118 +2094,118 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 		switch(measureKind)
 		{
 			case MEASURE_KIND_ONE_RACK:
-			{
-				if (param.location().rack().index() != rackIndex)
 				{
-					continue;
-				}
+					if (param.location().rack().index() != rackIndex)
+					{
+						continue;
+					}
 
-				if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, Metrology::Channel_0, &m_signalList[i]) == false)
-				{
-					continue;
+					if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, Metrology::Channel_0, &m_signalList[i]) == false)
+					{
+						continue;
+					}
 				}
-			}
 				break;
 
 			case MEASURE_KIND_ONE_MODULE:
-			{
-				if (param.location().rack().index() != rackIndex)
 				{
-					continue;
-				}
-
-				QString id;
-				id = QString::asprintf("%d - %d - %d",
-									   param.location().rack().index(),
-									   param.location().chassis(),
-									   param.location().module());
-
-				Hash hashid = calcHash(id);
-
-				if (mesaureSignalMap.contains(hashid) == true)
-				{
-					int index = mesaureSignalMap[hashid];
-					if (index >= 0 && index < m_signalMeasureList.count())
+					if (param.location().rack().index() != rackIndex)
 					{
-						int channel = param.location().place() - 1;
-						if (channel >= 0 && channel < measureSignal.channelCount())
-						{
-							if (m_signalMeasureList[index].metrologySignal(signalConnectionType, channel) != nullptr)
-							{
-								continue;
-							}
-
-							if (m_signalMeasureList[index].setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
-							{
-								continue;
-							}
-						}
-					}
-
-					continue;
-				}
-
-				mesaureSignalMap.insert(hashid, signalIndex);
-
-				int channel = param.location().place() - 1;
-				if (channel >= 0 && channel < measureSignal.channelCount())
-				{
-					if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
-					{
-						mesaureSignalMap.remove(hashid);
 						continue;
 					}
+
+					QString id;
+					id = QString::asprintf("%d - %d - %d",
+										   param.location().rack().index(),
+										   param.location().chassis(),
+										   param.location().module());
+
+					Hash hashid = calcHash(id);
+
+					if (mesaureSignalMap.contains(hashid) == true)
+					{
+						int index = mesaureSignalMap[hashid];
+						if (index >= 0 && index < m_signalMeasureList.count())
+						{
+							int channel = param.location().place() - 1;
+							if (channel >= 0 && channel < measureSignal.channelCount())
+							{
+								if (m_signalMeasureList[index].metrologySignal(signalConnectionType, channel) != nullptr)
+								{
+									continue;
+								}
+
+								if (m_signalMeasureList[index].setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+								{
+									continue;
+								}
+							}
+						}
+
+						continue;
+					}
+
+					mesaureSignalMap.insert(hashid, signalIndex);
+
+					int channel = param.location().place() - 1;
+					if (channel >= 0 && channel < measureSignal.channelCount())
+					{
+						if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+						{
+							mesaureSignalMap.remove(hashid);
+							continue;
+						}
+					}
 				}
-			}
 				break;
 
 			case MEASURE_KIND_MULTI_RACK:
-			{
-				if (param.location().rack().groupIndex() != rackIndex)
 				{
-					continue;
-				}
-
-				QString id;
-				id = QString::asprintf("%d - %d - %d - %d - ",
-									   param.location().rack().groupIndex(),
-									   param.location().chassis(),
-									   param.location().module(),
-									   param.location().place());
-				id.append(param.location().contact());
-
-				Hash hashid = calcHash(id);
-
-				if (mesaureSignalMap.contains(hashid) == true)
-				{
-					int index = mesaureSignalMap[hashid];
-					if (index >= 0 && index < m_signalMeasureList.count())
+					if (param.location().rack().groupIndex() != rackIndex)
 					{
-						int channel = param.location().rack().channel();
-						if (channel >= 0 && channel < measureSignal.channelCount())
-						{
-							if (m_signalMeasureList[index].setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
-							{
-								continue;
-							}
-						}
-					}
-
-					continue;
-				}
-
-				mesaureSignalMap.insert(hashid, signalIndex);
-
-				int channel = param.location().rack().channel();
-				if (channel >= 0 && channel < measureSignal.channelCount())
-				{
-					if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
-					{
-						mesaureSignalMap.remove(hashid);
 						continue;
 					}
+
+					QString id;
+					id = QString::asprintf("%d - %d - %d - %d - ",
+										   param.location().rack().groupIndex(),
+										   param.location().chassis(),
+										   param.location().module(),
+										   param.location().place());
+					id.append(param.location().contact());
+
+					Hash hashid = calcHash(id);
+
+					if (mesaureSignalMap.contains(hashid) == true)
+					{
+						int index = mesaureSignalMap[hashid];
+						if (index >= 0 && index < m_signalMeasureList.count())
+						{
+							int channel = param.location().rack().channel();
+							if (channel >= 0 && channel < measureSignal.channelCount())
+							{
+								if (m_signalMeasureList[index].setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+								{
+									continue;
+								}
+							}
+						}
+
+						continue;
+					}
+
+					mesaureSignalMap.insert(hashid, signalIndex);
+
+					int channel = param.location().rack().channel();
+					if (channel >= 0 && channel < measureSignal.channelCount())
+					{
+						if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+						{
+							mesaureSignalMap.remove(hashid);
+							continue;
+						}
+					}
 				}
-			}
 				break;
 
 			default:
@@ -2107,7 +2215,6 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 		if (measureSignal.isEmpty() == true)
 		{
-			assert(false);
 			continue;
 		}
 
@@ -2141,11 +2248,11 @@ MeasureSignal SignalBase::activeSignal() const
 
 void SignalBase::setActiveSignal(const MeasureSignal& signal)
 {
-	QMutexLocker l(&m_activeSignalMutex);
+	QMutexLocker la(&m_activeSignalMutex);
 
 	m_activeSignal = signal;
 
-	m_stateMutex.lock();
+	QMutexLocker ls(&m_stateMutex);
 
 	m_requestStateList.clear();
 
@@ -2255,8 +2362,6 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 		}
 	}
 
-	m_stateMutex.unlock();
-
 	emit activeSignalChanged(m_activeSignal);
 }
 
@@ -2264,15 +2369,13 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 void SignalBase::clearActiveSignal()
 {
-	QMutexLocker l(&m_activeSignalMutex);
+	QMutexLocker la(&m_activeSignalMutex);
 
 	m_activeSignal.clear();
 
-	m_stateMutex.lock();
+	QMutexLocker ls(&m_stateMutex);
 
-		m_requestStateList.clear();
-
-	m_stateMutex.unlock();
+	m_requestStateList.clear();
 
 	emit activeSignalChanged(m_activeSignal);
 }
@@ -2281,6 +2384,13 @@ void SignalBase::clearActiveSignal()
 
 bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 {
+	int maxComparatorCount = Metrology::ComparatorCount;
+
+	if (theOptions.module().maxComparatorCount() > maxComparatorCount)
+	{
+		maxComparatorCount = theOptions.module().maxComparatorCount();
+	}
+
 	QStringList appSignalIDList = comparatorSet.inputSignalIDs();
 
 	for(const QString& appSignalID : appSignalIDList)
@@ -2375,7 +2485,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					break;
 			}
 
-			if (metrologyComparatorList.count() >= theOptions.comparator().maxComparatorCount())
+			if (metrologyComparatorList.count() >= maxComparatorCount)
 			{
 				break;
 			}
@@ -2384,7 +2494,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
 
-	m_statisticBase.createStatisticComparatorList();
+	m_statisticsBase.createComparatorList();
 
 	return true;
 }

@@ -7657,24 +7657,26 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
+	/// Title: Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
-	///		%2 Wrong electrical low Limit
-	///		%3 Correct electrical low Limit
+	///		%2 Wrong low electrical Limit
+	///		%3 Correct low electrical Limit
+	///		%4 Electrical unit
 	///
 	/// Description:
 	///		Only ThermoCouple and ThermoResistor. Engineering low Limit mismatch electrical low Limit.
 	///
-	void IssueLogger::errEQP6112(QString appSignalID, QString wrongValue, QString correctValue)
+	void IssueLogger::errEQP6112(QString appSignalID, double wrongValue, double correctValue, QString unit, int precesion)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6112,
-				  tr("Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.")
+				  tr("Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4")
 				  .arg(appSignalID)
-				  .arg(wrongValue)
-				  .arg(correctValue)
+				  .arg(QString::number(wrongValue, 'f', precesion))
+				  .arg(QString::number(correctValue, 'f', precesion))
+				  .arg(unit)
 				  );
 	}
 
@@ -7682,24 +7684,26 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
+	/// Title: Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
-	///		%2 Wrong electrical low Limit
-	///		%3 Correct electrical low Limit
+	///		%2 Wrong high electrical Limit
+	///		%3 Correct high electrical Limit
+	///		%4 Electrical unit
 	///
 	/// Description:
-	///		 Only ThermoCouple and ThermoResistor. Engineering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
+	///		 Only ThermoCouple and ThermoResistor. Engineering high Limit mismatch electrical high Limit.
 	///
-	void IssueLogger::errEQP6113(QString appSignalID, QString wrongValue, QString correctValue)
+	void IssueLogger::errEQP6113(QString appSignalID, double wrongValue, double correctValue, QString unit, int precesion)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6113,
-				  tr("Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.")
+				  tr("Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4")
 				  .arg(appSignalID)
-				  .arg(wrongValue)
-				  .arg(correctValue)
+				  .arg(QString::number(wrongValue, 'f', precesion))
+				  .arg(QString::number(correctValue, 'f', precesion))
+				  .arg(unit)
 				  );
 	}
 
@@ -7724,6 +7728,142 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6115
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong RLoad (mA).
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong RLoad. It is required to set RLoad of mA. For convserion from V to mA.
+	///
+	void IssueLogger::errEQP6115(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6115,
+				  tr("Signal %1 has wrong RLoad (mA).")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6116
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong value
+	///		%3 Low electric limit
+	///		%4 High electric limit
+	///		%5 Electric unit
+	///
+	/// Description:
+	///		Wrong electric low Limit.
+	///
+	void IssueLogger::errEQP6116(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6116,
+				  tr("Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5")
+				  .arg(appSignalID)
+				  .arg(QString::number(wrongValue, 'f', precesion))
+				  .arg(QString::number(lowLimit, 'f', precesion))
+				  .arg(QString::number(highLinmit, 'f', precesion))
+				  .arg(unit)
+				  );
+	}
+
+	/// IssueCode: EQP6117
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong value
+	///		%3 Low electric limit
+	///		%4 High electric limit
+	///		%5 Electric unit
+	///
+	/// Description:
+	///		Wrong electric high Limit.
+	///
+	void IssueLogger::errEQP6117(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6117,
+				  tr("Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5")
+				  .arg(appSignalID)
+				  .arg(QString::number(wrongValue, 'f', precesion))
+				  .arg(QString::number(lowLimit, 'f', precesion))
+				  .arg(QString::number(highLinmit, 'f', precesion))
+				  .arg(unit)
+				  );
+	}
+
+	/// IssueCode: EQP6118
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong value
+	///		%3 Low engineering limit
+	///		%4 High engineering limit
+	///		%5 Engineering unit
+	///
+	/// Description:
+	///		Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+	///
+	void IssueLogger::errEQP6118(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6118,
+				  tr("Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5")
+				  .arg(appSignalID)
+				  .arg(QString::number(wrongValue, 'f', precesion))
+				  .arg(QString::number(lowLimit, 'f', precesion))
+				  .arg(QString::number(highLinmit, 'f', precesion))
+				  .arg(unit)
+				  );
+	}
+
+	/// IssueCode: EQP6119
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong value
+	///		%3 Low engineering limit
+	///		%4 High engineering limit
+	///		%5 Engineering unit
+	///
+	/// Description:
+	///		Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+	///
+	void IssueLogger::errEQP6119(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6119,
+				  tr("Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5")
+				  .arg(appSignalID)
+				  .arg(QString::number(wrongValue, 'f', precesion))
+				  .arg(QString::number(lowLimit, 'f', precesion))
+				  .arg(QString::number(highLinmit, 'f', precesion))
+				  .arg(unit)
+				  );
+	}
 
 	/// IssueCode: EQP6200
 	///

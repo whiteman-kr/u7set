@@ -12,6 +12,7 @@
 #include <QComboBox>
 
 #include "../lib/Types.h"
+#include "../lib/UnitsConvertor.h"
 
 // ==============================================================================================
 
@@ -68,10 +69,14 @@ private:
 	void			createInterface();
 	void			initDialog();
 
-	QRadioButton*	m_pDrСelsiusRadio = nullptr;
-	QLineEdit*		m_pDrСelsiusEdit = nullptr;
-	QRadioButton*	m_pDrFahrenheitRadio = nullptr;
-	QLineEdit*		m_pDrFahrenheitEdit = nullptr;
+	QRadioButton*	m_pLinInRadio = nullptr;
+	QLineEdit*		m_pLinInValEdit = nullptr;
+	QRadioButton*	m_pLinOutRadio = nullptr;
+	QLineEdit*		m_pLinOutValEdit = nullptr;
+	QLineEdit*		m_pLinInLowEdit = nullptr;
+	QLineEdit*		m_pLinInHighEdit = nullptr;
+	QLineEdit*		m_pLinOutLowEdit = nullptr;
+	QLineEdit*		m_pLinOutHighEdit = nullptr;
 
 	QComboBox*		m_pTrList = nullptr;
 	QRadioButton*	m_pTrDegreeRadio = nullptr;
@@ -87,26 +92,35 @@ private:
 	QRadioButton*	m_pTcElectricRadio = nullptr;
 	QLineEdit*		m_pTcElectricEdit = nullptr;
 
-	QRadioButton*	m_pLinInRadio = nullptr;
-	QLineEdit*		m_pLinInValEdit = nullptr;
-	QRadioButton*	m_pLinOutRadio = nullptr;
-	QLineEdit*		m_pLinOutValEdit = nullptr;
-	QLineEdit*		m_pLinInLowEdit = nullptr;
-	QLineEdit*		m_pLinInHighEdit = nullptr;
-	QLineEdit*		m_pLinOutLowEdit = nullptr;
-	QLineEdit*		m_pLinOutHighEdit = nullptr;
+	QRadioButton*	m_pDpfPRadio = nullptr;
+	QLineEdit*		m_pDpfPValEdit = nullptr;
+	QRadioButton*	m_pDpfFRadio = nullptr;
+	QLineEdit*		m_pDpfFValEdit = nullptr;
+	QLineEdit*		m_pDpfPLowEdit = nullptr;
+	QLineEdit*		m_pDpfPHighEdit = nullptr;
+	QLineEdit*		m_pDpfFLowEdit = nullptr;
+	QLineEdit*		m_pDpfFHighEdit = nullptr;
+
+	QRadioButton*	m_pDrСelsiusRadio = nullptr;
+	QLineEdit*		m_pDrСelsiusEdit = nullptr;
+	QRadioButton*	m_pDrFahrenheitRadio = nullptr;
+	QLineEdit*		m_pDrFahrenheitEdit = nullptr;
 
 	QFont*			m_digitFont = nullptr;
 
-	void			conversionDr();
+	UnitsConvertor	m_uc;
+
+	void			conversionLin();
 	void			conversionTr();
 	void			conversionTc();
-	void			conversionLin();
+	void			conversionDpf();
+	void			conversionDr();
 
 private slots:
 
-	void			onDrRadio() { conversionDr(); }
-	void			onDrValue(QString) { conversionDr(); }
+
+	void			onLinRadio() { conversionLin(); }
+	void			onLinValue(QString) { conversionLin(); }
 
 	void			onTrSensorTypeChanged(int) { conversionTr(); }
 	void			onTrRadio() { conversionTr(); }
@@ -116,9 +130,11 @@ private slots:
 	void			onTcRadio() { conversionTc(); }
 	void			onTcValue(QString) { conversionTc(); }
 
-	void			onLinRadio() { conversionLin(); }
-	void			onLinValue(QString) { conversionLin(); }
+	void			onDpfRadio() { conversionDpf(); }
+	void			onDpfValue(QString) { conversionDpf(); }
 
+	void			onDrRadio() { conversionDr(); }
+	void			onDrValue(QString) { conversionDr(); }
 };
 
 // ==============================================================================================

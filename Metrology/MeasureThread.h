@@ -32,9 +32,11 @@ public:
 
 private:
 
-	QWidget*				m_parent = nullptr;
+	int						m_measureType = MEASURE_TYPE_UNDEFINED;
+	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int						m_measureTimeout = 0;
 
-	int						m_measureType = MEASURE_TYPE_UNKNOWN;
 	bool					m_cmdStopMeasure = true;
 
 	QVector<IoSignalParam>	m_activeIoParamList;
@@ -61,8 +63,6 @@ private:
 
 public:
 
-	void					init(QWidget* parent = nullptr);
-	void					setMeasureType(int measureType) { m_measureType = measureType; }
 	bool					enableMesureIsSignal();
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
@@ -90,7 +90,10 @@ public slots:
 	void					signalSocketDisconnected();
 	void					tuningSocketDisconnected();
 
-private slots:
+	void					measureTypeChanged(int type);
+	void					measureKindChanged(int kind);
+	void					signalConnectionTypeChanged(int type);
+	void					measureTimeoutChanged(int timeout);
 
 	void					updateSignalParam(const QString& appSignalID);
 

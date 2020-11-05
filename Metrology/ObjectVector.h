@@ -316,12 +316,7 @@ void ObjectVector<TYPE>::initEmptyData(QVector<TYPE>& data)
 template <class TYPE>
 bool ObjectVector<TYPE>::loadData(int table)
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	if (thePtrDB->isOpen() == false)
+	if (theDatabase.isOpen() == false)
 	{
 		return false;
 	}
@@ -331,7 +326,7 @@ bool ObjectVector<TYPE>::loadData(int table)
 		return false;
 	}
 
-	SqlTable* pTable = thePtrDB->openTable(table);
+	SqlTable* pTable = theDatabase.openTable(table);
 	if (pTable == nullptr)
 	{
 		return false;
@@ -374,12 +369,7 @@ bool ObjectVector<TYPE>::loadData(int table)
 template <class TYPE>
 bool ObjectVector<TYPE>::saveData(int table)
 {
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	if (thePtrDB->isOpen() == false)
+	if (theDatabase.isOpen() == false)
 	{
 		return false;
 	}
@@ -389,7 +379,7 @@ bool ObjectVector<TYPE>::saveData(int table)
 		return false;
 	}
 
-	SqlTable* pTable = thePtrDB->openTable(table);
+	SqlTable* pTable = theDatabase.openTable(table);
 	if (pTable == nullptr)
 	{
 		return false;

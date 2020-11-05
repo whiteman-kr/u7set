@@ -6,11 +6,11 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QStatusBar>
-#include <QClipboard>
 #include <QTableWidget>
 
 #include "MainWindow.h"
 #include "MeasureView.h"
+#include "CopyData.h"
 #include "Options.h"
 #include "Delegate.h"
 
@@ -31,7 +31,6 @@ FindItem::FindItem(int row, int column, const QString& text, int beginPos, int e
 	m_beginPos (beginPos) ,
 	m_endPos (endPos)
 {
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,7 +92,7 @@ QVariant FindMeasureTable::headerData(int section, Qt::Orientation orientation, 
 	{
 		if (section >= 0 && section < FIND_MEASURE_COLUMN_COUNT)
 		{
-			result = FindMeasureColumn[section];
+			result = qApp->translate("FindMeasurePanel.h", FindMeasureColumn[section]);
 		}
 	}
 
@@ -244,7 +243,7 @@ FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Search measurements panel");
+	setWindowTitle(tr("Search measurements panel"));
 	setObjectName(windowTitle());
 	loadSettings();
 
@@ -268,7 +267,7 @@ void FindMeasurePanel::createInterface()
 
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
-	m_findTextEdit->setClearButtonEnabled(true);
+	//m_findTextEdit->setClearButtonEnabled(true);
 
 	toolBar->addWidget(m_findTextEdit);
 	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
@@ -345,7 +344,7 @@ bool FindMeasurePanel::event(QEvent* e)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			find();
 		}
@@ -432,9 +431,19 @@ void FindMeasurePanel::find()
 				continue;
 			}
 
-			QString text = pMeasureView->table().text(row, column);
+			Measurement* pMeasurement = pMeasureView->table().at(row);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
 
-			int pos = text.indexOf(m_findText);
+			QString text = pMeasureView->table().text(row, column, pMeasurement);
+			if (text.isEmpty() == true)
+			{
+				continue;
+			}
+
+			int pos = text.indexOf(m_findText, 0, Qt::CaseInsensitive);
 			if (pos == -1)
 			{
 				continue;
@@ -516,33 +525,8 @@ void FindMeasurePanel::onContextMenu(QPoint)
 
 void FindMeasurePanel::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

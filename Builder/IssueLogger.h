@@ -487,11 +487,16 @@ namespace Builder
 		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);	// Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);					// Tuning Source %1 specified in Tuning Client %2 does not exist.
 
-		void errEQP6110(QString appSignalID);												//  Signal %1 has wrong physical low Limit
-		void errEQP6111(QString appSignalID);												//  Signal %1 has wrong physical high Limit
-		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
-		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
-		void errEQP6114(QString appSignalID);												//  Signal %1 has wrong R0 (ThermoResistor)
+		void errEQP6110(QString appSignalID);																						//  Signal %1 has wrong physical low Limit
+		void errEQP6111(QString appSignalID);																						//  Signal %1 has wrong physical high Limit
+		void errEQP6112(QString appSignalID, double wrongValue, double correctValue, QString unit, int precesion);					//	Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4.
+		void errEQP6113(QString appSignalID, double wrongValue, double correctValue, QString unit, int precesion);					//  Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4.
+		void errEQP6114(QString appSignalID);																						//  Signal %1 has wrong R0 (ThermoResistor)
+		void errEQP6115(QString appSignalID);																						//  Signal %1 has wrong RLoad (mA)
+		void errEQP6116(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5.
+		void errEQP6117(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5.
+		void errEQP6118(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+		void errEQP6119(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
 
 
 		void errEQP6200(QString monotorId);							// Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.

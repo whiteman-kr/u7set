@@ -14,9 +14,9 @@ const char* const			MeasureIoSignalType[] =
 
 const int					MEASURE_IO_SIGNAL_TYPE_COUNT = sizeof(MeasureIoSignalType)/sizeof(MeasureIoSignalType[0]);
 
-const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
-							MEASURE_IO_SIGNAL_TYPE_INPUT	= 0,
-							MEASURE_IO_SIGNAL_TYPE_OUTPUT	= 1;
+const int					MEASURE_IO_SIGNAL_TYPE_UNDEFINED	= -1,
+							MEASURE_IO_SIGNAL_TYPE_INPUT		= 0,
+							MEASURE_IO_SIGNAL_TYPE_OUTPUT		= 1;
 
 // ==============================================================================================
 
@@ -48,7 +48,7 @@ const int					SIGNAL_CONNECTION_TYPE_UNDEFINED				= -1,
 
 #pragma pack(push, 1)
 
-	union SignalConnectionID
+	union SignalConnectionHandle
 	{
 		struct
 		{
@@ -76,7 +76,7 @@ private:
 
 	int						m_index = -1;									// for database
 
-	SignalConnectionID		m_id;
+	SignalConnectionHandle	m_handle;
 	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
 	Metrology::Signal*		m_pSignal[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
@@ -88,13 +88,12 @@ public:
 	int						index() const { return m_index; }
 	void					setIndex(int index) { m_index = index; }
 
-	void					createID();
-	SignalConnectionID		id() const { return m_id; }
+	void					createHandle();
+	SignalConnectionHandle	handle() const { return m_handle; }
 
-	int						type() const { return m_id.type; }
+	int						type() const { return m_handle.type; }
 	QString					typeStr() const;
-	void					setType(int type) { m_id.type = type; }
-	void					setType(const QString& typeStr);					// for import signals from CSV file
+	void					setType(int type) { m_handle.type = type; }
 
 	QString					appSignalID(int type) const;
 	void					setAppSignalID(int type, const QString& appSignalID);

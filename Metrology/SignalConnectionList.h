@@ -15,7 +15,6 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDialogButtonBox>
-#include <QClipboard>
 
 #include "../lib/Signal.h"
 
@@ -25,6 +24,7 @@
 
 const char* const			SignalConnectionColumn[] =
 {
+							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type No"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (input)"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (output)"),
@@ -32,12 +32,14 @@ const char* const			SignalConnectionColumn[] =
 
 const int					SIGNAL_CONNECTION_COLUMN_COUNT			= sizeof(SignalConnectionColumn)/sizeof(SignalConnectionColumn[0]);
 
-const int					SIGNAL_CONNECTION_COLUMN_TYPE			= 0,
-							SIGNAL_CONNECTION_COLUMN_IN_ID			= 1,
-							SIGNAL_CONNECTION_COLUMN_OUT_ID			= 2;
+const int					SIGNAL_CONNECTION_COLUMN_TYPE_NO		= 0,
+							SIGNAL_CONNECTION_COLUMN_TYPE			= 1,
+							SIGNAL_CONNECTION_COLUMN_IN_ID			= 2,
+							SIGNAL_CONNECTION_COLUMN_OUT_ID			= 3;
 
 const int					SignalConnectionColumnWidth[SIGNAL_CONNECTION_COLUMN_COUNT] =
 {
+							 50,	// SIGNAL_CONNECTION_COLUMN_TYPE_NO
 							150,	// SIGNAL_CONNECTION_COLUMN_TYPE
 							250,	// SIGNAL_CONNECTION_COLUMN_IN_ID
 							250,	// SIGNAL_CONNECTION_COLUMN_OUT_ID
@@ -136,7 +138,7 @@ public:
 private:
 
 	QMenuBar*				m_pMenuBar = nullptr;
-	QMenu*					m_pSignalMenu = nullptr;
+	QMenu*					m_pConnectionMenu = nullptr;
 	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 

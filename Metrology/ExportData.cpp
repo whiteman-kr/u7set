@@ -11,9 +11,10 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ExportData::ExportData(QTableView *pView, const QString& fileName) :
+ExportData::ExportData(QTableView *pView, bool writeHiddenColumn, const QString& fileName) :
 	QObject(pView),
 	m_pView(pView),
+	m_writeHiddenColumn(writeHiddenColumn),
 	m_fileName(fileName)
 {
 	createProgressDialog(pView);
@@ -38,7 +39,7 @@ void ExportData::createProgressDialog(QTableView *pView)
 
 	m_pProgressDialog->setWindowFlags(Qt::Drawer);
 	m_pProgressDialog->setFixedSize(300, 70);
-	m_pProgressDialog->setWindowTitle(EXPORT_WINDOW_TITLE);
+	m_pProgressDialog->setWindowTitle(qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE));
 	m_pProgressDialog->setWindowIcon(QIcon(":/icons/Export.png"));
 
 		m_progress = new QProgressBar;
@@ -92,14 +93,14 @@ void ExportData::exec()
 
 	if (m_pView->model()->rowCount() == 0)
 	{
-		QMessageBox::information(m_pProgressDialog, EXPORT_WINDOW_TITLE, tr("Data is absent!"));
+		QMessageBox::information(m_pProgressDialog, qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE), tr("Data is absent!"));
 		return;
 	}
 
 	//QString filter = tr("Excel files (*.xlsx);;CSV files (*.csv)");
 	QString filter = tr("CSV files (*.csv)");
 
-	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog, EXPORT_WINDOW_TITLE, m_fileName, filter);
+	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog, qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE), m_fileName, filter);
 	if (fileName.isEmpty() == true)
 	{
 		return;
@@ -144,7 +145,7 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
-	Q_UNUSED(fileName);
+	Q_UNUSED(fileName)
     /*if (m_pView == nullptr)
 	{
 		return false;
@@ -231,9 +232,12 @@ bool ExportData::saveCsvFile(const QString &fileName)
 	int columnCount = m_pView->model()->columnCount();
 	for(int column = 0; column < columnCount; column++)
 	{
-		if (m_pView->isColumnHidden(column) == true)
+		if (m_writeHiddenColumn == false)
 		{
-			continue;
+			if (m_pView->isColumnHidden(column) == true)
+			{
+				continue;
+			}
 		}
 
 		file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
@@ -255,9 +259,12 @@ bool ExportData::saveCsvFile(const QString &fileName)
 
 		for(int column = 0; column < columnCount; column++)
 		{
-			if (m_pView->isColumnHidden(column) == true)
+			if (m_writeHiddenColumn == false)
 			{
-				continue;
+				if (m_pView->isColumnHidden(column) == true)
+				{
+					continue;
+				}
 			}
 
 			file.write(m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
@@ -273,6 +280,20 @@ bool ExportData::saveCsvFile(const QString &fileName)
 	file.close();
 
 	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ExportData::exportCancel()
+{
+	m_exportCancel = true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ExportData::exportComplited()
+{
+	QMessageBox::information(m_pProgressDialog, qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE), tr("Export is complited!"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

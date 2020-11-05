@@ -2,8 +2,9 @@
 
 #include "MainWindow.h"
 #include "Options.h"
-#include "ExportData.h"
+#include "CopyData.h"
 #include "FindData.h"
+#include "ExportData.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -52,7 +53,7 @@ QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int
 	{
 		if (section >= 0 && section < RACK_LIST_COLUMN_COUNT)
 		{
-			result = RackListColumn[section];
+			result = qApp->translate("RackListDialog.h", RackListColumn[section]);
 		}
 	}
 
@@ -302,7 +303,7 @@ void RackListDialog::createInterface()
 
 	m_pEditMenu->addSeparator();
 
-	m_pRackPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pRackPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pRackPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pMenuBar->addMenu(m_pRackMenu);
@@ -396,7 +397,7 @@ bool RackListDialog::eventFilter(QObject *object, QEvent *event)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			rackProperty();
 		}
@@ -427,7 +428,7 @@ void RackListDialog::rackGroups()
 
 void RackListDialog::exportRacks()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Racks"));
+	ExportData* dialog = new ExportData(m_pView, false, "Racks");
 	dialog->exec();
 }
 
@@ -443,33 +444,8 @@ void RackListDialog::find()
 
 void RackListDialog::copy()
 {
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -490,8 +466,7 @@ void RackListDialog::rackProperty()
 
 	if (m_rackBase.groups().count() == 0)
 	{
-		QMessageBox::information(this, windowTitle(), tr("No groups have been found.\n"
-														 "To create a group of racks, click menu \"Racks\" - \"Groups ...\""));
+		QMessageBox::information(this, windowTitle(), tr("No rack groups have been found.\nTo create a group of racks, click menu \"Racks\" - \"Groups ...\""));
 	}
 
 	RackPropertyDialog dialog(*pRack, m_rackBase);

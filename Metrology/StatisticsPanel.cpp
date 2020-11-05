@@ -1,46 +1,43 @@
-#include "StatisticPanel.h"
-
-#include <QClipboard>
-#include <QHeaderView>
+#include "StatisticsPanel.h"
 
 #include "MainWindow.h"
-#include "Delegate.h"
-#include "Options.h"
-#include "ExportData.h"
+#include "CopyData.h"
 #include "FindData.h"
+#include "ExportData.h"
+#include "Options.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticTable::StatisticTable(QObject*)
+StatisticsTable::StatisticsTable(QObject*)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticTable::~StatisticTable()
+StatisticsTable::~StatisticsTable()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int StatisticTable::columnCount(const QModelIndex&) const
+int StatisticsTable::columnCount(const QModelIndex&) const
 {
-	return STATISTIC_COLUMN_COUNT;
+	return STATISTICS_COLUMN_COUNT;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int StatisticTable::rowCount(const QModelIndex&) const
+int StatisticsTable::rowCount(const QModelIndex&) const
 {
-	return m_statisticItemCount;
+	return m_statisticsItemCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant StatisticTable::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant StatisticsTable::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole)
 	{
@@ -51,9 +48,9 @@ QVariant StatisticTable::headerData(int section, Qt::Orientation orientation, in
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < STATISTIC_COLUMN_COUNT)
+		if (section >= 0 && section < STATISTICS_COLUMN_COUNT)
 		{
-			result = StatisticColumn[section];
+			result = qApp->translate("StatisticDialog.h", StatisticsColumn[section]);
 		}
 	}
 
@@ -67,7 +64,7 @@ QVariant StatisticTable::headerData(int section, Qt::Orientation orientation, in
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant StatisticTable::data(const QModelIndex &index, int role) const
+QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
 	{
@@ -75,13 +72,13 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= m_statisticItemCount)
+	if (row < 0 || row >= m_statisticsItemCount)
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > STATISTIC_COLUMN_COUNT)
+	if (column < 0 || column > STATISTICS_COLUMN_COUNT)
 	{
 		return QVariant();
 	}
@@ -92,23 +89,24 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case STATISTIC_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_EQUIPMENT_ID:			result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_CAPTION:				result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_CMP_VALUE:			result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_CMP_NO:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_RACK:					result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_ADC:					result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_EL_RANGE:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_EN_RANGE:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_SIGNAL_TYPE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_STATE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_EQUIPMENT_ID:			result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_CAPTION:				result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_CMP_VALUE:			result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_CMP_NO:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_CMP_OUT_ID:			result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_RACK:					result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_EL_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_EL_SENSOR:			result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_EN_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_SIGNAL_TYPE:			result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_STATE:				result = Qt::AlignCenter;	break;
 
 			default:									assert(0);
 		}
@@ -121,7 +119,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
-	const StatisticItem& si = theSignalBase.statistic().item(row);
+	const StatisticsItem& si = theSignalBase.statistics().item(row);
 
 	Metrology::Signal* pSignal = si.signal();
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
@@ -133,7 +131,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 	{
 		if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
 		{
-			if (column == STATISTIC_COLUMN_SIGNAL_TYPE || column == STATISTIC_COLUMN_SIGNAL_CONNECTION)
+			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
 				if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
 				{
@@ -163,8 +161,8 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		{
 			switch (si.state())
 			{
-				case StatisticItem::State::Failed:	return theOptions.measureView().colorErrorLimit();
-				case StatisticItem::State::Success:	return theOptions.measureView().colorNotError();
+				case StatisticsItem::State::Failed:	return theOptions.measureView().colorErrorLimit();
+				case StatisticsItem::State::Success:	return theOptions.measureView().colorNotError();
 			}
 		}
 
@@ -181,37 +179,35 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticTable::set()
+void StatisticsTable::set()
 {
-	m_statisticItemCount = theSignalBase.statistic().count();
-	if (m_statisticItemCount == 0)
+	m_statisticsItemCount = theSignalBase.statistics().count();
+	if (m_statisticsItemCount == 0)
 	{
 		return;
 	}
 
-	beginInsertRows(QModelIndex(), 0, m_statisticItemCount - 1);
+	beginInsertRows(QModelIndex(), 0, m_statisticsItemCount - 1);
 	endInsertRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticTable::clear()
+void StatisticsTable::clear()
 {
-	if (m_statisticItemCount == 0)
+	if (m_statisticsItemCount == 0)
 	{
 		return;
 	}
 
-	beginRemoveRows(QModelIndex(), 0, m_statisticItemCount - 1);
+	beginRemoveRows(QModelIndex(), 0, m_statisticsItemCount - 1);
 	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticTable::text(int row, int column, const StatisticItem& si) const
+QString StatisticsTable::text(int row, int column, const StatisticsItem& si) const
 {
-	Q_UNUSED(row)
-
 	Metrology::Signal* pSignal = si.signal();
 	if (pSignal == nullptr)
 	{
@@ -224,22 +220,24 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 		return QString();
 	}
 
-	QString comparatorNo;
 	QString comparatorValue;
+	QString comparatorNo;
+	QString comparatorOutputID;
 
-	if (theSignalBase.statistic().measureType() == MEASURE_TYPE_COMPARATOR)
+	if (theSignalBase.statistics().measureType() == MEASURE_TYPE_COMPARATOR)
 	{
 		std::shared_ptr<Metrology::ComparatorEx> comparator = si.comparator();
 		if (comparator != nullptr)
 		{
 			comparatorValue = comparator->compareDefaultValueStr();
 			comparatorNo = QString::number(comparator->index() + 1);
+			comparatorOutputID = comparator->output().appSignalID();
 		}
 	}
 
 	bool visible = true;
 
-	if (row > 0 && theSignalBase.statistic().item(row - 1).signal() == pSignal)
+	if (row > 0 && theSignalBase.statistics().item(row - 1).signal() == pSignal)
 	{
 		visible = false;
 	}
@@ -248,24 +246,24 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 
 	switch (column)
 	{
-		case STATISTIC_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();										break;
-		case STATISTIC_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();								break;
-		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = visible ? param.equipmentID() : QString();										break;
-		case STATISTIC_COLUMN_CAPTION:				result = visible ? param.caption() : QString();											break;
-		case STATISTIC_COLUMN_CMP_VALUE:			result = comparatorValue;																break;
-		case STATISTIC_COLUMN_CMP_NO:				result = comparatorNo;																	break;
-		case STATISTIC_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();						break;
-		case STATISTIC_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();							break;
-		case STATISTIC_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();							break;
-		case STATISTIC_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();								break;
-		case STATISTIC_COLUMN_ADC:					result = visible ? param.adcRangeStr(true) : QString();									break;
-		case STATISTIC_COLUMN_EL_RANGE:				result = visible ? param.electricRangeStr() : QString();								break;
-		case STATISTIC_COLUMN_EN_RANGE:				result = visible ? param.engineeringRangeStr() : QString();								break;
-		case STATISTIC_COLUMN_SIGNAL_TYPE:			result = visible ? E::valueToString<E::SignalInOutType>(param.inOutType()) : QString();	break;
-		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = si.signalConnectionTypeStr();													break;
-		case STATISTIC_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
-		case STATISTIC_COLUMN_STATE:				result = si.stateStr();																	break;
-
+		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();										break;
+		case STATISTICS_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();								break;
+		case STATISTICS_COLUMN_EQUIPMENT_ID:			result = visible ? param.equipmentID() : QString();										break;
+		case STATISTICS_COLUMN_CAPTION:				result = visible ? param.caption() : QString();											break;
+		case STATISTICS_COLUMN_CMP_VALUE:			result = comparatorValue;																break;
+		case STATISTICS_COLUMN_CMP_NO:				result = comparatorNo;																	break;
+		case STATISTICS_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;															break;
+		case STATISTICS_COLUMN_RACK:					result = visible ? param.location().rack().caption() : QString();						break;
+		case STATISTICS_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();							break;
+		case STATISTICS_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();							break;
+		case STATISTICS_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();								break;
+		case STATISTICS_COLUMN_EL_RANGE:				result = param.electricRangeStr();														break;
+		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();													break;
+		case STATISTICS_COLUMN_EN_RANGE:				result = param.engineeringRangeStr();													break;
+		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();															break;
+		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.signalConnectionTypeStr().toUtf8());	break;
+		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
+		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());					break;
 		default:									assert(0);
 	}
 
@@ -274,7 +272,7 @@ QString StatisticTable::text(int row, int column, const StatisticItem& si) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticTable::updateSignal(Hash signalHash)
+void StatisticsTable::updateSignal(Hash signalHash)
 {
 	if (signalHash == UNDEFINED_HASH)
 	{
@@ -283,10 +281,10 @@ void StatisticTable::updateSignal(Hash signalHash)
 
 	QVector<int> rowList;
 
-	int count = theSignalBase.statistic().count();
+	int count = theSignalBase.statistics().count();
 	for(int i = 0; i < count; i++)
 	{
-		const StatisticItem& si = theSignalBase.statistic().item(i);
+		const StatisticsItem& si = theSignalBase.statistics().item(i);
 
 		Metrology::Signal* pSignal = si.signal();
 		if (pSignal == nullptr || pSignal->param().isValid() == false)
@@ -305,7 +303,7 @@ void StatisticTable::updateSignal(Hash signalHash)
 	{
 		int row1 = rowList[i];
 
-		for (int column = 0; column < STATISTIC_COLUMN_COUNT; column ++)
+		for (int column = 0; column < STATISTICS_COLUMN_COUNT; column ++)
 		{
 			QModelIndex cellIndex = index(row1, column);
 
@@ -318,11 +316,13 @@ void StatisticTable::updateSignal(Hash signalHash)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int StatisticPanel::m_measureType = MEASURE_TYPE_LINEARITY;
+int StatisticsPanel::m_measureType = MEASURE_TYPE_LINEARITY;
+int StatisticsPanel::m_measureKind = MEASURE_TYPE_UNDEFINED;
+int StatisticsPanel::m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticPanel::StatisticPanel(QWidget* parent) :
+StatisticsPanel::StatisticsPanel(QWidget* parent) :
 	QDockWidget(parent)
 {
 	m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
@@ -331,7 +331,7 @@ StatisticPanel::StatisticPanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Panel statistics (Checklist)");
+	setWindowTitle(tr("Panel statistics (Checklist)"));
 	setObjectName(windowTitle());
 
 	createInterface();
@@ -341,28 +341,28 @@ StatisticPanel::StatisticPanel(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticPanel::~StatisticPanel()
+StatisticsPanel::~StatisticsPanel()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::createInterface()
+void StatisticsPanel::createInterface()
 {
-	m_pStatisticWindow = new QMainWindow;
-	if (m_pStatisticWindow == nullptr)
+	m_pStatisticsWindow = new QMainWindow;
+	if (m_pStatisticsWindow == nullptr)
 	{
 		return;
 	}
 
-	m_pStatisticWindow->installEventFilter(this);
+	m_pStatisticsWindow->installEventFilter(this);
 
 	//
 	//
-	m_pMenuBar = new QMenuBar(m_pStatisticWindow);
-	m_pSignalMenu = new QMenu(tr("&Results"), m_pStatisticWindow);
-	m_pEditMenu = new QMenu(tr("&Edit"), m_pStatisticWindow);
-	m_pViewMenu = new QMenu(tr("&View"), m_pStatisticWindow);
+	m_pMenuBar = new QMenuBar(m_pStatisticsWindow);
+	m_pSignalMenu = new QMenu(tr("&Results"), m_pStatisticsWindow);
+	m_pEditMenu = new QMenu(tr("&Edit"), m_pStatisticsWindow);
+	m_pViewMenu = new QMenu(tr("&View"), m_pStatisticsWindow);
 
 	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
@@ -381,12 +381,12 @@ void StatisticPanel::createInterface()
 
 	m_pEditMenu->addSeparator();
 
-	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
+	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	m_pEditMenu->addSeparator();
 
-	m_pViewGotoMenu = new QMenu(tr("Go to next"), m_pStatisticWindow);
+	m_pViewGotoMenu = new QMenu(tr("Go to next"), m_pStatisticsWindow);
 	m_pGotoNextNotMeasuredAction = m_pViewGotoMenu->addAction(tr("Not measured"));
 	m_pGotoNextInvalidAction = m_pViewGotoMenu->addAction(tr("Invalid"));
 
@@ -397,45 +397,45 @@ void StatisticPanel::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pExportAction, &QAction::triggered, this, &StatisticPanel::exportSignal);
+	connect(m_pExportAction, &QAction::triggered, this, &StatisticsPanel::exportSignal);
 
-	connect(m_pFindAction, &QAction::triggered, this, &StatisticPanel::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &StatisticPanel::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &StatisticPanel::selectAll);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &StatisticPanel::onProperty);
+	connect(m_pFindAction, &QAction::triggered, this, &StatisticsPanel::find);
+	connect(m_pCopyAction, &QAction::triggered, this, &StatisticsPanel::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &StatisticsPanel::selectAll);
+	connect(m_pSignalPropertyAction, &QAction::triggered, this, &StatisticsPanel::onProperty);
 
-	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &StatisticPanel::gotoNextNotMeasured);
-	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &StatisticPanel::gotoNextInvalid);
+	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &StatisticsPanel::gotoNextNotMeasured);
+	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &StatisticsPanel::gotoNextInvalid);
 
-	m_pStatisticWindow->setMenuBar(m_pMenuBar);
+	m_pStatisticsWindow->setMenuBar(m_pMenuBar);
 
 	//
 	//
-	m_pView = new QTableView(m_pStatisticWindow);
+	m_pView = new QTableView(m_pStatisticsWindow);
 	m_pView->setModel(&m_signalTable);
 	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
-	for(int column = 0; column < STATISTIC_COLUMN_COUNT; column++)
+	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
 	{
-		m_pView->setColumnWidth(column, StatisticColumnWidth[column]);
+		m_pView->setColumnWidth(column, StatisticsColumnWidth[column]);
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
 
-	connect(m_pView, &QTableView::doubleClicked , this, &StatisticPanel::onListDoubleClicked);
+	connect(m_pView, &QTableView::doubleClicked , this, &StatisticsPanel::onListDoubleClicked);
 
-	m_pStatisticWindow->setCentralWidget(m_pView);
+	m_pStatisticsWindow->setCentralWidget(m_pView);
 
-	setWidget(m_pStatisticWindow);
+	setWidget(m_pStatisticsWindow);
 
 	createStatusBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::createHeaderContexMenu()
+void StatisticsPanel::createHeaderContexMenu()
 {
 	if (m_pView == nullptr)
 	{
@@ -445,13 +445,13 @@ void StatisticPanel::createHeaderContexMenu()
 	// init header context menu
 	//
 	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &StatisticPanel::onHeaderContextMenu);
+	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &StatisticsPanel::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pView);
 
-	for(int column = 0; column < STATISTIC_COLUMN_COUNT; column++)
+	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(StatisticColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("StatisticDialog.h", StatisticsColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -459,14 +459,14 @@ void StatisticPanel::createHeaderContexMenu()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &StatisticPanel::onColumnAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &StatisticsPanel::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::createContextMenu()
+void StatisticsPanel::createContextMenu()
 {
-	if (m_pStatisticWindow == nullptr)
+	if (m_pStatisticsWindow == nullptr)
 	{
 		return;
 	}
@@ -478,10 +478,14 @@ void StatisticPanel::createContextMenu()
 
 	// create context menu
 	//
-	m_pContextMenu = new QMenu(tr(""), m_pStatisticWindow);
+	m_pContextMenu = new QMenu(tr(""), m_pStatisticsWindow);
 
 	m_pSelectSignalForMeasure = m_pContextMenu->addAction(tr("&Select signal for measuring"));
-	m_pFindSignalInMeasureList = m_pContextMenu->addAction(tr("&Find signal in the measure list"));
+	m_pContextMenu->addSeparator();
+	m_pFindSignalInStatisticsList = m_pContextMenu->addAction(tr("&Find signal in the statistics list ..."));
+	m_pFindSignalInStatisticsList->setIcon(QIcon(":/icons/Find.png"));
+	m_pFindSignalInMeasureList = m_pContextMenu->addAction(tr("&Find signal in the measure list ..."));
+	m_pFindSignalInMeasureList->setIcon(QIcon(":/icons/Find.png"));
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
 	m_pContextMenu->addSeparator();
@@ -490,22 +494,23 @@ void StatisticPanel::createContextMenu()
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &StatisticPanel::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &StatisticsPanel::onContextMenu);
 
-	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &StatisticPanel::selectSignalForMeasure);
-	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &StatisticPanel::findSignalInMeasureList);
+	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &StatisticsPanel::selectSignalForMeasure);
+	connect(m_pFindSignalInStatisticsList, &QAction::triggered, this, &StatisticsPanel::findSignalInStatisticsList);
+	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &StatisticsPanel::findSignalInMeasureList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::createStatusBar()
+void StatisticsPanel::createStatusBar()
 {
-	if (m_pStatisticWindow == nullptr)
+	if (m_pStatisticsWindow == nullptr)
 	{
 		return;
 	}
 
-	m_pStatusBar = m_pStatisticWindow->statusBar();
+	m_pStatusBar = m_pStatisticsWindow->statusBar();
 
 	m_statusEmpty = new QLabel(m_pStatusBar);
 	m_statusMeasureInavlid = new QLabel(m_pStatusBar);
@@ -524,13 +529,13 @@ void StatisticPanel::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool StatisticPanel::eventFilter(QObject *object, QEvent *event)
+bool StatisticsPanel::eventFilter(QObject *object, QEvent *event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
-		if (keyEvent->key() == Qt::Key_Return)
+		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
 			selectSignalForMeasure();
 		}
@@ -541,7 +546,7 @@ bool StatisticPanel::eventFilter(QObject *object, QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::changedMeasureType(int type)
+void StatisticsPanel::measureTypeChanged(int type)
 {
 	if (type < 0 || type >= MEASURE_TYPE_COUNT)
 	{
@@ -550,26 +555,40 @@ void StatisticPanel::changedMeasureType(int type)
 
 	m_measureType = type;
 
-	theSignalBase.statistic().setMeasureType(m_measureType);
+	theSignalBase.statistics().setMeasureType(m_measureType);
 
 	updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::changedSignalConnectionType(int type)
+void StatisticsPanel::measureKindChanged(int kind)
+{
+	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	m_measureKind = kind;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsPanel::signalConnectionTypeChanged(int type)
 {
 	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
 
+	m_signalConnectionType = type;
+
 	updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
+void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	if (activeSignal.isEmpty() == true)
 	{
@@ -586,7 +605,7 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	Metrology::Signal* pSignal = nullptr;
 
-	if(theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
+	if(m_signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
 		pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();
 	}
@@ -607,10 +626,10 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	int foundIndex = -1;
 
-	int statisticCount = theSignalBase.statistic().count();
+	int statisticCount = theSignalBase.statistics().count();
 	for(int i = 0; i < statisticCount; i++)
 	{
-		if (theSignalBase.statistic().item(i).signal() == pSignal)
+		if (theSignalBase.statistics().item(i).signal() == pSignal)
 		{
 			foundIndex = i;
 			break;
@@ -628,85 +647,43 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::updateList()
+void StatisticsPanel::updateList()
 {
 	updateVisibleColunm();
 
-	// temporary solution
-	//
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
 	m_signalTable.clear();
 
-	theSignalBase.statistic().updateStatistics(pMeasureView);
+	theSignalBase.statistics().updateStatistics();
 
 	m_signalTable.set();
-	//
-	// temporary solution
 
 	updateStatusBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::updateSignalInList(Hash signalHash)
+void StatisticsPanel::updateSignalInList(Hash signalHash)
 {
 	if (signalHash == UNDEFINED_HASH)
 	{
 		return;
 	}
 
-	// temporary solution
-	//
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
-	theSignalBase.statistic().updateStatistics(pMeasureView, signalHash);
+	theSignalBase.statistics().updateStatistics(signalHash);
 
 	m_signalTable.updateSignal(signalHash);
-	//
-	// temporary solution
 
 	updateStatusBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::updateStatusBar()
+void StatisticsPanel::updateStatusBar()
 {
-	m_statusMeasureInavlid->setText(tr(" Invalid: %1").arg(theSignalBase.statistic().invalidMeasureCount()));
-	m_statusMeasured->setText(tr(" Measured: %1 / %2").arg(theSignalBase.statistic().measuredCount()).arg(theSignalBase.statistic().count()));
+	m_statusMeasureInavlid->setText(tr(" Invalid: %1").arg(theSignalBase.statistics().invalidMeasureCount()));
+	m_statusMeasured->setText(tr(" Measured: %1 / %2").arg(theSignalBase.statistics().measuredCount()).arg(theSignalBase.statistics().count()));
 
-	if (theSignalBase.statistic().invalidMeasureCount() == 0)
+	if (theSignalBase.statistics().invalidMeasureCount() == 0)
 	{
 		m_statusMeasureInavlid->hide();
 	}
@@ -719,34 +696,35 @@ void StatisticPanel::updateStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::updateVisibleColunm()
+void StatisticsPanel::updateVisibleColunm()
 {
-	for(int c = 0; c < STATISTIC_COLUMN_COUNT; c++)
+	for(int c = 0; c < STATISTICS_COLUMN_COUNT; c++)
 	{
 		hideColumn(c, false);
 	}
 
-	hideColumn(STATISTIC_COLUMN_CUSTOM_ID, true);
-	hideColumn(STATISTIC_COLUMN_EQUIPMENT_ID, true);
-	hideColumn(STATISTIC_COLUMN_CMP_VALUE, m_measureType != MEASURE_TYPE_COMPARATOR);
-	hideColumn(STATISTIC_COLUMN_CMP_NO, m_measureType != MEASURE_TYPE_COMPARATOR);
-	hideColumn(STATISTIC_COLUMN_CHASSIS, true);
-	hideColumn(STATISTIC_COLUMN_MODULE, true);
-	hideColumn(STATISTIC_COLUMN_PLACE, true);
-	hideColumn(STATISTIC_COLUMN_ADC, true);
-	hideColumn(STATISTIC_COLUMN_EL_RANGE, true);
+	hideColumn(STATISTICS_COLUMN_CUSTOM_ID, true);
+	hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
+	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != MEASURE_TYPE_COMPARATOR);
+	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != MEASURE_TYPE_COMPARATOR);
+	hideColumn(STATISTICS_COLUMN_CMP_OUT_ID, true);
+	hideColumn(STATISTICS_COLUMN_CHASSIS, true);
+	hideColumn(STATISTICS_COLUMN_MODULE, true);
+	hideColumn(STATISTICS_COLUMN_PLACE, true);
+	hideColumn(STATISTICS_COLUMN_EL_RANGE, true);
+	hideColumn(STATISTICS_COLUMN_EL_SENSOR, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::hideColumn(int column, bool hide)
+void StatisticsPanel::hideColumn(int column, bool hide)
 {
 	if (m_pView == nullptr)
 	{
 		return;
 	}
 
-	if (column < 0 || column >= STATISTIC_COLUMN_COUNT)
+	if (column < 0 || column >= STATISTICS_COLUMN_COUNT)
 	{
 		return;
 	}
@@ -765,41 +743,30 @@ void StatisticPanel::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::exportSignal()
+void StatisticsPanel::exportSignal()
 {
-	ExportData* dialog = new ExportData(m_pView, tr("Statistics"));
+	ExportData* dialog = new ExportData(m_pView, false, "Statistics");
 	dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::selectSignalForMeasure()
+void StatisticsPanel::selectSignalForMeasure()
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	if (pMainWindow->rackCombo() == nullptr || pMainWindow->signalCombo() == nullptr)
-	{
-		return;
-	}
-
 	if (m_pView == nullptr)
 	{
 		return;
 	}
 
 	int statisticItemIndex = m_pView->currentIndex().row();
-	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistic().count())
+	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistics().count())
 	{
 		return;
 	}
 
 	//
 	//
-	const StatisticItem& si = theSignalBase.statistic().item(statisticItemIndex);
+	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
 	if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
 	{
@@ -813,7 +780,7 @@ void StatisticPanel::selectSignalForMeasure()
 		str = tr("Signal %1 is \"%2\" signal.\nTo measure this signal you have to create connection with input signal.\nFor example, type of connection: \"Input\" -> \"%2\".\n\n"
 				 "To create a new connection between signals, select \"View\"->\"Signal connections...\"")
 				.arg(si.signal()->param().appSignalID())
-				.arg(E::valueToString<E::SignalInOutType>(si.signal()->param().inOutType()));
+				.arg(si.signal()->param().signalTypeStr());
 
 		QMessageBox::information(this, windowTitle(), str);
 
@@ -841,31 +808,7 @@ void StatisticPanel::selectSignalForMeasure()
 					break;
 				}
 
-				Metrology::Signal* pInputSignal = comparatorEx->inputSignal();
-				if (pInputSignal == nullptr || pInputSignal->param().isValid() == false)
-				{
-					break;
-				}
-
-				if (pInputSignal->param().isInput() == true)
-				{
-					pSignal = pInputSignal;
-					break;
-				}
-
-				int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pInputSignal);
-				if (connectionIndex == -1)
-				{
-					break;
-				}
-
-				const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
-				if (connection.isValid() == false)
-				{
-					break;
-				}
-
-				pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				pSignal = comparatorEx->inputSignal();
 			}
 			break;
 
@@ -879,66 +822,97 @@ void StatisticPanel::selectSignalForMeasure()
 		return;
 	}
 
-	if (theOptions.toolBar().signalConnectionType() != si.signalConnectionType())
+	if (pSignal->param().isInput() == false)
 	{
-		pMainWindow->signalConnectionTypeList()->setCurrentIndex(si.signalConnectionType());
+		int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+		if (connectionIndex == -1)
+		{
+			return;
+		}
+
+		const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+		if (connection.isValid() == false)
+		{
+			return;
+		}
+
+		pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			return;
+		}
 	}
 
+	// set SignalConnectionType
 	//
-	//
-	int rackComboIndex = -1;
-
-	int rackComboCount = pMainWindow->rackCombo()->count();
-	for(int i = 0; i < rackComboCount; i++)
+	if (m_signalConnectionType != si.signalConnectionType())
 	{
-		switch (theOptions.toolBar().measureKind())
+		emit setSignalConnectionType(si.signalConnectionType());
+	}
+
+	// find Rack
+	//
+	int rackIndex = -1;
+
+	int rackCount = theSignalBase.rackForMeasureCount();
+	for(int i = 0; i < rackCount; i++)
+	{
+		const Metrology::RackParam& rack = theSignalBase.rackForMeasure(i);
+		if (rack.isValid() == false)
+		{
+			continue;
+		}
+
+		switch (m_measureKind)
 		{
 			case MEASURE_KIND_ONE_RACK:
 			case MEASURE_KIND_ONE_MODULE:
 
-				if (pMainWindow->rackCombo()->itemData(i).toInt() == pSignal->param().location().rack().index())
+				if (rack.index() != pSignal->param().location().rack().index())
 				{
-					rackComboIndex = i;
+					continue;
 				}
 
+				rackIndex = i;
 				break;
 
 			case MEASURE_KIND_MULTI_RACK:
 
-				if (pMainWindow->rackCombo()->itemData(i).toInt() == pSignal->param().location().rack().groupIndex())
+				if (rack.index() != pSignal->param().location().rack().groupIndex())
 				{
-					rackComboIndex = i;
+					continue;
 				}
 
+				rackIndex = i;
 				break;
 
 			default:
 				assert(0);
 		}
 
-		if (rackComboIndex != -1)
+		if (rackIndex != -1)
 		{
 			break;
 		}
 	}
 
-	if (rackComboIndex == -1)
+	if (rackIndex == -1)
 	{
 		return;
 	}
 
+	// set Rack
 	//
-	//
-	pMainWindow->rackCombo()->setCurrentIndex(rackComboIndex);
+	emit setRack(rackIndex);
 
-	//
+	// find Signal
 	//
 	int measureSignalIndex = -1;
 
-	int signalComboCount = theSignalBase.signalForMeasureCount();
-	for(int i = 0; i < signalComboCount; i++)
+	int measureSignalCount = theSignalBase.signalForMeasureCount();
+	for(int i = 0; i < measureSignalCount; i++)
 	{
-		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure1(i);
+		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure(i);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;
@@ -959,33 +933,19 @@ void StatisticPanel::selectSignalForMeasure()
 		return;
 	}
 
-	//
-	//
-	int signalComboIndex = -1;
-
-	signalComboCount = pMainWindow->signalCombo()->count();
-	for(int i = 0; i < signalComboCount; i++)
-	{
-		if (pMainWindow->signalCombo()->itemData(i).toInt() ==  measureSignalIndex)
-		{
-			signalComboIndex = i;
-			break;
-		}
-	}
-
-	if (signalComboIndex == -1)
-	{
-		return;
-	}
-
-	//
-	//
-	pMainWindow->signalCombo()->setCurrentIndex(signalComboIndex);
+	emit setMeasureSignal(measureSignalIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::findSignalInMeasureList()
+void StatisticsPanel::findSignalInStatisticsList()
+{
+	find();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsPanel::findSignalInMeasureList()
 {
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
 	if (pMainWindow == nullptr)
@@ -1000,14 +960,14 @@ void StatisticPanel::findSignalInMeasureList()
 	}
 
 	int statisticItemIndex = m_pView->currentIndex().row();
-	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistic().count())
+	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistics().count())
 	{
 		return;
 	}
 
 	//
 	//
-	const StatisticItem& si = theSignalBase.statistic().item(statisticItemIndex);
+	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
 	Metrology::Signal* pSignal = si.signal();
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
@@ -1022,7 +982,7 @@ void StatisticPanel::findSignalInMeasureList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::find()
+void StatisticsPanel::find()
 {
 	if (m_pView == nullptr)
 	{
@@ -1035,45 +995,15 @@ void StatisticPanel::find()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::copy()
+void StatisticsPanel::copy()
 {
-	if (m_pView == nullptr)
-	{
-		return;
-	}
-
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
+	CopyData copyData(m_pView, false);
+	copyData.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::selectAll()
+void StatisticsPanel::selectAll()
 {
 	if (m_pView == nullptr)
 	{
@@ -1085,15 +1015,15 @@ void StatisticPanel::selectAll()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::onProperty()
+void StatisticsPanel::onProperty()
 {
 	int index = m_pView->currentIndex().row();
-	if (index < 0 || index >= theSignalBase.statistic().count())
+	if (index < 0 || index >= theSignalBase.statistics().count())
 	{
 		return;
 	}
 
-	const StatisticItem& si = theSignalBase.statistic().item(index);
+	const StatisticsItem& si = theSignalBase.statistics().item(index);
 
 	switch (m_measureType)
 	{
@@ -1136,14 +1066,14 @@ void StatisticPanel::onProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::gotoNextNotMeasured()
+void StatisticsPanel::gotoNextNotMeasured()
 {
 	if (m_pView == nullptr)
 	{
 		return;
 	}
 
-	int statisticCount = theSignalBase.statistic().count();
+	int statisticCount = theSignalBase.statistics().count();
 	if (statisticCount == 0)
 	{
 		return;
@@ -1154,7 +1084,7 @@ void StatisticPanel::gotoNextNotMeasured()
 
 	for(int i = startIndex + 1; i < statisticCount; i++)
 	{
-		if (theSignalBase.statistic().item(i).isMeasured() == false)
+		if (theSignalBase.statistics().item(i).isMeasured() == false)
 		{
 			foundIndex = i;
 
@@ -1172,14 +1102,14 @@ void StatisticPanel::gotoNextNotMeasured()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::gotoNextInvalid()
+void StatisticsPanel::gotoNextInvalid()
 {
 	if (m_pView == nullptr)
 	{
 		return;
 	}
 
-	int statisticCount = theSignalBase.statistic().count();
+	int statisticCount = theSignalBase.statistics().count();
 	if (statisticCount == 0)
 	{
 		return;
@@ -1190,7 +1120,7 @@ void StatisticPanel::gotoNextInvalid()
 
 	for(int i = startIndex + 1; i < statisticCount; i++)
 	{
-		if (theSignalBase.statistic().item(i).state() == StatisticItem::State::Failed)
+		if (theSignalBase.statistics().item(i).state() == StatisticsItem::State::Failed)
 		{
 			foundIndex = i;
 
@@ -1208,7 +1138,7 @@ void StatisticPanel::gotoNextInvalid()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::onContextMenu(QPoint)
+void StatisticsPanel::onContextMenu(QPoint)
 {
 	if (m_pContextMenu == nullptr)
 	{
@@ -1218,9 +1148,9 @@ void StatisticPanel::onContextMenu(QPoint)
 	if (m_pFindSignalInMeasureList != nullptr)
 	{
 		int statisticItemIndex = m_pView->currentIndex().row();
-		if (statisticItemIndex >= 0 && statisticItemIndex < theSignalBase.statistic().count())
+		if (statisticItemIndex >= 0 && statisticItemIndex < theSignalBase.statistics().count())
 		{
-			const StatisticItem& si = theSignalBase.statistic().item(statisticItemIndex);
+			const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
 			m_pFindSignalInMeasureList->setEnabled(si.isMeasured());
 		}
@@ -1231,26 +1161,30 @@ void StatisticPanel::onContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::onHeaderContextMenu(QPoint)
+void StatisticsPanel::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
 		return;
 	}
 
+	m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != MEASURE_TYPE_COMPARATOR);
+	m_pColumnAction[STATISTICS_COLUMN_CMP_NO]->setDisabled(m_measureType != MEASURE_TYPE_COMPARATOR);
+	m_pColumnAction[STATISTICS_COLUMN_CMP_OUT_ID]->setDisabled(m_measureType != MEASURE_TYPE_COMPARATOR);
+
 	m_headerContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::onColumnAction(QAction* action)
+void StatisticsPanel::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{
 		return;
 	}
 
-	for(int column = 0; column < STATISTIC_COLUMN_COUNT; column++)
+	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
 	{
 		if (m_pColumnAction[column] == action)
 		{

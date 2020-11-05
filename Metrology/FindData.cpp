@@ -41,9 +41,9 @@ void FindData::createInterface(QTableView *pView)
 
 		m_pFindTextEdit = new QLineEdit(m_findText, m_pFindDialog);
 		m_pFindTextEdit->setPlaceholderText(tr("Search Text"));
-		m_pFindTextEdit->setClearButtonEnabled(true);
+		//m_pFindTextEdit->setClearButtonEnabled(true);
 
-		m_findNextButton = new QPushButton(tr("Find Next"), m_pFindDialog);
+		m_findNextButton = new QPushButton(tr(" Find next ..."), m_pFindDialog);
 
 		QHBoxLayout *mainLayout = new QHBoxLayout ;
 
@@ -106,10 +106,6 @@ void FindData::findNext()
 	}
 
 	int startRow = m_pView->currentIndex().row();
-	if (startRow == 0)
-	{
-		startRow = -1;
-	}
 
 	int foundRow = find(startRow);
 	if (foundRow != -1)
@@ -156,8 +152,7 @@ int FindData::find(int start)
 
 			QString text = m_pView->model()->data(m_pView->model()->index(row, column)).toString();
 
-			int pos = text.indexOf(m_findText);
-			if (pos == -1)
+			if (text.contains(m_findText, Qt::CaseInsensitive) == false)
 			{
 				continue;
 			}

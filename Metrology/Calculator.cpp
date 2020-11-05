@@ -1,6 +1,6 @@
 #include "Calculator.h"
 
-#include "Conversion.h"
+#include "Calibrator.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -31,41 +31,63 @@ void Calculator::createInterface()
 
 	m_digitFont = new QFont("Arial", 16, 2);
 
-	// Degree
+	// Linearity
 	//
-	QGroupBox* drGroup = new QGroupBox(tr("Degree"));
-	QVBoxLayout *drLayout = new QVBoxLayout;
+	QGroupBox* linGroup = new QGroupBox(tr("Linearity"));
+	QVBoxLayout *linLayout = new QVBoxLayout;
 
-	QHBoxLayout *dr_C_Layout = new QHBoxLayout;
+	QHBoxLayout *lin_inval_Layout = new QHBoxLayout;
 
-	m_pDrСelsiusRadio = new QRadioButton(this);
-	m_pDrСelsiusEdit = new QLineEdit(tr("100"), this);
-	QLabel* pDrСelsiusLabel = new QLabel(tr("°C"), this);
-	pDrСelsiusLabel->setFixedWidth(30);
-	m_pDrСelsiusEdit->setFont(*m_digitFont);
+	m_pLinInRadio = new QRadioButton(this);
+	m_pLinInValEdit = new QLineEdit("2.5", this);
+	QLabel* pLinInValLabel = new QLabel(tr("In"), this);
+	pLinInValLabel->setFixedWidth(30);
+	m_pLinInValEdit->setFont(*m_digitFont);
 
-	dr_C_Layout->addWidget(m_pDrСelsiusRadio);
-	dr_C_Layout->addWidget(m_pDrСelsiusEdit);
-	dr_C_Layout->addWidget(pDrСelsiusLabel);
-	dr_C_Layout->addStretch();
+	lin_inval_Layout->addWidget(m_pLinInRadio);
+	lin_inval_Layout->addWidget(m_pLinInValEdit);
+	lin_inval_Layout->addWidget(pLinInValLabel);
+	lin_inval_Layout->addStretch();
 
-	QHBoxLayout *dr_F_Layout = new QHBoxLayout;
+	QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
 
-	m_pDrFahrenheitRadio = new QRadioButton(this);
-	m_pDrFahrenheitEdit = new QLineEdit(this);
-	QLabel* pDrFahrenheitLabel = new QLabel(tr("°F"), this);
-	pDrFahrenheitLabel->setFixedWidth(30);
-	m_pDrFahrenheitEdit->setFont(*m_digitFont);
+	m_pLinOutRadio = new QRadioButton(this);
+	m_pLinOutValEdit = new QLineEdit("0", this);
+	QLabel* pLinOutValLabel = new QLabel(tr("Out"), this);
+	pLinOutValLabel->setFixedWidth(30);
+	m_pLinOutValEdit->setFont(*m_digitFont);
 
-	dr_F_Layout->addWidget(m_pDrFahrenheitRadio);
-	dr_F_Layout->addWidget(m_pDrFahrenheitEdit);
-	dr_F_Layout->addWidget(pDrFahrenheitLabel);
-	dr_F_Layout->addStretch();
+	lin_outval_Layout->addWidget(m_pLinOutRadio);
+	lin_outval_Layout->addWidget(m_pLinOutValEdit);
+	lin_outval_Layout->addWidget(pLinOutValLabel);
+	lin_outval_Layout->addStretch();
 
-	drLayout->addLayout(dr_C_Layout);
-	drLayout->addLayout(dr_F_Layout);
+	QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
 
-	drGroup->setLayout(drLayout);
+	m_pLinInLowEdit = new QLineEdit("0", this);
+	m_pLinInHighEdit = new QLineEdit("5", this);
+
+	lin_inrange_Layout->addWidget(new QLabel(tr("min"), this));
+	lin_inrange_Layout->addWidget(m_pLinInLowEdit);
+	lin_inrange_Layout->addWidget(new QLabel(tr("max"), this));
+	lin_inrange_Layout->addWidget(m_pLinInHighEdit);
+
+	QHBoxLayout *lin_outrange_Layout = new QHBoxLayout;
+
+	m_pLinOutLowEdit = new QLineEdit("0", this);
+	m_pLinOutHighEdit = new QLineEdit("100", this);
+
+	lin_outrange_Layout->addWidget(new QLabel(tr("min"), this));
+	lin_outrange_Layout->addWidget(m_pLinOutLowEdit);
+	lin_outrange_Layout->addWidget(new QLabel(tr("max"), this));
+	lin_outrange_Layout->addWidget(m_pLinOutHighEdit);
+
+	linLayout->addLayout(lin_inval_Layout);
+	linLayout->addLayout(lin_outval_Layout);
+	linLayout->addLayout(lin_inrange_Layout);
+	linLayout->addLayout(lin_outrange_Layout);
+
+	linGroup->setLayout(linLayout);
 
 	// Thermistor
 	//
@@ -77,7 +99,7 @@ void Calculator::createInterface()
 	QHBoxLayout *tr_C_Layout = new QHBoxLayout;
 
 	m_pTrDegreeRadio = new QRadioButton(this);
-	m_pTrDegreeEdit = new QLineEdit(tr("100"), this);
+	m_pTrDegreeEdit = new QLineEdit("100", this);
 	QLabel* pTrDegreeLabel = new QLabel(tr("°C"), this);
 	pTrDegreeLabel->setFixedWidth(30);
 	m_pTrDegreeEdit->setFont(*m_digitFont);
@@ -103,7 +125,7 @@ void Calculator::createInterface()
 
 	m_tr_R0_Layout = new QHBoxLayout;
 
-	m_pTrR0Edit = new QLineEdit(tr("100"), this);
+	m_pTrR0Edit = new QLineEdit("100", this);
 	QLabel* pTrR0Label = new QLabel(tr(""), this);
 	pTrR0Label->setFixedWidth(30);
 	m_pTrR0Edit->setFont(*m_digitFont);
@@ -131,7 +153,7 @@ void Calculator::createInterface()
 	QHBoxLayout *tc_C_Layout = new QHBoxLayout;
 
 	m_pTcDegreeRadio = new QRadioButton(this);
-	m_pTcDegreeEdit = new QLineEdit(tr("400"), this);
+	m_pTcDegreeEdit = new QLineEdit("400", this);
 	QLabel* pTcDegreeLabel = new QLabel(tr("°C"), this);
 	pTcDegreeLabel->setFixedWidth(30);
 	m_pTcDegreeEdit->setFont(*m_digitFont);
@@ -160,72 +182,110 @@ void Calculator::createInterface()
 
 	tcGroup->setLayout(tcLayout);
 
-	// Linearity
+	// dp->F
 	//
-	QGroupBox* linGroup = new QGroupBox(tr("Linearity"));
-	QVBoxLayout *linLayout = new QVBoxLayout;
+	QGroupBox* dpfGroup = new QGroupBox(tr("Pressure -> Flow"));
+	QVBoxLayout *dpfLayout = new QVBoxLayout;
 
-	QHBoxLayout *lin_inval_Layout = new QHBoxLayout;
+	QHBoxLayout *dpf_inval_Layout = new QHBoxLayout;
 
-	m_pLinInRadio = new QRadioButton(this);
-	m_pLinInValEdit = new QLineEdit(tr("2.5"), this);
-	QLabel* pLinInValLabel = new QLabel(tr("In"), this);
-	pLinInValLabel->setFixedWidth(30);
-	m_pLinInValEdit->setFont(*m_digitFont);
+	m_pDpfPRadio = new QRadioButton(this);
+	m_pDpfPValEdit = new QLineEdit("2.5", this);
+	QLabel* pDpfInValLabel = new QLabel(tr("P"), this);
+	pDpfInValLabel->setFixedWidth(30);
+	m_pDpfPValEdit->setFont(*m_digitFont);
 
-	lin_inval_Layout->addWidget(m_pLinInRadio);
-	lin_inval_Layout->addWidget(m_pLinInValEdit);
-	lin_inval_Layout->addWidget(pLinInValLabel);
-	lin_inval_Layout->addStretch();
+	dpf_inval_Layout->addWidget(m_pDpfPRadio);
+	dpf_inval_Layout->addWidget(m_pDpfPValEdit);
+	dpf_inval_Layout->addWidget(pDpfInValLabel);
+	dpf_inval_Layout->addStretch();
 
-	QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
+	QHBoxLayout *dpf_outval_Layout = new QHBoxLayout;
 
-	m_pLinOutRadio = new QRadioButton(this);
-	m_pLinOutValEdit = new QLineEdit(tr("0"), this);
-	QLabel* pLinOutValLabel = new QLabel(tr("Out"), this);
-	pLinOutValLabel->setFixedWidth(30);
-	m_pLinOutValEdit->setFont(*m_digitFont);
+	m_pDpfFRadio = new QRadioButton(this);
+	m_pDpfFValEdit = new QLineEdit("0", this);
+	QLabel* pDpfOutValLabel = new QLabel(tr("F"), this);
+	pDpfOutValLabel->setFixedWidth(30);
+	m_pDpfFValEdit->setFont(*m_digitFont);
 
-	lin_outval_Layout->addWidget(m_pLinOutRadio);
-	lin_outval_Layout->addWidget(m_pLinOutValEdit);
-	lin_outval_Layout->addWidget(pLinOutValLabel);
-	lin_outval_Layout->addStretch();
+	dpf_outval_Layout->addWidget(m_pDpfFRadio);
+	dpf_outval_Layout->addWidget(m_pDpfFValEdit);
+	dpf_outval_Layout->addWidget(pDpfOutValLabel);
+	dpf_outval_Layout->addStretch();
 
-	QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
+	QHBoxLayout *dpf_inrange_Layout = new QHBoxLayout;
 
-	m_pLinInLowEdit = new QLineEdit(tr("0"), this);
-	m_pLinInHighEdit = new QLineEdit(tr("5"), this);
+	m_pDpfPLowEdit = new QLineEdit("0", this);
+	m_pDpfPHighEdit = new QLineEdit("10", this);
 
-	lin_inrange_Layout->addWidget(new QLabel(tr("min"), this));
-	lin_inrange_Layout->addWidget(m_pLinInLowEdit);
-	lin_inrange_Layout->addWidget(new QLabel(tr("max"), this));
-	lin_inrange_Layout->addWidget(m_pLinInHighEdit);
+	dpf_inrange_Layout->addWidget(new QLabel(tr("min P"), this));
+	dpf_inrange_Layout->addWidget(m_pDpfPLowEdit);
+	dpf_inrange_Layout->addWidget(new QLabel(tr("max P"), this));
+	dpf_inrange_Layout->addWidget(m_pDpfPHighEdit);
 
-	QHBoxLayout *lin_outrange_Layout = new QHBoxLayout;
+	QHBoxLayout *dpf_outrange_Layout = new QHBoxLayout;
 
-	m_pLinOutLowEdit = new QLineEdit(tr("0"), this);
-	m_pLinOutHighEdit = new QLineEdit(tr("100"), this);
+	m_pDpfFLowEdit = new QLineEdit("0", this);
+	m_pDpfFHighEdit = new QLineEdit("100", this);
 
-	lin_outrange_Layout->addWidget(new QLabel(tr("min"), this));
-	lin_outrange_Layout->addWidget(m_pLinOutLowEdit);
-	lin_outrange_Layout->addWidget(new QLabel(tr("max"), this));
-	lin_outrange_Layout->addWidget(m_pLinOutHighEdit);
+	dpf_outrange_Layout->addWidget(new QLabel(tr("min F"), this));
+	dpf_outrange_Layout->addWidget(m_pDpfFLowEdit);
+	dpf_outrange_Layout->addWidget(new QLabel(tr("max F"), this));
+	dpf_outrange_Layout->addWidget(m_pDpfFHighEdit);
 
-	linLayout->addLayout(lin_inval_Layout);
-	linLayout->addLayout(lin_outval_Layout);
-	linLayout->addLayout(lin_inrange_Layout);
-	linLayout->addLayout(lin_outrange_Layout);
+	dpfLayout->addLayout(dpf_inval_Layout);
+	dpfLayout->addLayout(dpf_outval_Layout);
+	dpfLayout->addLayout(dpf_inrange_Layout);
+	dpfLayout->addLayout(dpf_outrange_Layout);
 
-	linGroup->setLayout(linLayout);
+	dpfGroup->setLayout(dpfLayout);
+
+	// Degree
+	//
+	QGroupBox* drGroup = new QGroupBox(tr("Degree"));
+	QVBoxLayout *drLayout = new QVBoxLayout;
+
+	QHBoxLayout *dr_C_Layout = new QHBoxLayout;
+
+	m_pDrСelsiusRadio = new QRadioButton(this);
+	m_pDrСelsiusEdit = new QLineEdit("100", this);
+	QLabel* pDrСelsiusLabel = new QLabel(tr("°C"), this);
+	pDrСelsiusLabel->setFixedWidth(30);
+	m_pDrСelsiusEdit->setFont(*m_digitFont);
+
+	dr_C_Layout->addWidget(m_pDrСelsiusRadio);
+	dr_C_Layout->addWidget(m_pDrСelsiusEdit);
+	dr_C_Layout->addWidget(pDrСelsiusLabel);
+	dr_C_Layout->addStretch();
+
+	QHBoxLayout *dr_F_Layout = new QHBoxLayout;
+
+	m_pDrFahrenheitRadio = new QRadioButton(this);
+	m_pDrFahrenheitEdit = new QLineEdit(this);
+	QLabel* pDrFahrenheitLabel = new QLabel(tr("°F"), this);
+	pDrFahrenheitLabel->setFixedWidth(30);
+	m_pDrFahrenheitEdit->setFont(*m_digitFont);
+
+	dr_F_Layout->addWidget(m_pDrFahrenheitRadio);
+	dr_F_Layout->addWidget(m_pDrFahrenheitEdit);
+	dr_F_Layout->addWidget(pDrFahrenheitLabel);
+	dr_F_Layout->addStretch();
+
+	drLayout->addLayout(dr_C_Layout);
+	drLayout->addLayout(dr_F_Layout);
+
+	drGroup->setLayout(drLayout);
 
 	// Main
 	//
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
-	mainLayout->addWidget(drGroup);
+	mainLayout->addWidget(linGroup);
 	mainLayout->addWidget(trGroup);
 	mainLayout->addWidget(tcGroup);
-	mainLayout->addWidget(linGroup);
+	mainLayout->addWidget(dpfGroup);
+	mainLayout->addWidget(drGroup);
+
 	mainLayout->addStretch();
 
 	setLayout(mainLayout);
@@ -247,19 +307,27 @@ void Calculator::initDialog()
 
 	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 
-	// Degrees
+	// Linearity
 	//
-	m_pDrСelsiusRadio->setChecked(true);
+	m_pLinInRadio->setChecked(true);
 
-	connect(m_pDrСelsiusRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
-	connect(m_pDrСelsiusEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
-	connect(m_pDrFahrenheitRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
-	connect(m_pDrFahrenheitEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
+	m_pLinInValEdit->setValidator(validator);
+	m_pLinOutValEdit->setValidator(validator);
+	m_pLinInLowEdit->setValidator(validator);
+	m_pLinInHighEdit->setValidator(validator);
+	m_pLinOutLowEdit->setValidator(validator);
+	m_pLinOutHighEdit->setValidator(validator);
 
-	m_pDrСelsiusEdit->setValidator(validator);
-	m_pDrFahrenheitEdit->setValidator(validator);
+	connect(m_pLinInRadio, &QRadioButton::clicked, this, &Calculator::onLinRadio);
+	connect(m_pLinInValEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pLinOutRadio, &QRadioButton::clicked, this, &Calculator::onLinRadio);
+	connect(m_pLinOutValEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pLinInLowEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pLinInHighEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pLinOutLowEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pLinOutHighEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
 
-	conversionDr();
+	conversionLin();
 
 	// Thermistor
 	//
@@ -338,131 +406,45 @@ void Calculator::initDialog()
 
 	conversionTc();
 
-	// Linearity
+	// dp->F
 	//
-	m_pLinInRadio->setChecked(true);
+	m_pDpfPRadio->setChecked(true);
 
-	m_pLinInValEdit->setValidator(validator);
-	m_pLinOutValEdit->setValidator(validator);
-	m_pLinInLowEdit->setValidator(validator);
-	m_pLinInHighEdit->setValidator(validator);
-	m_pLinOutLowEdit->setValidator(validator);
-	m_pLinOutHighEdit->setValidator(validator);
+	m_pDpfPValEdit->setValidator(validator);
+	m_pDpfFValEdit->setValidator(validator);
+	m_pDpfPLowEdit->setValidator(validator);
+	m_pDpfPHighEdit->setValidator(validator);
+	m_pDpfFLowEdit->setValidator(validator);
+	m_pDpfFHighEdit->setValidator(validator);
 
-	connect(m_pLinInRadio, &QRadioButton::clicked, this, &Calculator::onLinRadio);
-	connect(m_pLinInValEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinOutRadio, &QRadioButton::clicked, this, &Calculator::onLinRadio);
-	connect(m_pLinOutValEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinInLowEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinInHighEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinOutLowEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinOutHighEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pDpfPRadio, &QRadioButton::clicked, this, &Calculator::onDpfRadio);
+	connect(m_pDpfPValEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
+	connect(m_pDpfFRadio, &QRadioButton::clicked, this, &Calculator::onDpfRadio);
+	connect(m_pDpfFValEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
+	connect(m_pDpfPLowEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
+	connect(m_pDpfPHighEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
+	connect(m_pDpfFLowEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
+	connect(m_pDpfFHighEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
 
-	conversionLin();
+	conversionDpf();
+
+	// Degrees
+	//
+	m_pDrСelsiusRadio->setChecked(true);
+
+	connect(m_pDrСelsiusRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
+	connect(m_pDrСelsiusEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
+	connect(m_pDrFahrenheitRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
+	connect(m_pDrFahrenheitEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
+
+	m_pDrСelsiusEdit->setValidator(validator);
+	m_pDrFahrenheitEdit->setValidator(validator);
+
+	conversionDr();
 
 	// Select first dialog item
 	//
 	m_pTrList->setFocus();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void Calculator::conversionDr()
-{
-	if (m_pDrСelsiusRadio->isChecked() == true)
-	{
-		double val = conversionDegree(m_pDrСelsiusEdit->text().toDouble(), CT_DEGREE_C_TO_F);
-
-		m_pDrСelsiusEdit->setFocus();
-		m_pDrСelsiusEdit->setReadOnly(false);
-		m_pDrFahrenheitEdit->setText(QString::number(val, 'f', 4));
-		m_pDrFahrenheitEdit->setReadOnly(true);
-	}
-
-	if (m_pDrFahrenheitRadio->isChecked() == true)
-	{
-		double val = conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), CT_DEGREE_F_TO_C);
-
-		m_pDrFahrenheitEdit->setFocus();
-		m_pDrFahrenheitEdit->setReadOnly(false);
-		m_pDrСelsiusEdit->setText(QString::number(val, 'f', 4));
-		m_pDrСelsiusEdit->setReadOnly(true);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void Calculator::conversionTr()
-{
-	int index = m_pTrList->currentIndex();
-	if (index == -1)
-	{
-		return;
-	}
-
-	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
-
-	switch (sensorType)
-	{
-		case E::SensorType::Ohm_Pt_a_391:
-		case E::SensorType::Ohm_Pt_a_385:
-		case E::SensorType::Ohm_Cu_a_428:
-		case E::SensorType::Ohm_Cu_a_426:
-		case E::SensorType::Ohm_Ni_a_617:	m_pTrR0Edit->setEnabled(true);		break;
-		default:							m_pTrR0Edit->setEnabled(false);		break;
-	}
-
-	if (m_pTrDegreeRadio->isChecked() == true)
-	{
-		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
-
-		m_pTrDegreeEdit->setReadOnly(false);
-		m_pTrElectricEdit->setText(QString::number(val, 'f', 4));
-		m_pTrElectricEdit->setReadOnly(true);
-	}
-
-	if (m_pTrElectricRadio->isChecked() == true)
-	{
-		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
-
-		m_pTrElectricEdit->setReadOnly(false);
-		m_pTrDegreeEdit->setText(QString::number(val, 'f', 4));
-		m_pTrDegreeEdit->setReadOnly(true);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void Calculator::conversionTc()
-{
-	int index = m_pTcList->currentIndex();
-	if (index == -1)
-	{
-		return;
-	}
-
-	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
-
-	if (m_pTcDegreeRadio->isChecked() == true)
-	{
-		double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::mV, sensorType);
-
-		m_pTcDegreeEdit->setFocus();
-		m_pTcDegreeEdit->setReadOnly(false);
-		m_pTcElectricEdit->setText(QString::number(val, 'f', 4));
-		m_pTcElectricEdit->setReadOnly(true);
-	}
-
-	if (m_pTcElectricRadio->isChecked() == true)
-	{
-		double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::mV, sensorType);
-
-		m_pTcElectricEdit->setFocus();
-		m_pTcElectricEdit->setReadOnly(false);
-		m_pTcDegreeEdit->setText(QString::number(val, 'f', 4));
-		m_pTcDegreeEdit->setReadOnly(true);
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -479,7 +461,7 @@ void Calculator::conversionLin()
 		double val = (m_pLinInValEdit->text().toDouble() - irl)*(orh-orl)/(irh-irl)+orl;
 
 		m_pLinInValEdit->setReadOnly(false);
-		m_pLinOutValEdit->setText(QString::number(val, 'f', 4));
+		m_pLinOutValEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
 		m_pLinOutValEdit->setReadOnly(true);
 	}
 
@@ -488,8 +470,213 @@ void Calculator::conversionLin()
 		double val = (m_pLinOutValEdit->text().toDouble() - orl)*(irh-irl)/(orh-orl)+irl;
 
 		m_pLinOutValEdit->setReadOnly(false);
-		m_pLinInValEdit->setText(QString::number(val, 'f', 4));
+		m_pLinInValEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
 		m_pLinInValEdit->setReadOnly(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Calculator::conversionTr()
+{
+	int index = m_pTrList->currentIndex();
+	if (index == -1)
+	{
+		return;
+	}
+
+	E::ElectricUnit unit = E::ElectricUnit::Ohm;
+	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
+
+	SignalElectricLimit electricLimit = m_uc.getElectricLimit(unit, sensorType);
+	if(electricLimit.isValid() == false)
+	{
+		return;
+	}
+
+	switch (sensorType)
+	{
+		case E::SensorType::Ohm_Pt_a_391:
+		case E::SensorType::Ohm_Pt_a_385:
+		case E::SensorType::Ohm_Cu_a_428:
+		case E::SensorType::Ohm_Cu_a_426:
+		case E::SensorType::Ohm_Ni_a_617:	m_pTrR0Edit->setEnabled(true);		break;
+		default:							m_pTrR0Edit->setEnabled(false);		break;
+	}
+
+	double degreeVal = m_pTrDegreeEdit->text().toDouble();
+	double electricVal = m_pTrElectricEdit->text().toDouble();
+
+	double r0 = m_pTrR0Edit->text().toDouble();
+
+	if (m_pTrDegreeRadio->isChecked() == true)
+	{
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+
+		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
+		{
+			m_pTrElectricEdit->setText(	tr("Out of range: %1 .. %2").
+										arg(QString::number(degreeLowLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)).
+										arg(QString::number(degreeHighLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)));
+
+			m_pTrElectricEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType, r0);
+
+			m_pTrElectricEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		}
+
+		m_pTrDegreeEdit->setReadOnly(false);
+		m_pTrElectricEdit->setReadOnly(true);
+	}
+
+	if (m_pTrElectricRadio->isChecked() == true)
+	{
+		if (electricVal < electricLimit.lowLimit * r0 / 100 || electricVal > electricLimit.highLimit * r0 / 100)
+		{
+			m_pTrDegreeEdit->setText(	tr("Out of range: %1 .. %2").
+										arg(QString::number(electricLimit.lowLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)).
+										arg(QString::number(electricLimit.highLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)));
+
+			m_pTrDegreeEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+
+			m_pTrDegreeEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		}
+
+		m_pTrElectricEdit->setReadOnly(false);
+		m_pTrDegreeEdit->setReadOnly(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Calculator::conversionTc()
+{
+	int index = m_pTcList->currentIndex();
+	if (index == -1)
+	{
+		return;
+	}
+
+	E::ElectricUnit unit = E::ElectricUnit::mV;
+	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
+
+	SignalElectricLimit electricLimit = m_uc.getElectricLimit(unit, sensorType);
+	if(electricLimit.isValid() == false)
+	{
+		return;
+	}
+
+	double degreeVal = m_pTcDegreeEdit->text().toDouble();
+	double electricVal = m_pTcElectricEdit->text().toDouble();
+
+	if (m_pTcDegreeRadio->isChecked() == true)
+	{
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+
+		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
+		{
+			m_pTcElectricEdit->setText(	tr("Out of range: %1 .. %2").
+										arg(QString::number(degreeLowLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)).
+										arg(QString::number(degreeHighLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)));
+
+			m_pTcElectricEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType);
+
+			m_pTcElectricEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		}
+
+		m_pTcDegreeEdit->setFocus();
+		m_pTcDegreeEdit->setReadOnly(false);
+		m_pTcElectricEdit->setReadOnly(true);
+	}
+
+	if (m_pTcElectricRadio->isChecked() == true)
+	{
+		if (electricVal < electricLimit.lowLimit || electricVal > electricLimit.highLimit)
+		{
+			m_pTcDegreeEdit->setText(	tr("Out of range: %1 .. %2").
+										arg(QString::number(electricLimit.lowLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)).
+										arg(QString::number(electricLimit.highLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)));
+
+			m_pTcDegreeEdit->setCursorPosition(0);
+		}
+		else
+		{
+			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType);
+
+			m_pTcDegreeEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		}
+
+		m_pTcElectricEdit->setFocus();
+		m_pTcElectricEdit->setReadOnly(false);
+		m_pTcDegreeEdit->setReadOnly(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Calculator::conversionDpf()
+{
+	double prl = m_pDpfPLowEdit->text().toDouble();
+	double prh = m_pDpfPHighEdit->text().toDouble();
+	double frl = m_pDpfFLowEdit->text().toDouble();
+	double frh = m_pDpfFHighEdit->text().toDouble();
+
+	double K = (frh - frl) / sqrt(prh - prl);
+
+	if (m_pDpfPRadio->isChecked() == true)
+	{
+		double val = K * sqrt(m_pDpfPValEdit->text().toDouble());
+
+		m_pDpfPValEdit->setReadOnly(false);
+		m_pDpfFValEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		m_pDpfFValEdit->setReadOnly(true);
+	}
+
+	if (m_pDpfFRadio->isChecked() == true)
+	{
+		double val = pow(m_pDpfFValEdit->text().toDouble() / K, 2);
+
+		m_pDpfFValEdit->setReadOnly(false);
+		m_pDpfPValEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		m_pDpfPValEdit->setReadOnly(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Calculator::conversionDr()
+{
+	if (m_pDrСelsiusRadio->isChecked() == true)
+	{
+		double val = m_uc.conversionDegree(m_pDrСelsiusEdit->text().toDouble(), UnitsConvertType::CelsiusToFahrenheit);
+
+		m_pDrСelsiusEdit->setFocus();
+		m_pDrСelsiusEdit->setReadOnly(false);
+		m_pDrFahrenheitEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		m_pDrFahrenheitEdit->setReadOnly(true);
+	}
+
+	if (m_pDrFahrenheitRadio->isChecked() == true)
+	{
+		double val = m_uc.conversionDegree(m_pDrFahrenheitEdit->text().toDouble(), UnitsConvertType::FahrenheitToCelsius);
+
+		m_pDrFahrenheitEdit->setFocus();
+		m_pDrFahrenheitEdit->setReadOnly(false);
+		m_pDrСelsiusEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));
+		m_pDrСelsiusEdit->setReadOnly(true);
 	}
 }
 

@@ -52,6 +52,7 @@ public:
 private:
 
 	int					m_measureType = MEASURE_TYPE_LINEARITY;
+	int					m_languageType = LANGUAGE_TYPE_EN;
 
 	// elements of interface
 	//

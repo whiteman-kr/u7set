@@ -1,4 +1,5 @@
 ﻿#include "UnitsConvertor.h"
+#include "SignalProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 //
@@ -87,6 +88,32 @@ double UnitsConvertResult::expectedHighValidRange() const
 
 // -------------------------------------------------------------------------------------------------------------------
 //
+// SignalElectricLimit struct implementation
+//
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalElectricLimit::isValid()
+{
+	if (lowLimit == 0.0 && highLimit == 0.0)
+	{
+		return false;
+	}
+
+	if (unit == E::ElectricUnit::NoUnit)
+	{
+		return false;
+	}
+
+	if (sensorType == E::SensorType::NoSensor)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//
 // UnitsConvert class implementation
 //
 // -------------------------------------------------------------------------------------------------------------------
@@ -106,6 +133,607 @@ UnitsConvertor::~UnitsConvertor()
 {
 }
 
+double UnitsConvertor::conversion(double val, const UnitsConvertType& conversionType, const Signal& signal)
+{
+	double retVal = 0;
+
+	switch(conversionType)
+	{
+		case UnitsConvertType::PhysicalToElectric:
+
+			switch(signal.electricUnit())
+			{
+				case E::ElectricUnit::Ohm:
+
+					switch(signal.sensorType())
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::Ohm_Raw:
+
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType(), r0_from_signal(signal));
+
+							break;
+					}
+
+					break;
+
+				case E::ElectricUnit::mV:
+
+					switch(signal.sensorType())
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:
+
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType());
+
+							break;
+					}
+
+					break;
+
+				case E::ElectricUnit::NoUnit:
+				case E::ElectricUnit::mA:
+				case E::ElectricUnit::V:
+
+					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+					{
+						break;
+					}
+
+					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					{
+						break;
+					}
+
+					retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+
+					break;
+
+				default:
+					assert(0);
+			}
+
+			break;
+
+		case UnitsConvertType::ElectricToPhysical:
+
+			switch(signal.electricUnit())
+			{
+				case E::ElectricUnit::Ohm:
+
+					switch(signal.sensorType())
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::Ohm_Raw:
+
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType(), r0_from_signal(signal));
+
+							break;
+					}
+
+					break;
+
+				case E::ElectricUnit::mV:
+
+					switch(signal.sensorType())
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:
+
+							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							{
+								break;
+							}
+
+							retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+
+							break;
+
+						default:
+
+							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							{
+								break;
+							}
+
+							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							{
+								break;
+							}
+
+							retVal = conversionDegree(val, conversionType, signal.electricUnit(), signal.sensorType());
+
+							break;
+					}
+
+					break;
+
+				case E::ElectricUnit::NoUnit:
+				case E::ElectricUnit::mA:
+				case E::ElectricUnit::V:
+
+					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+					{
+						break;
+					}
+
+					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					{
+						break;
+					}
+
+					retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+
+					break;
+
+				default:
+					assert(0);
+			}
+
+			break;
+
+		case UnitsConvertType::CelsiusToFahrenheit:
+
+			retVal = conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
+
+			break;
+
+		case UnitsConvertType::FahrenheitToCelsius:
+
+			retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
+
+			break;
+
+		default:
+			assert(0);
+	}
+
+	return retVal;
+}
+
+double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0)
+{
+	double retVal = 0;
+
+	switch(conversionType)
+	{
+		case UnitsConvertType::PhysicalToElectric:
+
+			switch(unitID)
+			{
+				case E::ElectricUnit::Ohm:
+
+					switch(sensorType)
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::Ohm_Raw:			retVal = val;																									break;
+
+						case E::SensorType::Ohm_Pt_a_391:		retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	retVal = retVal * r0 / 100;	break;
+						case E::SensorType::Ohm_Pt_a_385:		retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	retVal = retVal * r0 / 100;	break;
+						case E::SensorType::Ohm_Cu_a_428:		retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	retVal = retVal * r0 / 100;	break;
+						case E::SensorType::Ohm_Cu_a_426:		retVal = findConversionVal(val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	retVal = retVal * r0 / 100;	break;
+						case E::SensorType::Ohm_Ni_a_617:		retVal = findConversionVal(val, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, true);	retVal = retVal * r0 / 100;	break;
+
+						case E::SensorType::Ohm_Pt50_W1391:
+						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, r0);			break;
+						case E::SensorType::Ohm_Pt50_W1385:
+						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, r0);			break;
+
+						case E::SensorType::Ohm_Cu50_W1428:
+						case E::SensorType::Ohm_Cu100_W1428:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, r0);			break;
+						case E::SensorType::Ohm_Cu50_W1426:
+						case E::SensorType::Ohm_Cu100_W1426:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, r0);			break;
+
+						case E::SensorType::Ohm_Ni50_W1617:
+						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, r0);			break;
+
+						case E::SensorType::Ohm_Pt21:			retVal = findConversionVal(val, &PT_21[0][0], PT_21_COUNT, true);												break;
+						case E::SensorType::Ohm_Cu23:			retVal = findConversionVal(val, &CU_23[0][0], CU_23_COUNT, true);												break;
+
+						default:
+							assert(0);
+					}
+
+					break;
+
+				case E::ElectricUnit::mV:
+
+					switch(sensorType)
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:		retVal = val;																		break;
+
+						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
+						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
+						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &N_THH[0][0], N_THH_COUNT, true);					break;
+
+						case E::SensorType::mV_Type_B:			retVal = findConversionVal(val, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, true);			break;
+						case E::SensorType::mV_Type_E:			retVal = findConversionVal(val, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, true);			break;
+						case E::SensorType::mV_Type_J:			retVal = findConversionVal(val, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, true);			break;
+						case E::SensorType::mV_Type_K:			retVal = findConversionVal(val, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, true);			break;
+						case E::SensorType::mV_Type_N:			retVal = findConversionVal(val, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, true);			break;
+						case E::SensorType::mV_Type_R:			retVal = findConversionVal(val, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, true);			break;
+						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, true);			break;
+						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, true);			break;
+
+						default:
+							assert(0);
+					}
+
+					break;
+
+				default:
+					assert(0);
+			}
+
+			break;
+
+		case UnitsConvertType::ElectricToPhysical:
+
+			switch(unitID)
+			{
+				case E::ElectricUnit::Ohm:
+
+					switch(sensorType)
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::Ohm_Raw:			retVal = val;	break;
+
+						case E::SensorType::Ohm_Pt_a_391:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
+						case E::SensorType::Ohm_Pt_a_385:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
+						case E::SensorType::Ohm_Cu_a_428:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
+						case E::SensorType::Ohm_Cu_a_426:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
+						case E::SensorType::Ohm_Ni_a_617:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);	break;
+
+
+						case E::SensorType::Ohm_Pt50_W1391:
+						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, r0); break;
+						case E::SensorType::Ohm_Pt50_W1385:
+						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, r0); break;
+
+						case E::SensorType::Ohm_Cu50_W1428:
+						case E::SensorType::Ohm_Cu100_W1428:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, r0); break;
+						case E::SensorType::Ohm_Cu50_W1426:
+						case E::SensorType::Ohm_Cu100_W1426:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, r0); break;
+
+						case E::SensorType::Ohm_Ni50_W1617:
+						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, r0); break;
+
+						case E::SensorType::Ohm_Pt21:			retVal = findConversionVal(val, &PT_21[0][0], PT_21_COUNT, false);	break;
+						case E::SensorType::Ohm_Cu23:			retVal = findConversionVal(val, &CU_23[0][0], CU_23_COUNT, false);	break;
+
+						default:
+							assert(0);
+					}
+
+					break;
+
+				case E::ElectricUnit::mV:
+
+					switch(sensorType)
+					{
+						case E::SensorType::NoSensor:
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:		retVal = val;																		break;
+
+						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
+						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
+						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &N_THH[0][0], N_THH_COUNT, false);					break;
+
+						case E::SensorType::mV_Type_B:			retVal = findConversionVal(val, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, false);			break;
+						case E::SensorType::mV_Type_E:			retVal = findConversionVal(val, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, false);			break;
+						case E::SensorType::mV_Type_J:			retVal = findConversionVal(val, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, false);			break;
+						case E::SensorType::mV_Type_K:			retVal = findConversionVal(val, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, false);			break;
+						case E::SensorType::mV_Type_N:			retVal = findConversionVal(val, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, false);			break;
+						case E::SensorType::mV_Type_R:			retVal = findConversionVal(val, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);			break;
+						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);			break;
+						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);			break;
+
+						default:
+							assert(0);
+					}
+
+					break;
+
+				default:
+					assert(0);
+			}
+			break;
+
+		case UnitsConvertType::CelsiusToFahrenheit:
+
+			retVal = conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
+
+			break;
+
+		case UnitsConvertType::FahrenheitToCelsius:
+
+			retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
+
+			break;
+
+		default:
+
+			assert(0);
+	}
+
+	return retVal;
+}
+
+double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conversionType)
+{
+	double retVal = 0;
+
+	switch (conversionType)
+	{
+		case UnitsConvertType::CelsiusToFahrenheit:	retVal = (val * (9.0 / 5.0)) + 32;		break;
+		case UnitsConvertType::FahrenheitToCelsius:	retVal = ((val - 32) * (5.0 / 9.0));	break;
+		default:									assert(0);
+	}
+
+	return retVal;
+}
+
+double UnitsConvertor::r0_from_signal(const Signal& signal)
+{
+	double r0 = 0;
+
+	if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
+	{
+		r0 = signal.r0_Ohm();
+	}
+	else
+	{
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == true)
+		{
+			switch(signal.sensorType())
+			{
+				case E::SensorType::Ohm_Pt50_W1391:		r0 = 50; break;
+				case E::SensorType::Ohm_Pt100_W1391:	r0 = 100; break;
+				case E::SensorType::Ohm_Pt50_W1385:		r0 = 50; break;
+				case E::SensorType::Ohm_Pt100_W1385:	r0 = 100; break;
+
+				case E::SensorType::Ohm_Cu50_W1428:		r0 = 50; break;
+				case E::SensorType::Ohm_Cu100_W1428:	r0 = 100; break;
+				case E::SensorType::Ohm_Cu50_W1426:		r0 = 50; break;
+				case E::SensorType::Ohm_Cu100_W1426:	r0 = 100; break;
+
+				case E::SensorType::Ohm_Ni50_W1617:		r0 = 50; break;
+				case E::SensorType::Ohm_Ni100_W1617:	r0 = 100; break;
+			}
+		}
+	}
+
+	return r0;
+}
+
+bool UnitsConvertor::r0_is_use(int sensorType)
+{
+	if (	sensorType == E::SensorType::NoSensor || sensorType == E::SensorType::Ohm_Raw ||
+			sensorType == E::SensorType::Ohm_Pt21 || sensorType == E::SensorType::Ohm_Cu23)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+SignalElectricLimit UnitsConvertor::getElectricLimit(int unitID, int sensorType)
+{
+	SignalElectricLimit limit;
+
+	for(int i = 0; i < SignalElectricLimitCount; i++)
+	{
+		const SignalElectricLimit& ul = SignalElectricLimits[i];
+
+		if (ul.unit != unitID)
+		{
+			continue;
+		}
+
+		if (ul.sensorType != sensorType)
+		{
+			continue;
+		}
+
+		limit = ul;
+
+		break;
+	}
+
+	return limit;
+}
+
+UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0)
+{
+	if (elVal < electricLowLimit || elVal > electricHighLimit)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Function argument is out of range"));
+	}
+
+	SignalElectricLimit el = getElectricLimit(unitID, sensorType);
+	if(el.isValid() == false)
+	{
+		assert(false);
+		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for %1").arg(meu.key(unitID)));
+	}
+
+	double lowLimit = el.lowLimit;
+	double highLimit = el.highLimit;
+
+	if (unitID == E::ElectricUnit::Ohm && r0_is_use(sensorType) == true)
+	{
+		lowLimit = lowLimit * r0 / 100;
+		highLimit = highLimit * r0 / 100;
+	}
+
+	if (electricLowLimit < lowLimit || electricLowLimit > highLimit)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, lowLimit, highLimit);
+	}
+
+	if (electricHighLimit < lowLimit || electricHighLimit > highLimit)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, lowLimit, highLimit);
+	}
+
+	return UnitsConvertResult(elVal);
+}
+
+UnitsConvertModule UnitsConvertor::getModuleType(int unitID, int sensorType)
+{
+	UnitsConvertModule moduleType = UnitsConvertModule::NonPlatform;
+
+	switch (unitID)
+	{
+		case E::ElectricUnit::V:
+
+			switch (sensorType)
+			{
+				case E::SensorType::V_0_5:			moduleType = UnitsConvertModule::AIM;	break;
+				case E::SensorType::V_m10_p10:		moduleType = UnitsConvertModule::WAIM;	break;
+			}
+
+			break;
+
+		case E::ElectricUnit::mA:
+
+			switch (sensorType)
+			{
+				case E::SensorType::V_0_5:			moduleType = UnitsConvertModule::AIM;	break;
+			}
+
+			break;
+
+		case E::ElectricUnit::Ohm:
+
+			switch (sensorType)
+			{
+				case E::SensorType::Ohm_Pt_a_391:
+				case E::SensorType::Ohm_Pt_a_385:
+				case E::SensorType::Ohm_Cu_a_428:
+				case E::SensorType::Ohm_Cu_a_426:
+				case E::SensorType::Ohm_Ni_a_617:
+
+				case E::SensorType::Ohm_Raw:		moduleType = UnitsConvertModule::RIM;	break;
+			}
+
+			break;
+
+		case E::ElectricUnit::mV:
+
+			switch (sensorType)
+			{
+				case E::SensorType::mV_Type_B:
+				case E::SensorType::mV_Type_E:
+				case E::SensorType::mV_Type_J:
+				case E::SensorType::mV_Type_K:
+				case E::SensorType::mV_Type_N:
+				case E::SensorType::mV_Type_R:
+				case E::SensorType::mV_Type_S:
+				case E::SensorType::mV_Type_T:
+
+				case E::SensorType::mV_Raw_Mul_8:
+				case E::SensorType::mV_Raw_Mul_32:	moduleType = UnitsConvertModule::TIM;	break;
+			}
+
+			break;
+
+		default:
+			assert(0);
+			break;
+	}
+
+	return moduleType;
+}
+
 UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
@@ -116,38 +744,15 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 	switch(unitID)
 	{
 		case E::ElectricUnit::V:
-
-			switch (sensorType)
 			{
-				case E::SensorType::V_0_5:
+				UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
 
-					if (electricLowLimit < V_0_5_LOW_LIMIT || electricLowLimit > V_0_5_HIGH_LIMIT)
-					{
-						return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, V_0_5_LOW_LIMIT, V_0_5_HIGH_LIMIT);
-					}
-					if (electricHighLimit < V_0_5_LOW_LIMIT || electricHighLimit > V_0_5_HIGH_LIMIT)
-					{
-						return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, V_0_5_LOW_LIMIT, V_0_5_HIGH_LIMIT);
-					}
-
+				if (result.ok() == true)
+				{
 					return UnitsConvertResult(elVal);
+				}
 
-				case E::SensorType::V_m10_p10:
-
-					if (electricLowLimit < V_m10_p10_LOW_LIMIT || electricLowLimit > V_m10_p10_HIGH_LIMIT)
-					{
-						return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, V_m10_p10_LOW_LIMIT, V_m10_p10_HIGH_LIMIT);
-					}
-					if (electricHighLimit < V_m10_p10_LOW_LIMIT || electricHighLimit > V_m10_p10_HIGH_LIMIT)
-					{
-						return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, V_m10_p10_LOW_LIMIT, V_m10_p10_HIGH_LIMIT);
-					}
-
-					return UnitsConvertResult(elVal);
-
-				default:
-
-					return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for V"));
+				return result;
 			}
 
 			break;
@@ -158,12 +763,12 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 			{
 				case E::SensorType::V_0_5:
 
-					if (rload < RLOAD_LOW_LIMIT || rload > RLOAD_HIGH_LIMIT)
+					if (rload < RLOAD_OHM_LOW_LIMIT || rload > RLOAD_OHM_HIGH_LIMIT)
 					{
 						return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Rload_Ohm argument is out of range"));
 					}
 
-					return  UnitsConvertResult(elVal * (rload / 1000.0));
+					return  UnitsConvertResult(elVal * (rload / RLOAD_OHM_HIGH_LIMIT));
 
 				default:
 
@@ -232,215 +837,19 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoCouple(double elVal,
 
 	if (unitID != E::ElectricUnit::mV)
 	{
-		return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect unitID for mV"));
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect unitID for mV"));
 	}
 
 	double phVal = 0;
 
-	switch(sensorType)
+	UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
+	if (result.ok() == true)
 	{
-		case E::SensorType::NoSensor:
-			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mv"));
-
-		case E::SensorType::mV_K_TXA:
-
-			if (electricLowLimit < mV_K_TXA_LOW_LIMIT || electricLowLimit > mV_K_TXA_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_K_TXA_LOW_LIMIT, mV_K_TXA_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_K_TXA_LOW_LIMIT || electricHighLimit > mV_K_TXA_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_K_TXA_LOW_LIMIT, mV_K_TXA_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &K_TXA[0][0], K_TXA_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_L_TXK:
-
-			if (electricLowLimit < mV_L_TXK_LOW_LIMIT || electricLowLimit > mV_L_TXK_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_L_TXK_LOW_LIMIT, mV_L_TXK_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_L_TXK_LOW_LIMIT || electricHighLimit > mV_L_TXK_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_L_TXK_LOW_LIMIT, mV_L_TXK_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &L_TXK[0][0], L_TXK_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_N_THH:
-
-			if (electricLowLimit < mV_N_THH_LOW_LIMIT || electricLowLimit > mV_N_THH_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_N_THH_LOW_LIMIT, mV_N_THH_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_N_THH_LOW_LIMIT || electricHighLimit > mV_N_THH_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_N_THH_LOW_LIMIT, mV_N_THH_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &N_THH[0][0], N_THH_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_B:
-
-			if (electricLowLimit < mV_Type_B_LOW_LIMIT || electricLowLimit > mV_Type_B_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_B_LOW_LIMIT, mV_Type_B_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_B_LOW_LIMIT || electricHighLimit > mV_Type_B_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_B_LOW_LIMIT, mV_Type_B_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_E:
-
-			if (electricLowLimit < mV_Type_E_LOW_LIMIT || electricLowLimit > mV_Type_E_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_E_LOW_LIMIT, mV_Type_E_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_E_LOW_LIMIT || electricHighLimit > mV_Type_E_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_E_LOW_LIMIT, mV_Type_E_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_J:
-
-			if (electricLowLimit < mV_Type_J_LOW_LIMIT || electricLowLimit > mV_Type_J_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_J_LOW_LIMIT, mV_Type_J_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_J_LOW_LIMIT || electricHighLimit > mV_Type_J_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_J_LOW_LIMIT, mV_Type_J_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_K:
-
-			if (electricLowLimit < mV_Type_K_LOW_LIMIT || electricLowLimit > mV_Type_K_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_K_LOW_LIMIT, mV_Type_K_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_K_LOW_LIMIT || electricHighLimit > mV_Type_K_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_K_LOW_LIMIT, mV_Type_K_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_N:
-
-			if (electricLowLimit < mV_Type_N_LOW_LIMIT || electricLowLimit > mV_Type_N_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_N_LOW_LIMIT, mV_Type_N_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_N_LOW_LIMIT || electricHighLimit > mV_Type_N_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_N_LOW_LIMIT, mV_Type_N_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_R:
-
-			if (electricLowLimit < mV_Type_R_LOW_LIMIT || electricLowLimit > mV_Type_R_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_R_LOW_LIMIT, mV_Type_R_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_R_LOW_LIMIT || electricHighLimit > mV_Type_R_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_R_LOW_LIMIT, mV_Type_R_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_S:
-
-			if (electricLowLimit < mV_Type_S_LOW_LIMIT || electricLowLimit > mV_Type_S_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_S_LOW_LIMIT, mV_Type_S_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_S_LOW_LIMIT || electricHighLimit > mV_Type_S_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_S_LOW_LIMIT, mV_Type_S_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Type_T:
-
-			if (electricLowLimit < mV_Type_T_LOW_LIMIT || electricLowLimit > mV_Type_T_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_T_LOW_LIMIT, mV_Type_T_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Type_T_LOW_LIMIT || electricHighLimit > mV_Type_T_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_T_LOW_LIMIT, mV_Type_T_HIGH_LIMIT);
-			}
-
-			phVal = findConversionVal(elVal, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);
-
-			break;
-
-		case E::SensorType::mV_Raw_Mul_8:
-
-			if (electricLowLimit < mV_Raw_Mul_8_LOW_LIMIT || electricLowLimit > mV_Raw_Mul_8_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Raw_Mul_8_LOW_LIMIT, mV_Raw_Mul_8_HIGH_LIMIT);
-			}
-
-			if (electricHighLimit < mV_Raw_Mul_8_LOW_LIMIT || electricHighLimit > mV_Raw_Mul_8_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Raw_Mul_8_LOW_LIMIT, mV_Raw_Mul_8_HIGH_LIMIT);
-			}
-
-			phVal = elVal;
-
-			break;
-
-		case E::SensorType::mV_Raw_Mul_32:
-
-			if (electricLowLimit < mV_Raw_Mul_32_LOW_LIMIT || electricLowLimit > mV_Raw_Mul_32_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Raw_Mul_32_LOW_LIMIT, mV_Raw_Mul_32_HIGH_LIMIT);
-			}
-			if (electricHighLimit < mV_Raw_Mul_32_LOW_LIMIT || electricHighLimit > mV_Raw_Mul_32_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Raw_Mul_32_LOW_LIMIT, mV_Raw_Mul_32_HIGH_LIMIT);
-			}
-
-			phVal = elVal;
-
-			break;
-
-		default:
-			assert(false);
-			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mV"));
+		phVal = conversionDegree(elVal, UnitsConvertType::ElectricToPhysical, static_cast<E::ElectricUnit>(unitID), static_cast<E::SensorType>(sensorType));
+	}
+	else
+	{
+		return result;
 	}
 
 	return UnitsConvertResult(phVal);
@@ -458,289 +867,23 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect unitID for Ohm"));
 	}
 
-	switch(sensorType)
+	if (r0_is_use(sensorType) == true && r0 == 0.0)
 	{
-		case E::SensorType::Ohm_Pt_a_391:
-		case E::SensorType::Ohm_Pt_a_385:
-		case E::SensorType::Ohm_Cu_a_428:
-		case E::SensorType::Ohm_Cu_a_426:
-		case E::SensorType::Ohm_Ni_a_617:
-
-			if (r0 == 0.0)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
-			}
-
-			elVal = elVal / r0 * 100;
-			electricLowLimit = electricLowLimit / r0 * 100;
-			electricHighLimit = electricHighLimit / r0 * 100;
-
-			break;
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
 	}
 
 	double phVal = 0;
 
-	switch(sensorType)
+	UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType, r0);
+
+	if (result.ok() == true)
 	{
-		case E::SensorType::NoSensor:
-			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Ohm"));
-
-		case E::SensorType::Ohm_Pt_a_391:
-
-			if (electricLowLimit < Ohm_Pt_a_391_LOW_LIMIT || electricLowLimit > Ohm_Pt_a_391_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Pt_a_391_LOW_LIMIT * r0 / 100, Ohm_Pt_a_391_HIGH_LIMIT * r0 / 100);
-			}
-			if (electricHighLimit < Ohm_Pt_a_391_LOW_LIMIT || electricHighLimit > Ohm_Pt_a_391_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Pt_a_391_LOW_LIMIT * r0 / 100, Ohm_Pt_a_391_HIGH_LIMIT * r0 / 100);
-			}
-
-			phVal = findConversionVal(elVal, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);
-
-			break;
-
-		case E::SensorType::Ohm_Pt_a_385:
-
-			if (electricLowLimit < Ohm_Pt_a_385_LOW_LIMIT || electricLowLimit > Ohm_Pt_a_385_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Pt_a_385_LOW_LIMIT * r0 / 100, Ohm_Pt_a_385_HIGH_LIMIT * r0 / 100);
-			}
-			if (electricHighLimit < Ohm_Pt_a_385_LOW_LIMIT || electricHighLimit > Ohm_Pt_a_385_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Pt_a_385_LOW_LIMIT * r0 / 100, Ohm_Pt_a_385_HIGH_LIMIT * r0 / 100);
-			}
-
-			phVal = findConversionVal(elVal, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);
-
-			break;
-
-		case E::SensorType::Ohm_Cu_a_428:
-
-			if (electricLowLimit < Ohm_Cu_a_428_LOW_LIMIT || electricLowLimit > Ohm_Cu_a_428_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Cu_a_428_LOW_LIMIT * r0 / 100, Ohm_Cu_a_428_HIGH_LIMIT * r0 / 100);
-			}
-			if (electricHighLimit < Ohm_Cu_a_428_LOW_LIMIT || electricHighLimit > Ohm_Cu_a_428_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Cu_a_428_LOW_LIMIT * r0 / 100, Ohm_Cu_a_428_HIGH_LIMIT * r0 / 100);
-			}
-
-			phVal = findConversionVal(elVal, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);
-
-			break;
-
-		case E::SensorType::Ohm_Cu_a_426:
-
-			if (electricLowLimit < Ohm_Cu_a_426_LOW_LIMIT || electricLowLimit > Ohm_Cu_a_426_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Cu_a_426_LOW_LIMIT * r0 / 100, Ohm_Cu_a_426_HIGH_LIMIT * r0 / 100);
-			}
-			if (electricHighLimit < Ohm_Cu_a_426_LOW_LIMIT || electricHighLimit > Ohm_Cu_a_426_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Cu_a_426_LOW_LIMIT * r0 / 100, Ohm_Cu_a_426_HIGH_LIMIT * r0 / 100);
-			}
-
-			phVal = findConversionVal(elVal, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);
-
-			break;
-
-		case E::SensorType::Ohm_Ni_a_617:
-
-			if (electricLowLimit < Ohm_Ni_a_617_LOW_LIMIT || electricLowLimit > Ohm_Ni_a_617_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Ni_a_617_LOW_LIMIT * r0 / 100, Ohm_Ni_a_617_HIGH_LIMIT * r0 / 100);
-			}
-			if (electricHighLimit < Ohm_Ni_a_617_LOW_LIMIT || electricHighLimit > Ohm_Ni_a_617_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Ni_a_617_LOW_LIMIT * r0 / 100, Ohm_Ni_a_617_HIGH_LIMIT * r0 / 100);
-			}
-
-			phVal = findConversionVal(elVal, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);
-
-			break;
-
-		case E::SensorType::Ohm_Raw:
-
-			if (electricLowLimit < Ohm_Raw_LOW_LIMIT || electricLowLimit > Ohm_Raw_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Raw_LOW_LIMIT, Ohm_Raw_HIGH_LIMIT);
-			}
-			if (electricHighLimit < Ohm_Raw_LOW_LIMIT || electricHighLimit > Ohm_Raw_HIGH_LIMIT)
-			{
-				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Raw_LOW_LIMIT, Ohm_Raw_HIGH_LIMIT);
-			}
-
-			phVal = elVal;
-
-			break;
-
-		default:
-			assert(false);
-			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Ohm"));
+		phVal = conversionDegree(elVal, UnitsConvertType::ElectricToPhysical, static_cast<E::ElectricUnit>(unitID), static_cast<E::SensorType>(sensorType), r0);
+	}
+	else
+	{
+		return result;
 	}
 
 	return UnitsConvertResult(phVal);
-}
-
-double UnitsConvertor::conversion(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0)
-{
-	double retVal = 0;
-
-	switch(conversionType)
-	{
-		case UnitsConvertType::PhysicalToElectric:
-
-			switch(unitID)
-			{
-				case E::ElectricUnit::Ohm:
-
-					switch(sensorType)
-					{
-						case E::SensorType::NoSensor:			retVal = 0;	break;
-
-						case E::SensorType::Ohm_Pt_a_391:		retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	retVal = retVal * r0 / 100; break;
-						case E::SensorType::Ohm_Pt_a_385:		retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	retVal = retVal * r0 / 100; break;
-						case E::SensorType::Ohm_Cu_a_428:		retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	retVal = retVal * r0 / 100; break;
-						case E::SensorType::Ohm_Cu_a_426:		retVal = findConversionVal(val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	retVal = retVal * r0 / 100; break;
-						case E::SensorType::Ohm_Ni_a_617:		retVal = findConversionVal(val, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, true);	retVal = retVal * r0 / 100; break;
-						case E::SensorType::Ohm_Raw:			retVal = 0;	break;
-
-						case E::SensorType::Ohm_Pt50_W1391:		retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 50); break;
-						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 100); break;
-						case E::SensorType::Ohm_Pt50_W1385:		retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 50); break;
-						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 100); break;
-
-						case E::SensorType::Ohm_Cu_50_W1428:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 50); break;
-						case E::SensorType::Ohm_Cu_100_W1428:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 100); break;
-						case E::SensorType::Ohm_Cu_50_W1426:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 50); break;
-						case E::SensorType::Ohm_Cu_100_W1426:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 100); break;
-
-						case E::SensorType::Ohm_Ni50_W1617:		retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 50); break;
-						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 100); break;
-
-						case E::SensorType::Ohm_Pt21:			retVal = findConversionVal(val, &PT_21[0][0], PT_21_COUNT, true);	break;
-						case E::SensorType::Ohm_Cu23:			retVal = findConversionVal(val, &CU_23[0][0], CU_23_COUNT, true);	break;
-
-
-						default:
-							assert(0);
-					}
-
-					break;
-
-				case E::ElectricUnit::mV:
-
-					switch(sensorType)
-					{
-						case E::SensorType::NoSensor:			retVal = 0;																			break;
-
-						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
-						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
-						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &N_THH[0][0], N_THH_COUNT, true);					break;
-
-						case E::SensorType::mV_Type_B:			retVal = findConversionVal(val, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, true);			break;
-						case E::SensorType::mV_Type_E:			retVal = findConversionVal(val, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, true);			break;
-						case E::SensorType::mV_Type_J:			retVal = findConversionVal(val, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, true);			break;
-						case E::SensorType::mV_Type_K:			retVal = findConversionVal(val, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, true);			break;
-						case E::SensorType::mV_Type_N:			retVal = findConversionVal(val, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, true);			break;
-						case E::SensorType::mV_Type_R:			retVal = findConversionVal(val, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, true);			break;
-						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, true);			break;
-						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, true);			break;
-
-						case E::SensorType::mV_Raw_Mul_8:
-						case E::SensorType::mV_Raw_Mul_32:		retVal = 0;																			break;
-
-
-						default:
-							assert(0);
-					}
-
-					break;
-
-				default:
-					assert(0);
-			}
-
-			break;
-
-		case UnitsConvertType::ElectricToPhysical:
-
-			switch(unitID)
-			{
-				case E::ElectricUnit::Ohm:
-
-					switch(sensorType)
-					{
-						case E::SensorType::NoSensor:			retVal = 0;	break;
-
-						case E::SensorType::Ohm_Pt_a_391:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
-						case E::SensorType::Ohm_Pt_a_385:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
-						case E::SensorType::Ohm_Cu_a_428:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
-						case E::SensorType::Ohm_Cu_a_426:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
-						case E::SensorType::Ohm_Ni_a_617:		if (r0 == 0.0) break; val = val / r0 * 100; retVal = findConversionVal(val, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);	break;
-						case E::SensorType::Ohm_Raw:			retVal = 0;	break;
-
-						case E::SensorType::Ohm_Pt50_W1391:		retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 50); break;
-						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 100); break;
-						case E::SensorType::Ohm_Pt50_W1385:		retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 50); break;
-						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 100); break;
-
-						case E::SensorType::Ohm_Cu_50_W1428:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 50); break;
-						case E::SensorType::Ohm_Cu_100_W1428:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 100); break;
-						case E::SensorType::Ohm_Cu_50_W1426:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 50); break;
-						case E::SensorType::Ohm_Cu_100_W1426:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 100); break;
-
-						case E::SensorType::Ohm_Ni50_W1617:		retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 50); break;
-						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversion(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 100); break;
-
-						case E::SensorType::Ohm_Pt21:			retVal = findConversionVal(val, &PT_21[0][0], PT_21_COUNT, false);	break;
-						case E::SensorType::Ohm_Cu23:			retVal = findConversionVal(val, &CU_23[0][0], CU_23_COUNT, false);	break;
-
-
-						default:
-							assert(0);
-					}
-
-					break;
-
-				case E::ElectricUnit::mV:
-
-					switch(sensorType)
-					{
-						case E::SensorType::NoSensor:			retVal = 0;																			break;
-
-						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
-						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
-						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &N_THH[0][0], N_THH_COUNT, false);					break;
-
-						case E::SensorType::mV_Type_B:			retVal = findConversionVal(val, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, false);			break;
-						case E::SensorType::mV_Type_E:			retVal = findConversionVal(val, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, false);			break;
-						case E::SensorType::mV_Type_J:			retVal = findConversionVal(val, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, false);			break;
-						case E::SensorType::mV_Type_K:			retVal = findConversionVal(val, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, false);			break;
-						case E::SensorType::mV_Type_N:			retVal = findConversionVal(val, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, false);			break;
-						case E::SensorType::mV_Type_R:			retVal = findConversionVal(val, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);			break;
-						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);			break;
-						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);			break;
-
-						case E::SensorType::mV_Raw_Mul_8:
-						case E::SensorType::mV_Raw_Mul_32:		retVal = 0;																			break;
-
-						default:
-							assert(0);
-					}
-
-					break;
-
-				default:
-					assert(0);
-			}
-			break;
-
-		default:
-
-			assert(0);
-	}
-
-	return retVal;
 }

@@ -21,12 +21,13 @@ class ExportData : public QObject
 
 public:
 
-	ExportData(QTableView* pView, const QString& fileName);
+	ExportData(QTableView* pView, bool writeHiddenColumn, const QString& fileName);
 	virtual ~ExportData();
 
 private:
 
 	QTableView*		m_pView = nullptr;
+	bool			m_writeHiddenColumn = false;
 	QString			m_fileName;
 
 	QDialog*		m_pProgressDialog = nullptr;
@@ -54,8 +55,8 @@ signals:
 
 public slots:
 
-	void			exportCancel() { m_exportCancel = true; }
-	void			exportComplited() { QMessageBox::information(m_pProgressDialog, EXPORT_WINDOW_TITLE, tr("Export is complited!")); }
+	void			exportCancel();
+	void			exportComplited();
 };
 
 // ==============================================================================================

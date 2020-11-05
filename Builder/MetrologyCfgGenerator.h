@@ -24,9 +24,13 @@ namespace Builder
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
 
-		bool testElectricRange_Input_mA(const Signal& signal);
-		bool testElectricRange_ThermoCouple(const Signal& signal);
-		bool testElectricRange_ThermoResistor(const Signal& signal);
+		bool testElectricLimit(const Signal& signal, double lowLimit, double highLimit);
+		bool testEngineeringLimit(const Signal& signal, double lowLimit, double highLimit);
+
+		bool testElectricLimit_Input_V(const Signal& signal);
+		bool testElectricLimit_Input_mA(const Signal& signal);
+		bool testElectricLimit_Input_mV(const Signal& signal);
+		bool testElectricLimit_Input_Ohm(const Signal& signal);
 
 	};
 }
