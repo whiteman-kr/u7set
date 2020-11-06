@@ -42,8 +42,6 @@ namespace Sim
 			CommandProcessor* result = it->second(device);
 			Q_ASSERT(result);
 
-			result->setOutputScope(equipmentId);
-
 			return result;
 		}
 	}

@@ -1717,6 +1717,11 @@ namespace ExtWidgets
 		connect(m_plainTextEdit->document(), &QTextDocument::contentsChange, this, &PropertyPlainTextEditor::onPlainTextContentsChange);
 	}
 
+	QString PropertyPlainTextEditor::text() const
+	{
+		return m_plainTextEdit->toPlainText();
+	}
+
 	void PropertyPlainTextEditor::setText(const QString& text)
 	{
 		m_plainTextEdit->blockSignals(true);
@@ -1728,9 +1733,9 @@ namespace ExtWidgets
 		m_prevPlainText = text;
 	}
 
-	QString PropertyPlainTextEditor::text()
+	bool PropertyPlainTextEditor::readOnly() const
 	{
-		return m_plainTextEdit->toPlainText();
+		return m_plainTextEdit->isReadOnly();
 	}
 
 	void PropertyPlainTextEditor::setReadOnly(bool value)

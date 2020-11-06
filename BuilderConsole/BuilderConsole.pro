@@ -93,4 +93,19 @@ unix {
     LIBS += -lBuilder
 }
 
+# Simulator Lib
+#
+INCLUDEPATH += $$PWD/../Simulator
+DEPENDPATH += $$PWD/../Simulator
+
+win32 {
+    LIBS += -L$$DESTDIR -lSimulator
+
+    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
+	CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
+}
+unix {
+    LIBS += -lSimulator
+}
+
 DISTFILES +=

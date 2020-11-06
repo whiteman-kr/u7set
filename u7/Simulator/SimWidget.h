@@ -1,5 +1,4 @@
-#ifndef SIMULATORWIDGET_H
-#define SIMULATORWIDGET_H
+#pragma once
 
 #include "../lib/DbController.h"
 #include "SimIdeSimulator.h"
@@ -17,7 +16,7 @@ class SimToolBar;
 class TabWidgetEx;
 
 
-class SimWidget : public QMainWindow, HasDbController, protected Sim::Output
+class SimWidget : public QMainWindow, HasDbController
 {
 	Q_OBJECT
 
@@ -141,4 +140,3 @@ protected:
 	virtual void dropEvent(QDropEvent* event) override;
 };
 
-#endif // SIMULATORWIDGET_H

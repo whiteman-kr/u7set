@@ -76,10 +76,12 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
+    ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
+    ../lib/Ui/FilesTreeView.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
@@ -104,6 +106,7 @@ SOURCES +=\
     Simulator/SimSelectSchemaPage.cpp \
     Simulator/SimSignalSnapshot.cpp \
     Simulator/SimTrend/SimTrends.cpp \
+    TestsTabPage.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -228,10 +231,12 @@ HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ExportPrint.h \
     ../lib/StandardColors.h \
+    ../lib/Ui/DbControllerTools.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
+    ../lib/Ui/FilesTreeView.h \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
@@ -256,6 +261,7 @@ HEADERS  += \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
+    TestsTabPage.h \
     UserManagementDialog.h \
     ../lib/DbStruct.h \
     ../lib/DeviceObject.h \

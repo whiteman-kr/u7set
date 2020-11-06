@@ -70,9 +70,9 @@ public:
 	~DialogFindReplace();
 
 signals:
-    void findFirst(QString findText);
-    void replace(QString findText, QString text);
-	void replaceAll(QString findText, QString replaceText, bool selectedOnly);
+	void findFirst(QString findText, bool caseSensitive);
+	void replace(QString findText, QString text, bool caseSensitive);
+	void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
 
 	void hasSelectedText(bool* result);	// Use Qt::DirectConnection for this
 
@@ -96,6 +96,31 @@ private:
 	QCompleter* m_findCompleter = nullptr;
 	QCompleter* m_replaceCompleter = nullptr;
 
+	QCheckBox* m_caseSensitiveCheck = nullptr;
+	static bool m_caseSensitive;
+
+	QMenu m_replaceMenu;
+	QAction* m_replaceSelectedAction = nullptr;
+	QAction* m_replaceAllAction = nullptr;
+};
+
+class IdeQsciScintilla : public QsciScintilla
+{
+	Q_OBJECT
+public:
+	IdeQsciScintilla();
+	virtual ~IdeQsciScintilla();
+
+	void setCustomMenuActions(QList<QAction*> actions);
+
+private:
+	virtual void contextMenuEvent (QContextMenuEvent *e) override;
+
+signals:
+	void customContextMenuAboutToBeShown();
+
+private:
+	QList<QAction*> m_customMenuActions;
 	QMenu m_replaceMenu;
 	QAction* m_replaceSelectedAction = nullptr;
 	QAction* m_replaceAllAction = nullptr;
@@ -120,27 +145,48 @@ public:
     IdeCodeEditor(CodeType codeType, QWidget* parent);
     ~IdeCodeEditor();
 
+	virtual QString text() const override;
 	virtual void setText(const QString& text) override;
-	virtual QString text() override;
 
+	int lines() const;
+	void getCursorPosition(int* line, int* index) const;
+	void setCursorPosition(int line, int index);
+
+	virtual bool readOnly() const override;
 	virtual void setReadOnly(bool value) override;
 
+	void activateEditor();
+	void setCustomMenuActions(QList<QAction*> actions);
+
 public slots:
-	void findFirst(QString findText);
-    void findNext();
-	void replace(QString findText, QString replaceText);
-	void replaceAll(QString findText, QString replaceText, bool selectedOnly);
+	void findFirst(QString findText, bool caseSensitive);
+	void findNext();
+	void replace(QString findText, QString replaceText, bool caseSensitive);
+	void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
 
 	void hasSelectedText(bool* result);
 
-protected:
+signals:
+	void customContextMenuAboutToBeShown();
+	void cursorPositionChanged(int line, int index);
+	void textChanged();
+	void saveKeyPressed();
+	void closeKeyPressed();
+	void ctrlTabKeyPressed();
+
+private:
     bool eventFilter(QObject* obj, QEvent* event);
+
+private slots:
+	void onCustomContextMenuAboutToBeShown();
+	void onCursorPositionChanged(int line, int index);
+	void onTextChanged();
 
 private:
 	void adjustMarginWidth();
 
 private:
-    QsciScintilla* m_textEdit = nullptr;
+	IdeQsciScintilla* m_textEdit = nullptr;
 
 	LexerJavaScript m_lexerJavaScript;
 	LexerXML m_lexerXml;
@@ -151,6 +197,7 @@ private:
 
 	bool m_findFirst = true;
 
+	static bool m_findCaseSensitive;
 	static QString m_findText;
 
 };
@@ -166,10 +213,10 @@ public:
 	explicit IdeTuningFiltersEditor(DbController* dbController, QWidget* parent);
     virtual ~IdeTuningFiltersEditor();
 
-    void setText(const QString& text) override;
+	QString text() const override;
+	void setText(const QString& text) override;
 
-    QString text() override;
-
+	bool readOnly() const override;
     void setReadOnly(bool value) override;
 
 private:

@@ -166,9 +166,10 @@ public:
 	explicit SpecificPropertiesEditor(QWidget* parent);
 	virtual ~SpecificPropertiesEditor();
 
+	QString text() const override;
 	void setText(const QString& text) override;
-	QString text() override;
 
+	bool readOnly() const override;
 	void setReadOnly(bool value) override;
 
 private slots:

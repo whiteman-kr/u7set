@@ -42,8 +42,11 @@ public:
 	bool upgradeProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget);
 
 	bool setProjectProperty(QString propertyName, bool propertyValue, QWidget* parentWidget);
+	bool setProjectProperty(QString propertyName, int propertyValue, QWidget* parentWidget);
 	bool setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget);
+
 	bool getProjectProperty(QString propertyName, bool* out, QWidget* parentWidget);
+	bool getProjectProperty(QString propertyName, int* out, QWidget* parentWidget);
 	bool getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget);
 
 	bool getProjectProperties(DbProjectProperties* out, QWidget* parentWidget);

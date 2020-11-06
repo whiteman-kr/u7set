@@ -17,6 +17,7 @@
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "SimulatorTabPage.h"
+#include "TestsTabPage.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/ProjectPropertiesForm.h"
@@ -60,6 +61,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	// Add main tab pages
 	//
 	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
+	connect(m_projectsTab, &ProjectsTabPage::projectAboutToBeClosed, this, &MainWindow::projectAboutToBeClosed, Qt::DirectConnection);
+
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
 	m_signalsTab = new SignalsTabPage(m_signalSetProvider, dbController(), nullptr);
 
@@ -81,11 +84,14 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
 
-	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_uploadTabPage, tr("Upload"));
-
 	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
+
+	m_testsTabPage = new TestsTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_testsTabPage, tr("Tests"));
+
+	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_uploadTabPage, tr("Upload"));
 
 	// --
 	//
@@ -120,19 +126,20 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		assert(m_buildTabPage);
 	}
 
-	// check if any schema is not saved
+	// check if any schema or test is not saved
 	//
-	if (m_editSchemaTabPage == nullptr)
+	if (m_editSchemaTabPage == nullptr || m_testsTabPage == nullptr)
 	{
 		assert(m_editSchemaTabPage);
+		assert(m_testsTabPage);
 		e->accept();
 		return;
 	}
 
-	if (m_editSchemaTabPage->hasUnsavedSchemas() == true)
+	if (m_editSchemaTabPage->hasUnsavedSchemas() == true || m_testsTabPage->hasUnsavedTests() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
-																   tr("Some schemas have unsaved changes."),
+																   tr("Some items on Schemas and Tests tab pages have unsaved changes."),
 																   QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
 																   QMessageBox::SaveAll);
 
@@ -145,12 +152,14 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		if (result == QMessageBox::SaveAll)
 		{
 			m_editSchemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
+			m_testsTabPage->saveUnsavedTests();	// It will reset modified flag
 		}
 
 		if (result == QMessageBox::Discard)
 		{
 			m_editSchemaTabPage->resetModified();		// Reset modidied flag for all opened files, so on closeEvent for tese files
 														// prompt to save them will not be shown
+			m_testsTabPage->resetModified();
 		}
 	}
 
@@ -373,9 +382,11 @@ void MainWindow::createMenus()
 	//
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
-	pProjectMenu->addAction(m_projectPropertiesAction);
-	pProjectMenu->addAction(m_startBuildAction);
 	pProjectMenu->addAction(m_pendingChangesAction);
+	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_startBuildAction);
+	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_projectPropertiesAction);
 
 	// Tools
 	//
@@ -1066,6 +1077,17 @@ void MainWindow::projectOpened(DbProject project)
 	}
 
 	return;
+}
+
+void MainWindow::projectAboutToBeClosed()
+{
+	if (m_testsTabPage == nullptr)
+	{
+		Q_ASSERT(m_testsTabPage);
+		return;
+	}
+
+	m_testsTabPage->saveUnsavedTests();
 }
 
 void MainWindow::projectClosed()

@@ -12,6 +12,7 @@ class FilesTabPage;
 class BuildTabPage;
 class UploadTabPage;
 class SimulatorTabPage;
+class TestsTabPage;
 class DialogShortcuts;
 class SignalSetProvider;
 
@@ -86,6 +87,7 @@ protected slots:
 
 private slots:
 	void projectOpened(DbProject project);
+	void projectAboutToBeClosed();
 	void projectClosed();
 
 	void buildStarted();
@@ -138,6 +140,7 @@ private:
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;
 	SimulatorTabPage* m_simulatorTabPage = nullptr;
+	TestsTabPage* m_testsTabPage = nullptr;
 
 	DbController* m_dbController = nullptr;
 	SignalSetProvider* m_signalSetProvider = nullptr;

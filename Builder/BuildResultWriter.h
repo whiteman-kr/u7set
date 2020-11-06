@@ -163,6 +163,7 @@ namespace Builder
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
 		QString outputPath() const;
+		QStringList fullOutputPathes() const;
 
 	private:
 		QString checkOutputPath(QString outputPath);

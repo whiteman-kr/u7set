@@ -103,7 +103,7 @@ bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator
 
 	QString script = file.readAll();
 
-	bool ok = simulator->runScript(script, QFileInfo(file).baseName());
+	bool ok = simulator->runScript({script, QFileInfo(file).baseName()}, timeout);
 	if (ok == false)
 	{
 		return false;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	Sim::Simulator simulator;
+	Sim::Simulator simulator{nullptr, nullptr};		// Log to console
 	QString buildPath = args[1];
 
 	if (bool ok = simulator.load(buildPath);

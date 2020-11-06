@@ -94,6 +94,7 @@ SOURCES += \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimScopedLog.cpp \
     SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
 	SimScriptLmDescription.cpp \
@@ -103,7 +104,6 @@ SOURCES += \
     SimScriptSimulator.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
-    SimOutput.cpp \
     SimRam.cpp \
     SimEeprom.cpp \
     SimSubsystem.cpp \
@@ -138,6 +138,7 @@ HEADERS += \
 	../lib/DataProtocols.h \
     ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
+    ../lib/ILogFile.h \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
@@ -147,6 +148,7 @@ HEADERS += \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
+    SimScopedLog.h \
     SimScriptConnection.h \
     SimScriptDevUtils.h \
 	SimScriptLmDescription.h \
@@ -164,7 +166,6 @@ HEADERS += \
     ../lib/ModuleFirmware.h \
     Simulator.h \
     ../lib/Crc.h \
-    SimOutput.h \
     SimRam.h \
     SimEeprom.h \
     SimSubsystem.h \

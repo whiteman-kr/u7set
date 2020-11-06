@@ -12,6 +12,7 @@
 #include "ArchivingServiceCfgGenerator.h"
 #include "MetrologyCfgGenerator.h"
 #include "TestClientCfgGenerator.h"
+#include "../Simulator/Simulator.h"
 
 namespace Builder
 {
@@ -118,7 +119,7 @@ namespace Builder
 				break;
 			}
 
-			m_context->m_progress += 5;			// Total progress 10
+			m_context->m_progress += 5;			// Total progress 5
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -154,7 +155,7 @@ namespace Builder
 				break;
 			}
 
-			m_context->m_progress += 10;		// Total progress 20
+			m_context->m_progress += 10;		// Total progress 15
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -170,7 +171,7 @@ namespace Builder
 				break;
 			}
 
-			m_context->m_progress += 5;			// Total progress 25
+			m_context->m_progress += 5;			// Total progress 20
 
 			//
 			// Loading subsystems
@@ -215,7 +216,7 @@ namespace Builder
 			}
 
 			//m_context->m_progress is set inside parseApplicationLogic(); up to 25%
-			//m_context->m_progress += 25;		// Total progress 50
+			//m_context->m_progress += 25;		// Total progress 45
 
 			//
 			// Save LogicModule Descriptions
@@ -242,7 +243,7 @@ namespace Builder
 				break;
 			}
 
-			m_context->m_progress += 10;		// Total progress 60
+			m_context->m_progress += 10;		// Total progress 55
 
 			//
 			// Tuning parameters
@@ -281,7 +282,7 @@ namespace Builder
 			LmsUniqueIdMap lmsUniqueIdMap;
 			generateLmsUniqueID(*m_context->m_buildResultWriter, m_context->m_lmModules, lmsUniqueIdMap);
 
-			m_context->m_progress += 10;		// Total progress 70
+			m_context->m_progress += 10;		// Total progress 65
 
 			//
 			// Generate MATS software configurations
@@ -294,7 +295,7 @@ namespace Builder
 				break;
 			}
 
-			m_context->m_progress += 10;		// Total progress 80
+			m_context->m_progress += 10;		// Total progress 75
 
 			//
 			// Write logic, configuration and tuning binary files
@@ -320,13 +321,25 @@ namespace Builder
 				break;
 			}
 
-			m_context->m_progress += 10;		// Total progress 90
+			m_context->m_progress += 10;		// Total progress 85
 
 			//
 			// Write Firmware Statistics
 			//
-
 			ok = writeFirmwareStatistics(*m_context->m_buildResultWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			m_context->m_progress += 5;		// Total progress 90
+
+			//
+			// Run simulator-based script tests
+			//
+			ok = runSimTests();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -336,6 +349,9 @@ namespace Builder
 
 			m_context->m_progress += 5;		// Total progress 95
 
+			//
+			// Ok
+			//
 			LOG_SUCCESS(m_context->m_log, tr("Ok"));
 		}
 		while (false);
@@ -1537,6 +1553,140 @@ namespace Builder
 		}
 	}
 
+	bool BuildWorkerThread::runSimTests()
+	{
+		Q_ASSERT(m_context);
+
+		if (m_context->m_projectProperties.runSimTestsOnBuild() == false)
+		{
+			return true;
+		}
+
+		LOG_MESSAGE(m_context->m_log, tr(""));
+		LOG_MESSAGE(m_context->m_log, tr("Run simulator-based tests..."));
+
+		// Get test scripts
+		//
+		DbFileTree scriptFilesTree;
+
+		bool ok = m_context->m_db.getFileListTree(&scriptFilesTree, m_context->m_db.testsFileId(), true, nullptr);
+		if (ok == false)
+		{
+			m_context->m_log->errPDB2001(m_context->m_db.testsFileId(), "", m_context->m_db.lastError());
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		std::vector<DbFileInfo> fileInfos = scriptFilesTree.toVector(true);
+
+		auto filter = [](const DbFileInfo& fi) -> bool
+		{
+			return fi.isFolder() || fi.fileName().endsWith(".js") == false;
+		};
+
+		fileInfos.erase(std::remove_if(fileInfos.begin(),
+									   fileInfos.end(),
+									   filter),
+						fileInfos.end());
+
+		std::vector<std::shared_ptr<DbFile>> files;
+
+		ok = m_context->m_db.getLatestVersion(fileInfos, &files, nullptr);
+		if (ok == false)
+		{
+			m_context->m_log->errPDB2001(m_context->m_db.testsFileId(), "", m_context->m_db.lastError());
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		// Run tests
+		//
+		std::vector<Sim::SimScriptItem> testScripts;
+		testScripts.reserve(files.size());
+
+		for (std::shared_ptr<DbFile> f : files)
+		{
+			testScripts.emplace_back(Sim::SimScriptItem{f->data(), scriptFilesTree.filePath(f->fileId()) + "/" + f->fileName()});
+		}
+
+		class SimLogger : public ILogFile
+		{
+			OutputLog* m_log = nullptr;
+
+		public:
+			SimLogger(OutputLog* log) : m_log(log) {}
+
+			virtual bool writeAlert(const QString& text) override
+			{
+				m_log->writeError(text); return true;
+			};
+			virtual bool writeError(const QString& text) override
+			{
+				m_log->writeError(text); return true;
+			};
+			virtual bool writeWarning(const QString& text) override
+			{
+				m_log->writeWarning0(text); return true;
+			};
+			virtual bool writeMessage(const QString& text) override
+			{
+				m_log->writeMessage(text); return true;
+			};
+			virtual bool writeText(const QString& text) override
+			{
+				m_log->writeMessage(text); return true;
+			};
+		};
+
+		SimLogger simLogger(m_log);
+		QString buildPath = m_context->m_buildResultWriter->fullOutputPathes()[0];
+
+		Sim::Simulator simulator{&simLogger, nullptr};
+
+		ok = simulator.load(buildPath);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		qint64 timeout = m_context->m_projectProperties.simTestsTimeout();
+
+		// Add modules to simulation
+		//
+		simulator.control().setRunList({});
+
+		// Run scripts
+		//
+		ok = simulator.runScripts(testScripts, timeout);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		ok = simulator.waitScript(timeout < 0 ? ULONG_MAX : static_cast<unsigned long>(timeout));
+		if (ok == false)
+		{
+			return false;
+		}
+
+		ok = simulator.scriptResult();
+
+		return ok;
+	}
+
 	QString BuildWorkerThread::projectName() const
 	{
 		return m_projectName;
@@ -1585,11 +1735,6 @@ namespace Builder
 	void BuildWorkerThread::setServerPassword(QString value)
 	{
 		m_serverPassword = value;
-	}
-
-	DbProjectProperties BuildWorkerThread::projectProperties() const
-	{
-		return m_projectProperties;
 	}
 
 	void BuildWorkerThread::setIssueLog(IssueLogger* value)

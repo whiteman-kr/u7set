@@ -8,10 +8,9 @@
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 #include <QMutex>
-#include <SimOutput.h>
-#include <SimLogicModule.h>
-#include <SimTimeController.h>
-#include <SimAppSignalManager.h>
+#include "SimLogicModule.h"
+#include "SimTimeController.h"
+#include "SimAppSignalManager.h"
 
 namespace Sim
 {
@@ -122,7 +121,7 @@ namespace Sim
 	};
 
 
-	class Control : public QThread, protected Output
+	class Control : public QThread
 	{
 		Q_OBJECT
 
@@ -165,6 +164,7 @@ namespace Sim
 
 	private:
 		Simulator* m_simulator = nullptr;
+		ScopedLog m_log;
 
 		std::atomic<bool> m_unlockTimer{false};
 
@@ -179,6 +179,7 @@ namespace Sim
 
 }
 
+Q_DECLARE_METATYPE(Sim::SimControlState);
 Q_DECLARE_METATYPE(Sim::ControlStatus);
 
 

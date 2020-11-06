@@ -15,7 +15,6 @@
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
 #include "../lib/LogicModulesInfo.h"
-#include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
 #include "SimConnections.h"
@@ -149,14 +148,14 @@ namespace Sim
 	//
 	// DeviceEmulator
 	//
-    class DeviceEmulator : public QObject, protected Output
+	class DeviceEmulator : public QObject
 	{
 		Q_OBJECT
 
 		friend SimCommandTest_LM5_LM6;
 
 	public:
-		DeviceEmulator();
+		explicit DeviceEmulator(ScopedLog log);
 		virtual ~DeviceEmulator();
 
 	public:
@@ -268,6 +267,8 @@ namespace Sim
 		// Props
 		//
 	public:
+		ScopedLog& log();
+
 		const QString& equipmentId() const;
 
 		int buildNo() const;
@@ -298,6 +299,8 @@ namespace Sim
 		// Data
 		//
 	private:
+		mutable ScopedLog m_log;
+
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 		::LogicModuleInfo m_logicModuleExtraInfo;

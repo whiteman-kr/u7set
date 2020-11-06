@@ -845,6 +845,11 @@ SpecificPropertiesEditor::~SpecificPropertiesEditor()
 	theSettings.m_specificEditorSplitterState = m_topSplitter->saveState();
 }
 
+QString SpecificPropertiesEditor::text() const
+{
+	return m_propertiesModel.toText();
+}
+
 void SpecificPropertiesEditor::setText(const QString& text)
 {
 	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 7);	// Editor must be reviewed if version is raised
@@ -1038,9 +1043,9 @@ void SpecificPropertiesEditor::setText(const QString& text)
 }
 
 
-QString SpecificPropertiesEditor::text()
+bool SpecificPropertiesEditor::readOnly() const
 {
-	return m_propertiesModel.toText();
+	return m_propertyEditor->isReadOnly();
 }
 
 void SpecificPropertiesEditor::setReadOnly(bool value)

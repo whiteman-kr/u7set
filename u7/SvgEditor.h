@@ -35,9 +35,10 @@ public:
 	explicit SvgEditor(QWidget* parent);
 	virtual ~SvgEditor();
 
+	QString text() const override;
 	void setText(const QString& text) override;
-	QString text() override;
 
+	bool readOnly() const override;
 	void setReadOnly(bool value) override;
 
 private slots:

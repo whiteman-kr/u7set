@@ -563,8 +563,8 @@ namespace Sim
 
 	OverrideSignals::OverrideSignals(Simulator* simulator, QObject* parent /*= nullptr*/) :
 		QObject(parent),
-		Output("OverrideSignals"),
-		m_simulator(simulator)
+		m_simulator(simulator),
+		m_log(simulator->log(), "OverrideSignals")
 	{
 		assert(simulator);
 		return;
@@ -603,7 +603,7 @@ namespace Sim
 
 			if (sp.has_value() == false)
 			{
-				writeWaning(QString("Cannot add signal to override list, signal %1 not found.").arg(id));
+				m_log.writeWarning(QString("Cannot add signal to override list, signal %1 not found.").arg(id));
 				continue;
 			}
 
@@ -614,7 +614,7 @@ namespace Sim
 				auto[it, ok] = m_signals.emplace(id, *sp);
 				if (ok == false)
 				{
-					writeWaning(QString("Signal %1 aldready added to override list.").arg(id));
+					m_log.writeWarning(QString("Signal %1 aldready added to override list.").arg(id));
 					continue;
 				}
 				else
@@ -650,7 +650,7 @@ namespace Sim
 
 		if (sp.has_value() == false)
 		{
-			writeWaning(QString("Cannot add signal to override list, signal %1 not found.").arg(appSignalId));
+			m_log.writeWarning(QString("Cannot add signal to override list, signal %1 not found.").arg(appSignalId));
 			return false;
 		}
 
@@ -661,7 +661,7 @@ namespace Sim
 			auto[it, ok] = m_signals.emplace(appSignalId, *sp);
 			if (ok == false)
 			{
-				writeWaning(QString("Signal %1 aldready added to override list.").arg(appSignalId));
+				m_log.writeWarning(QString("Signal %1 aldready added to override list.").arg(appSignalId));
 				return false;
 			}
 			else
@@ -742,7 +742,7 @@ namespace Sim
 
 			if (it == m_signals.end())
 			{
-				writeError(tr("Can't set new value for %1, signal not found").arg(appSignalId));
+				m_log.writeError(tr("Can't set new value for %1, signal not found").arg(appSignalId));
 				return;
 			}
 
@@ -767,7 +767,7 @@ namespace Sim
 
 			if (sp.has_value() == false)
 			{
-				writeWaning(tr("Signal %1 removed from overriden signals.").arg(osp.appSignalId()));
+				m_log.writeWarning(tr("Signal %1 removed from overriden signals.").arg(osp.appSignalId()));
 				continue;
 			}
 
@@ -834,7 +834,7 @@ namespace Sim
 						                       .arg(osp.m_scriptValue->property("lineNumber").toInt())
 						                       .arg(osp.m_scriptValue->toString());
 
-						writeError(errorMessage);
+						m_log.writeError(errorMessage);
 
 						qDebug() << "Script evaluate error at line " << osp.m_scriptValue->property("lineNumber").toInt();
 						qDebug() << "\tSignal: " << appSignalId;
@@ -1047,10 +1047,10 @@ namespace Sim
 		//
 		if (ramAreaInfo.size() > 0x10000)
 		{
-			writeError(tr("RamArea (offset %1) in LogicModule %2 seems too big (%3)")
-						.arg(ramAreaInfo.offset())
-						.arg(lmEquipmentId)
-						.arg(ramAreaInfo.size()));
+			m_log.writeError(tr("RamArea (offset %1) in LogicModule %2 seems too big (%3)")
+							 .arg(ramAreaInfo.offset())
+							 .arg(lmEquipmentId)
+							 .arg(ramAreaInfo.size()));
 			return result;
 		}
 
