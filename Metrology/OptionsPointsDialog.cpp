@@ -57,9 +57,8 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
 	QHBoxLayout* listLayout = new QHBoxLayout;
 	m_pointList = new QTableWidget;
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pointList->verticalHeader()->setDefaultSectionSize(cellSize.height());
-	m_pointList->setFont(theOptions.measureView().font());
 
 	QVBoxLayout* buttonsLayout = new QVBoxLayout;
 	m_addButton = new QPushButton(tr("&Add"));

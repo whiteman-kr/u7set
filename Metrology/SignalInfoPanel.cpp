@@ -1,7 +1,6 @@
 #include "SignalInfoPanel.h"
 
 #include <QApplication>
-#include <QMainWindow>
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -10,7 +9,7 @@
 #include "../lib/UnitsConvertor.h"
 
 #include "CalibratorBase.h"
-#include "CopyData.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------

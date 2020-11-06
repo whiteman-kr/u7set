@@ -1,15 +1,13 @@
 #include "ComparatorInfoPanel.h"
 
 #include <QApplication>
-#include <QMainWindow>
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QKeyEvent>
 
-#include "Conversion.h"
 #include "CalibratorBase.h"
-#include "CopyData.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------

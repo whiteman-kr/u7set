@@ -1,11 +1,8 @@
 #include "StatisticsPanel.h"
 
-#include "MainWindow.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
-#include "Options.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -114,11 +111,6 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 		return result;
 	}
 
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
-	}
-
 	const StatisticsItem& si = theSignalBase.statistics().item(row);
 
 	Metrology::Signal* pSignal = si.signal();
@@ -133,10 +125,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 		{
 			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
-				if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
-				{
-					return QColor(Qt::red);
-				}
+				return QColor(Qt::red);
 			}
 			else
 			{
@@ -161,7 +150,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 		{
 			switch (si.state())
 			{
-				case StatisticsItem::State::Failed:	return theOptions.measureView().colorErrorLimit();
+				case StatisticsItem::State::Failed:		return theOptions.measureView().colorErrorLimit();
 				case StatisticsItem::State::Success:	return theOptions.measureView().colorNotError();
 			}
 		}
@@ -325,12 +314,6 @@ int StatisticsPanel::m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 StatisticsPanel::StatisticsPanel(QWidget* parent) :
 	QDockWidget(parent)
 {
-	m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
-	if (m_pMainWindow == nullptr)
-	{
-		return;
-	}
-
 	setWindowTitle(tr("Panel statistics (Checklist)"));
 	setObjectName(windowTitle());
 
@@ -413,7 +396,7 @@ void StatisticsPanel::createInterface()
 	//
 	m_pView = new QTableView(m_pStatisticsWindow);
 	m_pView->setModel(&m_signalTable);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
@@ -542,6 +525,20 @@ bool StatisticsPanel::eventFilter(QObject *object, QEvent *event)
 	}
 
 	return QObject::eventFilter(object, event);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsPanel::setViewFont(const QFont& font)
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	m_pView->setFont(font);
+	QSize cellSize = QFontMetrics(font).size(Qt::TextSingleLine,"A");
+	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -947,18 +944,6 @@ void StatisticsPanel::findSignalInStatisticsList()
 
 void StatisticsPanel::findSignalInMeasureList()
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	FindMeasurePanel* pFindMeasurePanel = pMainWindow->findMeasurePanel();
-	if (pFindMeasurePanel == nullptr)
-	{
-		return;
-	}
-
 	int statisticItemIndex = m_pView->currentIndex().row();
 	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistics().count())
 	{
@@ -975,9 +960,7 @@ void StatisticsPanel::findSignalInMeasureList()
 		return;
 	}
 
-	pFindMeasurePanel->show();
-	pFindMeasurePanel->setFindText(pSignal->param().appSignalID());
-	emit pFindMeasurePanel->find();
+	emit showFindMeasurePanel(pSignal->param().appSignalID());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

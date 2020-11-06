@@ -187,11 +187,6 @@ public:
 	MeasureView*			measureView(int measureType);
 	void					appendMeasureView(int measureType, MeasureView* pView);
 
-	// Panels
-	//
-	FindMeasurePanel*		findMeasurePanel() { return m_pFindMeasurePanel; }
-	StatisticsPanel*		statisticsPanel() { return m_pStatisticsPanel; }
-
 	// Sockets
 	//
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }
@@ -205,6 +200,9 @@ public:
 	MeasureThread&			measureThread() { return m_measureThread; }
 
 	bool					signalSourceIsValid(bool showMsg);
+	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
+	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);														// only for mode "Simaple module"
+
 
 protected:
 
@@ -214,6 +212,7 @@ signals:
 
 	// from ToolBars
 	//
+	void					measureViewChanged(MeasureView* pView);	// appear when changing the type of measurement
 	void					measureTypeChanged(int type);			// appear when changing the type of measurement
 	void					measureKindChanged(int kind);			// appear when changing the kind of measurement
 	void					signalConnectionTypeChanged(int type);	// appear when changing the SignalConnectionType
@@ -276,6 +275,7 @@ private slots:
 	void					setAcitiveMeasureSignal(int index);
 	void					previousMeasureSignal();
 	void					nextMeasureSignal();
+	bool					setNextMeasureSignalFromModule();
 	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
 
 	// Slots of contex menu
@@ -310,13 +310,16 @@ private slots:
 	void					setMeasureThreadInfo(QString msg);
 	void					setMeasureThreadInfo(int timeout);
 	void					measureThreadMsgBox(int type, QString text, int *result = nullptr);
-	void					setNextMeasureSignal(bool& measureNextSignal);
 	void					measureComplite(Measurement* pMeasurement);
 
 	// Slots for enable measuring
 	//
 	void					updateStartStopActions();
 	void					updatePrevNextSignalActions(int signalIndex);
+
+	// Slots for panels
+	//
+	void					showFindMeasurePanel(const QString& appSignalID);
 };
 
 // ==============================================================================================

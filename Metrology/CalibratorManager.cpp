@@ -12,6 +12,8 @@
 
 #include "../lib/MetrologySignal.h"
 
+#include "Options.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
@@ -19,8 +21,7 @@ CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
 	, m_pCalibrator (pCalibrator)
 {
 	setReadyForManage(true);
-
-	createManageDialog();
+	createInterface();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -103,7 +104,7 @@ void CalibratorManager::waitReadyForManage()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::createManageDialog()
+void CalibratorManager::createInterface()
 {
 	// create elements of interface
 	//
@@ -124,6 +125,7 @@ void CalibratorManager::createManageDialog()
 
 	valueGroup->setLayout(valueLayout);
 
+	m_valueCompleter.create(this);
 	m_pValueEdit = new QLineEdit(this);
 
 	QGroupBox* buttonGroup = new QGroupBox(tr("Control"));
@@ -213,9 +215,12 @@ void CalibratorManager::initDialog()
 	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
 	QValidator *validator = new QRegExpValidator(rx, this);
 
+	m_valueCompleter.load(QString("%1Calibrator%2").arg(CALIBRATOR_OPTIONS_KEY).arg(m_pCalibrator->channel()));
+
 	m_pValueEdit->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	m_pValueEdit->setFont(*font);
 	m_pValueEdit->setValidator(validator);
+	m_pValueEdit->setCompleter(m_valueCompleter.completer());
 
 	m_pSetValueButton->setDefault(true);
 	m_pSetValueButton->setFont(*font);
@@ -354,14 +359,13 @@ void CalibratorManager::enableInterface(bool enable)
 
 void CalibratorManager::updateModeList()
 {
+	m_pModeList->clear();
+	m_pUnitList->clear();
+
 	if (calibratorIsConnected() == false)
 	{
-		m_pModeList->clear();
-		m_pUnitList->clear();
 		return;
 	}
-
-	int currentModeIndex = -1;
 
 	m_pModeList->blockSignals(true);
 
@@ -389,47 +393,35 @@ void CalibratorManager::updateModeList()
 		}
 
 		m_pModeList->addItem(qApp->translate("Calibrator.h", CalibratorMode[cl.mode]), cl.mode);
-
-		if (cl.mode == m_pCalibrator->mode())
-		{
-			currentModeIndex = m_pModeList->count() - 1;
-		}
 	}
+
+	m_pModeList->setCurrentIndex(CALIBRATOR_MODE_UNDEFINED);
 
 	m_pModeList->blockSignals(false);
-
-	if (m_pModeList->count() == 0)
-	{
-		return;
-	}
-
-	m_pModeList->setCurrentIndex(currentModeIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::updateUnitList(int mode)
+void CalibratorManager::updateUnitList()
 {
+	m_pUnitList->clear();
+
 	if (calibratorIsConnected() == false)
 	{
 		return;
 	}
 
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	int modeIndex = m_pModeList->currentIndex();
+	if(modeIndex == -1)
 	{
 		return;
 	}
 
-	int currentUnit = CALIBRATOR_UNIT_UNDEFINED;
-	int selectedUnitIndex = -1;
-
-	switch(mode)
+	int mode = m_pModeList->itemData(modeIndex).toInt();
+	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
 	{
-		case CALIBRATOR_MODE_MEASURE:	currentUnit = m_pCalibrator->measureUnit();	break;
-		case CALIBRATOR_MODE_SOURCE:	currentUnit = m_pCalibrator->sourceUnit();	break;
+		return;
 	}
-
-	m_pUnitList->clear();
 
 	m_pUnitList->blockSignals(true);
 
@@ -457,21 +449,11 @@ void CalibratorManager::updateUnitList(int mode)
 		}
 
 		m_pUnitList->addItem(qApp->translate("Calibrator.h", CalibratorUnit[cl.unit]), cl.unit);
-
-		if (cl.unit == currentUnit)
-		{
-			selectedUnitIndex = m_pUnitList->count() - 1;
-		}
 	}
+
+	m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNDEFINED);
 
 	m_pUnitList->blockSignals(false);
-
-	if (m_pUnitList->count() == 0)
-	{
-		return;
-	}
-
-	m_pUnitList->setCurrentIndex(selectedUnitIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -520,7 +502,6 @@ void CalibratorManager::updateValue()
 	m_pSourceEdit->setCursorPosition(0);
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorManager::onCalibratorError(QString errorText)
@@ -550,6 +531,7 @@ void CalibratorManager::onCalibratorConnect()
 	enableInterface(true);
 
 	updateModeList();
+	updateUnitList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -560,7 +542,8 @@ void CalibratorManager::onCalibratorDisconnect()
 
 	enableInterface(false);
 
-	updateModeList();
+	m_pModeList->clear();
+	m_pUnitList->clear();
 
 	setReadyForManage(false);
 }
@@ -579,9 +562,36 @@ bool CalibratorManager::setUnit(int mode, int unit)
 		return false;
 	}
 
+	int modeCount = m_pModeList->count();
+	for (int modeIndex = 0; modeIndex < modeCount; modeIndex++)
+	{
+		if (m_pModeList->itemData(modeIndex).toInt() == mode)
+		{
+			m_pModeList->blockSignals(true);
+			m_pModeList->setCurrentIndex(modeIndex);
+			m_pModeList->blockSignals(false);
+
+			updateUnitList();
+
+			break;
+		}
+	}
+
 	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
 	{
 		return false;
+	}
+
+	int unitCount = m_pUnitList->count();
+	for (int unitIndex = 0; unitIndex < unitCount; unitIndex++)
+	{
+		if (m_pUnitList->itemData(unitIndex).toInt() == unit)
+		{
+			m_pUnitList->blockSignals(true);
+			m_pUnitList->setCurrentIndex(unitIndex);
+			m_pUnitList->blockSignals(false);
+			break;
+		}
 	}
 
 	setReadyForManage(true);
@@ -610,7 +620,7 @@ void CalibratorManager::onSetMode(int modeIndex)
 		return;
 	}
 
-	updateUnitList(mode);
+	updateUnitList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -633,6 +643,13 @@ void CalibratorManager::onSetUnit(int unitIndex)
 		return;
 	}
 
+	if (mode == CALIBRATOR_MODE_SOURCE)
+	{
+		m_pSetValueButton->setEnabled(true);
+		m_pStepDownButton->setEnabled(true);
+		m_pStepUpButton->setEnabled(true);
+	}
+
 	if (unitIndex == -1)
 	{
 		return;
@@ -647,13 +664,6 @@ void CalibratorManager::onSetUnit(int unitIndex)
 	if (calibratorIsConnected() == false)
 	{
 		return;
-	}
-
-	if (mode == CALIBRATOR_MODE_SOURCE)
-	{
-		m_pSetValueButton->setEnabled(true);
-		m_pStepDownButton->setEnabled(true);
-		m_pStepUpButton->setEnabled(true);
 	}
 
 	setReadyForManage(true);
@@ -715,6 +725,14 @@ void CalibratorManager::onSetValue()
 	}
 
 	setValue(value.toDouble());
+
+	if (m_pCalibrator == nullptr)
+	{
+		return;
+	}
+
+	m_valueCompleter.appendFilter(value);
+	m_valueCompleter.save(QString("%1Calibrator%2").arg(CALIBRATOR_OPTIONS_KEY).arg(m_pCalibrator->channel()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

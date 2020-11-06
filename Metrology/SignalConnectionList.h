@@ -162,14 +162,14 @@ private:
 	void					createInterface();
 	void					createContextMenu();
 
-signals:
-
-private slots:
+public slots:
 
 	// slots for updating
 	//
 	void					configurationLoaded();
 	void					updateList();
+
+private slots:
 
 	// slots of menu
 	//

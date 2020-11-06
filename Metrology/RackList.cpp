@@ -1,11 +1,8 @@
 #include "RackList.h"
 
-#include "MainWindow.h"
-#include "Options.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -111,11 +108,6 @@ QVariant RackListTable::data(const QModelIndex &index, int role) const
 		}
 
 		return result;
-	}
-
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -244,12 +236,6 @@ void RackListTable::clear()
 RackListDialog::RackListDialog(QWidget *parent) :
 	QDialog(parent)
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
-	{
-		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &RackListDialog::updateList, Qt::QueuedConnection);
-	}
-
 	m_rackBase = theSignalBase.racks();
 	m_rackTable.setRackGroups(m_rackBase.groups());
 
@@ -319,7 +305,7 @@ void RackListDialog::createInterface()
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_rackTable);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < RACK_LIST_COLUMN_COUNT; column++)

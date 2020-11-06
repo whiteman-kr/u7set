@@ -1,6 +1,7 @@
 #ifndef SIGNALINFOPANEL_H
 #define SIGNALINFOPANEL_H
 
+#include <QMainWindow>
 #include <QDockWidget>
 #include <QMenu>
 #include <QAction>

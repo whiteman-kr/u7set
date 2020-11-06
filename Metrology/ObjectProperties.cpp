@@ -483,7 +483,7 @@ void RackGroupPropertyDialog::createPropertyList()
 	m_pGroupView->horizontalHeader()->hide();
 	m_pGroupView->verticalHeader()->hide();
 
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pGroupView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	m_pGroupView->installEventFilter(this);

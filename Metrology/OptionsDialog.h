@@ -176,7 +176,7 @@ class OptionsDialog : public QDialog
 
 public:
 
-	explicit OptionsDialog(QWidget *parent = nullptr);
+	explicit OptionsDialog(const Options& options, QWidget *parent = nullptr);
 	virtual ~OptionsDialog();
 
 private:
@@ -220,6 +220,10 @@ private:
 	void						loadSettings();
 	void						saveSettings();
 
+public:
+
+	Options&					options() { return m_options; }
+
 protected:
 
 	bool						event(QEvent * e);
@@ -236,7 +240,6 @@ private slots:
 	void						updateMeasureViewPage(bool isDialog);
 
 	void						onOk();
-	void						onApply();
 };
 
 // ==============================================================================================

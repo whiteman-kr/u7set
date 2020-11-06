@@ -1971,53 +1971,53 @@
 <context>
     <name>CalibratorManager</name>
     <message>
-        <location filename="../CalibratorManager.cpp" line="111"/>
+        <location filename="../CalibratorManager.cpp" line="112"/>
         <source>Display</source>
         <translation>Дисплей</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="114"/>
+        <location filename="../CalibratorManager.cpp" line="115"/>
         <source>Measure</source>
         <translation>Измерение</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="117"/>
+        <location filename="../CalibratorManager.cpp" line="118"/>
         <source>Source</source>
         <translation>Источник</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="129"/>
+        <location filename="../CalibratorManager.cpp" line="131"/>
         <source>Control</source>
         <translation>Управление</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="132"/>
+        <location filename="../CalibratorManager.cpp" line="134"/>
         <source>set value</source>
         <translation>Установить</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="136"/>
+        <location filename="../CalibratorManager.cpp" line="138"/>
         <source>Step down</source>
         <translation>Шаг вниз</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="137"/>
+        <location filename="../CalibratorManager.cpp" line="139"/>
         <source>Step up</source>
         <translation>Шаг вверх</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="155"/>
-        <location filename="../CalibratorManager.cpp" line="343"/>
+        <location filename="../CalibratorManager.cpp" line="157"/>
+        <location filename="../CalibratorManager.cpp" line="348"/>
         <source>Remote control</source>
         <translation>Удаленное управление</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="286"/>
+        <location filename="../CalibratorManager.cpp" line="291"/>
         <source>c:%1 (%2) - Disconnected</source>
         <translation>c:%1 (%2) - Не подключен</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.cpp" line="347"/>
+        <location filename="../CalibratorManager.cpp" line="352"/>
         <source>Output ON/OFF</source>
         <translation>Выход ON/OFF</translation>
     </message>
@@ -2025,17 +2025,17 @@
 <context>
     <name>CalibratorManager.h</name>
     <message>
-        <location filename="../CalibratorManager.h" line="17"/>
+        <location filename="../CalibratorManager.h" line="18"/>
         <source>Error list</source>
         <translation>Список ошибок</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.h" line="18"/>
+        <location filename="../CalibratorManager.h" line="19"/>
         <source>Not connected</source>
         <translation>Не подключен</translation>
     </message>
     <message>
-        <location filename="../CalibratorManager.h" line="19"/>
+        <location filename="../CalibratorManager.h" line="20"/>
         <source>Calibrator</source>
         <translation>Калибратор</translation>
     </message>
@@ -2094,12 +2094,12 @@
 <context>
     <name>ComparatorInfoPanel</name>
     <message>
-        <location filename="../ComparatorInfoPanel.cpp" line="292"/>
+        <location filename="../ComparatorInfoPanel.cpp" line="290"/>
         <source>Panel comparator information</source>
         <translation>Панель информации об уставках</translation>
     </message>
     <message>
-        <location filename="../ComparatorInfoPanel.cpp" line="353"/>
+        <location filename="../ComparatorInfoPanel.cpp" line="351"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
@@ -2107,7 +2107,7 @@
 <context>
     <name>ComparatorInfoTable</name>
     <message>
-        <location filename="../ComparatorInfoPanel.cpp" line="90"/>
+        <location filename="../ComparatorInfoPanel.cpp" line="88"/>
         <source>Comparator %1</source>
         <translation>Уставка %1</translation>
     </message>
@@ -2115,47 +2115,47 @@
 <context>
     <name>ComparatorList.h</name>
     <message>
-        <location filename="../ComparatorList.h" line="22"/>
+        <location filename="../ComparatorList.h" line="23"/>
         <source>AppSignalID (Input/Internal)</source>
         <translation>AppSignalID (Входной/Внутренний)</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="23"/>
+        <location filename="../ComparatorList.h" line="24"/>
         <source>Set point</source>
         <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="24"/>
+        <location filename="../ComparatorList.h" line="25"/>
         <source>Hysteresis</source>
         <translation>Зона возврата</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="25"/>
+        <location filename="../ComparatorList.h" line="26"/>
         <source>Signal type</source>
         <translation>Тип сигнала</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="26"/>
+        <location filename="../ComparatorList.h" line="27"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="27"/>
+        <location filename="../ComparatorList.h" line="28"/>
         <source>Electric sensor</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="28"/>
+        <location filename="../ComparatorList.h" line="29"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="29"/>
+        <location filename="../ComparatorList.h" line="30"/>
         <source>AppSignalID (Discrete)</source>
         <translation>AppSignalID (Дискретный)</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.h" line="30"/>
+        <location filename="../ComparatorList.h" line="31"/>
         <source>Schema</source>
         <translation>Схема</translation>
     </message>
@@ -2163,42 +2163,42 @@
 <context>
     <name>ComparatorListDialog</name>
     <message>
-        <location filename="../ComparatorList.cpp" line="364"/>
+        <location filename="../ComparatorList.cpp" line="352"/>
         <source>Comparators</source>
         <translation>Уставки</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="370"/>
+        <location filename="../ComparatorList.cpp" line="358"/>
         <source>&amp;Comparator</source>
         <translation>&amp;Уставки</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="371"/>
+        <location filename="../ComparatorList.cpp" line="359"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="373"/>
+        <location filename="../ComparatorList.cpp" line="361"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="377"/>
+        <location filename="../ComparatorList.cpp" line="365"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="383"/>
+        <location filename="../ComparatorList.cpp" line="371"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="387"/>
+        <location filename="../ComparatorList.cpp" line="375"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../ComparatorList.cpp" line="392"/>
+        <location filename="../ComparatorList.cpp" line="380"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
@@ -2367,27 +2367,27 @@
 <context>
     <name>ExportData</name>
     <message>
-        <location filename="../ExportData.cpp" line="51"/>
+        <location filename="../ProcessData.cpp" line="529"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../ExportData.cpp" line="91"/>
+        <location filename="../ProcessData.cpp" line="569"/>
         <source>Export</source>
         <translation>Экспорт</translation>
     </message>
     <message>
-        <location filename="../ExportData.cpp" line="96"/>
+        <location filename="../ProcessData.cpp" line="574"/>
         <source>Data is absent!</source>
         <translation>Данные отсутствую!</translation>
     </message>
     <message>
-        <location filename="../ExportData.cpp" line="101"/>
+        <location filename="../ProcessData.cpp" line="579"/>
         <source>CSV files (*.csv)</source>
         <translation>CSV файлы (*.csv)</translation>
     </message>
     <message>
-        <location filename="../ExportData.cpp" line="296"/>
+        <location filename="../ProcessData.cpp" line="774"/>
         <source>Export is complited!</source>
         <translation>Экспорт завершен!</translation>
     </message>
@@ -2395,7 +2395,7 @@
 <context>
     <name>ExportData.h</name>
     <message>
-        <location filename="../ExportData.h" line="14"/>
+        <location filename="../ProcessData.h" line="132"/>
         <source>Export data</source>
         <translation>Экспорт данных</translation>
     </message>
@@ -2403,17 +2403,17 @@
 <context>
     <name>FindData</name>
     <message>
-        <location filename="../FindData.cpp" line="39"/>
+        <location filename="../ProcessData.cpp" line="312"/>
         <source>Find</source>
         <translation>Найти</translation>
     </message>
     <message>
-        <location filename="../FindData.cpp" line="43"/>
+        <location filename="../ProcessData.cpp" line="318"/>
         <source>Search Text</source>
         <translation>Текст поиска</translation>
     </message>
     <message>
-        <location filename="../FindData.cpp" line="46"/>
+        <location filename="../ProcessData.cpp" line="322"/>
         <source> Find next ...</source>
         <translation> Найти далее ...</translation>
     </message>
@@ -2421,60 +2421,59 @@
 <context>
     <name>FindMeasurePanel</name>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="246"/>
+        <location filename="../FindMeasurePanel.cpp" line="240"/>
         <source>Search measurements panel</source>
         <translation>Панель поиска измерений</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="269"/>
+        <location filename="../FindMeasurePanel.cpp" line="274"/>
         <source>Search Text</source>
         <translation>Текст поиска</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="273"/>
+        <location filename="../FindMeasurePanel.cpp" line="279"/>
         <source>Find text</source>
         <translation>Найти текст</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="277"/>
+        <location filename="../FindMeasurePanel.cpp" line="283"/>
         <source>Search measurements ToolBar</source>
         <translation>Поиск измерений</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="302"/>
+        <location filename="../FindMeasurePanel.cpp" line="308"/>
         <source>Found: 0</source>
         <translation>Найдено: 0</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="315"/>
+        <location filename="../FindMeasurePanel.cpp" line="321"/>
         <source>&amp;Measurements</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="317"/>
+        <location filename="../FindMeasurePanel.cpp" line="323"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="322"/>
+        <location filename="../FindMeasurePanel.cpp" line="328"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.cpp" line="460"/>
         <source>Text &quot;%1&quot; was not found!</source>
-        <translation>Текст %1 не был найден!</translation>
+        <translation type="vanished">Текст %1 не был найден!</translation>
     </message>
 </context>
 <context>
     <name>FindMeasurePanel.h</name>
     <message>
-        <location filename="../FindMeasurePanel.h" line="66"/>
+        <location filename="../FindMeasurePanel.h" line="70"/>
         <source>Row</source>
         <translation>Строка</translation>
     </message>
     <message>
-        <location filename="../FindMeasurePanel.h" line="67"/>
+        <location filename="../FindMeasurePanel.h" line="71"/>
         <source>Text</source>
         <translation>Текст</translation>
     </message>
@@ -2531,352 +2530,376 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="79"/>
+        <location filename="../MainWindow.cpp" line="77"/>
         <source>Metrology</source>
         <translation>Метрология</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="105"/>
+        <location filename="../MainWindow.cpp" line="103"/>
         <source>Start</source>
         <translation>Запустить</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="108"/>
+        <location filename="../MainWindow.cpp" line="106"/>
         <source>To start the measurement process</source>
         <translation>Запустить процесс измерения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="111"/>
+        <location filename="../MainWindow.cpp" line="109"/>
         <source>Stop</source>
         <translation>Остановить</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="114"/>
+        <location filename="../MainWindow.cpp" line="112"/>
         <source>To stop the measurement process</source>
         <translation>Остановить процесс измерения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="117"/>
+        <location filename="../MainWindow.cpp" line="115"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="120"/>
+        <location filename="../MainWindow.cpp" line="118"/>
         <source>Export measurements</source>
         <translation>Экспорт измерений</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="123"/>
+        <location filename="../MainWindow.cpp" line="121"/>
         <source>Previous signal</source>
         <translation>Предыдущий сигнал</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="126"/>
+        <location filename="../MainWindow.cpp" line="124"/>
         <source>Select previous signal</source>
         <translation>Выбрать предыдущий сигнал</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="129"/>
+        <location filename="../MainWindow.cpp" line="127"/>
         <source>Next signal</source>
         <translation>Следующий сигнал</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="132"/>
+        <location filename="../MainWindow.cpp" line="130"/>
         <source>Select next signal</source>
         <translation>Выбрать следующий сигнал</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="137"/>
+        <location filename="../MainWindow.cpp" line="135"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="140"/>
+        <location filename="../MainWindow.cpp" line="138"/>
         <source>Copy of the measurements</source>
         <translation>Копировать измерения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="143"/>
+        <location filename="../MainWindow.cpp" line="141"/>
         <source>&amp;Delete</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="146"/>
+        <location filename="../MainWindow.cpp" line="144"/>
         <source>Delete the selected measurements</source>
         <translation>Удалить выделенные измерения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="149"/>
+        <location filename="../MainWindow.cpp" line="147"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="152"/>
+        <location filename="../MainWindow.cpp" line="150"/>
         <source>Select all measurements</source>
         <translation>Выбрать все измерения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="157"/>
+        <location filename="../MainWindow.cpp" line="155"/>
         <source>Racks ...</source>
         <translation>Шкафы ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="162"/>
+        <location filename="../MainWindow.cpp" line="160"/>
         <source>&amp;Signals ...</source>
         <translation>&amp;Сигналы ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="167"/>
+        <location filename="../MainWindow.cpp" line="165"/>
         <source>&amp;Comparators ...</source>
         <translation>&amp;Уставки ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="172"/>
+        <location filename="../MainWindow.cpp" line="170"/>
         <source>Tuning signals ...</source>
         <translation>Сигналы тюнинга ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="177"/>
+        <location filename="../MainWindow.cpp" line="175"/>
         <source>Signal connections ...</source>
         <translation>Соединение сигналов ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="182"/>
+        <location filename="../MainWindow.cpp" line="180"/>
         <source>Sta&amp;tistics (Checklist) ...</source>
         <translation>Ста&amp;тистика (Чек-лист) ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="189"/>
+        <location filename="../MainWindow.cpp" line="187"/>
         <source>&amp;Calibrations ...</source>
         <translation>&amp;Калибраторы ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="191"/>
+        <location filename="../MainWindow.cpp" line="189"/>
         <source>Connecting and configuring calibrators</source>
         <translation>Подключение и настройка калибраторов</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="194"/>
+        <location filename="../MainWindow.cpp" line="192"/>
         <source>Metrological &amp;calculator ...</source>
         <translation>Метрологический &amp;калькулятор ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="197"/>
+        <location filename="../MainWindow.cpp" line="195"/>
         <source>Calculator for converting metrological quantities</source>
         <translation>Калькулятор для преобразования метрологических величин</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="200"/>
+        <location filename="../MainWindow.cpp" line="198"/>
         <source>&amp;Options ...</source>
         <translation>&amp;Настройки ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="203"/>
+        <location filename="../MainWindow.cpp" line="201"/>
         <source>Editing application settings</source>
         <translation>Изменение настроек приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="208"/>
+        <location filename="../MainWindow.cpp" line="206"/>
         <source>About connect to server ...</source>
         <translation>О соединении с сервером ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="213"/>
+        <location filename="../MainWindow.cpp" line="211"/>
         <source>About Metrology ...</source>
         <translation>О приложении ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="231"/>
+        <location filename="../MainWindow.cpp" line="229"/>
         <source>&amp;Measure</source>
         <translation>&amp;Измерения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="240"/>
+        <location filename="../MainWindow.cpp" line="238"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="250"/>
+        <location filename="../MainWindow.cpp" line="248"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="251"/>
+        <location filename="../MainWindow.cpp" line="249"/>
         <source>&amp;Panels</source>
         <translation>&amp;Панели</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="266"/>
+        <location filename="../MainWindow.cpp" line="264"/>
         <source>&amp;Tools</source>
         <translation>&amp;Инструменты</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="276"/>
+        <location filename="../MainWindow.cpp" line="274"/>
         <source>&amp;?</source>
         <translation>&amp;?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="292"/>
+        <location filename="../MainWindow.cpp" line="290"/>
         <source>Control panel measure process</source>
         <translation>Панель управления процессом измерений</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="311"/>
+        <location filename="../MainWindow.cpp" line="309"/>
         <source>Control panel measure timeout</source>
         <translation>Панель управления таймаутом измерений</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="326"/>
+        <location filename="../MainWindow.cpp" line="324"/>
         <source> Measure timeout </source>
         <translation> Таймаут измерения </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="340"/>
+        <location filename="../MainWindow.cpp" line="338"/>
         <source> sec.</source>
         <translation> сек.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="353"/>
+        <location filename="../MainWindow.cpp" line="351"/>
         <source>Control panel measure kind</source>
         <translation>Панель управления видом измерений</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="366"/>
+        <location filename="../MainWindow.cpp" line="364"/>
         <source> Measure kind </source>
         <translation> Вид измерения </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="391"/>
+        <location filename="../MainWindow.cpp" line="389"/>
         <source>Control panel signal connections</source>
         <translation>Панель управления соединениями сигналов</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="401"/>
+        <location filename="../MainWindow.cpp" line="399"/>
         <source> Signal connections </source>
         <translation> Соединение сигналов </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="424"/>
+        <location filename="../MainWindow.cpp" line="422"/>
         <source>Control panel selecting analog signal</source>
         <translation>Панель выбора аналоговых сигналов</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="431"/>
+        <location filename="../MainWindow.cpp" line="429"/>
         <source> Rack </source>
         <translation> Шкаф </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="447"/>
+        <location filename="../MainWindow.cpp" line="446"/>
         <source> Signal </source>
         <translation> Сигнал </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="486"/>
+        <location filename="../MainWindow.cpp" line="487"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="489"/>
+        <location filename="../MainWindow.cpp" line="490"/>
         <source>Find data in list of measurements</source>
         <translation>Найти данные в списке измерений</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="704"/>
-        <location filename="../MainWindow.cpp" line="1701"/>
+        <location filename="../MainWindow.cpp" line="707"/>
+        <location filename="../MainWindow.cpp" line="1989"/>
         <source> ConfigurationService: off </source>
         <translation> ConfigurationService: off </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="706"/>
-        <location filename="../MainWindow.cpp" line="710"/>
-        <location filename="../MainWindow.cpp" line="714"/>
-        <location filename="../MainWindow.cpp" line="1703"/>
-        <location filename="../MainWindow.cpp" line="1776"/>
-        <location filename="../MainWindow.cpp" line="1847"/>
+        <location filename="../MainWindow.cpp" line="709"/>
+        <location filename="../MainWindow.cpp" line="713"/>
+        <location filename="../MainWindow.cpp" line="717"/>
+        <location filename="../MainWindow.cpp" line="1991"/>
+        <location filename="../MainWindow.cpp" line="2063"/>
+        <location filename="../MainWindow.cpp" line="2134"/>
         <source>Please, connect to server
 click menu &quot;Tool&quot; - &quot;Options...&quot; - &quot;Connect to server&quot;</source>
         <translation>Подключитесь к серверу
 выберите меню &quot;Инструменты&quot; - &quot;Настройки ...&quot; - &quot;Соединение с сервером&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="708"/>
-        <location filename="../MainWindow.cpp" line="1774"/>
+        <location filename="../MainWindow.cpp" line="711"/>
+        <location filename="../MainWindow.cpp" line="2061"/>
         <source> AppDataService: off </source>
         <translation> AppDataService: off </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="712"/>
-        <location filename="../MainWindow.cpp" line="1845"/>
-        <location filename="../MainWindow.cpp" line="1876"/>
+        <location filename="../MainWindow.cpp" line="715"/>
+        <location filename="../MainWindow.cpp" line="2132"/>
+        <location filename="../MainWindow.cpp" line="2163"/>
         <source> TuningService: off </source>
         <translation> TuningService: off </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="954"/>
+        <location filename="../MainWindow.cpp" line="963"/>
+        <source>Proccess of measure can not start, because no connected calibrators!
+Please, make initialization calibrators!</source>
+        <translation>Невозможно начать процесс измерения, потому что нет подключенных калибраторов!
+Проведите инициализацию калибраторов!</translation>
+    </message>
+    <message>
         <source>Proccess of measure can not start, because no connected calibrators!
 Please, make initialization calibrators</source>
-        <translation>Невозможно начать процесс измерения, потому что нет подключенных калибраторов!
+        <translation type="vanished">Невозможно начать процесс измерения, потому что нет подключенных калибраторов!
 Проведите инициализацию калибраторов.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="969"/>
+        <location filename="../MainWindow.cpp" line="975"/>
         <source>No connect to Tuning Service!</source>
         <translation>Нет соединения с Tuning Service!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="996"/>
+        <location filename="../MainWindow.cpp" line="1145"/>
         <source>Measurement process is already running</source>
         <translation>Процесс измерения уже запущен</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1002"/>
+        <location filename="../MainWindow.cpp" line="1151"/>
         <source>No connect to Application Data Service!</source>
         <translation>Нет соединения с Application Data Service!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1098"/>
+        <location filename="../MainWindow.cpp" line="1177"/>
+        <source>Unable to start the measurement process!
+All electrical ranges of the inputs (or outputs) of the module must be the same.</source>
+        <translation>Невозможно начать процесс измерения!
+Все электрические диапазоны входов (или выходов) модуля, должны быть одинаковы.</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="1194"/>
+        <source>Following signals were measured:
+
+%1
+Do you want to measure them again?</source>
+        <translation>Следующие сигналы уже были измерены:
+
+%1
+Вы хотите измерить их снова?</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="1300"/>
         <source>Attempt to save rack groups was unsuccessfully!</source>
         <translation>Попытка сохранить группу шкафов закончилась неудачно!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1145"/>
+        <location filename="../MainWindow.cpp" line="1380"/>
         <source>Attempt to save signal connections was unsuccessfully!</source>
         <translation>Попытка сохранить соединения между сигналами закончилась неудачно!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1255"/>
+        <location filename="../MainWindow.cpp" line="1499"/>
         <source>Russian language could not be installed.
 File of russian language: %1 - was not found!</source>
         <translation>Русский язык не может быть установлен.
 Файл русского языка: %1 не был найден.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1324"/>
+        <location filename="../MainWindow.cpp" line="1568"/>
         <source>For measurements in several racks simultaneously, you need to combine several racks into groups.Currently, no groups have been found.
 To create a group of racks, click menu &quot;View&quot; - &quot;Racks ...&quot; .</source>
         <translation>Для измерения в нескольких шкафах одновременно, вам нужно объединить шкафы в группы. На текущий момент, ни одной созданной группы шкафов не найдено.
 Чтобы создать группу шкафов выберите меню &quot;Вид&quot; - &quot;Шкафы ...&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1600"/>
+        <location filename="../MainWindow.cpp" line="1888"/>
         <source> Connected calibrators: %1 </source>
         <translation> Подключенные калибраторы: %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1605"/>
+        <location filename="../MainWindow.cpp" line="1893"/>
         <source>Please, connect Calibrators
 click menu &quot;Tool&quot; - &quot;Calibrators...&quot;</source>
         <translation>Пожалуйста, подсоедините калибраторы, для этого выберите пункт меню &quot;Инструменты&quot; - &quot;Калибраторы ...&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1627"/>
+        <location filename="../MainWindow.cpp" line="1915"/>
         <source>Calibrator %1: %2, %3
 </source>
         <translation>Калибратор %1: %2, %3
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1647"/>
+        <location filename="../MainWindow.cpp" line="1935"/>
         <source>Connected: %1 : %2
 
 </source>
@@ -2885,12 +2908,12 @@ click menu &quot;Tool&quot; - &quot;Calibrators...&quot;</source>
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1651"/>
+        <location filename="../MainWindow.cpp" line="1939"/>
         <source>Loaded files: %1</source>
         <translation>Загружено файлов: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1658"/>
+        <location filename="../MainWindow.cpp" line="1946"/>
         <source>
 
 Loaded signals: %1</source>
@@ -2899,7 +2922,7 @@ Loaded signals: %1</source>
 Загружено сигналов: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1662"/>
+        <location filename="../MainWindow.cpp" line="1950"/>
         <source>
 
 Failed version of %1. Current version: %2. Received version: %3 </source>
@@ -2908,51 +2931,51 @@ Failed version of %1. Current version: %2. Received version: %3 </source>
 Некорректная версия %1. Текущая версия %2. Полученная версия %3 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1687"/>
-        <location filename="../MainWindow.cpp" line="1715"/>
+        <location filename="../MainWindow.cpp" line="1975"/>
+        <location filename="../MainWindow.cpp" line="2003"/>
         <source> ConfigurationService: on </source>
         <translation> ConfigurationService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1755"/>
+        <location filename="../MainWindow.cpp" line="2042"/>
         <source> AppDataService: on </source>
         <translation> AppDataService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1757"/>
-        <location filename="../MainWindow.cpp" line="1798"/>
+        <location filename="../MainWindow.cpp" line="2044"/>
+        <location filename="../MainWindow.cpp" line="2085"/>
         <source>Connected: %1 : %2
 </source>
         <translation>Подключено: %1 : %2
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1800"/>
+        <location filename="../MainWindow.cpp" line="2087"/>
         <source>
 Tuning sources: %1</source>
         <translation>
 Источники тюнинга: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1801"/>
+        <location filename="../MainWindow.cpp" line="2088"/>
         <source>
 Tuning signals: %1</source>
         <translation>
 Сигналы тюнинга: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1815"/>
-        <location filename="../MainWindow.cpp" line="1866"/>
+        <location filename="../MainWindow.cpp" line="2102"/>
+        <location filename="../MainWindow.cpp" line="2153"/>
         <source> TuningService: on </source>
         <translation> TuningService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1905"/>
+        <location filename="../MainWindow.cpp" line="2192"/>
         <source> Measure process is running </source>
         <translation> Процесс измерения запущен </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1924"/>
+        <location filename="../MainWindow.cpp" line="2211"/>
         <source> Measure process is stopped </source>
         <translation> Процесс измерения остановлен </translation>
     </message>
@@ -3043,22 +3066,22 @@ Tuning signals: %1</source>
 <context>
     <name>MeasureSignal.h</name>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="182"/>
+        <location filename="../../lib/MetrologySignal.h" line="185"/>
         <source>Input</source>
         <translation>Входной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="183"/>
+        <location filename="../../lib/MetrologySignal.h" line="186"/>
         <source>Output</source>
         <translation>Выходной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="184"/>
+        <location filename="../../lib/MetrologySignal.h" line="187"/>
         <source>Internal</source>
         <translation>Внутренний</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="308"/>
+        <location filename="../../lib/MetrologySignal.h" line="311"/>
         <source>No valid</source>
         <translation>Не валидный</translation>
     </message>
@@ -3066,112 +3089,113 @@ Tuning signals: %1</source>
 <context>
     <name>MeasureThread</name>
     <message>
-        <location filename="../MeasureThread.cpp" line="45"/>
         <source>Following signals were measured:
 
 %1
 Do you want to measure them again?</source>
-        <translation>Следующие сигналы уже были измерены:
+        <translation type="vanished">Следующие сигналы уже были измерены:
 
 %1
 Вы хотите измерить их снова?</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="67"/>
         <source>Unable to start the measurement process!
 All electrical ranges of the inputs (or outputs) of the module must be the same.</source>
-        <translation>Невозможно начать процесс измерения!
+        <translation type="vanished">Невозможно начать процесс измерения!
 Все электрические диапазоны входов (или выходов) модуля, должны быть одинаковы.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="347"/>
-        <location filename="../MeasureThread.cpp" line="597"/>
         <source>No connected calibrators for measure</source>
+        <translation type="vanished">Нет подключенных калибраторов</translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.cpp" line="155"/>
+        <source>No connected calibrators for measuring</source>
         <translation>Нет подключенных калибраторов</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="411"/>
+        <location filename="../MeasureThread.cpp" line="216"/>
         <source>Calibrator: %1 - %2 can not set source mode.</source>
         <translation>Калибратор: %1 - %2 не может установить режим для выдачи электрического значения.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="428"/>
-        <location filename="../MeasureThread.cpp" line="447"/>
+        <location filename="../MeasureThread.cpp" line="233"/>
+        <location filename="../MeasureThread.cpp" line="252"/>
         <source>Calibrator: %1 - %2 can not set measure mode.</source>
         <translation>Калибратор: %1 - %2 не может установить режим для измерения электрического значения.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="519"/>
+        <location filename="../MeasureThread.cpp" line="320"/>
         <source>Calibrator: %1 - %2 can not set unit &quot;%3&quot;.</source>
         <translation>Калибратор: %1 - %2 не может установить электрические единицы: &quot;%3&quot;.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="526"/>
+        <location filename="../MeasureThread.cpp" line="327"/>
         <source>Prepare calibrator: %1 %2</source>
         <translation>Подготовка калибратора: %1 %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="566"/>
+        <location filename="../MeasureThread.cpp" line="367"/>
         <source>Please, switch polarity for calibrator %1
 You have used the negative (-) part of the electrical range.</source>
         <translation>Переключите полярность на калибраторе: %1
 Вы используете отрицательную (-) часть электрического диапазона.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="572"/>
+        <location filename="../MeasureThread.cpp" line="373"/>
         <source>Please, switch polarity for calibrator %1
 You have used the positive (+) part of the electrical range.</source>
         <translation>Переключите полярность на калибраторе: %1
 Вы используете положительную (+) часть электрического диапазона.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="651"/>
+        <location filename="../MeasureThread.cpp" line="417"/>
         <source>No points for measure</source>
         <translation>Нет точек измерения</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="664"/>
+        <location filename="../MeasureThread.cpp" line="430"/>
         <source>Point %1 / %2 </source>
         <translation>Точка %1 / %2 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="745"/>
+        <location filename="../MeasureThread.cpp" line="506"/>
         <source>Wait timeout for point %1 / %2 </source>
         <translation>Ожидаем таймаут для точки %1 / %2 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="750"/>
-        <location filename="../MeasureThread.cpp" line="1308"/>
+        <location filename="../MeasureThread.cpp" line="511"/>
+        <location filename="../MeasureThread.cpp" line="1059"/>
         <source>Save measurement </source>
         <translation>Сохранение измерения </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="824"/>
+        <location filename="../MeasureThread.cpp" line="585"/>
         <source>Selected signal has no comparators</source>
         <translation>Выбранный сигнал не содержит уставок</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="877"/>
+        <location filename="../MeasureThread.cpp" line="638"/>
         <source>Comparator %1, Prepare %2</source>
         <translation>Уставка %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="878"/>
+        <location filename="../MeasureThread.cpp" line="639"/>
         <source>Hysteresis of comparator %1, Prepare %2</source>
         <translation>Зона возврата уставки %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1040"/>
+        <location filename="../MeasureThread.cpp" line="796"/>
         <source>Comparator %1, additional delay</source>
         <translation>Уставка %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1041"/>
+        <location filename="../MeasureThread.cpp" line="797"/>
         <source>Hysteresis of comparator %1, additional delay</source>
         <translation>Зона возврата уставки %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1112"/>
+        <location filename="../MeasureThread.cpp" line="868"/>
         <source>Comparator %1, for following signals, is already in state of logical &quot;%2&quot;:
 
 </source>
@@ -3180,26 +3204,26 @@ You have used the positive (+) part of the electrical range.</source>
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1154"/>
+        <location filename="../MeasureThread.cpp" line="910"/>
         <source>%1
 </source>
         <translation>%1
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1166"/>
+        <location filename="../MeasureThread.cpp" line="922"/>
         <source>
 Do you want to repeat the preparation process in order to switch the comparator to state of logical &quot;%1&quot;, click &quot;Yes&quot;. Go to next comparator, click &quot;No&quot;</source>
         <translation>
 Вы хотите повторить процесс подготовок, чтобы переключать уставку в состояние лог. &quot;%1&quot;, тогда выберите &quot;Да&quot;. Перейти к следующей уставке, выберите &quot;Нет&quot;</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1196"/>
+        <location filename="../MeasureThread.cpp" line="952"/>
         <source>Comparator %1, Step %2</source>
         <translation>Уставка %1, Шаг %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1197"/>
+        <location filename="../MeasureThread.cpp" line="953"/>
         <source>Hysteresis of comparator %1, Step %2</source>
         <translation>Зона возврата уставки %1, Шаг %2</translation>
     </message>
@@ -3544,12 +3568,12 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologySignal.h</name>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="372"/>
+        <location filename="../../lib/MetrologySignal.h" line="375"/>
         <source>Set point</source>
         <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.h" line="373"/>
+        <location filename="../../lib/MetrologySignal.h" line="376"/>
         <source>Hysteresis</source>
         <translation>Зона возврата</translation>
     </message>
@@ -4034,128 +4058,127 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>OptionsDialog</name>
     <message>
-        <location filename="../OptionsDialog.cpp" line="227"/>
+        <location filename="../OptionsDialog.cpp" line="226"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="228"/>
+        <location filename="../OptionsDialog.cpp" line="227"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="229"/>
         <source>Apply</source>
-        <translation>Применить</translation>
+        <translation type="vanished">Применить</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="319"/>
+        <location filename="../OptionsDialog.cpp" line="315"/>
         <source>Server (primary)</source>
         <translation>Сервер (основной)</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="339"/>
+        <location filename="../OptionsDialog.cpp" line="335"/>
         <source>Server (reserve)</source>
         <translation>Сервер (резервный)</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="378"/>
+        <location filename="../OptionsDialog.cpp" line="374"/>
         <source>Identification of module</source>
         <translation>Идентификация модуля</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="385"/>
+        <location filename="../OptionsDialog.cpp" line="381"/>
         <source>Measuring of module</source>
         <translation>Измерения модуля</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="397"/>
+        <location filename="../OptionsDialog.cpp" line="393"/>
         <source>Limits</source>
         <translation>Пределы</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="421"/>
-        <location filename="../OptionsDialog.cpp" line="550"/>
+        <location filename="../OptionsDialog.cpp" line="417"/>
+        <location filename="../OptionsDialog.cpp" line="546"/>
         <source>Metrological error</source>
         <translation>Метрологическая погрешность</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="452"/>
+        <location filename="../OptionsDialog.cpp" line="448"/>
         <source>Measurements at the single point</source>
         <translation>Измерения в одной точке</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="470"/>
+        <location filename="../OptionsDialog.cpp" line="466"/>
         <source>Measurement points</source>
         <translation>Точки измерения</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="526"/>
+        <location filename="../OptionsDialog.cpp" line="522"/>
         <source>Type of displaying measurement list</source>
         <translation>Тип отображения измерений в списке</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="588"/>
+        <location filename="../OptionsDialog.cpp" line="584"/>
         <source>Permissions</source>
         <translation>Разрешения</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="612"/>
-        <location filename="../OptionsDialog.cpp" line="663"/>
-        <location filename="../OptionsDialog.cpp" line="723"/>
+        <location filename="../OptionsDialog.cpp" line="608"/>
+        <location filename="../OptionsDialog.cpp" line="659"/>
+        <location filename="../OptionsDialog.cpp" line="719"/>
         <source>Font</source>
         <translation>Шрифт</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="619"/>
-        <location filename="../OptionsDialog.cpp" line="682"/>
-        <location filename="../OptionsDialog.cpp" line="742"/>
+        <location filename="../OptionsDialog.cpp" line="615"/>
+        <location filename="../OptionsDialog.cpp" line="678"/>
+        <location filename="../OptionsDialog.cpp" line="738"/>
         <source>Colors</source>
         <translation>Цвета</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="636"/>
+        <location filename="../OptionsDialog.cpp" line="632"/>
         <source>Measurements</source>
         <translation>Измерения</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="670"/>
+        <location filename="../OptionsDialog.cpp" line="666"/>
         <source>Displaying signal state</source>
         <translation>Отображение состояния сигнала</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="699"/>
-        <location filename="../OptionsDialog.cpp" line="754"/>
+        <location filename="../OptionsDialog.cpp" line="695"/>
+        <location filename="../OptionsDialog.cpp" line="750"/>
         <source>Time for updating</source>
         <translation>Время обновления</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="730"/>
+        <location filename="../OptionsDialog.cpp" line="726"/>
         <source>Displaying comparator state</source>
         <translation>Отображение состояния уставки</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="777"/>
+        <location filename="../OptionsDialog.cpp" line="773"/>
         <source>Location of Database</source>
         <translation>Расположение базы данных</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="803"/>
+        <location filename="../OptionsDialog.cpp" line="799"/>
         <source>Events</source>
         <translation>События</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="815"/>
+        <location filename="../OptionsDialog.cpp" line="811"/>
         <source>Location of reserve copy</source>
         <translation>Расположение резервной копии</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="831"/>
+        <location filename="../OptionsDialog.cpp" line="827"/>
         <source>Language of application </source>
         <translation>Язык приложения</translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="1008"/>
+        <location filename="../OptionsDialog.cpp" line="1004"/>
         <source>Options - %1</source>
         <translation>Настройки %1</translation>
     </message>
@@ -4344,14 +4367,14 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Тип измерения:</translation>
     </message>
     <message>
-        <location filename="../OptionsMvhDialog.cpp" line="141"/>
-        <location filename="../OptionsMvhDialog.cpp" line="311"/>
+        <location filename="../OptionsMvhDialog.cpp" line="140"/>
+        <location filename="../OptionsMvhDialog.cpp" line="310"/>
         <source>True</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../OptionsMvhDialog.cpp" line="141"/>
-        <location filename="../OptionsMvhDialog.cpp" line="311"/>
+        <location filename="../OptionsMvhDialog.cpp" line="140"/>
+        <location filename="../OptionsMvhDialog.cpp" line="310"/>
         <source>False</source>
         <translation>Нет</translation>
     </message>
@@ -4392,32 +4415,32 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Верх, %</translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="65"/>
+        <location filename="../OptionsPointsDialog.cpp" line="64"/>
         <source>&amp;Add</source>
         <translation>&amp;Создать</translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="66"/>
+        <location filename="../OptionsPointsDialog.cpp" line="65"/>
         <source>&amp;Edit</source>
         <translation>&amp;Изменить</translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="67"/>
+        <location filename="../OptionsPointsDialog.cpp" line="66"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="68"/>
+        <location filename="../OptionsPointsDialog.cpp" line="67"/>
         <source>&amp;Up</source>
         <translation>&amp;Вверх</translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="69"/>
+        <location filename="../OptionsPointsDialog.cpp" line="68"/>
         <source>&amp;Down</source>
         <translation>&amp;Вниз</translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="362"/>
+        <location filename="../OptionsPointsDialog.cpp" line="361"/>
         <source>Please, select point</source>
         <translation>Выберите точку</translation>
     </message>
@@ -5013,52 +5036,52 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>RackListDialog</name>
     <message>
-        <location filename="../RackList.cpp" line="273"/>
+        <location filename="../RackList.cpp" line="259"/>
         <source>Racks</source>
         <translation>Шкафы</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="279"/>
+        <location filename="../RackList.cpp" line="265"/>
         <source>&amp;Racks</source>
         <translation>&amp;Шкафы</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="280"/>
+        <location filename="../RackList.cpp" line="266"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="282"/>
+        <location filename="../RackList.cpp" line="268"/>
         <source>&amp;Groups ...</source>
         <translation>&amp;Группы ...</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="286"/>
+        <location filename="../RackList.cpp" line="272"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="290"/>
+        <location filename="../RackList.cpp" line="276"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="296"/>
+        <location filename="../RackList.cpp" line="282"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="300"/>
+        <location filename="../RackList.cpp" line="286"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="306"/>
+        <location filename="../RackList.cpp" line="292"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
     <message>
-        <location filename="../RackList.cpp" line="469"/>
+        <location filename="../RackList.cpp" line="455"/>
         <source>No rack groups have been found.
 To create a group of racks, click menu &quot;Racks&quot; - &quot;Groups ...&quot;</source>
         <translation>Не было найдено ни одной группы шкафов.
@@ -5068,22 +5091,22 @@ To create a group of racks, click menu &quot;Racks&quot; - &quot;Groups ...&quot
 <context>
     <name>RackListDialog.h</name>
     <message>
-        <location filename="../RackList.h" line="20"/>
+        <location filename="../RackList.h" line="21"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../RackList.h" line="21"/>
+        <location filename="../RackList.h" line="22"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../RackList.h" line="22"/>
+        <location filename="../RackList.h" line="23"/>
         <source>Group</source>
         <translation>Группа</translation>
     </message>
     <message>
-        <location filename="../RackList.h" line="23"/>
+        <location filename="../RackList.h" line="24"/>
         <source>Channel</source>
         <translation>Канал</translation>
     </message>
@@ -5207,106 +5230,106 @@ Please choose a different group or channel.</source>
 <context>
     <name>SignalConnectionDialog</name>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="560"/>
+        <location filename="../SignalConnectionList.cpp" line="628"/>
         <source>Signal connections</source>
         <translation>Соединение сигналов</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="565"/>
+        <location filename="../SignalConnectionList.cpp" line="633"/>
         <source>&amp;Connection</source>
         <translation>&amp;Соединение</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="566"/>
+        <location filename="../SignalConnectionList.cpp" line="634"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="568"/>
+        <location filename="../SignalConnectionList.cpp" line="636"/>
         <source>&amp;Create ...</source>
         <translation>&amp;Создать ...</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="572"/>
+        <location filename="../SignalConnectionList.cpp" line="640"/>
         <source>&amp;Edit ...</source>
         <translation>&amp;Изменить ...</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="575"/>
+        <location filename="../SignalConnectionList.cpp" line="643"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="581"/>
+        <location filename="../SignalConnectionList.cpp" line="649"/>
         <source>&amp;Import ...</source>
         <translation>&amp;Импорт ...</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="585"/>
+        <location filename="../SignalConnectionList.cpp" line="653"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="589"/>
+        <location filename="../SignalConnectionList.cpp" line="657"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="595"/>
+        <location filename="../SignalConnectionList.cpp" line="663"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="599"/>
+        <location filename="../SignalConnectionList.cpp" line="667"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="716"/>
-        <location filename="../SignalConnectionList.cpp" line="762"/>
+        <location filename="../SignalConnectionList.cpp" line="784"/>
+        <location filename="../SignalConnectionList.cpp" line="830"/>
         <source>Connection already exist!</source>
         <translation>Соединение уже существует!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="739"/>
+        <location filename="../SignalConnectionList.cpp" line="807"/>
         <source>Please, select сonnection for edit!</source>
         <translation>Выберите соединение для редактирования</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="785"/>
+        <location filename="../SignalConnectionList.cpp" line="853"/>
         <source>Please, select connection for remove!</source>
         <translation>Выберите соединения для удаления</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="789"/>
+        <location filename="../SignalConnectionList.cpp" line="857"/>
         <source>Do you want delete %1 connection(s)?</source>
         <translation>Вы хотите удалить %1 соединений?</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="813"/>
+        <location filename="../SignalConnectionList.cpp" line="881"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="816"/>
-        <location filename="../SignalConnectionList.cpp" line="822"/>
-        <location filename="../SignalConnectionList.cpp" line="829"/>
+        <location filename="../SignalConnectionList.cpp" line="884"/>
+        <location filename="../SignalConnectionList.cpp" line="890"/>
+        <location filename="../SignalConnectionList.cpp" line="897"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="816"/>
+        <location filename="../SignalConnectionList.cpp" line="884"/>
         <source>Could not open file: Empty file name</source>
         <translation>Невозможно открыть файл: не задано имя файла!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="822"/>
+        <location filename="../SignalConnectionList.cpp" line="890"/>
         <source>Could not open file: %1
 file is not found!</source>
         <translation>Невозможно открыть файл: %1 файл не найден!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="829"/>
+        <location filename="../SignalConnectionList.cpp" line="897"/>
         <source>Could not open file</source>
         <translation>Невозможно открыть файл</translation>
     </message>
@@ -5337,130 +5360,157 @@ file is not found!</source>
 <context>
     <name>SignalConnectionItemDialog</name>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="284"/>
+        <location filename="../SignalConnectionList.cpp" line="277"/>
         <source>Create connection</source>
         <translation>Создать соединение</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="289"/>
+        <location filename="../SignalConnectionList.cpp" line="282"/>
         <source>Edit connection</source>
         <translation>Редактировать соединение</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="298"/>
+        <location filename="../SignalConnectionList.cpp" line="291"/>
         <source>Connection type</source>
         <translation>Тип соединения</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="311"/>
+        <location filename="../SignalConnectionList.cpp" line="304"/>
         <source>Input signal</source>
         <translation>Входной</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="313"/>
-        <location filename="../SignalConnectionList.cpp" line="331"/>
+        <location filename="../SignalConnectionList.cpp" line="306"/>
+        <location filename="../SignalConnectionList.cpp" line="324"/>
         <source>Select ...</source>
         <translation>Выбрать ...</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="329"/>
+        <location filename="../SignalConnectionList.cpp" line="322"/>
         <source>Output signal</source>
         <translation>Выходной</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="481"/>
+        <location filename="../SignalConnectionList.cpp" line="474"/>
         <source>Please, select connection type!</source>
         <translation>Выберите тип соединения</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="494"/>
+        <location filename="../SignalConnectionList.cpp" line="487"/>
         <source>Please, select input signal!</source>
         <translation>Выберите входной сигнал!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="502"/>
+        <location filename="../SignalConnectionList.cpp" line="495"/>
         <source>Signal %1 is not found.
 Please, select input signal!</source>
         <translation>Сигнал %1 не найден.
 Выберите входной сигнал!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="510"/>
+        <location filename="../SignalConnectionList.cpp" line="503"/>
         <source>Please, select output signal!</source>
         <translation>Выберите выходной сигнал!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="518"/>
+        <location filename="../SignalConnectionList.cpp" line="511"/>
         <source>Signal %1 is not found.
 Please, select output signal!</source>
         <translation>Сигнал %1 не найден.
 Выберите выходной сигнал!</translation>
     </message>
+    <message>
+        <location filename="../SignalConnectionList.cpp" line="527"/>
+        <source>Signal %1 is not input signal!</source>
+        <translation>Сигнал %1 - не Входной сигнал!</translation>
+    </message>
+    <message>
+        <location filename="../SignalConnectionList.cpp" line="534"/>
+        <location filename="../SignalConnectionList.cpp" line="589"/>
+        <source>Signal %1 has wrong electric limit!</source>
+        <translation>Сигнал %1 - имеет не верный электрический диапазон!</translation>
+    </message>
+    <message>
+        <location filename="../SignalConnectionList.cpp" line="545"/>
+        <location filename="../SignalConnectionList.cpp" line="568"/>
+        <source>Signal %1 is not internal signal!</source>
+        <translation>Сигнал %1 - не Внутренний сигнал!</translation>
+    </message>
+    <message>
+        <location filename="../SignalConnectionList.cpp" line="552"/>
+        <source>Signal %1 is not tuning signal!</source>
+        <translation>Сигнал %1 - не сигнал Тюнинга!</translation>
+    </message>
+    <message>
+        <location filename="../SignalConnectionList.cpp" line="582"/>
+        <source>Signal %1 is not output signal!</source>
+        <translation>Сигнал %1 - не Выходной сигнал!</translation>
+    </message>
 </context>
 <context>
     <name>SignalInfoMeasure.h</name>
     <message>
-        <location filename="../SignalInfoPanel.h" line="16"/>
+        <location filename="../SignalInfoPanel.h" line="17"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="17"/>
+        <location filename="../SignalInfoPanel.h" line="18"/>
         <source>CustomSignalID</source>
         <translation>CustomSignalID</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="18"/>
+        <location filename="../SignalInfoPanel.h" line="19"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="19"/>
+        <location filename="../SignalInfoPanel.h" line="20"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="20"/>
+        <location filename="../SignalInfoPanel.h" line="21"/>
         <source>State</source>
         <translation>Значение</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="21"/>
+        <location filename="../SignalInfoPanel.h" line="22"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="22"/>
+        <location filename="../SignalInfoPanel.h" line="23"/>
         <source>Chassis</source>
         <translation>Корзина</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="23"/>
+        <location filename="../SignalInfoPanel.h" line="24"/>
         <source>Module</source>
         <translation>Модуль</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="24"/>
+        <location filename="../SignalInfoPanel.h" line="25"/>
         <source>Place</source>
         <translation>Место</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="25"/>
+        <location filename="../SignalInfoPanel.h" line="26"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="26"/>
+        <location filename="../SignalInfoPanel.h" line="27"/>
         <source>Electric sensor</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="27"/>
+        <location filename="../SignalInfoPanel.h" line="28"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.h" line="28"/>
+        <location filename="../SignalInfoPanel.h" line="29"/>
         <source>Calibrator</source>
         <translation>Калибратор</translation>
     </message>
@@ -5468,32 +5518,32 @@ Please, select output signal!</source>
 <context>
     <name>SignalInfoPanel</name>
     <message>
-        <location filename="../SignalInfoPanel.cpp" line="414"/>
+        <location filename="../SignalInfoPanel.cpp" line="413"/>
         <source>Panel signal information</source>
         <translation>Панель информации о сигнале</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.cpp" line="525"/>
+        <location filename="../SignalInfoPanel.cpp" line="524"/>
         <source>Show</source>
         <translation>Отображать</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.cpp" line="527"/>
+        <location filename="../SignalInfoPanel.cpp" line="526"/>
         <source>State if signal is no valid</source>
         <translation>Значение, если сигнал не валиден</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.cpp" line="531"/>
+        <location filename="../SignalInfoPanel.cpp" line="530"/>
         <source>Electrical state</source>
         <translation>Электрическое значение</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.cpp" line="540"/>
+        <location filename="../SignalInfoPanel.cpp" line="539"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../SignalInfoPanel.cpp" line="545"/>
+        <location filename="../SignalInfoPanel.cpp" line="544"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
@@ -5501,87 +5551,87 @@ Please, select output signal!</source>
 <context>
     <name>SignalListDialog</name>
     <message>
-        <location filename="../SignalList.cpp" line="351"/>
+        <location filename="../SignalList.cpp" line="337"/>
         <source>Signals</source>
         <translation>Сигналы</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="357"/>
+        <location filename="../SignalList.cpp" line="343"/>
         <source>&amp;Signal</source>
         <translation>&amp;Сигнал</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="358"/>
+        <location filename="../SignalList.cpp" line="344"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="359"/>
+        <location filename="../SignalList.cpp" line="345"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="361"/>
+        <location filename="../SignalList.cpp" line="347"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="365"/>
+        <location filename="../SignalList.cpp" line="351"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="371"/>
+        <location filename="../SignalList.cpp" line="357"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="375"/>
+        <location filename="../SignalList.cpp" line="361"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="381"/>
+        <location filename="../SignalList.cpp" line="367"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="384"/>
+        <location filename="../SignalList.cpp" line="370"/>
         <source>Type A/D</source>
         <translation>Тип аналоговый/дискретный</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="385"/>
+        <location filename="../SignalList.cpp" line="371"/>
         <source>Analog</source>
         <translation>Аналоговые</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="388"/>
+        <location filename="../SignalList.cpp" line="374"/>
         <source>Discrete</source>
         <translation>Дискретные</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="391"/>
+        <location filename="../SignalList.cpp" line="377"/>
         <source>Bus</source>
         <translation>Шина</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="395"/>
+        <location filename="../SignalList.cpp" line="381"/>
         <source>Type I/O</source>
         <translation>Типы вход/выход</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="396"/>
+        <location filename="../SignalList.cpp" line="382"/>
         <source>Input</source>
         <translation>Входные</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="399"/>
+        <location filename="../SignalList.cpp" line="385"/>
         <source>Internal</source>
         <translation>Внутренние</translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="402"/>
+        <location filename="../SignalList.cpp" line="388"/>
         <source>Output</source>
         <translation>Выходные</translation>
     </message>
@@ -5589,87 +5639,87 @@ Please, select output signal!</source>
 <context>
     <name>SignalListDialog.h</name>
     <message>
-        <location filename="../SignalList.h" line="23"/>
+        <location filename="../SignalList.h" line="24"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="24"/>
+        <location filename="../SignalList.h" line="25"/>
         <source>CustomSignalID</source>
         <translation>CustomSignalID</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="25"/>
+        <location filename="../SignalList.h" line="26"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="26"/>
+        <location filename="../SignalList.h" line="27"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="27"/>
+        <location filename="../SignalList.h" line="28"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="28"/>
+        <location filename="../SignalList.h" line="29"/>
         <source>Chassis</source>
         <translation>Корзина</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="29"/>
+        <location filename="../SignalList.h" line="30"/>
         <source>Module</source>
         <translation>Модуль</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="30"/>
+        <location filename="../SignalList.h" line="31"/>
         <source>Place</source>
         <translation>Место</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="31"/>
+        <location filename="../SignalList.h" line="32"/>
         <source>Shown on schemas</source>
         <translation>Отображен на схемах</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="32"/>
+        <location filename="../SignalList.h" line="33"/>
         <source>ADC range</source>
         <translation>Диапазон ADC</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="33"/>
+        <location filename="../SignalList.h" line="34"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="34"/>
+        <location filename="../SignalList.h" line="35"/>
         <source>Electric sensor</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="35"/>
+        <location filename="../SignalList.h" line="36"/>
         <source>Physical range</source>
         <translation>Промежуточный диапазон</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="36"/>
+        <location filename="../SignalList.h" line="37"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="37"/>
+        <location filename="../SignalList.h" line="38"/>
         <source>Tuning</source>
         <translation>Тюнинг</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="38"/>
+        <location filename="../SignalList.h" line="39"/>
         <source>Default value</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../SignalList.h" line="39"/>
+        <location filename="../SignalList.h" line="40"/>
         <source>Tuning range</source>
         <translation>Диапазон тюнинга</translation>
     </message>
@@ -5808,92 +5858,92 @@ Please, select output signal!</source>
 <context>
     <name>StatisticDialog.h</name>
     <message>
-        <location filename="../StatisticsPanel.h" line="23"/>
+        <location filename="../StatisticsPanel.h" line="24"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="24"/>
+        <location filename="../StatisticsPanel.h" line="25"/>
         <source>CustomSignalID</source>
         <translation>CustomSignalID</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="25"/>
+        <location filename="../StatisticsPanel.h" line="26"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="26"/>
+        <location filename="../StatisticsPanel.h" line="27"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="27"/>
+        <location filename="../StatisticsPanel.h" line="28"/>
         <source>Comparator value</source>
         <translation>Значение уставки</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="28"/>
+        <location filename="../StatisticsPanel.h" line="29"/>
         <source>Comparator No</source>
         <translation>Уставка No</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="29"/>
+        <location filename="../StatisticsPanel.h" line="30"/>
         <source>Comparator Output ID</source>
         <translation>Уставка OutputID</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="30"/>
+        <location filename="../StatisticsPanel.h" line="31"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="31"/>
+        <location filename="../StatisticsPanel.h" line="32"/>
         <source>Chassis</source>
         <translation>Корзина</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="32"/>
+        <location filename="../StatisticsPanel.h" line="33"/>
         <source>Module</source>
         <translation>Модуль</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="33"/>
+        <location filename="../StatisticsPanel.h" line="34"/>
         <source>Place</source>
         <translation>Место</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="34"/>
+        <location filename="../StatisticsPanel.h" line="35"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="35"/>
+        <location filename="../StatisticsPanel.h" line="36"/>
         <source>Electric sensor</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="36"/>
+        <location filename="../StatisticsPanel.h" line="37"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="37"/>
+        <location filename="../StatisticsPanel.h" line="38"/>
         <source>Signal type</source>
         <translation>Тип сигнала</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="38"/>
+        <location filename="../StatisticsPanel.h" line="39"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="39"/>
+        <location filename="../StatisticsPanel.h" line="40"/>
         <source>Measure count</source>
         <translation>Число измерений</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.h" line="40"/>
+        <location filename="../StatisticsPanel.h" line="41"/>
         <source>State</source>
         <translation>Годен</translation>
     </message>
@@ -5901,92 +5951,92 @@ Please, select output signal!</source>
 <context>
     <name>StatisticsPanel</name>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="334"/>
+        <location filename="../StatisticsPanel.cpp" line="317"/>
         <source>Panel statistics (Checklist)</source>
         <translation>Панель статистики (чек-лист)</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="363"/>
+        <location filename="../StatisticsPanel.cpp" line="346"/>
         <source>&amp;Results</source>
         <translation>&amp;Результаты</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="364"/>
+        <location filename="../StatisticsPanel.cpp" line="347"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="365"/>
+        <location filename="../StatisticsPanel.cpp" line="348"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="367"/>
+        <location filename="../StatisticsPanel.cpp" line="350"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="370"/>
+        <location filename="../StatisticsPanel.cpp" line="353"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="375"/>
+        <location filename="../StatisticsPanel.cpp" line="358"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="379"/>
+        <location filename="../StatisticsPanel.cpp" line="362"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="384"/>
+        <location filename="../StatisticsPanel.cpp" line="367"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="389"/>
+        <location filename="../StatisticsPanel.cpp" line="372"/>
         <source>Go to next</source>
         <translation>Перейти к следующему</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="390"/>
+        <location filename="../StatisticsPanel.cpp" line="373"/>
         <source>Not measured</source>
         <translation>Не измеренному</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="391"/>
+        <location filename="../StatisticsPanel.cpp" line="374"/>
         <source>Invalid</source>
         <translation>Плохому</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="483"/>
+        <location filename="../StatisticsPanel.cpp" line="466"/>
         <source>&amp;Select signal for measuring</source>
         <translation>&amp;Выбрать сигнал для измерения</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="485"/>
+        <location filename="../StatisticsPanel.cpp" line="468"/>
         <source>&amp;Find signal in the statistics list ...</source>
         <translation>Найти сигнал в списке &amp;статистики ...</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="487"/>
+        <location filename="../StatisticsPanel.cpp" line="470"/>
         <source>&amp;Find signal in the measure list ...</source>
         <translation>Найти сигнал в списке &amp;измерений ...</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="683"/>
+        <location filename="../StatisticsPanel.cpp" line="680"/>
         <source> Invalid: %1</source>
         <translation> Плохих: %1</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="684"/>
+        <location filename="../StatisticsPanel.cpp" line="681"/>
         <source> Measured: %1 / %2</source>
         <translation> Измеренных: %1 / %2</translation>
     </message>
     <message>
-        <location filename="../StatisticsPanel.cpp" line="780"/>
+        <location filename="../StatisticsPanel.cpp" line="777"/>
         <source>Signal %1 is &quot;%2&quot; signal.
 To measure this signal you have to create connection with input signal.
 For example, type of connection: &quot;Input&quot; -&gt; &quot;%2&quot;.
@@ -6116,77 +6166,77 @@ To create a new connection between signals, select &quot;View&quot;-&gt;&quot;Si
 <context>
     <name>TuningSignalListDialog</name>
     <message>
-        <location filename="../TuningSignalList.cpp" line="652"/>
+        <location filename="../TuningSignalList.cpp" line="624"/>
         <source>Tuning signals</source>
         <translation>Сигналы тюнинга</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="658"/>
+        <location filename="../TuningSignalList.cpp" line="630"/>
         <source>&amp;Signal</source>
         <translation>&amp;Сигнал</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="659"/>
+        <location filename="../TuningSignalList.cpp" line="631"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="660"/>
+        <location filename="../TuningSignalList.cpp" line="632"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="662"/>
+        <location filename="../TuningSignalList.cpp" line="634"/>
         <source>&amp;Set value ...</source>
         <translation>&amp;Установить значение ...</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="668"/>
+        <location filename="../TuningSignalList.cpp" line="640"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="672"/>
+        <location filename="../TuningSignalList.cpp" line="644"/>
         <source>&amp;Find ...</source>
         <translation>&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="678"/>
+        <location filename="../TuningSignalList.cpp" line="650"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="682"/>
+        <location filename="../TuningSignalList.cpp" line="654"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="688"/>
+        <location filename="../TuningSignalList.cpp" line="660"/>
         <source>Type A/D</source>
         <translation>Тип аналоговый/дискретный</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="689"/>
+        <location filename="../TuningSignalList.cpp" line="661"/>
         <source>Analog</source>
         <translation>Аналоговые</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="692"/>
+        <location filename="../TuningSignalList.cpp" line="664"/>
         <source>Discrete</source>
         <translation>Дискретные</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="695"/>
+        <location filename="../TuningSignalList.cpp" line="667"/>
         <source>Bus</source>
         <translation>Шина</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="700"/>
+        <location filename="../TuningSignalList.cpp" line="672"/>
         <source>Show</source>
         <translation>Отображать</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="701"/>
+        <location filename="../TuningSignalList.cpp" line="673"/>
         <source>Sources</source>
         <translation>Источники</translation>
     </message>
@@ -6194,84 +6244,84 @@ To create a new connection between signals, select &quot;View&quot;-&gt;&quot;Si
 <context>
     <name>TuningSignalListDialog.h</name>
     <message>
-        <location filename="../TuningSignalList.h" line="22"/>
-        <location filename="../TuningSignalList.h" line="104"/>
+        <location filename="../TuningSignalList.h" line="23"/>
+        <location filename="../TuningSignalList.h" line="105"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="23"/>
-        <location filename="../TuningSignalList.h" line="105"/>
+        <location filename="../TuningSignalList.h" line="24"/>
+        <location filename="../TuningSignalList.h" line="106"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="24"/>
+        <location filename="../TuningSignalList.h" line="25"/>
         <source>IP</source>
         <translation>IP</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="25"/>
+        <location filename="../TuningSignalList.h" line="26"/>
         <source>Channel</source>
         <translation>Канал</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="26"/>
+        <location filename="../TuningSignalList.h" line="27"/>
         <source>Subsytem</source>
         <translation>Подсистема</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="27"/>
+        <location filename="../TuningSignalList.h" line="28"/>
         <source>LM number</source>
         <translation>Номер LM</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="28"/>
+        <location filename="../TuningSignalList.h" line="29"/>
         <source>isReply</source>
         <translation>Отвечает</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="29"/>
+        <location filename="../TuningSignalList.h" line="30"/>
         <source>Request count</source>
         <translation>Число запросов</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="30"/>
+        <location filename="../TuningSignalList.h" line="31"/>
         <source>Reply count</source>
         <translation>Число ответов</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="31"/>
+        <location filename="../TuningSignalList.h" line="32"/>
         <source>Cmd queue size</source>
         <translation>Размер очереди команд</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="101"/>
+        <location filename="../TuningSignalList.h" line="102"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="102"/>
+        <location filename="../TuningSignalList.h" line="103"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="103"/>
+        <location filename="../TuningSignalList.h" line="104"/>
         <source>CustomSignalID</source>
         <translation>CustomSignalID</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="106"/>
+        <location filename="../TuningSignalList.h" line="107"/>
         <source>State</source>
         <translation>Состояние</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="107"/>
+        <location filename="../TuningSignalList.h" line="108"/>
         <source>Default</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.h" line="108"/>
+        <location filename="../TuningSignalList.h" line="109"/>
         <source>Range</source>
         <translation>Диапазон</translation>
     </message>
@@ -6279,52 +6329,52 @@ To create a new connection between signals, select &quot;View&quot;-&gt;&quot;Si
 <context>
     <name>TuningSignalStateDialog</name>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1150"/>
+        <location filename="../TuningSignalList.cpp" line="1122"/>
         <source>Signal state</source>
         <translation>Значение сигнала</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1154"/>
+        <location filename="../TuningSignalList.cpp" line="1126"/>
         <source>It is not possible to change signal state!</source>
         <translation>Невозможно изменить значение сигнала!</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1166"/>
+        <location filename="../TuningSignalList.cpp" line="1138"/>
         <source>Please, input new state of analog signal:</source>
         <translation>Введите новое значение аналогового сигнала:</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1183"/>
+        <location filename="../TuningSignalList.cpp" line="1155"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1184"/>
+        <location filename="../TuningSignalList.cpp" line="1156"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1204"/>
+        <location filename="../TuningSignalList.cpp" line="1176"/>
         <source>Please, select new state of discrete signal:</source>
         <translation>Выберите новое значение дискретного сигнала:</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1210"/>
+        <location filename="../TuningSignalList.cpp" line="1182"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1211"/>
+        <location filename="../TuningSignalList.cpp" line="1183"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1245"/>
+        <location filename="../TuningSignalList.cpp" line="1217"/>
         <source>Failed input value: %1</source>
         <translation>Неверное значение: %1</translation>
     </message>
     <message>
-        <location filename="../TuningSignalList.cpp" line="1246"/>
+        <location filename="../TuningSignalList.cpp" line="1218"/>
         <source>
 Range of signal: %1</source>
         <translation>

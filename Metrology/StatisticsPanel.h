@@ -13,6 +13,7 @@
 #include <QTableWidget>
 #include <QLabel>
 #include <QStatusBar>
+#include <QKeyEvent>
 
 #include "SignalBase.h"
 
@@ -132,7 +133,6 @@ private:
 
 	// elements of interface
 	//
-	QMainWindow*			m_pMainWindow = nullptr;
 	QMainWindow*			m_pStatisticsWindow = nullptr;
 
 	QMenuBar*				m_pMenuBar = nullptr;
@@ -184,11 +184,17 @@ protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
+public:
+
+	void					setViewFont(const QFont& font);
+
 signals:
 
 	void					setSignalConnectionType(int index);
 	void					setRack(int index);
 	void					setMeasureSignal(int index);
+
+	void					showFindMeasurePanel(const QString& appSignalID);
 
 public slots:
 

@@ -86,8 +86,6 @@ public:
 
 	void				updateColumn();
 
-signals:
-
 public slots:
 
 	void				onHeaderContextMenu(QPoint);

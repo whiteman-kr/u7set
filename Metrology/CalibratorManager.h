@@ -11,6 +11,7 @@
 #include <QMutex>
 
 #include "Calibrator.h"
+#include "ProcessData.h"
 
 // ==============================================================================================
 
@@ -43,6 +44,7 @@ private:
 	QLineEdit*		m_pMeasureEdit = nullptr;
 	QLabel*			m_pSourceLabel = nullptr;
 	QLineEdit*		m_pSourceEdit = nullptr;
+	CompleterData	m_valueCompleter;
 	QLineEdit*		m_pValueEdit = nullptr;
 	QPushButton*	m_pSetValueButton = nullptr;
 	QPushButton*	m_pStepDownButton = nullptr;
@@ -55,13 +57,13 @@ private:
 	QDialog*		m_pErrorDialog = nullptr;
 	QTextEdit*		m_pErrorList = nullptr;
 
-	void			createManageDialog();
+	void			createInterface();
 	void			initDialog();
 	void			setWindowCaption();
 	void			enableInterface(bool enable);
 
 	void			updateModeList();
-	void			updateUnitList(int mode);
+	void			updateUnitList();
 	void			updateValue();
 
 public:

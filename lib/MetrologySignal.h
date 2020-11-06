@@ -1,14 +1,17 @@
 #pragma once
 
-#include "../lib/Signal.h"
 #include "../lib/AppSignal.h"
+#include "../lib/Signal.h"
+#include "../lib/SignalProperties.h"
+#include "../lib/ComparatorSet.h"
+
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
-#include "../lib/ComparatorSet.h"
-#include "../lib/SignalProperties.h"
-#include "../Builder/CfgFiles.h"
-#include "../Proto/serialization.pb.h"
+
 #include "../lib/ProtoSerialization.h"
+#include "../Proto/serialization.pb.h"
+
+#include "../Builder/CfgFiles.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS

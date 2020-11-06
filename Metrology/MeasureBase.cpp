@@ -5,8 +5,8 @@
 #include "../lib/UnitsConvertor.h"
 
 #include "Database.h"
-#include "Options.h"
 #include "Conversion.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -2696,93 +2696,7 @@ int MeasureBase::load(int measureType)
 
 void MeasureBase::signalLoaded()
 {
-	QMutexLocker l(&m_measureMutex);
-
-	int measureCount = m_measureList.count();
-	for (int m = 0; m < measureCount; m++)
-	{
-		Measurement* pMeasurement = m_measureList[m];
-		if (pMeasurement == nullptr)
-		{
-			continue;
-		}
-
-		int measureType = pMeasurement->measureType();
-		if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-		{
-			continue;
-		}
-
-		pMeasurement->setFoundInStatistics(false);
-
-		int count = theSignalBase.statistics().count(measureType);
-		for(int s = 0; s < count; s++)
-		{
-			const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
-
-			Metrology::Signal* pSignal = si.signal();
-			if (pSignal == nullptr || pSignal->param().isValid() == false)
-			{
-				continue;
-			}
-
-			bool measurementIsFound = false;
-
-			switch (measureType)
-			{
-				case MEASURE_TYPE_LINEARITY:
-					{
-						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
-						if (pLinearityMeasurement == nullptr)
-						{
-							continue;
-						}
-
-						if (pLinearityMeasurement->appSignalID() != pSignal->param().appSignalID())
-						{
-							continue;
-						}
-
-						measurementIsFound = true;
-					}
-					break;
-
-				case MEASURE_TYPE_COMPARATOR:
-					{
-						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
-						if (comparatorEx == nullptr)
-						{
-							continue;
-						}
-
-						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
-						if (pComparatorMeasurement == nullptr)
-						{
-							continue;
-						}
-
-						if (pComparatorMeasurement->appSignalID() != pSignal->param().appSignalID())
-						{
-							continue;
-						}
-
-						if (pComparatorMeasurement->outputAppSignalID() != comparatorEx->output().appSignalID())
-						{
-							continue;
-						}
-
-						measurementIsFound = true;
-					}
-					break;
-
-				default:
-					assert(0);
-					break;
-			}
-
-			pMeasurement->setFoundInStatistics(measurementIsFound);
-		}
-	}
+	markNotExistMeasuremetsFromStatistics();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -3037,6 +2951,104 @@ void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
 				assert(0);
 		}
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::markNotExistMeasuremetsFromStatistics()
+{
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	QMutexLocker l(&m_measureMutex);
+
+	int measureCount = m_measureList.count();
+	for (int m = 0; m < measureCount; m++)
+	{
+		Measurement* pMeasurement = m_measureList[m];
+		if (pMeasurement == nullptr)
+		{
+			continue;
+		}
+
+		int measureType = pMeasurement->measureType();
+		if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+		{
+			continue;
+		}
+
+		pMeasurement->setFoundInStatistics(false);
+
+		int count = theSignalBase.statistics().count(measureType);
+		for(int s = 0; s < count; s++)
+		{
+			const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
+
+			Metrology::Signal* pSignal = si.signal();
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
+			{
+				continue;
+			}
+
+			bool measurementIsFound = false;
+
+			switch (measureType)
+			{
+				case MEASURE_TYPE_LINEARITY:
+					{
+						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+						if (pLinearityMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						if (pLinearityMeasurement->appSignalID() != pSignal->param().appSignalID())
+						{
+							continue;
+						}
+
+						measurementIsFound = true;
+					}
+					break;
+
+				case MEASURE_TYPE_COMPARATOR:
+					{
+						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+						if (comparatorEx == nullptr)
+						{
+							continue;
+						}
+
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						if (pComparatorMeasurement->appSignalID() != pSignal->param().appSignalID())
+						{
+							continue;
+						}
+
+						if (pComparatorMeasurement->outputAppSignalID() != comparatorEx->output().appSignalID())
+						{
+							continue;
+						}
+
+						measurementIsFound = true;
+					}
+					break;
+
+				default:
+					assert(0);
+					break;
+			}
+
+			pMeasurement->setFoundInStatistics(measurementIsFound);
+		}
+	}
+
+	qDebug() << __FUNCTION__ << "- Signals were marked, " << " Time for marked: " << responseTime.elapsed() << " ms";
 }
 
 // -------------------------------------------------------------------------------------------------------------------
