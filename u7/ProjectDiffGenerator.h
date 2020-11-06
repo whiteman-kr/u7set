@@ -7,6 +7,8 @@
 #include "../VFrame30/SchemaView.h"
 #include "../lib/DbController.h"
 
+#include "EditSchemaWidget.h"
+
 #include <optional>
 
 class DbController;
@@ -31,6 +33,8 @@ public:
 	ReportSchemaView(QWidget* parent);
 
 	void adjust(QPainter* painter, double startX, double startY, double zoom) const;
+
+	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, CompareAction>& compareActions);
 };
 
 //
@@ -126,6 +130,9 @@ public:
 	std::shared_ptr<VFrame30::Schema> schema() const;
 	void setSchema(std::shared_ptr<VFrame30::Schema> schema);
 
+	const std::map<QUuid, CompareAction>& compareItemActions() const;
+	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
+
 	// Render functions
 
 	void render(QSizeF pageSize);
@@ -138,6 +145,8 @@ private:
 	std::vector<std::shared_ptr<ReportObject>> m_objects;
 
 	std::shared_ptr<VFrame30::Schema> m_schema;
+
+	std::map<QUuid, CompareAction> m_itemsActions;
 
 	QTextDocument m_textDocument;
 
@@ -182,7 +191,7 @@ protected:
 	// Rendering functions
 
 	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter);
-	void printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schemas);
+	void printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schemas, const std::map<QUuid, CompareAction>& itemActions);
 
 	// Formatting functions
 
@@ -382,6 +391,8 @@ private:
 
 	void generateTitlePage(QTextCursor* textCursor);
 	void createMarginItems(QTextCursor* textCursor);
+
+	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
 
 	QString changesetString(const std::shared_ptr<DbFile>& file);
 	QString changesetString(const Signal& signal);

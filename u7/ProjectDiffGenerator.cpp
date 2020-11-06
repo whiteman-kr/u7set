@@ -24,6 +24,76 @@ void ReportSchemaView::adjust(QPainter* painter, double startX, double startY, d
 	Ajust(painter, startX, startY, zoom);
 }
 
+void ReportSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, CompareAction>& compareActions)
+{
+	if (drawParam == nullptr)
+	{
+		assert(drawParam != nullptr);
+		return;
+	}
+
+	// Draw items by layers which has Show flag
+	//
+	double clipX = clipRect.left();
+	double clipY = clipRect.top();
+	double clipWidth = clipRect.width();
+	double clipHeight = clipRect.height();
+
+	// Find compile layer
+	//
+	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	{
+		const VFrame30::SchemaLayer* pLayer = layer->get();
+
+		if (pLayer->show() == false)
+		{
+			continue;
+		}
+
+		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		{
+			const SchemaItemPtr& item = *vi;
+
+			auto actionIt = compareActions.find(item->guid());
+			if (actionIt == compareActions.end())
+			{
+				assert(actionIt != compareActions.end());
+				continue;
+			}
+
+			CompareAction compareAction = actionIt->second;
+
+			QColor color;
+
+			switch (compareAction)
+			{
+			case CompareAction::Unmodified:
+				color = QColor(0, 0, 0, 0);			// Full transparent, as is
+				break;
+			case CompareAction::Modified:
+				color = QColor(0, 0, 0xC0, 128);
+				break;
+			case CompareAction::Added:
+				color = QColor(0, 0xC0, 0, 128);
+				break;
+			case CompareAction::Deleted:
+				color = QColor(0xC0, 0, 0, 128);
+				break;
+			default:
+				assert(false);
+			}
+
+			if (compareAction != CompareAction::Unmodified &&
+				item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			{
+				// Draw item issue
+				//
+				item->drawCompareAction(drawParam, color);
+			}
+		}
+	}
+
+}
 
 //
 // ReportObject
@@ -104,8 +174,6 @@ void ReportTable::render(const ReportObjectContext& context) const
 {
 	int cols = columnCount();
 	int rows = rowCount();
-
-	qDebug() << "Rendering table: rows = " << rows;
 
 	QString html = QObject::tr("<html>\
 					<head>\
@@ -267,6 +335,16 @@ void ReportSection::setSchema(std::shared_ptr<VFrame30::Schema> schema)
 	m_schema = schema;
 }
 
+const std::map<QUuid, CompareAction>& ReportSection::compareItemActions() const
+{
+	return m_itemsActions;
+}
+
+void ReportSection::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)
+{
+	m_itemsActions = itemsActions;
+}
+
 std::shared_ptr<VFrame30::Schema> ReportSection::schema() const
 {
 	return m_schema;
@@ -413,7 +491,7 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 	return;
 }
 
-void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema)
+void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, const std::map<QUuid, CompareAction>& compareActions)
 {
 	if (textDocument == nullptr || painter == nullptr || schemaView == nullptr)
 	{
@@ -489,6 +567,12 @@ void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter
 	QRectF clipRect(0, 0, schema->docWidth(), schema->docHeight());
 
 	schema->Draw(&drawParam, clipRect);
+
+	drawParam.setControlBarSize(
+		schema->unit() == VFrame30::SchemaUnit::Display ?
+					(4 / zoom) : (mm2in(2.4) / zoom));
+
+	schemaView->drawCompareOutlines(&drawParam, clipRect, compareActions);
 
 	painter->restore();
 
@@ -1280,7 +1364,7 @@ void ProjectDiffWorker::compareProject()
 		std::shared_ptr<VFrame30::Schema> schema = section->schema();
 		if (schema != nullptr)
 		{
-			printSchema(section->textDocument(), &painter, m_schemaView.get(), schema);
+			printSchema(section->textDocument(), &painter, m_schemaView.get(), schema, section->compareItemActions());
 		}
 
 		// Clear text document
@@ -1760,29 +1844,7 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
 		restoreFormat();
 
-		for (const PropertyDiff& diff : diffs)
-		{
-			switch (diff.action)
-			{
-			case PropertyDiff::Action::Added:
-				{
-					diffTable->insertRow({diff.caption, tr("Added"), QString(), QString()});
-				}
-				break;
-			case PropertyDiff::Action::Removed:
-				{
-					diffTable->insertRow({diff.caption, tr("Removed"), QString(), QString()});
-				}
-				break;
-			case PropertyDiff::Action::Modified:
-				{
-					diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
-				}
-				break;
-			}
-		}
-
-
+		fillDiffTable(diffTable.get(), diffs);
 	}
 
 	return;
@@ -1836,47 +1898,189 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 		return;
 	}
 
-	std::vector<PropertyDiff> diffs;
+	// Create tables
 
-	comparePropertyObjects(*sourceSchema, *targetSchema, &diffs);
+	saveFormat();
+	setFont(m_tableFont);
+	QStringList schemaHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
+	std::shared_ptr<ReportTable> schemaDiffTable = std::make_shared<ReportTable>(schemaHeaderLabels, m_currentCharFormat);
+	restoreFormat();
 
-	if (diffs.empty() == false)
+	saveFormat();
+	setFont(m_tableFont);
+	QStringList itemsHeaderLabels = {tr("Item"), tr("Layer"), tr("Status")};
+	std::shared_ptr<ReportTable> itemsDiffTable = std::make_shared<ReportTable>(itemsHeaderLabels, m_currentCharFormat);
+	restoreFormat();
+
+	// Compare schemas properties
+
+	std::vector<PropertyDiff> schemaDiffs;
+	comparePropertyObjects(*sourceSchema, *targetSchema, &schemaDiffs);
+
+	fillDiffTable(schemaDiffTable.get(), schemaDiffs);
+
+	// Compare schemas items properties
+
+	std::map<QUuid, CompareAction> itemsActions;
+
+	std::map<std::shared_ptr<VFrame30::SchemaItem>, std::shared_ptr<ReportTable>> itemsTables;
+
+	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : targetSchema->Layers)
 	{
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
-
-		section->addText(targetFile->fileName(), m_currentCharFormat, m_currentBlockFormat);
-
-		headerTable->insertRow({targetFile->fileName(), targetFile->action().text(),  changesetString(targetFile)});
-
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
-		restoreFormat();
-
-		for (const PropertyDiff& diff : diffs)
+		for (SchemaItemPtr targetItem : targetLayer->Items)
 		{
-			switch (diff.action)
-			{
+			// Look for this item in source
+			//
+			SchemaItemPtr sourceItem = sourceSchema->getItemById(targetItem->guid());
 
-			case PropertyDiff::Action::Added:
+			if (sourceItem != nullptr)
+			{
+				// Item is found, so it was modified
+				//
+
+				std::vector<PropertyDiff> itemDiffs;
+
+				comparePropertyObjects(*sourceItem, *targetItem, &itemDiffs);
+
+				// Check if properties where modified
+				//
+				if (itemDiffs.empty() == true)
 				{
-					diffTable->insertRow({diff.caption, tr("Added"), QString(), QString()});
+					// Check if position was changed
+					//
+					std::vector<VFrame30::SchemaPoint> sourcePoints = sourceItem->getPointList();
+					std::vector<VFrame30::SchemaPoint> targetPoints = targetItem->getPointList();
+
+					if (sourcePoints == targetPoints)
+					{
+						itemsActions[targetItem->guid()] = CompareAction::Unmodified;
+					}
+					else
+					{
+						itemsActions[targetItem->guid()] = CompareAction::Modified;
+					}
 				}
-				break;
-			case PropertyDiff::Action::Removed:
+				else
 				{
-					diffTable->insertRow({diff.caption, tr("Removed"), QString(), QString()});
+					itemsActions[targetItem->guid()] = CompareAction::Modified;
 				}
-				break;
-			case PropertyDiff::Action::Modified:
+
+				// Save properties to table
+
+				if (itemDiffs.empty() == false)
 				{
-					diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
+					const std::string& className = targetItem->metaObject()->className();
+					itemsDiffTable->insertRow({QString(className.c_str()), targetLayer->name(), tr("Modified")});
+
+					saveFormat();
+					setFont(m_tableFont);
+					QStringList itemHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
+					std::shared_ptr<ReportTable> itemDiffTable = std::make_shared<ReportTable>(itemHeaderLabels, m_currentCharFormat);
+					restoreFormat();
+
+					fillDiffTable(itemDiffTable.get(), itemDiffs);
+
+					itemsTables[targetItem] = itemDiffTable;
 				}
-				break;
+
+				continue;
+			}
+
+			if (sourceItem == nullptr)
+			{
+				// Item was added to targer
+				//
+				itemsActions[targetItem->guid()] = CompareAction::Added;
+
+				const std::string& className = targetItem->metaObject()->className();
+				itemsDiffTable->insertRow({QString(className.c_str()), targetLayer->name(), tr("Added")});
+
+				continue;
 			}
 		}
+	}
 
+	// Look for deteled items (in target)
+	//
+	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : sourceSchema->Layers)
+	{
+		for (SchemaItemPtr sourceItem : sourceLayer->Items)
+		{
+			// Look for this item in source
+			//
+			SchemaItemPtr targetItem = targetSchema->getItemById(sourceItem->guid());
+
+			if (targetItem == nullptr)
+			{
+				// Item is found, so it was deleted in target
+				//
+				itemsActions[sourceItem->guid()] = CompareAction::Deleted;
+
+				const std::string& className = sourceItem->metaObject()->className();
+				itemsDiffTable->insertRow({QString(className.c_str()), sourceLayer->name(), tr("Deleted")});
+
+				// Add item to target
+				//
+				bool layerFound = false;
+				for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : targetSchema->Layers)
+				{
+					if (targetLayer->guid() == sourceLayer->guid())
+					{
+						targetLayer->Items.push_back(sourceItem);
+						layerFound = true;
+						break;
+					}
+				}
+
+				Q_ASSERT(layerFound);
+			}
+		}
+	}
+
+	if (schemaDiffTable->rowCount() > 0 || itemsDiffTable->rowCount() > 0 || itemsTables.empty() == false)
+	{
+		headerTable->insertRow({targetFile->fileName(), targetFile->action().text(),  changesetString(targetFile)});
+
+		// Add tables to section
+
+		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>();
+		m_sections.push_back(schemaDiffSection);
+
+		schemaDiffSection->addText(tr("Schema: %1\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
+
+		if (schemaDiffTable->rowCount() != 0)
+		{
+			schemaDiffSection->addTable(schemaDiffTable);
+		}
+
+		if (itemsDiffTable->rowCount() != 0)
+		{
+			schemaDiffSection->addText(tr("Items Differences:\n"), m_currentCharFormat, m_currentBlockFormat);
+			schemaDiffSection->addTable(itemsDiffTable);
+		}
+
+		for (auto it : itemsTables)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = it.first;
+			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
+
+			const std::string& className = item->metaObject()->className();
+			schemaDiffSection->addText(QString(className.c_str()), m_currentCharFormat, m_currentBlockFormat);
+
+			schemaDiffSection->addTable(itemDiffTable);
+		}
+
+		// Add schema differences drawing
+
+		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>();
+		m_sections.push_back(schemaDrawingSection);
+
+		schemaDrawingSection->addText(tr("Drawing of Schema: %1\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
+		schemaDrawingSection->setSchema(targetSchema);
+		schemaDrawingSection->setCompareItemActions(itemsActions);
+	}
+
+	/*
 		std::shared_ptr<ReportSection> sourceSection = std::make_shared<ReportSection>();
 		m_sections.push_back(sourceSection);
 
@@ -1887,8 +2091,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 		m_sections.push_back(targetSection);
 
 		targetSection->addText("Target schema:\n", m_currentCharFormat, m_currentBlockFormat);
-		targetSection->setSchema(targetSchema);
-	}
+		targetSection->setSchema(targetSchema);*/
 
 }
 
@@ -1960,27 +2163,7 @@ void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& source
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
 		restoreFormat();
 
-		for (const PropertyDiff& diff : diffs)
-		{
-			switch (diff.action)
-			{
-			case PropertyDiff::Action::Added:
-				{
-					diffTable->insertRow({diff.caption, tr("Added"), QString(), QString()});
-				}
-				break;
-			case PropertyDiff::Action::Removed:
-				{
-					diffTable->insertRow({diff.caption, tr("Removed"), QString(), QString()});
-				}
-				break;
-			case PropertyDiff::Action::Modified:
-				{
-					diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
-				}
-				break;
-			}
-		}
+		fillDiffTable(diffTable.get(), diffs);
 	}
 }
 
@@ -2285,27 +2468,7 @@ void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal, const 
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
 		restoreFormat();
 
-		for (const PropertyDiff& diff : diffs)
-		{
-			switch (diff.action)
-			{
-			case PropertyDiff::Action::Added:
-				{
-					diffTable->insertRow({diff.caption, tr("Added"), QString(), QString()});
-				}
-				break;
-			case PropertyDiff::Action::Removed:
-				{
-					diffTable->insertRow({diff.caption, tr("Removed"), QString(), QString()});
-				}
-				break;
-			case PropertyDiff::Action::Modified:
-				{
-					diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
-				}
-				break;
-			}
-		}
+		fillDiffTable(diffTable.get(), diffs);
 	}
 }
 
@@ -2573,6 +2736,40 @@ void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor)
 	addMarginItem({appVersion, 2, -1, Qt::AlignRight | Qt::AlignTop, charFormat, blockFormat});
 
 	addMarginItem({tr("%PAGE%"), 2, -1, Qt::AlignRight | Qt::AlignBottom, charFormat, blockFormat});
+}
+
+void ProjectDiffWorker::fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs)
+{
+	if (diffTable == nullptr)
+	{
+		Q_ASSERT(diffTable);
+		return;
+	}
+
+	for (const PropertyDiff& diff : diffs)
+	{
+		switch (diff.action)
+		{
+
+		case PropertyDiff::Action::Added:
+			{
+				diffTable->insertRow({diff.caption, tr("Added"), QString(), QString()});
+			}
+			break;
+		case PropertyDiff::Action::Removed:
+			{
+				diffTable->insertRow({diff.caption, tr("Removed"), QString(), QString()});
+			}
+			break;
+		case PropertyDiff::Action::Modified:
+			{
+				diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
+			}
+			break;
+		}
+	}
+
+	return;
 }
 
 QString ProjectDiffWorker::changesetString(const std::shared_ptr<DbFile>& file)
