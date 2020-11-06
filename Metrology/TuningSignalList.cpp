@@ -1,11 +1,8 @@
 #include "TuningSignalList.h"
 
-#include "MainWindow.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
-#include "Options.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -117,11 +114,6 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 		}
 
 		return result;
-	}
-
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::ForegroundRole)
@@ -386,11 +378,6 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 		return result;
 	}
 
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
-	}
-
 	if (role == Qt::ForegroundRole)
 	{
 		if (column == TUN_SIGNAL_LIST_COLUMN_DEFAULT)
@@ -614,21 +601,6 @@ bool			TuningSignalListDialog::m_showSource = false;
 TuningSignalListDialog::TuningSignalListDialog(QWidget *parent) :
 	QDialog(parent)
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
-	{
-		if (pMainWindow->configSocket() != nullptr)
-		{
-			connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
-		}
-
-		if (pMainWindow->tuningSocket() != nullptr)
-		{
-			connect(pMainWindow->tuningSocket(), &TuningSocket::sourcesLoaded, this, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
-			connect(pMainWindow->tuningSocket(), &TuningSocket::socketDisconnected, this, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
-		}
-	}
-
 	createInterface();
 	updateSourceList();
 	updateSignalList();
@@ -725,7 +697,7 @@ void TuningSignalListDialog::createInterface()
 
 	m_pSourceView = new QTableView(this);
 	m_pSourceView->setModel(&m_sourceTable);
-	QSize sourceCellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize sourceCellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pSourceView->verticalHeader()->setDefaultSectionSize(sourceCellSize.height());
 
 	for(int column = 0; column < TUN_SOURCE_LIST_COLUMN_COUNT; column++)
@@ -743,7 +715,7 @@ void TuningSignalListDialog::createInterface()
 
 	m_pSignalView = new QTableView(this);
 	m_pSignalView->setModel(&m_signalTable);
-	QSize signalCellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize signalCellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pSignalView->verticalHeader()->setDefaultSectionSize(signalCellSize.height());
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)

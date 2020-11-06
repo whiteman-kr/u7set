@@ -1,11 +1,10 @@
 #include "ComparatorList.h"
 
-#include "MainWindow.h"
-#include "Options.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
+#include "../lib/UnitsConvertor.h"
+
+#include "ProcessData.h"
 #include "ObjectProperties.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -140,11 +139,6 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		}
 
 		return QVariant();
-	}
-
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -339,12 +333,6 @@ int ComparatorListDialog::m_currenIndex = 0;
 ComparatorListDialog::ComparatorListDialog(QWidget *parent) :
 	QDialog(parent)
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
-	{
-		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &ComparatorListDialog::updateList, Qt::QueuedConnection);
-	}
-
 	createInterface();
 	updateList();
 }
@@ -404,7 +392,7 @@ void ComparatorListDialog::createInterface()
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_comparatorTable);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < COMPARATOR_LIST_COLUMN_COUNT; column++)

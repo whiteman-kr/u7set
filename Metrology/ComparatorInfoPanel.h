@@ -1,6 +1,7 @@
 #ifndef COMPARATORINFOPANEL_H
 #define COMPARATORINFOPANEL_H
 
+#include <QMainWindow>
 #include <QDockWidget>
 #include <QMenu>
 #include <QAction>

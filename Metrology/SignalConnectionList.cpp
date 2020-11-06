@@ -1,13 +1,11 @@
 #include "SignalConnectionList.h"
 
-#include "MainWindow.h"
-#include "Options.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
-#include "SignalList.h"
-
 #include <QFileDialog>
+#include <QMessageBox>
+
+#include "ProcessData.h"
+#include "SignalList.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,11 +91,6 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 	if (role == Qt::TextAlignmentRole)
 	{
 		return Qt::AlignLeft;
-	}
-
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::BackgroundRole)
@@ -432,11 +425,6 @@ void SignalConnectionItemDialog::selectOutputSignal()
 
 void SignalConnectionItemDialog::selectSignal(int type)
 {
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		return;
-	}
-
 	SignalListDialog dialog(true, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
@@ -458,6 +446,11 @@ void SignalConnectionItemDialog::selectSignal(int type)
 	}
 
 	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
+
+	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
@@ -520,6 +513,87 @@ void SignalConnectionItemDialog::onOk()
 		return;
 	}
 
+	switch(type)
+	{
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+
+			if (pInSignal->param().isInput() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not input signal!").arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			if (pInSignal->param().electricRangeIsValid() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 has wrong electric limit!").arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+
+			if (pInSignal->param().isInternal() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not internal signal!").arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			if (pInSignal->param().enableTuning() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not tuning signal!").arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+	}
+
+	switch(type)
+	{
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+
+			if (pOutSignal->param().isInternal() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not internal signal!").arg(outputAppSignalID));
+				m_pOutputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+
+			if (pOutSignal->param().isOutput() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not output signal!").arg(outputAppSignalID));
+				m_pOutputSignalButton->setFocus();
+				return;
+			}
+
+			if (pOutSignal->param().electricRangeIsValid() == false)
+			{
+				QMessageBox::information(this, windowTitle(), tr("Signal %1 has wrong electric limit!").arg(outputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+	}
+
 	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
 	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pOutSignal);
 
@@ -533,12 +607,6 @@ void SignalConnectionItemDialog::onOk()
 SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
 	QDialog(parent)
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
-	{
-		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalConnectionDialog::configurationLoaded, Qt::QueuedConnection);
-	}
-
 	m_connectionBase = theSignalBase.signalConnections();
 
 	createInterface();
@@ -616,7 +684,7 @@ void SignalConnectionDialog::createInterface()
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_connectionTable);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < SIGNAL_CONNECTION_COLUMN_COUNT; column++)

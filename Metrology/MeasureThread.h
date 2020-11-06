@@ -21,6 +21,16 @@ const int				MEASURE_THREAD_CMP_PREPARE_COUNT	= 2;
 
 // ==============================================================================================
 
+enum class MeasureThreadExitCode
+{
+	Usual = 0,
+	Manual = 1,
+};
+
+Q_DECLARE_METATYPE(MeasureThreadExitCode)
+
+// ==============================================================================================
+
 class MeasureThread : public QThread
 {
 	Q_OBJECT
@@ -35,12 +45,13 @@ private:
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
-	int						m_measureTimeout = 0;
 
+	MeasureThreadExitCode	m_exitCode = MeasureThreadExitCode::Manual;
 	bool					m_cmdStopMeasure = true;
 
 	QVector<IoSignalParam>	m_activeIoParamList;
 
+	int						m_measureTimeout = 0;
 	void					waitMeasureTimeout();
 
 	// calibrators
@@ -63,12 +74,9 @@ private:
 
 public:
 
-	bool					enableMesureIsSignal();
-	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
-	bool					inputsOfmoduleIsSame();														// only for mode "Simaple module"
 
-	void					stop() { m_cmdStopMeasure = true; }
+	MeasureThreadExitCode	exitCode() { return m_exitCode; }
 
 protected:
 
@@ -83,21 +91,20 @@ signals:
 
 	void					measureComplite(Measurement*);
 
-	void					setNextMeasureSignal(bool& signalIsSelected);
-
 public slots:
 
 	void					signalSocketDisconnected();
 	void					tuningSocketDisconnected();
 
+	void					measureTimeoutChanged(int timeout);
 	void					measureTypeChanged(int type);
 	void					measureKindChanged(int kind);
 	void					signalConnectionTypeChanged(int type);
-	void					measureTimeoutChanged(int timeout);
 
+	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateSignalParam(const QString& appSignalID);
 
-	void					stopMeasure();
+	void					stopMeasure(const MeasureThreadExitCode& exitCode);
 };
 
 // ==============================================================================================

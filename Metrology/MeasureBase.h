@@ -411,6 +411,7 @@ public:
 	void					remove(int measureType, const QVector<int>& keyList);
 
 	void					updateStatistics(int measureType, StatisticsItem& si);
+	void					markNotExistMeasuremetsFromStatistics();
 
 signals:
 

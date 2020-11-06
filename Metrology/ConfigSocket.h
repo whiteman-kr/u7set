@@ -35,6 +35,7 @@ private:
 	SoftwareInfo		m_softwareInfo;
 	HostAddressPort		m_serverAddressPort1;
 	HostAddressPort		m_serverAddressPort2;
+	SocketClientOption	m_option;
 
 
 	CfgLoaderThread*	m_cfgLoaderThread = nullptr;

@@ -5,7 +5,6 @@
 #include "TuningSignalBase.h"
 #include "Options.h"
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort) :

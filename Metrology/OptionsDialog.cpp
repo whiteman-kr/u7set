@@ -96,11 +96,10 @@ int OptionsDialog::m_activePage = OPTION_PAGE_LINEARITY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsDialog::OptionsDialog(QWidget *parent) :
-	QDialog(parent)
+OptionsDialog::OptionsDialog(const Options& options, QWidget *parent) :
+	QDialog(parent),
+	m_options(options)
 {
-	m_options = theOptions;
-
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 	{
 		m_options.measureView().setUpdateColumnView(type, false);
@@ -226,16 +225,13 @@ QHBoxLayout* OptionsDialog::createButtons()
 
 	QPushButton* okButton = new QPushButton(tr("Ok"));
 	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-	QPushButton* applyButton = new QPushButton(tr("Apply"));
 
 	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(okButton);
 	buttonsLayout->addWidget(cancelButton);
-	buttonsLayout->addWidget(applyButton);
 
 	connect(okButton, &QPushButton::clicked, this, &OptionsDialog::onOk);
 	connect(cancelButton, &QPushButton::clicked, this, &OptionsDialog::reject);
-	connect(applyButton, &QPushButton::clicked, this, &OptionsDialog::onApply);
 
 	return buttonsLayout;
 }
@@ -590,7 +586,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]));
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), theOptions.module().maxComparatorCount());
+					item->setAttribute(QLatin1String("maximum"), m_options.module().maxComparatorCount());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
@@ -1469,17 +1465,7 @@ void OptionsDialog::saveSettings()
 
 void OptionsDialog::onOk()
 {
-	onApply();
-
 	accept();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OptionsDialog::onApply()
-{
-	theOptions = m_options;
-	theOptions.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

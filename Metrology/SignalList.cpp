@@ -1,11 +1,8 @@
 #include "SignalList.h"
 
-#include "MainWindow.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
-#include "Options.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -119,11 +116,6 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 		}
 
 		return result;
-	}
-
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::BackgroundRole)
@@ -326,12 +318,6 @@ int					SignalListDialog::m_currenIndex = 0;
 SignalListDialog::SignalListDialog(bool hasButtons, QWidget *parent) :
 	QDialog(parent)
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
-	{
-		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalListDialog::updateList, Qt::QueuedConnection);
-	}
-
 	createInterface(hasButtons);
 	updateList();
 }
@@ -427,7 +413,7 @@ void SignalListDialog::createInterface(bool hasButtons)
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_signalTable);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)

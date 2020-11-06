@@ -11,7 +11,7 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QKeyEvent>
 
-#include "CopyData.h"
+#include "ProcessData.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

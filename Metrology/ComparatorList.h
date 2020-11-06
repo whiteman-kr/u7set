@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QDialogButtonBox>
+#include <QKeyEvent>
 
 #include "../lib/Signal.h"
 
@@ -132,13 +133,11 @@ protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
-signals:
+public slots:
+
+	void					updateList();	// slots for updating
 
 private slots:
-
-	// slots for updating
-	//
-	void					updateList();
 
 	// slots of menu
 	//

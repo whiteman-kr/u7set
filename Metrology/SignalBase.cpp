@@ -1,8 +1,8 @@
 #include "SignalBase.h"
 
 #include "CalibratorBase.h"
-#include "MeasureBase.h"
 #include "Database.h"
+#include "MeasureBase.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ void IoSignalParam::clear()
 	m_percent = 0;
 	m_comparatorIndex = -1;
 	m_negativeRange = false;
-	m_tunSignalState = 0;
+	m_tunStateForRestore = 0;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -700,7 +700,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 	m_percent = from.m_percent;
 	m_comparatorIndex = from.m_comparatorIndex;
 	m_negativeRange  = from.m_negativeRange;
-	m_tunSignalState = from.m_tunSignalState;
+	m_tunStateForRestore = from.m_tunStateForRestore;
 
 	return *this;
 }
@@ -1564,6 +1564,200 @@ void SignalBase::setSignalState(int index, const Metrology::SignalState& state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool SignalBase::enableForMeasure(int signalConnectionType, Metrology::Signal* pSignal)
+{
+	if (pSignal == nullptr)
+	{
+		return false;
+	}
+
+	const Metrology::SignalParam& param = pSignal->param();
+	if (param.isValid() == false)
+	{
+		return false;
+	}
+
+	if (param.isAnalog() == false)
+	{
+		return false;
+	}
+
+	if (param.location().shownOnSchemas() == false)
+	{
+		return false;
+	}
+
+	switch (signalConnectionType)
+	{
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
+		{
+			if (param.isInput() == false)
+			{
+				return false;
+			}
+
+			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+			{
+				return false;
+			}
+
+			if (param.electricRangeIsValid() == false)
+			{
+				return false;
+			}
+		}
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		{
+			if (param.isInput() == false)
+			{
+				return false;
+			}
+
+			if (param.electricRangeIsValid() == false)
+			{
+				return false;
+			}
+
+			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+			{
+				return false;
+			}
+
+			int connectionIndex = m_signalConnectionBase.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal);
+			if (connectionIndex == -1)
+			{
+				return false;
+			}
+
+			const SignalConnection& connection = m_signalConnectionBase.connection(connectionIndex);
+			if (connection.isValid() == false)
+			{
+				return false;
+			}
+
+			Metrology::Signal* pOutoutSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			if (pOutoutSignal == nullptr || pOutoutSignal->param().isValid() == false)
+			{
+				return false;
+			}
+
+			if (pOutoutSignal->param().isInternal() == false)
+			{
+				return false;
+			}
+		}
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		{
+			if (param.isInput() == false)
+			{
+				return false;
+			}
+
+			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+			{
+				return false;
+			}
+
+			if (param.electricRangeIsValid() == false)
+			{
+				return false;
+			}
+
+			int connectionIndex = m_signalConnectionBase.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal);
+			if (connectionIndex == -1)
+			{
+				return false;
+			}
+
+			const SignalConnection& connection = m_signalConnectionBase.connection(connectionIndex);
+			if (connection.isValid() == false)
+			{
+				return false;
+			}
+
+			Metrology::Signal* pOutoutSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			if (pOutoutSignal == nullptr || pOutoutSignal->param().isValid() == false)
+			{
+				return false;
+			}
+
+			if (pOutoutSignal->param().isOutput() == false)
+			{
+				return false;
+			}
+
+			if (pOutoutSignal->param().electricRangeIsValid() == false)
+			{
+				return false;
+			}
+		}
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+		{
+			if (param.isInternal() == false)
+			{
+				return false;
+			}
+
+			if (param.location().chassis() == -1 || param.location().module() == -1)
+			{
+				return false;
+			}
+
+			if (param.enableTuning() == false)
+			{
+				return false;
+			}
+
+			int connectionIndex = m_signalConnectionBase.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal);
+			if (connectionIndex == -1)
+			{
+				return false;
+			}
+
+			const SignalConnection& connection = m_signalConnectionBase.connection(connectionIndex);
+			if (connection.isValid() == false)
+			{
+				return false;
+			}
+
+			Metrology::Signal* pOutoutSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			if (pOutoutSignal == nullptr || pOutoutSignal->param().isValid() == false)
+			{
+				return false;
+			}
+
+			if (pOutoutSignal->param().isOutput() == false)
+			{
+				return false;
+			}
+
+			if (pOutoutSignal->param().electricRangeIsValid() == false)
+			{
+				return false;
+			}
+		}
+		break;
+
+		default:
+			assert(0);
+			return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalBase::hashForRequestStateCount() const
 {
 	QMutexLocker l(&m_stateMutex);
@@ -1692,66 +1886,15 @@ int SignalBase::createRackListForMeasure(int measureKind, int signalConnectionTy
 				int signalCount = m_signalList.count();
 				for(int i = 0; i < signalCount; i ++)
 				{
-					Metrology::SignalParam& param = m_signalList[i].param();
+					const Metrology::SignalParam& param = m_signalList[i].param();
 					if (param.isValid() == false)
 					{
 						continue;
 					}
 
-					if (param.location().shownOnSchemas() == false)
+					if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
 					{
 						continue;
-					}
-
-					if (param.isAnalog() == false)
-					{
-						continue;
-					}
-
-					switch (signalConnectionType)
-					{
-						case SIGNAL_CONNECTION_TYPE_UNUSED:
-						case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-						case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-						case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-						case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-						case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-						case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-
-							if (param.isInput() == false)
-							{
-								continue;
-							}
-
-							if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-							{
-								continue;
-							}
-
-							if (param.electricRangeIsValid() == false)
-							{
-								continue;
-							}
-
-							break;
-
-						case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-
-							if (param.isInternal() == false)
-							{
-								continue;
-							}
-
-							if (param.location().chassis() == -1 || param.location().module() == -1)
-							{
-								continue;
-							}
-
-							break;
-
-						default:
-							assert(0);
-							continue;
 					}
 
 					Hash rackHash = param.location().rack().hash();
@@ -1832,6 +1975,9 @@ void SignalBase::clearRackListForMeasure()
 
 void SignalBase::initSignals()
 {
+	QElapsedTimer responseTime;
+	responseTime.start();
+
 	int analogTuningSignalCount = 0;
 	int discreteTuningSignalCount = 0;
 	int busTuningSignalCount = 0;
@@ -1872,6 +2018,8 @@ void SignalBase::initSignals()
 	m_tuningBase.signalBase().createSignalList();
 
 	m_statisticsBase.createSignalList();
+
+	qDebug() << __FUNCTION__ << "Signals have been initialized" << " Time for load: " << responseTime.elapsed() << " ms";
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1966,7 +2114,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 		return 0;
 	}
 
-	int				signalIndex = 0;
+	int signalIndex = 0;
 	QMap<Hash, int>	mesaureSignalMap;
 
 	// determine the number of channels for a multi-channel signal
@@ -2003,90 +2151,9 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 			continue;
 		}
 
-		if (param.location().shownOnSchemas() == false)
+		if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
 		{
 			continue;
-		}
-
-		if (param.isAnalog() == false)
-		{
-			continue;
-		}
-
-		// switch for signal connection type
-		//
-		switch (signalConnectionType)
-		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:
-
-				if (param.isInput() == false)
-				{
-					continue;
-				}
-
-				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-				{
-					continue;
-				}
-
-				if (param.electricRangeIsValid() == false)
-				{
-					continue;
-				}
-
-				break;
-
-			case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-			case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-			case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-
-				if (param.isInput() == false)
-				{
-					continue;
-				}
-
-				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-				{
-					continue;
-				}
-
-				if (param.electricRangeIsValid() == false)
-				{
-					continue;
-				}
-
-				if (m_signalConnectionBase.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, &m_signalList[i]) == -1)
-				{
-					continue;
-				}
-
-				break;
-
-			case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-
-				if (param.isInternal() == false)
-				{
-					continue;
-				}
-
-				if (param.location().chassis() == -1 || param.location().module() == -1)
-				{
-					continue;
-				}
-
-				if (m_signalConnectionBase.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, &m_signalList[i]) == -1)
-				{
-					continue;
-				}
-
-				break;
-
-			default:
-				assert(0);
-				continue;
 		}
 
 		// switch for Measure kind
