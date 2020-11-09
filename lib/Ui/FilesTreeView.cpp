@@ -1207,6 +1207,16 @@ FileTreeView::~FileTreeView()
 {
 }
 
+QString FileTreeView::defaultExtension() const
+{
+	return m_defaultExtension;
+}
+
+void FileTreeView::setDefaultExtension(const QString& extension)
+{
+	m_defaultExtension = extension;
+}
+
 // Returns selected rows mapped to source model
 //
 QModelIndexList FileTreeView::selectedSourceRows() const
@@ -1606,9 +1616,11 @@ void FileTreeView::renameFile()
 		return;
 	}
 
-	if (newFileName.endsWith(".js") == false)
+	// Add default extension
+
+	if (m_defaultExtension.isEmpty() == false && newFileName.endsWith(m_defaultExtension) == false)
 	{
-		newFileName += ".js";
+		newFileName += m_defaultExtension;
 	}
 
 	DbFileInfo newFi;

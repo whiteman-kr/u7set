@@ -161,6 +161,9 @@ public:
 	explicit FileTreeView(DbController* dbc, FileTreeModel* model);
 	virtual ~FileTreeView();
 
+	QString defaultExtension() const;
+	void setDefaultExtension(const QString& extension);	// Sets default file extension (with point!), for example, ".js"
+
 	QModelIndexList selectedSourceRows() const;	// Returns selected rows mapped to source model
 
 	bool newFile(const QString& fileName, const QByteArray& data);
@@ -213,6 +216,8 @@ private:
 
 	FileTreeModel* m_model = nullptr;
 	FileTreeProxyModel* m_proxyModel = nullptr;
+
+	QString m_defaultExtension;
 };
 
 #endif // FILESTREEMODEL_H

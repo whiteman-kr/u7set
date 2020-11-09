@@ -1171,17 +1171,21 @@ void TestsWidget::openFilesClicked(const QModelIndex &index)
 
 void TestsWidget::newFile()
 {
+	QString defaultExtension = m_testsTreeView->defaultExtension();
+
 	// Get new file name
 	//
-	QString fileName = QInputDialog::getText(this, "New File", tr("Enter file name:"), QLineEdit::Normal, tr("NewFile_%1.js").arg(db()->nextCounterValue()));
+	QString fileName = QInputDialog::getText(this, "New File", tr("Enter file name:"), QLineEdit::Normal, tr("NewFile_%1%2").arg(db()->nextCounterValue()).arg(defaultExtension));
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
 
-	if (fileName.endsWith(".js") == false)
+	// Add default extension
+
+	if (defaultExtension.isEmpty() == false && fileName.endsWith(defaultExtension) == false)
 	{
-		fileName += ".js";
+		fileName += defaultExtension;
 	}
 
 	// Read script template
@@ -2909,6 +2913,7 @@ void TestsWidget::createTestsDock()
 		m_testsTreeView->sortByColumn(index, order);
 	});
 	m_testsTreeView->sortByColumn(0, Qt::AscendingOrder);
+	m_testsTreeView->setDefaultExtension(".js");
 
 	testsLayout->addWidget(m_testsTreeView);
 
