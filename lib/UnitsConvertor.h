@@ -20,7 +20,7 @@ struct SignalElectricLimit
 	E::SensorType sensorType = E::SensorType::NoSensor;
 };
 
-const SignalElectricLimit SignalElectricLimits[] =
+	const SignalElectricLimit SignalElectricLimits[] =
 {
 	// V
 	//
@@ -71,6 +71,10 @@ const SignalElectricLimit SignalElectricLimits[] =
 
 	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,	},						// module TIM
 	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,	},						// module TIM
+
+	// microA
+	//
+	//	{ 0, 5, E::ElectricUnit::microA, E::SensorType::V_0_5, },										// module WAIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
@@ -86,6 +90,12 @@ const double RLOAD_OHM_HIGH_LIMIT = 1000;																// module AIM and Rload
 //
 const double OUT_PH_LOW_LIMIT = 0;																		// module AOM
 const double OUT_PH_HIGH_LIMIT = 65535;																	// module AOM
+
+
+// limits for otput signals of module ROM
+//
+//const double OUT_OHM_LOW_LIMIT = 0;																	// module ROM
+//const double OUT_OHM_HIGH_LIMIT = 2110; // Ohm														// module ROM
 
 // ==============================================================================================
 // class UnitsConvertResult

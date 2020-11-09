@@ -123,6 +123,7 @@ private:
 	// Elements of interface - StatusBar
 	//
 	QLabel*					m_statusEmpty = nullptr;
+	QProgressBar*			m_statusLoadSignals = nullptr;
 	QLabel*					m_statusMeasureThreadInfo = nullptr;
 	QProgressBar*			m_statusMeasureTimeout = nullptr;
 	QLabel*					m_statusMeasureThreadState = nullptr;
@@ -213,10 +214,10 @@ signals:
 	// from ToolBars
 	//
 	void					measureViewChanged(MeasureView* pView);	// appear when changing the type of measurement
+	void					measureTimeoutChanged(int timeout);		// appear when changing the timeout of measuring
 	void					measureTypeChanged(int type);			// appear when changing the type of measurement
 	void					measureKindChanged(int kind);			// appear when changing the kind of measurement
 	void					signalConnectionTypeChanged(int type);	// appear when changing the SignalConnectionType
-	void					measureTimeoutChanged(int timeout);		// appear when changing the timeout of measuring
 
 	// from measureComplite
 	//
@@ -284,13 +285,16 @@ private slots:
 
 	// Slots of calibrator base
 	//
-	void					calibratorConnectedChanged(int);
+	void					calibratorConnectedChanged(int count);
 
 	// Slots of configSocket
 	//
 	void					configSocketConnected();
 	void					configSocketDisconnected();
+	void					configSocketUnknownClient();
 	void					configSocketConfigurationLoaded();
+	void					configSocketSignalBaseLoading(int persentage);
+	void					configSocketSignalBaseLoaded();
 
 	// Slots of signalSocket
 	//
@@ -307,10 +311,13 @@ private slots:
 	//
 	void					measureThreadStarted();
 	void					measureThreadStoped();
-	void					setMeasureThreadInfo(QString msg);
-	void					setMeasureThreadInfo(int timeout);
+	void					measureThreadInfo(const MeasureThreadInfo& info);
 	void					measureThreadMsgBox(int type, QString text, int *result = nullptr);
 	void					measureComplite(Measurement* pMeasurement);
+
+	// Slots of measure base
+	//
+	void					updateMeasureView();
 
 	// Slots for enable measuring
 	//

@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include "FolderPropertyManager.h"
-#include "OptionsPointsDialog.h"
+#include "MeasurePointDialog.h"
 #include "OptionsMvhDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -258,8 +258,8 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_MEASURE_VIEW_TEXT:
 		case OPTION_PAGE_SIGNAL_INFO:
 		case OPTION_PAGE_COMPARATOR_INFO:
-		case OPTION_PAGE_DATABASE:
-		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_DATABASE_LOCATION:
+		case OPTION_PAGE_DATABASE_BACKUP:
 		case OPTION_PAGE_LANGUAGE:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:	pPropertyPage = createPropertyDialog(page);	break;
@@ -768,13 +768,13 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 			break;
 
-		case OPTION_PAGE_DATABASE:
+		case OPTION_PAGE_DATABASE_LOCATION:
 			{
 				QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of Database"));
 
-					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_PATH]));
-					item->setValue(m_options.database().path());
-					appendProperty(item, page, DBO_PARAM_PATH);
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_LOCATION_PATH]));
+					item->setValue(m_options.database().locationPath());
+					appendProperty(item, page, DBO_PARAM_LOCATION_PATH);
 					databaseGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_TYPE]));
@@ -794,25 +794,25 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			}
 			break;
 
-		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_DATABASE_BACKUP:
 			{
 				QtProperty *eventGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Events"));
 
-					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", BackupParam[BUO_PARAM_ON_START]));
-					item->setValue(m_options.backup().onStart());
-					appendProperty(item, page, BUO_PARAM_ON_START);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", DatabaseParam[DBO_PARAM_ON_START]));
+					item->setValue(m_options.database().onStart());
+					appendProperty(item, page, DBO_PARAM_ON_START);
 					eventGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", BackupParam[BUO_PARAM_ON_EXIT]));
-					item->setValue(m_options.backup().onExit());
-					appendProperty(item, page, BUO_PARAM_ON_EXIT);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", DatabaseParam[DBO_PARAM_ON_EXIT]));
+					item->setValue(m_options.database().onExit());
+					appendProperty(item, page, DBO_PARAM_ON_EXIT);
 					eventGroup->addSubProperty(item);
 
 				QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
-					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", BackupParam[BUO_PARAM_PATH]));
-					item->setValue(m_options.backup().path());
-					appendProperty(item, page, BUO_PARAM_PATH);
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_COPY_PATH]));
+					item->setValue(m_options.database().copyPath());
+					appendProperty(item, page, DBO_PARAM_COPY_PATH);
 					pathGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -872,8 +872,8 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 	{
 		case OPTION_PAGE_LINEARITY_POINT:
 			{
-				OptionsPointsDialog* dialog = new OptionsPointsDialog(m_options.linearity());
-				connect(dialog, &OptionsPointsDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
+				MeasurePointDialog* dialog = new MeasurePointDialog(m_options.linearity());
+				connect(dialog, &MeasurePointDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
 
 				pDialogPage = dialog;
 			}
@@ -1265,24 +1265,24 @@ void OptionsDialog::applyProperty()
 
 			break;
 
-		case OPTION_PAGE_DATABASE:
+		case OPTION_PAGE_DATABASE_LOCATION:
 			{
 				switch(param)
 				{
-					case DBO_PARAM_PATH:				m_options.database().setPath(value.toString());									break;
+					case DBO_PARAM_LOCATION_PATH:		m_options.database().setLocationPath(value.toString());							break;
 					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());									break;
 					default:							assert(0);
 				}
 			}
 			break;
 
-		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_DATABASE_BACKUP:
 			{
 				switch(param)
 				{
-					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());									break;
-					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());									break;
-					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());									break;
+					case DBO_PARAM_ON_START:			m_options.database().setOnStart(value.toBool());								break;
+					case DBO_PARAM_ON_EXIT:				m_options.database().setOnExit(value.toBool());									break;
+					case DBO_PARAM_COPY_PATH:			m_options.database().setCopyPath(value.toString());								break;
 					default:							assert(0);
 				}
 			}
@@ -1329,7 +1329,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 		return;
 	}
 
-	OptionsPointsDialog* dialog = dynamic_cast<OptionsPointsDialog*>(page->getWidget());
+	MeasurePointDialog* dialog = dynamic_cast<MeasurePointDialog*>(page->getWidget());
 	if (dialog == nullptr)
 	{
 		return;

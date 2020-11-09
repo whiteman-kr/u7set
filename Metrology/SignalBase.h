@@ -316,15 +316,11 @@ public:
 	//
 	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
 	bool					initComparatorSignals(Metrology::ComparatorEx* pComparatorEx);
-	
+
 signals:
 
-	void					updatedSignalParam(const QString& appSignalID);
-
 	void					activeSignalChanged(const MeasureSignal& signal);
-
-public slots:
-
+	void					signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================

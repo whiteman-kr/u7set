@@ -15,7 +15,7 @@ const char* const CalibratorType[] =
 				"KEITHLEY-6221",
 };
 
-const int		CALIBRATOR_TYPE_COUNT			= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
+const int		CALIBRATOR_TYPE_COUNT		= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
 
 const int		CALIBRATOR_TYPE_UNDEFINED	= -1,
 				CALIBRATOR_TYPE_TRXII		= 0,

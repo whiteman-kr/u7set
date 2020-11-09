@@ -737,7 +737,7 @@ void SignalConnectionDialog::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionDialog::configurationLoaded()
+void SignalConnectionDialog::signalBaseLoaded()
 {
 	m_connectionBase.initSignals();
 	updateList();

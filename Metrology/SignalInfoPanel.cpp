@@ -18,7 +18,7 @@
 
 SignalInfoTable::SignalInfoTable(QObject*)
 {
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &SignalInfoTable::updateSignalParam, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, this, &SignalInfoTable::signalParamChanged, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -379,7 +379,7 @@ void SignalInfoTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::updateSignalParam(const QString& appSignalID)
+void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{

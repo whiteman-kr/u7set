@@ -16,7 +16,7 @@
 
 ComparatorInfoTable::ComparatorInfoTable(QObject*)
 {
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &ComparatorInfoTable::updateSignalParam, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, this, &ComparatorInfoTable::signalParamChanged, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -256,7 +256,7 @@ void ComparatorInfoTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoTable::updateSignalParam(const QString& appSignalID)
+void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{

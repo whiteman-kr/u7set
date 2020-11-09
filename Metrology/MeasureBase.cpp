@@ -1,6 +1,7 @@
 #include "MeasureBase.h"
 
 #include <QThread>
+#include <QtConcurrent>
 
 #include "../lib/UnitsConvertor.h"
 
@@ -2694,9 +2695,9 @@ int MeasureBase::load(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::signalLoaded()
+void MeasureBase::signalBaseLoaded()
 {
-	markNotExistMeasuremetsFromStatistics();
+	QtConcurrent::run(MeasureBase::markNotExistMeasuremetsFromStatistics, this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2955,17 +2956,22 @@ void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::markNotExistMeasuremetsFromStatistics()
+void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
 {
+	if (pThis == nullptr)
+	{
+		return;
+	}
+
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	QMutexLocker l(&m_measureMutex);
+	QMutexLocker l(&pThis->m_measureMutex);
 
-	int measureCount = m_measureList.count();
+	int measureCount = pThis->m_measureList.count();
 	for (int m = 0; m < measureCount; m++)
 	{
-		Measurement* pMeasurement = m_measureList[m];
+		Measurement* pMeasurement = pThis->m_measureList[m];
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -3047,6 +3053,8 @@ void MeasureBase::markNotExistMeasuremetsFromStatistics()
 			pMeasurement->setFoundInStatistics(measurementIsFound);
 		}
 	}
+
+	emit pThis->updateMeasureView();
 
 	qDebug() << __FUNCTION__ << "- Signals were marked, " << " Time for marked: " << responseTime.elapsed() << " ms";
 }

@@ -3,7 +3,6 @@
 #include "CalibratorBase.h"
 #include "Database.h"
 #include "MeasureBase.h"
-#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -1435,7 +1434,7 @@ void SignalBase::setSignalParam(const Hash& hash, const Metrology::SignalParam& 
 
 	m_signalList[index].setParam(param);
 
-	emit updatedSignalParam(param.appSignalID());
+	emit signalParamChanged(param.appSignalID());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1451,7 +1450,7 @@ void SignalBase::setSignalParam(int index, const Metrology::SignalParam& param)
 
 	m_signalList[index].setParam(param);
 
-	emit updatedSignalParam(param.appSignalID());
+	emit signalParamChanged(param.appSignalID());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1868,8 +1867,6 @@ int SignalBase::createRackListForMeasure(int measureKind, int signalConnectionTy
 		return 0;
 	}
 
-	QMap<Hash, int> rackHashMap;
-
 	// find all type of racks for selected signalConnectionType and create rackTypeList for ToolBar
 	//
 	QMutexLocker l(&m_rackMutex);
@@ -1883,16 +1880,18 @@ int SignalBase::createRackListForMeasure(int measureKind, int signalConnectionTy
 			{
 				// select racks that has signals, other racks ignore
 				//
+				QMap<Hash, int> rackHashMap;
+
 				int signalCount = m_signalList.count();
 				for(int i = 0; i < signalCount; i ++)
 				{
-					const Metrology::SignalParam& param = m_signalList[i].param();
-					if (param.isValid() == false)
+					if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
 					{
 						continue;
 					}
 
-					if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
+					const Metrology::SignalParam& param = m_signalList[i].param();
+					if (param.isValid() == false)
 					{
 						continue;
 					}
@@ -1931,6 +1930,8 @@ int SignalBase::createRackListForMeasure(int measureKind, int signalConnectionTy
 
 		case MEASURE_KIND_MULTI_RACK:
 			{
+				// select racks from tables
+				//
 				int rackGroupCount = racks().groups().count();
 
 				for(int g = 0; g < rackGroupCount; g++)
@@ -2145,13 +2146,13 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 	{
 		measureSignal.clear();
 
-		Metrology::SignalParam& param = m_signalList[i].param();
-		if (param.isValid() == false)
+		if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
 		{
 			continue;
 		}
 
-		if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
+		Metrology::SignalParam& param = m_signalList[i].param();
+		if (param.isValid() == false)
 		{
 			continue;
 		}

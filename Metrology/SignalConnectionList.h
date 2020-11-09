@@ -166,7 +166,7 @@ public slots:
 
 	// slots for updating
 	//
-	void					configurationLoaded();
+	void					signalBaseLoaded();
 	void					updateList();
 
 private slots:

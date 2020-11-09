@@ -539,7 +539,6 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 			break;
 
 		default:
-
 			assert(0);
 	}
 

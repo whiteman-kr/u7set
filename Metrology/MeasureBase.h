@@ -117,7 +117,7 @@ const int	MEASURE_ADDITIONAL_PARAM_UNDEFINED			= -1,
 			MEASURE_ADDITIONAL_PARAM_UNCERTAINTY		= 4;
 
 			// maximum 16 items (0 .. 15)
-			// now used 4 (0 .. 4)
+			// now used 5 (1 .. 5)
 
 // ==============================================================================================
 
@@ -411,15 +411,16 @@ public:
 	void					remove(int measureType, const QVector<int>& keyList);
 
 	void					updateStatistics(int measureType, StatisticsItem& si);
-	void					markNotExistMeasuremetsFromStatistics();
+	static void				markNotExistMeasuremetsFromStatistics(MeasureBase* pThis);
 
 signals:
 
 	void					updatedMeasureBase(Hash signalHash);
+	void					updateMeasureView();
 
 public slots:
 
-	void					signalLoaded();
+	void					signalBaseLoaded();
 };
 
 // ==============================================================================================

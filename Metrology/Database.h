@@ -5,6 +5,7 @@
 #include <QtSql>
 
 #include "MeasureBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -354,6 +355,8 @@ private:
 	QSqlDatabase		m_database;
 	SqlTable			m_table[SQL_TABLE_COUNT];
 
+	DatabaseOption		m_databaseOption;
+
 	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
 
 	bool				createBackup();
@@ -362,6 +365,8 @@ private:
 	void				createTables();
 
 public:
+
+	void				setDatabaseOption(const DatabaseOption& option) { m_databaseOption = option; }
 
 	bool				isOpen() const { return m_database.isOpen(); }
 	bool				open();

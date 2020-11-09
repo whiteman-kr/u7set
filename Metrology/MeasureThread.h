@@ -7,6 +7,7 @@
 #include "MeasureBase.h"
 #include "SignalBase.h"
 #include "TuningSignalBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -21,13 +22,54 @@ const int				MEASURE_THREAD_CMP_PREPARE_COUNT	= 2;
 
 // ==============================================================================================
 
-enum class MeasureThreadExitCode
+class MeasureThreadInfo
 {
-	Usual = 0,
-	Manual = 1,
+public:
+
+		MeasureThreadInfo();
+
+		enum msgType
+		{
+			String,
+			StringError,
+			Timeout,
+		};
+
+		enum ExitCode
+		{
+			Usual = 0,
+			Manual = 1,
+		};
+
+private:
+
+		msgType m_type = msgType::String;
+		QString m_message;
+		int m_timeout = 0;
+
+		bool m_cmdStopMeasure = true;
+		ExitCode m_exitCode = ExitCode::Manual;
+
+public:
+
+		void init();
+
+		msgType type() const { return m_type; }
+
+		QString message() const { return m_message; }
+		void setMessage(const QString& message, const msgType& type = msgType::String);
+
+		int timeout() const { return m_timeout; }
+		void setTimeout(int timeout);
+
+		bool cmdStopMeasure() const { return m_cmdStopMeasure; }
+		void setCmdStopMeasure(bool stop) { m_cmdStopMeasure = stop; }
+
+		ExitCode exitCode() const { return m_exitCode; }
+		void setExitCode(ExitCode exitCode) { m_exitCode = exitCode; }
 };
 
-Q_DECLARE_METATYPE(MeasureThreadExitCode)
+Q_DECLARE_METATYPE(MeasureThreadInfo)
 
 // ==============================================================================================
 
@@ -46,8 +88,7 @@ private:
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
-	MeasureThreadExitCode	m_exitCode = MeasureThreadExitCode::Manual;
-	bool					m_cmdStopMeasure = true;
+	MeasureThreadInfo		m_info;
 
 	QVector<IoSignalParam>	m_activeIoParamList;
 
@@ -62,6 +103,11 @@ private:
 	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 	void					polarityTest(double electricVal, IoSignalParam& ioParam);
 
+	// Options
+	//
+	LinearityOption			m_linearityOption;
+	ComparatorOption		m_comparatorOption;
+
 	// function of measure
 	//
 	void					measureLinearity();
@@ -74,9 +120,12 @@ private:
 
 public:
 
+	MeasureThreadInfo		info() const { return m_info; }
+
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
 
-	MeasureThreadExitCode	exitCode() { return m_exitCode; }
+	void					setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
+	void					setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
 
 protected:
 
@@ -84,10 +133,8 @@ protected:
 
 signals:
 
+	void					sendMeasureInfo(const MeasureThreadInfo& info);
 	void					msgBox(int type, QString text, int* result = nullptr);
-
-	void					measureInfo(QString);
-	void					measureInfo(int);
 
 	void					measureComplite(Measurement*);
 
@@ -102,9 +149,9 @@ public slots:
 	void					signalConnectionTypeChanged(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
-	void					updateSignalParam(const QString& appSignalID);
+	void					signalParamChanged(const QString& appSignalID);
 
-	void					stopMeasure(const MeasureThreadExitCode& exitCode);
+	void					stopMeasure(MeasureThreadInfo::ExitCode exitCode);
 };
 
 // ==============================================================================================

@@ -111,7 +111,7 @@ public:
 
 public slots:
 
-	void						signalLoaded() {}
+	void						signalBaseLoaded() {}
 	void						measurementAppend() {}
 	void						measurementRemoved() {}
 };

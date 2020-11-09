@@ -10,9 +10,11 @@
 #include <QColor>
 
 #include "../lib/SocketIO.h"
+#include "../lib/MetrologySignal.h"
 
 #include "MeasureViewHeader.h"
-#include "ObjectVector.h"
+#include "MeasureBase.h"
+#include "MeasurePointBase.h"
 
 // ==============================================================================================
 
@@ -365,77 +367,6 @@ public:
 
 // ==============================================================================================
 
-const char* const		LinearityPointSensor[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "%"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 5 V"),
-						QT_TRANSLATE_NOOP("Options.h", "-10 .. 10 V"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 5 mA"),
-						QT_TRANSLATE_NOOP("Options.h", "4 .. 20 mA"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 100 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 150 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 200 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 400 °C"),
-};
-
-const int				POINT_SENSOR_COUNT			= sizeof(LinearityPointSensor)/sizeof(LinearityPointSensor[0]);
-
-const int				POINT_SENSOR_UNDEFINED		= -1,
-						POINT_SENSOR_PERCENT		= 0,
-						POINT_SENSOR_U_0_5_V		= 1,
-						POINT_SENSOR_U_m10_10_V		= 2,
-						POINT_SENSOR_I_0_5_MA		= 3,
-						POINT_SENSOR_I_4_20_MA		= 4,
-						POINT_SENSOR_T_0_100_C		= 5,
-						POINT_SENSOR_T_0_150_C		= 6,
-						POINT_SENSOR_T_0_200_C		= 7,
-						POINT_SENSOR_T_0_400_C		= 8;
-
-// ----------------------------------------------------------------------------------------------
-
-class LinearityPoint
-{
-public:
-
-	LinearityPoint() { setPercent(0); }
-	explicit LinearityPoint(double percent) { setPercent(percent); }
-	virtual ~LinearityPoint() {}
-
-private:
-
-	int					m_index = -1;
-
-	double				m_percentValue = 0;
-	double				m_sensorValue[POINT_SENSOR_COUNT];
-
-public:
-
-	int					Index() const { return m_index; }
-	void				setIndex(int index) { m_index = index; }
-
-	double				percent() const {return m_percentValue; }
-	void				setPercent(double value);
-
-	double				sensorValue(int sensor);
-};
-
-// ==============================================================================================
-
-class LinearityPointBase : public ObjectVector<LinearityPoint>
-{
-
-public:
-
-	LinearityPointBase();
-	virtual ~LinearityPointBase() { clear(); }
-
-	QString				text();
-
-	virtual void		initEmptyData(QVector<LinearityPoint> &data);
-};
-
-// ==============================================================================================
-
 #define					LINEARITY_OPTIONS_KEY			"Options/Linearity/"
 
 // ----------------------------------------------------------------------------------------------
@@ -514,7 +445,7 @@ public:
 
 private:
 
-	LinearityPointBase	m_pointBase;												// list of measurement points
+	MeasurePointBase	m_pointBase;												// list of measurement points
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
@@ -531,7 +462,7 @@ private:
 
 public:
 
-	LinearityPointBase& points() { return m_pointBase; }
+	MeasurePointBase&	points() { return m_pointBase; }
 
 	double				errorLimit() const { return m_errorLimit; }
 	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
@@ -993,14 +924,20 @@ public:
 
 const char* const		DatabaseParam[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
+						QT_TRANSLATE_NOOP("Options.h", "Location path"),
 						QT_TRANSLATE_NOOP("Options.h", "Type"),
+						QT_TRANSLATE_NOOP("Options.h", "On start application"),
+						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
+						QT_TRANSLATE_NOOP("Options.h", "Path for copy"),
 };
 
-const int				DBO_PARAM_COUNT	= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
+const int				DBO_PARAM_COUNT			= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
 
-const int				DBO_PARAM_PATH	= 0,
-						DBO_PARAM_TYPE	= 1;
+const int				DBO_PARAM_LOCATION_PATH	= 0,
+						DBO_PARAM_TYPE			= 1,
+						DBO_PARAM_ON_START		= 2,
+						DBO_PARAM_ON_EXIT		= 3,
+						DBO_PARAM_COPY_PATH		= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -1028,61 +965,20 @@ public:
 
 private:
 
-	QString				m_path;
+	QString				m_locationPath;
 	int					m_type;
-
-public:
-
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
-
-	int					type() const { return m_type; }
-	void				setType(int type) { m_type = type; }
-
-	void				load();
-	void				save();
-
-	DatabaseOption&		operator=(const DatabaseOption& from);
-};
-
-// ==============================================================================================
-
-#define					BACKUP_OPTIONS_REG_KEY			"Options/BackupMeasure/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		BackupParam[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "On start application"),
-						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
-};
-
-const int				BUO_PARAM_COUNT		= sizeof(BackupParam)/sizeof(BackupParam[0]);
-
-const int				BUO_PARAM_ON_START	= 0,
-						BUO_PARAM_ON_EXIT	= 1,
-						BUO_PARAM_PATH		= 2;
-
-// ----------------------------------------------------------------------------------------------
-
-class BackupOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit BackupOption(QObject *parent = nullptr);
-	explicit BackupOption(const BackupOption& from, QObject *parent = nullptr);
-	virtual ~BackupOption();
-
-private:
 
 	bool				m_onStart = false;
 	bool				m_onExit = true;
-	QString				m_path;
+	QString				m_copyPath;
 
 public:
+
+	QString				locationPath() const { return m_locationPath; }
+	void				setLocationPath(const QString& path) { m_locationPath = path; }
+
+	int					type() const { return m_type; }
+	void				setType(int type) { m_type = type; }
 
 	bool				onStart () const { return m_onStart; }
 	void				setOnStart(bool onStart) { m_onStart = onStart; }
@@ -1090,13 +986,13 @@ public:
 	bool				onExit() const { return m_onExit; }
 	void				setOnExit(bool onExit) { m_onExit = onExit; }
 
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
+	QString				copyPath() const { return m_copyPath; }
+	void				setCopyPath(const QString& path) { m_copyPath = path; }
 
 	void				load();
 	void				save();
 
-	BackupOption&		operator=(const BackupOption& from);
+	DatabaseOption&		operator=(const DatabaseOption& from);
 };
 
 // ==============================================================================================
@@ -1181,9 +1077,7 @@ private:
 	SignalInfoOption		m_signalInfo;
 	ComparatorInfoOption	m_comparatorInfo;
 
-
 	DatabaseOption			m_database;
-	BackupOption			m_backup;
 
 	LanguageOption			m_language;
 
@@ -1222,9 +1116,6 @@ public:
 
 	DatabaseOption&			database() { return m_database; }
 	void					setDatabase(const DatabaseOption& database) { m_database = database; }
-
-	BackupOption&			backup() { return m_backup; }
-	void					setBackup(const BackupOption& backup) { m_backup = backup; }
 
 	LanguageOption&			language() { return m_language; }
 	void					setLanguage(const LanguageOption& language) { m_language = language; }

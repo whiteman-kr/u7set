@@ -34,6 +34,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 {
 	// open database
 	//
+	theDatabase.setDatabaseOption(theOptions.database());
 	theDatabase.open();
 
 	// init calibration base
@@ -51,10 +52,13 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 
 	// load measurement base
 	//
+
+	theOptions.linearity().points().load();
 	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
 	{
 		theMeasureBase.load(measureType);
 	}
+	connect(&theMeasureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
 
 	//
 	//
@@ -677,6 +681,7 @@ void MainWindow::createStatusBar()
 	}
 
 	m_statusEmpty = new QLabel(pStatusBar);
+	m_statusLoadSignals = new QProgressBar(pStatusBar);
 	m_statusMeasureThreadInfo = new QLabel(pStatusBar);
 	m_statusMeasureTimeout = new QProgressBar(pStatusBar);
 	m_statusMeasureThreadState = new QLabel(pStatusBar);
@@ -684,6 +689,12 @@ void MainWindow::createStatusBar()
 	m_statusConnectToConfigServer = new QLabel(pStatusBar);
 	m_statusConnectToAppDataServer = new QLabel(pStatusBar);
 	m_statusConnectToTuningServer = new QLabel(pStatusBar);
+
+	m_statusLoadSignals->setTextVisible(false);
+	m_statusLoadSignals->setRange(0, 100);
+	m_statusLoadSignals->setFixedWidth(100);
+	m_statusLoadSignals->setFixedHeight(10);
+	m_statusLoadSignals->setLayoutDirection(Qt::LeftToRight);
 
 	m_statusMeasureTimeout->setTextVisible(false);
 	m_statusMeasureTimeout->setRange(0, 100);
@@ -698,6 +709,7 @@ void MainWindow::createStatusBar()
 	pStatusBar->addWidget(m_statusMeasureThreadState);
 	pStatusBar->addWidget(m_statusMeasureTimeout);
 	pStatusBar->addWidget(m_statusMeasureThreadInfo);
+	pStatusBar->addWidget(m_statusLoadSignals);
 	pStatusBar->addWidget(m_statusEmpty);
 
 	pStatusBar->setLayoutDirection(Qt::RightToLeft);
@@ -1202,6 +1214,10 @@ void MainWindow::startMeasure()
 		}
 	}
 
+	m_measureThread.setActiveSignalParam(theSignalBase.activeSignal());
+	m_measureThread.setLinearityOption(theOptions.linearity());
+	m_measureThread.setComparatorOption(theOptions.comparator());
+
 	m_measureThread.start();
 }
 
@@ -1214,7 +1230,7 @@ void MainWindow::stopMeasure()
 		return;
 	}
 
-	m_measureThread.stopMeasure(MeasureThreadExitCode::Manual);
+	m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Manual);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1286,7 +1302,7 @@ void MainWindow::showRackList()
 
 	RackListDialog dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &dialog, &RackListDialog::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &RackListDialog::updateList, Qt::QueuedConnection);
 
 	if (dialog.exec() != QDialog::Accepted)
 	{
@@ -1318,7 +1334,7 @@ void MainWindow::showSignalList()
 
 	SignalListDialog dialog(false, this);
 
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &dialog, &SignalListDialog::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &SignalListDialog::updateList, Qt::QueuedConnection);
 
 	dialog.exec();
 }
@@ -1334,7 +1350,7 @@ void MainWindow::showComparatorsList()
 
 	ComparatorListDialog dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &dialog, &ComparatorListDialog::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &ComparatorListDialog::updateList, Qt::QueuedConnection);
 
 	dialog.exec();
 }
@@ -1350,7 +1366,7 @@ void MainWindow::showTuningSignalList()
 
 	TuningSignalListDialog dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &dialog, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
 	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
 	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
 
@@ -1368,7 +1384,7 @@ void MainWindow::showSignalConnectionList()
 
 	SignalConnectionDialog dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &dialog, &SignalConnectionDialog::configurationLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &SignalConnectionDialog::signalBaseLoaded, Qt::QueuedConnection);
 
 	if (dialog.exec() != QDialog::Accepted)
 	{
@@ -1433,6 +1449,8 @@ void MainWindow::showOptions()
 	theOptions = pDialog->options();
 	theOptions.save();
 
+	theDatabase.setDatabaseOption(theOptions.database());
+
 	// reconnect ConfigSocket
 	//
 	if (options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
@@ -1447,6 +1465,9 @@ void MainWindow::showOptions()
 										theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY));
 		}
 	}
+
+	m_measureThread.setLinearityOption(theOptions.linearity());
+	m_measureThread.setComparatorOption(theOptions.comparator());
 
 	// update columns in the measure views
 	//
@@ -1534,12 +1555,21 @@ void MainWindow::setMeasureTimeout(QString value)
 
 	//
 	//
+
 	if (m_statusMeasureTimeout == nullptr)
 	{
 		return;
 	}
 
-	m_statusMeasureTimeout->setRange(0, m_measureTimeout);
+	if (m_measureTimeout == 0)
+	{
+		m_statusMeasureTimeout->hide();
+	}
+	else
+	{
+		m_statusMeasureTimeout->show();
+		m_statusMeasureTimeout->setRange(0, m_measureTimeout);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1894,7 +1924,7 @@ void MainWindow::calibratorConnectedChanged(int count)
 	}
 	else
 	{
-		m_statusCalibratorCount->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+		m_statusCalibratorCount->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 
 		QString calibratorInfo;
 
@@ -1973,7 +2003,7 @@ void MainWindow::configSocketConnected()
 	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
-	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
 }
 
@@ -1981,7 +2011,7 @@ void MainWindow::configSocketConnected()
 
 void MainWindow::configSocketDisconnected()
 {
-	if (m_statusConnectToConfigServer == nullptr)
+	if (m_statusConnectToConfigServer == nullptr || m_statusLoadSignals == nullptr)
 	{
 		return;
 	}
@@ -1989,32 +2019,75 @@ void MainWindow::configSocketDisconnected()
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
+
+	m_statusLoadSignals->hide();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketUnknownClient()
+{
+	QMessageBox::critical(this,
+						  windowTitle(),
+						  tr("Configuration Service does not recognize EquipmentID \"%1\" for software \"Metrology\"")
+						  .arg(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY)));
+	return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::configSocketConfigurationLoaded()
 {
-	if (m_statusConnectToConfigServer == nullptr)
+	runSignalSocket();
+	runTuningSocket();
+
+	//
+	//
+	if (m_statusConnectToConfigServer == nullptr || m_statusLoadSignals == nullptr)
 	{
 		return;
 	}
 
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
-	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
+
+
+	m_statusLoadSignals->show();
+	m_statusLoadSignals->setValue(0);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketSignalBaseLoading(int persentage)
+{
+	if (m_statusLoadSignals == nullptr)
+	{
+		return;
+	}
+
+	m_statusLoadSignals->setValue(persentage);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketSignalBaseLoaded()
+{
+	loadRacksOnToolBar();
+
+	//
+	//
+	if (m_statusConnectToConfigServer == nullptr || m_statusLoadSignals == nullptr)
+	{
+		return;
+	}
 
 	if (theSignalBase.signalCount() == 0)
 	{
 		m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 255, 160);");
 	}
 
-	loadRacksOnToolBar();
-
-	//
-	//
-	runSignalSocket();
-	runTuningSocket();
+	m_statusLoadSignals->hide();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2040,7 +2113,7 @@ void MainWindow::signalSocketConnected()
 	HostAddressPort signalSocketAddress = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(serverType);
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: on "));
-	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\n").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()));
 }
 
@@ -2055,7 +2128,7 @@ void MainWindow::signalSocketDisconnected()
 
 	if (m_measureThread.isRunning() == true)
 	{
-		m_measureThread.stopMeasure(MeasureThreadExitCode::Usual);
+		m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
 	}
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
@@ -2100,7 +2173,7 @@ void MainWindow::tuningSocketConnected()
 	}
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
-	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToTuningServer->setToolTip(tuningSocketConnectedStateStr());
 
 	if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
@@ -2122,7 +2195,7 @@ void MainWindow::tuningSocketDisconnected()
 	{
 		if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 		{
-			m_measureThread.stopMeasure(MeasureThreadExitCode::Usual);
+			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
 		}
 	}
 
@@ -2151,7 +2224,7 @@ void MainWindow::tuningSignalsCreated()
 	if (m_pTuningSocket->isConnected() == true)
 	{
 		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
-		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 
 		if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
 		{
@@ -2209,7 +2282,7 @@ void MainWindow::measureThreadStoped()
 	m_statusMeasureTimeout->setValue(0);
 
 	m_statusMeasureThreadState->setText(tr(" Measure process is stopped "));
-	m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 
 	//
 	//
@@ -2218,7 +2291,7 @@ void MainWindow::measureThreadStoped()
 		return;
 	}
 
-	if (m_measureThread.exitCode() == MeasureThreadExitCode::Manual)
+	if (m_measureThread.info().exitCode() == MeasureThreadInfo::ExitCode::Manual)
 	{
 		return;
 	}
@@ -2234,16 +2307,44 @@ void MainWindow::measureThreadStoped()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setMeasureThreadInfo(QString msg)
+void MainWindow::measureThreadInfo(const MeasureThreadInfo& info)
 {
-	m_statusMeasureThreadInfo->setText(msg);
-}
 
-// -------------------------------------------------------------------------------------------------------------------
+	switch (info.type())
+	{
+		case MeasureThreadInfo::msgType::String:
 
-void MainWindow::setMeasureThreadInfo(int timeout)
-{
-	m_statusMeasureTimeout->setValue(timeout);
+			if (m_statusMeasureThreadInfo == nullptr)
+			{
+				break;
+			}
+
+			m_statusMeasureThreadInfo->setText(info.message());
+			m_statusMeasureThreadInfo->setStyleSheet("color: rgb(0x0, 0x0, 0x0);");
+
+			break;
+
+		case MeasureThreadInfo::msgType::StringError:
+
+			if (m_statusMeasureThreadInfo == nullptr)
+			{
+				break;
+			}
+
+			m_statusMeasureThreadInfo->setText(info.message());
+			m_statusMeasureThreadInfo->setStyleSheet("color: rgb(255, 0, 0);");
+
+			break;
+
+		case MeasureThreadInfo::msgType::Timeout:
+
+			if (m_statusMeasureTimeout == nullptr)
+			{
+				break;
+			}
+
+			m_statusMeasureTimeout->setValue(info.timeout());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2297,6 +2398,19 @@ void MainWindow::measureComplite(Measurement* pMeasurement)
 	}
 
 	emit appendMeasure(pMeasurement);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateMeasureView()
+{
+	MeasureView* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	pView->updateColumn();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2393,10 +2507,15 @@ void MainWindow::runConfigSocket()
 
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
+
+	connect(m_pConfigSocket, &ConfigSocket::unknownClient, this, &MainWindow::configSocketUnknownClient, Qt::QueuedConnection);
+
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistics(), &StatisticsBase::signalLoaded, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticsPanel, &StatisticsPanel::updateList, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theMeasureBase, &MeasureBase::signalLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoading, this, &MainWindow::configSocketSignalBaseLoading, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, this, &MainWindow::configSocketSignalBaseLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &theSignalBase.statistics(), &StatisticsBase::signalBaseLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, m_pStatisticsPanel, &StatisticsPanel::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &theMeasureBase, &MeasureBase::signalBaseLoaded, Qt::QueuedConnection);
 
 	m_pConfigSocket->start();
 }
@@ -2480,8 +2599,7 @@ void MainWindow::runMeasureThread()
 	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection);
 	connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
-	connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::sendMeasureInfo, this, &MainWindow::measureThreadInfo, Qt::QueuedConnection);
 	connect(&m_measureThread, &MeasureThread::msgBox, this, &MainWindow::measureThreadMsgBox, Qt::BlockingQueuedConnection);
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
@@ -2496,7 +2614,7 @@ void MainWindow::runMeasureThread()
 	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, &m_measureThread, &MeasureThread::activeSignalChanged, Qt::QueuedConnection);
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, &m_measureThread, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_measureThread, &MeasureThread::signalParamChanged, Qt::QueuedConnection);
 
 	measureThreadStoped();
 }
