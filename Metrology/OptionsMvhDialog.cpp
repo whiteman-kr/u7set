@@ -233,10 +233,17 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 
 	switch(column)
 	{
-		case MVH_COLUMN_TITLE:		m_header.m_column[m_measureType][m_languageType][row].setTitle(item->text());			break;
-		case MVH_COLUMN_VISIBLE:	break;
-		case MVH_COLUMN_WIDTH:		m_header.m_column[m_measureType][m_languageType][row].setWidth(item->text().toInt());	break;
-		default:					assert(0);																				break;
+		case MVH_COLUMN_TITLE:
+			m_header.m_column[m_measureType][m_languageType][row].setTitle(item->text());
+			break;
+		case MVH_COLUMN_VISIBLE:
+			break;
+		case MVH_COLUMN_WIDTH:
+			m_header.m_column[m_measureType][m_languageType][row].setWidth(item->text().toInt());
+			break;
+		default:
+			assert(0);
+			break;
 	}
 
 	updateList();

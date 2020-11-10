@@ -58,23 +58,23 @@ public:
 
 private:
 
-	mutable QMutex			m_connectionMutex;
+	mutable QMutex m_connectionMutex;
 	QVector<SignalConnection> m_connectionList;
 
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const;
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant data(const QModelIndex &index, int role) const;
 
 public:
 
-	int						connectionCount() const;
-	SignalConnection		at(int index) const;
-	void					set(const QVector<SignalConnection>& list_add);
-	void					clear();
+	int	connectionCount() const;
+	SignalConnection at(int index) const;
+	void set(const QVector<SignalConnection>& list_add);
+	void clear();
 
-	QString					text(int row, int column, const SignalConnection& connection) const;
+	QString text(int row, int column, const SignalConnection& connection) const;
 };
 
 // ==============================================================================================
@@ -91,37 +91,35 @@ public:
 
 private:
 
-	QComboBox*				m_pTypeList = nullptr;
+	QComboBox* m_pTypeList = nullptr;
 
-	QLineEdit*				m_pInputSignalIDEdit = nullptr;
-	QPushButton*			m_pInputSignalButton = nullptr;
+	QLineEdit* m_pInputSignalIDEdit = nullptr;
+	QPushButton* m_pInputSignalButton = nullptr;
 
-	QLineEdit*				m_pOutputSignalIDEdit = nullptr;
-	QPushButton*			m_pOutputSignalButton = nullptr;
+	QLineEdit* m_pOutputSignalIDEdit = nullptr;
+	QPushButton* m_pOutputSignalButton = nullptr;
 
-	QDialogButtonBox*		m_buttonBox = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	SignalConnection		m_signalConnection;
+	SignalConnection m_signalConnection;
 
-	void					createInterface();
-	void					updateSignals();
+	void createInterface();
+	void updateSignals();
 
 public:
 
-	SignalConnection		connection() const { return m_signalConnection; }
-
-signals:
+	SignalConnection connection() const { return m_signalConnection; }
 
 private slots:
 
 	// slots of buttons
 	//
-	void					selectedType(int);
-	void					selectInputSignal();
-	void					selectOutputSignal();
-	void					selectSignal(int type);
+	void selectedType(int);
+	void selectInputSignal();
+	void selectOutputSignal();
+	void selectSignal(int type);
 
-	void					onOk();
+	void onOk();
 };
 
 // ==============================================================================================
@@ -133,70 +131,75 @@ class SignalConnectionDialog : public QDialog
 public:
 
 	explicit SignalConnectionDialog(QWidget *parent = nullptr);
-	virtual ~SignalConnectionDialog();
+	explicit SignalConnectionDialog(Metrology::Signal* pSignal, QWidget *parent = nullptr);
+	virtual ~SignalConnectionDialog() override;
 
 private:
 
-	QMenuBar*				m_pMenuBar = nullptr;
-	QMenu*					m_pConnectionMenu = nullptr;
-	QMenu*					m_pEditMenu = nullptr;
-	QMenu*					m_pContextMenu = nullptr;
+	QMenuBar* m_pMenuBar = nullptr;
+	QMenu* m_pConnectionMenu = nullptr;
+	QMenu* m_pEditMenu = nullptr;
+	QMenu* m_pContextMenu = nullptr;
 
-	QAction*				m_pCreateAction = nullptr;
-	QAction*				m_pEditAction = nullptr;
-	QAction*				m_pRemoveAction = nullptr;
-	QAction*				m_pImportAction = nullptr;
-	QAction*				m_pExportAction = nullptr;
+	QAction* m_pCreateAction = nullptr;
+	QAction* m_pEditAction = nullptr;
+	QAction* m_pRemoveAction = nullptr;
+	QAction* m_pImportAction = nullptr;
+	QAction* m_pExportAction = nullptr;
 
-	QAction*				m_pFindAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pSelectAllAction = nullptr;
+	QAction* m_pFindAction = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pSelectAllAction = nullptr;
 
-	QTableView*				m_pView = nullptr;
-	SignalConnectionTable	m_connectionTable;
+	QTableView* m_pView = nullptr;
+	SignalConnectionTable m_connectionTable;
 
-	QDialogButtonBox*		m_buttonBox = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	SignalConnectionBase	m_connectionBase;
+	SignalConnectionBase m_connectionBase;
 
-	void					createInterface();
-	void					createContextMenu();
+	void createInterface();
+	void createContextMenu();
+
+	Metrology::Signal*		m_pOutputSignal = nullptr;
+	bool createConnectionBySignal(Metrology::Signal* pSignal);
 
 public slots:
 
 	// slots for updating
 	//
-	void					signalBaseLoaded();
-	void					updateList();
+	void signalBaseLoaded();
+	void updateList();
 
 private slots:
 
 	// slots of menu
 	//
-							// Signal
-							//
-	void					createConnection();
-	void					editConnection();
-	void					removeConnection();
-	void					importConnections();
-	void					exportConnections();
+		// Signal
+		//
+	void createConnection();
+	void editConnection();
+	void removeConnection();
+	void importConnections();
+	void exportConnections();
 
-							// Edit
-							//
-	void					find();
-	void					copy();
-	void					selectAll() { m_pView->selectAll(); }
+		// Edit
+		//
+	void find();
+	void copy();
+	void selectAll() { m_pView->selectAll(); }
 
-
-	void					onContextMenu(QPoint);
+	// ContextMenu
+	//
+	void onContextMenu(QPoint);
 
 	// slots for list
 	//
-	void					onListDoubleClicked(const QModelIndex&) { editConnection(); }
+	void onListDoubleClicked(const QModelIndex&) { editConnection(); }
 
 	// slots of buttons
 	//
-	void					onOk();
+	void onOk();
 };
 
 // ==============================================================================================

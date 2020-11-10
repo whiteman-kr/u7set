@@ -164,7 +164,7 @@ private:
 	//
 	QTableWidget*				m_pGroupView = nullptr;
 
-	void						updateGroupList();
+	void						updateGroupList(const Hash& hash = UNDEFINED_HASH);
 
 	// Property list
 	//
@@ -186,6 +186,7 @@ private:
 
 public:
 
+	RackBase&					racks() { return m_rackBase; }
 	RackGroupBase&				rackGroups() { return m_groupBase; }
 
 protected:

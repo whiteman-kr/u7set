@@ -184,7 +184,8 @@ SelectSignalWidget::SelectSignalWidget(QWidget* parent) :
 	//
 	connect(m_button, &QPushButton::clicked, this, &SelectSignalWidget::slot_buttonClicked);
 
-	// It will make this button the size to 2 rows, it is important to keep toolbar always the same size, from the very start of app
+	// It will make this button the size to 2 rows,
+	// it is important to keep toolbar always the same size, from the very start of app
 	//
 	m_button->setText(QString("\n"));
 
@@ -224,7 +225,8 @@ bool SelectSignalWidget::setCurrentSignalIndex(const QString& signalId)
 
 	if (signal.isValid() == false)
 	{
-		// It will make this button the size to 2 rows, it is important to keep toolbar always the same size, from the very start of app
+		// It will make this button the size to 2 rows,
+		// it is important to keep toolbar always the same size, from the very start of app
 		//
 		m_button->setText(QString("\n"));
 		return false;
@@ -570,7 +572,9 @@ QVariant SelectSignalModel::data(const QModelIndex& modelIndex, int role) const
 		{
 			if (signal.connectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 			{
-				str = QString(" %1\n %2").arg(signal.signalId(MEASURE_IO_SIGNAL_TYPE_INPUT)).arg(signal.caption(MEASURE_IO_SIGNAL_TYPE_INPUT));
+				str = QString(" %1\n %2").
+						arg(signal.signalId(MEASURE_IO_SIGNAL_TYPE_INPUT)).
+						arg(signal.caption(MEASURE_IO_SIGNAL_TYPE_INPUT));
 			}
 			else
 			{

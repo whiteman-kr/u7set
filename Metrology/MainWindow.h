@@ -202,8 +202,7 @@ public:
 
 	bool					signalSourceIsValid(bool showMsg);
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
-	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);														// only for mode "Simaple module"
-
+	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
 
 protected:
 

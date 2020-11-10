@@ -87,7 +87,10 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 
 	TuningSourceState sourceState = src.state();
 
-	if (column == TUN_SOURCE_LIST_COLUMN_IS_REPLY || column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
+	if (	column == TUN_SOURCE_LIST_COLUMN_IS_REPLY ||
+			column == TUN_SOURCE_LIST_COLUMN_REQUESTS ||
+			column == TUN_SOURCE_LIST_COLUMN_REPLIES ||
+			column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
 	{
 		// get fresh state from base
 		//
@@ -118,7 +121,9 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
+		if (	column == TUN_SOURCE_LIST_COLUMN_REQUESTS ||
+				column == TUN_SOURCE_LIST_COLUMN_REPLIES ||
+				column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
 		{
 			if (sourceState.isReply() == false)
 			{
@@ -748,13 +753,15 @@ void TuningSignalListDialog::createHeaderContexMenu()
 	// init header context menu
 	//
 	m_pSignalView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pSignalView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &TuningSignalListDialog::onHeaderContextMenu);
+	connect(m_pSignalView->horizontalHeader(), &QHeaderView::customContextMenuRequested,
+			this, &TuningSignalListDialog::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pSignalView);
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[column]));
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("TuningSignalListDialog.h",
+																				 TuningSignalColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -762,7 +769,8 @@ void TuningSignalListDialog::createHeaderContexMenu()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &TuningSignalListDialog::onColumnAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
+			this, &TuningSignalListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

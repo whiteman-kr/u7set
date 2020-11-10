@@ -456,13 +456,15 @@ void SignalListDialog::createHeaderContexMenu()
 	// init header context menu
 	//
 	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &SignalListDialog::onHeaderContextMenu);
+	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested,
+			this, &SignalListDialog::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pView);
 
 	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("SignalListDialog.h", SignalListColumn[column]));
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("SignalListDialog.h",
+																				 SignalListColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -470,7 +472,8 @@ void SignalListDialog::createHeaderContexMenu()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onColumnAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
+			this, &SignalListDialog::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -340,7 +340,8 @@ namespace Metrology
 
 			if (signal.isInput() == true || signal.isOutput() == true)
 			{
-				if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true && signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
+				if (	signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true &&
+						signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
 				{
 					m_electricLowLimit = signal.electricLowLimit();
 					m_electricHighLimit = signal.electricHighLimit();
@@ -704,7 +705,10 @@ namespace Metrology
 
 		formatStr = QString::asprintf("%%.%df", m_electricPrecision);
 
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_electricLowLimit, m_electricHighLimit);
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
+								  formatStr.toLocal8Bit(),
+								  m_electricLowLimit,
+								  m_electricHighLimit);
 
 		QString unit = electricUnitStr();
 
@@ -720,8 +724,12 @@ namespace Metrology
 
 	bool SignalParam::isLinearRange() const
 	{
-		if (	(m_electricUnitID == E::ElectricUnit::mV && m_electricSensorType != E::SensorType::mV_Raw_Mul_8 && m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
-				(m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw) )
+		if (	(m_electricUnitID == E::ElectricUnit::mV &&
+				 m_electricSensorType != E::SensorType::mV_Raw_Mul_8 &&
+				 m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
+
+				(m_electricUnitID == E::ElectricUnit::Ohm &&
+				 m_electricSensorType != E::SensorType::Ohm_Raw) )
 		{
 			return false;	// for non-linear
 		}
@@ -774,7 +782,10 @@ namespace Metrology
 
 		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
+								  formatStr.toLocal8Bit(),
+								  lowEngineeringUnits(),
+								  highEngineeringUnits());
 
 		if (unit().isEmpty() == false)
 		{
@@ -860,7 +871,10 @@ namespace Metrology
 
 		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), tuningLowBound().toDouble(), tuningHighBound().toDouble());
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
+								  formatStr.toLocal8Bit(),
+								  tuningLowBound().toDouble(),
+								  tuningHighBound().toDouble());
 
 		return range;
 	}

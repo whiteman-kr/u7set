@@ -413,7 +413,8 @@ bool MainWindow::createToolBars()
 			m_signalConnectionType = theOptions.toolBar().signalConnectionType();
 			m_pSignalConnectionTypeList->setCurrentIndex(m_signalConnectionType);
 
-			connect(m_pSignalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setSignalConnectionType);
+			connect(m_pSignalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this, &MainWindow::setSignalConnectionType);
 		}
 	}
 
@@ -459,7 +460,8 @@ bool MainWindow::createToolBars()
 			m_pSelectSignalWidget->setFixedWidth(530);
 
 			connect(m_pSelectSignalWidget, &SelectSignalWidget::selectionChanged, this, &MainWindow::setAcitiveMeasureSignal);
-			connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pSelectSignalWidget, &SelectSignalWidget::activeSignalChanged, Qt::QueuedConnection);
+			connect(&theSignalBase, &SignalBase::activeSignalChanged,
+					m_pSelectSignalWidget, &SelectSignalWidget::activeSignalChanged, Qt::QueuedConnection);
 		}
 
 		m_pAnalogSignalToolBar->addAction(m_pPreviousSignalAction);
@@ -591,7 +593,8 @@ void MainWindow::createPanels()
 		m_pComparatorInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
 		m_pComparatorInfoPanel->setMaxComparatorCount(theOptions.module().maxComparatorCount());
 
-		connect(this, &MainWindow::signalConnectionTypeChanged, m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::signalConnectionTypeChanged,
+				m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
 	}
 }
 
@@ -972,7 +975,10 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 	{
 		if (showMsg == true)
 		{
-			QMessageBox::critical(this, windowTitle(), tr("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators!"));
+			QMessageBox::critical(this,
+								  windowTitle(),
+								  tr("Proccess of measure can not start, because no connected calibrators!\n"
+									 "Please, make initialization calibrators!"));
 		}
 
 		return false;
@@ -1075,15 +1081,20 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:	ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+			break;
+
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
-		default:											assert(0);
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			break;
+
+		default:
+			assert(0);
 	}
-
-
 
 	if (ioSignal.isEmpty() == true)
 	{
@@ -1506,8 +1517,10 @@ void MainWindow::showOptions()
 
 	// if changed error type or limitType
 	//
-	if (options.linearity().errorType() != theOptions.linearity().errorType() || options.linearity().limitType() != theOptions.linearity().limitType() ||
-		options.comparator().errorType() != theOptions.comparator().errorType() || options.comparator().limitType() != theOptions.comparator().limitType())
+	if (	options.linearity().errorType() != theOptions.linearity().errorType() ||
+			options.linearity().limitType() != theOptions.linearity().limitType() ||
+			options.comparator().errorType() != theOptions.comparator().errorType() ||
+			options.comparator().limitType() != theOptions.comparator().limitType())
 	{
 		m_pStatisticsPanel->updateList();
 	}
@@ -1517,7 +1530,11 @@ void MainWindow::showOptions()
 		QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
 		if (QFile::exists(languageFilePath) == false)
 		{
-			QMessageBox::information(this, windowTitle(), tr("Russian language could not be installed.\nFile of russian language: %1 - was not found!").arg(languageFilePath));
+			QMessageBox::information(this,
+									 windowTitle(),
+									 tr("Russian language could not be installed.\n"
+										"File of russian language: %1 - was not found!").
+									 arg(languageFilePath));
 			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
 			theOptions.language().save();
 		}
@@ -1567,8 +1584,11 @@ void MainWindow::setMeasureTimeout(QString value)
 	}
 	else
 	{
-		m_statusMeasureTimeout->show();
-		m_statusMeasureTimeout->setRange(0, m_measureTimeout);
+		if (m_measureThread.isRunning() == true)
+		{
+			m_statusMeasureTimeout->show();
+			m_statusMeasureTimeout->setRange(0, m_measureTimeout);
+		}
 	}
 }
 
@@ -1595,10 +1615,12 @@ void MainWindow::setMeasureKind(int index)
 			m_pMeasureKindList->setCurrentIndex(m_measureKind);
 			m_pMeasureKindList->blockSignals(false);
 
-			QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
-															 "you need to combine several racks into groups."
-															 "Currently, no groups have been found.\n"
-															 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
+			QMessageBox::information(this,
+									 windowTitle(),
+									 tr( "For measurements in several racks simultaneously, "
+										 "you need to combine several racks into groups."
+										 "Currently, no groups have been found.\n"
+										 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
 
 
 			return;
@@ -2604,14 +2626,14 @@ void MainWindow::runMeasureThread()
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
 	m_measureThread.measureTypeChanged(m_measureType);
+	m_measureThread.measureTimeoutChanged(m_measureTimeout);
 	m_measureThread.measureKindChanged(m_measureKind);
 	m_measureThread.signalConnectionTypeChanged(m_signalConnectionType);
-	m_measureThread.measureTimeoutChanged(m_measureTimeout);
 
 	connect(this, &MainWindow::measureTypeChanged, &m_measureThread, &MeasureThread::measureTypeChanged, Qt::QueuedConnection);
+	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
 	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged, Qt::QueuedConnection);
 	connect(this, &MainWindow::signalConnectionTypeChanged, &m_measureThread, &MeasureThread::signalConnectionTypeChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, &m_measureThread, &MeasureThread::activeSignalChanged, Qt::QueuedConnection);
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_measureThread, &MeasureThread::signalParamChanged, Qt::QueuedConnection);

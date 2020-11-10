@@ -380,7 +380,8 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 	{
 		QKeyEvent* ke = static_cast<QKeyEvent *>(e);
 
-		if (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down || ke->key() == Qt::Key_PageUp || ke->key() == Qt::Key_PageDown)
+		if (	ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down ||
+				ke->key() == Qt::Key_PageUp || ke->key() == Qt::Key_PageDown)
 		{
 			selectItemInMeasureView();
 		}

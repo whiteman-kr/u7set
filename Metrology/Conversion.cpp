@@ -221,7 +221,8 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 		return val;
 	}
 
-	if (inParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || inParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	if (	inParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
+			inParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 	{
 		return val;
 	}
@@ -232,7 +233,8 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 		return val;
 	}
 
-	if (outParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || outParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	if (	outParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
+			outParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 	{
 		return val;
 	}
@@ -249,13 +251,17 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 			{
 				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 					{
-						retVal = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
+						retVal = (val - inParam.lowEngineeringUnits())*
+								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
+								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) +
+								outParam.lowEngineeringUnits();
 					}
 					break;
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 					{
-						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
+								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
 						retVal = K * sqrt( val );
 					}
@@ -263,9 +269,13 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 				{
-					val = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
+					val = (val - outParam.lowEngineeringUnits())*
+							(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
+							(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) +
+							inParam.lowEngineeringUnits();
 
-					double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+					double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
+							sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
 					retVal = K * sqrt( val );
 				}
@@ -279,7 +289,10 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 					{
-						val = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
+						val = (val - outParam.lowEngineeringUnits())*
+								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
+								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) +
+								inParam.lowEngineeringUnits();
 
 						retVal = uc.conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
 					}
@@ -294,13 +307,17 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 			{
 				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 					{
-						retVal = (val - outParam.lowEngineeringUnits())*(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) + inParam.lowEngineeringUnits();
+						retVal = (val - outParam.lowEngineeringUnits())*
+								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
+								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) +
+								inParam.lowEngineeringUnits();
 					}
 					break;
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 					{
-						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
+								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
 						retVal = pow(val / K, 2);
 					}
@@ -308,9 +325,13 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 					{
-						val = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
+						val = (val - inParam.lowEngineeringUnits())*
+								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
+								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) +
+								outParam.lowEngineeringUnits();
 
-						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
+								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
 
 						retVal = pow(val / K, 2);
 					}
@@ -324,7 +345,10 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 
 				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 					{
-						val = (val - inParam.lowEngineeringUnits())*(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) + outParam.lowEngineeringUnits();
+						val = (val - inParam.lowEngineeringUnits())*
+								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
+								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) +
+								outParam.lowEngineeringUnits();
 
 						retVal = uc.conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
 					}

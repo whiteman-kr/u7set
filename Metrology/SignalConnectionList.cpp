@@ -492,7 +492,10 @@ void SignalConnectionItemDialog::onOk()
 	Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
 	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select input signal!").arg(inputAppSignalID));
+		QMessageBox::information(this,
+								 windowTitle(),
+								 tr("Signal %1 is not found.\nPlease, select input signal!").
+								 arg(inputAppSignalID));
 		m_pInputSignalButton->setFocus();
 		return;
 	}
@@ -508,7 +511,10 @@ void SignalConnectionItemDialog::onOk()
 	Metrology::Signal* pOutSignal = theSignalBase.signalPtr(outputAppSignalID);
 	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select output signal!").arg(outputAppSignalID));
+		QMessageBox::information(this,
+								 windowTitle(),
+								 tr("Signal %1 is not found.\nPlease, select output signal!").
+								 arg(outputAppSignalID));
 		m_pOutputSignalButton->setFocus();
 		return;
 	}
@@ -524,14 +530,20 @@ void SignalConnectionItemDialog::onOk()
 
 			if (pInSignal->param().isInput() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not input signal!").arg(inputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not input signal!").
+										 arg(inputAppSignalID));
 				m_pInputSignalButton->setFocus();
 				return;
 			}
 
 			if (pInSignal->param().electricRangeIsValid() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 has wrong electric limit!").arg(inputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 has wrong electric limit!").
+										 arg(inputAppSignalID));
 				m_pInputSignalButton->setFocus();
 				return;
 			}
@@ -542,14 +554,20 @@ void SignalConnectionItemDialog::onOk()
 
 			if (pInSignal->param().isInternal() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not internal signal!").arg(inputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not internal signal!").
+										 arg(inputAppSignalID));
 				m_pInputSignalButton->setFocus();
 				return;
 			}
 
 			if (pInSignal->param().enableTuning() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not tuning signal!").arg(inputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not tuning signal!").
+										 arg(inputAppSignalID));
 				m_pInputSignalButton->setFocus();
 				return;
 			}
@@ -565,7 +583,10 @@ void SignalConnectionItemDialog::onOk()
 
 			if (pOutSignal->param().isInternal() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not internal signal!").arg(outputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not internal signal!").
+										 arg(outputAppSignalID));
 				m_pOutputSignalButton->setFocus();
 				return;
 			}
@@ -579,14 +600,20 @@ void SignalConnectionItemDialog::onOk()
 
 			if (pOutSignal->param().isOutput() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 is not output signal!").arg(outputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not output signal!").
+										 arg(outputAppSignalID));
 				m_pOutputSignalButton->setFocus();
 				return;
 			}
 
 			if (pOutSignal->param().electricRangeIsValid() == false)
 			{
-				QMessageBox::information(this, windowTitle(), tr("Signal %1 has wrong electric limit!").arg(outputAppSignalID));
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 has wrong electric limit!").
+										 arg(outputAppSignalID));
 				m_pInputSignalButton->setFocus();
 				return;
 			}
@@ -611,6 +638,27 @@ SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
 
 	createInterface();
 	updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalConnectionDialog::SignalConnectionDialog(Metrology::Signal* pSignal, QWidget *parent) :
+	QDialog(parent)
+{
+	m_connectionBase = theSignalBase.signalConnections();
+
+	createInterface();
+	updateList();
+
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		assert(0);
+		return;
+	}
+
+	m_pOutputSignal = pSignal;
+
+	createConnectionBySignal(m_pOutputSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -762,6 +810,70 @@ void SignalConnectionDialog::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool SignalConnectionDialog::createConnectionBySignal(Metrology::Signal* pSignal)
+{
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		assert(0);
+		return false;
+	}
+
+	SignalConnection connection;
+
+	int ioType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+
+	switch (pSignal->param().inOutType())
+	{
+		case E::SignalInOutType::Internal:	ioType = SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL;	break;
+		case E::SignalInOutType::Output:	ioType = SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT;	break;
+	}
+
+	if (ioType == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+	{
+		return false;
+	}
+
+	connection.setType(ioType);
+	connection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+
+	SignalConnectionItemDialog dialog(connection);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		reject();
+		return false;
+	}
+
+	connection = dialog.connection();
+	if (connection.isValid() == false)
+	{
+		return false;
+	}
+
+	int foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+
+		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
+		return false;
+	}
+
+	m_connectionBase.append(connection);
+	m_connectionBase.sort();
+
+	updateList();
+
+	foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void SignalConnectionDialog::createConnection()
 {
 	SignalConnectionItemDialog dialog;
@@ -854,7 +966,9 @@ void SignalConnectionDialog::removeConnection()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete %1 connection(s)?").arg(selectedConnectionCount)) == QMessageBox::No)
+	if (QMessageBox::question(this,
+							  windowTitle(), tr("Do you want delete %1 connection(s)?").
+							  arg(selectedConnectionCount)) == QMessageBox::No)
 	{
 		return;
 	}
@@ -878,7 +992,10 @@ void SignalConnectionDialog::removeConnection()
 
 void SignalConnectionDialog::importConnections()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "SignalConnections.csv", "CSV files (*.csv);;All files (*.*)");
+	QString fileName = QFileDialog::getOpenFileName(this,
+													tr("Open File"),
+													"SignalConnections.csv",
+													"CSV files (*.csv);;All files (*.*)");
 	if (fileName.isEmpty() == true)
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Could not open file: Empty file name"));
@@ -920,9 +1037,15 @@ void SignalConnectionDialog::importConnections()
 			{
 				switch (column)
 				{
-					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	connection.setType(line[column].toInt());								break;
-					case SIGNAL_CONNECTION_COLUMN_IN_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);	break;
-					case SIGNAL_CONNECTION_COLUMN_OUT_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);	break;
+					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:
+						connection.setType(line[column].toInt());
+						break;
+					case SIGNAL_CONNECTION_COLUMN_IN_ID:
+						connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);
+						break;
+					case SIGNAL_CONNECTION_COLUMN_OUT_ID:
+						connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);
+						break;
 				}
 			}
 

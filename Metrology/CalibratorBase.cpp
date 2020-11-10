@@ -287,7 +287,9 @@ void CalibratorBase::updateList()
 		m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setText(pCalibrator->isConnected() ? tr("Yes") : tr("No"));
 		m_pCalibratorView->item(index, CALIBRATOR_COLUMN_SN)->setText(pCalibrator->serialNo());
 
-		m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setBackground(pCalibrator->isConnected() == true ? COLOR_CALIBRATOR_CONNECTED : COLOR_CALIBRATOR_NOT_CONNECTED);
+		m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setBackground(pCalibrator->isConnected() == true ?
+																					 COLOR_CALIBRATOR_CONNECTED :
+																					 COLOR_CALIBRATOR_NOT_CONNECTED);
 	}
 }
 

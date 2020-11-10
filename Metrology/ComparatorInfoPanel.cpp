@@ -506,13 +506,12 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		switch (activeSignal.signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);		break;
-			default:									pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(c);	break;
-		}
-
-		if (pSignal == nullptr)
-		{
-			continue;
+			case SIGNAL_CONNECTION_TYPE_UNUSED:
+				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);
+				break;
+			default:
+				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(c);
+				break;
 		}
 
 		if (pSignal != nullptr && pSignal->param().isValid() == true)
@@ -554,7 +553,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	}
 	else
 	{
-		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height() * 2);
+		m_pView->verticalHeader()->setDefaultSectionSize(static_cast<int>(cellSize.height() * 2.1));
 	}
 }
 

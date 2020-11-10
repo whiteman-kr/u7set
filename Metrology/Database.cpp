@@ -275,8 +275,6 @@ int SqlFieldBase::init(int objectType, int)
 			append("RackID1",						QVariant::String, 64);
 			append("RackID2",						QVariant::String, 64);
 			append("RackID3",						QVariant::String, 64);
-			append("RackID4",						QVariant::String, 64);
-			append("RackID5",						QVariant::String, 64);
 
 			break;
 

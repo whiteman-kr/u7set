@@ -106,47 +106,6 @@ bool IoSignalParam::setParam(int type, const Metrology::SignalParam& param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString IoSignalParam::rackCaption() const
-{
-	QMutexLocker l(&m_mutex);
-
-	QString result;
-
-	if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
-	{
-		const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-		if (param.isValid() == true)
-		{
-			result = param.location().rack().caption();
-		}
-	}
-	else
-	{
-		const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-		if (inParam.isValid() == true)
-		{
-			result = inParam.location().rack().caption() + MULTI_TEXT_DEVIDER;
-		}
-
-		const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-		if (outParam.isValid() == true)
-		{
-			if (inParam.location().rack().caption() != outParam.location().rack().caption())
-			{
-				result += outParam.location().rack().caption();
-			}
-			else
-			{
-				result = outParam.location().rack().caption();
-			}
-		}
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QString IoSignalParam::appSignalID() const
 {
 	QMutexLocker l(&m_mutex);
@@ -247,6 +206,47 @@ QString IoSignalParam::equipmentID() const
 			else
 			{
 				result = outParam.equipmentID();
+			}
+		}
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString IoSignalParam::rackCaption() const
+{
+	QMutexLocker l(&m_mutex);
+
+	QString result;
+
+	if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
+	{
+		const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+		if (param.isValid() == true)
+		{
+			result = param.location().rack().caption();
+		}
+	}
+	else
+	{
+		const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+		if (inParam.isValid() == true)
+		{
+			result = inParam.location().rack().caption() + MULTI_TEXT_DEVIDER;
+		}
+
+		const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+		if (outParam.isValid() == true)
+		{
+			if (inParam.location().rack().caption() != outParam.location().rack().caption())
+			{
+				result += outParam.location().rack().caption();
+			}
+			else
+			{
+				result = outParam.location().rack().caption();
 			}
 		}
 	}
@@ -432,54 +432,55 @@ QString IoSignalParam::electricRangeStr() const
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
 			{
-				result = param.electricRangeStr();
+				const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+				if (param.isValid() == true)
+				{
+					result = param.electricRangeStr();
+				}
 			}
-		}
 
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
 			{
-				result = inParam.electricRangeStr() + MULTI_TEXT_DEVIDER;
-			}
+				const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+				if (inParam.isValid() == true)
+				{
+					result = inParam.electricRangeStr() + MULTI_TEXT_DEVIDER;
+				}
 
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.electricRangeStr() != outParam.electricRangeStr())
+				const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+				if (outParam.isValid() == true)
 				{
-					result += outParam.electricRangeStr();
-				}
-				else
-				{
-					result = outParam.electricRangeStr();
+					if (inParam.electricRangeStr() != outParam.electricRangeStr())
+					{
+						result += outParam.electricRangeStr();
+					}
+					else
+					{
+						result = outParam.electricRangeStr();
+					}
 				}
 			}
-		}
 
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (param.isValid() == true)
 			{
-				result = param.electricRangeStr();
+				const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+				if (param.isValid() == true)
+				{
+					result = param.electricRangeStr();
+				}
 			}
-		}
 
 			break;
 
-		default: assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -499,50 +500,50 @@ QString IoSignalParam::electricSensorStr() const
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
 			{
-				result = param.electricSensorTypeStr();
+				const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+				if (param.isValid() == true)
+				{
+					result = param.electricSensorTypeStr();
+				}
 			}
-		}
 
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
 			{
-				result = inParam.electricSensorTypeStr() + MULTI_TEXT_DEVIDER;
-			}
+				const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+				if (inParam.isValid() == true)
+				{
+					result = inParam.electricSensorTypeStr() + MULTI_TEXT_DEVIDER;
+				}
 
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.electricSensorTypeStr() != outParam.electricSensorTypeStr())
+				const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+				if (outParam.isValid() == true)
 				{
-					result += outParam.electricSensorTypeStr();
-				}
-				else
-				{
-					result = outParam.electricSensorTypeStr();
+					if (inParam.electricSensorTypeStr() != outParam.electricSensorTypeStr())
+					{
+						result += outParam.electricSensorTypeStr();
+					}
+					else
+					{
+						result = outParam.electricSensorTypeStr();
+					}
 				}
 			}
-		}
 
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (param.isValid() == true)
 			{
-				result = param.electricSensorTypeStr();
+				const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+				if (param.isValid() == true)
+				{
+					result = param.electricSensorTypeStr();
+				}
 			}
-		}
 
 			break;
 
@@ -604,13 +605,13 @@ QString IoSignalParam::engineeringRangeStr() const
 	switch (m_signalConnectionType)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
-		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
 			{
-				result = param.engineeringRangeStr();
+				const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+				if (param.isValid() == true)
+				{
+					result = param.engineeringRangeStr();
+				}
 			}
-		}
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
@@ -619,26 +620,26 @@ QString IoSignalParam::engineeringRangeStr() const
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
 			{
-				result = inParam.engineeringRangeStr() + MULTI_TEXT_DEVIDER;
-			}
+				const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+				if (inParam.isValid() == true)
+				{
+					result = inParam.engineeringRangeStr() + MULTI_TEXT_DEVIDER;
+				}
 
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.engineeringRangeStr() != outParam.engineeringRangeStr())
+				const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+				if (outParam.isValid() == true)
 				{
-					result += outParam.engineeringRangeStr();
-				}
-				else
-				{
-					result = outParam.engineeringRangeStr();
+					if (inParam.engineeringRangeStr() != outParam.engineeringRangeStr())
+					{
+						result += outParam.engineeringRangeStr();
+					}
+					else
+					{
+						result = outParam.engineeringRangeStr();
+					}
 				}
 			}
-		}
 			break;
 
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
@@ -678,7 +679,10 @@ QString IoSignalParam::calibratorStr() const
 		return qApp->translate("CalibratorManager.h", CalibratorNotConnected);
 	}
 
-	return QString("%1 %2 (%3)").arg(qApp->translate("CalibratorManager.h", CalibratorStr)).arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
+	return QString("%1 %2 (%3)").
+			arg(qApp->translate("CalibratorManager.h", CalibratorStr)).
+			arg(m_pCalibratorManager->calibratorChannel() + 1).
+			arg(m_pCalibratorManager->calibratorPort());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -836,7 +840,10 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 				case E::SignalInOutType::Input:
 				case E::SignalInOutType::Output:
 
-					m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());
+					m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d",
+												   m_location.chassis(),
+												   m_location.module(),
+												   m_location.place());
 
 					break;
 
@@ -844,11 +851,16 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 					if (param.enableTuning() == true)
 					{
-						m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());
+						m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d",
+													   m_location.chassis(),
+													   m_location.module(),
+													   m_location.place());
 					}
 					else
 					{
-						m_signalID = QString::asprintf("CH %02d _ MD %02d", m_location.chassis(), m_location.module());
+						m_signalID = QString::asprintf("CH %02d _ MD %02d",
+													   m_location.chassis(),
+													   m_location.module());
 					}
 
 					break;
@@ -2168,7 +2180,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 						continue;
 					}
 
-					if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, Metrology::Channel_0, &m_signalList[i]) == false)
+					if (measureSignal.setMetrologySignal(measureKind,
+														 m_signalConnectionBase,
+														 signalConnectionType,
+														 Metrology::Channel_0,
+														 &m_signalList[i]) == false)
 					{
 						continue;
 					}
@@ -2203,7 +2219,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 									continue;
 								}
 
-								if (m_signalMeasureList[index].setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
+																				  m_signalConnectionBase,
+																				  signalConnectionType,
+																				  channel,
+																				  &m_signalList[i]) == false)
 								{
 									continue;
 								}
@@ -2218,7 +2238,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					int channel = param.location().place() - 1;
 					if (channel >= 0 && channel < measureSignal.channelCount())
 					{
-						if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+						if (measureSignal.setMetrologySignal(measureKind,
+															 m_signalConnectionBase,
+															 signalConnectionType,
+															 channel,
+															 &m_signalList[i]) == false)
 						{
 							mesaureSignalMap.remove(hashid);
 							continue;
@@ -2252,7 +2276,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 							int channel = param.location().rack().channel();
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[index].setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
+																				  m_signalConnectionBase,
+																				  signalConnectionType,
+																				  channel,
+																				  &m_signalList[i]) == false)
 								{
 									continue;
 								}
@@ -2267,7 +2295,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 					int channel = param.location().rack().channel();
 					if (channel >= 0 && channel < measureSignal.channelCount())
 					{
-						if (measureSignal.setMetrologySignal(measureKind, m_signalConnectionBase, signalConnectionType, channel, &m_signalList[i]) == false)
+						if (measureSignal.setMetrologySignal(measureKind,
+															 m_signalConnectionBase,
+															 signalConnectionType,
+															 channel,
+															 &m_signalList[i]) == false)
 						{
 							mesaureSignalMap.remove(hashid);
 							continue;

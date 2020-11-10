@@ -304,9 +304,9 @@ QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 
 	switch(m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:			result = textLinearity(row, column, pMeasurement);	break;
-		case MEASURE_TYPE_COMPARATOR:			result = textComparator(row, column, pMeasurement);	break;
-		default:								result.clear();
+		case MEASURE_TYPE_LINEARITY:	result = textLinearity(row, column, pMeasurement);	break;
+		case MEASURE_TYPE_COMPARATOR:	result = textComparator(row, column, pMeasurement);	break;
+		default:						result.clear();
 	}
 
 	return result;
@@ -734,7 +734,8 @@ void MeasureView::updateColumn()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MeasureView::onHeaderContextAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
+			this, &MeasureView::onHeaderContextAction);
 
 	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	verticalHeader()->setDefaultSectionSize(cellSize.height());
@@ -907,7 +908,10 @@ void MeasureView::removeMeasure()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete %1 measurement(s)?").arg(removeIndexList.count())) == QMessageBox::No)
+	if (QMessageBox::question(this,
+							  windowTitle(),
+							  tr("Do you want delete %1 measurement(s)?").
+							  arg(removeIndexList.count())) == QMessageBox::No)
 	{
 		return;
 	}

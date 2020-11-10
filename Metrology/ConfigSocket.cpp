@@ -346,7 +346,11 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 
 	if (tuningSourceCount != theSignalBase.tuning().sourceBase().sourceEquipmentID().count())
 	{
-		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count() << " from " << tuningSourceCount;
+		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " <<
+					theSignalBase.tuning().sourceBase().sourceEquipmentID().count() <<
+					" from " <<
+					tuningSourceCount;
+
 		assert(false);
 		return false;
 	}

@@ -417,7 +417,8 @@ SignalInfoPanel::SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* pa
 	createHeaderContexMenu();
 	initContextMenu();
 
-	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::activeSignalChanged,
+			this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
 
 	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
@@ -616,7 +617,8 @@ void SignalInfoPanel::appendSignalConnetionMenu()
 		return;
 	}
 
-	connect(m_pContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalInfoPanel::onConnectionAction);
+	connect(m_pContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
+			this, &SignalInfoPanel::onConnectionAction);
 
 	m_pContextMenu->addSeparator();
 }
@@ -791,7 +793,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	}
 	else
 	{
-		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height() * 2);
+		m_pView->verticalHeader()->setDefaultSectionSize(static_cast<int>(cellSize.height() * 2.3));
 	}
 }
 

@@ -60,10 +60,10 @@ public:
 	int						signalConnectionType() const { return m_signalConnectionType; }
 	void					setSignalConnectionType(int type) { m_signalConnectionType = type; }
 
-	QString					rackCaption() const;
 	QString					appSignalID() const;
 	QString					customSignalID() const;
 	QString					equipmentID() const;
+	QString					rackCaption() const;
 	QString					chassisStr() const;
 	QString					moduleStr() const;
 	QString					placeStr() const;
