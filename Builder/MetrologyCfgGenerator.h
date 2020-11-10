@@ -17,9 +17,11 @@ namespace Builder
 		virtual ~MetrologyCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 
+		bool writeDatabaseInfo();
 		bool writeSettings();
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();

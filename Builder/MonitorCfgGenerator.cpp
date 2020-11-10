@@ -80,14 +80,11 @@ namespace Builder
 		return result;
 	}
 
-	bool MonitorCfgGenerator::writeMonitorSettings()
+	bool MonitorCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		// write XML via m_cfgXml->xmlWriter()
-		//
-		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
+		xmlWriter.writeStartElement("Settings");
 
 		{
-			xmlWriter.writeStartElement("Settings");
 			std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
 				{
 					xmlWriter.writeEndElement();
@@ -164,10 +161,16 @@ namespace Builder
 			{
 				return false;
 			}
-
-		} // Settings
+		}
 
 		return true;
+	}
+
+	bool MonitorCfgGenerator::writeMonitorSettings()
+	{
+		// write XML via m_cfgXml->xmlWriter()
+		//
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MonitorCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)

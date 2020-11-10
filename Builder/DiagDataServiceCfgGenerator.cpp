@@ -30,17 +30,24 @@ namespace Builder
 		return result;
 	}
 
-	bool DiagDataServiceCfgGenerator::writeSettings()
+	bool DiagDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		if (m_settings.isInitialized() == false)
+		{
+			bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
-		RETURN_IF_FALSE(result);
+			RETURN_IF_FALSE(result);
 
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
+			m_settings.setInitialized();
+		}
 
-		result = m_settings.writeToXml(xml);
+		XmlWriteHelper xml(xmlWriter);
 
-		return result;
+		return m_settings.writeToXml(xml);
 	}
 
+	bool DiagDataServiceCfgGenerator::writeSettings()
+	{
+		return getSettingsXml(m_cfgXml->xmlWriter());
+	}
 }

@@ -14,6 +14,7 @@ namespace Builder
 		~MonitorCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	protected:
 		bool writeMonitorSettings();

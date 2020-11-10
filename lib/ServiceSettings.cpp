@@ -175,6 +175,17 @@ const char* CfgServiceSettings::CLIENT = "Client";
 const char* CfgServiceSettings::CLIENT_EQUIPMENT_ID = "EquipmentID";
 const char* CfgServiceSettings::CLIENT_SOFTWARE_TYPE = "SoftwareType";
 
+bool CfgServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
+{
+	bool result = true;
+
+	result &= DeviceHelper::getIpPortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
+											  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
+	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
+
+	return result;
+}
+
 bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(SETTINGS_SECTION);

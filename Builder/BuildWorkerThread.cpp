@@ -1314,8 +1314,17 @@ namespace Builder
 
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(context);
 
+		QByteArray softwareXmlData;
+		QXmlStreamWriter softwareXml(&softwareXmlData);
+
+		softwareXml.setAutoFormatting(true);
+		softwareXml.writeStartDocument();
+		softwareXml.writeStartElement("SoftwareItems");
+
+		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
+
 		equipmentWalker(context->m_equipmentSet->root(),
-			[this, lmsUniqueIdMap, context, &result](Hardware::DeviceObject* currentDevice)
+		    [this, lmsUniqueIdMap, context, &softwareXml, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (QThread::currentThread()->isInterruptionRequested() == true)
 				{
@@ -1384,10 +1393,20 @@ namespace Builder
 				{
 					result &= softwareCfgGenerator->run();
 
+					softwareCfgGenerator->writeSoftwareSection(softwareXml, false);	// <Software>
+
+					result &= softwareCfgGenerator->getSettingsXml(softwareXml);
+
+					softwareXml.writeEndElement();	// </Software>
+
 					delete softwareCfgGenerator;
 				}
 			}
 		);
+
+		softwareXml.writeEndElement();		// </SoftwareItems>
+
+		context->m_buildResultWriter->addFile(DIR_COMMON, FILE_SOFTWARE_XML, softwareXmlData);
 
 		context->m_buildResultWriter->writeConfigurationXmlFiles();
 

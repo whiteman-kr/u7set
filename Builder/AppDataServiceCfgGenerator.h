@@ -18,6 +18,7 @@ namespace Builder
 		~AppDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 		bool getAssociatedLMs();

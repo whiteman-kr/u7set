@@ -30,28 +30,27 @@ namespace Builder
 		return result;
 	}
 
-	bool ConfigurationServiceCfgGenerator::writeSettings()
+	bool ConfigurationServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		CfgServiceSettings settings;
-
-		bool result = true;
-
-		result &= DeviceHelper::getIpPortProperty(m_software, EquipmentPropNames::CLIENT_REQUEST_IP,
-		                                          EquipmentPropNames::CLIENT_REQUEST_PORT, &settings.clientRequestIP, false, "", 0, m_log);
-		result &= DeviceHelper::getIPv4Property(m_software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &settings.clientRequestNetmask, false, "", m_log);
-
-		result &= buildClientsList(&settings);
-
-		if (result == false)
+		if (m_settings.isInitialized() == false)
 		{
-			return false;
+			bool result = m_settings.readFromDevice(m_software, m_log);
+
+			result &= buildClientsList(&m_settings);
+
+			RETURN_IF_FALSE(result);
+
+			m_settings.setInitialized();
 		}
 
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
+		XmlWriteHelper xml(xmlWriter);
 
-		result = settings.writeToXml(xml);
+		return m_settings.writeToXml(xml);
+	}
 
-		return result;
+	bool ConfigurationServiceCfgGenerator::writeSettings()
+	{
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool ConfigurationServiceCfgGenerator::writeBatFile()

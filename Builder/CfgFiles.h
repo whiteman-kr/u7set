@@ -13,6 +13,7 @@ namespace Builder
 	const char* const FILE_APP_DATA_SOURCES_XML = "AppDataSources.xml";
 	const char* const FILE_TUNING_SOURCES_XML = "TuningSources.xml";
 	const char* const FILE_CONFIGURATION_XML = "Configuration.xml";
+	const char* const FILE_SOFTWARE_XML = "Software.xml";
 
 	const char* const FILE_METROLOGY_ITEMS_XML = "MetrologyItems.xml";
 	const char* const FILE_METROLOGY_SIGNAL_SET = "MetrologySignal.set";

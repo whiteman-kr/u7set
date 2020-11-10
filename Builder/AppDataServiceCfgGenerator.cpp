@@ -41,17 +41,25 @@ namespace Builder
 		return result;
 	}
 
+	bool AppDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		if (m_settings.isInitialized() == false)
+		{
+			bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+			RETURN_IF_FALSE(result);
+
+			m_settings.setInitialized();
+		}
+
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = m_settings.writeToXml(xml);
-
-		return result;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool AppDataServiceCfgGenerator::writeAppDataSourcesXml()

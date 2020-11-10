@@ -56,6 +56,14 @@ public:
 										QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
 										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
 										Builder::IssueLogger* log);
+
+	void setInitialized() { m_initialized = true; }
+	void resetInitialized() { m_initialized = false; }
+
+	bool isInitialized() const { return m_initialized; }
+
+private:
+	bool m_initialized = false;
 };
 
 class CfgServiceSettings : public ServiceSettings
@@ -72,6 +80,7 @@ public:
 
 	QList<QPair<QString, E::SoftwareType>> clients;
 
+	bool readFromDevice(Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 

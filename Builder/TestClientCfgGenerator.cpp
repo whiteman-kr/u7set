@@ -1,5 +1,4 @@
 #include "TestClientCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
 
 namespace Builder
 {
@@ -15,6 +14,7 @@ namespace Builder
 		do
 		{
 			if (writeSettings() == false) break;
+			if (linkAppSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
 
@@ -25,26 +25,34 @@ namespace Builder
 		return result;
 	}
 
-	bool TestClientCfgGenerator::writeSettings()
+	bool TestClientCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_cfgXml, m_log);
 
-		bool result = true;
-
-		TestClientSettings settings;
-
-		result = settings.readFromDevice(m_equipment, m_software, m_log);
-
-		if (result == true)
+		if (m_settings.isInitialized() == false)
 		{
-			XmlWriteHelper xml(m_cfgXml->xmlWriter());
+			bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
-			result = settings.writeToXml(xml);
+			RETURN_IF_FALSE(result);
+
+			m_settings.setInitialized();
 		}
 
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
+	bool TestClientCfgGenerator::writeSettings()
+	{
+		return getSettingsXml(m_cfgXml->xmlWriter());
+	}
+
+	bool TestClientCfgGenerator::linkAppSignalsFile()
+	{
 		bool res = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_APP_SIGNALS_ASGS);
 
 		if (res == false)
@@ -52,10 +60,10 @@ namespace Builder
 			// Can't link build file %1 into /%2/configuration.xml.
 			//
 			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_APP_SIGNALS_ASGS), equipmentID());
-			result = false;
+			return false;
 		}
 
-		return result;
+		return true;
 	}
 
 	bool TestClientCfgGenerator::writeBatFile()

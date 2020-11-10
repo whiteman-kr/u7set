@@ -20,6 +20,7 @@ namespace Builder
 		~TuningServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 		TuningServiceSettings m_settings;

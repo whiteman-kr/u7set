@@ -20,6 +20,7 @@ namespace Builder
 		do
 		{
 			if (writeSettings() == false) break;
+			if (writeArchSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
 
@@ -30,22 +31,28 @@ namespace Builder
 		return result;
 	}
 
+	bool ArchivingServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		if (m_settings.isInitialized() == false)
+		{
+			bool result = true;
+
+			result &= m_settings.readFromDevice(m_software, m_log);
+			result &= m_settings.checkSettings(m_software, m_log);
+
+			RETURN_IF_FALSE(result);
+
+			m_settings.setInitialized();
+		}
+
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
 	bool ArchivingServiceCfgGenerator::writeSettings()
 	{
-		bool result = true;
-
-		result &= m_settings.readFromDevice(m_software, m_log);
-		result &= m_settings.checkSettings(m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result &= m_settings.writeToXml(xml);
-
-		result &= writeArchSignalsFile();
-
-		return result;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool ArchivingServiceCfgGenerator::writeArchSignalsFile()

@@ -23,6 +23,7 @@ namespace Builder
 	{
 		bool result = true;
 
+		result &= writeDatabaseInfo();
 		result &= writeSettings();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
@@ -30,38 +31,12 @@ namespace Builder
 		return result;
 	}
 
-	bool MetrologyCfgGenerator::writeSettings()
+	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
-
-		//
-		//
-		xmlWriter.writeStartElement("DatabaseInfo");
-		{
-			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
-		}
-		xmlWriter.writeEndElement();
-
-		//
-		//
-
-		Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
-		if (pObjectSoftware == nullptr || pObjectSoftware->isSoftware() == false)
-		{
-			// Unknown software type (Software object StrID '%1').
-			//
-			m_log->errEQP6100(m_software->equipmentId(), m_software->uuid());
-			xmlWriter.writeTextElement("Error", tr("Software Metrology (%1) not found").arg(m_software->equipmentId()));
-			return false;
-		}
-
-		//
-		//
-
 		xmlWriter.writeStartElement("Settings");
+
 		{
 			bool result = true;
-
 
 			// AppDataService
 			//
@@ -69,8 +44,8 @@ namespace Builder
 			QString appDataServiceId1;
 			QString appDataServiceId2;
 
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID1" , &appDataServiceId1, m_log);
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID2" , &appDataServiceId2, m_log);
+			result &= DeviceHelper::getStrProperty(m_software, "AppDataServiceID1" , &appDataServiceId1, m_log);
+			result &= DeviceHelper::getStrProperty(m_software, "AppDataServiceID2" , &appDataServiceId2, m_log);
 
 			if (result == false)
 			{
@@ -149,7 +124,7 @@ namespace Builder
 
 			QString tuningServiceId;
 
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID" , &tuningServiceId, m_log);
+			result &= DeviceHelper::getStrProperty(m_software, "TuningServiceID" , &tuningServiceId, m_log);
 
 			if (result == false)
 			{
@@ -185,9 +160,28 @@ namespace Builder
 				xmlWriter.writeAttribute("port", QString::number(tuningSettings.clientRequestIP.port()));
 			}
 			xmlWriter.writeEndElement(); // </TuningService>
+
 		} // </Settings>
 
 		return true;
+	}
+
+	bool MetrologyCfgGenerator::writeDatabaseInfo()
+	{
+		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
+
+		xmlWriter.writeStartElement("DatabaseInfo");
+		{
+			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
+		}
+		xmlWriter.writeEndElement();
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::writeSettings()
+	{
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MetrologyCfgGenerator::writeMetrologyItemsXml()

@@ -52,6 +52,9 @@ namespace Builder
 		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);
 
 		virtual bool generateConfiguration() = 0;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) = 0;
+
+		void writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection);
 
 		void initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems);
 

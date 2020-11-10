@@ -70,13 +70,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
 					arg(m_software->equipmentIdTemplate()));
 
-		m_cfgXml->xmlWriter().writeStartElement("Software");
-
-		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->equipmentIdTemplate());
-		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
-
-		m_cfgXml->xmlWriter().writeEndElement();	// </Software>
+		writeSoftwareSection(m_cfgXml->xmlWriter(), true);
 
 		bool result = true;
 
@@ -509,6 +503,20 @@ namespace Builder
 		m_schemaTagToFile.clear();
 
 		return;
+	}
+
+	void SoftwareCfgGenerator::writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection)
+	{
+		xmlWriter.writeStartElement("Software");
+
+		xmlWriter.writeAttribute("Caption", m_software->caption());
+		xmlWriter.writeAttribute("ID", m_software->equipmentIdTemplate());
+		xmlWriter.writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
+
+		if (finalizeSection == true)
+		{
+			xmlWriter.writeEndElement();	// </Software>
+		}
 	}
 
 	void SoftwareCfgGenerator::initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems)
