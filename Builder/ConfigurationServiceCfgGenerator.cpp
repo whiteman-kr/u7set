@@ -39,8 +39,6 @@ namespace Builder
 			result &= buildClientsList(&m_settings);
 
 			RETURN_IF_FALSE(result);
-
-			m_settings.setInitialized();
 		}
 
 		XmlWriteHelper xml(xmlWriter);

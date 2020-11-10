@@ -1319,7 +1319,7 @@ namespace Builder
 
 		softwareXml.setAutoFormatting(true);
 		softwareXml.writeStartDocument();
-		softwareXml.writeStartElement("SoftwareItems");
+		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);
 
 		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
 

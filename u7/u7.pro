@@ -76,6 +76,8 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
+    ../lib/SoftwareXmlReader.cpp \
+    ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
@@ -230,6 +232,8 @@ SOURCES +=\
 HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ExportPrint.h \
+    ../lib/SoftwareXmlReader.h \
+    ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
     ../lib/Ui/DialogSignalInfo.h \

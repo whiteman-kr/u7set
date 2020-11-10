@@ -57,7 +57,7 @@ public:
 										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
 										Builder::IssueLogger* log);
 
-	void setInitialized() { m_initialized = true; }
+	void setInitialized(bool initialized) { m_initialized = initialized; }
 	void resetInitialized() { m_initialized = false; }
 
 	bool isInitialized() const { return m_initialized; }

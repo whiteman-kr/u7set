@@ -62,8 +62,6 @@ namespace Builder
 				m_log->errEQP6201(equipmentID());
 				return false;
 			}
-
-			m_settings.setInitialized();
 		}
 
 		XmlWriteHelper xml(xmlWriter);

@@ -112,10 +112,18 @@ namespace EquipmentPropNames
 	const QString CFG_SERVICE_PORT2 = "ConfigurationServicePort2";
 }
 
+namespace XmlElement
+{
+	const QString SOFTWARE_ITEMS("SoftwareItems");
+	const QString SOFTWARE("Software");
+}
+
 namespace XmlAttribute
 {
+	const QString CAPTION("Caption");
 	const QString COUNT("Count");
 	const QString ID("ID");
+	const QString TYPE("Type");
 
 	const QString DATA_ID("DataID");
 	const QString HEX_DATA_ID("HexDataID");

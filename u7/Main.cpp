@@ -13,6 +13,8 @@
 #include "../lib/Signal.h"
 #include <QList>
 
+#include "../lib/SoftwareXmlReader.h"
+
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif
@@ -116,6 +118,9 @@ int main(int argc, char *argv[])
 	Builder::init();
 
 	GlobalMessanger::instance();		// Create instance of GlobalMessanger
+
+	SoftwareXmlReader swReader;
+	swReader.readSoftwareXml(QString("d:/temp/compiler_tests/build/common/software.xml"));
 
 	// Read settings
 	//

@@ -7,8 +7,6 @@ win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selec
 win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
 win32:QMAKE_CXXFLAGS += /wd4251
 
-HEADERS += \
-    $$PWD/lib/SoftwareXmlReader.h
+HEADERS +=
 
-SOURCES += \
-    $$PWD/lib/SoftwareXmlReader.cpp
+SOURCES +=

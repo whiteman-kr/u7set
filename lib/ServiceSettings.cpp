@@ -177,11 +177,15 @@ const char* CfgServiceSettings::CLIENT_SOFTWARE_TYPE = "SoftwareType";
 
 bool CfgServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
+	resetInitialized();
+
 	bool result = true;
 
 	result &= DeviceHelper::getIpPortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
+
+	setInitialized(result);
 
 	return result;
 }
@@ -217,6 +221,8 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 {
+	resetInitialized();
+
 	clients.clear();
 
 	bool result = false;
@@ -270,6 +276,8 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 		}
 	}
 
+	setInitialized(result);
+
 	return result;
 }
 
@@ -293,6 +301,8 @@ QStringList CfgServiceSettings::knownClients()
 
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
+	resetInitialized();
+
 	TEST_PTR_RETURN_FALSE(log);
 
 	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
@@ -340,6 +350,8 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::AUTO_ARCHIVE_INTERVAL,
 										   &autoArchiveInterval, log);
 
+	setInitialized(result);
+
 	return result;
 }
 
@@ -381,6 +393,8 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
+	resetInitialized();
+
 	bool result = false;
 
 	result = xml.findElement(SETTINGS_SECTION);
@@ -414,6 +428,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
 									  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
+	setInitialized(result);
 
 	return result;
 }
@@ -427,6 +442,8 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 bool DiagDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment,
 											 Hardware::Software* software, Builder::IssueLogger* log)
 {
+	resetInitialized();
+
 	TEST_PTR_RETURN_FALSE(log);
 
 	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
@@ -464,6 +481,8 @@ bool DiagDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment,
 	result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
 									  &cfgServiceID2, &cfgServiceIP2, log);
 
+	setInitialized(result);
+
 	return result;
 }
 
@@ -500,6 +519,8 @@ bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
+	resetInitialized();
+
 	bool result = false;
 
 	result = xml.findElement(SETTINGS_SECTION);
@@ -528,6 +549,8 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+	setInitialized(result);
 
 	return result;
 }
@@ -647,6 +670,8 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 
 bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder::IssueLogger* log)
 {
+	resetInitialized();
+
 	bool result = true;
 
 	result &= DeviceHelper::getIpPortProperty(software,
@@ -671,6 +696,8 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
 
 	result &= fillTuningClientsInfo(software, singleLmControl, log);
+
+	setInitialized(result);
 
 	return result;
 }
@@ -726,6 +753,8 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 {
+	resetInitialized();
+
 	bool result = false;
 
 	result = xml.findElement(SETTINGS_SECTION);
@@ -850,6 +879,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		clients.append(tc);
 	}
 
+	setInitialized(result);
+
 	return result;
 }
 
@@ -861,6 +892,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
+	resetInitialized();
+
 	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(software, log);
 
@@ -902,6 +935,8 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
 	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, log);
+
+	setInitialized(result);
 
 	return result;
 }
@@ -950,6 +985,8 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 {
+	resetInitialized();
+
 	bool result = false;
 
 	result = xml.findElement(SETTINGS_SECTION);
@@ -975,6 +1012,8 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, true);
 	result &= xml.readStringElement(EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, true);
 
+	setInitialized(result);
+
 	return result;
 }
 
@@ -993,6 +1032,8 @@ const char* TestClientSettings::TUNING_SERVICE_SECTION = "TuningService";
 
 bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
+	resetInitialized();
+
 	bool result = true;
 
 	// Get CfgService connection
@@ -1185,6 +1226,8 @@ bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardw
 									true, Socket::IP_NULL,
 									PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST,
 									E::SoftwareType::DiagDataService, log);
+	setInitialized(result);
+
 	return result;
 }
 
@@ -1263,6 +1306,8 @@ bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
 
 bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 {
+	resetInitialized();
+
 	bool result = true;
 
 	result &= xml.findElement(SETTINGS_SECTION);
@@ -1306,6 +1351,8 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 									  EquipmentPropNames::TUNING_DATA_PORT, &tuningService_tuningDataIP);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningService_clientRequestIP);
+
+	setInitialized(result);
 
 	return result;
 }

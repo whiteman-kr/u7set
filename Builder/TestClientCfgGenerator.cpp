@@ -37,8 +37,6 @@ namespace Builder
 			bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
 			RETURN_IF_FALSE(result);
-
-			m_settings.setInitialized();
 		}
 
 		XmlWriteHelper xml(xmlWriter);

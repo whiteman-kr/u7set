@@ -41,8 +41,6 @@ namespace Builder
 			result &= m_settings.checkSettings(m_software, m_log);
 
 			RETURN_IF_FALSE(result);
-
-			m_settings.setInitialized();
 		}
 
 		XmlWriteHelper xml(xmlWriter);

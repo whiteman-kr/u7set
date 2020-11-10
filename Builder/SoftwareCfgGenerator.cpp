@@ -507,11 +507,11 @@ namespace Builder
 
 	void SoftwareCfgGenerator::writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection)
 	{
-		xmlWriter.writeStartElement("Software");
+		xmlWriter.writeStartElement(XmlElement::SOFTWARE);
 
-		xmlWriter.writeAttribute("Caption", m_software->caption());
-		xmlWriter.writeAttribute("ID", m_software->equipmentIdTemplate());
-		xmlWriter.writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
+		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
+		xmlWriter.writeAttribute(XmlAttribute::ID, m_software->equipmentIdTemplate());
+		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->type())));
 
 		if (finalizeSection == true)
 		{
