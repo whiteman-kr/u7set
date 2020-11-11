@@ -650,11 +650,21 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 void StatisticsPanel::updateList()
 {
+	if (m_pMeasureBase == nullptr)
+	{
+		return;
+	}
+
+	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
 	updateVisibleColunm();
 
 	m_signalTable.clear();
 
-	theSignalBase.statistics().updateStatistics();
+	m_pMeasureBase->updateStatisticsBase(m_measureType);
 
 	m_signalTable.set();
 
@@ -665,12 +675,22 @@ void StatisticsPanel::updateList()
 
 void StatisticsPanel::updateSignalInList(Hash signalHash)
 {
+	if (m_pMeasureBase == nullptr)
+	{
+		return;
+	}
+
+	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
 	if (signalHash == UNDEFINED_HASH)
 	{
 		return;
 	}
 
-	theSignalBase.statistics().updateStatistics(signalHash);
+	m_pMeasureBase->updateStatisticsBase(m_measureType, signalHash);
 
 	m_signalTable.updateSignal(signalHash);
 
@@ -684,6 +704,7 @@ void StatisticsPanel::updateStatusBar()
 	m_statusMeasureInavlid->setText(tr(" Invalid: %1").
 									arg(theSignalBase.statistics().
 										invalidMeasureCount()));
+
 	m_statusMeasured->setText(tr(" Measured: %1 / %2").
 							  arg(theSignalBase.statistics().measuredCount()).
 							  arg(theSignalBase.statistics().count()));

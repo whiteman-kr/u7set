@@ -408,9 +408,11 @@ public:
 	int						append(Measurement* pMeasurement);
 	Measurement*			measurement(int index) const;
 	bool					remove(int index, bool removeData = true);
-	void					remove(int measureType, const QVector<int>& keyList);
+	bool					remove(int measureType, const QVector<int>& keyList);
 
-	void					updateStatistics(int measureType, StatisticsItem& si);
+	void					updateStatisticsItem(int measureType, StatisticsItem& si);
+	void					updateStatisticsBase(int measureType);
+	void					updateStatisticsBase(int measureType, Hash signalHash);
 	static void				markNotExistMeasuremetsFromStatistics(MeasureBase* pThis);
 
 signals:
@@ -421,11 +423,10 @@ signals:
 public slots:
 
 	void					signalBaseLoaded();
+
+	void					appendToBase(Measurement* pMeasurement);
+	void					removeFromBase(int measureType, const QVector<int>& keyList);
 };
-
-// ==============================================================================================
-
-extern MeasureBase theMeasureBase;
 
 // ==============================================================================================
 

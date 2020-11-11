@@ -8,7 +8,6 @@
 
 #include "../lib/UnitsConvertor.h"
 
-#include "CalibratorBase.h"
 #include "ProcessData.h"
 #include "ObjectProperties.h"
 
@@ -741,6 +740,11 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	clear();
 
+	if (m_pCalibratorBase == nullptr)
+	{
+		return;
+	}
+
 	if (activeSignal.isEmpty() == true)
 	{
 		return;
@@ -775,7 +779,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 			ioParam.setParam(type, param);
 			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
-			ioParam.setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
+			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
 		ioParamList.append(ioParam);

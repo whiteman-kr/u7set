@@ -1448,7 +1448,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
 					query.bindValue(field++, measure->measureTimeStr());
-					query.bindValue(field++, measure->calibratorPrecision());
+					query.bindValue(field++, measure->calibrator());
 				}
 				break;
 
@@ -1928,6 +1928,23 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void Database::appendToBase(Measurement* pMeasurement)
+{
+	if (pMeasurement == nullptr)
+	{
+		return;
+	}
+
+	bool result = appendMeasure(pMeasurement);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Save measurements"), tr("Error saving measurements to database"));
+		return;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 {
 	bool result = false;
@@ -1957,6 +1974,17 @@ bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 	}
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Database::removeFromBase(int measureType, const QVector<int>& keyList)
+{
+	bool result = removeMeasure(measureType, keyList);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from database"));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

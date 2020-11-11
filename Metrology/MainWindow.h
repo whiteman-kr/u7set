@@ -12,11 +12,12 @@
 
 #include "../lib/SimpleThread.h"
 
-#include "SelectSignalWidget.h"
-#include "MeasureView.h"
+#include "CalibratorBase.h"
 #include "ConfigSocket.h"
 #include "SignalSocket.h"
 #include "TuningSocket.h"
+#include "SelectSignalWidget.h"
+#include "MeasureView.h"
 #include "MeasureThread.h"
 #include "FindMeasurePanel.h"
 #include "StatisticsPanel.h"
@@ -135,6 +136,9 @@ private:
 private:
 
 	SoftwareInfo			m_softwareInfo;
+
+	CalibratorBase			m_calibratorBase;
+	MeasureBase				m_measureBase;
 
 	ConfigSocket*			m_pConfigSocket = nullptr;
 	void					runConfigSocket();

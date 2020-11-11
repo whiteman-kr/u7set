@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QMessageBox>
 
+#include "CalibratorBase.h"
 #include "MeasureBase.h"
 #include "SignalBase.h"
 #include "TuningSignalBase.h"
@@ -122,7 +123,7 @@ public:
 
 	MeasureThreadInfo		info() const { return m_info; }
 
-	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
+	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
 
 	void					setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
 	void					setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
@@ -148,7 +149,6 @@ public slots:
 	void					measureKindChanged(int kind);
 	void					signalConnectionTypeChanged(int type);
 
-	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					signalParamChanged(const QString& appSignalID);
 
 	void					stopMeasure(MeasureThreadInfo::ExitCode exitCode);

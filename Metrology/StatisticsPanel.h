@@ -15,6 +15,7 @@
 #include <QStatusBar>
 #include <QKeyEvent>
 
+#include "MeasureBase.h"
 #include "SignalBase.h"
 
 // ==============================================================================================
@@ -167,9 +168,12 @@ private:
 	QAction* m_pColumnAction[STATISTICS_COLUMN_COUNT];
 	QMenu* m_headerContextMenu = nullptr;
 
+	MeasureBase* m_pMeasureBase = nullptr;
+
 	static int m_measureType;
 	static int m_measureKind;
 	static int m_signalConnectionType;
+
 
 	void createInterface();
 	void createHeaderContexMenu();
@@ -186,6 +190,7 @@ protected:
 
 public:
 
+	void setMeasureBase(MeasureBase* pMeasureBase) { m_pMeasureBase = pMeasureBase; }
 	void setViewFont(const QFont& font);
 
 signals:
@@ -204,8 +209,8 @@ public slots:
 
 	void activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 
-	void updateList();											// slots for reload list
-	void updateSignalInList(Hash signalHash);					// slots for updating one singal in list
+	void updateList();												// slots for reload list
+	void updateSignalInList(Hash signalHash);						// slots for updating one singal in list
 
 private slots:
 

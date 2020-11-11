@@ -36,12 +36,14 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	//
 	theDatabase.setDatabaseOption(theOptions.database());
 	theDatabase.open();
+	connect(this, &MainWindow::appendMeasure, &theDatabase, &Database::appendToBase, Qt::QueuedConnection);
+
 
 	// init calibration base
 	//
-	theCalibratorBase.init(theOptions.calibrators(), this);
-	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
-	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	m_calibratorBase.init(theOptions.calibrators(), this);
+	connect(&m_calibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
+	connect(&m_calibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
 	// load signal base
 	//
@@ -54,11 +56,14 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	//
 
 	theOptions.linearity().points().load();
+
 	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
 	{
-		theMeasureBase.load(measureType);
+		m_measureBase.load(measureType);
 	}
-	connect(&theMeasureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
+	connect(this, &MainWindow::appendMeasure, &m_measureBase, &MeasureBase::appendToBase, Qt::QueuedConnection);
+	connect(&m_measureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
+
 
 	//
 	//
@@ -378,8 +383,8 @@ bool MainWindow::createToolBars()
 
 			connect(m_pMeasureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind);
 
-			theCalibratorBase.measureKindChanged(m_measureKind);
-			connect(this, &MainWindow::measureKindChanged, &theCalibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
+			m_calibratorBase.measureKindChanged(m_measureKind);
+			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
 		}
 	}
 
@@ -526,11 +531,12 @@ void MainWindow::createPanels()
 
 		m_pStatisticsPanel->hide();
 
+		m_pStatisticsPanel->setMeasureBase(&m_measureBase);
 		m_pStatisticsPanel->measureKindChanged(m_measureKind);
 		m_pStatisticsPanel->signalConnectionTypeChanged(m_signalConnectionType);
 
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticsPanel, &StatisticsPanel::activeSignalChanged, Qt::QueuedConnection);
-		connect(&theMeasureBase, &MeasureBase::updatedMeasureBase, m_pStatisticsPanel, &StatisticsPanel::updateSignalInList, Qt::QueuedConnection);
+		connect(&m_measureBase, &MeasureBase::updatedMeasureBase, m_pStatisticsPanel, &StatisticsPanel::updateSignalInList, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::measureTypeChanged, m_pStatisticsPanel, &StatisticsPanel::measureTypeChanged, Qt::QueuedConnection);
 		connect(this, &MainWindow::measureKindChanged, m_pStatisticsPanel, &StatisticsPanel::measureKindChanged, Qt::QueuedConnection);
@@ -566,6 +572,8 @@ void MainWindow::createPanels()
 
 		m_pSignalInfoPanel->hide();
 
+
+		m_pSignalInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pSignalInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
 
 		connect(this, &MainWindow::signalConnectionTypeChanged, m_pSignalInfoPanel, &SignalInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
@@ -590,6 +598,7 @@ void MainWindow::createPanels()
 
 		m_pComparatorInfoPanel->hide();
 
+		m_pComparatorInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pComparatorInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
 		m_pComparatorInfoPanel->setMaxComparatorCount(theOptions.module().maxComparatorCount());
 
@@ -613,13 +622,19 @@ void MainWindow::createMeasureViews()
 			continue;
 		}
 
-		pView->loadMeasureList();
+		pView->loadMeasurements(m_measureBase);
 
 		m_pMainTab->addTab(pView, qApp->translate("MeasureBase.h", MeasureType[measureType]));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
 		appendMeasureView(measureType, pView);
+
+		//
+		//
+
+		connect(pView, &MeasureView::removeFromBase, &theDatabase, &Database::removeFromBase, Qt::QueuedConnection);
+		connect(pView, &MeasureView::removeFromBase, &m_measureBase, &MeasureBase::removeFromBase, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::appendMeasure, pView, &MeasureView::appendMeasure, Qt::QueuedConnection);
 	}
@@ -971,7 +986,7 @@ bool MainWindow::tuningSocketIsConnected()
 
 bool MainWindow::signalSourceIsValid(bool showMsg)
 {
-	if (theCalibratorBase.connectedCalibratorsCount() == 0)
+	if (m_calibratorBase.connectedCalibratorsCount() == 0)
 	{
 		if (showMsg == true)
 		{
@@ -1058,7 +1073,7 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 				break;
 		}
 
-		theMeasureBase.updateStatistics(m_measureType, si);
+		m_measureBase.updateStatisticsItem(m_measureType, si);
 		if (si.isMeasured() == true)
 		{
 			signalID.append(pMetrologySignal->param().appSignalID() + "\n");
@@ -1225,7 +1240,7 @@ void MainWindow::startMeasure()
 		}
 	}
 
-	m_measureThread.setActiveSignalParam(theSignalBase.activeSignal());
+	m_measureThread.setActiveSignalParam(theSignalBase.activeSignal(), m_calibratorBase);
 	m_measureThread.setLinearityOption(theOptions.linearity());
 	m_measureThread.setComparatorOption(theOptions.comparator());
 
@@ -1320,13 +1335,14 @@ void MainWindow::showRackList()
 		return;
 	}
 
-	theSignalBase.updateRackParam();
-
+	theSignalBase.racks() = dialog.racks();
 	if (theSignalBase.racks().groups().save() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save rack groups was unsuccessfully!"));
 		return;
 	}
+
+	theSignalBase.updateRackParam();
 
 	if (m_measureKind == MEASURE_KIND_MULTI_RACK)
 	{
@@ -1402,6 +1418,7 @@ void MainWindow::showSignalConnectionList()
 		return;
 	}
 
+	theSignalBase.signalConnections() = dialog.signalConnections();
 	if (theSignalBase.signalConnections().save() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
@@ -1430,7 +1447,7 @@ void MainWindow::showStatistics()
 
 void MainWindow::showCalibrators()
 {
-	theCalibratorBase.showInitDialog();
+	m_calibratorBase.showInitDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1950,15 +1967,15 @@ void MainWindow::calibratorConnectedChanged(int count)
 
 		QString calibratorInfo;
 
-		int calibratorCount = theCalibratorBase.calibratorCount();
+		int calibratorCount = m_calibratorBase.calibratorCount();
 		for(int i  = 0; i < calibratorCount; i++)
 		{
-			if (theCalibratorBase.calibratorManager(i) == nullptr)
+			if (m_calibratorBase.calibratorManager(i) == nullptr)
 			{
 				continue;
 			}
 
-			Calibrator* pCalibrator = theCalibratorBase.calibratorManager(i)->calibrator();
+			Calibrator* pCalibrator = m_calibratorBase.calibratorManager(i)->calibrator();
 			if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 			{
 				continue;
@@ -2537,7 +2554,7 @@ void MainWindow::runConfigSocket()
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, this, &MainWindow::configSocketSignalBaseLoaded, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &theSignalBase.statistics(), &StatisticsBase::signalBaseLoaded, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, m_pStatisticsPanel, &StatisticsPanel::updateList, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &theMeasureBase, &MeasureBase::signalBaseLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &m_measureBase, &MeasureBase::signalBaseLoaded, Qt::QueuedConnection);
 
 	m_pConfigSocket->start();
 }
@@ -2635,7 +2652,6 @@ void MainWindow::runMeasureThread()
 	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged, Qt::QueuedConnection);
 	connect(this, &MainWindow::signalConnectionTypeChanged, &m_measureThread, &MeasureThread::signalConnectionTypeChanged, Qt::QueuedConnection);
 
-	connect(&theSignalBase, &SignalBase::activeSignalChanged, &m_measureThread, &MeasureThread::activeSignalChanged, Qt::QueuedConnection);
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_measureThread, &MeasureThread::signalParamChanged, Qt::QueuedConnection);
 
 	measureThreadStoped();
@@ -2724,9 +2740,10 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	stopSignalSocket();
 	stopTuningSocket();
 
-	theMeasureBase.clear();
 	theSignalBase.clear();
-	theCalibratorBase.clear();
+	theOptions.linearity().points().save();
+	m_measureBase.clear();
+	m_calibratorBase.clear();
 
 	theDatabase.close();
 

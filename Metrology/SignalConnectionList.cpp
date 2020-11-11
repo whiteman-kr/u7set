@@ -1100,8 +1100,6 @@ void SignalConnectionDialog::onContextMenu(QPoint)
 
 void SignalConnectionDialog::onOk()
 {
-	theSignalBase.signalConnections() = m_connectionBase;
-
 	accept();
 }
 

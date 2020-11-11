@@ -679,10 +679,9 @@ QString IoSignalParam::calibratorStr() const
 		return qApp->translate("CalibratorManager.h", CalibratorNotConnected);
 	}
 
-	return QString("%1 %2 (%3)").
+	return QString("%1 %2").
 			arg(qApp->translate("CalibratorManager.h", CalibratorStr)).
-			arg(m_pCalibratorManager->calibratorChannel() + 1).
-			arg(m_pCalibratorManager->calibratorPort());
+			arg(m_pCalibratorManager->calibratorChannel() + 1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

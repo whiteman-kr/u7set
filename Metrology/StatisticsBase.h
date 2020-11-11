@@ -105,9 +105,8 @@ public:
 
 	StatisticsItem item(int index) const;
 	StatisticsItem item(int measureType, int index) const;
-
-	void updateStatistics();
-	void updateStatistics(Hash signalHash);
+	StatisticsItem* itemPtr(int measureType, int index);
+	void setItem(int measureType, int index, const StatisticsItem& item);
 
 public slots:
 

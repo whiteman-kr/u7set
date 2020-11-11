@@ -6,7 +6,6 @@
 #include <QVBoxLayout>
 #include <QKeyEvent>
 
-#include "CalibratorBase.h"
 #include "ProcessData.h"
 #include "ObjectProperties.h"
 
@@ -483,6 +482,11 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	clear();
 
+	if (m_pCalibratorBase == nullptr)
+	{
+		return;
+	}
+
 	if (activeSignal.isEmpty() == true)
 	{
 		return;
@@ -523,7 +527,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 			ioParam.setParam(MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal->param());
 			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
-			ioParam.setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
+			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
 		ioParamList.append(ioParam);

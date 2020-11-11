@@ -164,6 +164,10 @@ private:
 	Metrology::Signal*		m_pOutputSignal = nullptr;
 	bool createConnectionBySignal(Metrology::Signal* pSignal);
 
+public:
+
+	SignalConnectionBase&	signalConnections() { return m_connectionBase; }	// signal connections
+
 public slots:
 
 	// slots for updating

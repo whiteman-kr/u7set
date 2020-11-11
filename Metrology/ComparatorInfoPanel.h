@@ -9,6 +9,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 
+#include "CalibratorBase.h"
 #include "SignalBase.h"
 #include "Options.h"
 
@@ -33,8 +34,8 @@ public:
 
 private:
 
-	int						m_maxComparatorCount = 0;
 	ComparatorInfoOption	m_comparatorInfo;
+	int						m_maxComparatorCount = 0;
 
 	mutable QMutex			m_signalMutex;
 	int						m_signalCount = 0;
@@ -48,8 +49,8 @@ private:
 
 public:
 
-	void					setMaxComparatorCount(int count);
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
+	void					setMaxComparatorCount(int count);
 
 	int						signalCount() const { return m_signalCount; }
 	IoSignalParam			signalParam(int index) const;
@@ -99,15 +100,18 @@ private:
 
 	//
 	//
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
-	int						m_maxComparatorCount = 0;
+	CalibratorBase*			m_pCalibratorBase = nullptr;
 	ComparatorInfoOption	m_comparatorInfo;
+	int						m_maxComparatorCount = 0;
+
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 public:
 
 	void					clear() { m_comparatorTable.clear(); }
 	void					restartComparatorStateTimer(int timeout);
 
+	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
 	void					setMaxComparatorCount(int count);
 

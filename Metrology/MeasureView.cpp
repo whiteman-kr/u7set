@@ -743,16 +743,16 @@ void MeasureView::updateColumn()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureView::loadMeasureList()
+void MeasureView::loadMeasurements(const MeasureBase& measureBase)
 {
 	m_table.clear();
 
 	QVector<Measurement*> measureList;
 
-	int measureCount = theMeasureBase.count();
+	int measureCount = measureBase.count();
 	for (int i = 0; i < measureCount; i++)
 	{
-		Measurement* pMeasurement = theMeasureBase.measurement(i);
+		Measurement* pMeasurement = measureBase.measurement(i);
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -842,21 +842,8 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 		return;
 	}
 
-	// append into database
+	// append into Database and MeasureBase from MainWindow
 	//
-	if (theDatabase.appendMeasure(pMeasurement) == false)
-	{
-		QMessageBox::critical(this, tr("Save measurements"), tr("Error saving measurements to database"));
-		return;
-	}
-
-	// append into MeasureBase
-	//
-	if (theMeasureBase.append(pMeasurement) == -1)
-	{
-		return;
-	}
-
 	// append into MeasureTable
 	//
 	if (m_table.append(pMeasurement) == false)
@@ -916,23 +903,13 @@ void MeasureView::removeMeasure()
 		return;
 	}
 
-	// remove from database
+	// remove from Database and MesaureBase
 	//
-	if (theDatabase.removeMeasure(m_measureType, keyList) == false)
-	{
-		QMessageBox::critical(this, tr("Delete measurements"), tr("Error remove measurements from database"));
-		return;
-	}
+	emit removeFromBase(m_measureType, keyList);
 
 	// remove from MeasureTable
 	//
 	m_table.remove(removeIndexList);
-
-	// remove from MesaureBase
-	//
-	theMeasureBase.remove(m_measureType, keyList);
-
-	QMessageBox::information(this, tr("Delete"), tr("Deleted %1 measurement(s)").arg(removeIndexList.count()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

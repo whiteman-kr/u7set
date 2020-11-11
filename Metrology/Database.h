@@ -376,6 +376,11 @@ public:
 
 	bool				appendMeasure(Measurement* pMeasurement);
 	bool				removeMeasure(int measuteType, const QVector<int>& keyList);
+
+public slots:
+
+	void				appendToBase(Measurement* pMeasurement);
+	void				removeFromBase(int measureType, const QVector<int>& keyList);
 };
 
 // ==============================================================================================

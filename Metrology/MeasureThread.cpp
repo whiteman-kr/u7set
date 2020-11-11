@@ -5,7 +5,6 @@
 
 #include "../lib/UnitsConvertor.h"
 
-#include "CalibratorBase.h"
 #include "Conversion.h"
 #include "Options.h"
 
@@ -61,7 +60,7 @@ MeasureThread::~MeasureThread()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal)
+bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase)
 {
 	m_activeIoParamList.clear();
 
@@ -98,7 +97,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal)
 //				continue;
 //			}
 
-			CalibratorManager* pCalibratorManager = theCalibratorBase.calibratorForMeasure(ch);
+			CalibratorManager* pCalibratorManager = calibratorBase.calibratorForMeasure(ch);
 			if (pCalibratorManager == nullptr || pCalibratorManager->calibratorIsConnected() == false)
 			{
 				continue;
@@ -1401,18 +1400,6 @@ void MeasureThread::signalConnectionTypeChanged(int type)
 	}
 
 	m_signalConnectionType = type;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureThread::activeSignalChanged(const MeasureSignal& activeSignal)
-{
-	if (activeSignal.isEmpty() == true)
-	{
-		return;
-	}
-
-	setActiveSignalParam(activeSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

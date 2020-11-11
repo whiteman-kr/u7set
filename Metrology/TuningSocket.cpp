@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "TuningSignalBase.h"
+#include "SignalBase.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------

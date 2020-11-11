@@ -512,8 +512,6 @@ void RackListDialog::onListDoubleClicked(const QModelIndex&)
 
 void RackListDialog::onOk()
 {
-	theSignalBase.racks() = m_rackBase;
-
 	accept();
 }
 

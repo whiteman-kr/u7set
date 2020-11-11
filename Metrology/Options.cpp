@@ -761,8 +761,6 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-
-	m_pointBase.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
