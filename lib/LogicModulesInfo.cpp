@@ -115,6 +115,25 @@ bool LogicModulesInfo::load(const QByteArray& xmlData, QString* errMsg)
 	return true;
 }
 
+std::optional<::LogicModuleInfo> LogicModulesInfo::get(QString equipmentId) const
+{
+	std::optional<::LogicModuleInfo> result;
+
+	auto fit = std::find_if(logicModulesInfo.begin(),
+							logicModulesInfo.end(),
+							[&equipmentId](const ::LogicModuleInfo& lmi)
+							{
+								return lmi.equipmentID == equipmentId;
+							});
+
+	if (fit != logicModulesInfo.end())
+	{
+		result = *fit;
+	}
+
+	return result;
+}
+
 bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QString* errMsg)
 {
 	if (lmi == nullptr)

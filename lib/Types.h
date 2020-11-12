@@ -199,6 +199,7 @@ public:
 	Q_ENUM(LogicModuleRamAccess)
 
 	// Lan Controller Type Identifiers
+	// These values can be combined, Example: (2 | 4) = AppData and DiagData
 	//
 	enum class LanControllerType
 	{

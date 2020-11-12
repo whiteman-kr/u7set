@@ -10,7 +10,7 @@ SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6()
 
 void SimCommandTest_LM5_LM6::initTestCase()
 {
-	m_device = std::make_unique<Sim::DeviceEmulator>(Sim::ScopedLog{nullptr, {}});
+	m_device = std::make_unique<Sim::DeviceEmulator>(nullptr);
 
 	QFile lmDescritptionFile(":/LM1_SF40.xml");
 

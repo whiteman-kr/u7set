@@ -10,6 +10,7 @@
 #include "../lib/ILogFile.h"
 #include "SimScopedLog.h"
 
+
 namespace Sim
 {
 	class Simulator;
@@ -26,27 +27,28 @@ namespace Sim
 	public:
 		bool startSimulation();
 		bool stopSimulation();
-		bool sendData(const QString& lmEquipmentId, QByteArray&& data, TimeStamp timeStamp);
+		bool sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
 
 	protected slots:
-		void projectUpdated();		// Project was loaded or cleared
+		void projectUpdated();					// Project was loaded or cleared
 
 	public:
-		bool enabled() const;
+		bool enabled() const;					// Global enable for all LogicModules AppData LANs
 		void setEnabled(bool value);
 
 	private:
 		void shutdownTransmitterThread();
 
 	private:
-		Simulator* m_simulator;
+		Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;
-		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
+
+		std::atomic<bool> m_enabled{false};		// Allow AppData trasmittion to AppDataSrv
 
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
 	};
 
-	//
+
 
 	class AppDataTransmitterThread : public RunOverrideThread
 	{
@@ -83,7 +85,7 @@ namespace Sim
 		AppDataTransmitterThread(const Simulator& simulator);
 		virtual ~AppDataTransmitterThread();
 
-		bool sendAppData(const QString& lmEquipmentId, QByteArray& data, TimeStamp timeStamp);
+		bool sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
 
 		virtual void run();
 

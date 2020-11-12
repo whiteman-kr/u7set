@@ -23,7 +23,7 @@ namespace Sim
 		return;
 	}
 
-	ScopedLog::ScopedLog(ScopedLog src, QString scope) :
+	ScopedLog::ScopedLog(const ScopedLog& src, QString scope) :
 		m_log(src.m_log),
 		m_scope(scope)
 	{

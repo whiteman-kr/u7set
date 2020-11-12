@@ -16,9 +16,9 @@ namespace Sim
 	public:
 		ScopedLog(const ScopedLog& src);
 		explicit ScopedLog(ILogFile* log, QString outputScope);
-		explicit ScopedLog(ScopedLog src, QString outputScope);
+		explicit ScopedLog(const ScopedLog& src, QString outputScope);
 
-		~ScopedLog();
+		virtual ~ScopedLog();
 
 	public slots:
 		bool writeAlert(QString text);
