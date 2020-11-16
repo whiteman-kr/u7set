@@ -306,7 +306,7 @@ const char* const		ModuleParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input mofule"),
+						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input module"),
 };
 
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
