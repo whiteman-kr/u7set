@@ -26,8 +26,8 @@ const char* const			SignalConnectionColumn[] =
 {
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type No"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type"),
-							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (input)"),
-							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (output)"),
+							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (source)"),
+							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (destination)"),
 };
 
 const int					SIGNAL_CONNECTION_COLUMN_COUNT			= sizeof(SignalConnectionColumn)/sizeof(SignalConnectionColumn[0]);

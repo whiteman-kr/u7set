@@ -301,11 +301,11 @@ void SignalConnectionItemDialog::createInterface()
 		//
 	QHBoxLayout *inputSignalLayout = new QHBoxLayout;
 
-	QLabel* pInputSignalLabel = new QLabel(tr("Input signal"), this);
+	QLabel* pInputSignalLabel = new QLabel(tr("Source signal"), this);
 	m_pInputSignalIDEdit = new QLineEdit(QString(), this);
 	m_pInputSignalButton = new QPushButton(tr("Select ..."), this);
 
-	pInputSignalLabel->setFixedWidth(70);
+	pInputSignalLabel->setFixedWidth(100);
 	m_pInputSignalIDEdit->setFixedWidth(200);
 
 	//m_pInputSignalIDEdit->setReadOnly(true);
@@ -319,11 +319,11 @@ void SignalConnectionItemDialog::createInterface()
 		//
 	QHBoxLayout *outputSignalLayout = new QHBoxLayout;
 
-	QLabel* pOutputSignalLabel = new QLabel(tr("Output signal"), this);
+	QLabel* pOutputSignalLabel = new QLabel(tr("Destination signal"), this);
 	m_pOutputSignalIDEdit = new QLineEdit(QString(), this);
 	m_pOutputSignalButton = new QPushButton(tr("Select ..."), this);
 
-	pOutputSignalLabel->setFixedWidth(70);
+	pOutputSignalLabel->setFixedWidth(100);
 	m_pOutputSignalIDEdit->setFixedWidth(200);
 
 	//m_pOutputSignalIDEdit->setReadOnly(true);

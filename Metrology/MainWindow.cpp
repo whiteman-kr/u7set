@@ -193,7 +193,7 @@ void MainWindow::createActions()
 
 	// Tools
 	//
-	m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
+	m_pCalibratorsAction = new QAction(tr("&Calibrators ..."), this);
 	m_pCalibratorsAction->setIcon(QIcon(":/icons/Calibrators.png"));
 	m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
 	connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::showCalibrators);
