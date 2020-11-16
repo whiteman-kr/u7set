@@ -4,6 +4,10 @@
 #include <map>
 #include <unordered_map>
 #include <optional>
+#include <queue>
+#include <array>
+#include <vector>
+#include <algorithm>
 
 // Qt includes
 //

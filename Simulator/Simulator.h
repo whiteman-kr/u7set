@@ -13,6 +13,7 @@
 #include "SimOverrideSignals.h"
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
+#include "SimLans.h"
 #include "SimAppDataTransmitter.h"
 #include "SimScopedLog.h"
 
@@ -80,9 +81,6 @@ namespace Sim
 		[[nodiscard]] std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
 		[[nodiscard]] std::vector<std::shared_ptr<LogicModule>> logicModules() const;
 
-		[[nodiscard]] Sim::AppDataTransmitter& appDataTransmitter();
-		[[nodiscard]] const Sim::AppDataTransmitter& appDataTransmitter() const;
-
 		[[nodiscard]] Sim::AppSignalManager& appSignalManager();
 		[[nodiscard]] const Sim::AppSignalManager& appSignalManager() const;
 
@@ -92,6 +90,9 @@ namespace Sim
 		[[nodiscard]] Sim::OverrideSignals& overrideSignals();
 		[[nodiscard]] const Sim::OverrideSignals& overrideSignals() const;
 
+		[[nodiscard]] Sim::AppDataTransmitter& appDataTransmitter();
+		[[nodiscard]] const Sim::AppDataTransmitter& appDataTransmitter() const;
+
 		[[nodiscard]] Sim::Control& control();
 		[[nodiscard]] const Sim::Control& control() const;
 
@@ -99,22 +100,21 @@ namespace Sim
 		mutable ScopedLog m_log;
 
 		QString m_buildPath;
-		Hardware::ModuleFirmwareStorage m_firmwares;	// Loaded bts file
+		Hardware::ModuleFirmwareStorage m_firmwares;						// Loaded bts file
 
 		Sim::Connections m_connections;
 
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
 
-
 		// Signals Management
 		//
-		Sim::AppDataTransmitter m_appDataTransmitter{this};
-
 		Sim::AppSignalManager m_appSignalManager{this};
 		Sim::TuningSignalManager m_tuningSignalManager;
 
 		Sim::OverrideSignals m_overrideSignals{this};
+
+		Sim::AppDataTransmitter m_appDataTransmitter{this};
 
 		// Control thread
 		//

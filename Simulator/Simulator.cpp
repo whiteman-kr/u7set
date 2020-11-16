@@ -195,6 +195,23 @@ namespace Sim
 			return false;
 		}
 
+		// Load LogicModules info - file /Common/LogicModules.xml
+		//
+		LogicModulesInfo logicModulesInfo;
+
+		{
+			QString loadLmsInfoErrorMessage;
+			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
+
+			ok = logicModulesInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
+			if (ok == false)
+			{
+				m_log.writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
+				clearImpl();
+				return false;
+			}
+		}
+
 		// Load ConnectinsInfo
 		//
 		ok = loadConnectionsInfo(buildPath);
@@ -248,7 +265,7 @@ namespace Sim
 				return false;
 			}
 
-			auto subsystem = std::make_shared<Sim::Subsystem>(subsystemId, m_log);
+			auto subsystem = std::make_shared<Sim::Subsystem>(subsystemId, this);
 			m_subsystems[subsystemId] = subsystem;
 
 			Subsystem& ss = *subsystem.get();
@@ -268,60 +285,11 @@ namespace Sim
 
 			// Upload data to susbystem
 			//
-			ok = ss.load(firmware, lmDescription, m_connections);
+			ok = ss.load(firmware, lmDescription, m_connections, logicModulesInfo);
 			if (ok == false)
 			{
 				// Error must be reported in Subsystem::load
 				//
-				clearImpl();
-				return false;
-			}
-		}
-
-		// Load LogicModules info - /Common/LogicModules.xml
-		//
-		{
-			LogicModulesInfo lmsInfo;
-			QString loadLmsInfoErrorMessage;
-			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
-
-			ok = lmsInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
-			if (ok == false)
-			{
-				m_log.writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
-				clearImpl();
-				return false;
-			}
-
-			auto lms = this->logicModules();
-			for (auto lm : lms)
-			{
-				QString lmEquipmentId = lm->equipmentId();
-
-				auto fit = std::find_if(lmsInfo.logicModulesInfo.begin(), lmsInfo.logicModulesInfo.end(),
-							 [&lmEquipmentId](const ::LogicModuleInfo& lmi)
-							 {
-								return lmi.equipmentID == lmEquipmentId;
-							 });
-				if (fit == lmsInfo.logicModulesInfo.end())
-				{
-					m_log.writeError(tr("Information for LogicModule %1 is not found (file %2)")
-								.arg(lmEquipmentId)
-								.arg(lmsInfoFileName));
-					ok = false;
-				}
-				else
-				{
-					const ::LogicModuleInfo& lmi = *fit;
-					Q_ASSERT(lmi.equipmentID == lm->equipmentId());
-					Q_ASSERT(lmi.lmNumber == lm->logicModuleInfo().lmNumber);
-
-					lm->setLogicModuleExtraInfo(lmi);
-				}
-			}
-
-			if (ok == false)
-			{
 				clearImpl();
 				return false;
 			}
@@ -568,16 +536,6 @@ namespace Sim
 		return result;
 	}
 
-	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
-	{
-		return m_appDataTransmitter;
-	}
-
-	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
-	{
-		return m_appDataTransmitter;
-	}
-
 	Sim::AppSignalManager& Simulator::appSignalManager()
 	{
 		return m_appSignalManager;
@@ -606,6 +564,16 @@ namespace Sim
 	const Sim::OverrideSignals& Simulator::overrideSignals() const
 	{
 		return m_overrideSignals;
+	}
+
+	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
+	{
+		return m_appDataTransmitter;
+	}
+
+	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
+	{
+		return m_appDataTransmitter;
 	}
 
 	Sim::Control& Simulator::control()

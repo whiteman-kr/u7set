@@ -1,5 +1,6 @@
 #include "SimSubsystem.h"
 #include "../lib/ModuleFirmware.h"
+#include "Simulator.h"
 #include "SimConnections.h"
 
 namespace Sim
@@ -7,13 +8,17 @@ namespace Sim
 	//
 	// Subsystem
 	//
-	Subsystem::Subsystem(QString subsystemId, ScopedLog log) :
-		m_log(log, subsystemId),
+	Subsystem::Subsystem(QString subsystemId, Simulator* simulator) :
+		m_simulator(simulator),
+		m_log(simulator->log(), subsystemId),
 		m_subsystemId(subsystemId)
 	{
 	}
 
-	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const Connections& connections)
+	bool Subsystem::load(const Hardware::ModuleFirmware& firmware,
+						 const LmDescription& lmDescription,
+						 const Connections& connections,
+						 const LogicModulesInfo& logicModulesExtraInfo)
 	{
 		m_lmDescription = lmDescription;
 
@@ -51,7 +56,7 @@ namespace Sim
 
 			m_log.writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections);
+			bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections, logicModulesExtraInfo);
 			if (loadOk == false)
 			{
 				return false;
@@ -87,7 +92,7 @@ namespace Sim
 
 	 std::shared_ptr<LogicModule> Subsystem::addDevice(const Hardware::LogicModuleInfo& lm)
 	 {
-		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>(m_log);
+		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>(m_simulator);
 
 		if (auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result);
 			p.second == false)

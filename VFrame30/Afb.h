@@ -200,7 +200,6 @@ namespace Afb
 	};
 
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// DELETE IT IN FUTURE
 	//
 

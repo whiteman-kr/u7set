@@ -972,6 +972,11 @@ bool LmDescription::LanController::isProvideDiagData() const
 			m_type == E::LanControllerType::AppAndDiagData;
 }
 
+int LmDescription::Lan::lanControllerCount() const
+{
+	return static_cast<int>(m_lanControllers.size());
+}
+
 E::LanControllerType LmDescription::Lan::lanControllerType(int index, bool* ok) const
 {
 	if (index < 0 || index >= lanControllerCount())
@@ -981,6 +986,7 @@ E::LanControllerType LmDescription::Lan::lanControllerType(int index, bool* ok) 
 		{
 			*ok = false;
 		}
+
 		return E::LanControllerType::Unknown;
 	}
 

@@ -79,6 +79,7 @@ protected slots:
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
+	void showAboutQt();
 	void debug();
 	void startBuild();
 	void projectHistory();
@@ -123,6 +124,7 @@ private:
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;
 	QAction* m_aboutAction = nullptr;
+	QAction* m_aboutQtAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;
 	QAction* m_projectHistoryAction = nullptr;

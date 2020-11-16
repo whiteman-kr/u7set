@@ -1,12 +1,13 @@
 #include "SimLogicModule.h"
 #include "../lib/ModuleFirmware.h"
+#include "Simulator.h"
 
 namespace Sim
 {
 
-	LogicModule::LogicModule(ScopedLog log) :
-		m_log(log, "LogicModule"),
-		m_device(log)
+	LogicModule::LogicModule(Simulator* simulator) :
+		m_simulator(simulator),
+		m_log(simulator->log(), "LogicModule")
 	{
 	}
 
@@ -18,7 +19,8 @@ namespace Sim
 	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo,
 						   const LmDescription& lmDescription,
 						   const Hardware::ModuleFirmware& firmware,
-						   const Connections& connections)
+						   const Connections& connections,
+						   const LogicModulesInfo& logicModulesExtraInfo)
 	{
 		m_log.setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
 
@@ -51,7 +53,8 @@ namespace Sim
 									   m_tuningEeprom,
 									   m_confEeprom,
 									   m_appLogicEeprom,
-									   connections);
+									   connections,
+									   logicModulesExtraInfo);
 
 		if (de == DeviceError::Ok || de == DeviceError::NoCommandProcessor)
 		{
@@ -224,21 +227,6 @@ namespace Sim
 	DeviceMode LogicModule::deviceMode() const
 	{
 		return m_device.currentMode();
-	}
-
-	void LogicModule::setOverrideSignals(OverrideSignals* overrideSignals)
-	{
-		m_device.setOverrideSignals(overrideSignals);
-	}
-
-	void LogicModule::setAppSignalManager(AppSignalManager* appSignalManager)
-	{
-		m_device.setAppSignalManager(appSignalManager);
-	}
-
-	void LogicModule::setAppDataTransmitter(AppDataTransmitter* appDataTransmitter)
-	{
-		m_device.setAppDataTransmitter(appDataTransmitter);
 	}
 
 	bool LogicModule::isPowerOff() const
