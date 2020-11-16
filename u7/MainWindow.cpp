@@ -313,10 +313,15 @@ void MainWindow::createActions()
 	m_AfbLibraryCheck->setEnabled(false);
 	connect(m_AfbLibraryCheck, &QAction::triggered, this, &MainWindow::afbLibraryCheck);
 
-	m_aboutAction = new QAction(tr("About..."), this);
+	m_aboutAction = new QAction(tr("About u7..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
+
+	m_aboutQtAction = new QAction(tr("About Qt..."), this);
+	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
+	//m_pAboutAction->setEnabled(true);
+	connect(m_aboutQtAction, &QAction::triggered, this, &MainWindow::showAboutQt);
 
 	m_debugAction = new QAction(tr("Debug Mode"), this);
 	m_debugAction->setStatusTip(tr("Set debug mode, some extra messages will be displayed"));
@@ -412,16 +417,13 @@ void MainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_manualAfblAction);
 	pHelpMenu->addAction(m_manualRpctAction);
-
-	QMenu* rpctHelpMenu = pHelpMenu->addMenu(tr("RPCT User Manual Appendixes"));
-
-	rpctHelpMenu->addAction(m_manualRpctAppendixAAction);
-	rpctHelpMenu->addAction(m_scriptHelpAction);
+	pHelpMenu->addAction(m_manualRpctAppendixAAction);
 
 	pHelpMenu->addSeparator();
 
-	pHelpMenu->addAction(m_manualAfblAction);
+	pHelpMenu->addAction(m_scriptHelpAction);
 
 	pHelpMenu->addSeparator();
 
@@ -431,7 +433,11 @@ void MainWindow::createMenus()
 	pHelpMenu->addSeparator();
 
 	pHelpMenu->addAction(m_shortcutsAction);
+
+	pHelpMenu->addSeparator();
+
 	pHelpMenu->addAction(m_aboutAction);
+	pHelpMenu->addAction(m_aboutQtAction);
 
 	return;
 }
@@ -957,6 +963,13 @@ void MainWindow::showAbout()
 	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>";
 
 	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+
+	return;
+}
+
+void MainWindow::showAboutQt()
+{
+	QMessageBox::aboutQt(this, qAppName());
 
 	return;
 }
