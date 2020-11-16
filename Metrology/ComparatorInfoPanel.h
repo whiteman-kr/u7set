@@ -35,7 +35,6 @@ public:
 private:
 
 	ComparatorInfoOption	m_comparatorInfo;
-	int						m_maxComparatorCount = 0;
 
 	mutable QMutex			m_signalMutex;
 	int						m_signalCount = 0;
@@ -50,7 +49,6 @@ private:
 public:
 
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
-	void					setMaxComparatorCount(int count);
 
 	int						signalCount() const { return m_signalCount; }
 	IoSignalParam			signalParam(int index) const;
@@ -102,7 +100,6 @@ private:
 	//
 	CalibratorBase*			m_pCalibratorBase = nullptr;
 	ComparatorInfoOption	m_comparatorInfo;
-	int						m_maxComparatorCount = 0;
 
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
@@ -113,7 +110,6 @@ public:
 
 	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
-	void					setMaxComparatorCount(int count);
 
 protected:
 

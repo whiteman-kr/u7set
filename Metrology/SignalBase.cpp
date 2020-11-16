@@ -2483,13 +2483,6 @@ void SignalBase::clearActiveSignal()
 
 bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 {
-	int maxComparatorCount = Metrology::ComparatorCount;
-
-	if (theOptions.module().maxComparatorCount() > maxComparatorCount)
-	{
-		maxComparatorCount = theOptions.module().maxComparatorCount();
-	}
-
 	QStringList appSignalIDList = comparatorSet.inputSignalIDs();
 
 	for(const QString& appSignalID : appSignalIDList)
@@ -2582,11 +2575,6 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					}
 
 					break;
-			}
-
-			if (metrologyComparatorList.count() >= maxComparatorCount)
-			{
-				break;
 			}
 		}
 

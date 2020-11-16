@@ -2846,6 +2846,13 @@ Please, make initialization calibrators!</source>
 Проведите инициализацию калибраторов!</translation>
     </message>
     <message>
+        <location filename="../MainWindow.cpp" line="1215"/>
+        <source>Unable to start the measurement process!
+All electrical ranges of the inputs of the module must be the same.</source>
+        <translation>Невозможно начать процесс измерения!
+Все электрические диапазоны входов  модуля, должны быть одинаковы.</translation>
+    </message>
+    <message>
         <source>Proccess of measure can not start, because no connected calibrators!
 Please, make initialization calibrators</source>
         <translation type="vanished">Невозможно начать процесс измерения, потому что нет подключенных калибраторов!
@@ -2867,10 +2874,9 @@ Please, make initialization calibrators</source>
         <translation>Нет соединения с Application Data Service!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1215"/>
         <source>Unable to start the measurement process!
 All electrical ranges of the inputs (or outputs) of the module must be the same.</source>
-        <translation>Невозможно начать процесс измерения!
+        <translation type="vanished">Невозможно начать процесс измерения!
 Все электрические диапазоны входов (или выходов) модуля, должны быть одинаковы.</translation>
     </message>
     <message>

@@ -398,12 +398,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
 					limitsGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_CMP_COUNT]));
-					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setValue(m_options.module().maxComparatorCount());
-					appendProperty(item, page, MO_PARAM_MAX_CMP_COUNT);
-					limitsGroup->addSubProperty(item);
-
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(identificationGroup);
@@ -586,7 +580,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]));
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), m_options.module().maxComparatorCount());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
@@ -1158,7 +1151,6 @@ void OptionsDialog::applyProperty()
 					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());					break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
-					case MO_PARAM_MAX_CMP_COUNT:			m_options.module().setMaxComparatorCount(value.toInt());					break;
 					default:								assert(0);
 				}
 			}

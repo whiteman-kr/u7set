@@ -26,30 +26,6 @@ ComparatorInfoTable::~ComparatorInfoTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoTable::setMaxComparatorCount(int count)
-{
-	if (m_maxComparatorCount == count)
-	{
-		return;
-	}
-
-	if (m_maxComparatorCount != 0)
-	{
-		beginRemoveColumns(QModelIndex(), 0, m_maxComparatorCount - 1);
-		endRemoveColumns();
-	}
-
-	m_maxComparatorCount = count;
-
-	if (m_maxComparatorCount != 0)
-	{
-		beginInsertColumns(QModelIndex(), 0, m_maxComparatorCount - 1);
-		endInsertColumns();
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void ComparatorInfoTable::setComparatorInfo(const ComparatorInfoOption& comparatorInfo)
 {
 	m_comparatorInfo = comparatorInfo;
@@ -59,7 +35,7 @@ void ComparatorInfoTable::setComparatorInfo(const ComparatorInfoOption& comparat
 
 int ComparatorInfoTable::columnCount(const QModelIndex&) const
 {
-	return m_maxComparatorCount;
+	return Metrology::ComparatorCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -82,7 +58,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < m_maxComparatorCount)
+		if (section >= 0 && section < Metrology::ComparatorCount)
 		{
 			result = tr("Comparator %1").arg(section + 1);
 		}
@@ -112,7 +88,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column >= m_maxComparatorCount)
+	if (column < 0 || column >= Metrology::ComparatorCount)
 	{
 		return QVariant();
 	}
@@ -193,7 +169,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, m_maxComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
+	emit dataChanged(index(0, 0), index(m_signalCount - 1, Metrology::ComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -313,7 +289,6 @@ void ComparatorInfoPanel::createInterface()
 	m_pComparatorInfoWindow->installEventFilter(this);
 
 	m_comparatorTable.setComparatorInfo(m_comparatorInfo);
-	m_comparatorTable.setMaxComparatorCount(m_maxComparatorCount);
 
 	m_pView = new QTableView(m_pComparatorInfoWindow);
 	m_pView->setModel(&m_comparatorTable);
@@ -322,7 +297,7 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < m_maxComparatorCount; column++)
+	for(int column = 0; column < Metrology::ComparatorCount; column++)
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
@@ -363,7 +338,7 @@ void ComparatorInfoPanel::createContextMenu()
 
 void ComparatorInfoPanel::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= m_maxComparatorCount)
+	if (column < 0 || column >= Metrology::ComparatorCount)
 	{
 		return;
 	}
@@ -415,20 +390,6 @@ void ComparatorInfoPanel::restartComparatorStateTimer(int timeout)
 
 	stopComparatorStateTimer();
 	startComparatorStateTimer(timeout);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoPanel::setMaxComparatorCount(int count)
-{
-	if (m_maxComparatorCount == count)
-	{
-		return;
-	}
-
-	m_maxComparatorCount = count;
-
-	m_comparatorTable.setMaxComparatorCount(m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -535,7 +496,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	m_comparatorTable.set(ioParamList);
 
-	for(int c = 0; c < m_maxComparatorCount; c ++)
+	for(int c = 0; c < Metrology::ComparatorCount; c ++)
 	{
 		if (c < maxComparatorCount)
 		{

@@ -306,8 +306,7 @@ const char* const		ModuleParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs (outpus) for mofule"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
+						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input mofule"),
 };
 
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
@@ -315,8 +314,7 @@ const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName
 const int				MO_PARAM_SUFFIX_SN				= 0,
 						MO_PARAM_MEASURE_ENTIRE_MODULE	= 1,
 						MO_PARAM_WARN_IF_MEASURED		= 2,
-						MO_PARAM_MAX_IMPUT_COUNT		= 3,
-						MO_PARAM_MAX_CMP_COUNT			= 4;
+						MO_PARAM_MAX_IMPUT_COUNT		= 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -337,8 +335,7 @@ private:
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
 
-	int					m_maxInputCount = Metrology::InputCount;					// Maximum number of inputs for mofule
-	int					m_maxComparatorCount = Metrology::ComparatorCount;			// Maximum number of comparators for signal
+	int					m_maxInputCount = Metrology::InputCount;					// maximum number of inputs for input mofule
 
 public:
 
@@ -353,9 +350,6 @@ public:
 
 	int					maxInputCount() const { return m_maxInputCount; }
 	void				setMaxInputCount(int count);
-
-	int					maxComparatorCount() const { return m_maxComparatorCount; }
-	void				setMaxComparatorCount(int count);
 
 public:
 

@@ -600,7 +600,6 @@ void MainWindow::createPanels()
 
 		m_pComparatorInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pComparatorInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
-		m_pComparatorInfoPanel->setMaxComparatorCount(theOptions.module().maxComparatorCount());
 
 		connect(this, &MainWindow::signalConnectionTypeChanged,
 				m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
@@ -1213,7 +1212,7 @@ void MainWindow::startMeasure()
 			QMessageBox::critical(this,
 								  windowTitle(),
 								  tr("Unable to start the measurement process!\n"
-									 "All electrical ranges of the inputs (or outputs) of the module must be the same."));
+									 "All electrical ranges of the inputs of the module must be the same."));
 			return;
 		}
 	}
@@ -1527,7 +1526,6 @@ void MainWindow::showOptions()
 
 	if (m_pComparatorInfoPanel != nullptr)
 	{
-		m_pComparatorInfoPanel->setMaxComparatorCount(theOptions.module().maxComparatorCount());
 		m_pComparatorInfoPanel->setComparatorInfo(theOptions.comparatorInfo());
 	}
 

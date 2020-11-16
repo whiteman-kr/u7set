@@ -574,18 +574,6 @@ void ModuleOption::setMaxInputCount(int count)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ModuleOption::setMaxComparatorCount(int count)
-{
-	if (count == 0)
-	{
-		count = 1;
-	}
-
-	m_maxComparatorCount = count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void ModuleOption::load()
 {
 	QSettings s;
@@ -596,7 +584,6 @@ void ModuleOption::load()
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
 
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
-	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -611,7 +598,6 @@ void ModuleOption::save()
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
-	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -624,7 +610,6 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 	m_warningIfMeasured = from.m_warningIfMeasured;
 
 	m_maxInputCount = from.m_maxInputCount;
-	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	return *this;
 }
