@@ -4407,7 +4407,6 @@ Do you want to repeat the preparation process in order to switch the comparator 
     </message>
     <message>
         <location filename="../OptionsDialog.h" line="29"/>
-        <location filename="../OptionsDialog.h" line="99"/>
         <source>Language</source>
         <translation>Язык</translation>
     </message>
@@ -4465,6 +4464,11 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <location filename="../OptionsDialog.h" line="58"/>
         <source>Displaying information of сomparators</source>
         <translation>отображение информации об уставках</translation>
+    </message>
+    <message>
+        <location filename="../OptionsDialog.h" line="99"/>
+        <source>Language of interface</source>
+        <translation>Язык интерфейса</translation>
     </message>
     <message>
         <source>Database settings</source>
@@ -5528,7 +5532,7 @@ file is not found!</source>
     <message>
         <location filename="../SignalConnectionList.h" line="30"/>
         <source>AppSignalID (destination)</source>
-        <translation>AppSignalID (Получатель)</translation>
+        <translation>AppSignalID (Приёмник)</translation>
     </message>
     <message>
         <source>AppSignalID (input)</source>
@@ -5573,12 +5577,12 @@ file is not found!</source>
     <message>
         <location filename="../SignalConnectionList.cpp" line="304"/>
         <source>Source signal</source>
-        <translation>Сигнал источника</translation>
+        <translation>Сигнал-источник</translation>
     </message>
     <message>
         <location filename="../SignalConnectionList.cpp" line="322"/>
         <source>Destination signal</source>
-        <translation>Сигнал получателя</translation>
+        <translation>Сигнал-приёмник</translation>
     </message>
     <message>
         <location filename="../SignalConnectionList.cpp" line="474"/>
