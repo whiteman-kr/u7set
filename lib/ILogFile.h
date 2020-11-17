@@ -1,5 +1,6 @@
 #pragma once
 
+
 class ILogFile
 {
 public:
@@ -9,5 +10,3 @@ public:
 	virtual bool writeMessage(const QString& text) = 0;
 	virtual bool writeText(const QString& text) = 0;
 };
-
-

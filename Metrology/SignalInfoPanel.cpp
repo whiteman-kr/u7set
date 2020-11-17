@@ -1,7 +1,6 @@
 #include "SignalInfoPanel.h"
 
 #include <QApplication>
-#include <QMainWindow>
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -9,8 +8,7 @@
 
 #include "../lib/UnitsConvertor.h"
 
-#include "CalibratorBase.h"
-#include "CopyData.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -19,7 +17,7 @@
 
 SignalInfoTable::SignalInfoTable(QObject*)
 {
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &SignalInfoTable::updateSignalParam, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, this, &SignalInfoTable::signalParamChanged, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -380,7 +378,7 @@ void SignalInfoTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::updateSignalParam(const QString& appSignalID)
+void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{
@@ -418,7 +416,8 @@ SignalInfoPanel::SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* pa
 	createHeaderContexMenu();
 	initContextMenu();
 
-	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::activeSignalChanged,
+			this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
 
 	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
@@ -617,7 +616,8 @@ void SignalInfoPanel::appendSignalConnetionMenu()
 		return;
 	}
 
-	connect(m_pContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalInfoPanel::onConnectionAction);
+	connect(m_pContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
+			this, &SignalInfoPanel::onConnectionAction);
 
 	m_pContextMenu->addSeparator();
 }
@@ -740,6 +740,11 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	clear();
 
+	if (m_pCalibratorBase == nullptr)
+	{
+		return;
+	}
+
 	if (activeSignal.isEmpty() == true)
 	{
 		return;
@@ -774,7 +779,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 			ioParam.setParam(type, param);
 			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
-			ioParam.setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
+			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
 		ioParamList.append(ioParam);
@@ -792,7 +797,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	}
 	else
 	{
-		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height() * 2);
+		m_pView->verticalHeader()->setDefaultSectionSize(static_cast<int>(cellSize.height() * 2.3));
 	}
 }
 

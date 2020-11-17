@@ -1,6 +1,7 @@
 #include "SimCommandTest_LM5_LM6.h"
 #include <QtTest>
 #include <algorithm>
+#include "../../Simulator/Simulator.h"
 #include "../../Simulator/SimDeviceEmulator.h"
 #include "../../Simulator/SimException.h"
 
@@ -10,7 +11,9 @@ SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6()
 
 void SimCommandTest_LM5_LM6::initTestCase()
 {
-	m_device = std::make_unique<Sim::DeviceEmulator>();
+	Sim::Simulator simulator{nullptr, nullptr};
+
+	m_device = std::make_unique<Sim::DeviceEmulator>(&simulator);
 
 	QFile lmDescritptionFile(":/LM1_SF40.xml");
 

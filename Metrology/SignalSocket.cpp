@@ -2,9 +2,8 @@
 
 #include <assert.h>
 
-#include "Options.h"
 #include "SignalBase.h"
-
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -133,7 +132,8 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 		return;
 	}
 
-	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData),
+													   static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "SignalSocket::replySignalState - error: ParseFromArray";

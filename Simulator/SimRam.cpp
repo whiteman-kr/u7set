@@ -1104,15 +1104,9 @@ namespace Sim
 		return ma;
 	}
 
-	void Ram::updateOverrideData(const QString& lmEquipmentId, const OverrideSignals* overrideSignals)
+	void Ram::updateOverrideData(const QString& lmEquipmentId, const OverrideSignals& overrideSignals)
 	{
-		if (overrideSignals == nullptr)
-		{
-			Q_ASSERT(overrideSignals);
-			return;
-		}
-
-		if (m_overrideSignalsLastCounter == overrideSignals->changesCounter())
+		if (m_overrideSignalsLastCounter == overrideSignals.changesCounter())
 		{
 			// Data has not been changesd since last update
 			//
@@ -1121,11 +1115,11 @@ namespace Sim
 
 		for (RamArea& ramArea : m_memoryAreas)
 		{
-			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(lmEquipmentId, ramArea);
+			std::vector<OverrideRamRecord> ovData = overrideSignals.ramOverrideData(lmEquipmentId, ramArea);
 			ramArea.setOverrideData(std::move(ovData));
 		}
 
-		m_overrideSignalsLastCounter = overrideSignals->changesCounter();
+		m_overrideSignalsLastCounter = overrideSignals.changesCounter();
 		return;
 	}
 

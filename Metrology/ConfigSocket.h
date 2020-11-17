@@ -35,9 +35,13 @@ private:
 	SoftwareInfo		m_softwareInfo;
 	HostAddressPort		m_serverAddressPort1;
 	HostAddressPort		m_serverAddressPort2;
+	SocketClientOption	m_option;
 
 
 	CfgLoaderThread*	m_cfgLoaderThread = nullptr;
+
+	::Proto::MetrologySignalSet m_protoMetrologySignalSet;
+	ComparatorSet		m_comparatorSet;
 
 	QTimer*				m_connectionStateTimer = nullptr;
 	void				startConnectionStateTimer();
@@ -73,12 +77,17 @@ private slots:
 	bool				readRacks(const QByteArray& fileData, int fileVersion);
 	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
 
+	static void			loadSignalBase(ConfigSocket* pThis);
+
 signals:
 
 	void				socketConnected();
 	void				socketDisconnected();
 
+	void				unknownClient();
 	void				configurationLoaded();
+	void				signalBaseLoading(int persentage);
+	void				signalBaseLoaded();
 };
 
 // ==============================================================================================

@@ -340,7 +340,8 @@ namespace Metrology
 
 			if (signal.isInput() == true || signal.isOutput() == true)
 			{
-				if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true && signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
+				if (	signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true &&
+						signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
 				{
 					m_electricLowLimit = signal.electricLowLimit();
 					m_electricHighLimit = signal.electricHighLimit();
@@ -530,9 +531,65 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setElectricLowLimit(double lowLimit)
+	{
+		m_electricLowLimit = lowLimit;
+
+		if (isSpecPropExists(SignalProperties::electricLowLimitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricLowLimit(lowLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricHighLimit(double highLimit)
+	{
+		m_electricHighLimit = highLimit;
+
+		if (isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricHighLimit(highLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricUnitID(E::ElectricUnit unitID)
+	{
+		m_electricUnitID = unitID;
+
+		if (isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setElectricUnit(unitID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::electricUnitStr() const
 	{
 		return QMetaEnum::fromType<E::ElectricUnit>().key(m_electricUnitID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricSensorType(E::SensorType sensorType)
+	{
+		m_electricSensorType = sensorType;
+
+		if (isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setSensorType(sensorType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -574,11 +631,39 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setElectricRLoad(double rload)
+	{
+		m_electricRLoad = rload;
+
+		if (isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setRload_Ohm(rload);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::electricRLoadStr() const
 	{
 		QString r0;
 		r0 = QString::asprintf("R=%0.0f", m_electricRLoad);
 		return r0;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricR0(double r0)
+	{
+		m_electricR0 = r0;
+
+		if (isSpecPropExists(SignalProperties::R0_OhmCaption) == false)
+		{
+			return;
+		}
+
+		Signal::setR0_Ohm(r0);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -620,7 +705,10 @@ namespace Metrology
 
 		formatStr = QString::asprintf("%%.%df", m_electricPrecision);
 
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_electricLowLimit, m_electricHighLimit);
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
+								  formatStr.toLocal8Bit(),
+								  m_electricLowLimit,
+								  m_electricHighLimit);
 
 		QString unit = electricUnitStr();
 
@@ -636,8 +724,12 @@ namespace Metrology
 
 	bool SignalParam::isLinearRange() const
 	{
-		if (	(m_electricUnitID == E::ElectricUnit::mV && m_electricSensorType != E::SensorType::mV_Raw_Mul_8 && m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
-				(m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw) )
+		if (	(m_electricUnitID == E::ElectricUnit::mV &&
+				 m_electricSensorType != E::SensorType::mV_Raw_Mul_8 &&
+				 m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
+
+				(m_electricUnitID == E::ElectricUnit::Ohm &&
+				 m_electricSensorType != E::SensorType::Ohm_Raw) )
 		{
 			return false;	// for non-linear
 		}
@@ -690,7 +782,10 @@ namespace Metrology
 
 		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
+								  formatStr.toLocal8Bit(),
+								  lowEngineeringUnits(),
+								  highEngineeringUnits());
 
 		if (unit().isEmpty() == false)
 		{
@@ -776,7 +871,10 @@ namespace Metrology
 
 		formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), tuningLowBound().toDouble(), tuningHighBound().toDouble());
+		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
+								  formatStr.toLocal8Bit(),
+								  tuningLowBound().toDouble(),
+								  tuningHighBound().toDouble());
 
 		return range;
 	}

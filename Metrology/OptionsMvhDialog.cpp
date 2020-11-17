@@ -10,7 +10,7 @@
 
 OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent) :
 	QDialog(parent),
-	m_header (header)
+	m_header(header)
 {
 	setStyleSheet(".OptionsMeasureViewHeaderDialog { border: 1px solid grey } ");
 
@@ -35,9 +35,8 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	m_columnList = new QTableWidget;
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_columnList->verticalHeader()->setDefaultSectionSize(cellSize.height());
-	m_columnList->setFont(theOptions.measureView().font());
 
 	mainLayout->addLayout(measureTypeLayout);
 	mainLayout->addWidget(m_columnList);
@@ -234,10 +233,17 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 
 	switch(column)
 	{
-		case MVH_COLUMN_TITLE:		m_header.m_column[m_measureType][m_languageType][row].setTitle(item->text());			break;
-		case MVH_COLUMN_VISIBLE:	break;
-		case MVH_COLUMN_WIDTH:		m_header.m_column[m_measureType][m_languageType][row].setWidth(item->text().toInt());	break;
-		default:					assert(0);																				break;
+		case MVH_COLUMN_TITLE:
+			m_header.m_column[m_measureType][m_languageType][row].setTitle(item->text());
+			break;
+		case MVH_COLUMN_VISIBLE:
+			break;
+		case MVH_COLUMN_WIDTH:
+			m_header.m_column[m_measureType][m_languageType][row].setWidth(item->text().toInt());
+			break;
+		default:
+			assert(0);
+			break;
 	}
 
 	updateList();

@@ -7,12 +7,12 @@
 #include <QVBoxLayout>
 #include <QStatusBar>
 #include <QTableWidget>
+#include <QMessageBox>
+#include <QCompleter>
 
-#include "MainWindow.h"
-#include "MeasureView.h"
-#include "CopyData.h"
-#include "Options.h"
+#include "ProcessData.h"
 #include "Delegate.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -237,12 +237,6 @@ void FindMeasureTable::clear()
 FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
 	QDockWidget(parent)
 {
-	m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
-	if (m_pMainWindow == nullptr)
-	{
-		return;
-	}
-
 	setWindowTitle(tr("Search measurements panel"));
 	setObjectName(windowTitle());
 	loadSettings();
@@ -259,14 +253,26 @@ FindMeasurePanel::~FindMeasurePanel()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void FindMeasurePanel::clear()
+{
+	m_table.clear();
+	m_statusLabel->setText(QString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void FindMeasurePanel::createInterface()
 {
 	m_pFindWindow = new QMainWindow;
 
 	QToolBar *toolBar = new QToolBar(m_pFindWindow);
 
+	m_findCompleter.create(this);
+	m_findCompleter.setFilterCount(20);
+
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
+	m_findTextEdit->setCompleter(m_findCompleter.completer());
 	//m_findTextEdit->setClearButtonEnabled(true);
 
 	toolBar->addWidget(m_findTextEdit);
@@ -280,7 +286,7 @@ void FindMeasurePanel::createInterface()
 
 	m_pView = new QTableView(m_pFindWindow);
 	m_pView->setModel(&m_table);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	m_pFindWindow->setCentralWidget(m_pView);
@@ -340,6 +346,11 @@ bool FindMeasurePanel::event(QEvent* e)
 		saveSettings();
 	}
 
+	if (e->type() == QEvent::Show)
+	{
+		find();
+	}
+
 	if (e->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
@@ -369,7 +380,8 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 	{
 		QKeyEvent* ke = static_cast<QKeyEvent *>(e);
 
-		if (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down || ke->key() == Qt::Key_PageUp || ke->key() == Qt::Key_PageDown)
+		if (	ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down ||
+				ke->key() == Qt::Key_PageUp || ke->key() == Qt::Key_PageDown)
 		{
 			selectItemInMeasureView();
 		}
@@ -377,6 +389,42 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 
 	return QDockWidget::eventFilter(object, e);
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FindMeasurePanel::setViewFont(const QFont& font)
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	m_pView->setFont(font);
+	QSize cellSize = QFontMetrics(font).size(Qt::TextSingleLine,"A");
+	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FindMeasurePanel::measureViewChanged(MeasureView* pView)
+{
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	clear();
+
+	m_pMeasureView = pView;
+
+	if (isVisible() == false)
+	{
+		return;
+	}
+
+	find();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -395,49 +443,38 @@ void FindMeasurePanel::find()
 		return;
 	}
 
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
+	if (m_pMeasureView == nullptr)
 	{
 		return;
 	}
 
-	int measureType = pMainWindow->measureType();
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
+	m_findCompleter.appendFilter(m_findText);
 
-	m_measureType = measureType;
-
-	MeasureView* pMeasureView = pMainWindow->measureView(measureType);
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
+	saveSettings();
 
 	QVector<FindItem> findItemList;
 
 	m_table.clear();
 
-	int rowCount = pMeasureView->table().count();
-	int columnCount = pMeasureView->table().header().count();
+	int rowCount = m_pMeasureView->table().count();
+	int columnCount = m_pMeasureView->table().header().count();
 
 	for(int row = 0; row < rowCount; row ++)
 	{
 		for(int column = 0; column < columnCount; column++)
 		{
-			if (pMeasureView->table().columnIsVisible(column) == false)
+			if (m_pMeasureView->table().columnIsVisible(column) == false)
 			{
 				continue;
 			}
 
-			Measurement* pMeasurement = pMeasureView->table().at(row);
+			Measurement* pMeasurement = m_pMeasureView->table().at(row);
 			if (pMeasurement == nullptr)
 			{
 				continue;
 			}
 
-			QString text = pMeasureView->table().text(row, column, pMeasurement);
+			QString text = m_pMeasureView->table().text(row, column, pMeasurement);
 			if (text.isEmpty() == true)
 			{
 				continue;
@@ -457,7 +494,7 @@ void FindMeasurePanel::find()
 
 	if (findItemList.count() == 0)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Text \"%1\" was not found!").arg(m_findText));
+		//QMessageBox::information(this, windowTitle(), tr("Text \"%1\" was not found!").arg(m_findText));
 		return;
 	}
 
@@ -473,19 +510,7 @@ void FindMeasurePanel::find()
 
 void FindMeasurePanel::selectItemInMeasureView()
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
-	if (pMainWindow == nullptr)
-	{
-		return;
-	}
-
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
-	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
-	if (pMeasureView == nullptr)
+	if (m_pMeasureView == nullptr)
 	{
 		return;
 	}
@@ -499,19 +524,19 @@ void FindMeasurePanel::selectItemInMeasureView()
 	FindItem fi = m_table.at(indexFindItem);
 
 	int row = fi.row();
-	if (row < 0 || row >= pMeasureView->table().count())
+	if (row < 0 || row >= m_pMeasureView->table().count())
 	{
 		return;
 	}
 
 	int column = fi.column();
-	if (column < 0 || column > pMeasureView->table().header().count())
+	if (column < 0 || column > m_pMeasureView->table().header().count())
 	{
 		return;
 	}
 
-	QModelIndex selectIndex = pMeasureView->model()->index(row, column);
-	pMeasureView->setCurrentIndex(selectIndex);
+	QModelIndex selectIndex = m_pMeasureView->model()->index(row, column);
+	m_pMeasureView->setCurrentIndex(selectIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -536,6 +561,8 @@ void FindMeasurePanel::loadSettings()
 	QSettings s;
 
 	m_findText = s.value(QString("%1/FindText").arg(FIND_MEASURE_OPTIONS_KEY), QString()).toString();
+
+	m_findCompleter.load(FIND_MEASURE_OPTIONS_KEY);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -545,6 +572,8 @@ void FindMeasurePanel::saveSettings()
 	QSettings s;
 
 	s.setValue(QString("%1/FindText").arg(FIND_MEASURE_OPTIONS_KEY), m_findText);
+
+	m_findCompleter.save(FIND_MEASURE_OPTIONS_KEY);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

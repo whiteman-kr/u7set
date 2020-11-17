@@ -13,7 +13,9 @@
 #include <QTableWidget>
 #include <QLabel>
 #include <QStatusBar>
+#include <QKeyEvent>
 
+#include "MeasureBase.h"
 #include "SignalBase.h"
 
 // ==============================================================================================
@@ -99,22 +101,22 @@ public:
 
 private:
 
-	int						m_statisticsItemCount = 0;
+	int m_statisticsItemCount = 0;
 
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const;
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant data(const QModelIndex &index, int role) const;
 
 public:
 
-	void					set();
-	void					clear();
+	void set();
+	void clear();
 
-	QString					text(int row, int column, const StatisticsItem& si) const;
+	QString text(int row, int column, const StatisticsItem& si) const;
 
-	void					updateSignal(Hash signalHash);
+	void updateSignal(Hash signalHash);
 };
 
 // ==============================================================================================
@@ -132,108 +134,117 @@ private:
 
 	// elements of interface
 	//
-	QMainWindow*			m_pMainWindow = nullptr;
-	QMainWindow*			m_pStatisticsWindow = nullptr;
+	QMainWindow* m_pStatisticsWindow = nullptr;
 
-	QMenuBar*				m_pMenuBar = nullptr;
-	QMenu*					m_pSignalMenu = nullptr;
-	QMenu*					m_pEditMenu = nullptr;
-	QMenu*					m_pViewMenu = nullptr;
-	QMenu*					m_pViewGotoMenu = nullptr;
-	QMenu*					m_pContextMenu = nullptr;
+	QMenuBar* m_pMenuBar = nullptr;
+	QMenu* m_pSignalMenu = nullptr;
+	QMenu* m_pEditMenu = nullptr;
+	QMenu* m_pViewMenu = nullptr;
+	QMenu* m_pViewGotoMenu = nullptr;
+	QMenu* m_pContextMenu = nullptr;
 
-	QAction*				m_pExportAction = nullptr;
+	QAction* m_pExportAction = nullptr;
 
-	QAction*				m_pSelectSignalForMeasure = nullptr;
-	QAction*				m_pFindSignalInStatisticsList = nullptr;
-	QAction*				m_pFindSignalInMeasureList = nullptr;
+	QAction* m_pSelectSignalForMeasure = nullptr;
+	QAction* m_pFindSignalInStatisticsList = nullptr;
+	QAction* m_pFindSignalInMeasureList = nullptr;
 
-	QAction*				m_pFindAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pSelectAllAction = nullptr;
-	QAction*				m_pSignalPropertyAction = nullptr;
+	QAction* m_pFindAction = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pSelectAllAction = nullptr;
+	QAction* m_pSignalPropertyAction = nullptr;
 
-	QAction*				m_pGotoNextNotMeasuredAction = nullptr;
-	QAction*				m_pGotoNextInvalidAction = nullptr;
+	QAction* m_pGotoNextNotMeasuredAction = nullptr;
+	QAction* m_pGotoNextInvalidAction = nullptr;
 
-	QStatusBar*				m_pStatusBar;
-	QLabel*					m_statusEmpty = nullptr;
-	QLabel*					m_statusMeasureInavlid = nullptr;
-	QLabel*					m_statusMeasured = nullptr;
+	QStatusBar* m_pStatusBar;
+	QLabel* m_statusEmpty = nullptr;
+	QLabel* m_statusMeasureInavlid = nullptr;
+	QLabel* m_statusMeasured = nullptr;
 
-	QTableView*				m_pView = nullptr;
-	StatisticsTable			m_signalTable;
+	QTableView* m_pView = nullptr;
+	StatisticsTable m_signalTable;
 
-	QAction*				m_pColumnAction[STATISTICS_COLUMN_COUNT];
-	QMenu*					m_headerContextMenu = nullptr;
+	QAction* m_pColumnAction[STATISTICS_COLUMN_COUNT];
+	QMenu* m_headerContextMenu = nullptr;
 
-	static int				m_measureType;
-	static int				m_measureKind;
-	static int				m_signalConnectionType;
+	MeasureBase* m_pMeasureBase = nullptr;
 
-	void					createInterface();
-	void					createHeaderContexMenu();
-	void					createContextMenu();
-	void					createStatusBar();
-	void					updateStatusBar();
+	static int m_measureType;
+	static int m_measureKind;
+	static int m_signalConnectionType;
 
-	void					updateVisibleColunm();
-	void					hideColumn(int column, bool hide);
+
+	void createInterface();
+	void createHeaderContexMenu();
+	void createContextMenu();
+	void createStatusBar();
+	void updateStatusBar();
+
+	void updateVisibleColunm();
+	void hideColumn(int column, bool hide);
 
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool eventFilter(QObject *object, QEvent *event);
+
+public:
+
+	void setMeasureBase(MeasureBase* pMeasureBase) { m_pMeasureBase = pMeasureBase; }
+	void setViewFont(const QFont& font);
 
 signals:
 
-	void					setSignalConnectionType(int index);
-	void					setRack(int index);
-	void					setMeasureSignal(int index);
+	void setSignalConnectionType(int index);
+	void setRack(int index);
+	void setMeasureSignal(int index);
+
+	void showFindMeasurePanel(const QString& appSignalID);
 
 public slots:
 
-	void					measureTypeChanged(int type);
-	void					measureKindChanged(int kind);
-	void					signalConnectionTypeChanged(int type);
+	void measureTypeChanged(int type);
+	void measureKindChanged(int kind);
+	void signalConnectionTypeChanged(int type);
 
-	void					activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
+	void activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 
-	void					updateList();											// slots for reload list
-	void					updateSignalInList(Hash signalHash);					// slots for updating one singal in list
+	void updateList();												// slots for reload list
+	void updateSignalInList(Hash signalHash);						// slots for updating one singal in list
 
 private slots:
 
 	// slots of menu
 	//
-							// Signal
-							//
-	void					exportSignal();
-	void					selectSignalForMeasure();
-	void					findSignalInStatisticsList();
-	void					findSignalInMeasureList();
+		// Signal
+		//
+	void exportSignal();
+	void selectSignalForMeasure();
+	void findSignalInStatisticsList();
+	void findSignalInMeasureList();
 
-							// Edit
-							//
-	void					find();
-	void					copy();
-	void					selectAll();
-	void					onProperty();
+		// Edit
+		//
+	void find();
+	void copy();
+	void selectAll();
+	void onProperty();
 
-							// View
-							//
-	void					gotoNextNotMeasured();
-	void					gotoNextInvalid();
+		// View
+		//
+	void gotoNextNotMeasured();
+	void gotoNextInvalid();
 
-	void					onContextMenu(QPoint);
+	void onContextMenu(QPoint);
 
 	// slots for list header, to hide or show columns
 	//
-	void					onHeaderContextMenu(QPoint);
-	void					onColumnAction(QAction* action);
+	void onHeaderContextMenu(QPoint);
+	void onColumnAction(QAction* action);
 
 	// slots for list
 	//
-	void					onListDoubleClicked(const QModelIndex&) { selectSignalForMeasure(); }
+	void onListDoubleClicked(const QModelIndex&) { selectSignalForMeasure(); }
 };
 
 // ==============================================================================================

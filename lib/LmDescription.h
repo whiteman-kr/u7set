@@ -172,7 +172,7 @@ public:
 	{
 		std::vector<LanController> m_lanControllers;
 
-		int lanControllerCount() const { return static_cast<int>(m_lanControllers.size()); }
+		int lanControllerCount() const;
 		E::LanControllerType lanControllerType(int index, bool* ok = nullptr) const;
 		int lanControllerPlace(int index, bool* ok = nullptr) const;
 

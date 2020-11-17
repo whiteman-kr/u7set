@@ -54,6 +54,8 @@ public:
 	bool load(const QString& fileName, QString* errMsg);
 	bool load(const QByteArray& xmlData, QString* errMsg);
 
+	std::optional<::LogicModuleInfo> get(QString equipmentId) const;
+
 private:
 	bool load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QString* errMsg);
 	bool load(LanControllerInfo* lci, const QDomNode& lanControllerNode, QString* errMsg);

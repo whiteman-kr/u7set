@@ -13,9 +13,10 @@
 
 // ==============================================================================================
 // IoSignalParam for :
-//						MeasureThread
+//						Conversion
 //						SignalInfoPanel
 //						ComparatorInfoPanel
+//						MeasureThread
 //						MeasureBase
 //
 // ----------------------------------------------------------------------------------------------
@@ -42,11 +43,11 @@ private:
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 
 	double					m_percent = 0;					// for measuring of linearity
-	int						m_comparatorIndex = -1;			// for measuring of comparators
-	int						m_comparatorValueType = -1;		// for measuring of comparators
+	int						m_comparatorIndex = -1;			// for measuring of comparators - current cmp index
+	int						m_comparatorValueType = -1;		// for measuring of comparators - cmp or hst
 
 	bool					m_negativeRange = false;
-	double					m_tunSignalState = 0;			// for restore tun value after measuring
+	double					m_tunStateForRestore = 0;		// for restore tun value after measuring
 
 public:
 
@@ -59,10 +60,10 @@ public:
 	int						signalConnectionType() const { return m_signalConnectionType; }
 	void					setSignalConnectionType(int type) { m_signalConnectionType = type; }
 
-	QString					rackCaption() const;
 	QString					appSignalID() const;
 	QString					customSignalID() const;
 	QString					equipmentID() const;
+	QString					rackCaption() const;
 	QString					chassisStr() const;
 	QString					moduleStr() const;
 	QString					placeStr() const;
@@ -88,8 +89,8 @@ public:
 	bool					isNegativeRange() const { return m_negativeRange; }
 	void					setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }
 
-	double					tunSignalState() const { return m_tunSignalState; }
-	void					setTunSignalState(double state) { m_tunSignalState = state; }
+	double					tunStateForRestore() const { return m_tunStateForRestore; }
+	void					setTunStateForRestore(double state) { m_tunStateForRestore = state; }
 
 	IoSignalParam&			operator=(const IoSignalParam& from);
 };
@@ -266,6 +267,8 @@ public:
 	void					setSignalState(const Hash& hash, const Metrology::SignalState& state);
 	void					setSignalState(int index, const Metrology::SignalState& state);
 
+	bool					enableForMeasure(int signalConnectionType, Metrology::Signal* pSignal);
+
 	// hashs for update signal state
 	//
 	int						hashForRequestStateCount() const;
@@ -313,15 +316,11 @@ public:
 	//
 	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
 	bool					initComparatorSignals(Metrology::ComparatorEx* pComparatorEx);
-	
+
 signals:
 
-	void					updatedSignalParam(const QString& appSignalID);
-
 	void					activeSignalChanged(const MeasureSignal& signal);
-
-public slots:
-
+	void					signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================

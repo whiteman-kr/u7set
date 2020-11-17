@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include "FolderPropertyManager.h"
-#include "OptionsPointsDialog.h"
+#include "MeasurePointDialog.h"
 #include "OptionsMvhDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -96,11 +96,10 @@ int OptionsDialog::m_activePage = OPTION_PAGE_LINEARITY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsDialog::OptionsDialog(QWidget *parent) :
-	QDialog(parent)
+OptionsDialog::OptionsDialog(const Options& options, QWidget *parent) :
+	QDialog(parent),
+	m_options(options)
 {
-	m_options = theOptions;
-
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 	{
 		m_options.measureView().setUpdateColumnView(type, false);
@@ -226,16 +225,13 @@ QHBoxLayout* OptionsDialog::createButtons()
 
 	QPushButton* okButton = new QPushButton(tr("Ok"));
 	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-	QPushButton* applyButton = new QPushButton(tr("Apply"));
 
 	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(okButton);
 	buttonsLayout->addWidget(cancelButton);
-	buttonsLayout->addWidget(applyButton);
 
 	connect(okButton, &QPushButton::clicked, this, &OptionsDialog::onOk);
 	connect(cancelButton, &QPushButton::clicked, this, &OptionsDialog::reject);
-	connect(applyButton, &QPushButton::clicked, this, &OptionsDialog::onApply);
 
 	return buttonsLayout;
 }
@@ -262,8 +258,8 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_MEASURE_VIEW_TEXT:
 		case OPTION_PAGE_SIGNAL_INFO:
 		case OPTION_PAGE_COMPARATOR_INFO:
-		case OPTION_PAGE_DATABASE:
-		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_DATABASE_LOCATION:
+		case OPTION_PAGE_DATABASE_BACKUP:
 		case OPTION_PAGE_LANGUAGE:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:	pPropertyPage = createPropertyDialog(page);	break;
@@ -400,12 +396,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setValue(m_options.module().maxInputCount());
 					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
-					limitsGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_CMP_COUNT]));
-					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setValue(m_options.module().maxComparatorCount());
-					appendProperty(item, page, MO_PARAM_MAX_CMP_COUNT);
 					limitsGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -590,7 +580,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]));
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), theOptions.module().maxComparatorCount());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
@@ -638,6 +627,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_SHOW_NO_VALID]));
 					item->setValue(m_options.measureView().showNoValid());
 					appendProperty(item, page, MWO_PARAM_SHOW_NO_VALID);
+					measureGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_PRECESION_BY_CALIBRATOR]));
+					item->setValue(m_options.measureView().precesionByCalibrator());
+					appendProperty(item, page, MWO_PARAM_PRECESION_BY_CALIBRATOR);
 					measureGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -767,13 +761,13 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 			break;
 
-		case OPTION_PAGE_DATABASE:
+		case OPTION_PAGE_DATABASE_LOCATION:
 			{
 				QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of Database"));
 
-					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_PATH]));
-					item->setValue(m_options.database().path());
-					appendProperty(item, page, DBO_PARAM_PATH);
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_LOCATION_PATH]));
+					item->setValue(m_options.database().locationPath());
+					appendProperty(item, page, DBO_PARAM_LOCATION_PATH);
 					databaseGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_TYPE]));
@@ -793,25 +787,25 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			}
 			break;
 
-		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_DATABASE_BACKUP:
 			{
 				QtProperty *eventGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Events"));
 
-					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", BackupParam[BUO_PARAM_ON_START]));
-					item->setValue(m_options.backup().onStart());
-					appendProperty(item, page, BUO_PARAM_ON_START);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", DatabaseParam[DBO_PARAM_ON_START]));
+					item->setValue(m_options.database().onStart());
+					appendProperty(item, page, DBO_PARAM_ON_START);
 					eventGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", BackupParam[BUO_PARAM_ON_EXIT]));
-					item->setValue(m_options.backup().onExit());
-					appendProperty(item, page, BUO_PARAM_ON_EXIT);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", DatabaseParam[DBO_PARAM_ON_EXIT]));
+					item->setValue(m_options.database().onExit());
+					appendProperty(item, page, DBO_PARAM_ON_EXIT);
 					eventGroup->addSubProperty(item);
 
 				QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
-					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", BackupParam[BUO_PARAM_PATH]));
-					item->setValue(m_options.backup().path());
-					appendProperty(item, page, BUO_PARAM_PATH);
+					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_COPY_PATH]));
+					item->setValue(m_options.database().copyPath());
+					appendProperty(item, page, DBO_PARAM_COPY_PATH);
 					pathGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -871,8 +865,8 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 	{
 		case OPTION_PAGE_LINEARITY_POINT:
 			{
-				OptionsPointsDialog* dialog = new OptionsPointsDialog(m_options.linearity());
-				connect(dialog, &OptionsPointsDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
+				MeasurePointDialog* dialog = new MeasurePointDialog(m_options.linearity());
+				connect(dialog, &MeasurePointDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
 
 				pDialogPage = dialog;
 			}
@@ -1157,7 +1151,6 @@ void OptionsDialog::applyProperty()
 					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());					break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
-					case MO_PARAM_MAX_CMP_COUNT:			m_options.module().setMaxComparatorCount(value.toInt());					break;
 					default:								assert(0);
 				}
 			}
@@ -1213,12 +1206,13 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case MWO_PARAM_FONT:				m_options.measureView().setFont(value.toString());								break;
-					case MWO_PARAM_COLOR_NOT_ERROR:		m_options.measureView().setColorNotError(QColor(value.toString()));				break;
-					case MWO_PARAM_COLOR_LIMIT_ERROR:	m_options.measureView().setColorErrorLimit(QColor(value.toString()));			break;
-					case MWO_PARAM_COLOR_CONTROL_ERROR:	m_options.measureView().setColorErrorControl(QColor(value.toString()));			break;
-					case MWO_PARAM_SHOW_NO_VALID:		m_options.measureView().setShowNoValid(value.toBool());							break;
-					default:							assert(0);
+					case MWO_PARAM_FONT:					m_options.measureView().setFont(value.toString());							break;
+					case MWO_PARAM_COLOR_NOT_ERROR:			m_options.measureView().setColorNotError(QColor(value.toString()));			break;
+					case MWO_PARAM_COLOR_LIMIT_ERROR:		m_options.measureView().setColorErrorLimit(QColor(value.toString()));		break;
+					case MWO_PARAM_COLOR_CONTROL_ERROR:		m_options.measureView().setColorErrorControl(QColor(value.toString()));		break;
+					case MWO_PARAM_SHOW_NO_VALID:			m_options.measureView().setShowNoValid(value.toBool());						break;
+					case MWO_PARAM_PRECESION_BY_CALIBRATOR:	m_options.measureView().setPrecesionByCalibrator(value.toBool());			break;
+					default:								assert(0);
 				}
 
 				for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
@@ -1263,24 +1257,24 @@ void OptionsDialog::applyProperty()
 
 			break;
 
-		case OPTION_PAGE_DATABASE:
+		case OPTION_PAGE_DATABASE_LOCATION:
 			{
 				switch(param)
 				{
-					case DBO_PARAM_PATH:				m_options.database().setPath(value.toString());									break;
+					case DBO_PARAM_LOCATION_PATH:		m_options.database().setLocationPath(value.toString());							break;
 					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());									break;
 					default:							assert(0);
 				}
 			}
 			break;
 
-		case OPTION_PAGE_BACKUP:
+		case OPTION_PAGE_DATABASE_BACKUP:
 			{
 				switch(param)
 				{
-					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());									break;
-					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());									break;
-					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());									break;
+					case DBO_PARAM_ON_START:			m_options.database().setOnStart(value.toBool());								break;
+					case DBO_PARAM_ON_EXIT:				m_options.database().setOnExit(value.toBool());									break;
+					case DBO_PARAM_COPY_PATH:			m_options.database().setCopyPath(value.toString());								break;
 					default:							assert(0);
 				}
 			}
@@ -1327,7 +1321,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 		return;
 	}
 
-	OptionsPointsDialog* dialog = dynamic_cast<OptionsPointsDialog*>(page->getWidget());
+	MeasurePointDialog* dialog = dynamic_cast<MeasurePointDialog*>(page->getWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1463,17 +1457,7 @@ void OptionsDialog::saveSettings()
 
 void OptionsDialog::onOk()
 {
-	onApply();
-
 	accept();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OptionsDialog::onApply()
-{
-	theOptions = m_options;
-	theOptions.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

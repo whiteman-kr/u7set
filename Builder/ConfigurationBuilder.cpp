@@ -322,7 +322,8 @@ namespace Builder
 		QByteArray lmReportData;
 		for (QString s : lmReport)
 		{
-			lmReportData.append(s + "\r\n");
+			lmReportData.append(s.toUtf8());
+			lmReportData.append(QChar::LineFeed);
 		}
 
 		if (m_buildResultWriter->addFile("Reports", "LmJumpers.txt", lmReportData) == nullptr)

@@ -1,8 +1,10 @@
 #ifndef FINDMEASUREPANEL_H
 #define FINDMEASUREPANEL_H
 
+#include <QMainWindow>
 #include <QDockWidget>
 #include <QMenu>
+#include <QToolBar>
 #include <QAction>
 #include <QKeyEvent>
 #include <QLabel>
@@ -10,6 +12,8 @@
 #include <QTableView>
 
 #include "MeasureBase.h"
+#include "MeasureView.h"
+#include "ProcessData.h"
 
 // ==============================================================================================
 
@@ -110,7 +114,7 @@ public:
 
 // ==============================================================================================
 
-#define				 FIND_MEASURE_OPTIONS_KEY		"Options/FindMeasure/"
+#define					FIND_MEASURE_OPTIONS_KEY		"Options/Find/FindMeasure/"
 
 // ==============================================================================================
 
@@ -125,21 +129,25 @@ public:
 
 private:
 
-	QMainWindow*		m_pMainWindow = nullptr;
-
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;
-
-	QString				m_findText;
-
-	QMainWindow*		m_pFindWindow = nullptr;
-	QLineEdit*			m_findTextEdit  = nullptr;
-	QTableView*			m_pView = nullptr;
-	QLabel*				m_statusLabel = nullptr;
-	FindMeasureTable	m_table;
+	MeasureView*		m_pMeasureView = nullptr;
 
 	QMenu*				m_pContextMenu = nullptr;
 	QAction*			m_pCopyAction = nullptr;
 	QAction*			m_pSelectAllAction = nullptr;
+
+	QString				m_findText;
+
+	QMainWindow*		m_pFindWindow = nullptr;
+
+	CompleterData		m_findCompleter;
+	QLineEdit*			m_findTextEdit  = nullptr;
+
+	QTableView*			m_pView = nullptr;
+	FindMeasureTable	m_table;
+
+	QLabel*				m_statusLabel = nullptr;
+
+	void				clear();
 
 	void				createInterface();
 	void				createContextMenu();
@@ -154,13 +162,16 @@ protected:
 
 public:
 
+	void				setViewFont(const QFont& font);
+
 	void				setFindText(const QString& findText);
 
 public slots:
 
-	void				clear()	{ m_table.clear(); m_statusLabel->setText(QString()); }
+	void				measureViewChanged(MeasureView* pView);
 
 	void				find();
+
 
 private slots:
 

@@ -44,13 +44,14 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
-    CopyData.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
+    MeasurePointBase.cpp \
+    MeasurePointDialog.cpp \
     OptionsDialog.cpp \
     Options.cpp \
-    OptionsPointsDialog.cpp \
+    ProcessData.cpp \
     SelectSignalWidget.cpp \
     StatisticsBase.cpp \
     StatisticsPanel.cpp \
@@ -83,8 +84,6 @@ SOURCES += \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
-    ExportData.cpp \
-    FindData.cpp \
     TuningSocket.cpp \
     TuningSignalBase.cpp \
     TuningSignalList.cpp \
@@ -122,13 +121,13 @@ SOURCES += \
 HEADERS  += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
-    CopyData.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
+    MeasurePointBase.h \
+    MeasurePointDialog.h \
     OptionsDialog.h \
     Options.h \
-    OptionsPointsDialog.h \
     MeasureThread.h \
     CalibratorManager.h \
     MeasureViewHeader.h \
@@ -139,9 +138,9 @@ HEADERS  += \
     Database.h \
     Conversion.h \
     Calculator.h \
+    ProcessData.h \
     SelectSignalWidget.h \
     Stable.h \
-    ObjectVector.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/Crc.h \
@@ -166,8 +165,6 @@ HEADERS  += \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
-    ExportData.h \
-    FindData.h \
     StatisticsBase.h \
     StatisticsPanel.h \
     TuningSocket.h \

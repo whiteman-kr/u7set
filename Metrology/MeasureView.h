@@ -20,42 +20,42 @@ public:
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;
+	int m_measureType = MEASURE_TYPE_UNDEFINED;
 
-	MeasureViewHeader	m_header;
+	MeasureViewHeader m_header;
 
-	mutable QMutex		m_measureMutex;
+	mutable QMutex m_measureMutex;
 	QVector<Measurement*> m_measureList;
-	int					m_measureCount = 0;
+	int m_measureCount = 0;
 
-	int					columnCount(const QModelIndex &parent) const;
-	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const;
 
-	QVariant			headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant			data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant data(const QModelIndex &index, int role) const;
 
-	QString				textLinearity(int row, int column, Measurement* pMeasurement) const;
-	QString				textComparator(int row, int column, Measurement* pMeasurement) const;
+	QString textLinearity(int row, int column, Measurement* pMeasurement) const;
+	QString textComparator(int row, int column, Measurement* pMeasurement) const;
 
 public:
 
-	int					measureType() const { return m_measureType; }
-	void				setMeasureType(int measureType) { m_measureType = measureType; }
+	int measureType() const { return m_measureType; }
+	void setMeasureType(int measureType) { m_measureType = measureType; }
 
-	int					count() const { return m_measureCount; }
+	int count() const { return m_measureCount; }
 
-	MeasureViewHeader&	header() { return m_header; }
-	bool				columnIsVisible(int column);
+	MeasureViewHeader& header() { return m_header; }
+	bool columnIsVisible(int column);
 
-	QColor				backgroundColor(int row, int column, Measurement* pMeasurement) const;
-	QString				text(int row, int column, Measurement* pMeasurement) const;
+	QColor backgroundColor(int row, int column, Measurement* pMeasurement) const;
+	QString text(int row, int column, Measurement* pMeasurement) const;
 
-	bool				append(Measurement* pMeasurement);
-	Measurement*		at(int index) const;
-	void				remove(const QVector<int>& removeIndexList);
+	bool append(Measurement* pMeasurement);
+	Measurement* at(int index) const;
+	void remove(const QVector<int>& removeIndexList);
 
-	void				set(const QVector<Measurement*>& list_add);
-	void				clear();
+	void set(const QVector<Measurement*>& list_add);
+	void clear();
 };
 
 // ==============================================================================================
@@ -71,36 +71,38 @@ public:
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;
-	MeasureTable		m_table;
+	int	m_measureType = MEASURE_TYPE_UNDEFINED;
+	MeasureTable m_table;
 
-	QMenu*				m_headerContextMenu = nullptr;
-	QVector<QAction*>	m_actionList;
+	QMenu* m_headerContextMenu = nullptr;
+	QVector<QAction*> m_actionList;
 
-	void				createContextMenu();
+	void createContextMenu();
 
 public:
 
-	int					measureType() const { return m_measureType; }
-	MeasureTable&		table() { return m_table; }
+	int	measureType() const { return m_measureType; }
+	MeasureTable& table() { return m_table; }
 
-	void				updateColumn();
+	void updateColumn();
 
 signals:
 
+	void removeFromBase(int measureType, const QVector<int>& keyList);
+
 public slots:
 
-	void				onHeaderContextMenu(QPoint);
-	void				onHeaderContextAction(QAction* action);
+	void onHeaderContextMenu(QPoint);
+	void onHeaderContextAction(QAction* action);
 
-	void				onColumnResized(int index, int, int width);
+	void onColumnResized(int index, int, int width);
 
-	void				loadMeasureList();
+	void loadMeasurements(const MeasureBase& measureBase);
 
-	void				appendMeasure(Measurement* pMeasurement);
-	void				removeMeasure();
+	void appendMeasure(Measurement* pMeasurement);
+	void removeMeasure();
 
-	void				copy();
+	void copy();
 };
 
 // ==============================================================================================

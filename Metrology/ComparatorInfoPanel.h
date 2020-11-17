@@ -1,6 +1,7 @@
 #ifndef COMPARATORINFOPANEL_H
 #define COMPARATORINFOPANEL_H
 
+#include <QMainWindow>
 #include <QDockWidget>
 #include <QMenu>
 #include <QAction>
@@ -8,6 +9,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 
+#include "CalibratorBase.h"
 #include "SignalBase.h"
 #include "Options.h"
 
@@ -32,7 +34,6 @@ public:
 
 private:
 
-	int						m_maxComparatorCount = 0;
 	ComparatorInfoOption	m_comparatorInfo;
 
 	mutable QMutex			m_signalMutex;
@@ -47,7 +48,6 @@ private:
 
 public:
 
-	void					setMaxComparatorCount(int count);
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
 
 	int						signalCount() const { return m_signalCount; }
@@ -61,7 +61,7 @@ public:
 
 private slots:
 
-	void					updateSignalParam(const QString& appSignalID);
+	void					signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================
@@ -98,17 +98,18 @@ private:
 
 	//
 	//
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
-	int						m_maxComparatorCount = 0;
+	CalibratorBase*			m_pCalibratorBase = nullptr;
 	ComparatorInfoOption	m_comparatorInfo;
+
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 public:
 
 	void					clear() { m_comparatorTable.clear(); }
 	void					restartComparatorStateTimer(int timeout);
 
+	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
-	void					setMaxComparatorCount(int count);
 
 protected:
 

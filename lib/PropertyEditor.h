@@ -212,9 +212,10 @@ namespace ExtWidgets
 		PropertyTextEditor(QWidget* parent);
 		virtual ~PropertyTextEditor();
 
+		virtual QString text() const = 0;
 		virtual void setText(const QString& text) = 0;
-		virtual QString text() = 0;
 
+		virtual bool readOnly() const = 0;
 		virtual void setReadOnly(bool value) = 0;
 
 		void setValidator(const QString& validator);
@@ -257,8 +258,11 @@ namespace ExtWidgets
 
 	public:
 		PropertyPlainTextEditor(QWidget* parent);
+
+		virtual QString text() const override;
 		virtual void setText(const QString& text) override;
-		virtual QString text() override;
+
+		virtual bool readOnly() const override;
 		virtual void setReadOnly(bool value) override;
 
 	protected:

@@ -70,7 +70,15 @@
         <file>Images/SimConnectionIcon.svg</file>
         <file>Images/SimAppLogicSchemas.svg</file>
         <file>Images/dragndrop.png</file>
+        <file>Images/CloseButtonWhite.svg</file>
+        <file>Images/ComboDownArrow.svg</file>
+        <file>Images/SchemaNewFile.svg</file>
         <file>Images/SimAllowRegData.svg</file>
+        <file>Images/TestsRunAll.svg</file>
+        <file>Images/TestsRunSelected.svg</file>
+        <file>Images/NextIssue.svg</file>
+        <file>Images/PreviousIssue.svg</file>
+        <file>Images/ClearLog.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
@@ -81,6 +89,6 @@
         <file>Simulator/Templates/SawtoothBack.js</file>
         <file>Simulator/Templates/DiscreteSquare.js</file>
         <file>Simulator/Templates/DiscreteSeries.js</file>
+        <file>Simulator/ScriptSample.js</file>
     </qresource>
 </RCC>
-     

@@ -12,6 +12,7 @@ class FilesTabPage;
 class BuildTabPage;
 class UploadTabPage;
 class SimulatorTabPage;
+class TestsTabPage;
 class DialogShortcuts;
 class SignalSetProvider;
 class ProjectDiffWorker;
@@ -79,6 +80,7 @@ protected slots:
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
+	void showAboutQt();
 	void debug();
 	void startBuild();
 	void projectHistory();
@@ -88,6 +90,7 @@ protected slots:
 
 private slots:
 	void projectOpened(DbProject project);
+	void projectAboutToBeClosed();
 	void projectClosed();
 
 	void buildStarted();
@@ -123,6 +126,7 @@ private:
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;
 	QAction* m_aboutAction = nullptr;
+	QAction* m_aboutQtAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;
 	QAction* m_projectHistoryAction = nullptr;
@@ -141,6 +145,7 @@ private:
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;
 	SimulatorTabPage* m_simulatorTabPage = nullptr;
+	TestsTabPage* m_testsTabPage = nullptr;
 
 	DbController* m_dbController = nullptr;
 	SignalSetProvider* m_signalSetProvider = nullptr;

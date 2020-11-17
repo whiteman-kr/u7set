@@ -1,6 +1,7 @@
 #include "ConfigSocket.h"
 
 #include <assert.h>
+#include <QtConcurrent>
 
 #include "../lib/ServiceSettings.h"
 
@@ -57,6 +58,7 @@ void ConfigSocket::start()
 	}
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, this, &ConfigSocket::unknownClient);
 
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
@@ -166,6 +168,8 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 	emit configurationLoaded();
 
+	QtConcurrent::run(ConfigSocket::loadSignalBase, this);
+
 	return;
 }
 
@@ -226,29 +230,14 @@ bool ConfigSocket::readMetrologyItems(const QByteArray& fileData)
 
 bool ConfigSocket::readMetrologySignalSet(const QByteArray& fileData)
 {
-	::Proto::MetrologySignalSet protoMetrologySignalSet;
-
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	bool result = protoMetrologySignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	bool result = m_protoMetrologySignalSet.ParseFromArray(fileData.constData(), fileData.size());
 	if (result == false)
 	{
 		return false;
 	}
-
-	int signalCount = protoMetrologySignalSet.metrologysignal_size();
-	for(int i = 0; i < signalCount; i++)
-	{
-		const ::Proto::MetrologySignal& protoAppSignal = protoMetrologySignalSet.metrologysignal(i);
-
-		Metrology::SignalParam param;
-		param.serializeFrom(protoAppSignal);
-
-		theSignalBase.appendSignal(param);
-	}
-
-	theSignalBase.initSignals();
 
 	qDebug() << __FUNCTION__ << "Signals were loaded" << theSignalBase.signalCount() << " Time for load: " << responseTime.elapsed() << " ms";
 
@@ -262,10 +251,7 @@ bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	ComparatorSet comparatorSet;
-	comparatorSet.serializeFrom(fileData);
-
-	theSignalBase.loadComparatorsInSignal(comparatorSet);
+	m_comparatorSet.serializeFrom(fileData);
 
 	qDebug() << __FUNCTION__ << "Comparators were loaded" << " Time for load: " << responseTime.elapsed() << " ms";
 
@@ -360,7 +346,11 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 
 	if (tuningSourceCount != theSignalBase.tuning().sourceBase().sourceEquipmentID().count())
 	{
-		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count() << " from " << tuningSourceCount;
+		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " <<
+					theSignalBase.tuning().sourceBase().sourceEquipmentID().count() <<
+					" from " <<
+					tuningSourceCount;
+
 		assert(false);
 		return false;
 	}
@@ -368,6 +358,47 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count();
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::loadSignalBase(ConfigSocket* pThis)
+{
+	if (pThis == nullptr)
+	{
+		return;
+	}
+
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	int persentage = 0;
+
+	int signalCount = pThis->m_protoMetrologySignalSet.metrologysignal_size();
+	for(int i = 0; i < signalCount; i++)
+	{
+		const ::Proto::MetrologySignal& protoAppSignal = pThis->m_protoMetrologySignalSet.metrologysignal(i);
+
+		Metrology::SignalParam param;
+		param.serializeFrom(protoAppSignal);
+
+		theSignalBase.appendSignal(param);
+
+		persentage = i * 100 / signalCount;
+
+		if (persentage % 5 == 0)
+		{
+			emit pThis->signalBaseLoading(persentage);
+		}
+	}
+
+	theSignalBase.initSignals();
+
+	theSignalBase.loadComparatorsInSignal(pThis->m_comparatorSet);
+
+	emit pThis->signalBaseLoaded();
+
+	qDebug() << __FUNCTION__ << " Time for load: " << responseTime.elapsed() << " ms";
 }
 
 // -------------------------------------------------------------------------------------------------------------------

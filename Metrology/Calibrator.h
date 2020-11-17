@@ -8,26 +8,19 @@
 
 // ==============================================================================================
 
-#define			CALIBRATOR_OPTIONS_KEY		"Options/Calibrators/"
-
-// ==============================================================================================
-
-const int		CALIBRATOR_TIMEOUT			= 8000,		// 8 seconds
-				CALIBRATOR_TIMEOUT_STEP		= 10;		// 10 milliseconds
-
-// ----------------------------------------------------------------------------------------------
-
 const char* const CalibratorType[] =
 {
-				QT_TRANSLATE_NOOP("Calibrator.h", "TRX-II"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "CALYS-75"),
+				"TRX-II",
+				"CALYS-75",
+				"KEITHLEY-6221",
 };
 
-const int		CALIBRATOR_TYPE_COUNT			= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
+const int		CALIBRATOR_TYPE_COUNT		= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
 
 const int		CALIBRATOR_TYPE_UNDEFINED	= -1,
 				CALIBRATOR_TYPE_TRXII		= 0,
-				CALIBRATOR_TYPE_CALYS75		= 1;
+				CALIBRATOR_TYPE_CALYS75		= 1,
+				CALIBRATOR_TYPE_KTHL6221	= 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -49,6 +42,8 @@ const char* const CalibratorUnit[] =
 {
 				QT_TRANSLATE_NOOP("Calibrator.h", "mV"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "mA"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "μA (micro)"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "nA"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "V"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "kHz"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (Low)"),
@@ -60,10 +55,12 @@ const int		CALIBRATOR_UNIT_COUNT		= sizeof(CalibratorUnit)/sizeof(CalibratorUnit
 const int		CALIBRATOR_UNIT_UNDEFINED	= -1,
 				CALIBRATOR_UNIT_MV			= 0,
 				CALIBRATOR_UNIT_MA			= 1,
-				CALIBRATOR_UNIT_V			= 2,
-				CALIBRATOR_UNIT_KHZ			= 3,
-				CALIBRATOR_UNIT_LOW_OHM		= 4,
-				CALIBRATOR_UNIT_HIGH_OHM	= 5;
+				CALIBRATOR_UNIT_McrA		= 2,
+				CALIBRATOR_UNIT_NA			= 3,
+				CALIBRATOR_UNIT_V			= 4,
+				CALIBRATOR_UNIT_KHZ			= 5,
+				CALIBRATOR_UNIT_LOW_OHM		= 6,
+				CALIBRATOR_UNIT_HIGH_OHM	= 7;
 
 // ----------------------------------------------------------------------------------------------
 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
@@ -72,119 +69,14 @@ const double	CALIBRATOR_MINIMAL_RANGE_OHM	= 400;
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const CalibratorStep[] =
-{
-				QT_TRANSLATE_NOOP("Calibrator.h", "Step down"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "Step up"),
-};
-
-const int		CALIBRATOR_STEP_COUNT			= sizeof(CalibratorStep)/sizeof(CalibratorStep[0]);
-
-const int		CALIBRATOR_STEP_UNDEFINED	= -1,
-				CALIBRATOR_STEP_DOWN		= 0,
-				CALIBRATOR_STEP_UP			= 1;
+const int		DEFAULT_ECLECTRIC_UNIT_PRECESION = 4;
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const CalibratorReset[] =
-{
-				QT_TRANSLATE_NOOP("Calibrator.h", "Hard reset"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "Soft reset"),
-};
-
-const int		CALIBRATOR_RESET_COUNT		  = sizeof(CalibratorStep)/sizeof(CalibratorReset[0]);
-
-const int		CALIBRATOR_RESET_UNDEFINED	= -1,
-				CALIBRATOR_RESET_HARD		= 0,
-				CALIBRATOR_RESET_SOFT		= 1;
+const int		CALIBRATOR_TIMEOUT			= 8000,		// 8 seconds
+				CALIBRATOR_TIMEOUT_STEP		= 10;		// 10 milliseconds
 
 // ----------------------------------------------------------------------------------------------
-
-const char* const CalibratorConvert[] =
-{
-				QT_TRANSLATE_NOOP("Calibrator.h", "Hz to kHz"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "kHz to Hz"),
-};
-
-const int		CALIBRATOR_CONVERT_COUNT		= sizeof(CalibratorConvert)/sizeof(CalibratorConvert[0]);
-
-const int		CALIBRATOR_CONVERT_HZ_TO_KHZ	= 0,
-				CALIBRATOR_CONVERT_KHZ_TO_HZ	= 1;
-
-
-// ----------------------------------------------------------------------------------------------
-
-const int		CalibratorBaudRate[CALIBRATOR_TYPE_COUNT] =
-{
-				QSerialPort::Baud9600,
-				QSerialPort::Baud115200,
-};
-
-// ----------------------------------------------------------------------------------------------
-
-const int		CALIBRATION_TS_AC0			= 0,
-				CALIBRATION_TS_AC1			= 1,
-				CALIBRATION_TS_RANGE		= 2;
-
-const int		CALIBRATION_TS_COUNT		= 3;
-
-const double	CalibratorTS[CALIBRATOR_TYPE_COUNT][CALIBRATOR_UNIT_COUNT][CALIBRATION_TS_COUNT] =
-{
-	// CALIBRATION_TYPE_TRXII	= 0,
-	{
-		{0.01,	0.005,	100},		// CALIBRATION_UNIT_MV			= 0,
-		{0.01,	0.02,	24},		// CALIBRATION_UNIT_MA			= 1,
-		{0.01,	0.005,	12},		// CALIBRATION_UNIT_V			= 2,
-		{0.005,	0.000,	20000},		// CALIBRATION_UNIT_KHZ			= 3,
-		{0.005,	0.02,	400},		// CALIBRATION_UNIT_LOW_OHM		= 4,
-		{0.02,	0.015,	2000},		// CALIBRATION_UNIT_HIGH_OHM	= 5;
-	},
-
-	// CALIBRATION_TYPE_CALYS75	= 1,
-	{
-		{0.013,	0.003,	100},		// CALIBRATION_UNIT_MV			= 0,
-		{0.018,	0.002,	24},		// CALIBRATION_UNIT_MA			= 1,
-		{0.015,	0.004,	50},		// CALIBRATION_UNIT_V			= 2,
-		{0.005,	0.000,	10000},		// CALIBRATION_UNIT_KHZ			= 3,
-		{0.012,	0.0025,	400},		// CALIBRATION_UNIT_LOW_OHM		= 4,
-		{0.012,	0.0025,	4000},		// CALIBRATION_UNIT_HIGH_OHM	= 5;
-	},
-};
-
-const int	CalibratorPrecision[CALIBRATOR_TYPE_COUNT][CALIBRATOR_UNIT_COUNT] =
-{
-	// CALIBRATION_TYPE_TRXII	= 0,
-	{
-		3,		// CALIBRATION_UNIT_MV			= 0,
-		3,		// CALIBRATION_UNIT_MA			= 1,
-		4,		// CALIBRATION_UNIT_V			= 2,
-		3,		// CALIBRATION_UNIT_KHZ			= 3,
-		2,		// CALIBRATION_UNIT_LOW_OHM		= 4,
-		1,		// CALIBRATION_UNIT_HIGH_OHM	= 5;
-	},
-
-	// CALIBRATION_TYPE_CALYS75	= 1,
-	{
-		3,		// CALIBRATION_UNIT_MV			= 0,
-		3,		// CALIBRATION_UNIT_MA			= 1,
-		3,		// CALIBRATION_UNIT_V			= 2,
-		4,		// CALIBRATION_UNIT_KHZ			= 3,
-		2,		// CALIBRATION_UNIT_LOW_OHM		= 4,
-		1,		// CALIBRATION_UNIT_HIGH_OHM	= 5;
-	},
-};
-
-// ----------------------------------------------------------------------------------------------
-
-const int		CALIBRATOR_TERMINATOR_LEN = 2;
-
-const char* const CalibratorTerminator[CALIBRATOR_TYPE_COUNT] =
-{
-				"\n\r",
-				"\r\n",
-};
-
-// ==============================================================================================
 
 const int		INVALID_CALIBRATOR_CHANNEL = -1;
 
@@ -195,66 +87,118 @@ const int		INVALID_CALIBRATOR_CHANNEL = -1;
 #define CALIBRATOR_RESET				"*RST"
 #define CALIBRATOR_BEEP					":SYSTEM:BEEP"
 
-
 // ==============================================================================================
 // Commands - model TRX-II
-
-#define TRXII_RESET_SOFT				":SYSTEM:RESET"
-
-#define TRXII_MEASURE_UNIT_MV			":MEASURE:MV"
-#define TRXII_MEASURE_UNIT_MA			":MEASURE:MA"
-#define TRXII_MEASURE_UNIT_V			":MEASURE:VOLT"
-#define TRXII_MEASURE_UNIT_KHZ			":MEASURE:FREQ Hz,5.00"
-#define TRXII_MEASURE_UNIT_OHM			":MEASURE:OHM"
-
-#define TRXII_SOURCE_UNIT_MV			":SOURCE:MV:DIRECT"
-#define TRXII_SOURCE_UNIT_MA			":SOURCE:MA:DIRECT"
-#define TRXII_SOURCE_UNIT_V				":SOURCE:VOLT:DIRECT"
-#define TRXII_SOURCE_UNIT_KHZ			":SOURCE:FREQ 20kHz,10.0"
-#define TRXII_SOURCE_UNIT_LOW_OHM		":SOURCE:OHM LO:DIRECT"
-#define TRXII_SOURCE_UNIT_HIGH_OHM		":SOURCE:OHM HI:DIRECT"
-
-#define TRXII_GET_VALUE					":SAMPLE"
-#define TRXII_SET_VALUE					":PT "
 
 #define TRXII_KEY_UP					":SYSTEM:KEY UP"
 #define TRXII_KEY_DOWN					":SYSTEM:KEY DOWN"
 
-
 // ==============================================================================================
 // Commands - model Calys 75
 
-#define CALYS75_RESET_SOFT				"*RST"
-
-#define CALYS75_MEASURE_UNIT_MV			"SENS:FUNC VOLT"
-#define CALYS75_MEASURE_RANG_MV			"SENS:VOLT:RANG 100mV"
-#define CALYS75_MEASURE_UNIT_MA			"SENS:FUNC CURR"
-#define CALYS75_MEASURE_RANG_MA			"SENS:CURR:RANG 50mA"
-#define CALYS75_MEASURE_UNIT_V			"SENS:FUNC VOLT"
-#define CALYS75_MEASURE_RANG_V			"SENS:VOLT:RANG 50V"
-#define CALYS75_MEASURE_UNIT_KHZ		"SENS:FUNC FREQ"
-#define CALYS75_MEASURE_RANG_KHZ		"SENS:FREQ:RANG 10KHZ"
-#define CALYS75_MEASURE_UNIT_OHM		"SENS:FUNC RES"
-#define CALYS75_MEASURE_LOW_RANG_OHM	"SENS:RES:RANG 400"
-#define CALYS75_MEASURE_HIGH_RANG_OHM	"SENS:RES:RANG 4000"
-
-#define CALYS75_SOURCE_UNIT_MV			"SOUR:FUNC VOLT"
-#define CALYS75_SOURCE_RANG_MV			"SOUR:VOLT:RANG 100mV"
-#define CALYS75_SOURCE_UNIT_MA			"SOUR:FUNC CURR"
-#define CALYS75_SOURCE_RANG_MA			"SOUR:CURR:RANG 24mA"
-#define CALYS75_SOURCE_UNIT_V			"SOUR:FUNC VOLT"
-#define CALYS75_SOURCE_RANG_V			"SOUR:VOLT:RANG 50V"
-#define CALYS75_SOURCE_UNIT_KHZ			"SOUR:FUNC FREQ"
-#define CALYS75_SOURCE_RANG_KHZ			"SOUR:FREQ:RANG 10KHZ"
-#define CALYS75_SOURCE_UNIT_OM			"SOUR:FUNC RES"
-#define CALYS75_SOURCE_LOW_RANG_OHM		"SOUR:RES:RANG 400,1mA"
-#define CALYS75_SOURCE_HIGH_RANG_OHM	"SOUR:RES:RANG 4000,1mA"
-
-#define CALYS75_GET_VALUE				"DISP?"
-#define CALYS75_SET_VALUE				"SOUR "
-
 #define CALYS75_REMOTE_CONTROL			"REM"
 #define CALYS75_MANUAL_CONTROL			"LOC"
+
+// ==============================================================================================
+// Commands - model KEITHLEY-6221
+
+#define KTHL6221_OUTPUT_ON				"OUTP ON"
+#define KTHL6221_OUTPUT_OFF				"OUTP OFF"
+
+#define KTHL6221_LIMIT_FOR_SWITCH		21
+
+// ==============================================================================================
+
+struct CalibratorParam
+{
+	bool isValid() const;
+
+	int type = CALIBRATOR_TYPE_UNDEFINED;
+
+	int baudRate = 0;
+
+	QString cmdGetValue;
+	QString cmdSetValue;
+
+	QString terminamtor;
+};
+
+const CalibratorParam CalibratorParams[CALIBRATOR_TYPE_COUNT] =
+{
+	{ CALIBRATOR_TYPE_TRXII,	QSerialPort::Baud9600,		":SAMPLE",	":PT ",		"\n\r"	},
+	{ CALIBRATOR_TYPE_CALYS75,	QSerialPort::Baud115200,	"DISP?",	"SOUR ",	"\r\n"	},
+	{ CALIBRATOR_TYPE_KTHL6221,	QSerialPort::Baud9600,		"CURR?",	"CURR ",	"\n\r"	},
+};
+
+// ==============================================================================================
+
+struct CalibratorLimit
+{
+	bool isValid() const;
+
+	int type = CALIBRATOR_TYPE_UNDEFINED;
+	int mode = CALIBRATOR_MODE_UNDEFINED;
+
+	double lowLimit = 0;
+	double highLimit = 0;
+	int unit = CALIBRATOR_UNIT_UNDEFINED;
+	int precesion = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+
+	double ac0 = 0;
+	double ac1 = 0;
+
+	QString cmdSetUnit;
+};
+
+const CalibratorLimit CalibratorLimits[] =
+{
+	// TRX-II
+	//
+		// Measure
+		//
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	100,	CALIBRATOR_UNIT_MV,			3,	0.02,	0.01	,":MEASURE:MV"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	 60,	CALIBRATOR_UNIT_V,			4,	0.05,	0.005	,":MEASURE:VOLT"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	 52,	CALIBRATOR_UNIT_MA,			3,	0.01,	0.01	,":MEASURE:MA"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.05,	0.02	,":MEASURE:OHM"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0, 2000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.02,	0.015	,":MEASURE:OHM"},
+
+		// Source
+		//
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	100,	CALIBRATOR_UNIT_MV,			3,	0.01,	0.005	,":SOURCE:MV:DIRECT"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	 12,	CALIBRATOR_UNIT_V,			4,	0.01,	0.005	,":SOURCE:VOLT:DIRECT"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	 24,	CALIBRATOR_UNIT_MA,			3,	0.01,	0.02	,":SOURCE:MA:DIRECT"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.005,	0.02	,":SOURCE:OHM LO:DIRECT"},
+	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0, 2000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.02,	0.015	,":SOURCE:OHM HI:DIRECT"},
+
+
+	// Calys 75
+	//
+		// Measure
+		//
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	100,	CALIBRATOR_UNIT_MV,			3,	0.013,	0.003	,"SENS:FUNC VOLT\r\nSENS:VOLT:RANG 100mV"},			// 0.013% +- 3 microV - i.e.  3 microV * 100% / 100 mV = 0.003%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	 50,	CALIBRATOR_UNIT_V,			3,	0.015,	0.004	,"SENS:FUNC VOLT\r\nSENS:VOLT:RANG 50V"},			// 0.015% +- 2 mV - i.e.  2 mV * 100% / 50 V = 0.004%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	 50,	CALIBRATOR_UNIT_MA,			3,	0.018,	0.004	,"SENS:FUNC CURR\r\nSENS:CURR:RANG 50mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 50 mA = 0.004%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.012,	0.0025	,"SENS:FUNC RES\r\nSENS:RES:RANG 400"},				// 0.012% +- 10 mOhm - i.e.  10 mOhm * 100% / 400 Ohm = 0.0025%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0, 4000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.012,	0.0025	,"SENS:FUNC RES\r\nSENS:RES:RANG 4000"},			// 0.012% +- 100 mOhm - i.e.  100 mOhm * 100% / 4000 Ohm = 0.0025%
+
+		// Source
+		//
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	100,	CALIBRATOR_UNIT_MV,			3,	0.013,	0.003	,"SOUR:FUNC VOLT\r\nSOUR:VOLT:RANG 100mV"},			// 0.013% +- 3 microV - i.e.  3 microV * 100% / 100 mV = 0.003%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	 50,	CALIBRATOR_UNIT_V,			3,	0.015,	0.004	,"SOUR:FUNC VOLT\r\nSOUR:VOLT:RANG 50V"},			// 0.015% +- 2 mV - i.e.  2 mV * 100% / 50 V = 0.004%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	 24,	CALIBRATOR_UNIT_MA,			3,	0.018,	0.0083	,"SOUR:FUNC CURR\r\nSOUR:CURR:RANG 24mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 24 mA = 0.008%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 400,1mA"},			// 0.014% +- 30 mOhm - i.e.  30 mOhm * 100% / 400 Ohm = 0.0075%
+	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0, 4000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 4000,1mA"},		// 0.014% +- 300 mOhm - i.e.  300 mOhm * 100% / 4000 Ohm = 0.0075%
+
+	// KEITHLEY-6221
+	//
+		// Source
+		//
+	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_MA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-3"},					// 0.05% +- 10 microA - i.e.  10 microA * 100% / 20 mА = 0.05%
+	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_McrA,		3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-6"},					// 0.05% +- 10 nanoA - i.e.  10 nanoA * 100% / 20 microА = 0.05%
+	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_NA,			3,	0.300,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-9"},					// 0.05% +- 10 picoA - i.e.  10 picoA * 100% / 20 nanoА = 0.05%
+};
+
+const int CalibratorLimitCount = sizeof(CalibratorLimits) / sizeof(CalibratorLimits[0]);
 
 // ==============================================================================================
 
@@ -269,112 +213,116 @@ public:
 
 private:
 
-	bool		m_connected = false;
-
-	int			m_channel = INVALID_CALIBRATOR_CHANNEL;									// index calibrator in a common base calibrators CalibratorBase
+	int m_channel = INVALID_CALIBRATOR_CHANNEL;											// index calibrator in a common base calibrators CalibratorBase
 
 	QSerialPort m_port;																	// object serial port for management of the calibrator
+	QString m_portName;																	// string containing the name of the serial port
 
-	QString		m_portName;																// string containing the name of the serial port
-	int			m_type = CALIBRATOR_TYPE_UNDEFINED;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
-	QString		m_caption;																// name of calibrator
-	QString		m_serialNo;																// serial number of calibrator
+	bool m_connected = false;
 
-	int			m_timeout = 0;															// time counter waits for a response from the calibrator
+	int m_type = CALIBRATOR_TYPE_UNDEFINED;												// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
+	QString m_caption;																	// name of calibrator
+	QString m_serialNo;																	// serial number of calibrator
 
-	int			m_mode = CALIBRATOR_MODE_UNDEFINED;										// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
-	int			m_measureUnit = 0;														// measure unit: mA, mV and etc.
-	int			m_sourceUnit = 0;														// source unit: mA, mV and etc.
+	int m_timeout = 0;																	// time counter waits for a response from the calibrator
 
-	double		m_measureValue = 0;														// contains measured electrical value of the calibrator
-	double		m_sourceValue = 0;														// contains installed electrical value of the calibrator
+	int m_mode = CALIBRATOR_MODE_UNDEFINED;												// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
+	int m_measureUnit = 0;																// measure unit: mA, mV and etc.
+	int m_sourceUnit = 0;																// source unit: mA, mV and etc.
 
-	QString		m_lastResponse;															// string containing the last response data from the calibrator
-	QString		m_lastError;															// in the case of an error of the calibrator, this string contains the description
+	double m_measureValue = 0;															// contains measured electrical value of the calibrator
+	double m_sourceValue = 0;															// contains installed electrical value of the calibrator
 
-	bool		m_enableWaitResponse = false;											// enbale wait response from calibrator after open port
+	QString m_lastResponse;																// string containing the last response data from the calibrator
+	QString m_lastError;																// in the case of an error of the calibrator, this string contains the description
 
-	bool		m_busy = false;
+	bool m_enableWaitResponse = false;													// enbale wait response from calibrator after open port
 
-	void		clear();																// erases all information on the calibrator: SerialNo, Name and etc.
+	bool m_busy = false;
 
-	void		setConnected(bool connect);												// function changes status calibrator: connected or disconnected
+	void clear();																		// erases all information on the calibrator: SerialNo, Name and etc.
 
-	bool		openPort();																// open the serial port to manage the calibrator
-	bool		getIDN();																// identify the calibrator, get: SerialNo, Type and etc.
+	void setConnected(bool connect);													// function changes status calibrator: connected or disconnected
 
-	bool		send(QString cmd);														// sending commands to the calibrator
-	bool		recv();																	// receiving a response from the calibrator
+	bool openPort();																	// open the serial port to manage the calibrator
+	bool getIDN();																		// identify the calibrator, get: SerialNo, Type and etc.
 
-	void		parseResponse();														// extracts from the string of the last response from the calibrator current electrical values
-	void		convert(double& val, int mode, int order);								// translation from Kilo to Mega, from Hz to kHz, etc.
+	CalibratorParam getParam(int type);													// get claibtator param by type
+
+	bool send(QString cmd);																// sending commands to the calibrator
+	bool recv();																		// receiving a response from the calibrator
+
+	void parseResponse();																// extracts from the string of the last response from the calibrator current electrical values
 
 public:
 
-	bool		isConnected() const { return m_connected; }
+	CalibratorLimit getLimit(int mode, int unit);										// get claibtator limit by mode and unit
+	CalibratorLimit currentMeasureLimit();												// get claibtator limit
+	CalibratorLimit currentSourceLimit();												// get claibtator limit
 
-	int			channel() const{ return m_channel; }
+	bool isConnected() const { return m_connected; }
 
-	bool		portIsOpen() const { return m_port.isOpen(); }
+	int channel() const{ return m_channel; }
 
-	QString		portName() const { return m_portName; }
-	void		setPortName(const QString& portName) { m_portName = portName; }
+	bool portIsOpen() const { return m_port.isOpen(); }
 
-	int			type() const { return m_type; }
-	QString		typeStr() const;
-	void		setType(int type) { m_type = type; }
+	QString portName() const { return m_portName; }
+	void setPortName(const QString& portName) { m_portName = portName; }
 
-	QString		caption() const { return m_caption; }
-	QString		serialNo() const { return m_serialNo; }
+	int type() const { return m_type; }
+	QString typeStr() const;
+	void setType(int type) { m_type = type; }
 
-	int			timeout() const { return m_timeout;	}
+	QString caption() const { return m_caption; }
+	QString serialNo() const { return m_serialNo; }
 
-	int			mode() const { return m_mode; }
-	int			measureUnit() const { return m_measureUnit; }
-	int			sourceUnit() const { return m_sourceUnit; }
+	int timeout() const { return m_timeout;	}
 
-	double		measureValue() const { return m_measureValue; }
-	double		sourceValue() const { return m_sourceValue; }
+	int mode() const { return m_mode; }
+	int measureUnit() const { return m_measureUnit; }
+	int sourceUnit() const { return m_sourceUnit; }
 
-	QString		lastError() const { return m_lastError; }
+	double measureValue() const { return m_measureValue; }
+	double sourceValue() const { return m_sourceValue; }
 
-	void		setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
+	QString lastError() const { return m_lastError; }
 
-	bool		isBusy() const { return m_busy; }
-	void		setBusy(bool busy);
+	void setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
+
+	bool isBusy() const { return m_busy; }
+	void setBusy(bool busy);
 
 signals:
 
-	void		connected();
-	void		disconnected();
+	void connected();
+	void disconnected();
 
-	void		unitIsChanged();
-	void		commandIsSent(QString);
-	void		responseIsReceived(QString);
-	void		valueIsRequested();
-	void		valueIsReceived();
+	void unitIsChanged();
+	void commandIsSent(QString);
+	void responseIsReceived(QString);
+	void valueIsRequested();
+	void valueIsReceived();
 
-	void		error(QString);
+	void error(QString);
 
 public slots:
 
-	bool		open();																	// initialization of the calibrator
+	bool open();																	// initialization of the calibrator
 
-	bool		setUnit(int mode, int unit);											// select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or source - 1 (CALIBRATOR_MODE_SOURCE)
-																						// select unit: mA, mV and etc.
-	bool		setValue(double value);													// set value
-	bool		stepDown();																// decrease the value on the calibrator
-	bool		stepUp();																// increasing the value on the calibrator
-	bool		step(int stepType);														// imitation of the "step"
+	bool setUnit(int mode, int unit);												// select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or source - 1 (CALIBRATOR_MODE_SOURCE)
+																					// select unit: mA, mV and etc.
+	bool setValue(double value);													// set value
+	bool stepDown();																// decrease the value on the calibrator
+	bool stepUp();																	// increasing the value on the calibrator
 
-	double		getValue();																// get electrical values ​​with calibrator
+	double getValue();																// get electrical values ​​with calibrator
 
-	bool		beep();																	// beep
-	bool		reset(int resetType);	  												// reset: hard: 0 - CALIBRATOR_RESET_HARD or soft: 1 - CALIBRATOR_RESET_SOFT
+	bool beep();																	// beep
+	bool reset();																	// reset
 
-	bool		setRemoteControl(bool enable);											// allow remote control of the calibrator (only model CALYS75)
+	bool setRemoteControl(bool enable);												// allow remote control of the calibrator
 
-	void		close();																// the end of the session with a calibrator
+	void close();																	// the end of the session with a calibrator
 };
 
 // ==============================================================================================

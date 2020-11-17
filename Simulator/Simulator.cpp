@@ -10,6 +10,7 @@
 #include "SimScriptLogicModule.h"
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
+#include "SimScopedLog.h"
 
 
 namespace Sim
@@ -17,13 +18,15 @@ namespace Sim
 	//
 	// Simulator
 	//
-	Simulator::Simulator(QObject* parent) :
-		QObject(parent),
-		Output(),
-		m_scriptSimulator(this)
+	Simulator::Simulator(ILogFile* log, QObject* parent) :
+		QObject{parent},
+		m_log{log, {}},
+		m_tuningSignalManager{ScopedLog{log, {}}},
+		m_scriptSimulator{this}
 	{
 		qRegisterMetaType<AppSignalParam>("AppSignalParam");
 
+		qRegisterMetaType<Sim::SimControlState>("SimControlState");
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
 		qRegisterMetaType<Sim::DeviceMode>("DeviceMode");
@@ -99,19 +102,21 @@ namespace Sim
 		return m_control.state() == SimControlState::Stop;
 	}
 
-	bool Simulator::runScript(QString script, QString testName)
+	bool Simulator::runScript(const SimScriptItem& script, qint64 timeout)
+	{
+		return runScripts({script}, timeout);
+	}
+
+	bool Simulator::runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout)
 	{
 		if (m_scriptSimulator.isRunning() == true)
 		{
-			bool ok = m_scriptSimulator.stopScript();
-			if (ok == false)
-			{
-				writeError(tr("RunScript error: cannot stop already running script."));
-				return false;
-			}
+			m_scriptSimulator.stopScript();
 		}
 
-		return m_scriptSimulator.runScript(script, testName);
+		m_scriptSimulator.setExecutionTimeout(timeout);
+
+		return m_scriptSimulator.runScripts(scripts);
 	}
 
 	bool Simulator::stopScript()
@@ -131,6 +136,7 @@ namespace Sim
 
 	void Simulator::clearImpl()
 	{
+		m_control.reset();
 		m_buildPath.clear();
 		m_firmwares.clear();
 		m_lmDescriptions.clear();
@@ -143,19 +149,23 @@ namespace Sim
 
 	bool Simulator::loadFunc(QString buildPath)
 	{
+		clearImpl();
+
+		// --
+		//
 		buildPath = QDir::fromNativeSeparators(buildPath);
 		if (buildPath.endsWith(QChar('/')) == false)
 		{
 			buildPath.append(QChar('/'));
 		}
 
-		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
+		m_log.writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
 
 		//--
 		//
 		if (QFileInfo::exists(buildPath) == false)
 		{
-			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
+			m_log.writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
 			return false;
 		}
 
@@ -171,7 +181,7 @@ namespace Sim
 		QStringList subsystems = m_firmwares.subsystems();
 		if (subsystems.isEmpty() == true)
 		{
-			writeError(QObject::tr("Bitstream file does not contain any subsystem."));
+			m_log.writeError(QObject::tr("Bitstream file does not contain any subsystem."));
 			clearImpl();
 			return false;
 		}
@@ -183,6 +193,23 @@ namespace Sim
 		{
 			clearImpl();
 			return false;
+		}
+
+		// Load LogicModules info - file /Common/LogicModules.xml
+		//
+		LogicModulesInfo logicModulesInfo;
+
+		{
+			QString loadLmsInfoErrorMessage;
+			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
+
+			ok = logicModulesInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
+			if (ok == false)
+			{
+				m_log.writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
+				clearImpl();
+				return false;
+			}
 		}
 
 		// Load ConnectinsInfo
@@ -198,12 +225,12 @@ namespace Sim
 		//
 		for (QString subsystemId : subsystems)
 		{
-			writeMessage(QObject::tr("Load subsystem: %1").arg(subsystemId));
+			m_log.writeMessage(QObject::tr("Load subsystem: %1").arg(subsystemId));
 
 			const Hardware::ModuleFirmware& firmware = m_firmwares.firmware(subsystemId, &ok);
 			if (ok == false)
 			{
-				writeError(QObject::tr("Subsystem %1 in not found in bitstream file.").arg(subsystemId));
+				m_log.writeError(QObject::tr("Subsystem %1 in not found in bitstream file.").arg(subsystemId));
 				clearImpl();
 				return false;
 			}
@@ -213,19 +240,19 @@ namespace Sim
 			//
 			if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
 			{
-				writeWaning(QObject::tr("Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
+				m_log.writeWarning(QObject::tr("Subsystem %1 has no ApplicationLogic, it will not be simulated.").arg(subsystemId));
 				continue;
 			}
 
 			if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
 			{
-				writeWaning(QObject::tr("Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
+				m_log.writeWarning(QObject::tr("Subsystem %1 has no Tuning, it will not be simulated.").arg(subsystemId));
 				continue;
 			}
 
 			if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
 			{
-				writeWaning(QObject::tr("Subsystem %1 has no Congiguration, it will not be simulated.").arg(subsystemId));
+				m_log.writeWarning(QObject::tr("Subsystem %1 has no Congiguration, it will not be simulated.").arg(subsystemId));
 				continue;
 			}
 
@@ -233,12 +260,12 @@ namespace Sim
 			//
 			if (m_subsystems.count(subsystemId) > 0)
 			{
-				writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
+				m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
 				clearImpl();
 				return false;
 			}
 
-			auto subsystem = std::make_shared<Sim::Subsystem>(subsystemId);
+			auto subsystem = std::make_shared<Sim::Subsystem>(subsystemId, this);
 			m_subsystems[subsystemId] = subsystem;
 
 			Subsystem& ss = *subsystem.get();
@@ -250,7 +277,7 @@ namespace Sim
 			auto lmit = m_lmDescriptions.find(lmDescriptionFile);
 			if (lmit == m_lmDescriptions.end())
 			{
-				writeError(QObject::tr("Cannot find LogicModule description file %1").arg(lmDescriptionFile));
+				m_log.writeError(QObject::tr("Cannot find LogicModule description file %1").arg(lmDescriptionFile));
 				return false;
 			}
 
@@ -258,60 +285,11 @@ namespace Sim
 
 			// Upload data to susbystem
 			//
-			ok = ss.load(firmware, lmDescription, m_connections);
+			ok = ss.load(firmware, lmDescription, m_connections, logicModulesInfo);
 			if (ok == false)
 			{
 				// Error must be reported in Subsystem::load
 				//
-				clearImpl();
-				return false;
-			}
-		}
-
-		// Load LogicModules info - /Common/LogicModules.xml
-		//
-		{
-			LogicModulesInfo lmsInfo;
-			QString loadLmsInfoErrorMessage;
-			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
-
-			ok = lmsInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
-			if (ok == false)
-			{
-				writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
-				clearImpl();
-				return false;
-			}
-
-			auto lms = this->logicModules();
-			for (auto lm : lms)
-			{
-				QString lmEquipmentId = lm->equipmentId();
-
-				auto fit = std::find_if(lmsInfo.logicModulesInfo.begin(), lmsInfo.logicModulesInfo.end(),
-							 [&lmEquipmentId](const ::LogicModuleInfo& lmi)
-							 {
-								return lmi.equipmentID == lmEquipmentId;
-							 });
-				if (fit == lmsInfo.logicModulesInfo.end())
-				{
-					writeError(tr("Information for LogicModule %1 is not found (file %2)")
-								.arg(lmEquipmentId)
-								.arg(lmsInfoFileName));
-					ok = false;
-				}
-				else
-				{
-					const ::LogicModuleInfo& lmi = *fit;
-					Q_ASSERT(lmi.equipmentID == lm->equipmentId());
-					Q_ASSERT(lmi.lmNumber == lm->logicModuleInfo().lmNumber);
-
-					lm->setLogicModuleExtraInfo(lmi);
-				}
-			}
-
-			if (ok == false)
-			{
 				clearImpl();
 				return false;
 			}
@@ -332,7 +310,7 @@ namespace Sim
 
 		// --
 		//
-		writeMessage("Project for simulation successfully loaded.");
+		m_log.writeMessage("Project for simulation successfully loaded.");
 		return true;
 	}
 
@@ -343,7 +321,7 @@ namespace Sim
 		QDir dir(buildPath);
 		if (dir.exists() == false)
 		{
-			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
+			m_log.writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
 			return false;
 		}
 
@@ -352,25 +330,25 @@ namespace Sim
 
 		if (btsFiles.size() == 0)
 		{
-			writeError(QObject::tr("Bitstream file not found, path %1").arg(buildPath));
+			m_log.writeError(QObject::tr("Bitstream file not found, path %1").arg(buildPath));
 			return false;
 		}
 
 		if (btsFiles.size() > 1)
 		{
-			writeError(QObject::tr("There are more than one bitstream file, path %1").arg(buildPath));
+			m_log.writeError(QObject::tr("There are more than one bitstream file, path %1").arg(buildPath));
 			return false;
 		}
 
 		QString btsFileName = btsFiles.front().canonicalFilePath();
-		writeMessage(QObject::tr("Load bitstream file: %1").arg(btsFiles.front().fileName()));
+		m_log.writeMessage(QObject::tr("Load bitstream file: %1").arg(btsFiles.front().fileName()));
 
 		QString errorMessage;
 
 		bool ok = m_firmwares.load(btsFileName, &errorMessage);
 		if (ok == false)
 		{
-			writeError(QObject::tr("Loading bitstream file error: %1").arg(errorMessage));
+			m_log.writeError(QObject::tr("Loading bitstream file error: %1").arg(errorMessage));
 			return false;
 		}
 
@@ -384,14 +362,14 @@ namespace Sim
 		QDir dir(buildPath);
 		if (dir.exists() == false)
 		{
-			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
+			m_log.writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
 			return false;
 		}
 
 		if (bool ok = dir.cd("LmDescriptions");
 			ok == false)
 		{
-			writeError(QObject::tr("Path %1/LmDescriptions does not exist").arg(buildPath));
+			m_log.writeError(QObject::tr("Path %1/LmDescriptions does not exist").arg(buildPath));
 			return false;
 		}
 
@@ -400,22 +378,22 @@ namespace Sim
 
 		if (xmlFiles.size() == 0)
 		{
-			writeError(QObject::tr("LogicModule description file(s) not found, path %1").arg(buildPath));
+			m_log.writeError(QObject::tr("LogicModule description file(s) not found, path %1").arg(buildPath));
 			return false;
 		}
 
 		for (QFileInfo& fi : xmlFiles)
 		{
 			QString fileName = fi.canonicalFilePath();
-			writeMessage(QObject::tr("Load LogicModule description file: %1").arg(fi.fileName()));
+			m_log.writeMessage(QObject::tr("Load LogicModule description file: %1").arg(fi.fileName()));
 
 			QFile file(fileName);
 
 			if (bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
 				ok == false)
 			{
-				writeError(QObject::tr("Open file error: %1")
-							.arg(file.errorString()));
+				m_log.writeError(QObject::tr("Open file error: %1")
+								  .arg(file.errorString()));
 				return false;
 			}
 
@@ -427,9 +405,9 @@ namespace Sim
 			if (bool ok = lmDescription->load(xmlData, &errorMessage);
 				ok == false)
 			{
-				writeError(QObject::tr("Loading file %1 error: %2")
-							.arg(fileName)
-							.arg(errorMessage));
+				m_log.writeError(QObject::tr("Loading file %1 error: %2")
+								  .arg(fileName)
+								  .arg(errorMessage));
 				return false;
 			}
 
@@ -449,13 +427,13 @@ namespace Sim
 
 		fileName += QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_CONNECTIONS_XML);
 
-		writeMessage(tr("Loading %1").arg(fileName));
+		m_log.writeMessage(tr("Loading %1").arg(fileName));
 
 		QString errorMessage;
 		bool ok = m_connections.load(fileName, &errorMessage);
 		if (ok == false)
 		{
-			writeError(tr("File loading error, file name %1, error:%2").arg(fileName).arg(errorMessage));
+			m_log.writeError(tr("File loading error, file name %1, error:%2").arg(fileName).arg(errorMessage));
 		}
 
 		return ok;
@@ -471,15 +449,20 @@ namespace Sim
 
 		fileName += QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_APP_SIGNALS_ASGS);
 
-		writeMessage(tr("Loading %1").arg(fileName));
+		m_log.writeMessage(tr("Loading %1").arg(fileName));
 
 		bool ok = m_appSignalManager.load(fileName);
 		if (ok == false)
 		{
-			writeError(tr("File loading error, file name %1.").arg(fileName));
+			m_log.writeError(tr("File loading error, file name %1.").arg(fileName));
 		}
 
 		return ok;
+	}
+
+	ScopedLog& Simulator::log()
+	{
+		return m_log;
 	}
 
 	bool Simulator::isLoaded() const
@@ -553,16 +536,6 @@ namespace Sim
 		return result;
 	}
 
-	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
-	{
-		return m_appDataTransmitter;
-	}
-
-	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
-	{
-		return m_appDataTransmitter;
-	}
-
 	Sim::AppSignalManager& Simulator::appSignalManager()
 	{
 		return m_appSignalManager;
@@ -591,6 +564,16 @@ namespace Sim
 	const Sim::OverrideSignals& Simulator::overrideSignals() const
 	{
 		return m_overrideSignals;
+	}
+
+	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
+	{
+		return m_appDataTransmitter;
+	}
+
+	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
+	{
+		return m_appDataTransmitter;
 	}
 
 	Sim::Control& Simulator::control()

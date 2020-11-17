@@ -380,6 +380,11 @@ bool DbController::setProjectProperty(QString propertyName, bool propertyValue, 
 	return setProjectProperty(propertyName, propertyValue ? QString("true") : QString("false") , parentWidget);
 }
 
+bool DbController::setProjectProperty(QString propertyName, int propertyValue, QWidget* parentWidget)
+{
+	return setProjectProperty(propertyName, QString::number(propertyValue, 10), parentWidget);
+}
+
 bool DbController::setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget)
 {
 	// Check parameters
@@ -425,6 +430,27 @@ bool DbController::getProjectProperty(QString propertyName, bool* out, QWidget* 
 	*out = propValueStr.compare("true", Qt::CaseInsensitive) == 0 ? true : false;
 
 	return true;
+}
+
+bool DbController::getProjectProperty(QString propertyName, int* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	QString propValueStr;
+
+	bool ok = getProjectProperty(propertyName, &propValueStr, parentWidget);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	*out = propValueStr.toInt(&ok, 10);
+
+	return ok;
 }
 
 bool DbController::getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget)
@@ -477,12 +503,19 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	bool generateAppSignalXml = false;
 	bool generateExtarDebugInfo = false;
 
+	bool runSimTestsOnBuild = true;
+	int simTestsTimeout = true;
+
 	ok &= getProjectProperty(Db::ProjectProperty::Description, &description, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SafetyProject, &safetyProject, parentWidget);
+
 	ok &= getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressWarningsStr, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtarDebugInfo, parentWidget);
+
+	ok &= getProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, &runSimTestsOnBuild, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::SimulatorTestsTimeout, &simTestsTimeout, parentWidget);
 
 	// --
 	//
@@ -497,6 +530,9 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	out->setUppercaseAppSignalId(uppercaseAppSignalId);
 	out->setGenerateAppSignalsXml(generateAppSignalXml);
 	out->setGenerateExtraDebugInfo(generateExtarDebugInfo);
+
+	out->setRunSimTestsOnBuild(runSimTestsOnBuild);
+	out->setSimTestsTimeout(simTestsTimeout);
 
 	return true;
 }
@@ -516,6 +552,9 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 	ok &= setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, in.uppercaseAppSignalId(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, in.generateExtraDebugInfo(), parentWidget);
+
+	ok &= setProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, in.runSimTestsOnBuild(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::SimulatorTestsTimeout, in.simTestsTimeout(), parentWidget);
 
 	return ok;
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "SimOutput.h"
 #include <QQmlEngine>
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
@@ -17,7 +16,14 @@ namespace Sim
 	class LogicModule;
 
 
-	class ScriptWorkerThread : public QThread, protected Output
+	struct SimScriptItem
+	{
+		QString script;
+		QString scriptCaption;
+	};
+
+
+	class ScriptWorkerThread : public QThread
 	{
 		Q_OBJECT
 
@@ -35,17 +41,17 @@ namespace Sim
 
 		bool result() const;
 
-		void setScript(QString value);
-		void setTestName(QString value);
+		void setScripts(const std::vector<SimScriptItem>& scripts);
 
 	private:
 		ScriptSimulator* m_scriptSimulator = nullptr;
+		ScopedLog m_log;
 
-		QString m_script;
-		QString m_testName;
+		std::vector<SimScriptItem> m_scripts;
 
-        QJSEngine m_jsEngine;
+		std::unique_ptr<QJSEngine> m_jsEngine;
         QJSValue m_jsThis;
+		QJSValue m_jsLog;
 
         std::atomic_bool m_result{true};
 	};
@@ -57,15 +63,15 @@ namespace Sim
 		\ingroup simulator
 		\brief Represents class that runs all simulations on compiled project.
 	*/
-	class ScriptSimulator : public QObject, protected Output
+	class ScriptSimulator : public QObject
 	{
 		Q_OBJECT
 
 		/// \brief Loaded project build directory, if empty then project is not loaded.
 		Q_PROPERTY(QString buildPath READ buildPath)
 
-		/// \brief Script execution timeout in milliseconds, if negative then timeout is not applied.
-		Q_PROPERTY(qint64 executionTimeOut READ executionTimeOut WRITE setExecutionTimeOut)
+		/// \brief Script execution timeout in milliseconds, if -1 then timeout is not applied.
+		Q_PROPERTY(qint64 executionTimeout READ executionTimeout WRITE setExecutionTimeout)
 
 		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
 		Q_PROPERTY(bool unlockTimer READ unlockTimer WRITE setUnlockTimer)
@@ -77,7 +83,7 @@ namespace Sim
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
 
-		bool runScript(QString script, QString testName);
+		bool runScripts(const std::vector<SimScriptItem>& scripts);
 		bool stopScript();
 
 		bool isRunning() const;
@@ -143,25 +149,32 @@ namespace Sim
 		ScriptDevUtils devUtils();
 
 	public:
+		[[nodiscard]] ScopedLog& log();
+
 		QString buildPath() const;
 
-		qint64 executionTimeOut() const;
-		void setExecutionTimeOut(qint64 value);
+		qint64 executionTimeout() const;
+		void setExecutionTimeout(qint64 value);
+
+		[[nodiscard]] Simulator* simulator();
+		[[nodiscard]] const Simulator* simulator() const;
 
 	private:
-		bool unlockTimer() const;
+		[[nodiscard]] bool unlockTimer() const;
 		void setUnlockTimer(bool value);
 
-		bool appDataTrasmittion() const;
+		[[nodiscard]] bool appDataTrasmittion() const;
 		void setAppDataTrasmittion(bool value);
 
 		// Data
 		//
 	private:
 		Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
+
 		ScriptWorkerThread m_workerThread{this};
 
-		qint64 m_executionTimeOut = -1;		// Script execution timeout in milliseconds, negative means no timeout
+		qint64 m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
 	};
 
 }

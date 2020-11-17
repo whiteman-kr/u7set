@@ -1,14 +1,17 @@
 #pragma once
 
-#include "../lib/Signal.h"
 #include "../lib/AppSignal.h"
+#include "../lib/Signal.h"
+#include "../lib/SignalProperties.h"
+#include "../lib/ComparatorSet.h"
+
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
-#include "../lib/ComparatorSet.h"
-#include "../lib/SignalProperties.h"
-#include "../Builder/CfgFiles.h"
-#include "../Proto/serialization.pb.h"
+
 #include "../lib/ProtoSerialization.h"
+#include "../Proto/serialization.pb.h"
+
+#include "../Builder/CfgFiles.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS
@@ -240,25 +243,25 @@ namespace Metrology
 		QString					adcRangeStr(bool showHex) const;
 
 		double					electricLowLimit() const { return m_electricLowLimit; }
-		void					setElectricLowLimit(double lowLimit) { m_electricLowLimit = lowLimit; }
+		void					setElectricLowLimit(double lowLimit);
 
 		double					electricHighLimit() const { return m_electricHighLimit; }
-		void					setElectricHighLimit(double highLimit) { m_electricHighLimit = highLimit; }
+		void					setElectricHighLimit(double highLimit);
 
 		E::ElectricUnit			electricUnitID() const { return m_electricUnitID; }
-		void					setElectricUnitID(E::ElectricUnit unitID) { m_electricUnitID = unitID; }
+		void					setElectricUnitID(E::ElectricUnit unitID);
 		QString					electricUnitStr() const;
 
 		E::SensorType			electricSensorType() const { return m_electricSensorType; }
-		void					setElectricSensorType(E::SensorType sensorType) { m_electricSensorType = sensorType; }
+		void					setElectricSensorType(E::SensorType sensorType);
 		QString					electricSensorTypeStr() const;
 
 		double					electricRLoad() const { return m_electricRLoad; }
-		void					setElectricRLoad(double rload) { m_electricRLoad = rload; }
+		void					setElectricRLoad(double rload);
 		QString					electricRLoadStr() const;
 
 		double					electricR0() const { return m_electricR0; }
-		void					setElectricR0(double r0) { m_electricR0 = r0; }
+		void					setElectricR0(double r0);
 		QString					electricR0Str() const;
 
 		int						electricPrecision() const { return m_electricPrecision; }
@@ -436,7 +439,7 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue(int cmpValueType);			// current online (run time) value
+		double compareOnlineValue(int cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
 		QString compareOnlineValueStr(int cmpValueType);		// str current oline (run time) value
 		double compareConstValue() const;						// default offine value
 		QString compareDefaultValueStr() const;					// str default offine value

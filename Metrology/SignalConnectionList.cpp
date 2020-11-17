@@ -1,13 +1,11 @@
 #include "SignalConnectionList.h"
 
-#include "MainWindow.h"
-#include "Options.h"
-#include "CopyData.h"
-#include "FindData.h"
-#include "ExportData.h"
-#include "SignalList.h"
-
 #include <QFileDialog>
+#include <QMessageBox>
+
+#include "ProcessData.h"
+#include "SignalList.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,11 +91,6 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 	if (role == Qt::TextAlignmentRole)
 	{
 		return Qt::AlignLeft;
-	}
-
-	if (role == Qt::FontRole)
-	{
-		return theOptions.measureView().font();
 	}
 
 	if (role == Qt::BackgroundRole)
@@ -308,11 +301,11 @@ void SignalConnectionItemDialog::createInterface()
 		//
 	QHBoxLayout *inputSignalLayout = new QHBoxLayout;
 
-	QLabel* pInputSignalLabel = new QLabel(tr("Input signal"), this);
+	QLabel* pInputSignalLabel = new QLabel(tr("Source signal"), this);
 	m_pInputSignalIDEdit = new QLineEdit(QString(), this);
 	m_pInputSignalButton = new QPushButton(tr("Select ..."), this);
 
-	pInputSignalLabel->setFixedWidth(70);
+	pInputSignalLabel->setFixedWidth(100);
 	m_pInputSignalIDEdit->setFixedWidth(200);
 
 	//m_pInputSignalIDEdit->setReadOnly(true);
@@ -326,11 +319,11 @@ void SignalConnectionItemDialog::createInterface()
 		//
 	QHBoxLayout *outputSignalLayout = new QHBoxLayout;
 
-	QLabel* pOutputSignalLabel = new QLabel(tr("Output signal"), this);
+	QLabel* pOutputSignalLabel = new QLabel(tr("Destination signal"), this);
 	m_pOutputSignalIDEdit = new QLineEdit(QString(), this);
 	m_pOutputSignalButton = new QPushButton(tr("Select ..."), this);
 
-	pOutputSignalLabel->setFixedWidth(70);
+	pOutputSignalLabel->setFixedWidth(100);
 	m_pOutputSignalIDEdit->setFixedWidth(200);
 
 	//m_pOutputSignalIDEdit->setReadOnly(true);
@@ -432,11 +425,6 @@ void SignalConnectionItemDialog::selectOutputSignal()
 
 void SignalConnectionItemDialog::selectSignal(int type)
 {
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		return;
-	}
-
 	SignalListDialog dialog(true, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
@@ -458,6 +446,11 @@ void SignalConnectionItemDialog::selectSignal(int type)
 	}
 
 	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
+	{
+		return;
+	}
+
+	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
@@ -499,7 +492,10 @@ void SignalConnectionItemDialog::onOk()
 	Metrology::Signal* pInSignal = theSignalBase.signalPtr(inputAppSignalID);
 	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select input signal!").arg(inputAppSignalID));
+		QMessageBox::information(this,
+								 windowTitle(),
+								 tr("Signal %1 is not found.\nPlease, select input signal!").
+								 arg(inputAppSignalID));
 		m_pInputSignalButton->setFocus();
 		return;
 	}
@@ -515,9 +511,114 @@ void SignalConnectionItemDialog::onOk()
 	Metrology::Signal* pOutSignal = theSignalBase.signalPtr(outputAppSignalID);
 	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Signal %1 is not found.\nPlease, select output signal!").arg(outputAppSignalID));
+		QMessageBox::information(this,
+								 windowTitle(),
+								 tr("Signal %1 is not found.\nPlease, select output signal!").
+								 arg(outputAppSignalID));
 		m_pOutputSignalButton->setFocus();
 		return;
+	}
+
+	switch(type)
+	{
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+
+			if (pInSignal->param().isInput() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not input signal!").
+										 arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			if (pInSignal->param().electricRangeIsValid() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 has wrong electric limit!").
+										 arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+
+			if (pInSignal->param().isInternal() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not internal signal!").
+										 arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			if (pInSignal->param().enableTuning() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not tuning signal!").
+										 arg(inputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+	}
+
+	switch(type)
+	{
+		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+
+			if (pOutSignal->param().isInternal() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not internal signal!").
+										 arg(outputAppSignalID));
+				m_pOutputSignalButton->setFocus();
+				return;
+			}
+
+			break;
+
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+
+			if (pOutSignal->param().isOutput() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 is not output signal!").
+										 arg(outputAppSignalID));
+				m_pOutputSignalButton->setFocus();
+				return;
+			}
+
+			if (pOutSignal->param().electricRangeIsValid() == false)
+			{
+				QMessageBox::information(this,
+										 windowTitle(),
+										 tr("Signal %1 has wrong electric limit!").
+										 arg(outputAppSignalID));
+				m_pInputSignalButton->setFocus();
+				return;
+			}
+
+			break;
 	}
 
 	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
@@ -533,16 +634,31 @@ void SignalConnectionItemDialog::onOk()
 SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
 	QDialog(parent)
 {
-	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
-	{
-		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalConnectionDialog::configurationLoaded, Qt::QueuedConnection);
-	}
-
 	m_connectionBase = theSignalBase.signalConnections();
 
 	createInterface();
 	updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalConnectionDialog::SignalConnectionDialog(Metrology::Signal* pSignal, QWidget *parent) :
+	QDialog(parent)
+{
+	m_connectionBase = theSignalBase.signalConnections();
+
+	createInterface();
+	updateList();
+
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		assert(0);
+		return;
+	}
+
+	m_pOutputSignal = pSignal;
+
+	createConnectionBySignal(m_pOutputSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -616,7 +732,7 @@ void SignalConnectionDialog::createInterface()
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_connectionTable);
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < SIGNAL_CONNECTION_COLUMN_COUNT; column++)
@@ -669,7 +785,7 @@ void SignalConnectionDialog::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionDialog::configurationLoaded()
+void SignalConnectionDialog::signalBaseLoaded()
 {
 	m_connectionBase.initSignals();
 	updateList();
@@ -690,6 +806,70 @@ void SignalConnectionDialog::updateList()
 	}
 
 	m_connectionTable.set(connectionList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalConnectionDialog::createConnectionBySignal(Metrology::Signal* pSignal)
+{
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		assert(0);
+		return false;
+	}
+
+	SignalConnection connection;
+
+	int ioType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+
+	switch (pSignal->param().inOutType())
+	{
+		case E::SignalInOutType::Internal:	ioType = SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL;	break;
+		case E::SignalInOutType::Output:	ioType = SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT;	break;
+	}
+
+	if (ioType == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+	{
+		return false;
+	}
+
+	connection.setType(ioType);
+	connection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+
+	SignalConnectionItemDialog dialog(connection);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		reject();
+		return false;
+	}
+
+	connection = dialog.connection();
+	if (connection.isValid() == false)
+	{
+		return false;
+	}
+
+	int foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+
+		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
+		return false;
+	}
+
+	m_connectionBase.append(connection);
+	m_connectionBase.sort();
+
+	updateList();
+
+	foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -786,7 +966,9 @@ void SignalConnectionDialog::removeConnection()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete %1 connection(s)?").arg(selectedConnectionCount)) == QMessageBox::No)
+	if (QMessageBox::question(this,
+							  windowTitle(), tr("Do you want delete %1 connection(s)?").
+							  arg(selectedConnectionCount)) == QMessageBox::No)
 	{
 		return;
 	}
@@ -810,7 +992,10 @@ void SignalConnectionDialog::removeConnection()
 
 void SignalConnectionDialog::importConnections()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "SignalConnections.csv", "CSV files (*.csv);;All files (*.*)");
+	QString fileName = QFileDialog::getOpenFileName(this,
+													tr("Open File"),
+													"SignalConnections.csv",
+													"CSV files (*.csv);;All files (*.*)");
 	if (fileName.isEmpty() == true)
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Could not open file: Empty file name"));
@@ -852,9 +1037,15 @@ void SignalConnectionDialog::importConnections()
 			{
 				switch (column)
 				{
-					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	connection.setType(line[column].toInt());								break;
-					case SIGNAL_CONNECTION_COLUMN_IN_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);	break;
-					case SIGNAL_CONNECTION_COLUMN_OUT_ID:	connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);	break;
+					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:
+						connection.setType(line[column].toInt());
+						break;
+					case SIGNAL_CONNECTION_COLUMN_IN_ID:
+						connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);
+						break;
+					case SIGNAL_CONNECTION_COLUMN_OUT_ID:
+						connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);
+						break;
 				}
 			}
 
@@ -909,8 +1100,6 @@ void SignalConnectionDialog::onContextMenu(QPoint)
 
 void SignalConnectionDialog::onOk()
 {
-	theSignalBase.signalConnections() = m_connectionBase;
-
 	accept();
 }
 

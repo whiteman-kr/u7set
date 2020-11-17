@@ -1,12 +1,14 @@
 #include "MeasureBase.h"
 
 #include <QThread>
+#include <QtConcurrent>
+#include <QMessageBox>
 
 #include "../lib/UnitsConvertor.h"
 
 #include "Database.h"
-#include "Options.h"
 #include "Conversion.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -48,7 +50,7 @@ void Measurement::clear()
 
 	m_location.clear();
 
-	m_calibratorPrecision = DEFAULT_ECLECTRIC_PRECESION;
+	m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 	{
@@ -144,7 +146,7 @@ double Measurement::nominal(int limitType) const
 
 QString Measurement::nominalStr(int limitType) const
 {
-	int precision = DEFAULT_ECLECTRIC_PRECESION;
+	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
@@ -154,9 +156,12 @@ QString Measurement::nominalStr(int limitType) const
 
 	precision = limitPrecision(limitType);
 
-	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		precision = calibratorPrecision();
+		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		{
+			precision = calibratorPrecision();
+		}
 	}
 
 	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', precision)).arg(m_unit[limitType]);
@@ -200,7 +205,7 @@ QString Measurement::measureStr(int limitType) const
 		}
 	}
 
-	int precision = DEFAULT_ECLECTRIC_PRECESION;
+	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
@@ -210,9 +215,12 @@ QString Measurement::measureStr(int limitType) const
 
 	precision = limitPrecision(limitType);
 
-	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		precision = calibratorPrecision();
+		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		{
+			precision = calibratorPrecision();
+		}
 	}
 
 	return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', precision)).arg(m_unit[limitType]);
@@ -511,7 +519,7 @@ QString Measurement::errorStr() const
 		}
 	}
 
-	int precision = DEFAULT_ECLECTRIC_PRECESION;
+	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	int limitType = theOptions.linearity().limitType();
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -522,9 +530,12 @@ QString Measurement::errorStr() const
 
 	precision = limitPrecision(limitType);
 
-	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		precision = calibratorPrecision();
+		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		{
+			precision = calibratorPrecision();
+		}
 	}
 
 	int errorType = theOptions.linearity().errorType();
@@ -703,12 +714,6 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int calibratorType = pCalibrator->type();
-	if (calibratorType < 0 || calibratorType >= CALIBRATOR_TYPE_COUNT)
-	{
-		return;
-	}
-
 	int signalConnectionType = ioParam.signalConnectionType();
 	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
@@ -716,7 +721,7 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int precision = DEFAULT_ECLECTRIC_PRECESION;
+	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	switch (signalConnectionType)
 	{
@@ -725,13 +730,13 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 			{
-				int sourceUnit = pCalibrator->sourceUnit();
-				if (sourceUnit < 0 || sourceUnit >= CALIBRATOR_UNIT_COUNT)
+				CalibratorLimit sourceLimit = pCalibrator->currentSourceLimit();
+				if (sourceLimit.isValid() == false)
 				{
 					break;
 				}
 
-				precision = CalibratorPrecision[calibratorType][sourceUnit];
+				precision = sourceLimit.precesion;
 			}
 			break;
 
@@ -741,13 +746,13 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
 			{
-				int measureUnit = pCalibrator->measureUnit();
-				if (measureUnit < 0 || measureUnit >= CALIBRATOR_UNIT_COUNT)
+				CalibratorLimit measureLimit = pCalibrator->currentMeasureLimit();
+				if (measureLimit.isValid() == false)
 				{
 					break;
 				}
 
-				precision = CalibratorPrecision[calibratorType][measureUnit];
+				precision = measureLimit.precesion;
 			}
 			break;
 
@@ -1290,7 +1295,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 
 		if (outParam.isOutput() == true)
 		{
-			ioParam.calibratorManager()->value();
+			ioParam.calibratorManager()->getValue();
 			ioParam.calibratorManager()->waitReadyForManage();
 
 			elVal = pCalibrator->measureValue();
@@ -1431,12 +1436,6 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 		return 0;
 	}
 
-	int calibratorType = pCalibrator->type();
-	if (calibratorType < 0 || calibratorType >= CALIBRATOR_TYPE_COUNT)
-	{
-		return 0;
-	}
-
 	int signalConnectionType = ioParam.signalConnectionType();
 	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
@@ -1467,13 +1466,6 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 			{
 				// this measurement have only electric input and have not electric output
 				//
-
-				int calibratorSourceUnit = pCalibrator->sourceUnit();
-				if (calibratorSourceUnit < 0 || calibratorSourceUnit >= CALIBRATOR_UNIT_COUNT)
-				{
-					return 0;
-				}
-
 				const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 				if (inParam.isValid() == false)
 				{
@@ -1481,17 +1473,21 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 					return 0;
 				}
 
+				CalibratorLimit sourceLimit = pCalibrator->currentSourceLimit();
+				if (sourceLimit.isValid() == false)
+				{
+					return 0;
+				}
+
 				double Kox = 2;
 
-				double dEj = (	CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC0] * pCalibrator->sourceValue() +
-								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC1] *
-								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_RANGE]) / 100.0;
+				double dEj = (sourceLimit.ac0 * pCalibrator->sourceValue() + sourceLimit.ac1 * sourceLimit.highLimit) / 100.0;
 
 				switch (limitType)
 				{
 					case MEASURE_LIMIT_TYPE_ELECTRIC:		// input electric
 						{
-							double MPe = 1 / pow(10.0, CalibratorPrecision[calibratorType][calibratorSourceUnit]);
+							double MPe = 1 / pow(10.0, sourceLimit.precesion);
 
 							// this is formula for case 2 from documet about uncertainty
 							//
@@ -1539,17 +1535,16 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 			{
 				// this measurement have electric input and have electric output
 				//
-
-				int calibratorSourceUnit = pCalibrator->sourceUnit();
-				if (calibratorSourceUnit < 0 || calibratorSourceUnit >= CALIBRATOR_UNIT_COUNT)
-				{
-					return 0;
-				}
-
 				const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 				if (inParam.isValid() == false)
 				{
 					assert(false);
+					return 0;
+				}
+
+				CalibratorLimit sourceLimit = pCalibrator->currentSourceLimit();
+				if (sourceLimit.isValid() == false)
+				{
 					return 0;
 				}
 
@@ -1560,21 +1555,17 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 					return 0;
 				}
 
-				double Kox = 2;
-
-				double dEj = (	CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC0] * pCalibrator->sourceValue()  +
-								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_AC1] *
-								CalibratorTS[calibratorType][calibratorSourceUnit][CALIBRATION_TS_RANGE]) / 100.0;
-
-				int сalibratorMeasureUnit = pCalibrator->measureUnit();
-				if (сalibratorMeasureUnit < 0 || сalibratorMeasureUnit >= CALIBRATOR_UNIT_COUNT)
+				CalibratorLimit measureLimit = pCalibrator->currentMeasureLimit();
+				if (measureLimit.isValid() == false)
 				{
 					return 0;
 				}
 
-				double dIj = (	CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC0] * measure(MEASURE_LIMIT_TYPE_ELECTRIC) +
-								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC1] *
-								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_RANGE]) / 100.0;
+				double Kox = 2;
+
+				double dEj = (sourceLimit.ac0 * pCalibrator->sourceValue() + sourceLimit.ac1 * sourceLimit.highLimit) / 100.0;
+
+				double dIj = (measureLimit.ac0 * measure(MEASURE_LIMIT_TYPE_ELECTRIC) + measureLimit.ac1 * measureLimit.highLimit) / 100.0;
 
 				switch (limitType)
 				{
@@ -1598,7 +1589,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 							}
 
-							double MPi = 1 / pow(10.0, CalibratorPrecision[calibratorType][сalibratorMeasureUnit]);
+							double MPi = 1 / pow(10.0, measureLimit.precesion);
 
 							// this is formula for case 3 from documet about uncertainty
 							//
@@ -1645,18 +1636,15 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 			{
 				// this measurement have not electric input and have only electric output
 				//
-
-				double Kox = 2;
-
-				int сalibratorMeasureUnit = pCalibrator->measureUnit();
-				if (сalibratorMeasureUnit < 0 || сalibratorMeasureUnit >= CALIBRATOR_UNIT_COUNT)
+				CalibratorLimit measureLimit = pCalibrator->currentMeasureLimit();
+				if (measureLimit.isValid() == false)
 				{
 					return 0;
 				}
 
-				double dIj = (	CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC0] * measure(MEASURE_LIMIT_TYPE_ELECTRIC) +
-								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_AC1] *
-								CalibratorTS[calibratorType][сalibratorMeasureUnit][CALIBRATION_TS_RANGE]) / 100.0;
+				double Kox = 2;
+
+				double dIj = (measureLimit.ac0 * measure(MEASURE_LIMIT_TYPE_ELECTRIC) + measureLimit.ac1 * measureLimit.highLimit) / 100.0;
 
 				switch (limitType)
 				{
@@ -1665,7 +1653,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 						{
 							// this is formula for case 4 from documet about uncertainty
 							//
-							double MPi = 1 / pow(10.0, CalibratorPrecision[calibratorType][сalibratorMeasureUnit]);
+							double MPi = 1 / pow(10.0, measureLimit.precesion);
 
 							// this is formula for case 4 from documet about uncertainty
 							//
@@ -1720,7 +1708,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 		}
 	}
 
-	int precision = DEFAULT_ECLECTRIC_PRECESION;
+	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
@@ -1730,9 +1718,12 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 
 	precision = limitPrecision(limitType);
 
-	if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		precision = calibratorPrecision();
+		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		{
+			precision = calibratorPrecision();
+		}
 	}
 
 	if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT)
@@ -2353,10 +2344,6 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureBase theMeasureBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 MeasureBase::MeasureBase(QObject *parent) :
 	QObject(parent)
 {
@@ -2705,95 +2692,9 @@ int MeasureBase::load(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::signalLoaded()
+void MeasureBase::signalBaseLoaded()
 {
-	QMutexLocker l(&m_measureMutex);
-
-	int measureCount = m_measureList.count();
-	for (int m = 0; m < measureCount; m++)
-	{
-		Measurement* pMeasurement = m_measureList[m];
-		if (pMeasurement == nullptr)
-		{
-			continue;
-		}
-
-		int measureType = pMeasurement->measureType();
-		if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-		{
-			continue;
-		}
-
-		pMeasurement->setFoundInStatistics(false);
-
-		int count = theSignalBase.statistics().count(measureType);
-		for(int s = 0; s < count; s++)
-		{
-			const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
-
-			Metrology::Signal* pSignal = si.signal();
-			if (pSignal == nullptr || pSignal->param().isValid() == false)
-			{
-				continue;
-			}
-
-			bool measurementIsFound = false;
-
-			switch (measureType)
-			{
-				case MEASURE_TYPE_LINEARITY:
-					{
-						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
-						if (pLinearityMeasurement == nullptr)
-						{
-							continue;
-						}
-
-						if (pLinearityMeasurement->appSignalID() != pSignal->param().appSignalID())
-						{
-							continue;
-						}
-
-						measurementIsFound = true;
-					}
-					break;
-
-				case MEASURE_TYPE_COMPARATOR:
-					{
-						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
-						if (comparatorEx == nullptr)
-						{
-							continue;
-						}
-
-						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
-						if (pComparatorMeasurement == nullptr)
-						{
-							continue;
-						}
-
-						if (pComparatorMeasurement->appSignalID() != pSignal->param().appSignalID())
-						{
-							continue;
-						}
-
-						if (pComparatorMeasurement->outputAppSignalID() != comparatorEx->output().appSignalID())
-						{
-							continue;
-						}
-
-						measurementIsFound = true;
-					}
-					break;
-
-				default:
-					assert(0);
-					break;
-			}
-
-			pMeasurement->setFoundInStatistics(measurementIsFound);
-		}
-	}
+	QtConcurrent::run(MeasureBase::markNotExistMeasuremetsFromStatistics, this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2817,6 +2718,23 @@ int MeasureBase::append(Measurement* pMeasurement)
 	emit updatedMeasureBase(pMeasurement->signalHash());
 
 	return index;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::appendToBase(Measurement* pMeasurement)
+{
+	if (pMeasurement == nullptr)
+	{
+		return;
+	}
+
+	int index = append(pMeasurement);
+	if (index == -1)
+	{
+		QMessageBox::critical(nullptr, tr("Save measurements"), tr("Error saving measurements to memory"));
+		return;
+	}
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -2868,24 +2786,26 @@ bool MeasureBase::remove(int index, bool removeData)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::remove(int measureType, const QVector<int>& keyList)
+bool MeasureBase::remove(int measureType, const QVector<int>& keyList)
 {
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
-		return;
+		return false;
 	}
 
 	int keyCount = keyList.count();
 	if (keyCount == 0)
 	{
-		return;
+		return false;
 	}
 
 	int measureCount = count();
 	if (measureCount == 0)
 	{
-		return;
+		return false;
 	}
+
+	int removed = 0;
 
 	for(int k = 0; k < keyCount; k++)
 	{
@@ -2907,16 +2827,37 @@ void MeasureBase::remove(int measureType, const QVector<int>& keyList)
 				continue;
 			}
 
-			remove(i);
+			if (remove(i) == true)
+			{
+				removed++;
+			}
 
 			break;
 		}
+	}
+
+	if (removed != keyCount)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::removeFromBase(int measureType, const QVector<int>& keyList)
+{
+	bool result = remove(measureType, keyList);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from memory"));
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
+void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 {
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
@@ -3048,6 +2989,220 @@ void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
 				assert(0);
 		}
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::updateStatisticsBase(int measureType)
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	int measuredCount = 0;
+	int invalidMeasureCount = 0;
+
+	int count = theSignalBase.statistics().count(measureType);
+	for(int i = 0; i < count; i++)
+	{
+		StatisticsItem* pSI = theSignalBase.statistics().itemPtr(measureType, i);
+		if (pSI == nullptr)
+		{
+			continue;
+		}
+
+		updateStatisticsItem(measureType, *pSI);
+
+		if (pSI->isMeasured() == true)
+		{
+			measuredCount++;
+		}
+
+		if (pSI->state() == StatisticsItem::State::Failed)
+		{
+			invalidMeasureCount ++;
+		}
+	}
+
+	theSignalBase.statistics().setMeasuredCount(measuredCount);
+	theSignalBase.statistics().setInvalidMeasureCount(invalidMeasureCount);
+
+	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::updateStatisticsBase(int measureType, Hash signalHash)
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	if (signalHash == UNDEFINED_HASH)
+	{
+		return;
+	}
+
+	int count = theSignalBase.statistics().count(measureType);
+	for(int i = 0; i < count; i++)
+	{
+		StatisticsItem* pSI = theSignalBase.statistics().itemPtr(measureType, i);
+		if (pSI == nullptr)
+		{
+			continue;
+		}
+
+		Metrology::Signal* pSignal = pSI->signal();
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		if (pSignal->param().hash() == signalHash)
+		{
+			updateStatisticsItem(measureType, *pSI);
+		}
+	}
+
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	int measuredCount = 0;
+	int invalidMeasureCount = 0;
+
+	for(int i = 0; i < count; i++)
+	{
+		StatisticsItem* pSI = theSignalBase.statistics().itemPtr(measureType, i);
+		if (pSI == nullptr)
+		{
+			continue;
+		}
+
+		if (pSI->isMeasured() == true)
+		{
+			measuredCount++;
+		}
+
+		if (pSI->state() == StatisticsItem::State::Failed)
+		{
+			invalidMeasureCount ++;
+		}
+	}
+
+	theSignalBase.statistics().setMeasuredCount(measuredCount);
+	theSignalBase.statistics().setInvalidMeasureCount(invalidMeasureCount);
+
+	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
+{
+	if (pThis == nullptr)
+	{
+		return;
+	}
+
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	QMutexLocker l(&pThis->m_measureMutex);
+
+	int measureCount = pThis->m_measureList.count();
+	for (int m = 0; m < measureCount; m++)
+	{
+		Measurement* pMeasurement = pThis->m_measureList[m];
+		if (pMeasurement == nullptr)
+		{
+			continue;
+		}
+
+		int measureType = pMeasurement->measureType();
+		if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+		{
+			continue;
+		}
+
+		pMeasurement->setFoundInStatistics(false);
+
+		int count = theSignalBase.statistics().count(measureType);
+		for(int s = 0; s < count; s++)
+		{
+			const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
+
+			Metrology::Signal* pSignal = si.signal();
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
+			{
+				continue;
+			}
+
+			bool measurementIsFound = false;
+
+			switch (measureType)
+			{
+				case MEASURE_TYPE_LINEARITY:
+					{
+						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+						if (pLinearityMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						if (pLinearityMeasurement->appSignalID() != pSignal->param().appSignalID())
+						{
+							continue;
+						}
+
+						measurementIsFound = true;
+					}
+					break;
+
+				case MEASURE_TYPE_COMPARATOR:
+					{
+						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+						if (comparatorEx == nullptr)
+						{
+							continue;
+						}
+
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						if (pComparatorMeasurement->appSignalID() != pSignal->param().appSignalID())
+						{
+							continue;
+						}
+
+						if (pComparatorMeasurement->outputAppSignalID() != comparatorEx->output().appSignalID())
+						{
+							continue;
+						}
+
+						measurementIsFound = true;
+					}
+					break;
+
+				default:
+					assert(0);
+					break;
+			}
+
+			pMeasurement->setFoundInStatistics(measurementIsFound);
+		}
+	}
+
+	emit pThis->updateMeasureView();
+
+	qDebug() << __FUNCTION__ << "- Signals were marked, " << " Time for marked: " << responseTime.elapsed() << " ms";
 }
 
 // -------------------------------------------------------------------------------------------------------------------

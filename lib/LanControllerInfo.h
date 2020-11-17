@@ -48,4 +48,21 @@ struct LanControllerInfo
 	int diagDataSizeBytes = 0;
 	int diagDataFramesQuantity = 0;
 	int overrideDiagDataWordCount = -1;
+
+	// --
+	//
+	bool isTuning() const
+	{
+		return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
+	}
+
+	bool isAppData() const
+	{
+		return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0;
+	}
+
+	bool isDiagData() const
+	{
+		return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0;
+	}
 };

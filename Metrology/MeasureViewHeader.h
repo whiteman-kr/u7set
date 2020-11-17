@@ -71,12 +71,6 @@ const int				MEASURE_VIEW_COLUMN_COUNT	= 64;
 
 // ==============================================================================================
 
-const int				MEASURE_VIEW_COLUMN_INDEX	= 0,
-						MEASURE_VIEW_COLUMN_RACK	= 1,
-						MEASURE_VIEW_COLUMN_ID		= 2;
-
-// ==============================================================================================
-
 class MeasureViewHeader : public QObject
 {
 	Q_OBJECT
@@ -88,7 +82,7 @@ public:
 
 private:
 
-	static MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
+	static				MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
 	int					m_measureType = MEASURE_TYPE_UNDEFINED;
 

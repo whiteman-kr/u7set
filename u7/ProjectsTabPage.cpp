@@ -286,6 +286,7 @@ void ProjectsTabPage::openProject()
 
 		mb.setText(tr("You cannot open this project."));
 		mb.setInformativeText(tr("The project database version is higher than the program version. Please update software."));
+		mb.setFixedSize(mb.minimumSizeHint());
 		mb.exec();
 		return;
 	}
@@ -298,6 +299,7 @@ void ProjectsTabPage::openProject()
 		mb.setInformativeText(tr("The project database version is lower than the program version. Do you want to upgrade the project to the appropriate version?"));
 		mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		mb.setDefaultButton(QMessageBox::Ok);
+		mb.setFixedSize(mb.minimumSizeHint());
 
 		int result = mb.exec();
 		if (result == QMessageBox::Cancel)
@@ -313,7 +315,7 @@ void ProjectsTabPage::openProject()
 			tr("Upgrade project"),
 			tr("Please, enter <b>Administrator</b>'s password for project %1:").arg(projectName),
 			QLineEdit::Password,
-			QString(), &ok);
+			QString(), &ok, Qt::MSWindowsFixedSizeDialogHint);
 
 		if (ok == false)
 		{
@@ -361,6 +363,7 @@ void ProjectsTabPage::closeProject()
 		return;
 	}
 
+	emit projectAboutToBeClosed();
 	dbController()->closeProject(this);
 	return;
 }

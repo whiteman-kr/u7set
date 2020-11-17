@@ -374,7 +374,7 @@ bool RackPropertyDialog::foundDuplicateGroups()
 
 		if (rack.groupIndex() == m_rack.groupIndex() && rack.channel() == m_rack.channel())
 		{
-			QString alert = tr(	"Another rack (%1) already has the same group or channel.\n"
+			QString alert = tr(	"Another rack \"%1\" already has the same group or channel.\n"
 								"Please choose a different group or channel.").arg(rack.caption());
 			QMessageBox::information(this, tr("Same racks"), alert);
 
@@ -483,7 +483,7 @@ void RackGroupPropertyDialog::createPropertyList()
 	m_pGroupView->horizontalHeader()->hide();
 	m_pGroupView->verticalHeader()->hide();
 
-	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pGroupView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	m_pGroupView->installEventFilter(this);
@@ -574,7 +574,7 @@ void RackGroupPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::updateGroupList()
+void RackGroupPropertyDialog::updateGroupList(const Hash& hash)
 {
 	m_pGroupView->blockSignals(true);
 
@@ -589,6 +589,8 @@ void RackGroupPropertyDialog::updateGroupList()
 			delete item;
 		}
 	}
+
+	QTableWidgetItem* pSelectItem = nullptr;
 
 	// append new group caption
 	//
@@ -607,9 +609,19 @@ void RackGroupPropertyDialog::updateGroupList()
 		QTableWidgetItem* item = new QTableWidgetItem(group.caption());
 		item->setTextAlignment(Qt::AlignHCenter);
 		m_pGroupView->setItem(i, RACK_GROUP_COLUMN_CAPTION, item);
+
+		if (group.hash() == hash)
+		{
+			pSelectItem = item;
+		}
 	}
 
 	m_pGroupView->blockSignals(false);
+
+	if (pSelectItem != nullptr)
+	{
+		m_pGroupView->setCurrentItem(pSelectItem);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -669,7 +681,7 @@ void RackGroupPropertyDialog::appendGroup()
 
 	m_groupBase.append(group);
 
-	updateGroupList();
+	updateGroupList(group.hash());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -688,7 +700,10 @@ void RackGroupPropertyDialog::removeGroup()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete group \"%1\"?").arg(group.caption())) == QMessageBox::No)
+	if (QMessageBox::question(this,
+							  windowTitle(),
+							  tr("Do you want delete group \"%1\"?").
+							  arg(group.caption())) == QMessageBox::No)
 	{
 		return;
 	}
@@ -753,6 +768,10 @@ void RackGroupPropertyDialog::onPropertyValueChanged(QtProperty *property, const
 		return;
 	}
 
+	rack.setChannel(channel);
+	rack.setGroupIndex(group.Index());
+	m_rackBase.setRack(rack.index(), rack);
+
 	group.setRackID(channel, rack.equipmentID());
 	m_groupBase.setGroup(index, group);
 }
@@ -805,7 +824,10 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 	{
 		if (m_groupBase.group(i).caption() == caption)
 		{
-			QMessageBox::information(this, tr("Group caption"), tr("Group caption \"%1\" already exists!").arg(caption));
+			QMessageBox::information(this,
+									 tr("Group caption"),
+									 tr("Group caption \"%1\" already exists!").
+									 arg(caption));
 			updateGroupList();
 			return;
 		}
@@ -1107,7 +1129,10 @@ void SignalPropertyDialog::createPropertyList()
 
 		// electric range group
 
-		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), qApp->translate("ObjectProperty.h", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) + m_param.electricRangeStr());
+		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
+																 qApp->translate(	"ObjectProperty.h",
+																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) +
+																					m_param.electricRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.electricLowLimit());
@@ -1141,14 +1166,35 @@ void SignalPropertyDialog::createPropertyList()
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR);
 			electricRangeGroup->addSubProperty(item);
 
-			if (m_param.electricUnitID() == E::ElectricUnit::Ohm)
+
+			switch (m_param.electricUnitID())
 			{
-				item = m_pManager->addProperty(QVariant::Double, tr("R0"));
-				item->setValue(m_param.electricR0());
-				item->setAttribute(QLatin1String("singleStep"), 1);
-				item->setAttribute(QLatin1String("decimals"), 2);
-				m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
-				electricRangeGroup->addSubProperty(item);
+				case E::ElectricUnit::mA:
+
+					if (m_param.sensorType() != E::SensorType::V_0_5)
+					{
+						break;
+					}
+
+					item = m_pManager->addProperty(QVariant::Double, tr("RLoad"));
+					item->setValue(m_param.electricRLoad());
+					item->setAttribute(QLatin1String("singleStep"), 1);
+					item->setAttribute(QLatin1String("decimals"), 2);
+					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD);
+					electricRangeGroup->addSubProperty(item);
+
+					break;
+
+				case E::ElectricUnit::Ohm:
+
+					item = m_pManager->addProperty(QVariant::Double, tr("R0"));
+					item->setValue(m_param.electricR0());
+					item->setAttribute(QLatin1String("singleStep"), 1);
+					item->setAttribute(QLatin1String("decimals"), 2);
+					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
+					electricRangeGroup->addSubProperty(item);
+
+					break;
 			}
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
@@ -1163,7 +1209,10 @@ void SignalPropertyDialog::createPropertyList()
 
 		// engineering range group
 
-		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), qApp->translate("ObjectProperty.h", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) + m_param.engineeringRangeStr());
+		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
+																	qApp->translate("ObjectProperty.h",
+																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) +
+																					m_param.engineeringRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.lowEngineeringUnits());
@@ -1290,6 +1339,7 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH:		m_param.setElectricHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(value.toInt()));				groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD:		m_param.setElectricRLoad(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 
@@ -1328,10 +1378,17 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 
 	switch(index)
 	{
-		case SIGNAL_PROPERTY_GROUP_ID:			header = tr("Signal ID");												break;
-		case SIGNAL_PROPERTY_GROUP_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.electricRangeStr();		break;
-		case SIGNAL_PROPERTY_GROUP_EN_RANGE:	header = SignalPropertyGroup[index] + m_param.engineeringRangeStr();	break;
-		default:								assert(0);
+		case SIGNAL_PROPERTY_GROUP_ID:
+			header = tr("Signal ID");
+			break;
+		case SIGNAL_PROPERTY_GROUP_EL_RANGE:
+			header = SignalPropertyGroup[index] + m_param.electricRangeStr();
+			break;
+		case SIGNAL_PROPERTY_GROUP_EN_RANGE:
+			header = SignalPropertyGroup[index] + m_param.engineeringRangeStr();
+			break;
+		default:
+			assert(0);
 	}
 
 	browserItem->property()->setPropertyName(header);
@@ -1509,7 +1566,9 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// compare group
 
-		QtProperty *compareGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().compare().isConst() == true ? tr("Compare - const") : tr("Compare - dynamic"));
+		QtProperty *compareGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
+														   comparator().compare().isConst() == true ? tr("Compare - const") :
+																									  tr("Compare - dynamic"));
 
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Type"));
 			item->setAttribute(QLatin1String("enumNames"), cmpTypeList);
@@ -1533,7 +1592,9 @@ void ComparatorPropertyDialog::createPropertyList()
 					}
 				}
 
-				item = m_pManager->addProperty(QVariant::Double, tr("Engineering value, %1").arg(m_comparatorEx.inputSignal() == nullptr ? QString() : m_comparatorEx.inputSignal()->param().unit()));
+				item = m_pManager->addProperty(QVariant::Double, tr("Engineering value, %1").
+											   arg(m_comparatorEx.inputSignal() == nullptr ? QString() :
+																							 m_comparatorEx.inputSignal()->param().unit()));
 				item->setValue(m_comparatorEx.compareConstValue());
 				item->setAttribute(QLatin1String("decimals"), m_comparatorEx.valuePrecision());
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE);

@@ -4,8 +4,6 @@
 #include <QMessageBox>
 #include <QFile>
 
-#include "Options.h"
-
 // -------------------------------------------------------------------------------------------------------------------
 
 Database theDatabase;
@@ -277,8 +275,6 @@ int SqlFieldBase::init(int objectType, int)
 			append("RackID1",						QVariant::String, 64);
 			append("RackID2",						QVariant::String, 64);
 			append("RackID3",						QVariant::String, 64);
-			append("RackID4",						QVariant::String, 64);
-			append("RackID5",						QVariant::String, 64);
 
 			break;
 
@@ -934,7 +930,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 			case SQL_TABLE_LINEARITY_POINT:
 				{
-					LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + readedCount;
+					MeasurePoint* point = static_cast<MeasurePoint*> (pRecord) + readedCount;
 					if (point == nullptr)
 					{
 						break;
@@ -1373,7 +1369,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 			case SQL_TABLE_LINEARITY_POINT:
 				{
-					LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + r;
+					MeasurePoint* point = static_cast<MeasurePoint*> (pRecord) + r;
 					if (point == nullptr)
 					{
 						break;
@@ -1452,7 +1448,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
 					query.bindValue(field++, measure->measureTimeStr());
-					query.bindValue(field++, measure->calibratorPrecision());
+					query.bindValue(field++, measure->calibrator());
 				}
 				break;
 
@@ -1653,16 +1649,16 @@ Database::~Database()
 
 bool Database::open()
 {
-	QString path = theOptions.database().path();
+	QString path = m_databaseOption.locationPath();
 	if (path.isEmpty() == true)
 	{
-		QMessageBox::critical(nullptr, tr("Database"), tr("Invalid path!"));
+		QMessageBox::critical(nullptr, tr("Database"), tr("Invalid path to Database!"));
 		return false;
 	}
 
 	//
 	//
-	switch(theOptions.database().type())
+	switch(m_databaseOption.type())
 	{
 		case DATABASE_TYPE_SQLITE:
 
@@ -1713,9 +1709,7 @@ bool Database::open()
 
 	//
 	//
-	theOptions.linearity().points().loadData(SQL_TABLE_LINEARITY_POINT);
-
-	if (theOptions.backup().onStart() == true)
+	if (m_databaseOption.onStart() == true)
 	{
 		createBackup();
 	}
@@ -1729,7 +1723,7 @@ bool Database::open()
 
 void Database::close()
 {
-	if (theOptions.backup().onExit() == true)
+	if (m_databaseOption.onExit() == true)
 	{
 		createBackup();
 	}
@@ -1849,21 +1843,21 @@ void Database::createTables()
 
 bool Database::createBackup()
 {
-	QString sourcePath = theOptions.database().path() + QDir::separator() + DATABASE_NAME;
+	QString sourcePath = m_databaseOption.locationPath() + QDir::separator() + DATABASE_NAME;
 
 	if (QFile::exists(sourcePath) == false)
 	{
 		return false;
 	}
 
-	QString path = theOptions.backup().path();
+	QString path = m_databaseOption.copyPath();
 
 	if (QFile::exists(path) == false)
 	{
 		path = QDir::tempPath();
 
 		QSettings s;
-		s.setValue(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), path);
+		s.setValue(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), path);
 	}
 
 	QDateTime&& currentTime = QDateTime::currentDateTime();
@@ -1934,6 +1928,23 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void Database::appendToBase(Measurement* pMeasurement)
+{
+	if (pMeasurement == nullptr)
+	{
+		return;
+	}
+
+	bool result = appendMeasure(pMeasurement);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Save measurements"), tr("Error saving measurements to database"));
+		return;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 {
 	bool result = false;
@@ -1963,6 +1974,17 @@ bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 	}
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Database::removeFromBase(int measureType, const QVector<int>& keyList)
+{
+	bool result = removeMeasure(measureType, keyList);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from database"));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

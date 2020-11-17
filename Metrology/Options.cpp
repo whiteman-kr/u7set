@@ -12,6 +12,132 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+CalibratorOption::CalibratorOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorOption::CalibratorOption(const QString& port, int type) :
+	m_port(port),
+	m_type(type)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool CalibratorOption::isValid() const
+{
+	if (m_port.isEmpty() == true)
+	{
+		return false;
+	}
+
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption::CalibratorsOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption::CalibratorsOption(const CalibratorsOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption::~CalibratorsOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorOption CalibratorsOption::calibrator(int channel) const
+{
+	if (channel < 0 || channel >= Metrology::ChannelCount)
+	{
+		assert(0);
+		return CalibratorOption();
+	}
+
+	return m_calibrator[channel];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+void CalibratorsOption::setCalibrator(int channel, const CalibratorOption& сalibrator)
+{
+	if (channel < 0 || channel >= Metrology::ChannelCount)
+	{
+		assert(0);
+		return;
+	}
+
+	m_calibrator[channel] = сalibrator;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorsOption::load()
+{
+	QSettings s;
+
+	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	{
+		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
+
+		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
+		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CALIBRATOR_TYPE_CALYS75).toInt();
+
+		m_calibrator[c].setPort(port);
+		m_calibrator[c].setType(type);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorsOption::save()
+{
+	QSettings s;
+
+	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	{
+		s.setValue(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), m_calibrator[c].port());
+		s.setValue(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), m_calibrator[c].type());
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorsOption& CalibratorsOption::operator=(const CalibratorsOption& from)
+{
+	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	{
+		m_calibrator[c] = from.m_calibrator[c];
+	}
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 SocketClientOption::SocketClientOption()
 {
 }
@@ -448,18 +574,6 @@ void ModuleOption::setMaxInputCount(int count)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ModuleOption::setMaxComparatorCount(int count)
-{
-	if (count == 0)
-	{
-		count = 1;
-	}
-
-	m_maxComparatorCount = count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void ModuleOption::load()
 {
 	QSettings s;
@@ -470,7 +584,6 @@ void ModuleOption::load()
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
 
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
-	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -485,7 +598,6 @@ void ModuleOption::save()
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
-	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -498,102 +610,8 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 	m_warningIfMeasured = from.m_warningIfMeasured;
 
 	m_maxInputCount = from.m_maxInputCount;
-	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPoint::setPercent(double value)
-{
-	m_percentValue = value;
-
-	for(int s = 0; s < POINT_SENSOR_COUNT; s++)
-	{
-		switch(s)
-		{
-			case POINT_SENSOR_PERCENT:		m_sensorValue[s] = value;						break;
-			case POINT_SENSOR_U_0_5_V:		m_sensorValue[s] = value * 5 / 100;				break;
-			case POINT_SENSOR_U_m10_10_V:	m_sensorValue[s] = value * 20 / 100 + (-10);	break;
-			case POINT_SENSOR_I_0_5_MA:		m_sensorValue[s] = value * 5 / 100;				break;
-			case POINT_SENSOR_I_4_20_MA:	m_sensorValue[s] = value * 16 / 100 + 4;		break;
-			case POINT_SENSOR_T_0_100_C:	m_sensorValue[s] = value * 100 / 100;			break;
-			case POINT_SENSOR_T_0_150_C:	m_sensorValue[s] = value * 150 / 100;			break;
-			case POINT_SENSOR_T_0_200_C:	m_sensorValue[s] = value * 200 / 100;			break;
-			case POINT_SENSOR_T_0_400_C:	m_sensorValue[s] = value * 400 / 100;			break;
-			default:						assert(0);
-		}
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-double LinearityPoint::sensorValue(int sensor)
-{
-	if (sensor < 0 || sensor >= POINT_SENSOR_COUNT)
-	{
-		return 0;
-	}
-
-	return m_sensorValue[sensor];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPointBase::LinearityPointBase()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString LinearityPointBase::text()
-{
-	QString result;
-
-	if (isEmpty() == true)
-	{
-		result = QT_TRANSLATE_NOOP("Options.cpp", "The measurement points are not set");
-	}
-	else
-	{
-		int pointCount = count();
-		for(int index = 0; index < pointCount; index++)
-		{
-			LinearityPoint point = at(index);
-			result.append(QString("%1%").arg(QString::number(point.percent(), 'f', 1)));
-
-			if (index != pointCount - 1)
-			{
-				result.append(QString(", "));
-			}
-		}
-	}
-
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPointBase::initEmptyData(QVector<LinearityPoint> &data)
-{
-	const int valueCount = 7;
-	double value[valueCount] = {5, 20, 40, 50, 60, 80, 95};
-
-	for(int index = 0; index < valueCount; index++)
-	{
-		LinearityPoint point;
-
-		point.setPercent(value[index]);
-		point.setIndex(index);
-
-		data.append(point);
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -677,7 +695,7 @@ void LinearityOption::recalcPoints(int count)
 
 	if (count == 1)
 	{
-		m_pointBase.append(LinearityPoint((m_lowLimitRange + m_highLimitRange) / 2));
+		m_pointBase.append(MeasurePoint((m_lowLimitRange + m_highLimitRange) / 2));
 	}
 	else
 	{
@@ -685,7 +703,7 @@ void LinearityOption::recalcPoints(int count)
 
 		for (int p = 0; p < count ; p++)
 		{
-			m_pointBase.append(LinearityPoint(m_lowLimitRange + (p * value)));
+			m_pointBase.append(MeasurePoint(m_lowLimitRange + (p * value)));
 		}
 	}
 }
@@ -728,8 +746,6 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-
-	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -998,6 +1014,7 @@ void MeasureViewOption::load()
 	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toUInt();
 
 	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
+	m_precesionByCalibrator = s.value(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1038,6 +1055,7 @@ void MeasureViewOption::save()
 	s.setValue(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorControl.rgb());
 
 	s.setValue(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), m_showNoValid);
+	s.setValue(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), m_precesionByCalibrator);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1066,6 +1084,7 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 	m_colorErrorControl = from.m_colorErrorControl;
 
 	m_showNoValid = from.m_showNoValid;
+	m_precesionByCalibrator = from.m_precesionByCalibrator;
 
 	return *this;
 }
@@ -1252,8 +1271,12 @@ void DatabaseOption::load()
 {
 	QSettings s;
 
-	m_path = s.value(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
+	m_locationPath = s.value(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
 	m_type = s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
+
+	m_onStart = s.value(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), false).toBool();
+	m_onExit = s.value(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), true).toBool();
+	m_copyPath = s.value(QString("%1CopyPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::tempPath()).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1262,72 +1285,24 @@ void DatabaseOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path);
+	s.setValue(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), m_locationPath);
 	s.setValue(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type);
+
+	s.setValue(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), m_onStart);
+	s.setValue(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), m_onExit);
+	s.setValue(QString("%1CopyPath").arg(DATABASE_OPTIONS_REG_KEY), m_copyPath);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 {
-	m_path = from.m_path;
+	m_locationPath = from.m_locationPath;
 	m_type = from.m_type;
 
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-BackupOption::BackupOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-BackupOption::BackupOption(const BackupOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-BackupOption::~BackupOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BackupOption::load()
-{
-	QSettings s;
-
-	m_onStart = s.value(QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), false).toBool();
-	m_onExit = s.value(QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), true).toBool();
-	m_path = s.value(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), QDir::tempPath()).toString();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BackupOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), m_onStart);
-	s.setValue(QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), m_onExit);
-	s.setValue(QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), m_path);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-BackupOption& BackupOption::operator=(const BackupOption& from)
-{
 	m_onStart = from.m_onStart;
 	m_onExit = from.m_onExit;
-	m_path = from.m_path;
+	m_copyPath = from.m_copyPath;
 
 	return *this;
 }
@@ -1418,6 +1393,7 @@ Options::~Options()
 
 void Options::load()
 {
+	m_calibrators.load();
 	m_database.load();
 
 	m_socket.load();
@@ -1433,14 +1409,13 @@ void Options::load()
 	m_module.load();
 	m_linearity.load();
 	m_comparator.load();
-
-	m_backup.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Options::save()
 {
+	m_calibrators.save();
 	m_database.save();
 
 	m_socket.save();
@@ -1457,8 +1432,6 @@ void Options::save()
 	m_module.save();
 	m_linearity.save();
 	m_comparator.save();
-
-	m_backup.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1500,6 +1473,8 @@ Options& Options::operator=(const Options& from)
 {
 	QMutexLocker l(&m_mutex);
 
+	m_calibrators = from.m_calibrators;
+
 	m_socket = from.m_socket;
 	m_database = from.m_database;
 	m_projectInfo = from.m_projectInfo;
@@ -1515,8 +1490,6 @@ Options& Options::operator=(const Options& from)
 	m_module = from.m_module;
 	m_linearity = from.m_linearity;
 	m_comparator = from.m_comparator;
-
-	m_backup = from.m_backup;
 
 	return *this;
 }

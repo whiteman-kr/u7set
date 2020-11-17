@@ -581,8 +581,8 @@ namespace Builder
 
 		UnitsConvertor uc;
 
-		UnitsConvertorLimit electricLimit;
-		if(uc.getElectricLimit(signal.electricUnit(), signal.sensorType(), electricLimit) == false)
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
@@ -637,7 +637,7 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.rload_Ohm() < RLOAD_LOW_LIMIT || signal.rload_Ohm() > RLOAD_HIGH_LIMIT)
+			if (signal.rload_Ohm() < RLOAD_OHM_LOW_LIMIT || signal.rload_Ohm() > RLOAD_OHM_HIGH_LIMIT)
 			{
 				// Signal %1 has wrong RLoad (mA).
 				//
@@ -648,14 +648,14 @@ namespace Builder
 
 		UnitsConvertor uc;
 
-		UnitsConvertorLimit electricLimit;
-		if(uc.getElectricLimit(signal.electricUnit(), signal.sensorType(), electricLimit) == false)
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
 
-		double lowLimit = electricLimit.lowLimit  / signal.rload_Ohm() * RLOAD_HIGH_LIMIT;
-		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * RLOAD_HIGH_LIMIT;
+		double lowLimit = electricLimit.lowLimit  / signal.rload_Ohm() * RLOAD_OHM_HIGH_LIMIT;
+		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * RLOAD_OHM_HIGH_LIMIT;
 
 		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
@@ -696,8 +696,8 @@ namespace Builder
 
 		UnitsConvertor uc;
 
-		UnitsConvertorLimit electricLimit;
-		if(uc.getElectricLimit(signal.electricUnit(), signal.sensorType(), electricLimit) == false)
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
@@ -759,8 +759,8 @@ namespace Builder
 			return false;
 		}
 
-		UnitsConvertorLimit electricLimit;
-		if(uc.getElectricLimit(signal.electricUnit(), signal.sensorType(), electricLimit) == false)
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}

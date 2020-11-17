@@ -76,44 +76,43 @@ public:
 
 private:
 
-	int							m_measureType = 0;			// measure type
+	int m_measureType = 0;			// measure type
 
-	mutable QMutex				m_signalMutex;
-	QVector<StatisticList>		m_statisticList;
+	mutable QMutex m_signalMutex;
+	QVector<StatisticList> m_statisticList;
 
-	int							m_measuredCount = 0;
-	int							m_invalidMeasureCount = 0;
+	int m_measuredCount = 0;
+	int m_invalidMeasureCount = 0;
 
 public:
 
-	void						clear();
-	int							count() const;
-	int							count(int measureType) const;
+	void clear();
+	int count() const;
+	int count(int measureType) const;
 
-	int							measureType() const { return m_measureType; }
-	void						setMeasureType(int type) { m_measureType = type; }
+	int measureType() const { return m_measureType; }
+	void setMeasureType(int type) { m_measureType = type; }
 
-	int							measuredCount() const { return m_measuredCount; }
-	void						setMeasuredCount(int count) { m_measuredCount = count; }
+	int measuredCount() const { return m_measuredCount; }
+	void setMeasuredCount(int count) { m_measuredCount = count; }
 
-	int							invalidMeasureCount() const { return m_invalidMeasureCount; }
-	void						setInvalidMeasureCount(int count) { m_invalidMeasureCount = count; }
+	int invalidMeasureCount() const { return m_invalidMeasureCount; }
+	void setInvalidMeasureCount(int count) { m_invalidMeasureCount = count; }
 
-	void						createSignalList();
-	void						createComparatorList();
-	void						updateConnections();
+	void createSignalList();
+	void createComparatorList();
+	void updateConnections();
 
-	StatisticsItem				item(int index) const;
-	StatisticsItem				item(int measureType, int index) const;
-
-	void						updateStatistics();
-	void						updateStatistics(Hash signalHash);
+	StatisticsItem item(int index) const;
+	StatisticsItem item(int measureType, int index) const;
+	StatisticsItem* itemPtr(int measureType, int index);
+	void setItem(int measureType, int index, const StatisticsItem& item);
 
 public slots:
 
-	void						signalLoaded() {}
-	void						measurementAppend() {}
-	void						measurementRemoved() {}
+	void signalBaseLoaded() {}
+	void measurementAppend() {}
+	void measurementRemoved() {}
 };
 
 // ==============================================================================================

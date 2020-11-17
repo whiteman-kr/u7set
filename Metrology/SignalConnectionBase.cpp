@@ -276,7 +276,12 @@ int SignalConnectionBase::load()
 
 	table->close();
 
-	qDebug() << __FUNCTION__ << "Loaded signal connections: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << __FUNCTION__ <<
+				"Loaded signal connections: " <<
+				readedRecordCount <<
+				", Time for load: " <<
+				responseTime.elapsed() <<
+				" ms";
 
 	return readedRecordCount;
 }

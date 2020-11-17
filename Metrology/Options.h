@@ -10,13 +10,73 @@
 #include <QColor>
 
 #include "../lib/SocketIO.h"
+#include "../lib/MetrologySignal.h"
 
 #include "MeasureViewHeader.h"
-#include "ObjectVector.h"
+#include "MeasureBase.h"
+#include "MeasurePointBase.h"
 
 // ==============================================================================================
 
 #define					WINDOW_GEOMETRY_OPTIONS_KEY		"Options/Window/"
+
+// ==============================================================================================
+
+#define					CALIBRATOR_OPTIONS_KEY			"Options/Calibrators/"
+
+// ----------------------------------------------------------------------------------------------
+
+class CalibratorOption
+{
+
+public:
+
+	CalibratorOption();
+	CalibratorOption(const QString& port, int type);
+	virtual ~CalibratorOption() {}
+
+private:
+
+	QString				m_port;
+	int					m_type = CALIBRATOR_TYPE_CALYS75;
+
+public:
+
+	bool				isValid() const;
+
+	QString				port() const { return m_port; }
+	void				setPort(const QString& port) { m_port = port; }
+
+	int					type() const { return m_type; }
+	void				setType(int type) { m_type = type; }
+};
+
+// ----------------------------------------------------------------------------------------------
+
+class CalibratorsOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit CalibratorsOption(QObject *parent = nullptr);
+	explicit CalibratorsOption(const CalibratorsOption& from, QObject *parent = nullptr);
+	virtual ~CalibratorsOption();
+
+private:
+
+	CalibratorOption	m_calibrator[Metrology::ChannelCount];
+
+public:
+
+	CalibratorOption	calibrator(int channel) const;
+	void				setCalibrator(int channel, const CalibratorOption& calibrator);
+
+	void				load();
+	void				save();
+
+	CalibratorsOption&	operator=(const CalibratorsOption& from);
+};
 
 
 // ==============================================================================================
@@ -246,8 +306,7 @@ const char* const		ModuleParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs (outpus) for mofule"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
+						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input module"),
 };
 
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
@@ -255,8 +314,7 @@ const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName
 const int				MO_PARAM_SUFFIX_SN				= 0,
 						MO_PARAM_MEASURE_ENTIRE_MODULE	= 1,
 						MO_PARAM_WARN_IF_MEASURED		= 2,
-						MO_PARAM_MAX_IMPUT_COUNT		= 3,
-						MO_PARAM_MAX_CMP_COUNT			= 4;
+						MO_PARAM_MAX_IMPUT_COUNT		= 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -277,8 +335,7 @@ private:
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
 
-	int					m_maxInputCount = Metrology::InputCount;					// Maximum number of inputs for mofule
-	int					m_maxComparatorCount = Metrology::ComparatorCount;			// Maximum number of comparators for signal
+	int					m_maxInputCount = Metrology::InputCount;					// maximum number of inputs for input mofule
 
 public:
 
@@ -294,86 +351,12 @@ public:
 	int					maxInputCount() const { return m_maxInputCount; }
 	void				setMaxInputCount(int count);
 
-	int					maxComparatorCount() const { return m_maxComparatorCount; }
-	void				setMaxComparatorCount(int count);
-
 public:
 
 	void				load();
 	void				save();
 
 	ModuleOption&		operator=(const ModuleOption& from);
-};
-
-// ==============================================================================================
-
-const char* const		LinearityPointSensor[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "%"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 5 V"),
-						QT_TRANSLATE_NOOP("Options.h", "-10 .. 10 V"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 5 mA"),
-						QT_TRANSLATE_NOOP("Options.h", "4 .. 20 mA"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 100 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 150 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 200 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 400 °C"),
-};
-
-const int				POINT_SENSOR_COUNT			= sizeof(LinearityPointSensor)/sizeof(LinearityPointSensor[0]);
-
-const int				POINT_SENSOR_UNDEFINED		= -1,
-						POINT_SENSOR_PERCENT		= 0,
-						POINT_SENSOR_U_0_5_V		= 1,
-						POINT_SENSOR_U_m10_10_V		= 2,
-						POINT_SENSOR_I_0_5_MA		= 3,
-						POINT_SENSOR_I_4_20_MA		= 4,
-						POINT_SENSOR_T_0_100_C		= 5,
-						POINT_SENSOR_T_0_150_C		= 6,
-						POINT_SENSOR_T_0_200_C		= 7,
-						POINT_SENSOR_T_0_400_C		= 8;
-
-// ----------------------------------------------------------------------------------------------
-
-class LinearityPoint
-{
-public:
-
-	LinearityPoint() { setPercent(0); }
-	explicit LinearityPoint(double percent) { setPercent(percent); }
-	virtual ~LinearityPoint() {}
-
-private:
-
-	int					m_index = -1;
-
-	double				m_percentValue = 0;
-	double				m_sensorValue[POINT_SENSOR_COUNT];
-
-public:
-
-	int					Index() const { return m_index; }
-	void				setIndex(int index) { m_index = index; }
-
-	double				percent() const {return m_percentValue; }
-	void				setPercent(double value);
-
-	double				sensorValue(int sensor);
-};
-
-// ==============================================================================================
-
-class LinearityPointBase : public ObjectVector<LinearityPoint>
-{
-
-public:
-
-	LinearityPointBase();
-	virtual ~LinearityPointBase() { clear(); }
-
-	QString				text();
-
-	virtual void		initEmptyData(QVector<LinearityPoint> &data);
 };
 
 // ==============================================================================================
@@ -456,7 +439,7 @@ public:
 
 private:
 
-	LinearityPointBase	m_pointBase;												// list of measurement points
+	MeasurePointBase	m_pointBase;												// list of measurement points
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
@@ -473,7 +456,7 @@ private:
 
 public:
 
-	LinearityPointBase& points() { return m_pointBase; }
+	MeasurePointBase&	points() { return m_pointBase; }
 
 	double				errorLimit() const { return m_errorLimit; }
 	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
@@ -660,15 +643,17 @@ const char* const		MeasureViewParam[] =
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over limit error"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over control error"),
 						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
+						QT_TRANSLATE_NOOP("Options.h", "Show accuracy for measure value and nominal value from calibrator"),
 };
 
-const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
+const int				MWO_PARAM_COUNT						= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
 
-const int				MWO_PARAM_FONT					= 0,
-						MWO_PARAM_COLOR_NOT_ERROR		= 1,
-						MWO_PARAM_COLOR_LIMIT_ERROR		= 2,
-						MWO_PARAM_COLOR_CONTROL_ERROR	= 3,
-						MWO_PARAM_SHOW_NO_VALID			= 4;
+const int				MWO_PARAM_FONT						= 0,
+						MWO_PARAM_COLOR_NOT_ERROR			= 1,
+						MWO_PARAM_COLOR_LIMIT_ERROR			= 2,
+						MWO_PARAM_COLOR_CONTROL_ERROR		= 3,
+						MWO_PARAM_SHOW_NO_VALID				= 4,
+						MWO_PARAM_PRECESION_BY_CALIBRATOR	= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -721,6 +706,7 @@ private:
 	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
 
 	bool				m_showNoValid = false;										// show measuring value if signal is not valid
+	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
 
 public:
 
@@ -747,6 +733,9 @@ public:
 
 	bool				showNoValid() const { return m_showNoValid; }
 	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
+
+	bool				precesionByCalibrator() const { return m_precesionByCalibrator; }
+	void				setPrecesionByCalibrator(bool enable) { m_precesionByCalibrator = enable; }
 
 	void				load();
 	void				save();
@@ -929,14 +918,20 @@ public:
 
 const char* const		DatabaseParam[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
+						QT_TRANSLATE_NOOP("Options.h", "Location path"),
 						QT_TRANSLATE_NOOP("Options.h", "Type"),
+						QT_TRANSLATE_NOOP("Options.h", "On start application"),
+						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
+						QT_TRANSLATE_NOOP("Options.h", "Path for copy"),
 };
 
-const int				DBO_PARAM_COUNT	= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
+const int				DBO_PARAM_COUNT			= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
 
-const int				DBO_PARAM_PATH	= 0,
-						DBO_PARAM_TYPE	= 1;
+const int				DBO_PARAM_LOCATION_PATH	= 0,
+						DBO_PARAM_TYPE			= 1,
+						DBO_PARAM_ON_START		= 2,
+						DBO_PARAM_ON_EXIT		= 3,
+						DBO_PARAM_COPY_PATH		= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -964,61 +959,20 @@ public:
 
 private:
 
-	QString				m_path;
+	QString				m_locationPath;
 	int					m_type;
-
-public:
-
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
-
-	int					type() const { return m_type; }
-	void				setType(int type) { m_type = type; }
-
-	void				load();
-	void				save();
-
-	DatabaseOption&		operator=(const DatabaseOption& from);
-};
-
-// ==============================================================================================
-
-#define					BACKUP_OPTIONS_REG_KEY			"Options/BackupMeasure/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		BackupParam[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "On start application"),
-						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
-};
-
-const int				BUO_PARAM_COUNT		= sizeof(BackupParam)/sizeof(BackupParam[0]);
-
-const int				BUO_PARAM_ON_START	= 0,
-						BUO_PARAM_ON_EXIT	= 1,
-						BUO_PARAM_PATH		= 2;
-
-// ----------------------------------------------------------------------------------------------
-
-class BackupOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit BackupOption(QObject *parent = nullptr);
-	explicit BackupOption(const BackupOption& from, QObject *parent = nullptr);
-	virtual ~BackupOption();
-
-private:
 
 	bool				m_onStart = false;
 	bool				m_onExit = true;
-	QString				m_path;
+	QString				m_copyPath;
 
 public:
+
+	QString				locationPath() const { return m_locationPath; }
+	void				setLocationPath(const QString& path) { m_locationPath = path; }
+
+	int					type() const { return m_type; }
+	void				setType(int type) { m_type = type; }
 
 	bool				onStart () const { return m_onStart; }
 	void				setOnStart(bool onStart) { m_onStart = onStart; }
@@ -1026,13 +980,13 @@ public:
 	bool				onExit() const { return m_onExit; }
 	void				setOnExit(bool onExit) { m_onExit = onExit; }
 
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
+	QString				copyPath() const { return m_copyPath; }
+	void				setCopyPath(const QString& path) { m_copyPath = path; }
 
 	void				load();
 	void				save();
 
-	BackupOption&		operator=(const BackupOption& from);
+	DatabaseOption&		operator=(const DatabaseOption& from);
 };
 
 // ==============================================================================================
@@ -1102,6 +1056,8 @@ private:
 
 	QMutex					m_mutex;
 
+	CalibratorsOption		m_calibrators;
+
 	SocketOption			m_socket;
 	ProjectInfo				m_projectInfo;
 
@@ -1115,14 +1071,15 @@ private:
 	SignalInfoOption		m_signalInfo;
 	ComparatorInfoOption	m_comparatorInfo;
 
-
 	DatabaseOption			m_database;
-	BackupOption			m_backup;
 
 	LanguageOption			m_language;
 
 
 public:
+
+	CalibratorsOption&		calibrators() { return m_calibrators; }
+	void					setCalibrators(const CalibratorsOption& calibrators) { m_calibrators = calibrators; }
 
 	SocketOption&			socket() { return m_socket; }
 	void					setSocket(const SocketOption& socket) { m_socket = socket; }
@@ -1153,9 +1110,6 @@ public:
 
 	DatabaseOption&			database() { return m_database; }
 	void					setDatabase(const DatabaseOption& database) { m_database = database; }
-
-	BackupOption&			backup() { return m_backup; }
-	void					setBackup(const BackupOption& backup) { m_backup = backup; }
 
 	LanguageOption&			language() { return m_language; }
 	void					setLanguage(const LanguageOption& language) { m_language = language; }

@@ -2,7 +2,6 @@
 #include <map>
 #include <functional>
 #include "QtCore"
-#include "SimOutput.h"
 #include "SimDeviceEmulator.h"
 #include "SimException.h"
 
@@ -20,7 +19,7 @@ namespace Sim
 	};
 
 
-	class CommandProcessor : public QObject, protected Output
+	class CommandProcessor : public QObject
 	{
 		Q_OBJECT
 

@@ -1,11 +1,13 @@
 #ifndef SIGNALINFOPANEL_H
 #define SIGNALINFOPANEL_H
 
+#include <QMainWindow>
 #include <QDockWidget>
 #include <QMenu>
 #include <QAction>
 #include <QTableView>
 
+#include "CalibratorBase.h"
 #include "SignalBase.h"
 #include "Options.h"
 
@@ -106,7 +108,7 @@ public:
 
 private slots:
 
-	void					updateSignalParam(const QString& appSignalID);
+	void					signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================
@@ -155,14 +157,17 @@ private:
 	//
 	QVector<Metrology::Signal*> m_outputSignalsList;
 
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	CalibratorBase*			m_pCalibratorBase = nullptr;
 	SignalInfoOption		m_signalInfo;
+
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 public:
 
 	void					clear() { m_signalParamTable.clear(); }
 	void					restartSignalStateTimer(int timeout);
 
+	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
 	void					setSignalInfo(const SignalInfoOption& signalInfo);
 
 protected:

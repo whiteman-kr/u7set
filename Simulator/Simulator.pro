@@ -91,9 +91,14 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
 	../lib/WUtils.cpp \
+    SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimDiagDataLanInterface.cpp \
+    SimLanInterface.cpp \
+    SimLans.cpp \
+    SimScopedLog.cpp \
     SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
 	SimScriptLmDescription.cpp \
@@ -101,9 +106,9 @@ SOURCES += \
     SimScriptRamAddress.cpp \
     SimScriptSignal.cpp \
     SimScriptSimulator.cpp \
+    SimTuningLanInterface.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
-    SimOutput.cpp \
     SimRam.cpp \
     SimEeprom.cpp \
     SimSubsystem.cpp \
@@ -138,15 +143,21 @@ HEADERS += \
 	../lib/DataProtocols.h \
     ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
+    ../lib/ILogFile.h \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
 	../lib/SimpleMutex.h \
 	../lib/SimpleThread.h \
 	../lib/WUtils.h \
+    SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
+    SimDiagDataLanInterface.h \
+    SimLanInterface.h \
+    SimLans.h \
+    SimScopedLog.h \
     SimScriptConnection.h \
     SimScriptDevUtils.h \
 	SimScriptLmDescription.h \
@@ -154,6 +165,7 @@ HEADERS += \
     SimScriptRamAddress.h \
     SimScriptSignal.h \
     SimScriptSimulator.h \
+    SimTuningLanInterface.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
@@ -164,7 +176,6 @@ HEADERS += \
     ../lib/ModuleFirmware.h \
     Simulator.h \
     ../lib/Crc.h \
-    SimOutput.h \
     SimRam.h \
     SimEeprom.h \
     SimSubsystem.h \

@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QHeaderView>
+#include <QKeyEvent>
 
 #include "TuningSignalBase.h"
 
@@ -229,14 +230,14 @@ protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
-signals:
-
-private slots:
+public slots:
 
 	// slots for updating source signal list
 	//
 	void					updateSourceList();
 	void					updateSignalList();
+
+private slots:
 
 	// slot informs that signal for measure has updated his state
 	//

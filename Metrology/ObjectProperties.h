@@ -121,8 +121,6 @@ public:
 
 	Metrology::RackParam		rack() const { return m_rack; }
 
-signals:
-
 private slots:
 
 	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
@@ -166,7 +164,7 @@ private:
 	//
 	QTableWidget*				m_pGroupView = nullptr;
 
-	void						updateGroupList();
+	void						updateGroupList(const Hash& hash = UNDEFINED_HASH);
 
 	// Property list
 	//
@@ -188,13 +186,12 @@ private:
 
 public:
 
+	RackBase&					racks() { return m_rackBase; }
 	RackGroupBase&				rackGroups() { return m_groupBase; }
 
 protected:
 
 	bool						event(QEvent* e);
-
-signals:
 
 private slots:
 
@@ -246,15 +243,16 @@ const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID			= 0,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH		= 3,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT		= 4,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 5,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 6,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 7,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD		= 6,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 7,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 8,
 
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 8,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 9,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 10,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 11;
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 9,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 10,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 11,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 12;
 
-const int						SIGNAL_PROPERTY_ITEM_COUNT				= 12;
+const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -295,8 +293,6 @@ private:
 public:
 
 	Metrology::SignalParam		param() const { return m_param; }
-
-signals:
 
 private slots:
 
@@ -375,8 +371,6 @@ private:
 public:
 
 	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
-
-signals:
 
 private slots:
 

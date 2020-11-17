@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 
 #include <QApplication>
-#include <QScreen>
 #include <QSettings>
 #include <QMessageBox>
 #include <QMenuBar>
@@ -17,8 +16,7 @@
 #include "CalibratorBase.h"
 #include "Database.h"
 #include "SignalBase.h"
-#include "TuningSignalBase.h"
-#include "ExportData.h"
+#include "ProcessData.h"
 #include "RackList.h"
 #include "SignalList.h"
 #include "ComparatorList.h"
@@ -34,19 +32,18 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
-		const int	ChannelCount1	= QMetaEnum::fromType<E::Channel>().keyCount();
-
-	int nnn  = ChannelCount1;
-
 	// open database
 	//
+	theDatabase.setDatabaseOption(theOptions.database());
 	theDatabase.open();
+	connect(this, &MainWindow::appendMeasure, &theDatabase, &Database::appendToBase, Qt::QueuedConnection);
+
 
 	// init calibration base
 	//
-	theCalibratorBase.init(this);
-	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
-	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	m_calibratorBase.init(theOptions.calibrators(), this);
+	connect(&m_calibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
+	connect(&m_calibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
 	// load signal base
 	//
@@ -57,10 +54,16 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 
 	// load measurement base
 	//
+
+	theOptions.linearity().points().load();
+
 	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
 	{
-		theMeasureBase.load(measureType);
+		m_measureBase.load(measureType);
 	}
+	connect(this, &MainWindow::appendMeasure, &m_measureBase, &MeasureBase::appendToBase, Qt::QueuedConnection);
+	connect(&m_measureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
+
 
 	//
 	//
@@ -190,7 +193,7 @@ void MainWindow::createActions()
 
 	// Tools
 	//
-	m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
+	m_pCalibratorsAction = new QAction(tr("&Calibrators ..."), this);
 	m_pCalibratorsAction->setIcon(QIcon(":/icons/Calibrators.png"));
 	m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
 	connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::showCalibrators);
@@ -380,8 +383,8 @@ bool MainWindow::createToolBars()
 
 			connect(m_pMeasureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind);
 
-			theCalibratorBase.measureKindChanged(m_measureKind);
-			connect(this, &MainWindow::measureKindChanged, &theCalibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
+			m_calibratorBase.measureKindChanged(m_measureKind);
+			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
 		}
 	}
 
@@ -415,7 +418,8 @@ bool MainWindow::createToolBars()
 			m_signalConnectionType = theOptions.toolBar().signalConnectionType();
 			m_pSignalConnectionTypeList->setCurrentIndex(m_signalConnectionType);
 
-			connect(m_pSignalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setSignalConnectionType);
+			connect(m_pSignalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this, &MainWindow::setSignalConnectionType);
 		}
 	}
 
@@ -441,6 +445,7 @@ bool MainWindow::createToolBars()
 			m_pAnalogSignalToolBar->addWidget(m_pRackCombo);
 			m_pRackCombo->setEnabled(false);
 			m_pRackCombo->setFixedWidth(100);
+
 			connect(m_pRackCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setRack);
 		}
 
@@ -458,8 +463,10 @@ bool MainWindow::createToolBars()
 			m_pSelectSignalWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 			m_pSelectSignalWidget->setEnabled(false);
 			m_pSelectSignalWidget->setFixedWidth(530);
+
 			connect(m_pSelectSignalWidget, &SelectSignalWidget::selectionChanged, this, &MainWindow::setAcitiveMeasureSignal);
-			connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pSelectSignalWidget, &SelectSignalWidget::activeSignalChanged, Qt::QueuedConnection);
+			connect(&theSignalBase, &SignalBase::activeSignalChanged,
+					m_pSelectSignalWidget, &SelectSignalWidget::activeSignalChanged, Qt::QueuedConnection);
 		}
 
 		m_pAnalogSignalToolBar->addAction(m_pPreviousSignalAction);
@@ -479,6 +486,7 @@ void MainWindow::createPanels()
 	if (m_pFindMeasurePanel != nullptr)
 	{
 		m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+		m_pFindMeasurePanel->setViewFont(theOptions.measureView().font());
 
 		addDockWidget(Qt::RightDockWidgetArea, m_pFindMeasurePanel);
 
@@ -503,7 +511,7 @@ void MainWindow::createPanels()
 			}
 		}
 
-		connect(this, &MainWindow::measureTypeChanged, m_pFindMeasurePanel, &FindMeasurePanel::clear, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureViewChanged, m_pFindMeasurePanel, &FindMeasurePanel::measureViewChanged, Qt::QueuedConnection);
 	}
 
 	// Panel statistics
@@ -512,6 +520,7 @@ void MainWindow::createPanels()
 	if (m_pStatisticsPanel != nullptr)
 	{
 		m_pStatisticsPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+		m_pStatisticsPanel->setViewFont(theOptions.measureView().font());
 
 		addDockWidget(Qt::RightDockWidgetArea, m_pStatisticsPanel);
 
@@ -522,11 +531,12 @@ void MainWindow::createPanels()
 
 		m_pStatisticsPanel->hide();
 
+		m_pStatisticsPanel->setMeasureBase(&m_measureBase);
 		m_pStatisticsPanel->measureKindChanged(m_measureKind);
 		m_pStatisticsPanel->signalConnectionTypeChanged(m_signalConnectionType);
 
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticsPanel, &StatisticsPanel::activeSignalChanged, Qt::QueuedConnection);
-		connect(&theMeasureBase, &MeasureBase::updatedMeasureBase, m_pStatisticsPanel, &StatisticsPanel::updateSignalInList, Qt::QueuedConnection);
+		connect(&m_measureBase, &MeasureBase::updatedMeasureBase, m_pStatisticsPanel, &StatisticsPanel::updateSignalInList, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::measureTypeChanged, m_pStatisticsPanel, &StatisticsPanel::measureTypeChanged, Qt::QueuedConnection);
 		connect(this, &MainWindow::measureKindChanged, m_pStatisticsPanel, &StatisticsPanel::measureKindChanged, Qt::QueuedConnection);
@@ -535,6 +545,7 @@ void MainWindow::createPanels()
 		connect(m_pStatisticsPanel, &StatisticsPanel::setSignalConnectionType, m_pSignalConnectionTypeList, &QComboBox::setCurrentIndex);
 		connect(m_pStatisticsPanel, &StatisticsPanel::setRack, m_pRackCombo, &QComboBox::setCurrentIndex);
 		connect(m_pStatisticsPanel, &StatisticsPanel::setMeasureSignal, this, &MainWindow::setAcitiveMeasureSignal);
+		connect(m_pStatisticsPanel, &StatisticsPanel::showFindMeasurePanel, this, &MainWindow::showFindMeasurePanel, Qt::QueuedConnection);
 	}
 
 
@@ -561,6 +572,8 @@ void MainWindow::createPanels()
 
 		m_pSignalInfoPanel->hide();
 
+
+		m_pSignalInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pSignalInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
 
 		connect(this, &MainWindow::signalConnectionTypeChanged, m_pSignalInfoPanel, &SignalInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
@@ -585,10 +598,11 @@ void MainWindow::createPanels()
 
 		m_pComparatorInfoPanel->hide();
 
+		m_pComparatorInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pComparatorInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
-		m_pComparatorInfoPanel->setMaxComparatorCount(theOptions.module().maxComparatorCount());
 
-		connect(this, &MainWindow::signalConnectionTypeChanged, m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::signalConnectionTypeChanged,
+				m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
 	}
 }
 
@@ -607,13 +621,19 @@ void MainWindow::createMeasureViews()
 			continue;
 		}
 
-		pView->loadMeasureList();
+		pView->loadMeasurements(m_measureBase);
 
 		m_pMainTab->addTab(pView, qApp->translate("MeasureBase.h", MeasureType[measureType]));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
 		appendMeasureView(measureType, pView);
+
+		//
+		//
+
+		connect(pView, &MeasureView::removeFromBase, &theDatabase, &Database::removeFromBase, Qt::QueuedConnection);
+		connect(pView, &MeasureView::removeFromBase, &m_measureBase, &MeasureBase::removeFromBase, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::appendMeasure, pView, &MeasureView::appendMeasure, Qt::QueuedConnection);
 	}
@@ -678,6 +698,7 @@ void MainWindow::createStatusBar()
 	}
 
 	m_statusEmpty = new QLabel(pStatusBar);
+	m_statusLoadSignals = new QProgressBar(pStatusBar);
 	m_statusMeasureThreadInfo = new QLabel(pStatusBar);
 	m_statusMeasureTimeout = new QProgressBar(pStatusBar);
 	m_statusMeasureThreadState = new QLabel(pStatusBar);
@@ -685,6 +706,12 @@ void MainWindow::createStatusBar()
 	m_statusConnectToConfigServer = new QLabel(pStatusBar);
 	m_statusConnectToAppDataServer = new QLabel(pStatusBar);
 	m_statusConnectToTuningServer = new QLabel(pStatusBar);
+
+	m_statusLoadSignals->setTextVisible(false);
+	m_statusLoadSignals->setRange(0, 100);
+	m_statusLoadSignals->setFixedWidth(100);
+	m_statusLoadSignals->setFixedHeight(10);
+	m_statusLoadSignals->setLayoutDirection(Qt::LeftToRight);
 
 	m_statusMeasureTimeout->setTextVisible(false);
 	m_statusMeasureTimeout->setRange(0, 100);
@@ -699,6 +726,7 @@ void MainWindow::createStatusBar()
 	pStatusBar->addWidget(m_statusMeasureThreadState);
 	pStatusBar->addWidget(m_statusMeasureTimeout);
 	pStatusBar->addWidget(m_statusMeasureThreadInfo);
+	pStatusBar->addWidget(m_statusLoadSignals);
 	pStatusBar->addWidget(m_statusEmpty);
 
 	pStatusBar->setLayoutDirection(Qt::RightToLeft);
@@ -749,13 +777,16 @@ void MainWindow::createContextMenu()
 
 void MainWindow::loadRacksOnToolBar()
 {
-	if (m_pRackCombo == nullptr)
+	if (m_pRackCombo == nullptr || m_pSelectSignalWidget == nullptr)
 	{
 		return;
 	}
 
 	m_pRackCombo->clear();
 	m_pRackCombo->setEnabled(false);
+
+	m_pSelectSignalWidget->clear();
+	updatePrevNextSignalActions(0);
 
 	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
 	{
@@ -770,6 +801,7 @@ void MainWindow::loadRacksOnToolBar()
 	int rackCount = theSignalBase.createRackListForMeasure(m_measureKind, m_signalConnectionType);
 	if (rackCount == 0)
 	{
+		updateStartStopActions();
 		return;
 	}
 
@@ -803,6 +835,8 @@ void MainWindow::loadRacksOnToolBar()
 		m_pRackCombo->addItem(caption, rack.index());
 	}
 
+	m_pRackCombo->setCurrentIndex(-1);
+
 	m_pRackCombo->blockSignals(false);
 
 	m_pRackCombo->setCurrentIndex(currentRackIndex);
@@ -817,6 +851,9 @@ void MainWindow::loadSignalsOnToolBar()
 	{
 		return;
 	}
+
+	m_pSelectSignalWidget->clear();
+	updatePrevNextSignalActions(0);
 
 	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
 	{
@@ -841,6 +878,12 @@ void MainWindow::loadSignalsOnToolBar()
 	std::vector<SelectSignalItem> signalList;
 
 	int signalCount = theSignalBase.createSignalListForMeasure(m_measureKind, m_signalConnectionType, rackIndex);
+	if (signalCount == 0)
+	{
+		updateStartStopActions();
+		return;
+	}
+
 	for(int index = 0; index < signalCount; index++)
 	{
 		const MeasureSignal& measureSignal = theSignalBase.signalForMeasure(index);
@@ -858,8 +901,8 @@ void MainWindow::loadSignalsOnToolBar()
 		signalList.push_back(signal);
 	}
 
-	int currentSignalID = m_pSelectSignalWidget->setSignalList(signalList, theOptions.toolBar().defaultSignalId());
-	setAcitiveMeasureSignal(currentSignalID);
+	int currentSignalIndex = m_pSelectSignalWidget->setSignalList(signalList, theOptions.toolBar().defaultSignalId());
+	setAcitiveMeasureSignal(currentSignalIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -898,7 +941,10 @@ void MainWindow::setMeasureType(int measureType)
 
 	m_measureType = measureType;
 
+
+	emit measureViewChanged(pView);
 	emit measureTypeChanged(m_measureType);
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -939,52 +985,188 @@ bool MainWindow::tuningSocketIsConnected()
 
 bool MainWindow::signalSourceIsValid(bool showMsg)
 {
-	bool result = false;
+	if (m_calibratorBase.connectedCalibratorsCount() == 0)
+	{
+		if (showMsg == true)
+		{
+			QMessageBox::critical(this,
+								  windowTitle(),
+								  tr("Proccess of measure can not start, because no connected calibrators!\n"
+									 "Please, make initialization calibrators!"));
+		}
+
+		return false;
+	}
+
+	if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	{
+		if (tuningSocketIsConnected() == false)
+		{
+			if (showMsg == true)
+			{
+				QMessageBox::critical(this, windowTitle(), tr("No connect to Tuning Service!"));
+			}
+
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID)
+{
+	MultiChannelSignal ioSignal;
+
+	switch (m_signalConnectionType)
+	{
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+		default:									ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+	}
+
+	if (ioSignal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	bool isMeasured = false;
+
+	int channelCount = activeSignal.channelCount();
+	for(int ch = 0; ch < channelCount; ch++)
+	{
+		Metrology::Signal* pMetrologySignal = ioSignal.metrologySignal(ch);
+		if (pMetrologySignal == nullptr || pMetrologySignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		StatisticsItem si;
+
+		switch (m_measureType)
+		{
+			case MEASURE_TYPE_LINEARITY:
+				{
+					si.setSignal(pMetrologySignal);
+				}
+				break;
+
+			case MEASURE_TYPE_COMPARATOR:
+				{
+					si.setSignal(pMetrologySignal);
+
+					int startComparatorIndex = theOptions.comparator().startComparatorIndex();
+					if (startComparatorIndex < 0 || startComparatorIndex >= pMetrologySignal->param().comparatorCount())
+					{
+						continue;
+					}
+
+					si.setComparator(pMetrologySignal->param().comparator(startComparatorIndex));
+				}
+
+				break;
+
+			default:
+				assert(0);
+				break;
+		}
+
+		m_measureBase.updateStatisticsItem(m_measureType, si);
+		if (si.isMeasured() == true)
+		{
+			signalID.append(pMetrologySignal->param().appSignalID() + "\n");
+
+			isMeasured = true;
+		}
+	}
+
+	return isMeasured;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
+{
+	MultiChannelSignal ioSignal;
 
 	switch (m_signalConnectionType)
 	{
 		case SIGNAL_CONNECTION_TYPE_UNUSED:
 		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
 		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-
-			if (theCalibratorBase.connectedCalibratorsCount() == 0)
-			{
-				if (showMsg == true)
-				{
-					QMessageBox::critical(this, windowTitle(), tr("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators"));
-				}
-				break;
-			}
-
-			result = true;
-
+			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 			break;
 
+		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
+		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-
-			if (tuningSocketIsConnected() == false)
-			{
-				if (showMsg == true)
-				{
-					QMessageBox::critical(this, windowTitle(), tr("No connect to Tuning Service!"));
-				}
-				break;
-			}
-
-			result = true;
-
+			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			break;
 
 		default:
 			assert(0);
 	}
 
-	return result;
+	if (ioSignal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	bool				eltalonIsFound = false;
+
+	double				electricLowLimit = 0;
+	double				electricHighLimit = 0;
+	E::ElectricUnit		electricUnitID = E::ElectricUnit::NoUnit;
+	E::SensorType		electricSensorType = E::SensorType::NoSensor;
+
+
+	int channelCount = activeSignal.channelCount();
+	for(int ch = 0; ch < channelCount; ch ++)
+	{
+		Metrology::Signal* pSignal = ioSignal.metrologySignal(ch);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		const Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
+
+		if (eltalonIsFound == false)
+		{
+			eltalonIsFound = true;
+
+			electricLowLimit = param.electricLowLimit();
+			electricHighLimit = param.electricHighLimit();
+			electricUnitID = param.electricUnitID();
+			electricSensorType = param.electricSensorType();
+		}
+		else
+		{
+			if (compareDouble(electricLowLimit, param.electricLowLimit()) == false ||
+				compareDouble(electricHighLimit, param.electricHighLimit()) == false ||
+				electricUnitID != param.electricUnitID() ||
+				electricSensorType != param.electricSensorType())
+			{
+				return false;
+			}
+		}
+	}
+
+	if (eltalonIsFound == false)
+	{
+		return false;
+	}
+
+	return true;
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1007,10 +1189,59 @@ void MainWindow::startMeasure()
 		return;
 	}
 
+	// source of signal
+	//
 	if (signalSourceIsValid(true) == false)
 	{
 		return;
 	}
+
+	MeasureSignal activeSignal = theSignalBase.activeSignal();
+	if (activeSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	// if we check in single module mode
+	// all module inputs must be the same
+	//
+	if (m_measureKind == MEASURE_KIND_ONE_MODULE)
+	{
+		if (inputsOfmoduleIsSame(activeSignal) == false)
+		{
+			QMessageBox::critical(this,
+								  windowTitle(),
+								  tr("Unable to start the measurement process!\n"
+									 "All electrical ranges of the inputs of the module must be the same."));
+			return;
+		}
+	}
+
+	// has this signal been measured before?
+	//
+	if (theOptions.module().warningIfMeasured() == true)
+	{
+		QString measuredSignals;
+
+		if (signalIsMeasured(activeSignal, measuredSignals) == true)
+		{
+
+			int result = QMessageBox::question(this,
+											  windowTitle(),
+											  tr("Following signals were measured:\n\n%1\n"
+												 "Do you want to measure them again?").
+											  arg(measuredSignals));
+
+			if (result == QMessageBox::No)
+			{
+				return;
+			}
+		}
+	}
+
+	m_measureThread.setActiveSignalParam(theSignalBase.activeSignal(), m_calibratorBase);
+	m_measureThread.setLinearityOption(theOptions.linearity());
+	m_measureThread.setComparatorOption(theOptions.comparator());
 
 	m_measureThread.start();
 }
@@ -1024,7 +1255,7 @@ void MainWindow::stopMeasure()
 		return;
 	}
 
-	m_measureThread.stop();
+	m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Manual);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1089,24 +1320,32 @@ void MainWindow::selectAllMeasure()
 
 void MainWindow::showRackList()
 {
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
 	RackListDialog dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &RackListDialog::updateList, Qt::QueuedConnection);
+
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	theSignalBase.updateRackParam();
-
+	theSignalBase.racks() = dialog.racks();
 	if (theSignalBase.racks().groups().save() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save rack groups was unsuccessfully!"));
 		return;
 	}
 
+	theSignalBase.updateRackParam();
+
 	if (m_measureKind == MEASURE_KIND_MULTI_RACK)
 	{
 		loadRacksOnToolBar();
-		loadSignalsOnToolBar();
 	}
 }
 
@@ -1114,7 +1353,15 @@ void MainWindow::showRackList()
 
 void MainWindow::showSignalList()
 {
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
 	SignalListDialog dialog(false, this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &SignalListDialog::updateList, Qt::QueuedConnection);
+
 	dialog.exec();
 }
 
@@ -1122,7 +1369,15 @@ void MainWindow::showSignalList()
 
 void MainWindow::showComparatorsList()
 {
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
 	ComparatorListDialog dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &ComparatorListDialog::updateList, Qt::QueuedConnection);
+
 	dialog.exec();
 }
 
@@ -1130,7 +1385,17 @@ void MainWindow::showComparatorsList()
 
 void MainWindow::showTuningSignalList()
 {
+	if (m_pConfigSocket == nullptr || m_pTuningSocket == nullptr)
+	{
+		return;
+	}
+
 	TuningSignalListDialog dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
+
 	dialog.exec();
 }
 
@@ -1138,19 +1403,28 @@ void MainWindow::showTuningSignalList()
 
 void MainWindow::showSignalConnectionList()
 {
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
 	SignalConnectionDialog dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &SignalConnectionDialog::signalBaseLoaded, Qt::QueuedConnection);
+
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
+	theSignalBase.signalConnections() = dialog.signalConnections();
 	if (theSignalBase.signalConnections().save() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
 		return;
 	}
 
-	loadSignalsOnToolBar();
+	loadRacksOnToolBar();
 
 	theSignalBase.statistics().createSignalList();
 	theSignalBase.statistics().createComparatorList();
@@ -1172,7 +1446,7 @@ void MainWindow::showStatistics()
 
 void MainWindow::showCalibrators()
 {
-	theCalibratorBase.showInitDialog();
+	m_calibratorBase.showInitDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1193,8 +1467,16 @@ void MainWindow::showOptions()
 {
 	Options options(theOptions);
 
-	OptionsDialog dialog(this);
-	dialog.exec();
+	OptionsDialog* pDialog = new OptionsDialog(theOptions, this);
+	if (pDialog->exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	theOptions = pDialog->options();
+	theOptions.save();
+
+	theDatabase.setDatabaseOption(theOptions.database());
 
 	// reconnect ConfigSocket
 	//
@@ -1210,6 +1492,9 @@ void MainWindow::showOptions()
 										theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY));
 		}
 	}
+
+	m_measureThread.setLinearityOption(theOptions.linearity());
+	m_measureThread.setComparatorOption(theOptions.comparator());
 
 	// update columns in the measure views
 	//
@@ -1229,6 +1514,9 @@ void MainWindow::showOptions()
 		pView->updateColumn();
 	}
 
+	m_pFindMeasurePanel->setViewFont(theOptions.measureView().font());
+	m_pStatisticsPanel->setViewFont(theOptions.measureView().font());
+
 	// update panels
 	//
 	if (m_pSignalInfoPanel != nullptr)
@@ -1238,15 +1526,16 @@ void MainWindow::showOptions()
 
 	if (m_pComparatorInfoPanel != nullptr)
 	{
-		m_pComparatorInfoPanel->setMaxComparatorCount(theOptions.module().maxComparatorCount());
 		m_pComparatorInfoPanel->setComparatorInfo(theOptions.comparatorInfo());
 	}
 
 
 	// if changed error type or limitType
 	//
-	if (options.linearity().errorType() != theOptions.linearity().errorType() || options.linearity().limitType() != theOptions.linearity().limitType() ||
-		options.comparator().errorType() != theOptions.comparator().errorType() || options.comparator().limitType() != theOptions.comparator().limitType())
+	if (	options.linearity().errorType() != theOptions.linearity().errorType() ||
+			options.linearity().limitType() != theOptions.linearity().limitType() ||
+			options.comparator().errorType() != theOptions.comparator().errorType() ||
+			options.comparator().limitType() != theOptions.comparator().limitType())
 	{
 		m_pStatisticsPanel->updateList();
 	}
@@ -1256,7 +1545,11 @@ void MainWindow::showOptions()
 		QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
 		if (QFile::exists(languageFilePath) == false)
 		{
-			QMessageBox::information(this, windowTitle(), tr("Russian language could not be installed.\nFile of russian language: %1 - was not found!").arg(languageFilePath));
+			QMessageBox::information(this,
+									 windowTitle(),
+									 tr("Russian language could not be installed.\n"
+										"File of russian language: %1 - was not found!").
+									 arg(languageFilePath));
 			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
 			theOptions.language().save();
 		}
@@ -1294,12 +1587,24 @@ void MainWindow::setMeasureTimeout(QString value)
 
 	//
 	//
+
 	if (m_statusMeasureTimeout == nullptr)
 	{
 		return;
 	}
 
-	m_statusMeasureTimeout->setRange(0, m_measureTimeout);
+	if (m_measureTimeout == 0)
+	{
+		m_statusMeasureTimeout->hide();
+	}
+	else
+	{
+		if (m_measureThread.isRunning() == true)
+		{
+			m_statusMeasureTimeout->show();
+			m_statusMeasureTimeout->setRange(0, m_measureTimeout);
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1325,10 +1630,12 @@ void MainWindow::setMeasureKind(int index)
 			m_pMeasureKindList->setCurrentIndex(m_measureKind);
 			m_pMeasureKindList->blockSignals(false);
 
-			QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
-															 "you need to combine several racks into groups."
-															 "Currently, no groups have been found.\n"
-															 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
+			QMessageBox::information(this,
+									 windowTitle(),
+									 tr( "For measurements in several racks simultaneously, "
+										 "you need to combine several racks into groups."
+										 "Currently, no groups have been found.\n"
+										 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
 
 
 			return;
@@ -1349,7 +1656,6 @@ void MainWindow::setMeasureKind(int index)
 	//
 	//
 	loadRacksOnToolBar();
-	loadSignalsOnToolBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1381,7 +1687,6 @@ void MainWindow::setSignalConnectionType(int index)
 	//
 	//
 	loadRacksOnToolBar();
-	loadSignalsOnToolBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1464,19 +1769,19 @@ void MainWindow::previousMeasureSignal()
 		return;
 	}
 
-	int currentASignalIndex = m_pSelectSignalWidget->currentSignalIndex();
-	if (currentASignalIndex < 0 || currentASignalIndex >= theSignalBase.signalForMeasureCount())
+	int currentSignalIndex = m_pSelectSignalWidget->currentSignalIndex();
+	if (currentSignalIndex < 0 || currentSignalIndex >= theSignalBase.signalForMeasureCount())
 	{
 		return;
 	}
 
-	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentASignalIndex);
+	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentSignalIndex);
 	if (currentActiveSignal.isEmpty() == true)
 	{
 		return;
 	}
 
-	int previousSignalIndex = currentASignalIndex - 1;
+	int previousSignalIndex = currentSignalIndex - 1;
 	if (previousSignalIndex < 0 || previousSignalIndex >= theSignalBase.signalForMeasureCount())
 	{
 		return;
@@ -1500,19 +1805,19 @@ void MainWindow::nextMeasureSignal()
 		return;
 	}
 
-	int currentASignalIndex = m_pSelectSignalWidget->currentSignalIndex();
-	if (currentASignalIndex < 0 || currentASignalIndex >= theSignalBase.signalForMeasureCount())
+	int currentSignalIndex = m_pSelectSignalWidget->currentSignalIndex();
+	if (currentSignalIndex < 0 || currentSignalIndex >= theSignalBase.signalForMeasureCount())
 	{
 		return;
 	}
 
-	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentASignalIndex);
+	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentSignalIndex);
 	if (currentActiveSignal.isEmpty() == true)
 	{
 		return;
 	}
 
-	int nextSignalIndex = currentASignalIndex + 1;
+	int nextSignalIndex = currentSignalIndex + 1;
 	if (nextSignalIndex < 0 || nextSignalIndex >= theSignalBase.signalForMeasureCount())
 	{
 		return;
@@ -1525,6 +1830,52 @@ void MainWindow::nextMeasureSignal()
 	}
 
 	setAcitiveMeasureSignal(nextSignalIndex);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::setNextMeasureSignalFromModule()
+{
+	if (m_pSelectSignalWidget == nullptr)
+	{
+		return false;
+	}
+
+	int currentSignalIndex = m_pSelectSignalWidget->currentSignalIndex();
+	if (currentSignalIndex < 0 || currentSignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return false;
+	}
+
+	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentSignalIndex);
+	if (currentActiveSignal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	int nextSignalIndex = currentSignalIndex + 1;
+	if (nextSignalIndex < 0 || nextSignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return false;
+	}
+
+	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
+	if (nextActiveSignal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// if module numbers not equal then disabling selection of next input
+	//
+	if (	currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
+			currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	{
+		return false;
+	}
+
+	setAcitiveMeasureSignal(nextSignalIndex);
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1610,19 +1961,19 @@ void MainWindow::calibratorConnectedChanged(int count)
 	}
 	else
 	{
-		m_statusCalibratorCount->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+		m_statusCalibratorCount->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 
 		QString calibratorInfo;
 
-		int calibratorCount = theCalibratorBase.calibratorCount();
+		int calibratorCount = m_calibratorBase.calibratorCount();
 		for(int i  = 0; i < calibratorCount; i++)
 		{
-			if (theCalibratorBase.calibratorManager(i) == nullptr)
+			if (m_calibratorBase.calibratorManager(i) == nullptr)
 			{
 				continue;
 			}
 
-			Calibrator* pCalibrator = theCalibratorBase.calibratorManager(i)->calibrator();
+			Calibrator* pCalibrator = m_calibratorBase.calibratorManager(i)->calibrator();
 			if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 			{
 				continue;
@@ -1689,7 +2040,7 @@ void MainWindow::configSocketConnected()
 	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
-	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
 }
 
@@ -1697,7 +2048,7 @@ void MainWindow::configSocketConnected()
 
 void MainWindow::configSocketDisconnected()
 {
-	if (m_statusConnectToConfigServer == nullptr)
+	if (m_statusConnectToConfigServer == nullptr || m_statusLoadSignals == nullptr)
 	{
 		return;
 	}
@@ -1705,33 +2056,75 @@ void MainWindow::configSocketDisconnected()
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
+
+	m_statusLoadSignals->hide();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketUnknownClient()
+{
+	QMessageBox::critical(this,
+						  windowTitle(),
+						  tr("Configuration Service does not recognize EquipmentID \"%1\" for software \"Metrology\"")
+						  .arg(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY)));
+	return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::configSocketConfigurationLoaded()
 {
-	if (m_statusConnectToConfigServer == nullptr)
+	runSignalSocket();
+	runTuningSocket();
+
+	//
+	//
+	if (m_statusConnectToConfigServer == nullptr || m_statusLoadSignals == nullptr)
 	{
 		return;
 	}
 
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
-	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToConfigServer->setToolTip(configSocketConnectedStateStr());
+
+
+	m_statusLoadSignals->show();
+	m_statusLoadSignals->setValue(0);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketSignalBaseLoading(int persentage)
+{
+	if (m_statusLoadSignals == nullptr)
+	{
+		return;
+	}
+
+	m_statusLoadSignals->setValue(persentage);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketSignalBaseLoaded()
+{
+	loadRacksOnToolBar();
+
+	//
+	//
+	if (m_statusConnectToConfigServer == nullptr || m_statusLoadSignals == nullptr)
+	{
+		return;
+	}
 
 	if (theSignalBase.signalCount() == 0)
 	{
 		m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 255, 160);");
 	}
 
-	loadRacksOnToolBar();
-	loadSignalsOnToolBar();
-
-	//
-	//
-	runSignalSocket();
-	runTuningSocket();
+	m_statusLoadSignals->hide();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1757,7 +2150,7 @@ void MainWindow::signalSocketConnected()
 	HostAddressPort signalSocketAddress = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(serverType);
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: on "));
-	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\n").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()));
 }
 
@@ -1772,7 +2165,7 @@ void MainWindow::signalSocketDisconnected()
 
 	if (m_measureThread.isRunning() == true)
 	{
-		m_measureThread.stop();
+		m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
 	}
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
@@ -1817,7 +2210,7 @@ void MainWindow::tuningSocketConnected()
 	}
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
-	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 	m_statusConnectToTuningServer->setToolTip(tuningSocketConnectedStateStr());
 
 	if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
@@ -1839,7 +2232,7 @@ void MainWindow::tuningSocketDisconnected()
 	{
 		if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 		{
-			m_measureThread.stop();
+			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
 		}
 	}
 
@@ -1868,7 +2261,7 @@ void MainWindow::tuningSignalsCreated()
 	if (m_pTuningSocket->isConnected() == true)
 	{
 		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
-		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
 
 		if (theSignalBase.tuning().sourceBase().count() == 0 && theSignalBase.tuning().signalBase().count() != 0)
 		{
@@ -1926,21 +2319,69 @@ void MainWindow::measureThreadStoped()
 	m_statusMeasureTimeout->setValue(0);
 
 	m_statusMeasureThreadState->setText(tr(" Measure process is stopped "));
-	m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
+
+	//
+	//
+	if (theOptions.module().measureEntireModule() == false)
+	{
+		return;
+	}
+
+	if (m_measureThread.info().exitCode() == MeasureThreadInfo::ExitCode::Manual)
+	{
+		return;
+	}
+
+	bool signalIsSelected = setNextMeasureSignalFromModule();
+	if (signalIsSelected == false)
+	{
+		return;
+	}
+
+	emit startMeasure();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setMeasureThreadInfo(QString msg)
+void MainWindow::measureThreadInfo(const MeasureThreadInfo& info)
 {
-	m_statusMeasureThreadInfo->setText(msg);
-}
 
-// -------------------------------------------------------------------------------------------------------------------
+	switch (info.type())
+	{
+		case MeasureThreadInfo::msgType::String:
 
-void MainWindow::setMeasureThreadInfo(int timeout)
-{
-	m_statusMeasureTimeout->setValue(timeout);
+			if (m_statusMeasureThreadInfo == nullptr)
+			{
+				break;
+			}
+
+			m_statusMeasureThreadInfo->setText(info.message());
+			m_statusMeasureThreadInfo->setStyleSheet("color: rgb(0x0, 0x0, 0x0);");
+
+			break;
+
+		case MeasureThreadInfo::msgType::StringError:
+
+			if (m_statusMeasureThreadInfo == nullptr)
+			{
+				break;
+			}
+
+			m_statusMeasureThreadInfo->setText(info.message());
+			m_statusMeasureThreadInfo->setStyleSheet("color: rgb(255, 0, 0);");
+
+			break;
+
+		case MeasureThreadInfo::msgType::Timeout:
+
+			if (m_statusMeasureTimeout == nullptr)
+			{
+				break;
+			}
+
+			m_statusMeasureTimeout->setValue(info.timeout());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1966,58 +2407,16 @@ void MainWindow::measureThreadMsgBox(int type, QString text, int* result)
 
 			break;
 
+		case QMessageBox::Critical:
+
+			QMessageBox::critical(this, windowTitle(), text);
+
+			break;
+
 		default:
 			assert(0);
 			break;
 	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
-{
-	signalIsSelected = false;
-
-	if (m_pSelectSignalWidget == nullptr)
-	{
-		return;
-	}
-
-	int currentASignalIndex = m_pSelectSignalWidget->currentSignalIndex();
-	if (currentASignalIndex < 0 || currentASignalIndex >= theSignalBase.signalForMeasureCount())
-	{
-		return;
-	}
-
-	MeasureSignal currentActiveSignal = theSignalBase.signalForMeasure(currentASignalIndex);
-	if (currentActiveSignal.isEmpty() == true)
-	{
-		return;
-	}
-
-	int nextSignalIndex = currentASignalIndex + 1;
-	if (nextSignalIndex < 0 || nextSignalIndex >= theSignalBase.signalForMeasureCount())
-	{
-		return;
-	}
-
-	const MeasureSignal& nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
-	if (nextActiveSignal.isEmpty() == true)
-	{
-		return;
-	}
-
-	// if module numbers not equal then disabling selection of next input
-	//
-	if (	currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
-			currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
-	{
-		return;
-	}
-
-	setAcitiveMeasureSignal(nextSignalIndex);
-
-	signalIsSelected = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2040,13 +2439,21 @@ void MainWindow::measureComplite(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::updateStartStopActions()
+void MainWindow::updateMeasureView()
 {
-	if (m_pSelectSignalWidget == nullptr)
+	MeasureView* pView = activeMeasureView();
+	if (pView == nullptr)
 	{
 		return;
 	}
 
+	pView->updateColumn();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateStartStopActions()
+{
 	if (m_pStartMeasureAction == nullptr || m_pStopMeasureAction == nullptr)
 	{
 		return;
@@ -2070,19 +2477,7 @@ void MainWindow::updateStartStopActions()
 		return;
 	}
 
-	if (m_pSelectSignalWidget == nullptr)
-	{
-		return;
-	}
-
-	int currentSignalIndex = m_pSelectSignalWidget->currentSignalIndex();
-	if (currentSignalIndex < 0 || currentSignalIndex >= theSignalBase.signalForMeasureCount())
-	{
-		return;
-	}
-
-	MeasureSignal activeSignal = theSignalBase.signalForMeasure(currentSignalIndex);
-	if (activeSignal.isEmpty() == true)
+	if (theSignalBase.rackForMeasureCount() == 0 || theSignalBase.signalForMeasureCount() == 0)
 	{
 		return;
 	}
@@ -2149,10 +2544,15 @@ void MainWindow::runConfigSocket()
 
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticsPanel, &StatisticsPanel::updateList);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistics(), &StatisticsBase::signalLoaded);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theMeasureBase, &MeasureBase::signalLoaded);
+
+	connect(m_pConfigSocket, &ConfigSocket::unknownClient, this, &MainWindow::configSocketUnknownClient, Qt::QueuedConnection);
+
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoading, this, &MainWindow::configSocketSignalBaseLoading, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, this, &MainWindow::configSocketSignalBaseLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &theSignalBase.statistics(), &StatisticsBase::signalBaseLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, m_pStatisticsPanel, &StatisticsPanel::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &m_measureBase, &MeasureBase::signalBaseLoaded, Qt::QueuedConnection);
 
 	m_pConfigSocket->start();
 }
@@ -2236,23 +2636,21 @@ void MainWindow::runMeasureThread()
 	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection);
 	connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
-	connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::sendMeasureInfo, this, &MainWindow::measureThreadInfo, Qt::QueuedConnection);
 	connect(&m_measureThread, &MeasureThread::msgBox, this, &MainWindow::measureThreadMsgBox, Qt::BlockingQueuedConnection);
-	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
 	m_measureThread.measureTypeChanged(m_measureType);
+	m_measureThread.measureTimeoutChanged(m_measureTimeout);
 	m_measureThread.measureKindChanged(m_measureKind);
 	m_measureThread.signalConnectionTypeChanged(m_signalConnectionType);
-	m_measureThread.measureTimeoutChanged(m_measureTimeout);
 
 	connect(this, &MainWindow::measureTypeChanged, &m_measureThread, &MeasureThread::measureTypeChanged, Qt::QueuedConnection);
+	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
 	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged, Qt::QueuedConnection);
 	connect(this, &MainWindow::signalConnectionTypeChanged, &m_measureThread, &MeasureThread::signalConnectionTypeChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
 
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, &m_measureThread, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_measureThread, &MeasureThread::signalParamChanged, Qt::QueuedConnection);
 
 	measureThreadStoped();
 }
@@ -2275,6 +2673,25 @@ void MainWindow::stopTuningSocket()
 	m_pTuningSocketThread->quitAndWait(10000);
 	delete m_pTuningSocketThread;
 	m_pTuningSocketThread = nullptr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showFindMeasurePanel(const QString& appSignalID)
+{
+	if (appSignalID.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (m_pFindMeasurePanel == nullptr)
+	{
+		return;
+	}
+
+	m_pFindMeasurePanel->show();
+	m_pFindMeasurePanel->setFindText(appSignalID);
+	emit m_pFindMeasurePanel->find();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2321,9 +2738,10 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	stopSignalSocket();
 	stopTuningSocket();
 
-	theMeasureBase.clear();
 	theSignalBase.clear();
-	theCalibratorBase.clear();
+	theOptions.linearity().points().save();
+	m_measureBase.clear();
+	m_calibratorBase.clear();
 
 	theDatabase.close();
 

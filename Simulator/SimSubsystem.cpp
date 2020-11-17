@@ -1,5 +1,6 @@
 #include "SimSubsystem.h"
 #include "../lib/ModuleFirmware.h"
+#include "Simulator.h"
 #include "SimConnections.h"
 
 namespace Sim
@@ -7,31 +8,35 @@ namespace Sim
 	//
 	// Subsystem
 	//
-	Subsystem::Subsystem(QString subsystemId) :
-		Output(subsystemId),
+	Subsystem::Subsystem(QString subsystemId, Simulator* simulator) :
+		m_simulator(simulator),
+		m_log(simulator->log(), subsystemId),
 		m_subsystemId(subsystemId)
 	{
 	}
 
-	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const Connections& connections)
+	bool Subsystem::load(const Hardware::ModuleFirmware& firmware,
+						 const LmDescription& lmDescription,
+						 const Connections& connections,
+						 const LogicModulesInfo& logicModulesExtraInfo)
 	{
 		m_lmDescription = lmDescription;
 
 		if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
 		{
-			writeError(QObject::tr("Application data is not found in firmware."));
+			m_log.writeError(QObject::tr("Application data is not found in firmware."));
 			return false;
 		}
 
 		if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
 		{
-			writeError(QObject::tr("Configuration data is not found in firmware."));
+			m_log.writeError(QObject::tr("Configuration data is not found in firmware."));
 			return false;
 		}
 
 		if (firmware.uartExists(static_cast<int>(UartId::Tuning)) == false)
 		{
-			writeError(QObject::tr("Tuning data is not found in firmware."));
+			m_log.writeError(QObject::tr("Tuning data is not found in firmware."));
 			return false;
 		}
 
@@ -49,9 +54,9 @@ namespace Sim
 				return false;
 			}
 
-			writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
+			m_log.writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections);
+			bool loadOk = logicModule->load(lmInfo, lmDescription, firmware, connections, logicModulesExtraInfo);
 			if (loadOk == false)
 			{
 				return false;
@@ -87,19 +92,19 @@ namespace Sim
 
 	 std::shared_ptr<LogicModule> Subsystem::addDevice(const Hardware::LogicModuleInfo& lm)
 	 {
-		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>();
+		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>(m_simulator);
 
 		if (auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result);
 			p.second == false)
 		{
-			writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
+			m_log.writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
 			return std::shared_ptr<LogicModule>();
 		}
 
 		if (auto p = m_devicesByEquipmentId.try_emplace(lm.equipmentId, result);
 			p.second == false)
 		{
-			writeError(QObject::tr("Cannot add device, device with EquipmentID %1 already exists.").arg(lm.equipmentId));
+			m_log.writeError(QObject::tr("Cannot add device, device with EquipmentID %1 already exists.").arg(lm.equipmentId));
 			m_devicesByLmNumber.erase(lm.lmNumber);		// Device to m_devicesByLmNumber already was added, remove it
 			return std::shared_ptr<LogicModule>();
 		}
@@ -113,7 +118,7 @@ namespace Sim
 		auto it = m_devicesByEquipmentId.find(equipmentId);
 		if (it == m_devicesByEquipmentId.end())
 		{
-			writeError(QObject::tr("Cannot remove device, device with EquipmentID %1 not found.").arg(equipmentId));
+			m_log.writeError(QObject::tr("Cannot remove device, device with EquipmentID %1 not found.").arg(equipmentId));
 			return false;
 		}
 
@@ -124,7 +129,7 @@ namespace Sim
 
 		if (removed == 0)
 		{
-			writeError(QObject::tr("Cannot remove device, device with LmNumber %1 not found.").arg(device->logicModuleInfo().lmNumber));
+			m_log.writeError(QObject::tr("Cannot remove device, device with LmNumber %1 not found.").arg(device->logicModuleInfo().lmNumber));
 			return false;
 		}
 
