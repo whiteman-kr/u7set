@@ -5,6 +5,7 @@
 #include "../lib/Connection.h"
 #include "../VFrame30/DrawParam.h"
 #include "../lib/TypesAndEnums.h"
+#include "../VFrame30/Bus.h"
 
 #include "Forms/DialogProjectDiffProgress.h"
 
@@ -1852,8 +1853,182 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 
 void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
 {
+	if (headerTable == nullptr)
+	{
+		Q_ASSERT(headerTable);
+		return;
+	}
 
+	// No Files
+	if (sourceFile == nullptr && targetFile == nullptr)
+	{
+		Q_ASSERT(sourceFile != nullptr || targetFile != nullptr);
+		return;
+	}
+
+	VFrame30::Bus sourceBus;
+	VFrame30::Bus targetBus;
+
+	bool ok = false;
+
+	if (sourceFile != nullptr)
+	{
+		ok = sourceBus.Load(sourceFile->data());
+		if (ok == false)
+		{
+			Q_ASSERT(ok);
+			return;
+		}
+	}
+
+	if (targetFile != nullptr)
+	{
+		ok = targetBus.Load(targetFile->data());
+		if (ok == false)
+		{
+			Q_ASSERT(ok);
+			return;
+		}
+	}
+
+	// Single object
+	//
+	if ((sourceFile != nullptr && targetFile == nullptr) ||
+		(sourceFile == nullptr && targetFile != nullptr))
+	{
+		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
+		auto* singleBus= sourceFile != nullptr ? &sourceBus : &targetBus;
+		headerTable->insertRow({singleBus->busTypeId(), tr("Added"),  changesetString(singleFile)});
+		return;
+	}
+
+	// Both Files
+	//
+	// Create tables
+
+	saveFormat();
+	setFont(m_tableFont);
+	QStringList busHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
+	std::shared_ptr<ReportTable> busDiffTable = std::make_shared<ReportTable>(busHeaderLabels, m_currentCharFormat);
+	restoreFormat();
+
+	saveFormat();
+	setFont(m_tableFont);
+	QStringList busSignalsHeaderLabels = {tr("SignalID"), tr("Caption"), tr("Status")};
+	std::shared_ptr<ReportTable> busSignalsDiffTable = std::make_shared<ReportTable>(busSignalsHeaderLabels, m_currentCharFormat);
+	restoreFormat();
+
+	std::vector<PropertyDiff> busDiffs;
+
+	// Compare bus properties
+
+	comparePropertyObjects(sourceBus, targetBus, &busDiffs);
+
+	if (busDiffs.empty() == false)
+	{
+		fillDiffTable(busDiffTable.get(), busDiffs);
+	}
+
+	std::map<QString, std::shared_ptr<ReportTable>> busSignalsPropertiesTables;
+
+	// Compare bus signals
+
+	for (const VFrame30::BusSignal& targetBusSignal : targetBus.busSignals())
+	{
+		bool busSignalFound = false;
+
+		for (const VFrame30::BusSignal& sourceBusSignal : sourceBus.busSignals())
+		{
+			if (targetBusSignal.signalId() == sourceBusSignal.signalId())
+			{
+				std::vector<PropertyDiff> busSignalDiffs;
+
+				comparePropertyObjects(sourceBusSignal, targetBusSignal, &busSignalDiffs);
+
+				if (busSignalDiffs.empty() == false)
+				{
+					saveFormat();
+					setFont(m_tableFont);
+					QStringList busSignalsPropertiesHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
+					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = std::make_shared<ReportTable>(busSignalsPropertiesHeaderLabels, m_currentCharFormat);
+					restoreFormat();
+
+					busSignalsPropertiesTables[targetBusSignal.signalId()] = busSignalsPropertiesDiffTable;
+
+					fillDiffTable(busSignalsPropertiesDiffTable.get(), busSignalDiffs);
+
+					busSignalsDiffTable->insertRow({targetBusSignal.signalId(), targetBusSignal.caption(), tr("Modified")});
+				}
+
+				busSignalFound = true;
+				break;
+			}
+		}
+
+		if (busSignalFound == false)
+		{
+			// Bus signal was added
+			busSignalsDiffTable->insertRow({targetBusSignal.signalId(), targetBusSignal.caption(), tr("Added")});
+		}
+	}
+
+	for (const VFrame30::BusSignal& sourceBusSignal : sourceBus.busSignals())
+	{
+		bool busSignalFound = false;
+
+		for (const VFrame30::BusSignal& targetBusSignal : targetBus.busSignals())
+		{
+			if (targetBusSignal.signalId() == sourceBusSignal.signalId())
+			{
+				busSignalFound = true;
+				break;
+			}
+		}
+
+		if (busSignalFound == false)
+		{
+			// Bus signal was deleted
+			busSignalsDiffTable->insertRow({sourceBusSignal.signalId(), sourceBusSignal.caption(), tr("Deleted")});
+		}
+	}
+
+	// Add tables to section
+
+	if (busDiffTable->rowCount() > 0 || busSignalsDiffTable->rowCount() > 0 || busSignalsPropertiesTables.empty() == false)
+	{
+		headerTable->insertRow({targetBus.busTypeId(), targetFile->action().text(),  changesetString(targetFile)});
+
+		// Add tables to section
+
+		std::shared_ptr<ReportSection> busDiffSection = std::make_shared<ReportSection>();
+		m_sections.push_back(busDiffSection);
+
+		busDiffSection->addText(tr("Bus: %1\n").arg(targetBus.busTypeId()), m_currentCharFormat, m_currentBlockFormat);
+
+		if (busDiffTable->rowCount() != 0)
+		{
+			busDiffSection->addTable(busDiffTable);
+		}
+
+		if (busSignalsDiffTable->rowCount() != 0)
+		{
+			busDiffSection->addText(tr("Bus %1 signals:\n").arg(targetBus.busTypeId()), m_currentCharFormat, m_currentBlockFormat);
+			busDiffSection->addTable(busSignalsDiffTable);
+		}
+
+		for (auto it : busSignalsPropertiesTables)
+		{
+			const QString& signalId = it.first;
+			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
+
+			busDiffSection->addText(tr("Bus: %1, signal: %2\n").arg(targetBus.busTypeId()).arg(signalId), m_currentCharFormat, m_currentBlockFormat);
+			busDiffSection->addTable(itemDiffTable);
+		}
+	}
+
+	return;
 }
+
 
 void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
 {
