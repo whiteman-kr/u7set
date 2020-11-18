@@ -122,7 +122,7 @@ const int				SOCKET_CLIENT_PARAM_EQUIPMENT_ID1	= 0,
 
 struct CONNECTION_OPTION
 {
-	bool				readFromCfgSrv = false;
+	bool				isValid = false;
 
 	QString				equipmentID;
 	QString				serverIP;
@@ -163,7 +163,7 @@ public:
 	void				load();
 	void				save();
 
-	bool				init(const MetrologySettings &settings);
+	bool				init(const MetrologySettings& settings);
 };
 
 // ==============================================================================================

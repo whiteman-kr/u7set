@@ -294,14 +294,14 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 			{
 				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-				primary.readFromCfgSrv = settings.appDataServicePropertyIsValid1;
+				primary.isValid = settings.appDataServicePropertyIsValid1;
 				primary.equipmentID = settings.appDataServiceID1;
 				primary.serverIP = settings.appDataServiceIP1;
 				primary.serverPort = settings.appDataServicePort1;
 
 				CONNECTION_OPTION& reserve = m_connectOption[SOCKET_SERVER_TYPE_RESERVE];
 
-				reserve.readFromCfgSrv = settings.appDataServicePropertyIsValid2;
+				reserve.isValid = settings.appDataServicePropertyIsValid2;
 				reserve.equipmentID = settings.appDataServiceID2;
 				reserve.serverIP = settings.appDataServiceIP2;
 				reserve.serverPort = settings.appDataServicePort2;
@@ -315,7 +315,7 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 			{
 				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-				primary.readFromCfgSrv = settings.tuningServicePropertyIsValid;
+				primary.isValid = settings.tuningServicePropertyIsValid;
 				primary.equipmentID = settings.softwareMetrologyID;
 				primary.serverIP = settings.tuningServiceIP;
 				primary.serverPort = settings.tuningServicePort;
@@ -1423,14 +1423,18 @@ bool Options::readFromXml(const QByteArray& fileData)
 	bool result = false;
 
 	result = m_projectInfo.readFromXml(fileData);
-
-	RETURN_IF_FALSE(result);
+	if (result == false)
+	{
+		return false;
+	}
 
 	XmlReadHelper xmlReader(fileData);
 
 	result = m_settings.readFromXml(xmlReader);
-
-	RETURN_IF_FALSE(result);
+	if (result == false)
+	{
+		return false;
+	}
 
 	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
 	{
