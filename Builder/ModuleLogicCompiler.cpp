@@ -12565,7 +12565,7 @@ namespace Builder
 
 		if (m_context->generateExtraDebugInfo() == true)
 		{
-			BuildFile* binFile = m_resultWriter->addFile(DIR_BIN, QString("%1.bin").arg(lmEquipmentID()), "", "", binCode);
+			BuildFile* binFile = m_resultWriter->addFile(Directory::BIN, QString("%1.bin").arg(lmEquipmentID()), "", "", binCode);
 
 			if (binFile == nullptr)
 			{

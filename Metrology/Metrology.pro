@@ -91,7 +91,7 @@ SOURCES += \
     ../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/TcpFileTransfer.cpp \
-    ../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../Builder/ModulesRawData.cpp \
     ../Builder/IssueLogger.cpp \
@@ -174,7 +174,7 @@ HEADERS  += \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
     ../lib/TcpFileTransfer.h \
-    ../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
     ../lib/DeviceHelper.h \
     ../Builder/ModulesRawData.h \
     ../Builder/IssueLogger.h \
@@ -188,7 +188,6 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../Builder/CfgFiles.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \

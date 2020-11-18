@@ -1,5 +1,5 @@
 #include "DiagDataServiceCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 
 
 namespace Builder
@@ -30,17 +30,19 @@ namespace Builder
 		return result;
 	}
 
+	bool DiagDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
 	bool DiagDataServiceCfgGenerator::writeSettings()
 	{
 		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
 		RETURN_IF_FALSE(result);
 
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = m_settings.writeToXml(xml);
-
-		return result;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
-
 }

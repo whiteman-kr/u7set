@@ -24,7 +24,7 @@ SOURCES +=\
     ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
 	TuningMainWindow.cpp \
-	../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
 	../lib/DeviceHelper.cpp \
 	../lib/XmlHelper.cpp \
 	../lib/DeviceObject.cpp \
@@ -74,7 +74,7 @@ HEADERS  += TuningMainWindow.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
-	../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
 	../lib/DeviceHelper.h \
 	../lib/XmlHelper.h \
 	../lib/DeviceObject.h \

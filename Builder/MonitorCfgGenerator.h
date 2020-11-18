@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../lib/XmlHelper.h"
+#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -14,6 +14,7 @@ namespace Builder
 		~MonitorCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	protected:
 		bool writeMonitorSettings();
@@ -40,7 +41,9 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-		bool m_tuningEnabled = false;
+		MonitorSettings m_settings;
+
+//		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 
 		QStringList m_schemaTagList;		// Generated in writeMonitorSettings

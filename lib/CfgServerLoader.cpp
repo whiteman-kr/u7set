@@ -1,7 +1,6 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/CircularLogger.h"
-
-#include "../Builder/CfgFiles.h"
+#include "../lib/ConstStrings.h"
 
 #include <QXmlStreamReader>
 #include <QStandardPaths>
@@ -225,7 +224,7 @@ void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 
 	setRootFolder(m_rootFolder);
 
-	m_configurationXmlPathFileName = "/" + m_appEquipmentID + "/" + Builder::FILE_CONFIGURATION_XML;
+	m_configurationXmlPathFileName = "/" + m_appEquipmentID + "/" + File::CONFIGURATION_XML;
 
 	readSavedConfiguration();
 

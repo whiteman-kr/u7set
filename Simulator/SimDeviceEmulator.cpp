@@ -1,6 +1,5 @@
 #include "SimDeviceEmulator.h"
 #include <QtEndian>
-#include "../Builder/CfgFiles.h"
 #include "SimException.h"
 #include "SimCommandProcessor.h"
 #include "Simulator.h"
@@ -193,8 +192,8 @@ namespace Sim
 
 			m_log.writeError(tr("Information for LogicModule %1 is not found (file %2/%3)")
 						.arg(equipmentId())
-						.arg(Builder::DIR_COMMON)
-						.arg(Builder::FILE_LOGIC_MODULES_XML));
+			            .arg(Directory::COMMON)
+			            .arg(File::LOGIC_MODULES_XML));
 
 			return DeviceError::ModuleExtraInfoNotFound;
 		}

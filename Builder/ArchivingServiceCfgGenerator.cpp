@@ -20,6 +20,7 @@ namespace Builder
 		do
 		{
 			if (writeSettings() == false) break;
+			if (writeArchSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
 
@@ -30,22 +31,23 @@ namespace Builder
 		return result;
 	}
 
+	bool ArchivingServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
 	bool ArchivingServiceCfgGenerator::writeSettings()
 	{
 		bool result = true;
 
-		result &= m_settings.readFromDevice(m_software, m_log);
+		result &= m_settings.readFromDevice(m_equipment, m_software, m_log);
 		result &= m_settings.checkSettings(m_software, m_log);
 
 		RETURN_IF_FALSE(result);
 
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result &= m_settings.writeToXml(xml);
-
-		result &= writeArchSignalsFile();
-
-		return result;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool ArchivingServiceCfgGenerator::writeArchSignalsFile()
@@ -106,7 +108,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -132,7 +134,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

@@ -588,7 +588,7 @@ namespace Tuning
 
 			result = true;
 
-			if (bfi.ID == CFG_FILE_ID_TUNING_SOURCES)
+			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
 				result &= readTuningDataSources(fileData);
 			}

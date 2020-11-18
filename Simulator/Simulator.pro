@@ -136,7 +136,6 @@ SOURCES += \
    ../lib/OutputLog.cpp
 
 HEADERS += \
-    ../Builder/CfgFiles.h \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \

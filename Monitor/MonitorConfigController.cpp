@@ -1,4 +1,4 @@
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"
 
@@ -317,7 +317,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	ConfigSettings readSettings;
 
 	readSettings.globalScript = getScriptFunc("/" + theSettings.instanceStrId() + "/GlobalScript.js");
-	readSettings.logoImage = getImageFunc(CFG_FILE_ID_LOGO);
+	readSettings.logoImage = getImageFunc(CfgFileId::LOGO);
 	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + theSettings.instanceStrId() + "/OnConfigurationArrived.js");
 
 	// Parse XML
@@ -368,7 +368,9 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 			// Settings node
 			//
-			QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
+			result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
+
+/*			QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
 			if (settingsNodes.size() != 1)
 			{
 				readSettings.errorMessage += tr("Parsing Settings node error.\n");
@@ -376,7 +378,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			else
 			{
 				result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
-			}
+			}*/
 		}
 
 		// Error handling
@@ -397,7 +399,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QByteArray data;
 		QString errorString;
 
-		bool result = getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorString);
+		bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &data, &errorString);
 
 		if (result == false)
 		{
@@ -456,7 +458,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CFG_FILE_ID_COMPARATOR_SET, &data, &errorString);
+		if (bool result = getFileBlockedById(CfgFileId::COMPARATOR_SET, &data, &errorString);
 			result == false)
 		{
 			readSettings.errorMessage += errorString + QStringLiteral("\n");
@@ -483,7 +485,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CFG_FILE_ID_BEHAVIOR, &data, &errorString);
+		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString);
 			result == false)
 		{
 			readSettings.errorMessage += errorString + QStringLiteral("\n");
@@ -594,6 +596,7 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 	return outSetting->errorMessage.isEmpty();
 }
 
+/*
 bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr)
@@ -760,6 +763,64 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 	return outSetting->errorMessage.isEmpty();
 }
 
+*/
+
+bool MonitorConfigController::xmlReadSettingsSection(const QByteArray& xmlFileData, ConfigSettings* outSetting)
+{
+	if (outSetting == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	XmlReadHelper xmlReader(xmlFileData);
+
+	MonitorSettings ms;
+
+	bool result = ms.readFromXml(xmlReader);
+
+	if (result == false)
+	{
+		outSetting->errorMessage += tr("Error reading <Settings> section from configuration.xml\n");
+		return false;
+	}
+
+	//
+
+	outSetting->startSchemaId = ms.startSchemaId;
+
+	//
+
+	outSetting->appDataService1 = ConfigConnection(ms.appDataServiceID1, ms.appDataServiceIP1, ms.appDataServicePort1);
+	outSetting->appDataService2 = ConfigConnection(ms.appDataServiceID2, ms.appDataServiceIP2, ms.appDataServicePort2);
+
+	outSetting->appDataServiceRealtimeTrend1 = ConfigConnection(ms.appDataServiceID1, ms.realtimeDataIP1, ms.realtimeDataPort1);
+	outSetting->appDataServiceRealtimeTrend2 = ConfigConnection(ms.appDataServiceID2, ms.realtimeDataIP2, ms.realtimeDataPort2);
+
+	//
+
+	outSetting->archiveService1 = ConfigConnection(ms.archiveServiceID1, ms.archiveServiceIP1, ms.archiveServicePort1);
+	outSetting->archiveService2 = ConfigConnection(ms.archiveServiceID2, ms.archiveServiceIP2, ms.archiveServicePort2);
+
+	//
+
+	outSetting->tuningEnabled = ms.tuningEnabled;
+
+	if (ms.tuningEnabled == true)
+	{
+		outSetting->tuningService = ConfigConnection(ms.tuningServiceID, ms.tuningServiceIP, ms.tuningServicePort);
+		outSetting->tuningSources = ms.getTuningSources();
+	}
+	else
+	{
+		// tuning disabled
+		//
+		outSetting->tuningService = ConfigConnection();
+		outSetting->tuningSources.clear();
+	}
+
+	return true;
+}
 
 VFrame30::SchemaDetailsSet MonitorConfigController::schemasDetailsSet() const
 {

@@ -43,7 +43,7 @@ SOURCES += \
     ArchivingService.cpp \
     ../lib/Queue.cpp \
     ../lib/Service.cpp \
-    ../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/SocketIO.cpp \
     ../lib/Tcp.cpp \
@@ -94,7 +94,7 @@ HEADERS += \
     Stable.h \
     ../lib/Queue.h \
     ../lib/Service.h \
-    ../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
     ../lib/Address16.h \
     ../lib/OrderedHash.h \
     ../lib/SimpleThread.h \

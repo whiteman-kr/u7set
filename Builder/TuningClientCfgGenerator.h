@@ -5,6 +5,7 @@
 
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -15,6 +16,7 @@ namespace Builder
 		TuningClientCfgGenerator(Context* context, Hardware::Software* software);
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
 
@@ -22,10 +24,10 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
-		bool createSettings(bool* filterByEquipment, bool* filterBySchema);
-		bool createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema);
+//		bool initFiltersSettings();
+		bool createObjectFilters(const QStringList& equipmentList);
 
-		bool writeSettings(bool filterByEquipment, bool filterBySchema);
+		bool writeSettings();
 		bool writeTuningSignals();
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
@@ -35,18 +37,24 @@ namespace Builder
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
 		bool createAutomaticFilters(const QStringList& equipmentList,
-									const TuningSignalManager& tuningSignalManager,
-									bool filterByEquipment,
-									bool filterBySchema);
+									const TuningSignalManager& tuningSignalManager);
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
+		TuningClientSettings m_settings;
+
 		::Proto::AppSignalSet m_tuningSet;
 
+/*		Moved to m_settings!
+
+		bool m_filterByEquipment = false;
+		bool m_filterBySchema = false;
+		bool m_filtersSettingsInitialized = false;*/
+
 		TuningFilterStorage m_tuningFilterStorage;
-		QStringList m_schemaTagList;					// Generated in writeSettings
+//		QStringList m_schemaTagList;					// Generated in writeSettings
 	};
 
 	template <typename TYPE>

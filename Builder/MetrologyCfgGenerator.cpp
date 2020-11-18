@@ -1,6 +1,6 @@
 #include "MetrologyCfgGenerator.h"
 #include "../lib/MetrologySignal.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
 
@@ -13,16 +13,15 @@ namespace Builder
 	{
 	}
 
-
 	MetrologyCfgGenerator::~MetrologyCfgGenerator()
 	{
 	}
-
 
 	bool MetrologyCfgGenerator::generateConfiguration()
 	{
 		bool result = true;
 
+		result &= writeDatabaseInfo();
 		result &= writeSettings();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
@@ -30,38 +29,17 @@ namespace Builder
 		return result;
 	}
 
-	bool MetrologyCfgGenerator::writeSettings()
+	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
+		XmlWriteHelper xml(xmlWriter);
 
-		//
-		//
-		xmlWriter.writeStartElement("DatabaseInfo");
-		{
-			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
-		}
-		xmlWriter.writeEndElement();
+		return m_settings.writeToXml(xml);
 
-		//
-		//
 
-		Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
-		if (pObjectSoftware == nullptr || pObjectSoftware->isSoftware() == false)
-		{
-			// Unknown software type (Software object StrID '%1').
-			//
-			m_log->errEQP6100(m_software->equipmentId(), m_software->uuid());
-			xmlWriter.writeTextElement("Error", tr("Software Metrology (%1) not found").arg(m_software->equipmentId()));
-			return false;
-		}
+/*		xmlWriter.writeStartElement("Settings");
 
-		//
-		//
-
-		xmlWriter.writeStartElement("Settings");
 		{
 			bool result = true;
-
 
 			// AppDataService
 			//
@@ -69,8 +47,8 @@ namespace Builder
 			QString appDataServiceId1;
 			QString appDataServiceId2;
 
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID1" , &appDataServiceId1, m_log);
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID2" , &appDataServiceId2, m_log);
+			result &= DeviceHelper::getStrProperty(m_software, "AppDataServiceID1" , &appDataServiceId1, m_log);
+			result &= DeviceHelper::getStrProperty(m_software, "AppDataServiceID2" , &appDataServiceId2, m_log);
 
 			if (result == false)
 			{
@@ -149,7 +127,7 @@ namespace Builder
 
 			QString tuningServiceId;
 
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID" , &tuningServiceId, m_log);
+			result &= DeviceHelper::getStrProperty(m_software, "TuningServiceID" , &tuningServiceId, m_log);
 
 			if (result == false)
 			{
@@ -172,7 +150,7 @@ namespace Builder
 				}
 				else
 				{
-					tuningSettings.readFromDevice(tuningObject, m_log);
+					tuningSettings.readFromDevice(m_equipment, tuningObject, m_log);
 					tuningPropertyIsValid = true;
 				}
 			}
@@ -185,9 +163,32 @@ namespace Builder
 				xmlWriter.writeAttribute("port", QString::number(tuningSettings.clientRequestIP.port()));
 			}
 			xmlWriter.writeEndElement(); // </TuningService>
+
 		} // </Settings>
 
+		return true; */
+	}
+
+	bool MetrologyCfgGenerator::writeDatabaseInfo()
+	{
+		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
+
+		xmlWriter.writeStartElement("DatabaseInfo");
+		{
+			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
+		}
+		xmlWriter.writeEndElement();
+
 		return true;
+	}
+
+	bool MetrologyCfgGenerator::writeSettings()
+	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		RETURN_IF_FALSE(result);
+
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MetrologyCfgGenerator::writeMetrologyItemsXml()
@@ -296,7 +297,7 @@ namespace Builder
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_ITEMS_XML, CFG_FILE_ID_METROLOGY_ITEMS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -308,7 +309,7 @@ namespace Builder
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_ITEMS_XML), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_ITEMS_XML), equipmentID());
 			return false;
 		}
 
@@ -415,7 +416,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNAL_SET, CFG_FILE_ID_METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -426,16 +427,16 @@ namespace Builder
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.set.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNAL_SET), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_SIGNAL_SET), equipmentID());
 			return false;
 		}
 
-		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		result = m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/Comparators.set.xml.
 			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
+			m_log->errCMN0018(QString("%1\\%2").arg(Directory::COMMON).arg(File::COMPARATORS_SET), equipmentID());
 			return false;
 		}
 

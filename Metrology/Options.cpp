@@ -279,76 +279,55 @@ void SocketClientOption::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SocketClientOption::readOptionsFromXml(const QByteArray& fileData)
+bool SocketClientOption::init(const MetrologySettings& settings)
 {
 	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
 	{
 		return false;
 	}
 
-	bool result = false;
-
-	XmlReadHelper xml(fileData);
+	bool result = true;
 
 	switch(m_type)
 	{
 		case SOCKET_TYPE_SIGNAL:
-
-			result = xml.findElement("AppDataService");
-			if (result == false)
 			{
-				break;
-			}
+				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-			result &= xml.readBoolAttribute("PropertyIsValid1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("AppDataServiceID1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
-				result &= xml.readStringAttribute("ip1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
-				result &= xml.readIntAttribute("port1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
-			}
+				primary.readFromCfgSrv = settings.appDataServicePropertyIsValid1;
+				primary.equipmentID = settings.appDataServiceID1;
+				primary.serverIP = settings.appDataServiceIP1;
+				primary.serverPort = settings.appDataServicePort1;
 
-			result &= xml.readBoolAttribute("PropertyIsValid2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("AppDataServiceID2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].equipmentID);
-				result &= xml.readStringAttribute("ip2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverIP);
-				result &= xml.readIntAttribute("port2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverPort);
-			}
+				CONNECTION_OPTION& reserve = m_connectOption[SOCKET_SERVER_TYPE_RESERVE];
 
-			if (result == false)
-			{
-				break;
-			}
+				reserve.readFromCfgSrv = settings.appDataServicePropertyIsValid2;
+				reserve.equipmentID = settings.appDataServiceID2;
+				reserve.serverIP = settings.appDataServiceIP2;
+				reserve.serverPort = settings.appDataServicePort2;
 
-			save();
+				save();
+			}
 
 			break;
 
 		case SOCKET_TYPE_TUNING:
-
-			result = xml.findElement("TuningService");
-			if (result == false)
 			{
-				break;
-			}
+				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-			result &= xml.readBoolAttribute("PropertyIsValid", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("SoftwareMetrologyID", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
-				result &= xml.readStringAttribute("ip", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
-				result &= xml.readIntAttribute("port", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
-			}
+				primary.readFromCfgSrv = settings.tuningServicePropertyIsValid;
+				primary.equipmentID = settings.softwareMetrologyID;
+				primary.serverIP = settings.tuningServiceIP;
+				primary.serverPort = settings.tuningServicePort;
 
-			if (result == false)
-			{
-				break;
+				save();
 			}
-
-			save();
 
 			break;
+
+		default:
+			Q_ASSERT(false);
+			result = false;
 	}
 
 	return result;
@@ -1444,10 +1423,14 @@ bool Options::readFromXml(const QByteArray& fileData)
 	bool result = false;
 
 	result = m_projectInfo.readFromXml(fileData);
-	if (result == false)
-	{
-		return false;
-	}
+
+	RETURN_IF_FALSE(result);
+
+	XmlReadHelper xmlReader(fileData);
+
+	result = m_settings.readFromXml(xmlReader);
+
+	RETURN_IF_FALSE(result);
 
 	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
 	{
@@ -1458,7 +1441,8 @@ bool Options::readFromXml(const QByteArray& fileData)
 
 		SocketClientOption sco = m_socket.client(t);
 
-		result &= sco.readOptionsFromXml(fileData);
+		result &= sco.init(m_settings);
+
 		if (result == false)
 		{
 			continue;

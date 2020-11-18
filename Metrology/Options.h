@@ -10,6 +10,7 @@
 #include <QColor>
 
 #include "../lib/SocketIO.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/MetrologySignal.h"
 
 #include "MeasureViewHeader.h"
@@ -162,7 +163,7 @@ public:
 	void				load();
 	void				save();
 
-	bool				readOptionsFromXml(const QByteArray& fileData);
+	bool				init(const MetrologySettings &settings);
 };
 
 // ==============================================================================================
@@ -1066,6 +1067,7 @@ private:
 
 	SocketOption			m_socket;
 	ProjectInfo				m_projectInfo;
+	MetrologySettings		m_settings;
 
 	ModuleOption			m_module;
 	LinearityOption			m_linearity;

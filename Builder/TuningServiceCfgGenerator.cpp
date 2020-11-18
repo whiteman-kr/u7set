@@ -44,12 +44,19 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningServiceCfgGenerator::writeSettings()
+	bool TuningServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_context, m_log);
 
-		bool result = m_settings.readFromDevice(m_software, m_log);
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
+	bool TuningServiceCfgGenerator::writeSettings()
+	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
 		RETURN_IF_FALSE(result);
 
@@ -61,13 +68,8 @@ namespace Builder
 			return false;
 		}
 
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = m_settings.writeToXml(xml);
-
-		return result;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
-
 
 	bool TuningServiceCfgGenerator::writeTuningSources()
 	{
@@ -163,7 +165,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_TUNING_SOURCES_XML, CFG_FILE_ID_TUNING_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -193,7 +195,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -217,7 +219,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

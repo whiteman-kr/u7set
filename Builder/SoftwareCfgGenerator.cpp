@@ -1,7 +1,7 @@
 #include "SoftwareCfgGenerator.h"
 #include "ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/LanControllerInfoHelper.h"
 
 
@@ -70,13 +70,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
 					arg(m_software->equipmentIdTemplate()));
 
-		m_cfgXml->xmlWriter().writeStartElement("Software");
-
-		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->equipmentIdTemplate());
-		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
-
-		m_cfgXml->xmlWriter().writeEndElement();	// </Software>
+		writeSoftwareSection(m_cfgXml->xmlWriter(), true);
 
 		bool result = true;
 
@@ -511,6 +505,20 @@ namespace Builder
 		return;
 	}
 
+	void SoftwareCfgGenerator::writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection)
+	{
+		xmlWriter.writeStartElement(XmlElement::SOFTWARE);
+
+		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
+		xmlWriter.writeAttribute(XmlAttribute::ID, m_software->equipmentIdTemplate());
+		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->type())));
+
+		if (finalizeSection == true)
+		{
+			xmlWriter.writeEndElement();	// </Software>
+		}
+	}
+
 	void SoftwareCfgGenerator::initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems)
 	{
 		if (subsystemKeyMap == nullptr || subsystems == nullptr)
@@ -851,7 +859,7 @@ namespace Builder
 
 		bool result = true;
 
-		result = ServiceSettings::getCfgServiceConnection(m_equipment, m_software,
+		result = SoftwareSettings::getCfgServiceConnection(m_equipment, m_software,
 														   &cfgServiceID1, &cfgServiceIP1,
 														   &cfgServiceID2, &cfgServiceIP2,
 														   m_log);

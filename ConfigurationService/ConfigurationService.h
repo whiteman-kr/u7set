@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../lib/Service.h"
-#include "../lib/ServiceSettings.h"
-#include "../Builder/CfgFiles.h"
+#include "../lib/SoftwareSettings.h"
 #include "CfgControlServer.h"
 
 // ------------------------------------------------------------------------------------
