@@ -21,7 +21,7 @@
 #include "SimAfb.h"
 #include "SimOverrideSignals.h"
 #include "SimAppSignalManager.h"
-#include "SimAppDataTransmitter.h"
+#include "SimLans.h"
 
 
 #ifndef __FUNCTION_NAME__
@@ -67,6 +67,7 @@ Q_DECLARE_METATYPE(Sim::DeviceMode)
 
 namespace Sim
 {
+	class Simulator;
 	class CommandProcessor;
 
 	struct LogicUnitData
@@ -92,7 +93,9 @@ namespace Sim
 		NoCommandProcessor,
 		AfbComponentNotFound,
 		InitEepromError,
-		ParsingAppLogicError
+		ParsingAppLogicError,
+		ModuleExtraInfoNotFound,
+		LanControllerError
 	};
 
 
@@ -155,7 +158,7 @@ namespace Sim
 		friend SimCommandTest_LM5_LM6;
 
 	public:
-		explicit DeviceEmulator(ScopedLog log);
+		explicit DeviceEmulator(Simulator* simulator);
 		virtual ~DeviceEmulator();
 
 	public:
@@ -165,7 +168,8 @@ namespace Sim
 						 const Eeprom& tuningEeprom,
 						 const Eeprom& confEeprom,
 						 const Eeprom& appLogicEeprom,
-						 const Connections& connections);
+						 const Connections& connections,
+						 const LogicModulesInfo& logicModulesExtraInfo);
 
 		bool powerOff();
 		bool reset();
@@ -281,15 +285,13 @@ namespace Sim
 
 		const LmDescription& lmDescription() const;
 
-		void setOverrideSignals(OverrideSignals* overrideSignals);
-		void setAppSignalManager(AppSignalManager* appSignalManager);
-		void setAppDataTransmitter(AppDataTransmitter* appDataTransmitter);
-
 		std::vector<DeviceCommand> commands() const;
 		std::unordered_map<int, size_t> offsetToCommands() const;
 
 		const Ram& ram() const;
 		Ram& mutableRam();
+
+		const Lans& lans() const;
 
 		DeviceMode currentMode() const;
 
@@ -299,15 +301,12 @@ namespace Sim
 		// Data
 		//
 	private:
+		class Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 		::LogicModuleInfo m_logicModuleExtraInfo;
-
-		OverrideSignals* m_overrideSignals = nullptr;
-		AppSignalManager* m_appSignalManager = nullptr;
-		AppDataTransmitter* m_appDataTransmitter = nullptr;
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 
@@ -332,6 +331,8 @@ namespace Sim
 																// empty offsets is -1
 																// Programm memory is not so big, max
 		AfbComponentSet m_afbComponents;
+
+		Lans m_lans{this, m_simulator};										// Device LAN Interfaces, based on m_logicModuleExtraInfo
 
 		// Cached state
 		//

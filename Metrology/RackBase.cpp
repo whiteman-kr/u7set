@@ -1,6 +1,5 @@
 #include "RackBase.h"
 
-
 #include "Database.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -186,7 +185,11 @@ int RackGroupBase::load()
 
 	table->close();
 
-	qDebug() << "RackBase::loadGroup() - Loaded rack groups: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << "RackBase::loadGroup() - Loaded rack groups: " <<
+				readedRecordCount <<
+				", Time for load: " <<
+				responseTime.elapsed() <<
+				" ms";
 
 	return readedRecordCount;
 }

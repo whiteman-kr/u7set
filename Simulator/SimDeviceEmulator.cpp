@@ -1,8 +1,10 @@
 #include "SimDeviceEmulator.h"
 #include <QtEndian>
+#include "../Builder/CfgFiles.h"
 #include "SimException.h"
 #include "SimCommandProcessor.h"
 #include "Simulator.h"
+
 
 namespace Sim
 {
@@ -77,8 +79,9 @@ namespace Sim
 	//
 	// DeviceEmulator
 	//
-	DeviceEmulator::DeviceEmulator(ScopedLog log) :
-		m_log(log, "DeviceEmulator")
+	DeviceEmulator::DeviceEmulator(Simulator* simulator) :
+		m_simulator(simulator),
+		m_log(simulator->log(), "DeviceEmulator")
 	{
 		m_offsetToCommand.reserve(32000);
 		return;
@@ -105,6 +108,8 @@ namespace Sim
 
 		m_afbComponents.clear();
 
+		m_lans.clear();
+
 		m_commands.clear();
 		m_offsetToCommand.clear();
 
@@ -124,7 +129,8 @@ namespace Sim
 									 const Eeprom& tuningEeprom,
 									 const Eeprom& confEeprom,
 									 const Eeprom& appLogicEeprom,
-									 const Connections& connections)
+									 const Connections& connections,
+									 const LogicModulesInfo& logicModulesExtraInfo)
 	{
 		clear();
 
@@ -177,6 +183,33 @@ namespace Sim
 		// Get LMs connections
 		//
 		m_connections = connections.lmConnections(equipmentId());
+
+		// Set LogicModuleExtraInfo and get LAN Connections
+		//
+		if (std::optional<::LogicModuleInfo> extraInfo = logicModulesExtraInfo.get(equipmentId());
+			extraInfo.has_value() == false)
+		{
+			setLogicModuleExtraInfo({});
+
+			m_log.writeError(tr("Information for LogicModule %1 is not found (file %2/%3)")
+						.arg(equipmentId())
+						.arg(Builder::DIR_COMMON)
+						.arg(Builder::FILE_LOGIC_MODULES_XML));
+
+			return DeviceError::ModuleExtraInfoNotFound;
+		}
+		else
+		{
+			setLogicModuleExtraInfo(extraInfo.value());
+		}
+
+		// Init Module LAN  Intefaces
+		//
+		if (bool ok = m_lans.init(logicModuleExtraInfo());
+			ok == false)
+		{
+			return DeviceError::LanControllerError;
+		}
 
 		// --
 		//
@@ -235,15 +268,6 @@ namespace Sim
 
 		// Perform post run cycle actions
 		//
-		if (m_appSignalManager == nullptr ||
-			m_appDataTransmitter == nullptr)
-		{
-			Q_ASSERT(m_appSignalManager);
-			Q_ASSERT(m_appDataTransmitter);
-
-			return false;
-		}
-
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
 
 		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
@@ -252,11 +276,11 @@ namespace Sim
 
 		// Set LogicModule's RAM to Sim::AppSignalManager
 		//
-		m_appSignalManager->setData(equipmentId(), ram(), plantTime, localTime, systemTime);
+		m_simulator->appSignalManager().setData(equipmentId(), ram(), plantTime, localTime, systemTime);
 
 		// Send reg data to AppDataSrv
 		//
-		if (m_appDataTransmitter->enabled() == true && logicModuleExtraInfo().appDataEnable == true)
+		if (m_lans.isAppDataEnabled() == true)
 		{
 			QByteArray regData;
 
@@ -287,7 +311,7 @@ namespace Sim
 				return false;
 			}
 
-			m_appDataTransmitter->sendData(equipmentId(), std::move(regData), plantTime);
+			m_lans.sendAppDataData(std::move(regData), plantTime);
 		}
 
 		return ok;
@@ -1243,14 +1267,7 @@ namespace Sim
 		m_logicUnit = LogicUnitData();
 		m_commandProcessor->updatePlatformInterfaceState(currentDateTime);
 
-		if (m_overrideSignals != nullptr)
-		{
-			m_ram.updateOverrideData(equipmentId(), m_overrideSignals);
-		}
-		else
-		{
-			Q_ASSERT(m_overrideSignals);
-		}
+		m_ram.updateOverrideData(equipmentId(), m_simulator->overrideSignals());
 
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
@@ -1719,21 +1736,6 @@ namespace Sim
 		return m_lmDescription;
 	}
 
-	void DeviceEmulator::setOverrideSignals(OverrideSignals* overrideSignals)
-	{
-		m_overrideSignals = overrideSignals;
-	}
-
-	void DeviceEmulator::setAppSignalManager(AppSignalManager* appSignalManager)
-	{
-		m_appSignalManager = appSignalManager;
-	}
-
-	void DeviceEmulator::setAppDataTransmitter(AppDataTransmitter* appDataTransmitter)
-	{
-		m_appDataTransmitter = appDataTransmitter;
-	}
-
 	std::vector<DeviceCommand> DeviceEmulator::commands() const
 	{
 		QMutexLocker ml(&m_cacheMutex);
@@ -1756,6 +1758,11 @@ namespace Sim
 	Ram& DeviceEmulator::mutableRam()
 	{
 		return m_ram;
+	}
+
+	const Lans& DeviceEmulator::lans() const
+	{
+		return m_lans;
 	}
 
 	DeviceMode DeviceEmulator::currentMode() const

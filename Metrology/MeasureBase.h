@@ -117,7 +117,7 @@ const int	MEASURE_ADDITIONAL_PARAM_UNDEFINED			= -1,
 			MEASURE_ADDITIONAL_PARAM_UNCERTAINTY		= 4;
 
 			// maximum 16 items (0 .. 15)
-			// now used 4 (0 .. 4)
+			// now used 5 (1 .. 5)
 
 // ==============================================================================================
 
@@ -408,23 +408,25 @@ public:
 	int						append(Measurement* pMeasurement);
 	Measurement*			measurement(int index) const;
 	bool					remove(int index, bool removeData = true);
-	void					remove(int measureType, const QVector<int>& keyList);
+	bool					remove(int measureType, const QVector<int>& keyList);
 
-	void					updateStatistics(int measureType, StatisticsItem& si);
-	void					markNotExistMeasuremetsFromStatistics();
+	void					updateStatisticsItem(int measureType, StatisticsItem& si);
+	void					updateStatisticsBase(int measureType);
+	void					updateStatisticsBase(int measureType, Hash signalHash);
+	static void				markNotExistMeasuremetsFromStatistics(MeasureBase* pThis);
 
 signals:
 
 	void					updatedMeasureBase(Hash signalHash);
+	void					updateMeasureView();
 
 public slots:
 
-	void					signalLoaded();
+	void					signalBaseLoaded();
+
+	void					appendToBase(Measurement* pMeasurement);
+	void					removeFromBase(int measureType, const QVector<int>& keyList);
 };
-
-// ==============================================================================================
-
-extern MeasureBase theMeasureBase;
 
 // ==============================================================================================
 

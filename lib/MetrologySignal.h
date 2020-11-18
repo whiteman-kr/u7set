@@ -437,7 +437,7 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue(int cmpValueType);			// current online (run time) value
+		double compareOnlineValue(int cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
 		QString compareOnlineValueStr(int cmpValueType);		// str current oline (run time) value
 		double compareConstValue() const;						// default offine value
 		QString compareDefaultValueStr() const;					// str default offine value

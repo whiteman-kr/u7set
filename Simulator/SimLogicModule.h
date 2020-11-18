@@ -16,6 +16,7 @@
 
 namespace Sim
 {
+	class Simulator;
 	class Connections;
 
 
@@ -24,14 +25,15 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		LogicModule(ScopedLog log);
+		LogicModule(Simulator* simulator);
 		virtual ~LogicModule();
 
 	public:
 		bool load(const Hardware::LogicModuleInfo& lmInfo,
 				  const LmDescription& lmDescription,
 				  const Hardware::ModuleFirmware& firmware,
-				  const Connections& connections);
+				  const Connections& connections,
+				  const LogicModulesInfo& logicModulesExtraInfo);
 
 		void clear();
 
@@ -74,14 +76,11 @@ namespace Sim
 
 		DeviceMode deviceMode() const;
 
-		void setOverrideSignals(OverrideSignals* overrideSignals);
-		void setAppSignalManager(AppSignalManager* appSignalManager);
-		void setAppDataTransmitter(AppDataTransmitter* appDataTransmitter);
-
 		bool isPowerOff() const;
 		void setPowerOff(bool value);
 
 	private:
+		Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;
 
 		// Loaded LM data
@@ -95,7 +94,7 @@ namespace Sim
 
 		// Running Emulation
 		//
-		DeviceEmulator m_device;
+		DeviceEmulator m_device{m_simulator};
 
 		// --
 		//

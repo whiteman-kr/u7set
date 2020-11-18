@@ -16,14 +16,14 @@
 
 // ==============================================================================================
 
-class OptionsPointsDialog : public QDialog
+class MeasurePointDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = nullptr);
-	virtual ~OptionsPointsDialog();
+	explicit MeasurePointDialog(const LinearityOption& linearity, QWidget *parent = nullptr);
+	virtual ~MeasurePointDialog();
 
 private:
 

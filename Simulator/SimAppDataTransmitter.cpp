@@ -11,8 +11,6 @@ namespace Sim
 		m_simulator(simulator),
 		m_log(m_simulator->log(), "AppDataTransmitter")
 	{
-		Q_ASSERT(m_simulator);
-
 		connect(m_simulator, &Simulator::projectUpdated, this, &AppDataTransmitter::projectUpdated);
 	}
 
@@ -38,11 +36,11 @@ namespace Sim
 		return true;
 	}
 
-	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, QByteArray&& data, TimeStamp timeStamp)
+	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
 		TEST_PTR_RETURN_FALSE(m_transmitterThread);
 
-		return m_transmitterThread->sendAppData(lmEquipmentId, data, timeStamp);
+		return m_transmitterThread->sendAppData(lmEquipmentId, portEquipmentId, data, timeStamp);
 	}
 
 	void AppDataTransmitter::projectUpdated()
@@ -87,20 +85,19 @@ namespace Sim
 	{
 	}
 
-	bool AppDataTransmitterThread::sendAppData(const QString& lmEquipmentId, QByteArray& data, TimeStamp timeStamp)
+	bool AppDataTransmitterThread::sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
+		int message_for_Yuriy_Beliy_sendData_will_be_called_for_each_port_portEquipmentId;
+
 		QThread* curThread = QThread::currentThread();
 
 		m_appDataQueueMutex.lock(curThread);
 
-		ExtAppData extAppData;
+		ExtAppData& extAppData = m_appDataQueue.emplace();
 
 		extAppData.lmEquipmentID = lmEquipmentId;
+		extAppData.appData = data;
 		extAppData.timeStamp = timeStamp;
-
-		m_appDataQueue.push(extAppData);
-
-		m_appDataQueue.back().appData.swap(data);			// !
 
 		m_appDataQueueMutex.unlock(curThread);
 

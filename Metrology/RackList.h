@@ -121,6 +121,10 @@ protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
+public:
+
+	RackBase&				racks() { return m_rackBase; }
+
 public slots:
 
 	void					updateList();	// slots for updating

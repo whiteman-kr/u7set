@@ -47,9 +47,10 @@ SOURCES += \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
+    MeasurePointBase.cpp \
+    MeasurePointDialog.cpp \
     OptionsDialog.cpp \
     Options.cpp \
-    OptionsPointsDialog.cpp \
     ProcessData.cpp \
     SelectSignalWidget.cpp \
     StatisticsBase.cpp \
@@ -123,9 +124,10 @@ HEADERS  += \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
+    MeasurePointBase.h \
+    MeasurePointDialog.h \
     OptionsDialog.h \
     Options.h \
-    OptionsPointsDialog.h \
     MeasureThread.h \
     CalibratorManager.h \
     MeasureViewHeader.h \
@@ -139,7 +141,6 @@ HEADERS  += \
     ProcessData.h \
     SelectSignalWidget.h \
     Stable.h \
-    ObjectVector.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/Crc.h \

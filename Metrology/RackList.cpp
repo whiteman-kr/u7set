@@ -402,8 +402,9 @@ void RackListDialog::rackGroups()
 		return;
 	}
 
+	m_rackBase = dialog.racks();
 	m_rackBase.groups() = dialog.rackGroups();
-	m_rackTable.setRackGroups(dialog.rackGroups());
+	m_rackTable.setRackGroups(m_rackBase.groups());
 
 	m_rackBase.updateParamFromGroups();
 
@@ -461,10 +462,36 @@ void RackListDialog::rackProperty()
 		return;
 	}
 
-	pRack->setGroupIndex(dialog.rack().groupIndex());
-	pRack->setChannel(dialog.rack().channel());
+	int groupIndex = dialog.rack().groupIndex();
+	if (groupIndex < 0 || groupIndex >= m_rackBase.groups().count())
+	{
+		return;
+	}
+
+	int channel = dialog.rack().channel();
+	if (channel < 0 || channel >= Metrology::ChannelCount)
+	{
+		return;
+	}
+
+	// update rack
+	//
+	pRack->setGroupIndex(groupIndex);
+	pRack->setChannel(channel);
 
 	m_rackBase.setRack(index, *pRack);
+
+	// update group rack
+	//
+	RackGroup group = m_rackBase.groups().group(groupIndex);
+	if (group.isValid() == false)
+	{
+		return;
+	}
+
+	group.setRackID(channel, pRack->equipmentID());
+
+	m_rackBase.groups().setGroup(groupIndex, group);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -485,8 +512,6 @@ void RackListDialog::onListDoubleClicked(const QModelIndex&)
 
 void RackListDialog::onOk()
 {
-	theSignalBase.racks() = m_rackBase;
-
 	accept();
 }
 

@@ -93,10 +93,6 @@ namespace Sim
 				continue;
 			}
 
-			lm->setOverrideSignals(&m_simulator->overrideSignals());
-			lm->setAppSignalManager(&m_simulator->appSignalManager());
-			lm->setAppDataTransmitter(&m_simulator->appDataTransmitter());
-
 			lms.emplace_back(lm);
 			addedModuleCount ++;
 		}

@@ -304,9 +304,9 @@ QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 
 	switch(m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:			result = textLinearity(row, column, pMeasurement);	break;
-		case MEASURE_TYPE_COMPARATOR:			result = textComparator(row, column, pMeasurement);	break;
-		default:								result.clear();
+		case MEASURE_TYPE_LINEARITY:	result = textLinearity(row, column, pMeasurement);	break;
+		case MEASURE_TYPE_COMPARATOR:	result = textComparator(row, column, pMeasurement);	break;
+		default:						result.clear();
 	}
 
 	return result;
@@ -734,7 +734,8 @@ void MeasureView::updateColumn()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MeasureView::onHeaderContextAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
+			this, &MeasureView::onHeaderContextAction);
 
 	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	verticalHeader()->setDefaultSectionSize(cellSize.height());
@@ -742,16 +743,16 @@ void MeasureView::updateColumn()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureView::loadMeasureList()
+void MeasureView::loadMeasurements(const MeasureBase& measureBase)
 {
 	m_table.clear();
 
 	QVector<Measurement*> measureList;
 
-	int measureCount = theMeasureBase.count();
+	int measureCount = measureBase.count();
 	for (int i = 0; i < measureCount; i++)
 	{
-		Measurement* pMeasurement = theMeasureBase.measurement(i);
+		Measurement* pMeasurement = measureBase.measurement(i);
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -841,21 +842,8 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 		return;
 	}
 
-	// append into database
+	// append into Database and MeasureBase from MainWindow
 	//
-	if (theDatabase.appendMeasure(pMeasurement) == false)
-	{
-		QMessageBox::critical(this, tr("Save measurements"), tr("Error saving measurements to database"));
-		return;
-	}
-
-	// append into MeasureBase
-	//
-	if (theMeasureBase.append(pMeasurement) == -1)
-	{
-		return;
-	}
-
 	// append into MeasureTable
 	//
 	if (m_table.append(pMeasurement) == false)
@@ -907,28 +895,21 @@ void MeasureView::removeMeasure()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete %1 measurement(s)?").arg(removeIndexList.count())) == QMessageBox::No)
+	if (QMessageBox::question(this,
+							  windowTitle(),
+							  tr("Do you want delete %1 measurement(s)?").
+							  arg(removeIndexList.count())) == QMessageBox::No)
 	{
 		return;
 	}
 
-	// remove from database
+	// remove from Database and MesaureBase
 	//
-	if (theDatabase.removeMeasure(m_measureType, keyList) == false)
-	{
-		QMessageBox::critical(this, tr("Delete measurements"), tr("Error remove measurements from database"));
-		return;
-	}
+	emit removeFromBase(m_measureType, keyList);
 
 	// remove from MeasureTable
 	//
 	m_table.remove(removeIndexList);
-
-	// remove from MesaureBase
-	//
-	theMeasureBase.remove(m_measureType, keyList);
-
-	QMessageBox::information(this, tr("Delete"), tr("Deleted %1 measurement(s)").arg(removeIndexList.count()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

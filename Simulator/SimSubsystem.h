@@ -14,8 +14,8 @@ namespace Hardware
 
 namespace Sim
 {
+	class Simulator;
 	class Connections;
-
 
 	class Subsystem
 	{
@@ -24,12 +24,13 @@ namespace Sim
 		Subsystem(const Subsystem&) = delete;
 		Subsystem& operator=(const Subsystem&) = delete;
 
-		explicit Subsystem(QString subsystemId, ScopedLog log);
+		explicit Subsystem(QString subsystemId, Simulator* simulator);
 
 	public:
 		bool load(const Hardware::ModuleFirmware& firmware,
 				  const LmDescription& lmDescription,
-				  const Connections& connections);
+				  const Connections& connections,
+				  const LogicModulesInfo& logicModulesExtraInfo);
 
 	private:
 		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;
@@ -44,6 +45,7 @@ namespace Sim
 		 std::shared_ptr<LogicModule> logicModule(QString equipmentId);
 
 	private:
+		Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;
 
 		QString m_subsystemId;

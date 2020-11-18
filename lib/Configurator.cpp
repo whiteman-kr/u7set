@@ -500,7 +500,7 @@ bool Configurator::openConnection()
     m_serialPort->setParity(QSerialPort::NoParity);
     m_serialPort->setStopBits(QSerialPort::OneStop);
 
-	//!!!!!!!!!!Cannot create children for a parent that is in a different thread.
+	// !! Cannot create children for a parent that is in a different thread. !!
 
     bool ok = m_serialPort->open(QIODevice::ReadWrite);
 

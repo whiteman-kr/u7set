@@ -1,4 +1,4 @@
-#include "OptionsPointsDialog.h"
+#include "MeasurePointDialog.h"
 
 #include <QMessageBox>
 #include <QHeaderView>
@@ -7,7 +7,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent) :
+MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget *parent) :
 	QDialog(parent),
 	m_linearity (linearity)
 {
@@ -86,33 +86,33 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
 	setHeaderList();
 
-	connect(m_addButton, &QPushButton::clicked, this, &OptionsPointsDialog::onAddPoint);
-	connect(m_editButton, &QPushButton::clicked, this, &OptionsPointsDialog::onEditPoint);
-	connect(m_removeButton, &QPushButton::clicked, this, &OptionsPointsDialog::onRemovePoint);
-	connect(m_upButton, &QPushButton::clicked, this, &OptionsPointsDialog::onUpPoint);
-	connect(m_downButton, &QPushButton::clicked, this, &OptionsPointsDialog::onDownPoint);
-	connect(m_rangeTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OptionsPointsDialog::onRangeType);
-	connect(m_pointCountEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
-	connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
-	connect(m_highRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
+	connect(m_addButton, &QPushButton::clicked, this, &MeasurePointDialog::onAddPoint);
+	connect(m_editButton, &QPushButton::clicked, this, &MeasurePointDialog::onEditPoint);
+	connect(m_removeButton, &QPushButton::clicked, this, &MeasurePointDialog::onRemovePoint);
+	connect(m_upButton, &QPushButton::clicked, this, &MeasurePointDialog::onUpPoint);
+	connect(m_downButton, &QPushButton::clicked, this, &MeasurePointDialog::onDownPoint);
+	connect(m_rangeTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MeasurePointDialog::onRangeType);
+	connect(m_pointCountEdit, &QLineEdit::textChanged, this, &MeasurePointDialog::onAutomaticCalculatePoints);
+	connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &MeasurePointDialog::onAutomaticCalculatePoints);
+	connect(m_highRangeEdit, &QLineEdit::textChanged, this, &MeasurePointDialog::onAutomaticCalculatePoints);
  }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsPointsDialog::~OptionsPointsDialog()
+MeasurePointDialog::~MeasurePointDialog()
 {
 	clearList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::setHeaderList()
+void MeasurePointDialog::setHeaderList()
 {
 	QStringList horizontalHeaderLabels;
 
 	for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
 	{
-		horizontalHeaderLabels.append(qApp->translate("Options.h", LinearityPointSensor[sensor]));
+		horizontalHeaderLabels.append(qApp->translate("MeasurePointBase.h", MeasurePointSensor[sensor]));
 	}
 
 	m_pointList->setColumnCount(horizontalHeaderLabels.count());
@@ -131,14 +131,14 @@ void OptionsPointsDialog::setHeaderList()
 		}
 	}
 
-	connect(m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint);
-	connect(m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged);
-	connect(m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged);
+	connect(m_pointList, &QTableWidget::cellDoubleClicked, this, &MeasurePointDialog::onEditPoint);
+	connect(m_pointList, &QTableWidget::cellChanged, this, &MeasurePointDialog::cellChanged);
+	connect(m_pointList, &QTableWidget::currentCellChanged, this, &MeasurePointDialog::currentCellChanged);
 
 	// init context menu
 	//
 	m_pointList->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pointList->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &OptionsPointsDialog::onHeaderContextMenu);
+	connect(m_pointList->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MeasurePointDialog::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pointList);
 
@@ -149,7 +149,7 @@ void OptionsPointsDialog::setHeaderList()
 			continue;
 		}
 
-		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("Options.h", LinearityPointSensor[sensor]));
+		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("MeasurePointBase.h", MeasurePointSensor[sensor]));
 		if (m_pColumnAction[sensor] != nullptr)
 		{
 			m_pColumnAction[sensor]->setCheckable(true);
@@ -157,7 +157,7 @@ void OptionsPointsDialog::setHeaderList()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onColumnAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MeasurePointDialog::onColumnAction);
 
 	DoubleDelegate * delegate = new DoubleDelegate(this);
 	m_pointList->setItemDelegate(delegate);
@@ -165,7 +165,7 @@ void OptionsPointsDialog::setHeaderList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::updateRangeType()
+void MeasurePointDialog::updateRangeType()
 {
 	switch(m_linearity.rangeType())
 	{
@@ -215,7 +215,7 @@ void OptionsPointsDialog::updateRangeType()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::updateList()
+void MeasurePointDialog::updateList()
 {
 	clearList();
 
@@ -232,7 +232,7 @@ void OptionsPointsDialog::updateList()
 	//
 	for(int index = 0; index < rowCount; index++)
 	{
-		LinearityPoint point = m_linearity.points().at(index);
+		MeasurePoint point = m_linearity.points().point(index);
 
 		point.setIndex(index);
 
@@ -250,7 +250,7 @@ void OptionsPointsDialog::updateList()
 			}
 		}
 
-		m_linearity.points().set(index, point);
+		m_linearity.points().setPoint(index, point);
 	}
 
 	m_pointList->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -277,7 +277,7 @@ void OptionsPointsDialog::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::clearList()
+void MeasurePointDialog::clearList()
 {
 	m_updatingList = true;
 
@@ -301,7 +301,7 @@ void OptionsPointsDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::hideColumn(int column, bool hide)
+void MeasurePointDialog::hideColumn(int column, bool hide)
 {
 	if (column < 0 || column >= m_pointList->columnCount())
 	{
@@ -320,7 +320,7 @@ void OptionsPointsDialog::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onAddPoint()
+void MeasurePointDialog::onAddPoint()
 {
 	int index = m_pointList->currentRow();
 	if (index == -1)
@@ -328,7 +328,7 @@ void OptionsPointsDialog::onAddPoint()
 		index = m_linearity.points().count() - 1;
 	}
 
-	m_linearity.points().insert(index + 1, LinearityPoint());
+	m_linearity.points().insert(index + 1, MeasurePoint());
 
 	updateList();
 
@@ -343,7 +343,7 @@ void OptionsPointsDialog::onAddPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::cellChanged(int row, int column)
+void MeasurePointDialog::cellChanged(int row, int column)
 {
 	if (m_updatingList == true)
 	{
@@ -370,9 +370,9 @@ void OptionsPointsDialog::cellChanged(int row, int column)
 
 	QString value = pItem->text();
 
-	LinearityPoint point = m_linearity.points().at(index);
+	MeasurePoint point = m_linearity.points().point(index);
 	point.setPercent(value.toDouble());
-	m_linearity.points().set(index, point);
+	m_linearity.points().setPoint(index, point);
 
 	updateList();
 
@@ -383,7 +383,7 @@ void OptionsPointsDialog::cellChanged(int row, int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::currentCellChanged(int, int column, int, int)
+void MeasurePointDialog::currentCellChanged(int, int column, int, int)
 {
 	if (column == POINT_SENSOR_PERCENT)
 	{
@@ -397,7 +397,7 @@ void OptionsPointsDialog::currentCellChanged(int, int column, int, int)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onEditPoint()
+void MeasurePointDialog::onEditPoint()
 {
 	int row = m_pointList->currentRow();
 	if (row == -1)
@@ -416,7 +416,7 @@ void OptionsPointsDialog::onEditPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onRemovePoint()
+void MeasurePointDialog::onRemovePoint()
 {
 	int pointCount = m_linearity.points().count();
 	for(int row = pointCount - 1; row >= 0; row --)
@@ -446,7 +446,7 @@ void OptionsPointsDialog::onRemovePoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onUpPoint()
+void MeasurePointDialog::onUpPoint()
 {
 	int index = m_pointList->currentRow();
 	if (index < 0 || index >= m_linearity.points().count())
@@ -471,7 +471,7 @@ void OptionsPointsDialog::onUpPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onDownPoint()
+void MeasurePointDialog::onDownPoint()
 {
 	int index = m_pointList->currentRow();
 	if (index < 0 || index >= m_linearity.points().count())
@@ -497,7 +497,7 @@ void OptionsPointsDialog::onDownPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onRangeType(int type)
+void MeasurePointDialog::onRangeType(int type)
 {
 	if (type < 0 || type >= LO_RANGE_TYPE_COUNT)
 	{
@@ -513,7 +513,7 @@ void OptionsPointsDialog::onRangeType(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onAutomaticCalculatePoints()
+void MeasurePointDialog::onAutomaticCalculatePoints()
 {
 	if (m_linearity.rangeType() != LO_RANGE_TYPE_AUTOMATIC)
 	{
@@ -571,7 +571,7 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onHeaderContextMenu(QPoint)
+void MeasurePointDialog::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
@@ -583,7 +583,7 @@ void OptionsPointsDialog::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onColumnAction(QAction* action)
+void MeasurePointDialog::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{
@@ -603,7 +603,7 @@ void OptionsPointsDialog::onColumnAction(QAction* action)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::keyPressEvent(QKeyEvent *e)
+void MeasurePointDialog::keyPressEvent(QKeyEvent *e)
 {
 	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{
@@ -622,7 +622,7 @@ void OptionsPointsDialog::keyPressEvent(QKeyEvent *e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::showEvent(QShowEvent* e)
+void MeasurePointDialog::showEvent(QShowEvent* e)
 {
 	m_rangeTypeList->setCurrentIndex(m_linearity.rangeType());
 	updateRangeType();

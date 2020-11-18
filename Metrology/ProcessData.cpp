@@ -135,7 +135,11 @@ void CompleterData::load(const QString& optionsKey)
 
 	for(int i = 0; i < m_count; i++)
 	{
-		QString recentFindText = s.value(QString("%1/%2/Text%3").arg(optionsKey).arg(COMPLETER_OPTIONS_KEY).arg(i), QString()).toString();
+		QString recentFindText = s.value(QString("%1/%2/Text%3").
+										 arg(optionsKey).
+										 arg(COMPLETER_OPTIONS_KEY).
+										 arg(i),
+										 QString()).toString();
 		if (recentFindText.isEmpty() == true)
 		{
 			continue;
@@ -167,7 +171,11 @@ void CompleterData::save(const QString& optionsKey)
 	int count = m_filterCompleterList.count();
 	for(int i = 0; i < count; i++)
 	{
-		s.setValue(QString("%1/%2/Text%3").arg(optionsKey).arg(COMPLETER_OPTIONS_KEY).arg(i), m_filterCompleterList[i]);
+		s.setValue(QString("%1/%2/Text%3").
+				   arg(optionsKey).
+				   arg(COMPLETER_OPTIONS_KEY).
+				   arg(i),
+				   m_filterCompleterList[i]);
 	}
 }
 
@@ -571,14 +579,19 @@ void ExportData::exec()
 
 	if (m_pView->model()->rowCount() == 0)
 	{
-		QMessageBox::information(m_pProgressDialog, qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE), tr("Data is absent!"));
+		QMessageBox::information(m_pProgressDialog,
+								 qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE),
+								 tr("Data is absent!"));
 		return;
 	}
 
 	//QString filter = tr("Excel files (*.xlsx);;CSV files (*.csv)");
 	QString filter = tr("CSV files (*.csv)");
 
-	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog, qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE), m_fileName, filter);
+	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog,
+													qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE),
+													m_fileName,
+													filter);
 	if (fileName.isEmpty() == true)
 	{
 		return;
@@ -771,7 +784,9 @@ void ExportData::exportCancel()
 
 void ExportData::exportComplited()
 {
-	QMessageBox::information(m_pProgressDialog, qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE), tr("Export is complited!"));
+	QMessageBox::information(m_pProgressDialog,
+							 qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE),
+							 tr("Export is complited!"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

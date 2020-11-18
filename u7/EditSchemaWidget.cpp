@@ -5933,7 +5933,7 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 	// update them in selected items, apparently this function was called for selected items.
 	//
 
-	// !!! Make a copy of selectted items!!!!!
+	// !!! Make a copy of selectted items !!!!!
 	// As in this loop runSetProperty is called and selection vector is changed,
 	// and this loop will crash if it is not a copy
 	//

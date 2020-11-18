@@ -409,96 +409,40 @@ StatisticsItem StatisticsBase::item(int measureType, int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsBase::updateStatistics()
+StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
-		return;
+		return nullptr;
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	QElapsedTimer responseTime;
-	responseTime.start();
-
-	m_measuredCount = 0;
-	m_invalidMeasureCount = 0;
-
-	int count = m_statisticList[m_measureType].count();
-	for(int i = 0; i < count; i++)
+	if (index < 0 || index >= m_statisticList[measureType].count())
 	{
-		StatisticsItem& si = m_statisticList[m_measureType][i];
-
-		theMeasureBase.updateStatistics(m_measureType, si);
-
-		if (si.isMeasured() == true)
-		{
-			m_measuredCount++;
-		}
-
-		if (si.state() == StatisticsItem::State::Failed)
-		{
-			m_invalidMeasureCount ++;
-		}
+		return nullptr;
 	}
 
-	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+	return &m_statisticList[measureType][index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsBase::updateStatistics(Hash signalHash)
+void StatisticsBase::setItem(int measureType, int index, const StatisticsItem& item)
 {
-	if (signalHash == UNDEFINED_HASH)
-	{
-		return;
-	}
-
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	int count = m_statisticList[m_measureType].count();
-	for(int i = 0; i < count; i++)
+	if (index < 0 || index >= m_statisticList[measureType].count())
 	{
-		Metrology::Signal* pSignal = m_statisticList[m_measureType][i].signal();
-		if (pSignal == nullptr || pSignal->param().isValid() == false)
-		{
-			continue;
-		}
-
-		if (pSignal->param().hash() == signalHash)
-		{
-			theMeasureBase.updateStatistics(m_measureType, m_statisticList[m_measureType][i]);
-		}
+		return;
 	}
 
-	QElapsedTimer responseTime;
-	responseTime.start();
-
-	m_measuredCount = 0;
-	m_invalidMeasureCount = 0;
-
-	count = m_statisticList[m_measureType].count();
-	for(int i = 0; i < count; i++)
-	{
-		StatisticsItem& si = m_statisticList[m_measureType][i];
-
-		if (si.isMeasured() == true)
-		{
-			m_measuredCount++;
-		}
-
-		if (si.state() == StatisticsItem::State::Failed)
-		{
-			m_invalidMeasureCount ++;
-		}
-	}
-
-	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+	m_statisticList[measureType][index] = item;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

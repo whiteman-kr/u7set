@@ -1,6 +1,8 @@
 #include "MeasureBase.h"
 
 #include <QThread>
+#include <QtConcurrent>
+#include <QMessageBox>
 
 #include "../lib/UnitsConvertor.h"
 
@@ -2342,10 +2344,6 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureBase theMeasureBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 MeasureBase::MeasureBase(QObject *parent) :
 	QObject(parent)
 {
@@ -2694,9 +2692,9 @@ int MeasureBase::load(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::signalLoaded()
+void MeasureBase::signalBaseLoaded()
 {
-	markNotExistMeasuremetsFromStatistics();
+	QtConcurrent::run(MeasureBase::markNotExistMeasuremetsFromStatistics, this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2720,6 +2718,23 @@ int MeasureBase::append(Measurement* pMeasurement)
 	emit updatedMeasureBase(pMeasurement->signalHash());
 
 	return index;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::appendToBase(Measurement* pMeasurement)
+{
+	if (pMeasurement == nullptr)
+	{
+		return;
+	}
+
+	int index = append(pMeasurement);
+	if (index == -1)
+	{
+		QMessageBox::critical(nullptr, tr("Save measurements"), tr("Error saving measurements to memory"));
+		return;
+	}
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -2771,24 +2786,26 @@ bool MeasureBase::remove(int index, bool removeData)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::remove(int measureType, const QVector<int>& keyList)
+bool MeasureBase::remove(int measureType, const QVector<int>& keyList)
 {
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
-		return;
+		return false;
 	}
 
 	int keyCount = keyList.count();
 	if (keyCount == 0)
 	{
-		return;
+		return false;
 	}
 
 	int measureCount = count();
 	if (measureCount == 0)
 	{
-		return;
+		return false;
 	}
+
+	int removed = 0;
 
 	for(int k = 0; k < keyCount; k++)
 	{
@@ -2810,16 +2827,37 @@ void MeasureBase::remove(int measureType, const QVector<int>& keyList)
 				continue;
 			}
 
-			remove(i);
+			if (remove(i) == true)
+			{
+				removed++;
+			}
 
 			break;
 		}
+	}
+
+	if (removed != keyCount)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::removeFromBase(int measureType, const QVector<int>& keyList)
+{
+	bool result = remove(measureType, keyList);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from memory"));
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
+void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 {
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
@@ -2955,17 +2993,131 @@ void MeasureBase::updateStatistics(int measureType, StatisticsItem& si)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::markNotExistMeasuremetsFromStatistics()
+void MeasureBase::updateStatisticsBase(int measureType)
 {
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	QMutexLocker l(&m_measureMutex);
+	int measuredCount = 0;
+	int invalidMeasureCount = 0;
 
-	int measureCount = m_measureList.count();
+	int count = theSignalBase.statistics().count(measureType);
+	for(int i = 0; i < count; i++)
+	{
+		StatisticsItem* pSI = theSignalBase.statistics().itemPtr(measureType, i);
+		if (pSI == nullptr)
+		{
+			continue;
+		}
+
+		updateStatisticsItem(measureType, *pSI);
+
+		if (pSI->isMeasured() == true)
+		{
+			measuredCount++;
+		}
+
+		if (pSI->state() == StatisticsItem::State::Failed)
+		{
+			invalidMeasureCount ++;
+		}
+	}
+
+	theSignalBase.statistics().setMeasuredCount(measuredCount);
+	theSignalBase.statistics().setInvalidMeasureCount(invalidMeasureCount);
+
+	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::updateStatisticsBase(int measureType, Hash signalHash)
+{
+	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	if (signalHash == UNDEFINED_HASH)
+	{
+		return;
+	}
+
+	int count = theSignalBase.statistics().count(measureType);
+	for(int i = 0; i < count; i++)
+	{
+		StatisticsItem* pSI = theSignalBase.statistics().itemPtr(measureType, i);
+		if (pSI == nullptr)
+		{
+			continue;
+		}
+
+		Metrology::Signal* pSignal = pSI->signal();
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		if (pSignal->param().hash() == signalHash)
+		{
+			updateStatisticsItem(measureType, *pSI);
+		}
+	}
+
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	int measuredCount = 0;
+	int invalidMeasureCount = 0;
+
+	for(int i = 0; i < count; i++)
+	{
+		StatisticsItem* pSI = theSignalBase.statistics().itemPtr(measureType, i);
+		if (pSI == nullptr)
+		{
+			continue;
+		}
+
+		if (pSI->isMeasured() == true)
+		{
+			measuredCount++;
+		}
+
+		if (pSI->state() == StatisticsItem::State::Failed)
+		{
+			invalidMeasureCount ++;
+		}
+	}
+
+	theSignalBase.statistics().setMeasuredCount(measuredCount);
+	theSignalBase.statistics().setInvalidMeasureCount(invalidMeasureCount);
+
+	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
+{
+	if (pThis == nullptr)
+	{
+		return;
+	}
+
+	QElapsedTimer responseTime;
+	responseTime.start();
+
+	QMutexLocker l(&pThis->m_measureMutex);
+
+	int measureCount = pThis->m_measureList.count();
 	for (int m = 0; m < measureCount; m++)
 	{
-		Measurement* pMeasurement = m_measureList[m];
+		Measurement* pMeasurement = pThis->m_measureList[m];
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -3047,6 +3199,8 @@ void MeasureBase::markNotExistMeasuremetsFromStatistics()
 			pMeasurement->setFoundInStatistics(measurementIsFound);
 		}
 	}
+
+	emit pThis->updateMeasureView();
 
 	qDebug() << __FUNCTION__ << "- Signals were marked, " << " Time for marked: " << responseTime.elapsed() << " ms";
 }

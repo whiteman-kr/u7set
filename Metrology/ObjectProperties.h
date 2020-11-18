@@ -121,8 +121,6 @@ public:
 
 	Metrology::RackParam		rack() const { return m_rack; }
 
-signals:
-
 private slots:
 
 	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
@@ -166,7 +164,7 @@ private:
 	//
 	QTableWidget*				m_pGroupView = nullptr;
 
-	void						updateGroupList();
+	void						updateGroupList(const Hash& hash = UNDEFINED_HASH);
 
 	// Property list
 	//
@@ -188,13 +186,12 @@ private:
 
 public:
 
+	RackBase&					racks() { return m_rackBase; }
 	RackGroupBase&				rackGroups() { return m_groupBase; }
 
 protected:
 
 	bool						event(QEvent* e);
-
-signals:
 
 private slots:
 
@@ -297,8 +294,6 @@ public:
 
 	Metrology::SignalParam		param() const { return m_param; }
 
-signals:
-
 private slots:
 
 	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
@@ -376,8 +371,6 @@ private:
 public:
 
 	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
-
-signals:
 
 private slots:
 

@@ -12,11 +12,12 @@
 
 #include "../lib/SimpleThread.h"
 
-#include "SelectSignalWidget.h"
-#include "MeasureView.h"
+#include "CalibratorBase.h"
 #include "ConfigSocket.h"
 #include "SignalSocket.h"
 #include "TuningSocket.h"
+#include "SelectSignalWidget.h"
+#include "MeasureView.h"
 #include "MeasureThread.h"
 #include "FindMeasurePanel.h"
 #include "StatisticsPanel.h"
@@ -123,6 +124,7 @@ private:
 	// Elements of interface - StatusBar
 	//
 	QLabel*					m_statusEmpty = nullptr;
+	QProgressBar*			m_statusLoadSignals = nullptr;
 	QLabel*					m_statusMeasureThreadInfo = nullptr;
 	QProgressBar*			m_statusMeasureTimeout = nullptr;
 	QLabel*					m_statusMeasureThreadState = nullptr;
@@ -134,6 +136,9 @@ private:
 private:
 
 	SoftwareInfo			m_softwareInfo;
+
+	CalibratorBase			m_calibratorBase;
+	MeasureBase				m_measureBase;
 
 	ConfigSocket*			m_pConfigSocket = nullptr;
 	void					runConfigSocket();
@@ -201,8 +206,7 @@ public:
 
 	bool					signalSourceIsValid(bool showMsg);
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
-	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);														// only for mode "Simaple module"
-
+	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
 
 protected:
 
@@ -213,10 +217,10 @@ signals:
 	// from ToolBars
 	//
 	void					measureViewChanged(MeasureView* pView);	// appear when changing the type of measurement
+	void					measureTimeoutChanged(int timeout);		// appear when changing the timeout of measuring
 	void					measureTypeChanged(int type);			// appear when changing the type of measurement
 	void					measureKindChanged(int kind);			// appear when changing the kind of measurement
 	void					signalConnectionTypeChanged(int type);	// appear when changing the SignalConnectionType
-	void					measureTimeoutChanged(int timeout);		// appear when changing the timeout of measuring
 
 	// from measureComplite
 	//
@@ -284,13 +288,16 @@ private slots:
 
 	// Slots of calibrator base
 	//
-	void					calibratorConnectedChanged(int);
+	void					calibratorConnectedChanged(int count);
 
 	// Slots of configSocket
 	//
 	void					configSocketConnected();
 	void					configSocketDisconnected();
+	void					configSocketUnknownClient();
 	void					configSocketConfigurationLoaded();
+	void					configSocketSignalBaseLoading(int persentage);
+	void					configSocketSignalBaseLoaded();
 
 	// Slots of signalSocket
 	//
@@ -307,10 +314,13 @@ private slots:
 	//
 	void					measureThreadStarted();
 	void					measureThreadStoped();
-	void					setMeasureThreadInfo(QString msg);
-	void					setMeasureThreadInfo(int timeout);
+	void					measureThreadInfo(const MeasureThreadInfo& info);
 	void					measureThreadMsgBox(int type, QString text, int *result = nullptr);
 	void					measureComplite(Measurement* pMeasurement);
+
+	// Slots of measure base
+	//
+	void					updateMeasureView();
 
 	// Slots for enable measuring
 	//
