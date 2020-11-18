@@ -38,7 +38,7 @@ public:
 
 		enum ExitCode
 		{
-			Usual = 0,
+			Program = 0,
 			Manual = 1,
 		};
 
@@ -121,7 +121,7 @@ private:
 
 public:
 
-	MeasureThreadInfo		info() const { return m_info; }
+	MeasureThreadInfo&		info() { return m_info; }
 
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
 

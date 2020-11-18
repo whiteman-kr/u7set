@@ -304,6 +304,7 @@ public:
 const char* const		ModuleParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure linearity and comparators together"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
 						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input module"),
@@ -312,9 +313,10 @@ const char* const		ModuleParamName[] =
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
 
 const int				MO_PARAM_SUFFIX_SN				= 0,
-						MO_PARAM_MEASURE_ENTIRE_MODULE	= 1,
-						MO_PARAM_WARN_IF_MEASURED		= 2,
-						MO_PARAM_MAX_IMPUT_COUNT		= 3;
+						MO_PARAM_MEASURE_LIN_AND_CMP	= 1,
+						MO_PARAM_MEASURE_ENTIRE_MODULE	= 2,
+						MO_PARAM_WARN_IF_MEASURED		= 3,
+						MO_PARAM_MAX_IMPUT_COUNT		= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -332,6 +334,7 @@ private:
 
 	QString				m_suffixSN;													// suffix to identify the signal of module serial number
 
+	bool				m_measureLinAndCmp = false;									// measure linearity and comparators together
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
 
@@ -341,6 +344,9 @@ public:
 
 	QString				suffixSN() const { return m_suffixSN; }
 	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
+
+	bool				measureLinAndCmp() const { return m_measureLinAndCmp; }
+	void				setMeasureLinAndCmp(bool measure) { m_measureLinAndCmp = measure; }
 
 	bool				measureEntireModule() const { return m_measureEntireModule; }
 	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
