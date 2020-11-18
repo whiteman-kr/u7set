@@ -9,12 +9,11 @@
 
 bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 {
-	m_cfgServiceSettings.resetInitialized();
-	m_appDataServiceSettings.resetInitialized();
-	m_diagDataServiceSettings.resetInitialized();
-	m_archivingServiceSettings.resetInitialized();
-	m_tuningServiceSettings.resetInitialized();
-	m_testClientSettings.resetInitialized();
+	if (m_settings != nullptr)
+	{
+		delete m_settings;
+		m_settings = nullptr;
+	}
 
 	if (xmlReader.checkElement(XmlElement::SOFTWARE) == false)
 	{
@@ -46,37 +45,43 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
 	case E::SoftwareType::ServiceControlManager:
-		break;											// no settings defined for this software
+		// no settings defined for this software for now
+		break;
 
 	case E::SoftwareType::ConfigurationService:
-		result = m_cfgServiceSettings.readFromXml(xmlReader);
+		m_settings = new CfgServiceSettings;
 		break;
 
 	case E::SoftwareType::AppDataService:
-		result = m_appDataServiceSettings.readFromXml(xmlReader);
+		m_settings = new AppDataServiceSettings;
 		break;
 
 	case E::SoftwareType::DiagDataService:
-		result = m_diagDataServiceSettings.readFromXml(xmlReader);
+		m_settings = new DiagDataServiceSettings;
 		break;
 
 	case E::SoftwareType::ArchiveService:
-		result = m_archivingServiceSettings.readFromXml(xmlReader);
+		m_settings = new ArchivingServiceSettings;
 		break;
 
 	case E::SoftwareType::TuningService:
-		result = m_tuningServiceSettings.readFromXml(xmlReader);
+		m_settings = new TuningServiceSettings;
 		break;
 
 	case E::SoftwareType::TestClient:
-		result = m_testClientSettings.readFromXml(xmlReader);
+		m_settings = new TestClientSettings;
+		break;
+
+	case E::SoftwareType::Metrology:
+		m_settings = new MetrologySettings;
 		break;
 
 	case E::SoftwareType::Monitor:
+		m_settings = new MonitorSettings;
+		break;
+
 	case E::SoftwareType::TuningClient:
-	case E::SoftwareType::Metrology:
-		Q_ASSERT(false);					// reading should be implemented
-		result = false;
+		m_settings = new TuningClientSettings;
 		break;
 
 	default:
@@ -84,55 +89,88 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 		result = false;
 	}
 
+	if (m_settings == nullptr)
+	{
+		return false;
+	}
+
+	result = m_settings->readFromXml(xmlReader);
+
+	Q_ASSERT(result == true);
+
 	return result;
 }
 
-const CfgServiceSettings& SoftwareXmlInfo::cfgServiceSettings() const
+const CfgServiceSettings* SoftwareXmlInfo::cfgServiceSettings() const
 {
 	Q_ASSERT(softwareType == E::SoftwareType::ConfigurationService);
-	Q_ASSERT(m_cfgServiceSettings.isInitialized() == true);
+	Q_ASSERT(m_settings != nullptr);
 
-	return m_cfgServiceSettings;
+	return dynamic_cast<const CfgServiceSettings*>(m_settings);
 }
 
-const AppDataServiceSettings& SoftwareXmlInfo::appDataServiceSettings() const
+const AppDataServiceSettings* SoftwareXmlInfo::appDataServiceSettings() const
 {
 	Q_ASSERT(softwareType == E::SoftwareType::AppDataService);
-	Q_ASSERT(m_appDataServiceSettings.isInitialized() == true);
+	Q_ASSERT(m_settings != nullptr);
 
-	return m_appDataServiceSettings;
+	return dynamic_cast<const AppDataServiceSettings*>(m_settings);
 }
 
-const DiagDataServiceSettings& SoftwareXmlInfo::diagDataServiceSettings() const
+const DiagDataServiceSettings* SoftwareXmlInfo::diagDataServiceSettings() const
 {
 	Q_ASSERT(softwareType == E::SoftwareType::DiagDataService);
-	Q_ASSERT(m_diagDataServiceSettings.isInitialized() == true);
+	Q_ASSERT(m_settings != nullptr);
 
-	return m_diagDataServiceSettings;
+	return dynamic_cast<const DiagDataServiceSettings*>(m_settings);
 }
 
-const ArchivingServiceSettings& SoftwareXmlInfo::archivingServiceSettings() const
+const ArchivingServiceSettings* SoftwareXmlInfo::archivingServiceSettings() const
 {
 	Q_ASSERT(softwareType == E::SoftwareType::ArchiveService);
-	Q_ASSERT(m_archivingServiceSettings.isInitialized() == true);
+	Q_ASSERT(m_settings != nullptr);
 
-	return m_archivingServiceSettings;
+	return dynamic_cast<const ArchivingServiceSettings*>(m_settings);
 }
 
-const TuningServiceSettings& SoftwareXmlInfo::tuningServiceSettings() const
+const TuningServiceSettings* SoftwareXmlInfo::tuningServiceSettings() const
 {
 	Q_ASSERT(softwareType == E::SoftwareType::TuningService);
-	Q_ASSERT(m_tuningServiceSettings.isInitialized() == true);
+	Q_ASSERT(m_settings != nullptr);
 
-	return m_tuningServiceSettings;
+	return dynamic_cast<const TuningServiceSettings*>(m_settings);
 }
 
-const TestClientSettings& SoftwareXmlInfo::testClientSettings() const
+const TestClientSettings* SoftwareXmlInfo::testClientSettings() const
 {
 	Q_ASSERT(softwareType == E::SoftwareType::TestClient);
-	Q_ASSERT(m_testClientSettings.isInitialized() == true);
+	Q_ASSERT(m_settings != nullptr);
 
-	return m_testClientSettings;
+	return dynamic_cast<const TestClientSettings*>(m_settings);
+}
+
+const MetrologySettings* SoftwareXmlInfo::metrologySettings() const
+{
+	Q_ASSERT(softwareType == E::SoftwareType::Metrology);
+	Q_ASSERT(m_settings != nullptr);
+
+	return dynamic_cast<const MetrologySettings*>(m_settings);
+}
+
+const MonitorSettings* SoftwareXmlInfo::monitorSettings() const
+{
+	Q_ASSERT(softwareType == E::SoftwareType::Monitor);
+	Q_ASSERT(m_settings != nullptr);
+
+	return dynamic_cast<const MonitorSettings*>(m_settings);
+}
+
+const TuningClientSettings* SoftwareXmlInfo::tuningClientSettings() const
+{
+	Q_ASSERT(softwareType == E::SoftwareType::TuningClient);
+	Q_ASSERT(m_settings != nullptr);
+
+	return dynamic_cast<const TuningClientSettings*>(m_settings);
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -166,8 +204,6 @@ bool SoftwareXmlReader::readSoftwareXml(const QByteArray& fileData)
 {
 	m_softwareXmlInfo.clear();
 
-	bool result = true;
-
 	XmlReadHelper xmlReader(fileData);
 
 	if (xmlReader.findElement(XmlElement::SOFTWARE_ITEMS) == false)
@@ -175,20 +211,25 @@ bool SoftwareXmlReader::readSoftwareXml(const QByteArray& fileData)
 		return false;
 	}
 
+	bool result = true;
+
 	while(xmlReader.findElement(XmlElement::SOFTWARE) == true)
 	{
 		SoftwareXmlInfo swXmlInfo;
 
-		bool result = swXmlInfo.readFromXml(xmlReader);
+		bool res = swXmlInfo.readFromXml(xmlReader);
 
-		if (result == true)
+		if (res == true)
 		{
 			m_softwareXmlInfo.insert(std::pair<QString, SoftwareXmlInfo>(swXmlInfo.equipmentID, swXmlInfo));
+		}
+		else
+		{
+			result = false;
 		}
 	}
 
 	return result;
-
 }
 
 // returns nullptr if software with equipmentID isn't found

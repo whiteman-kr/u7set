@@ -4,43 +4,18 @@
 #include "DeviceHelper.h"
 #include "XmlHelper.h"
 #include "SocketIO.h"
+#include "WUtils.h"
+
 #include "../Builder/IssueLogger.h"
 
-
-const char* const CFG_FILE_ID_APP_DATA_SOURCES = "APP_DATA_SOURCES";
-const char* const CFG_FILE_ID_APP_SIGNALS = "APP_SIGNALS";
-const char* const CFG_FILE_ID_APP_SIGNAL_SET = "APP_SIGNAL_SET";
-const char* const CFG_FILE_ID_COMPARATOR_SET = "COMPARATOR_SET";
-const char* const CFG_FILE_ID_UNIT_SET = "UNIT_SET";
-
-const char* const CFG_FILE_ID_TUNING_SOURCES = "TUNING_SOURCES";
-const char* const CFG_FILE_ID_TUNING_SIGNALS = "TUNING_SIGNALS";
-const char* const CFG_FILE_ID_TUNING_SCHEMAS_DETAILS = "TUNING_SCHEMAS_DETAILS";
-const char* const CFG_FILE_ID_TUNING_FILTERS = "TUNING_FILTERS";
-const char* const CFG_FILE_ID_TUNING_GLOBALSCRIPT = "TUNING_GLOBALSCRIPT";
-const char* const CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT = "TUNING_CONFIGARRIVEDSCRIPT";
-
-const char* const CFG_FILE_ID_BEHAVIOR = "CLIENT_BEHAVIOR";
-const char* const CFG_FILE_ID_LOGO = "LOGO";
-
-const char* const CFG_FILE_ID_METROLOGY_ITEMS = "METROLOGY_ITEMS";
-const char* const CFG_FILE_ID_METROLOGY_SIGNAL_SET = "METROLOGY_SIGNAL_SET";
-
-class ServiceSettings
+class SoftwareSettings : public QObject
 {
 public:
-	// common properties of services
-	//
-	static const char* SETTINGS_SECTION;
+	virtual ~SoftwareSettings();
 
-	static const char* ATTR_COUNT;
-	static const char* ATTR_EQUIIPMENT_ID;
-	static const char* ATTR_SOFTWARE_TYPE;
-
-public:
 	static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 										const Hardware::Software* thisSoftware,
-										const QString& propConnectedSoftwareID,
+										const QString& propConnectedSoBftwareID,
 										const QString& propConnectedSoftwareIP,
 										const QString& propConnectedSoftwarePort,
 										QString* connectedSoftwareID,
@@ -57,16 +32,15 @@ public:
 										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
 										Builder::IssueLogger* log);
 
-	void setInitialized(bool initialized) { m_initialized = initialized; }
-	void resetInitialized() { m_initialized = false; }
+	virtual bool readFromDevice(const Hardware::EquipmentSet* equipment,
+								const Hardware::Software* software,
+								Builder::IssueLogger* log) = 0;
 
-	bool isInitialized() const { return m_initialized; }
-
-private:
-	bool m_initialized = false;
+	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
+	virtual bool readFromXml(XmlReadHelper& xml) = 0;
 };
 
-class CfgServiceSettings : public ServiceSettings
+class CfgServiceSettings : public SoftwareSettings
 {
 private:
 	static const char* CLIENTS_SECTION;
@@ -80,14 +54,19 @@ public:
 
 	QList<QPair<QString, E::SoftwareType>> clients;
 
-	bool readFromDevice(Hardware::Software* software, Builder::IssueLogger* log);
-	bool writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 
 	QStringList knownClients();
 };
 
-class AppDataServiceSettings : public ServiceSettings
+class AppDataServiceSettings : public SoftwareSettings
 {
 public:
 	QString cfgServiceID1;
@@ -109,12 +88,16 @@ public:
 
 	HostAddressPort rtTrendsRequestIP;
 
-	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
-	bool writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 };
 
-class DiagDataServiceSettings : public ServiceSettings
+class DiagDataServiceSettings : public SoftwareSettings
 {
 public:
 	QString cfgServiceID1;
@@ -132,20 +115,22 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
-	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
-	bool writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 };
 
-class TuningServiceSettings : public ServiceSettings
+class TuningServiceSettings : public SoftwareSettings
 {
 private:
 	static const char* TUNING_CLIENTS;
 	static const char* TUNING_CLIENT;
 	static const char* TUNING_SOURCES;
 	static const char* TUNING_SOURCE;
-
-	bool fillTuningClientsInfo(Hardware::Software *software, bool singleLmControlEnabled, Builder::IssueLogger* log);
 
 public:
 	struct TuningClient
@@ -165,12 +150,20 @@ public:
 
 	QVector<TuningClient> clients;
 
-	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
-	bool writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+private:
+	bool fillTuningClientsInfo(const Hardware::Software* software, bool singleLmControlEnabled, Builder::IssueLogger* log);
 };
 
-class ArchivingServiceSettings : public ServiceSettings
+class ArchivingServiceSettings : public SoftwareSettings
 {
 public:
 	static const char* PROP_ARCHIVE_DB_HOST_IP;
@@ -195,14 +188,21 @@ public:
 
 	QString archiveLocation;
 
-	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
-	bool checkSettings(Hardware::Software *software, Builder::IssueLogger* log);
+	//
 
-	bool writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+	bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
+
+	const ArchivingServiceSettings& operator = (const ArchivingServiceSettings& src);
 };
 
-class TestClientSettings : public ServiceSettings
+class TestClientSettings : public SoftwareSettings
 {
 public:
 	static const char* CFG_SERVICE1_SECTION;
@@ -238,9 +238,136 @@ public:
 	HostAddressPort tuningService_clientRequestIP;
 	QStringList		tuningService_tuningSources;
 
-	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
-	bool writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 };
 
+class MetrologySettings : public SoftwareSettings
+{
+public:
+	bool appDataServicePropertyIsValid1 = false;
+	QString appDataServiceID1;
+	QString appDataServiceIP1;
+	int appDataServicePort1 = 0;
 
+	bool appDataServicePropertyIsValid2 = false;
+	QString appDataServiceID2;
+	QString appDataServiceIP2;
+	int appDataServicePort2 = 0;
+
+	bool tuningServicePropertyIsValid = false;
+	QString tuningServiceID;
+	QString softwareMetrologyID;
+	QString tuningServiceIP;
+	int tuningServicePort = 0;
+
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xmlWriter) override;
+	bool readFromXml(XmlReadHelper& xmlReader) override;
+};
+
+class MonitorSettings : public SoftwareSettings
+{
+public:
+	QString startSchemaId;
+	QString schemaTags;
+
+	QString appDataServiceID1;
+	QString appDataServiceIP1;
+	int appDataServicePort1 = 0;
+	QString realtimeDataIP1;
+	int realtimeDataPort1 = 0;
+
+	QString appDataServiceID2;
+	QString appDataServiceIP2;
+	int appDataServicePort2 = 0;
+	QString realtimeDataIP2;
+	int realtimeDataPort2 = 0;
+
+	QString archiveServiceID1;
+	QString archiveServiceIP1;
+	int archiveServicePort1 = 0;
+
+	QString archiveServiceID2;
+	QString archiveServiceIP2;
+	int archiveServicePort2 = 0;
+
+	bool tuningEnabled = false;
+	QString tuningServiceID;
+	QString tuningServiceIP;
+	int tuningServicePort = 0;
+	QString tuningSources;
+
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xmlWriter) override;
+	bool readFromXml(XmlReadHelper& xmlReader) override;
+
+	QStringList getSchemaTags() const;
+	QStringList getTuningSources() const;
+
+private:
+	void clear();
+
+	bool readAppDataServiceAndArchiveSettings(const Hardware::EquipmentSet* equipment,
+								   const Hardware::Software* software,
+								   Builder::IssueLogger* log);
+
+	bool readTuningSettings(const Hardware::EquipmentSet* equipment,
+								   const Hardware::Software* software,
+								   Builder::IssueLogger* log);
+
+};
+
+class TuningClientSettings : public SoftwareSettings
+{
+public:
+	QString tuningServiceID;
+	QString tuningServiceIP;
+	int tuningServicePort = 0;
+
+	bool autoApply = false;
+	bool showSignals = false;
+	bool showSchemas = false;
+	bool showSchemasList = false;
+	bool showSchemasTabs = false;
+	bool showSOR = false;
+	bool useAccessFlag = false;
+	bool loginPerOperation = false;
+	QString usersAccounts;
+	int loginSessionLength = 0;
+
+	bool filterByEquipment = false;
+	bool filterBySchema = false;
+
+	QString startSchemaID;
+
+	QString schemaTags;
+
+	//
+
+	bool readFromDevice(const Hardware::EquipmentSet* equipment,
+						const Hardware::Software* software,
+						Builder::IssueLogger* log) override;
+
+	bool writeToXml(XmlWriteHelper& xmlWriter) override;
+	bool readFromXml(XmlReadHelper& xmlReader) override;
+
+	QStringList getSchemaTags() const;
+	QStringList getUsersAccounts() const;
+};

@@ -49,21 +49,6 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_context, m_log);
 
-		if (m_settings.isInitialized() == false)
-		{
-			bool result = m_settings.readFromDevice(m_software, m_log);
-
-			RETURN_IF_FALSE(result);
-
-			if (m_context->m_projectProperties.safetyProject() == true && m_settings.singleLmControl == false)
-			{
-				// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
-				//
-				m_log->errEQP6201(equipmentID());
-				return false;
-			}
-		}
-
 		XmlWriteHelper xml(xmlWriter);
 
 		return m_settings.writeToXml(xml);
@@ -71,6 +56,18 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeSettings()
 	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		RETURN_IF_FALSE(result);
+
+		if (m_context->m_projectProperties.safetyProject() == true && m_settings.singleLmControl == false)
+		{
+			// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+			//
+			m_log->errEQP6201(equipmentID());
+			return false;
+		}
+
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
@@ -168,7 +165,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_TUNING_SOURCES_XML, CFG_FILE_ID_TUNING_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -198,7 +195,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -222,7 +219,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

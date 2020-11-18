@@ -3,15 +3,13 @@
 #include "SoftwareCfgGenerator.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
+#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
+
 	class MetrologyCfgGenerator : public SoftwareCfgGenerator
 	{
-	private:
-		Hardware::SubsystemStorage* m_subsystems = nullptr;
-		std::unordered_set<QString> m_analogSignalsOnSchemas;
-
 	public:
 		MetrologyCfgGenerator(Context* context, Hardware::Software* software);
 		virtual ~MetrologyCfgGenerator();
@@ -20,7 +18,6 @@ namespace Builder
 		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
-
 		bool writeDatabaseInfo();
 		bool writeSettings();
 		bool writeMetrologyItemsXml();
@@ -34,5 +31,9 @@ namespace Builder
 		bool testElectricLimit_Input_mV(const Signal& signal);
 		bool testElectricLimit_Input_Ohm(const Signal& signal);
 
+	private:
+		MetrologySettings m_settings;
+		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		std::unordered_set<QString> m_analogSignalsOnSchemas;
 	};
 }

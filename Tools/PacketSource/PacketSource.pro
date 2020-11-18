@@ -95,7 +95,6 @@ HEADERS += \
     Stable.h \
     ../../Proto/network.pb.h \
     ../../Proto/serialization.pb.h \
-    ../../Builder/CfgFiles.h \
     ../../Builder/IssueLogger.h \
     ../../lib/MemLeaksDetection.h \
     ../../lib/CommandLineParser.h \

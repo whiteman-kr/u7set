@@ -3,10 +3,10 @@
 #include <assert.h>
 #include <QFile>
 
-#include "../../Builder/CfgFiles.h"
 #include "../../lib/XmlHelper.h"
 #include "../../lib/DataProtocols.h"
 #include "../../lib/WUtils.h"
+#include "../../lib/ConstStrings.h"
 
 #ifndef Q_CONSOLE_APP
 	#include <QMessageBox>
@@ -448,7 +448,7 @@ int SignalBase::readFromFile(const BuildInfo& buildInfo)
 	QString signalsfile = buildInfo.buildFile(BUILD_FILE_TYPE_SIGNALS).path();
 	if (signalsfile.isEmpty() == true)
 	{
-		QString strError = tr("Signals file %1 - path is empty!").arg(Builder::FILE_APP_SIGNALS_ASGS);
+		QString strError = tr("Signals file %1 - path is empty!").arg(File::APP_SIGNALS_ASGS);
 
 		#ifdef Q_CONSOLE_APP
 			qDebug() << strError;

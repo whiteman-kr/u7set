@@ -824,7 +824,7 @@ namespace Builder
 
 			cfgFile->finalize();
 
-			BuildFile* buildFile = addFile(cfgFile->subDir(), Builder::FILE_CONFIGURATION_XML, cfgFile->getFileData());
+			BuildFile* buildFile = addFile(cfgFile->subDir(), File::CONFIGURATION_XML, cfgFile->getFileData());
 
 			if (buildFile == nullptr)
 			{

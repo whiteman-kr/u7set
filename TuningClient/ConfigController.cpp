@@ -1,6 +1,6 @@
 #include "ConfigController.h"
 #include "MainWindow.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/ClientBehavior.h"
 
 //
@@ -255,7 +255,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Settings node
 		//
-		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
+/*		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
 		if (settingsNodes.size() != 1)
 		{
 			readSettings.errorMessage += tr("Parsing Settings node error.\n");
@@ -263,7 +263,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		else
 		{
 			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
-		}
+		}  */
+
+		result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
 	}
 
 	// Error handling
@@ -352,7 +354,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Filters
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_FILTERS)
+			if (buildFileInfo.ID == CfgFileId::TUNING_FILTERS)
 			{
 				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
@@ -369,7 +371,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Signals
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_SIGNALS)
+			if (buildFileInfo.ID == CfgFileId::TUNING_SIGNALS)
 			{
 				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
@@ -383,7 +385,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 			}
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
+			if (buildFileInfo.ID == CfgFileId::TUNING_GLOBALSCRIPT)
 			{
 				QByteArray globalScriptData;
 
@@ -399,7 +401,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 			}
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT)
+			if (buildFileInfo.ID == CfgFileId::TUNING_CONFIGARRIVEDSCRIPT)
 			{
 				QByteArray configurationArrivedScriptData;
 
@@ -619,7 +621,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 
 	return outSetting->errorMessage.isEmpty();
 }
-
+/*
 bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
@@ -719,5 +721,56 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 	}
 
 	return outSetting->errorMessage.isEmpty();
-}
+}*/
 
+bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, ConfigSettings* outSetting)
+{
+	if (outSetting == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	XmlReadHelper xmlReader(cfgFiledata);
+
+	TuningClientSettings ts;
+
+	bool result = ts.readFromXml(xmlReader);
+
+	if (result == false)
+	{
+		outSetting->errorMessage += tr("Error reading <Settings> section from file configuration.xml\n");
+		return false;
+	}
+
+	outSetting->tuningServiceAddress = ConfigConnection(ts.tuningServiceID, ts.tuningServiceIP, ts.tuningServicePort);
+
+	outSetting->autoApply = ts.autoApply;
+	outSetting->showSignals = ts.showSignals;
+	outSetting->showSchemas = ts.showSchemas;
+	outSetting->showSchemasList = ts.showSchemasList;
+	outSetting->showSchemasTabs = ts.showSchemasTabs;
+	outSetting->startSchemaID = ts.startSchemaID;
+	outSetting->filterByEquipment = ts.filterByEquipment;
+	outSetting->filterBySchema = ts.filterBySchema;
+
+	outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
+
+	if (ts.showSOR == true)
+	{
+		outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
+	}
+	else
+	{
+		if (ts.useAccessFlag == true)
+		{
+			outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
+		}
+	}
+
+	outSetting->logonMode = ts.loginPerOperation == true ? LogonMode::PerOperation : LogonMode::Permanent;
+	outSetting->loginSessionLength = ts.loginSessionLength;
+	outSetting->usersAccounts = ts.getUsersAccounts();
+
+	return true;
+}

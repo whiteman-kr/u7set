@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <QFile>
 
-#include "../../Builder/CfgFiles.h"
 #include "../../lib/XmlHelper.h"
 #include "../../lib/DataSource.h"
+#include "../../lib/ConstStrings.h"
 
 #ifndef Q_CONSOLE_APP
 	#include <QMessageBox>
@@ -370,7 +370,7 @@ int SourceBase::readFromFile(const BuildInfo& buildInfo)
 	QString fileCfg = buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path();
 	if (fileCfg.isEmpty() == true)
 	{
-		QString strError = tr("Sources configuration file %1 - path is empty!").arg(Builder::FILE_CONFIGURATION_XML);
+		QString strError = tr("Sources configuration file %1 - path is empty!").arg(File::CONFIGURATION_XML);
 
 		#ifdef Q_CONSOLE_APP
 			qDebug() << strError;
@@ -418,7 +418,7 @@ int SourceBase::readFromFile(const BuildInfo& buildInfo)
 
 	if (xmlCfg.readHostAddressPort("AppDataReceivingIP", "AppDataReceivingPort", &serverAddress) == false)
 	{
-		QString strError = tr("IP-address of AppDataSrv is not found in file %1!").arg(Builder::FILE_CONFIGURATION_XML);
+		QString strError = tr("IP-address of AppDataSrv is not found in file %1!").arg(File::CONFIGURATION_XML);
 
 		#ifdef Q_CONSOLE_APP
 			qDebug() << strError;
@@ -434,7 +434,7 @@ int SourceBase::readFromFile(const BuildInfo& buildInfo)
 	QString sourcesFile = buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path();
 	if (sourcesFile.isEmpty() == true)
 	{
-		QString strError =  tr("Sources file %1 - path is empty!").arg(Builder::FILE_APP_DATA_SOURCES_XML);
+		QString strError =  tr("Sources file %1 - path is empty!").arg(File::APP_DATA_SOURCES_XML);
 
 		#ifdef Q_CONSOLE_APP
 			qDebug() << strError;

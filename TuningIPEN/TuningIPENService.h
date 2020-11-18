@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/Service.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "AppSignalStateEx.h"
 #include "TuningIPENSource.h"
 #include "TuningIPENSocket.h"

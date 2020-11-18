@@ -119,9 +119,6 @@ int main(int argc, char *argv[])
 
 	GlobalMessanger::instance();		// Create instance of GlobalMessanger
 
-	SoftwareXmlReader swReader;
-	swReader.readSoftwareXml(QString("d:/temp/compiler_tests/build/common/software.xml"));
-
 	// Read settings
 	//
 	theSettings.load();

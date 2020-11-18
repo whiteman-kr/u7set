@@ -57,7 +57,7 @@ SOURCES += \
     CfgChecker.cpp \
     CfgControlServer.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../Builder/IssueLogger.cpp \
@@ -88,7 +88,7 @@ HEADERS += \
     CfgControlServer.h \
     ../lib/Types.h \
     ../lib/SoftwareInfo.h \
-    ../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
     ../lib/DeviceHelper.h \
     ../lib/DeviceObject.h \
     ../Builder/IssueLogger.h \

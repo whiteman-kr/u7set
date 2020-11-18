@@ -2,7 +2,6 @@
 
 #include "../../lib/Ui/DialogAbout.h"
 #include "../../lib/XmlHelper.h"
-#include "../../Builder/CfgFiles.h"
 
 #include "OptionsDialog.h"
 

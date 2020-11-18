@@ -11,8 +11,6 @@
 #include "../lib/ProtoSerialization.h"
 #include "../Proto/serialization.pb.h"
 
-#include "../Builder/CfgFiles.h"
-
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS
 // and write log history about changing

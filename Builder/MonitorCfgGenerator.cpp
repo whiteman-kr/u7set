@@ -1,6 +1,6 @@
 #include "MonitorCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "Context.h"
 #include "../lib/ClientBehavior.h"
@@ -52,7 +52,7 @@ namespace Builder
 
 		// Generate tuning signals file
 		//
-		if (m_tuningEnabled == true)
+		if (m_settings.tuningEnabled == true)
 		{
 			result &= writeTuningSignals();
 		}
@@ -67,7 +67,7 @@ namespace Builder
 
 		// Add link to FILE_COMPARATORS_SET (Common/Comparator.set)
 		//
-		if (BuildFile* compBuildFile = m_buildResultWriter->getBuildFileByID(DIR_COMMON, CFG_FILE_ID_COMPARATOR_SET);
+		if (BuildFile* compBuildFile = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::COMPARATOR_SET);
 			compBuildFile != nullptr)
 		{
 			m_cfgXml->addLinkToFile(compBuildFile);
@@ -82,6 +82,11 @@ namespace Builder
 
 	bool MonitorCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+
+		/*
 		xmlWriter.writeStartElement("Settings");
 
 		{
@@ -163,13 +168,32 @@ namespace Builder
 			}
 		}
 
-		return true;
+		return true;*/
 	}
 
 	bool MonitorCfgGenerator::writeMonitorSettings()
 	{
-		// write XML via m_cfgXml->xmlWriter()
-		//
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		m_schemaTagList = m_settings.getSchemaTags();
+
+		if (m_settings.tuningEnabled == true &&
+			m_context->m_projectProperties.safetyProject() == true)
+		{
+			// Tuning for Monitor is forbiden for Safety Projects
+			// Stupid decision but not mine
+			//
+			m_log->errEQP6200(m_software->equipmentIdTemplate());
+			return false;
+		}
+
+		m_tuningSources = m_settings.getTuningSources();
+
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
@@ -289,7 +313,7 @@ namespace Builder
 
 	bool MonitorCfgGenerator::writeAppDataServiceSection(QXmlStreamWriter& xmlWriter)
 	{
-		bool ok1 = false;
+/*		bool ok1 = false;
 		bool ok2 = false;
 
 		// AppDataServiceID
@@ -424,12 +448,14 @@ namespace Builder
 			xmlWriter.writeAttribute("rtport2", QString::number(adsSettings2.rtTrendsRequestIP.port()));
 		}	// AppDataService
 
+*/
+
 		return true;
 	}
 
 	bool MonitorCfgGenerator::writeArchiveServiceSection(QXmlStreamWriter& xmlWriter)
 	{
-		QString archiveServiceId1;
+/*		QString archiveServiceId1;
 		QString archiveServiceId2;
 
 		// Get ArchServiceID from AppDataService
@@ -537,12 +563,12 @@ namespace Builder
 
 		if (archiveServiceObject1 != nullptr)
 		{
-			ok1 = archiveServiceSettings1.readFromDevice(archiveServiceObject1, m_log);
+			ok1 = archiveServiceSettings1.readFromDevice(m_equipment, archiveServiceObject1, m_log);
 		}
 
 		if (archiveServiceObject2 != nullptr)
 		{
-			ok2 = archiveServiceSettings2.readFromDevice(archiveServiceObject2, m_log);
+			ok2 = archiveServiceSettings2.readFromDevice(m_equipment, archiveServiceObject2, m_log);
 		}
 
 		if (ok1 == false || ok2 == false)
@@ -570,12 +596,14 @@ namespace Builder
 			xmlWriter.writeAttribute("port2", QString::number(archiveServiceSettings2.clientRequestIP.port()));
 		}	// ArchiveService
 
+*/
+
 		return true;
 	}
 
 	bool MonitorCfgGenerator::writeTuningServiceSection(QXmlStreamWriter& xmlWriter)
 	{
-		bool ok = true;
+/*		bool ok = true;
 
 		// TuningEnable
 		//
@@ -694,7 +722,7 @@ namespace Builder
 
 			// Reading TuningService Settings
 			//
-			ok = tuningServiceSettings.readFromDevice(tuningServiceObject, m_log);	// readFromDevice reports to log about errors
+			ok = tuningServiceSettings.readFromDevice(m_equipment, tuningServiceObject, m_log);	// readFromDevice reports to log about errors
 
 			if (ok == false)
 			{
@@ -731,6 +759,8 @@ namespace Builder
 			xmlWriter.writeTextElement(QLatin1String("TuningSources"), m_tuningSources.join(QLatin1String("; ")));
 		}
 
+*/
+
 		return true;
 	}
 
@@ -765,7 +795,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
 
 		if (buildFile == nullptr)
 		{
@@ -844,7 +874,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehavior.xml", CfgFileId::CLIENT_BEHAVIOR, "", data);
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -902,7 +932,7 @@ namespace Builder
 		//
 		QString buildFileName = tr("Logo.%1").arg(QFileInfo(fi.fileName()).completeSuffix());
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), buildFileName, CFG_FILE_ID_LOGO, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), buildFileName, CfgFileId::LOGO, "", data);
 		if (buildFile == nullptr)
 		{
 			return false;

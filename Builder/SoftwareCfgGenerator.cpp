@@ -1,7 +1,7 @@
 #include "SoftwareCfgGenerator.h"
 #include "ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/LanControllerInfoHelper.h"
 
 
@@ -859,7 +859,7 @@ namespace Builder
 
 		bool result = true;
 
-		result = ServiceSettings::getCfgServiceConnection(m_equipment, m_software,
+		result = SoftwareSettings::getCfgServiceConnection(m_equipment, m_software,
 														   &cfgServiceID1, &cfgServiceIP1,
 														   &cfgServiceID2, &cfgServiceIP2,
 														   m_log);

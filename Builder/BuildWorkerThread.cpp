@@ -1406,7 +1406,7 @@ namespace Builder
 
 		softwareXml.writeEndElement();		// </SoftwareItems>
 
-		context->m_buildResultWriter->addFile(DIR_COMMON, FILE_SOFTWARE_XML, softwareXmlData);
+		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
 
 		context->m_buildResultWriter->writeConfigurationXmlFiles();
 

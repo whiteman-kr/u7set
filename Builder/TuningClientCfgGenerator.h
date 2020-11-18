@@ -5,6 +5,7 @@
 
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -23,7 +24,7 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
-		bool initFiltersSettings();
+//		bool initFiltersSettings();
 		bool createObjectFilters(const QStringList& equipmentList);
 
 		bool writeSettings();
@@ -42,14 +43,18 @@ namespace Builder
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
+		TuningClientSettings m_settings;
+
 		::Proto::AppSignalSet m_tuningSet;
+
+/*		Moved to m_settings!
 
 		bool m_filterByEquipment = false;
 		bool m_filterBySchema = false;
-		bool m_filtersSettingsInitialized = false;
+		bool m_filtersSettingsInitialized = false;*/
 
 		TuningFilterStorage m_tuningFilterStorage;
-		QStringList m_schemaTagList;					// Generated in writeSettings
+//		QStringList m_schemaTagList;					// Generated in writeSettings
 	};
 
 	template <typename TYPE>

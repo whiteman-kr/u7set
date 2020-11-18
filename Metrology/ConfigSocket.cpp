@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 
 #include "SignalBase.h"
 
@@ -144,17 +144,17 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		result = true;
 
-		if (bfi.ID == CFG_FILE_ID_METROLOGY_ITEMS)
+		if (bfi.ID == CfgFileId::METROLOGY_ITEMS)
 		{
 			result &= readMetrologyItems(fileData);					// fill MetrologyItems
 		}
 
-		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNAL_SET)
+		if (bfi.ID == CfgFileId::METROLOGY_SIGNAL_SET)
 		{
 			result &= readMetrologySignalSet(fileData);				// fill MetrologySignalSet
 		}
 
-		if (bfi.ID == CFG_FILE_ID_COMPARATOR_SET)
+		if (bfi.ID == CfgFileId::COMPARATOR_SET)
 		{
 			result &= readComparatorSet(fileData);					// fill ComparatorSet
 		}

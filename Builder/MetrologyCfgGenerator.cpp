@@ -1,6 +1,6 @@
 #include "MetrologyCfgGenerator.h"
 #include "../lib/MetrologySignal.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
 
@@ -13,11 +13,9 @@ namespace Builder
 	{
 	}
 
-
 	MetrologyCfgGenerator::~MetrologyCfgGenerator()
 	{
 	}
-
 
 	bool MetrologyCfgGenerator::generateConfiguration()
 	{
@@ -33,7 +31,12 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		xmlWriter.writeStartElement("Settings");
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+
+
+/*		xmlWriter.writeStartElement("Settings");
 
 		{
 			bool result = true;
@@ -147,7 +150,7 @@ namespace Builder
 				}
 				else
 				{
-					tuningSettings.readFromDevice(tuningObject, m_log);
+					tuningSettings.readFromDevice(m_equipment, tuningObject, m_log);
 					tuningPropertyIsValid = true;
 				}
 			}
@@ -163,7 +166,7 @@ namespace Builder
 
 		} // </Settings>
 
-		return true;
+		return true; */
 	}
 
 	bool MetrologyCfgGenerator::writeDatabaseInfo()
@@ -181,6 +184,10 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::writeSettings()
 	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		RETURN_IF_FALSE(result);
+
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
@@ -290,7 +297,7 @@ namespace Builder
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_ITEMS_XML, CFG_FILE_ID_METROLOGY_ITEMS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -302,7 +309,7 @@ namespace Builder
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_ITEMS_XML), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_ITEMS_XML), equipmentID());
 			return false;
 		}
 
@@ -409,7 +416,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNAL_SET, CFG_FILE_ID_METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -420,16 +427,16 @@ namespace Builder
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.set.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNAL_SET), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_SIGNAL_SET), equipmentID());
 			return false;
 		}
 
-		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		result = m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/Comparators.set.xml.
 			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
+			m_log->errCMN0018(QString("%1\\%2").arg(Directory::COMMON).arg(File::COMPARATORS_SET), equipmentID());
 			return false;
 		}
 

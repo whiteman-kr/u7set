@@ -12,6 +12,7 @@
 #include <QCloseEvent>
 
 #include "../lib/Ui/DialogAbout.h"
+#include "../lib/ConstStrings.h"
 
 #include "CalibratorBase.h"
 #include "Database.h"
@@ -1948,7 +1949,7 @@ QString MainWindow::configSocketConnectedStateStr()
 	if (CFG_FILE_VER_METROLOGY_ITEMS_XML != theOptions.projectInfo().cfgFileVersion())
 	{
 		connectedState.append(tr("\n\nFailed version of %1. Current version: %2. Received version: %3 ")
-								.arg(Builder::FILE_METROLOGY_ITEMS_XML)
+		                        .arg(File::METROLOGY_ITEMS_XML)
 								.arg(CFG_FILE_VER_METROLOGY_ITEMS_XML)
 								.arg(theOptions.projectInfo().cfgFileVersion()));
 	}

@@ -43,13 +43,6 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		if (m_settings.isInitialized() == false)
-		{
-			bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
-
-			RETURN_IF_FALSE(result);
-		}
-
 		XmlWriteHelper xml(xmlWriter);
 
 		return m_settings.writeToXml(xml);
@@ -57,6 +50,10 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		RETURN_IF_FALSE(result);
+
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
@@ -156,7 +153,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_APP_DATA_SOURCES_XML, CFG_FILE_ID_APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -243,7 +240,7 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -260,7 +257,7 @@ namespace Builder
 		// After task RPCT-2170 resolving (separate signalset files for each AppDataService)
 		// this link should be removed !!!
 
-		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(DIR_COMMON, CFG_FILE_ID_APP_SIGNAL_SET);
+		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::APP_SIGNAL_SET);
 
 		if (buildFile == nullptr)
 		{
@@ -288,7 +285,7 @@ namespace Builder
 		}
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -312,7 +309,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

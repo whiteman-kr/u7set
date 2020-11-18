@@ -1,7 +1,7 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/LmDescription.h"
 #include "../lib/DataSource.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/ConnectionsInfo.h"
 #include "../lib/LogicModulesInfo.h"
 
@@ -605,7 +605,7 @@ namespace Builder
 		fileContentStringList.append("");
 		fileContentStringList.append(afbsUsage);
 
-		buildResultWriter()->addFile(Builder::DIR_REPORTS, "Resources.txt", fileContentStringList);
+		buildResultWriter()->addFile(Directory::REPORTS, "Resources.txt", fileContentStringList);
 
 		return result;
 	}
@@ -709,7 +709,7 @@ namespace Builder
 			}
 		}
 
-		buildResultWriter()->addFile(Builder::DIR_REPORTS, Builder::FILE_CONNECTIONS_TXT, "", "", list);
+		buildResultWriter()->addFile(Directory::REPORTS, File::CONNECTIONS_TXT, "", "", list);
 
 		return true;
 	}
@@ -734,7 +734,7 @@ namespace Builder
 
 		bool result = true;
 
-		BuildFile* file = buildResultWriter()->addFile(Builder::DIR_COMMON, Builder::FILE_CONNECTIONS_XML, "", "", xmlData);
+		BuildFile* file = buildResultWriter()->addFile(Directory::COMMON, File::CONNECTIONS_XML, "", "", xmlData);
 
 		if (file == nullptr)
 		{
@@ -756,7 +756,7 @@ namespace Builder
 
 		bool result = true;
 
-		BuildFile* file = buildResultWriter()->addFile(Builder::DIR_COMMON, Builder::FILE_LOGIC_MODULES_XML, "", "", xmlData);
+		BuildFile* file = buildResultWriter()->addFile(Directory::COMMON, File::LOGIC_MODULES_XML, "", "", xmlData);
 
 		if (file == nullptr)
 		{
@@ -990,9 +990,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
+		buildResultWriter()->addFile(Directory::OPTO_VHD, vhdFileName, list);
 
-		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
+		buildResultWriter()->addFile(Directory::OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1169,9 +1169,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
+		buildResultWriter()->addFile(Directory::OPTO_VHD, vhdFileName, list);
 
-		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
+		buildResultWriter()->addFile(Directory::OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1239,7 +1239,7 @@ namespace Builder
 			}
 		}
 
-		buildResultWriter()->addFile(Builder::DIR_REPORTS, "Opto-modules.txt", "", "", list);
+		buildResultWriter()->addFile(Directory::REPORTS, "Opto-modules.txt", "", "", list);
 
 		return true;
 	}
@@ -1275,7 +1275,7 @@ namespace Builder
 
 		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* appSignalSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_APP_SIGNALS_ASGS, CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
+		BuildFile* appSignalSetFile = buildResultWriter()->addFile(Directory::COMMON, File::APP_SIGNALS_ASGS, CfgFileId::APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
 	}
@@ -1299,7 +1299,7 @@ namespace Builder
 
 		protoComparatorSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* comparatorSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_COMPARATORS_SET, CFG_FILE_ID_COMPARATOR_SET, "", data, true);
+		BuildFile* comparatorSetFile = buildResultWriter()->addFile(Directory::COMMON, File::COMPARATORS_SET, CfgFileId::COMPARATOR_SET, "", data, true);
 
 		return comparatorSetFile != nullptr;
 	}
@@ -1445,7 +1445,7 @@ namespace Builder
 		xml.writeEndElement(); // </Subsystems>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = buildResultWriter()->addFile(Builder::DIR_COMMON, "Subsystems.xml", "", "",  data);
+		BuildFile* buildFile = buildResultWriter()->addFile(Directory::COMMON, File::SUBSYSTEMS_XML, "", "",  data);
 
 		if (buildFile == nullptr)
 		{

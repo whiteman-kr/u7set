@@ -99,6 +99,8 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../lib/SoftwareSettings.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -165,7 +167,10 @@ SOURCES +=\
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
+    ../lib/ConstStrings.h \
+    ../lib/DeviceHelper.h \
     ../lib/ILogFile.h \
+    ../lib/SoftwareSettings.h \
     Stable.h \
     TuningPage.h \
     Settings.h \

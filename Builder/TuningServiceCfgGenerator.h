@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "../TuningService/TuningSource.h"
 #include "Builder.h"

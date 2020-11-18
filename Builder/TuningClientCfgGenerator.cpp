@@ -1,5 +1,5 @@
 #include "TuningClientCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/AppSignal.h"
 #include "../lib/ClientBehavior.h"
@@ -49,11 +49,14 @@ namespace Builder
 			return result;
 		}
 
+
+/*		moved to m_settings.readFromDevice!
+
 		result &= initFiltersSettings();
 		if (result == false)
 		{
 			return result;
-		}
+		}*/
 
 		// Generate tuning signals
 		//
@@ -110,7 +113,11 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+
+/*		{
 			xmlWriter.writeStartElement("Settings");
 			std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
 			{
@@ -243,7 +250,7 @@ namespace Builder
 			}
 
 			TuningServiceSettings tunsSettings;
-			tunsSettings.readFromDevice(tunsObject, m_log);
+			tunsSettings.readFromDevice(m_equipment, tunsObject, m_log);
 
 			//
 			// AutoApply
@@ -418,7 +425,7 @@ namespace Builder
 			}
 		}
 
-		return true;
+		return true; */
 	}
 
 	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
@@ -527,7 +534,7 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::initFiltersSettings()
+/*	bool TuningClientCfgGenerator::initFiltersSettings()
 	{
 		bool ok = false;
 
@@ -552,10 +559,19 @@ namespace Builder
 		m_filtersSettingsInitialized = true;
 
 		return true;
-	}
+	} */
 
 	bool TuningClientCfgGenerator::writeSettings()
 	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+//		m_schemaTagList = m_settings.getSchemaTags();
+
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
@@ -632,7 +648,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
 
 		if (buildFile == nullptr)
 		{
@@ -658,7 +674,7 @@ namespace Builder
 			return false;
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CfgFileId::TUNING_FILTERS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -680,11 +696,13 @@ namespace Builder
 		//
 		bool result = true;
 
+		QStringList schemaTagList = m_settings.getSchemaTags();
+
 		std::set<std::shared_ptr<SchemaFile>> tuningSchemas;
 
 		// If tag list is empty, then link all Tuning schemas
 		//
-		if (m_schemaTagList.isEmpty() == true)
+		if (schemaTagList.isEmpty() == true)
 		{
 			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
@@ -697,7 +715,7 @@ namespace Builder
 		}
 		else
 		{
-			for (QString tag : m_schemaTagList)
+			for (QString tag : schemaTagList)
 			{
 				tag = tag.toLower();
 				auto tagRange = m_schemaTagToFile.equal_range(tag);
@@ -772,7 +790,7 @@ namespace Builder
 		else
 		{
 			QString globalScript = m_software->propertyValue("GlobalScript").toString();
-			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CFG_FILE_ID_TUNING_GLOBALSCRIPT, "", globalScript);
+			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CfgFileId::TUNING_GLOBALSCRIPT, "", globalScript);
 
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);
 		}
@@ -789,7 +807,7 @@ namespace Builder
 		else
 		{
 			QString arrivedScript = m_software->propertyValue("OnConfigurationArrived").toString();
-			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
+			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CfgFileId::TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
 
 			m_cfgXml->addLinkToFile(arrivedScriptBuildFile);
 		}
@@ -866,7 +884,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CfgFileId::CLIENT_BEHAVIOR, "", data);
 
 		if (buildFile == nullptr)
 		{
@@ -887,9 +905,7 @@ namespace Builder
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
 														  const TuningSignalManager& tuningSignalManager)
 	{
-		Q_ASSERT(m_filtersSettingsInitialized == true);
-
-		if (m_filterBySchema == true)
+		if (m_settings.filterBySchema == true)
 		{
 			// Filter for Schema
 			//
@@ -938,7 +954,7 @@ namespace Builder
 			m_tuningFilterStorage.add(ofSchema, true);
 		}	 // filterBySchema
 
-		if (m_filterByEquipment == true)
+		if (m_settings.filterByEquipment == true)
 		{
 			// Filter for EquipmentId
 			//

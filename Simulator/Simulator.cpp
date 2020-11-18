@@ -5,7 +5,6 @@
 #include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
 #include "../lib/LogicModulesInfo.h"
-#include "../Builder/CfgFiles.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptSignal.h"
@@ -283,7 +282,7 @@ namespace Sim
 		{
 			LogicModulesInfo lmsInfo;
 			QString loadLmsInfoErrorMessage;
-			QString lmsInfoFileName = buildPath + QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_LOGIC_MODULES_XML);
+			QString lmsInfoFileName = buildPath + QString(Directory::COMMON) + "/" + QString(File::LOGIC_MODULES_XML);
 
 			ok = lmsInfo.load(lmsInfoFileName, &loadLmsInfoErrorMessage);
 			if (ok == false)
@@ -457,7 +456,7 @@ namespace Sim
 			fileName.append(QChar('/'));
 		}
 
-		fileName += QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_CONNECTIONS_XML);
+		fileName += QString(Directory::COMMON) + "/" + QString(File::CONNECTIONS_XML);
 
 		m_log.writeMessage(tr("Loading %1").arg(fileName));
 
@@ -479,7 +478,7 @@ namespace Sim
 			fileName.append(QChar('/'));
 		}
 
-		fileName += QString(Builder::DIR_COMMON) + "/" + QString(Builder::FILE_APP_SIGNALS_ASGS);
+		fileName += QString(Directory::COMMON) + "/" + QString(File::APP_SIGNALS_ASGS);
 
 		m_log.writeMessage(tr("Loading %1").arg(fileName));
 

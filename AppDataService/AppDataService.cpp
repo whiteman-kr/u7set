@@ -357,12 +357,12 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 		result = true;
 
-		if (bfi.ID == CFG_FILE_ID_APP_DATA_SOURCES)
+		if (bfi.ID == CfgFileId::APP_DATA_SOURCES)
 		{
 			result &= readDataSources(fileData);			// fill m_appDataSources
 		}
 
-		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
+		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
 		{
 			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
 		}

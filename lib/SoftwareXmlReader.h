@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Types.h"
-#include "ServiceSettings.h"
+#include "SoftwareSettings.h"
 
 class SoftwareXmlInfo
 {
@@ -12,27 +12,18 @@ public:
 
 	bool readFromXml(XmlReadHelper& xmlReader);
 
-	const CfgServiceSettings& cfgServiceSettings() const;
-	const AppDataServiceSettings& appDataServiceSettings() const;
-	const DiagDataServiceSettings& diagDataServiceSettings() const;
-	const ArchivingServiceSettings& archivingServiceSettings() const;
-	const TuningServiceSettings& tuningServiceSettings() const;
-	const TestClientSettings& testClientSettings() const;
+	const CfgServiceSettings* cfgServiceSettings() const;
+	const AppDataServiceSettings* appDataServiceSettings() const;
+	const DiagDataServiceSettings* diagDataServiceSettings() const;
+	const ArchivingServiceSettings* archivingServiceSettings() const;
+	const TuningServiceSettings* tuningServiceSettings() const;
+	const TestClientSettings* testClientSettings() const;
+	const MetrologySettings* metrologySettings() const;
+	const MonitorSettings* monitorSettings() const;
+	const TuningClientSettings* tuningClientSettings() const;
 
 private:
-	CfgServiceSettings m_cfgServiceSettings;
-	AppDataServiceSettings m_appDataServiceSettings;
-	DiagDataServiceSettings m_diagDataServiceSettings;
-	ArchivingServiceSettings m_archivingServiceSettings;
-	TuningServiceSettings m_tuningServiceSettings;
-	TestClientSettings m_testClientSettings;
-
-	// Settings structures isn't defined for:
-	//
-	// Monitor
-	// Metrology
-	// TuningClient
-
+	SoftwareSettings* m_settings = nullptr;
 };
 
 class SoftwareXmlReader

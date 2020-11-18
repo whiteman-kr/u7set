@@ -76,6 +76,7 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
+    ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
@@ -152,7 +153,6 @@ SOURCES +=\
     EditEngine/EditEngineSetOrder.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/ServiceSettings.cpp \
     ../lib/Queue.cpp \
     UploadTabPage.cpp \
     DialogChoosePreset.cpp \
@@ -232,6 +232,7 @@ SOURCES +=\
 HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ExportPrint.h \
+    ../lib/SoftwareSettings.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
@@ -317,7 +318,6 @@ HEADERS  += \
     EditEngine/EditEngineSetOrder.h \
     ../lib/DeviceHelper.h \
     ../lib/XmlHelper.h \
-    ../lib/ServiceSettings.h \
     ../lib/Queue.h \
     UploadTabPage.h \
     DialogChoosePreset.h \

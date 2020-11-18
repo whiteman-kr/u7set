@@ -33,16 +33,6 @@ namespace Builder
 
 	bool ArchivingServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
-		if (m_settings.isInitialized() == false)
-		{
-			bool result = true;
-
-			result &= m_settings.readFromDevice(m_software, m_log);
-			result &= m_settings.checkSettings(m_software, m_log);
-
-			RETURN_IF_FALSE(result);
-		}
-
 		XmlWriteHelper xml(xmlWriter);
 
 		return m_settings.writeToXml(xml);
@@ -50,6 +40,13 @@ namespace Builder
 
 	bool ArchivingServiceCfgGenerator::writeSettings()
 	{
+		bool result = true;
+
+		result &= m_settings.readFromDevice(m_equipment, m_software, m_log);
+		result &= m_settings.checkSettings(m_software, m_log);
+
+		RETURN_IF_FALSE(result);
+
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
@@ -111,7 +108,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -137,7 +134,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

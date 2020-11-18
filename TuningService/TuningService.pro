@@ -45,7 +45,7 @@ SOURCES += \
     TuningService.cpp \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/Queue.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/DeviceObject.cpp \
@@ -98,7 +98,7 @@ HEADERS += \
     TuningService.h \
     ../lib/DataSource.h \
     ../lib/XmlHelper.h \
-    ../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
     ../lib/Queue.h \
     ../lib/DeviceHelper.h \
     ../lib/DeviceObject.h \

@@ -4,8 +4,8 @@
 #include <QFile>
 #include <QCryptographicHash>
 
-#include "../../Builder/CfgFiles.h"
 #include "../../lib/XmlHelper.h"
+#include "../../lib/ConstStrings.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ void BuildInfo::loadBuildFiles()
 		return;
 	}
 
-	QString signalsFile = m_buildDirPath + BUILD_FILE_SEPARATOR + Builder::DIR_COMMON + BUILD_FILE_SEPARATOR + Builder::FILE_APP_SIGNALS_ASGS;
+	QString signalsFile = m_buildDirPath + BUILD_FILE_SEPARATOR + Directory::COMMON + BUILD_FILE_SEPARATOR + File::APP_SIGNALS_ASGS;
 	signalsFile.replace("\\", BUILD_FILE_SEPARATOR);
 	m_buildFile[BUILD_FILE_TYPE_SIGNALS].setPath(signalsFile);
 
@@ -138,7 +138,7 @@ void BuildInfo::loadBuildFiles()
 	QStringList listPathSubDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 	foreach (QString pathSubDir, listPathSubDirs)
 	{
-		QString fileCfg = m_buildDirPath + BUILD_FILE_SEPARATOR + pathSubDir + BUILD_FILE_SEPARATOR + Builder::FILE_CONFIGURATION_XML;
+		QString fileCfg = m_buildDirPath + BUILD_FILE_SEPARATOR + pathSubDir + BUILD_FILE_SEPARATOR + File::CONFIGURATION_XML;
 
 		QFile fileCfgXml(fileCfg);
 		if (fileCfgXml.open(QIODevice::ReadOnly) == false)
@@ -174,11 +174,11 @@ void BuildInfo::loadBuildFiles()
 		return;
 	}
 
-	QString sourceCfgFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + Builder::FILE_CONFIGURATION_XML;
+	QString sourceCfgFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + File::CONFIGURATION_XML;
 	sourceCfgFile.replace("\\", BUILD_FILE_SEPARATOR);
 	m_buildFile[BUILD_FILE_TYPE_SOURCE_CFG].setPath(sourceCfgFile);
 
-	QString sourcesFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + Builder::FILE_APP_DATA_SOURCES_XML;
+	QString sourcesFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + File::APP_DATA_SOURCES_XML;
 	sourcesFile.replace("\\", BUILD_FILE_SEPARATOR);
 	m_buildFile[BUILD_FILE_TYPE_SOURCES].setPath(sourcesFile);
 }

@@ -49,7 +49,7 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
@@ -107,7 +107,7 @@ HEADERS += \
     ../lib/TcpFileTransfer.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    ../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
     ../lib/DeviceHelper.h \
     ../lib/OutputLog.h \
     ../lib/XmlHelper.h \

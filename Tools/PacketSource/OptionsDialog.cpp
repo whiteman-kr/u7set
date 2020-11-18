@@ -4,9 +4,9 @@
 #include <QFile>
 #include <QFileDialog>
 
-#include "../../Builder/CfgFiles.h"
 #include "../../lib/XmlHelper.h"
 #include "../../lib/Types.h"
+#include "../../lib/ConstStrings.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -230,7 +230,7 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 
 	if (QFile::exists(m_buildInfo.buildFile(BUILD_FILE_TYPE_SIGNALS).path()) == false)
 	{
-		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(File::APP_SIGNALS_ASGS));
 		return false;
 	}
 
@@ -238,7 +238,7 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 
 	if (QFile::exists(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path()) == false)
 	{
-		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(Builder::FILE_CONFIGURATION_XML));
+		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(File::CONFIGURATION_XML));
 		return false;
 	}
 
@@ -246,7 +246,7 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 
 	if (QFile::exists(m_buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path()) == false)
 	{
-		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(File::APP_DATA_SOURCES_XML));
 		return false;
 	}
 
