@@ -207,6 +207,7 @@ public:
 	bool					signalSourceIsValid(bool showMsg);
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
+	int						getMaxComparatorCount(const MeasureSignal& activeSignal);
 
 protected:
 

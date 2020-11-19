@@ -910,6 +910,11 @@ void MainWindow::loadSignalsOnToolBar()
 
 void MainWindow::setMeasureType(int measureType)
 {
+	if (m_measureThread.isRunning() == true)
+	{
+		return;
+	}
+
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
@@ -945,7 +950,6 @@ void MainWindow::setMeasureType(int measureType)
 
 	emit measureViewChanged(pView);
 	emit measureTypeChanged(m_measureType);
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1168,6 +1172,40 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 	return true;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
+{
+	int maxComparatorCount = 0;
+
+	int channelCount =  activeSignal.channelCount();
+	for(int ch = 0; ch < channelCount; ch++)
+	{
+		Metrology::Signal* pSignal = nullptr;
+
+		switch (activeSignal.signalConnectionType())
+		{
+			case SIGNAL_CONNECTION_TYPE_UNUSED:
+				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(ch);
+				break;
+			default:
+				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(ch);
+				break;
+		}
+
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		if (maxComparatorCount < pSignal->param().comparatorCount())
+		{
+			maxComparatorCount = pSignal->param().comparatorCount();
+		}
+	}
+
+	return maxComparatorCount;
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1197,10 +1235,21 @@ void MainWindow::startMeasure()
 		return;
 	}
 
-	MeasureSignal activeSignal = theSignalBase.activeSignal();
+	const MeasureSignal& activeSignal = theSignalBase.activeSignal();
 	if (activeSignal.isEmpty() == true)
 	{
 		return;
+	}
+
+	if (m_measureType == MEASURE_TYPE_COMPARATOR)
+	{
+		int comparatorCount = getMaxComparatorCount(activeSignal);
+		if (comparatorCount == 0)
+		{
+			m_measureThread.info().setExitCode(MeasureThreadInfo::ExitCode::Program);
+			emit measureThreadStoped();
+			return;
+		}
 	}
 
 	// if we check in single module mode
@@ -1235,6 +1284,8 @@ void MainWindow::startMeasure()
 
 			if (result == QMessageBox::No)
 			{
+				m_measureThread.info().setExitCode(MeasureThreadInfo::ExitCode::Program);
+				emit measureThreadStoped();
 				return;
 			}
 		}
@@ -2166,7 +2217,7 @@ void MainWindow::signalSocketDisconnected()
 
 	if (m_measureThread.isRunning() == true)
 	{
-		m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+		m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 	}
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
@@ -2233,7 +2284,7 @@ void MainWindow::tuningSocketDisconnected()
 	{
 		if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 		{
-			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 		}
 	}
 
@@ -2321,6 +2372,48 @@ void MainWindow::measureThreadStoped()
 
 	m_statusMeasureThreadState->setText(tr(" Measure process is stopped "));
 	m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
+
+	//
+	//
+	if (theOptions.module().measureLinAndCmp() == true)
+	{
+		if (m_measureThread.info().exitCode() == MeasureThreadInfo::ExitCode::Manual)
+		{
+			return;
+		}
+
+		switch (m_measureType)
+		{
+			case MEASURE_TYPE_LINEARITY:
+				{
+					const MeasureSignal& activeSignal = theSignalBase.activeSignal();
+					if (activeSignal.isEmpty() == true)
+					{
+						break;
+					}
+
+					int comparatorCount = getMaxComparatorCount(activeSignal);
+					if (comparatorCount == 0)
+					{
+						break;
+					}
+
+					m_pMainTab->setCurrentIndex(MEASURE_TYPE_COMPARATOR);
+
+					emit startMeasure();
+
+					return;
+				}
+			case MEASURE_TYPE_COMPARATOR:
+				{
+					m_pMainTab->setCurrentIndex(MEASURE_TYPE_LINEARITY);
+				}
+				break;
+			default:
+				assert(0);
+				break;
+		}
+	}
 
 	//
 	//

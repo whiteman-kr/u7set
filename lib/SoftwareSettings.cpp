@@ -1485,24 +1485,82 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xmlReader)
 
 	result &= xmlReader.findElement(XmlElement::SETTINGS);
 
+	// for compatibility current settings and old settings
+	// read current settings but if attributeRead == false, then try read old settings
+	//
+	bool attributeRead = true;
+
+	// AppDataService
+	//
 	result &= xmlReader.findElement(XmlElement::APP_DATA_SERVICE);
 
-	result &= xmlReader.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, &appDataServicePropertyIsValid1);
+		// primary
+		//
+	attributeRead = xmlReader.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, &appDataServicePropertyIsValid1);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readBoolAttribute("PropertyIsValid1", &appDataServicePropertyIsValid1);
+	}
+
 	result &= xmlReader.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataServiceID1);
-	result &= xmlReader.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, &appDataServiceIP1);
-	result &= xmlReader.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, &appDataServicePort1);
 
-	result &= xmlReader.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, &appDataServicePropertyIsValid2);
+	attributeRead = xmlReader.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, &appDataServiceIP1);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readStringAttribute("ip1", &appDataServiceIP1);
+	}
+
+	attributeRead = xmlReader.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, &appDataServicePort1);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readIntAttribute("port1", &appDataServicePort1);
+	}
+
+		// reserve
+		//
+	attributeRead = xmlReader.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, &appDataServicePropertyIsValid2);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readBoolAttribute("PropertyIsValid2", &appDataServicePropertyIsValid2);
+	}
+
 	result &= xmlReader.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataServiceID2);
-	result &= xmlReader.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, &appDataServiceIP2);
-	result &= xmlReader.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, &appDataServicePort2);
 
+	attributeRead = xmlReader.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, &appDataServiceIP2);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readStringAttribute("ip2", &appDataServiceIP2);
+	}
+
+	attributeRead = xmlReader.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, &appDataServicePort2);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readIntAttribute("port2", &appDataServicePort2);
+	}
+
+	// TuningService
+	//
 	result &= xmlReader.findElement(XmlElement::TUNING_SERVICE);
 
-	result &= xmlReader.readBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, &tuningServicePropertyIsValid);
+	attributeRead = xmlReader.readBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, &tuningServicePropertyIsValid);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readBoolAttribute("PropertyIsValid", &tuningServicePropertyIsValid);
+	}
+
 	result &= xmlReader.readStringAttribute(XmlAttribute::SOFTWARE_METROLOGY_ID, &softwareMetrologyID);
-	result &= xmlReader.readStringAttribute(XmlAttribute::TUNING_SERVICE_IP, &tuningServiceIP);
-	result &= xmlReader.readIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, &tuningServicePort);
+
+	attributeRead = xmlReader.readStringAttribute(XmlAttribute::TUNING_SERVICE_IP, &tuningServiceIP);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readStringAttribute("ip", &tuningServiceIP);
+	}
+
+	attributeRead = xmlReader.readIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, &tuningServicePort);
+	if (attributeRead == false)
+	{
+		result &= xmlReader.readIntAttribute("port", &tuningServicePort);
+	}
 
 	return result;
 }

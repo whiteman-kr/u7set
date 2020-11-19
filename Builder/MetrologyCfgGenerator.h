@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
 #include "../lib/SoftwareSettings.h"
@@ -12,7 +13,7 @@ namespace Builder
 	{
 	public:
 		MetrologyCfgGenerator(Context* context, Hardware::Software* software);
-		virtual ~MetrologyCfgGenerator();
+		virtual ~MetrologyCfgGenerator() override;
 
 		virtual bool generateConfiguration() override;
 		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
