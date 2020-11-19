@@ -78,7 +78,6 @@ SOURCES +=\
     ../lib/ExportPrint.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
-    ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
