@@ -335,9 +335,6 @@ public:
 	bool needConversion() const { return m_needConversion; }
 	void setNeedConversion(bool need) { m_needConversion = need; }
 
-	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
-	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
-
 	bool isConst() const { return m_isConst; }
 	void setIsConst(bool isConst) { m_isConst = isConst; }
 
@@ -369,11 +366,17 @@ public:
 
 	void initTuningValues();
 
-	void setLog(Builder::IssueLogger* log) { m_log = log; }
-
 	static QString expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
 												const QString& templateStr,
 												QString* errMsg);
+#ifdef IS_BUILDER
+
+	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
+	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
+
+	void setLog(Builder::IssueLogger* log) { m_log = log; }
+
+#endif
 
 private:
 
@@ -516,8 +519,14 @@ private:
 
 	bool m_needConversion = false;
 
-	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
+#ifdef IS_BUILDER
+
+	// specific build-time fields
+	//
+	std::shared_ptr<Hardware::DeviceModule> m_lm;
 	Builder::IssueLogger* m_log = nullptr;
+
+#endif
 };
 
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
@@ -557,7 +566,11 @@ public:
 
 	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
 
+#ifdef IS_BUILDER
+
 	void setLog(Builder::IssueLogger* log);
+
+#endif
 
 private:
 	QMultiHash<int, int> m_groupSignals;
