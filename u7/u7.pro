@@ -76,7 +76,6 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
-    ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -116,7 +115,6 @@ SOURCES +=\
     ../lib/DbWorker.cpp \
     ../lib/DbProgressDialog.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Signal.cpp \
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
@@ -136,7 +134,6 @@ SOURCES +=\
     DialogFileEditor.cpp \
     DialogSubsystemListEditor.cpp \
     EquipmentVcsDialog.cpp \
-    ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/Types.cpp \
