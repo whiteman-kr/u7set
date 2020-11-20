@@ -64,7 +64,7 @@ SOURCES += \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     AppDataSource.cpp \
-    ../Builder/ModulesRawData.cpp \
+#    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
