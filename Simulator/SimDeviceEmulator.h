@@ -43,7 +43,7 @@ namespace Sim
 {
 	Q_NAMESPACE
 
-	enum class DeviceMode
+	enum class DeviceState
 	{
 		Off,
 		Start,
@@ -51,8 +51,23 @@ namespace Sim
 		Operate
 	};
 
-	Q_ENUM_NS(DeviceMode)
+	Q_ENUM_NS(DeviceState)
 
+	// --
+	//
+	enum class RuntimeMode
+	{
+		StartupMode,
+		ConfigurationMode,
+		RunSafeMode,
+		RunMode,
+		TuningMode,
+		FaultedMode,
+		PoweredOffMode,
+	};
+
+	// --
+	//
 	enum class CyclePhase
 	{
 		IdrPhase,
@@ -63,7 +78,7 @@ namespace Sim
 }
 
 Q_DECLARE_METATYPE(Sim::CyclePhase)
-Q_DECLARE_METATYPE(Sim::DeviceMode)
+Q_DECLARE_METATYPE(Sim::DeviceState)
 
 namespace Sim
 {
@@ -293,10 +308,23 @@ namespace Sim
 
 		const Lans& lans() const;
 
-		DeviceMode currentMode() const;
+		[[nodiscard]] RuntimeMode runtimeMode() const;
+		void setRuntimeMode(RuntimeMode value);
 
+		[[nodiscard]] DeviceState deviceState() const;
 	private:
-		void setCurrentMode(DeviceMode value);
+		void setDeviceState(DeviceState value);
+
+		// Tuning
+		//
+	public:
+		[[nodiscard]] bool armingKey() const;
+		void setArmingKey(bool value);
+
+		[[nodiscard]] bool tuningKey() const;
+		void setTuningKey(bool value);
+
+		[[nodiscard]] bool testTuningApplyCommand(bool newValue);	// Test m_tuningApplyCommand and set new value
 
 		// Data
 		//
@@ -319,9 +347,12 @@ namespace Sim
 
 		// Current state
 		//
-		std::atomic<DeviceMode> m_currentMode = DeviceMode::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
-																	// powerOff can be called while simulation is running
-																	// reset can be called to restart module after powerOff
+		std::atomic<RuntimeMode> m_runtimeMode = RuntimeMode::PoweredOffMode;
+		std::atomic<DeviceState> m_deviceState = DeviceState::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
+																			// powerOff can be called while simulation is running
+																			// reset can be called to restart module after powerOff
+
+
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
 		std::vector<ConnectionPtr> m_connections;
@@ -332,7 +363,13 @@ namespace Sim
 																// Programm memory is not so big, max
 		AfbComponentSet m_afbComponents;
 
-		Lans m_lans{this, m_simulator};										// Device LAN Interfaces, based on m_logicModuleExtraInfo
+		Lans m_lans{this, m_simulator};							// Device LAN Interfaces, based on m_logicModuleExtraInfo
+
+		// Tuning
+		//
+		std::atomic<bool> m_armingKey{false};					// External Key
+		std::atomic<bool> m_tuningKey{false};					// Extrenal Key
+		std::atomic<bool> m_tuningApplyCommand{false};			// Flag from tunning comunnication to apply tuning changes
 
 		// Cached state
 		//

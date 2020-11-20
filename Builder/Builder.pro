@@ -95,7 +95,6 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/DeviceHelper.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/Queue.cpp \

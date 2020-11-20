@@ -380,6 +380,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
 
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_LIN_AND_CMP]));
+					item->setValue(m_options.module().measureLinAndCmp());
+					appendProperty(item, page, MO_PARAM_MEASURE_LIN_AND_CMP);
+					measuremoduleGroup->addSubProperty(item);
+
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]));
 					item->setValue(m_options.module().measureEntireModule());
 					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
@@ -1148,6 +1153,7 @@ void OptionsDialog::applyProperty()
 				switch(param)
 				{
 					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());							break;
+					case MO_PARAM_MEASURE_LIN_AND_CMP:		m_options.module().setMeasureLinAndCmp(value.toBool());						break;
 					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());					break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;

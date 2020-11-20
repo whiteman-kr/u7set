@@ -294,14 +294,14 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 			{
 				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-				primary.readFromCfgSrv = settings.appDataServicePropertyIsValid1;
+				primary.isValid = settings.appDataServicePropertyIsValid1;
 				primary.equipmentID = settings.appDataServiceID1;
 				primary.serverIP = settings.appDataServiceIP1;
 				primary.serverPort = settings.appDataServicePort1;
 
 				CONNECTION_OPTION& reserve = m_connectOption[SOCKET_SERVER_TYPE_RESERVE];
 
-				reserve.readFromCfgSrv = settings.appDataServicePropertyIsValid2;
+				reserve.isValid = settings.appDataServicePropertyIsValid2;
 				reserve.equipmentID = settings.appDataServiceID2;
 				reserve.serverIP = settings.appDataServiceIP2;
 				reserve.serverPort = settings.appDataServicePort2;
@@ -315,7 +315,7 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 			{
 				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-				primary.readFromCfgSrv = settings.tuningServicePropertyIsValid;
+				primary.isValid = settings.tuningServicePropertyIsValid;
 				primary.equipmentID = settings.softwareMetrologyID;
 				primary.serverIP = settings.tuningServiceIP;
 				primary.serverPort = settings.tuningServicePort;
@@ -559,6 +559,7 @@ void ModuleOption::load()
 
 	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
 
+	m_measureLinAndCmp = s.value(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
 
@@ -573,6 +574,7 @@ void ModuleOption::save()
 
 	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
 
+	s.setValue(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), m_measureLinAndCmp);
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
@@ -585,6 +587,7 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
 	m_suffixSN = from.m_suffixSN;
 
+	m_measureLinAndCmp = from.m_measureLinAndCmp;
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
 
@@ -1420,14 +1423,18 @@ bool Options::readFromXml(const QByteArray& fileData)
 	bool result = false;
 
 	result = m_projectInfo.readFromXml(fileData);
-
-	RETURN_IF_FALSE(result);
+	if (result == false)
+	{
+		return false;
+	}
 
 	XmlReadHelper xmlReader(fileData);
 
 	result = m_settings.readFromXml(xmlReader);
-
-	RETURN_IF_FALSE(result);
+	if (result == false)
+	{
+		return false;
+	}
 
 	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
 	{

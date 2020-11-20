@@ -255,16 +255,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Settings node
 		//
-/*		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
-		if (settingsNodes.size() != 1)
-		{
-			readSettings.errorMessage += tr("Parsing Settings node error.\n");
-		}
-		else
-		{
-			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
-		}  */
-
 		result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
 	}
 
@@ -621,107 +611,6 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 
 	return outSetting->errorMessage.isEmpty();
 }
-/*
-bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
-{
-	if (outSetting == nullptr ||
-			settingsNode.nodeName() != "Settings")
-	{
-		assert(outSetting);
-		assert(settingsNode.nodeName() == "Settings");
-		return false;
-	}
-
-	QDomElement settingsElement = settingsNode.toElement();
-
-	// Check if XML contains Error tag
-	//
-	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
-
-	if (errorNodes.isEmpty() == false)
-	{
-		for (int i = 0; i < errorNodes.count();  i++)
-		{
-			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
-		}
-		return false;
-	}
-
-	// Get TuningService data
-	//
-	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("TuningService");
-
-		if (dasNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find TuningService tag\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
-
-			QString tunsId = dasXmlElement.attribute("TuningServiceID1");
-			QString tunsIp = dasXmlElement.attribute("ip1");
-			int tunsPort = dasXmlElement.attribute("port1").toInt();
-
-			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
-
-		}
-	}
-
-	// Get TuningService data
-	//
-	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("Appearance");
-
-		if (dasNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find Appearance tag\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
-
-			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
-			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
-			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
-			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
-			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
-			outSetting->startSchemaID = dasXmlElement.attribute("startSchemaID");
-			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
-			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-
-			bool showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
-			bool useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
-
-			outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
-			if (showSOR == true)
-			{
-				outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
-			}
-			else
-			{
-				if (useAccessFlag == true)
-				{
-					outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
-				}
-			}
-
-			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
-			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
-
-			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
-			usersAccounts.replace(' ', ';');
-			usersAccounts.replace('\n', ';');
-			usersAccounts.remove('\r');
-			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
-		}
-	}
-
-	return outSetting->errorMessage.isEmpty();
-}*/
 
 bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, ConfigSettings* outSetting)
 {

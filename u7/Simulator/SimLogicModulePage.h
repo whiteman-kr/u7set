@@ -23,6 +23,8 @@ protected slots:
 	void projectUpdated();
 
 	void powerOff(bool toPowerOff);
+	void armingKeyToggled(bool value);
+	void tuningKeyToggled(bool value);
 	void signalsButtonClicked();
 	void codeButtonClicked();
 	void memoryButtonClicked();
@@ -51,12 +53,36 @@ private:
 private:
 	QSplitter* m_splitter = new QSplitter;
 
-	QLabel* m_subsystemIdLabel = new QLabel{this};
-	QLabel* m_equipmentIdLabel = new QLabel{this};
-	QLabel* m_channelLabel = new QLabel{this};
+	QLabel m_equipmentIdLabel{tr("EquipmentID:"), this};
+	QLabel m_equipmentIdValue{this};
 
-	QPushButton* m_disableButton = new QPushButton{tr("Disable"), this};
-	QLabel* m_stateLabel = new QLabel{this};
+	QLabel m_subsystemIdLabel{tr("SubsystemID:"), this};
+	QLabel m_subsystemIdValue{this};
+
+	QLabel m_channelLabel{tr("Channel:"), this};
+	QLabel m_channelValue{this};
+
+	QLabel m_moduleLabel{tr("Module:"), this};
+	QLabel m_moduleValue{this};
+
+	QFrame m_stateLine{this};
+
+	QPushButton m_disableButton{tr("Disable"), this};
+	QLabel m_stateLabel{this};
+
+	QLabel m_runtimeModeLabel{tr("Runtime Mode:"), this};
+	QLabel m_runtimeModeValue{tr("{}"), this};
+
+	QFrame m_tuningLine{this};
+
+	QLabel m_tuningModeLabel{tr("Tuning Mode:"), this};
+	QLabel m_tuningModeValue{tr("{No}"), this};
+
+	QPushButton m_armingKeyButton{tr("Arming Key"), this};
+	QLabel m_armingKeyStateLabel{tr("{0}"), this};
+
+	QPushButton m_tuningKeyButton{tr("Tuning Key"), this};
+	QLabel m_tuningKeyStateLabel{tr("{0}"), this};
 
 	QPushButton* m_signalsButton = new QPushButton{tr("Signals"), this};
 	QPushButton* m_memoryButton = new QPushButton{tr("Memory Dump"), this};

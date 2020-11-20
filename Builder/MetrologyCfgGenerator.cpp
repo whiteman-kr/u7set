@@ -1,4 +1,5 @@
 #include "MetrologyCfgGenerator.h"
+
 #include "../lib/MetrologySignal.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
@@ -34,139 +35,6 @@ namespace Builder
 		XmlWriteHelper xml(xmlWriter);
 
 		return m_settings.writeToXml(xml);
-
-
-/*		xmlWriter.writeStartElement("Settings");
-
-		{
-			bool result = true;
-
-			// AppDataService
-			//
-
-			QString appDataServiceId1;
-			QString appDataServiceId2;
-
-			result &= DeviceHelper::getStrProperty(m_software, "AppDataServiceID1" , &appDataServiceId1, m_log);
-			result &= DeviceHelper::getStrProperty(m_software, "AppDataServiceID2" , &appDataServiceId2, m_log);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			if (appDataServiceId1.isEmpty() == true &&
-				appDataServiceId2.isEmpty() == true)
-			{
-				// Property '%1.%2' is empty.
-				//
-				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID1");
-				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID2");
-
-				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID1 and AppDataServiceID2 is empty"));
-				return false;
-			}
-
-			bool appDataPropertyIsValid1 = false;
-			bool appDataPropertyIsValid2 = false;
-
-			AppDataServiceSettings adsSettings1;
-			AppDataServiceSettings adsSettings2;
-
-			if (appDataServiceId1.isEmpty() == false)
-			{
-				Hardware::Software* appDataObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
-
-				if (appDataObject1 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
-				}
-				else
-				{
-					adsSettings1.readFromDevice(m_equipment, appDataObject1, m_log);
-					appDataPropertyIsValid1 = true;
-				}
-			}
-
-			if (appDataServiceId2.isEmpty() == false)
-			{
-				Hardware::Software* appDataObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
-
-				if (appDataObject2 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
-				}
-				else
-				{
-					adsSettings2.readFromDevice(m_equipment, appDataObject2, m_log);
-					appDataPropertyIsValid2 = true;
-				}
-			}
-
-			xmlWriter.writeStartElement("AppDataService");
-			{
-				xmlWriter.writeAttribute("PropertyIsValid1", appDataPropertyIsValid1 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
-				xmlWriter.writeAttribute("ip1", adsSettings1.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(adsSettings1.clientRequestIP.port()));
-
-				xmlWriter.writeAttribute("PropertyIsValid2", appDataPropertyIsValid2 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
-				xmlWriter.writeAttribute("ip2", adsSettings2.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port2", QString::number(adsSettings2.clientRequestIP.port()));
-			}
-			xmlWriter.writeEndElement(); // </AppDataService>
-
-
-			// TuningService
-			//
-
-			QString tuningServiceId;
-
-			result &= DeviceHelper::getStrProperty(m_software, "TuningServiceID" , &tuningServiceId, m_log);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			bool tuningPropertyIsValid = false;
-
-			TuningServiceSettings tuningSettings;
-
-			if (tuningServiceId.isEmpty() == false)
-			{
-				Hardware::Software* tuningObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
-
-				if (tuningObject == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->wrnCFG3015(m_software->equipmentId(), "TuningServiceID", tuningServiceId);
-				}
-				else
-				{
-					tuningSettings.readFromDevice(m_equipment, tuningObject, m_log);
-					tuningPropertyIsValid = true;
-				}
-			}
-
-			xmlWriter.writeStartElement("TuningService");
-			{
-				xmlWriter.writeAttribute("PropertyIsValid", tuningPropertyIsValid == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("SoftwareMetrologyID", m_software->equipmentId());
-				xmlWriter.writeAttribute("ip", tuningSettings.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port", QString::number(tuningSettings.clientRequestIP.port()));
-			}
-			xmlWriter.writeEndElement(); // </TuningService>
-
-		} // </Settings>
-
-		return true; */
 	}
 
 	bool MetrologyCfgGenerator::writeDatabaseInfo()
@@ -186,7 +54,7 @@ namespace Builder
 	{
 		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
-		RETURN_IF_FALSE(result);
+		RETURN_IF_FALSE(result)
 
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
@@ -297,6 +165,9 @@ namespace Builder
 		}
 		xml.writeEndDocument();
 
+
+		// Create and write build file MetrologySignals.xml
+		//
 		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
@@ -304,6 +175,8 @@ namespace Builder
 			return false;
 		}
 
+		// add link to file MetrologySignals.xml in Configuration.xml
+		//
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
 		{

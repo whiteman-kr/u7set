@@ -1604,13 +1604,18 @@ namespace Builder
 
 		auto filter = [](const DbFileInfo& fi) -> bool
 		{
-			return fi.isFolder() || fi.fileName().endsWith(".js") == false;
+			return fi.isFolder() || fi.fileName().endsWith(".js") == false || fi.deleted() == true;
 		};
 
 		fileInfos.erase(std::remove_if(fileInfos.begin(),
 									   fileInfos.end(),
 									   filter),
 						fileInfos.end());
+
+		if (fileInfos.empty() == true)
+		{
+			return true;
+		}
 
 		std::vector<std::shared_ptr<DbFile>> files;
 
