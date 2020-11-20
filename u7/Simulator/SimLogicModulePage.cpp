@@ -20,16 +20,50 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 #else
 		QFont font = QFont("Courier");
 #endif
-	m_subsystemIdLabel->setFont(font);
-	m_equipmentIdLabel->setFont(font);
-	m_channelLabel->setFont(font);
+	QFont fontBold{font};
+	fontBold.setBold(true);
 
-	m_subsystemIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-	m_equipmentIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-	m_channelLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	m_equipmentIdLabel.setFont(font);
+	m_equipmentIdValue.setFont(fontBold);
 
-	m_disableButton->setCheckable(true);
-	m_disableButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+	m_subsystemIdLabel.setFont(font);
+	m_subsystemIdValue.setFont(font);
+
+	m_channelLabel.setFont(font);
+	m_channelValue.setFont(font);
+
+	m_moduleLabel.setFont(font);
+	m_moduleValue.setFont(font);
+
+	m_disableButton.setFont(font);
+	m_stateLabel.setFont(font);
+
+	m_runtimeModeLabel.setFont(font);
+	m_runtimeModeValue.setFont(font);
+
+	m_tuningModeLabel.setFont(font);
+	m_tuningModeValue.setFont(font);
+
+	m_armingKeyButton.setFont(font);
+	m_tuningKeyButton.setFont(font);
+
+	m_equipmentIdValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	m_subsystemIdValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	m_channelValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	m_moduleValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+
+	// --
+	//
+	m_disableButton.setCheckable(true);
+
+	m_armingKeyButton.setCheckable(true);
+	m_tuningKeyButton.setCheckable(true);
+
+	m_stateLine.setFrameShape(QFrame::HLine);
+	m_stateLine.setFrameShadow(QFrame::Sunken);
+
+	m_tuningLine.setFrameShape(QFrame::HLine);
+	m_tuningLine.setFrameShadow(QFrame::Sunken);
 
 	QStringList schemaListHeader;
 	schemaListHeader << tr("SchemaID");
@@ -44,7 +78,6 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 
 	m_schemasList->setSortingEnabled(true);
 	m_schemasList->sortByColumn(0, Qt::SortOrder::AscendingOrder);
-
 
 	m_schemaFilterEdit->setPlaceholderText(tr("Schema Filter: Start typing IDs, Labels, Signals' IDS etc"));
 	m_schemaFilterEdit->setClearButtonEnabled(true);
@@ -64,17 +97,57 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 
 		int row = 0;
 
-		layout->addWidget(m_subsystemIdLabel, row++, 0, 1, 3);
-		layout->addWidget(m_equipmentIdLabel, row++, 0, 1, 3);
-		layout->addWidget(m_channelLabel, row++, 0, 1, 3);
+		layout->addWidget(&m_equipmentIdLabel, row, 0, 1, 1);
+		layout->addWidget(&m_equipmentIdValue, row, 1, 1, 2);
+		row ++;
 
-		layout->addWidget(m_disableButton, row, 0, 1, 1);
-		layout->addWidget(m_stateLabel, row++, 1, 1, 1);
+		layout->addWidget(&m_subsystemIdLabel, row, 0, 1, 1);
+		layout->addWidget(&m_subsystemIdValue, row, 1, 1, 2);
+		row ++;
 
-		// Add spacer
+		layout->addWidget(&m_channelLabel, row, 0, 1, 1);
+		layout->addWidget(&m_channelValue, row, 1, 1, 2);
+		row ++;
+
+		layout->addWidget(&m_moduleLabel, row, 0, 1, 1);
+		layout->addWidget(&m_moduleValue, row, 1, 1, 2);
+		row ++;
+
+		layout->addWidget(&m_stateLine, row, 0, 1, 3);
+		row ++;
+
+		layout->addWidget(&m_disableButton, row, 0, 1, 1);
+		layout->addWidget(&m_stateLabel, row, 1, 1, 2);
+		row ++;
+
+		layout->addWidget(&m_runtimeModeLabel, row, 0, 1, 1);
+		layout->addWidget(&m_runtimeModeValue, row, 1, 1, 2);
+		row ++;
+
+		layout->addWidget(&m_tuningLine, row, 0, 1, 3);
+		row ++;
+
+		layout->addWidget(&m_tuningModeLabel, row, 0, 1, 1);
+		layout->addWidget(&m_tuningModeValue, row, 1, 1, 2);
+		row ++;
+
+		layout->addWidget(&m_armingKeyButton, row, 0, 1, 1);
+		layout->addWidget(&m_armingKeyStateLabel, row, 1, 1, 1);
+		row ++;
+
+		layout->addWidget(&m_tuningKeyButton, row, 0, 1, 1);
+		layout->addWidget(&m_tuningKeyStateLabel, row, 1, 1, 1);
+		row ++;
+
+		// Add horizontal spacer to column 3 (0-based index)
 		//
-		QSpacerItem* spacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
-		layout->addItem(spacer, row++, 0, 1, 3);
+		QSpacerItem* hspacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+		layout->addItem(hspacer, 0, 3);
+
+		// Add spacer vertical spacer
+		//
+		QSpacerItem* vspacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		layout->addItem(vspacer, row++, 0, 1, 3);
 
 		// Buttons  Signals, Memory, Code
 		//
@@ -115,7 +188,9 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 	//
 	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
 
-	connect(m_disableButton, &QPushButton::toggled, this, &SimLogicModulePage::powerOff);
+	connect(&m_disableButton, &QPushButton::toggled, this, &SimLogicModulePage::powerOff);
+	connect(&m_armingKeyButton, &QPushButton::toggled, this, &SimLogicModulePage::armingKeyToggled);
+	connect(&m_tuningKeyButton, &QPushButton::toggled, this, &SimLogicModulePage::tuningKeyToggled);
 
 	connect(m_signalsButton, &QPushButton::clicked, this, &SimLogicModulePage::signalsButtonClicked);
 	connect(m_codeButton, &QPushButton::clicked, this, &SimLogicModulePage::codeButtonClicked);
@@ -165,12 +240,19 @@ void SimLogicModulePage::updateLogicModuleInfoInfo()
 		return;
 	}
 
-	const Hardware::LogicModuleInfo& lmInfo = lm->logicModuleInfo();
+	const ::LogicModuleInfo& lmInfoExtras = lm->logicModuleExtraInfo();
 
-	m_equipmentIdLabel->setText(QString("EquipmnetID: %1").arg(lmInfo.equipmentId));
-	m_channelLabel->setText(QString("LmNumber: %1, Channel: %2")
-								.arg(lmInfo.lmNumber)
-								.arg(QChar('A' + static_cast<char>(lmInfo.channel))));
+	m_equipmentIdValue.setText(lmInfoExtras.equipmentID);
+
+	m_subsystemIdValue.setText(QString("%1 (LMNumber: %2)")
+							   .arg(lmInfoExtras.subsystemID)
+							   .arg(lmInfoExtras.lmNumber));
+
+	m_channelValue.setText(lmInfoExtras.subsystemChannel);
+
+	m_moduleValue.setText(QString("%1 (%2)")
+							.arg(lmInfoExtras.caption)
+							.arg(lmInfoExtras.lmDescriptionFile));
 
 	// Fill schema list
 	//
@@ -234,6 +316,28 @@ void SimLogicModulePage::powerOff(bool toPowerOff)
 		lm != nullptr && lm->isPowerOff() != toPowerOff)
 	{
 		lm->setPowerOff(toPowerOff);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::armingKeyToggled(bool value)
+{
+	if (auto lm = logicModule();
+		lm != nullptr && lm->armingKey() != value)
+	{
+		lm->setArmingKey(value);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::tuningKeyToggled(bool value)
+{
+	if (auto lm = logicModule();
+		lm != nullptr && lm->tuningKey() != value)
+	{
+		lm->setTuningKey(value);
 	}
 
 	return;
@@ -447,19 +551,19 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 
 	if (state.m_state != Sim::SimControlState::Stop)
 	{
-		switch (lmState.deviceMode)
+		switch (lmState.deviceState)
 		{
-		case Sim::DeviceMode::Off:
+		case Sim::DeviceState::Off:
 			text += QStringLiteral("Off");
 			break;
-		case Sim::DeviceMode::Start:
+		case Sim::DeviceState::Start:
 			text += QStringLiteral("Start");
 			break;
-		case Sim::DeviceMode::Fault:
+		case Sim::DeviceState::Fault:
 			text += QStringLiteral("Fault");
 			color = qRgb(0xD0, 0x00, 0x00);
 			break;
-		case Sim::DeviceMode::Operate:
+		case Sim::DeviceState::Operate:
 			text += QStringLiteral("Operate");
 			break;
 		default:
@@ -469,20 +573,73 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 		}
 	}
 
+	Sim::RuntimeMode runtimeMode = Sim::RuntimeMode::PoweredOffMode;
 	bool disabled = false;
+	bool tuningMode = false;
+	bool armingKey = false;
+	bool tuningKey = false;
 
-	if (auto lm = logicModule();
+	if (std::shared_ptr<Sim::LogicModule> lm = logicModule();
 		lm != nullptr)
 	{
+		runtimeMode = lm->runtimeMode();
+
 		disabled = lm->isPowerOff();
+		tuningMode = (runtimeMode == Sim::RuntimeMode::TuningMode);
+		armingKey = lm->armingKey();
+		tuningKey = lm->tuningKey();
 	}
 
-	if (m_disableButton->isChecked() != disabled)
+	if (m_disableButton.isChecked() != disabled)
 	{
-		// Update push button state
-		//
-		m_disableButton->setChecked(disabled);
+		m_disableButton.setChecked(disabled);
 	}
+
+	{
+		QString runtimeString = "{}";
+		switch (runtimeMode)
+		{
+		case Sim::RuntimeMode::StartupMode:
+			runtimeString = QStringLiteral("{StartupMode}");
+			break;
+		case Sim::RuntimeMode::ConfigurationMode:
+			runtimeString = QStringLiteral("{ConfigurationMode}");
+			break;
+		case Sim::RuntimeMode::RunSafeMode:
+			runtimeString = QStringLiteral("{RunSafeMode}");
+			break;
+		case Sim::RuntimeMode::RunMode:
+			runtimeString = QStringLiteral("{RunMode}");
+			break;
+		case Sim::RuntimeMode::TuningMode:
+			runtimeString = QStringLiteral("{TuningMode}");
+			break;
+		case Sim::RuntimeMode::FaultedMode:
+			runtimeString = QStringLiteral("{FaultedMode}");
+			break;
+		case Sim::RuntimeMode::PoweredOffMode:
+			runtimeString = QStringLiteral("{PoweredOffMode}");
+			break;
+		}
+
+		m_runtimeModeValue.setText(runtimeString);
+	}
+
+	// Update Tuning state
+	//
+	if (m_armingKeyButton.isChecked() != armingKey)
+	{
+		m_armingKeyButton.setChecked(armingKey);
+	}
+
+	if (m_tuningKeyButton.isChecked() != tuningKey )
+	{
+		m_tuningKeyButton.setChecked(tuningKey );
+	}
+
+	m_tuningModeValue.setText(tuningMode ? QStringLiteral("{1}") : QStringLiteral("{0}"));
+	m_armingKeyStateLabel.setText(armingKey ? QStringLiteral("{1}") : QStringLiteral("{0}"));
+	m_tuningKeyStateLabel.setText(tuningKey ? QStringLiteral("{1}") : QStringLiteral("{0}"));
 
 	// State
 	//
@@ -499,7 +656,12 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 		}
 	}
 
-	m_stateLabel->setText(stateText);
+	if (stateText.isEmpty() == false)
+	{
+		stateText = "{" + stateText + "}";
+	}
+
+	m_stateLabel.setText(stateText);
 
 	return;
 }

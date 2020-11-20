@@ -108,7 +108,163 @@ namespace Sim
 
 		m_device->writeRamDword(millisecondsAddress, time.msec(), E::LogicModuleRamAccess::Read);
 
+		// Set Arming Key State
+		//
+		const quint32 inputControllerOffset = 57782 + 0;
+		const quint16 armingKeyValidityBit = 0;
+		const quint16 armingKeyHighABit = 3;
+		const quint16 armingKeyLowABit = 6;
+		const quint16 armingKeyHighBBit = 9;
+		const quint16 armingKeyLowBBit = 12;
+		const quint16 armingKey = m_device->armingKey();
+
+		m_device->writeRamBit(inputControllerOffset, armingKeyValidityBit, 1, E::LogicModuleRamAccess::Read);
+		m_device->writeRamBit(inputControllerOffset, armingKeyHighABit, armingKey, E::LogicModuleRamAccess::Read);
+		m_device->writeRamBit(inputControllerOffset, armingKeyLowABit, armingKey, E::LogicModuleRamAccess::Read);
+		m_device->writeRamBit(inputControllerOffset, armingKeyHighBBit, armingKey, E::LogicModuleRamAccess::Read);
+		m_device->writeRamBit(inputControllerOffset, armingKeyLowBBit, armingKey, E::LogicModuleRamAccess::Read);
+
+		// Set Tuning Key State
+		//
+		const quint32 tuningKeyOffset = 57526 + 169;	// <TxDiagDataOffset>57526</TxDiagDataOffset>
+		const quint16 tuningKeyBit = 14;
+		const quint16 tuningKey = m_device->tuningKey();
+
+		m_device->writeRamBit(tuningKeyOffset, tuningKeyBit, tuningKey, E::LogicModuleRamAccess::Read);
+
+		// Set Mode signals
+		//
+		{
+			const quint32 runModeOffset = 57782 + 39;
+			const quint32 runModeBit = 5;
+			const quint16 runMode = !(armingKey && tuningKey);
+
+			m_device->writeRamBit(runModeOffset, runModeBit, runMode, E::LogicModuleRamAccess::Read);
+		}
+
+		{
+			const quint32 tuningModeOffset = 57782 + 39;
+			const quint32 tuningModeBit = 6;
+			const quint16 tuningMode = armingKey && tuningKey;
+			const quint16 prevTuningMode = m_device->readRamBit(tuningModeOffset, tuningModeBit, E::LogicModuleRamAccess::Read);
+
+			m_device->writeRamBit(tuningModeOffset, tuningModeBit, tuningMode, E::LogicModuleRamAccess::Read);
+
+			if (prevTuningMode != tuningMode)
+			{
+				// Switch to/from tuning mode just thappened
+				//
+				bool ok = true;
+				if (tuningMode == 1)
+				{
+					ok = tuningEnterTuningMode();
+				}
+				else
+				{
+					ok = tuningLeaveTuningMode();
+				}
+
+				if (ok == false)
+				{
+					return false;
+				}
+			}
+
+			if (m_device->testTuningApplyCommand(false) == true)
+			{
+				tuningApplyCommand();
+			}
+		}
+
+		bool ok = setRuntimeModeSignals();
+
+		return ok;
+	}
+
+	bool CommandProcessor_LM5_LM6::tuningEnterTuningMode()
+	{
+		// Device just entered to TuningMode.
+		// The copy of tuning memory is done here
+		//
+		const LmDescription::Memory& memory = m_device->lmDescription().memory();
+
+		Ram::Handle ramAreaHandle = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
+		const RamArea* tuningRamArea = m_device->ram().memoryArea(ramAreaHandle);
+
+		if (tuningRamArea == nullptr)
+		{
+			m_device->fault(QString("Getting tuning ram area error, offset 0x%1")
+							  .arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+							"CommandProcessor_LM5_LM6::tuningEnterTuningMode");
+			return false;
+		}
+
+		m_tuningRamArea = *tuningRamArea;
+
+		m_device->setRuntimeMode(RuntimeMode::TuningMode);
+
 		return true;
+	}
+
+	bool CommandProcessor_LM5_LM6::tuningLeaveTuningMode()
+	{
+		if (m_device->runtimeMode() != RuntimeMode::TuningMode)
+		{
+			m_device->fault(QString("Device is not in tuning mode"), "CommandProcessor_LM5_LM6::tuningLeaveTuningMode");
+			return false;
+		}
+
+		// On leaving tuning mode m_tuningRamArea is copied back to RAM
+		//
+		const LmDescription::Memory& memory = m_device->lmDescription().memory();
+
+		Ram::Handle ramAreaHandle = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
+		RamArea* tuningRamArea = m_device->mutableRam().memoryArea(ramAreaHandle);
+
+		if (tuningRamArea == nullptr)
+		{
+			m_device->fault(QString("Getting tuning ram area error, offset 0x%1")
+							  .arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+							"CommandProcessor_LM5_LM6::tuningLeaveTuningMode");
+			return false;
+		}
+
+		*tuningRamArea = std::move(m_tuningRamArea);
+		m_tuningRamArea.clear();
+
+		m_device->setRuntimeMode(RuntimeMode::RunMode);
+
+		return true;
+	}
+
+	bool CommandProcessor_LM5_LM6::tuningApplyCommand()
+	{
+		if (m_device->runtimeMode() != RuntimeMode::TuningMode)
+		{
+			m_device->fault(QString("Device is not in tuning mode"), "CommandProcessor_LM5_LM6::tuningApplyCommand");
+			return false;
+		}
+
+		bool ok = tuningEnterTuningMode();
+		return ok;
+	}
+
+	bool CommandProcessor_LM5_LM6::setRuntimeModeSignals()
+	{
+		bool ok = true;
+		RuntimeMode mode = m_device->runtimeMode();
+
+		const quint32 offset = 57526 + 39;		// <TxDiagDataOffset>57526</TxDiagDataOffset>
+
+		ok &= m_device->writeRamBit(offset, 2, mode == RuntimeMode::StartupMode, E::LogicModuleRamAccess::Read);
+		ok &= m_device->writeRamBit(offset, 3, mode == RuntimeMode::ConfigurationMode, E::LogicModuleRamAccess::Read);
+		ok &= m_device->writeRamBit(offset, 4, mode == RuntimeMode::RunSafeMode, E::LogicModuleRamAccess::Read);
+		ok &= m_device->writeRamBit(offset, 5, mode == RuntimeMode::RunMode, E::LogicModuleRamAccess::Read);
+		ok &= m_device->writeRamBit(offset, 6, mode == RuntimeMode::TuningMode, E::LogicModuleRamAccess::Read);
+		ok &= m_device->writeRamBit(offset, 7, mode == RuntimeMode::FaultedMode, E::LogicModuleRamAccess::Read);
+		ok &= m_device->writeRamBit(offset, 8, mode == RuntimeMode::PoweredOffMode, E::LogicModuleRamAccess::Read);
+
+		return ok;
 	}
 
 	bool CommandProcessor_LM5_LM6::runCommand(const DeviceCommand& command)

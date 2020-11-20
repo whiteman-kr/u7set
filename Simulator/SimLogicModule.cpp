@@ -224,14 +224,19 @@ namespace Sim
 		return m_device.mutableRam();
 	}
 
-	DeviceMode LogicModule::deviceMode() const
+	RuntimeMode LogicModule::runtimeMode() const
 	{
-		return m_device.currentMode();
+		return m_device.runtimeMode();
+	}
+
+	DeviceState LogicModule::deviceState() const
+	{
+		return m_device.deviceState();
 	}
 
 	bool LogicModule::isPowerOff() const
 	{
-		return deviceMode() == DeviceMode::Off;
+		return deviceState() == DeviceState::Off;
 	}
 
 	void LogicModule::setPowerOff(bool value)
@@ -252,4 +257,25 @@ namespace Sim
 //			}
 		}
 	}
+
+	bool LogicModule::armingKey() const
+	{
+		return m_device.armingKey();
+	}
+
+	void LogicModule::setArmingKey(bool value)
+	{
+		return m_device.setArmingKey(value);
+	}
+
+	bool LogicModule::tuningKey() const
+	{
+		return m_device.tuningKey();
+	}
+
+	void LogicModule::setTuningKey(bool value)
+	{
+		return m_device.setTuningKey(value);
+	}
+
 }

@@ -28,7 +28,7 @@ namespace Sim
 		qRegisterMetaType<Sim::SimControlState>("SimControlState");
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
-		qRegisterMetaType<Sim::DeviceMode>("DeviceMode");
+		qRegisterMetaType<Sim::DeviceState>("DeviceState");
 
 		qRegisterMetaType<Sim::RamAddress>("RamAddress");
 		qRegisterMetaType<Sim::ScriptSignal>("ScriptSignal");
