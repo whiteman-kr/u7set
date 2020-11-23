@@ -24,7 +24,6 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
-//		bool initFiltersSettings();
 		bool createObjectFilters(const QStringList& equipmentList);
 
 		bool writeSettings();
@@ -47,14 +46,7 @@ namespace Builder
 
 		::Proto::AppSignalSet m_tuningSet;
 
-/*		Moved to m_settings!
-
-		bool m_filterByEquipment = false;
-		bool m_filterBySchema = false;
-		bool m_filtersSettingsInitialized = false;*/
-
 		TuningFilterStorage m_tuningFilterStorage;
-//		QStringList m_schemaTagList;					// Generated in writeSettings
 	};
 
 	template <typename TYPE>

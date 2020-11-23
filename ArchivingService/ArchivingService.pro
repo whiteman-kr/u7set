@@ -54,15 +54,11 @@ SOURCES += \
     ../lib/UdpSocket.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/DeviceHelper.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/DeviceObject.cpp \
-    ../Builder/IssueLogger.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/OutputLog.cpp \
     ../lib/Types.cpp \
-    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     ArchServiceMain.cpp \
     TcpAppDataServer.cpp \
@@ -107,16 +103,12 @@ HEADERS += \
     ../lib/UdpSocket.h \
     ../lib/BuildInfo.h \
     ../lib/CircularLogger.h \
-    ../lib/DeviceHelper.h \
     ../lib/TcpFileTransfer.h \
     ../lib/DeviceObject.h \
-    ../Builder/IssueLogger.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
-    ../lib/OutputLog.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \

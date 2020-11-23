@@ -23,9 +23,6 @@ namespace Builder
 
 		bool writeSchemasByTags();
 
-		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);
-		bool writeArchiveServiceSection(QXmlStreamWriter& xmlWriter);
-		bool writeTuningServiceSection(QXmlStreamWriter& xmlWriter);
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
 		template <typename TYPE>

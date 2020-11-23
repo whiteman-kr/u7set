@@ -567,6 +567,8 @@ void Signal::cacheSpecPropValues()
 		m_cachedSpecPropValues = std::make_shared<SignalSpecPropValues>();
 	}
 
+#ifdef IS_BUILDER
+
 	bool res = m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
 
 	if (res == false && m_log != nullptr)
@@ -574,6 +576,11 @@ void Signal::cacheSpecPropValues()
 		LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 specific properties values parsing error").arg(appSignalID()));
 	}
 
+#else
+
+	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
+
+#endif
 }
 
 void Signal::saveProtoData(QByteArray* protoDataArray) const
@@ -701,15 +708,6 @@ void Signal::resetAddresses()
 QString Signal::regValueAddrStr() const
 {
 	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
-}
-
-void Signal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
-{
-	TEST_PTR_RETURN(lm);
-
-	m_lm = lm;
-
-	setLmEquipmentID(lm->equipmentIdTemplate());
 }
 
 void Signal::writeToXml(XmlWriteHelper& xml)
@@ -1425,6 +1423,19 @@ QString Signal::expandDeviceSignalTemplate(	const Hardware::DeviceObject& startD
 	return resultStr;
 }
 
+#ifdef IS_BUILDER
+
+	void Signal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
+	{
+		TEST_PTR_RETURN(lm);
+
+		m_lm = lm;
+
+		setLmEquipmentID(lm->equipmentIdTemplate());
+	}
+
+#endif
+
 QString Signal::expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
 										const QString& macroStr,
 										QString* errMsg)
@@ -1703,12 +1714,17 @@ double Signal::getSpecPropDouble(const QString& name) const
 
 	if (result == false)
 	{
+
+#ifdef IS_BUILDER
+
 		if (m_log != nullptr)
 		{
 			// Specific property %1 is not exists in signal %2
 			//
 			m_log->errALC5176(appSignalID(), name);
 		}
+
+#endif
 
 		return 0;
 	}
@@ -1727,12 +1743,17 @@ int Signal::getSpecPropInt(const QString& name) const
 
 	if (result == false)
 	{
+
+#ifdef IS_BUILDER
+
 		if (m_log != nullptr)
 		{
 			// Specific property %1 is not exists in signal %2
 			//
 			m_log->errALC5176(appSignalID(), name);
 		}
+
+#endif
 
 		return 0;
 	}
@@ -1751,12 +1772,17 @@ unsigned int Signal::getSpecPropUInt(const QString& name) const
 
 	if (result == false)
 	{
+
+#ifdef IS_BUILDER
+
 		if (m_log != nullptr)
 		{
 			// Specific property %1 is not exists in signal %2
 			//
 			m_log->errALC5176(appSignalID(), name);
 		}
+
+#endif
 
 		return 0;
 	}
@@ -1776,12 +1802,17 @@ int Signal::getSpecPropEnum(const QString& name) const
 
 	if (result == false)
 	{
+
+#ifdef IS_BUILDER
+
 		if (m_log != nullptr)
 		{
 			// Specific property %1 is not exists in signal %2
 			//
 			m_log->errALC5176(appSignalID(), name);
 		}
+
+#endif
 
 		return 0;
 	}
@@ -1810,10 +1841,15 @@ bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) c
 
 		if (res == false)
 		{
+
+#ifdef IS_BUILDER
+
 			if (m_log != nullptr)
 			{
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 specific properties values parsing error").arg(appSignalID()));
 			}
+
+#endif
 
 			result = false;
 		}
@@ -2244,19 +2280,22 @@ void SignalSet::replaceOrAppendIfNotExists(int signalID, const Signal& s)
 	}
 }
 
-void SignalSet::setLog(Builder::IssueLogger* log)
-{
-	TEST_PTR_RETURN(log);
+#ifdef IS_BUILDER
 
-	m_log = log;
-
-	int signalCount = count();
-
-	for(int i = 0; i < signalCount; i++)
+	void SignalSet::setLog(Builder::IssueLogger* log)
 	{
-		Signal& s = (*this)[i];
+		TEST_PTR_RETURN(log);
 
-		s.setLog(log);
+		m_log = log;
+
+		int signalCount = count();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& s = (*this)[i];
+
+			s.setLog(log);
+		}
 	}
-}
 
+#endif

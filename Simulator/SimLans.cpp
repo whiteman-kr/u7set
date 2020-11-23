@@ -69,11 +69,6 @@ namespace Sim
 
 	bool Lans::sendAppDataData(const QByteArray& data, TimeStamp timeStamp)
 	{
-		return sendAppDataData(QByteArray{data}, timeStamp);
-	}
-
-	bool Lans::sendAppDataData(QByteArray&& data, TimeStamp timeStamp)
-	{
 		if (m_simulator->appDataTransmitter().enabled() == false)
 		{
 			return false;
@@ -92,6 +87,27 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	bool Lans::isTuningEnabled() const
+	{
+		int check_global_tuning_enable_flag;
+//		if (m_simulator->appDataTransmitter().enabled() == false)
+//		{
+//			return false;
+//		}
+
+		// true if at least one LAN can transmit app data
+		//
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	ScopedLog& Lans::log()

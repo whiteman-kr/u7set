@@ -95,7 +95,6 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/DeviceHelper.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/Queue.cpp \
@@ -147,7 +146,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/Times.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/DbProgressDialog.cpp \
+	../lib/DbProgressDialog.cpp \
     ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
@@ -190,7 +189,6 @@ HEADERS += \
     ../lib/Crc.h \
     ../lib/Hash.h \
     ../lib/HostAddressPort.h \
-    ../lib/DeviceHelper.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
     ../lib/Queue.h \

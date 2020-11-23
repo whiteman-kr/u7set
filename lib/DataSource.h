@@ -12,10 +12,13 @@
 #include "AppSignal.h"
 #include "SimpleThread.h"
 #include "CommonTypes.h"
+#include "WUtils.h"
+
+#ifdef IS_BUILDER
 
 #include "../Builder/IssueLogger.h"
 
-#include "WUtils.h"
+#endif
 
 
 class DataSource
@@ -70,6 +73,8 @@ public:
 	DataSource();
 	virtual ~DataSource();
 
+#ifdef IS_BUILDER
+
 	bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 								   DataType dataType,
 								   int adapterNo,
@@ -78,6 +83,8 @@ public:
 								   const SubsystemKeyMap& subsystemKeyMap,
 								   const QHash<QString, quint64>& lmUniqueIdMap,
 								   Builder::IssueLogger* log);
+
+#endif
 
 	// LM's properties
 	//
