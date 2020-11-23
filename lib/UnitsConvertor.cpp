@@ -227,6 +227,7 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
+				case E::ElectricUnit::uA:
 
 					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 					{
@@ -336,6 +337,7 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
+				case E::ElectricUnit::uA:
 
 					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 					{
