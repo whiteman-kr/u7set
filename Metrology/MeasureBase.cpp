@@ -482,9 +482,11 @@ void Measurement::calcError()
 	{
 		setError(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,		std::abs(nominal(limitType)-measure(limitType)));
 		setError(limitType, MEASURE_ERROR_TYPE_REDUCE,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
+		setError(limitType, MEASURE_ERROR_TYPE_RELATIVE,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
 
 		setErrorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
 		setErrorLimit(limitType, MEASURE_ERROR_TYPE_REDUCE,		errorLimit);
+		setErrorLimit(limitType, MEASURE_ERROR_TYPE_RELATIVE,	errorLimit);
 	}
 }
 
@@ -550,7 +552,8 @@ QString Measurement::errorStr() const
 	switch(errorType)
 	{
 		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
+		case MEASURE_ERROR_TYPE_REDUCE:
+		case MEASURE_ERROR_TYPE_RELATIVE:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
 		default:							assert(0);
 	}
 
@@ -618,7 +621,8 @@ QString Measurement::errorLimitStr() const
 	switch(errorType)
 	{
 		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
+		case MEASURE_ERROR_TYPE_REDUCE:
+		case MEASURE_ERROR_TYPE_RELATIVE:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
 		default:							assert(0);
 	}
 
@@ -1370,7 +1374,7 @@ void LinearityMeasurement::calcAdditionalParam(const IoSignalParam &ioParam)
 			//
 		double systemError = std::abs(measure(limitType) - nominal(limitType));
 
-		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, systemError);
+		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION, systemError);
 
 
 			// according to GOST 8.736-2011 paragraph 5.3 formula 3

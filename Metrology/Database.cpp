@@ -86,13 +86,17 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
+			append("ElectricErrorRelative",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
+			append("ElectricLimitErrorRelative",	QVariant::Double);
 
 			append("EngineeringErrorAbsolute",		QVariant::Double);
 			append("EngineeringErrorReduce",		QVariant::Double);
+			append("EngineeringErrorRelative",		QVariant::Double);
 			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
 			append("EngineeringLimitErrorReduce",	QVariant::Double);
+			append("EngineeringLimitErrorRelative",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 			append("Calibrator",					QVariant::String, 64);
@@ -216,13 +220,17 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
+			append("ElectricErrorRelative",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
+			append("ElectricLimitErrorRelative",	QVariant::Double);
 
 			append("EngineeringErrorAbsolute",		QVariant::Double);
 			append("EngineeringErrorReduce",		QVariant::Double);
+			append("EngineeringErrorRelative",		QVariant::Double);
 			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
 			append("EngineeringLimitErrorReduce",	QVariant::Double);
+			append("EngineeringLimitErrorRelative",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 			append("Calibrator",					QVariant::String, 64);
@@ -830,13 +838,17 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
 					measure->setError(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setError(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setError(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
 					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
 					measure->setCalibrator(query.value(field++).toString());
@@ -871,7 +883,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setAdditionalParamCount(query.value(field++).toInt());
 
 					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY, query.value(field++).toDouble());
@@ -996,13 +1008,17 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
 					measure->setError(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setError(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setError(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
 					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
 					measure->setCalibrator(query.value(field++).toString());
@@ -1256,13 +1272,17 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE));
 
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE));
 
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
@@ -1299,7 +1319,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->additionalParamCount());
 
 					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE));
-					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR));
+					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION));
 					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD));
 					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER));
 					query.bindValue(field++, measure->additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY));
@@ -1437,13 +1457,17 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_RELATIVE));
 
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_ABSOLUTE));
 					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGINEER, MEASURE_ERROR_TYPE_RELATIVE));
 
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
@@ -1850,7 +1874,7 @@ bool Database::createBackup()
 		return false;
 	}
 
-	QString path = m_databaseOption.copyPath();
+	QString path = m_databaseOption.backupPath();
 
 	if (QFile::exists(path) == false)
 	{

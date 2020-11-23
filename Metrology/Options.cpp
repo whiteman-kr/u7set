@@ -559,6 +559,7 @@ void ModuleOption::load()
 
 	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
 
+	m_measureInterInsteadIn = s.value(QString("%1MeasureInterInsteadIn").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_measureLinAndCmp = s.value(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
@@ -574,6 +575,7 @@ void ModuleOption::save()
 
 	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
 
+	s.setValue(QString("%1MeasureInterInsteadIn").arg(MODULE_OPTIONS_KEY), m_measureInterInsteadIn);
 	s.setValue(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), m_measureLinAndCmp);
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
@@ -587,6 +589,7 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
 	m_suffixSN = from.m_suffixSN;
 
+	m_measureInterInsteadIn = from.m_measureInterInsteadIn;
 	m_measureLinAndCmp = from.m_measureLinAndCmp;
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
@@ -1258,7 +1261,7 @@ void DatabaseOption::load()
 
 	m_onStart = s.value(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), false).toBool();
 	m_onExit = s.value(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), true).toBool();
-	m_copyPath = s.value(QString("%1CopyPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::tempPath()).toString();
+	m_backupPath = s.value(QString("%1BackupPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::tempPath()).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1272,7 +1275,7 @@ void DatabaseOption::save()
 
 	s.setValue(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), m_onStart);
 	s.setValue(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), m_onExit);
-	s.setValue(QString("%1CopyPath").arg(DATABASE_OPTIONS_REG_KEY), m_copyPath);
+	s.setValue(QString("%1BackupPath").arg(DATABASE_OPTIONS_REG_KEY), m_backupPath);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1284,7 +1287,7 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 
 	m_onStart = from.m_onStart;
 	m_onExit = from.m_onExit;
-	m_copyPath = from.m_copyPath;
+	m_backupPath = from.m_backupPath;
 
 	return *this;
 }

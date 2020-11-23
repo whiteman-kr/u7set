@@ -511,14 +511,14 @@ int SignalConnectionBase::findIndex(const SignalConnection& connection) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVector<Metrology::Signal*> SignalConnectionBase::getOutputSignals(int connectionType, const QString& appSignalID) const
+QVector<Metrology::Signal*> SignalConnectionBase::getOutputSignals(int connectionType, const QString& InputAppSignalID) const
 {
 	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return QVector<Metrology::Signal*>();
 	}
 
-	if (appSignalID.isEmpty() == true)
+	if (InputAppSignalID.isEmpty() == true)
 	{
 		return QVector<Metrology::Signal*>();
 	}
@@ -538,7 +538,7 @@ QVector<Metrology::Signal*> SignalConnectionBase::getOutputSignals(int connectio
 			continue;
 		}
 
-		if (connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) == appSignalID)
+		if (connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) == InputAppSignalID)
 		{
 			Metrology::Signal* pOutputSignal = m_connectionList[i].signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)

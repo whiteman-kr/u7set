@@ -32,7 +32,7 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn("MVC_CMN_L_PERCENT", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Value to %"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn("MVC_CMN_L_EL_MEASURE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Electric measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn("MVC_CMN_L_EN_MEASURE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Engineering measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn("MVC_CMN_L_SYSTEM_ERROR", QT_TRANSLATE_NOOP("MeasureViewHeader",	"System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn("MVC_CMN_L_SYSTEM_DEVIATION", QT_TRANSLATE_NOOP("MeasureViewHeader",	"System deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn("MVC_CMN_L_SD", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn("MVC_CMN_L_BORDER", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn("MVC_CMN_L_UNCERTAINTY", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Uncertainty"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -330,7 +330,7 @@ void MeasureViewHeader::updateColumnState()
 					case LO_VIEW_TYPE_SIMPLE:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
-						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
+						setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
 						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
 						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
@@ -350,7 +350,7 @@ void MeasureViewHeader::updateColumnState()
 					case LO_VIEW_TYPE_EXTENDED:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, true);
-						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, true);
+						setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, true);
 						setColumnVisible(MVC_CMN_L_SD, true);
 						setColumnVisible(MVC_CMN_L_BORDER, true);
 						setColumnVisible(MVC_CMN_L_UNCERTAINTY, true);
@@ -371,7 +371,7 @@ void MeasureViewHeader::updateColumnState()
 					case LO_VIEW_TYPE_DETAIL_ENGINEERING:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
-						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
+						setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
 						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
 						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);

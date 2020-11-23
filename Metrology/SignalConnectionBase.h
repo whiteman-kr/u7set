@@ -144,7 +144,7 @@ public:
 	int						findIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
 	int						findIndex(const SignalConnection& connection) const;
 
-	QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& appSignalID) const;
+	QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& InputAppSignalID) const;
 
 	SignalConnectionBase&	operator=(const SignalConnectionBase& from);
 
