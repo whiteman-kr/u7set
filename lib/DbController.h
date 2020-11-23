@@ -188,6 +188,9 @@ public:
 	bool nextCounterValue(int* counter);
 	int nextCounterValue();
 
+	bool getTags(QStringList* tags);
+	bool writeTags(const QStringList& tags, const QString& comment);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);

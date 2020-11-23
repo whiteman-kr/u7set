@@ -43,6 +43,20 @@ namespace ExtWidgets
 		return new PropertyPlainTextEditor(parent);
 	}
 
+	bool PropertyEditorBase::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+	{
+		Q_UNUSED(propertyPtr);
+		Q_UNUSED(dialog);
+		return false;
+	}
+
+	bool PropertyEditorBase::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+	{
+		Q_UNUSED(propertyPtr);
+		Q_UNUSED(dialog);
+		return false;
+	}
+
 	bool PropertyEditorBase::expertMode() const
 	{
 		return m_expertMode;
@@ -2151,14 +2165,17 @@ namespace ExtWidgets
 	{
 		setWindowTitle(p->caption());
 
-		if (thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+		if (m_propertyEditorBase->restorePropertyTextEditorSize(m_property, this) == false)
 		{
-			move(thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos);
-			restoreGeometry(thePropertyEditorSettings.m_multiLinePropertyEditorGeometry);
-		}
-		else
-		{
-			resize(1024, 768);
+			if (thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+			{
+				move(thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos);
+				restoreGeometry(thePropertyEditorSettings.m_multiLinePropertyEditorGeometry);
+			}
+			else
+			{
+				resize(1024, 768);
+			}
 		}
 
 		QVBoxLayout* vl = new QVBoxLayout();
@@ -2249,8 +2266,11 @@ namespace ExtWidgets
 	{
 		Q_UNUSED(result);
 
-		thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos = pos();
-		thePropertyEditorSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+		if (m_propertyEditorBase->storePropertyTextEditorSize(m_property, this) == false)
+		{
+			thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos = pos();
+			thePropertyEditorSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+		}
 
 	}
 

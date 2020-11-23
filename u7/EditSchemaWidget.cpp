@@ -8009,7 +8009,7 @@ void EditSchemaWidget::schemaProperties()
 {
 	if (m_schemaPropertiesDialog == nullptr)
 	{
-		m_schemaPropertiesDialog = new SchemaPropertiesDialog(m_editEngine, this);
+		m_schemaPropertiesDialog = new SchemaPropertiesDialog(m_editEngine, db(), this);
 	}
 
 	m_schemaPropertiesDialog->setSchema(schema());

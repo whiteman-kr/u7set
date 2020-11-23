@@ -368,7 +368,8 @@ void DialogSubsystemListEditor::on_m_remove_clicked()
 		index = items[0]->data(0, Qt::UserRole).toInt();
 	}
 
-	ui->m_list->takeTopLevelItem(index);
+	QTreeWidgetItem* deletedItem = ui->m_list->takeTopLevelItem(index);
+	delete deletedItem;
 
 	// Renumber indexes
 	//

@@ -92,6 +92,7 @@ SOURCES +=\
     CreateUserDialogDialog.cpp \
     DialogClientBehavior.cpp \
     DialogSettings.cpp \
+    DialogTagsEditor.cpp \
     EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
     LoginDialog.cpp \
@@ -108,6 +109,7 @@ SOURCES +=\
     Simulator/SimSelectSchemaPage.cpp \
     Simulator/SimSignalSnapshot.cpp \
     Simulator/SimTrend/SimTrends.cpp \
+    TagsEditor.cpp \
     TestsTabPage.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
@@ -249,6 +251,7 @@ HEADERS  += \
     CreateUserDialogDialog.h \
     DialogClientBehavior.h \
     DialogSettings.h \
+    DialogTagsEditor.h \
     EditEngine/EditEngineNop.h \
     FilesTabPage.h \
     LoginDialog.h \
@@ -265,6 +268,7 @@ HEADERS  += \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
     Stable.h \
+    TagsEditor.h \
     TestsTabPage.h \
     UserManagementDialog.h \
     ../lib/DbStruct.h \
@@ -398,6 +402,7 @@ FORMS    += \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
+    DialogTagsEditor.ui \
     LoginDialog.ui \
     Simulator/SimSelectBuildDialog.ui \
     UserManagementDialog.ui \

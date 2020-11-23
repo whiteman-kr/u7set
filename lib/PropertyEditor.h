@@ -47,6 +47,9 @@ namespace ExtWidgets
 		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
 		virtual PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent);
 
+		virtual bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);	// return true if custom size is set
+		virtual bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);	// return true if custom size is set
+
 		bool expertMode() const;
 		void setExpertMode(bool expertMode);
 

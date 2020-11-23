@@ -2,12 +2,13 @@
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
 #include "SvgEditor.h"
+#include "TagsEditor.h"
 
 //
 // IdePropertyEditorHelper
 //
 
-ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent, DbController* dbController)
+ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, DbController* dbController, QWidget* parent)
 {
 	if (propertyPtr == nullptr || parent == nullptr)
 	{
@@ -41,21 +42,77 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 
 	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Svg)
 	{
-		// This is Specific Properties
+		// This is SVG
 		//
 
 		SvgEditor* editor = new SvgEditor(parent);
 		return editor;
 	}
 
-	if (propertyPtr->isScript() == false)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
 	{
-		return new ExtWidgets::PropertyPlainTextEditor(parent);
+		// This is Tags
+		//
+		if (dbController == nullptr)
+		{
+			Q_ASSERT(dbController);
+			return new ExtWidgets::PropertyPlainTextEditor(parent);
+		}
+
+		TagsEditor* editor = new TagsEditor(dbController, parent);
+		return editor;
 	}
-	else
+
+	if (propertyPtr->isScript() == true)
 	{
+		// This is Script
+		//
 		return new IdeCodeEditor(CodeType::JavaScript, parent);
 	}
+
+	return new ExtWidgets::PropertyPlainTextEditor(parent);
+}
+
+bool IdePropertyEditorHelper::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	if (propertyPtr == nullptr || dialog == nullptr)
+	{
+		Q_ASSERT(propertyPtr);
+		Q_ASSERT(dialog);
+		return false;
+	}
+
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
+	{
+		// Resize depends on monitor size, DPI, resolution
+		//
+		QRect screen = QDesktopWidget().availableGeometry(dialog->parentWidget());
+
+		dialog->resize(static_cast<int>(screen.width() * 0.20),
+			   static_cast<int>(screen.height() * 0.40));
+		dialog->move(screen.center() - dialog->rect().center());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool IdePropertyEditorHelper::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	if (propertyPtr == nullptr || dialog == nullptr)
+	{
+		Q_ASSERT(propertyPtr);
+		Q_ASSERT(dialog);
+		return false;
+	}
+
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
+	{
+		return true;	// Do not save Tags editor size
+	}
+
+	return false;
 }
 
 
@@ -82,8 +139,19 @@ ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget
 
 ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, parent, m_dbController);
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
 }
+
+bool IdePropertyEditor::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::restorePropertyTextEditorSize(propertyPtr, dialog);
+}
+
+bool IdePropertyEditor::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::storePropertyTextEditorSize(propertyPtr, dialog);
+}
+
 
 //
 // IdePropertyTable
@@ -109,9 +177,18 @@ ExtWidgets::PropertyEditor* IdePropertyTable::createChildPropertyEditor(QWidget*
 
 ExtWidgets::PropertyTextEditor* IdePropertyTable::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, parent, m_dbController);
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
 }
 
+bool IdePropertyTable::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::restorePropertyTextEditorSize(propertyPtr, dialog);
+}
+
+bool IdePropertyTable::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::storePropertyTextEditorSize(propertyPtr, dialog);
+}
 
 //
 // DialogFindReplace
@@ -349,7 +426,8 @@ bool IdeCodeEditor::m_findCaseSensitive = false;
 
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     PropertyTextEditor(parent),
-    m_parent(parent)
+	m_codeType(codeType),
+	m_parent(parent)
 {
 	m_textEdit = new IdeQsciScintilla();
 
@@ -443,7 +521,16 @@ void IdeCodeEditor::setText(const QString& text)
 
 	m_textEdit->blockSignals(false);
 
-	adjustMarginWidth();
+	if (m_codeType == CodeType::JavaScript || m_codeType == CodeType::Xml)
+	{
+		if (m_textEdit->lexer() == nullptr)
+		{
+			Q_ASSERT(m_textEdit->lexer());
+			return;
+		}
+
+		adjustMarginWidth();
+	}
 }
 
 int IdeCodeEditor::lines() const

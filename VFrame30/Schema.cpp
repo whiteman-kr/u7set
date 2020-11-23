@@ -92,7 +92,8 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, "Tags", true, Schema::tagsAsString, Schema::setTags);
+		auto tagsProp = ADD_PROPERTY_GETTER_SETTER(QString, "Tags", true, Schema::tagsAsString, Schema::setTags);
+		tagsProp->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);

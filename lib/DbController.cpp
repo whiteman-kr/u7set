@@ -2742,6 +2742,102 @@ int DbController::nextCounterValue()
 	}
 }
 
+bool DbController::getTags(QStringList* tags)
+{
+	if (tags == nullptr)
+	{
+		Q_ASSERT(tags);
+		return false;
+	}
+
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+	if (ok == false || fileList.size() != 1)
+	{
+		return true;	// File does not exist
+	}
+
+	std::shared_ptr<DbFile> file;
+
+	if (getLatestVersion(fileList[0], &file, nullptr) == false)
+	{
+		return false;
+	}
+
+	QTextStream in(file->data());
+
+	while (in.atEnd() == false)
+	{
+		QString str = in.readLine();
+		if (str.isEmpty() == false)
+		{
+			tags->push_back(str);
+		}
+	}
+
+	return true;
+}
+
+bool DbController::writeTags(const QStringList& tags, const QString& comment)
+{
+	// save to db
+	//
+	std::shared_ptr<DbFile> file = nullptr;
+
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+	if (ok == false || fileList.size() != 1)
+	{
+		// create a file, if it does not exists
+		//
+		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
+		pf->setFileName(Db::File::TagsFileName);
+
+		if (addFile(pf, etcFileId(), nullptr) == false)
+		{
+			return false;
+		}
+
+		ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+		if (ok == false || fileList.size() != 1)
+		{
+			return false;
+		}
+	}
+
+	ok = getLatestVersion(fileList[0], &file, nullptr);
+	if (ok == false || file == nullptr)
+	{
+		return false;
+	}
+
+	if (file->state() != VcsState::CheckedOut)
+	{
+		if (checkOut(fileList[0], nullptr) == false)
+		{
+			return false;
+		}
+	}
+
+	QByteArray data = tags.join('\n').toUtf8();
+	file->swapData(data);
+
+	if (setWorkcopy(file, nullptr) == false)
+	{
+		return false;
+	}
+
+	if (checkIn(fileList[0], comment, nullptr) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
 	// Check parameters

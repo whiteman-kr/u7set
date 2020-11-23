@@ -429,7 +429,8 @@ public:
 		TuningFilter,
 		SpecificPropertyStruct,
 		LoadFileDialog,
-		Svg
+		Svg,
+		Tags
 	};
 	Q_ENUM(PropertySpecificEditor)
 

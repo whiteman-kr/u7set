@@ -1,16 +1,17 @@
 #include "SchemaPropertiesDialog.h"
 #include "ui_SchemaPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
+#include "IdePropertyEditor.h"
 #include "Settings.h"
 
 
-SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
+SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, DbController* dbController, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::SchemaPropertiesDialog)
 {
 	ui->setupUi(this);
 
-	m_propertyEditor = new SchemaPropertyEditor(editEngine, this);
+	m_propertyEditor = new SchemaPropertyEditor(editEngine, dbController, this);
 
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
@@ -58,11 +59,13 @@ void SchemaPropertiesDialog::resizeEvent(QResizeEvent* event)
 //		SchemaPropertyBrowser
 //
 //
-SchemaPropertyEditor::SchemaPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
+SchemaPropertyEditor::SchemaPropertyEditor(EditEngine::EditEngine* editEngine, DbController* dbController, QWidget* parent) :
 	PropertyEditor(parent),
-	m_editEngine(editEngine)
+	m_editEngine(editEngine),
+	m_dbController(dbController)
 {
 	assert(m_editEngine);
+	assert(m_dbController);
 }
 
 SchemaPropertyEditor::~SchemaPropertyEditor()
@@ -94,6 +97,21 @@ void SchemaPropertyEditor::valueChanged(QString propertyName, QVariant value)
 	}
 
 	return;
+}
+
+ExtWidgets::PropertyTextEditor* SchemaPropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
+{
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
+}
+
+bool SchemaPropertyEditor::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::restorePropertyTextEditorSize(propertyPtr, dialog);
+}
+
+bool SchemaPropertyEditor::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::storePropertyTextEditorSize(propertyPtr, dialog);
 }
 
 EditEngine::EditEngine* SchemaPropertyEditor::editEngine()
