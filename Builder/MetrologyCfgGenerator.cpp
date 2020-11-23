@@ -213,14 +213,6 @@ namespace Builder
 				{
 					switch (signal.electricUnit())
 					{
-						case E::ElectricUnit::V:
-
-							if (testElectricLimit_Input_V(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
-
 						case E::ElectricUnit::mA:
 
 							if (testElectricLimit_Input_mA(signal) == false)
@@ -240,6 +232,22 @@ namespace Builder
 						case E::ElectricUnit::Ohm:
 
 							if (testElectricLimit_Input_Ohm(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::V:
+
+							if (testElectricLimit_Input_V(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::uA:
+
+							if (testElectricLimit_Input_uA(signal) == false)
 							{
 								hasWrongField = true;
 							}
@@ -417,58 +425,6 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const Signal& signal)
-	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
-		{
-			return true;
-		}
-
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-		{
-			return true;
-		}
-
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
-		{
-			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::V)
-			{
-				return false;
-			}
-		}
-
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
-		{
-			return true;
-		}
-		else
-		{
-			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
-			{
-				return false;
-			}
-		}
-
-		UnitsConvertor uc;
-
-		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
-		if(electricLimit.isValid() == false)
-		{
-			return false;
-		}
-
-		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
 	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const Signal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
@@ -589,6 +545,7 @@ namespace Builder
 		return true;
 	}
 
+
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const Signal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
@@ -654,6 +611,110 @@ namespace Builder
 		}
 
 		if (testEngineeringLimit(signal, lowLimit, highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::V)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::uA)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::uA_m5_p5)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
 			return false;
 		}

@@ -27,10 +27,11 @@ namespace Builder
 		bool testElectricLimit(const Signal& signal, double lowLimit, double highLimit);
 		bool testEngineeringLimit(const Signal& signal, double lowLimit, double highLimit);
 
-		bool testElectricLimit_Input_V(const Signal& signal);
 		bool testElectricLimit_Input_mA(const Signal& signal);
 		bool testElectricLimit_Input_mV(const Signal& signal);
 		bool testElectricLimit_Input_Ohm(const Signal& signal);
+		bool testElectricLimit_Input_V(const Signal& signal);
+		bool testElectricLimit_Input_uA(const Signal& signal);
 
 	private:
 		MetrologySettings m_settings;
