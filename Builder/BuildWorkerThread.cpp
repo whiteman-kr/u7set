@@ -948,8 +948,6 @@ namespace Builder
 			return false;
 		}
 
-		signalSet->setLog(log);
-
 		signalSet->findAndRemoveExcludedFromBuildSignals();
 
 		signalSet->cacheSpecPropValues();

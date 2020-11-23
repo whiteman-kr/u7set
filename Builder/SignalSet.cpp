@@ -573,7 +573,7 @@ namespace Builder
 			return true;
 		}
 
-		double properyValue = s.getSpecPropDouble(propertyName);
+		double properyValue = s.getSpecPropDouble(propertyName, nullptr);
 
 		bool result = true;
 
