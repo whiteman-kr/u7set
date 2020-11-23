@@ -74,7 +74,7 @@ struct SignalElectricLimit
 
 	// microA
 	//
-	//	{ 0, 5, E::ElectricUnit::microA, E::SensorType::V_0_5, },										// module WAIM
+	{   -5,		5,		E::ElectricUnit::uA,	E::SensorType::uA_m5_p5,		},						// module MAIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
