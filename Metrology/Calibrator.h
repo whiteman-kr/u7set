@@ -42,7 +42,7 @@ const char* const CalibratorUnit[] =
 {
 				QT_TRANSLATE_NOOP("Calibrator.h", "mV"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "mA"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "μA (micro)"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "μA"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "nA"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "V"),
 				QT_TRANSLATE_NOOP("Calibrator.h", "kHz"),
@@ -55,7 +55,7 @@ const int		CALIBRATOR_UNIT_COUNT		= sizeof(CalibratorUnit)/sizeof(CalibratorUnit
 const int		CALIBRATOR_UNIT_UNDEFINED	= -1,
 				CALIBRATOR_UNIT_MV			= 0,
 				CALIBRATOR_UNIT_MA			= 1,
-				CALIBRATOR_UNIT_McrA		= 2,
+				CALIBRATOR_UNIT_UA			= 2,
 				CALIBRATOR_UNIT_NA			= 3,
 				CALIBRATOR_UNIT_V			= 4,
 				CALIBRATOR_UNIT_KHZ			= 5,
@@ -194,7 +194,7 @@ const CalibratorLimit CalibratorLimits[] =
 		// Source
 		//
 	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_MA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-3"},					// 0.05% +- 10 microA - i.e.  10 microA * 100% / 20 mА = 0.05%
-	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_McrA,		3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-6"},					// 0.05% +- 10 nanoA - i.e.  10 nanoA * 100% / 20 microА = 0.05%
+	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_UA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-6"},					// 0.05% +- 10 nanoA - i.e.  10 nanoA * 100% / 20 microА = 0.05%
 	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_NA,			3,	0.300,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-9"},					// 0.05% +- 10 picoA - i.e.  10 picoA * 100% / 20 nanoА = 0.05%
 };
 

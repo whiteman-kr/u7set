@@ -1832,9 +1832,13 @@
         <translation>мА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="45"/>
         <source>μA (micro)</source>
-        <translation>μА (микро)</translation>
+        <translation type="vanished">μА (микро)</translation>
+    </message>
+    <message>
+        <location filename="../Calibrator.h" line="45"/>
+        <source>μA</source>
+        <translation>μA</translation>
     </message>
     <message>
         <location filename="../Calibrator.h" line="46"/>
@@ -3304,47 +3308,47 @@ All electrical ranges of the inputs (or outputs) of the module must be the same.
         <translation>Калибратор: %1 - %2 не может установить режим для измерения электрического значения.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="380"/>
+        <location filename="../MeasureThread.cpp" line="381"/>
         <source>Calibrator: %1 - %2 can not set unit &quot;%3&quot;.</source>
         <translation>Калибратор: %1 - %2 не может установить электрические единицы: &quot;%3&quot;.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="388"/>
+        <location filename="../MeasureThread.cpp" line="389"/>
         <source>Prepare calibrator: %1 %2</source>
         <translation>Подготовка калибратора: %1 %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="430"/>
+        <location filename="../MeasureThread.cpp" line="431"/>
         <source>Please, switch polarity for calibrator %1
 You have used the negative (-) part of the electrical range.</source>
         <translation>Переключите полярность на калибраторе: %1
 Вы используете отрицательную (-) часть электрического диапазона.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="439"/>
+        <location filename="../MeasureThread.cpp" line="440"/>
         <source>Please, switch polarity for calibrator %1
 You have used the positive (+) part of the electrical range.</source>
         <translation>Переключите полярность на калибраторе: %1
 Вы используете положительную (+) часть электрического диапазона.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="483"/>
+        <location filename="../MeasureThread.cpp" line="484"/>
         <source>No points for measure</source>
         <translation>Нет точек измерения</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="495"/>
+        <location filename="../MeasureThread.cpp" line="496"/>
         <source>Point %1 / %2 </source>
         <translation>Точка %1 / %2 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="577"/>
+        <location filename="../MeasureThread.cpp" line="578"/>
         <source>Wait timeout for point %1 / %2 </source>
         <translation>Ожидаем таймаут для точки %1 / %2 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="584"/>
-        <location filename="../MeasureThread.cpp" line="1224"/>
+        <location filename="../MeasureThread.cpp" line="585"/>
+        <location filename="../MeasureThread.cpp" line="1225"/>
         <source>Save measurement </source>
         <translation>Сохранение измерения </translation>
     </message>
@@ -3353,27 +3357,27 @@ You have used the positive (+) part of the electrical range.</source>
         <translation type="vanished">Выбранный сигнал не содержит уставок</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="718"/>
+        <location filename="../MeasureThread.cpp" line="719"/>
         <source>Comparator %1, Prepare %2</source>
         <translation>Уставка %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="721"/>
+        <location filename="../MeasureThread.cpp" line="722"/>
         <source>Hysteresis of comparator %1, Prepare %2</source>
         <translation>Зона возврата уставки %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="890"/>
+        <location filename="../MeasureThread.cpp" line="891"/>
         <source>Comparator %1, additional delay</source>
         <translation>Уставка %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="893"/>
+        <location filename="../MeasureThread.cpp" line="894"/>
         <source>Hysteresis of comparator %1, additional delay</source>
         <translation>Зона возврата уставки %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="973"/>
+        <location filename="../MeasureThread.cpp" line="974"/>
         <source>Comparator %1, for following signals, is already in state of logical &quot;%2&quot;:
 
 </source>
@@ -3382,26 +3386,26 @@ You have used the positive (+) part of the electrical range.</source>
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1019"/>
+        <location filename="../MeasureThread.cpp" line="1020"/>
         <source>%1
 </source>
         <translation>%1
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1031"/>
+        <location filename="../MeasureThread.cpp" line="1032"/>
         <source>
 Do you want to repeat the preparation process in order to switch the comparator to state of logical &quot;%1&quot;, click &quot;Yes&quot;. Go to next comparator, click &quot;No&quot;</source>
         <translation>
 Вы хотите повторить процесс подготовок, чтобы переключать уставку в состояние лог. &quot;%1&quot;, тогда выберите &quot;Да&quot;. Перейти к следующей уставке, выберите &quot;Нет&quot;</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1067"/>
+        <location filename="../MeasureThread.cpp" line="1068"/>
         <source>Comparator %1, Step %2</source>
         <translation>Уставка %1, Шаг %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="1070"/>
+        <location filename="../MeasureThread.cpp" line="1071"/>
         <source>Hysteresis of comparator %1, Step %2</source>
         <translation>Зона возврата уставки %1, Шаг %2</translation>
     </message>
@@ -3736,7 +3740,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologySignal.cpp</name>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="1192"/>
+        <location filename="../../lib/MetrologySignal.cpp" line="1199"/>
         <source>Unused</source>
         <translation>Не используется</translation>
     </message>
@@ -3757,7 +3761,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MonitorSettings</name>
     <message>
-        <location filename="../../lib/SoftwareSettings.cpp" line="1596"/>
+        <location filename="../../lib/SoftwareSettings.cpp" line="1631"/>
         <source>Monitor configuration error %1, property startSchemaId is invalid</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6635,9 +6639,9 @@ Range of signal: %1</source>
     <message>
         <location filename="../../lib/UnitsConvertor.cpp" line="636"/>
         <location filename="../../lib/UnitsConvertor.cpp" line="740"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="789"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="834"/>
-        <location filename="../../lib/UnitsConvertor.cpp" line="861"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="806"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="851"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="878"/>
         <source>Function argument is out of range</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6647,42 +6651,52 @@ Range of signal: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="767"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="754"/>
         <source>Rload_Ohm argument is out of range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="774"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="749"/>
         <source>Unknown SensorType for mA</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="782"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="765"/>
+        <source>Unknown SensorType for V</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/UnitsConvertor.cpp" line="784"/>
+        <source>Unknown SensorType for uA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/UnitsConvertor.cpp" line="799"/>
         <source>Unknown unitID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="807"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="824"/>
         <source>Unknown OutputMode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="822"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="839"/>
         <source>Incorrect electric unit: &quot;%1&quot; for mode: &quot;%2&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="839"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="856"/>
         <source>Incorrect unitID for mV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="866"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="883"/>
         <source>Incorrect unitID for Ohm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/UnitsConvertor.cpp" line="871"/>
+        <location filename="../../lib/UnitsConvertor.cpp" line="888"/>
         <source>Incorrect R0 for Ohm</source>
         <translation type="unfinished"></translation>
     </message>
