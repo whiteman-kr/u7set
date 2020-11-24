@@ -360,9 +360,9 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busType
 									 busTypeID);
 }
 
-int Signal::lowADC() const
+int Signal::lowADC(QString* err) const
 {
-	return static_cast<int>(getSpecPropUInt(SignalProperties::lowADCCaption));
+	return static_cast<int>(getSpecPropUInt(SignalProperties::lowADCCaption, err));
 }
 
 void Signal::setLowADC(int lowADC)
@@ -370,9 +370,9 @@ void Signal::setLowADC(int lowADC)
 	setSpecPropUInt(SignalProperties::lowADCCaption, static_cast<unsigned int>(lowADC));
 }
 
-int Signal::highADC() const
+int Signal::highADC(QString* err) const
 {
-	return static_cast<int>(getSpecPropUInt(SignalProperties::highADCCaption));
+	return static_cast<int>(getSpecPropUInt(SignalProperties::highADCCaption, err));
 }
 
 void Signal::setHighADC(int highADC)
@@ -380,9 +380,9 @@ void Signal::setHighADC(int highADC)
 	setSpecPropUInt(SignalProperties::highADCCaption, static_cast<unsigned int>(highADC));
 }
 
-int Signal::lowDAC() const
+int Signal::lowDAC(QString* err) const
 {
-	return static_cast<int>(getSpecPropUInt(SignalProperties::lowDACCaption));
+	return static_cast<int>(getSpecPropUInt(SignalProperties::lowDACCaption, err));
 }
 
 void Signal::setLowDAC(int lowDAC)
@@ -390,9 +390,9 @@ void Signal::setLowDAC(int lowDAC)
 	setSpecPropInt(SignalProperties::lowDACCaption, lowDAC);
 }
 
-int Signal::highDAC() const
+int Signal::highDAC(QString* err) const
 {
-	return static_cast<int>(getSpecPropUInt(SignalProperties::highDACCaption));
+	return static_cast<int>(getSpecPropUInt(SignalProperties::highDACCaption, err));
 }
 
 void Signal::setHighDAC(int highDAC)
@@ -400,9 +400,9 @@ void Signal::setHighDAC(int highDAC)
 	setSpecPropInt(SignalProperties::highDACCaption, highDAC);
 }
 
-double Signal::lowEngineeringUnits() const
+double Signal::lowEngineeringUnits(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::lowEngineeringUnitsCaption);
+	return getSpecPropDouble(SignalProperties::lowEngineeringUnitsCaption, err);
 }
 
 void Signal::setLowEngineeringUnits(double lowEngineeringUnits)
@@ -410,9 +410,9 @@ void Signal::setLowEngineeringUnits(double lowEngineeringUnits)
 	setSpecPropDouble(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
 }
 
-double Signal::highEngineeringUnits() const
+double Signal::highEngineeringUnits(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::highEngineeringUnitsCaption);
+	return getSpecPropDouble(SignalProperties::highEngineeringUnitsCaption, err);
 }
 
 void Signal::setHighEngineeringUnits(double highEngineeringUnits)
@@ -420,9 +420,9 @@ void Signal::setHighEngineeringUnits(double highEngineeringUnits)
 	setSpecPropDouble(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
 }
 
-double Signal::lowValidRange() const
+double Signal::lowValidRange(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::lowValidRangeCaption);
+	return getSpecPropDouble(SignalProperties::lowValidRangeCaption, err);
 }
 
 void Signal::setLowValidRange(double lowValidRange)
@@ -430,9 +430,9 @@ void Signal::setLowValidRange(double lowValidRange)
 	setSpecPropDouble(SignalProperties::lowValidRangeCaption, lowValidRange);
 }
 
-double Signal::highValidRange() const
+double Signal::highValidRange(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::highValidRangeCaption);
+	return getSpecPropDouble(SignalProperties::highValidRangeCaption, err);
 }
 
 void Signal::setHighValidRange(double highValidRange)
@@ -440,9 +440,9 @@ void Signal::setHighValidRange(double highValidRange)
 	setSpecPropDouble(SignalProperties::highValidRangeCaption, highValidRange);
 }
 
-double Signal::filteringTime() const
+double Signal::filteringTime(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::filteringTimeCaption);
+	return getSpecPropDouble(SignalProperties::filteringTimeCaption, err);
 }
 
 void Signal::setFilteringTime(double filteringTime)
@@ -450,9 +450,9 @@ void Signal::setFilteringTime(double filteringTime)
 	setSpecPropDouble(SignalProperties::filteringTimeCaption, filteringTime);
 }
 
-double Signal::spreadTolerance() const
+double Signal::spreadTolerance(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::spreadToleranceCaption);
+	return getSpecPropDouble(SignalProperties::spreadToleranceCaption, err);
 }
 
 void Signal::setSpreadTolerance(double spreadTolerance)
@@ -460,9 +460,9 @@ void Signal::setSpreadTolerance(double spreadTolerance)
 	setSpecPropDouble(SignalProperties::spreadToleranceCaption, spreadTolerance);
 }
 
-double Signal::electricLowLimit() const
+double Signal::electricLowLimit(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::electricLowLimitCaption);
+	return getSpecPropDouble(SignalProperties::electricLowLimitCaption, err);
 }
 
 void Signal::setElectricLowLimit(double electricLowLimit)
@@ -470,9 +470,9 @@ void Signal::setElectricLowLimit(double electricLowLimit)
 	setSpecPropDouble(SignalProperties::electricLowLimitCaption, electricLowLimit);
 }
 
-double Signal::electricHighLimit() const
+double Signal::electricHighLimit(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::electricHighLimitCaption);
+	return getSpecPropDouble(SignalProperties::electricHighLimitCaption, err);
 }
 
 void Signal::setElectricHighLimit(double electricHighLimit)
@@ -480,9 +480,9 @@ void Signal::setElectricHighLimit(double electricHighLimit)
 	setSpecPropDouble(SignalProperties::electricHighLimitCaption, electricHighLimit);
 }
 
-E::ElectricUnit Signal::electricUnit() const
+E::ElectricUnit Signal::electricUnit(QString* err) const
 {
-	return static_cast<E::ElectricUnit>(getSpecPropEnum(SignalProperties::electricUnitCaption));
+	return static_cast<E::ElectricUnit>(getSpecPropEnum(SignalProperties::electricUnitCaption, err));
 }
 
 void Signal::setElectricUnit(E::ElectricUnit electricUnit)
@@ -490,9 +490,9 @@ void Signal::setElectricUnit(E::ElectricUnit electricUnit)
 	setSpecPropEnum(SignalProperties::electricUnitCaption, static_cast<int>(electricUnit));
 }
 
-double Signal::rload_Ohm() const
+double Signal::rload_Ohm(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::rload_OhmCaption);
+	return getSpecPropDouble(SignalProperties::rload_OhmCaption, err);
 }
 
 void Signal::setRload_Ohm(double rload_Ohm)
@@ -500,9 +500,9 @@ void Signal::setRload_Ohm(double rload_Ohm)
 	setSpecPropDouble(SignalProperties::rload_OhmCaption, rload_Ohm);
 }
 
-E::SensorType Signal::sensorType() const
+E::SensorType Signal::sensorType(QString* err) const
 {
-	return static_cast<E::SensorType>(getSpecPropEnum(SignalProperties::sensorTypeCaption));
+	return static_cast<E::SensorType>(getSpecPropEnum(SignalProperties::sensorTypeCaption, err));
 }
 
 void Signal::setSensorType(E::SensorType sensorType)
@@ -510,9 +510,9 @@ void Signal::setSensorType(E::SensorType sensorType)
 	setSpecPropEnum(SignalProperties::sensorTypeCaption, static_cast<int>(sensorType));
 }
 
-E::OutputMode Signal::outputMode() const
+E::OutputMode Signal::outputMode(QString* err) const
 {
-	return static_cast<E::OutputMode>(getSpecPropEnum(SignalProperties::outputModeCaption));
+	return static_cast<E::OutputMode>(getSpecPropEnum(SignalProperties::outputModeCaption, err));
 }
 
 void Signal::setOutputMode(E::OutputMode outputMode)
@@ -520,9 +520,9 @@ void Signal::setOutputMode(E::OutputMode outputMode)
 	setSpecPropEnum(SignalProperties::outputModeCaption, static_cast<int>(outputMode));
 }
 
-double Signal::r0_Ohm() const
+double Signal::r0_Ohm(QString* err) const
 {
-	return getSpecPropDouble(SignalProperties::R0_OhmCaption);
+	return getSpecPropDouble(SignalProperties::R0_OhmCaption, err);
 }
 
 void Signal::setR0_Ohm(double r0_Ohm)
@@ -567,13 +567,7 @@ void Signal::cacheSpecPropValues()
 		m_cachedSpecPropValues = std::make_shared<SignalSpecPropValues>();
 	}
 
-	bool res = m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
-
-	if (res == false && m_log != nullptr)
-	{
-		LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 specific properties values parsing error").arg(appSignalID()));
-	}
-
+	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
 }
 
 void Signal::saveProtoData(QByteArray* protoDataArray) const
@@ -703,15 +697,6 @@ QString Signal::regValueAddrStr() const
 	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
 }
 
-void Signal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
-{
-	TEST_PTR_RETURN(lm);
-
-	m_lm = lm;
-
-	setLmEquipmentID(lm->equipmentIdTemplate());
-}
-
 void Signal::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement("Signal");	// <Signal>
@@ -784,7 +769,7 @@ void Signal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& pr
 {
 	QVariant v;
 	bool isEnum = false;
-	bool res = getSpecPropValue(propName, &v, &isEnum);
+	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
 
 	if (res == true)
 	{
@@ -800,7 +785,7 @@ void Signal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propN
 {
 	QVariant v;
 	bool isEnum = false;
-	bool res = getSpecPropValue(propName, &v, &isEnum);
+	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
 
 	if (res == true)
 	{
@@ -1359,8 +1344,8 @@ void Signal::initTuningValues()
 	switch (signalType())
 	{
 	case E::SignalType::Analog:
-		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngineeringUnits()), lowEngineeringUnits());
-		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngineeringUnits()), highEngineeringUnits());
+		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngineeringUnits(nullptr)), lowEngineeringUnits(nullptr));
+		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngineeringUnits(nullptr)), highEngineeringUnits(nullptr));
 		break;
 
 	case E::SignalType::Discrete:
@@ -1423,6 +1408,15 @@ QString Signal::expandDeviceSignalTemplate(	const Hardware::DeviceObject& startD
 	while(true);
 
 	return resultStr;
+}
+
+void Signal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
+{
+	TEST_PTR_RETURN(lm);
+
+	m_lm = lm;
+
+	setLmEquipmentID(lm->equipmentIdTemplate());
 }
 
 QString Signal::expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
@@ -1639,7 +1633,6 @@ void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
 	}
 }
 
-
 void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
 {
 	if (deviceSignal.propertyExists(SignalProperties::enableTuningCaption) == false)
@@ -1694,20 +1687,23 @@ void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSign
 								deviceSignal.propertyValue(SignalProperties::tuningHighBoundCaption));
 }
 
-double Signal::getSpecPropDouble(const QString& name) const
+QString Signal::specPropNotExistErr(const QString& propName) const
+{
+	return QString("Specific property %1 is not exists in signal %2").arg(m_appSignalID).arg(propName);
+}
+
+double Signal::getSpecPropDouble(const QString& name, QString* err) const
 {
 	QVariant qv;
 	bool isEnum = false;
 
-	bool result = getSpecPropValue(name, &qv, &isEnum);
+	bool result = getSpecPropValue(name, &qv, &isEnum, err);
 
 	if (result == false)
 	{
-		if (m_log != nullptr)
+		if (err != nullptr)
 		{
-			// Specific property %1 is not exists in signal %2
-			//
-			m_log->errALC5176(appSignalID(), name);
+			*err = specPropNotExistErr(name);
 		}
 
 		return 0;
@@ -1718,20 +1714,18 @@ double Signal::getSpecPropDouble(const QString& name) const
 	return qv.toDouble();
 }
 
-int Signal::getSpecPropInt(const QString& name) const
+int Signal::getSpecPropInt(const QString& name, QString* err) const
 {
 	QVariant qv;
 	bool isEnum = false;
 
-	bool result = getSpecPropValue(name, &qv, &isEnum);
+	bool result = getSpecPropValue(name, &qv, &isEnum, err);
 
 	if (result == false)
 	{
-		if (m_log != nullptr)
+		if (err != nullptr)
 		{
-			// Specific property %1 is not exists in signal %2
-			//
-			m_log->errALC5176(appSignalID(), name);
+			*err = specPropNotExistErr(name);
 		}
 
 		return 0;
@@ -1742,20 +1736,18 @@ int Signal::getSpecPropInt(const QString& name) const
 	return qv.toInt();
 }
 
-unsigned int Signal::getSpecPropUInt(const QString& name) const
+unsigned int Signal::getSpecPropUInt(const QString& name, QString* err) const
 {
 	QVariant qv;
 	bool isEnum = false;
 
-	bool result = getSpecPropValue(name, &qv, &isEnum);
+	bool result = getSpecPropValue(name, &qv, &isEnum, err);
 
 	if (result == false)
 	{
-		if (m_log != nullptr)
+		if (err != nullptr)
 		{
-			// Specific property %1 is not exists in signal %2
-			//
-			m_log->errALC5176(appSignalID(), name);
+			*err = specPropNotExistErr(name);
 		}
 
 		return 0;
@@ -1767,20 +1759,18 @@ unsigned int Signal::getSpecPropUInt(const QString& name) const
 }
 
 
-int Signal::getSpecPropEnum(const QString& name) const
+int Signal::getSpecPropEnum(const QString& name, QString* err) const
 {
 	QVariant qv;
 	bool isEnum = false;
 
-	bool result = getSpecPropValue(name, &qv, &isEnum);
+	bool result = getSpecPropValue(name, &qv, &isEnum, err);
 
 	if (result == false)
 	{
-		if (m_log != nullptr)
+		if (err != nullptr)
 		{
-			// Specific property %1 is not exists in signal %2
-			//
-			m_log->errALC5176(appSignalID(), name);
+			*err = specPropNotExistErr(name);
 		}
 
 		return 0;
@@ -1791,7 +1781,7 @@ int Signal::getSpecPropEnum(const QString& name) const
 	return qv.toInt();
 }
 
-bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const
+bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum, QString* err) const
 {
 	TEST_PTR_RETURN_FALSE(qv);
 	TEST_PTR_RETURN_FALSE(isEnum);
@@ -1810,9 +1800,9 @@ bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) c
 
 		if (res == false)
 		{
-			if (m_log != nullptr)
+			if (err != nullptr)
 			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 specific properties values parsing error").arg(appSignalID()));
+				*err = QString("Signal %1 specific properties values parsing error").arg(m_appSignalID);
 			}
 
 			result = false;
@@ -2243,20 +2233,3 @@ void SignalSet::replaceOrAppendIfNotExists(int signalID, const Signal& s)
 		append(signalID, new Signal(s));
 	}
 }
-
-void SignalSet::setLog(Builder::IssueLogger* log)
-{
-	TEST_PTR_RETURN(log);
-
-	m_log = log;
-
-	int signalCount = count();
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		Signal& s = (*this)[i];
-
-		s.setLog(log);
-	}
-}
-

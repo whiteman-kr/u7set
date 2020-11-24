@@ -305,6 +305,7 @@ public:
 const char* const		ModuleParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure Internal signal instead Input signal"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure linearity and comparators together"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
@@ -314,10 +315,11 @@ const char* const		ModuleParamName[] =
 const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
 
 const int				MO_PARAM_SUFFIX_SN				= 0,
-						MO_PARAM_MEASURE_LIN_AND_CMP	= 1,
-						MO_PARAM_MEASURE_ENTIRE_MODULE	= 2,
-						MO_PARAM_WARN_IF_MEASURED		= 3,
-						MO_PARAM_MAX_IMPUT_COUNT		= 4;
+						MO_PARAM_MEASURE_INT_INSTEAD_IN	= 1,
+						MO_PARAM_MEASURE_LIN_AND_CMP	= 2,
+						MO_PARAM_MEASURE_ENTIRE_MODULE	= 3,
+						MO_PARAM_WARN_IF_MEASURED		= 4,
+						MO_PARAM_MAX_IMPUT_COUNT		= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -335,6 +337,8 @@ private:
 
 	QString				m_suffixSN;													// suffix to identify the signal of module serial number
 
+
+	bool				m_measureInterInsteadIn = false;							// measure internal signal instead input signal
 	bool				m_measureLinAndCmp = false;									// measure linearity and comparators together
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
@@ -345,6 +349,9 @@ public:
 
 	QString				suffixSN() const { return m_suffixSN; }
 	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
+
+	bool				measureInterInsteadIn() const { return m_measureInterInsteadIn; }
+	void				setMeasureInterInsteadIn(bool measure) { m_measureInterInsteadIn = measure; }
 
 	bool				measureLinAndCmp() const { return m_measureLinAndCmp; }
 	void				setMeasureLinAndCmp(bool measure) { m_measureLinAndCmp = measure; }
@@ -929,7 +936,7 @@ const char* const		DatabaseParam[] =
 						QT_TRANSLATE_NOOP("Options.h", "Type"),
 						QT_TRANSLATE_NOOP("Options.h", "On start application"),
 						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
-						QT_TRANSLATE_NOOP("Options.h", "Path for copy"),
+						QT_TRANSLATE_NOOP("Options.h", "Path for backup"),
 };
 
 const int				DBO_PARAM_COUNT			= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
@@ -971,7 +978,7 @@ private:
 
 	bool				m_onStart = false;
 	bool				m_onExit = true;
-	QString				m_copyPath;
+	QString				m_backupPath;
 
 public:
 
@@ -987,8 +994,8 @@ public:
 	bool				onExit() const { return m_onExit; }
 	void				setOnExit(bool onExit) { m_onExit = onExit; }
 
-	QString				copyPath() const { return m_copyPath; }
-	void				setCopyPath(const QString& path) { m_copyPath = path; }
+	QString				backupPath() const { return m_backupPath; }
+	void				setBackupPath(const QString& path) { m_backupPath = path; }
 
 	void				load();
 	void				save();

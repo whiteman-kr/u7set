@@ -74,9 +74,7 @@ CONFIG(release, debug|release) {
 
 
 SOURCES +=\
-    ../lib/ClientBehavior.cpp \
     ../lib/ExportPrint.cpp \
-    ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -112,13 +110,7 @@ SOURCES +=\
     TagsEditor.cpp \
     TestsTabPage.cpp \
     UserManagementDialog.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/DbController.cpp \
-    ../lib/DbWorker.cpp \
     ../lib/DbProgressDialog.cpp \
-    ../lib/ProtoSerialization.cpp \
-    ../lib/Signal.cpp \
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
@@ -130,20 +122,12 @@ SOURCES +=\
     EditEngine/EditEngineMoveItem.cpp \
     EditEngine/EditEngineSetPoints.cpp \
     EditEngine/EditEngineSetProperty.cpp \
-    ../lib/ModuleFirmware.cpp \
     BuildTabPage.cpp \
-    ../lib/OutputLog.cpp \
-    ../lib/DbProgress.cpp \
-    ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     DialogSubsystemListEditor.cpp \
     EquipmentVcsDialog.cpp \
-    ../lib/DataSource.cpp \
-    ../lib/SocketIO.cpp \
     ../lib/PropertyEditor.cpp \
-    ../lib/Types.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    ../lib/BuildInfo.cpp \
     GlobalMessanger.cpp \
     EditSchemaWidget.cpp \
     SchemaPropertiesDialog.cpp \
@@ -152,15 +136,8 @@ SOURCES +=\
     CreateSchemaDialog.cpp \
     EditEngine/EditEngineSetSchemaProperty.cpp \
     EditEngine/EditEngineSetOrder.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/Queue.cpp \
     UploadTabPage.cpp \
     DialogChoosePreset.cpp \
-    ../lib/WUtils.cpp \
-    ../lib/DataProtocols.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/SignalProperties.cpp \
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
     Forms/ChooseUfbDialog.cpp \
@@ -171,29 +148,19 @@ SOURCES +=\
     Forms/ComparePropertyObjectDialog.cpp \
     ../TuningIPEN/TuningIPENDataStorage.cpp \
     DialogConnections.cpp \
-    ../lib/MetrologySignal.cpp \
-    ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    ../lib/AppSignal.cpp \
-    ../lib/CsvFile.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
     Forms/ChooseAfbDialog.cpp \
     IdePropertyEditor.cpp \
     EditEngine/EditEngineSetObject.cpp \
-    ../lib/Address16.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp \
-    ../Proto/network.pb.cc \
-    ../lib/LmDescription.cpp \
     SimulatorTabPage.cpp \
     Simulator/SimIdeSimulator.cpp \
-    ../lib/TuningValue.cpp \
     Simulator/SimSchemaWidget.cpp \
     Simulator/SimSchemaManager.cpp \
     Simulator/SimSchemaView.cpp \
@@ -207,18 +174,14 @@ SOURCES +=\
     Simulator/SimOutputWidget.cpp \
     Simulator/SimMemoryWidget.cpp \
     Simulator/SimBasePage.cpp \
-    ../lib/Times.cpp \
     SpecificPropertiesEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
-    ../lib/Subsystem.cpp \
-    ../lib/Connection.cpp \
-    ../lib/LogicModuleSet.cpp \
     SchemaTabPageEx.cpp \
     DialogInputEx.cpp \
     DialogAfbLibraryCheck.cpp \
     ../lib/WidgetUtils.cpp \
     Forms/ProjectPropertiesForm.cpp \
-    Forms/PendingChangesDialog.cpp \
+	Forms/PendingChangesDialog.cpp \
     ../lib/SimpleMutex.cpp \
     ../lib/Ui/TextEditCompleter.cpp \
     ../lib/QScintillaLexers/LexerJavaScript.cpp \
@@ -231,9 +194,7 @@ SOURCES +=\
 
 
 HEADERS  += \
-    ../lib/ClientBehavior.h \
     ../lib/ExportPrint.h \
-    ../lib/SoftwareSettings.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
@@ -271,15 +232,9 @@ HEADERS  += \
     TagsEditor.h \
     TestsTabPage.h \
     UserManagementDialog.h \
-    ../lib/DbStruct.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbController.h \
-    ../lib/DbWorker.h \
     ../lib/DbProgressDialog.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Factory.h \
     ../lib/CUtils.h \
-    ../lib/Signal.h \
     ../lib/OrderedHash.h \
     EquipmentTabPage.h \
     CheckInDialog.h \
@@ -292,26 +247,16 @@ HEADERS  += \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
     EditEngine/EditEngineSetProperty.h \
-    ../lib/ModuleFirmware.h \
     BuildTabPage.h \
-    ../lib/OutputLog.h \
-    ../lib/DbProgress.h \
-    ../lib/Crc.h \
     DialogFileEditor.h \
     DialogSubsystemListEditor.h \
-    ../lib/Types.h \
     Forms/ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
-    ../lib/DataSource.h \
-    ../lib/SocketIO.h \
     ../lib/PropertyObject.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
-    ../lib/BuildInfo.h \
     GlobalMessanger.h \
-    ../lib/Address16.h \
-    ../lib/WUtils.h \
     EditSchemaWidget.h \
     SchemaPropertiesDialog.h \
     SchemaItemPropertiesDialog.h \
@@ -319,14 +264,8 @@ HEADERS  += \
     CreateSchemaDialog.h \
     EditEngine/EditEngineSetSchemaProperty.h \
     EditEngine/EditEngineSetOrder.h \
-    ../lib/DeviceHelper.h \
-    ../lib/XmlHelper.h \
-    ../lib/Queue.h \
     UploadTabPage.h \
     DialogChoosePreset.h \
-    ../lib/DataProtocols.h \
-    ../lib/HostAddressPort.h \
-    ../lib/SignalProperties.h \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
     Forms/ChooseUfbDialog.h \
@@ -338,13 +277,8 @@ HEADERS  += \
     ../lib/diff_match_patch.h \
     ../TuningIPEN/TuningIPENDataStorage.h \
     DialogConnections.h \
-    ../lib/MetrologySignal.h \
-    ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
-    ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningModel.h \
-    ../lib/AppSignal.h \
-    ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
     DialogBusEditor.h \
     BusStorage.h \
@@ -354,12 +288,8 @@ HEADERS  += \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
-    ../lib/Tuning/TuningSignalManager.h \
-    ../Proto/network.pb.h \
-    ../lib/LmDescription.h \
     SimulatorTabPage.h \
     Simulator/SimIdeSimulator.h \
-    ../lib/TuningValue.h \
     Simulator/SimSchemaWidget.h \
     Simulator/SimSchemaManager.h \
     Simulator/SimSchemaView.h \
@@ -375,12 +305,8 @@ HEADERS  += \
     Simulator/SimProjectWidget.h \
     SpecificPropertiesEditor.h \
     ../lib/CommonTypes.h \
-    ../lib/Times.h \
     ../lib/Ui/DialogAbout.h \
-    ../lib/Subsystem.h \
     ../lib/DbObjectStorage.h \
-    ../lib/Connection.h \
-    ../lib/LogicModuleSet.h \
     SchemaTabPageEx.h \
     DialogInputEx.h \
     DialogAfbLibraryCheck.h \

@@ -13,6 +13,8 @@ class SoftwareSettings : public QObject
 public:
 	virtual ~SoftwareSettings();
 
+#ifdef IS_BUILDER
+
 	static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 										const Hardware::Software* thisSoftware,
 										const QString& propConnectedSoBftwareID,
@@ -37,6 +39,9 @@ public:
 								Builder::IssueLogger* log) = 0;
 
 	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
+
+#endif
+
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
 };
 
@@ -56,11 +61,16 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
 	bool writeToXml(XmlWriteHelper& xml) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	QStringList knownClients();
@@ -90,10 +100,15 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 	bool writeToXml(XmlWriteHelper& xml) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xml) override;
 };
 
@@ -117,10 +132,15 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 	bool writeToXml(XmlWriteHelper& xml) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xml) override;
 };
 
@@ -152,15 +172,22 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
 	bool writeToXml(XmlWriteHelper& xml) override;
-	bool readFromXml(XmlReadHelper& xml) override;
 
 private:
 	bool fillTuningClientsInfo(const Hardware::Software* software, bool singleLmControlEnabled, Builder::IssueLogger* log);
+
+#endif
+
+public:
+	bool readFromXml(XmlReadHelper& xml) override;
+
 };
 
 class ArchivingServiceSettings : public SoftwareSettings
@@ -190,14 +217,20 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
+	bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
+
 	bool writeToXml(XmlWriteHelper& xml) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xml) override;
 
-	bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
 
 	const ArchivingServiceSettings& operator = (const ArchivingServiceSettings& src);
 };
@@ -240,11 +273,16 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
 	bool writeToXml(XmlWriteHelper& xml) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xml) override;
 };
 
@@ -269,11 +307,16 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xmlReader) override;
 };
 
@@ -311,19 +354,15 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-	bool readFromXml(XmlReadHelper& xmlReader) override;
-
-	QStringList getSchemaTags() const;
-	QStringList getTuningSources() const;
 
 private:
-	void clear();
-
 	bool readAppDataServiceAndArchiveSettings(const Hardware::EquipmentSet* equipment,
 								   const Hardware::Software* software,
 								   Builder::IssueLogger* log);
@@ -331,6 +370,16 @@ private:
 	bool readTuningSettings(const Hardware::EquipmentSet* equipment,
 								   const Hardware::Software* software,
 								   Builder::IssueLogger* log);
+#endif
+
+public:
+	bool readFromXml(XmlReadHelper& xmlReader) override;
+
+	QStringList getSchemaTags() const;
+	QStringList getTuningSources() const;
+
+private:
+	void clear();
 
 };
 
@@ -361,11 +410,16 @@ public:
 
 	//
 
+#ifdef IS_BUILDER
+
 	bool readFromDevice(const Hardware::EquipmentSet* equipment,
 						const Hardware::Software* software,
 						Builder::IssueLogger* log) override;
 
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
+
+#endif
+
 	bool readFromXml(XmlReadHelper& xmlReader) override;
 
 	QStringList getSchemaTags() const;

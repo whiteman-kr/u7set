@@ -242,7 +242,7 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 			bool isEnum = propertyIsEnum;
 			QString name = propertyName;
 
-			bool result = s->getSpecPropValue(name, &qv, &isEnum);
+			bool result = s->getSpecPropValue(name, &qv, &isEnum, nullptr);
 
 			if (result == false)
 			{

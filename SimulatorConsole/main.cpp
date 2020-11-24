@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 
 	for (auto lm : lms)
 	{
-		if (lm->deviceMode() == Sim::DeviceMode::Fault)
+		if (lm->deviceState() == Sim::DeviceState::Fault)
 		{
 			QString message = QString("Simulation afterrun check: LogicModule %1 is in FAULT mode").arg(lm->equipmentId());
 			std::cout << message.toStdString() << "\n";

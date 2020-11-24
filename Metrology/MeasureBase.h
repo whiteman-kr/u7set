@@ -73,14 +73,15 @@ const char* const MeasureErrorType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduced"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Relative"),
 };
 
 const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(MeasureErrorType)/sizeof(MeasureErrorType[0]);
 
 const int	MEASURE_ERROR_TYPE_UNDEFINED	= -1,
 			MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
-			MEASURE_ERROR_TYPE_REDUCE		= 1;
-
+			MEASURE_ERROR_TYPE_REDUCE		= 1,
+			MEASURE_ERROR_TYPE_RELATIVE		= 2;
 
 // ==============================================================================================
 
@@ -101,7 +102,7 @@ const int	MEASURE_ERROR_RESULT_UNDEFINED		= -1,
 const char* const MeasureAdditionalParam[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Measure value max"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "System error"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "System deviation"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Standard deviation"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Low High border"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Uncertainty"),
@@ -111,7 +112,7 @@ const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/siz
 
 const int	MEASURE_ADDITIONAL_PARAM_UNDEFINED			= -1,
 			MEASURE_ADDITIONAL_PARAM_MAX_VALUE			= 0,
-			MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR		= 1,
+			MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION	= 1,
 			MEASURE_ADDITIONAL_PARAM_SD					= 2,
 			MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER	= 3,
 			MEASURE_ADDITIONAL_PARAM_UNCERTAINTY		= 4;

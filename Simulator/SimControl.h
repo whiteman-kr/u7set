@@ -101,7 +101,7 @@ namespace Sim
 
 			for (const SimControlRunStruct& lm : cd.m_lms)
 			{
-				m_lmDeviceModes.emplace_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceMode()});
+				m_lmDeviceModes.emplace_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
 			}
 		}
 
@@ -114,7 +114,7 @@ namespace Sim
 		struct LmMode
 		{
 			QString lmEquipmentId;
-			Sim::DeviceMode deviceMode;
+			Sim::DeviceState deviceState;
 		};
 
 		std::vector<Sim::ControlStatus::LmMode> m_lmDeviceModes;

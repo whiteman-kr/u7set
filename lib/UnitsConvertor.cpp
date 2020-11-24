@@ -227,6 +227,7 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
+				case E::ElectricUnit::uA:
 
 					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 					{
@@ -336,6 +337,7 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
+				case E::ElectricUnit::uA:
 
 					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 					{
@@ -742,8 +744,29 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 
 	switch(unitID)
 	{
+		case E::ElectricUnit::mA:
+			{
+				if (sensorType != E::SensorType::V_0_5)
+				{
+					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mA"));
+				}
+
+				if (rload < RLOAD_OHM_LOW_LIMIT || rload > RLOAD_OHM_HIGH_LIMIT)
+				{
+					return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Rload_Ohm argument is out of range"));
+				}
+
+				return  UnitsConvertResult(elVal * (rload / RLOAD_OHM_HIGH_LIMIT));
+			}
+			break;
+
 		case E::ElectricUnit::V:
 			{
+				if (sensorType != E::SensorType::V_0_5 && sensorType != E::SensorType::V_m10_p10)
+				{
+					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for V"));
+				}
+
 				UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
 
 				if (result.ok() == true)
@@ -756,27 +779,23 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 
 			break;
 
-		case E::ElectricUnit::mA:
+		case E::ElectricUnit::uA:
 
-			switch (sensorType)
+			if (sensorType != E::SensorType::uA_m5_p5)
 			{
-				case E::SensorType::V_0_5:
-
-					if (rload < RLOAD_OHM_LOW_LIMIT || rload > RLOAD_OHM_HIGH_LIMIT)
-					{
-						return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Rload_Ohm argument is out of range"));
-					}
-
-					return  UnitsConvertResult(elVal * (rload / RLOAD_OHM_HIGH_LIMIT));
-
-				default:
-
-					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mA"));
+				return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for uA"));
 			}
 
-			break;
+			UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
 
-		default: ;
+			if (result.ok() == true)
+			{
+				return UnitsConvertResult(elVal);
+			}
+
+			return result;
+
+			break;
 	}
 
 	return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown unitID"));

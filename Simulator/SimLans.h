@@ -26,15 +26,14 @@ namespace Sim
 		// AppData
 		//
 		bool isAppDataEnabled() const;
-
 		bool sendAppDataData(const QByteArray& data, TimeStamp timeStamp);
-		bool sendAppDataData(QByteArray&& data, TimeStamp timeStamp);
 
 		// DiagData
 		//
 
 		// Tuning
 		//
+		bool isTuningEnabled() const;
 
 	public:
 		ScopedLog& log();

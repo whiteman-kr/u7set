@@ -252,6 +252,7 @@ public:
 		mV = 2,
 		Ohm = 3,
 		V = 4,
+		uA = 5,
 
 		// oder version
 		// NoInputUnit = 1,
@@ -313,6 +314,8 @@ public:
 		Ohm_Cu_a_426 = 31,
 		Ohm_Ni_a_617 = 32,
 		Ohm_Raw = 33,
+
+		uA_m5_p5 = 34,
 	};
 	Q_ENUM(SensorType)
 
