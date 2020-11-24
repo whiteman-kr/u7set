@@ -47,6 +47,7 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 	//
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	mainLayout->addWidget(m_textEdit);
+	mainLayout->addWidget(new QLabel("Predefined tags:"));
 	mainLayout->addWidget(m_tagsList);
 	mainLayout->setContentsMargins(0, 0, 0, 0);
 }

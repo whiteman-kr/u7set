@@ -2750,11 +2750,14 @@ bool DbController::getTags(QStringList* tags)
 		return false;
 	}
 
+	static const QStringList defaultTags = {"applicationlogic", "monitor", "tuning", "in", "out"};
+
 	std::vector<DbFileInfo> fileList;
 
 	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
 	if (ok == false || fileList.size() != 1)
 	{
+		*tags = defaultTags;
 		return true;	// File does not exist
 	}
 

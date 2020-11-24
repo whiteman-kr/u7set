@@ -31,8 +31,8 @@ DialogTagsEditor::DialogTagsEditor(DbController* pDbController, QWidget *parent)
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << tag);
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
-		ui->m_list->insertTopLevelItem(ui->m_list->topLevelItemCount(), item);
 		item->setData(0, Qt::UserRole, i);
+		ui->m_list->insertTopLevelItem(ui->m_list->topLevelItemCount(), item);
 	}
 }
 
@@ -104,7 +104,7 @@ bool DialogTagsEditor::askForSaveChanged()
 bool DialogTagsEditor::saveChanges()
 {
 	bool ok = false;
-	QString comment = QInputDialog::getText(this, tr("Subsystem List Editor"),
+	QString comment = QInputDialog::getText(this, qAppName(),
 											tr("Please enter comment:"), QLineEdit::Normal,
 											tr("comment"), &ok);
 
@@ -114,7 +114,7 @@ bool DialogTagsEditor::saveChanges()
 	}
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied!");
+		QMessageBox::warning(this, qAppName(), "No comment supplied!");
 		return false;
 	}
 
@@ -251,6 +251,34 @@ DbController* DialogTagsEditor::db()
 
 void DialogTagsEditor::on_buttonOk_clicked()
 {
+	bool hasDuplicates = false;
+
+	QStringList tags = getTags();
+
+	for (const QString& tag : tags)
+	{
+		if (tags.count(tag) > 1)
+		{
+			hasDuplicates = true;
+			break;
+		}
+	}
+
+	if (hasDuplicates == true)
+	{
+		auto mb = QMessageBox::warning(
+					  this,
+					  qAppName(),
+					  tr("Warning!\n\nThere are duplicated tags in the list.\n\nAre you sure you want to continue?"),
+					  QMessageBox::Yes | QMessageBox::No,
+					  QMessageBox::No);
+
+		if (mb == QMessageBox::No)
+		{
+			return;
+		}
+	}
+
 	if (m_modified == true)
 	{
 		if (saveChanges() == false)
