@@ -1430,8 +1430,8 @@ void MeasureThread::signalParamChanged(const QString& appSignalID)
 
 void MeasureThread::stopMeasure(MeasureThreadInfo::ExitCode exitCode)
 {
-	m_info.setCmdStopMeasure(true);
 	m_info.setExitCode(exitCode);
+	m_info.setCmdStopMeasure(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

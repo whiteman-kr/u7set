@@ -8,6 +8,10 @@ namespace Sim
 		LanInterface(lci, lans)
 	{
 		m_log.setOutputScope("DiagDataLanInterface");
+
+		setEnabled(lci.diagDataEnable);
+
+		return;
 	}
 
 	DiagDataLanInterface::~DiagDataLanInterface()

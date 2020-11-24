@@ -602,8 +602,6 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
-	activeSignal.multiChannelSignal(0).metrologySignal(Metrology::Channel_0);
-
 	Metrology::Signal* pSignal = nullptr;
 
 	if(m_signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
