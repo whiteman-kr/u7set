@@ -380,10 +380,10 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
 
-//					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_INT_INSTEAD_IN]));
-//					item->setValue(m_options.module().measureInterInsteadIn());
-//					appendProperty(item, page, MO_PARAM_MEASURE_INT_INSTEAD_IN);
-//					measuremoduleGroup->addSubProperty(item);
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_INT_INSTEAD_IN]));
+					item->setValue(m_options.module().measureInterInsteadIn());
+					appendProperty(item, page, MO_PARAM_MEASURE_INT_INSTEAD_IN);
+					measuremoduleGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_LIN_AND_CMP]));
 					item->setValue(m_options.module().measureLinAndCmp());

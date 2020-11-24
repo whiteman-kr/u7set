@@ -108,45 +108,45 @@ QString SignalConnection::typeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalConnection::appSignalID(int type) const
+QString SignalConnection::appSignalID(int ioType) const
 {
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return QString();
 	}
 
-	return m_appSignalID[type];
+	return m_appSignalID[ioType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnection::setAppSignalID(int type, const QString& appSignalID)
+void SignalConnection::setAppSignalID(int ioType, const QString& appSignalID)
 {
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
 
-	m_appSignalID[type] = appSignalID;
+	m_appSignalID[ioType] = appSignalID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* SignalConnection::signal(int type) const
+Metrology::Signal* SignalConnection::signal(int ioType) const
 {
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return nullptr;
 	}
 
-	return m_pSignal[type];
+	return m_pSignal[ioType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnection::setSignal(int type, Metrology::Signal* pSignal)
+void SignalConnection::setSignal(int ioType, Metrology::Signal* pSignal)
 {
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
@@ -162,9 +162,9 @@ void SignalConnection::setSignal(int type, Metrology::Signal* pSignal)
 		return;
 	}
 
-	m_appSignalID[type] = param.appSignalID();
+	m_appSignalID[ioType] = param.appSignalID();
 
-	m_pSignal[type] = pSignal;
+	m_pSignal[ioType] = pSignal;
 
 	createHandle();
 }

@@ -55,7 +55,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 
 	// load measurement base
 	//
-
 	theOptions.linearity().points().load();
 
 	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
@@ -64,7 +63,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	}
 	connect(this, &MainWindow::appendMeasure, &m_measureBase, &MeasureBase::appendToBase, Qt::QueuedConnection);
 	connect(&m_measureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
-
 
 	//
 	//
@@ -1021,7 +1019,7 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MainWindow::changeActicveSignalOnInternal(const MeasureSignal& activeSignal, bool isStart)
+bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 {
 	if (m_pSignalConnectionTypeList == nullptr)
 	{
@@ -1049,17 +1047,12 @@ bool MainWindow::changeActicveSignalOnInternal(const MeasureSignal& activeSignal
 		return false;
 	}
 
-	int connectionIndex = -1;
-
-	if (activeSignal.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
-		connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
-	}
-	else
-	{
-		connectionIndex = theSignalBase.signalConnections().findIndex(activeSignal.signalConnectionType(), MEASURE_IO_SIGNAL_TYPE_OUTPUT, activeSignal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, Metrology::Channel_0));
+		return false;
 	}
 
+	int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
 	if (connectionIndex == -1)
 	{
 		return false;
@@ -1071,62 +1064,7 @@ bool MainWindow::changeActicveSignalOnInternal(const MeasureSignal& activeSignal
 		return false;
 	}
 
-	if (activeSignal.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
-	{
-		qDebug() << activeSignal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, Metrology::Channel_0)->param().appSignalID();
-
-		if (activeSignal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, Metrology::Channel_0) == connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT))
-		{
-			if (isStart == true)
-			{
-				return false;
-			}
-			else
-			{
-				QVector<Metrology::Signal*> outputSignals = theSignalBase.signalConnections().getOutputSignals(connection.type(), pInSignal->param().appSignalID());
-
-				int outputSignalcount = outputSignals.count();
-				if (outputSignalcount == 1)
-				{
-					return false;
-				}
-				else
-				{
-					int nextOutSignalIndex = -1;
-
-					for(int i = 0; i < outputSignalcount; i ++)
-					{
-						Metrology::Signal* pOutSignal = outputSignals[i];
-						if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
-						{
-							continue;
-						}
-
-						if (pOutSignal == connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT))
-						{
-							nextOutSignalIndex = i + 1;
-							break;
-						}
-					}
-
-					if (nextOutSignalIndex < 0 || nextOutSignalIndex >= outputSignalcount)
-					{
-						return false;
-					}
-
-					updateActiveOutputSignal(Metrology::Channel_0, outputSignals[nextOutSignalIndex]);
-
-					emit startMeasure();
-
-					return true;
-				}
-			}
-		}
-	}
-
 	m_pSignalConnectionTypeList->setCurrentIndex(connection.type());
-
-	emit startMeasure();
 
 	return true;
 }
@@ -1353,23 +1291,24 @@ void MainWindow::startMeasure()
 		return;
 	}
 
-//	if (theOptions.module().measureInterInsteadIn() == true)
-//	{
-//		if (m_measureKind == MEASURE_KIND_ONE_RACK)
-//		{
-//			if (changeActicveSignalOnInternal(activeSignal, true) == true)
-//			{
-//				return;
-//			}
-//		}
-//	}
+	if (theOptions.module().measureInterInsteadIn() == true)
+	{
+		if (m_measureKind == MEASURE_KIND_ONE_RACK)
+		{
+			if (changeInputSignalOnInternal(activeSignal) == true)
+			{
+				emit startMeasure();
+				return;
+			}
+		}
+	}
 
 	if (m_measureType == MEASURE_TYPE_COMPARATOR)
 	{
 		int comparatorCount = getMaxComparatorCount(activeSignal);
 		if (comparatorCount == 0)
 		{
-			m_measureThread.info().setExitCode(MeasureThreadInfo::ExitCode::Program);
+			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 			emit measureThreadStoped();
 			return;
 		}
@@ -1407,7 +1346,7 @@ void MainWindow::startMeasure()
 
 			if (result == QMessageBox::No)
 			{
-				m_measureThread.info().setExitCode(MeasureThreadInfo::ExitCode::Program);
+				m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 				emit measureThreadStoped();
 				return;
 			}
@@ -2510,7 +2449,7 @@ void MainWindow::measureThreadStoped()
 	}
 
 	//
-
+	//
 	if (theOptions.module().measureLinAndCmp() == true)
 	{
 		switch (m_measureType)
@@ -2538,17 +2477,6 @@ void MainWindow::measureThreadStoped()
 				break;
 		}
 	}
-
-	//	if (theOptions.module().measureInterInsteadIn() == true)
-	//	{
-	//		if (m_measureType == MEASURE_TYPE_LINEARITY)
-	//		{
-	//			if (m_measureKind == MEASURE_KIND_ONE_RACK)
-	//			{
-	//				if (changeActicveSignalOnInternal(activeSignal, false);
-	//			}
-	//		}
-	//	}
 
 	//
 	//

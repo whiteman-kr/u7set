@@ -22,6 +22,13 @@ const int		CALIBRATOR_TYPE_UNDEFINED	= -1,
 				CALIBRATOR_TYPE_CALYS75		= 1,
 				CALIBRATOR_TYPE_KTHL6221	= 2;
 
+const char* const CalibratorIdnCaption[CALIBRATOR_TYPE_COUNT] =
+{
+				"TRX-IIR",
+				"Calys 75",
+				"MODEL 6221",
+};
+
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorMode[] =

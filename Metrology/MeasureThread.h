@@ -121,7 +121,7 @@ private:
 
 public:
 
-	MeasureThreadInfo&		info() { return m_info; }
+	MeasureThreadInfo		info() const { return m_info; }
 
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
 
