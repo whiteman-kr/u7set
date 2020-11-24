@@ -8,6 +8,10 @@ namespace Sim
 		LanInterface(lci, lans)
 	{
 		m_log.setOutputScope("AppDataLanInterface");
+
+		setEnabled(lci.appDataEnable);
+
+		return;
 	}
 
 	AppDataLanInterface::~AppDataLanInterface()
