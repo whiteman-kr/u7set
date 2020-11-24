@@ -59,7 +59,7 @@ namespace TuningIPEN
 
 		quint16* ptr = reinterpret_cast<quint16*>(sr.fotipData);
 
-		for(int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
+		for(unsigned int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
 		{
 			*ptr = reverseBytes<quint16>(*ptr);
 
@@ -72,7 +72,7 @@ namespace TuningIPEN
 	{
 		quint16* ptr = reinterpret_cast<quint16*>(sr.fotipData);
 
-		for(int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
+		for(unsigned int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
 		{
 			*ptr = reverseBytes<quint16>(*ptr);
 
@@ -162,7 +162,7 @@ namespace TuningIPEN
 
 		for(int i = 0; i < sourceCount; i++)
 		{
-			result = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
+			result = xml.findElement(XmlElement::DATA_SOURCE);
 
 			if (result == false)
 			{

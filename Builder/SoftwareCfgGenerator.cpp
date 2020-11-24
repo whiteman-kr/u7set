@@ -859,7 +859,7 @@ namespace Builder
 
 		bool result = true;
 
-		result = SoftwareSettings::getCfgServiceConnection(m_equipment, m_software,
+		result = SoftwareSettingsGetter::getCfgServiceConnection(m_equipment, m_software,
 														   &cfgServiceID1, &cfgServiceIP1,
 														   &cfgServiceID2, &cfgServiceIP2,
 														   m_log);
@@ -1130,6 +1130,103 @@ namespace Builder
 
 		return true;
 	}
+
+	bool SoftwareCfgGenerator::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
+															DataSource::DataType dataType,
+															int adapterNo,
+															E::LanControllerType lanControllerType,
+															const Hardware::EquipmentSet& equipmentSet,
+															const SubsystemKeyMap& subsystemKeyMap,
+															const QHash<QString, quint64>& lmUniqueIdMap,
+															DataSource* ds,
+															Builder::IssueLogger* log)
+	{
+		TEST_PTR_RETURN_FALSE(log);
+		TEST_PTR_LOG_RETURN_FALSE(lm, log);
+		TEST_PTR_LOG_RETURN_FALSE(ds, log);
+
+		ds->setLmDataType(dataType);
+		ds->setLmEquipmentID(lm->equipmentIdTemplate());
+		ds->setLmPresetName(lm->presetName());
+		ds->setLmModuleType(lm->moduleType());
+		ds->setLmCaption(lm->caption());
+
+		bool result = true;
+
+		int lmNumber = 0;
+		QString subsystemChannel;
+		QString subsystemID;
+
+		result &= DeviceHelper::getIntProperty(lm, EquipmentPropNames::LM_NUMBER, &lmNumber, log);
+		result &= DeviceHelper::getStrProperty(lm, EquipmentPropNames::SUBSYSTEM_CHANNEL, &subsystemChannel, log);
+		result &= DeviceHelper::getStrProperty(lm, EquipmentPropNames::SUBSYSTEM_ID, &subsystemID, log);
+
+		ds->setLmNumber(lmNumber);
+		ds->setLmSubsystemChannel(subsystemChannel);
+		ds->setLmSubsystemID(subsystemID);
+
+		if (subsystemKeyMap.contains(subsystemID) == false)
+		{
+			// Subsystem '%1' is not found in subsystem set (Logic Module '%2')
+			//
+			log->errCFG3001(subsystemID, lm->equipmentIdTemplate());
+			return false;
+		}
+
+		ds->setLmSubsystemKey(subsystemKeyMap.value(subsystemID));
+		ds->setLmUniqueID(lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0));
+
+		LanControllerInfo lanControllerInfo;
+
+		result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType, &lanControllerInfo, equipmentSet, log);
+
+		ds->setLmAdapterID(lanControllerInfo.equipmentID);
+
+		switch(dataType)
+		{
+		case DataSource::DataType::App:
+
+			assert(lanControllerType == E::LanControllerType::AppData || lanControllerType == E::LanControllerType::AppAndDiagData);
+
+			ds->setLmDataEnable(lanControllerInfo.appDataEnable);
+			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.appDataIP, lanControllerInfo.appDataPort));
+			ds->setLmDataID(lanControllerInfo.appDataUID);
+			ds->setLmDataSize(lanControllerInfo.appDataSizeBytes);
+			ds->setLmRupFramesQuantity(lanControllerInfo.appDataFramesQuantity);
+			ds->setServiceID(lanControllerInfo.appDataServiceID);
+			break;
+
+		case DataSource::DataType::Diag:
+
+			assert(lanControllerType == E::LanControllerType::DiagData || lanControllerType == E::LanControllerType::AppAndDiagData);
+
+			ds->setLmDataEnable(lanControllerInfo.diagDataEnable);
+			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.diagDataIP, lanControllerInfo.diagDataPort));
+			ds->setLmDataID(lanControllerInfo.diagDataUID);
+			ds->setLmDataSize(lanControllerInfo.diagDataSizeBytes);
+			ds->setLmRupFramesQuantity(lanControllerInfo.diagDataFramesQuantity);
+			ds->setServiceID(lanControllerInfo.diagDataServiceID);
+			break;
+
+		case DataSource::DataType::Tuning:
+
+			assert(lanControllerType == E::LanControllerType::Tuning);
+
+			ds->setLmDataEnable(lanControllerInfo.tuningEnable);
+			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.tuningIP, lanControllerInfo.tuningPort));
+			ds->setLmDataID(0);
+			ds->setLmDataSize(0);
+			ds->setLmRupFramesQuantity(0);
+			ds->setServiceID(lanControllerInfo.tuningServiceID);
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return result;
+	}
+
 }
 
 

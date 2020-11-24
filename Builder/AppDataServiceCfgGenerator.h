@@ -34,7 +34,7 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
-		AppDataServiceSettings m_settings;
+		AppDataServiceSettingsGetter m_settings;
 		const QHash<QString, quint64>& m_lmUniqueIdMap;
 		SubsystemKeyMap m_subsystemKeyMap;
 

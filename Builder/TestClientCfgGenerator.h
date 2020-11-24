@@ -20,6 +20,6 @@ namespace Builder
 		bool writeShFile();
 
 	private:
-		TestClientSettings m_settings;
+		TestClientSettingsGetter m_settings;
 	};
 }

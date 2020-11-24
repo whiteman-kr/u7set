@@ -140,7 +140,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ConfigurationServiceCfgGenerator::buildClientsList(CfgServiceSettings* settings)
+	bool ConfigurationServiceCfgGenerator::buildClientsList(CfgServiceSettingsGetter* settings)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

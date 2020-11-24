@@ -69,6 +69,16 @@ namespace Builder
 
 		static bool loadFileFromDatabase(DbController* db, int parentId, const QString& fileName, QString *errorCode, QByteArray* data);
 
+		bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
+									   DataSource::DataType dataType,
+									   int adapterNo,
+									   E::LanControllerType adapterType,
+									   const Hardware::EquipmentSet& equipmentSet,
+									   const SubsystemKeyMap& subsystemKeyMap,
+									   const QHash<QString, quint64>& lmUniqueIdMap,
+									   DataSource* ds,
+									   Builder::IssueLogger* log);
+
 	protected:
 		Context* m_context = nullptr;
 		DbController* m_dbController = nullptr;

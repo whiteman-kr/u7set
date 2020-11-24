@@ -196,7 +196,6 @@ SOURCES +=\
 HEADERS  += \
     ../lib/ExportPrint.h \
     ../lib/SoftwareXmlReader.h \
-    ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
     ../lib/Ui/DialogSignalInfo.h \
