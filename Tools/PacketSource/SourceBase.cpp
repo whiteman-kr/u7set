@@ -509,7 +509,7 @@ int SourceBase::readFromFile(const BuildInfo& buildInfo)
 		si.equipmentID = ds.lmEquipmentID();
 
 		si.moduleType = ds.lmModuleType();
-		si.subSystem = ds.lmSubsystem();
+		si.subSystem = ds.lmSubsystemID();
 		si.frameCount = ds.lmRupFramesQuantity();
 		si.dataID = ds.lmDataID();
 

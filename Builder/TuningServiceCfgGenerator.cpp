@@ -110,12 +110,13 @@ namespace Builder
 
 				Tuning::TuningSource ts;
 
-				result &= ts.getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
+				result &= getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
 													   lanController.m_place,
 													   lanController.m_type,
 				                                       *m_equipment,
 													   m_subsystemKeyMap,
 													   m_lmsUniqueIdMap,
+				                                       &ts,
 													   m_log);
 				if (result == false)
 				{

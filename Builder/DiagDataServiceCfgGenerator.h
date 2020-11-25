@@ -22,6 +22,6 @@ namespace Builder
 		bool writeSettings();
 
 	private:
-		DiagDataServiceSettings m_settings;
+		DiagDataServiceSettingsGetter m_settings;
 	};
 }

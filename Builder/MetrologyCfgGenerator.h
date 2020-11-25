@@ -34,7 +34,7 @@ namespace Builder
 		bool testElectricLimit_Input_uA(const Signal& signal);
 
 	private:
-		MetrologySettings m_settings;
+		MetrologySettingsGetter m_settings;
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 	};

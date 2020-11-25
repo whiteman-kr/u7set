@@ -42,7 +42,7 @@ namespace Builder
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
-		TuningClientSettings m_settings;
+		TuningClientSettingsGetter m_settings;
 
 		::Proto::AppSignalSet m_tuningSet;
 
