@@ -87,8 +87,6 @@ namespace Sim
 
 	bool AppDataTransmitterThread::sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
-		int message_for_Yuriy_Beliy_sendData_will_be_called_for_each_port_portEquipmentId;
-
 		QThread* curThread = QThread::currentThread();
 
 		m_appDataQueueMutex.lock(curThread);
@@ -97,6 +95,7 @@ namespace Sim
 
 		extAppData.lmEquipmentID = lmEquipmentId;
 		extAppData.appData = data;
+		extAppData.portEquipmentID = portEquipmentId;
 		extAppData.timeStamp = timeStamp;
 
 		m_appDataQueueMutex.unlock(curThread);
@@ -123,6 +122,7 @@ namespace Sim
 				ExtAppData& queueAppData = m_appDataQueue.front();
 
 				extAppData.lmEquipmentID = queueAppData.lmEquipmentID;
+				extAppData.portEquipmentID = queueAppData.portEquipmentID;
 				extAppData.timeStamp = queueAppData.timeStamp;
 				extAppData.appData.swap(queueAppData.appData);
 
@@ -158,49 +158,47 @@ namespace Sim
 				continue;
 			}
 
-			AppDataSourceInfo adsi;
-
-			adsi.appDataUID = lmi.appDataUID;
-			adsi.appDataSizeBytes = lmi.appDataSizeBytes;
-
-			adsi.moduleType = lmi.moduleType();
-
-			adsi.rupFramesCount = (adsi.appDataSizeBytes / sizeof(Rup::Data)) +
-									((adsi.appDataSizeBytes % sizeof(Rup::Data)) == 0 ? 0 : 1);
-
 			for(LanControllerInfo lci : lmi.lanControllers)
 			{
 				if (lci.appDataProvided == true && lci.appDataEnable == true)
 				{
-					LanController lanController;
+					AppDataSourcePortInfo adspi;
 
-					lanController.sourceIP = QHostAddress(lci.appDataIP);
-					lanController.sourcePort = lci.appDataPort;
+					adspi.equipmentID = lci.equipmentID;
 
-					lanController.destinationIP = QHostAddress(lci.appDataServiceIP);
-					lanController.destinationPort = lci.appDataServicePort;
+					adspi.appDataUID = lmi.appDataUID;
+					adspi.appDataSizeBytes = lmi.appDataSizeBytes;
 
-					adsi.lanControllers.push_back(lanController);
+					adspi.moduleType = lmi.moduleType();
+
+					adspi.rupFramesCount = (adspi.appDataSizeBytes / sizeof(Rup::Data)) +
+											((adspi.appDataSizeBytes % sizeof(Rup::Data)) == 0 ? 0 : 1);
+
+					adspi.lanSourceIP = QHostAddress(lci.appDataIP);
+					adspi.lanSourcePort = lci.appDataPort;
+
+					adspi.lanDestinationIP = QHostAddress(lci.appDataServiceIP);
+					adspi.lanDestinationPort = lci.appDataServicePort;
+
+					m_appDataSourcePorts.insert({lci.equipmentID, adspi});
 				}
 			}
-
-			m_appDataSources.insert({lmi.equipmentID, adsi});
 		}
 	}
 
 	void AppDataTransmitterThread::privateSendAppData(const ExtAppData& extAppData)
 	{
-		auto item = m_appDataSources.find(extAppData.lmEquipmentID);
+		auto item = m_appDataSourcePorts.find(extAppData.portEquipmentID);
 
-		if (item == m_appDataSources.end())
+		if (item == m_appDataSourcePorts.end())
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		AppDataSourceInfo& adsi = item->second;
+		AppDataSourcePortInfo& adspi = item->second;
 
-		Q_ASSERT(extAppData.appData.size() == adsi.appDataSizeBytes);
+		Q_ASSERT(extAppData.appData.size() == adspi.appDataSizeBytes);
 
 		Rup::SimFrame simFrame;
 
@@ -216,10 +214,10 @@ namespace Sim
 		rupHeader.flags.all = 0;
 		rupHeader.flags.appData = 1;
 
-		rupHeader.dataId = adsi.appDataUID;
-		rupHeader.moduleType = static_cast<quint16>(adsi.moduleType);
-		rupHeader.numerator = adsi.rupFramesNumerator;
-		rupHeader.framesQuantity = adsi.rupFramesCount;
+		rupHeader.dataId = adspi.appDataUID;
+		rupHeader.moduleType = static_cast<quint16>(adspi.moduleType);
+		rupHeader.numerator = adspi.rupFramesNumerator;
+		rupHeader.framesQuantity = adspi.rupFramesCount;
 
 		QDateTime dt = extAppData.timeStamp.toDateTime();
 
@@ -236,7 +234,7 @@ namespace Sim
 
 		const int RUP_FRAME_DATA_SIZE = sizeof(rupFrame.data);
 
-		for(int frameNo = 0; frameNo < adsi.rupFramesCount; frameNo++)
+		for(int frameNo = 0; frameNo < adspi.rupFramesCount; frameNo++)
 		{
 			rupHeader.frameNumber = reverseUint16(static_cast<quint16>(frameNo));
 
@@ -256,17 +254,14 @@ namespace Sim
 
 			rupFrame.calcCRC64();
 
-			for(LanController& lanController: adsi.lanControllers)
-			{
-				simFrame.sourceIP = reverseUint32(lanController.sourceIP.toIPv4Address());
+			simFrame.sourceIP = reverseUint32(adspi.lanSourceIP.toIPv4Address());
 
-				m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
-										sizeof(simFrame),
-										lanController.destinationIP,
-										lanController.destinationPort);
-			}
+			m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
+									sizeof(simFrame),
+									adspi.lanDestinationIP,
+									adspi.lanDestinationPort);
 		}
 
-		adsi.rupFramesNumerator++;
+		adspi.rupFramesNumerator++;
 	}
 }

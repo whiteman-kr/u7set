@@ -10,8 +10,6 @@ public:
 	QString equipmentID;
 	E::SoftwareType softwareType;
 
-	bool readFromXml(XmlReadHelper& xmlReader);
-
 	const CfgServiceSettings* cfgServiceSettings() const;
 	const AppDataServiceSettings* appDataServiceSettings() const;
 	const DiagDataServiceSettings* diagDataServiceSettings() const;
@@ -21,6 +19,11 @@ public:
 	const MetrologySettings* metrologySettings() const;
 	const MonitorSettings* monitorSettings() const;
 	const TuningClientSettings* tuningClientSettings() const;
+
+private:
+	bool readFromXml(XmlReadHelper& xmlReader);
+
+	friend class SoftwareXmlReader;
 
 private:
 	SoftwareSettings* m_settings = nullptr;
@@ -33,6 +36,8 @@ public:
 	bool readSoftwareXml(const QByteArray& fileData);
 
 	const SoftwareXmlInfo* getSoftwareXmlInfo(const QString& equipmentID);	// returns nullptr if software with equipmentID isn't found
+
+	const std::map<QString, SoftwareXmlInfo>& softwareXmlInfo() { return m_softwareXmlInfo; }
 
 private:
 	std::map<QString, SoftwareXmlInfo> m_softwareXmlInfo;

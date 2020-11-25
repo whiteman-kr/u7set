@@ -38,7 +38,7 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-		MonitorSettings m_settings;
+		MonitorSettingsGetter m_settings;
 
 //		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;

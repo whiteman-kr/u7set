@@ -24,7 +24,7 @@ namespace Builder
 		bool writeShFile();
 
 	private:
-		ArchivingServiceSettings m_settings;
+		ArchivingServiceSettingsGetter m_settings;
 	};
 
 }

@@ -23,7 +23,7 @@ namespace Builder
 		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
-		TuningServiceSettings m_settings;
+		TuningServiceSettingsGetter m_settings;
 		const LmsUniqueIdMap m_lmsUniqueIdMap;
 		SubsystemKeyMap m_subsystemKeyMap;
 

@@ -21,10 +21,10 @@ namespace Builder
 		bool writeBatFile();
 		bool writeShFile();
 
-		bool buildClientsList(CfgServiceSettings* settings);
+		bool buildClientsList(CfgServiceSettingsGetter *settings);
 
 	private:
-		CfgServiceSettings m_settings;
+		CfgServiceSettingsGetter m_settings;
 	};
 
 }

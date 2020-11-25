@@ -34,7 +34,7 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
 	{ QStringLiteral("Module number"), [](const DataSource& source) { return source.lmNumber(); } },
 	{ QStringLiteral("Module type"), [](const DataSource& source) { return source.lmNumber(); } },
 	{ QStringLiteral("Subsystem ID"), [](const DataSource& source) { return source.lmSubsystemKey(); } },
-	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.lmSubsystem(); } },
+	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.lmSubsystemID(); } },
 	{ QStringLiteral("Adapter ID"), [](const DataSource& source) { return source.lmAdapterID(); } },
 };
 

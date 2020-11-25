@@ -48,34 +48,34 @@ namespace Sim
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
 	};
 
-
-
 	class AppDataTransmitterThread : public RunOverrideThread
 	{
 	private:
 		struct ExtAppData
 		{
 			QString lmEquipmentID;
+			QString portEquipmentID;
 			QByteArray appData;
 			TimeStamp timeStamp;
 		};
 
-		struct LanController
+		struct AppDataSourcePortInfo
 		{
-			QHostAddress sourceIP;
-			int sourcePort = 0;
+			QString equipmentID;
 
-			QHostAddress destinationIP;
-			int destinationPort = 0;
-		};
-
-		struct AppDataSourceInfo
-		{
 			quint32 appDataUID = 0;
 			int appDataSizeBytes = 0;
 			int moduleType = 0;
 
-			std::vector<LanController> lanControllers;
+			//
+
+			QHostAddress lanSourceIP;
+			int lanSourcePort = 0;
+
+			QHostAddress lanDestinationIP;
+			int lanDestinationPort = 0;
+
+			//
 
 			quint16 rupFramesNumerator = 0;
 			int rupFramesCount = 0;
@@ -99,7 +99,7 @@ namespace Sim
 		mutable SimpleMutex m_appDataQueueMutex;
 		std::queue<ExtAppData> m_appDataQueue;
 
-		std::unordered_map<QString, AppDataSourceInfo> m_appDataSources;
+		std::unordered_map<QString, AppDataSourcePortInfo> m_appDataSourcePorts;
 
 		QUdpSocket* m_socket = nullptr;
 	};

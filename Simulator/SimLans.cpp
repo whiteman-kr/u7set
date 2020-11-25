@@ -67,7 +67,7 @@ namespace Sim
 		return false;
 	}
 
-	bool Lans::sendAppDataData(const QByteArray& data, TimeStamp timeStamp)
+	bool Lans::sendAppData(const QByteArray& data, TimeStamp timeStamp)
 	{
 		if (m_simulator->appDataTransmitter().enabled() == false)
 		{
@@ -80,7 +80,7 @@ namespace Sim
 
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
-			if (i->isAppData() == true && i->enabled() == true)
+			if (i->isAppData() == true && i->enabled() == true && i->appDataSizeBytes() > 0)
 			{
 				ok &= m_simulator->appDataTransmitter().sendData(logicModuleId(), i->portEquipmentId(), data, timeStamp);
 			}

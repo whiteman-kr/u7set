@@ -13,46 +13,46 @@ class SoftwareSettings : public QObject
 public:
 	virtual ~SoftwareSettings();
 
-#ifdef IS_BUILDER
-
-	static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
-										const Hardware::Software* thisSoftware,
-										const QString& propConnectedSoBftwareID,
-										const QString& propConnectedSoftwareIP,
-										const QString& propConnectedSoftwarePort,
-										QString* connectedSoftwareID,
-										HostAddressPort* connectedSoftwareIP,
-										bool emptyAllowed,
-										const QString &defaultIP,
-										int defaultPort,
-										E::SoftwareType requiredSoftwareType,
-										Builder::IssueLogger* log);
-
-	static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
-										const Hardware::Software* software,
-										QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
-										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
-										Builder::IssueLogger* log);
-
-	virtual bool readFromDevice(const Hardware::EquipmentSet* equipment,
-								const Hardware::Software* software,
-								Builder::IssueLogger* log) = 0;
 
 	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
-
-#endif
-
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
 };
 
+#ifdef IS_BUILDER
+
+	class SoftwareSettingsGetter
+	{
+	public:
+		virtual ~SoftwareSettingsGetter();
+
+		static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
+											const Hardware::Software* thisSoftware,
+											const QString& propConnectedSoBftwareID,
+											const QString& propConnectedSoftwareIP,
+											const QString& propConnectedSoftwarePort,
+											QString* connectedSoftwareID,
+											HostAddressPort* connectedSoftwareIP,
+											bool emptyAllowed,
+											const QString &defaultIP,
+											int defaultPort,
+											E::SoftwareType requiredSoftwareType,
+											Builder::IssueLogger* log);
+
+		static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+											const Hardware::Software* software,
+											QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
+											QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
+											Builder::IssueLogger* log);
+
+		virtual bool readFromDevice(const Hardware::EquipmentSet* equipment,
+									const Hardware::Software* software,
+									Builder::IssueLogger* log) = 0;
+	};
+
+#endif
+
 class CfgServiceSettings : public SoftwareSettings
 {
-private:
-	static const char* CLIENTS_SECTION;
-	static const char* CLIENT;
-	static const char* CLIENT_EQUIPMENT_ID;
-	static const char* CLIENT_SOFTWARE_TYPE;
-
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
@@ -61,20 +61,24 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
 	bool writeToXml(XmlWriteHelper& xml) override;
-
-#endif
-
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	QStringList knownClients();
 };
+
+#ifdef IS_BUILDER
+
+	class CfgServiceSettingsGetter : public CfgServiceSettings, public SoftwareSettingsGetter
+	{
+	public:
+
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	};
+
+#endif
 
 class AppDataServiceSettings : public SoftwareSettings
 {
@@ -100,17 +104,23 @@ public:
 
 	//
 
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
+};
+
 #ifdef IS_BUILDER
 
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-	bool writeToXml(XmlWriteHelper& xml) override;
+	class AppDataServiceSettingsGetter : public AppDataServiceSettings, public SoftwareSettingsGetter
+	{
+	public:
+
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	};
 
 #endif
 
-	bool readFromXml(XmlReadHelper& xml) override;
-};
 
 class DiagDataServiceSettings : public SoftwareSettings
 {
@@ -132,26 +142,25 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
 	bool writeToXml(XmlWriteHelper& xml) override;
-
-#endif
-
 	bool readFromXml(XmlReadHelper& xml) override;
 };
 
+#ifdef IS_BUILDER
+
+	class DiagDataServiceSettingsGetter : public DiagDataServiceSettings, public SoftwareSettingsGetter
+	{
+	public:
+
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	};
+
+#endif
+
 class TuningServiceSettings : public SoftwareSettings
 {
-private:
-	static const char* TUNING_CLIENTS;
-	static const char* TUNING_CLIENT;
-	static const char* TUNING_SOURCES;
-	static const char* TUNING_SOURCE;
-
 public:
 	struct TuningClient
 	{
@@ -172,34 +181,26 @@ public:
 
 	//
 
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
+};
+
 #ifdef IS_BUILDER
 
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
-	bool writeToXml(XmlWriteHelper& xml) override;
-
-private:
-	bool fillTuningClientsInfo(const Hardware::Software* software, bool singleLmControlEnabled, Builder::IssueLogger* log);
+	class TuningServiceSettingsGetter : public TuningServiceSettings, public SoftwareSettingsGetter
+	{
+	public:
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	private:
+		bool fillTuningClientsInfo(const Hardware::Software* software, bool singleLmControlEnabled, Builder::IssueLogger* log);
+	};
 
 #endif
 
-public:
-	bool readFromXml(XmlReadHelper& xml) override;
-
-};
-
 class ArchivingServiceSettings : public SoftwareSettings
 {
-public:
-	static const char* PROP_ARCHIVE_DB_HOST_IP;
-	static const char* PROP_ARCHIVE_DB_HOST_PORT;
-
-	static const char* PROP_ARCHIVE_SHORT_TERM_PERIOD;
-	static const char* PROP_ARCHIVE_LONG_TERM_PERIOD;
-	static const char* PROP_ARCHIVE_LOCATION;
-
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
@@ -217,35 +218,28 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
-	bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
-
 	bool writeToXml(XmlWriteHelper& xml) override;
-
-#endif
-
 	bool readFromXml(XmlReadHelper& xml) override;
-
 
 	const ArchivingServiceSettings& operator = (const ArchivingServiceSettings& src);
 };
 
+#ifdef IS_BUILDER
+
+	class ArchivingServiceSettingsGetter : public ArchivingServiceSettings, public SoftwareSettingsGetter
+	{
+	public:
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+
+		bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
+	};
+
+#endif
+
 class TestClientSettings : public SoftwareSettings
 {
-public:
-	static const char* CFG_SERVICE1_SECTION;
-	static const char* CFG_SERVICE2_SECTION;
-	static const char* APP_DATA_SERVICE_SECTION;
-	static const char* DIAG_DATA_SERVICE_SECTION;
-	static const char* ARCH_SERVICE_SECTION;
-	static const char* TUNING_SERVICE_SECTION;
-	static const char* PROP_TUNING_SERVICE_SECTION;
-
 public:
 	QString			cfgService1_equipmentID;
 	HostAddressPort cfgService1_clientRequestIP;
@@ -273,18 +267,22 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
 	bool writeToXml(XmlWriteHelper& xml) override;
-
-#endif
-
 	bool readFromXml(XmlReadHelper& xml) override;
 };
+
+#ifdef IS_BUILDER
+
+	class TestClientSettingsGetter : public TestClientSettings, public SoftwareSettingsGetter
+	{
+	public:
+
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	};
+
+#endif
 
 class MetrologySettings : public SoftwareSettings
 {
@@ -307,18 +305,21 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-
-#endif
-
 	bool readFromXml(XmlReadHelper& xmlReader) override;
 };
+
+#ifdef IS_BUILDER
+
+	class MetrologySettingsGetter : public MetrologySettings, public SoftwareSettingsGetter
+	{
+	public:
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	};
+
+#endif
 
 class MonitorSettings : public SoftwareSettings
 {
@@ -354,34 +355,36 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-
-private:
-	bool readAppDataServiceAndArchiveSettings(const Hardware::EquipmentSet* equipment,
-								   const Hardware::Software* software,
-								   Builder::IssueLogger* log);
-
-	bool readTuningSettings(const Hardware::EquipmentSet* equipment,
-								   const Hardware::Software* software,
-								   Builder::IssueLogger* log);
-#endif
-
-public:
 	bool readFromXml(XmlReadHelper& xmlReader) override;
 
 	QStringList getSchemaTags() const;
 	QStringList getTuningSources() const;
 
-private:
 	void clear();
-
 };
+
+#ifdef IS_BUILDER
+
+	class MonitorSettingsGetter : public MonitorSettings, public SoftwareSettingsGetter
+	{
+	public:
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+
+
+	private:
+		bool readAppDataServiceAndArchiveSettings(const Hardware::EquipmentSet* equipment,
+									   const Hardware::Software* software,
+									   Builder::IssueLogger* log);
+
+		bool readTuningSettings(const Hardware::EquipmentSet* equipment,
+									   const Hardware::Software* software,
+									   Builder::IssueLogger* log);
+	};
+
+#endif
 
 class TuningClientSettings : public SoftwareSettings
 {
@@ -410,18 +413,22 @@ public:
 
 	//
 
-#ifdef IS_BUILDER
-
-	bool readFromDevice(const Hardware::EquipmentSet* equipment,
-						const Hardware::Software* software,
-						Builder::IssueLogger* log) override;
-
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-
-#endif
-
 	bool readFromXml(XmlReadHelper& xmlReader) override;
 
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;
 };
+
+#ifdef IS_BUILDER
+
+	class TuningClientSettingsGetter : public TuningClientSettings, public SoftwareSettingsGetter
+	{
+	public:
+		bool readFromDevice(const Hardware::EquipmentSet* equipment,
+							const Hardware::Software* software,
+							Builder::IssueLogger* log) override;
+	};
+
+#endif
+

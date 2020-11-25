@@ -29,6 +29,7 @@ namespace Sim
 
 		bool isTuning() const;
 		bool isAppData() const;
+		int appDataSizeBytes() const;
 		bool isDiagData() const;
 
 	protected:
