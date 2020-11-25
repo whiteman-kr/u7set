@@ -27,7 +27,7 @@
           <bool>false</bool>
          </property>
          <property name="headerHidden">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <column>
           <property name="text">
@@ -49,6 +49,20 @@
           <widget class="QPushButton" name="m_remove">
            <property name="text">
             <string>Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_up">
+           <property name="text">
+            <string>Move Up</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_down">
+           <property name="text">
+            <string>Move Down</string>
            </property>
           </widget>
          </item>

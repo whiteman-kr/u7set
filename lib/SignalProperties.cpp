@@ -308,6 +308,7 @@ void SignalProperties::initProperties(bool savePropertyDescription)
 
 	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, tagsCaption, true, Signal::tagsStr, Signal::setTagsStr, m_signal);
 	tagsProperty->setCategory(categoryOnlineMonitoringSystem);
+	tagsProperty->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 	// append signal specific properties
 	//

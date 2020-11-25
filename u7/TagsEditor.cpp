@@ -18,30 +18,35 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 
 	// Tags list
 	//
-	m_tagsList = new QListWidget();
+	m_tagsList = new QTreeWidget();
+	m_tagsList->setRootIsDecorated(false);
 
-	QStringList tags;
-	bool ok = dbController->getTags(&tags);
+	QStringList l;
+	l << tr("Tag");
+	l << tr("Description");
+	m_tagsList->setHeaderLabels(l);
+	m_tagsList->setColumnCount(l.size());
 
-
-	if (ok == false)
+	std::vector<DbTag> dbTags;
+	bool ok = dbController->getTags(&dbTags);
+	if (ok == true)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Could not read tags from the database!"));
-	}
-	else
-	{
-		tags.sort();
-
-		for (const QString& tag :  tags)
+		for (const DbTag& dbTag :  dbTags)
 		{
-			QListWidgetItem* item = new QListWidgetItem(tag);
+			QTreeWidgetItem* item = new QTreeWidgetItem();
+			item->setText(0, dbTag.tag);
+			item->setText(1, dbTag.description);
 			item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-			item->setCheckState(Qt::Unchecked);
-			m_tagsList->addItem(item);
+			item->setCheckState(0, Qt::Unchecked);
+
+			m_tagsList->addTopLevelItem(item);
 		}
 	}
 
-	connect(m_tagsList, &QListWidget::itemChanged, this, &TagsEditor::tagsListItemChanged);
+	m_tagsList->resizeColumnToContents(0);
+
+	connect(m_tagsList, &QTreeWidget::itemChanged, this, &TagsEditor::tagsListItemChanged);
+	connect(m_tagsList, &QTreeWidget::itemPressed, this, &TagsEditor::tagsListItemPressed);
 
 	// Main Layout
 	//
@@ -90,9 +95,34 @@ void TagsEditor::tagsTextChanged(const QString& text)
 	return;
 }
 
-void TagsEditor::tagsListItemChanged(QListWidgetItem*)
+void TagsEditor::tagsListItemChanged(QTreeWidgetItem *item, int column)
 {
+	Q_UNUSED(item);
+	Q_UNUSED(column);
+
 	updateTags();
+
+	return;
+}
+
+void TagsEditor::tagsListItemPressed(QTreeWidgetItem *item, int column)
+{
+	Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	if (item->checkState(0) == Qt::Checked)
+	{
+		item->setCheckState(0, Qt::Unchecked);
+	}
+	else
+	{
+		item->setCheckState(0, Qt::Checked);
+	}
 
 	return;
 }
@@ -111,18 +141,18 @@ void TagsEditor::updateChecks(const QString& text)
 
 	m_tagsList->blockSignals(true);
 
-	int count = m_tagsList->count();
+	int count = m_tagsList->topLevelItemCount();
 	for (int i = 0; i < count; i++)
 	{
-		QListWidgetItem* item = m_tagsList->item(i);
+		QTreeWidgetItem* item = m_tagsList->topLevelItem(i);
 
-		if (textTags.contains(item->text()) == true)
+		if (textTags.contains(item->text(0)) == true)
 		{
-			item->setCheckState(Qt::Checked);
+			item->setCheckState(0, Qt::Checked);
 		}
 		else
 		{
-			item->setCheckState(Qt::Unchecked);
+			item->setCheckState(0, Qt::Unchecked);
 		}
 	}
 
@@ -148,17 +178,17 @@ void TagsEditor::updateTags()
 
 	std::map<QString, bool> tagsListState;
 
-	int count = m_tagsList->count();
+	int count = m_tagsList->topLevelItemCount();
 	for (int i = 0; i < count; i++)
 	{
-		QListWidgetItem* item = m_tagsList->item(i);
+		QTreeWidgetItem* item = m_tagsList->topLevelItem(i);
 		if (item == nullptr)
 		{
 			Q_ASSERT(item);
 			continue;
 		}
 
-		tagsListState[item->text()] = item->checkState() == Qt::Checked;
+		tagsListState[item->text(0)] = item->checkState(0) == Qt::Checked;
 	}
 
 	// Add manually added and previously checked tags to the result

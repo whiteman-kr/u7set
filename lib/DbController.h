@@ -188,8 +188,10 @@ public:
 	bool nextCounterValue(int* counter);
 	int nextCounterValue();
 
-	bool getTags(QStringList* tags);
-	bool writeTags(const QStringList& tags, const QString& comment);
+	// Tags for schemas, signals, ...
+	//
+	bool getTags(std::vector<DbTag>* tags);
+	bool writeTags(const std::vector<DbTag> tags, const QString& comment);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);

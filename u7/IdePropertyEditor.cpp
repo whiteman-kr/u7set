@@ -89,7 +89,7 @@ bool IdePropertyEditorHelper::restorePropertyTextEditorSize(std::shared_ptr<Prop
 		QRect screen = QDesktopWidget().availableGeometry(dialog->parentWidget());
 
 		dialog->resize(static_cast<int>(screen.width() * 0.20),
-			   static_cast<int>(screen.height() * 0.40));
+			   static_cast<int>(screen.height() * 0.30));
 		dialog->move(screen.center() - dialog->rect().center());
 
 		return true;

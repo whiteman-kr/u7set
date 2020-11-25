@@ -230,7 +230,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 {
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	m_propertyEditor = new IdePropertyEditor(this);
+	m_propertyEditor = new IdePropertyEditor(this, dbController);
 
 	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
 

@@ -1,6 +1,64 @@
 #include "DialogTagsEditor.h"
 #include "ui_DialogTagsEditor.h"
 
+
+//
+//
+// DialogTagsEditorDelegate
+//
+//
+DialogTagsEditorDelegate::DialogTagsEditorDelegate(QObject *parent):QItemDelegate(parent)
+{
+}
+
+QWidget* DialogTagsEditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+	if (index.column() == 0)
+	{
+		QLineEdit* edit = new QLineEdit(parent);
+
+		QRegExp rx("^[A-Za-z][A-Za-z_\\d]*$");
+		edit->setValidator(new QRegExpValidator(rx, edit));
+
+		return edit;
+	}
+	else
+	{
+		return QItemDelegate::createEditor(parent, option, index);
+	}
+}
+
+void DialogTagsEditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+	if (index.column() == 0)
+	{
+		QString s = index.model()->data(index, Qt::EditRole).toString();
+		QLineEdit *edit = qobject_cast<QLineEdit*>(editor);
+		edit->setText(s);
+	}
+	else
+	{
+		QItemDelegate::setEditorData(editor, index);
+	}
+}
+
+void DialogTagsEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+	if (index.column() == 0)
+	{
+		QLineEdit* edit = qobject_cast<QLineEdit*>(editor);
+		model->setData(index, edit->text(), Qt::EditRole);
+	}
+	else
+	{
+		QItemDelegate::setModelData(editor, model, index);
+	}
+}
+
+//
+// DialogTagsEditor
+//
+
 DialogTagsEditor::DialogTagsEditor(DbController* pDbController, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTagsEditor),
@@ -12,12 +70,13 @@ DialogTagsEditor::DialogTagsEditor(DbController* pDbController, QWidget *parent)
 
 	setWindowTitle(tr("Tags Editor"));
 
-	ui->m_list->setColumnCount(1);
 	QStringList l;
 	l << tr("Tag");
+	l << tr("Description");
 	ui->m_list->setHeaderLabels(l);
+	ui->m_list->setColumnCount(l.size());
 
-	QStringList tags;
+	std::vector<DbTag> tags;
 
 	if (db()->getTags(&tags) == false)
 	{
@@ -27,13 +86,24 @@ DialogTagsEditor::DialogTagsEditor(DbController* pDbController, QWidget *parent)
 
 	for (int i = 0; i < static_cast<int>(tags.size()); i++)
 	{
-		const QString& tag = tags[i];
+		const DbTag& tag = tags[i];
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << tag);
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+		item->setText(0, tag.tag);
+		item->setText(1, tag.description);
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
-		item->setData(0, Qt::UserRole, i);
+
 		ui->m_list->insertTopLevelItem(ui->m_list->topLevelItemCount(), item);
 	}
+
+	ui->m_list->setItemDelegate(new DialogTagsEditorDelegate(this));
+
+	// Delete shortcut
+
+	QShortcut* removeShortcut = new QShortcut(QKeySequence(QKeySequence::Delete), this);
+	connect(removeShortcut, &QShortcut::activated, this, &DialogTagsEditor::on_remove_shortcut);
+
+	return;
 }
 
 DialogTagsEditor::~DialogTagsEditor()
@@ -47,16 +117,16 @@ void DialogTagsEditor::showEvent(QShowEvent*)
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 
-	resize(static_cast<int>(screen.width() * 0.20),
-		   static_cast<int>(screen.height() * 0.20));
+	resize(static_cast<int>(screen.width() * 0.25),
+		   static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
 
 	return;
 }
 
-QStringList DialogTagsEditor::getTags() const
+std::vector<DbTag> DialogTagsEditor::getTags() const
 {
-	QStringList tags;
+	std::vector<DbTag> tags;
 
 	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
 	{
@@ -64,12 +134,10 @@ QStringList DialogTagsEditor::getTags() const
 		if (item == nullptr)
 		{
 			assert(item);
-			return QStringList();
+			return {};
 		}
 
-		QString tag = item->text(0);
-
-		tags.push_back(tag);
+		tags.push_back({item->text(0), item->text(1)});
 	}
 
 	return tags;
@@ -120,7 +188,7 @@ bool DialogTagsEditor::saveChanges()
 
 	// save to db
 	//
-	QStringList tags = getTags();
+	std::vector<DbTag> tags = getTags();
 
 	if (db()->writeTags(tags, comment) == false)
 	{
@@ -149,14 +217,14 @@ void DialogTagsEditor::on_m_add_clicked()
 {
 	// Get existing tags
 
-	QStringList tags = getTags();
+	std::vector<DbTag> tags = getTags();
 
-	QString tag;
+	QString newTag;
 
 	while(true)
 	{
 		bool ok = false;
-		tag = QInputDialog::getText(this, qAppName(),
+		newTag = QInputDialog::getText(this, qAppName(),
 												tr("Please enter tag:"), QLineEdit::Normal,
 												tr("tag"), &ok);
 
@@ -165,45 +233,36 @@ void DialogTagsEditor::on_m_add_clicked()
 			return;
 		}
 
-		if (std::find(tags.begin(), tags.end(), tag) == tags.end())
+		bool hasDuplicates = false;
+
+		for (const DbTag& dbTag : tags)
 		{
-			break;
+			if (dbTag.tag == newTag)
+			{
+				hasDuplicates = true;
+				break;
+			}
 		}
 
-		QMessageBox::warning(this, qAppName(), "This tag already exists, please enter another one.");
+		if (hasDuplicates == true)
+		{
+			QMessageBox::warning(this, qAppName(), "This tag already exists, please enter another one.");
+			continue;
+		}
+
+		break;
 	}
 
-
-	// --
-	//
-	int index = -1;
-
-	QList<QTreeWidgetItem*> items = ui->m_list->selectedItems();
-	if (items.size() != 1)
-	{
-		index = ui->m_list->topLevelItemCount();
-	}
-	else
-	{
-		index = items[0]->data(0, Qt::UserRole).toInt() + 1;
-	}
-
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << tag);
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText(0, newTag);
+	//item->setText(1, "<Description>");
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
-	ui->m_list->insertTopLevelItem(index, item);
-
-	// Renumber indexes
-	//
-	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* ti = ui->m_list->topLevelItem(i);
-		ti->setData(0, Qt::UserRole, i);
-	}
+	ui->m_list->addTopLevelItem(item);
 
 	// Select the created element
 	//
 	ui->m_list->clearSelection();
-	ui->m_list->selectionModel()->select(ui->m_list->model()->index (index, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	item->setSelected(true);
 
 	m_modified = true;
 
@@ -211,28 +270,30 @@ void DialogTagsEditor::on_m_add_clicked()
 
 void DialogTagsEditor::on_m_remove_clicked()
 {
-	int index = -1;
-
 	QList<QTreeWidgetItem*> items = ui->m_list->selectedItems();
 	if (items.size() != 1)
 	{
 		return;
 	}
-	else
+
+	if (QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected tag?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
 	{
-		index = items[0]->data(0, Qt::UserRole).toInt();
+		return;
 	}
+
+	int index = ui->m_list->indexOfTopLevelItem(items[0]);
+
+	// Delete item
 
 	QTreeWidgetItem* deletedItem = ui->m_list->takeTopLevelItem(index);
+	if (deletedItem == nullptr)
+	{
+		Q_ASSERT(deletedItem);
+		return;
+	}
 	delete deletedItem;
 
-	// Renumber indexes
-	//
-	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
-		item->setData(0, Qt::UserRole, i);
-	}
+	// Select next item
 
 	if (ui->m_list->topLevelItemCount() > 0 && index != -1)
 	{
@@ -253,15 +314,18 @@ void DialogTagsEditor::on_buttonOk_clicked()
 {
 	bool hasDuplicates = false;
 
-	QStringList tags = getTags();
+	std::vector<DbTag> dbTags = getTags();
 
-	for (const QString& tag : tags)
+	QStringList allTags;
+
+	for (const DbTag& dbTag : dbTags)
 	{
-		if (tags.count(tag) > 1)
+		if (allTags.count(dbTag.tag) != 0)
 		{
 			hasDuplicates = true;
 			break;
 		}
+		allTags.push_back(dbTag.tag);
 	}
 
 	if (hasDuplicates == true)
@@ -305,4 +369,76 @@ void DialogTagsEditor::on_m_list_itemChanged(QTreeWidgetItem *item, int column)
 	Q_UNUSED(item);
 	Q_UNUSED(column);
 	m_modified = true;
+}
+
+void DialogTagsEditor::on_remove_shortcut()
+{
+	if (ui->m_list->hasFocus() == false)
+	{
+		return;
+	}
+
+	on_m_remove_clicked();
+}
+
+void DialogTagsEditor::on_m_up_clicked()
+{
+	QList<QTreeWidgetItem*> items = ui->m_list->selectedItems();
+	if (items.size() != 1)
+	{
+		return;
+	}
+
+	int index = ui->m_list->indexOfTopLevelItem(items[0]);
+	if (index == 0)
+	{
+		return;
+	}
+
+	QTreeWidgetItem* item = ui->m_list->takeTopLevelItem(index);
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	ui->m_list->insertTopLevelItem(index - 1, item);
+	ui->m_list->clearSelection();
+
+	item->setSelected(true);
+
+	m_modified = true;
+
+	return;
+}
+
+void DialogTagsEditor::on_m_down_clicked()
+{
+	QList<QTreeWidgetItem*> items = ui->m_list->selectedItems();
+	if (items.size() != 1)
+	{
+		return;
+	}
+
+	int index = ui->m_list->indexOfTopLevelItem(items[0]);
+	if (index == ui->m_list->topLevelItemCount() - 1)
+	{
+		return;
+	}
+
+	QTreeWidgetItem* item = ui->m_list->takeTopLevelItem(index);
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	ui->m_list->insertTopLevelItem(index + 1, item);
+	ui->m_list->clearSelection();
+
+	item->setSelected(true);
+
+	m_modified = true;
+
+	return;
 }

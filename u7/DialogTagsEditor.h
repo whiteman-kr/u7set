@@ -8,6 +8,20 @@ namespace Ui {
 	class DialogTagsEditor;
 }
 
+class DialogTagsEditorDelegate: public QItemDelegate
+{
+	Q_OBJECT
+
+public:
+	DialogTagsEditorDelegate(QObject *parent);
+	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+private:
+	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+
+};
+
 class DialogTagsEditor : public QDialog
 {
 	Q_OBJECT
@@ -20,7 +34,7 @@ protected:
 	virtual void showEvent(QShowEvent* event) override;
 
 private:
-	QStringList getTags() const;
+	std::vector<DbTag> getTags() const;
 	bool askForSaveChanged();
 	bool saveChanges();
 
@@ -33,6 +47,11 @@ private slots:
 	void on_buttonOk_clicked();
 	void on_buttonCancel_clicked();
 	void on_m_list_itemChanged(QTreeWidgetItem* item, int column);
+	void on_remove_shortcut();
+
+	void on_m_up_clicked();
+
+	void on_m_down_clicked();
 
 private:
 

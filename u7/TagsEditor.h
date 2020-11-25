@@ -19,7 +19,8 @@ public:
 
 private slots:
 	void tagsTextChanged(const QString& text);
-	void tagsListItemChanged(QListWidgetItem *);
+	void tagsListItemChanged(QTreeWidgetItem* item, int column);
+	void tagsListItemPressed(QTreeWidgetItem* item, int column);
 
 private:
 	void updateChecks(const QString& text);
@@ -29,7 +30,7 @@ private:
 	QWidget* m_parent = nullptr;
 
 	QLineEdit* m_textEdit = nullptr;
-	QListWidget* m_tagsList = nullptr;
+	QTreeWidget* m_tagsList = nullptr;
 };
 
 #endif // TAGSEDITOR_H

@@ -2742,7 +2742,7 @@ int DbController::nextCounterValue()
 	}
 }
 
-bool DbController::getTags(QStringList* tags)
+bool DbController::getTags(std::vector<DbTag>* tags)
 {
 	if (tags == nullptr)
 	{
@@ -2750,7 +2750,11 @@ bool DbController::getTags(QStringList* tags)
 		return false;
 	}
 
-	static const QStringList defaultTags = {"applicationlogic", "monitor", "tuning", "in", "out"};
+	static const std::vector<DbTag> defaultTags = {{"applicationlogic", "Application Logic Schema"},
+												   {"monitor", "Monitor Schema"},
+												   {"tuning", "TuningClient Schema"},
+												   {"in", "Input Signal"},
+												   {"out", "Output Signal"}};
 
 	std::vector<DbFileInfo> fileList;
 
@@ -2775,14 +2779,24 @@ bool DbController::getTags(QStringList* tags)
 		QString str = in.readLine();
 		if (str.isEmpty() == false)
 		{
-			tags->push_back(str);
+			str = str.trimmed();
+
+			QStringList tag = str.split(';', Qt::KeepEmptyParts);
+
+			if (tag.size() != 2)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			tags->push_back({tag[0], tag[1]});
 		}
 	}
 
 	return true;
 }
 
-bool DbController::writeTags(const QStringList& tags, const QString& comment)
+bool DbController::writeTags(const std::vector<DbTag> tags, const QString& comment)
 {
 	// save to db
 	//
@@ -2824,7 +2838,13 @@ bool DbController::writeTags(const QStringList& tags, const QString& comment)
 		}
 	}
 
-	QByteArray data = tags.join('\n').toUtf8();
+	QByteArray data;
+
+	for (const DbTag& tag : tags)
+	{
+		data.append((tr("%1;%2\n").arg(tag.tag).arg(tag.description)).toUtf8());
+	}
+
 	file->swapData(data);
 
 	if (setWorkcopy(file, nullptr) == false)

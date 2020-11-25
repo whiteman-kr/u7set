@@ -56,7 +56,7 @@ namespace Db
 		constexpr static const char* SimTestsFileName = "$root$/Tests/SimTests";	// SimTests folder
 
 		constexpr static const char* SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
-		constexpr static const char* TagsFileName = "Tags.txt";
+		constexpr static const char* TagsFileName = "Tags.csv";
 
 		constexpr static const char* AlFileExtension = "als";						// Application Logic schema file extension
 		constexpr static const char* AlTemplExtension = "templ_als";				// Application Logic schema template file extnesion
@@ -696,6 +696,17 @@ private:
 	QString m_fileRenameText;
 };
 
+struct DbTag
+{
+	DbTag(const QString& tag, const QString& description)
+	{
+		this->tag = tag;
+		this->description = description;
+	}
+
+	QString tag;
+	QString description;
+};
 
 Q_DECLARE_METATYPE(DbUser)
 Q_DECLARE_METATYPE(DbFileTree)
