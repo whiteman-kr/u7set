@@ -72,9 +72,9 @@ struct SignalElectricLimit
 	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,	},						// module TIM
 	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,	},						// module TIM
 
-	// microA
+	// micro A
 	//
-	{   -5,		5,		E::ElectricUnit::uA,	E::SensorType::uA_m5_p5,		},						// module MAIM
+	{   -10,	10,		E::ElectricUnit::uA,	E::SensorType::uA_m10_p10,		},						// module MAIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);

@@ -781,7 +781,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 
 		case E::ElectricUnit::uA:
 
-			if (sensorType != E::SensorType::uA_m5_p5)
+			if (sensorType != E::SensorType::uA_m10_p10)
 			{
 				return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for uA"));
 			}
