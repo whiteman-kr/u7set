@@ -26,7 +26,7 @@ namespace Sim
 		// AppData
 		//
 		bool isAppDataEnabled() const;
-		bool sendAppDataData(const QByteArray& data, TimeStamp timeStamp);
+		bool sendAppData(const QByteArray& data, TimeStamp timeStamp);
 
 		// DiagData
 		//

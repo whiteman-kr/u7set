@@ -254,7 +254,7 @@ namespace Sim
 
 			rupFrame.calcCRC64();
 
-			simFrame.sourceIP = adspi.lanSourceIP.toIPv4Address();
+			simFrame.sourceIP = reverseUint32(adspi.lanSourceIP.toIPv4Address());
 
 			m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
 									sizeof(simFrame),

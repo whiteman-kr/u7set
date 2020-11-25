@@ -312,7 +312,7 @@ namespace Sim
 				return false;
 			}
 
-			m_lans.sendAppDataData(regData, plantTime);
+			m_lans.sendAppData(regData, plantTime);
 		}
 
 		return ok;

@@ -328,7 +328,12 @@ DataSourceOnline::~DataSourceOnline()
 
 bool DataSourceOnline::initQueue()
 {
-	int queueSize = lmRupFramesQuantity() * 200 * 3;	// 3 seconds queue
+	int queueSize = FastThreadSafeQueue<RupFrameTime>::MIN_QUEUE_SIZE;
+
+	if (lmRupFramesQuantity() > 0)
+	{
+		queueSize = lmRupFramesQuantity() * 200 * 3;	// 3 seconds queue;
+	}
 
 	m_rupFrameTimeQueue.resize(queueSize);
 
