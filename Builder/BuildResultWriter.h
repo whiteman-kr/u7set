@@ -4,7 +4,7 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/BuildInfo.h"
-#include "CfgFiles.h"
+#include "../lib/ConstStrings.h"
 #include "ModuleFirmwareWriter.h"
 #include <QFile>
 
@@ -79,7 +79,7 @@ namespace Builder
 
 		const QByteArray& getFileData() { return m_fileData; }
 		QString subDir() const { return m_subDir; }
-		QString fileName() const { return m_subDir + "/" + QString(FILE_CONFIGURATION_XML); }
+		QString fileName() const { return m_subDir + "/" + File::CONFIGURATION_XML; }
 
 	private:
 		BuildResultWriter& m_buildResultWriter;

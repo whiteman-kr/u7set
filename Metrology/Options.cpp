@@ -279,76 +279,55 @@ void SocketClientOption::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SocketClientOption::readOptionsFromXml(const QByteArray& fileData)
+bool SocketClientOption::init(const MetrologySettings& settings)
 {
 	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
 	{
 		return false;
 	}
 
-	bool result = false;
-
-	XmlReadHelper xml(fileData);
+	bool result = true;
 
 	switch(m_type)
 	{
 		case SOCKET_TYPE_SIGNAL:
-
-			result = xml.findElement("AppDataService");
-			if (result == false)
 			{
-				break;
-			}
+				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-			result &= xml.readBoolAttribute("PropertyIsValid1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("AppDataServiceID1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
-				result &= xml.readStringAttribute("ip1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
-				result &= xml.readIntAttribute("port1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
-			}
+				primary.isValid = settings.appDataServicePropertyIsValid1;
+				primary.equipmentID = settings.appDataServiceID1;
+				primary.serverIP = settings.appDataServiceIP1;
+				primary.serverPort = settings.appDataServicePort1;
 
-			result &= xml.readBoolAttribute("PropertyIsValid2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("AppDataServiceID2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].equipmentID);
-				result &= xml.readStringAttribute("ip2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverIP);
-				result &= xml.readIntAttribute("port2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverPort);
-			}
+				CONNECTION_OPTION& reserve = m_connectOption[SOCKET_SERVER_TYPE_RESERVE];
 
-			if (result == false)
-			{
-				break;
-			}
+				reserve.isValid = settings.appDataServicePropertyIsValid2;
+				reserve.equipmentID = settings.appDataServiceID2;
+				reserve.serverIP = settings.appDataServiceIP2;
+				reserve.serverPort = settings.appDataServicePort2;
 
-			save();
+				save();
+			}
 
 			break;
 
 		case SOCKET_TYPE_TUNING:
-
-			result = xml.findElement("TuningService");
-			if (result == false)
 			{
-				break;
-			}
+				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
 
-			result &= xml.readBoolAttribute("PropertyIsValid", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("SoftwareMetrologyID", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
-				result &= xml.readStringAttribute("ip", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
-				result &= xml.readIntAttribute("port", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
-			}
+				primary.isValid = settings.tuningServicePropertyIsValid;
+				primary.equipmentID = settings.softwareMetrologyID;
+				primary.serverIP = settings.tuningServiceIP;
+				primary.serverPort = settings.tuningServicePort;
 
-			if (result == false)
-			{
-				break;
+				save();
 			}
-
-			save();
 
 			break;
+
+		default:
+			Q_ASSERT(false);
+			result = false;
 	}
 
 	return result;
@@ -580,6 +559,8 @@ void ModuleOption::load()
 
 	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
 
+	m_measureInterInsteadIn = s.value(QString("%1MeasureInterInsteadIn").arg(MODULE_OPTIONS_KEY), false).toBool();
+	m_measureLinAndCmp = s.value(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
 
@@ -594,6 +575,8 @@ void ModuleOption::save()
 
 	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
 
+	s.setValue(QString("%1MeasureInterInsteadIn").arg(MODULE_OPTIONS_KEY), m_measureInterInsteadIn);
+	s.setValue(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), m_measureLinAndCmp);
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
@@ -606,6 +589,8 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
 	m_suffixSN = from.m_suffixSN;
 
+	m_measureInterInsteadIn = from.m_measureInterInsteadIn;
+	m_measureLinAndCmp = from.m_measureLinAndCmp;
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
 
@@ -1276,7 +1261,7 @@ void DatabaseOption::load()
 
 	m_onStart = s.value(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), false).toBool();
 	m_onExit = s.value(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), true).toBool();
-	m_copyPath = s.value(QString("%1CopyPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::tempPath()).toString();
+	m_backupPath = s.value(QString("%1BackupPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::tempPath()).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1290,7 +1275,7 @@ void DatabaseOption::save()
 
 	s.setValue(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), m_onStart);
 	s.setValue(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), m_onExit);
-	s.setValue(QString("%1CopyPath").arg(DATABASE_OPTIONS_REG_KEY), m_copyPath);
+	s.setValue(QString("%1BackupPath").arg(DATABASE_OPTIONS_REG_KEY), m_backupPath);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1302,7 +1287,7 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 
 	m_onStart = from.m_onStart;
 	m_onExit = from.m_onExit;
-	m_copyPath = from.m_copyPath;
+	m_backupPath = from.m_backupPath;
 
 	return *this;
 }
@@ -1446,6 +1431,14 @@ bool Options::readFromXml(const QByteArray& fileData)
 		return false;
 	}
 
+	XmlReadHelper xmlReader(fileData);
+
+	result = m_settings.readFromXml(xmlReader);
+	if (result == false)
+	{
+		return false;
+	}
+
 	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
 	{
 		if (t == SOCKET_TYPE_CONFIG)
@@ -1455,7 +1448,8 @@ bool Options::readFromXml(const QByteArray& fileData)
 
 		SocketClientOption sco = m_socket.client(t);
 
-		result &= sco.readOptionsFromXml(fileData);
+		result &= sco.init(m_settings);
+
 		if (result == false)
 		{
 			continue;

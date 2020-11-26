@@ -694,6 +694,14 @@ void SignalConnectionDialog::createInterface()
 
 	m_pConnectionMenu->addSeparator();
 
+	m_pMoveUpAction = m_pConnectionMenu->addAction(tr("Move &Up"));
+	m_pMoveUpAction->setShortcut(Qt::CTRL + Qt::Key_Up);
+
+	m_pMoveDownAction = m_pConnectionMenu->addAction(tr("Move &Down"));
+	m_pMoveDownAction->setShortcut(Qt::CTRL + Qt::Key_Down);
+
+	m_pConnectionMenu->addSeparator();
+
 	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
 	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
 	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
@@ -722,6 +730,8 @@ void SignalConnectionDialog::createInterface()
 	connect(m_pCreateAction, &QAction::triggered, this, &SignalConnectionDialog::createConnection);
 	connect(m_pEditAction, &QAction::triggered, this, &SignalConnectionDialog::editConnection);
 	connect(m_pRemoveAction, &QAction::triggered, this, &SignalConnectionDialog::removeConnection);
+	connect(m_pMoveUpAction, &QAction::triggered, this, &SignalConnectionDialog::moveUpConnection);
+	connect(m_pMoveDownAction, &QAction::triggered, this, &SignalConnectionDialog::moveDownConnection);
 	connect(m_pImportAction, &QAction::triggered, this, &SignalConnectionDialog::importConnections);
 	connect(m_pExportAction, &QAction::triggered, this, &SignalConnectionDialog::exportConnections);
 
@@ -774,6 +784,9 @@ void SignalConnectionDialog::createContextMenu()
 	m_pContextMenu->addAction(m_pCreateAction);
 	m_pContextMenu->addAction(m_pEditAction);
 	m_pContextMenu->addAction(m_pRemoveAction);
+	m_pContextMenu->addSeparator();
+	m_pContextMenu->addAction(m_pMoveUpAction);
+	m_pContextMenu->addAction(m_pMoveDownAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
 
@@ -921,6 +934,10 @@ void SignalConnectionDialog::editConnection()
 	}
 
 	SignalConnection connection = m_connectionTable.at(index);
+	if (connection.isValid() == false)
+	{
+		return;
+	}
 
 	SignalConnectionItemDialog dialog(connection);
 	if (dialog.exec() != QDialog::Accepted)
@@ -986,6 +1003,98 @@ void SignalConnectionDialog::removeConnection()
 	}
 
 	updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalConnectionDialog::moveUpConnection()
+{
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_connectionTable.connectionCount())
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for move!"));
+		return;
+	}
+
+	SignalConnection connection = m_connectionTable.at(index);
+	if (connection.isValid() == false)
+	{
+		return;
+	}
+
+	int indexPrev = index - 1;
+	if (indexPrev < 0 || indexPrev >= m_connectionTable.connectionCount())
+	{
+		return;
+	}
+
+	SignalConnection connectionPrev = m_connectionTable.at(indexPrev);
+	if (connectionPrev.isValid() == false)
+	{
+		return;
+	}
+
+	if (connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT) != connectionPrev.signal(MEASURE_IO_SIGNAL_TYPE_INPUT))
+	{
+		return;
+	}
+
+	m_connectionBase.setConnection(index, connectionPrev);
+	m_connectionBase.setConnection(indexPrev, connection);
+
+	updateList();
+
+	int foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalConnectionDialog::moveDownConnection()
+{
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_connectionTable.connectionCount())
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for move!"));
+		return;
+	}
+
+	SignalConnection connection = m_connectionTable.at(index);
+	if (connection.isValid() == false)
+	{
+		return;
+	}
+
+	int indexNext = index + 1;
+	if (indexNext < 0 || indexNext >= m_connectionTable.connectionCount())
+	{
+		return;
+	}
+
+	SignalConnection connectionNext = m_connectionTable.at(indexNext);
+	if (connectionNext.isValid() == false)
+	{
+		return;
+	}
+
+	if (connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT) != connectionNext.signal(MEASURE_IO_SIGNAL_TYPE_INPUT))
+	{
+		return;
+	}
+
+	m_connectionBase.setConnection(index, connectionNext);
+	m_connectionBase.setConnection(indexNext, connection);
+
+	updateList();
+
+	int foundIndex = m_connectionBase.findIndex(connection);
+	if (foundIndex != -1)
+	{
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

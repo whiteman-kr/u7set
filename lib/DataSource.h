@@ -12,11 +12,8 @@
 #include "AppSignal.h"
 #include "SimpleThread.h"
 #include "CommonTypes.h"
-
-#include "../Builder/IssueLogger.h"
-
 #include "WUtils.h"
-
+#include "ConstStrings.h"
 
 class DataSource
 {
@@ -28,56 +25,15 @@ public:
 		Tuning,
 	};
 
-	static const char* const ELEMENT_DATA_SOURCES;
-	static const char* const ELEMENT_DATA_SOURCE;
-	static const char* const ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS;
-
-	// LM device properties
-
-	static const char* PROP_DEVICE_LM_NUMBER;
-	static const char* PROP_DEVICE_SUBSYSTEM_CHANNEL;
-	static const char* PROP_DEVICE_SUBSYSTEM_ID;
-
-	// XML-serializable members
-	//
-	static const char* DATA_TYPE_APP;
-	static const char* DATA_TYPE_DIAG;
-	static const char* DATA_TYPE_TUNING;
-
-	static const char* PROP_LM_DATA_TYPE;
-	static const char* PROP_LM_ID;
-	static const char* PROP_LM_PRESET_NAME;
-	static const char* PROP_LM_NUMBER;
-	static const char* PROP_LM_CHANNEL;
-	static const char* PROP_LM_SUBSYSTEM_KEY;
-	static const char* PROP_LM_SUBSYSTEM_ID;
-	static const char* PROP_LM_MODULE_TYPE;
-	static const char* PROP_LM_CAPTION;
-	static const char* PROP_LM_ADAPTER_ID;
-	static const char* PROP_LM_DATA_ENABLE;
-	static const char* PROP_LM_DATA_IP;
-	static const char* PROP_LM_DATA_PORT;
-	static const char* PROP_LM_DATA_SIZE;
-	static const char* PROP_LM_RUP_FRAMES_QUANTITY;
-	static const char* PROP_LM_DATA_ID;
-	static const char* PROP_LM_UNIQUE_ID;
-	static const char* PROP_SERVICE_ID;
-	static const char* PROP_COUNT;
+	static const QString DATA_TYPE_APP;
+	static const QString DATA_TYPE_DIAG;
+	static const QString DATA_TYPE_TUNING;
 
 private:
 
 public:
 	DataSource();
 	virtual ~DataSource();
-
-	bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
-								   DataType dataType,
-								   int adapterNo,
-								   E::LanControllerType adapterType,
-								   const Hardware::EquipmentSet& equipmentSet,
-								   const SubsystemKeyMap& subsystemKeyMap,
-								   const QHash<QString, quint64>& lmUniqueIdMap,
-								   Builder::IssueLogger* log);
 
 	// LM's properties
 	//
@@ -104,8 +60,8 @@ public:
 	int lmModuleType() const { return m_lmModuleType; }
 	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
 
-	QString lmSubsystem() const { return m_lmSubsystemID; }
-	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystemID = lmSubsystem; }
+	QString lmSubsystemID() const { return m_lmSubsystemID; }
+	void setLmSubsystemID(const QString& lmSubsystemID) { m_lmSubsystemID = lmSubsystemID; }
 
 	QString lmCaption() const { return m_lmCaption; }
 	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
@@ -123,6 +79,7 @@ public:
 
 	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
 	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
+	void setLmAddressPort(const HostAddressPort& addrPort) { m_lmAddressPort = addrPort; }
 
 	int lmPort() const { return m_lmAddressPort.port(); }
 	void setLmPort(int port) { Q_ASSERT(port >= 0 && port <= 65535); m_lmAddressPort.setPort(static_cast<quint16>(port)); }
@@ -135,6 +92,9 @@ public:
 
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
+
+	int lmDataSize() const { return m_lmDataSize; }
+	void setLmDataSize(int lmDataSize) { m_lmDataSize = lmDataSize; }
 
 	QString serviceID()	 const { return m_serviceID; }
 	void setServiceID(const QString& serviceID) { m_serviceID = serviceID; }
@@ -439,8 +399,8 @@ bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArr
 	xml.setAutoFormatting(true);
 	xml.writeStartDocument();
 
-	xml.writeStartElement(DataSource::ELEMENT_DATA_SOURCES);
-	xml.writeIntAttribute(DataSource::PROP_COUNT, dataSources.count());
+	xml.writeStartElement(XmlElement::DATA_SOURCES);
+	xml.writeIntAttribute(XmlAttribute::COUNT, dataSources.count());
 
 	for(const TYPE& ds : dataSources)
 	{
@@ -464,14 +424,14 @@ bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE>
 
 	bool result = true;
 
-	if (xml.findElement(DataSource::ELEMENT_DATA_SOURCES) == false)
+	if (xml.findElement(XmlElement::DATA_SOURCES) == false)
 	{
 		return false;
 	}
 
 	int count = 0;
 
-	if (xml.readIntAttribute(DataSource::PROP_COUNT, &count) == false)
+	if (xml.readIntAttribute(XmlAttribute::COUNT, &count) == false)
 	{
 		return false;
 	}

@@ -1,6 +1,7 @@
 #include "MetrologyCfgGenerator.h"
+
 #include "../lib/MetrologySignal.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
 
@@ -13,16 +14,15 @@ namespace Builder
 	{
 	}
 
-
 	MetrologyCfgGenerator::~MetrologyCfgGenerator()
 	{
 	}
-
 
 	bool MetrologyCfgGenerator::generateConfiguration()
 	{
 		bool result = true;
 
+		result &= writeDatabaseInfo();
 		result &= writeSettings();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
@@ -30,164 +30,33 @@ namespace Builder
 		return result;
 	}
 
-	bool MetrologyCfgGenerator::writeSettings()
+	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
+	bool MetrologyCfgGenerator::writeDatabaseInfo()
 	{
 		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
 
-		//
-		//
 		xmlWriter.writeStartElement("DatabaseInfo");
 		{
 			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
 		}
 		xmlWriter.writeEndElement();
 
-		//
-		//
-
-		Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
-		if (pObjectSoftware == nullptr || pObjectSoftware->isSoftware() == false)
-		{
-			// Unknown software type (Software object StrID '%1').
-			//
-			m_log->errEQP6100(m_software->equipmentId(), m_software->uuid());
-			xmlWriter.writeTextElement("Error", tr("Software Metrology (%1) not found").arg(m_software->equipmentId()));
-			return false;
-		}
-
-		//
-		//
-
-		xmlWriter.writeStartElement("Settings");
-		{
-			bool result = true;
-
-
-			// AppDataService
-			//
-
-			QString appDataServiceId1;
-			QString appDataServiceId2;
-
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID1" , &appDataServiceId1, m_log);
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID2" , &appDataServiceId2, m_log);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			if (appDataServiceId1.isEmpty() == true &&
-				appDataServiceId2.isEmpty() == true)
-			{
-				// Property '%1.%2' is empty.
-				//
-				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID1");
-				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID2");
-
-				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID1 and AppDataServiceID2 is empty"));
-				return false;
-			}
-
-			bool appDataPropertyIsValid1 = false;
-			bool appDataPropertyIsValid2 = false;
-
-			AppDataServiceSettings adsSettings1;
-			AppDataServiceSettings adsSettings2;
-
-			if (appDataServiceId1.isEmpty() == false)
-			{
-				Hardware::Software* appDataObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
-
-				if (appDataObject1 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
-				}
-				else
-				{
-					adsSettings1.readFromDevice(m_equipment, appDataObject1, m_log);
-					appDataPropertyIsValid1 = true;
-				}
-			}
-
-			if (appDataServiceId2.isEmpty() == false)
-			{
-				Hardware::Software* appDataObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
-
-				if (appDataObject2 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
-				}
-				else
-				{
-					adsSettings2.readFromDevice(m_equipment, appDataObject2, m_log);
-					appDataPropertyIsValid2 = true;
-				}
-			}
-
-			xmlWriter.writeStartElement("AppDataService");
-			{
-				xmlWriter.writeAttribute("PropertyIsValid1", appDataPropertyIsValid1 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
-				xmlWriter.writeAttribute("ip1", adsSettings1.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(adsSettings1.clientRequestIP.port()));
-
-				xmlWriter.writeAttribute("PropertyIsValid2", appDataPropertyIsValid2 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
-				xmlWriter.writeAttribute("ip2", adsSettings2.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port2", QString::number(adsSettings2.clientRequestIP.port()));
-			}
-			xmlWriter.writeEndElement(); // </AppDataService>
-
-
-			// TuningService
-			//
-
-			QString tuningServiceId;
-
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID" , &tuningServiceId, m_log);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			bool tuningPropertyIsValid = false;
-
-			TuningServiceSettings tuningSettings;
-
-			if (tuningServiceId.isEmpty() == false)
-			{
-				Hardware::Software* tuningObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
-
-				if (tuningObject == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->wrnCFG3015(m_software->equipmentId(), "TuningServiceID", tuningServiceId);
-				}
-				else
-				{
-					tuningSettings.readFromDevice(tuningObject, m_log);
-					tuningPropertyIsValid = true;
-				}
-			}
-
-			xmlWriter.writeStartElement("TuningService");
-			{
-				xmlWriter.writeAttribute("PropertyIsValid", tuningPropertyIsValid == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("SoftwareMetrologyID", m_software->equipmentId());
-				xmlWriter.writeAttribute("ip", tuningSettings.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port", QString::number(tuningSettings.clientRequestIP.port()));
-			}
-			xmlWriter.writeEndElement(); // </TuningService>
-		} // </Settings>
-
 		return true;
+	}
+
+	bool MetrologyCfgGenerator::writeSettings()
+	{
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+
+		RETURN_IF_FALSE(result)
+
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MetrologyCfgGenerator::writeMetrologyItemsXml()
@@ -296,19 +165,24 @@ namespace Builder
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_ITEMS_XML, CFG_FILE_ID_METROLOGY_ITEMS, "",  data);
+
+		// Create and write build file MetrologySignals.xml
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
 			return false;
 		}
 
+		// add link to file MetrologySignals.xml in Configuration.xml
+		//
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_ITEMS_XML), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_ITEMS_XML), equipmentID());
 			return false;
 		}
 
@@ -339,14 +213,6 @@ namespace Builder
 				{
 					switch (signal.electricUnit())
 					{
-						case E::ElectricUnit::V:
-
-							if (testElectricLimit_Input_V(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
-
 						case E::ElectricUnit::mA:
 
 							if (testElectricLimit_Input_mA(signal) == false)
@@ -366,6 +232,22 @@ namespace Builder
 						case E::ElectricUnit::Ohm:
 
 							if (testElectricLimit_Input_Ohm(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::V:
+
+							if (testElectricLimit_Input_V(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::uA:
+
+							if (testElectricLimit_Input_uA(signal) == false)
 							{
 								hasWrongField = true;
 							}
@@ -415,7 +297,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNAL_SET, CFG_FILE_ID_METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -426,16 +308,16 @@ namespace Builder
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.set.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNAL_SET), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_SIGNAL_SET), equipmentID());
 			return false;
 		}
 
-		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		result = m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/Comparators.set.xml.
 			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
+			m_log->errCMN0018(QString("%1\\%2").arg(Directory::COMMON).arg(File::COMPARATORS_SET), equipmentID());
 			return false;
 		}
 
@@ -537,58 +419,6 @@ namespace Builder
 			// Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4.
 			//
 			m_log->errEQP6113(signal.appSignalID(), signal.electricHighLimit(), highElectricVal, meu.key(signal.electricUnit()), 4);
-			return false;
-		}
-
-		return true;
-	}
-
-	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const Signal& signal)
-	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
-		{
-			return true;
-		}
-
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-		{
-			return true;
-		}
-
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
-		{
-			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::V)
-			{
-				return false;
-			}
-		}
-
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
-		{
-			return true;
-		}
-		else
-		{
-			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
-			{
-				return false;
-			}
-		}
-
-		UnitsConvertor uc;
-
-		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
-		if(electricLimit.isValid() == false)
-		{
-			return false;
-		}
-
-		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
-		{
 			return false;
 		}
 
@@ -715,6 +545,7 @@ namespace Builder
 		return true;
 	}
 
+
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const Signal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
@@ -780,6 +611,110 @@ namespace Builder
 		}
 
 		if (testEngineeringLimit(signal, lowLimit, highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::V)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::uA)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::uA_m10_p10)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
 			return false;
 		}

@@ -30,28 +30,22 @@ namespace Builder
 		return result;
 	}
 
+	bool ConfigurationServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
+	}
+
 	bool ConfigurationServiceCfgGenerator::writeSettings()
 	{
-		CfgServiceSettings settings;
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
-		bool result = true;
+		result &= buildClientsList(&m_settings);
 
-		result &= DeviceHelper::getIpPortProperty(m_software, EquipmentPropNames::CLIENT_REQUEST_IP,
-		                                          EquipmentPropNames::CLIENT_REQUEST_PORT, &settings.clientRequestIP, false, "", 0, m_log);
-		result &= DeviceHelper::getIPv4Property(m_software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &settings.clientRequestNetmask, false, "", m_log);
+		RETURN_IF_FALSE(result);
 
-		result &= buildClientsList(&settings);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = settings.writeToXml(xml);
-
-		return result;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool ConfigurationServiceCfgGenerator::writeBatFile()
@@ -93,7 +87,7 @@ namespace Builder
 
 		content += " -ip=" + clientRequestIP.addressPortStr() + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -139,14 +133,14 @@ namespace Builder
 
 		content += " -ip=" + clientRequestIP.addressPortStr() + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return true;
 	}
 
-	bool ConfigurationServiceCfgGenerator::buildClientsList(CfgServiceSettings* settings)
+	bool ConfigurationServiceCfgGenerator::buildClientsList(CfgServiceSettingsGetter* settings)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

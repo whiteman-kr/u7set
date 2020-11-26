@@ -206,24 +206,24 @@ public:
 	Q_INVOKABLE QString customAppSignalID() const { return m_signal.customAppSignalID(); }
 	Q_INVOKABLE QString caption() const { return m_signal.caption(); }
 	Q_INVOKABLE int dataSize() const { return m_signal.dataSize(); }
-	Q_INVOKABLE int lowADC() const { return m_signal.lowADC(); }
-	Q_INVOKABLE int highADC() const { return m_signal.highADC(); }
-	Q_INVOKABLE double lowEngineeringUnits() const { return m_signal.lowEngineeringUnits(); }
-	Q_INVOKABLE double highEngineeringUnits() const { return m_signal.highEngineeringUnits(); }
-	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
-	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
-	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(); }
-	Q_INVOKABLE double inputHighLimit() const { return m_signal.electricHighLimit(); }
-	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.electricUnit());}
-	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.sensorType());}
-	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(m_signal.outputMode());}
+	Q_INVOKABLE int lowADC() const { return m_signal.lowADC(nullptr); }
+	Q_INVOKABLE int highADC() const { return m_signal.highADC(nullptr); }
+	Q_INVOKABLE double lowEngineeringUnits() const { return m_signal.lowEngineeringUnits(nullptr); }
+	Q_INVOKABLE double highEngineeringUnits() const { return m_signal.highEngineeringUnits(nullptr); }
+	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(nullptr); }
+	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(nullptr); }
+	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(nullptr); }
+	Q_INVOKABLE double inputHighLimit() const { return m_signal.electricHighLimit(nullptr); }
+	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.electricUnit(nullptr));}
+	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.sensorType(nullptr));}
+	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(m_signal.outputMode(nullptr));}
 	Q_INVOKABLE bool acquire() const { return m_signal.acquire(); }
 	Q_INVOKABLE int decimalPlaces() const { return m_signal.decimalPlaces(); }
 	Q_INVOKABLE double aperture() const { return m_signal.coarseAperture(); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_signal.inOutType(); }
 	Q_INVOKABLE QString equipmentID() const { return m_signal.equipmentID(); }
-	Q_INVOKABLE double filteringTime() const { return m_signal.filteringTime(); }
-	Q_INVOKABLE double spreadTolerance() const { return m_signal.spreadTolerance(); }
+	Q_INVOKABLE double filteringTime() const { return m_signal.filteringTime(nullptr); }
+	Q_INVOKABLE double spreadTolerance() const { return m_signal.spreadTolerance(nullptr); }
 	Q_INVOKABLE E::ByteOrder byteOrder() const { return m_signal.byteOrder(); }
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_signal.byteOrder()); }
 	Q_INVOKABLE bool enableTuning() const { return m_signal.enableTuning(); }

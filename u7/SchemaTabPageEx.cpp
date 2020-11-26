@@ -7,7 +7,7 @@
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
 #include "Forms/ComparePropertyObjectDialog.h"
-#include "../lib/PropertyEditor.h"
+#include "IdePropertyEditor.h"
 #include "../lib/Ui/TabWidgetEx.h"
 #include "../lib/Ui/TagSelectorWidget.h"
 #include "../VFrame30/LogicSchema.h"
@@ -4438,7 +4438,7 @@ void SchemaControlTabPageEx::showFileProperties()
 					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-	ExtWidgets::PropertyEditor* propertyEditor = new ExtWidgets::PropertyEditor(this);
+	IdePropertyEditor* propertyEditor = new IdePropertyEditor(this, dbc());
 	propertyEditor->setReadOnly(readOnly);
 
 	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;

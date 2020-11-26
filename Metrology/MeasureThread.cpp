@@ -24,7 +24,7 @@ void MeasureThreadInfo::init()
 	m_timeout = 0;
 
 	m_cmdStopMeasure = false;
-	m_exitCode = ExitCode::Usual;
+	m_exitCode = ExitCode::Program;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ int MeasureThread::getConnectedCalibrators()
 	if (connectedCalibratorCount == 0)
 	{
 		emit msgBox(QMessageBox::Information, tr("No connected calibrators for measuring!"));
-		stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+		stopMeasure(MeasureThreadInfo::ExitCode::Program);
 	}
 
 	return connectedCalibratorCount;
@@ -346,6 +346,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 	switch(signalUnit)
 	{
 		case E::ElectricUnit::mA:	calibratorUnit = CALIBRATOR_UNIT_MA;	break;
+		case E::ElectricUnit::uA:	calibratorUnit = CALIBRATOR_UNIT_UA;	break;
 		case E::ElectricUnit::mV:	calibratorUnit = CALIBRATOR_UNIT_MV;	break;
 		case E::ElectricUnit::V:	calibratorUnit = CALIBRATOR_UNIT_V;		break;
 		case E::ElectricUnit::Ohm:
@@ -661,7 +662,7 @@ void MeasureThread::measureComprators()
 
 	if (maxComparatorCount == 0)
 	{
-		emit msgBox(QMessageBox::Information, tr("Selected signal has no comparators"));
+		// emit msgBox(QMessageBox::Information, tr("Selected signal has no comparators"));
 		return;
 	}
 
@@ -1280,7 +1281,7 @@ void MeasureThread::measureComprators()
 
 void MeasureThread::signalSocketDisconnected()
 {
-	stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+	stopMeasure(MeasureThreadInfo::ExitCode::Program);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1289,7 +1290,7 @@ void MeasureThread::tuningSocketDisconnected()
 {
 	if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 	{
-		stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+		stopMeasure(MeasureThreadInfo::ExitCode::Program);
 	}
 }
 
@@ -1429,8 +1430,8 @@ void MeasureThread::signalParamChanged(const QString& appSignalID)
 
 void MeasureThread::stopMeasure(MeasureThreadInfo::ExitCode exitCode)
 {
-	m_info.setCmdStopMeasure(true);
 	m_info.setExitCode(exitCode);
+	m_info.setCmdStopMeasure(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

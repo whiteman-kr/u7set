@@ -38,7 +38,7 @@ public:
 
 		enum ExitCode
 		{
-			Usual = 0,
+			Program = 0,
 			Manual = 1,
 		};
 

@@ -2,7 +2,7 @@
 
 #include "../lib/Service.h"
 #include "../lib/CfgServerLoader.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/Queue.h"
 
 #include "TcpAppDataServer.h"

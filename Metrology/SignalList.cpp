@@ -225,7 +225,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();			break;
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();			break;
 		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();			break;
-		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = param.location().shownOnSchemasStr();	break;
+		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = qApp->translate("MetrologySignal", param.location().shownOnSchemasStr().toUtf8());	break;
 		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(true);				break;
 		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();				break;
 		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();			break;

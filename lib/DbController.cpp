@@ -2742,6 +2742,125 @@ int DbController::nextCounterValue()
 	}
 }
 
+bool DbController::getTags(std::vector<DbTag>* tags)
+{
+	if (tags == nullptr)
+	{
+		Q_ASSERT(tags);
+		return false;
+	}
+
+	static const std::vector<DbTag> defaultTags = {{"applicationlogic", "Application Logic Schema"},
+												   {"monitor", "Monitor Schema"},
+												   {"tuning", "TuningClient Schema"},
+												   {"in", "Input Signal"},
+												   {"out", "Output Signal"}};
+
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+	if (ok == false || fileList.size() != 1)
+	{
+		*tags = defaultTags;
+		return true;	// File does not exist
+	}
+
+	std::shared_ptr<DbFile> file;
+
+	if (getLatestVersion(fileList[0], &file, nullptr) == false)
+	{
+		return false;
+	}
+
+	QTextStream in(file->data());
+
+	while (in.atEnd() == false)
+	{
+		QString str = in.readLine();
+		if (str.isEmpty() == false)
+		{
+			str = str.trimmed();
+
+			QStringList tag = str.split(';', Qt::KeepEmptyParts);
+
+			if (tag.size() != 2)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			tags->push_back({tag[0], tag[1]});
+		}
+	}
+
+	return true;
+}
+
+bool DbController::writeTags(const std::vector<DbTag> tags, const QString& comment)
+{
+	// save to db
+	//
+	std::shared_ptr<DbFile> file = nullptr;
+
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+	if (ok == false || fileList.size() != 1)
+	{
+		// create a file, if it does not exists
+		//
+		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
+		pf->setFileName(Db::File::TagsFileName);
+
+		if (addFile(pf, etcFileId(), nullptr) == false)
+		{
+			return false;
+		}
+
+		ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+		if (ok == false || fileList.size() != 1)
+		{
+			return false;
+		}
+	}
+
+	ok = getLatestVersion(fileList[0], &file, nullptr);
+	if (ok == false || file == nullptr)
+	{
+		return false;
+	}
+
+	if (file->state() != VcsState::CheckedOut)
+	{
+		if (checkOut(fileList[0], nullptr) == false)
+		{
+			return false;
+		}
+	}
+
+	QByteArray data;
+
+	for (const DbTag& tag : tags)
+	{
+		data.append((tr("%1;%2\n").arg(tag.tag).arg(tag.description)).toUtf8());
+	}
+
+	file->swapData(data);
+
+	if (setWorkcopy(file, nullptr) == false)
+	{
+		return false;
+	}
+
+	if (checkIn(fileList[0], comment, nullptr) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
 	// Check parameters

@@ -108,7 +108,7 @@ void SimCommandTest_LM5_LM6::testCommandNop()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -159,7 +159,7 @@ void SimCommandTest_LM5_LM6::testCommandStartAfb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -232,7 +232,7 @@ void SimCommandTest_LM5_LM6::testCommandStop()
 		QFAIL("Unexpected execptiom STOP command");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -286,7 +286,7 @@ void SimCommandTest_LM5_LM6::testCommandMov()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -353,7 +353,7 @@ void SimCommandTest_LM5_LM6::testCommandMovMem()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -405,7 +405,7 @@ void SimCommandTest_LM5_LM6::testCommandMovc()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -464,7 +464,7 @@ void SimCommandTest_LM5_LM6::testCommandMovbc()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -526,7 +526,7 @@ void SimCommandTest_LM5_LM6::testCommandWrfb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -586,7 +586,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -644,7 +644,7 @@ void SimCommandTest_LM5_LM6::testCommandWrfbc()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -721,7 +721,7 @@ void SimCommandTest_LM5_LM6::testCommandWrfbb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -788,7 +788,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfbb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -862,7 +862,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -921,7 +921,7 @@ void SimCommandTest_LM5_LM6::testCommandSetMem()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -992,7 +992,7 @@ void SimCommandTest_LM5_LM6::testCommandMovb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1042,7 +1042,7 @@ void SimCommandTest_LM5_LM6::testCommandAppStart()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1096,7 +1096,7 @@ void SimCommandTest_LM5_LM6::testCommandMov32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1148,7 +1148,7 @@ void SimCommandTest_LM5_LM6::testCommandMovc32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1209,7 +1209,7 @@ void SimCommandTest_LM5_LM6::testCommandWrfb32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1269,7 +1269,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfb32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1328,7 +1328,7 @@ void SimCommandTest_LM5_LM6::testCommandWrfbc32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1402,7 +1402,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1471,7 +1471,7 @@ void SimCommandTest_LM5_LM6::testCommandMovCmpf()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1526,7 +1526,7 @@ void SimCommandTest_LM5_LM6::testCommandPmov()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1580,7 +1580,7 @@ void SimCommandTest_LM5_LM6::testCommandPmov32()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 
@@ -1652,7 +1652,7 @@ void SimCommandTest_LM5_LM6::testCommandFillb()
 		QFAIL("");
 	}
 
-	QVERIFY(m_device->currentMode() != Sim::DeviceMode::Fault);
+	QVERIFY(m_device->deviceState() != Sim::DeviceState::Fault);
 	return;
 }
 

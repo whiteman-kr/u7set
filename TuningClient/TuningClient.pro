@@ -99,6 +99,7 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
+    ../lib/SoftwareSettings.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -120,8 +121,6 @@ SOURCES +=\
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/LogFile.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
@@ -165,7 +164,9 @@ SOURCES +=\
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
+    ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
+    ../lib/SoftwareSettings.h \
     Stable.h \
     TuningPage.h \
     Settings.h \
@@ -188,8 +189,6 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
     ../lib/LogFile.h \
-    ../Builder/IssueLogger.h \
-    ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
     DialogPassword.h \

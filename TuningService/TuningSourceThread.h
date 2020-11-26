@@ -3,7 +3,7 @@
 #include <QUdpSocket>
 
 #include "../lib/SimpleThread.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/CircularLogger.h"
 
 #include "TuningSource.h"

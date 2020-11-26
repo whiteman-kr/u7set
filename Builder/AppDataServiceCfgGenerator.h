@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/WUtils.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
@@ -18,6 +18,7 @@ namespace Builder
 		~AppDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 		bool getAssociatedLMs();
@@ -33,7 +34,7 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
-		AppDataServiceSettings m_settings;
+		AppDataServiceSettingsGetter m_settings;
 		const QHash<QString, quint64>& m_lmUniqueIdMap;
 		SubsystemKeyMap m_subsystemKeyMap;
 

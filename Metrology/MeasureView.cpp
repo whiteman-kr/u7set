@@ -412,7 +412,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(limitType, 18); break;
 		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(limitType, 19); break;
 
-		case MVC_CMN_L_SYSTEM_ERROR:			result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR); break;
+		case MVC_CMN_L_SYSTEM_DEVIATION:		result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION); break;
 		case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_SD); break;
 		case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
 		case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY); break;

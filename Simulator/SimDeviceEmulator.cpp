@@ -1,6 +1,5 @@
 #include "SimDeviceEmulator.h"
 #include <QtEndian>
-#include "../Builder/CfgFiles.h"
 #include "SimException.h"
 #include "SimCommandProcessor.h"
 #include "Simulator.h"
@@ -96,6 +95,8 @@ namespace Sim
 	bool DeviceEmulator::clear()
 	{
 		setLogicModuleInfo(Hardware::LogicModuleInfo());
+
+		setDeviceState(DeviceState::Off);
 
 		m_commandProcessor.reset();
 
@@ -193,8 +194,8 @@ namespace Sim
 
 			m_log.writeError(tr("Information for LogicModule %1 is not found (file %2/%3)")
 						.arg(equipmentId())
-						.arg(Builder::DIR_COMMON)
-						.arg(Builder::FILE_LOGIC_MODULES_XML));
+			            .arg(Directory::COMMON)
+			            .arg(File::LOGIC_MODULES_XML));
 
 			return DeviceError::ModuleExtraInfoNotFound;
 		}
@@ -225,14 +226,14 @@ namespace Sim
 	bool DeviceEmulator::powerOff()
 	{
 		m_log.writeDebug(tr("Off"));
-		setCurrentMode(DeviceMode::Off);
+		setDeviceState(DeviceState::Off);
 		return true;
 	}
 
 	bool DeviceEmulator::reset()
 	{
 		m_log.writeDebug(tr("Reset"));
-		setCurrentMode(DeviceMode::Start);
+		setDeviceState(DeviceState::Start);
 		return true;
 	}
 
@@ -240,7 +241,7 @@ namespace Sim
 	{
 		bool ok = false;
 
-		if (m_currentMode == DeviceMode::Start)
+		if (m_deviceState == DeviceState::Start)
 		{
 			bool processStartOk = processStartMode();
 			if (processStartOk == false)
@@ -249,19 +250,19 @@ namespace Sim
 			}
 		}
 
-		if (m_currentMode == DeviceMode::Fault)
+		if (m_deviceState == DeviceState::Fault)
 		{
 			ok = processFaultMode();
 		}
 		else
 		{
-			if (m_currentMode == DeviceMode::Off)
+			if (m_deviceState == DeviceState::Off)
 			{
 				ok = processOffMode();
 			}
 			else
 			{
-				Q_ASSERT(m_currentMode == DeviceMode::Operate);
+				Q_ASSERT(m_deviceState == DeviceState::Operate);
 				ok = processOperate(currentTime, currentDateTime, workcycle);
 			}
 		}
@@ -295,7 +296,7 @@ namespace Sim
 								 .arg(regDataSizeW)
 								 .arg(m_lmDescription.memory().m_appLogicWordDataSize));
 
-				setCurrentMode(DeviceMode::Fault);
+				setDeviceState(DeviceState::Fault);
 				return false;
 			}
 
@@ -307,11 +308,11 @@ namespace Sim
 								 .arg(regDataOffsetW)
 								 .arg(regDataSizeW));
 
-				setCurrentMode(DeviceMode::Fault);
+				setDeviceState(DeviceState::Fault);
 				return false;
 			}
 
-			m_lans.sendAppDataData(std::move(regData), plantTime);
+			m_lans.sendAppData(regData, plantTime);
 		}
 
 		return ok;
@@ -1260,12 +1261,16 @@ namespace Sim
 
 		// One LogicModule Cycle
 		//
-		bool result = true;
 
 		// Initialization before work cycle
 		//
-		m_logicUnit = LogicUnitData();
-		m_commandProcessor->updatePlatformInterfaceState(currentDateTime);
+		m_logicUnit = LogicUnitData{};
+
+		bool result = m_commandProcessor->updatePlatformInterfaceState(currentDateTime);
+		if (result == false)
+		{
+			return false;
+		}
 
 		m_ram.updateOverrideData(equipmentId(), m_simulator->overrideSignals());
 
@@ -1308,14 +1313,14 @@ namespace Sim
 			Q_ASSERT(m_logicUnit.programCounter == command.m_offset);
 
 			if (bool ok = runCommand(command);
-				ok == false && m_currentMode != DeviceMode::Fault)
+				ok == false && m_deviceState != DeviceState::Fault)
 			{
 				SIM_FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
 				result = false;
 				break;
 			}
 
-			if (m_currentMode == DeviceMode::Fault)
+			if (m_deviceState == DeviceState::Fault)
 			{
 				result = true;
 				break;
@@ -1363,33 +1368,34 @@ namespace Sim
 		m_log.writeError(str2);
 		m_log.writeError(str3);
 
-		setCurrentMode(DeviceMode::Fault);
+		setDeviceState(DeviceState::Fault);
 
 		return;
 	}
 
 	bool DeviceEmulator::processOffMode()
 	{
-		Q_ASSERT(m_currentMode == DeviceMode::Off);
+		Q_ASSERT(m_deviceState == DeviceState::Off);
 		return true;
 	}
 
 	bool DeviceEmulator::processStartMode()
 	{
-		Q_ASSERT(m_currentMode == DeviceMode::Start);
+		Q_ASSERT(m_deviceState == DeviceState::Start);
 		m_log.writeDebug(tr("Start mode"));
 
 		bool ok = initMemory();
 		if (ok == false)
 		{
 			m_log.writeError(tr("Init memory error."));
-			setCurrentMode(DeviceMode::Fault);
+			setDeviceState(DeviceState::Fault);
 			return false;
 		}
 
 		m_afbComponents.resetState();	// It will clear all AFBs' params
 
-		setCurrentMode(DeviceMode::Operate);
+		setDeviceState(DeviceState::Operate);
+		setRuntimeMode(RuntimeMode::RunMode);
 
 		return true;
 	}
@@ -1436,7 +1442,8 @@ namespace Sim
 
 	bool DeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (m_currentMode == DeviceMode::Off)
+		if (m_deviceState == DeviceState::Off ||
+			m_deviceState == DeviceState::Fault)
 		{
 			return true;
 		}
@@ -1590,7 +1597,8 @@ namespace Sim
 
 	bool DeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (m_currentMode == DeviceMode::Off)
+		if (m_deviceState == DeviceState::Off ||
+			m_deviceState == DeviceState::Fault)
 		{
 			return true;
 		}
@@ -1765,13 +1773,65 @@ namespace Sim
 		return m_lans;
 	}
 
-	DeviceMode DeviceEmulator::currentMode() const
+	RuntimeMode DeviceEmulator::runtimeMode() const
 	{
-		return m_currentMode;
+		return m_runtimeMode;
 	}
 
-	void DeviceEmulator::setCurrentMode(DeviceMode value)
+	void DeviceEmulator::setRuntimeMode(RuntimeMode value)
 	{
-		m_currentMode = value;
+		m_runtimeMode = value;
+	}
+
+	DeviceState DeviceEmulator::deviceState() const
+	{
+		return m_deviceState;
+	}
+
+	void DeviceEmulator::setDeviceState(DeviceState value)
+	{
+		m_deviceState = value;
+
+		switch (value)
+		{
+		case DeviceState::Fault:
+			setRuntimeMode(RuntimeMode::FaultedMode);
+			break;
+		case DeviceState::Off:
+			setRuntimeMode(RuntimeMode::PoweredOffMode);
+			break;
+		case DeviceState::Start:
+			setRuntimeMode(RuntimeMode::StartupMode);
+			break;
+		default:
+			break;
+		}
+
+		return;
+	}
+
+	bool DeviceEmulator::armingKey() const
+	{
+		return m_armingKey;
+	}
+
+	void DeviceEmulator::setArmingKey(bool value)
+	{
+		m_armingKey = value;
+	}
+
+	bool DeviceEmulator::tuningKey() const
+	{
+		return m_tuningKey;
+	}
+
+	void DeviceEmulator::setTuningKey(bool value)
+	{
+		m_tuningKey = value;
+	}
+
+	bool DeviceEmulator::testTuningApplyCommand(bool value)
+	{
+		return m_tuningApplyCommand.exchange(value);
 	}
 }

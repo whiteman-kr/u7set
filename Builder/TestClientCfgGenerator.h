@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -9,11 +10,16 @@ namespace Builder
 	public:
 		TestClientCfgGenerator(Context* context, Hardware::Software* software);
 
-		bool generateConfiguration() override;
+		virtual bool generateConfiguration() override;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 		bool writeSettings();
+		bool linkAppSignalsFile();
 		bool writeBatFile();
 		bool writeShFile();
+
+	private:
+		TestClientSettingsGetter m_settings;
 	};
 }

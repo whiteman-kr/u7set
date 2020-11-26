@@ -71,6 +71,7 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
+    ../lib/DeviceHelper.cpp \
     ../lib/DomXmlHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
@@ -94,9 +95,8 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/DeviceHelper.cpp \
     ../lib/DataSource.cpp \
-    ../lib/ServiceSettings.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/Queue.cpp \
     ../lib/WUtils.cpp \
     ../lib/CsvFile.cpp \
@@ -146,7 +146,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/Times.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/DbProgressDialog.cpp \
+	../lib/DbProgressDialog.cpp \
     ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
@@ -159,6 +159,7 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
+    ../lib/DeviceHelper.h \
     ../lib/DomXmlHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
@@ -188,9 +189,8 @@ HEADERS += \
     ../lib/Crc.h \
     ../lib/Hash.h \
     ../lib/HostAddressPort.h \
-    ../lib/DeviceHelper.h \
     ../lib/DataSource.h \
-    ../lib/ServiceSettings.h \
+	../lib/SoftwareSettings.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/CsvFile.h \
@@ -209,7 +209,6 @@ HEADERS += \
     IssueLogger.h \
     BuildWorkerThread.h \
     BuildResultWriter.h \
-    CfgFiles.h \
     ModuleFirmwareWriter.h \
     Parser.h \
     SignalSet.h \

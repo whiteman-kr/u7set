@@ -77,6 +77,7 @@ protected slots:
 	void runSubsystemListEditor();
     void runConnectionsEditor();
 	void runBusEditor();
+	void runTagsEditor();
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
@@ -123,6 +124,7 @@ private:
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
+	QAction* m_tagsEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;
 	QAction* m_aboutAction = nullptr;

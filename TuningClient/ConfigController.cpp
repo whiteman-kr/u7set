@@ -1,6 +1,6 @@
 #include "ConfigController.h"
 #include "MainWindow.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/ClientBehavior.h"
 
 //
@@ -255,15 +255,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Settings node
 		//
-		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
-		if (settingsNodes.size() != 1)
-		{
-			readSettings.errorMessage += tr("Parsing Settings node error.\n");
-		}
-		else
-		{
-			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
-		}
+		result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
 	}
 
 	// Error handling
@@ -352,7 +344,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Filters
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_FILTERS)
+			if (buildFileInfo.ID == CfgFileId::TUNING_FILTERS)
 			{
 				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
@@ -369,7 +361,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Signals
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_SIGNALS)
+			if (buildFileInfo.ID == CfgFileId::TUNING_SIGNALS)
 			{
 				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
@@ -383,7 +375,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 			}
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
+			if (buildFileInfo.ID == CfgFileId::TUNING_GLOBALSCRIPT)
 			{
 				QByteArray globalScriptData;
 
@@ -399,7 +391,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 			}
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT)
+			if (buildFileInfo.ID == CfgFileId::TUNING_CONFIGARRIVEDSCRIPT)
 			{
 				QByteArray configurationArrivedScriptData;
 
@@ -620,104 +612,54 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
+bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-			settingsNode.nodeName() != "Settings")
+	if (outSetting == nullptr)
 	{
-		assert(outSetting);
-		assert(settingsNode.nodeName() == "Settings");
+		Q_ASSERT(false);
 		return false;
 	}
 
-	QDomElement settingsElement = settingsNode.toElement();
+	XmlReadHelper xmlReader(cfgFiledata);
 
-	// Check if XML contains Error tag
-	//
-	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
+	TuningClientSettings ts;
 
-	if (errorNodes.isEmpty() == false)
+	bool result = ts.readFromXml(xmlReader);
+
+	if (result == false)
 	{
-		for (int i = 0; i < errorNodes.count();  i++)
-		{
-			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
-		}
+		outSetting->errorMessage += tr("Error reading <Settings> section from file configuration.xml\n");
 		return false;
 	}
 
-	// Get TuningService data
-	//
+	outSetting->tuningServiceAddress = ConfigConnection(ts.tuningServiceID, ts.tuningServiceIP, ts.tuningServicePort);
+
+	outSetting->autoApply = ts.autoApply;
+	outSetting->showSignals = ts.showSignals;
+	outSetting->showSchemas = ts.showSchemas;
+	outSetting->showSchemasList = ts.showSchemasList;
+	outSetting->showSchemasTabs = ts.showSchemasTabs;
+	outSetting->startSchemaID = ts.startSchemaID;
+	outSetting->filterByEquipment = ts.filterByEquipment;
+	outSetting->filterBySchema = ts.filterBySchema;
+
+	outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
+
+	if (ts.showSOR == true)
 	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("TuningService");
-
-		if (dasNodes.isEmpty() == true)
+		outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
+	}
+	else
+	{
+		if (ts.useAccessFlag == true)
 		{
-			outSetting->errorMessage += tr("Cannot find TuningService tag\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
-
-			QString tunsId = dasXmlElement.attribute("TuningServiceID1");
-			QString tunsIp = dasXmlElement.attribute("ip1");
-			int tunsPort = dasXmlElement.attribute("port1").toInt();
-
-			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
-
+			outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
 		}
 	}
 
-	// Get TuningService data
-	//
-	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("Appearance");
+	outSetting->logonMode = ts.loginPerOperation == true ? LogonMode::PerOperation : LogonMode::Permanent;
+	outSetting->loginSessionLength = ts.loginSessionLength;
+	outSetting->usersAccounts = ts.getUsersAccounts();
 
-		if (dasNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find Appearance tag\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
-
-			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
-			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
-			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
-			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
-			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
-			outSetting->startSchemaID = dasXmlElement.attribute("startSchemaID");
-			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
-			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-
-			bool showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
-			bool useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
-
-			outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
-			if (showSOR == true)
-			{
-				outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
-			}
-			else
-			{
-				if (useAccessFlag == true)
-				{
-					outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
-				}
-			}
-
-			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
-			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
-
-			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
-			usersAccounts.replace(' ', ';');
-			usersAccounts.replace('\n', ';');
-			usersAccounts.remove('\r');
-			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
-		}
-	}
-
-	return outSetting->errorMessage.isEmpty();
+	return true;
 }
-

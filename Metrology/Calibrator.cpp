@@ -287,6 +287,15 @@ bool Calibrator::getIDN()
 		return false;
 	}
 
+	for(int type = 0; type < CALIBRATOR_TYPE_COUNT; type++)
+	{
+		if (m_caption == CalibratorIdnCaption[type])
+		{
+			m_type = type;
+			break;
+		}
+	}
+
 	begPos = endPos;
 	endPos = m_lastResponse.indexOf(',', begPos+1);
 
@@ -869,7 +878,7 @@ bool Calibrator::setValue(double value)
 				switch (m_sourceUnit)
 				{
 					case CALIBRATOR_UNIT_MA:	decimal = 3;	break;
-					case CALIBRATOR_UNIT_McrA:	decimal = 6;	break;
+					case CALIBRATOR_UNIT_UA:	decimal = 6;	break;
 					case CALIBRATOR_UNIT_NA:	decimal = 9;	break;
 				}
 
@@ -1438,7 +1447,7 @@ void Calibrator::parseResponse()
 			switch (m_sourceUnit)
 			{
 				case CALIBRATOR_UNIT_MA:	m_sourceValue *= 1e+3;		break;
-				case CALIBRATOR_UNIT_McrA:	m_sourceValue *= 1e+6;		break;
+				case CALIBRATOR_UNIT_UA:	m_sourceValue *= 1e+6;		break;
 				case CALIBRATOR_UNIT_NA:	m_sourceValue *= 1e+9;		break;
 			}
 

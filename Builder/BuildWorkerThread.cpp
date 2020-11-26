@@ -948,8 +948,6 @@ namespace Builder
 			return false;
 		}
 
-		signalSet->setLog(log);
-
 		signalSet->findAndRemoveExcludedFromBuildSignals();
 
 		signalSet->cacheSpecPropValues();
@@ -1314,8 +1312,17 @@ namespace Builder
 
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(context);
 
+		QByteArray softwareXmlData;
+		QXmlStreamWriter softwareXml(&softwareXmlData);
+
+		softwareXml.setAutoFormatting(true);
+		softwareXml.writeStartDocument();
+		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);
+
+		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
+
 		equipmentWalker(context->m_equipmentSet->root(),
-			[this, lmsUniqueIdMap, context, &result](Hardware::DeviceObject* currentDevice)
+		    [this, lmsUniqueIdMap, context, &softwareXml, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (QThread::currentThread()->isInterruptionRequested() == true)
 				{
@@ -1384,10 +1391,20 @@ namespace Builder
 				{
 					result &= softwareCfgGenerator->run();
 
+					softwareCfgGenerator->writeSoftwareSection(softwareXml, false);	// <Software>
+
+					result &= softwareCfgGenerator->getSettingsXml(softwareXml);
+
+					softwareXml.writeEndElement();	// </Software>
+
 					delete softwareCfgGenerator;
 				}
 			}
 		);
+
+		softwareXml.writeEndElement();		// </SoftwareItems>
+
+		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
 
 		context->m_buildResultWriter->writeConfigurationXmlFiles();
 
@@ -1585,13 +1602,18 @@ namespace Builder
 
 		auto filter = [](const DbFileInfo& fi) -> bool
 		{
-			return fi.isFolder() || fi.fileName().endsWith(".js") == false;
+			return fi.isFolder() || fi.fileName().endsWith(".js") == false || fi.deleted() == true;
 		};
 
 		fileInfos.erase(std::remove_if(fileInfos.begin(),
 									   fileInfos.end(),
 									   filter),
 						fileInfos.end());
+
+		if (fileInfos.empty() == true)
+		{
+			return true;
+		}
 
 		std::vector<std::shared_ptr<DbFile>> files;
 

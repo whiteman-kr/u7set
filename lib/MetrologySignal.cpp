@@ -207,7 +207,7 @@ namespace Metrology
 
 	QString SignalLocation::shownOnSchemasStr() const
 	{
-		return m_shownOnSchemas == true ? QString("Yes") : QString();
+		return m_shownOnSchemas == true ? QT_TRANSLATE_NOOP("MetrologySignal", "Yes") : QString();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -364,13 +364,6 @@ namespace Metrology
 
 						switch (m_electricUnitID)
 						{
-							case E::ElectricUnit::V:
-
-								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
-								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
-
-								break;
-
 							case E::ElectricUnit::mA:
 
 								if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == true)
@@ -396,6 +389,20 @@ namespace Metrology
 
 								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
 								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
+
+								break;
+
+							case E::ElectricUnit::V:
+
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+
+								break;
+
+							case E::ElectricUnit::uA:
+
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricRLoad);
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID,m_electricSensorType, m_electricRLoad);
 
 								break;
 						}
@@ -1189,7 +1196,7 @@ namespace Metrology
 
 		if (m_deviationType != DeviationType::Unused)
 		{
-			value = QT_TRANSLATE_NOOP("MetrologySignal.cpp", "Unused");
+			value = QT_TRANSLATE_NOOP("MetrologySignal", "Unused");
 		}
 
 		return value;
@@ -1217,7 +1224,8 @@ namespace Metrology
 
 	QString ComparatorEx::outputStateStr() const
 	{
-		return outputStateStr("True", "False");
+		return outputStateStr(	QT_TRANSLATE_NOOP("MetrologySignal", "True"),
+								QT_TRANSLATE_NOOP("MetrologySignal", "False"));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

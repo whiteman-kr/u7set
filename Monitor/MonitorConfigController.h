@@ -106,7 +106,7 @@ private slots:
 private:
 	bool xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
-	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
+	bool xmlReadSettingsSection(const QByteArray& xmlFileData, ConfigSettings* outSetting);
 
 	// Public properties
 	//

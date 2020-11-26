@@ -1,4 +1,4 @@
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"
 
@@ -317,7 +317,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	ConfigSettings readSettings;
 
 	readSettings.globalScript = getScriptFunc("/" + theSettings.instanceStrId() + "/GlobalScript.js");
-	readSettings.logoImage = getImageFunc(CFG_FILE_ID_LOGO);
+	readSettings.logoImage = getImageFunc(CfgFileId::LOGO);
 	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + theSettings.instanceStrId() + "/OnConfigurationArrived.js");
 
 	// Parse XML
@@ -368,15 +368,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 			// Settings node
 			//
-			QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
-			if (settingsNodes.size() != 1)
-			{
-				readSettings.errorMessage += tr("Parsing Settings node error.\n");
-			}
-			else
-			{
-				result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
-			}
+			result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
 		}
 
 		// Error handling
@@ -397,7 +389,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QByteArray data;
 		QString errorString;
 
-		bool result = getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorString);
+		bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &data, &errorString);
 
 		if (result == false)
 		{
@@ -456,7 +448,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CFG_FILE_ID_COMPARATOR_SET, &data, &errorString);
+		if (bool result = getFileBlockedById(CfgFileId::COMPARATOR_SET, &data, &errorString);
 			result == false)
 		{
 			readSettings.errorMessage += errorString + QStringLiteral("\n");
@@ -483,7 +475,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CFG_FILE_ID_BEHAVIOR, &data, &errorString);
+		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString);
 			result == false)
 		{
 			readSettings.errorMessage += errorString + QStringLiteral("\n");
@@ -594,172 +586,62 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
+bool MonitorConfigController::xmlReadSettingsSection(const QByteArray& xmlFileData, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr)
 	{
-		Q_ASSERT(outSetting);
+		Q_ASSERT(false);
 		return false;
 	}
 
-	if (settingsNode.nodeName() != "Settings")
+	XmlReadHelper xmlReader(xmlFileData);
+
+	MonitorSettings ms;
+
+	bool result = ms.readFromXml(xmlReader);
+
+	if (result == false)
 	{
-		Q_ASSERT(settingsNode.nodeName() == "Settings");
+		outSetting->errorMessage += tr("Error reading <Settings> section from configuration.xml\n");
 		return false;
 	}
 
-	QDomElement settingsElement = settingsNode.toElement();
-
-	// Check if XML contains Error tag
 	//
-	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
 
-	if (errorNodes.isEmpty() == false)
+	outSetting->startSchemaId = ms.startSchemaId;
+
+	//
+
+	outSetting->appDataService1 = ConfigConnection(ms.appDataServiceID1, ms.appDataServiceIP1, ms.appDataServicePort1);
+	outSetting->appDataService2 = ConfigConnection(ms.appDataServiceID2, ms.appDataServiceIP2, ms.appDataServicePort2);
+
+	outSetting->appDataServiceRealtimeTrend1 = ConfigConnection(ms.appDataServiceID1, ms.realtimeDataIP1, ms.realtimeDataPort1);
+	outSetting->appDataServiceRealtimeTrend2 = ConfigConnection(ms.appDataServiceID2, ms.realtimeDataIP2, ms.realtimeDataPort2);
+
+	//
+
+	outSetting->archiveService1 = ConfigConnection(ms.archiveServiceID1, ms.archiveServiceIP1, ms.archiveServicePort1);
+	outSetting->archiveService2 = ConfigConnection(ms.archiveServiceID2, ms.archiveServiceIP2, ms.archiveServicePort2);
+
+	//
+
+	outSetting->tuningEnabled = ms.tuningEnabled;
+
+	if (ms.tuningEnabled == true)
 	{
-		for (int i = 0; i < errorNodes.count();  i++)
-		{
-			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
-		}
-		return false;
+		outSetting->tuningService = ConfigConnection(ms.tuningServiceID, ms.tuningServiceIP, ms.tuningServicePort);
+		outSetting->tuningSources = ms.getTuningSources();
 	}
-
-	// Get StartSchemaID data
-	//
+	else
 	{
-		QDomNodeList startSchemaNodes = settingsElement.elementsByTagName("StartSchemaID");
-
-		if (startSchemaNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find StartSchemaID tag %1\n");
-			return false;
-		}
-		else
-		{
-			outSetting->startSchemaId = startSchemaNodes.at(0).toElement().text();
-		}
-	}
-
-	// Get AppDataService data
-	//
-	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("AppDataService");
-
-		if (dasNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find AppDataService tag %1\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
-
-			QString id1 = dasXmlElement.attribute("AppDataServiceID1");
-
-			QString ip1 = dasXmlElement.attribute("ip1");
-			int port1 = dasXmlElement.attribute("port1").toInt();
-			QString rtip1 = dasXmlElement.attribute("rtip1");
-			int rtport1 = dasXmlElement.attribute("rtport1").toInt();
-
-			QString id2 = dasXmlElement.attribute("AppDataServiceID2");
-			QString ip2 = dasXmlElement.attribute("ip2");
-			int port2 = dasXmlElement.attribute("port2").toInt();
-			QString rtip2 = dasXmlElement.attribute("rtip2");
-			int rtport2 = dasXmlElement.attribute("rtport2").toInt();
-
-			outSetting->appDataService1 = ConfigConnection(id1, ip1, port1);
-			outSetting->appDataService2 = ConfigConnection(id2, ip2, port2);
-
-			outSetting->appDataServiceRealtimeTrend1 = ConfigConnection(id1, rtip1, rtport1);
-			outSetting->appDataServiceRealtimeTrend2 = ConfigConnection(id2, rtip2, rtport2);
-		}
-	}
-
-	// Get ArchiveService data
-	//
-	{
-		QDomNodeList archServiceNodes = settingsElement.elementsByTagName("ArchiveService");
-
-		if (archServiceNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find ArchiveService tag %1\n");
-			return false;
-		}
-		else
-		{
-			QDomElement archServiceXmlElement = archServiceNodes.at(0).toElement();
-
-			QString id1 = archServiceXmlElement.attribute("ArchiveServiceID1");
-			QString ip1 = archServiceXmlElement.attribute("ip1");
-			int port1 = archServiceXmlElement.attribute("port1").toInt();
-
-			QString id2 = archServiceXmlElement.attribute("ArchiveServiceID2");
-			QString ip2 = archServiceXmlElement.attribute("ip2");
-			int port2 = archServiceXmlElement.attribute("port2").toInt();
-
-			outSetting->archiveService1 = ConfigConnection(id1, ip1, port1);
-			outSetting->archiveService2 = ConfigConnection(id2, ip2, port2);
-		}
-	}
-
-	// Get Tuning data
-	//
-	{
-		outSetting->tuningEnabled = false;
-		outSetting->tuningSources.clear();
+		// tuning disabled
+		//
 		outSetting->tuningService = ConfigConnection();
-
-		// TuningService data
-		//
-		QDomNodeList tuningServiceNodes = settingsElement.elementsByTagName("TuningService");
-
-		if (tuningServiceNodes.isEmpty() == true)
-		{
-			// Tuning is disabled
-			//
-		}
-		else
-		{
-			QDomElement tuningServiceElement = tuningServiceNodes.at(0).toElement();
-
-			bool enableTuning = tuningServiceElement.attribute("Enable").compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
-
-			QString id = tuningServiceElement.attribute("TuningServiceID");
-			QString ip = tuningServiceElement.attribute("ip");
-			int port = tuningServiceElement.attribute("port").toInt();
-
-			outSetting->tuningEnabled = enableTuning;
-			outSetting->tuningService = ConfigConnection(id, ip, port);
-		}
-
-		// TuningSources
-		//
-		QDomNodeList tuningSourceNodes = settingsElement.elementsByTagName("TuningSources");
-
-		if (outSetting->tuningEnabled == true &&
-			tuningSourceNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find tuningSourceNodes tag %1\n").arg("TuningSources");
-			return false;
-		}
-
-
-		{
-			QDomElement tuningSourceElement = tuningSourceNodes.at(0).toElement();
-
-			QString str = tuningSourceElement.text().trimmed();
-			str = str.replace(QChar(QChar::LineFeed), QChar(';'));
-			str = str.replace(QChar(QChar::CarriageReturn), QChar(';'));
-			str = str.replace(QChar(QChar::Tabulation), QChar(';'));
-
-			QStringList tuningSourceList = str.split(QChar(';'), QString::SkipEmptyParts);
-
-			outSetting->tuningSources = tuningSourceList;
-		}
+		outSetting->tuningSources.clear();
 	}
 
-	return outSetting->errorMessage.isEmpty();
+	return true;
 }
-
 
 VFrame30::SchemaDetailsSet MonitorConfigController::schemasDetailsSet() const
 {

@@ -31,7 +31,6 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
@@ -48,20 +47,16 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/ServiceSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/XmlHelper.cpp \
     DiagDataService.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
-    ../Builder/IssueLogger.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -72,8 +67,7 @@ SOURCES += \
 
 HEADERS += \
     ../lib/Address16.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
+	../lib/LanControllerInfo.h \
 	../lib/MemLeaksDetection.h \
 	Stable.h \
 	../lib/SocketIO.h \
@@ -93,20 +87,16 @@ HEADERS += \
     ../lib/TcpFileTransfer.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    ../lib/ServiceSettings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/OutputLog.h \
+	../lib/SoftwareSettings.h \
     ../lib/XmlHelper.h \
     ../lib/DataProtocols.h \
     DiagDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    ../Builder/IssueLogger.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \

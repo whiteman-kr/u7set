@@ -52,6 +52,9 @@ namespace Builder
 		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);
 
 		virtual bool generateConfiguration() = 0;
+		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) = 0;
+
+		void writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection);
 
 		void initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems);
 
@@ -65,6 +68,16 @@ namespace Builder
 		static bool joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge);
 
 		static bool loadFileFromDatabase(DbController* db, int parentId, const QString& fileName, QString *errorCode, QByteArray* data);
+
+		bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
+									   DataSource::DataType dataType,
+									   int adapterNo,
+									   E::LanControllerType adapterType,
+									   const Hardware::EquipmentSet& equipmentSet,
+									   const SubsystemKeyMap& subsystemKeyMap,
+									   const QHash<QString, quint64>& lmUniqueIdMap,
+									   DataSource* ds,
+									   Builder::IssueLogger* log);
 
 	protected:
 		Context* m_context = nullptr;

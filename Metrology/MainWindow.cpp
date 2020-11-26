@@ -12,6 +12,7 @@
 #include <QCloseEvent>
 
 #include "../lib/Ui/DialogAbout.h"
+#include "../lib/ConstStrings.h"
 
 #include "CalibratorBase.h"
 #include "Database.h"
@@ -54,7 +55,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 
 	// load measurement base
 	//
-
 	theOptions.linearity().points().load();
 
 	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
@@ -63,7 +63,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	}
 	connect(this, &MainWindow::appendMeasure, &m_measureBase, &MeasureBase::appendToBase, Qt::QueuedConnection);
 	connect(&m_measureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
-
 
 	//
 	//
@@ -909,6 +908,11 @@ void MainWindow::loadSignalsOnToolBar()
 
 void MainWindow::setMeasureType(int measureType)
 {
+	if (m_measureThread.isRunning() == true)
+	{
+		return;
+	}
+
 	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
 	{
 		return;
@@ -944,7 +948,6 @@ void MainWindow::setMeasureType(int measureType)
 
 	emit measureViewChanged(pView);
 	emit measureTypeChanged(m_measureType);
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1010,6 +1013,58 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 			return false;
 		}
 	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
+{
+	if (m_pSignalConnectionTypeList == nullptr)
+	{
+		return false;
+	}
+
+	if (m_measureKind != MEASURE_KIND_ONE_RACK)
+	{
+		return false;
+	}
+
+	if (activeSignal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	Metrology::Signal* pInSignal = activeSignal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT, Metrology::Channel_0);
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		return false;
+	}
+
+	if (pInSignal->param().isInput() == false)
+	{
+		return false;
+	}
+
+	if (activeSignal.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
+	{
+		return false;
+	}
+
+	int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
+	if (connectionIndex == -1)
+	{
+		return false;
+	}
+
+	const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+	if (connection.isValid() == false)
+	{
+		return false;
+	}
+
+	m_pSignalConnectionTypeList->setCurrentIndex(connection.type());
 
 	return true;
 }
@@ -1167,6 +1222,40 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 	return true;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
+{
+	int maxComparatorCount = 0;
+
+	int channelCount =  activeSignal.channelCount();
+	for(int ch = 0; ch < channelCount; ch++)
+	{
+		Metrology::Signal* pSignal = nullptr;
+
+		switch (activeSignal.signalConnectionType())
+		{
+			case SIGNAL_CONNECTION_TYPE_UNUSED:
+				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(ch);
+				break;
+			default:
+				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(ch);
+				break;
+		}
+
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		if (maxComparatorCount < pSignal->param().comparatorCount())
+		{
+			maxComparatorCount = pSignal->param().comparatorCount();
+		}
+	}
+
+	return maxComparatorCount;
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1196,10 +1285,33 @@ void MainWindow::startMeasure()
 		return;
 	}
 
-	MeasureSignal activeSignal = theSignalBase.activeSignal();
+	const MeasureSignal& activeSignal = theSignalBase.activeSignal();
 	if (activeSignal.isEmpty() == true)
 	{
 		return;
+	}
+
+	if (theOptions.module().measureInterInsteadIn() == true)
+	{
+		if (m_measureKind == MEASURE_KIND_ONE_RACK)
+		{
+			if (changeInputSignalOnInternal(activeSignal) == true)
+			{
+				emit startMeasure();
+				return;
+			}
+		}
+	}
+
+	if (m_measureType == MEASURE_TYPE_COMPARATOR)
+	{
+		int comparatorCount = getMaxComparatorCount(activeSignal);
+		if (comparatorCount == 0)
+		{
+			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
+			emit measureThreadStoped();
+			return;
+		}
 	}
 
 	// if we check in single module mode
@@ -1234,6 +1346,8 @@ void MainWindow::startMeasure()
 
 			if (result == QMessageBox::No)
 			{
+				m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
+				emit measureThreadStoped();
 				return;
 			}
 		}
@@ -2015,7 +2129,7 @@ QString MainWindow::configSocketConnectedStateStr()
 	if (CFG_FILE_VER_METROLOGY_ITEMS_XML != theOptions.projectInfo().cfgFileVersion())
 	{
 		connectedState.append(tr("\n\nFailed version of %1. Current version: %2. Received version: %3 ")
-								.arg(Builder::FILE_METROLOGY_ITEMS_XML)
+		                        .arg(File::METROLOGY_ITEMS_XML)
 								.arg(CFG_FILE_VER_METROLOGY_ITEMS_XML)
 								.arg(theOptions.projectInfo().cfgFileVersion()));
 	}
@@ -2165,7 +2279,7 @@ void MainWindow::signalSocketDisconnected()
 
 	if (m_measureThread.isRunning() == true)
 	{
-		m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+		m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 	}
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
@@ -2232,7 +2346,7 @@ void MainWindow::tuningSocketDisconnected()
 	{
 		if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
 		{
-			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Usual);
+			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 		}
 	}
 
@@ -2323,7 +2437,8 @@ void MainWindow::measureThreadStoped()
 
 	//
 	//
-	if (theOptions.module().measureEntireModule() == false)
+	const MeasureSignal& activeSignal = theSignalBase.activeSignal();
+	if (activeSignal.isEmpty() == true)
 	{
 		return;
 	}
@@ -2333,13 +2448,47 @@ void MainWindow::measureThreadStoped()
 		return;
 	}
 
-	bool signalIsSelected = setNextMeasureSignalFromModule();
-	if (signalIsSelected == false)
+	//
+	//
+	if (theOptions.module().measureLinAndCmp() == true)
 	{
-		return;
+		switch (m_measureType)
+		{
+			case MEASURE_TYPE_LINEARITY:
+				{
+					int comparatorCount = getMaxComparatorCount(activeSignal);
+					if (comparatorCount == 0)
+					{
+						break;
+					}
+
+					m_pMainTab->setCurrentIndex(MEASURE_TYPE_COMPARATOR);
+
+					emit startMeasure();
+					return;
+				}
+			case MEASURE_TYPE_COMPARATOR:
+				{
+					m_pMainTab->setCurrentIndex(MEASURE_TYPE_LINEARITY);
+				}
+				break;
+			default:
+				assert(0);
+				break;
+		}
 	}
 
-	emit startMeasure();
+	//
+	//
+	if (theOptions.module().measureEntireModule() == true)
+	{
+		bool signalIsSelected = setNextMeasureSignalFromModule();
+		if (signalIsSelected == true)
+		{
+			emit startMeasure();
+			return;
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

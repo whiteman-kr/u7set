@@ -33,7 +33,6 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
@@ -49,9 +48,7 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/ServiceSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/XmlHelper.cpp \
     AppDataService.cpp \
     ../lib/Queue.cpp \
@@ -63,12 +60,11 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/AppSignal.cpp \
-    ../Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     AppDataSource.cpp \
-    ../Builder/ModulesRawData.cpp \
+#    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
@@ -87,7 +83,6 @@ SOURCES += \
 HEADERS += \
     ../lib/Address16.h \
     ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
 	Stable.h \
     ../lib/SocketIO.h \
@@ -107,9 +102,7 @@ HEADERS += \
     ../lib/TcpFileTransfer.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    ../lib/ServiceSettings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/OutputLog.h \
+	../lib/SoftwareSettings.h \
     ../lib/XmlHelper.h \
     ../lib/DataProtocols.h \
     AppDataService.h \
@@ -123,7 +116,6 @@ HEADERS += \
     ../Proto/serialization.pb.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/AppSignal.h \
-    ../Builder/IssueLogger.h \
     TcpAppDataClient.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \

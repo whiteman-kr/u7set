@@ -8,6 +8,10 @@ namespace Sim
 		LanInterface(lci, lans)
 	{
 		m_log.setOutputScope("TuningLanInterface");
+
+		setEnabled(lci.tuningEnable);
+
+		return;
 	}
 
 	TuningLanInterface::~TuningLanInterface()

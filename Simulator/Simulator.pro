@@ -131,12 +131,9 @@ SOURCES += \
     SimCommandProcessor.cpp \
     SimException.cpp \
     SimOverrideSignals.cpp \
-	../lib/SignalProperties.cpp \
-   ../Builder/IssueLogger.cpp \
-   ../lib/OutputLog.cpp
+	../lib/SignalProperties.cpp
 
 HEADERS += \
-    ../Builder/CfgFiles.h \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
@@ -200,9 +197,7 @@ HEADERS += \
     SimCommandProcessor.h \
     SimException.h \
     SimOverrideSignals.h \
-	../lib/SignalProperties.h \
-	../Builder/IssueLogger.h \
-	../lib/OutputLog.h
+	../lib/SignalProperties.h
 
 
 ## VFrame30 library

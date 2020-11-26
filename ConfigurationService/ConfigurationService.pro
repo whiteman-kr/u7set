@@ -57,12 +57,8 @@ SOURCES += \
     CfgChecker.cpp \
     CfgControlServer.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/ServiceSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/DeviceObject.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp \
-    ../Builder/ModulesRawData.cpp \
+	../lib/SoftwareSettings.cpp \
+	../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp
 
@@ -88,12 +84,8 @@ HEADERS += \
     CfgControlServer.h \
     ../lib/Types.h \
     ../lib/SoftwareInfo.h \
-    ../lib/ServiceSettings.h \
-    ../lib/DeviceHelper.h \
+	../lib/SoftwareSettings.h \
     ../lib/DeviceObject.h \
-    ../Builder/IssueLogger.h \
-    ../lib/OutputLog.h \
-    ../Builder/ModulesRawData.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
     ../lib/ProtoSerialization.h \

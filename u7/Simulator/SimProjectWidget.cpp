@@ -299,19 +299,19 @@ namespace SimProjectTreeItems
 
 		if (state.m_state != Sim::SimControlState::Stop)
 		{
-			switch (lmState.deviceMode)
+			switch (lmState.deviceState)
 			{
-			case Sim::DeviceMode::Off:
+			case Sim::DeviceState::Off:
 				text += QStringLiteral("Off");
 				break;
-			case Sim::DeviceMode::Start:
+			case Sim::DeviceState::Start:
 				text += QStringLiteral("Start");
 				break;
-			case Sim::DeviceMode::Fault:
+			case Sim::DeviceState::Fault:
 				text += QStringLiteral("Fault");
 				color = qRgb(0xD0, 0x00, 0x00);
 				break;
-			case Sim::DeviceMode::Operate:
+			case Sim::DeviceState::Operate:
 				text += QStringLiteral("Operate");
 				break;
 			default:

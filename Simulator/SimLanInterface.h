@@ -24,17 +24,18 @@ namespace Sim
 		QString lmEquipmentId() const;
 		QString portEquipmentId() const;
 
-		virtual bool enabled() const;
-		virtual void setEnabled(bool value);
+		bool enabled() const;
+		void setEnabled(bool value);
 
 		bool isTuning() const;
 		bool isAppData() const;
+		int appDataSizeBytes() const;
 		bool isDiagData() const;
 
 	protected:
 		Lans* m_lans = nullptr;
 		mutable ScopedLog m_log;
-		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
+		std::atomic<bool> m_enabled{true};			// Allow AppData trasmittion to AppDataSrv, TuningService, DiagService
 
 		::LanControllerInfo m_lanControllerInfo;
 	};

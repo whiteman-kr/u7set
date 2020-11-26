@@ -380,6 +380,16 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
 
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_INT_INSTEAD_IN]));
+					item->setValue(m_options.module().measureInterInsteadIn());
+					appendProperty(item, page, MO_PARAM_MEASURE_INT_INSTEAD_IN);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_LIN_AND_CMP]));
+					item->setValue(m_options.module().measureLinAndCmp());
+					appendProperty(item, page, MO_PARAM_MEASURE_LIN_AND_CMP);
+					measuremoduleGroup->addSubProperty(item);
+
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]));
 					item->setValue(m_options.module().measureEntireModule());
 					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
@@ -804,7 +814,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
 					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_COPY_PATH]));
-					item->setValue(m_options.database().copyPath());
+					item->setValue(m_options.database().backupPath());
 					appendProperty(item, page, DBO_PARAM_COPY_PATH);
 					pathGroup->addSubProperty(item);
 
@@ -1148,6 +1158,8 @@ void OptionsDialog::applyProperty()
 				switch(param)
 				{
 					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());							break;
+					case MO_PARAM_MEASURE_INT_INSTEAD_IN:	m_options.module().setMeasureInterInsteadIn(value.toBool());				break;
+					case MO_PARAM_MEASURE_LIN_AND_CMP:		m_options.module().setMeasureLinAndCmp(value.toBool());						break;
 					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());					break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
@@ -1274,7 +1286,7 @@ void OptionsDialog::applyProperty()
 				{
 					case DBO_PARAM_ON_START:			m_options.database().setOnStart(value.toBool());								break;
 					case DBO_PARAM_ON_EXIT:				m_options.database().setOnExit(value.toBool());									break;
-					case DBO_PARAM_COPY_PATH:			m_options.database().setCopyPath(value.toString());								break;
+					case DBO_PARAM_COPY_PATH:			m_options.database().setBackupPath(value.toString());								break;
 					default:							assert(0);
 				}
 			}

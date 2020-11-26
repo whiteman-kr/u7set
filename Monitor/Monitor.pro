@@ -62,6 +62,7 @@ SOURCES += main.cpp \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
+    ../lib/SoftwareSettings.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
@@ -129,15 +130,15 @@ SOURCES += main.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
     ../lib/TcpClientsStatistics.cpp \
-    ../lib/ExportPrint.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp
+	../lib/ExportPrint.cpp
 
 HEADERS  += \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
+    ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
+    ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/SchemaListWidget.h \
@@ -209,9 +210,7 @@ HEADERS  += \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \
     ../lib/TcpClientsStatistics.h \
-    ../lib/ExportPrint.h \
-    ../Builder/IssueLogger.h \
-    ../lib/OutputLog.h
+	../lib/ExportPrint.h
 
 FORMS    += \
     DialogSettings.ui \

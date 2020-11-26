@@ -1,5 +1,5 @@
 #include "TuningClientCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/AppSignal.h"
 #include "../lib/ClientBehavior.h"
@@ -43,16 +43,7 @@ namespace Builder
 
 		QStringList equipmentList;
 
-		bool filterByEquipment = false;
-		bool filterBySchema = false;
-
 		result &= createEquipmentList(&equipmentList);
-		if (result == false)
-		{
-			return result;
-		}
-
-		result &= createSettings(&filterByEquipment, &filterBySchema);
 		if (result == false)
 		{
 			return result;
@@ -72,7 +63,7 @@ namespace Builder
 			return result;
 		}
 
-		result &= writeSettings(filterByEquipment, filterBySchema);
+		result &= writeSettings();
 		if (result == false)
 		{
 			return result;
@@ -86,7 +77,7 @@ namespace Builder
 
 		// --
 		//
-		result &= createObjectFilters(equipmentList, filterByEquipment, filterBySchema);
+		result &= createObjectFilters(equipmentList);
 		if (result == false)
 		{
 			return result;
@@ -109,6 +100,13 @@ namespace Builder
 		result &= writeTuningClientBehavior();
 
 		return result;
+	}
+
+	bool TuningClientCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settings.writeToXml(xml);
 	}
 
 	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
@@ -217,351 +215,19 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::createSettings(bool* filterByEquipment, bool* filterBySchema)
+	bool TuningClientCfgGenerator::writeSettings()
 	{
-		if (filterByEquipment == nullptr || filterBySchema == nullptr)
-		{
-			assert(filterByEquipment);
-			assert(filterBySchema);
-			return false;
-		}
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
-		bool ok = false;
-
-		//
-		// filterByEquipment
-		//
-		*filterByEquipment = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "FilterByEquipment", &ok);
-		if (ok == false)
+		if (result == false)
 		{
 			return false;
 		}
 
-		//
-		// filterBySchema
-		//
-		*filterBySchema = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "FilterBySchema", &ok);
-		if (ok == false)
-		{
-			return false;
-		}
-
-		return true;
+		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
-	bool TuningClientCfgGenerator::writeSettings(bool filterByEquipment, bool filterBySchema)
-	{
-
-		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
-
-		{
-			xmlWriter.writeStartElement("Settings");
-			std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
-			{
-				xmlWriter.writeEndElement();
-			});
-
-			// --
-			//
-			bool ok = true;
-
-			//
-			// ConfigurationServiceID1,2
-			//
-			{
-
-				QString configServiceIdProperties[2];
-				configServiceIdProperties[0] = "ConfigurationServiceID1";
-				configServiceIdProperties[1] = "ConfigurationServiceID2";
-
-				QString configurationServiceId[2];
-
-				for (int i = 0; i < 2; i++)
-				{
-					const QString& cfgsProperty = configServiceIdProperties[i];
-
-					configurationServiceId[i] = getObjectProperty<QString>(m_software->equipmentIdTemplate(), cfgsProperty, &ok).trimmed();
-					if (ok == false)
-					{
-						return false;
-					}
-				}
-
-				if (configurationServiceId[0].isEmpty() == true && configurationServiceId[1].isEmpty() == true)
-				{
-					m_log->errCFG3022(m_software->equipmentId(), configServiceIdProperties[0]);
-					m_log->errCFG3022(m_software->equipmentId(), configServiceIdProperties[1]);
-					return false;
-				}
-
-				if (configurationServiceId[0].isEmpty() == true)
-				{
-					m_log->wrnCFG3016(m_software->equipmentId(), configServiceIdProperties[0]);
-					configurationServiceId[0] = configurationServiceId[1];
-
-					std::swap(configServiceIdProperties[0], configServiceIdProperties[1]);	// Property #2 will be processed first
-				}
-
-				if (configurationServiceId[1].isEmpty() == true)
-				{
-					m_log->wrnCFG3016(m_software->equipmentId(), configServiceIdProperties[1]);
-					configurationServiceId[1] = configurationServiceId[0];
-				}
-
-				for (int i = 0; i < 2; i++)
-				{
-					Hardware::Software* cfgs = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(configurationServiceId[i]));
-
-					if (cfgs == nullptr)
-					{
-						m_log->errCFG3021(m_software->equipmentIdTemplate(), configServiceIdProperties[i], configurationServiceId[i]);
-
-						QString errorStr = tr("Object %1 is not found").arg(configurationServiceId[i]);
-
-						writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-						return false;
-					}
-
-					if (cfgs->type() != E::SoftwareType::ConfigurationService)
-					{
-						m_log->errCFG3017(m_software->equipmentIdTemplate(), configServiceIdProperties[i], configurationServiceId[i]);
-
-						QString errorStr = tr("Property '%1.%2' is linked to not compatible software '%3'.")
-								.arg(m_software->equipmentIdTemplate())
-								.arg(configServiceIdProperties[i])
-								.arg(configurationServiceId[i]);
-
-
-						writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-						return false;
-					}
-				}
-			}
-
-			//
-			// TuningServiceID
-			//
-			QString tunsProperty = "TuningServiceID";
-
-			QString tuningServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), tunsProperty, &ok).trimmed();
-			if (ok == false)
-			{
-				return false;
-			}
-
-			if (tuningServiceId.isEmpty() == true)
-			{
-				m_log->errCFG3022(m_software->equipmentId(), tunsProperty);
-
-				QString errorStr = tr("TuningClient configuration error %1, property %2 is invalid")
-						.arg(m_software->equipmentIdTemplate()).arg(tunsProperty);
-
-				writeErrorSection(xmlWriter, errorStr);
-				return false;
-			}
-
-			Hardware::Software* tunsObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
-
-			if (tunsObject == nullptr)
-			{
-				m_log->errCFG3021(m_software->equipmentIdTemplate(), tunsProperty, tuningServiceId);
-
-				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId);
-
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-				return false;
-			}
-
-			if (tunsObject->type() != E::SoftwareType::TuningService)
-			{
-				m_log->errCFG3017(m_software->equipmentIdTemplate(), tunsProperty, tuningServiceId);
-
-				QString errorStr = tr("Property '%1.%2' is linked to not compatible software '%3'.")
-					.arg(m_software->equipmentIdTemplate())
-					.arg(tunsProperty)
-					.arg(tuningServiceId);
-
-
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-				return false;
-			}
-
-			TuningServiceSettings tunsSettings;
-			tunsSettings.readFromDevice(tunsObject, m_log);
-
-			//
-			// AutoApply
-			//
-			bool autoApply = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "AutoApply", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			//
-			// showSignals
-			//
-			bool showSignals = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSignals", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			//
-			// showSchemas
-			//
-			bool showSchemas = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemas", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			//
-			// schemasNavigation
-			//
-			bool showSchemasList = false;
-			bool showSchemasTabs = false;
-
-			int schemasNavigation = getObjectProperty<int>(m_software->equipmentIdTemplate(), "SchemasNavigation", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			switch (schemasNavigation)
-			{
-			case 0:
-				break;
-			case 1:
-				showSchemasList = true;
-				break;
-			case 2:
-				showSchemasTabs = true;
-				break;
-			default:
-				Q_ASSERT(false);
-			}
-
-			//
-			// statusFlagFunction
-			//
-			int statusFlagFunction = getObjectProperty<int>(m_software->equipmentIdTemplate(), "StatusFlagFunction", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			bool showSOR = false;
-			bool useAccessFlag = false;
-
-			switch (statusFlagFunction)
-			{
-			case 0:
-				break;
-			case 1:
-				showSOR = true;
-				break;
-			case 2:
-				useAccessFlag = true;
-				break;
-			default:
-				Q_ASSERT(false);
-			}
-
-			//
-			// loginPerOperation
-			//
-			bool loginPerOperation = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "LoginPerOperation", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			//
-			// usersAccounts
-			//
-			QString usersAccounts = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "UsersAccounts", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			//
-			// loginSessionLength
-			//
-			int loginSessionLength = getObjectProperty<int>(m_software->equipmentIdTemplate(), "LoginSessionLength", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			//
-			// startSchemaID
-			//
-			QString startSchemaID = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "StartSchemaID", &ok);
-			if (ok == false)
-			{
-				return false;
-			}
-
-			{
-				xmlWriter.writeStartElement("TuningService");
-				std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-				{
-					xmlWriter.writeEndElement();
-				});
-
-				// --
-				//
-				xmlWriter.writeAttribute("TuningServiceID1", tuningServiceId);
-
-				xmlWriter.writeAttribute("ip1", tunsSettings.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(tunsSettings.clientRequestIP.port()));
-			}
-
-			{
-				xmlWriter.writeStartElement("Appearance");
-				std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-				{
-					xmlWriter.writeEndElement();
-				});
-
-				xmlWriter.writeAttribute("autoApply", (autoApply ? "true" : "false"));
-				xmlWriter.writeAttribute("showSignals", (showSignals ? "true" : "false"));
-				xmlWriter.writeAttribute("showSchemas", (showSchemas? "true" : "false"));
-				xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
-				xmlWriter.writeAttribute("showSchemasTabs", (showSchemasTabs ? "true" : "false"));
-				xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
-				xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
-				xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
-				xmlWriter.writeAttribute("useAccessFlag", (useAccessFlag ? "true" : "false"));
-				xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
-				xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
-				xmlWriter.writeAttribute("usersAccounts", usersAccounts);
-				xmlWriter.writeAttribute("startSchemaID", startSchemaID);
-			}
-
-			// SchemaTags
-			//
-			{
-				bool getObjectSchemaTagesOk = true;
-				QString schemaTags = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "SchemaTags", &getObjectSchemaTagesOk);
-				if (getObjectSchemaTagesOk == false)
-				{
-					return false;
-				}
-
-				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
-				schemaTags = m_schemaTagList.join("; ");
-
-				xmlWriter.writeTextElement("SchemaTags", schemaTags);
-			}
-		}
-
-		return true;
-	}
-
-	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema)
+	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)
 	{
 		bool ok = true;
 
@@ -612,7 +278,7 @@ namespace Builder
 
 		// Create schemas and equipment filters
 
-		ok = createAutomaticFilters(equipmentList, tuningSignalManager, filterByEquipment, filterBySchema);
+		ok = createAutomaticFilters(equipmentList, tuningSignalManager);
 		if (ok == false)
 		{
 			assert(false);
@@ -634,7 +300,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
 
 		if (buildFile == nullptr)
 		{
@@ -660,7 +326,7 @@ namespace Builder
 			return false;
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CfgFileId::TUNING_FILTERS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -677,16 +343,15 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::writeTuningSchemas()
 	{
-		// class SoftwareCfgGenerator
-		//		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
-		//
 		bool result = true;
+
+		QStringList schemaTagList = m_settings.getSchemaTags();
 
 		std::set<std::shared_ptr<SchemaFile>> tuningSchemas;
 
 		// If tag list is empty, then link all Tuning schemas
 		//
-		if (m_schemaTagList.isEmpty() == true)
+		if (schemaTagList.isEmpty() == true)
 		{
 			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
@@ -699,7 +364,7 @@ namespace Builder
 		}
 		else
 		{
-			for (QString tag : m_schemaTagList)
+			for (QString tag : schemaTagList)
 			{
 				tag = tag.toLower();
 				auto tagRange = m_schemaTagToFile.equal_range(tag);
@@ -774,7 +439,7 @@ namespace Builder
 		else
 		{
 			QString globalScript = m_software->propertyValue("GlobalScript").toString();
-			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CFG_FILE_ID_TUNING_GLOBALSCRIPT, "", globalScript);
+			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CfgFileId::TUNING_GLOBALSCRIPT, "", globalScript);
 
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);
 		}
@@ -791,7 +456,7 @@ namespace Builder
 		else
 		{
 			QString arrivedScript = m_software->propertyValue("OnConfigurationArrived").toString();
-			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
+			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CfgFileId::TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
 
 			m_cfgXml->addLinkToFile(arrivedScriptBuildFile);
 		}
@@ -868,7 +533,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CFG_FILE_ID_BEHAVIOR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CfgFileId::CLIENT_BEHAVIOR, "", data);
 
 		if (buildFile == nullptr)
 		{
@@ -887,11 +552,9 @@ namespace Builder
 	}
 
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
-														  const TuningSignalManager& tuningSignalManager,
-														  bool filterByEquipment,
-														  bool filterBySchema)
+														  const TuningSignalManager& tuningSignalManager)
 	{
-		if (filterBySchema == true)
+		if (m_settings.filterBySchema == true)
 		{
 			// Filter for Schema
 			//
@@ -940,9 +603,7 @@ namespace Builder
 			m_tuningFilterStorage.add(ofSchema, true);
 		}	 // filterBySchema
 
-
-
-		if (filterByEquipment == true)
+		if (m_settings.filterByEquipment == true)
 		{
 			// Filter for EquipmentId
 			//

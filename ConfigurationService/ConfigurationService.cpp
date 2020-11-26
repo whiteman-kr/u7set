@@ -84,7 +84,7 @@ void ConfigurationServiceWorker::loadSettings()
 
 bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath)
 {
-	QString cfgXmlPath = QString("%1/%2/%3").arg(buildPath).arg(equipmentID()).arg(Builder::FILE_CONFIGURATION_XML);
+	QString cfgXmlPath = QString("%1/%2/%3").arg(buildPath).arg(equipmentID()).arg(File::CONFIGURATION_XML);
 
 	QFile cfgXmlFile(cfgXmlPath);
 

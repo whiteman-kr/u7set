@@ -13,6 +13,8 @@
 #include "../lib/Signal.h"
 #include <QList>
 
+#include "../lib/SoftwareXmlReader.h"
+
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif

@@ -13,6 +13,7 @@
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
 #include "DialogBusEditor.h"
+#include "DialogTagsEditor.h"
 #include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
@@ -306,6 +307,11 @@ void MainWindow::createActions()
 	m_busEditorAction->setEnabled(false);
 	connect(m_busEditorAction, &QAction::triggered, this, &MainWindow::runBusEditor);
 
+	m_tagsEditorAction = new QAction(tr("Tags Editor..."), this);
+	m_tagsEditorAction->setStatusTip(tr("Run Tags Editor"));
+	m_tagsEditorAction->setEnabled(false);
+	connect(m_tagsEditorAction, &QAction::triggered, this, &MainWindow::runTagsEditor);
+
 	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs/Busses..."), this);
 	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs/Busses on all schemas"));
 	m_updateUfbsAfbs->setEnabled(false);
@@ -410,6 +416,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
+	pToolsMenu->addAction(m_tagsEditorAction);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
@@ -635,6 +642,16 @@ void MainWindow::runBusEditor()
 	}
 }
 
+void MainWindow::runTagsEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogTagsEditor d(dbController(), this);
+	d.exec();
+}
 
 
 void MainWindow::updateUfbsAfbsBusses()
@@ -1111,6 +1128,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
+	m_tagsEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 	m_AfbLibraryCheck->setEnabled(true);
 
@@ -1153,6 +1171,7 @@ void MainWindow::projectClosed()
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
+	m_tagsEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 	m_AfbLibraryCheck->setEnabled(false);
 

@@ -18,7 +18,10 @@
 class IdePropertyEditorHelper
 {
 public:
-	static ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent, DbController* dbController);
+	static ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, DbController* dbController, QWidget* parent);
+
+	static bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);
+	static bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);
 };
 
 
@@ -33,8 +36,10 @@ public:
     virtual ~IdePropertyEditor();
 
 	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
-
 	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent) override;
+
+	virtual bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog) override;
+	virtual bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog) override;
 
 private:
 	DbController* m_dbController = nullptr;
@@ -51,8 +56,10 @@ public:
 	virtual ~IdePropertyTable();
 
 	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
-
 	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent) override;
+
+	virtual bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog) override;
+	virtual bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog) override;
 
 private:
 	DbController* m_dbController = nullptr;
@@ -187,6 +194,8 @@ private:
 
 private:
 	IdeQsciScintilla* m_textEdit = nullptr;
+
+	CodeType m_codeType = CodeType::Unknown;
 
 	LexerJavaScript m_lexerJavaScript;
 	LexerXML m_lexerXml;

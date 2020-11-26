@@ -46,6 +46,11 @@ namespace Sim
 		return (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0;
 	}
 
+	int LanInterface::appDataSizeBytes() const
+	{
+		return m_lanControllerInfo.appDataSizeBytes;
+	}
+
 	bool LanInterface::isDiagData() const
 	{
 		return (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0;

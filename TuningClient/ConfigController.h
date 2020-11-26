@@ -59,7 +59,8 @@ private:
 
 	bool xmlReadBuildInfoNode(const QDomNode& node, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
-	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
+
+	bool xmlReadSettingsSection(const QByteArray& cfgFiledata, ConfigSettings* outSetting);
 
 	// Public properties
 public:

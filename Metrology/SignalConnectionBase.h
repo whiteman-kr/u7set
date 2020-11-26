@@ -95,11 +95,11 @@ public:
 	QString					typeStr() const;
 	void					setType(int type) { m_handle.type = type; }
 
-	QString					appSignalID(int type) const;
-	void					setAppSignalID(int type, const QString& appSignalID);
+	QString					appSignalID(int ioType) const;
+	void					setAppSignalID(int ioType, const QString& appSignalID);
 
-	Metrology::Signal*		signal(int type) const;
-	void					setSignal(int type, Metrology::Signal* pSignal);
+	Metrology::Signal*		signal(int ioType) const;
+	void					setSignal(int ioType, Metrology::Signal* pSignal);
 	void					initSignals();										// set Metrology::Signal* from SignalBase
 
 	SignalConnection&		operator=(const SignalConnection& from);
@@ -144,7 +144,7 @@ public:
 	int						findIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
 	int						findIndex(const SignalConnection& connection) const;
 
-	QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& appSignalID) const;
+	QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& InputAppSignalID) const;
 
 	SignalConnectionBase&	operator=(const SignalConnectionBase& from);
 
