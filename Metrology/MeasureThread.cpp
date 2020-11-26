@@ -23,8 +23,8 @@ void MeasureThreadInfo::init()
 	m_message.clear();
 	m_timeout = 0;
 
-	m_cmdStopMeasure = false;
 	m_exitCode = ExitCode::Program;
+	m_cmdStopMeasure = false;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -220,7 +220,7 @@ bool MeasureThread::setCalibratorUnit()
 
 	int channelCount = m_activeIoParamList.count();
 
-	if (m_measureKind == MEASURE_KIND_ONE_MODULE)
+	if (m_measureKind == MEASURE_KIND_ONE_RACK || m_measureKind == MEASURE_KIND_ONE_MODULE)
 	{
 		channelCount = 1;
 	}
@@ -314,8 +314,6 @@ bool MeasureThread::setCalibratorUnit()
 			}
 		}
 	}
-
-
 
 	return true;
 }
@@ -417,6 +415,11 @@ void MeasureThread::polarityTest(double electricVal, IoSignalParam& ioParam)
 		return;
 	}
 
+	if (pCalibrator->type() == CALIBRATOR_TYPE_KTHL6221)
+	{
+		return;
+	}
+
 	double negativeLimit = 0;
 
 	if (pCalibrator->mode() == CALIBRATOR_MODE_SOURCE && pCalibrator->sourceUnit() == CALIBRATOR_UNIT_MV)
@@ -466,9 +469,32 @@ void MeasureThread::run()
 	//
 	switch (m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:	measureLinearity();		break;
-		case MEASURE_TYPE_COMPARATOR:	measureComprators();	break;
-		default:						assert(0);				break;
+		case MEASURE_TYPE_LINEARITY:
+			measureLinearity();
+			break;
+
+		case MEASURE_TYPE_COMPARATOR:
+
+			switch (m_measureKind)
+			{
+				case MEASURE_KIND_ONE_RACK:
+				case MEASURE_KIND_ONE_MODULE:
+					measureCompratorsInSeries();
+					break;
+
+				case MEASURE_KIND_MULTI_RACK:
+					measureCompratorsInParallel();
+					break;
+
+				default:
+					assert(0);
+					break;
+			}
+			break;
+
+		default:
+			assert(0);
+			break;
 	}
 }
 
@@ -500,7 +526,7 @@ void MeasureThread::measureLinearity()
 		//
 		int channelCount = m_activeIoParamList.count();
 
-		if (m_measureKind == MEASURE_KIND_ONE_MODULE)
+		if (m_measureKind == MEASURE_KIND_ONE_RACK || m_measureKind == MEASURE_KIND_ONE_MODULE)
 		{
 			channelCount = 1;
 		}
@@ -621,7 +647,493 @@ void MeasureThread::measureLinearity()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::measureComprators()
+void MeasureThread::measureCompratorsInSeries()
+{
+	UnitsConvertor uc;
+
+	int channelCount = m_activeIoParamList.count();
+	for(int ch = 0; ch < channelCount; ch ++)
+	{
+		CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+		if (calibratorIsValid(pCalibratorManager) == false)
+		{
+			continue;
+		}
+
+		// get max amount of comparators
+		//
+		int comparatorCount = 0;
+
+		Metrology::SignalParam param;
+
+		switch (m_activeIoParamList[ch].signalConnectionType())
+		{
+			case SIGNAL_CONNECTION_TYPE_UNUSED:
+				param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				break;
+			default:
+				param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+				break;
+		}
+
+		if (param.isValid() == false)
+		{
+			continue;
+		}
+
+		comparatorCount = param.comparatorCount();
+		if (comparatorCount == 0)
+		{
+			continue;
+		}
+
+		// starting from startComparatorIndex
+		//
+		int startComparatorIndex = m_comparatorOption.startComparatorIndex();
+
+		// iterate over all the comparators from one to maxComparatorCount
+		//
+		for (int cmp = startComparatorIndex; cmp < comparatorCount; cmp++)
+		{
+			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
+			if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
+			{
+				break;
+			}
+
+			bool goToNextComparator = false;
+
+			// we must do two pass
+			// first pass to measure set point of comparator
+			// second pass to measure set point of hysteresis
+			//
+			for(int cmpValueType = 0; cmpValueType < Metrology::CmpValueTypeCount; cmpValueType ++)
+			{
+				//
+				//
+				if (cmpValueType == Metrology::CmpValueTypeHysteresis && m_comparatorOption.enableMeasureHysteresis() == false)
+				{
+					break;  // go to next comparator
+				}
+
+				// select active output state
+				//
+				bool activeDiscreteOutputState = false;	// output state of comparator, depended from pass
+
+				switch (cmpValueType)
+				{
+					case Metrology::CmpValueTypeSetPoint:	activeDiscreteOutputState = false;	break;
+					case Metrology::CmpValueTypeHysteresis:	activeDiscreteOutputState = true;	break;
+				}
+
+				// phase of preparation started
+				// switching comparator to logical 0
+				//
+				do
+				{
+					// Two preparations
+					// The purpose of preparations for switching the comparator to logical 0, and go to starting value
+					// 1 - go below return zone to switch comparator to logical 0
+					// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
+					//
+					for (int pr = 0; pr < MEASURE_THREAD_CMP_PREPARE_COUNT; pr++)
+					{
+						switch (cmpValueType)
+						{
+							case Metrology::CmpValueTypeSetPoint:
+								m_info.setMessage(tr("Comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
+								break;
+							case Metrology::CmpValueTypeHysteresis:
+								m_info.setMessage(tr("Hysteresis of comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
+								break;
+						}
+
+						emit sendMeasureInfo(m_info);
+
+						// get compare value and hysteresis value
+						//
+						double compareVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare value
+						double hysteresisVal = comparatorEx->hysteresisOnlineValue();			// get hysteresis value
+
+						// calc start value for comaprator by engineering range
+						//
+						double startValueForComapre = ((param.highEngineeringUnits() - param.lowEngineeringUnits()) *
+													   m_comparatorOption.startValueForCompare()) / 100.0;
+
+						// calc delta value
+						//
+						double deltaVal = 0;
+
+						switch (pr)
+						{
+							// 1 - go below return zone to switch comparator to logical 0 state
+							//
+							case MEASURE_THREAD_CMP_PREAPRE_1:
+
+								if (comparatorEx->deviation() == Metrology::ComparatorEx::DeviationType::Unused)
+								{
+									deltaVal = hysteresisVal * 2;	// for comparators Less and Greate
+								}
+								else
+								{
+									deltaVal = hysteresisVal / 2;	// for comparators Equal and NotEqual
+								}
+
+								break;
+
+							// 2 - set the starting value, which will be as close as possible to the state of logical 1,
+							// but not reach it in a few steps
+							//
+							case MEASURE_THREAD_CMP_PREAPRE_2:
+
+								deltaVal = startValueForComapre;
+
+								break;
+
+							default:
+								break;
+						}
+
+						double engineeringVal = 0;
+
+						switch (cmpValueType)
+						{
+							case Metrology::CmpValueTypeSetPoint:
+
+								switch (comparatorEx->cmpType())
+								{
+									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
+									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
+									default:					break;
+								}
+
+								break;
+
+							case Metrology::CmpValueTypeHysteresis:
+
+								switch (comparatorEx->cmpType())
+								{
+									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
+									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
+									default:					break;
+								}
+
+								break;
+						}
+
+
+						double engineeringCalcVal = conversionCalcVal(engineeringVal,
+																	  ConversionCalcType::Inversion,
+																	  m_activeIoParamList[ch].signalConnectionType(),
+																	  m_activeIoParamList[ch]);
+
+
+						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+						if (inParam.isValid() == false)
+						{
+							break;
+						}
+
+						double electricVal = uc.conversion(engineeringCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
+
+						if (electricVal < inParam.electricLowLimit())
+						{
+							electricVal = inParam.electricLowLimit();
+						}
+						if (electricVal > inParam.electricHighLimit())
+						{
+							electricVal = inParam.electricHighLimit();
+						}
+
+						polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
+
+						// set electric value on calibrators, depend from comparator value
+						//
+						if (calibratorIsValid(pCalibratorManager) == false)
+						{
+							break;
+						}
+
+						pCalibratorManager->setValue(m_activeIoParamList[ch].isNegativeRange() ? -electricVal : electricVal);
+
+						// wait ready of calibrator,
+						// wait until calibrator will has fixed electric value
+						//
+						while(pCalibratorManager->isReadyForManage() != true)
+						{
+							if (calibratorIsValid(pCalibratorManager) == false)
+							{
+								break;
+							}
+
+							msleep(1);
+						}
+
+						// wait timeout for preparation
+						//
+						waitMeasureTimeout();
+
+						// additional delay = 10 sec
+						// before starting the measure test, comparator must be in logical 0
+						// maybe for someone the comparator did not have enough time to switch to logical 0
+						//
+						if (pr == MEASURE_THREAD_CMP_PREAPRE_1)
+						{
+							switch (cmpValueType)
+							{
+								case Metrology::CmpValueTypeSetPoint:
+									m_info.setMessage(tr("Comparator %1, additional delay").arg(cmp + 1));
+									break;
+								case Metrology::CmpValueTypeHysteresis:
+									m_info.setMessage(tr("Hysteresis of comparator %1, additional delay").arg(cmp + 1));
+									break;
+							}
+
+							emit sendMeasureInfo(m_info);
+
+							int timeoutStep = m_measureTimeout / 100;
+
+							for (int t = 0; t < 100; t++ )
+							{
+								if (calibratorIsValid(pCalibratorManager) == false)
+								{
+									break;
+								}
+
+								// if  state of comparator = logical 0, then you do not need to wait
+								//
+								if (comparatorEx->outputState() == activeDiscreteOutputState)
+								{
+									break;
+								}
+
+								QThread::msleep(MEASURE_THREAD_TIMEOUT_STEP);
+
+								m_info.setTimeout((t+1) * timeoutStep);
+								emit sendMeasureInfo(m_info);
+							}
+
+							m_info.setTimeout(0);
+							emit sendMeasureInfo(m_info);
+						} // end of additional delay
+					} // end one of preparations
+
+					if (calibratorIsValid(pCalibratorManager) == false)
+					{
+						break;
+					}
+
+					// before starting the test, comparator must be in a logical 0
+					// if state of comparator = logical 0, thеn finish phase of preparations and go to measure
+					// looking for comparator that did not switch to logical 1
+					// if comparator did not switch to logical 0, then we issue messages and repeat the preparations
+					//
+					// if  state of comparator = logical 0, then you do not need to wait
+					//
+					if (comparatorEx->outputState() == activeDiscreteOutputState)
+					{
+						break;
+					}
+					else
+					{
+						QString strInvalidComaprator = tr(	"Comparator %1, for following signals, is already in state of logical \"%2\":\n\n")
+															.arg(cmp + 1)
+															.arg(static_cast<int>(!activeDiscreteOutputState));
+
+						strInvalidComaprator.append(tr("%1\n").arg(param.appSignalID()));
+
+						strInvalidComaprator.append(tr(	"\nDo you want to repeat the preparation process "
+															"in order to switch the comparator "
+															"to state of logical \"%1\", click \"Yes\". "
+															"Go to next comparator, click \"No\"")
+															.arg(static_cast<int>(activeDiscreteOutputState)));
+
+
+						// if state comparator = logical 0, go to measure
+						// else repeat preparation
+						//
+						int result = QMessageBox::NoButton;
+						emit msgBox(QMessageBox::Question, strInvalidComaprator, &result);
+						if (result == QMessageBox::No)
+						{
+							goToNextComparator = true;
+							break;
+						}
+					}
+
+				} while(m_info.cmdStopMeasure() == false);
+				//
+				// phase of preparation is over
+
+				if (goToNextComparator == true)
+				{
+					break;
+				}
+
+				MeasureThreadInfo::msgType msgType = MeasureThreadInfo::msgType::String;
+
+				// phase of measuring started
+				// Okey - go
+				//
+				int step = 0;
+
+				while (comparatorEx->outputState() == activeDiscreteOutputState)
+				{
+					switch (cmpValueType)
+					{
+						case Metrology::CmpValueTypeSetPoint:
+							m_info.setMessage(tr("Comparator %1, Step %2").arg(cmp + 1).arg(step + 1), msgType);
+							break;
+						case Metrology::CmpValueTypeHysteresis:
+							m_info.setMessage(tr("Hysteresis of comparator %1, Step %2").arg(cmp + 1).arg(step + 1), msgType);
+							break;
+						default:
+							break;
+					}
+
+					emit sendMeasureInfo(m_info);
+
+					if (calibratorIsValid(pCalibratorManager) == false)
+					{
+						break;
+					}
+
+					// if state of comparator = logical 1, then skip it
+					// if state of comparator = logical 0, take a step
+					//
+					if (comparatorEx->outputState() == activeDiscreteOutputState)
+					{
+						switch (cmpValueType)
+						{
+							case Metrology::CmpValueTypeSetPoint:
+
+								switch (comparatorEx->cmpType())
+								{
+									case E::CmpType::Greate:
+										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:
+																							 pCalibratorManager->stepDown();
+										break;
+
+									case E::CmpType::Less:
+										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown() :
+																							 pCalibratorManager->stepUp();
+										break;
+
+									default:
+										break;
+								}
+
+								break;
+
+							case Metrology::CmpValueTypeHysteresis:
+
+								switch (comparatorEx->cmpType())
+								{
+									case E::CmpType::Greate:
+										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown()	:
+																							 pCalibratorManager->stepUp();
+										break;
+
+									case E::CmpType::Less:
+										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp() :
+																							 pCalibratorManager->stepDown();
+										break;
+
+									default:
+										break;
+								}
+
+								break;
+
+							default:
+								break;
+						}
+
+						// red string in the StatusBar reduce error >= limit of error
+						//
+						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+						if (inParam.isValid() == true)
+						{
+							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
+
+							double engineeringEtalonCalcVal = conversionCalcVal(comporatorEtalonVal,
+																				ConversionCalcType::Inversion,
+																				m_activeIoParamList[ch].signalConnectionType(),
+																				m_activeIoParamList[ch]);
+
+							double electricEtalonVal = uc.conversion(engineeringEtalonCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
+
+							double reduceError = (std::abs(pCalibratorManager->calibrator()->sourceValue() - electricEtalonVal) /
+												  inParam.electricHighLimit() - inParam.electricLowLimit()) * 100;
+
+							if (reduceError >= m_comparatorOption.errorLimit())
+							{
+								msgType = MeasureThreadInfo::msgType::StringError;
+							}
+						}
+					}
+					else
+					{
+						continue;
+					}
+
+					step++;
+
+					// wait ready of calibrator,
+					// wait until calibrator will has fixed electric value
+					//
+					while(pCalibratorManager->isReadyForManage() != true)
+					{
+						if (calibratorIsValid(pCalibratorManager) == false)
+						{
+							break;
+						}
+
+						msleep(1);
+					}
+
+					// wait timeout for measure
+					//
+					waitMeasureTimeout();
+				}
+				//
+				// phase of measuring is over
+
+
+				// phase saving of results started
+				//
+				m_info.setMessage(tr("Save measurement "));
+				emit sendMeasureInfo(m_info);
+
+				if (calibratorIsValid(pCalibratorManager) == false)
+				{
+					break;
+				}
+
+				m_activeIoParamList[ch].setComparatorIndex(cmp);
+				m_activeIoParamList[ch].setComparatorValueType(cmpValueType);
+
+				ComparatorMeasurement* pMeasurement = new ComparatorMeasurement(m_activeIoParamList[ch]);
+				if (pMeasurement == nullptr)
+				{
+					continue;
+				}
+
+				emit measureComplite(pMeasurement);
+
+				//
+				// phase saving of results is over
+
+				m_info.setMessage(QString());
+				emit sendMeasureInfo(m_info);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::measureCompratorsInParallel()
 {
 	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0 = 0;
 	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 = 0;
@@ -686,7 +1198,7 @@ void MeasureThread::measureComprators()
 		{
 			//
 			//
-			if (m_comparatorOption.enableMeasureHysteresis() == false && cmpValueType == Metrology::CmpValueTypeHysteresis)
+			if (cmpValueType == Metrology::CmpValueTypeHysteresis && m_comparatorOption.enableMeasureHysteresis() == false)
 			{
 				break;  // go to next comparator
 			}

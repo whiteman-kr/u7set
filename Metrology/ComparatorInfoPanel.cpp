@@ -394,6 +394,19 @@ void ComparatorInfoPanel::restartComparatorStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void ComparatorInfoPanel::measureKindChanged(int kind)
+{
+	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	m_measureKind = kind;
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void ComparatorInfoPanel::signalConnectionTypeChanged(int type)
 {
 	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)

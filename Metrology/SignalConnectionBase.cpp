@@ -276,12 +276,8 @@ int SignalConnectionBase::load()
 
 	table->close();
 
-	qDebug() << __FUNCTION__ <<
-				"Loaded signal connections: " <<
-				readedRecordCount <<
-				", Time for load: " <<
-				responseTime.elapsed() <<
-				" ms";
+	qDebug() << __FUNCTION__ <<  "Loaded signal connections: " << readedRecordCount <<
+				", Time for load: " <<	responseTime.elapsed() << " ms";
 
 	return readedRecordCount;
 }
@@ -511,6 +507,52 @@ int SignalConnectionBase::findIndex(const SignalConnection& connection) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+int SignalConnectionBase::getOutputSignalCount(int connectionType, const QString& InputAppSignalID) const
+{
+	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	{
+		return 0;
+	}
+
+	if (InputAppSignalID.isEmpty() == true)
+	{
+		return 0;
+	}
+
+	int outputSignalCount = 0;
+
+	QMutexLocker l(&m_connectionMutex);
+
+	int count = m_connectionList.count();
+
+	for(int i = 0; i < count; i ++)
+	{
+		const SignalConnection& connection = m_connectionList[i];
+
+		if (connection.type() != connectionType)
+		{
+			continue;
+		}
+
+		if (connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) != InputAppSignalID)
+		{
+			continue;
+		}
+
+		Metrology::Signal* pOutputSignal = m_connectionList[i].signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+		if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		outputSignalCount ++;
+	}
+
+	return outputSignalCount;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 QVector<Metrology::Signal*> SignalConnectionBase::getOutputSignals(int connectionType, const QString& InputAppSignalID) const
 {
 	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
@@ -538,16 +580,18 @@ QVector<Metrology::Signal*> SignalConnectionBase::getOutputSignals(int connectio
 			continue;
 		}
 
-		if (connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) == InputAppSignalID)
+		if (connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) != InputAppSignalID)
 		{
-			Metrology::Signal* pOutputSignal = m_connectionList[i].signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-			if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
-			{
-				continue;
-			}
-
-			outputSignalsList.append(pOutputSignal);
+			continue;
 		}
+
+		Metrology::Signal* pOutputSignal = m_connectionList[i].signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+		if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		outputSignalsList.append(pOutputSignal);
 	}
 
 	return outputSignalsList;

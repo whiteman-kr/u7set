@@ -101,6 +101,7 @@ private:
 	CalibratorBase*			m_pCalibratorBase = nullptr;
 	ComparatorInfoOption	m_comparatorInfo;
 
+	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 public:
@@ -117,6 +118,7 @@ protected:
 
 public slots:
 
+	void					measureKindChanged(int kind);
 	void					signalConnectionTypeChanged(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected

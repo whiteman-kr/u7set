@@ -1054,79 +1054,98 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 		return false;
 	}
 
+	// set input signal
+	//
+
 	bool result = true;
 
-	switch (signalConnectionType)
+	m_mutex.lock();
+
+		m_signalConnectionType = signalConnectionType;
+
+		result = m_signal[MEASURE_IO_SIGNAL_TYPE_INPUT].setMetrologySignal(measureKind, channel, pSignal);
+
+	m_mutex.unlock();
+
+	if (result == false)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:
-			{
-				m_mutex.lock();
+		clear();
+		return false;
+	}
 
-					m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
+	// set output signal
+	//
+	if (signalConnectionType != SIGNAL_CONNECTION_TYPE_UNUSED)
+	{
+		Metrology::Signal* pOutSignal = nullptr;
 
-					result = m_signal[MEASURE_IO_SIGNAL_TYPE_INPUT].setMetrologySignal(measureKind, channel, pSignal);
-
-				m_mutex.unlock();
-			}
-			break;
-
-
-		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-			{
-				// find index of signal connection in the base by input signal
-				//
-				int index = signalConnections.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal);
-				if (index == -1)
+		switch (measureKind)
+		{
+			case MEASURE_KIND_ONE_RACK:
 				{
-					result = false;
-					break;
-				}
-
-				// take signal connection in the base by index
-				//
-				const SignalConnection& signalConnection = signalConnections.connection(index);
-
-				m_mutex.lock();
-
-					m_signalConnectionType = signalConnectionType;
-
-					for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+					// take output signals of input signal
+					//
+					QVector<Metrology::Signal*> outputSignals = signalConnections.getOutputSignals(signalConnectionType, pSignal->param().appSignalID());
+					if (channel < 0 || channel >= outputSignals.count())
 					{
-						Metrology::Signal* pSignalFromConnection = signalConnection.signal(type);
-						if (pSignalFromConnection == nullptr || pSignalFromConnection->param().isValid() == false)
-						{
-							result = false;
-							break;
-						}
-
-						if (m_signal[type].setMetrologySignal(measureKind, channel, pSignalFromConnection) == false)
-						{
-							result = false;
-							break;
-						}
+						break;
 					}
 
-				m_mutex.unlock();
-			}
+					pOutSignal = outputSignals[channel];
+				}
+				break;
 
-			break;
+			case MEASURE_KIND_ONE_MODULE:
+			case MEASURE_KIND_MULTI_RACK:
+				{
+					// find index of signal connection in the base by input signal
+					//
+					int index = signalConnections.findIndex(signalConnectionType, MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal);
+					if (index == -1)
+					{
+						break;
+					}
 
-		default:
-			assert(0);
+					// take signal connection in the base by index
+					//
+					const SignalConnection& signalConnection = signalConnections.connection(index);
+					if (signalConnection.isValid() == false)
+					{
+						break;
+					}
+
+					pOutSignal = signalConnection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+				}
+				break;
+
+			default:
+				{
+					assert(0);
+					break;
+				}
+		}
+
+		if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+		{
+			result = false;
+		}
+		else
+		{
+			m_mutex.lock();
+
+				result &= m_signal[MEASURE_IO_SIGNAL_TYPE_OUTPUT].setMetrologySignal(measureKind, channel, pOutSignal);
+
+			m_mutex.unlock();
+		}
 	}
 
 	if (result == false)
 	{
 		clear();
+		return false;
 	}
 
-	return result;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2127,26 +2146,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 	}
 
 	int signalIndex = 0;
-	QMap<Hash, int>	mesaureSignalMap;
-
-	// determine the number of channels for a multi-channel signal
-	//
-	int channelCount = 0;
-
-	switch(measureKind)
-	{
-		case MEASURE_KIND_ONE_RACK:		channelCount = 1;									break;
-		case MEASURE_KIND_ONE_MODULE:	channelCount = theOptions.module().maxInputCount();	break;
-		case MEASURE_KIND_MULTI_RACK:	channelCount = Metrology::ChannelCount;				break;
-		default:						assert(0);
-	}
-
 	MeasureSignal measureSignal;
-	measureSignal.setChannelCount(channelCount);
+	QMap<Hash, int>	mesaureSignalMap;
 
 	// find all signals for selected rack or group and create Measure Signal List map for ToolBar
 	//
-
 	QMutexLocker l(&m_signalMesaureMutex);
 
 	m_signalMeasureList.clear();
@@ -2155,8 +2159,6 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 	for(int i = 0; i < signalCount; i ++)
 	{
-		measureSignal.clear();
-
 		if (enableForMeasure(signalConnectionType, &m_signalList[i]) == false)
 		{
 			continue;
@@ -2167,6 +2169,42 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 		{
 			continue;
 		}
+
+		// determine the number of channels for a multi-channel signal
+		//
+		int channelCount = 0;
+
+		switch(measureKind)
+		{
+			case MEASURE_KIND_ONE_RACK:
+
+				if (signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
+				{
+					channelCount = 1;
+				}
+				else
+				{
+					channelCount = m_signalConnectionBase.getOutputSignalCount(signalConnectionType, m_signalList[i].param().appSignalID());
+				}
+				break;
+
+			case MEASURE_KIND_ONE_MODULE:
+
+				channelCount = theOptions.module().maxInputCount();
+				break;
+
+			case MEASURE_KIND_MULTI_RACK:
+
+				channelCount = Metrology::ChannelCount;
+				break;
+
+			default:
+				assert(0);
+				continue;
+		}
+
+		measureSignal.clear();
+		measureSignal.setChannelCount(channelCount);
 
 		// switch for Measure kind
 		//
@@ -2179,13 +2217,16 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 						continue;
 					}
 
-					if (measureSignal.setMetrologySignal(measureKind,
-														 m_signalConnectionBase,
-														 signalConnectionType,
-														 Metrology::Channel_0,
-														 &m_signalList[i]) == false)
+					for(int channel = 0; channel < measureSignal.channelCount(); channel++)
 					{
-						continue;
+						if (measureSignal.setMetrologySignal(measureKind,
+															 m_signalConnectionBase,
+															 signalConnectionType,
+															 channel,
+															 &m_signalList[i]) == false)
+						{
+							continue;
+						}
 					}
 				}
 				break;

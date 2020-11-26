@@ -2689,7 +2689,9 @@ int MeasureBase::load(int measureType)
 		}
 	}
 
-	qDebug() << __FUNCTION__ << ": MeasureType: " << measureType << ", Loaded MeasureItem: " << count() << ", Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << __FUNCTION__ << ": MeasureType: " << measureType <<
+				", Loaded MeasureItem: " << count() <<
+				", Time for load: " << responseTime.elapsed() << " ms";
 
 	return count();
 }
