@@ -185,15 +185,12 @@ QString MeasurePointBase::text()
 
 void MeasurePointBase::initEmpty()
 {
-	const int valueCount = 7;
-	double value[valueCount] = {5, 20, 40, 50, 60, 80, 95};
-
-	for(int index = 0; index < valueCount; index++)
+	for(int index = 0; index < MeasurePointValueCount; index++)
 	{
 		MeasurePoint point;
 
 		point.setIndex(index);
-		point.setPercent(value[index]);
+		point.setPercent(MeasurePointValue[index]);
 
 		m_pointList.append(point);
 	}
