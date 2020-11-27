@@ -595,9 +595,11 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
 							 EquipmentPropNames::TUNING_DATA_PORT, tuningDataIP);
 	xml.writeHostAddress(EquipmentPropNames::TUNING_DATA_NETMASK, tuningDataNetmask);
-
 	xml.writeBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, singleLmControl);
 	xml.writeBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
+	xml.writeHostAddressPort(EquipmentPropNames::TUNING_SIM_IP,
+							 EquipmentPropNames::TUNING_SIM_PORT,
+							 tuningSimIP);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -640,10 +642,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result = xml.findElement(XmlElement::SETTINGS);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
@@ -652,28 +651,11 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 									  EquipmentPropNames::TUNING_DATA_PORT, &tuningDataIP);
 	result &= xml.readHostAddress(EquipmentPropNames::TUNING_DATA_NETMASK, &tuningDataNetmask);
 
-	result = xml.findElement(EquipmentPropNames::SINGLE_LM_CONTROL);
+	result &= xml.readBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, true);
+	result &= xml.readBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, true);
 
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl);
-
-	result = xml.findElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking);
-
-	if (result == false)
-	{
-		return false;
-	}
+	result &= xml.readHostAddressPort(EquipmentPropNames::TUNING_SIM_IP,
+									  EquipmentPropNames::TUNING_SIM_PORT, &tuningSimIP);
 
 	// read tuning clients info
 	//
@@ -681,19 +663,13 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result = xml.findElement(XmlElement::TUNING_CLIENTS);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	int clientsCount = 0;
 
 	result = xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	for(int i = 0; i < clientsCount; i++)
 	{
@@ -801,6 +777,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
+
+		// for a now tuningSimIP isn't read from equipment
 
 		result &= fillTuningClientsInfo(software, singleLmControl, log);
 

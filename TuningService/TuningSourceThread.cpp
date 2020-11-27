@@ -243,6 +243,8 @@ namespace Tuning
 
 		m_disableModulesTypeChecking = settings.disableModulesTypeChecking;
 
+		m_tuningSimIP = settings.tuningSimIP;
+
 		const TuningData* td = source.tuningData();
 
 		if (td != nullptr)
@@ -608,6 +610,11 @@ namespace Tuning
 		}
 	}
 
+	bool TuningSourceHandler::isSimulationMode() const
+	{
+		return m_tuningSimIP.isSet();
+	}
+
 	bool TuningSourceHandler::processWaitReply()
 	{
 		if (m_waitReply == true)
@@ -674,7 +681,7 @@ namespace Tuning
 			return false;
 		}*/
 
-		bool result = prepareFotipRequest(m_lastProcessedCommand, m_request);
+		bool result = prepareFotipRequest(m_lastProcessedCommand, m_request.rupFotipV2);
 
 		if (result == false)
 		{
@@ -733,39 +740,60 @@ namespace Tuning
 		return result;
 	}
 
-	void TuningSourceHandler::sendFotipRequest(RupFotipV2& request, const QString& appSignalID)
+	void TuningSourceHandler::sendFotipRequest(SimRupFotipV2& request, const QString& appSignalID)
 	{
 		assert(sizeof(Rup::Frame) == Socket::ENTIRE_UDP_SIZE);
 		assert(sizeof(RupFotipV2) == Socket::ENTIRE_UDP_SIZE);
 		assert(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
 		assert(sizeof(FotipV2::Header) == 128);
 
+		RupFotipV2& rupFotipV2 = request.rupFotipV2;
+
 		// convert headers to BigEndian
 		//
-		request.rupHeader.reverseBytes();
-		request.fotipFrame.header.reverseBytes();
+		rupFotipV2.rupHeader.reverseBytes();
+		rupFotipV2.fotipFrame.header.reverseBytes();
 
 		//
 
-		request.calcCRC64();
+		rupFotipV2.calcCRC64();
 
-		qint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
-											  sizeof(request),
-											  m_sourceIP.address(),
-											  m_sourceIP.port());
+		qint64 sent = 0;
+
+		if (isSimulationMode() == false)
+		{
+			// packet sending to real LM
+			//
+			sent = m_socket.writeDatagram(reinterpret_cast<char*>(&rupFotipV2),
+										  sizeof(rupFotipV2),
+										  m_sourceIP.address(),
+										  m_sourceIP.port());
+		}
+		else
+		{
+			// packet sending to Simulator
+			//
+			request.simVersion = reverseUint16(1);
+			request.destIP = reverseUint32(m_sourceIP.address32());
+
+			sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
+										  sizeof(request),
+										  m_tuningSimIP.address(),
+										  m_tuningSimIP.port());
+		}
 
 		m_stat.requestCount++;
 
 		// revert headers to LittleEndian
 		//
-		request.rupHeader.reverseBytes();
-		request.fotipFrame.header.reverseBytes();
+		rupFotipV2.rupHeader.reverseBytes();
+		rupFotipV2.fotipFrame.header.reverseBytes();
 
 		//
 
-		quint32 rawDiscreteValue = request.fotipFrame.write.discreteValue;
-		quint32 rawBitmask = request.fotipFrame.write.bitMask;
-		quint16 requestID = request.rupHeader.numerator;
+		quint32 rawDiscreteValue = rupFotipV2.fotipFrame.write.discreteValue;
+		quint32 rawBitmask = rupFotipV2.fotipFrame.write.bitMask;
+		quint16 requestID = rupFotipV2.rupHeader.numerator;
 
 		//
 
@@ -786,13 +814,13 @@ namespace Tuning
 
 		// logging
 		//
-		switch(static_cast<FotipV2::OpCode>(request.fotipFrame.header.operationCode))
+		switch(static_cast<FotipV2::OpCode>(rupFotipV2.fotipFrame.header.operationCode))
 		{
 		case FotipV2::OpCode::Write:
 			{
-				QString valueStr = request.fotipFrame.valueStr(true);
+				QString valueStr = rupFotipV2.fotipFrame.valueStr(true);
 
-				if (request.fotipFrame.isDiscreteData() == true)
+				if (rupFotipV2.fotipFrame.isDiscreteData() == true)
 				{
 					DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 WRITE request %1 is sent to %2 (%3), signal %4 value %5."
 													"StartAddrW %6, OffsetInFrameW %7, RawValue32 %8 BE, Bitmask32 %9 BE").
@@ -801,8 +829,8 @@ namespace Tuning
 								  arg(m_sourceIP.addressStr()).
 								  arg(appSignalID).
 								  arg(valueStr).
-								  arg(request.fotipFrame.header.startAddressW).
-								  arg(request.fotipFrame.header.offsetInFrameW).
+								  arg(rupFotipV2.fotipFrame.header.startAddressW).
+								  arg(rupFotipV2.fotipFrame.header.offsetInFrameW).
 								  arg(rawDiscreteValue, 8, 16, QLatin1Char('0')).
 								  arg(rawBitmask, 8, 16, QLatin1Char('0')));
 				}
@@ -1089,23 +1117,14 @@ namespace Tuning
 
 		case FotipV2::DataType::Discrete:
 			{
-				quint32 data32 = *reinterpret_cast<quint32*>(reply.fotipFrame.data + m_request.fotipFrame.header.offsetInFrameW * 2);
+				quint32 data32 = *reinterpret_cast<quint32*>(reply.fotipFrame.data + m_request.rupFotipV2.fotipFrame.header.offsetInFrameW * 2);
 
 				msg = QString("Reply is received from %1 (%2) on RupFotipV2 WRITE request %3. Data32[%4W] = %5").
 								arg(sourceEquipmentID()).
 								arg(m_sourceIP.addressStr()).
 								arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
-								arg(m_request.fotipFrame.header.offsetInFrameW).
+								arg(m_request.rupFotipV2.fotipFrame.header.offsetInFrameW).
 								arg(data32, 8, 16, QLatin1Char('0'));
-
-				// REMOVE AFTER DEBUG !!!!
-
-/*				if ((data32 & 0x000000fe) != 0x000000fe)
-				{
-					m_STOP_SEND_REQUESTS = true;
-				}*/
-
-				// REMOVE AFTER DEBUG !!!!
 			}
 			break;
 
@@ -1130,14 +1149,9 @@ namespace Tuning
 
 		DEBUG_LOG_ERR(m_logger, msg);
 
-/*		if (m_STOP_SEND_REQUESTS == true)
-		{
-			DEBUG_LOG_ERR(m_logger, "STOP SEND REQUESTS");
-		}*/
-
 		if (hasErrors == true)
 		{
-		//	DEBUG_LOG_ERR(m_logger, msg);
+//			DEBUG_LOG_ERR(m_logger, msg);
 		}
 		else
 		{
@@ -1385,7 +1399,7 @@ namespace Tuning
 			result = false;
 		}
 
-		if (fotipHeader.operationCode != m_request.fotipFrame.header.operationCode)
+		if (fotipHeader.operationCode != m_request.rupFotipV2.fotipFrame.header.operationCode)
 		{
 			m_stat.errFotipOperationCode++;
 			result = false;

@@ -17,6 +17,8 @@ namespace Tuning
 	{
 		Q_OBJECT
 
+		static const QString SETTING_TUNING_SIM_IP;
+
 	public:
 		TuningServiceWorker(const SoftwareInfo& softwareInfo,
 							const QString &serviceInstanceName,
@@ -27,7 +29,7 @@ namespace Tuning
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
-		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;
+		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
@@ -95,6 +97,9 @@ namespace Tuning
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	private:
+		QString m_tuningSimIPStr;
+		HostAddressPort m_tuningSimIP;
+
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 

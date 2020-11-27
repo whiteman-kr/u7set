@@ -253,6 +253,8 @@ namespace Tuning
 	private:
 		void initTuningSignals(const TuningData* td);
 
+		bool isSimulationMode() const;
+
 		bool processWaitReply();
 		bool processCommandQueue();
 		bool processIdle();
@@ -260,7 +262,7 @@ namespace Tuning
 		void onNoReply();
 
 		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
-		void sendFotipRequest(RupFotipV2& request, const QString& appSignalID);
+		void sendFotipRequest(SimRupFotipV2& request, const QString& appSignalID);
 
 		bool initRupHeader(Rup::Header& rupHeader);
 		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
@@ -288,6 +290,8 @@ namespace Tuning
 		CircularLoggerShared m_tuningLog;
 
 		bool m_disableModulesTypeChecking = false;
+
+		HostAddressPort m_tuningSimIP;
 
 		// data from tuning source
 		//
@@ -325,7 +329,7 @@ namespace Tuning
 
 		QUdpSocket m_socket;
 
-		RupFotipV2 m_request;
+		SimRupFotipV2 m_request;
 		QString m_requestAppSignalID;
 
 		RupFotipV2 m_reply;

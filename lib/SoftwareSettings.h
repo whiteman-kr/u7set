@@ -181,6 +181,9 @@ public:
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
+	HostAddressPort tuningSimIP;			// for now this option isn't read from equipment
+	                                        // it can be initialized from TuningService cmd line option -sim
+	                                        // or inside Simulator for run TuningServiceCommunicator
 	QVector<TuningClient> clients;
 
 	//

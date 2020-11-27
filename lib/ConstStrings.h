@@ -72,6 +72,9 @@ namespace EquipmentPropNames
 	inline const QString SINGLE_LM_CONTROL("SingleLmControl");
 	inline const QString DISABLE_MODULES_TYPE_CHECKING("DisableModulesTypeChecking");
 
+	inline const QString TUNING_SIM_IP("TunigSimIP");
+	inline const QString TUNING_SIM_PORT("TunigSimPort");
+
 	// TuningClient properties
 	//
 	inline const QString AUTO_APPLAY("AutoApply");

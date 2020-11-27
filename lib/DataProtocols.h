@@ -238,5 +238,13 @@ struct RupFotipV2
 	bool checkCRC64();
 };
 
+struct SimRupFotipV2
+{
+	RupFotipV2 rupFotipV2;
+
+	quint16 simVersion;
+	quint32 destIP;
+};
+
 
 #pragma pack(pop)

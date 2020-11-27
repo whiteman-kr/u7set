@@ -10,6 +10,8 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
+	const QString TuningServiceWorker::SETTING_TUNING_SIM_IP("TuningSimIP");
+
 	TuningServiceWorker::TuningServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
 											 int& argc,
@@ -49,16 +51,27 @@ namespace Tuning
 		CommandLineParser& cp = cmdLineParser();
 
 		cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-		cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
-		cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+
+		cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1,
+								QString("IP-address of first Configuration Service (default port - %1).").
+											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
+		cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2,
+								QString("IP-address of second Configuration Service (default port - %1).").
+											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
+		cp.addSingleValueOption("sim", SETTING_TUNING_SIM_IP,
+								QString("IP-address of Simulator (default port - %1)").arg(PORT_LM_TUNING), "ip[:port]");
 	}
 
 	void TuningServiceWorker::loadSettings()
 	{
+		m_tuningSimIPStr = getStrSetting(SETTING_TUNING_SIM_IP);
+		m_tuningSimIP.setAddressPortStr(m_tuningSimIPStr, PORT_LM_TUNING);
+
 		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_TUNING_SIM_IP).arg(m_tuningSimIP.addressPortStrIfSet()));
 	}
 
 	void TuningServiceWorker::clear()
@@ -569,6 +582,15 @@ namespace Tuning
 			DEBUG_LOG_ERR(m_logger, QString("Configuration reading error"));
 			return;
 		}
+
+		//
+
+		if (m_tuningSimIP.isSet() == true)
+		{
+			m_cfgSettings.tuningSimIP = m_tuningSimIP;
+		}
+
+		//
 
 		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
 
