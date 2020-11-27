@@ -386,7 +386,7 @@ namespace Sim
 			case SimControlState::Pause:
 				// Have some rest
 				//
-				yieldCurrentThread();
+				msleep(1);		// yieldCurrentThread(); - gives high CPU load
 				break;
 
 			default:
