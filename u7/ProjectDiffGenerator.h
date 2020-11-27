@@ -245,11 +245,20 @@ public:
 		{
 			return hash == That.hash;
 		}
+		bool operator != (const FileLine& That) const
+		{
+			return text != That.text;
+		}
 	};
 
-	static bool diff(const QByteArray& sourceData, const QByteArray& targetData, std::vector<FileLine>* sourceDiff, std::vector<FileLine>* targetDiff);
 	static void loadFileData(const QByteArray& fileData, std::vector<FileLine>* fileLines);
 	template<typename T> static void calculateLcs(const std::vector<T>& X, const std::vector<T>& Y, std::vector<T>* result);
+};
+
+struct FileDiffPair
+{
+	QString sourceText;
+	QString targetText;
 };
 
 //
@@ -376,7 +385,7 @@ private:
 	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
 	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
 	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
-	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile);
+	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
 
 	void compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable);
 	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable);

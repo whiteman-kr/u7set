@@ -241,9 +241,9 @@ void ReportTable::render(const ReportObjectContext& context) const
 
 		for (int c = 0; c < cols; c++)
 		{
-			const QString& str = row[c];
+			const QString str = row[c];
 
-			html += QObject::tr("<td>%1</td>").arg(str);
+			html += QObject::tr("<td>%1</td>").arg(str.toHtmlEscaped());
 		}
 
 		html += "</tr>";
@@ -688,67 +688,6 @@ void ReportGenerator::drawMarginItems(int page, QPainter* painter)
 //
 // FileDiff
 //
-
-bool FileDiff::diff(const QByteArray& sourceData, const QByteArray& targetData, std::vector<FileLine>* sourceDiff, std::vector<FileLine>* targetDiff)
-{
-	if (sourceDiff == nullptr || targetDiff == nullptr)
-	{
-		Q_ASSERT(sourceDiff);
-		Q_ASSERT(targetDiff);
-		return false;
-	}
-
-	std::vector<FileLine> fileLinesSource;
-	std::vector<FileLine> fileLinesTarget;
-	std::vector<FileLine> fileLinesCommon;
-
-	loadFileData(sourceData, &fileLinesSource);
-	loadFileData(targetData, &fileLinesTarget);
-
-	fileLinesCommon.reserve(static_cast<int>(fileLinesSource.size()));
-
-	calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
-
-	for (const FileLine& fileLine : fileLinesSource)
-	{
-		bool commonLineExists = false;
-
-		for (const FileLine& commonLine : fileLinesCommon)
-		{
-			if (fileLine.hash == commonLine.hash)
-			{
-				commonLineExists = true;
-				break;
-			}
-		}
-
-		if (commonLineExists == false)
-		{
-			sourceDiff->push_back(fileLine);
-		}
-	}
-
-	for (const FileLine& fileLine : fileLinesTarget)
-	{
-		bool commonLineExists = false;
-
-		for (const FileLine& commonLine : fileLinesCommon)
-		{
-			if (fileLine.hash == commonLine.hash)
-			{
-				commonLineExists = true;
-				break;
-			}
-		}
-
-		if (commonLineExists == false)
-		{
-			targetDiff->push_back(fileLine);
-		}
-	}
-
-	return true;
-}
 
 void FileDiff::loadFileData(const QByteArray& fileData, std::vector<FileLine>* fileLines)
 {
@@ -1659,7 +1598,7 @@ void ProjectDiffWorker::compareFileContents(const std::shared_ptr<DbFile>& sourc
 		return;
 	}
 
-	compareFilesData(sourceFile, targetFile);
+	compareFilesData(sourceFile, targetFile, headerTable);
 	return;
 }
 
@@ -2342,9 +2281,15 @@ void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& source
 	}
 }
 
-void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile)
+void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
 {
-	/*// No Files
+	if (headerTable == nullptr)
+	{
+		Q_ASSERT(headerTable);
+		return;
+	}
+
+	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
 		Q_ASSERT(sourceFile != nullptr || targetFile != nullptr);
@@ -2357,59 +2302,101 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 		(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
-		m_textCursor.insertText(tr("\n%1: %2\n").arg(singleFile->fileName()).arg(singleFile->action().text()));
+		headerTable->insertRow({singleFile->fileName(), tr("Added"),  changesetString(singleFile)});
 		return;
 	}
+
+	if (sourceFile->data() == targetFile->data())
+	{
+		return;
+	}
+
+	headerTable->insertRow({targetFile->fileName(), targetFile->action().text(), changesetString(targetFile)});
+
+	std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+	m_sections.push_back(section);
 
 	// Both Files
 	//
 	if (isTextFile(targetFile->fileName()) == true)
 	{
-		std::vector<FileDiff::FileLine> sourceDiff;
-		std::vector<FileDiff::FileLine> targetDiff;
+		section->addText(tr("File %1 differences\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
 
-		FileDiff::diff(sourceFile->data(), targetFile->data(), &sourceDiff, &targetDiff);
+		std::vector<FileDiff::FileLine> fileLinesSource;
+		std::vector<FileDiff::FileLine> fileLinesTarget;
+		std::vector<FileDiff::FileLine> fileLinesCommon;
 
-		if (sourceDiff.empty() == true && targetDiff.empty() == true)
+		FileDiff::loadFileData(sourceFile->data(), &fileLinesSource);
+		FileDiff::loadFileData(targetFile->data(), &fileLinesTarget);
+
+		fileLinesCommon.reserve(static_cast<int>(fileLinesSource.size() + fileLinesTarget.size()));
+
+		FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
+
+		saveFormat();
+		setFont(m_tableFont);
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")}, m_currentCharFormat);
+		restoreFormat();
+
+		int sourceIndex = 0;
+		int targetIndex  = 0;
+		int lcsIndex = 0;
+
+		while (sourceIndex < fileLinesSource.size() &&
+			   targetIndex < fileLinesTarget.size() &&
+			   lcsIndex < fileLinesCommon.size())
 		{
-			return;
-		}
+			const FileDiff::FileLine& sourceLine = fileLinesSource[sourceIndex];
+			const FileDiff::FileLine& targetLine = fileLinesTarget[targetIndex];
+			const FileDiff::FileLine& commonLine = fileLinesCommon[lcsIndex];
 
-		m_textCursor.insertText(tr("\n%1n").arg(targetFile->fileName()));
-		if (sourceDiff.empty() == false)
-		{
-			m_textCursor.insertText(tr("Source differences:\n"));
-		}
-
-		for (const FileDiff::FileLine& fileLine : sourceDiff)
-		{
-			m_textCursor.insertText(tr("%1 %2\n").arg(fileLine.line).arg(fileLine.text));
-		}
-
-		if (targetDiff.empty() == false)
-		{
-			m_textCursor.insertText(tr("Target differences:\n"));
-		}
-
-		for (const FileDiff::FileLine& fileLine : targetDiff)
-		{
-			m_textCursor.insertText(tr("%1 %2\n").arg(fileLine.line).arg(fileLine.text));
+			if (sourceLine == commonLine && targetLine == commonLine)
+			{
+				sourceIndex++;
+				targetIndex++;
+				lcsIndex++;
+			}
+			else
+			{
+				if (sourceLine == commonLine && targetLine != commonLine)
+				{
+					diffTable->insertRow({QString(), QString(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
+					targetIndex++;
+				}
+				else
+				{
+					if (sourceLine != commonLine && targetLine == commonLine)
+					{
+						diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), QString(), QString()});
+						sourceIndex++;
+					}
+					else
+					{
+						if (sourceLine != commonLine && targetLine != commonLine)
+						{
+							diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
+							sourceIndex++;
+							targetIndex++;
+						}
+					}
+				}
+			}
 		}
 	}
 	else
 	{
 		// Other file
 		//
-		if (sourceFile->data() != targetFile->data())
-		{
-			m_textCursor.insertText(tr("\n%1: Binary data changed\n").arg(targetFile->fileName()));
-		}
-	}
 
-	if (sourceFile->data().size() != targetFile->data().size())
-	{
-		m_textCursor.insertText(tr("Size %1 bytes -> %2 bytes\n").arg(sourceFile->data().size()).arg(targetFile->data().size()));
-	}*/
+		QString str = tr("File %1: binary data modified.").arg(targetFile->fileName());
+
+		if (sourceFile->data().size() != targetFile->data().size())
+		{
+			str += tr(" Size changed: %1 -> %2 bytes.").arg(sourceFile->data().size()).arg(targetFile->data().size());
+		}
+
+		section->addText(str + "\n", m_currentCharFormat, m_currentBlockFormat);
+	}
 }
 
 void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable)
