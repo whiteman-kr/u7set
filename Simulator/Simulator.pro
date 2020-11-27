@@ -170,6 +170,7 @@ HEADERS += \
     SimScriptSimulator.h \
     SimSoftware.h \
     SimTuningLanInterface.h \
+    SimTuningRecord.h \
     SimTuningServiceCommunicator.h \
     Stable.h \
     ../lib/LmDescription.h \

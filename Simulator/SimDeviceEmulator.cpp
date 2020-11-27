@@ -1305,6 +1305,21 @@ namespace Sim
 			return false;
 		}
 
+		// Get from TuningService data to apply
+		//
+		if (runtimeMode() == RuntimeMode::TuningMode)
+		{
+			std::queue<TuningRecord> q = m_lans.fetchWriteTuningQueue();
+
+			while (q.empty() == false)
+			{
+				q.front().writeToRam(mutableRam());
+				q.pop();
+			}
+		}
+
+		// --
+		//
 		m_ram.updateOverrideData(equipmentId(), m_simulator->overrideSignals());
 
 		// COMMENTED as for now there is no need to zero IO modules memory
