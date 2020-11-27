@@ -227,10 +227,10 @@ void SimWidget::createToolBar()
 	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
-	m_allowRegData = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"), tr("Allow LogicModules' Application Data transmittion to AppDataSrv"), this};
-	m_allowRegData->setCheckable(true);
-	m_allowRegData->setChecked(m_simulator->appDataTransmitter().enabled());
-	connect(m_allowRegData, &QAction::toggled, this, &SimWidget::allowRegDataToggled);
+	m_allowLanComm = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"), tr("Allow LogicModules' Application Data transmittion to AppDataSrv"), this};
+	m_allowLanComm->setCheckable(true);
+	m_allowLanComm->setChecked(m_simulator->software().enabled());
+	connect(m_allowLanComm, &QAction::toggled, this, &SimWidget::allowLanCommToggled);
 
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
@@ -273,7 +273,7 @@ void SimWidget::createToolBar()
 	m_toolBar->addWidget(m_timeIndicator);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_allowRegData);
+	m_toolBar->addAction(m_allowLanComm);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_snapshotAction);
@@ -721,9 +721,9 @@ void SimWidget::stopSimulation(bool stopSimulationThread)
 	return;
 }
 
-void SimWidget::allowRegDataToggled(bool state)
+void SimWidget::allowLanCommToggled(bool state)
 {
-	m_simulator->appDataTransmitter().setEnabled(state);
+	m_simulator->software().setEnabled(state);
 	return;
 }
 

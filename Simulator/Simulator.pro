@@ -88,6 +88,8 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
 	../lib/SimpleMutex.cpp \
 	../lib/SimpleThread.cpp \
+    ../lib/SoftwareSettings.cpp \
+    ../lib/SoftwareXmlReader.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
 	../lib/WUtils.cpp \
@@ -106,7 +108,9 @@ SOURCES += \
     SimScriptRamAddress.cpp \
     SimScriptSignal.cpp \
     SimScriptSimulator.cpp \
+    SimSoftware.cpp \
     SimTuningLanInterface.cpp \
+    SimTuningServiceCommunicator.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
     SimRam.cpp \
@@ -146,6 +150,8 @@ HEADERS += \
 	../lib/LogicModulesInfo.h \
 	../lib/SimpleMutex.h \
 	../lib/SimpleThread.h \
+    ../lib/SoftwareSettings.h \
+    ../lib/SoftwareXmlReader.h \
 	../lib/WUtils.h \
     SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
@@ -162,7 +168,9 @@ HEADERS += \
     SimScriptRamAddress.h \
     SimScriptSignal.h \
     SimScriptSimulator.h \
+    SimSoftware.h \
     SimTuningLanInterface.h \
+    SimTuningServiceCommunicator.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \

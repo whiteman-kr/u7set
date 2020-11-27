@@ -27,7 +27,21 @@ namespace Sim
 		{
 			if (lc.isTuning() == true)
 			{
-				auto i = std::make_unique<TuningLanInterface>(lc, this);
+				std::shared_ptr<TuningServiceCommunicator> tuningServiceCommunicator;
+
+				if (lc.tuningEnable == true)
+				{
+					tuningServiceCommunicator = m_simulator->software().tuningService(lc.tuningServiceID);
+
+					if (tuningServiceCommunicator == nullptr)
+					{
+						log().writeAlert(QString("TuningService %1 not forund for LAN port %2")
+										 .arg(lc.tuningServiceID)
+										 .arg(lc.equipmentID));
+					}
+				}
+
+				auto i = std::make_unique<TuningLanInterface>(lc, this, tuningServiceCommunicator);
 				m_interfaces.emplace_back(std::move(i));
 			}
 
@@ -49,7 +63,8 @@ namespace Sim
 
 	bool Lans::isAppDataEnabled() const
 	{
-		if (m_simulator->appDataTransmitter().enabled() == false)
+		if (m_simulator->software().enabled() == false ||
+			m_simulator->software().appDataTransmitter().enabled() == false)
 		{
 			return false;
 		}
@@ -58,7 +73,7 @@ namespace Sim
 		//
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
-			if (i->isAppData() == true && i->enabled() == true)
+			if (i->isAppData() == true && i->enabled() == true && i->appDataSizeBytes() > 0)
 			{
 				return true;
 			}
@@ -69,7 +84,8 @@ namespace Sim
 
 	bool Lans::sendAppData(const QByteArray& data, TimeStamp timeStamp)
 	{
-		if (m_simulator->appDataTransmitter().enabled() == false)
+		if (m_simulator->software().enabled() == false ||
+			m_simulator->software().appDataTransmitter().enabled() == false)
 		{
 			return false;
 		}
@@ -82,7 +98,7 @@ namespace Sim
 		{
 			if (i->isAppData() == true && i->enabled() == true && i->appDataSizeBytes() > 0)
 			{
-				ok &= m_simulator->appDataTransmitter().sendData(logicModuleId(), i->portEquipmentId(), data, timeStamp);
+				ok &= m_simulator->software().sendAppData(logicModuleId(), i->portEquipmentId(), data, timeStamp);
 			}
 		}
 
@@ -91,17 +107,19 @@ namespace Sim
 
 	bool Lans::isTuningEnabled() const
 	{
-		int check_global_tuning_enable_flag;
-//		if (m_simulator->appDataTransmitter().enabled() == false)
-//		{
-//			return false;
-//		}
+		if (m_simulator->software().enabled() == false)
+		{
+			return false;
+		}
 
 		// true if at least one LAN can transmit app data
 		//
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
-			if (i->isTuning() == true && i->enabled() == true)
+			if (i->isTuning() == true &&
+				i->enabled() == true &&
+				i->toTuningLanInterface() &&
+				i->toTuningLanInterface()->enabled() == true)
 			{
 				return true;
 			}
@@ -110,12 +128,58 @@ namespace Sim
 		return false;
 	}
 
+	bool Lans::updateTuningRam(const RamArea& data, TimeStamp timeStamp)
+	{
+		if (m_simulator->software().enabled() == false ||
+			m_logicModuleDevice->runtimeMode() != RuntimeMode::TuningMode)
+		{
+			return false;
+		}
+
+		// true if at least one LAN can transmit tuning data
+		//
+		bool ok = true;
+
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				ok &= tli->updateTuningRam(data, timeStamp);
+			}
+		}
+
+		return ok;
+	}
+
+	void Lans::tuningModeChanged(bool tuningMode)
+	{
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				tli->tuningModeChanged(tuningMode);
+			}
+		}
+	}
+
 	ScopedLog& Lans::log()
 	{
 		return m_log;
 	}
 
-	QString Lans::logicModuleId() const
+	const QString& Lans::logicModuleId() const
 	{
 		Q_ASSERT(m_logicModuleDevice);
 		return m_logicModuleDevice->equipmentId();

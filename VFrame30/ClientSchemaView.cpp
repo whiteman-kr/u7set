@@ -298,7 +298,7 @@ namespace VFrame30
 			return;
 		}
 
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
@@ -356,7 +356,7 @@ namespace VFrame30
 
 	void ClientSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//

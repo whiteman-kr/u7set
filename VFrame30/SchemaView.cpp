@@ -197,7 +197,7 @@ namespace VFrame30
 		//
 		if (event->buttons().testFlag(Qt::LeftButton) == true ||
 			event->buttons().testFlag(Qt::RightButton) == true ||
-			event->buttons().testFlag(Qt::MidButton) == true)
+			event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			unsetCursor();		// set cursor to parent cursor
 

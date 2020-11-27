@@ -70,7 +70,7 @@ namespace VFrame30
 
 		// While midButton is pressed, this is move mode, don't change zoom
 		//
-		if (event->buttons().testFlag(Qt::MidButton))
+		if (event->buttons().testFlag(Qt::MiddleButton))
 		{
 			return;
 		}
@@ -90,7 +90,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mousePressEvent(QMouseEvent* event)
 	{
-		if (event->button() == Qt::MidButton)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// Enter to scrolling mode
 			//
@@ -113,7 +113,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (event->button() == Qt::MidButton)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// Leave scrolling mode;
 			//
@@ -128,7 +128,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// Scrolling mode
 			//

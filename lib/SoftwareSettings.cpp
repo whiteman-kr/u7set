@@ -11,6 +11,10 @@
 //
 // -------------------------------------------------------------------------------------
 
+SoftwareSettings::SoftwareSettings(const SoftwareSettings&)
+{
+}
+
 SoftwareSettings::~SoftwareSettings()
 {
 }

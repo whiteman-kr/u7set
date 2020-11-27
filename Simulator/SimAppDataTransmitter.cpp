@@ -38,6 +38,11 @@ namespace Sim
 
 	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
+		if (enabled() == false)
+		{
+			return true;
+		}
+
 		TEST_PTR_RETURN_FALSE(m_transmitterThread);
 
 		return m_transmitterThread->sendAppData(lmEquipmentId, portEquipmentId, data, timeStamp);

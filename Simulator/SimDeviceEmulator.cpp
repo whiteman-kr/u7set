@@ -193,9 +193,9 @@ namespace Sim
 			setLogicModuleExtraInfo({});
 
 			m_log.writeError(tr("Information for LogicModule %1 is not found (file %2/%3)")
-						.arg(equipmentId())
-			            .arg(Directory::COMMON)
-			            .arg(File::LOGIC_MODULES_XML));
+							 .arg(equipmentId())
+							 .arg(Directory::COMMON)
+							 .arg(File::LOGIC_MODULES_XML));
 
 			return DeviceError::ModuleExtraInfoNotFound;
 		}
@@ -313,6 +313,39 @@ namespace Sim
 			}
 
 			m_lans.sendAppData(regData, plantTime);
+		}
+
+		// Update tuning data
+		//
+		if (runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
+		{
+			quint32 tuningDataOffsetW = m_lmDescription.memory().m_tuningDataOffset;
+
+			auto tuningRamHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, tuningDataOffsetW);
+			if (tuningRamHandle == Ram::InvalidHandle)
+			{
+				m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
+								 .arg(equipmentId())
+								 .arg(tuningDataOffsetW));
+
+				setDeviceState(DeviceState::Fault);
+				return false;
+			}
+
+			const RamArea* ramArea = m_ram.memoryArea(tuningRamHandle);
+			if (ramArea == nullptr)
+			{
+				Q_ASSERT(ramArea);
+
+				m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
+								 .arg(equipmentId())
+								 .arg(tuningDataOffsetW));
+
+				setDeviceState(DeviceState::Fault);
+				return false;
+			}
+
+			m_lans.updateTuningRam(*ramArea, plantTime);
 		}
 
 		return ok;
@@ -1674,6 +1707,75 @@ namespace Sim
 		return true;
 	}
 
+	bool DeviceEmulator::tuningEnterTuningMode()
+	{
+		// Device just entered to TuningMode.
+		// The copy of tuning memory is done here
+		//
+		const LmDescription::Memory& memory = lmDescription().memory();
+
+		Ram::Handle ramAreaHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
+		const RamArea* tuningRamArea = m_ram.memoryArea(ramAreaHandle);
+
+		if (tuningRamArea == nullptr)
+		{
+			fault(QString("Getting tuning ram area error, offset 0x%1")
+					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+				  "DeviceEmulator::tuningEnterTuningMode");
+			return false;
+		}
+
+		m_tuningRamArea = *tuningRamArea;
+
+		setRuntimeMode(RuntimeMode::TuningMode);
+
+		return true;
+	}
+
+	bool DeviceEmulator::tuningLeaveTuningMode()
+	{
+		if (runtimeMode() != RuntimeMode::TuningMode)
+		{
+			fault(QString("Device is not in tuning mode"), "DeviceEmulator::tuningLeaveTuningMode");
+			return false;
+		}
+
+		// On leaving tuning mode m_tuningRamArea is copied back to RAM
+		//
+		const LmDescription::Memory& memory = lmDescription().memory();
+
+		Ram::Handle ramAreaHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
+		RamArea* tuningRamArea = m_ram.memoryArea(ramAreaHandle);
+
+		if (tuningRamArea == nullptr)
+		{
+			fault(QString("Getting tuning ram area error, offset 0x%1")
+					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+				  "DeviceEmulator::tuningLeaveTuningMode");
+			return false;
+		}
+
+		*tuningRamArea = std::move(m_tuningRamArea);
+		m_tuningRamArea.clear();
+
+		setRuntimeMode(RuntimeMode::RunMode);
+
+		return true;
+	}
+
+	bool DeviceEmulator::tuningApplyCommand()
+	{
+		if (runtimeMode() != RuntimeMode::TuningMode)
+		{
+			fault(QString("Device is not in tuning mode"), "DeviceEmulator::tuningApplyCommand");
+			return false;
+		}
+
+		bool ok = tuningEnterTuningMode();	// it will copy tuning ram area again
+		return ok;
+	}
+
+
 	// Getting data from m_plainAppLogic
 	//
 	template <typename TYPE>
@@ -1780,7 +1882,17 @@ namespace Sim
 
 	void DeviceEmulator::setRuntimeMode(RuntimeMode value)
 	{
-		m_runtimeMode = value;
+		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value);
+
+		if ((currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode) ||
+			(currentRuntimeMode != RuntimeMode::TuningMode && value == RuntimeMode::TuningMode))
+		{
+			// Module enters or leaves TuningMode, LAN must be notified
+			//
+			m_lans.tuningModeChanged(value == RuntimeMode::TuningMode);
+		}
+
+		return;
 	}
 
 	DeviceState DeviceEmulator::deviceState() const

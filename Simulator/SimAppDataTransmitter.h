@@ -43,10 +43,11 @@ namespace Sim
 		Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;
 
-		std::atomic<bool> m_enabled{false};		// Allow AppData trasmittion to AppDataSrv
+		std::atomic<bool> m_enabled{true};
 
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
 	};
+
 
 	class AppDataTransmitterThread : public RunOverrideThread
 	{
