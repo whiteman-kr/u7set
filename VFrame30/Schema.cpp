@@ -223,7 +223,7 @@ namespace VFrame30
 
 		m_width = schema.width();
 		m_height = schema.height();
-		m_unit = static_cast<SchemaUnit>(schema.unit());
+		setUnit(static_cast<SchemaUnit>(schema.unit()));
 		m_excludeFromBuild = schema.excludefrombuild();
 
 		if (schema.has_backgroundcolor() == true)
@@ -334,9 +334,8 @@ namespace VFrame30
 				continue;
 			}
 
-			for (auto vi = layer->Items.cbegin(); vi != layer->Items.cend(); ++vi)
+			for (const SchemaItemPtr& item : layer->Items)
 			{
-				const std::shared_ptr<SchemaItem>& item = *vi;
 				Q_ASSERT(item);
 
 				item->setDrawParam(drawParam);
@@ -907,7 +906,7 @@ namespace VFrame30
 
 	// Guid
 	//
-	QUuid Schema::guid() const
+	QUuid Schema::guid() const noexcept
 	{
 		return m_guid;
 	}
@@ -920,7 +919,7 @@ namespace VFrame30
 
 	// SchemaID
 	//
-	QString Schema::schemaId() const
+	QString Schema::schemaId() const noexcept
 	{
 		return m_schemaID;
 	}
@@ -932,7 +931,7 @@ namespace VFrame30
 
 	// Caption
 	//
-	QString Schema::caption() const
+	QString Schema::caption() const noexcept
 	{
 		return m_caption;
 	}
@@ -944,7 +943,7 @@ namespace VFrame30
 
 	// Tags
 	//
-	QString Schema::tagsAsString() const
+	QString Schema::tagsAsString() const noexcept
 	{
 		QString result;
 
@@ -963,7 +962,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QStringList Schema::tagsAsList() const
+	QStringList Schema::tagsAsList() const noexcept
 	{
 		QStringList result;
 		result.reserve(m_tags.size());
@@ -1224,14 +1223,26 @@ namespace VFrame30
 
 	// Unit
 	//
-	SchemaUnit Schema::unit() const
+	SchemaUnit Schema::unit() const noexcept
 	{
 		return m_unit;
 	}
 
-	void Schema::setUnit(SchemaUnit value)
+	void Schema::setUnit(SchemaUnit value) noexcept
 	{
+		Q_ASSERT(value == SchemaUnit::Display || value == SchemaUnit::Inch);
+
 		m_unit = value;
+		setGridSize(Settings::defaultGridSize(value));
+
+		if (value == SchemaUnit::Display)
+		{
+			setPinGridStep(20);
+		}
+		else
+		{
+			setPinGridStep(4);
+		}
 	}
 
 	int Schema::activeLayerIndex() const
@@ -1282,7 +1293,7 @@ namespace VFrame30
 		return;
 	}
 
-	double Schema::gridSize() const
+	double Schema::gridSize() const noexcept
 	{
 		return m_gridSize;
 	}
@@ -1292,7 +1303,7 @@ namespace VFrame30
 		m_gridSize = value;
 	}
 
-	int Schema::pinGridStep() const
+	int Schema::pinGridStep() const noexcept
 	{
 		return m_pinGridStep;
 	}
@@ -1302,7 +1313,7 @@ namespace VFrame30
 		m_pinGridStep = value;
 	}
 
-	bool Schema::excludeFromBuild() const
+	bool Schema::excludeFromBuild() const noexcept
 	{
 		return m_excludeFromBuild;
 	}
@@ -1312,7 +1323,7 @@ namespace VFrame30
 		m_excludeFromBuild = value;
 	}
 
-	QColor Schema::backgroundColor() const
+	QColor Schema::backgroundColor() const noexcept
 	{
 		return m_backgroundColor;
 	}
@@ -1322,52 +1333,52 @@ namespace VFrame30
 		m_backgroundColor = value;
 	}
 
-	bool Schema::isLogicSchema() const
+	bool Schema::isLogicSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isUfbSchema() const
+	bool Schema::isUfbSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isMonitorSchema() const
+	bool Schema::isMonitorSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::MonitorSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isTuningSchema() const
+	bool Schema::isTuningSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::TuningSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isDiagSchema() const
+	bool Schema::isDiagSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
 	}
 
-	LogicSchema* Schema::toLogicSchema()
+	LogicSchema* Schema::toLogicSchema() noexcept
 	{
 		return dynamic_cast<VFrame30::LogicSchema*>(this);
 	}
 
-	const LogicSchema* Schema::toLogicSchema() const
+	const LogicSchema* Schema::toLogicSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
 	}
 
-	UfbSchema* Schema::toUfbSchema()
+	UfbSchema* Schema::toUfbSchema() noexcept
 	{
 		return dynamic_cast<VFrame30::UfbSchema*>(this);
 	}
 
-	const UfbSchema* Schema::toUfbSchema() const
+	const UfbSchema* Schema::toUfbSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this);
 	}
 
-	int Schema::changeset() const
+	int Schema::changeset() const noexcept
 	{
 		return m_changeset;
 	}

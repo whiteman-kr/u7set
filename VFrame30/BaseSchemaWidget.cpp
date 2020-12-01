@@ -194,8 +194,8 @@ namespace VFrame30
 			startY = -verticalScrollBar()->value();
 		}
 
-		double x = widgetPoint.x() - startX;		// position in points
-		double y = widgetPoint.y() - startY;
+		const double x = widgetPoint.x() - startX;		// position in points
+		const double y = widgetPoint.y() - startY;
 
 		// Scaling to zoom factor
 		//
@@ -224,7 +224,7 @@ namespace VFrame30
 		dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
 		dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
 
-		double zoom = schemaView()->zoom();
+		const double zoom = schemaView()->zoom();
 
 		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom);
 		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom);
@@ -252,8 +252,8 @@ namespace VFrame30
 			startY = -verticalScrollBar()->value();
 		}
 
-		int x = mousePos.x() - startX;
-		int y = mousePos.y() - startY;
+		const int x = mousePos.x() - startX;
+		const int y = mousePos.y() - startY;
 
 		if (schema()->unit() == VFrame30::SchemaUnit::Display)
 		{

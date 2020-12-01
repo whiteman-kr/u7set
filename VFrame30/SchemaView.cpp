@@ -47,8 +47,9 @@ namespace VFrame30
 		}
 
 		// Update all children
+		// !!! Don't make childWidgets as a reference, as we change this list in the loop !!!
 		//
-		QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+		QObjectList childWidgets = children();
 
 		for (QObject* childObject : childWidgets)
 		{
@@ -96,7 +97,7 @@ namespace VFrame30
 		{
 			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = controlItemPair.second;
 
-			QWidget* childWidget = controlItem->createWidget(this, editMode);
+			QWidget* childWidget = controlItem->createWidget(this, editMode, zoom());
 			assert(childWidget);
 
 			Q_UNUSED(childWidget);
@@ -293,7 +294,7 @@ namespace VFrame30
 
 		if (p->device()->logicalDpiX() <= 96)
 		{
-			// If higher then 96 then most likely it is 4K display, no need to use Antialiasing
+			// If higher then 96 then most likely it is 4K display, no need to use Antialiasing in primitive drawings
 			// Note, that font will be antialiased in anyway
 			//
 			p->setRenderHint(QPainter::Antialiasing);
@@ -308,6 +309,8 @@ namespace VFrame30
 		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
 		schema()->Draw(&drawParam, clipRect);
+
+		return;
 	}
 
 	void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const

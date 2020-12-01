@@ -723,7 +723,7 @@ namespace VFrame30
 		m_variables = values;
 	}
 
-	const MonitorBehavior& ClientSchemaView::monitorBehavor() const
+	const MonitorBehavior& ClientSchemaView::monitorBehavor() const noexcept
 	{
 		return m_monitorBehavior;
 	}
@@ -738,7 +738,7 @@ namespace VFrame30
 		m_monitorBehavior = std::move(src);
 	}
 
-	const TuningClientBehavior& ClientSchemaView::tuningClientBehavior() const
+	const TuningClientBehavior& ClientSchemaView::tuningClientBehavior() const noexcept
 	{
 		return m_tuningClientBehavior;
 	}
