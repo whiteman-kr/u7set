@@ -473,8 +473,10 @@ namespace VFrame30
 		return itemRect.intersects(detRect) | detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
 	}
 
-	QRectF PosRectImpl::boundingRectInDocPt(CDrawParam* drawParam) const
+	QRectF PosRectImpl::boundingRectInDocPt(const CDrawParam* drawParam) const
 	{
+		Q_ASSERT(drawParam);
+
 		QRectF result(m_leftDocPt, m_topDocPt, m_widthDocPt, m_heightDocPt);
 
 		result.setTopRight(drawParam->gridToDpi(result.topRight()));

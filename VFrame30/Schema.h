@@ -132,79 +132,81 @@ namespace VFrame30
 		// Properties and Datas
 		//
 	public:
-		QUuid guid() const;
+		[[nodiscard]] QUuid guid() const noexcept;
 		void setGuid(const QUuid& guid);
 
-		QString schemaId() const;
+		[[nodiscard]] QString schemaId() const noexcept;
 		void setSchemaId(const QString& id);
 
-		QString caption() const;
+		[[nodiscard]] QString caption() const noexcept;
 		void setCaption(const QString& caption);
 
-		QString tagsAsString() const;
-		QStringList tagsAsList() const;
+		[[nodiscard]] QString tagsAsString() const noexcept;
+		[[nodiscard]] QStringList tagsAsList() const noexcept;
 
 		void setTags(QString tags);
 		void setTagsList(const QStringList& tags);
 
-		bool joinHorzPriority() const;
+		[[nodiscard]] bool joinHorzPriority() const;
 		void setJoinHorzPriority(bool value);
 
-		QString joinLeftSchemaId() const;
+		[[nodiscard]] QString joinLeftSchemaId() const;
 		void setJoinLeftSchemaId(const QString& value);
 
-		QString joinTopSchemaId() const;
+		[[nodiscard]] QString joinTopSchemaId() const;
 		void setJoinTopSchemaId(const QString& value);
 
-		QString joinRightSchemaId() const;
+		[[nodiscard]] QString joinRightSchemaId() const;
 		void setJoinRightSchemaId(const QString& value);
 
-		QString joinBottomSchemaId() const;
+		[[nodiscard]] QString joinBottomSchemaId() const;
 		void setJoinBottomSchemaId(const QString& value);
 
-		double docWidth() const;
+		[[nodiscard]] double docWidth() const;
 		void setDocWidth(double width);
-		double docWidthRegional() const;
+
+		[[nodiscard]] double docWidthRegional() const;
 		void setDocWidthRegional(double width);
 
-		double docHeight() const;
+		[[nodiscard]] double docHeight() const;
 		void setDocHeight(double height);
-		double docHeightRegional() const;
+
+		[[nodiscard]] double docHeightRegional() const;
 		void setDocHeightRegional(double height);
 
-		SchemaUnit unit() const;
-		void setUnit(SchemaUnit value);
+		[[nodiscard]] SchemaUnit unit() const noexcept;
+		void setUnit(SchemaUnit value) noexcept;
 
-		int activeLayerIndex() const;
-		QUuid activeLayerGuid() const;
-		std::shared_ptr<VFrame30::SchemaLayer> activeLayer() const;
+		[[nodiscard]] int activeLayerIndex() const;
+		[[nodiscard]] QUuid activeLayerGuid() const;
+		[[nodiscard]] std::shared_ptr<VFrame30::SchemaLayer> activeLayer() const;
 		void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		double gridSize() const;
+		[[nodiscard]] double gridSize() const noexcept;
 		void setGridSize(double value);
 
-		int pinGridStep() const;
+		[[nodiscard]] int pinGridStep() const noexcept;
 		void setPinGridStep(int value);
 
-		bool excludeFromBuild() const;
+		[[nodiscard]] bool excludeFromBuild() const noexcept;
 		void setExcludeFromBuild(bool value);
 
-		QColor backgroundColor() const;
+		[[nodiscard]] QColor backgroundColor() const noexcept;
 		void setBackgroundColor(const QColor& value);
 
-		bool isLogicSchema() const;
-		bool isUfbSchema() const;
-		bool isMonitorSchema() const;
-		bool isTuningSchema() const;
-		bool isDiagSchema() const;
+		[[nodiscard]] bool isLogicSchema() const noexcept;
+		[[nodiscard]] bool isUfbSchema() const noexcept;
+		[[nodiscard]] bool isMonitorSchema() const noexcept;
+		[[nodiscard]] bool isTuningSchema() const noexcept;
+		[[nodiscard]] bool isDiagSchema() const noexcept;
 
-		LogicSchema* toLogicSchema();
-		const LogicSchema* toLogicSchema() const;
+		[[nodiscard]] LogicSchema* toLogicSchema() noexcept;
+		[[nodiscard]] const LogicSchema* toLogicSchema() const noexcept;
 
-		UfbSchema* toUfbSchema();
-		const UfbSchema* toUfbSchema() const;
+		[[nodiscard]] UfbSchema* toUfbSchema() noexcept;
+		[[nodiscard]] const UfbSchema* toUfbSchema() const noexcept;
 
-		int changeset() const;
+		[[nodiscard]] int changeset() const noexcept;
 		void setChangeset(int value);
 
 	public:

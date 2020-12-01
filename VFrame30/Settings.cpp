@@ -19,6 +19,7 @@ namespace VFrame30
 
 	void Settings::setRegionalUnit(SchemaUnit value)
 	{
+		Q_ASSERT(value == SchemaUnit::Millimeter || value == SchemaUnit::Inch);
 		m_regionalUnit = value;
 	}
 

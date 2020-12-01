@@ -7,6 +7,14 @@
 #include "../VFrame30/Settings.h"
 #include "../VFrame30/FblItemRect.h"
 
+
+//1. если мен€ютс€ юниты то надо помен€ть введенные размеры
+//2. при прин€итии разных инитор мен€ть и
+//	setGridSize(Settings::defaultGridSize(unit()));
+//	setPinGridStep(4); и это же надо сохранить в файл????? и прочитать
+
+
+
 CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::CreateSchemaDialog),
@@ -18,11 +26,18 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	ui->setupUi(this);
 
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+
 	// Set StrID label
 	//
 	QString idLabel;
 	int tempateParentFileId = -1;
 	QString templateFileExtension;
+
+	std::vector<std::pair<QString, VFrame30::SchemaUnit>> units;
+	auto pxUnits = std::make_pair<QString, VFrame30::SchemaUnit>("Pixels", VFrame30::SchemaUnit::Display);
+	auto mmUnits = std::make_pair<QString, VFrame30::SchemaUnit>("Millimeters", VFrame30::SchemaUnit::Inch);
+	auto inUnits = std::make_pair<QString, VFrame30::SchemaUnit>("Inches", VFrame30::SchemaUnit::Inch);
 
 	if (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr)
 	{
@@ -30,6 +45,15 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		tempateParentFileId = db->alFileId();
 		templateFileExtension = Db::File::AlTemplExtension;
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			units.push_back(inUnits);
+		}
+		else
+		{
+			units.push_back(mmUnits);
+		}
 	}
 
 	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
@@ -38,6 +62,15 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		tempateParentFileId = db->ufblFileId();
 		templateFileExtension = Db::File::UfbTemplExtension;
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			units.push_back(inUnits);
+		}
+		else
+		{
+			units.push_back(mmUnits);
+		}
 	}
 
 	if (isMonitorSchema() == true)
@@ -46,6 +79,17 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		tempateParentFileId = db->mvsFileId();
 		templateFileExtension = Db::File::MvsTemplExtension;
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			units.push_back(inUnits);
+			units.push_back(pxUnits);
+		}
+		else
+		{
+			units.push_back(mmUnits);
+			units.push_back(pxUnits);
+		}
 	}
 
 	if (isTuningSchema() == true)
@@ -54,6 +98,17 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		tempateParentFileId = db->tvsFileId();
 		templateFileExtension = Db::File::TvsTemplExtension;
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			units.push_back(inUnits);
+			units.push_back(pxUnits);
+		}
+		else
+		{
+			units.push_back(mmUnits);
+			units.push_back(pxUnits);
+		}
 	}
 
 	if (isDiagSchema() == true)
@@ -67,6 +122,28 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	assert(idLabel.isEmpty() == false);							// Should be corresponded to schema type
 
 	ui->strIdLabel->setText(idLabel);
+
+	// Add units choice
+	//
+	int setUnitIndex = -1;
+	int unitIndex = 0;
+	VFrame30::SchemaUnit s_lastSelectedMonitorUnits =
+			static_cast<VFrame30::SchemaUnit>(QSettings().value("CreateSchemaDialog/s_lastSelectedMonitorUnits",
+																QVariant(static_cast<int>(VFrame30::Settings::regionalUnit()))).toInt());
+
+	for (auto&[unitsCaption, schemaUnits] : units)
+	{
+		ui->unitsComboBox->addItem(unitsCaption, static_cast<int>(schemaUnits));
+
+		if (schemaUnits == s_lastSelectedMonitorUnits)
+		{
+			setUnitIndex = unitIndex;
+		}
+
+		unitIndex ++;
+	}
+
+	ui->unitsComboBox->setCurrentIndex(setUnitIndex >= 0 ? setUnitIndex : 0);
 
 	// Set height and width
 	//
@@ -261,6 +338,11 @@ void CreateSchemaDialog::accept()
 		return;
 	}
 
+	// Units
+	//
+	VFrame30::SchemaUnit units = static_cast<VFrame30::SchemaUnit>(ui->unitsComboBox->currentData().toInt());
+	m_schema->setUnit(units);
+
 	// Width
 	//
 	bool widthResult = false;
@@ -381,6 +463,11 @@ void CreateSchemaDialog::accept()
 	{
 		ufbSchema()->setLmDescriptionFile(lmDescriptionFile);
 		theSettings.m_lastSelectedLmDescriptionFile = lmDescriptionFile;
+	}
+
+	if (isMonitorSchema() == true || isTuningSchema() == true || isDiagSchema() == true)
+	{
+		QSettings().setValue("CreateSchemaDialog/s_lastSelectedMonitorUnits", static_cast<int>(units));
 	}
 
 	QDialog::accept();

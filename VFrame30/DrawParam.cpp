@@ -109,47 +109,43 @@ namespace VFrame30
 		return m_cosmeticPenWidth;
 	}
 
-	int CDrawParam::dpiX() const
+	int CDrawParam::dpiX() const noexcept
 	{
 		if (m_dpiX == -1)
 		{
-			CDrawParam* mutable_this = const_cast<CDrawParam*>(this);
-
 			if (m_painter != nullptr && m_painter->device() != nullptr)
 			{
-				mutable_this->m_dpiX = m_painter->device()->logicalDpiX();
+				this->m_dpiX = m_painter->device()->logicalDpiX();
 			}
 			else
 			{
 				Q_ASSERT(m_painter);
-				mutable_this->m_dpiX = 96;
+				this->m_dpiX = 96;
 			}
 		}
 
 		return m_dpiX;
 	}
 
-	int CDrawParam::dpiY() const
+	int CDrawParam::dpiY() const noexcept
 	{
 		if (m_dpiY == -1)
 		{
-			CDrawParam* mutable_this = const_cast<CDrawParam*>(this);
-
 			if (m_painter != nullptr && m_painter->device() != nullptr)
 			{
-				mutable_this->m_dpiY = m_painter->device()->logicalDpiY();
+				this->m_dpiY = m_painter->device()->logicalDpiY();
 			}
 			else
 			{
 				Q_ASSERT(m_painter);
-				mutable_this->m_dpiY = 96;
+				this->m_dpiY = 96;
 			}
 		}
 
 		return m_dpiY;
 	}
 
-	double CDrawParam::gridToDpiX(double pos) const
+	double CDrawParam::gridToDpiX(double pos) const noexcept
 	{
 		if (schemaView() == nullptr)
 		{
@@ -157,7 +153,7 @@ namespace VFrame30
 			return pos;
 		}
 
-		double zoom = schemaView()->zoom() / 100.0;
+		const double zoom = schemaView()->zoom() / 100.0;
 
 		if (schema()->unit() == SchemaUnit::Display)
 		{
@@ -175,7 +171,7 @@ namespace VFrame30
 
 	}
 
-	double CDrawParam::gridToDpiY(double pos) const
+	double CDrawParam::gridToDpiY(double pos) const noexcept
 	{
 		if (schemaView() == nullptr)
 		{
@@ -183,7 +179,7 @@ namespace VFrame30
 			return pos;
 		}
 
-		double zoom = schemaView()->zoom() / 100.0;
+		const double zoom = schemaView()->zoom() / 100.0;
 
 		if (schema()->unit() == SchemaUnit::Display)
 		{
@@ -192,7 +188,7 @@ namespace VFrame30
 
 		if (schema()->unit() == SchemaUnit::Inch)
 		{
-			int dpiy = this->dpiY();
+			const int dpiy = this->dpiY();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpiy)) / dpiy) / zoom;
 		}
 
@@ -200,70 +196,75 @@ namespace VFrame30
 		return pos;
 	}
 
-	QPointF CDrawParam::gridToDpi(double x, double y) const
+	QPointF CDrawParam::gridToDpi(double x, double y) const noexcept
 	{
+		QPointF result;
+
 		if (schemaView() == nullptr)
 		{
 			Q_ASSERT(schemaView() != nullptr);
-			return QPointF(x, y);
+			result = QPointF(x, y);
+			return result;
 		}
 
-		double zoom = schemaView()->zoom() / 100.0;
+		const double zoom = schemaView()->zoom() / 100.0;
 
 		if (schema()->unit() == SchemaUnit::Display)
 		{
-			return QPointF((double)qRound(x * zoom) / zoom,
-						   (double)qRound(y * zoom) / zoom);
+			result = QPointF((double)qRound(x * zoom) / zoom,
+							 (double)qRound(y * zoom) / zoom);
 		}
-
-		if (schema()->unit() == SchemaUnit::Inch)
+		else
 		{
-			int dpix = this->dpiX();
-			int dpiy = this->dpiY();
+			Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
 
-			return QPointF((static_cast<double>(static_cast<int>(x * zoom * dpix)) / dpix) / zoom,
-						   (static_cast<double>(static_cast<int>(y * zoom * dpiy)) / dpiy) / zoom);
+			const int dpix = this->dpiX();
+			const int dpiy = this->dpiY();
+
+			result = QPointF((static_cast<double>(static_cast<int>(x * zoom * dpix)) / dpix) / zoom,
+							 (static_cast<double>(static_cast<int>(y * zoom * dpiy)) / dpiy) / zoom);
 		}
 
-		Q_ASSERT(false);
-		return QPointF(x, y);
+		return result;
 	}
 
-	QPointF CDrawParam::gridToDpi(const QPointF& pos) const
+	QPointF CDrawParam::gridToDpi(const QPointF& pos) const noexcept
 	{
+		QPointF result = pos;
+
 		if (schemaView() == nullptr)
 		{
 			Q_ASSERT(schemaView() != nullptr);
-			return pos;
+			return result;
 		}
 
-		double zoom = schemaView()->zoom() / 100.0;
+		const double zoom = schemaView()->zoom() / 100.0;
 
 		if (schema()->unit() == SchemaUnit::Display)
 		{
-			return QPointF((double)qRound(pos.x() * zoom) / zoom,
-						   (double)qRound(pos.y() * zoom) / zoom);
+			result = QPointF((double)qRound(pos.x() * zoom) / zoom,
+							 (double)qRound(pos.y() * zoom) / zoom);
 		}
-
-		if (schema()->unit() == SchemaUnit::Inch)
+		else
 		{
-			int dpix = this->dpiX();
-			int dpiy = this->dpiY();
+			Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
 
-			return QPointF((static_cast<double>(static_cast<int>(pos.x() * zoom * dpix)) / dpix) / zoom,
-						   (static_cast<double>(static_cast<int>(pos.y() * zoom * dpiy)) / dpiy) / zoom);
+			const int dpix = this->dpiX();
+			const int dpiy = this->dpiY();
+
+			result = QPointF((static_cast<double>(static_cast<int>(pos.x() * zoom * dpix)) / dpix) / zoom,
+							 (static_cast<double>(static_cast<int>(pos.y() * zoom * dpiy)) / dpiy) / zoom);
 		}
 
-		Q_ASSERT(false);
-		return pos;
+		return result;
 	}
 
-	QRectF CDrawParam::gridToDpi(const QRectF& rect) const
+	QRectF CDrawParam::gridToDpi(const QRectF& rect) const noexcept
 	{
-		return {gridToDpi(rect.topLeft()), gridToDpi(rect.bottomRight())};
+		return QRectF{gridToDpi(rect.topLeft()), gridToDpi(rect.bottomRight())};
 	}
 
-	bool CDrawParam::isEditMode() const
+	bool CDrawParam::isEditMode() const noexcept
 	{
 		return m_isEditMode;
 	}
@@ -273,7 +274,7 @@ namespace VFrame30
 		m_isEditMode = value;
 	}
 
-	bool CDrawParam::isMonitorMode() const
+	bool CDrawParam::isMonitorMode() const noexcept
 	{
 		return !isEditMode();
 	}
@@ -283,7 +284,7 @@ namespace VFrame30
 		setEditMode(!value);
 	}
 
-	bool CDrawParam::infoMode() const
+	bool CDrawParam::infoMode() const noexcept
 	{
 		return m_infoMode;
 	}
@@ -293,7 +294,7 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
-	bool CDrawParam::blinkPhase() const
+	bool CDrawParam::blinkPhase() const noexcept
 	{
 		return m_blinkPhase;
 	}
@@ -303,7 +304,7 @@ namespace VFrame30
 		m_blinkPhase = value;
 	}
 
-	bool CDrawParam::drawNotesLayer() const
+	bool CDrawParam::drawNotesLayer() const noexcept
 	{
 		return m_drawNotesLayer;
 	}
@@ -313,7 +314,7 @@ namespace VFrame30
 		m_drawNotesLayer = value;
 	}
 
-	AppSignalController* CDrawParam::appSignalController()
+	AppSignalController* CDrawParam::appSignalController() noexcept
 	{
 		return m_appSignalController;
 	}
@@ -323,7 +324,7 @@ namespace VFrame30
 		m_appSignalController = value;
 	}
 
-	TuningController* CDrawParam::tuningController()
+	TuningController* CDrawParam::tuningController() noexcept
 	{
 		return m_tuningController;
 	}
@@ -333,7 +334,7 @@ namespace VFrame30
 		m_tuningController = value;
 	}
 
-	const Session& CDrawParam::session() const
+	const Session& CDrawParam::session() const noexcept
 	{
 		return m_session;
 	}
@@ -343,7 +344,7 @@ namespace VFrame30
 		return m_session;
 	}
 
-	const MonitorBehavior& CDrawParam::monitorBehavor() const
+	const MonitorBehavior& CDrawParam::monitorBehavor() const noexcept
 	{
 		Q_ASSERT(m_schemaView);
 		return clientSchemaView()->monitorBehavor();
@@ -378,21 +379,13 @@ namespace VFrame30
 			return;
 		}
 
-		painter->save();
-
-		double dpiX = 96;
-		double dpiY = 96;
-
 		QPaintDevice* pPaintDevice = painter->device();
-		if (pPaintDevice != nullptr)
-		{
-			dpiX = pPaintDevice->logicalDpiX();
-			dpiY = pPaintDevice->logicalDpiY();
-		}
-		else
-		{
-			Q_ASSERT(pPaintDevice);
-		}
+		const double dpiX = pPaintDevice->logicalDpiX();
+		const double dpiY = pPaintDevice->logicalDpiY();
+
+		QRectF rc;
+
+		painter->save();
 
 		QFont f(font.name());
 
@@ -400,8 +393,6 @@ namespace VFrame30
 		f.setItalic(font.italic());
 		//f.setStyleStrategy(QFont::StyleStrategy::NoAntialias);
 		//f.setStyleStrategy(QFont::PreferDevice);
-
-		QRectF rc;
 
 		if (unit == SchemaUnit::Display)
 		{
@@ -439,23 +430,13 @@ namespace VFrame30
 			return;
 		}
 
-		painter->save();
-
-		double dpiX = 96;
-		double dpiY = 96;
-
 		QPaintDevice* pPaintDevice = painter->device();
-		if (pPaintDevice != nullptr)
-		{
-			dpiX = pPaintDevice->logicalDpiX();
-			dpiY = pPaintDevice->logicalDpiY();
-		}
-		else
-		{
-			Q_ASSERT(pPaintDevice);
-		}
+		const double dpiX = pPaintDevice->logicalDpiX();
+		const double dpiY = pPaintDevice->logicalDpiY();
 
 		QRectF rc;
+
+		painter->save();
 
 		if (unit == SchemaUnit::Display)
 		{

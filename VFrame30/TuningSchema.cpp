@@ -9,13 +9,10 @@ namespace VFrame30
 	{
 		//qDebug() << "TuningSchema::TuningSchema(void)";
 
-		setUnit(SchemaUnit::Display);
+		setUnit(SchemaUnit::Inch);
 
-		setGridSize(Settings::defaultGridSize(unit()));
-		setPinGridStep(20);
-
-		setDocWidth(1000);
-		setDocHeight(750);
+		setDocWidth(mm2in(297));
+		setDocHeight(mm2in(210));
 
 		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
 
