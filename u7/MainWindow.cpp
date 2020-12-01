@@ -319,15 +319,15 @@ void MainWindow::createActions()
 	m_AfbLibraryCheck->setEnabled(false);
 	connect(m_AfbLibraryCheck, &QAction::triggered, this, &MainWindow::afbLibraryCheck);
 
-	m_aboutAction = new QAction(tr("About u7..."), this);
-	m_aboutAction->setStatusTip(tr("Show application information"));
-	//m_pAboutAction->setEnabled(true);
-	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
-
 	m_aboutQtAction = new QAction(tr("About Qt..."), this);
 	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutQtAction, &QAction::triggered, this, &MainWindow::showAboutQt);
+
+	m_aboutAction = new QAction(tr("About u7..."), this);
+	m_aboutAction->setStatusTip(tr("Show application information"));
+	//m_pAboutAction->setEnabled(true);
+	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 
 	m_debugAction = new QAction(tr("Debug Mode"), this);
 	m_debugAction->setStatusTip(tr("Set debug mode, some extra messages will be displayed"));
@@ -443,8 +443,8 @@ void MainWindow::createMenus()
 
 	pHelpMenu->addSeparator();
 
-	pHelpMenu->addAction(m_aboutAction);
 	pHelpMenu->addAction(m_aboutQtAction);
+	pHelpMenu->addAction(m_aboutAction);
 
 	return;
 }

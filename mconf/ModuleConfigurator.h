@@ -35,6 +35,9 @@ private slots:
 	void settingsClicked();
 	void clearLogClicked();
 
+	void aboutQtClicked();
+	void aboutClicked();
+
 	void disableControls();
 	void enableControls();
 
@@ -66,6 +69,9 @@ private:
 
 	QPushButton* m_pSettingsButton = nullptr;
 	QPushButton* m_pClearLogButton = nullptr;
+
+	QPushButton* m_pAboutButton = nullptr;
+	QPushButton* m_pAboutQtButton = nullptr;
 
 	int m_logTimerId;
 

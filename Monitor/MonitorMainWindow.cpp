@@ -348,7 +348,12 @@ void MonitorMainWindow::createActions()
 	m_pLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
 
-	m_pAboutAction = new QAction(tr("About..."), this);
+	m_pAboutQtAction = new QAction(tr("About Qt..."), this);
+	m_pAboutQtAction->setStatusTip(tr("Show Qt information"));
+	//m_pAboutAction->setEnabled(true);
+	connect(m_pAboutQtAction, &QAction::triggered, this, &MonitorMainWindow::showAboutQt);
+
+	m_pAboutAction = new QAction(tr("About Monitor..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
@@ -505,16 +510,20 @@ void MonitorMainWindow::createMenus()
 	//helpMenu->addAction(m_pDebugAction);
 #endif	// Q_DEBUG
 
-
-	helpMenu->addAction(m_manualMatsAction);
-	helpMenu->addAction(m_pAboutAction);
-	helpMenu->addSeparator();
-
 	helpMenu->addAction(m_pDataSourcesAction);
 	helpMenu->addAction(m_pStatisticsAction);
 
 	helpMenu->addSeparator();
 	helpMenu->addAction(m_pLogAction);
+
+	helpMenu->addSeparator();
+
+	helpMenu->addAction(m_manualMatsAction);
+
+	helpMenu->addSeparator();
+
+	helpMenu->addAction(m_pAboutQtAction);
+	helpMenu->addAction(m_pAboutAction);
 
 	return;
 }
@@ -841,6 +850,13 @@ void MonitorMainWindow::showStatistics()
 	}
 
 	UiTools::adjustDialogPlacement(m_dialogStatistics);
+}
+
+void MonitorMainWindow::showAboutQt()
+{
+	QMessageBox::aboutQt(this, qAppName());
+
+	return;
 }
 
 void MonitorMainWindow::showAbout()

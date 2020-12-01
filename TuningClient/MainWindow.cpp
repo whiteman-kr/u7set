@@ -168,7 +168,12 @@ void MainWindow::createActions()
 	m_pSignalLogAction->setStatusTip(tr("Show signals log"));
 	connect(m_pSignalLogAction, &QAction::triggered, this, &MainWindow::showSignalsLog);
 
-	m_pAboutAction = new QAction(tr("About..."), this);
+	m_aboutQtAction = new QAction(tr("About Qt..."), this);
+	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
+	//m_pAboutAction->setEnabled(true);
+	connect(m_aboutQtAction, &QAction::triggered, this, &MainWindow::showAboutQt);
+
+	m_pAboutAction = new QAction(tr("About TuningClient..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
@@ -200,14 +205,23 @@ void MainWindow::createMenu()
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
-	pHelpMenu->addAction(m_manualTuningAction);
-	pHelpMenu->addAction(m_pAboutAction);
-	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pTuningSourcesAction);
 	pHelpMenu->addAction(m_pStatisticsAction);
+
 	pHelpMenu->addSeparator();
+
 	pHelpMenu->addAction(m_pAppLogAction);
 	pHelpMenu->addAction(m_pSignalLogAction);
+
+	pHelpMenu->addSeparator();
+
+	pHelpMenu->addAction(m_manualTuningAction);
+
+	pHelpMenu->addSeparator();
+
+	pHelpMenu->addAction(m_aboutQtAction);
+	pHelpMenu->addAction(m_pAboutAction);
+
 }
 
 void MainWindow::createStatusBar()
@@ -1003,6 +1017,12 @@ void MainWindow::showSignalsLog()
 	{
 		m_tuningLog->viewSignalsLog(this);
 	}
+}
+
+void MainWindow::showAboutQt()
+{
+	QMessageBox::aboutQt(this, qAppName());
+	return;
 }
 
 void MainWindow::showAbout()
