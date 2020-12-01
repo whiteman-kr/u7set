@@ -8,6 +8,22 @@ namespace Ui {
 	class DialogTagsEditor;
 }
 
+class DialogTagInput: public QDialog
+{
+	Q_OBJECT
+public:
+	static QString getText(QWidget *parent, const QString &title, const QString &label,
+						const QString &text, const QString& validator, bool *ok);
+
+private:
+	DialogTagInput(QWidget* parent, const QString &title, const QString &label,
+				   const QString &text, const QString& validator);
+
+private:
+	QLineEdit* m_edit = nullptr;
+
+};
+
 class DialogTagsEditorDelegate: public QItemDelegate
 {
 	Q_OBJECT

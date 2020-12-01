@@ -1,5 +1,7 @@
 #include "TagsEditor.h"
 
+QString TagsEditor::m_filterText = QString();
+
 TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 	PropertyTextEditor(parent),
 	m_parent(parent)
@@ -10,6 +12,8 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 		Q_ASSERT(dbController);
 		return;
 	}
+
+	setHasOkCancelButtons(false);
 
 	// TextEditor
 	//
@@ -27,26 +31,30 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 	m_tagsList->setHeaderLabels(l);
 	m_tagsList->setColumnCount(l.size());
 
-	std::vector<DbTag> dbTags;
-	bool ok = dbController->getTags(&dbTags);
-	if (ok == true)
-	{
-		for (const DbTag& dbTag :  dbTags)
-		{
-			QTreeWidgetItem* item = new QTreeWidgetItem();
-			item->setText(0, dbTag.tag);
-			item->setText(1, dbTag.description);
-			item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-			item->setCheckState(0, Qt::Unchecked);
-
-			m_tagsList->addTopLevelItem(item);
-		}
-	}
-
-	m_tagsList->resizeColumnToContents(0);
-
 	connect(m_tagsList, &QTreeWidget::itemChanged, this, &TagsEditor::tagsListItemChanged);
 	connect(m_tagsList, &QTreeWidget::itemPressed, this, &TagsEditor::tagsListItemPressed);
+
+	// Buttons and Filter Layout
+	//
+	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+
+	m_filterEdit = new QLineEdit();
+	m_filterEdit->setClearButtonEnabled(true);
+	m_filterEdit->setPlaceholderText(tr("Filter"));
+	m_filterEdit->setToolTip(tr("Start typing to filter tags"));
+	m_filterEdit->setText(m_filterText);
+	connect(m_filterEdit, &QLineEdit::textEdited, this, &TagsEditor::filterTextChanged);
+	buttonsLayout->addWidget(m_filterEdit);
+
+	buttonsLayout->addStretch();
+
+	QPushButton* b = new QPushButton(tr("OK"));
+	connect(b, &QPushButton::clicked, this, &TagsEditor::okButtonPressed);
+	buttonsLayout->addWidget(b);
+
+	b = new QPushButton(tr("Cancel"));
+	connect(b, &QPushButton::clicked, this, &TagsEditor::cancelButtonPressed);
+	buttonsLayout->addWidget(b);
 
 	// Main Layout
 	//
@@ -54,12 +62,24 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 	mainLayout->addWidget(m_textEdit);
 	mainLayout->addWidget(new QLabel("Predefined tags:"));
 	mainLayout->addWidget(m_tagsList);
+	mainLayout->addLayout(buttonsLayout);
 	mainLayout->setContentsMargins(0, 0, 0, 0);
+
+	// Fill tags
+	//
+	bool ok = dbController->getTags(&m_dbTags);
+	if (ok == true)
+	{
+		fillDbTags();
+	}
+
+	return;
 }
 
 TagsEditor::~TagsEditor()
 {
-
+	m_filterText = m_filterEdit->text();
+	return;
 }
 
 QString TagsEditor::text() const
@@ -127,6 +147,47 @@ void TagsEditor::tagsListItemPressed(QTreeWidgetItem *item, int column)
 	return;
 }
 
+void TagsEditor::filterTextChanged(const QString& text)
+{
+	Q_UNUSED(text);
+
+	fillDbTags();
+
+	return;
+}
+
+void TagsEditor::fillDbTags()
+{
+	QString filterText = m_filterEdit->text();
+
+	m_tagsList->clear();
+
+	for (const DbTag& dbTag :  m_dbTags)
+	{
+		if (filterText.isEmpty() == false)
+		{
+			if (dbTag.tag.contains(filterText, Qt::CaseInsensitive) == false)
+			{
+				continue;
+			}
+		}
+
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+		item->setText(0, dbTag.tag);
+		item->setText(1, dbTag.description);
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setCheckState(0, Qt::Unchecked);
+
+		m_tagsList->addTopLevelItem(item);
+	}
+
+	m_tagsList->resizeColumnToContents(0);
+
+	updateChecks(m_textEdit->text());
+
+	return;
+}
+
 void TagsEditor::updateChecks(const QString& text)
 {
 	// Get exitsing tags
@@ -157,7 +218,6 @@ void TagsEditor::updateChecks(const QString& text)
 	}
 
 	m_tagsList->blockSignals(false);
-
 
 	return;
 }
