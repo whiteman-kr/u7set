@@ -54,3 +54,13 @@ void SimSchemaManager::slot_projectUpdated()
 	return;
 }
 
+SimIdeSimulator* SimSchemaManager::simulator()
+{
+	return m_simulator;
+}
+
+const SimIdeSimulator* SimSchemaManager::simulator() const
+{
+	return m_simulator;
+}
+

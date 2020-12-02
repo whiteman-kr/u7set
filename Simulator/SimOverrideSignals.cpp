@@ -1032,6 +1032,23 @@ namespace Sim
 		return result;
 	}
 
+	QStringList OverrideSignals::overrideSignalIds() const
+	{
+		QStringList result;
+
+		QReadLocker rl(&m_lock);
+
+		result.reserve(static_cast<int>(m_signals.size()));
+
+		for (auto[appSignalId, ovSignalParam] :  m_signals)
+		{
+			Q_UNUSED(ovSignalParam);
+			result.push_back(appSignalId);
+		}
+
+		return result;
+	}
+
 	int OverrideSignals::changesCounter() const
 	{
 		QReadLocker rl(&m_lock);
