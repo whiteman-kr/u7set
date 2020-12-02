@@ -358,6 +358,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0338.sql", "Upgrade to version 338, Reduced number of AFBs instance counters for MSO4_SR21"},
 	{":/DatabaseUpgrade/Upgrade0339.sql", "Upgrade to version 339, Added project property -Run Simulator Tests on Build-, -Simulator Tests Timeout-"},
 	{":/DatabaseUpgrade/Upgrade0340.sql", "Upgrade to version 340, Tags were changed on schema templates, applogic and ufb"},
+	{":/DatabaseUpgrade/Upgrade0341.sql", "Upgrade to version 341, Changes in get_checked_out_files, getting all (inc. dangling) checked out files for root"},
 };
 
 int DbWorker::counter = 0;
