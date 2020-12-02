@@ -2754,9 +2754,12 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 		return false;
 	}
 
-	static const std::vector<DbTag> defaultTags = {{"applicationlogic", "Application Logic Schema"},
+	static const std::vector<DbTag> defaultTags = {{"applogic", "Application Logic Schema"},
 												   {"monitor", "Monitor Schema"},
 												   {"tuning", "TuningClient Schema"},
+												   {"diagnostics", "Diagnostics Schema"},
+												   {"ufb", "UFB Schema"},
+												   {"wiring", "Wiring Schema"},
 												   {"in", "Input Signal"},
 												   {"out", "Output Signal"}};
 
