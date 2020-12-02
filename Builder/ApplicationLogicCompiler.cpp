@@ -66,7 +66,6 @@ namespace Builder
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 			&ApplicationLogicCompiler::writeOptoConnectionsXml,
-			&ApplicationLogicCompiler::writeLogicModulesInfoXml,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
@@ -735,28 +734,6 @@ namespace Builder
 		bool result = true;
 
 		BuildFile* file = buildResultWriter()->addFile(Directory::COMMON, File::CONNECTIONS_XML, "", "", xmlData);
-
-		if (file == nullptr)
-		{
-			result = false;
-		}
-
-		return result;
-	}
-
-	bool ApplicationLogicCompiler::writeLogicModulesInfoXml()
-	{
-		LogicModulesInfoWriter writer(m_moduleCompilers, *equipmentSet());
-
-		writer.fill();
-
-		QByteArray xmlData;
-
-		writer.save(&xmlData);
-
-		bool result = true;
-
-		BuildFile* file = buildResultWriter()->addFile(Directory::COMMON, File::LOGIC_MODULES_XML, "", "", xmlData);
 
 		if (file == nullptr)
 		{

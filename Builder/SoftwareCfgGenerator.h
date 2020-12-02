@@ -56,28 +56,14 @@ namespace Builder
 
 		void writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection);
 
-		void initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems);
-
 		QString equipmentID() const;
 
 	protected:
-		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);
-		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
 		static bool checkLmToSoftwareLinks(Context* context);
 
 		static bool joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge);
 
 		static bool loadFileFromDatabase(DbController* db, int parentId, const QString& fileName, QString *errorCode, QByteArray* data);
-
-		bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
-									   DataSource::DataType dataType,
-									   int adapterNo,
-									   E::LanControllerType adapterType,
-									   const Hardware::EquipmentSet& equipmentSet,
-									   const SubsystemKeyMap& subsystemKeyMap,
-									   const QHash<QString, quint64>& lmUniqueIdMap,
-									   DataSource* ds,
-									   Builder::IssueLogger* log);
 
 	protected:
 		Context* m_context = nullptr;
@@ -89,9 +75,6 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 		ConfigurationXmlFile* m_cfgXml = nullptr;
 		QString m_subDir;
-
-		static HashedVector<QString, Hardware::DeviceModule*> m_lmList;
-		static HashedVector<QString, Hardware::Software*> m_softwareList;
 
 		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
 

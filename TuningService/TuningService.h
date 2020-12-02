@@ -93,6 +93,8 @@ namespace Tuning
 		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
 		void removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread);
 
+		bool isSimulationMode() const;
+
 	private slots:
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 

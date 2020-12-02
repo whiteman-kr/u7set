@@ -3,7 +3,6 @@
 
 #include <QJSEngine>
 #include "../lib/Subsystem.h"
-#include "../lib/CommonTypes.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "Context.h"
 #include "TuningBuilder.h"
@@ -92,7 +91,7 @@ namespace Builder
 
 		// Generate MATS software configurations
 		//
-		bool generateSoftwareConfiguration(const LmsUniqueIdMap& lmsUniqueIdMap);
+		bool generateSoftwareConfiguration();
 
 		bool writeFirmwareStatistics(BuildResultWriter& buildResultWriter);
 
@@ -101,9 +100,11 @@ namespace Builder
 		void generateModulesInformation(BuildResultWriter& buildWriter,
 								   const std::vector<Hardware::DeviceModule *>& lmModules);
 
-		void generateLmsUniqueID(BuildResultWriter& buildWriter,
-								 const std::vector<Hardware::DeviceModule *>& lmModules,
-								 LmsUniqueIdMap& lmsUniqueIdMap);
+		bool generateLmsUniqueIDs(Context* context);
+
+		bool writeLogicModulesInfoXml(Context* context);
+
+		bool buildSoftwareList(Context* context);
 
 		// Run simulator-based script tests
 		//

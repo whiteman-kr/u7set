@@ -13,8 +13,7 @@ namespace Builder
 	{
 	public:
 		AppDataServiceCfgGenerator(Context* context,
-								   Hardware::Software* software,
-								   const QHash<QString, quint64>& lmUniqueIdMap);
+								   Hardware::Software* software);
 		~AppDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
@@ -35,8 +34,6 @@ namespace Builder
 
 	private:
 		AppDataServiceSettingsGetter m_settings;
-		const QHash<QString, quint64>& m_lmUniqueIdMap;
-		SubsystemKeyMap m_subsystemKeyMap;
 
 		//
 

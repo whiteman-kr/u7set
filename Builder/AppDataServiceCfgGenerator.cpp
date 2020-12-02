@@ -7,14 +7,10 @@ class DataSource;
 namespace Builder
 {
 	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(Context* context,
-														   Hardware::Software* software,
-														   const QHash<QString, quint64>& lmUniqueIdMap) :
-		SoftwareCfgGenerator(context, software),
-		m_lmUniqueIdMap(lmUniqueIdMap)
+														   Hardware::Software* software) :
+		SoftwareCfgGenerator(context, software)
 	{
-		assert(context);
-
-		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
+		Q_ASSERT(context != nullptr);
 	}
 
 	AppDataServiceCfgGenerator::~AppDataServiceCfgGenerator()
@@ -50,7 +46,7 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		bool result = m_settings.readFromDevice(m_context, m_software);
 
 		RETURN_IF_FALSE(result);
 
@@ -69,7 +65,7 @@ namespace Builder
 
 		quint32 receivingSubnet = m_settings.appDataReceivingIP.address32() & receivingNetmask;
 
-		for(Hardware::DeviceModule* lm : m_lmList)
+		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
 		{
 			if (lm == nullptr)
 			{
@@ -100,14 +96,11 @@ namespace Builder
 
 				DataSource ds;
 
-				result &= getLmPropertiesFromDevice(lm, DataSource::DataType::App,
-				                                    lanController.m_place,
-				                                    lanController.m_type,
-				                                    *m_equipment,
-				                                    m_subsystemKeyMap,
-				                                    m_lmUniqueIdMap,
-				                                    &ds,
-				                                    m_log);
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::App,
+																			lanController.m_place,
+																			lanController.m_type,
+																			m_context,
+																			&ds);
 
 				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
 				{

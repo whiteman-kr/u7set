@@ -173,7 +173,7 @@ namespace Builder
 
 	bool MonitorCfgGenerator::writeMonitorSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		bool result = m_settings.readFromDevice(m_context, m_software);
 
 		if (result == false)
 		{

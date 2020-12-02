@@ -182,6 +182,8 @@ namespace Builder
 
 		BusShared getBusShared(const QString& busTypeID);
 
+		Builder::Context* builderContext() const { return m_context; }
+
 	private:
 		// pass #1 compilation functions
 		//

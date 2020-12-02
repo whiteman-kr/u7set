@@ -1,12 +1,18 @@
 #pragma once
 
 #include "ConstStrings.h"
-#include "DeviceHelper.h"
 #include "XmlHelper.h"
 #include "SocketIO.h"
 #include "WUtils.h"
 
+#ifdef IS_BUILDER
+
+#include "DeviceHelper.h"
+#include "../Builder/Context.h"
 #include "../Builder/IssueLogger.h"
+#include "../TuningService/TuningSource.h"
+
+#endif
 
 class SoftwareSettings : public QObject
 {
@@ -45,9 +51,15 @@ public:
 											QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
 											Builder::IssueLogger* log);
 
-		virtual bool readFromDevice(const Hardware::EquipmentSet* equipment,
-									const Hardware::Software* software,
-									Builder::IssueLogger* log) = 0;
+		static bool getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
+												DataSource::DataType dataType,
+												int adapterNo,
+												E::LanControllerType lanControllerType,
+												const Builder::Context* context,
+												DataSource* ds);
+
+		virtual bool readFromDevice(const Builder::Context* context,
+									const Hardware::Software* software) = 0;
 	};
 
 #endif
@@ -73,10 +85,8 @@ public:
 	class CfgServiceSettingsGetter : public CfgServiceSettings, public SoftwareSettingsGetter
 	{
 	public:
-
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	};
 
 #endif
@@ -114,10 +124,8 @@ public:
 	class AppDataServiceSettingsGetter : public AppDataServiceSettings, public SoftwareSettingsGetter
 	{
 	public:
-
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	};
 
 #endif
@@ -152,10 +160,8 @@ public:
 	class DiagDataServiceSettingsGetter : public DiagDataServiceSettings, public SoftwareSettingsGetter
 	{
 	public:
-
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	};
 
 #endif
@@ -172,6 +178,14 @@ public:
 		QStringList sourcesIDs;
 	};
 
+	struct TuningSource
+	{
+		QString equipmentID;
+		HostAddressPort tuningDataIP;
+	};
+
+	QString equipmentID;
+
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
@@ -184,7 +198,8 @@ public:
 	HostAddressPort tuningSimIP;			// for now this option isn't read from equipment
 	                                        // it can be initialized from TuningService cmd line option -sim
 	                                        // or inside Simulator for run TuningServiceCommunicator
-	QVector<TuningClient> clients;
+	std::vector<TuningSource> sources;
+	std::vector<TuningClient> clients;
 
 	//
 
@@ -197,11 +212,18 @@ public:
 	class TuningServiceSettingsGetter : public TuningServiceSettings, public SoftwareSettingsGetter
 	{
 	public:
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	private:
-		bool fillTuningClientsInfo(const Hardware::Software* software, bool singleLmControlEnabled, Builder::IssueLogger* log);
+		bool fillTuningSourcesInfo(const Builder::Context* context,
+								   const Hardware::Software* software);
+
+		bool fillTuningClientsInfo(const Builder::Context* context,
+								   const Hardware::Software* software,
+								   bool singleLmControlEnabled);
+
+	public:
+		QVector<Tuning::TuningSource> tuningSources;
 	};
 
 #endif
@@ -236,9 +258,8 @@ public:
 	class ArchivingServiceSettingsGetter : public ArchivingServiceSettings, public SoftwareSettingsGetter
 	{
 	public:
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 
 		bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
 	};
@@ -284,9 +305,8 @@ public:
 	{
 	public:
 
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	};
 
 #endif
@@ -321,9 +341,8 @@ public:
 	class MetrologySettingsGetter : public MetrologySettings, public SoftwareSettingsGetter
 	{
 	public:
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	};
 
 #endif
@@ -376,19 +395,16 @@ public:
 	class MonitorSettingsGetter : public MonitorSettings, public SoftwareSettingsGetter
 	{
 	public:
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 
 
 	private:
-		bool readAppDataServiceAndArchiveSettings(const Hardware::EquipmentSet* equipment,
-									   const Hardware::Software* software,
-									   Builder::IssueLogger* log);
+		bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
+												  const Hardware::Software* software);
 
-		bool readTuningSettings(const Hardware::EquipmentSet* equipment,
-									   const Hardware::Software* software,
-									   Builder::IssueLogger* log);
+		bool readTuningSettings(const Builder::Context* context,
+								const Hardware::Software* software);
 	};
 
 #endif
@@ -432,9 +448,8 @@ public:
 	class TuningClientSettingsGetter : public TuningClientSettings, public SoftwareSettingsGetter
 	{
 	public:
-		bool readFromDevice(const Hardware::EquipmentSet* equipment,
-							const Hardware::Software* software,
-							Builder::IssueLogger* log) override;
+		bool readFromDevice(const Builder::Context* context,
+							const Hardware::Software* software) override;
 	};
 
 #endif

@@ -64,7 +64,10 @@ namespace Builder
 		std::vector<Hardware::DeviceModule*> m_lmAndBvbModules;
 		std::vector<Hardware::DeviceModule*> m_fscModules;
 
+		std::map<QString, Hardware::Software*> m_software;
+
 		std::shared_ptr<Hardware::SubsystemStorage> m_subsystems;
+		std::map<QString, quint64> m_lmsUniqueIDs;
 
 		std::shared_ptr<AppLogicData> m_appLogicData;
 

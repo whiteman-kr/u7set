@@ -87,6 +87,7 @@ SOURCES += \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/Signal.cpp \
+    ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
     ../lib/ProtoSerialization.cpp \
@@ -96,7 +97,6 @@ SOURCES += \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/DataSource.cpp \
-	../lib/SoftwareSettings.cpp \
     ../lib/Queue.cpp \
     ../lib/WUtils.cpp \
     ../lib/CsvFile.cpp \
@@ -174,12 +174,11 @@ HEADERS += \
     ../lib/Connection.h \
     ../TuningService/TuningSource.h \
     ../TuningService/TuningDataStorage.h \
-    ../TuningService/TuningSource.h \
-    ../lib/CommonTypes.h \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
     ../lib/Signal.h \
+    ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \
     ../lib/ProtoSerialization.h \
@@ -190,7 +189,6 @@ HEADERS += \
     ../lib/Hash.h \
     ../lib/HostAddressPort.h \
     ../lib/DataSource.h \
-	../lib/SoftwareSettings.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/CsvFile.h \

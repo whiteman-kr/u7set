@@ -516,7 +516,10 @@ namespace Tuning
 		//
 		assert(m_socketListenerThread == nullptr);
 
-		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP, m_sourceThreadMap, m_logger);
+		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP,
+																m_sourceThreadMap,
+																isSimulationMode(),
+																m_logger);
 		m_socketListenerThread->start();
 	}
 
@@ -562,6 +565,11 @@ namespace Tuning
 
 			clientContext->removeSourceThread(thread);
 		}
+	}
+
+	bool TuningServiceWorker::isSimulationMode() const
+	{
+		return m_tuningSimIP.isSet();
 	}
 
 	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)

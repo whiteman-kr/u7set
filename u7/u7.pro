@@ -303,7 +303,6 @@ HEADERS  += \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \
     SpecificPropertiesEditor.h \
-    ../lib/CommonTypes.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/DbObjectStorage.h \
     SchemaTabPageEx.h \

@@ -13,6 +13,7 @@
 #include "DeviceHelper.h"
 #include "LmDescription.h"
 #include "LanControllerInfoHelper.h"
+#include "Context.h"
 
 #endif
 
@@ -23,8 +24,11 @@ public:
 	QString caption;
 
 	QString subsystemID;
+	int subsystemKey = 0;
 	int lmNumber = 0;
 	QString subsystemChannel;
+
+	quint64 lmUniqueID = 0;
 
 	QString moduleFamily;
 	int moduleFamilyID = 0;
@@ -81,22 +85,22 @@ protected:
 class LogicModulesInfoWriter : public LogicModulesInfo
 {
 public:
-	LogicModulesInfoWriter(const QVector<Builder::ModuleLogicCompiler *>& moduleCompilers,
-						   const Hardware::EquipmentSet& equipmentSet);
+	LogicModulesInfoWriter(const Builder::Context& context);
 
 	bool fill();
 	void save(QByteArray* xmlFileData) const;
 
 private:
-	bool fill(LogicModuleInfo* lmInfo, Builder::ModuleLogicCompiler& mc);
+	Builder::IssueLogger* log() const { return m_context.m_log; }
+
+	bool fill(const Hardware::DeviceModule* lmModule, LogicModuleInfo* lmInfo);
 
 	bool save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const;
 
 	bool save(const LanControllerInfo& lci, XmlWriteHelper& xml) const;
 
 private:
-	const QVector<Builder::ModuleLogicCompiler *>& m_moduleCompilers;
-	const Hardware::EquipmentSet& m_equipmentSet;
+	const Builder::Context& m_context;
 };
 
 #endif
