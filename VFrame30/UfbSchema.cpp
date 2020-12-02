@@ -21,7 +21,7 @@ namespace VFrame30
 		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
 
-		setTagsList(QStringList{"UFB"});
+		setTagsList(QStringList{"ufb"});
 
 		return;
 	}

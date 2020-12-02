@@ -19,7 +19,7 @@ namespace VFrame30
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
-		setTagsList(QStringList{"Monitor"});
+		setTagsList(QStringList{"monitor"});
 
 		return;
 	}

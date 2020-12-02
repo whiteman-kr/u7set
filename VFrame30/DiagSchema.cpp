@@ -13,7 +13,7 @@ namespace VFrame30
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
-		setTagsList(QStringList{"Diagnostics"});
+		setTagsList(QStringList{"diagnostics"});
 
 		return;
 	}
