@@ -52,40 +52,40 @@ namespace VFrame30
 
 		double cosmeticPenWidth() const;
 
-		int dpiX() const;
-		int dpiY() const;
+		int dpiX() const noexcept;
+		int dpiY() const noexcept;
 
-		double gridToDpiX(double pos) const;
-		double gridToDpiY(double pos) const;
-		QPointF gridToDpi(double x, double y) const;
-		QPointF gridToDpi(const QPointF& pos) const;
-		QRectF gridToDpi(const QRectF& rect) const;
+		double gridToDpiX(double pos) const noexcept;
+		double gridToDpiY(double pos) const noexcept;
+		QPointF gridToDpi(double x, double y) const noexcept;
+		QPointF gridToDpi(const QPointF& pos) const noexcept;
+		QRectF gridToDpi(const QRectF& rect) const noexcept;
 
-		bool isEditMode() const;
+		bool isEditMode() const noexcept;
 		void setEditMode(bool value);
 
-		bool isMonitorMode() const;
+		bool isMonitorMode() const noexcept;
 		void setMonitorMode(bool value);
 
-		bool infoMode() const;
+		bool infoMode() const noexcept;
 		void setInfoMode(bool value);
 
-		bool blinkPhase() const;
+		bool blinkPhase() const noexcept;
 		void setBlinkPhase(bool value);
 
-		bool drawNotesLayer() const;
+		bool drawNotesLayer() const noexcept;
 		void setDrawNotesLayer(bool value);
 
-		AppSignalController* appSignalController();
+		AppSignalController* appSignalController() noexcept;
 		void setAppSignalController(AppSignalController* value);
 
-		TuningController* tuningController();
+		TuningController* tuningController() noexcept;
 		void setTuningController(TuningController* value);
 
-		const Session& session() const;
+		const Session& session() const noexcept;
 		Session& session();
 
-		const MonitorBehavior& monitorBehavor() const;
+		const MonitorBehavior& monitorBehavor() const noexcept;
 		const TuningClientBehavior& tuningClientBehavior() const;
 
 		const QStringList& hightlightIds() const;
@@ -111,8 +111,8 @@ namespace VFrame30
 		bool m_blinkPhase = false;
 		bool m_drawNotesLayer = true;
 
-		int m_dpiX = -1;
-		int m_dpiY = -1;
+		mutable int m_dpiX = -1;
+		mutable int m_dpiY = -1;
 
 		double m_cosmeticPenWidth = 0.0;
 	};

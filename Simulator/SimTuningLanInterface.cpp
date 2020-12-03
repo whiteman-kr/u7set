@@ -46,4 +46,16 @@ namespace Sim
 
 		return m_tuningServiceCommunicator->tuningModeChanged(lmEquipmentId(), tuningMode);
 	}
+
+	std::queue<TuningRecord> TuningLanInterface::fetchWriteTuningQueue()
+	{
+		std::queue<TuningRecord> result;
+
+		if (m_tuningServiceCommunicator != nullptr)
+		{
+			result = m_tuningServiceCommunicator->fetchWriteTuningQueue(lmEquipmentId());
+		}
+
+		return result;
+	}
 }

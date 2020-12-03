@@ -174,6 +174,42 @@ namespace Sim
 		}
 	}
 
+	std::queue<TuningRecord> Lans::fetchWriteTuningQueue()
+	{
+		std::queue<TuningRecord> result;
+
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				if (result.empty() == true)
+				{
+					result = tli->fetchWriteTuningQueue();
+				}
+				else
+				{
+					// No stl alg to concat two queues ((
+					//
+					std::queue<TuningRecord> src = tli->fetchWriteTuningQueue();
+
+					while (src.empty() == false)
+					{
+						result.push(src.front());
+						src.pop();
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	ScopedLog& Lans::log()
 	{
 		return m_log;

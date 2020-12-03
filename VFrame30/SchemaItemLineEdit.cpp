@@ -130,7 +130,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemLineEdit::createWidget(QWidget* parent, bool editMode)
+	QWidget* SchemaItemLineEdit::createWidget(QWidget* parent, bool editMode, double zoom)
 	{
 		if (parent == nullptr)
 		{
@@ -171,6 +171,8 @@ namespace VFrame30
 			//
 			afterCreate(control);
 		}
+
+		updateWdgetPosAndSize(control, zoom);
 
 		control->setVisible(true);
 		control->update();

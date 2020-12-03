@@ -234,23 +234,23 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		bool IsStatic() const;
-		bool IsDynamic() const;
+		bool IsStatic() const noexcept;
+		bool IsDynamic() const noexcept;
 
-		bool isFblItemRect() const;
+		bool isFblItemRect() const noexcept;
 		FblItemRect* toFblItemRect();
 		const FblItemRect* toFblItemRect() const;
 
-		bool isFblItem() const;
+		bool isFblItem() const noexcept;
 		FblItem* toFblItem();
 		const FblItem* toFblItem() const;
 
-		bool isSchemaItemAfb() const;
+		bool isSchemaItemAfb() const noexcept;
 		SchemaItemAfb* toSchemaItemAfb();
 		const SchemaItemAfb* toSchemaItemAfb() const;
 
 		template<typename SCHEMAITEMTYPE>
-		bool isType() const
+		bool isType() const noexcept
 		{
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this) != nullptr;
 		}
@@ -267,51 +267,51 @@ namespace VFrame30
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
 		}
 
-		bool isControl() const;
+		bool isControl() const noexcept;
 
-		bool isLocked() const;
+		bool isLocked() const noexcept;
 		void setLocked(bool locked);
 
-		bool isCommented() const;
-		bool commented() const;
+		bool isCommented() const noexcept;
+		bool commented() const noexcept;
 		void setCommented(bool value);
 
-		QUuid guid() const;
+		QUuid guid() const noexcept;
 		void setGuid(const QUuid& guid);
 		virtual void setNewGuid();			// set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
 
 		// Item position unit, can be inches or pixels
 		//
-		SchemaUnit itemUnit() const;
+		SchemaUnit itemUnit() const noexcept;
 		void setItemUnit(SchemaUnit value);
 
-		QString label() const;
+		QString label() const noexcept;
 		void setLabel(const QString& value);
 
-		E::TextPos labelPos() const;
+		E::TextPos labelPos() const noexcept;
 		void setLabelPos(E::TextPos value);
 
-		bool acceptClick() const;
+		bool acceptClick() const noexcept;
 		void setAcceptClick(bool value);
 
-		QString clickScript() const;
+		QString clickScript() const noexcept;
 		void setClickScript(QString value);
 
-		QString preDrawScript() const;
+		QString preDrawScript() const noexcept;
 		void setPreDrawScript(QString value);
 
-		bool blinkPhase() const;
+		bool blinkPhase() const noexcept;
 
 		const CDrawParam* drawParam() const;
 		void setDrawParam(CDrawParam* value);
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
-		virtual QRectF boundingRectInDocPt(CDrawParam* drawParam) const;
+		virtual QRectF boundingRectInDocPt(const CDrawParam* drawParam) const;
 
 		virtual QString toolTipText(int dpiX, int dpiY) const;
 
-		QString lastScriptError() const;
+		QString lastScriptError() const noexcept;
 
 		// Data
 		//

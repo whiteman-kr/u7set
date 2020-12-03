@@ -79,6 +79,7 @@ protected slots:
 	void showSettings();
 	void showStatistics();
 
+	void showAboutQt();
 	void showAbout();
 	void showMatsUserManual();
 	void debug();
@@ -160,6 +161,7 @@ private:
 	//
 	QAction* m_pDebugAction = nullptr;
 	QAction* m_pLogAction = nullptr;
+	QAction* m_pAboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;
 

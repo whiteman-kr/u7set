@@ -1,13 +1,16 @@
 #pragma once
 
+#include "queue"
 #include "SimLanInterface.h"
 #include "../lib/TimeStamp.h"
+#include "SimTuningRecord.h"
 
 namespace Sim
 {
 	class Simulator;
 	class RamArea;
 	class TuningServiceCommunicator;
+
 
 	class TuningLanInterface : public LanInterface
 	{
@@ -22,6 +25,8 @@ namespace Sim
 	public:
 		bool updateTuningRam(const Sim::RamArea& ramArea, TimeStamp timeStamp);
 		void tuningModeChanged(bool tuningMode);
+
+		std::queue<TuningRecord> fetchWriteTuningQueue();
 
 	public:
 	private:

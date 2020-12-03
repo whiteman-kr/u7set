@@ -208,6 +208,10 @@ DbProjectProperties::DbProjectProperties()
 	p->setCategory("Build");
 	p->setDescription("Generate file AppSignals.xml on build");
 
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppLogicDrawings, true, DbProjectProperties::generateAppLogicDrawings, DbProjectProperties::setGenerateAppLogicDrawings);
+	p->setCategory("Build");
+	p->setDescription("Generate file AppLogicDrawings.pdf on build");
+
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
 	p->setCategory("Build");
 	p->setDescription("Generate extra debug information on build");
@@ -325,6 +329,16 @@ bool DbProjectProperties::generateAppSignalsXml() const
 void DbProjectProperties::setGenerateAppSignalsXml(bool value)
 {
 	m_generateAppSignalsXml = value;
+}
+
+bool DbProjectProperties::generateAppLogicDrawings() const
+{
+	return m_generateAppLogicDrawings;
+}
+
+void DbProjectProperties::setGenerateAppLogicDrawings(bool value)
+{
+	m_generateAppLogicDrawings = value;
 }
 
 bool DbProjectProperties::generateExtraDebugInfo() const

@@ -59,6 +59,7 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 #win32:LIBS += advapi32.lib
 
 HEADERS += \
+    ../lib/Ui/DialogAbout.h \
 	Stable.h \
 	ftdi/ftd2xx.h \
         ../lib/DbStruct.h \
@@ -79,6 +80,7 @@ HEADERS += \
     ../lib/ModuleFirmware.h
 
 SOURCES += \
+    ../lib/Ui/DialogAbout.cpp \
 	main.cpp \
 	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -139,5 +141,6 @@ unix {
 }
 
 DISTFILES += \
+    Images/Logo.png \
     Images/MConf.ico
 

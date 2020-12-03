@@ -67,24 +67,19 @@ namespace Sim
 		}
 	}
 
-	void TuningServiceCommunicator::writeTuningWord(const QString& lmEquipmentId, const QString& portEquipmentId, quint16 data, quint16 mask)
+	void TuningServiceCommunicator::writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask)
 	{
-		return writeTuningRecord(TuningRecord::createWord(lmEquipmentId, portEquipmentId, data, mask));
+		return writeTuningRecord(TuningRecord::createDword(lmEquipmentId, portEquipmentId, offsetW, data, mask));
 	}
 
-	void TuningServiceCommunicator::writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 data)
+	void TuningServiceCommunicator::writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data)
 	{
-		return writeTuningRecord(TuningRecord::createDword(lmEquipmentId, portEquipmentId, data));
+		return writeTuningRecord(TuningRecord::createSignedInt32(lmEquipmentId, portEquipmentId, offsetW, data));
 	}
 
-	void TuningServiceCommunicator::writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, qint32 data)
+	void TuningServiceCommunicator::writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data)
 	{
-		return writeTuningRecord(TuningRecord::createSignedInt32(lmEquipmentId, portEquipmentId, data));
-	}
-
-	void TuningServiceCommunicator::writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, float data)
-	{
-		return writeTuningRecord(TuningRecord::createFloat(lmEquipmentId, portEquipmentId, data));
+		return writeTuningRecord(TuningRecord::createFloat(lmEquipmentId, portEquipmentId, offsetW, data));
 	}
 
 	std::queue<TuningRecord> TuningServiceCommunicator::fetchWriteTuningQueue(const QString& lmEquipmentId)

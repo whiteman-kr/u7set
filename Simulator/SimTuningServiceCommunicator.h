@@ -6,69 +6,11 @@
 #include "../lib/DataProtocols.h"
 #include "../lib/LogicModulesInfo.h"
 #include "SimRam.h"
+#include "SimTuningRecord.h"
 
 namespace Sim
 {
 	class Simulator;
-
-	struct TuningRecord
-	{
-		QString lmEquipmentId;
-		QString portEquipmentId;
-
-		union
-		{
-			struct
-			{
-				quint16 value;
-				quint16 mask;
-			} word;
-			quint32 dword;
-			qint32 signedInt32;
-			float float32;
-		} data;
-
-		E::ByteOrder dataByteOrder;
-
-		static TuningRecord createWord(const QString& lmEquipmentId,
-									   const QString& portEquipmentId,
-									   quint16 value,
-									   quint16 mask)
-		{
-			TuningRecord r{lmEquipmentId, portEquipmentId, {}, E::ByteOrder::BigEndian};
-			r.data.word.value = value;
-			r.data.word.mask = mask;
-			return r;
-		}
-
-		static TuningRecord createDword(const QString& lmEquipmentId,
-										const QString& portEquipmentId,
-										quint32 value)
-		{
-			TuningRecord r{lmEquipmentId, portEquipmentId, {}, E::ByteOrder::BigEndian};
-			r.data.dword = value;
-			return r;
-		}
-
-		static TuningRecord createSignedInt32(const QString& lmEquipmentId,
-											  const QString& portEquipmentId,
-											  qint32 value)
-		{
-			TuningRecord r{lmEquipmentId, portEquipmentId, {}, E::ByteOrder::BigEndian};
-			r.data.signedInt32 = value;
-			return r;
-		}
-
-		static TuningRecord createFloat(const QString& lmEquipmentId,
-											  const QString& portEquipmentId,
-											  float value)
-		{
-			TuningRecord r{lmEquipmentId, portEquipmentId, {}, E::ByteOrder::BigEndian};
-			r.data.float32 = value;
-			return r;
-		}
-	};
-
 	class TuningRequestsProcessingThread;
 
 	class TuningServiceCommunicator : public QObject
@@ -100,10 +42,9 @@ namespace Sim
 		void tuningModeChanged(const QString& lmEquipmentId, bool tuningMode);
 
 	public:
-		void writeTuningWord(const QString& lmEquipmentId, const QString& portEquipmentId, quint16 data, quint16 mask);
-		void writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 data);
-		void writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, qint32 data);
-		void writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, float data);
+		void writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask);
+		void writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data);
+		void writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data);
 
 		std::queue<TuningRecord> fetchWriteTuningQueue(const QString& lmEquipmentId);
 	private:

@@ -135,7 +135,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, bool editMode)
+	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, bool editMode, double zoom)
 	{
 		if (parent == nullptr)
 		{
@@ -182,6 +182,8 @@ namespace VFrame30
 			//
 			afterCreate(control);
 		}
+
+		updateWdgetPosAndSize(control, zoom);
 
 		control->setVisible(true);
 		control->update();

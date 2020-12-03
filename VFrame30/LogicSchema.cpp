@@ -15,9 +15,6 @@ namespace VFrame30
 
 		setUnit(SchemaUnit::Inch);
 
-		setGridSize(Settings::defaultGridSize(unit()));
-		setPinGridStep(4);
-
 		setDocWidth(mm2in(420));
 		setDocHeight(mm2in(297));
 
@@ -25,7 +22,7 @@ namespace VFrame30
 		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
-		setTagsList(QStringList{"ApplicationLogic"});
+		setTagsList(QStringList{"applogic"});
 
 		return;
 	}

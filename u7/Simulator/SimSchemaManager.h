@@ -20,6 +20,10 @@ protected:
 protected slots:
 	void slot_projectUpdated();
 
+public:
+	SimIdeSimulator* simulator();
+	const SimIdeSimulator* simulator() const;
+
 	// Data
 	//
 private:
