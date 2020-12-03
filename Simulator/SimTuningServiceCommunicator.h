@@ -5,11 +5,11 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/DataProtocols.h"
 #include "../lib/LogicModulesInfo.h"
+#include "SimRam.h"
 
 namespace Sim
 {
 	class Simulator;
-	class RamArea;
 
 	struct TuningRecord
 	{
@@ -85,10 +85,15 @@ namespace Sim
 
 		Simulator* simulator() const;
 
-		// This function is called by Simulator to provide current RAM state of Tuning memory area if sLM is in TuningMode and Tuning is enabled.
+		// This function is called by Simulator to provide current RAM state of Tuning memory area
+		// if sLM is in TuningMode and Tuning is enabled.
+		//
 		// Data is in LogicMoudule's native endianness (BE).
 		//
-		bool updateTuningRam(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp);
+		bool updateTuningRam(const QString& lmEquipmentId,
+							 const QString& portEquipmentId,
+							 const RamArea& ramArea,
+							 TimeStamp timeStamp);
 
 		// This function is called by Simulator when module's tuning mode has changed to or from TuningMode
 		//
@@ -133,7 +138,7 @@ namespace Sim
 		std::map<QString, std::queue<TuningRecord>> m_writeTuningQueue;
 	};
 
-	class TuningSourceInterface;
+	class TuningSourceHandler;
 
 	class TuningRequestsProcessingThread : public RunOverrideThread
 	{
@@ -141,10 +146,17 @@ namespace Sim
 		TuningRequestsProcessingThread(TuningServiceCommunicator* tsCommunicator, const TuningServiceSettings& settings);
 		virtual ~TuningRequestsProcessingThread() override;
 
+		void updateTuningData(const QString& lmEquipmentID,
+							  const QString& portEquipmentID,
+							  const RamArea& data,
+							  TimeStamp timeStamp);
+
+		void tuningModeChanged(const QString& lmEquipmentId, bool tuningEnabled);
+
 	private:
 		virtual void run() override;
 
-		void initTuningSourcesInterfaces(const TuningServiceSettings& settings);
+		void initTuningSourcesHandlers(const TuningServiceSettings& settings);
 
 		bool tryCreateAndBindSocket();
 		void closeSocket();
@@ -163,20 +175,33 @@ namespace Sim
 		const QThread* m_thisThread = nullptr;
 		QUdpSocket* m_socket = nullptr;
 
-		std::map<quint32, TuningSourceInterface> m_tuningSources;
+		std::map<quint32, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByIP;
+		std::map<QString, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByEquipmentID;
 	};
 
-	class TuningSourceInterface
+	class TuningSourceHandler
 	{
 	public:
-		TuningSourceInterface(TuningServiceCommunicator* tsCommunicator,
+		TuningSourceHandler(TuningServiceCommunicator* tsCommunicator,
 							  const QString& equipmentID,
 							  const HostAddressPort& ip,
 							  const ::LogicModuleInfo& logicModuleInfo);
 
-		virtual ~TuningSourceInterface();
+		virtual ~TuningSourceHandler();
+
+		void updateTuningData(const RamArea& data, TimeStamp timeStamp);
+
+		void tuningModeChanged(bool tuningEnabled);
 
 		bool processRequest(const RupFotipV2& request, RupFotipV2* reply);
+
+	private:
+		bool checkRequestRupHeader(const Rup::Header& rupHeader);
+		bool checkRequestFotipHeader(const FotipV2::Header& fotipHeader, FotipV2::HeaderFlags* replyFlags);
+
+		void processReadRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
+		void processWriteRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
+		void processApplyRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
 
 	private:
 		TuningServiceCommunicator* m_tsCommunicator = nullptr;
@@ -187,8 +212,21 @@ namespace Sim
 		int m_subsystemKey = -1;
 		quint64 m_lmUniqueID = 0;
 
-		quint32 m_tuningFlashSizeB = 0;
-		quint32 m_tuningFlashFramePayloadB = 0;
+		quint32 m_tuningDataStartAddrW = 0;
+		quint32 m_tuningDataSizeW = 0;
+		quint32 m_tuningDataSizeB = 0;
+		quint32 m_tuningDataFrameSizeW = 0;
+		quint32 m_tuningDataFramePayloadW = 0;
+		quint32 m_tuningDataFramePayloadB = 0;
+
+		//
+
+		std::atomic<bool> m_tuningEnabled = { false };
+
+		QMutex m_tuningDataMutex;
+		std::shared_ptr<RamArea> m_tuningData;
+
+		std::vector<quint8> m_tuningDataReadBuffer;
 	};
 }
 
