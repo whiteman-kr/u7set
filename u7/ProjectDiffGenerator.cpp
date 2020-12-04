@@ -194,7 +194,7 @@ void ReportTable::render(const ReportObjectContext& context) const
 							padding: 3px;\
 						}\
 						tr.d0 td {\
-						  background-color: #dddddd;\
+						  background-color: #e0e0e0;\
 						  color: black;\
 						}\
 						tr.d1 td {\
@@ -717,7 +717,7 @@ void FileDiff::loadFileData(const QByteArray& fileData, std::vector<FileLine>* f
 	return;
 }
 
-template<typename T> void FileDiff::calculateLcs(const std::vector<T>& X, const std::vector<T>& Y, std::vector<T>* result)
+template<typename T> void FileDiff::calculateLcs(const std::vector<T>& source, const std::vector<T>& target, std::vector<T>* result)
 {
 	if (result == NULL)
 	{
@@ -725,8 +725,8 @@ template<typename T> void FileDiff::calculateLcs(const std::vector<T>& X, const 
 		return;
 	}
 
-	int m = static_cast<int>(X.size());
-	int n = static_cast<int>(Y.size());
+	int m = static_cast<int>(source.size());
+	int n = static_cast<int>(target.size());
 
 	std::vector<std::vector<int>> L(m + 1, std::vector<int>(n + 1));
 
@@ -742,7 +742,7 @@ template<typename T> void FileDiff::calculateLcs(const std::vector<T>& X, const 
 			}
 			else
 			{
-				if (X[i - 1] == Y[j - 1])
+				if (source[i - 1] == target[j - 1])
 				{
 					L[i][j] = L[i - 1][j - 1] + 1;
 				}
@@ -769,9 +769,9 @@ template<typename T> void FileDiff::calculateLcs(const std::vector<T>& X, const 
 	{
 		// If current character in X[] and Y are same, then
 		// current character is part of LCS
-		if (X[i - 1] == Y[j - 1])
+		if (source[i - 1] == target[j - 1])
 		{
-			(*result)[index-1] = X[i-1]; // Put current character in result
+			(*result)[index-1] = source[i-1]; // Put current character in result
 			i--;
 			j--;
 			index--;     // reduce values of i, j and index
@@ -793,11 +793,134 @@ template<typename T> void FileDiff::calculateLcs(const std::vector<T>& X, const 
 	}
 }
 
+template<typename T>
+void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& target,
+								   const std::vector<T>& lcs,
+								   std::vector<T>* sourceAligned, std::vector<T>* targetAligned,
+								   std::vector<FileDiffAction>* actions,
+								   int* addedCount,
+								   int* removedCount,
+								   int* alignedCount)
+{
+	int sourceIndex = 0;
+	int targetIndex  = 0;
+	int lcsIndex = 0;
+
+	*alignedCount = 0;
+	*addedCount = 0;
+	*removedCount = 0;
+
+	while (sourceIndex < source.size() || targetIndex < target.size())
+	{
+		if (sourceIndex >= source.size())
+		{
+			// Source is done, print the rest of target
+			//
+			while (targetIndex < target.size())
+			{
+				sourceAligned->push_back(T());
+				targetAligned->push_back(target[targetIndex]);
+				targetIndex++;
+
+				actions->push_back(FileDiffAction::Added);
+
+				(*addedCount)++;
+			}
+			break;
+		}
+
+		if (targetIndex >= target.size())
+		{
+			// Target is done, print the rest of source
+			//
+			while (sourceIndex < source.size())
+			{
+				sourceAligned->push_back(source[sourceIndex]);
+				targetAligned->push_back(T());
+				sourceIndex++;
+
+				actions->push_back(FileDiffAction::Added);
+
+				(*addedCount)++;
+			}
+			break;
+		}
+
+		if (lcsIndex >= lcs.size())
+		{
+			// LCS is done, next lines are all different
+			//
+			sourceAligned->push_back(source[sourceIndex]);
+			targetAligned->push_back(target[targetIndex]);
+			sourceIndex++;
+			targetIndex++;
+
+			actions->push_back(FileDiffAction::Modified);
+			continue;
+		}
+
+		const T& sourceLine = source[sourceIndex];
+		const T& targetLine = target[targetIndex];
+		const T& commonLine = lcs[lcsIndex];
+
+		if (sourceLine == commonLine && targetLine == commonLine)
+		{
+			sourceAligned->push_back(source[sourceIndex]);
+			targetAligned->push_back(target[targetIndex]);
+
+			sourceIndex++;
+			targetIndex++;
+			lcsIndex++;
+
+			actions->push_back(FileDiffAction::Match);
+		}
+
+		if (sourceLine == commonLine && targetLine != commonLine)
+		{
+			sourceAligned->push_back(T());
+			targetAligned->push_back(target[targetIndex]);
+			targetIndex++;
+
+			(*addedCount)++;
+
+			actions->push_back(FileDiffAction::Added);
+		}
+
+		if (sourceLine != commonLine && targetLine == commonLine)
+		{
+			sourceAligned->push_back(source[sourceIndex]);
+			targetAligned->push_back(T());
+			sourceIndex++;
+
+			(*removedCount)++;
+
+			actions->push_back(FileDiffAction::Removed);
+		}
+
+		if (sourceLine != commonLine && targetLine != commonLine)
+		{
+			sourceAligned->push_back(source[sourceIndex]);
+			targetAligned->push_back(target[targetIndex]);
+			sourceIndex++;
+			targetIndex++;
+
+			actions->push_back(FileDiffAction::Modified);
+
+		}
+	}
+
+	Q_ASSERT(sourceAligned->size() == targetAligned->size());
+	Q_ASSERT(actions->size() == actions->size());
+
+	*alignedCount = static_cast<int>(sourceAligned->size());
+}
+
+
 //
 // ProjectDiffGenerator
 //
 
-void ProjectDiffGenerator::run(const CompareData& compareData, std::map<int, QString> fileTypesMap, const QString& projectName, const QString& userName, const QString& userPassword, QWidget* parent)
+void ProjectDiffGenerator::run(const ProjectDiffParams& settings, const QString& projectName, const QString& userName, const QString& userPassword, QWidget* parent)
 {
 	// Get filename
 	//
@@ -815,7 +938,7 @@ void ProjectDiffGenerator::run(const CompareData& compareData, std::map<int, QSt
 
 	// Create Worker
 
-	std::shared_ptr<ProjectDiffWorker> worker = std::make_shared<ProjectDiffWorker>(fileName, compareData, fileTypesMap, schemaView, projectName, userName, userPassword);
+	std::shared_ptr<ProjectDiffWorker> worker = std::make_shared<ProjectDiffWorker>(fileName, settings, schemaView, projectName, userName, userPassword);
 
 	// Create Progress Dialog
 
@@ -856,29 +979,32 @@ void ProjectDiffGenerator::run(const CompareData& compareData, std::map<int, QSt
 
 }
 
-std::map<int, QString> ProjectDiffGenerator::filesTypesNamesMap(DbController* db)
+std::vector<ProjectFileType> ProjectDiffGenerator::defaultProjectFileTypes(DbController* db)
 {
-	std::map<int, QString> result;
+	std::vector<ProjectFileType> result;
 
-	result[applicationSignalsTypeId()] = QObject::tr("Application Signals");
+	result.push_back({db->hcFileId(),				QObject::tr("Hardware Configuration"),	true});
 
-	result[db->busTypesFileId()] = QObject::tr("Busses");
-	result[db->schemaFileId()] = QObject::tr("Schemas");
-	result[db->afblFileId()] = QObject::tr("AFBL Descriptions ");
-	result[db->ufblFileId()] = QObject::tr("UFBL Descriptions");
-	result[db->alFileId()] = QObject::tr("Application Logic");
-	result[db->hcFileId()] = QObject::tr("Hardware Configuration");
-	result[db->hpFileId()] = QObject::tr("Hardware Presets");
-	result[db->mcFileId()] = QObject::tr("Module Configuration");
-	result[db->mvsFileId()] = QObject::tr("Monitor Schemas");
-	result[db->tvsFileId()] = QObject::tr("Tuning Schemas");
-	result[db->dvsFileId()] = QObject::tr("Diagnostics Schemas");
-	result[db->connectionsFileId()] = QObject::tr("Connections");
-	result[db->etcFileId()] = QObject::tr("Other Files");
-	result[db->testsFileId()] = QObject::tr("Tests");
-	result[db->simTestsFileId()] = QObject::tr("Simulator Tests");
+	result.push_back({applicationSignalsTypeId(),	QObject::tr("Application Signals"),		true});
+
+	result.push_back({db->mvsFileId(),				QObject::tr("Monitor Schemas"),			true});
+	result.push_back({db->tvsFileId(),				QObject::tr("Tuning Schemas"),			true});
+	result.push_back({db->dvsFileId(),				QObject::tr("Diagnostics Schemas"),		true});
+	result.push_back({db->alFileId(),				QObject::tr("Application Logic"),		true});
+	result.push_back({db->ufblFileId(),				QObject::tr("UFBL Descriptions"),		true});
+
+	result.push_back({db->busTypesFileId(),			QObject::tr("Busses"),					true});
+	result.push_back({db->connectionsFileId(),		QObject::tr("Connections"),				true});
+
+	result.push_back({db->simTestsFileId(),			QObject::tr("Simulator Tests"),			true});
+
+	result.push_back({db->afblFileId(),				QObject::tr("AFBL Descriptions"),		false});
+	result.push_back({db->hpFileId(),				QObject::tr("Hardware Presets"),		false});
+	result.push_back({db->mcFileId(),				QObject::tr("Module Configuration"),	false});
+	result.push_back({db->etcFileId(),				QObject::tr("Other Files"),				false});
 
 	return result;
+
 }
 
 //
@@ -886,14 +1012,13 @@ std::map<int, QString> ProjectDiffGenerator::filesTypesNamesMap(DbController* db
 //
 
 ProjectDiffWorker::ProjectDiffWorker(const QString& fileName,
-									 const CompareData& compareData, std::map<int, QString> fileTypesMap,
+									 const ProjectDiffParams& settings,
 									 std::shared_ptr<ReportSchemaView> schemaView,
 									 const QString& projectName,
 									 const QString& userName,
 									 const QString& userPassword):
 	ReportGenerator(fileName, schemaView),
-	m_compareData(compareData),
-	m_fileTypesNamesMap(fileTypesMap),
+	m_diffParams(settings),
 	m_projectName(projectName),
 	m_userName(userName),
 	m_userPassword(userPassword)
@@ -1017,15 +1142,6 @@ void ProjectDiffWorker::compareProject()
 	m_sourceDeviceObjectMap.clear();
 	m_targetDeviceObjectMap.clear();
 
-	std::vector<DbFileInfo> rootFiles;
-
-	ok = db()->getFileList(&rootFiles, db()->rootFileId(), false, nullptr);
-	if (ok == false)
-	{
-		Q_ASSERT(ok);
-		return;
-	}
-
 	{
 		QMutexLocker l(&m_statisticsMutex);
 		m_filesCount = 0;
@@ -1035,31 +1151,33 @@ void ProjectDiffWorker::compareProject()
 		m_pageIndex = 1;
 	}
 
-
 	int filesCount = 0;
 
 	std::vector<DbFileTree> filesTrees;
 
-	for (int i = 0; i < static_cast<int>(rootFiles.size()); i++)
+	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
 	{
-		const DbFileInfo& rootFile = rootFiles[i];
-
-		auto typeIt = m_fileTypesNamesMap.find(rootFile.fileId());
-		if (typeIt == m_fileTypesNamesMap.end())
+		if (ft.selected == false)
 		{
+			continue;
+		}
+
+		if (ft.fileId < 0)
+		{
+			// This is not a file
 			continue;
 		}
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = rootFile.fileName();
+			m_currentSectionName = ft.fileName;
 		}
 
 		filesTrees.push_back({});
 
 		DbFileTree* filesTree = &filesTrees[filesTrees.size() - 1];
 
-		ok = db()->getFileListTree(filesTree, rootFile.fileId(), false/*removeDeleted*/, nullptr);
+		ok = db()->getFileListTree(filesTree, ft.fileId, false/*removeDeleted*/, nullptr);
 		if (ok == false)
 		{
 			Q_ASSERT(ok);
@@ -1141,8 +1259,15 @@ void ProjectDiffWorker::compareProject()
 
 	// Process Files
 
-	for (const DbFileTree& filesTree : filesTrees)
+	int fileTreeIndex = 0;
+
+	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
 	{
+		if (ft.selected == false)
+		{
+			continue;
+		}
+
 		if (m_stop == true)
 		{
 			return;
@@ -1150,96 +1275,68 @@ void ProjectDiffWorker::compareProject()
 
 		// Print section name
 
-		QString sectionName;
-
-		auto typeIt = m_fileTypesNamesMap.find(filesTree.rootFile()->fileId());
-		if (typeIt == m_fileTypesNamesMap.end())
 		{
-			Q_ASSERT(false);
-			sectionName = filesTree.rootFile()->fileName();
+			QMutexLocker l(&m_statisticsMutex);
+			m_currentSectionName = ft.fileName;
+		}
+
+		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
+		m_sections.push_back(section);
+
+		setFont(m_normalFont);
+
+		saveFormat();
+		setTextAlignment(Qt::AlignHCenter);
+		setFont(m_headerFont);
+		section->addText(tr("%1\n\n").arg(ft.fileName), m_currentCharFormat, m_currentBlockFormat);
+		restoreFormat();
+
+		std::shared_ptr<ReportTable> headerTable;
+
+		if (ft.fileId == ProjectDiffGenerator::applicationSignalsTypeId())
+		{
+			// This is application signals
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_currentObjectName.clear();
+			}
+
+			section->addText(tr("Signals with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
+
+			saveFormat();
+			setFont(m_tableFont);
+			headerTable = section->addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
+			restoreFormat();
+
+			for (int signalID : signalIDs)
+			{
+				if (m_stop == true)
+				{
+					return;
+				}
+
+				compareSignal(signalID, m_diffParams.compareData, headerTable.get());
+			}
 		}
 		else
 		{
-			sectionName = typeIt->second;
+			section->addText(tr("Objects with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
+
+			saveFormat();
+			setFont(m_tableFont);
+			headerTable = section->addTable({tr("Object"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
+			restoreFormat();
+
+			// Compare files
+
+			const DbFileTree& filesTree = filesTrees[fileTreeIndex++];
+
+			compareFilesRecursive(filesTree, filesTree.rootFile(), m_diffParams.compareData, headerTable.get());
 		}
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = sectionName;
-		}
-
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
-
-		setFont(m_normalFont);
-
-		saveFormat();
-		setTextAlignment(Qt::AlignHCenter);
-		setFont(m_headerFont);
-		section->addText(tr("%1\n\n").arg(sectionName), m_currentCharFormat, m_currentBlockFormat);
-		restoreFormat();
-
-		section->addText(tr("Objects with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
-
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> headerTable = section->addTable({tr("Object"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
-		restoreFormat();
-
-		// Compare files
-
-		compareFilesRecursive(filesTree, filesTree.rootFile(), m_compareData, headerTable.get());
 
 		// Remove header if no data
-
-		if (headerTable->rowCount() == 0)
-		{
-			m_sections.pop_back();
-		}
-	}
-
-	// Process signals
-	//
-	auto typeIt = m_fileTypesNamesMap.find(ProjectDiffGenerator::applicationSignalsTypeId());
-	if (typeIt != m_fileTypesNamesMap.end())
-	{
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = tr("Application Signals");
-			m_currentObjectName.clear();
-		}
-
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
-
-		setFont(m_normalFont);
-
-		saveFormat();
-		setTextAlignment(Qt::AlignHCenter);
-		setTextForeground(QBrush(Qt::red));
-		setTextBackground(QBrush(Qt::black));
-		setFont(m_headerFont);
-		section->addText(tr("Application Signals\n\n"), m_currentCharFormat, m_currentBlockFormat);
-		restoreFormat();
-
-		section->addText(tr("Signals with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
-
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> headerTable = section->addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
-		restoreFormat();
-
-		for (int signalID : signalIDs)
-		{
-			if (m_stop == true)
-			{
-				return;
-			}
-
-			compareSignal(signalID, m_compareData, headerTable.get());
-		}
-
+		//
 		if (headerTable->rowCount() == 0)
 		{
 			m_sections.pop_back();
@@ -2022,7 +2119,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 
 	saveFormat();
 	setFont(m_tableFont);
-	QStringList itemsHeaderLabels = {tr("Item"), tr("Layer"), tr("Status")};
+	QStringList itemsHeaderLabels = {tr("Type"), tr("Label"), tr("Layer"), tr("Status")};
 	std::shared_ptr<ReportTable> itemsDiffTable = std::make_shared<ReportTable>(itemsHeaderLabels, m_currentCharFormat);
 	restoreFormat();
 
@@ -2083,8 +2180,10 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 
 				if (itemDiffs.empty() == false)
 				{
-					const std::string& className = targetItem->metaObject()->className();
-					itemsDiffTable->insertRow({QString(className.c_str()), targetLayer->name(), tr("Modified")});
+					QString className(targetItem->metaObject()->className());
+					className.remove("VFrame30::");
+
+					itemsDiffTable->insertRow({tr("%1)").arg(className), targetItem->label(), targetLayer->name(), tr("Modified")});
 
 					saveFormat();
 					setFont(m_tableFont);
@@ -2106,8 +2205,10 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 				//
 				itemsActions[targetItem->guid()] = CompareAction::Added;
 
-				const std::string& className = targetItem->metaObject()->className();
-				itemsDiffTable->insertRow({QString(className.c_str()), targetLayer->name(), tr("Added")});
+				QString className(targetItem->metaObject()->className());
+				className.remove("VFrame30::");
+
+				itemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Added")});
 
 				continue;
 			}
@@ -2130,8 +2231,10 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 				//
 				itemsActions[sourceItem->guid()] = CompareAction::Deleted;
 
-				const std::string& className = sourceItem->metaObject()->className();
-				itemsDiffTable->insertRow({QString(className.c_str()), sourceLayer->name(), tr("Deleted")});
+				QString className(sourceItem->metaObject()->className());
+				className.remove("VFrame30::");
+
+				itemsDiffTable->insertRow({tr("%1").arg(className), sourceItem->label(), sourceLayer->name(), tr("Deleted")});
 
 				// Add item to target
 				//
@@ -2155,22 +2258,34 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 	{
 		headerTable->insertRow({targetFile->fileName(), targetFile->action().text(),  changesetString(targetFile)});
 
-		// Add tables to section
+		// Add schema differences drawing
+
+		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>();
+		m_sections.push_back(schemaDrawingSection);
+
+		QString schemaId = targetSchema->schemaId();
+
+		schemaDrawingSection->addText(tr("Schema: %1\n").arg(schemaId), m_currentCharFormat, m_currentBlockFormat);
+		schemaDrawingSection->setSchema(targetSchema);
+		schemaDrawingSection->setCompareItemActions(itemsActions);
+
+		// Add schema differences tables
 
 		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>();
 		m_sections.push_back(schemaDiffSection);
 
-		schemaDiffSection->addText(tr("Schema: %1\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
-
 		if (schemaDiffTable->rowCount() != 0)
 		{
+			schemaDiffSection->addText(tr("Schema %1 Properties:\n").arg(schemaId), m_currentCharFormat, m_currentBlockFormat);
 			schemaDiffSection->addTable(schemaDiffTable);
+			schemaDiffSection->addText(tr("\n"), m_currentCharFormat, m_currentBlockFormat);
 		}
 
 		if (itemsDiffTable->rowCount() != 0)
 		{
-			schemaDiffSection->addText(tr("Items Differences:\n"), m_currentCharFormat, m_currentBlockFormat);
+			schemaDiffSection->addText(tr("Schema %1 Items:\n").arg(schemaId), m_currentCharFormat, m_currentBlockFormat);
 			schemaDiffSection->addTable(itemsDiffTable);
+			schemaDiffSection->addText(tr("\n"), m_currentCharFormat, m_currentBlockFormat);
 		}
 
 		for (auto it : itemsTables)
@@ -2178,35 +2293,14 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 			const std::shared_ptr<VFrame30::SchemaItem>& item = it.first;
 			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
 
-			const std::string& className = item->metaObject()->className();
-			schemaDiffSection->addText(QString(className.c_str()), m_currentCharFormat, m_currentBlockFormat);
+			QString className(item->metaObject()->className());
+			className.remove("VFrame30::");
 
+			schemaDiffSection->addText(tr("%1 %2:").arg(className).arg(item->label()), m_currentCharFormat, m_currentBlockFormat);
 			schemaDiffSection->addTable(itemDiffTable);
+			schemaDiffSection->addText(tr("\n"), m_currentCharFormat, m_currentBlockFormat);
 		}
-
-		// Add schema differences drawing
-
-		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>();
-		m_sections.push_back(schemaDrawingSection);
-
-		schemaDrawingSection->addText(tr("Drawing of Schema: %1\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
-		schemaDrawingSection->setSchema(targetSchema);
-		schemaDrawingSection->setCompareItemActions(itemsActions);
 	}
-
-	/*
-		std::shared_ptr<ReportSection> sourceSection = std::make_shared<ReportSection>();
-		m_sections.push_back(sourceSection);
-
-		sourceSection->addText("Source schema:\n", m_currentCharFormat, m_currentBlockFormat);
-		sourceSection->setSchema(sourceSchema);
-
-		std::shared_ptr<ReportSection> targetSection = std::make_shared<ReportSection>();
-		m_sections.push_back(targetSection);
-
-		targetSection->addText("Target schema:\n", m_currentCharFormat, m_currentBlockFormat);
-		targetSection->setSchema(targetSchema);*/
-
 }
 
 void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
@@ -2326,6 +2420,18 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 		std::vector<FileDiff::FileLine> fileLinesTarget;
 		std::vector<FileDiff::FileLine> fileLinesCommon;
 
+		/*
+		{
+			QFile f1("d:\\Source" + targetFile->fileName());
+			f1.open(QFile::WriteOnly);
+			f1.write(sourceFile->data());
+
+			QFile f2("d:\\Target" + targetFile->fileName());
+			f2.open(QFile::WriteOnly);
+			f2.write(targetFile->data());
+		}
+		*/
+
 		FileDiff::loadFileData(sourceFile->data(), &fileLinesSource);
 		FileDiff::loadFileData(targetFile->data(), &fileLinesTarget);
 
@@ -2338,49 +2444,55 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")}, m_currentCharFormat);
 		restoreFormat();
 
+		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
+		std::vector<FileDiff::FileLine> fileLinesTargetAligned;
+		std::vector<FileDiff::FileDiffAction> fileLinesActions;
+
+		int addedCount = 0;
+		int removedCount = 0;
+		int alignedCount = 0;
+
+		FileDiff::alignResults(fileLinesSource, fileLinesTarget,
+							   fileLinesCommon,
+							   &fileLinesSourceAligned, &fileLinesTargetAligned,
+							   &fileLinesActions,
+							   &addedCount,
+							   &removedCount,
+							   &alignedCount);
+
 		int sourceIndex = 0;
 		int targetIndex  = 0;
-		int lcsIndex = 0;
+		int actionIndex = 0;
 
-		while (sourceIndex < fileLinesSource.size() &&
-			   targetIndex < fileLinesTarget.size() &&
-			   lcsIndex < fileLinesCommon.size())
+		while (sourceIndex < fileLinesSourceAligned.size() || targetIndex < fileLinesTargetAligned.size())
 		{
-			const FileDiff::FileLine& sourceLine = fileLinesSource[sourceIndex];
-			const FileDiff::FileLine& targetLine = fileLinesTarget[targetIndex];
-			const FileDiff::FileLine& commonLine = fileLinesCommon[lcsIndex];
+			const FileDiff::FileLine& sourceLine = fileLinesSourceAligned[sourceIndex++];
+			const FileDiff::FileLine& targetLine = fileLinesTargetAligned[targetIndex++];
+			const FileDiff::FileDiffAction action = fileLinesActions[actionIndex++];
 
-			if (sourceLine == commonLine && targetLine == commonLine)
+			if (action == FileDiff::FileDiffAction::Match)
 			{
-				sourceIndex++;
-				targetIndex++;
-				lcsIndex++;
+				continue;
+			}
+
+			diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
+
+			/*
+			if (sourceLine.line == -1)
+			{
+				diffTable->insertRow({QString(), QString(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
 			}
 			else
 			{
-				if (sourceLine == commonLine && targetLine != commonLine)
+				if (targetLine.line == -1)
 				{
-					diffTable->insertRow({QString(), QString(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
-					targetIndex++;
+					diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), QString(), QString()});
 				}
 				else
 				{
-					if (sourceLine != commonLine && targetLine == commonLine)
-					{
-						diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), QString(), QString()});
-						sourceIndex++;
-					}
-					else
-					{
-						if (sourceLine != commonLine && targetLine != commonLine)
-						{
-							diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
-							sourceIndex++;
-							targetIndex++;
-						}
-					}
+					diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
 				}
-			}
+			}*/
 		}
 	}
 	else
@@ -2645,51 +2757,80 @@ void ProjectDiffWorker::comparePropertyObjects(const PropertyObject& sourceObjec
 	std::vector<std::shared_ptr<Property>> sourceProperties = sourceObject.properties();
 	std::vector<std::shared_ptr<Property>> targetProperties = targetObject.properties();
 
-	std::map<QString, int> propertyExistMap;
+	std::map<Hash, QString> allPropertiesMap;
+	std::map<Hash, std::shared_ptr<Property>> sourcePropertyMap;
+	std::map<Hash, std::shared_ptr<Property>> targetPropertyMap;
 
 	for (std::shared_ptr<Property> p : sourceProperties)
 	{
-		propertyExistMap[p->caption()] = 1;
+		// Skip expert properties
+		//
+		if (p->expert() == true && m_diffParams.expertProperties == false)
+		{
+			continue;
+		}
+
+		Hash hash = ::calcHash(p->caption());
+
+		allPropertiesMap[hash] = p->caption();
+
+		sourcePropertyMap[hash] = p;
 	}
+
 	for (std::shared_ptr<Property> p : targetProperties)
 	{
-		propertyExistMap[p->caption()] |= 2;
+		// Skip expert properties
+		//
+		if (p->expert() == true && m_diffParams.expertProperties == false)
+		{
+			continue;
+		}
+
+		Hash hash = ::calcHash(p->caption());
+
+		allPropertiesMap[hash] = p->caption();
+
+		targetPropertyMap[hash] = p;
 	}
 
-	result->reserve(propertyExistMap.size());
+	result->reserve(allPropertiesMap.size());
 
-	for (auto it : propertyExistMap)
+	for (auto it : allPropertiesMap)
 	{
-		const QString& name = it.first;
-		int existCode = it.second;
+		Hash hash = it.first;
 
 		PropertyDiff diff;
-		diff.caption = name;
+		diff.caption =  it.second;	// Name
 
-		if (existCode == 1)
+		auto itSource = sourcePropertyMap.find(hash);
+		auto itTarget = targetPropertyMap.find(hash);
+
+		if (itSource != sourcePropertyMap.end() && itTarget == targetPropertyMap.end())
 		{
 			// Exists only in source
+			//
 			diff.action = PropertyDiff::Action::Removed;
 			result->push_back(diff);
 			continue;
 		}
 
-
-		if (existCode == 2)
+		if (itSource == sourcePropertyMap.end() && itTarget != targetPropertyMap.end())
 		{
 			// Exists only in target
+			//
 			diff.action = PropertyDiff::Action::Added;
 			result->push_back(diff);
 			continue;
 		}
 
-		Q_ASSERT(existCode == 3);
-
 		// Exists in both
+
+		Q_ASSERT(itSource != sourcePropertyMap.end() && itTarget != targetPropertyMap.end());
+
 		diff.action = PropertyDiff::Action::Modified;
 
-		std::shared_ptr<Property> sp = sourceObject.propertyByCaption(name);
-		std::shared_ptr<Property> tp = targetObject.propertyByCaption(name);
+		std::shared_ptr<Property> sp = sourcePropertyMap[hash];
+		std::shared_ptr<Property> tp = targetPropertyMap[hash];
 
 		if (sp == nullptr || tp == nullptr)
 		{
@@ -2925,7 +3066,79 @@ void ProjectDiffWorker::fillDiffTable(ReportTable* diffTable, const std::vector<
 			break;
 		case PropertyDiff::Action::Modified:
 			{
-				diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
+				if (diff.oldValueText.length() > 256 || diff.newValueText.length() > 256)
+				{
+					diffTable->insertRow({diff.caption, tr("Modified"), tr("<Long Data Array>"), tr("<Long Data Array>")});
+					/*
+					QStringList sourceText;
+					QStringList targetText;
+
+					// Compare text using diff
+
+					std::vector<FileDiff::FileLine> fileLinesSource;
+					std::vector<FileDiff::FileLine> fileLinesTarget;
+					std::vector<FileDiff::FileLine> fileLinesCommon;
+
+					FileDiff::loadFileData(diff.oldValueText.toUtf8(), &fileLinesSource);
+					FileDiff::loadFileData(diff.newValueText.toUtf8(), &fileLinesTarget);
+
+					fileLinesCommon.reserve(static_cast<int>(fileLinesSource.size() + fileLinesTarget.size()));
+
+					FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
+
+					int addedCount = 0;
+					int removedCount = 0;
+					int alignedCount = 0;
+
+					std::vector<FileDiff::FileLine> fileLinesSourceAligned;
+					std::vector<FileDiff::FileLine> fileLinesTargetAligned;
+					std::vector<FileDiff::FileDiffAction> fileLinesActions;
+
+					FileDiff::alignResults(fileLinesSource, fileLinesTarget,
+										   fileLinesCommon,
+										   &fileLinesSourceAligned, &fileLinesTargetAligned,
+										   &fileLinesActions,
+										   &addedCount,
+										   &removedCount,
+										   &alignedCount);
+
+					int sourceIndex = 0;
+					int targetIndex  = 0;
+					//int actionIndex = 0;
+
+					while (sourceIndex < fileLinesSourceAligned.size() || targetIndex < fileLinesTargetAligned.size())
+					{
+						const FileDiff::FileLine& sourceLine = fileLinesSourceAligned[sourceIndex];
+						const FileDiff::FileLine& targetLine = fileLinesTargetAligned[targetIndex];
+
+						if (sourceLine.line == -1)
+						{
+							sourceText.push_back(QString());
+						}
+						else
+						{
+							sourceText.push_back(tr("%1 %2").arg(sourceLine.line).arg(sourceLine.text.trimmed()));
+						}
+
+						if (targetLine.line == -1)
+						{
+							targetText.push_back(QString());
+						}
+						else
+						{
+							targetText.push_back(tr("%1 %2").arg(targetLine.line).arg(targetLine.text.trimmed()));
+						}
+
+						sourceIndex++;
+						targetIndex++;
+					}
+
+					diffTable->insertRow({diff.caption, tr("Modified"), sourceText.join('\n'), targetText.join('\n')});*/
+				}
+				else
+				{
+					diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
+				}
 			}
 			break;
 		}
@@ -2936,10 +3149,24 @@ void ProjectDiffWorker::fillDiffTable(ReportTable* diffTable, const std::vector<
 
 QString ProjectDiffWorker::changesetString(const std::shared_ptr<DbFile>& file)
 {
-	return tr("#%1 (%2), %3").arg(file->changeset()).arg(file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(file->userId()));
+	if (file->changeset() == 0)
+	{
+		return tr("Checked Out at %1 by %2").arg(file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(file->userId()));
+	}
+	else
+	{
+		return tr("#%1 at %2 by %3").arg(file->changeset()).arg(file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(file->userId()));
+	}
 }
 
 QString ProjectDiffWorker::changesetString(const Signal& signal)
 {
-	return tr("#%1 (%2), %3").arg(signal.changesetID()).arg(signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(signal.userID()));
+	if (signal.changesetID() == 0)
+	{
+		return tr("Checked Out %1 by %2").arg(signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(signal.userID()));
+	}
+	else
+	{
+		return tr("#%1 at %2 by %3").arg(signal.changesetID()).arg(signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(signal.userID()));
+	}
 }

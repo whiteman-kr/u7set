@@ -2,10 +2,11 @@
 #include "ui_DialogProjectDiff.h"
 #include "../../lib/DbController.h"
 #include "SelectChangesetDialog.h"
-#include "../ProjectDiffGenerator.h"
+
+ProjectDiffParams DialogProjectDiff::m_diffParams;
 
 DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogProjectDiff),
 	m_db(db)
 {
@@ -37,18 +38,32 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	connect(ui->sourceTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogProjectDiff::versionTypeChanged);
 	connect(ui->targetTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogProjectDiff::versionTypeChanged);
 
+	// Select default file types if they are not selected
 	//
-
-	std::map<int, QString> filesTypesNamesMap = ProjectDiffGenerator::filesTypesNamesMap(db);
-
-	for (auto it : filesTypesNamesMap)
+	if (m_diffParams.projectFileTypes.empty() == true)
 	{
-		QListWidgetItem* item = new QListWidgetItem(tr("%1 - %2").arg(it.first).arg(it.second));
-		item->setData(Qt::UserRole, it.first);
-		item->setCheckState(Qt::Checked);
-
-		ui->categoriesList->insertItem(ui->categoriesList->count(), item);
+		m_diffParams.projectFileTypes = ProjectDiffGenerator::defaultProjectFileTypes(db);
 	}
+
+	// Fill file types list
+	//
+	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
+	{
+		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.fileName));
+
+		if (ft.selected == true)
+		{
+			item->setCheckState(Qt::Checked);
+		}
+		else
+		{
+			item->setCheckState(Qt::Unchecked);
+		}
+
+		ui->categoriesList->addItem(item);
+	}
+
+	ui->expertPropertiesCheck->setChecked(m_diffParams.expertProperties == true);
 
 	return;
 
@@ -59,14 +74,9 @@ DialogProjectDiff::~DialogProjectDiff()
 	delete ui;
 }
 
-CompareData DialogProjectDiff::compareDataResult() const
+ProjectDiffParams DialogProjectDiff::diffParams() const
 {
-	return m_compareDataResult;
-}
-
-std::map<int, QString> DialogProjectDiff::fileTypesMap() const
-{
-	return m_fileTypesMapResult;
+	return m_diffParams;
 }
 
 void DialogProjectDiff::showEvent(QShowEvent*)
@@ -240,23 +250,34 @@ void DialogProjectDiff::done(int r)
 		return;
 	}
 
-	m_compareDataResult = compareData;
+	m_diffParams.compareData = compareData;
 
-	m_fileTypesMapResult.clear();
+	int selectedCount = 0;
+
+	if (ui->categoriesList->count() != m_diffParams.projectFileTypes.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	for (int i = 0; i < ui->categoriesList->count(); i++)
 	{
 		QListWidgetItem* item = ui->categoriesList->item(i);
-		if (item->checkState() == Qt::Checked)
+
+		m_diffParams.projectFileTypes[i].selected = item->checkState() == Qt::Checked;
+		if (m_diffParams.projectFileTypes[i].selected == true)
 		{
-			m_fileTypesMapResult[item->data(Qt::UserRole).toInt()] = item->text();
+			selectedCount++;
 		}
 	}
 
-	if (m_fileTypesMapResult.empty() == true)
+	if (selectedCount == 0)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Please select at least one file category!"));
 		return;
 	}
+
+	m_diffParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
 
 	QDialog::done(r);
 }

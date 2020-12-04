@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "GlobalMessanger.h"
+#include "../ProjectDiffGenerator.h"
 
 namespace Ui {
 	class DialogProjectDiff;
@@ -18,8 +19,7 @@ public:
 	explicit DialogProjectDiff(DbController* db, QWidget *parent = nullptr);
 	~DialogProjectDiff();
 
-	CompareData compareDataResult() const;
-	std::map<int, QString> fileTypesMap() const;
+	ProjectDiffParams diffParams() const;
 
 protected:
 	virtual void showEvent(QShowEvent* event) override;
@@ -32,7 +32,6 @@ private slots:
 	virtual void done(int r) override;
 
 	void on_buttonSelectAll_clicked();
-
 	void on_buttonSelectNone_clicked();
 
 private:
@@ -42,8 +41,8 @@ private:
 private:
 	Ui::DialogProjectDiff *ui;
 
-	CompareData m_compareDataResult;
-	std::map<int, QString> m_fileTypesMapResult;
+static ProjectDiffParams m_diffParams;
+
 };
 
 #endif // DIALOGPROJECTDIFF_H

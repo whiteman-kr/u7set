@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>409</height>
+    <width>395</width>
+    <height>463</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Project Differences Report</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="3">
@@ -89,8 +89,12 @@
       <string>Target Version</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,0,2,0">
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="targetChangesetLineEdit"/>
+      <item row="0" column="2">
+       <widget class="QLabel" name="targetChangesetLabel">
+        <property name="text">
+         <string>Changeset:</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="targetTypeLabel">
@@ -101,13 +105,6 @@
       </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="targetTypeComboBox"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="targetChangesetLabel">
-        <property name="text">
-         <string>Changeset:</string>
-        </property>
-       </widget>
       </item>
       <item row="0" column="4">
        <widget class="QPushButton" name="targetChangesetButton">
@@ -133,6 +130,9 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="targetChangesetLineEdit"/>
+      </item>
      </layout>
     </widget>
    </item>
@@ -145,7 +145,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Files to process:</string>
+      <string>Files Groups to process:</string>
      </property>
     </widget>
    </item>
@@ -183,7 +183,27 @@
      </property>
     </spacer>
    </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="expertPropertiesCheck">
+     <property name="text">
+      <string>Compare Expert properties</string>
+     </property>
+    </widget>
+   </item>
    <item row="6" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>134</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="1" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

@@ -238,8 +238,8 @@ public:
 	struct FileLine
 	{
 		QString text;
-		int line;
-		Hash hash;
+		int line = -1;
+		Hash hash = UNDEFINED_HASH;
 
 		bool operator == (const FileLine& That) const
 		{
@@ -247,12 +247,30 @@ public:
 		}
 		bool operator != (const FileLine& That) const
 		{
-			return text != That.text;
+			return hash != That.hash;
 		}
 	};
 
+	enum class FileDiffAction
+	{
+		Added,
+		Removed,
+		Modified,
+		Match
+	};
+
 	static void loadFileData(const QByteArray& fileData, std::vector<FileLine>* fileLines);
-	template<typename T> static void calculateLcs(const std::vector<T>& X, const std::vector<T>& Y, std::vector<T>* result);
+
+	template<typename T> static void calculateLcs(const std::vector<T>& source, const std::vector<T>& target, std::vector<T>* result);
+
+	template<typename T>
+	static void alignResults(const std::vector<T>& source, const std::vector<T>& target,
+							 const std::vector<T>& lcs,
+							 std::vector<T>* sourceAligned, std::vector<T>* targetAligned,
+							 std::vector<FileDiffAction>* actions,
+							 int* addedCount,
+							 int* removedCount,
+							 int* alignedCount);
 };
 
 struct FileDiffPair
@@ -260,10 +278,6 @@ struct FileDiffPair
 	QString sourceText;
 	QString targetText;
 };
-
-//
-// PropertyDiff
-//
 
 struct PropertyDiff
 {
@@ -284,18 +298,37 @@ struct PropertyDiff
 	QString newValueText;
 };
 
+struct ProjectFileType
+{
+	ProjectFileType(int fileId, const QString& fileName, bool selected)
+	{
+		this->fileId = fileId;
+		this->fileName = fileName;
+		this->selected = selected;
+	}
+
+	int fileId = -1;
+	QString fileName;
+	bool selected = false;
+};
+
+struct ProjectDiffParams
+{
+	CompareData compareData;
+	std::vector<ProjectFileType> projectFileTypes;
+	bool expertProperties = false;
+};
 
 class ProjectDiffGenerator
 {
 public:
-	static void run(const CompareData& compareData,
-					std::map<int, QString> fileTypesMap,
+	static void run(const ProjectDiffParams& settings,
 					const QString& projectName,
 					const QString& userName,
 					const QString& userPassword,
 					QWidget* parent);
 
-	static std::map<int, QString> filesTypesNamesMap(DbController* db);
+	static std::vector<ProjectFileType> defaultProjectFileTypes(DbController* db);
 
 	static int applicationSignalsTypeId() { return -256; }
 };
@@ -310,8 +343,7 @@ class ProjectDiffWorker : public ReportGenerator
 
 public:
 	ProjectDiffWorker(const QString& fileName,
-					  const CompareData& compareData,
-					  std::map<int, QString> fileTypesMap,
+					  const ProjectDiffParams& settings,
 					  std::shared_ptr<ReportSchemaView> schemaView,
 					  const QString& projectName,
 					  const QString& userName,
@@ -408,11 +440,12 @@ private:
 
 private:
 	DbController m_db;
+
+	ProjectDiffParams m_diffParams;
+
 	QString m_projectName;
 	QString m_userName;
 	QString m_userPassword;
-
-	CompareData m_compareData;
 
 	QFont m_headerFont;
 	QFont m_normalFont;
@@ -443,8 +476,6 @@ private:
 
 
 	bool m_stop = false;	// Stop processing flag, set by stop()
-
-	std::map<int, QString> m_fileTypesNamesMap;
 
 };
 
