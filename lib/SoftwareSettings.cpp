@@ -11,6 +11,10 @@
 //
 // -------------------------------------------------------------------------------------
 
+SoftwareSettings::SoftwareSettings(const SoftwareSettings&)
+{
+}
+
 SoftwareSettings::~SoftwareSettings()
 {
 }
@@ -1790,12 +1794,12 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xmlReader)
 
 QStringList MonitorSettings::getSchemaTags() const
 {
-	return  schemaTags.split(Separator::SEMICOLON);
+	return  schemaTags.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
 
 QStringList MonitorSettings::getTuningSources() const
 {
-	return  tuningSources.split(Separator::SEMICOLON);
+	return  tuningSources.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
 
 void MonitorSettings::clear()
@@ -2222,12 +2226,12 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xmlReader)
 
 QStringList TuningClientSettings::getSchemaTags() const
 {
-	return  schemaTags.split(Separator::SEMICOLON);
+	return  schemaTags.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
 
 QStringList TuningClientSettings::getUsersAccounts() const
 {
-	return  usersAccounts.split(Separator::SEMICOLON);
+	return  usersAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
 
 #ifdef IS_BUILDER

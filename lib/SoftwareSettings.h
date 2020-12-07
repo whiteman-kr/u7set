@@ -11,8 +11,9 @@
 class SoftwareSettings : public QObject
 {
 public:
+	SoftwareSettings() = default;
+	SoftwareSettings(const SoftwareSettings&);
 	virtual ~SoftwareSettings();
-
 
 	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
@@ -162,6 +163,9 @@ public:
 class TuningServiceSettings : public SoftwareSettings
 {
 public:
+	TuningServiceSettings() = default;
+	TuningServiceSettings(const TuningServiceSettings&) = default;
+
 	struct TuningClient
 	{
 		QString equipmentID;

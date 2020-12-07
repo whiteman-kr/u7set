@@ -1089,8 +1089,8 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	QRegion visiblePart = visibleRegion();
 
-	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
-	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
+	const double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
+	const double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
 
 	std::vector<QPointF> points;
 	points.reserve(1024);
@@ -7671,36 +7671,69 @@ void EditSchemaWidget::editPaste()
 
 			SchemaItemPtr schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
 
-			if (schemaItem != nullptr)
+			if (schemaItem == nullptr)
 			{
-				schemaItem->setNewGuid();
-				itemList.push_back(schemaItem);
+				Q_ASSERT(schemaItem);
+				continue;
 			}
 
-			if (schemaItem->isSchemaItemAfb() == true)
+			// --
+			//
+			if (schemaItem->itemUnit() != schema()->unit())
 			{
-				schemaItemAfbIsPresent = true;
+				continue;	// No transform, the problem is: we need to transform pos, height, points pos
+							// it's all ok, BUT also we need to trasform lineWeight, TextSize and maybe something else
+							// and these properties can variy from item to item.
+
+//				// Transform units
+//				//
+//				double xf = 1.0;
+//				double yf = 1.0;
+
+//				if (schemaItem->itemUnit() == VFrame30::SchemaUnit::Display)
+//				{
+//					Q_ASSERT(schema()->unit() == VFrame30::SchemaUnit::Inch);
+
+//					xf = this->logicalDpiX();
+//					yf = this->logicalDpiY();
+//				}
+//				else
+//				{
+//					Q_ASSERT(schema()->unit() == VFrame30::SchemaUnit::Display);
+
+//					xf = 1.0 / this->logicalDpiX();
+//					yf = 1.0 / this->logicalDpiY();
+//				}
+
+//				if (VFrame30::PosRectImpl* posRect = schemaItem->toType<VFrame30::PosRectImpl>();
+//					posRect != nullptr)
+//				{
+//					schemaItem->setItemUnit(schema()->unit());
+
+//					posRect->moveItem(posRect->leftDocPt() * xf, posRect->topDocPt() * yf);
+
+//					posRect->SetWidthInDocPt(posRect->GetWidthInDocPt() * xf);
+//					posRect->SetHeightInDocPt(posRect->GetHeightInDocPt() * yf);
+//				}
+
+//				if (VFrame30::PosLineImpl* posLine = schemaItem->toType<VFrame30::PosLineImpl>();
+//					posLine != nullptr)
+//				{
+//				}
 			}
 
-			if (schemaItem->isType<VFrame30::SchemaItemUfb>() == true)
-			{
-				schemaItemUfbIsPresent = true;
-			}
+			// --
+			//
+			schemaItem->setNewGuid();
+			itemList.push_back(schemaItem);
 
-			if (schemaItem->isType<VFrame30::SchemaItemBus>() == true)
-			{
-				schemaItemBusIsPresent = true;
-			}
-
-			if (schemaItem->isType<VFrame30::SchemaItemConnection>() == true)
-			{
-				schemaItemConnectionIsPresent = true;
-			}
-
-			if (schemaItem->isType<VFrame30::SchemaItemInOut>() == true)
-			{
-				schemaItemInOutIsPresent = true;
-			}
+			// --
+			//
+			schemaItemAfbIsPresent |= schemaItem->isSchemaItemAfb();
+			schemaItemUfbIsPresent |= schemaItem->isType<VFrame30::SchemaItemUfb>();
+			schemaItemBusIsPresent |= schemaItem->isType<VFrame30::SchemaItemBus>();
+			schemaItemConnectionIsPresent |= schemaItem->isType<VFrame30::SchemaItemConnection>();
+			schemaItemInOutIsPresent |= schemaItem->isType<VFrame30::SchemaItemInOut>();
 
 			{
 				// set label to it

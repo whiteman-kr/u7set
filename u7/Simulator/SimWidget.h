@@ -64,7 +64,7 @@ protected slots:
 	void pauseSimulation();
 	void stopSimulation(bool stopSimulationThread = false);
 
-	void allowRegDataToggled(bool state);
+	void allowLanCommToggled(bool state);
 
 	void showSnapshot();
 	void showFindSignal();
@@ -118,7 +118,7 @@ private:
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
 
-	QAction* m_allowRegData = nullptr;
+	QAction* m_allowLanComm = nullptr;
 
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;

@@ -517,7 +517,10 @@ void SignalInfoPanel::createContextMenu()
 
 	// append signal connection items
 	//
-	appendSignalConnetionMenu();
+	if (m_measureKind != MEASURE_KIND_ONE_RACK)
+	{
+		appendSignalConnetionMenu();
+	}
 
 	//
 	//
@@ -531,6 +534,25 @@ void SignalInfoPanel::createContextMenu()
 	m_pShowElectricValueAction->setCheckable(true);
 	m_pShowElectricValueAction->setChecked(m_signalInfo.showElectricState());
 
+	if (m_measureKind == MEASURE_KIND_ONE_RACK)
+	{
+		if (m_signalParamTable.signalCount() > 1)
+		{
+			m_pShowMenu->addSeparator();
+
+			if ( m_pView->currentIndex().row() > 0)
+			{
+				m_pShowSignalMoveUpAction = m_pShowMenu->addAction(tr("Move Up"));
+				connect(m_pShowSignalMoveUpAction, &QAction::triggered, this, &SignalInfoPanel::showSignalMoveUp);
+			}
+
+			if ( m_pView->currentIndex().row() < m_signalParamTable.signalCount() - 1)
+			{
+				m_pShowSignalMoveDownAction = m_pShowMenu->addAction(tr("Move Down"));
+				connect(m_pShowSignalMoveDownAction, &QAction::triggered, this, &SignalInfoPanel::showSignalMoveDown);
+			}
+		}
+	}
 
 	m_pContextMenu->addMenu(m_pShowMenu);
 
@@ -621,6 +643,7 @@ void SignalInfoPanel::appendSignalConnetionMenu()
 
 	m_pContextMenu->addSeparator();
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -724,6 +747,18 @@ bool SignalInfoPanel::eventFilter(QObject *object, QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalInfoPanel::measureKindChanged(int kind)
+{
+	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	m_measureKind = kind;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void SignalInfoPanel::signalConnectionTypeChanged(int type)
 {
 	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
@@ -808,7 +843,6 @@ void SignalInfoPanel::updateSignalState()
 	m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_STATE);
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalInfoPanel::onConnectionAction(QAction* action)
@@ -850,7 +884,7 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 		return;
 	}
 
-	emit updateActiveOutputSignal(channel, pOutputSignal);
+	emit changeActiveSignalOutput(channel, pOutputSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -869,6 +903,70 @@ void SignalInfoPanel::showElectricValue()
 	m_signalInfo.setShowElectricState(m_pShowElectricValueAction->isChecked());
 	m_signalParamTable.setSignalInfo(m_signalInfo);
 	m_signalInfo.save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showSignalMoveUp()
+{
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_signalParamTable.signalCount())
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select signal for move!"));
+		return;
+	}
+
+	IoSignalParam ioParam = m_signalParamTable.signalParam(index);
+	if (ioParam.isValid() == false)
+	{
+		return;
+	}
+
+	int indexPrev = index - 1;
+	if (indexPrev < 0 || indexPrev >= m_signalParamTable.signalCount())
+	{
+		return;
+	}
+
+	IoSignalParam ioParamPrev = m_signalParamTable.signalParam(indexPrev);
+	if (ioParamPrev.isValid() == false)
+	{
+		return;
+	}
+
+	emit changeActiveSignalOutputs(index, indexPrev);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showSignalMoveDown()
+{
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_signalParamTable.signalCount())
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select signal for move!"));
+		return;
+	}
+
+	IoSignalParam ioParam = m_signalParamTable.signalParam(index);
+	if (ioParam.isValid() == false)
+	{
+		return;
+	}
+
+	int indexNext = index + 1;
+	if (indexNext < 0 || indexNext >= m_signalParamTable.signalCount())
+	{
+		return;
+	}
+
+	IoSignalParam ioParamNext = m_signalParamTable.signalParam(indexNext);
+	if (ioParamNext.isValid() == false)
+	{
+		return;
+	}
+
+	emit changeActiveSignalOutputs(index, indexNext);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

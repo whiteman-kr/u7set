@@ -11,8 +11,7 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 {
 	if (m_settings != nullptr)
 	{
-		delete m_settings;
-		m_settings = nullptr;
+		m_settings = {};
 	}
 
 	if (xmlReader.checkElement(XmlElement::SOFTWARE) == false)
@@ -49,39 +48,39 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 		break;
 
 	case E::SoftwareType::ConfigurationService:
-		m_settings = new CfgServiceSettings;
+		m_settings = std::make_shared<CfgServiceSettings>();
 		break;
 
 	case E::SoftwareType::AppDataService:
-		m_settings = new AppDataServiceSettings;
+		m_settings = std::make_shared<AppDataServiceSettings>();
 		break;
 
 	case E::SoftwareType::DiagDataService:
-		m_settings = new DiagDataServiceSettings;
+		m_settings = std::make_shared<DiagDataServiceSettings>();
 		break;
 
 	case E::SoftwareType::ArchiveService:
-		m_settings = new ArchivingServiceSettings;
+		m_settings = std::make_shared<ArchivingServiceSettings>();
 		break;
 
 	case E::SoftwareType::TuningService:
-		m_settings = new TuningServiceSettings;
+		m_settings = std::make_shared<TuningServiceSettings>();
 		break;
 
 	case E::SoftwareType::TestClient:
-		m_settings = new TestClientSettings;
+		m_settings = std::make_shared<TestClientSettings>();
 		break;
 
 	case E::SoftwareType::Metrology:
-		m_settings = new MetrologySettings;
+		m_settings = std::make_shared<MetrologySettings>();
 		break;
 
 	case E::SoftwareType::Monitor:
-		m_settings = new MonitorSettings;
+		m_settings = std::make_shared<MonitorSettings>();
 		break;
 
 	case E::SoftwareType::TuningClient:
-		m_settings = new TuningClientSettings;
+		m_settings = std::make_shared<TuningClientSettings>();
 		break;
 
 	default:
@@ -106,7 +105,7 @@ const CfgServiceSettings* SoftwareXmlInfo::cfgServiceSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::ConfigurationService);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const CfgServiceSettings*>(m_settings);
+	return dynamic_cast<const CfgServiceSettings*>(m_settings.get());
 }
 
 const AppDataServiceSettings* SoftwareXmlInfo::appDataServiceSettings() const
@@ -114,7 +113,7 @@ const AppDataServiceSettings* SoftwareXmlInfo::appDataServiceSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::AppDataService);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const AppDataServiceSettings*>(m_settings);
+	return dynamic_cast<const AppDataServiceSettings*>(m_settings.get());
 }
 
 const DiagDataServiceSettings* SoftwareXmlInfo::diagDataServiceSettings() const
@@ -122,7 +121,7 @@ const DiagDataServiceSettings* SoftwareXmlInfo::diagDataServiceSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::DiagDataService);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const DiagDataServiceSettings*>(m_settings);
+	return dynamic_cast<const DiagDataServiceSettings*>(m_settings.get());
 }
 
 const ArchivingServiceSettings* SoftwareXmlInfo::archivingServiceSettings() const
@@ -130,7 +129,7 @@ const ArchivingServiceSettings* SoftwareXmlInfo::archivingServiceSettings() cons
 	Q_ASSERT(softwareType == E::SoftwareType::ArchiveService);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const ArchivingServiceSettings*>(m_settings);
+	return dynamic_cast<const ArchivingServiceSettings*>(m_settings.get());
 }
 
 const TuningServiceSettings* SoftwareXmlInfo::tuningServiceSettings() const
@@ -138,7 +137,7 @@ const TuningServiceSettings* SoftwareXmlInfo::tuningServiceSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::TuningService);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const TuningServiceSettings*>(m_settings);
+	return dynamic_cast<const TuningServiceSettings*>(m_settings.get());
 }
 
 const TestClientSettings* SoftwareXmlInfo::testClientSettings() const
@@ -146,7 +145,7 @@ const TestClientSettings* SoftwareXmlInfo::testClientSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::TestClient);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const TestClientSettings*>(m_settings);
+	return dynamic_cast<const TestClientSettings*>(m_settings.get());
 }
 
 const MetrologySettings* SoftwareXmlInfo::metrologySettings() const
@@ -154,7 +153,7 @@ const MetrologySettings* SoftwareXmlInfo::metrologySettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::Metrology);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const MetrologySettings*>(m_settings);
+	return dynamic_cast<const MetrologySettings*>(m_settings.get());
 }
 
 const MonitorSettings* SoftwareXmlInfo::monitorSettings() const
@@ -162,7 +161,7 @@ const MonitorSettings* SoftwareXmlInfo::monitorSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::Monitor);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const MonitorSettings*>(m_settings);
+	return dynamic_cast<const MonitorSettings*>(m_settings.get());
 }
 
 const TuningClientSettings* SoftwareXmlInfo::tuningClientSettings() const
@@ -170,7 +169,7 @@ const TuningClientSettings* SoftwareXmlInfo::tuningClientSettings() const
 	Q_ASSERT(softwareType == E::SoftwareType::TuningClient);
 	Q_ASSERT(m_settings != nullptr);
 
-	return dynamic_cast<const TuningClientSettings*>(m_settings);
+	return dynamic_cast<const TuningClientSettings*>(m_settings.get());
 }
 
 // -----------------------------------------------------------------------------------------------

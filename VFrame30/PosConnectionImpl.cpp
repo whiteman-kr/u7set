@@ -456,7 +456,7 @@ namespace VFrame30
 		return false;
 	}
 
-	QRectF PosConnectionImpl::boundingRectInDocPt(CDrawParam* /*drawParam*/) const
+	QRectF PosConnectionImpl::boundingRectInDocPt(const CDrawParam* /*drawParam*/) const
 	{
 		if (points.size() == 0)
 		{

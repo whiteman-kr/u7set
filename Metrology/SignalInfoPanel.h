@@ -135,6 +135,8 @@ private:
 	QMenu*					m_pContextMenu = nullptr;
 	QAction*				m_pShowNoValidAction = nullptr;
 	QAction*				m_pShowElectricValueAction = nullptr;
+	QAction*				m_pShowSignalMoveUpAction = nullptr;
+	QAction*				m_pShowSignalMoveDownAction = nullptr;
 	QAction*				m_pCopyAction = nullptr;
 	QAction*				m_pSignalPropertyAction = nullptr;
 
@@ -160,6 +162,7 @@ private:
 	CalibratorBase*			m_pCalibratorBase = nullptr;
 	SignalInfoOption		m_signalInfo;
 
+	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
 
 public:
@@ -174,16 +177,19 @@ protected:
 
 	bool					eventFilter(QObject *object, QEvent *event);
 
-signals:
-
-	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
-
 public slots:
 
+	void					measureKindChanged(int kind);
 	void					signalConnectionTypeChanged(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateSignalState();										// slot informs that signal for measure has updated his state
+
+signals:
+
+	void					changeActiveSignalOutputs(int channelPrev, int channelNext);
+
+	void					changeActiveSignalOutput(int channel, Metrology::Signal* pOutputSignal);
 
 private slots:
 
@@ -192,6 +198,8 @@ private slots:
 	void					onConnectionAction(QAction* action);
 	void					showNoValid();
 	void					showElectricValue();
+	void					showSignalMoveUp();
+	void					showSignalMoveDown();
 	void					copy();
 	void					signalProperty();
 

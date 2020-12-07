@@ -6,24 +6,20 @@
 namespace VFrame30
 {
 
-	MonitorSchema::MonitorSchema(void)
+	MonitorSchema::MonitorSchema(void) :
+		Schema()
 	{
-		//qDebug() << "MonitorSchema::MonitorSchema(void)";
+		setUnit(SchemaUnit::Inch);
 
-		setUnit(SchemaUnit::Display);
-
-		setGridSize(Settings::defaultGridSize(unit()));
-		setPinGridStep(20);
-
-		setDocWidth(1000);
-		setDocHeight(750);
+		setDocWidth(mm2in(420));
+		setDocHeight(mm2in(297));
 
 		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
 
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
-		setTagsList(QStringList{"Monitor"});
+		setTagsList(QStringList{"monitor"});
 
 		return;
 	}

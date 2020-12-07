@@ -112,7 +112,8 @@ private:
 	// function of measure
 	//
 	void					measureLinearity();
-	void					measureComprators();
+	void					measureCompratorsInSeries();
+	void					measureCompratorsInParallel();
 
 	// function for tunning signal
 	//

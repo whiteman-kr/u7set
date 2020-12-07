@@ -14,8 +14,8 @@ namespace VFrame30
 	const QColor SchemaItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
 	const QColor SchemaItem::lockedSelectionColor(0xF0, 0x80, 0x80, 0xB0);
 	const QColor SchemaItem::commentedColor(0xE0, 0xE0, 0xEF, 0xC0);
-	const QColor SchemaItem::highlightColor1(0x33, 0x99, 0xFF, 0xE0);
-	const QColor SchemaItem::highlightColor2(0x00, 0x00, 0x00, 0x00);	// Transparent
+	const QColor SchemaItem::highlightColor1(0x33, 0x99, 0xFF, 0x50);
+	const QColor SchemaItem::highlightColor2(0x33, 0x99, 0xFF, 0x18);	// Transparent
 
 	// SchemaItem
 	//
@@ -700,17 +700,17 @@ namespace VFrame30
 	// Properties and Data
 	//
 
-	bool SchemaItem::IsStatic() const
+	bool SchemaItem::IsStatic() const noexcept
 	{
 		return m_static;
 	}
 
-	bool SchemaItem::IsDynamic() const
+	bool SchemaItem::IsDynamic() const noexcept
 	{
 		return !m_static;
 	}
 
-	bool SchemaItem::isFblItemRect() const
+	bool SchemaItem::isFblItemRect() const noexcept
 	{
 		return dynamic_cast<const FblItemRect*>(this) != nullptr;
 	}
@@ -725,7 +725,7 @@ namespace VFrame30
 		return dynamic_cast<const FblItemRect*>(this);
 	}
 
-	bool SchemaItem::isFblItem() const
+	bool SchemaItem::isFblItem() const noexcept
 	{
 		return dynamic_cast<const FblItem*>(this) != nullptr;
 	}
@@ -740,7 +740,7 @@ namespace VFrame30
 		return dynamic_cast<const FblItem*>(this);
 	}
 
-	bool SchemaItem::isSchemaItemAfb() const
+	bool SchemaItem::isSchemaItemAfb() const noexcept
 	{
 		return dynamic_cast<const SchemaItemAfb*>(this) != nullptr;
 	}
@@ -755,12 +755,12 @@ namespace VFrame30
 		return dynamic_cast<const SchemaItemAfb*>(this);
 	}
 
-	bool SchemaItem::isControl() const
+	bool SchemaItem::isControl() const noexcept
 	{
 		return dynamic_cast<const SchemaItemControl*>(this) != nullptr;
 	}
 
-	bool SchemaItem::isLocked() const
+	bool SchemaItem::isLocked() const noexcept
 	{
 		return m_locked;
 	}
@@ -771,12 +771,12 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItem::isCommented() const
+	bool SchemaItem::isCommented() const noexcept
 	{
 		return m_commented;
 	}
 
-	bool SchemaItem::commented() const
+	bool SchemaItem::commented() const noexcept
 	{
 		return m_commented;
 	}
@@ -786,7 +786,7 @@ namespace VFrame30
 		m_commented = value;
 	}
 
-	QUuid SchemaItem::guid() const
+	QUuid SchemaItem::guid() const noexcept
 	{
 		return m_guid;
 	}
@@ -813,7 +813,7 @@ namespace VFrame30
 
 	// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 	//
-	SchemaUnit SchemaItem::itemUnit() const
+	SchemaUnit SchemaItem::itemUnit() const noexcept
 	{
 		return m_itemUnit;
 	}
@@ -824,7 +824,7 @@ namespace VFrame30
 		m_itemUnit = value;
 	}
 
-	QString SchemaItem::label() const
+	QString SchemaItem::label() const noexcept
 	{
 		return m_label;
 	}
@@ -834,7 +834,7 @@ namespace VFrame30
 		m_label = value;
 	}
 
-	E::TextPos SchemaItem::labelPos() const
+	E::TextPos SchemaItem::labelPos() const noexcept
 	{
 		return m_labelPos;
 	}
@@ -846,7 +846,7 @@ namespace VFrame30
 
 	// AcceptClick property
 	//
-	bool SchemaItem::acceptClick() const
+	bool SchemaItem::acceptClick() const noexcept
 	{
 		return m_acceptClick;
 	}
@@ -858,7 +858,7 @@ namespace VFrame30
 
 	// ClickScript property
 	//
-	QString SchemaItem::clickScript() const
+	QString SchemaItem::clickScript() const noexcept
 	{
 		return m_clickScript;
 	}
@@ -868,7 +868,7 @@ namespace VFrame30
 		m_clickScript = value;
 	}
 
-	QString SchemaItem::preDrawScript() const
+	QString SchemaItem::preDrawScript() const noexcept
 	{
 		return m_preDrawScript;
 	}
@@ -878,7 +878,7 @@ namespace VFrame30
 		m_preDrawScript = value;
 	}
 
-	bool SchemaItem::blinkPhase() const
+	bool SchemaItem::blinkPhase() const noexcept
 	{
 		if (m_drawParam != nullptr && m_drawParam->isMonitorMode() == true)
 		{
@@ -900,7 +900,7 @@ namespace VFrame30
 		m_drawParam = value;
 	}
 
-	QRectF SchemaItem::boundingRectInDocPt(CDrawParam* /*drawParam*/) const
+	QRectF SchemaItem::boundingRectInDocPt(const CDrawParam* /*drawParam*/) const
 	{
 		assert(false);		// Must be implemented in child classes
 		return QRectF();
@@ -913,7 +913,7 @@ namespace VFrame30
 		return {};
 	}
 
-	QString SchemaItem::lastScriptError() const
+	QString SchemaItem::lastScriptError() const noexcept
 	{
 		return m_lastScriptError;
 	}

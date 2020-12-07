@@ -62,6 +62,15 @@ public:
 
 // ==============================================================================================
 
+const double			MeasurePointValue[] =
+{
+						5, 20, 40, 50, 60, 80, 95
+};
+
+const int				MeasurePointValueCount = sizeof(MeasurePointValue)/sizeof(MeasurePointValue[0]);
+
+// ----------------------------------------------------------------------------------------------
+
 class MeasurePointBase : public QObject
 {
 	Q_OBJECT

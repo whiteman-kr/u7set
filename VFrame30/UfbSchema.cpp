@@ -15,16 +15,13 @@ namespace VFrame30
 
 		setUnit(SchemaUnit::Inch);
 
-		setGridSize(Settings::defaultGridSize(unit()));
-		setPinGridStep(4);
-
 		setDocWidth(mm2in(297));
 		setDocHeight(mm2in(210));
 
 		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
 
-		setTagsList(QStringList{"UFB"});
+		setTagsList(QStringList{"ufb"});
 
 		return;
 	}
@@ -51,7 +48,7 @@ namespace VFrame30
 
 		us->set_description(m_description.toStdString());
 
-		const_cast<UfbSchema*>(this)->m_version++;		// Incerement version
+		this->m_version++;		// Incerement version
 		us->set_version(m_version);
 		us->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
 

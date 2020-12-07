@@ -157,11 +157,11 @@ namespace Sim
 				bool ok = true;
 				if (tuningMode == 1)
 				{
-					ok = tuningEnterTuningMode();
+					ok = m_device->tuningEnterTuningMode();
 				}
 				else
 				{
-					ok = tuningLeaveTuningMode();
+					ok = m_device->tuningLeaveTuningMode();
 				}
 
 				if (ok == false)
@@ -172,80 +172,12 @@ namespace Sim
 
 			if (m_device->testTuningApplyCommand(false) == true)
 			{
-				tuningApplyCommand();
+				m_device->tuningApplyCommand();
 			}
 		}
 
 		bool ok = setRuntimeModeSignals();
 
-		return ok;
-	}
-
-	bool CommandProcessor_LM5_LM6::tuningEnterTuningMode()
-	{
-		// Device just entered to TuningMode.
-		// The copy of tuning memory is done here
-		//
-		const LmDescription::Memory& memory = m_device->lmDescription().memory();
-
-		Ram::Handle ramAreaHandle = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
-		const RamArea* tuningRamArea = m_device->ram().memoryArea(ramAreaHandle);
-
-		if (tuningRamArea == nullptr)
-		{
-			m_device->fault(QString("Getting tuning ram area error, offset 0x%1")
-							  .arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
-							"CommandProcessor_LM5_LM6::tuningEnterTuningMode");
-			return false;
-		}
-
-		m_tuningRamArea = *tuningRamArea;
-
-		m_device->setRuntimeMode(RuntimeMode::TuningMode);
-
-		return true;
-	}
-
-	bool CommandProcessor_LM5_LM6::tuningLeaveTuningMode()
-	{
-		if (m_device->runtimeMode() != RuntimeMode::TuningMode)
-		{
-			m_device->fault(QString("Device is not in tuning mode"), "CommandProcessor_LM5_LM6::tuningLeaveTuningMode");
-			return false;
-		}
-
-		// On leaving tuning mode m_tuningRamArea is copied back to RAM
-		//
-		const LmDescription::Memory& memory = m_device->lmDescription().memory();
-
-		Ram::Handle ramAreaHandle = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
-		RamArea* tuningRamArea = m_device->mutableRam().memoryArea(ramAreaHandle);
-
-		if (tuningRamArea == nullptr)
-		{
-			m_device->fault(QString("Getting tuning ram area error, offset 0x%1")
-							  .arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
-							"CommandProcessor_LM5_LM6::tuningLeaveTuningMode");
-			return false;
-		}
-
-		*tuningRamArea = std::move(m_tuningRamArea);
-		m_tuningRamArea.clear();
-
-		m_device->setRuntimeMode(RuntimeMode::RunMode);
-
-		return true;
-	}
-
-	bool CommandProcessor_LM5_LM6::tuningApplyCommand()
-	{
-		if (m_device->runtimeMode() != RuntimeMode::TuningMode)
-		{
-			m_device->fault(QString("Device is not in tuning mode"), "CommandProcessor_LM5_LM6::tuningApplyCommand");
-			return false;
-		}
-
-		bool ok = tuningEnterTuningMode();
 		return ok;
 	}
 

@@ -2,6 +2,66 @@
 #include "ui_DialogTagsEditor.h"
 
 
+QString DialogTagInput::getText(QWidget *parent, const QString &title, const QString &label,
+					const QString &text, const QString& validator, bool *ok)
+{
+	if (ok == nullptr)
+	{
+		Q_ASSERT(ok);
+		return QString();
+	}
+
+	DialogTagInput d(parent, title, label, text, validator);
+	if (d.exec() == QDialog::Accepted)
+	{
+		*ok = true;
+		return d.m_edit->text();
+	}
+
+	*ok = false;
+	return QString();
+}
+
+DialogTagInput::DialogTagInput(QWidget* parent, const QString& title, const QString& label, const QString& text, const QString& validator)
+	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+{
+	setWindowTitle(title);
+
+	QLabel* l = new QLabel();
+	l->setText(label);
+
+	m_edit = new QLineEdit(parent);
+	if (text.isEmpty() == false)
+	{
+		m_edit->setText(text);
+		m_edit->selectAll();
+	}
+	if (validator.isEmpty() == false)
+	{
+		QRegExp rx(validator);
+		m_edit->setValidator(new QRegExpValidator(rx, m_edit));
+	}
+
+	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	buttonsLayout->addStretch();
+
+	QPushButton* b = new QPushButton(tr("OK"));
+	connect(b, &QPushButton::clicked, this, &DialogTagInput::accept);
+	buttonsLayout->addWidget(b);
+
+	b = new QPushButton(tr("Cancel"));
+	connect(b, &QPushButton::clicked, this, &DialogTagInput::reject);
+	buttonsLayout->addWidget(b);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->addWidget(l);
+	mainLayout->addWidget(m_edit);
+	mainLayout->addLayout(buttonsLayout);
+	setLayout(mainLayout);
+
+	return;
+}
+
 //
 //
 // DialogTagsEditorDelegate
@@ -224,9 +284,10 @@ void DialogTagsEditor::on_m_add_clicked()
 	while(true)
 	{
 		bool ok = false;
-		newTag = QInputDialog::getText(this, qAppName(),
-												tr("Please enter tag:"), QLineEdit::Normal,
-												tr("tag"), &ok);
+		newTag = DialogTagInput::getText(this, qAppName(),
+										 tr("Please enter tag:"),
+										 tr("tag"), "^[A-Za-z][A-Za-z_\\d]*$",
+										 &ok);
 
 		if (ok == false)
 		{

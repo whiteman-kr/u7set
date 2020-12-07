@@ -573,11 +573,14 @@ void MainWindow::createPanels()
 
 
 		m_pSignalInfoPanel->setCalibratorBase(&m_calibratorBase);
+		m_pSignalInfoPanel->measureKindChanged(m_measureKind);
 		m_pSignalInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
 
+		connect(this, &MainWindow::measureKindChanged, m_pSignalInfoPanel, &SignalInfoPanel::measureKindChanged, Qt::QueuedConnection);
 		connect(this, &MainWindow::signalConnectionTypeChanged, m_pSignalInfoPanel, &SignalInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
 
-		connect(m_pSignalInfoPanel, &SignalInfoPanel::updateActiveOutputSignal, this, &MainWindow::updateActiveOutputSignal, Qt::QueuedConnection);
+		connect(m_pSignalInfoPanel, &SignalInfoPanel::changeActiveSignalOutput, this, &MainWindow::changeActiveSignalOutput, Qt::QueuedConnection);
+		connect(m_pSignalInfoPanel, &SignalInfoPanel::changeActiveSignalOutputs, this, &MainWindow::changeActiveSignalOutputs, Qt::QueuedConnection);
 	}
 
 	// Panel comparator information
@@ -598,7 +601,11 @@ void MainWindow::createPanels()
 		m_pComparatorInfoPanel->hide();
 
 		m_pComparatorInfoPanel->setCalibratorBase(&m_calibratorBase);
+		m_pComparatorInfoPanel->measureKindChanged(m_measureKind);
 		m_pComparatorInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
+
+		connect(this, &MainWindow::measureKindChanged,
+				m_pComparatorInfoPanel, &ComparatorInfoPanel::measureKindChanged, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::signalConnectionTypeChanged,
 				m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
@@ -1060,6 +1067,17 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 
 	const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
 	if (connection.isValid() == false)
+	{
+		return false;
+	}
+
+	Metrology::Signal* pOutSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+	{
+		return false;
+	}
+
+	if (pOutSignal->param().isInternal() == false)
 	{
 		return false;
 	}
@@ -1994,7 +2012,7 @@ bool MainWindow::setNextMeasureSignalFromModule()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal)
+void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutputSignal)
 {
 	if (m_pSelectSignalWidget == nullptr)
 	{
@@ -2009,6 +2027,12 @@ void MainWindow::updateActiveOutputSignal(int channel, Metrology::Signal* pOutpu
 
 	MeasureSignal measureSignal = theSignalBase.signalForMeasure(index);
 	if (measureSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
 	}
@@ -2030,8 +2054,6 @@ void MainWindow::updateActiveOutputSignal(int channel, Metrology::Signal* pOutpu
 
 	// change
 	//
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-
 	multiChannelSignal.setMetrologySignal(m_measureKind, channel, pOutputSignal);
 
 	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
@@ -2039,7 +2061,82 @@ void MainWindow::updateActiveOutputSignal(int channel, Metrology::Signal* pOutpu
 	// set
 	//
 	bool result = theSignalBase.setSignalForMeasure(index, measureSignal);
+	if (result == false)
+	{
+		return;
+	}
 
+	m_pSelectSignalWidget->updateActiveOutputSignal(measureSignal);
+
+	setAcitiveMeasureSignal(index);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
+{
+	if (m_pSelectSignalWidget == nullptr)
+	{
+		return;
+	}
+
+	int index = m_pSelectSignalWidget->currentSignalIndex();
+	if(index < 0 || index > theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	MeasureSignal measureSignal = theSignalBase.signalForMeasure(index);
+	if (measureSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (multiChannelSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	// get output signals
+	//
+	if (channelPrev < 0 || channelPrev >= measureSignal.channelCount())
+	{
+		return;
+	}
+
+	Metrology::Signal* pOutputSignalPrev = multiChannelSignal.metrologySignal(channelPrev);
+	if (pOutputSignalPrev == nullptr || pOutputSignalPrev->param().isValid() == false)
+	{
+		return;
+	}
+
+	if (channelNext < 0 || channelNext >= measureSignal.channelCount())
+	{
+		return;
+	}
+
+	Metrology::Signal* pOutputSignalNext = multiChannelSignal.metrologySignal(channelNext);
+	if (pOutputSignalNext == nullptr || pOutputSignalNext->param().isValid() == false)
+	{
+		return;
+	}
+
+	// change
+	//
+	multiChannelSignal.setMetrologySignal(m_measureKind, channelPrev, pOutputSignalNext);
+	multiChannelSignal.setMetrologySignal(m_measureKind, channelNext, pOutputSignalPrev);
+
+	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+
+	// set
+	//
+	bool result = theSignalBase.setSignalForMeasure(index, measureSignal);
 	if (result == false)
 	{
 		return;
@@ -2495,7 +2592,6 @@ void MainWindow::measureThreadStoped()
 
 void MainWindow::measureThreadInfo(const MeasureThreadInfo& info)
 {
-
 	switch (info.type())
 	{
 		case MeasureThreadInfo::msgType::String:

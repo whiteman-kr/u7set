@@ -157,7 +157,7 @@ namespace VFrame30
 		//
 		std::shared_ptr<ImageItem> currentImage;
 
-		for (auto i : m_images)
+		for (const auto& i : m_images)
 		{
 			if (i->imageId() == currentImageId())
 			{

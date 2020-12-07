@@ -270,7 +270,7 @@ public:
 		return 0.0;
 	}
 
-	static void ConvertPoint(double& x, double& y, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo, int dpiX, int dpiY)
+	static void ConvertPoint(double& x, double& y, const VFrame30::SchemaUnit convertFrom, const VFrame30::SchemaUnit convertTo, const int dpiX, const int dpiY)
 	{
 		if (convertFrom == convertTo)
 		{

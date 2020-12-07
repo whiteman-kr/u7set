@@ -78,6 +78,7 @@ public slots:
 	void showStatistics();
 	void showAppLog();
 	void showSignalsLog();
+	void showAboutQt();
 	void showAbout();
 	void showTuningUserManual();
 
@@ -110,6 +111,7 @@ private:
 	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pAppLogAction = nullptr;
 	QAction* m_pSignalLogAction = nullptr;
+	QAction* m_aboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 	QAction* m_manualTuningAction = nullptr;
 

@@ -197,6 +197,7 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		std::optional<OverrideSignalParam> overrideSignal(QString appSignalId) const;
 		std::vector<OverrideSignalParam> overrideSignals() const;
+		QStringList overrideSignalIds() const;
 
 		int changesCounter() const;
 

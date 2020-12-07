@@ -412,6 +412,16 @@ namespace Sim
 		return readData<quint32>(offsetW, data, byteOrder, applyOverride);
 	}
 
+	bool RamArea::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder) noexcept
+	{
+		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder);
+	}
+
+	bool RamArea::readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept
+	{
+		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, applyOverride);
+	}
+
 	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept
 	{
 		return writeData<qint32>(offsetW, data, byteOrder);
@@ -756,7 +766,7 @@ namespace Sim
 			}
 		}
 
-		return std::numeric_limits<size_t>::max();
+		return InvalidHandle;
 	}
 
 	RamArea* Ram::memoryArea(Ram::Handle handle)
@@ -1002,12 +1012,24 @@ namespace Sim
 
 	bool Ram::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
 	{
-		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder, access);
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->writeFloat(offsetW, data, byteOrder);
 	}
 
 	bool Ram::readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride) const
 	{
-		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, access, applyOverride);
+		const RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->readFloat(offsetW, data, byteOrder, applyOverride);
 	}
 
 	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)

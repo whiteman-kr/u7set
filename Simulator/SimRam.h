@@ -90,6 +90,9 @@ namespace Sim
 		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder) noexcept;
 		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
+		bool writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder) noexcept;
+		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
+
 		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept;
 		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
@@ -144,6 +147,7 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(int index) const;
 
 	using Handle = size_t;	// Handle is just index in m_memoryAreas vector
+	static const Handle InvalidHandle = std::numeric_limits<Handle>::max();
 
 		[[nodiscard]] Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;
 		[[nodiscard]] RamArea* memoryArea(Handle handle);

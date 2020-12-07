@@ -282,7 +282,8 @@ private slots:
 	void					previousMeasureSignal();
 	void					nextMeasureSignal();
 	bool					setNextMeasureSignalFromModule();
-	void					updateActiveOutputSignal(int channel, Metrology::Signal* pOutputSignal);
+	void					changeActiveSignalOutput(int channel, Metrology::Signal* pOutputSignal);
+	void					changeActiveSignalOutputs(int channelPrev, int channelNext);
 
 	// Slots of contex menu
 	//

@@ -22,12 +22,13 @@ namespace Db
 	public:
 		constexpr static const char* Description = "Description";
 		constexpr static const char* SafetyProject = "Safety Project";
-		constexpr static const char* SuppressWarnings = "SuppressWarnings";					// A list of suppressed warnings on build
+		constexpr static const char* SuppressWarnings = "SuppressWarnings";						// A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
-		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";		// Generate file AppSignals.xml on build
-		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";	// Generate extra debug information on build
-		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";	// Run simulator based tests on build project
-		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";		// Simulator run tests script timeout
+		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";			// Generate file AppSignals.xml on build
+		constexpr static const char* GenerateAppLogicDrawings = "Generate App Logic Drawings";	// Generate file AppLogicDrawings.pdf on build
+		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";		// Generate extra debug information on build
+		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
+		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";			// Simulator run tests script timeout
 	};
 
 	class File
@@ -245,6 +246,9 @@ public:
 	bool generateAppSignalsXml() const;
 	void setGenerateAppSignalsXml(bool value);
 
+	bool generateAppLogicDrawings() const;
+	void setGenerateAppLogicDrawings(bool value);
+
 	bool generateExtraDebugInfo() const;
 	void setGenerateExtraDebugInfo(bool value);
 
@@ -256,6 +260,7 @@ private:
 	int m_simTestsTimeout = -1;
 	bool m_uppercaseAppSignalId = true;
 	bool m_generateAppSignalsXml = false;
+	bool m_generateAppLogicDrawings = false;
 	bool m_generateExtraDebugInfo = false;
 };
 

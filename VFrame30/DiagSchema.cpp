@@ -7,16 +7,13 @@ namespace VFrame30
 	{
 		setUnit(SchemaUnit::Display);
 
-		setGridSize(Settings::defaultGridSize(unit()));
-		setPinGridStep(20);
-
 		setDocWidth(1000);
 		setDocHeight(750);
 
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
-		setTagsList(QStringList{"Diagnostics"});
+		setTagsList(QStringList{"diagnostics"});
 
 		return;
 	}

@@ -27,7 +27,7 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		virtual QWidget* createWidget(QWidget* parent, bool editMode);
+		virtual QWidget* createWidget(QWidget* parent, bool editMode, double zoom);
 		virtual void updateWidgetProperties(QWidget* widget) const;
 
 		void updateWdgetPosAndSize(QWidget* widget, double zoom);
