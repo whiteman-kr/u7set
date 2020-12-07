@@ -122,20 +122,11 @@ bool ReportObject::isTable() const
 // ReportTable
 //
 
-ReportTable::ReportTable(const QStringList& headerLabels, const QTextCharFormat& charFormat):
+ReportTable::ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat):
 	m_headerLabels(headerLabels),
+	m_columnWidths(columnWidths),
 	m_charFormat(charFormat)
 {
-}
-
-QStringList ReportTable::headerLabels() const
-{
-	return m_headerLabels;
-}
-
-void ReportTable::setHeaderLabels(const QStringList& headerLabels)
-{
-	m_headerLabels = headerLabels;
 }
 
 int ReportTable::columnCount() const
@@ -171,10 +162,31 @@ void ReportTable::insertRow(const QStringList& row)
 	m_rows.push_back(row);
 }
 
+void ReportTable::sortByColumn(int column)
+{
+	std::sort(m_rows.begin(), m_rows.end(), [column](const QStringList& a, const QStringList& b){
+
+		if (column >= a.size() || column >= b.size())
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		return a.at(column) < b.at(column);
+	});
+}
+
 void ReportTable::render(const ReportObjectContext& context) const
 {
 	int cols = columnCount();
 	int rows = rowCount();
+
+	if (m_columnWidths.size() != cols || m_headerLabels.size() != cols)
+	{
+		context.textCursor->insertText("Table rendering error!");
+		Q_ASSERT(false);
+		return;
+	}
 
 	QString html = QObject::tr("<html>\
 					<head>\
@@ -184,11 +196,9 @@ void ReportTable::render(const ReportObjectContext& context) const
 							font-size: %2pt;\
 							border-collapse: collapse;\
 						}\
-	th{\
-	  border: 1px solid black;\
-	}\
-	th {\
-							padding: 3px;\
+						th{\
+							border: 1px solid black;\
+						   padding: 3px;\
 						}\
 						td {\
 							padding: 3px;\
@@ -204,20 +214,14 @@ void ReportTable::render(const ReportObjectContext& context) const
 						</style>\
 					</head>\
 				<body>\
-					<table width=\"100%\">\
-						<colgroup>\
-							<col width=\"40%\">\
-							<col width=\"20%\">\
-							<col width=\"40%\">\
-						</colgroup>").arg(m_charFormat.fontFamily()).arg(m_charFormat.fontPointSize());
-
+					<table width=\"100%\">").arg(m_charFormat.fontFamily()).arg(m_charFormat.fontPointSize());
 
 	html += "<thead><tr>";
 	for (int c = 0; c < cols; c++)
 	{
 		const QString& str = m_headerLabels[c];
 
-		html += QObject::tr("<th>%1</th>").arg(str);
+		html += QObject::tr("<th width=%1%>%2</th>").arg(m_columnWidths[c]).arg(str);
 	}
 	html += "</tr></thead>";
 
@@ -243,7 +247,7 @@ void ReportTable::render(const ReportObjectContext& context) const
 		{
 			const QString str = row[c];
 
-			html += QObject::tr("<td>%1</td>").arg(str.toHtmlEscaped());
+			html += QObject::tr("<td width=%1%>%2</td>").arg(m_columnWidths[c]).arg(str.toHtmlEscaped());
 		}
 
 		html += "</tr>";
@@ -300,7 +304,8 @@ void ReportText::render(const ReportObjectContext& context) const
 // ReportSection
 //
 
-ReportSection::ReportSection()
+ReportSection::ReportSection(const QString& caption):
+	m_caption(caption)
 {
 }
 
@@ -313,6 +318,11 @@ bool ReportSection::isEmpty() const
 	return m_objects.empty() == true && m_schema == nullptr;
 }
 
+const QString& ReportSection::caption() const
+{
+	return m_caption;
+}
+
 void ReportSection::addText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat)
 {
 	m_objects.push_back(std::make_shared<ReportText>(text, charFormat, blockFormat));
@@ -323,10 +333,17 @@ void ReportSection::addTable(std::shared_ptr<ReportTable> table)
 	m_objects.push_back(table);
 }
 
-std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels, const QTextCharFormat& charFormat)
+std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat)
 {
-	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, charFormat);
+	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, columnWidths, charFormat);
 	m_objects.push_back(table);
+
+	return table;
+}
+
+std::shared_ptr<ReportTable> ReportSection::createTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat)
+{
+	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, columnWidths, charFormat);
 
 	return table;
 }
@@ -369,6 +386,9 @@ void ReportSection::render(QSizeF pageSize)
 	m_textDocument.setPageSize(pageSize);
 
 	QTextCursor textCursor(&m_textDocument);
+
+	//int remove_caption = 1;
+	//textCursor.insertText(m_caption);
 
 	QTextCharFormat charFormat = textCursor.charFormat();
 	charFormat.setFontPointSize(40);
@@ -1259,6 +1279,8 @@ void ProjectDiffWorker::compareProject()
 
 	// Process Files
 
+	std::vector<std::shared_ptr<ReportSection>> allSections;
+
 	int fileTreeIndex = 0;
 
 	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
@@ -1273,6 +1295,8 @@ void ProjectDiffWorker::compareProject()
 			return;
 		}
 
+		std::vector<std::shared_ptr<ReportSection>> fileTypeSections;
+
 		// Print section name
 
 		{
@@ -1280,15 +1304,14 @@ void ProjectDiffWorker::compareProject()
 			m_currentSectionName = ft.fileName;
 		}
 
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
+		std::shared_ptr<ReportSection> headerSection = std::make_shared<ReportSection>(tr("Header"));
 
 		setFont(m_normalFont);
 
 		saveFormat();
 		setTextAlignment(Qt::AlignHCenter);
 		setFont(m_headerFont);
-		section->addText(tr("%1\n\n").arg(ft.fileName), m_currentCharFormat, m_currentBlockFormat);
+		headerSection->addText(tr("%1\n\n").arg(ft.fileName), m_currentCharFormat, m_currentBlockFormat);
 		restoreFormat();
 
 		std::shared_ptr<ReportTable> headerTable;
@@ -1302,11 +1325,13 @@ void ProjectDiffWorker::compareProject()
 				m_currentObjectName.clear();
 			}
 
-			section->addText(tr("Signals with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
+			headerSection->addText(tr("Signals with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
 
 			saveFormat();
 			setFont(m_tableFont);
-			headerTable = section->addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
+			headerTable = headerSection->addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")},
+											{35, 15, 50},
+											m_currentCharFormat);
 			restoreFormat();
 
 			for (int signalID : signalIDs)
@@ -1316,30 +1341,41 @@ void ProjectDiffWorker::compareProject()
 					return;
 				}
 
-				compareSignal(signalID, m_diffParams.compareData, headerTable.get());
+				compareSignal(signalID, m_diffParams.compareData, headerTable.get(), &fileTypeSections);
 			}
 		}
 		else
 		{
-			section->addText(tr("Objects with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
+			headerSection->addText(tr("Objects with Differences\n"), m_currentCharFormat, m_currentBlockFormat);
 
 			saveFormat();
 			setFont(m_tableFont);
-			headerTable = section->addTable({tr("Object"), tr("Status"), tr("Latest Changeset")}, m_currentCharFormat);
+			headerTable = headerSection->addTable({tr("Object"), tr("Status"), tr("Latest Changeset")},
+											{50, 15, 35},
+											m_currentCharFormat);
 			restoreFormat();
 
 			// Compare files
 
 			const DbFileTree& filesTree = filesTrees[fileTreeIndex++];
 
-			compareFilesRecursive(filesTree, filesTree.rootFile(), m_diffParams.compareData, headerTable.get());
+			compareFilesRecursive(filesTree, filesTree.rootFile(), m_diffParams.compareData, headerTable.get(), &fileTypeSections);
 		}
 
 		// Remove header if no data
 		//
-		if (headerTable->rowCount() == 0)
+		if (headerTable->rowCount() > 0)
 		{
-			m_sections.pop_back();
+			headerTable->sortByColumn(0);
+
+			allSections.push_back(headerSection);
+
+			std::sort(fileTypeSections.begin(), fileTypeSections.end(), [](const std::shared_ptr<ReportSection>& a, const std::shared_ptr<ReportSection>& b)
+			{
+				return a->caption() < b->caption();
+			});
+
+			allSections.insert(allSections.end(), fileTypeSections.begin(), fileTypeSections.end());
 		}
 	}
 
@@ -1354,10 +1390,10 @@ void ProjectDiffWorker::compareProject()
 		QMutexLocker l(&m_statisticsMutex);
 		m_currentStatus = WorkerStatus::Rendering;
 
-		m_sectionCount = static_cast<int>(m_sections.size());
+		m_sectionCount = static_cast<int>(allSections.size());
 	}
 
-	for (std::shared_ptr<ReportSection> section : m_sections)
+	for (std::shared_ptr<ReportSection> section : allSections)
 	{
 		{
 			QMutexLocker l(&m_statisticsMutex);
@@ -1383,7 +1419,7 @@ void ProjectDiffWorker::compareProject()
 		m_sectionCount = m_pagesCount;
 	}
 
-	for (std::shared_ptr<ReportSection> section : m_sections)
+	for (std::shared_ptr<ReportSection> section : allSections)
 	{
 		// Print Text Document
 
@@ -1413,7 +1449,11 @@ void ProjectDiffWorker::compareProject()
 	return;
 }
 
-void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const std::shared_ptr<DbFileInfo>& fi, const CompareData& compareData, ReportTable* const headerTable)
+void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree,
+											  const std::shared_ptr<DbFileInfo>& fi,
+											  const CompareData& compareData,
+											  ReportTable* const headerTable,
+											  std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
 	if (m_stop == true)
 	{
@@ -1432,7 +1472,7 @@ void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const
 		return;
 	}
 
-	compareFile(filesTree, fi, compareData, headerTable);
+	compareFile(filesTree, fi, compareData, headerTable, sectionsArray);
 
 	// Process children
 	//
@@ -1448,16 +1488,17 @@ void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree, const
 			return;
 		}
 
-		compareFilesRecursive(filesTree, fiChild, compareData, headerTable);
+		compareFilesRecursive(filesTree, fiChild, compareData, headerTable, sectionsArray);
 	}
 
 	return;
 }
 
 void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
-				 const std::shared_ptr<DbFileInfo>& fi,
-				 const CompareData& compareData,
-				 ReportTable* const headerTable)
+									const std::shared_ptr<DbFileInfo>& fi,
+									const CompareData& compareData,
+									ReportTable* const headerTable,
+									std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
 	// Print file name
 	//
@@ -1575,15 +1616,16 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 
 	// Compare files
 
-	compareFileContents(sourceFile, targetFile, fileName, headerTable);
+	compareFileContents(sourceFile, targetFile, fileName, headerTable, sectionsArray);
 
 	return;
 }
 
 void ProjectDiffWorker::compareFileContents(const std::shared_ptr<DbFile>& sourceFile,
-											   const std::shared_ptr<DbFile>& targetFile,
-											   const QString& fileName,
-											   ReportTable* const headerTable)
+											const std::shared_ptr<DbFile>& targetFile,
+											const QString& fileName,
+											ReportTable* const headerTable,
+											std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
 	if (headerTable == nullptr)
 	{
@@ -1673,29 +1715,29 @@ void ProjectDiffWorker::compareFileContents(const std::shared_ptr<DbFile>& sourc
 	//
 	if (hardwareObject == true)
 	{
-		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable);
+		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable, sectionsArray);
 		return;
 	}
 
 	if (isConnectionFile(fileName) == true)
 	{
-		compareConnections(sourceFile, targetFile, headerTable);
+		compareConnections(sourceFile, targetFile, headerTable, sectionsArray);
 		return;
 	}
 
 	if (isBusTypeFile(fileName) == true)
 	{
-		compareBusTypes(sourceFile, targetFile, headerTable);
+		compareBusTypes(sourceFile, targetFile, headerTable, sectionsArray);
 		return;
 	}
 
 	if (isSchemaFile(fileName) == true)
 	{
-		compareSchemas(sourceFile, targetFile, headerTable);
+		compareSchemas(fileName, sourceFile, targetFile, headerTable, sectionsArray);
 		return;
 	}
 
-	compareFilesData(sourceFile, targetFile, headerTable);
+	compareFilesData(sourceFile, targetFile, headerTable, sectionsArray);
 	return;
 }
 
@@ -1817,11 +1859,13 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 											 const std::shared_ptr<DbFile>& targetFile,
 											 const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
 											 const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-											 ReportTable* const headerTable)
+											 ReportTable* const headerTable,
+											 std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
-	if (headerTable == nullptr)
+	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
 		Q_ASSERT(headerTable);
+		Q_ASSERT(sectionsArray);
 		return;
 	}
 
@@ -1871,14 +1915,16 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 	{
 		headerTable->insertRow({tr("%1").arg(targetObject->equipmentId()), targetFile->action().text(),  changesetString(targetFile)});
 
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
+		std::shared_ptr<ReportSection> deviceDiffSection = std::make_shared<ReportSection>(targetObject->equipmentId());
+		sectionsArray->push_back(deviceDiffSection);
 
-		section->addText(targetObject->equipmentId(), m_currentCharFormat, m_currentBlockFormat);
+		deviceDiffSection->addText(targetObject->equipmentId(), m_currentCharFormat, m_currentBlockFormat);
 
 		saveFormat();
 		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		std::shared_ptr<ReportTable> diffTable = deviceDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																   {15, 15, 35, 35},
+																   m_currentCharFormat);
 		restoreFormat();
 
 		fillDiffTable(diffTable.get(), diffs);
@@ -1887,11 +1933,15 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 	return;
 }
 
-void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
+void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
+										const std::shared_ptr<DbFile>& targetFile,
+										ReportTable* const headerTable,
+										std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
-	if (headerTable == nullptr)
+	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
 		Q_ASSERT(headerTable);
+		Q_ASSERT(sectionsArray);
 		return;
 	}
 
@@ -1944,14 +1994,16 @@ void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFil
 
 	saveFormat();
 	setFont(m_tableFont);
-	QStringList busHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
-	std::shared_ptr<ReportTable> busDiffTable = std::make_shared<ReportTable>(busHeaderLabels, m_currentCharFormat);
+	std::shared_ptr<ReportTable> busDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																		   {15, 15, 35, 35},
+																		   m_currentCharFormat);
 	restoreFormat();
 
 	saveFormat();
 	setFont(m_tableFont);
-	QStringList busSignalsHeaderLabels = {tr("SignalID"), tr("Caption"), tr("Status")};
-	std::shared_ptr<ReportTable> busSignalsDiffTable = std::make_shared<ReportTable>(busSignalsHeaderLabels, m_currentCharFormat);
+	std::shared_ptr<ReportTable> busSignalsDiffTable = ReportSection::createTable({tr("SignalID"), tr("Caption"), tr("Status")},
+																				  {35, 15, 50},
+																				  m_currentCharFormat);
 	restoreFormat();
 
 	std::vector<PropertyDiff> busDiffs;
@@ -1985,8 +2037,9 @@ void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFil
 				{
 					saveFormat();
 					setFont(m_tableFont);
-					QStringList busSignalsPropertiesHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
-					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = std::make_shared<ReportTable>(busSignalsPropertiesHeaderLabels, m_currentCharFormat);
+					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																											{15, 15, 35, 35},
+																											m_currentCharFormat);
 					restoreFormat();
 
 					busSignalsPropertiesTables[targetBusSignal.signalId()] = busSignalsPropertiesDiffTable;
@@ -2036,8 +2089,8 @@ void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFil
 
 		// Add tables to section
 
-		std::shared_ptr<ReportSection> busDiffSection = std::make_shared<ReportSection>();
-		m_sections.push_back(busDiffSection);
+		std::shared_ptr<ReportSection> busDiffSection = std::make_shared<ReportSection>(targetBus.busTypeId());
+		sectionsArray->push_back(busDiffSection);
 
 		busDiffSection->addText(tr("Bus: %1\n").arg(targetBus.busTypeId()), m_currentCharFormat, m_currentBlockFormat);
 
@@ -2048,6 +2101,8 @@ void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFil
 
 		if (busSignalsDiffTable->rowCount() != 0)
 		{
+			busSignalsDiffTable->sortByColumn(0);
+
 			busDiffSection->addText(tr("Bus %1 signals:\n").arg(targetBus.busTypeId()), m_currentCharFormat, m_currentBlockFormat);
 			busDiffSection->addTable(busSignalsDiffTable);
 		}
@@ -2066,11 +2121,16 @@ void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFil
 }
 
 
-void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
+void ProjectDiffWorker::compareSchemas(const QString& fileName,
+									   const std::shared_ptr<DbFile>& sourceFile,
+									   const std::shared_ptr<DbFile>& targetFile,
+									   ReportTable* const headerTable,
+									   std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
-	if (headerTable == nullptr)
+	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
 		Q_ASSERT(headerTable);
+		Q_ASSERT(sectionsArray);
 		return;
 	}
 
@@ -2087,7 +2147,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 		(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
-		headerTable->insertRow({singleFile->fileName(), tr("Added"),  changesetString(singleFile)});
+		headerTable->insertRow({fileName, tr("Added"),  changesetString(singleFile)});
 		return;
 	}
 
@@ -2097,7 +2157,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 	if (sourceSchema == nullptr)
 	{
 		Q_ASSERT(false);
-		headerTable->insertRow({sourceFile->fileName(), tr("Loading failed"),  QString()});
+		headerTable->insertRow({fileName, tr("Source loading failed"),  QString()});
 		return;
 	}
 
@@ -2105,7 +2165,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 	if (targetSchema == nullptr)
 	{
 		Q_ASSERT(false);
-		headerTable->insertRow({targetFile->fileName(), tr("Loading failed"),  QString()});
+		headerTable->insertRow({fileName, tr("Target loading failed"),  QString()});
 		return;
 	}
 
@@ -2113,14 +2173,16 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 
 	saveFormat();
 	setFont(m_tableFont);
-	QStringList schemaHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
-	std::shared_ptr<ReportTable> schemaDiffTable = std::make_shared<ReportTable>(schemaHeaderLabels, m_currentCharFormat);
+	std::shared_ptr<ReportTable> schemaDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																			  {15, 15, 35, 35},
+																			  m_currentCharFormat);
 	restoreFormat();
 
 	saveFormat();
 	setFont(m_tableFont);
-	QStringList itemsHeaderLabels = {tr("Type"), tr("Label"), tr("Layer"), tr("Status")};
-	std::shared_ptr<ReportTable> itemsDiffTable = std::make_shared<ReportTable>(itemsHeaderLabels, m_currentCharFormat);
+	std::shared_ptr<ReportTable> schemaItemsDiffTable = ReportSection::createTable({tr("Type"), tr("Label"), tr("Layer"), tr("Status")},
+																						  {25, 35, 25, 15},
+																						  m_currentCharFormat);
 	restoreFormat();
 
 	// Compare schemas properties
@@ -2183,12 +2245,13 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 					QString className(targetItem->metaObject()->className());
 					className.remove("VFrame30::");
 
-					itemsDiffTable->insertRow({tr("%1)").arg(className), targetItem->label(), targetLayer->name(), tr("Modified")});
+					schemaItemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Modified")});
 
 					saveFormat();
 					setFont(m_tableFont);
-					QStringList itemHeaderLabels = {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")};
-					std::shared_ptr<ReportTable> itemDiffTable = std::make_shared<ReportTable>(itemHeaderLabels, m_currentCharFormat);
+					std::shared_ptr<ReportTable> itemDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																							{15, 15, 35, 35},
+																							m_currentCharFormat);
 					restoreFormat();
 
 					fillDiffTable(itemDiffTable.get(), itemDiffs);
@@ -2208,7 +2271,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 				QString className(targetItem->metaObject()->className());
 				className.remove("VFrame30::");
 
-				itemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Added")});
+				schemaItemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Added")});
 
 				continue;
 			}
@@ -2234,7 +2297,7 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 				QString className(sourceItem->metaObject()->className());
 				className.remove("VFrame30::");
 
-				itemsDiffTable->insertRow({tr("%1").arg(className), sourceItem->label(), sourceLayer->name(), tr("Deleted")});
+				schemaItemsDiffTable->insertRow({tr("%1").arg(className), sourceItem->label(), sourceLayer->name(), tr("Deleted")});
 
 				// Add item to target
 				//
@@ -2254,14 +2317,14 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 		}
 	}
 
-	if (schemaDiffTable->rowCount() > 0 || itemsDiffTable->rowCount() > 0 || itemsTables.empty() == false)
+	if (schemaDiffTable->rowCount() > 0 || schemaItemsDiffTable->rowCount() > 0 || itemsTables.empty() == false)
 	{
-		headerTable->insertRow({targetFile->fileName(), targetFile->action().text(),  changesetString(targetFile)});
+		headerTable->insertRow({fileName, targetFile->action().text(),  changesetString(targetFile)});
 
 		// Add schema differences drawing
 
-		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>();
-		m_sections.push_back(schemaDrawingSection);
+		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>("1" + fileName);
+		sectionsArray->push_back(schemaDrawingSection);
 
 		QString schemaId = targetSchema->schemaId();
 
@@ -2271,8 +2334,8 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 
 		// Add schema differences tables
 
-		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>();
-		m_sections.push_back(schemaDiffSection);
+		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>("2" + fileName);
+		sectionsArray->push_back(schemaDiffSection);
 
 		if (schemaDiffTable->rowCount() != 0)
 		{
@@ -2281,10 +2344,12 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 			schemaDiffSection->addText(tr("\n"), m_currentCharFormat, m_currentBlockFormat);
 		}
 
-		if (itemsDiffTable->rowCount() != 0)
+		if (schemaItemsDiffTable->rowCount() != 0)
 		{
+			schemaItemsDiffTable->sortByColumn(1);
+
 			schemaDiffSection->addText(tr("Schema %1 Items:\n").arg(schemaId), m_currentCharFormat, m_currentBlockFormat);
-			schemaDiffSection->addTable(itemsDiffTable);
+			schemaDiffSection->addTable(schemaItemsDiffTable);
 			schemaDiffSection->addText(tr("\n"), m_currentCharFormat, m_currentBlockFormat);
 		}
 
@@ -2296,18 +2361,29 @@ void ProjectDiffWorker::compareSchemas(const std::shared_ptr<DbFile>& sourceFile
 			QString className(item->metaObject()->className());
 			className.remove("VFrame30::");
 
-			schemaDiffSection->addText(tr("%1 %2:").arg(className).arg(item->label()), m_currentCharFormat, m_currentBlockFormat);
+			if (item->label().isEmpty() == true)
+			{
+				schemaDiffSection->addText(tr("%1 (no label):").arg(className), m_currentCharFormat, m_currentBlockFormat);
+			}
+			else
+			{
+				schemaDiffSection->addText(tr("%1 %2:").arg(className).arg(item->label()), m_currentCharFormat, m_currentBlockFormat);
+			}
 			schemaDiffSection->addTable(itemDiffTable);
 			schemaDiffSection->addText(tr("\n"), m_currentCharFormat, m_currentBlockFormat);
 		}
 	}
 }
 
-void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
+void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& sourceFile,
+										   const std::shared_ptr<DbFile>& targetFile,
+										   ReportTable* const headerTable,
+										   std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
-	if (headerTable == nullptr)
+	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
 		Q_ASSERT(headerTable);
+		Q_ASSERT(sectionsArray);
 		return;
 	}
 
@@ -2359,27 +2435,33 @@ void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& source
 
 	if (diffs.empty() == false)
 	{
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
+		std::shared_ptr<ReportSection> connectionDiffSection = std::make_shared<ReportSection>(targetConnection.connectionID());
+		sectionsArray->push_back(connectionDiffSection);
 
-		section->addText(targetConnection.connectionID(), m_currentCharFormat, m_currentBlockFormat);
+		connectionDiffSection->addText(targetConnection.connectionID(), m_currentCharFormat, m_currentBlockFormat);
 
 		headerTable->insertRow({targetConnection.connectionID(), targetFile->action().text(),  changesetString(targetFile)});
 
 		saveFormat();
 		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		std::shared_ptr<ReportTable> diffTable = connectionDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																   {15, 15, 35, 35},
+																   m_currentCharFormat);
 		restoreFormat();
 
 		fillDiffTable(diffTable.get(), diffs);
 	}
 }
 
-void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable)
+void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
+										 const std::shared_ptr<DbFile>& targetFile,
+										 ReportTable* const headerTable,
+										 std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
-	if (headerTable == nullptr)
+	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
 		Q_ASSERT(headerTable);
+		Q_ASSERT(sectionsArray);
 		return;
 	}
 
@@ -2407,14 +2489,14 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 
 	headerTable->insertRow({targetFile->fileName(), targetFile->action().text(), changesetString(targetFile)});
 
-	std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-	m_sections.push_back(section);
+	std::shared_ptr<ReportSection> fileDiffSection = std::make_shared<ReportSection>(targetFile->fileName());
+	sectionsArray->push_back(fileDiffSection);
 
 	// Both Files
 	//
 	if (isTextFile(targetFile->fileName()) == true)
 	{
-		section->addText(tr("File %1 differences\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
+		fileDiffSection->addText(tr("File %1 differences\n").arg(targetFile->fileName()), m_currentCharFormat, m_currentBlockFormat);
 
 		std::vector<FileDiff::FileLine> fileLinesSource;
 		std::vector<FileDiff::FileLine> fileLinesTarget;
@@ -2441,7 +2523,9 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 
 		saveFormat();
 		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")}, m_currentCharFormat);
+		std::shared_ptr<ReportTable> diffTable = fileDiffSection->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
+																   {10, 40, 10, 40},
+																   m_currentCharFormat);
 		restoreFormat();
 
 		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
@@ -2475,9 +2559,6 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 				continue;
 			}
 
-			diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
-
-			/*
 			if (sourceLine.line == -1)
 			{
 				diffTable->insertRow({QString(), QString(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
@@ -2492,7 +2573,7 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 				{
 					diffTable->insertRow({tr("%1").arg(sourceLine.line), sourceLine.text.trimmed(), tr("%1").arg(targetLine.line), targetLine.text.trimmed()});
 				}
-			}*/
+			}
 		}
 	}
 	else
@@ -2507,11 +2588,14 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 			str += tr(" Size changed: %1 -> %2 bytes.").arg(sourceFile->data().size()).arg(targetFile->data().size());
 		}
 
-		section->addText(str + "\n", m_currentCharFormat, m_currentBlockFormat);
+		fileDiffSection->addText(str + "\n", m_currentCharFormat, m_currentBlockFormat);
 	}
 }
 
-void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable)
+void ProjectDiffWorker::compareSignal(const int signalID,
+									  const CompareData& compareData,
+									  ReportTable* const headerTable,
+									  std::vector<std::shared_ptr<ReportSection> >* sectionsArray)
 {
 	if (headerTable == nullptr)
 	{
@@ -2705,7 +2789,7 @@ void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& com
 					std::swap(sourceSignal, targetSignal);
 				}
 
-				compareSignalContents(sourceSignal.value(), targetSignal.value(), headerTable);
+				compareSignalContents(sourceSignal.value(), targetSignal.value(), headerTable, sectionsArray);
 			}
 		}
 	}
@@ -2713,11 +2797,15 @@ void ProjectDiffWorker::compareSignal(const int signalID, const CompareData& com
 	return;
 }
 
-void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable)
+void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal,
+											  const Signal& targetSignal,
+											  ReportTable* const headerTable,
+											  std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
-	if (headerTable == nullptr)
+	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
 		Q_ASSERT(headerTable);
+		Q_ASSERT(sectionsArray);
 		return;
 	}
 
@@ -2730,16 +2818,18 @@ void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal, const 
 
 	if (diffs.empty() == false)
 	{
-		std::shared_ptr<ReportSection> section = std::make_shared<ReportSection>();
-		m_sections.push_back(section);
+		std::shared_ptr<ReportSection> signalDiffSection = std::make_shared<ReportSection>(targetSignal.appSignalID());
+		sectionsArray->push_back(signalDiffSection);
 
-		section->addText(targetSignal.appSignalID(), m_currentCharFormat, m_currentBlockFormat);
+		signalDiffSection->addText(targetSignal.appSignalID(), m_currentCharFormat, m_currentBlockFormat);
 
 		headerTable->insertRow({targetSignal.appSignalID(), targetSignal.instanceAction().text(), changesetString(targetSignal)});
 
 		saveFormat();
 		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")}, m_currentCharFormat);
+		std::shared_ptr<ReportTable> diffTable = signalDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																   {15, 15, 35, 35},
+																   m_currentCharFormat);
 		restoreFormat();
 
 		fillDiffTable(diffTable.get(), diffs);
@@ -3143,6 +3233,8 @@ void ProjectDiffWorker::fillDiffTable(ReportTable* diffTable, const std::vector<
 			break;
 		}
 	}
+
+	diffTable->sortByColumn(0);
 
 	return;
 }

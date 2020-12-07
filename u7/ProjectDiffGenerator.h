@@ -62,10 +62,7 @@ public:
 class ReportTable : public ReportObject
 {
 public:
-	ReportTable(const QStringList& headerLabels, const QTextCharFormat& charFormat);
-
-	QStringList headerLabels() const;
-	void setHeaderLabels(const QStringList& headerLabels);
+	ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat);
 
 	int columnCount() const;
 	int rowCount() const;
@@ -74,11 +71,15 @@ public:
 
 	void insertRow(const QStringList& row);
 
+	void sortByColumn(int column);
+
 	void render(const ReportObjectContext& context) const override;
 
 private:
 
 	QStringList m_headerLabels;
+	std::vector<int> m_columnWidths;
+
 	std::vector<QStringList> m_rows;
 
 	// Format
@@ -113,17 +114,21 @@ private:
 class ReportSection
 {
 public:
-	ReportSection();
+	ReportSection(const QString& caption);
 	virtual ~ReportSection();
 
 	bool isEmpty() const;
+
+	const QString& caption() const;
 
 	// Add object functions
 
 	void addText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
 
 	void addTable(std::shared_ptr<ReportTable> table);
-	std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels, const QTextCharFormat& charFormat);
+	std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat);
+
+	static std::shared_ptr<ReportTable> createTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat);
 
 	// Schema functions
 
@@ -142,6 +147,8 @@ public:
 	QTextDocument* textDocument();
 
 private:
+	QString m_caption;
+
 	std::vector<std::shared_ptr<ReportObject>> m_objects;
 
 	std::shared_ptr<VFrame30::Schema> m_schema;
@@ -215,8 +222,6 @@ protected:
 
 	QTextCharFormat m_currentCharFormatSaved;
 	QTextBlockFormat m_currentBlockFormatSaved;
-
-	std::vector<std::shared_ptr<ReportSection>> m_sections;
 
 	mutable QMutex m_statisticsMutex;
 
@@ -390,19 +395,22 @@ private:
 
 	void compareProject();
 	void compareFilesRecursive(const DbFileTree& filesTree,
-					 const std::shared_ptr<DbFileInfo>& fi,
-					 const CompareData& compareData,
-					 ReportTable* const headerTable);
+							   const std::shared_ptr<DbFileInfo>& fi,
+							   const CompareData& compareData,
+							   ReportTable* const headerTable,
+							   std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	void compareFile(const DbFileTree& filesTree,
 					 const std::shared_ptr<DbFileInfo>& fi,
 					 const CompareData& compareData,
-					 ReportTable* const headerTable);
+					 ReportTable* const headerTable,
+					 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	void compareFileContents(const std::shared_ptr<DbFile>& sourceFile,
 							 const std::shared_ptr<DbFile>& targetFile,
 							 const QString& fileName,
-							 ReportTable* const headerTable);
+							 ReportTable* const headerTable,
+							 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
 												  const CompareVersionType versionType,
@@ -413,14 +421,14 @@ private:
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
 							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject, const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-							  ReportTable* const headerTable);
-	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
-	void compareSchemas(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
-	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
-	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable);
+							  ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareSchemas(const QString& fileName, const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
-	void compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable);
-	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable);
+	void compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const;
 
