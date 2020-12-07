@@ -1151,9 +1151,7 @@ void SignalsTabPage::addSignal()
 	fl->addRow(buttonBox);
 
 	signalTypeDialog.setLayout(fl);
-
 	signalTypeDialog.setWindowTitle("Create signals");
-	signalTypeDialog.setFixedSize(600, 200);
 
 	if (signalTypeDialog.exec() != QDialog::Accepted)
 	{

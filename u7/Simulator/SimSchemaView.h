@@ -12,14 +12,11 @@ public:
 	explicit SimSchemaView(SimSchemaManager* schemaManager, QWidget* parent = nullptr);
 	virtual ~SimSchemaView();
 
-	// Properties
-	//
-public:
+public slots:
+	void overrideSignalsChanged(QStringList addedAppSignalIds);	// Added or deleted signal
 
-	// Data
-	//
 private:
-
+	SimIdeSimulator* m_simulator = nullptr;
 };
 
 
