@@ -742,7 +742,8 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 		xml.writeStartElement(XmlElement::TUNING_SOURCE);
 
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ts.equipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, ts.lmEquipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, ts.portEquipmentID);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_DATA_IP, ts.tuningDataIP.addressPortStr());
 
 		xml.writeEndElement();		// TUNING_SOURCE
@@ -815,7 +816,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		TuningSource ts;
 
 		result &= xml.findElement(XmlElement::TUNING_SOURCE);
-		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ts.equipmentID);
+		result &= xml.readStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, &ts.lmEquipmentID);
+		result &= xml.readStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, &ts.portEquipmentID);
 
 		QString addressPortStr;
 
@@ -1015,7 +1017,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		{
 			TuningServiceSettings::TuningSource tunSrc;
 
-			tunSrc.equipmentID = ts.lmEquipmentID();
+			tunSrc.lmEquipmentID = ts.lmEquipmentID();
+			tunSrc.portEquipmentID = ts.lmAdapterID();
 			tunSrc.tuningDataIP = ts.lmAddressPort();
 
 			sources.push_back(tunSrc);

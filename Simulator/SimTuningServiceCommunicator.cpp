@@ -173,9 +173,7 @@ namespace Sim
 														  const RamArea& data,
 														  TimeStamp timeStamp)
 	{
-		Q_UNUSED(portEquipmentID);
-
-		auto p = m_tuningSourcesByEquipmentID.find(lmEquipmentID);
+		auto p = m_tuningSourcesByEquipmentID.find(std::pair<QString, QString>(lmEquipmentID, portEquipmentID));
 
 		if (p == m_tuningSourcesByEquipmentID.end())
 		{
@@ -188,15 +186,17 @@ namespace Sim
 
 	void TuningRequestsProcessingThread::tuningModeChanged(const QString& lmEquipmentId, bool tuningEnabled)
 	{
-		auto p = m_tuningSourcesByEquipmentID.find(lmEquipmentId);
-
-		if (p == m_tuningSourcesByEquipmentID.end())
+		for(auto p : m_tuningSourcesByIP)
 		{
-			Q_ASSERT(false);
-			return;
-		}
+			std::shared_ptr<TuningSourceHandler> tsh = p.second;
 
-		p->second->tuningModeChanged(tuningEnabled);
+			TEST_PTR_CONTINUE(tsh);
+
+			if (tsh->lmEquipmentID() == lmEquipmentId)
+			{
+				tsh->tuningModeChanged(tuningEnabled);
+			}
+		}
 	}
 
 	void TuningRequestsProcessingThread::run()
@@ -233,21 +233,22 @@ namespace Sim
 
 		for(const TuningServiceSettings::TuningSource& ts : settings.sources)
 		{
-			std::shared_ptr<LogicModule> lm = m_sim->logicModule(ts.equipmentID);
+			std::shared_ptr<LogicModule> lm = m_sim->logicModule(ts.lmEquipmentID);
 
 			if (lm == nullptr)
 			{
-				m_log.writeError(QString("Tuning source %1 isn't initialized").arg(ts.equipmentID));
+				m_log.writeError(QString("Tuning source %1 isn't initialized").arg(ts.lmEquipmentID));
 				continue;
 			}
 
 			auto tsh = std::make_shared<TuningSourceHandler>(m_tsCommunicator,
-															ts.equipmentID,
+															ts.lmEquipmentID,
+															ts.portEquipmentID,
 															ts.tuningDataIP,
 															lm->logicModuleExtraInfo());
 
 			m_tuningSourcesByIP.insert({ts.tuningDataIP.address32(), tsh});
-			m_tuningSourcesByEquipmentID.insert({ts.equipmentID, tsh});
+			m_tuningSourcesByEquipmentID.insert({{ts.lmEquipmentID, ts.portEquipmentID}, tsh});
 		}
 	}
 
@@ -415,22 +416,27 @@ namespace Sim
 	// ---------------------------------------------------------------------------------------------------------
 
 	TuningSourceHandler::TuningSourceHandler(TuningServiceCommunicator* tsCommunicator,
-												 const QString& equipmentID,
+												 const QString& lmEquipmentID,
+												 const QString& portEquipmentID,
 												 const HostAddressPort& ip,
 												 const ::LogicModuleInfo& logicModuleInfo) :
 		m_tsCommunicator(tsCommunicator),
-		m_equipmentID(equipmentID),
+		m_lmEquipmentID(lmEquipmentID),
+		m_portEquipmentID(portEquipmentID),
 		m_tuningSourceIP(ip),
 		m_moduleType(logicModuleInfo.moduleType()),
 		m_lmNumber(logicModuleInfo.lmNumber),
 		m_subsystemKey(logicModuleInfo.subsystemKey),
 		m_lmUniqueID(logicModuleInfo.lmUniqueID)
 	{
-		std::shared_ptr<LogicModule> lm = m_tsCommunicator->simulator()->logicModule(m_equipmentID);
+		std::shared_ptr<LogicModule> lm = m_tsCommunicator->simulator()->logicModule(m_lmEquipmentID);
 
 		TEST_PTR_RETURN(lm);
 
 		const LmDescription& lmDescription = lm->lmDescription();
+
+		m_tuningFlashSizeB = lmDescription.flashMemory().m_tuningFrameCount * lmDescription.flashMemory().m_tuningFrameSize;
+		m_tuningFlashFramePayloadB = lmDescription.flashMemory().m_tuningFramePayload;
 
 		m_tuningDataStartAddrW = lmDescription.memory().m_tuningDataOffset;
 
@@ -449,7 +455,7 @@ namespace Sim
 													m_tuningDataStartAddrW,
 													m_tuningDataSizeW,
 													false /* clearOnStartCycle */,
-													QString("TuningData::") + m_equipmentID);
+													QString("TuningData::") + m_lmEquipmentID);
 
 		m_tuningDataReadBuffer.resize(m_tuningDataFramePayloadB);
 	}
@@ -532,8 +538,8 @@ namespace Sim
 		replyFotipHeader.subsystemKey.subsystemCode = m_subsystemKey;
 		replyFotipHeader.operationCode = requestFotipHeader.operationCode;
 		replyFotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
-		replyFotipHeader.romSizeB = m_tuningDataSizeB;
-		replyFotipHeader.romFrameSizeB = m_tuningDataFramePayloadB;
+		replyFotipHeader.romSizeB = m_tuningFlashSizeB;
+		replyFotipHeader.romFrameSizeB = m_tuningFlashFramePayloadB;
 
 		memset(replyFotipHeader.reserv, 0, sizeof(replyFotipHeader.reserv));
 
@@ -541,6 +547,9 @@ namespace Sim
 
 		memset(reply->fotipFrame.data, 0, sizeof(reply->fotipFrame.data));
 		memset(reply->fotipFrame.reserv, 0, sizeof(reply->fotipFrame.reserv));
+
+		reply->fotipFrame.header.startAddressW = requestFotipHeader.startAddressW;
+		reply->fotipFrame.header.offsetInFrameW = requestFotipHeader.offsetInFrameW;
 
 		FotipV2::HeaderFlags replyFlags;
 
@@ -653,12 +662,12 @@ namespace Sim
 			replyFlags->frameSizeError = 1;
 		}
 
-		if (fotipHeader.romSizeB !=  m_tuningDataSizeB)
+		if (fotipHeader.romSizeB !=  m_tuningFlashSizeB)
 		{
 			replyFlags->romSizeError = 1;
 		}
 
-		if (fotipHeader.romFrameSizeB != m_tuningDataFramePayloadB)
+		if (fotipHeader.romFrameSizeB != m_tuningFlashFramePayloadB)
 		{
 			replyFlags->romFrameSizeError = 1;
 		}
@@ -687,7 +696,7 @@ namespace Sim
 
 		if (fotipHeader.startAddressW < m_tuningDataStartAddrW ||
 			fotipHeader.startAddressW > (m_tuningDataStartAddrW + m_tuningDataSizeW) ||
-			((fotipHeader.startAddressW - m_tuningDataStartAddrW) % m_tuningDataFrameSizeW) != 0)
+			((fotipHeader.startAddressW - m_tuningDataStartAddrW) % m_tuningDataFramePayloadW) != 0)
 		{
 			replyFlags->startAddressError = 1;
 		}
@@ -703,11 +712,67 @@ namespace Sim
 
 	void TuningSourceHandler::processReadRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags)
 	{
-		quint32 requestedTuningDataStartAddrW = request.header.startAddressW;
+		quint32 requestedTuningDataStartAddrW = reverseUint32(request.header.startAddressW);
 
+		readFrameData(requestedTuningDataStartAddrW, reply);
+	}
+
+	void TuningSourceHandler::processWriteRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags)
+	{
+		quint32 frameStartAddrW = reverseUint32(request.header.startAddressW);
+		quint32 offsetInFrameW = reverseUint32(request.header.offsetInFrameW);
+
+		quint32 writeAddrW = frameStartAddrW + offsetInFrameW;
+
+		replyFlags->successfulWrite = 1;
+
+		switch(static_cast<FotipV2::DataType>(reverseUint16(request.header.dataType)))
+		{
+		case FotipV2::DataType::AnalogSignedInt:
+			{
+				qint32 value = reverseInt32(request.write.analogSignedIntValue);
+
+				m_tsCommunicator->writeTuningSignedInt32(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value);
+			}
+
+			break;
+
+		case FotipV2::DataType::AnalogFloat:
+			{
+				float value = reverseFloat(request.write.analogFloatValue);
+
+				m_tsCommunicator->writeTuningFloat(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value);
+			}
+
+			break;
+
+		case FotipV2::DataType::Discrete:
+			{
+				quint32 value = reverseUint32(request.write.discreteValue);
+				quint32 mask = reverseUint32(request.write.bitMask);
+
+				m_tsCommunicator->writeTuningDword(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value, mask);
+			}
+
+			break;
+
+		default:
+			replyFlags->successfulWrite = 0;
+		}
+	}
+
+	void TuningSourceHandler::processApplyRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags)
+	{
+		replyFlags->succesfulApply = 1;
+
+		int to_do_real_APPLY_processing;
+	}
+
+	void TuningSourceHandler::readFrameData(quint32 startFrameAddrW, FotipV2::Frame* reply)
+	{
 		m_tuningDataMutex.lock();
 
-		bool res = m_tuningData->readToBuffer<std::vector<quint8>>(requestedTuningDataStartAddrW,
+		bool res = m_tuningData->readToBuffer<std::vector<quint8>>(startFrameAddrW,
 																   m_tuningDataFramePayloadW,
 																   &m_tuningDataReadBuffer,
 																   false);
@@ -725,18 +790,5 @@ namespace Sim
 		}
 	}
 
-	void TuningSourceHandler::processWriteRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags)
-	{
-		replyFlags->successfulWrite = 1;
-
-		int to_do_real_WRITE_processing;
-	}
-
-	void TuningSourceHandler::processApplyRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags)
-	{
-		replyFlags->succesfulApply = 1;
-
-		int to_do_real_APPLY_processing;
-	}
 }
 

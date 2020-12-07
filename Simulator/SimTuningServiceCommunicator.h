@@ -117,14 +117,15 @@ namespace Sim
 		QUdpSocket* m_socket = nullptr;
 
 		std::map<quint32, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByIP;
-		std::map<QString, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByEquipmentID;
+		std::map<std::pair<QString, QString>, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByEquipmentID;
 	};
 
 	class TuningSourceHandler
 	{
 	public:
 		TuningSourceHandler(TuningServiceCommunicator* tsCommunicator,
-							  const QString& equipmentID,
+							  const QString& lmEquipmentID,
+							  const QString& portEquipmentID,
 							  const HostAddressPort& ip,
 							  const ::LogicModuleInfo& logicModuleInfo);
 
@@ -136,6 +137,8 @@ namespace Sim
 
 		bool processRequest(const RupFotipV2& request, RupFotipV2* reply);
 
+		QString lmEquipmentID() const { return m_lmEquipmentID; }
+
 	private:
 		bool checkRequestRupHeader(const Rup::Header& rupHeader);
 		bool checkRequestFotipHeader(const FotipV2::Header& fotipHeader, FotipV2::HeaderFlags* replyFlags);
@@ -144,14 +147,20 @@ namespace Sim
 		void processWriteRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
 		void processApplyRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
 
+		void readFrameData(quint32 startFrameAddrW, FotipV2::Frame* reply);
+
 	private:
 		TuningServiceCommunicator* m_tsCommunicator = nullptr;
-		QString m_equipmentID;
+		QString m_lmEquipmentID;
+		QString m_portEquipmentID;
 		HostAddressPort m_tuningSourceIP;
 		int m_moduleType = 0;
 		int m_lmNumber = -1;
 		int m_subsystemKey = -1;
 		quint64 m_lmUniqueID = 0;
+
+		quint32 m_tuningFlashSizeB = 0;
+		quint32 m_tuningFlashFramePayloadB = 0;
 
 		quint32 m_tuningDataStartAddrW = 0;
 		quint32 m_tuningDataSizeW = 0;

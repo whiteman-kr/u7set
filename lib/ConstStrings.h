@@ -58,6 +58,8 @@ namespace EquipmentPropNames
 	inline const QString LM_NUMBER("LMNumber");
 	inline const QString SUBSYSTEM_CHANNEL("SubsystemChannel");
 	inline const QString LM_UNIQUE_ID("LmUniqueID");
+	inline const QString LM_EQUIPMENT_ID("LmEquipmentID");
+	inline const QString PORT_EQUIPMENT_ID("PortEquipmentID");
 
 	inline const QString MODULE_FAMILY("ModuleFamily");
 	inline const QString MODULE_FAMILY_ID("ModuleFamilyID");

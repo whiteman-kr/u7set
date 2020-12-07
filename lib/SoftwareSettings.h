@@ -180,7 +180,8 @@ public:
 
 	struct TuningSource
 	{
-		QString equipmentID;
+		QString lmEquipmentID;
+		QString portEquipmentID;
 		HostAddressPort tuningDataIP;
 	};
 
