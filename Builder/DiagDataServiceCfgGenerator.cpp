@@ -9,11 +9,9 @@ namespace Builder
 	{
 	}
 
-
 	DiagDataServiceCfgGenerator::~DiagDataServiceCfgGenerator()
 	{
 	}
-
 
 	bool DiagDataServiceCfgGenerator::generateConfiguration()
 	{
@@ -39,7 +37,7 @@ namespace Builder
 
 	bool DiagDataServiceCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		bool result = m_settings.readFromDevice(m_context, m_software);
 
 		RETURN_IF_FALSE(result);
 

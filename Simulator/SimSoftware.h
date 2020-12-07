@@ -44,7 +44,7 @@ namespace  Sim
 		//
 		Sim::AppDataTransmitter m_appDataTransmitter;
 
-		// TunningService Communicators, each instance works with its on TuningService
+		// TunningService Communicators, each instance works with its own TuningService
 		// Key is TuningService equipmentId
 		//
 		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceCommunicators;

@@ -6,13 +6,10 @@
 namespace Builder
 {
 	TuningServiceCfgGenerator::TuningServiceCfgGenerator(Context* context,
-														 Hardware::Software* software,
-														 const LmsUniqueIdMap& lmsUniqueIdMap) :
+														 Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software),
-		m_lmsUniqueIdMap(lmsUniqueIdMap),
 		m_tuningDataStorage(context->m_tuningDataStorage.get())
 	{
-		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
 	}
 
 
@@ -56,7 +53,7 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		bool result = m_settings.readFromDevice(m_context, m_software);
 
 		RETURN_IF_FALSE(result);
 
@@ -73,94 +70,11 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeTuningSources()
 	{
+		QByteArray fileData;
+
 		bool result = true;
 
-		QVector<Tuning::TuningSource> tuningSources;
-
-		quint32 receivingNetmask = m_settings.tuningDataNetmask.toIPv4Address();
-
-		quint32 receivingSubnet = m_settings.tuningDataIP.address32() & receivingNetmask;
-
-		for(Hardware::DeviceModule* lm : m_lmList)
-		{
-			if (lm == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(lm);
-
-			if (lmDescription == nullptr)
-			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
-				result = false;
-				continue;
-			}
-
-			const LmDescription::Lan& lan = lmDescription->lan();
-
-			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
-			{
-				if (lanController.isProvideTuning() == false)
-				{
-					continue;
-				}
-
-				Tuning::TuningSource ts;
-
-				result &= getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
-													   lanController.m_place,
-													   lanController.m_type,
-				                                       *m_equipment,
-													   m_subsystemKeyMap,
-													   m_lmsUniqueIdMap,
-				                                       &ts,
-													   m_log);
-				if (result == false)
-				{
-					continue;
-				}
-
-				if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
-				{
-					continue;
-				}
-
-				if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
-				{
-					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
-					//
-					m_log->errCFG3043(ts.lmAddress().toString(),
-									  ts.lmAdapterID(),
-									  m_settings.tuningDataIP.addressStr(),
-									  equipmentID());
-					result = false;
-					continue;
-				}
-
-				Tuning::TuningData* tuningData = m_tuningDataStorage->value(lm->equipmentId(), nullptr);
-
-				if(tuningData != nullptr)
-				{
-					ts.setTuningData(tuningData);
-				}
-				else
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Tuning data for LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
-					result = false;
-				}
-
-				tuningSources.append(ts);
-			}
-		}
-
-		RETURN_IF_FALSE(result)
-
-		QByteArray fileData;
-		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
+		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(m_settings.tuningSources, &fileData);
 
 		RETURN_IF_FALSE(result)
 
@@ -177,7 +91,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool TuningServiceCfgGenerator::writeBatFile()
 	{

@@ -42,7 +42,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= m_settings.readFromDevice(m_equipment, m_software, m_log);
+		result &= m_settings.readFromDevice(m_context, m_software);
 		result &= m_settings.checkSettings(m_software, m_log);
 
 		RETURN_IF_FALSE(result);

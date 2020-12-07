@@ -316,4 +316,9 @@ namespace Hardware
 
 		return -1;
 	}
+
+	int SubsystemStorage::subsystemKey(const QString& subsystemID)
+	{
+		return ssKey(subsystemID);
+	}
 }

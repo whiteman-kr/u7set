@@ -5,15 +5,12 @@
 #include <memory>
 #include <QByteArray>
 #include "../lib/Types.h"
+#include "SimOverrideSignals.h"
 
 class SimRamTests;
 
 namespace Sim
 {
-	struct OverrideRamRecord;
-	class OverrideSignals;
-
-
 	class RamAreaInfo
 	{
 	public:
@@ -54,7 +51,6 @@ namespace Sim
 		quint32 m_offset = 0xFFFFFFFF;
 		quint32 m_size = 0;
 	};
-
 
 	class RamArea final : public RamAreaInfo
 	{
@@ -123,6 +119,60 @@ namespace Sim
 		friend SimRamTests;
 	};
 
+	template<typename CONTAINER>
+	bool RamArea::readToBuffer(quint32 offsetW, quint32 countW, CONTAINER* data, bool applyOverride) const noexcept
+	{
+		if (data == nullptr)
+		{
+			assert(data);
+			return false;
+		}
+
+		int countBytes = countW * 2;
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			m_data.size() - byteOffset < countBytes)
+		{
+			// Buffer must be completely inside area
+			//
+			Q_ASSERT(byteOffset >= 0 &&
+					 m_data.size() - byteOffset >= countBytes);
+			return false;
+		}
+
+		if (static_cast<int>(data->size()) != countBytes)
+		{
+			data->resize(countBytes);
+		}
+
+		// Copy memory
+		//
+		std::memcpy(data->data(), m_data.constData() + byteOffset, countBytes);
+
+		// Apply override to just copied memory
+		//
+		if (applyOverride == true &&
+			m_overrideData.empty() == false)
+		{
+			int zeroBasedOffsetW = offsetW - offset();
+
+			if (zeroBasedOffsetW < 0 ||
+				zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+			{
+				Q_ASSERT(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < static_cast<int>(m_overrideData.size()));
+				return false;
+			}
+
+			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
+			for (quint32 i = 0; i < countW; i++)
+			{
+				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
+			}
+		}
+
+		return true;
+	}
 
 	class Ram
 	{

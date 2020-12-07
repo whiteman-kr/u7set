@@ -14,8 +14,7 @@ namespace Builder
 	{
 	public:
 		TuningServiceCfgGenerator(Context* context,
-								  Hardware::Software* software,
-								  const LmsUniqueIdMap& lmsUniqueIdMap);
+								  Hardware::Software* software);
 
 		~TuningServiceCfgGenerator();
 
@@ -23,19 +22,18 @@ namespace Builder
 		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
-		TuningServiceSettingsGetter m_settings;
-		const LmsUniqueIdMap m_lmsUniqueIdMap;
-		SubsystemKeyMap m_subsystemKeyMap;
-
-		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
-
-		QVector<Signal*> m_tuningSignals;
-
 		bool writeSettings();
 		bool writeTuningSources();
 
 		bool writeBatFile();
 		bool writeShFile();
+
+	private:
+		TuningServiceSettingsGetter m_settings;
+
+		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
+
+		QVector<Signal*> m_tuningSignals;
 	};
 
 }
