@@ -13,6 +13,7 @@ namespace Sim
 	class Simulator;
 	class TuningRequestsProcessingThread;
 
+
 	class TuningServiceCommunicator : public QObject
 	{
 		Q_OBJECT
@@ -29,7 +30,6 @@ namespace Sim
 
 		// This function is called by Simulator to provide current RAM state of Tuning memory area
 		// if sLM is in TuningMode and Tuning is enabled.
-		//
 		// Data is in LogicMoudule's native endianness (BE).
 		//
 		bool updateTuningRam(const QString& lmEquipmentId,
@@ -37,18 +37,31 @@ namespace Sim
 							 const RamArea& ramArea,
 							 TimeStamp timeStamp);
 
-		// This function is called by Simulator when module's tuning mode has changed to or from TuningMode
+		// This function is called by Simulator to provide confiramtion about writing data to RAM
 		//
-		void tuningModeChanged(const QString& lmEquipmentId, bool tuningMode);
+		void writeConfirmation(std::vector<qint64> confirmedRecords,
+							   const QString& lmEquipmentId,
+							   const QString& portEquipmentId,
+							   const RamArea& ramArea,
+							   TimeStamp timeStamp);	// timeStamp can be the same with following updateTuningRam call (writeConfiramtion is called before workcycle, updateTuningRam after workcyle, both already have the same timestamp)
+
+		// These functions are called by Simulator when module enters or leaves tuning mode
+		//
+		void tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
 	public:
-		void writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask);
-		void writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data);
-		void writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data);
+		// Write command to LM's RAM
+		// Save returned qint64 (RecordIndex) for confirmation
+		//
+		qint64 applyWrittenChanges(const QString& lmEquipmentId, const QString& portEquipmentId);
+		qint64 writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask);
+		qint64 writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data);
+		qint64 writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data);
 
 		std::queue<TuningRecord> fetchWriteTuningQueue(const QString& lmEquipmentId);
 	private:
-		void writeTuningRecord(TuningRecord&& r);
+		qint64 writeTuningRecord(TuningRecord&& r);
 
 		void startProcessingThread();
 		void stopProcessingThread();

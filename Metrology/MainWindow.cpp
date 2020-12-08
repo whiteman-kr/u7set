@@ -1671,21 +1671,6 @@ void MainWindow::showOptions()
 	{
 		m_pStatisticsPanel->updateList();
 	}
-
-	if(theOptions.language().languageType() == LANGUAGE_TYPE_RU)
-	{
-		QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
-		if (QFile::exists(languageFilePath) == false)
-		{
-			QMessageBox::information(this,
-									 windowTitle(),
-									 tr("Russian language could not be installed.\n"
-										"File of russian language: %1 - was not found!").
-									 arg(languageFilePath));
-			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
-			theOptions.language().save();
-		}
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

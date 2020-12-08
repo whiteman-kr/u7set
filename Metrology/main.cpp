@@ -26,24 +26,25 @@ int main(int argc, char *argv[])
 
 	theOptions.load();
 
+	// select language
+	//
 	QTranslator translator;
-	//
-	//
+
 	if (theOptions.language().languageType() == LANGUAGE_TYPE_RU)
 	{
-		if (translator.load(LANGUAGE_OPTIONS_FILE_RU, QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR) == true)
+		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR).arg(LANGUAGE_OPTIONS_FILE_RU)) == true)
 		{
 			qApp->installTranslator(&translator);
 		}
 		else
 		{
 			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
-			QMessageBox::critical(nullptr, "Russian language", QString("Didn't found russian language file:\n%1").arg(languageFilePath));
+			QMessageBox::critical(nullptr, "Russian language", QString("Didn't load russian language:\n%1").arg(languageFilePath));
 			theOptions.language().setLanguageType(LANGUAGE_TYPE_EN);
 		}
 	}
 
-	//
+	// init SoftwareInfo
 	//
 	SoftwareInfo si;
 

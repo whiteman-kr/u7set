@@ -59,25 +59,47 @@ namespace Sim
 		return true;
 	}
 
-	void TuningServiceCommunicator::tuningModeChanged(const QString& lmEquipmentId, bool tuningMode)
+	void TuningServiceCommunicator::writeConfirmation(std::vector<qint64> confirmedRecords,
+													  const QString& lmEquipmentId,
+													  const QString& portEquipmentId,
+													  const RamArea& ramArea,
+													  TimeStamp timeStamp)
+	{
+		int to_Yuriy_Beliy_get_write_confirmation_here;
+	}
+
+	void TuningServiceCommunicator::tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->tuningModeChanged(lmEquipmentId, tuningMode);
+			m_processingThread->tuningModeChanged(lmEquipmentId, true);
 		}
 	}
 
-	void TuningServiceCommunicator::writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask)
+	void TuningServiceCommunicator::tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId)
+	{
+		if (m_processingThread != nullptr)
+		{
+			m_processingThread->tuningModeChanged(lmEquipmentId, false);
+		}
+	}
+
+	qint64 TuningServiceCommunicator::applyWrittenChanges(const QString& lmEquipmentId, const QString& portEquipmentId)
+	{
+		return writeTuningRecord(TuningRecord::createApplyChanges(lmEquipmentId, portEquipmentId));
+	}
+
+	qint64 TuningServiceCommunicator::writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask)
 	{
 		return writeTuningRecord(TuningRecord::createDword(lmEquipmentId, portEquipmentId, offsetW, data, mask));
 	}
 
-	void TuningServiceCommunicator::writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data)
+	qint64 TuningServiceCommunicator::writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data)
 	{
 		return writeTuningRecord(TuningRecord::createSignedInt32(lmEquipmentId, portEquipmentId, offsetW, data));
 	}
 
-	void TuningServiceCommunicator::writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data)
+	qint64 TuningServiceCommunicator::writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data)
 	{
 		return writeTuningRecord(TuningRecord::createFloat(lmEquipmentId, portEquipmentId, offsetW, data));
 	}
@@ -97,13 +119,13 @@ namespace Sim
 		return result;
 	}
 
-	void TuningServiceCommunicator::writeTuningRecord(TuningRecord&& r)
+	qint64 TuningServiceCommunicator::writeTuningRecord(TuningRecord&& r)
 	{
 		QMutexLocker l(&m_qmutex);
 
 		m_writeTuningQueue[r.lmEquipmentId].push(std::move(r));
 
-		return;
+		return r.recordIndex;
 	}
 
 	void TuningServiceCommunicator::startProcessingThread()

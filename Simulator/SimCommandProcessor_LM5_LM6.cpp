@@ -10,8 +10,6 @@
 
 namespace Sim
 {
-	const int CommandProcessor_LM5_LM6::m_cycleDurationMs;
-
 	CommandProcessor_LM5_LM6::CommandProcessor_LM5_LM6(DeviceEmulator* device) :
 		CommandProcessor(device)
 	{
@@ -157,7 +155,7 @@ namespace Sim
 				bool ok = true;
 				if (tuningMode == 1)
 				{
-					ok = m_device->tuningEnterTuningMode();
+					ok = m_device->tuningEnterTuningMode(TimeStamp{currentTime});
 				}
 				else
 				{
@@ -2820,7 +2818,7 @@ namespace Sim
 
 		quint16 track = instance->param(i_track)->wordValue();
 
-		if (time == 0 || (conf != 1 && conf != 2))
+		if (time < m_cycleDurationMs || (conf != 1 && conf != 2))
 		{
 			// ?????
 			//
