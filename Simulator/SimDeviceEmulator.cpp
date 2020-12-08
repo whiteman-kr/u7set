@@ -1313,7 +1313,17 @@ namespace Sim
 
 			while (q.empty() == false)
 			{
-				q.front().writeToRam(mutableRam());
+				const TuningRecord& record =  q.front();
+
+				if (record.type == TuningRecord::RecordType::ApplyChanges)
+				{
+					this->tuningApplyCommand();
+				}
+				else
+				{
+					record.writeToRam(mutableRam());
+				}
+
 				q.pop();
 			}
 		}

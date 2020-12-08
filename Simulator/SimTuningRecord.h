@@ -7,6 +7,15 @@ namespace Sim
 
 	struct TuningRecord
 	{
+		enum class RecordType
+		{
+			ApplyChanges,
+			WriteDword,
+			WriteSignedInt32,
+			WriteFloat
+		};
+
+		RecordType type;
 		QString lmEquipmentId;
 		QString portEquipmentId;
 
@@ -14,9 +23,11 @@ namespace Sim
 		std::variant<quint32, qint32, float> value;
 		quint32 dwordMask;
 
-		static const size_t ValueDwordIndex = 0;		// Index in std::variant<quint32, qint32, float> value
-		static const size_t ValueSignedInt32Index = 1;
-		static const size_t ValueFloatIndex = 2;
+		static TuningRecord createApplyChanges(const QString& lmEquipmentId,
+											   const QString& portEquipmentId)
+		{
+			return TuningRecord{RecordType::ApplyChanges, lmEquipmentId, portEquipmentId, 0, 0, 0};
+		}
 
 		static TuningRecord createDword(const QString& lmEquipmentId,
 										const QString& portEquipmentId,
@@ -24,7 +35,7 @@ namespace Sim
 										quint32 value,
 										quint32 mask)
 		{
-			return TuningRecord{lmEquipmentId, portEquipmentId, offsetW, value, ~mask};		// Mask is flipped here, to be classical mask (1s is what to leave as is)
+			return TuningRecord{RecordType::WriteDword, lmEquipmentId, portEquipmentId, offsetW, value, ~mask};		// Mask is flipped here, to be classical mask (1s is what to leave as is)
 		}
 
 		static TuningRecord createSignedInt32(const QString& lmEquipmentId,
@@ -32,7 +43,7 @@ namespace Sim
 											  quint32 offsetW,
 											  qint32 value)
 		{
-			return TuningRecord{lmEquipmentId, portEquipmentId, offsetW, value, 0xFFFFFFFF};
+			return TuningRecord{RecordType::WriteSignedInt32, lmEquipmentId, portEquipmentId, offsetW, value, 0xFFFFFFFF};
 		}
 
 		static TuningRecord createFloat(const QString& lmEquipmentId,
@@ -40,18 +51,28 @@ namespace Sim
 										quint32 offsetW,
 										float value)
 		{
-			return TuningRecord{lmEquipmentId, portEquipmentId, offsetW, value, 0xFFFFFFFF};
+			return TuningRecord{RecordType::WriteFloat, lmEquipmentId, portEquipmentId, offsetW, value, 0xFFFFFFFF};
 		}
 
-		bool writeToRam(Sim::Ram& ram)
+		bool writeToRam(Sim::Ram& ram) const
 		{
 			bool ok = true;
 
-			switch (value.index())
+			switch (type)
 			{
-			case TuningRecord::ValueDwordIndex:
+			case TuningRecord::RecordType::WriteDword:
 				{
-					quint32 v = std::get<quint32>(value);
+					quint32 v = 0;
+
+					try
+					{
+						v = std::get<quint32>(value);
+					}
+					catch (const std::bad_variant_access&)
+					{
+						Q_ASSERT(false);
+						ok = false;
+					}
 
 					quint32 ramDword = 0;
 					ok &= ram.readDword(offsetW, &ramDword, E::ByteOrder::BigEndian);
@@ -62,15 +83,37 @@ namespace Sim
 					ok &= ram.writeDword(offsetW, ramDword, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
 				}
 				break;
-			case TuningRecord::ValueSignedInt32Index:
+			case TuningRecord::RecordType::WriteSignedInt32:
 				{
-					qint32 v = std::get<qint32>(value);
+					qint32 v = 0;
+
+					try
+					{
+						v = std::get<qint32>(value);
+					}
+					catch (const std::bad_variant_access&)
+					{
+						Q_ASSERT(false);
+						ok = false;
+					}
+
 					ok &= ram.writeSignedInt(offsetW, v, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
 				}
 				break;
-			case TuningRecord::ValueFloatIndex:
+			case TuningRecord::RecordType::WriteFloat:
 				{
-					float v = std::get<float>(value);
+					float v = 0;
+
+					try
+					{
+						v = std::get<float>(value);
+					}
+					catch (const std::bad_variant_access&)
+					{
+						Q_ASSERT(false);
+						ok = false;
+					}
+
 					ok &= ram.writeFloat(offsetW, v, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
 				}
 				break;

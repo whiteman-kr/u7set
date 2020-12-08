@@ -75,6 +75,11 @@ namespace Sim
 		}
 	}
 
+	void TuningServiceCommunicator::applyWrittenChanges(const QString& lmEquipmentId, const QString& portEquipmentId)
+	{
+		return writeTuningRecord(TuningRecord::createApplyChanges(lmEquipmentId, portEquipmentId));
+	}
+
 	void TuningServiceCommunicator::writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask)
 	{
 		return writeTuningRecord(TuningRecord::createDword(lmEquipmentId, portEquipmentId, offsetW, data, mask));

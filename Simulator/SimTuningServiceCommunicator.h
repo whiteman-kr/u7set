@@ -43,6 +43,7 @@ namespace Sim
 		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
 	public:
+		void applyWrittenChanges(const QString& lmEquipmentId, const QString& portEquipmentId);
 		void writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask);
 		void writeTuningSignedInt32(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, qint32 data);
 		void writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data);
