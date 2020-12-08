@@ -68,4 +68,14 @@ namespace Sim
 
 		return result;
 	}
+
+	void TuningLanInterface::sendWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& ramArea, TimeStamp timeStamp)
+	{
+		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
+		{
+			return;
+		}
+
+		return m_tuningServiceCommunicator->writeConfirmation(std::move(confirmedRecords), lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
+	}
 }

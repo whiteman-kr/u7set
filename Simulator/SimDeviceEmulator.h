@@ -253,6 +253,9 @@ namespace Sim
 		quint16 getWord(int wordOffset) const;
 		quint32 getDword(int wordOffset) const;
 
+	private:
+		RamArea tuningRamArea() const;		// Returns copy of Tuning RAM area
+
 		// --
 		//
 	private:

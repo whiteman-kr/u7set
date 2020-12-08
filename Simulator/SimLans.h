@@ -41,6 +41,7 @@ namespace Sim
 		void tuningModeLeft();
 
 		std::queue<TuningRecord> fetchWriteTuningQueue();
+		void sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, TimeStamp timeStamp);
 
 	public:
 		ScopedLog& log();

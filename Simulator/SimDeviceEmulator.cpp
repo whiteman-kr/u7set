@@ -263,6 +263,7 @@ namespace Sim
 			else
 			{
 				Q_ASSERT(m_deviceState == DeviceState::Operate);
+
 				ok = processOperate(currentTime, currentDateTime, workcycle);
 			}
 		}
@@ -319,33 +320,7 @@ namespace Sim
 		//
 		if (runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
 		{
-			quint32 tuningDataOffsetW = m_lmDescription.memory().m_tuningDataOffset;
-
-			auto tuningRamHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, tuningDataOffsetW);
-			if (tuningRamHandle == Ram::InvalidHandle)
-			{
-				m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
-								 .arg(equipmentId())
-								 .arg(tuningDataOffsetW));
-
-				setDeviceState(DeviceState::Fault);
-				return false;
-			}
-
-			const RamArea* ramArea = m_ram.memoryArea(tuningRamHandle);
-			if (ramArea == nullptr)
-			{
-				Q_ASSERT(ramArea);
-
-				m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
-								 .arg(equipmentId())
-								 .arg(tuningDataOffsetW));
-
-				setDeviceState(DeviceState::Fault);
-				return false;
-			}
-
-			m_lans.updateTuningRam(*ramArea, plantTime);
+			m_lans.updateTuningRam(tuningRamArea(), plantTime);
 		}
 
 		return ok;
@@ -881,6 +856,37 @@ namespace Sim
 		return getData<quint32>(wordOffset * 2);
 	}
 
+	RamArea DeviceEmulator::tuningRamArea() const
+	{
+		RamArea result{false};
+
+		quint32 tuningDataOffsetW = m_lmDescription.memory().m_tuningDataOffset;
+
+		auto tuningRamHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, tuningDataOffsetW);
+		if (tuningRamHandle == Ram::InvalidHandle)
+		{
+			m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
+							 .arg(equipmentId())
+							 .arg(tuningDataOffsetW));
+			return result;
+		}
+
+		const RamArea* ramArea = m_ram.memoryArea(tuningRamHandle);
+		if (ramArea == nullptr)
+		{
+			Q_ASSERT(ramArea);
+
+			m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
+							 .arg(equipmentId())
+							 .arg(tuningDataOffsetW));
+			return result;
+		}
+
+		result = *ramArea;
+
+		return result;
+	}
+
 	bool DeviceEmulator::initMemory()
 	{
 		bool ok = true;
@@ -1311,6 +1317,9 @@ namespace Sim
 		{
 			std::queue<TuningRecord> q = m_lans.fetchWriteTuningQueue();
 
+			std::vector<qint64> confirmedRecords;
+			confirmedRecords.reserve(q.size());
+
 			while (q.empty() == false)
 			{
 				const TuningRecord& record =  q.front();
@@ -1324,7 +1333,19 @@ namespace Sim
 					record.writeToRam(mutableRam());
 				}
 
+				confirmedRecords.push_back(record.recordIndex);
+
 				q.pop();
+			}
+
+			// Send confirmations to tuning subsystem
+			//
+			if (confirmedRecords.empty() == false)
+			{
+				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
+				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+
+				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), plantTime);
 			}
 		}
 

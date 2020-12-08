@@ -227,6 +227,25 @@ namespace Sim
 		return result;
 	}
 
+	void Lans::sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, TimeStamp timeStamp)
+	{
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				tli->sendWriteConfirmation(confirmedRecords, data, timeStamp);
+			}
+		}
+
+		return;
+	}
+
 	ScopedLog& Lans::log()
 	{
 		return m_log;

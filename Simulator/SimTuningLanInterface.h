@@ -29,6 +29,7 @@ namespace Sim
 		void tuningModeLeft();
 
 		std::queue<TuningRecord> fetchWriteTuningQueue();
+		void sendWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& ramArea, TimeStamp timeStamp);
 
 	public:
 	private:
