@@ -156,8 +156,23 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::CAPTION, &lmi->caption, errMsg);
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::SUBSYSTEM_ID, &lmi->subsystemID, errMsg);
+	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::SUBSYSTEM_KEY, &lmi->subsystemKey, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::LM_NUMBER, &lmi->lmNumber, errMsg);
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::SUBSYSTEM_CHANNEL, &lmi->subsystemChannel, errMsg);
+
+	QString uniqueIdStr;
+
+	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::LM_UNIQUE_ID, &uniqueIdStr, errMsg);
+
+	bool ok = false;
+
+	lmi->lmUniqueID = uniqueIdStr.toULongLong(&ok, 16);
+
+	if (ok == false)
+	{
+		*errMsg = DomXmlHelper::errAttributeParsing(lmElem, EquipmentPropNames::LM_UNIQUE_ID);
+		return false;
+	}
 
 	result &= DomXmlHelper::getBoolAttribute(lmElem, EquipmentPropNames::APP_DATA_ENABLE, &lmi->appDataEnable, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &lmi->appDataSizeBytes, errMsg);
@@ -173,7 +188,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY_ID, &strModuleFamilyID, errMsg);
 
-	bool ok = false;
+	ok = false;
 
 	lmi->moduleFamilyID = strModuleFamilyID.toInt(&ok, 0);
 
@@ -376,28 +391,28 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 	//
 	// -----------------------------------------------------------------------------------
 
-	LogicModulesInfoWriter::LogicModulesInfoWriter(	const QVector<Builder::ModuleLogicCompiler *>& moduleCompilers,
-													const Hardware::EquipmentSet& equipmentSet) :
-		m_moduleCompilers(moduleCompilers),
-		m_equipmentSet(equipmentSet)
+	LogicModulesInfoWriter::LogicModulesInfoWriter(const Builder::Context& context) :
+		m_context(context)
 	{
 	}
 
 	bool LogicModulesInfoWriter::fill()
 	{
+		TEST_PTR_RETURN_FALSE(log());
+
 		bool result = true;
 
-		int lmsCount = m_moduleCompilers.size();
+		int lmsCount = static_cast<int>(m_context.m_lmModules.size());
 
 		logicModulesInfo.resize(lmsCount);
 
 		for(int i = 0; i < lmsCount; i++)
 		{
-			Builder::ModuleLogicCompiler* mc = m_moduleCompilers[i];
+			const Hardware::DeviceModule* lmModule = m_context.m_lmModules[i];
 
-			TEST_PTR_CONTINUE(mc);
+			TEST_PTR_CONTINUE(lmModule);
 
-			result &= fill(&logicModulesInfo[i], *mc);
+			result &= fill(lmModule, &logicModulesInfo[i]);
 		}
 
 		return result;
@@ -428,33 +443,47 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		xml.writeEndDocument();
 	}
 
-	bool LogicModulesInfoWriter::fill(LogicModuleInfo* lmInfo, Builder::ModuleLogicCompiler& mc)
+	bool LogicModulesInfoWriter::fill(const Hardware::DeviceModule* lmModule, LogicModuleInfo* lmInfo)
 	{
 		TEST_PTR_RETURN_FALSE(lmInfo);
 
 		bool result = true;
 
-		std::shared_ptr<Hardware::DeviceModule> lmModule = mc.getLmSharedPtr();
-
-		TEST_PTR_RETURN_FALSE(lmModule);
-
 		lmInfo->equipmentID = lmModule->equipmentIdTemplate();
 		lmInfo->caption = lmModule->caption();
 
-		result &= DeviceHelper::getStrProperty(lmModule.get(), EquipmentPropNames::SUBSYSTEM_ID, &lmInfo->subsystemID, mc.log());
-		result &= DeviceHelper::getIntProperty(lmModule.get(), EquipmentPropNames::LM_NUMBER, &lmInfo->lmNumber, mc.log());
-		result &= DeviceHelper::getStrProperty(lmModule.get(), EquipmentPropNames::SUBSYSTEM_CHANNEL, &lmInfo->subsystemChannel, mc.log());
+		result &= DeviceHelper::getStrProperty(lmModule, EquipmentPropNames::SUBSYSTEM_ID, &lmInfo->subsystemID, log());
 
-		result &= DeviceHelper::getStrProperty(lmModule.get(), EquipmentPropNames::MODULE_FAMILY, &lmInfo->moduleFamily, mc.log());
+		TEST_PTR_RETURN_FALSE(m_context.m_subsystems);
+
+		lmInfo->subsystemKey = m_context.m_subsystems->subsystemKey(lmInfo->subsystemID);
+
+		auto p = m_context.m_lmsUniqueIDs.find(lmInfo->equipmentID);
+
+		if (p != m_context.m_lmsUniqueIDs.end())
+		{
+			lmInfo->lmUniqueID = p->second;
+		}
+		else
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(log(), QString("UniqueID isn't found fro LM %1").arg(lmInfo->equipmentID));
+			return false;
+		}
+
+		result &= DeviceHelper::getIntProperty(lmModule, EquipmentPropNames::LM_NUMBER, &lmInfo->lmNumber, log());
+		result &= DeviceHelper::getStrProperty(lmModule, EquipmentPropNames::SUBSYSTEM_CHANNEL, &lmInfo->subsystemChannel, log());
+
+		result &= DeviceHelper::getStrProperty(lmModule, EquipmentPropNames::MODULE_FAMILY, &lmInfo->moduleFamily, log());
 		lmInfo->moduleFamilyID = static_cast<int>(lmModule->moduleFamily());
-		result &= DeviceHelper::getIntProperty(lmModule.get(), EquipmentPropNames::MODULE_VERSION, &lmInfo->moduleVersion, mc.log());
+		result &= DeviceHelper::getIntProperty(lmModule, EquipmentPropNames::MODULE_VERSION, &lmInfo->moduleVersion, log());
 
 		lmInfo->presetName = lmModule->presetName();
-		result &= DeviceHelper::getStrProperty(lmModule.get(), EquipmentPropNames::LM_DESCRIPTION_FILE, &lmInfo->lmDescriptionFile, mc.log());
+		result &= DeviceHelper::getStrProperty(lmModule, EquipmentPropNames::LM_DESCRIPTION_FILE, &lmInfo->lmDescriptionFile, log());
 
 		lmInfo->lanControllers.clear();
 
-		std::shared_ptr<LmDescription> lmDescription = mc.getLmDescription();
+		std::shared_ptr<LmDescription> lmDescription = m_context.m_lmDescriptions->get(lmModule);
 
 		TEST_PTR_RETURN_FALSE(lmDescription);
 
@@ -476,8 +505,8 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 			LanControllerInfo& lci = lmInfo->lanControllers[i];
 
-			result &= LanControllerInfoHelper::getInfo(	*lmModule.get(), lc.m_place, lc.m_type, &lci,
-														m_equipmentSet, mc.log());
+			result &= LanControllerInfoHelper::getInfo(	*lmModule, lc.m_place, lc.m_type, &lci,
+														*m_context.m_equipmentSet.get(), log());
 
 			if (lci.appDataProvided == true && lci.appDataEnable == true)
 			{
@@ -529,8 +558,11 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		xml.writeStringAttribute(EquipmentPropNames::CAPTION, lmInfo.caption);
 
 		xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_ID, lmInfo.subsystemID);
+		xml.writeIntAttribute(EquipmentPropNames::SUBSYSTEM_KEY, lmInfo.subsystemKey);
 		xml.writeIntAttribute(EquipmentPropNames::LM_NUMBER, lmInfo.lmNumber);
 		xml.writeStringAttribute(EquipmentPropNames::SUBSYSTEM_CHANNEL, lmInfo.subsystemChannel);
+
+		xml.writeUInt64Attribute(EquipmentPropNames::LM_UNIQUE_ID, lmInfo.lmUniqueID, true);
 
 		xml.writeBoolAttribute(EquipmentPropNames::APP_DATA_ENABLE, lmInfo.appDataEnable);
 		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lmInfo.appDataSizeBytes);

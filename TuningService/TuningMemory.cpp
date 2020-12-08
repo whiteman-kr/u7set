@@ -9,8 +9,6 @@
 
 namespace Tuning
 {
-
-
 	// ----------------------------------------------------------------------------------
 	//
 	// TuningMemory class implementation
@@ -21,12 +19,10 @@ namespace Tuning
 	{
 	}
 
-
 	TuningMemory::~TuningMemory()
 	{
 		freeMemory();
 	}
-
 
 	void TuningMemory::init(int startAddr, int frameSizeW, int framesCount)
 	{
@@ -46,25 +42,21 @@ namespace Tuning
 		allocateMemory();
 	}
 
-
-	void TuningMemory::updateFrame(int startAddrW, int frameSizeB, const quint8* buffer)
+	bool TuningMemory::updateFrame(int startAddrW, int frameSizeB, const quint8* buffer)
 	{
 		if (startAddrW < m_startAddrW)
 		{
-			assert(false);
-			return;
+			return false;
 		}
 
 		if (frameSizeB != m_frameSizeB)
 		{
-			assert(false);
-			return;
+			return false;
 		}
 
 		if ( (startAddrW + m_frameSizeW) > (m_startAddrW + m_frameSizeW * m_framesCount) )
 		{
-			assert(false);
-			return;
+			return false;
 		}
 
 		int offsetB = (startAddrW - m_startAddrW) * sizeof(quint16);
@@ -73,13 +65,13 @@ namespace Tuning
 
 		if (m_memory == nullptr)
 		{
-			assert(false);
-			return;
+			return false;
 		}
 
 		memcpy(m_memory + offsetB, buffer, m_frameSizeB);
-	}
 
+		return true;
+	}
 
 	void TuningMemory::allocateMemory()
 	{
@@ -94,7 +86,6 @@ namespace Tuning
 		m_memory = new quint8 [m_frameSizeB * m_framesCount];
 	}
 
-
 	void TuningMemory::freeMemory()
 	{
 		AUTO_LOCK(m_memLock)
@@ -107,5 +98,4 @@ namespace Tuning
 		delete [] m_memory;
 		m_memory = nullptr;
 	}
-
 }

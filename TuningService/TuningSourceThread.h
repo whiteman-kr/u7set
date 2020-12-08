@@ -72,6 +72,8 @@ namespace Tuning
 		qint64 errAnalogLowBoundCheck = 0;
 		qint64 errAnalogHighBoundCheck = 0;
 
+		qint64 errTuningFrameUpdate = 0;
+
 		bool controlIsActive = false;
 		bool setSOR = false;
 		bool writingDisabled = false;
@@ -233,7 +235,7 @@ namespace Tuning
 		void periodicProcessing();
 		bool processReplyQueue();
 
-		void pushReply(const Rup::Frame& reply);
+		void pushReply(const RupFotipV2& reply);
 		void incErrReplySize();
 
 		void getState(Network::TuningSourceState* tuningSourceState);
@@ -247,11 +249,10 @@ namespace Tuning
 
 		NetworkError applySignalStates(	const QString& clientEquipmentID,
 										const QString& user);
-	protected:
-//		Queue<Rup::Frame>& replyQueue() { return m_replyQueue; }
-
 	private:
 		void initTuningSignals(const TuningData* td);
+
+		bool isSimulationMode() const;
 
 		bool processWaitReply();
 		bool processCommandQueue();
@@ -260,7 +261,7 @@ namespace Tuning
 		void onNoReply();
 
 		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
-		void sendFotipRequest(RupFotipV2& request, const QString& appSignalID);
+		void sendFotipRequest(SimRupFotipV2& request, const QString& appSignalID);
 
 		bool initRupHeader(Rup::Header& rupHeader);
 		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
@@ -282,12 +283,12 @@ namespace Tuning
 		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply);
 
 	private:
-//		bool m_STOP_SEND_REQUESTS = false;
-
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
 		bool m_disableModulesTypeChecking = false;
+
+		HostAddressPort m_tuningSimIP;
 
 		// data from tuning source
 		//
@@ -325,7 +326,7 @@ namespace Tuning
 
 		QUdpSocket m_socket;
 
-		RupFotipV2 m_request;
+		SimRupFotipV2 m_request;
 		QString m_requestAppSignalID;
 
 		RupFotipV2 m_reply;
@@ -334,7 +335,7 @@ namespace Tuning
 
 		const int MAX_RETRY_COUNT = 3;
 
-		Queue<Rup::Frame> m_replyQueue;
+		Queue<RupFotipV2> m_replyQueue;
 
 		TuningCommandQueue m_tuningCommandQueue;
 
@@ -370,7 +371,7 @@ namespace Tuning
 										CircularLoggerShared logger,
 										CircularLoggerShared tuningLog);
 
-		void pushReply(const Rup::Frame& reply);
+		void pushReply(const RupFotipV2& reply);
 		void incErrReplySize();
 
 		void getState(Network::TuningSourceState* tuningSourceState);
@@ -426,6 +427,7 @@ namespace Tuning
 	public:
 		TuningSocketListener(const HostAddressPort& listenIP,
 							 TuningSourceThreadMap& sourceWorkerMap,
+							 bool simulationMode,
 							 std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListener();
 
@@ -445,12 +447,13 @@ namespace Tuning
 
 		void onSocketReadyRead();
 
-		void pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const Rup::Frame& reply);
+		void pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const RupFotipV2& reply);
 		void incSourceWorkerErrReplySize(const QHostAddress& tuningSourceIP);
 
 	private:
 		HostAddressPort m_listenIP;
 		TuningSourceThreadMap& m_sourceThreadMap;
+		bool m_simMode = false;
 
 		std::shared_ptr<CircularLogger> m_logger;
 
@@ -477,6 +480,7 @@ namespace Tuning
 	public:
 		TuningSocketListenerThread(const HostAddressPort& listenIP,
 								   TuningSourceThreadMap& sourceWorkerMap,
+								   bool simulationMode,
 								   std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListenerThread();
 

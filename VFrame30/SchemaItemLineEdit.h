@@ -194,8 +194,8 @@ namespace VFrame30
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, bool editMode) final;
-		virtual void updateWidgetProperties(QWidget* widget) const final;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode, double zoom) override final;
+		virtual void updateWidgetProperties(QWidget* widget) const  override final;
 
 	protected slots:
 		void afterCreate(QLineEdit* control);

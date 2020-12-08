@@ -4,6 +4,7 @@
 #include "SettingsForm.h"
 #include "DiagTabPage.h"
 #include "ApplicationTabPage.h"
+#include "../lib/Ui/DialogAbout.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -60,6 +61,14 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	m_pClearLogButton = new QPushButton(tr("Clear Log"));
 
+	// About button
+	//
+	m_pAboutButton = new QPushButton(tr("About mconf..."));
+
+	// About Qt button
+	//
+	m_pAboutQtButton = new QPushButton(tr("About Qt..."));
+
 	//
 	// Layouts
 	//
@@ -87,6 +96,9 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	pRightLayout->addWidget(m_pSettingsButton);
 	pRightLayout->addWidget(m_pClearLogButton);
 		
+	pRightLayout->addWidget(m_pAboutQtButton);
+	pRightLayout->addWidget(m_pAboutButton);
+
 	// Main, dialog layout
 	//
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
@@ -112,6 +124,9 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	
 	connect(m_pSettingsButton, &QAbstractButton::clicked, this, &ModuleConfigurator::settingsClicked);
 	connect(m_pClearLogButton, &QAbstractButton::clicked, this, &ModuleConfigurator::clearLogClicked);
+
+	connect(m_pAboutQtButton, &QAbstractButton::clicked, this, &ModuleConfigurator::aboutQtClicked);
+	connect(m_pAboutButton, &QAbstractButton::clicked, this, &ModuleConfigurator::aboutClicked);
 
 	// Logic
 	//
@@ -412,6 +427,21 @@ void ModuleConfigurator::settingsClicked()
 
 	return;
 }
+
+void ModuleConfigurator::aboutQtClicked()
+{
+	QMessageBox::aboutQt(this, qAppName());
+	return;
+}
+
+void ModuleConfigurator::aboutClicked()
+{
+	QString text = qApp->applicationName() + tr(" allows user to upload firmware to flash memory of logic modules.<br>");
+	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
+
+	return;
+}
+
 
 void ModuleConfigurator::clearLogClicked()
 {

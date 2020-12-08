@@ -70,7 +70,7 @@ namespace VFrame30
 
 		// While midButton is pressed, this is move mode, don't change zoom
 		//
-		if (event->buttons().testFlag(Qt::MidButton))
+		if (event->buttons().testFlag(Qt::MiddleButton))
 		{
 			return;
 		}
@@ -90,7 +90,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mousePressEvent(QMouseEvent* event)
 	{
-		if (event->button() == Qt::MidButton)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// Enter to scrolling mode
 			//
@@ -113,7 +113,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (event->button() == Qt::MidButton)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// Leave scrolling mode;
 			//
@@ -128,7 +128,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// Scrolling mode
 			//
@@ -194,8 +194,8 @@ namespace VFrame30
 			startY = -verticalScrollBar()->value();
 		}
 
-		double x = widgetPoint.x() - startX;		// position in points
-		double y = widgetPoint.y() - startY;
+		const double x = widgetPoint.x() - startX;		// position in points
+		const double y = widgetPoint.y() - startY;
 
 		// Scaling to zoom factor
 		//
@@ -224,7 +224,7 @@ namespace VFrame30
 		dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
 		dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
 
-		double zoom = schemaView()->zoom();
+		const double zoom = schemaView()->zoom();
 
 		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom);
 		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom);
@@ -252,8 +252,8 @@ namespace VFrame30
 			startY = -verticalScrollBar()->value();
 		}
 
-		int x = mousePos.x() - startX;
-		int y = mousePos.y() - startY;
+		const int x = mousePos.x() - startX;
+		const int y = mousePos.y() - startY;
 
 		if (schema()->unit() == VFrame30::SchemaUnit::Display)
 		{

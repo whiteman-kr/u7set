@@ -629,13 +629,13 @@ namespace Sim
 		m_simulator->control().setUnlockTimer(value);
 	}
 
-	bool ScriptSimulator::appDataTrasmittion() const
+	bool ScriptSimulator::enabledLanComm() const
 	{
-		return m_simulator->appDataTransmitter().enabled();
+		return m_simulator->software().enabled();
 	}
 
-	void ScriptSimulator::setAppDataTrasmittion(bool value)
+	void ScriptSimulator::setEnabledLanComm(bool value)
 	{
-		m_simulator->appDataTransmitter().setEnabled(value);
+		m_simulator->software().setEnabled(value);
 	}
 }

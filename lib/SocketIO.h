@@ -38,6 +38,8 @@ const quint16   PORT_BASE_SERVICE = 13300,
 				PORT_DIAG_DATA_SERVICE_DATA = 13352,				// port receiving diagnostics data from LM's
 				PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST = 13353;
 
+const quint16	PORT_LM_TUNING = 50000;								// default port of LM tuning
+
 // All services request IDs
 //
 const quint32   RQID_SERVICE_GET_INFO = 1000,

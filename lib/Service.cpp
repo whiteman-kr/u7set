@@ -49,10 +49,10 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 char** argv,
 							 CircularLoggerShared logger) :
 	m_softwareInfo(softwareInfo),
+	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
 	m_logger(logger),
-	m_serviceName(serviceName),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv)
 {

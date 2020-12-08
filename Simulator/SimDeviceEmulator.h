@@ -277,6 +277,10 @@ namespace Sim
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);	// This one is public to be called from Sim::Control
 		bool sendConnectionsData(std::chrono::microseconds currentTime);	// Actually this one is private
 
+		bool tuningEnterTuningMode();
+		bool tuningLeaveTuningMode();
+		bool tuningApplyCommand();
+
 	private:
 		// Getting data from m_plainAppLogic
 		//
@@ -358,18 +362,22 @@ namespace Sim
 		std::vector<ConnectionPtr> m_connections;
 
 		std::vector<DeviceCommand> m_commands;
-		std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands
-																// empty offsets is -1
-																// Programm memory is not so big, max
+		std::vector<int> m_offsetToCommand;				// index: command offset, value: index in m_commands
+														// empty offsets is -1
+														// Programm memory is not so big, max
 		AfbComponentSet m_afbComponents;
 
-		Lans m_lans{this, m_simulator};							// Device LAN Interfaces, based on m_logicModuleExtraInfo
+		Lans m_lans{this, m_simulator};					// Device LAN Interfaces, based on m_logicModuleExtraInfo
 
 		// Tuning
 		//
-		std::atomic<bool> m_armingKey{false};					// External Key
-		std::atomic<bool> m_tuningKey{false};					// Extrenal Key
-		std::atomic<bool> m_tuningApplyCommand{false};			// Flag from tunning comunnication to apply tuning changes
+		std::atomic<bool> m_armingKey{false};			// External Key
+		std::atomic<bool> m_tuningKey{false};			// Extrenal Key
+		std::atomic<bool> m_tuningApplyCommand{false};	// Flag from tunning comunnication to apply tuning changes
+
+		RamArea m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
+											// On command 'Apply' RAM memory is copied into this area
+											// On leaving tuning mode this area is copied back to RAM
 
 		// Cached state
 		//

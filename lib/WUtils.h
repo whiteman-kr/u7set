@@ -83,6 +83,12 @@
 										return false; \
 									}
 
+#define BREAK_IF_FALSE(result)		if (result == false) \
+									{ \
+										break; \
+									}
+
+
 
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 

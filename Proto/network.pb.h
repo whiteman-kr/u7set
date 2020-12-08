@@ -4503,6 +4503,13 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 fotipflagwritingdisabled() const;
   inline void set_fotipflagwritingdisabled(::google::protobuf::int64 value);
 
+  // optional int64 errTuningFrameUpdate = 47 [default = 0];
+  inline bool has_errtuningframeupdate() const;
+  inline void clear_errtuningframeupdate();
+  static const int kErrTuningFrameUpdateFieldNumber = 47;
+  inline ::google::protobuf::int64 errtuningframeupdate() const;
+  inline void set_errtuningframeupdate(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   inline void set_has_sourceid();
@@ -4597,6 +4604,8 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline void clear_has_writingdisabled();
   inline void set_has_fotipflagwritingdisabled();
   inline void clear_has_fotipflagwritingdisabled();
+  inline void set_has_errtuningframeupdate();
+  inline void clear_has_errtuningframeupdate();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4645,10 +4654,11 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 erranaloghighboundcheck_;
   ::google::protobuf::int64 errrupcrc_;
   ::google::protobuf::int64 fotipflagwritingdisabled_;
+  ::google::protobuf::int64 errtuningframeupdate_;
   bool writingdisabled_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(46 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(47 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -13160,6 +13170,28 @@ inline ::google::protobuf::int64 TuningSourceState::fotipflagwritingdisabled() c
 inline void TuningSourceState::set_fotipflagwritingdisabled(::google::protobuf::int64 value) {
   set_has_fotipflagwritingdisabled();
   fotipflagwritingdisabled_ = value;
+}
+
+// optional int64 errTuningFrameUpdate = 47 [default = 0];
+inline bool TuningSourceState::has_errtuningframeupdate() const {
+  return (_has_bits_[1] & 0x00004000u) != 0;
+}
+inline void TuningSourceState::set_has_errtuningframeupdate() {
+  _has_bits_[1] |= 0x00004000u;
+}
+inline void TuningSourceState::clear_has_errtuningframeupdate() {
+  _has_bits_[1] &= ~0x00004000u;
+}
+inline void TuningSourceState::clear_errtuningframeupdate() {
+  errtuningframeupdate_ = GOOGLE_LONGLONG(0);
+  clear_has_errtuningframeupdate();
+}
+inline ::google::protobuf::int64 TuningSourceState::errtuningframeupdate() const {
+  return errtuningframeupdate_;
+}
+inline void TuningSourceState::set_errtuningframeupdate(::google::protobuf::int64 value) {
+  set_has_errtuningframeupdate();
+  errtuningframeupdate_ = value;
 }
 
 // -------------------------------------------------------------------

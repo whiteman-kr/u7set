@@ -26,10 +26,6 @@ namespace Sim
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime) override;
 
 	private:
-		bool tuningEnterTuningMode();
-		bool tuningLeaveTuningMode();
-		bool tuningApplyCommand();
-
 		bool setRuntimeModeSignals();
 
 	public:
@@ -444,10 +440,6 @@ namespace Sim
 
 		static const int m_cycleDurationMs = 5;
 		qint64 m_blinkCounter = 0;
-
-		RamArea m_tuningRamArea{false};	// The copy of tuning ram area at the momemt device entered the TuningMode,
-										// On command 'Apply' RAM memory is copied into this area
-										// On leaving tuning mode this area is copied back to RAM
 
 		friend SimCommandTest_LM5_LM6;
 	};

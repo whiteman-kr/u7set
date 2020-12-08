@@ -5,15 +5,12 @@
 #include <memory>
 #include <QByteArray>
 #include "../lib/Types.h"
+#include "SimOverrideSignals.h"
 
 class SimRamTests;
 
 namespace Sim
 {
-	struct OverrideRamRecord;
-	class OverrideSignals;
-
-
 	class RamAreaInfo
 	{
 	public:
@@ -55,7 +52,6 @@ namespace Sim
 		quint32 m_size = 0;
 	};
 
-
 	class RamArea final : public RamAreaInfo
 	{
 	public:
@@ -90,6 +86,9 @@ namespace Sim
 		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder) noexcept;
 		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
+		bool writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder) noexcept;
+		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
+
 		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept;
 		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
@@ -120,6 +119,60 @@ namespace Sim
 		friend SimRamTests;
 	};
 
+	template<typename CONTAINER>
+	bool RamArea::readToBuffer(quint32 offsetW, quint32 countW, CONTAINER* data, bool applyOverride) const noexcept
+	{
+		if (data == nullptr)
+		{
+			assert(data);
+			return false;
+		}
+
+		int countBytes = countW * 2;
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			m_data.size() - byteOffset < countBytes)
+		{
+			// Buffer must be completely inside area
+			//
+			Q_ASSERT(byteOffset >= 0 &&
+					 m_data.size() - byteOffset >= countBytes);
+			return false;
+		}
+
+		if (static_cast<int>(data->size()) != countBytes)
+		{
+			data->resize(countBytes);
+		}
+
+		// Copy memory
+		//
+		std::memcpy(data->data(), m_data.constData() + byteOffset, countBytes);
+
+		// Apply override to just copied memory
+		//
+		if (applyOverride == true &&
+			m_overrideData.empty() == false)
+		{
+			int zeroBasedOffsetW = offsetW - offset();
+
+			if (zeroBasedOffsetW < 0 ||
+				zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+			{
+				Q_ASSERT(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < static_cast<int>(m_overrideData.size()));
+				return false;
+			}
+
+			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
+			for (quint32 i = 0; i < countW; i++)
+			{
+				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
+			}
+		}
+
+		return true;
+	}
 
 	class Ram
 	{
@@ -144,6 +197,7 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(int index) const;
 
 	using Handle = size_t;	// Handle is just index in m_memoryAreas vector
+	static const Handle InvalidHandle = std::numeric_limits<Handle>::max();
 
 		[[nodiscard]] Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;
 		[[nodiscard]] RamArea* memoryArea(Handle handle);

@@ -14,7 +14,7 @@ namespace Tuning
 
 		void init(int startAddr, int frameSizeW, int framesCount);
 
-		void updateFrame(int startAddrW, int frameSizeB, const quint8* buffer);
+		bool updateFrame(int startAddrW, int frameSizeB, const quint8* buffer);
 
 	private:
 		void allocateMemory();

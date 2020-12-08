@@ -95,7 +95,7 @@ namespace VFrame30
 		return gridSize;
 	}
 
-	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/)
+	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/, double /*zoom*/)
 	{
 		// Implement in derived class
 		//
@@ -144,14 +144,38 @@ namespace VFrame30
 
 		bool updateRequired = false;
 
-		QPoint pos = {static_cast<int>(leftDocPt() * zoom / 100.0),
-					  static_cast<int>(topDocPt() * zoom / 100.0)};
+		QPoint displayPos;
+		QSize displaySize;
 
-		QSize size = {static_cast<int>(widthDocPt() * zoom / 100.0),
-					  static_cast<int>(heightDocPt() * zoom / 100.0)};
+		switch (itemUnit())
+		{
+		case SchemaUnit::Display:
+			{
+				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0),
+							  static_cast<int>(topDocPt() * zoom / 100.0)};
 
-		if (widget->pos() != pos ||
-			widget->size() != size)
+				displaySize = {static_cast<int>(widthDocPt() * zoom / 100.0),
+							   static_cast<int>(heightDocPt() * zoom / 100.0)};
+			}
+			break;
+		case SchemaUnit::Inch:
+			{
+				double dpiX = widget->logicalDpiX();
+				double dpiY = widget->logicalDpiY();
+
+				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0 * dpiX),
+							  static_cast<int>(topDocPt() * zoom / 100.0 * dpiY)};
+
+				displaySize = {static_cast<int>(widthDocPt() * zoom / 100.0 * dpiX),
+							   static_cast<int>(heightDocPt() * zoom / 100.0 * dpiY)};
+			}
+			break;
+		default:
+			assert(false);
+		}
+
+		if (widget->pos() != displayPos ||
+			widget->size() != displaySize)
 		{
 			 updateRequired = true;
 		}
@@ -160,14 +184,14 @@ namespace VFrame30
 		{
 			widget->setUpdatesEnabled(false);
 
-			if (widget->pos() != pos)
+			if (widget->pos() != displayPos)
 			{
-				widget->move(pos);
+				widget->move(displayPos);
 			}
 
-			if (widget->size() != size)
+			if (widget->size() != displaySize)
 			{
-				widget->resize(size);
+				widget->resize(displaySize);
 			}
 
 			widget->setUpdatesEnabled(true);

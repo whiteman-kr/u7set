@@ -299,11 +299,11 @@ namespace VFrame30
 
 		// ClientBehavior
 		//
-		const MonitorBehavior& monitorBehavor() const;
+		const MonitorBehavior& monitorBehavor() const noexcept;
 		void setMonitorBehavior(const MonitorBehavior& src);
 		void setMonitorBehavior(MonitorBehavior&& src);
 
-		const TuningClientBehavior& tuningClientBehavior() const;
+		const TuningClientBehavior& tuningClientBehavior() const noexcept;
 		void setTuningClientBehavior(const TuningClientBehavior& src);
 		void setTuningClientBehavior(TuningClientBehavior&& src);
 

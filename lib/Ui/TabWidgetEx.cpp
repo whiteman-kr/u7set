@@ -9,7 +9,7 @@ void TabBarEx::mouseReleaseEvent(QMouseEvent* event)
 {
 	QTabBar::mouseReleaseEvent(event);
 
-	if (event->button() != Qt::MouseButton::MidButton)
+	if (event->button() != Qt::MouseButton::MiddleButton)
 	{
 		return;
 	}

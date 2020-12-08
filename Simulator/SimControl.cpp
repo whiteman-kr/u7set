@@ -46,7 +46,7 @@ namespace Sim
 			m_controlData = ControlData{};
 		}
 
-		m_simulator->appDataTransmitter().stopSimulation();
+		m_simulator->software().stopSimulation();
 
 		return;
 	}
@@ -223,7 +223,7 @@ namespace Sim
 				m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
 			}
 
-			m_simulator->appDataTransmitter().startSimulation();
+			m_simulator->software().startSimulation();
 			break;
 
 		case SimControlState::Run:
@@ -283,7 +283,7 @@ namespace Sim
 			cs = ControlStatus{m_controlData};
 		}
 
-		m_simulator->appDataTransmitter().stopSimulation();
+		m_simulator->software().stopSimulation();
 
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);
@@ -386,7 +386,7 @@ namespace Sim
 			case SimControlState::Pause:
 				// Have some rest
 				//
-				yieldCurrentThread();
+				msleep(1);		// yieldCurrentThread(); - gives high CPU load
 				break;
 
 			default:

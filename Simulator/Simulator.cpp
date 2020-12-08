@@ -21,6 +21,7 @@ namespace Sim
 		QObject{parent},
 		m_log{log, {}},
 		m_tuningSignalManager{ScopedLog{log, {}}},
+		m_software{this},
 		m_scriptSimulator{this}
 	{
 		qRegisterMetaType<AppSignalParam>("AppSignalParam");
@@ -142,6 +143,7 @@ namespace Sim
 		m_subsystems.clear();
 		m_appSignalManager.resetAll();
 		m_connections.clear();
+		m_software.clear();
 
 		return;
 	}
@@ -166,6 +168,21 @@ namespace Sim
 		{
 			m_log.writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
 			return false;
+		}
+
+		// Load Software - file /Common/Software.xml
+		//
+		{
+			QString softwareFileName = buildPath + Directory::COMMON + "/" + File::SOFTWARE_XML;
+			bool ok = m_software.loadSoftwareXml(softwareFileName);
+
+			if (ok == false)
+			{
+				m_log.writeError(QObject::tr("Load sofware description error, file %1 not found or corrupted").arg(softwareFileName));
+
+				clearImpl();
+				return false;
+			}
 		}
 
 		// Load bts file
@@ -565,14 +582,14 @@ namespace Sim
 		return m_overrideSignals;
 	}
 
-	Sim::AppDataTransmitter& Simulator::appDataTransmitter()
+	Sim::Software& Simulator::software()
 	{
-		return m_appDataTransmitter;
+		return m_software;
 	}
 
-	const Sim::AppDataTransmitter& Simulator::appDataTransmitter() const
+	const Sim::Software& Simulator::software() const
 	{
-		return m_appDataTransmitter;
+		return m_software;
 	}
 
 	Sim::Control& Simulator::control()

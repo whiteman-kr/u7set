@@ -11,7 +11,6 @@
 #include "DeviceObject.h"
 #include "AppSignal.h"
 #include "SimpleThread.h"
-#include "CommonTypes.h"
 #include "WUtils.h"
 #include "ConstStrings.h"
 

@@ -14,7 +14,7 @@
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
 #include "SimLans.h"
-#include "SimAppDataTransmitter.h"
+#include "SimSoftware.h"
 #include "SimScopedLog.h"
 
 
@@ -90,8 +90,8 @@ namespace Sim
 		[[nodiscard]] Sim::OverrideSignals& overrideSignals();
 		[[nodiscard]] const Sim::OverrideSignals& overrideSignals() const;
 
-		[[nodiscard]] Sim::AppDataTransmitter& appDataTransmitter();
-		[[nodiscard]] const Sim::AppDataTransmitter& appDataTransmitter() const;
+		[[nodiscard]] Sim::Software& software();
+		[[nodiscard]] const Sim::Software& software() const;
 
 		[[nodiscard]] Sim::Control& control();
 		[[nodiscard]] const Sim::Control& control() const;
@@ -114,7 +114,9 @@ namespace Sim
 
 		Sim::OverrideSignals m_overrideSignals{this};
 
-		Sim::AppDataTransmitter m_appDataTransmitter{this};
+		// Software Info
+		//
+		Sim::Software m_software;
 
 		// Control thread
 		//

@@ -35,10 +35,15 @@ namespace Sim
 		//
 		bool isTuningEnabled() const;
 
+		bool updateTuningRam(const Sim::RamArea& data, TimeStamp timeStamp);	// Copy of tuning RAM Area
+		void tuningModeChanged(bool tuningMode);
+
+		std::queue<TuningRecord> fetchWriteTuningQueue();
+
 	public:
 		ScopedLog& log();
 
-		QString logicModuleId() const;
+		const QString& logicModuleId() const;
 
 	private:
 		DeviceEmulator* m_logicModuleDevice;

@@ -26,7 +26,7 @@ private:
 	friend class SoftwareXmlReader;
 
 private:
-	SoftwareSettings* m_settings = nullptr;
+	std::shared_ptr<SoftwareSettings> m_settings = nullptr;
 };
 
 class SoftwareXmlReader

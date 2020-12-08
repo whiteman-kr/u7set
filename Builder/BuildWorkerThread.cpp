@@ -208,8 +208,8 @@ namespace Builder
 			//
 			// Parse application logic
 			//
-			if (bool pareseOk = parseApplicationLogic();
-				pareseOk == false ||
+			if (bool parseOk = parseApplicationLogic();
+				parseOk == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
@@ -279,15 +279,24 @@ namespace Builder
 
 			generateModulesInformation(*m_context->m_buildResultWriter, m_context->m_lmAndBvbModules);
 
-			LmsUniqueIdMap lmsUniqueIdMap;
-			generateLmsUniqueID(*m_context->m_buildResultWriter, m_context->m_lmModules, lmsUniqueIdMap);
+			ok &= generateLmsUniqueIDs(m_context.get());
+
+			ok &= writeLogicModulesInfoXml(m_context.get());
+
+			ok &= buildSoftwareList(m_context.get());
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
 
 			m_context->m_progress += 10;		// Total progress 65
 
 			//
 			// Generate MATS software configurations
 			//
-			ok = generateSoftwareConfiguration(lmsUniqueIdMap);
+			ok = generateSoftwareConfiguration();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1300,7 +1309,7 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::generateSoftwareConfiguration(const LmsUniqueIdMap& lmsUniqueIdMap)
+	bool BuildWorkerThread::generateSoftwareConfiguration()
 	{
 		Context* context = m_context.get();
 
@@ -1322,7 +1331,7 @@ namespace Builder
 		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
 
 		equipmentWalker(context->m_equipmentSet->root(),
-		    [this, lmsUniqueIdMap, context, &softwareXml, &result](Hardware::DeviceObject* currentDevice)
+			[this, context, &softwareXml, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (QThread::currentThread()->isInterruptionRequested() == true)
 				{
@@ -1347,7 +1356,7 @@ namespace Builder
 				switch(software->type())
 				{
 				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new AppDataServiceCfgGenerator(context, software, lmsUniqueIdMap);
+					softwareCfgGenerator = new AppDataServiceCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::DiagDataService:
@@ -1359,7 +1368,7 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(context, software, lmsUniqueIdMap);
+					softwareCfgGenerator = new TuningServiceCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::TuningClient:
@@ -1443,7 +1452,6 @@ namespace Builder
 		return result;
 	}
 
-
 	void BuildWorkerThread::generateModulesInformation(BuildResultWriter& buildWriter,
 							   const std::vector<Hardware::DeviceModule *>& lmModules)
 	{
@@ -1493,11 +1501,23 @@ namespace Builder
 		}
 	}
 
-	void BuildWorkerThread::generateLmsUniqueID(BuildResultWriter& buildWriter,
-												const std::vector<Hardware::DeviceModule *>& lmModules,
-												LmsUniqueIdMap &lmsUniqueIdMap)
+	bool BuildWorkerThread::generateLmsUniqueIDs(Context* context)
 	{
-		lmsUniqueIdMap.clear();
+		TEST_PTR_RETURN_FALSE(context);
+		TEST_PTR_RETURN_FALSE(context->m_buildResultWriter);
+
+		BuildResultWriter& buildWriter = *context->m_buildResultWriter.get();
+
+		IssueLogger* log = context->m_log;
+
+		TEST_PTR_RETURN_FALSE(log);
+
+		const std::vector<Hardware::DeviceModule *>& lmModules = m_context->m_lmModules;
+		std::map<QString, quint64>& lmsUniqueIDs = m_context->m_lmsUniqueIDs;
+
+		lmsUniqueIDs.clear();
+
+		bool result = true;
 
 		//
 		// Count Unique ID for this compilation
@@ -1509,22 +1529,25 @@ namespace Builder
 
 			if (lm == nullptr)
 			{
-				assert(lm);
+				Q_ASSERT(lm);
+				result = false;
 				continue;
 			}
 
-			QString subsysID = lm->propertyValue("SubsystemID").toString();
+			QString subsysID = lm->propertyValue(EquipmentPropNames::SUBSYSTEM_ID).toString();
 			if (subsysID.isEmpty())
 			{
-				assert(false);
+				Q_ASSERT(false);
+				result = false;
 				continue;
 			}
 
 			bool ok = false;
-			int lmNumber = lm->propertyValue("LMNumber").toInt(&ok);
+			int lmNumber = lm->propertyValue(EquipmentPropNames::LM_NUMBER).toInt(&ok);
 			if (ok == false)
 			{
-				assert(false);
+				Q_ASSERT(false);
+				result = false;
 				continue;
 			}
 
@@ -1536,7 +1559,7 @@ namespace Builder
 			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->firmware(subsysID, &ok);
 			if (ok == false)
 			{
-				assert(ok);
+				Q_ASSERT(ok);
 				continue;
 			}
 
@@ -1549,7 +1572,8 @@ namespace Builder
 				quint64 uniqueID = firmwareWriter->uniqueID(subsysID, uartId, lmNumber, &ok);
 				if (ok == false)
 				{
-					m_context->m_log->errINT1001(tr("UniqueID is not found for Subsystem='%1', UartID='%2', LmNumber='%3'. ").arg(subsysID).arg(uartId).arg(lmNumber) + Q_FUNC_INFO);
+					log->errINT1001(tr("UniqueID is not found for Subsystem='%1', UartID='%2', LmNumber='%3'. ").arg(subsysID).arg(uartId).arg(lmNumber) + Q_FUNC_INFO);
+					result = false;
 					continue;
 				}
 
@@ -1566,8 +1590,95 @@ namespace Builder
 
 			firmwareWriter->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
 
-			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
+			lmsUniqueIDs.insert({ lm->equipmentIdTemplate(), genericUniqueId });
 		}
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(log, "Can't generate LMs unique IDs");
+		}
+
+		return result;
+	}
+
+	bool BuildWorkerThread::writeLogicModulesInfoXml(Context* context)
+	{
+		TEST_PTR_RETURN_FALSE(context);
+		TEST_PTR_RETURN_FALSE(context->m_buildResultWriter);
+
+		LogicModulesInfoWriter writer(*context);
+
+		writer.fill();
+
+		QByteArray xmlData;
+
+		writer.save(&xmlData);
+
+		bool result = true;
+
+		BuildFile* file = context->m_buildResultWriter->addFile(Directory::COMMON, File::LOGIC_MODULES_XML, "", "", xmlData);
+
+		if (file == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
+	}
+
+	bool BuildWorkerThread::buildSoftwareList(Context* context)
+	{
+		TEST_PTR_RETURN_FALSE(context);
+
+		IssueLogger* log = context->m_log;
+
+		TEST_PTR_RETURN_FALSE(log);
+
+		Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+		TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+
+		context->m_software.clear();
+
+		bool result = true;
+
+		equipmentWalker(equipment->root(), [context, &result](Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice == nullptr)
+				{
+					Q_ASSERT(false);
+					result = false;
+					return;
+				}
+
+				if (currentDevice->isSoftware() == false)
+				{
+					return;
+				}
+
+				Hardware::Software* software = currentDevice->toSoftware();
+
+				if (software == nullptr)
+				{
+					Q_ASSERT(false);
+					result = false;
+					return;
+				}
+
+				context->m_software.insert( { software->equipmentId(), software} );
+			}
+		);
+
+		if (result == true)
+		{
+			LOG_MESSAGE(log, QString(tr("Software list building... OK")));
+		}
+		else
+		{
+			LOG_INTERNAL_ERROR_MSG(log, QString(tr("Can't build software list")));
+		}
+
+		return result;
 	}
 
 	bool BuildWorkerThread::runSimTests()
