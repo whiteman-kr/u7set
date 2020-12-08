@@ -24,7 +24,9 @@ namespace Sim
 
 	public:
 		bool updateTuningRam(const Sim::RamArea& ramArea, TimeStamp timeStamp);
-		void tuningModeChanged(bool tuningMode);
+
+		void tuningModeEntered(const Sim::RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeLeft();
 
 		std::queue<TuningRecord> fetchWriteTuningQueue();
 

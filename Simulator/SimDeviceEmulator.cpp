@@ -1722,7 +1722,7 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::tuningEnterTuningMode()
+	bool DeviceEmulator::tuningEnterTuningMode(TimeStamp timeStamp)
 	{
 		// Device just entered to TuningMode.
 		// The copy of tuning memory is done here
@@ -1743,6 +1743,8 @@ namespace Sim
 		m_tuningRamArea = *tuningRamArea;
 
 		setRuntimeMode(RuntimeMode::TuningMode);
+
+		m_lans.tuningModeEntered(m_tuningRamArea, timeStamp);
 
 		return true;
 	}
@@ -1786,8 +1788,24 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = tuningEnterTuningMode();	// it will copy tuning ram area again
-		return ok;
+		// Copy tuning RAM area again
+		//
+		const LmDescription::Memory& memory = lmDescription().memory();
+
+		Ram::Handle ramAreaHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
+		const RamArea* tuningRamArea = m_ram.memoryArea(ramAreaHandle);
+
+		if (tuningRamArea == nullptr)
+		{
+			fault(QString("Getting tuning ram area error, offset 0x%1")
+					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+				  "DeviceEmulator::tuningApplyCommand");
+			return false;
+		}
+
+		m_tuningRamArea = *tuningRamArea;
+
+		return true;
 	}
 
 
@@ -1899,12 +1917,11 @@ namespace Sim
 	{
 		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value);
 
-		if ((currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode) ||
-			(currentRuntimeMode != RuntimeMode::TuningMode && value == RuntimeMode::TuningMode))
+		if (currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode)
 		{
-			// Module enters or leaves TuningMode, LAN must be notified
+			// Module leaves TuningMode, LAN must be notified
 			//
-			m_lans.tuningModeChanged(value == RuntimeMode::TuningMode);
+			m_lans.tuningModeLeft();
 		}
 
 		return;

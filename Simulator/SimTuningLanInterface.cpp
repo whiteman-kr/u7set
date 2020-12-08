@@ -37,14 +37,24 @@ namespace Sim
 		return m_tuningServiceCommunicator->updateTuningRam(lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
 	}
 
-	void TuningLanInterface::tuningModeChanged(bool tuningMode)
+	void TuningLanInterface::tuningModeEntered(const RamArea& ramArea, TimeStamp timeStamp)
 	{
 		if (m_tuningServiceCommunicator == nullptr)
 		{
 			return;
 		}
 
-		return m_tuningServiceCommunicator->tuningModeChanged(lmEquipmentId(), tuningMode);
+		return m_tuningServiceCommunicator->tuningModeEntered(lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
+	}
+
+	void TuningLanInterface::tuningModeLeft()
+	{
+		if (m_tuningServiceCommunicator == nullptr)
+		{
+			return;
+		}
+
+		return m_tuningServiceCommunicator->tuningModeLeft(lmEquipmentId(), portEquipmentId());
 	}
 
 	std::queue<TuningRecord> TuningLanInterface::fetchWriteTuningQueue()

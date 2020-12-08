@@ -157,7 +157,7 @@ namespace Sim
 				bool ok = true;
 				if (tuningMode == 1)
 				{
-					ok = m_device->tuningEnterTuningMode();
+					ok = m_device->tuningEnterTuningMode(TimeStamp{currentTime});
 				}
 				else
 				{

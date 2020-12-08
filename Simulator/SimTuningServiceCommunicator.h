@@ -37,9 +37,10 @@ namespace Sim
 							 const RamArea& ramArea,
 							 TimeStamp timeStamp);
 
-		// This function is called by Simulator when module's tuning mode has changed to or from TuningMode
+		// These functions are called by Simulator when module enters or leaves tuning mode
 		//
-		void tuningModeChanged(const QString& lmEquipmentId, bool tuningMode);
+		void tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
 	public:
 		void writeTuningDword(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, quint32 data, quint32 mask);

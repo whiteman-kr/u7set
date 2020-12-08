@@ -277,7 +277,7 @@ namespace Sim
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);	// This one is public to be called from Sim::Control
 		bool sendConnectionsData(std::chrono::microseconds currentTime);	// Actually this one is private
 
-		bool tuningEnterTuningMode();
+		bool tuningEnterTuningMode(TimeStamp timeStamp);
 		bool tuningLeaveTuningMode();
 		bool tuningApplyCommand();
 
@@ -375,7 +375,7 @@ namespace Sim
 		std::atomic<bool> m_tuningKey{false};			// Extrenal Key
 		std::atomic<bool> m_tuningApplyCommand{false};	// Flag from tunning comunnication to apply tuning changes
 
-		RamArea m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
+		RamArea	m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
 											// On command 'Apply' RAM memory is copied into this area
 											// On leaving tuning mode this area is copied back to RAM
 

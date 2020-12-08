@@ -27,7 +27,7 @@ namespace  Sim
 		std::shared_ptr<Sim::TuningServiceCommunicator> tuningService(QString equipmentId) const;
 
 	public:
-		bool enabled() const;
+		[[nodiscard]] bool enabled() const;
 		void setEnabled(bool value);
 
 		[[nodiscard]] Sim::AppDataTransmitter& appDataTransmitter();

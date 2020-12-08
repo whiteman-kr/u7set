@@ -59,11 +59,19 @@ namespace Sim
 		return true;
 	}
 
-	void TuningServiceCommunicator::tuningModeChanged(const QString& lmEquipmentId, bool tuningMode)
+	void TuningServiceCommunicator::tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->tuningModeChanged(lmEquipmentId, tuningMode);
+			m_processingThread->tuningModeChanged(lmEquipmentId, true);
+		}
+	}
+
+	void TuningServiceCommunicator::tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId)
+	{
+		if (m_processingThread != nullptr)
+		{
+			m_processingThread->tuningModeChanged(lmEquipmentId, false);
 		}
 	}
 

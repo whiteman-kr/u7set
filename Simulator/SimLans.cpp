@@ -157,7 +157,7 @@ namespace Sim
 		return ok;
 	}
 
-	void Lans::tuningModeChanged(bool tuningMode)
+	void Lans::tuningModeEntered(const RamArea& data, TimeStamp timeStamp)
 	{
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
@@ -169,7 +169,24 @@ namespace Sim
 					continue;
 				}
 
-				tli->tuningModeChanged(tuningMode);
+				tli->tuningModeEntered(data, timeStamp);
+			}
+		}
+	}
+
+	void Lans::tuningModeLeft()
+	{
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				tli->tuningModeLeft();
 			}
 		}
 	}
