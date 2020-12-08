@@ -438,7 +438,7 @@ namespace Sim
 			{QStringLiteral("afb_pulse_gen_v0"),	&CommandProcessor_LM5_LM6::afb_pulse_gen_v0},			// 30
 		};
 
-		static const int m_cycleDurationMs = 5;
+		static constexpr int m_cycleDurationMs = 5;
 		qint64 m_blinkCounter = 0;
 
 		friend SimCommandTest_LM5_LM6;
