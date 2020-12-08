@@ -537,6 +537,7 @@ namespace Sim
 		replyFotipHeader.subsystemKey.lmNumber = m_lmNumber;
 		replyFotipHeader.subsystemKey.subsystemCode = m_subsystemKey;
 		replyFotipHeader.operationCode = requestFotipHeader.operationCode;
+		replyFotipHeader.dataType = requestFotipHeader.dataType;
 		replyFotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
 		replyFotipHeader.romSizeB = m_tuningFlashSizeB;
 		replyFotipHeader.romFrameSizeB = m_tuningFlashFramePayloadB;
@@ -732,7 +733,37 @@ namespace Sim
 			{
 				qint32 value = reverseInt32(request.write.analogSignedIntValue);
 
-				m_tsCommunicator->writeTuningSignedInt32(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value);
+				qint32 lowBound = 0;
+
+				m_tuningData->readSignedInt(frameStartAddrW + m_tuningDataFramePayloadW + offsetInFrameW,
+											&lowBound, E::ByteOrder::BigEndian, false);
+				qint32 highBound = 0;
+
+				m_tuningData->readSignedInt(frameStartAddrW + m_tuningDataFramePayloadW * 2 + offsetInFrameW,
+											&highBound, E::ByteOrder::BigEndian, false);
+
+				if (value >= lowBound && value <= highBound)
+				{
+					m_tsCommunicator->writeTuningSignedInt32(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value);
+					replyFlags->successfulCheck = 1;
+				}
+				else
+				{
+					if (value < lowBound)
+					{
+						reply->analogCmpErrors.lowBoundCheckError = 1;
+					}
+					else
+					{
+						if (value > highBound)
+						{
+							reply->analogCmpErrors.highBoundCheckError = 1;
+						}
+					}
+
+					replyFlags->successfulCheck = 0;
+					replyFlags->successfulWrite = 0;
+				}
 			}
 
 			break;
@@ -740,6 +771,38 @@ namespace Sim
 		case FotipV2::DataType::AnalogFloat:
 			{
 				float value = reverseFloat(request.write.analogFloatValue);
+
+				float lowBound = 0;
+
+				m_tuningData->readFloat(frameStartAddrW + m_tuningDataFramePayloadW + offsetInFrameW,
+											&lowBound, E::ByteOrder::BigEndian, false);
+				float highBound = 0;
+
+				m_tuningData->readFloat(frameStartAddrW + m_tuningDataFramePayloadW * 2 + offsetInFrameW,
+											&highBound, E::ByteOrder::BigEndian, false);
+
+				if (value >= lowBound && value <= highBound)
+				{
+					m_tsCommunicator->writeTuningFloat(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value);
+					replyFlags->successfulCheck = 1;
+				}
+				else
+				{
+					if (value < lowBound)
+					{
+						reply->analogCmpErrors.lowBoundCheckError = 1;
+					}
+					else
+					{
+						if (value > highBound)
+						{
+							reply->analogCmpErrors.highBoundCheckError = 1;
+						}
+					}
+
+					replyFlags->successfulCheck = 0;
+					replyFlags->successfulWrite = 0;
+				}
 
 				m_tsCommunicator->writeTuningFloat(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value);
 			}
@@ -752,6 +815,8 @@ namespace Sim
 				quint32 mask = reverseUint32(request.write.bitMask);
 
 				m_tsCommunicator->writeTuningDword(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value, mask);
+
+				replyFlags->successfulCheck = 1;
 			}
 
 			break;
@@ -759,6 +824,8 @@ namespace Sim
 		default:
 			replyFlags->successfulWrite = 0;
 		}
+
+		readFrameData(frameStartAddrW, reply);
 	}
 
 	void TuningSourceHandler::processApplyRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags)
@@ -776,9 +843,27 @@ namespace Sim
 																   m_tuningDataFramePayloadW,
 																   &m_tuningDataReadBuffer,
 																   false);
+		DEBUG_STOP;
+
 		Q_ASSERT(res == true);
 
 		m_tuningDataMutex.unlock();
+
+/*		if (startFrameAddrW == 46336 ||``
+				startFrameAddrW == 46336 + 508 ||
+				startFrameAddrW == 46336 + 508 + 508)
+		{
+			for(int i = 0; i < 3; i++)
+			{
+				float* ptr = reinterpret_cast<float*>(m_tuningDataReadBuffer.data()) + i;
+
+				float value = reverseFloat(*ptr);
+
+				qDebug() << C_STR(QString("addr: %1 value %2").arg(startFrameAddrW + i).arg(value));
+			}
+		}
+
+		qDebug() << "\n";*/
 
 		if (m_tuningDataReadBuffer.size() == FotipV2::TX_RX_DATA_SIZE)
 		{
