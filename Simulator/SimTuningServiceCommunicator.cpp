@@ -237,7 +237,7 @@ namespace Sim
 
 			if (lm == nullptr)
 			{
-				m_log.writeError(QString("Tuning source %1 isn't initialized").arg(ts.lmEquipmentID));
+				m_log.writeWarning(QString("Tuning source %1 isn't initialized").arg(ts.lmEquipmentID));
 				continue;
 			}
 
@@ -280,7 +280,7 @@ namespace Sim
 
 			if (result == false)
 			{
-				m_log.writeAlert(QString("Tuning simulation listening socket binding error to %1").
+				m_log.writeWarning(QString("Tuning simulation listening socket binding error to %1").
 								 arg(m_tuningRequestsReceivingIP.addressPortStr()));
 
 				closeSocket();
