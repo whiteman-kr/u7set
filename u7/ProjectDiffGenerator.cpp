@@ -1217,6 +1217,7 @@ void ProjectDiffWorker::compareProject()
 		m_currentObjectName = tr("Application Signals");
 	}
 
+
 	ok = db()->getSignalsIDs(&signalIDs, nullptr);
 	if (ok == false)
 	{
@@ -1334,15 +1335,15 @@ void ProjectDiffWorker::compareProject()
 											m_currentCharFormat);
 			restoreFormat();
 
-			for (int signalID : signalIDs)
+			/*for (int signalID : signalIDs)
 			{
 				if (m_stop == true)
 				{
 					return;
-				}
+				}*/
 
-				compareSignal(signalID, m_diffParams.compareData, headerTable.get(), &fileTypeSections);
-			}
+			compareSignals(signalIDs, m_diffParams.compareData, headerTable.get(), &fileTypeSections);
+			//}
 		}
 		else
 		{
@@ -1525,70 +1526,69 @@ void ProjectDiffWorker::compareFile(const DbFileTree& filesTree,
 		m_fileIndex++;
 	}
 
-	// Get file history
-	//
-	std::vector<DbChangeset> fileHistory;
-
-	bool ok = db()->getFileHistory(*fi, &fileHistory, nullptr);
-	if (ok == false)
-	{
-		//diffDataSet.addText(tr("Get file history for %1 failed.").arg(fi->fileName()));
-		return;
-	}
-
 	// Get source file
 	//
+	bool sourceOk = false;
 	std::shared_ptr<DbFile> sourceFile;
 
-	if (compareData.sourceVersionType == CompareVersionType::LatestVersion)
+	switch (compareData.sourceVersionType)
 	{
-		ok = db()->getLatestVersion(*fi, &sourceFile, nullptr);
-	}
-	else
-	{
-		std::optional<DbChangeset> changesetOpt = getRecentChangeset(fileHistory, compareData.sourceVersionType, compareData.sourceChangeset, compareData.sourceDate);
-
-		if (changesetOpt.has_value() == true)
+	case CompareVersionType::LatestVersion:
 		{
-			ok = db()->getSpecificCopy(*fi, changesetOpt.value().changeset(), &sourceFile, nullptr);
+			sourceOk = db()->getLatestVersion(*fi, &sourceFile, nullptr);
 		}
-		else
+		break;
+	case CompareVersionType::Changeset:
 		{
-			ok = true;
+			sourceOk = db()->getSpecificCopy(*fi, compareData.sourceChangeset, &sourceFile, nullptr);
 		}
-	}
-
-	if (ok == false)
-	{
-		headerTable->insertRow({fi->fileName(), tr("Get source copy failed"), QString()});
+		break;
+	case CompareVersionType::Date:
+		{
+			sourceOk = db()->getSpecificCopy(*fi, compareData.sourceDate, &sourceFile, nullptr);
+		}
+		break;
+	default:
+		Q_ASSERT(false);
 		return;
 	}
 
 	// Get target file
 	//
+	bool targetOk = false;
 	std::shared_ptr<DbFile> targetFile;
 
-	if (compareData.targetVersionType == CompareVersionType::LatestVersion)
+	switch (compareData.targetVersionType)
 	{
-		ok = db()->getLatestVersion(*fi, &targetFile, nullptr);
-	}
-	else
-	{
-		std::optional<DbChangeset> changesetOpt = getRecentChangeset(fileHistory, compareData.targetVersionType, compareData.targetChangeset, compareData.targetDate);
-
-		if (changesetOpt.has_value() == true)
+	case CompareVersionType::LatestVersion:
 		{
-			ok = db()->getSpecificCopy(*fi, changesetOpt.value().changeset(), &targetFile, nullptr);
+			targetOk = db()->getLatestVersion(*fi, &targetFile, nullptr);
 		}
-		else
+		break;
+	case CompareVersionType::Changeset:
 		{
-			ok = true;
+			targetOk = db()->getSpecificCopy(*fi, compareData.targetChangeset, &targetFile, nullptr);
 		}
+		break;
+	case CompareVersionType::Date:
+		{
+			targetOk = db()->getSpecificCopy(*fi, compareData.targetDate, &targetFile, nullptr);
+		}
+		break;
+	default:
+		Q_ASSERT(false);
+		return;
 	}
 
-	if (ok == false)
+	if (sourceOk == true && sourceFile == nullptr)
 	{
-		headerTable->insertRow({fi->fileName(), tr("Get target copy failed"), QString()});
+		Q_ASSERT(sourceFile);
+		return;
+	}
+
+	if (targetOk == true && targetFile == nullptr)
+	{
+		Q_ASSERT(targetFile);
 		return;
 	}
 
@@ -2323,7 +2323,7 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 
 		// Add schema differences drawing
 
-		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>("1" + fileName);
+		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>(fileName + "1");
 		sectionsArray->push_back(schemaDrawingSection);
 
 		QString schemaId = targetSchema->schemaId();
@@ -2334,7 +2334,7 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 
 		// Add schema differences tables
 
-		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>("2" + fileName);
+		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>(fileName + "2");
 		sectionsArray->push_back(schemaDiffSection);
 
 		if (schemaDiffTable->rowCount() != 0)
@@ -2592,8 +2592,8 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 	}
 }
 
-void ProjectDiffWorker::compareSignal(const int signalID,
-									  const CompareData& compareData,
+void ProjectDiffWorker::compareSignals(const QVector<int>& signalIDsAll,
+									   const CompareData& compareData,
 									  ReportTable* const headerTable,
 									  std::vector<std::shared_ptr<ReportSection> >* sectionsArray)
 {
@@ -2602,6 +2602,267 @@ void ProjectDiffWorker::compareSignal(const int signalID,
 		Q_ASSERT(headerTable);
 		return;
 	}
+
+	return;
+
+	const int chunkSize = 10;
+
+	QVector<int> signalIDs;
+	signalIDs.reserve(chunkSize);
+
+	int allCount = signalIDsAll.size();
+
+	for (int v = 0; v < allCount; v+= chunkSize)
+	{
+		signalIDs.clear();
+
+		for (int ci = 0; ci < chunkSize; ci++)
+		{
+			if (v + ci >= allCount)
+			{
+				break;
+			}
+
+			signalIDs.push_back(signalIDsAll[v + ci]);
+		}
+
+		std::vector<int> signalIDsVec = std::vector<int>(signalIDs.begin(), signalIDs.end());
+
+		int signalsCount = signalIDs.size();
+
+		bool ok = false;
+
+		// Get source signals
+		//
+
+		SignalSet sourceSignals;
+		std::vector<Signal> sourceSignalsVec;
+
+		switch (compareData.sourceVersionType)
+		{
+		case CompareVersionType::LatestVersion:
+			{
+				ok = db()->getSignals(&sourceSignals, false/*excludeDeleted*/, nullptr);
+				if (ok == true)
+				{
+					Q_ASSERT(signalIDs.size() == sourceSignals.count());
+
+					qDebug() << signalIDs.size();
+					qDebug() << sourceSignals.count();
+				}
+				else
+				{
+					Q_ASSERT(false);
+					return;
+				}
+			}
+			break;
+		case CompareVersionType::Changeset:
+			{
+				ok = db()->getSpecificSignals(&signalIDsVec, compareData.sourceChangeset, &sourceSignalsVec, nullptr);
+
+				if (ok == true)
+				{
+					Q_ASSERT(signalIDs.size() == sourceSignalsVec.size());
+
+					for (int i = 0; i < signalsCount; i++)
+					{
+						sourceSignals.append(signalIDs[i], &sourceSignalsVec[i]);
+					}
+
+					qDebug() << signalIDs.size();
+					qDebug() << sourceSignals.count();
+				}
+				else
+				{
+					Q_ASSERT(false);
+					return;
+				}
+			}
+			break;
+		case CompareVersionType::Date:
+			{
+				Q_ASSERT(false);
+				return;
+			}
+			break;
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		// Get target signals
+		//
+
+		SignalSet targetSignals;
+		std::vector<Signal> targetSignalsVec;
+
+		switch (compareData.targetVersionType)
+		{
+		case CompareVersionType::LatestVersion:
+			{
+				ok = db()->getSignals(&targetSignals, false/*excludeDeleted*/, nullptr);
+				if (ok == true)
+				{
+					Q_ASSERT(signalIDs.size() == targetSignals.count());
+
+					qDebug() << signalIDs.size();
+					qDebug() << targetSignals.count();
+				}
+				else
+				{
+					Q_ASSERT(false);
+					return;
+				}
+			}
+			break;
+		case CompareVersionType::Changeset:
+			{
+				ok = db()->getSpecificSignals(&signalIDsVec, compareData.targetChangeset, &targetSignalsVec, nullptr);
+
+				if (ok == true)
+				{
+					Q_ASSERT(signalIDs.size() == targetSignalsVec.size());
+
+					for (int i = 0; i < signalsCount; i++)
+					{
+						targetSignals.append(signalIDs[i], &targetSignalsVec[i]);
+					}
+					qDebug() << signalIDs.size();
+					qDebug() << targetSignals.count();
+				}
+				else
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+			}
+			break;
+		case CompareVersionType::Date:
+			{
+				Q_ASSERT(false);
+				return;
+			}
+			break;
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		Q_ASSERT(sourceSignals.count() == targetSignals.count());
+
+		for (int i = 0; i < signalsCount; i++)
+		{
+			if (m_stop == true)
+			{
+				break;
+			}
+
+			QString appSignalID;
+
+			Signal* targetSignal = targetSignals.valuePtr(signalIDs[i]);
+
+			if (targetSignal != nullptr)
+			{
+				appSignalID = targetSignal->appSignalID();
+			}
+
+			Signal* sourceSignal = sourceSignals.valuePtr(signalIDs[i]);
+
+			if (sourceSignal != nullptr)
+			{
+				if (targetSignal != nullptr)
+				{
+					appSignalID = sourceSignal->appSignalID();
+				}
+			}
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_signalIndex++;
+				m_currentObjectName = appSignalID;
+			}
+
+			// Only source file exists
+			//
+			if (sourceSignal != nullptr && targetSignal == nullptr)
+			{
+				headerTable->insertRow({appSignalID, tr("Added"),  changesetString(*sourceSignal)});
+				continue;
+			}
+
+			// Only target file exists
+			//
+			if (sourceSignal == nullptr && targetSignal != nullptr)
+			{
+				headerTable->insertRow({appSignalID, tr("Added"),  changesetString(*targetSignal)});
+				continue;
+			}
+
+			// Both files exist
+			//
+			if (sourceSignal != nullptr &&
+				targetSignal != nullptr &&
+				sourceSignal->changesetID() != targetSignal->changesetID())
+			{
+				// Compare contents
+				//
+				if (sourceSignal->deleted() == true)
+				{
+					headerTable->insertRow({appSignalID, tr("Deleted"),  changesetString(*sourceSignal)});
+				}
+				else
+				{
+					if (targetSignal->deleted() == true)
+					{
+						headerTable->insertRow({appSignalID, tr("Deleted"),  changesetString(*targetSignal)});
+					}
+					else
+					{
+						bool swap = false;
+
+						// Target changeset should be later or checked-out
+						//
+						if (sourceSignal->changesetID() == 0 ||  targetSignal->changesetID() == 0)
+						{
+							// One of files is checked out
+							//
+							if (sourceSignal->changesetID() == 0 &&  targetSignal->changesetID() != 0)
+							{
+								swap = true;
+							}
+						}
+						else
+						{
+							if (sourceSignal->changesetID() >  targetSignal->changesetID())
+							{
+								swap = true;
+							}
+						}
+
+						if (swap == true)
+						{
+							std::swap(sourceSignal, targetSignal);
+						}
+
+						compareSignalContents(*sourceSignal, *targetSignal, headerTable, sectionsArray);
+					}
+				}
+			}
+
+		} // i
+
+	}
+
+	return;
+/*
+
+
+
+
+
+
 
 	// Print signal ID
 	//
@@ -2650,31 +2911,70 @@ void ProjectDiffWorker::compareSignal(const int signalID,
 	}
 	else
 	{
-		std::optional<DbChangeset> sourceChangesetOpt = getRecentChangeset(signalHistory, compareData.sourceVersionType, compareData.sourceChangeset, compareData.sourceDate);
-
-		if (sourceChangesetOpt.has_value() == true)
+		if (compareData.sourceVersionType == CompareVersionType::Changeset)
 		{
+			//std::optional<DbChangeset> sourceChangesetOpt = getRecentChangeset(signalHistory, compareData.sourceVersionType, compareData.sourceChangeset, compareData.sourceDate);
+
+			//if (sourceChangesetOpt.has_value() == true)
+			//{
 			std::vector<int> signalIDs;			// for getSpecificSignals
 			signalIDs.push_back(signalID);
 			std::vector<Signal> sourceSignals;	// for getSpecificSignals
 
-			ok = db()->getSpecificSignals(&signalIDs, sourceChangesetOpt.value().changeset(), &sourceSignals, nullptr);
+			ok = db()->getSpecificSignals(&signalIDs, compareData.sourceChangeset, &sourceSignals, nullptr);
 			if (ok == true)
 			{
 				if (sourceSignals.size() == 1)
 				{
 					sourceSignal = sourceSignals[0];
 				}
+			}
+				/*
+					else
+					{
+						Q_ASSERT(sourceSignals.size() == 1);
+						return;
+					}
+				}
 				else
 				{
-					Q_ASSERT(sourceSignals.size() == 1);
-					return;
-				}
-			}
-		}
+					Q_ASSERT(false);
+					ok = true;
+				}*/
+			//}
+			//else
+			//{
+//				ok = true;
+//			}
+	/*	}
 		else
 		{
-			ok = true;
+			std::optional<DbChangeset> sourceChangesetOpt = getRecentChangeset(signalHistory, compareData.sourceVersionType, compareData.sourceChangeset, compareData.sourceDate);
+
+			if (sourceChangesetOpt.has_value() == true)
+			{
+				std::vector<int> signalIDs;			// for getSpecificSignals
+				signalIDs.push_back(signalID);
+				std::vector<Signal> sourceSignals;	// for getSpecificSignals
+
+				ok = db()->getSpecificSignals(&signalIDs, sourceChangesetOpt.value().changeset(), &sourceSignals, nullptr);
+				if (ok == true)
+				{
+					if (sourceSignals.size() == 1)
+					{
+						sourceSignal = sourceSignals[0];
+					}
+					else
+					{
+						Q_ASSERT(sourceSignals.size() == 1);
+						return;
+					}
+				}
+			}
+			else
+			{
+				ok = true;
+			}
 		}
 	}
 
@@ -2695,31 +2995,61 @@ void ProjectDiffWorker::compareSignal(const int signalID,
 	}
 	else
 	{
-		std::optional<DbChangeset> targetChangesetOpt = getRecentChangeset(signalHistory, compareData.targetVersionType, compareData.targetChangeset, compareData.targetDate);
-
-		if (targetChangesetOpt.has_value() == true)
+		if (compareData.targetVersionType == CompareVersionType::Changeset)
 		{
 			std::vector<int> signalIDs;			// for getSpecificSignals
 			signalIDs.push_back(signalID);
 			std::vector<Signal> targetSignals;	// for getSpecificSignals
 
-			ok = db()->getSpecificSignals(&signalIDs, targetChangesetOpt.value().changeset(), &targetSignals, nullptr);
+			ok = db()->getSpecificSignals(&signalIDs, compareData.targetChangeset, &targetSignals, nullptr);
 			if (ok == true)
 			{
 				if (targetSignals.size() == 1)
 				{
 					targetSignal = targetSignals[0];
 				}
+			}
+			/*
 				else
 				{
 					Q_ASSERT(targetSignals.size() == 1);
 					return;
 				}
 			}
-		}
+			else
+			{
+				Q_ASSERT(false);
+				ok = true;
+			}*/
+		/*}
 		else
 		{
-			ok = true;
+			std::optional<DbChangeset> targetChangesetOpt = getRecentChangeset(signalHistory, compareData.targetVersionType, compareData.targetChangeset, compareData.targetDate);
+
+			if (targetChangesetOpt.has_value() == true)
+			{
+				std::vector<int> signalIDs;			// for getSpecificSignals
+				signalIDs.push_back(signalID);
+				std::vector<Signal> targetSignals;	// for getSpecificSignals
+
+				ok = db()->getSpecificSignals(&signalIDs, targetChangesetOpt.value().changeset(), &targetSignals, nullptr);
+				if (ok == true)
+				{
+					if (targetSignals.size() == 1)
+					{
+						targetSignal = targetSignals[0];
+					}
+					else
+					{
+						Q_ASSERT(targetSignals.size() == 1);
+						return;
+					}
+				}
+			}
+			else
+			{
+				ok = true;
+			}
 		}
 	}
 
@@ -2794,7 +3124,7 @@ void ProjectDiffWorker::compareSignal(const int signalID,
 		}
 	}
 
-	return;
+	return;*/
 }
 
 void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal,

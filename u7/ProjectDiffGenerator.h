@@ -427,7 +427,7 @@ private:
 	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
-	void compareSignal(const int signalID, const CompareData& compareData, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareSignals(const QVector<int>& signalIDsAll, const CompareData& compareData, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const;
