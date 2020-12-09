@@ -3275,7 +3275,7 @@ namespace Sim
 		// AFB MATH version 104 has an issue for SI operations +, -, *:
 		// if result is -2'147'483'648 (what is ok) the overflow flag is set to 1 (supposed to be 0 as -2'147'483'648 within valid int32 range)
 		//
-		if (operand1.signedIntValue() == -2'147'483'648 &&
+		if (operand1.signedIntValue() == INT_MIN &&
 			(confValue == 1 || confValue == 2 || confValue == 3))
 		{
 			instance->addParamWord(o_overflow, 1);
