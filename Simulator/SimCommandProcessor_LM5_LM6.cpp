@@ -3225,9 +3225,11 @@ namespace Sim
 		AfbComponentParam operand1 = *instance->param(i_1_oprd);
 		AfbComponentParam operand2 = *instance->param(i_2_oprd);
 
+		quint16 confValue = conf->wordValue();
+
 		// Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)
 		//
-		switch (conf->wordValue())
+		switch (confValue)
 		{
 			case 1:
 				operand1.addSignedInteger(operand2);
@@ -3265,11 +3267,23 @@ namespace Sim
 		result.setOpIndex(o_result);
 
 		instance->addParam(result);
-		instance->addParamWord(o_overflow, operand1.mathOverflow());
 		instance->addParamWord(o_underflow, operand1.mathUnderflow());
 		instance->addParamWord(o_zero, operand1.mathZero());
 		instance->addParamWord(o_nan, operand1.mathNan());
 		instance->addParamWord(o_div_by_zero, operand1.mathDivByZero());
+
+		// AFB MATH version 104 has an issue for SI operations +, -, *:
+		// if result is -2'147'483'648 (what is ok) the overflow flag is set to 1 (supposed to be 0 as -2'147'483'648 within valid int32 range)
+		//
+		if (operand1.signedIntValue() == -2'147'483'648 &&
+			(confValue == 1 || confValue == 2 || confValue == 3))
+		{
+			instance->addParamWord(o_overflow, 1);
+		}
+		else
+		{
+			instance->addParamWord(o_overflow, operand1.mathOverflow());
+		}
 
 		return;
 	}
