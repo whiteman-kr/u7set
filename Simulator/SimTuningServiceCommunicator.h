@@ -47,7 +47,11 @@ namespace Sim
 
 		// These functions are called by Simulator when module enters or leaves tuning mode
 		//
-		void tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeEntered(const QString& lmEquipmentId,
+							   const QString& portEquipmentId,
+							   const RamArea& ramArea,
+							   TimeStamp timeStamp);
+
 		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
 	public:
@@ -105,7 +109,12 @@ namespace Sim
 							  const RamArea& data,
 							  TimeStamp timeStamp);
 
-		void tuningModeChanged(const QString& lmEquipmentId, bool tuningEnabled);
+		void tuningModeEntered(const QString& lmEquipmentId,
+							   const QString& portEquipmentId,
+							   const RamArea& ramArea,
+							   TimeStamp timeStamp);
+
+		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
 	private:
 		virtual void run() override;
@@ -146,11 +155,15 @@ namespace Sim
 
 		void updateTuningData(const RamArea& data, TimeStamp timeStamp);
 
-		void tuningModeChanged(bool tuningEnabled);
+		void tuningModeEntered(const RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeLeft();
 
 		bool processRequest(const RupFotipV2& request, RupFotipV2* reply);
 
 		QString lmEquipmentID() const { return m_lmEquipmentID; }
+
+	private:
+
 
 	private:
 		bool checkRequestRupHeader(const Rup::Header& rupHeader);

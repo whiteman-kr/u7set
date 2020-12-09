@@ -68,11 +68,14 @@ namespace Sim
 		int to_Yuriy_Beliy_get_write_confirmation_here;
 	}
 
-	void TuningServiceCommunicator::tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp)
+	void TuningServiceCommunicator::tuningModeEntered(const QString& lmEquipmentId,
+													  const QString& portEquipmentId,
+													  const RamArea& ramArea,
+													  TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->tuningModeChanged(lmEquipmentId, true);
+			m_processingThread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, timeStamp);
 		}
 	}
 
@@ -80,7 +83,7 @@ namespace Sim
 	{
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->tuningModeChanged(lmEquipmentId, false);
+			m_processingThread->tuningModeLeft(lmEquipmentId, portEquipmentId);
 		}
 	}
 
@@ -206,19 +209,33 @@ namespace Sim
 		p->second->updateTuningData(data, timeStamp);
 	}
 
-	void TuningRequestsProcessingThread::tuningModeChanged(const QString& lmEquipmentId, bool tuningEnabled)
+	void TuningRequestsProcessingThread::tuningModeEntered(const QString& lmEquipmentId,
+														   const QString& portEquipmentId,
+														   const RamArea& ramArea,
+														   TimeStamp timeStamp)
 	{
-		for(auto p : m_tuningSourcesByIP)
+		auto p = m_tuningSourcesByEquipmentID.find(std::pair<QString, QString>(lmEquipmentId, portEquipmentId));
+
+		if (p == m_tuningSourcesByEquipmentID.end())
 		{
-			std::shared_ptr<TuningSourceHandler> tsh = p.second;
-
-			TEST_PTR_CONTINUE(tsh);
-
-			if (tsh->lmEquipmentID() == lmEquipmentId)
-			{
-				tsh->tuningModeChanged(tuningEnabled);
-			}
+			Q_ASSERT(false);
+			return;
 		}
+
+		p->second->tuningModeEntered(ramArea, timeStamp);
+	}
+
+	void TuningRequestsProcessingThread::tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId)
+	{
+		auto p = m_tuningSourcesByEquipmentID.find(std::pair<QString, QString>(lmEquipmentId, portEquipmentId));
+
+		if (p == m_tuningSourcesByEquipmentID.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		p->second->tuningModeLeft();
 	}
 
 	void TuningRequestsProcessingThread::run()
@@ -490,12 +507,6 @@ namespace Sim
 	{
 		Q_UNUSED(timeStamp);
 
-		if (m_tuningEnabled == false)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
 		m_tuningDataMutex.lock();
 
 		*m_tuningData.get() = data;
@@ -503,9 +514,16 @@ namespace Sim
 		m_tuningDataMutex.unlock();
 	}
 
-	void TuningSourceHandler::tuningModeChanged(bool tuningEnabled)
+	void TuningSourceHandler::tuningModeEntered(const RamArea& ramArea, TimeStamp timeStamp)
 	{
-		m_tuningEnabled.store(tuningEnabled);
+		updateTuningData(ramArea, timeStamp);
+
+		m_tuningEnabled.store(true);
+	}
+
+	void TuningSourceHandler::tuningModeLeft()
+	{
+		m_tuningEnabled.store(false);
 	}
 
 	bool TuningSourceHandler::processRequest(const RupFotipV2& request, RupFotipV2* reply)
