@@ -63,8 +63,7 @@ namespace Sim
 
 	bool Lans::isAppDataEnabled() const
 	{
-		if (m_simulator->software().enabled() == false ||
-			m_simulator->software().appDataTransmitter().enabled() == false)
+		if (m_simulator->software().enabled() == false)
 		{
 			return false;
 		}
@@ -84,8 +83,7 @@ namespace Sim
 
 	bool Lans::sendAppData(const QByteArray& data, TimeStamp timeStamp)
 	{
-		if (m_simulator->software().enabled() == false ||
-			m_simulator->software().appDataTransmitter().enabled() == false)
+		if (m_simulator->software().enabled() == false)
 		{
 			return false;
 		}

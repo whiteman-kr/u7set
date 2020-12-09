@@ -33,8 +33,7 @@ namespace Sim
 		void projectUpdated();					// Project was loaded or cleared
 
 	public:
-		bool enabled() const;					// Global enable for all LogicModules AppData LANs
-		void setEnabled(bool value);
+		bool softwareEnabled() const;			// Global enable for all LogicModules AppData LANs
 
 	private:
 		void shutdownTransmitterThread();
@@ -42,8 +41,6 @@ namespace Sim
 	private:
 		Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;
-
-		std::atomic<bool> m_enabled{true};
 
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
 	};

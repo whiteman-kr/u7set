@@ -74,8 +74,7 @@ namespace Sim
 		void projectUpdated();					// Project was loaded or cleared
 
 	public:
-		bool enabled() const;
-		void setEnabled(bool value);
+		bool softwareEnabled() const;			// Global enable for all LogicModules AppData LANs
 
 		// Data Section
 		//

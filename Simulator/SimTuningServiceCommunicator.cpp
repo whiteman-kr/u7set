@@ -51,6 +51,11 @@ namespace Sim
 													const RamArea& ramArea,
 													TimeStamp timeStamp)
 	{
+		if (softwareEnabled() == false)
+		{
+			return false;
+		}
+
 		if (m_processingThread != nullptr)
 		{
 			m_processingThread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, timeStamp);
@@ -159,14 +164,9 @@ namespace Sim
 		//
 	}
 
-	bool TuningServiceCommunicator::enabled() const
+	bool TuningServiceCommunicator::softwareEnabled() const
 	{
-		return m_enabled;
-	}
-
-	void TuningServiceCommunicator::TuningServiceCommunicator::setEnabled(bool value)
-	{
-		m_enabled = value;
+		return m_simulator->software().enabled();
 	}
 
 	// ---------------------------------------------------------------------------------------------------------

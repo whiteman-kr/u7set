@@ -29,7 +29,8 @@ namespace Sim
 
 	bool TuningLanInterface::updateTuningRam(const RamArea& ramArea, TimeStamp timeStamp)
 	{
-		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
+		if (enabled() == false ||
+			m_tuningServiceCommunicator == nullptr)
 		{
 			return false;
 		}
