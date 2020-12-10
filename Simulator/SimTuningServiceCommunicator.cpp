@@ -49,6 +49,7 @@ namespace Sim
 	bool TuningServiceCommunicator::updateTuningRam(const QString& lmEquipmentId,
 													const QString& portEquipmentId,
 													const RamArea& ramArea,
+													bool setSorChassisState,
 													TimeStamp timeStamp)
 	{
 		if (softwareEnabled() == false)
@@ -67,7 +68,7 @@ namespace Sim
 	void TuningServiceCommunicator::writeConfirmation(std::vector<qint64> confirmedRecords,
 													  const QString& lmEquipmentId,
 													  const QString& portEquipmentId,
-													  const RamArea& ramArea,
+													  const RamArea& ramArea, bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)
@@ -78,7 +79,7 @@ namespace Sim
 
 	void TuningServiceCommunicator::tuningModeEntered(const QString& lmEquipmentId,
 													  const QString& portEquipmentId,
-													  const RamArea& ramArea,
+													  const RamArea& ramArea, bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)

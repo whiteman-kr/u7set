@@ -179,6 +179,15 @@ namespace Sim
 		return ok;
 	}
 
+	quint16 CommandProcessor_LM5_LM6::signalSetSorChassis() const
+	{
+		const quint32 inputControllerOffset = 57782;
+		const quint32 setSorChassisOffset = inputControllerOffset + 1;
+		const quint16 setSorChassisBit = 0;
+
+		return m_device->readRamBit(setSorChassisOffset, setSorChassisBit, E::LogicModuleRamAccess::Write);		// Application Logic writes TO this signal
+	}
+
 	bool CommandProcessor_LM5_LM6::setRuntimeModeSignals()
 	{
 		bool ok = true;

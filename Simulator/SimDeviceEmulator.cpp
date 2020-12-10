@@ -320,7 +320,7 @@ namespace Sim
 		//
 		if (runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
 		{
-			m_lans.updateTuningRam(tuningRamArea(), plantTime);
+			m_lans.updateTuningRam(tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 		}
 
 		return ok;
@@ -1345,7 +1345,7 @@ namespace Sim
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
 				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
 
-				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), plantTime);
+				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 			}
 		}
 
@@ -1775,7 +1775,7 @@ namespace Sim
 
 		setRuntimeMode(RuntimeMode::TuningMode);
 
-		m_lans.tuningModeEntered(m_tuningRamArea, timeStamp);
+		m_lans.tuningModeEntered(m_tuningRamArea, m_commandProcessor->signalSetSorChassis(), timeStamp);
 
 		return true;
 	}

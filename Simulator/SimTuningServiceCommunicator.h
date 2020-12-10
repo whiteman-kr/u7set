@@ -35,6 +35,7 @@ namespace Sim
 		bool updateTuningRam(const QString& lmEquipmentId,
 							 const QString& portEquipmentId,
 							 const RamArea& ramArea,
+							 bool setSorChassisState,
 							 TimeStamp timeStamp);
 
 		// This function is called by Simulator to provide confiramtion about writing data to RAM
@@ -43,6 +44,7 @@ namespace Sim
 							   const QString& lmEquipmentId,
 							   const QString& portEquipmentId,
 							   const RamArea& ramArea,
+							   bool setSorChassisState,
 							   TimeStamp timeStamp);	// timeStamp can be the same with following updateTuningRam call (writeConfiramtion is called before workcycle, updateTuningRam after workcyle, both already have the same timestamp)
 
 		// These functions are called by Simulator when module enters or leaves tuning mode
@@ -50,6 +52,7 @@ namespace Sim
 		void tuningModeEntered(const QString& lmEquipmentId,
 							   const QString& portEquipmentId,
 							   const RamArea& ramArea,
+							   bool setSorChassisState,
 							   TimeStamp timeStamp);
 
 		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
