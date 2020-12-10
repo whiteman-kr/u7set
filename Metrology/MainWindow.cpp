@@ -372,15 +372,10 @@ bool MainWindow::createToolBars()
 			pMeasureKindLabel->setText(tr(" Measure kind "));
 			pMeasureKindLabel->setEnabled(false);
 
-			for(int k = 0; k < MEASURE_KIND_COUNT; k++)
-			{
-				m_pMeasureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[k]));
-			}
+			loadMeasureKindToolBar();
 
-			m_measureKind = theOptions.toolBar().measureKind();
-			m_pMeasureKindList->setCurrentIndex(m_measureKind);
-
-			connect(m_pMeasureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind);
+			connect(m_pMeasureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this, &MainWindow::setMeasureKind);
 
 			m_calibratorBase.measureKindChanged(m_measureKind);
 			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
@@ -409,13 +404,7 @@ bool MainWindow::createToolBars()
 
 			m_pSignalConnectionToolBar->addWidget(m_pSignalConnectionTypeList);
 
-			for(int s = 0; s < SIGNAL_CONNECTION_TYPE_COUNT; s++)
-			{
-				m_pSignalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[s]));
-			}
-
-			m_signalConnectionType = theOptions.toolBar().signalConnectionType();
-			m_pSignalConnectionTypeList->setCurrentIndex(m_signalConnectionType);
+			loadSignalConnectionToolBar();
 
 			connect(m_pSignalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 					this, &MainWindow::setSignalConnectionType);
@@ -777,6 +766,107 @@ void MainWindow::createContextMenu()
 		pView->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(pView, &QTableView::customContextMenuRequested, this, &MainWindow::onContextMenu);
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::loadMeasureKindToolBar()
+{
+	if (m_pMeasureKindList == nullptr)
+	{
+		return;
+	}
+
+	m_pMeasureKindList->blockSignals(true);
+
+		m_pMeasureKindList->clear();
+
+		int selectedItem = -1;
+		m_measureKind = theOptions.toolBar().measureKind();
+
+		for(int kind = 0; kind < MEASURE_KIND_COUNT; kind++)
+		{
+			m_pMeasureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[kind]), kind);
+
+			if (kind == m_measureKind)
+			{
+				selectedItem = kind;
+			}
+
+		}
+
+	m_pMeasureKindList->blockSignals(false);
+
+	if (selectedItem == -1)
+	{
+		selectedItem = 0;
+		m_measureKind = MEASURE_KIND_ONE_RACK;
+	}
+
+	m_pMeasureKindList->setCurrentIndex(selectedItem);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::loadSignalConnectionToolBar()
+{
+	if (m_pSignalConnectionTypeList == nullptr)
+	{
+		return;
+	}
+
+	m_pSignalConnectionTypeList->blockSignals(true);
+
+		m_pSignalConnectionTypeList->clear();
+
+		m_pSignalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[SIGNAL_CONNECTION_TYPE_UNUSED]), SIGNAL_CONNECTION_TYPE_UNUSED);
+
+		QSet<int> signalConnectionSet;
+
+		int connectionCount = theSignalBase.signalConnections().count();
+		for(int i = 0; i < connectionCount; i++)
+		{
+			int type = theSignalBase.signalConnections().connection(i).type();
+			if (type < 0 || type > SIGNAL_CONNECTION_TYPE_COUNT)
+			{
+				continue;
+			}
+
+			signalConnectionSet.insert(theSignalBase.signalConnections().connection(i).type());
+		}
+
+		int selectedItem = -1;
+		m_signalConnectionType = theOptions.toolBar().signalConnectionType();
+
+		QList<int> signalConnectionList = signalConnectionSet.values();
+		std::sort(signalConnectionList.begin(), signalConnectionList.end());
+
+		connectionCount = signalConnectionList.count();
+		for(int i = 0; i < connectionCount; i++)
+		{
+			int type = signalConnectionList.at(i);
+			if (type < 0 || type > SIGNAL_CONNECTION_TYPE_COUNT)
+			{
+				continue;
+			}
+
+			if (type == m_signalConnectionType)
+			{
+				selectedItem = i + 1;	// SIGNAL_CONNECTION_TYPE_UNUSED item has already been added, hence +1
+			}
+
+			m_pSignalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[type]), type);
+		}
+
+	m_pSignalConnectionTypeList->blockSignals(false);
+
+	if (selectedItem == -1)
+	{
+		selectedItem = 0;
+		m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
+	}
+
+	m_pSignalConnectionTypeList->setCurrentIndex(selectedItem);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1556,7 +1646,8 @@ void MainWindow::showSignalConnectionList()
 		return;
 	}
 
-	loadRacksOnToolBar();
+	loadSignalConnectionToolBar();
+	//loadSignalConnectionToolBar call loadRacksOnToolBar() after setCurrentIndex
 
 	theSignalBase.statistics().createSignalList();
 	theSignalBase.statistics().createComparatorList();
@@ -1733,7 +1824,7 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	int kind = index;
+	int kind = m_pMeasureKindList->itemData(index).toInt();
 	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
 	{
 		return;
@@ -1753,8 +1844,6 @@ void MainWindow::setMeasureKind(int index)
 										 "you need to combine several racks into groups."
 										 "Currently, no groups have been found.\n"
 										 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
-
-
 			return;
 		}
 	}
@@ -1784,7 +1873,7 @@ void MainWindow::setSignalConnectionType(int index)
 		return;
 	}
 
-	int type = index;
+	int type = m_pSignalConnectionTypeList->itemData(index).toInt();
 	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
