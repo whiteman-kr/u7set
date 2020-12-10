@@ -29,7 +29,8 @@ namespace Sim
 
 	bool TuningLanInterface::updateTuningRam(const RamArea& ramArea, TimeStamp timeStamp)
 	{
-		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
+		if (enabled() == false ||
+			m_tuningServiceCommunicator == nullptr)
 		{
 			return false;
 		}
@@ -37,14 +38,24 @@ namespace Sim
 		return m_tuningServiceCommunicator->updateTuningRam(lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
 	}
 
-	void TuningLanInterface::tuningModeChanged(bool tuningMode)
+	void TuningLanInterface::tuningModeEntered(const RamArea& ramArea, TimeStamp timeStamp)
 	{
 		if (m_tuningServiceCommunicator == nullptr)
 		{
 			return;
 		}
 
-		return m_tuningServiceCommunicator->tuningModeChanged(lmEquipmentId(), tuningMode);
+		return m_tuningServiceCommunicator->tuningModeEntered(lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
+	}
+
+	void TuningLanInterface::tuningModeLeft()
+	{
+		if (m_tuningServiceCommunicator == nullptr)
+		{
+			return;
+		}
+
+		return m_tuningServiceCommunicator->tuningModeLeft(lmEquipmentId(), portEquipmentId());
 	}
 
 	std::queue<TuningRecord> TuningLanInterface::fetchWriteTuningQueue()
@@ -57,5 +68,15 @@ namespace Sim
 		}
 
 		return result;
+	}
+
+	void TuningLanInterface::sendWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& ramArea, TimeStamp timeStamp)
+	{
+		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
+		{
+			return;
+		}
+
+		return m_tuningServiceCommunicator->writeConfirmation(std::move(confirmedRecords), lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
 	}
 }

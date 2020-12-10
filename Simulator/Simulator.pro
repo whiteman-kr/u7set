@@ -110,6 +110,7 @@ SOURCES += \
     SimScriptSimulator.cpp \
     SimSoftware.cpp \
     SimTuningLanInterface.cpp \
+    SimTuningRecord.cpp \
     SimTuningServiceCommunicator.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
