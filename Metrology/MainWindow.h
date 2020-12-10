@@ -179,6 +179,8 @@ private:
 	void					createStatusBar();
 	void					createContextMenu();
 
+	void					loadMeasureKindToolBar();
+	void					loadSignalConnectionToolBar();
 	void					loadRacksOnToolBar();
 	void					loadSignalsOnToolBar();
 
