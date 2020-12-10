@@ -457,12 +457,12 @@ void MainWindow::createWorkspace()
 
 	// Create new workspaces
 
-	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
+	if (theConfigSettings.clientSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, this);
 	}
 
-	if (theConfigSettings.showSignals == true)
+	if (theConfigSettings.clientSettings.showSignals == true)
 	{
 		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClient, &m_filterStorage, this);
 	}
@@ -775,7 +775,7 @@ void MainWindow::updateStatusBar()
 
 		// Sor tool
 
-		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
+		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
 		{
 			QString sorStatus;
 

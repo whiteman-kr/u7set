@@ -33,7 +33,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 	QHBoxLayout* mainLayout = new QHBoxLayout(this);
 
-	if (theConfigSettings.showSchemasList == true)
+	if (theConfigSettings.clientSettings.showSchemasList == true)
 	{
 		m_schemasList = new QTreeWidget();
 		m_schemasList->setObjectName("SchemasTreeWidget");
@@ -82,7 +82,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 				return;
 			}
 
-			if (item->text(0) == theConfigSettings.startSchemaID)
+			if (item->text(0) == theConfigSettings.clientSettings.startSchemaID)
 			{
 				startSchemaItem = item;
 				break;
@@ -139,7 +139,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 	}
 	else
 	{
-		if (theConfigSettings.showSchemasTabs == true)
+		if (theConfigSettings.clientSettings.showSchemasTabs == true)
 		{
 			// Create widgets sorted by id map
 
@@ -172,7 +172,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 				m_tabWidget->addTab(schemaWidget, schemaWidget->caption());
 
-				if (w.first == theConfigSettings.startSchemaID)
+				if (w.first == theConfigSettings.clientSettings.startSchemaID)
 				{
 					// Set current tab to startSchemaID
 					//
@@ -190,7 +190,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 			for (int i = 0; i < theConfigSettings.schemas.size(); i++)
 			{
-				if (theConfigSettings.schemas[i].m_id == theConfigSettings.startSchemaID)
+				if (theConfigSettings.schemas[i].m_id == theConfigSettings.clientSettings.startSchemaID)
 				{
 					schemaID = theConfigSettings.schemas[i];
 				}
@@ -271,7 +271,7 @@ void SchemasWorkspace::slot_schemaChanged(VFrame30::ClientSchemaWidget* widget, 
 	QString id = schema->schemaId();
 	QString caption = schema->caption();
 
-	if (theConfigSettings.showSchemasList == true)
+	if (theConfigSettings.clientSettings.showSchemasList == true)
 	{
 		if (m_schemasList == nullptr)
 		{
@@ -298,7 +298,7 @@ void SchemasWorkspace::slot_schemaChanged(VFrame30::ClientSchemaWidget* widget, 
 	}
 	else
 	{
-		if (theConfigSettings.showSchemasTabs == true)
+		if (theConfigSettings.clientSettings.showSchemasTabs == true)
 		{
 			if (m_tabWidget == nullptr)
 			{

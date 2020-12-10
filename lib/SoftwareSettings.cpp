@@ -1074,7 +1074,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 				//
 				QString tuningServiceID;
 
-				result &= DeviceHelper::getStrProperty(tuningClient, "TuningServiceID", &tuningServiceID, log);
+				result &= DeviceHelper::getStrProperty(tuningClient, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServiceID, log);
 
 				if (result == false)
 				{
@@ -1088,9 +1088,9 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 				bool tuningEnable = true;			// by default tuning is enabled for known clients without property "TuningEnable"
 
-				if (DeviceHelper::isPropertyExists(tuningClient, "TuningEnable") == true)
+				if (DeviceHelper::isPropertyExists(tuningClient, EquipmentPropNames::TUNING_ENABLE) == true)
 				{
-					result &= DeviceHelper::getBoolProperty(tuningClient, "TuningEnable", &tuningEnable, log);
+					result &= DeviceHelper::getBoolProperty(tuningClient, EquipmentPropNames::TUNING_ENABLE, &tuningEnable, log);
 
 					if (result == false)
 					{
@@ -2353,8 +2353,7 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xmlWriter)
 	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
 	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
 	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SOR, showSOR);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::USE_ACCESS_FLAG, useAccessFlag);
+	xmlWriter.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, statusFlagFunction);
 	xmlWriter.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
 	xmlWriter.writeStringAttribute(EquipmentPropNames::USER_ACCOUNTS, usersAccounts);
 	xmlWriter.writeIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, loginSessionLength);
@@ -2392,8 +2391,38 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xmlReader)
 	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, &showSchemas);
 	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, &showSchemasList);
 	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, &showSchemasTabs);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SOR, &showSOR);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::USE_ACCESS_FLAG, &useAccessFlag);
+
+	bool resultStatusFlagFunction = xmlReader.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction);
+	if (resultStatusFlagFunction == false)
+	{
+		// Compatibility loading statusFlagFunction before 10.12.2020
+		//
+		statusFlagFunction = 0;
+
+		bool showSOR = false;
+		bool useAccessFlag = false;
+
+		resultStatusFlagFunction = xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SOR, &showSOR);
+		resultStatusFlagFunction &= xmlReader.readBoolAttribute(EquipmentPropNames::USE_ACCESS_FLAG, &useAccessFlag);
+
+		if (resultStatusFlagFunction == true)
+		{
+			if (showSOR == true)
+			{
+				statusFlagFunction = 1;
+			}
+			else
+			{
+				if (useAccessFlag == true)
+				{
+					statusFlagFunction = 2;
+				}
+			}
+		}
+	}
+
+	result &= resultStatusFlagFunction;
+
 	result &= xmlReader.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
 	result &= xmlReader.readStringAttribute(EquipmentPropNames::USER_ACCOUNTS, &usersAccounts);
 	result &= xmlReader.readIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, &loginSessionLength);
@@ -2418,6 +2447,68 @@ QStringList TuningClientSettings::getSchemaTags() const
 QStringList TuningClientSettings::getUsersAccounts() const
 {
 	return  usersAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+}
+
+const TuningClientSettings& TuningClientSettings::operator = (const TuningClientSettings& src)
+{
+	tuningServiceID = src.tuningServiceID;
+	tuningServiceIP = src.tuningServiceIP;
+	tuningServicePort = src.tuningServicePort;
+
+	autoApply = src.autoApply;
+
+	showSignals = src.showSignals;
+	showSchemas = src.showSchemas;
+	showSchemasList = src.showSchemasList;
+	showSchemasTabs = src.showSchemasTabs;
+
+	statusFlagFunction = src.statusFlagFunction;
+
+	loginPerOperation = src.loginPerOperation;
+	usersAccounts = src.usersAccounts;
+	loginSessionLength = src.loginSessionLength;
+
+	filterByEquipment = src.filterByEquipment;
+	filterBySchema = src.filterBySchema;
+
+	startSchemaID = src.startSchemaID;
+	schemaTags = src.schemaTags;
+
+	return *this;
+}
+
+bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) const
+{
+	if (autoApply != src.autoApply ||
+		filterByEquipment != src.filterByEquipment ||
+		filterBySchema != src.filterBySchema ||
+		showSchemasList != src.showSchemasList ||
+		showSchemasTabs != src.showSchemasTabs ||
+		showSchemas != src.showSchemas ||
+		showSignals != src.showSignals ||
+		statusFlagFunction != src.statusFlagFunction ||
+		loginPerOperation != src.loginPerOperation ||
+		loginSessionLength != src.loginSessionLength ||
+		usersAccounts != src.usersAccounts)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) const
+{
+	if (tuningServiceID != src.tuningServiceID ||
+		tuningServiceIP != src.tuningServiceIP ||
+		tuningServicePort != src.tuningServicePort ||
+		autoApply != src.autoApply ||
+		statusFlagFunction != src.statusFlagFunction)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 #ifdef IS_BUILDER
@@ -2516,28 +2607,7 @@ QStringList TuningClientSettings::getUsersAccounts() const
 		//
 		// statusFlagFunction
 		//
-		showSOR = false;
-		useAccessFlag = false;
-
-		int statusFlagFunction = 0;
-
 		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction, log);
-
-		RETURN_IF_FALSE(result);
-
-		switch (statusFlagFunction)
-		{
-		case 0:
-			break;
-		case 1:
-			showSOR = true;
-			break;
-		case 2:
-			useAccessFlag = true;
-			break;
-		default:
-			Q_ASSERT(false);
-		}
 
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation, log);
 

@@ -894,7 +894,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	m_bottomLayout->addWidget(m_undoButton);
 	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
-	if (theConfigSettings.autoApply == false)
+	if (theConfigSettings.clientSettings.autoApply == false)
 	{
 		m_applyButton = new QPushButton(tr("Apply"));
 		connect(m_applyButton, &QPushButton::clicked, this, &TuningPage::slot_Apply);

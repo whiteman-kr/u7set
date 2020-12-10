@@ -6,9 +6,9 @@ TuningSchemaManager::TuningSchemaManager(ConfigController* configController, QOb
 {
 	assert(m_configController);
 
-	setGlobalScript(theConfigSettings.globalScript);
+	setGlobalScript(theConfigSettings.scriptGlobal);
 
-	setConfigurationArrivedScript(theConfigSettings.configurationArrivedScript);
+	setConfigurationArrivedScript(theConfigSettings.scriptConfigArrived);
 
 	return;
 }
