@@ -25,6 +25,11 @@ namespace Sim
 		//
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime) override;
 
+		// Get state of signal 'Set SOR Chassis', this state is fetched from RAM withount any mutex, so
+		// device must not run or performe any work cycle while calling this function
+		//
+		virtual quint16 signalSetSorChassis() const override;
+
 	private:
 		bool setRuntimeModeSignals();
 

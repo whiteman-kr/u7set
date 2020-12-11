@@ -126,7 +126,7 @@ namespace Sim
 		return false;
 	}
 
-	bool Lans::updateTuningRam(const RamArea& data, TimeStamp timeStamp)
+	bool Lans::updateTuningRam(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		if (m_simulator->software().enabled() == false ||
 			m_logicModuleDevice->runtimeMode() != RuntimeMode::TuningMode)
@@ -148,14 +148,14 @@ namespace Sim
 					continue;
 				}
 
-				ok &= tli->updateTuningRam(data, timeStamp);
+				ok &= tli->updateTuningRam(data, setSorChassisState, timeStamp);
 			}
 		}
 
 		return ok;
 	}
 
-	void Lans::tuningModeEntered(const RamArea& data, TimeStamp timeStamp)
+	void Lans::tuningModeEntered(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
@@ -167,7 +167,7 @@ namespace Sim
 					continue;
 				}
 
-				tli->tuningModeEntered(data, timeStamp);
+				tli->tuningModeEntered(data, setSorChassisState, timeStamp);
 			}
 		}
 	}
@@ -225,7 +225,7 @@ namespace Sim
 		return result;
 	}
 
-	void Lans::sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, TimeStamp timeStamp)
+	void Lans::sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
@@ -237,7 +237,7 @@ namespace Sim
 					continue;
 				}
 
-				tli->sendWriteConfirmation(confirmedRecords, data, timeStamp);
+				tli->sendWriteConfirmation(confirmedRecords, data, setSorChassisState, timeStamp);
 			}
 		}
 

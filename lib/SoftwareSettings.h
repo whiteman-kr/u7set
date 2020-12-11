@@ -417,31 +417,36 @@ public:
 	QString tuningServiceIP;
 	int tuningServicePort = 0;
 
-	bool autoApply = false;
-	bool showSignals = false;
-	bool showSchemas = false;
-	bool showSchemasList = false;
-	bool showSchemasTabs = false;
-	bool showSOR = false;
-	bool useAccessFlag = false;
+	bool autoApply = true;
+
+	bool showSignals = true;
+	bool showSchemas = true;
+	bool showSchemasList = true;
+	bool showSchemasTabs = true;
+
+	int statusFlagFunction = 0;	// LmStatusFlagMode::None
+
 	bool loginPerOperation = false;
 	QString usersAccounts;
-	int loginSessionLength = 0;
+	int loginSessionLength = 120;
 
-	bool filterByEquipment = false;
-	bool filterBySchema = false;
+	bool filterByEquipment = true;
+	bool filterBySchema = true;
 
 	QString startSchemaID;
-
 	QString schemaTags;
 
-	//
-
+public:
 	bool writeToXml(XmlWriteHelper& xmlWriter) override;
 	bool readFromXml(XmlReadHelper& xmlReader) override;
 
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;
+
+	const TuningClientSettings& operator = (const TuningClientSettings& src);
+
+	bool appearanceChanged(const TuningClientSettings& src) const;
+	bool connectionChanged(const TuningClientSettings& src) const;
 };
 
 #ifdef IS_BUILDER

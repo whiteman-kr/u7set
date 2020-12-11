@@ -35,13 +35,13 @@ namespace Sim
 		//
 		bool isTuningEnabled() const;
 
-		bool updateTuningRam(const Sim::RamArea& data, TimeStamp timeStamp);	// Copy of tuning RAM Area
+		bool updateTuningRam(const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp);	// Copy of tuning RAM Area
 
-		void tuningModeEntered(const Sim::RamArea& data, TimeStamp timeStamp);
+		void tuningModeEntered(const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp);
 		void tuningModeLeft();
 
 		std::queue<TuningRecord> fetchWriteTuningQueue();
-		void sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, TimeStamp timeStamp);
+		void sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp);
 
 	public:
 		ScopedLog& log();

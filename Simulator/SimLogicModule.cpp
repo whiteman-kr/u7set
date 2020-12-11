@@ -278,4 +278,44 @@ namespace Sim
 		return m_device.setTuningKey(value);
 	}
 
+	bool LogicModule::sorIsSet() const
+	{
+		return m_device.sorIsSet();
+	}
+
+	bool LogicModule::sorSetSwitch1() const
+	{
+		return m_device.sorSetSwitch1();
+	}
+
+	void LogicModule::setSorSetSwitch1(bool value)
+	{
+		m_device.setSorSetSwitch1(value);
+	}
+
+	bool LogicModule::sorSetSwitch2() const
+	{
+		return m_device.sorSetSwitch2();
+	}
+
+	void LogicModule::setSorSetSwitch2(bool value)
+	{
+		m_device.setSorSetSwitch2(value);
+	}
+
+	bool LogicModule::sorSetSwitch3() const
+	{
+		return m_device.sorSetSwitch3();
+	}
+
+	void LogicModule::setSorSetSwitch3(bool value)
+	{
+		m_device.setSorSetSwitch3(value);
+	}
+
+	bool LogicModule::testSorResetSwitch(bool newValue)
+	{
+		return m_device.testSorResetSwitch(true);
+	}
+
 }

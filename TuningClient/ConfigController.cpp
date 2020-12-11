@@ -273,7 +273,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	// Trace received params
 	//
 	theLogFile->writeMessage(tr("New configuration arrived"));
-	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuningServiceAddress.equipmentId()).arg(readSettings.tuningServiceAddress.ip()).arg(readSettings.tuningServiceAddress.port()));
+	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.serviceAddress.equipmentId()).arg(readSettings.serviceAddress.ip()).arg(readSettings.serviceAddress.port()));
 
 	bool someFilesUpdated = false;
 
@@ -387,7 +387,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 				else
 				{
-					readSettings.globalScript = globalScriptData;
+					readSettings.scriptGlobal = globalScriptData;
 				}
 			}
 
@@ -403,7 +403,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 				else
 				{
-					readSettings.configurationArrivedScript = configurationArrivedScriptData;
+					readSettings.scriptConfigArrived = configurationArrivedScriptData;
 				}
 			}
 
@@ -446,21 +446,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool apperanceUpdated = false;
 
-	if (theConfigSettings.autoApply != readSettings.autoApply ||
-			theConfigSettings.filterByEquipment != readSettings.filterByEquipment ||
-			theConfigSettings.filterBySchema != readSettings.filterBySchema ||
-			theConfigSettings.showSchemasList != readSettings.showSchemasList ||
-			theConfigSettings.showSchemasTabs != readSettings.showSchemasTabs ||
-			theConfigSettings.showSchemas != readSettings.showSchemas ||
-			theConfigSettings.showSignals != readSettings.showSignals ||
-	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode ||
-			theConfigSettings.logonMode != readSettings.logonMode ||
-			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
-			theConfigSettings.usersAccounts != readSettings.usersAccounts ||
-			theConfigSettings.globalScript != readSettings.globalScript ||
-			theConfigSettings.configurationArrivedScript != readSettings.configurationArrivedScript ||
-			theConfigSettings.schemas.size() != readSettings.schemas.size()
-			)
+	if (theConfigSettings.clientSettings.appearanceChanged(readSettings.clientSettings)  == true ||
+		theConfigSettings.scriptGlobal != readSettings.scriptGlobal ||
+		theConfigSettings.scriptConfigArrived != readSettings.scriptConfigArrived ||
+		theConfigSettings.schemas.size() != readSettings.schemas.size()
+		)
 	{
 
 		updateInformation.push_back(tr("New configuration: appearance updated"));
@@ -469,11 +459,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool serversUpdated = false;
 
-	if (theConfigSettings.tuningServiceAddress.address().address() != readSettings.tuningServiceAddress.address().address() ||
-	        theConfigSettings.autoApply != readSettings.autoApply ||
-	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode)
+	if (theConfigSettings.clientSettings.connectionChanged(readSettings.clientSettings) == true)
 	{
-		updateInformation.push_back(tr("New configuration: servers updated"));
+		updateInformation.push_back(tr("New configuration: connection parameters updated"));
 		serversUpdated = true;
 	}
 
@@ -489,7 +477,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (serversUpdated == true)
 	{
-		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply, theConfigSettings.lmStatusFlagMode);
+
+		emit tcpClientConfigurationArrived(theConfigSettings.serviceAddress.address(),
+										   theConfigSettings.clientSettings.autoApply,
+										   theConfigSettings.lmStatusFlagMode());
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
@@ -497,7 +488,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Modify logon mode
 
-		theMainWindow->userManager()->setConfiguration(theConfigSettings.usersAccounts, theConfigSettings.logonMode, theConfigSettings.loginSessionLength);
+		theMainWindow->userManager()->setConfiguration(theConfigSettings.clientSettings.getUsersAccounts(),
+													   theConfigSettings.clientSettings.loginPerOperation == true ? LogonMode::PerOperation : LogonMode::Permanent,
+													   theConfigSettings.clientSettings.loginSessionLength);
 
 		emit configurationArrived();
 	}
@@ -622,9 +615,7 @@ bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, Con
 
 	XmlReadHelper xmlReader(cfgFiledata);
 
-	TuningClientSettings ts;
-
-	bool result = ts.readFromXml(xmlReader);
+	bool result = outSetting->clientSettings.readFromXml(xmlReader);
 
 	if (result == false)
 	{
@@ -632,34 +623,9 @@ bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, Con
 		return false;
 	}
 
-	outSetting->tuningServiceAddress = ConfigConnection(ts.tuningServiceID, ts.tuningServiceIP, ts.tuningServicePort);
-
-	outSetting->autoApply = ts.autoApply;
-	outSetting->showSignals = ts.showSignals;
-	outSetting->showSchemas = ts.showSchemas;
-	outSetting->showSchemasList = ts.showSchemasList;
-	outSetting->showSchemasTabs = ts.showSchemasTabs;
-	outSetting->startSchemaID = ts.startSchemaID;
-	outSetting->filterByEquipment = ts.filterByEquipment;
-	outSetting->filterBySchema = ts.filterBySchema;
-
-	outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
-
-	if (ts.showSOR == true)
-	{
-		outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
-	}
-	else
-	{
-		if (ts.useAccessFlag == true)
-		{
-			outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
-		}
-	}
-
-	outSetting->logonMode = ts.loginPerOperation == true ? LogonMode::PerOperation : LogonMode::Permanent;
-	outSetting->loginSessionLength = ts.loginSessionLength;
-	outSetting->usersAccounts = ts.getUsersAccounts();
+	outSetting->serviceAddress = ConfigConnection(outSetting->clientSettings.tuningServiceID,
+														outSetting->clientSettings.tuningServiceIP,
+														outSetting->clientSettings.tuningServicePort);
 
 	return true;
 }
