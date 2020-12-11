@@ -289,7 +289,7 @@ namespace Builder
 			signal.serializeTo(protoMetrologySignal);
 		}
 
-		int dataSize = protoMetrologySignalSet.ByteSize();
+		int dataSize = static_cast<int>(protoMetrologySignalSet.ByteSizeLong());
 
 		QByteArray data;
 

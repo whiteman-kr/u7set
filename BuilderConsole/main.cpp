@@ -162,7 +162,7 @@ int startBuild(QString buildArgsFileName)
 
 	// Some inititializations
 	//
-	VFrame30::VFrame30Library::init();
+	VFrame30::init();
 	Hardware::init();
 	DbController::init();
 	Builder::init();
@@ -310,7 +310,7 @@ int startBuild(QString buildArgsFileName)
 	Builder::shutdown();
 	DbController::shutdown();
 	Hardware::shutdown();
-	VFrame30::VFrame30Library::shutdown();
+	VFrame30::shutdown();
 
 	return result;
 }
@@ -338,10 +338,7 @@ int main(int argc, char *argv[])
 	switch (args.size())
 	{
 		case 2:
-			{
-				int result = startBuild(args[1]);
-				return result;
-			}
+			return startBuild(args[1]);
 
 		case 3:
 			// Create a template file?

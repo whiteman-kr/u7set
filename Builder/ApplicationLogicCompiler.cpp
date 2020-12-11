@@ -1244,7 +1244,7 @@ namespace Builder
 			s.serializeTo(protoAppSignal);
 		}
 
-		int dataSize = protoAppSignalSet.ByteSize();
+		int dataSize = static_cast<int>(protoAppSignalSet.ByteSizeLong());
 
 		QByteArray data;
 
@@ -1268,7 +1268,7 @@ namespace Builder
 		::Proto::ComparatorSet protoComparatorSet;
 		comparatorSet()->serializeTo(&protoComparatorSet);
 
-		int dataSize = protoComparatorSet.ByteSize();
+		int dataSize = static_cast<int>(protoComparatorSet.ByteSizeLong());
 
 		QByteArray data;
 

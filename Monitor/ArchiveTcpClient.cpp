@@ -77,7 +77,7 @@ bool ArchiveTcpClient::cancelRequest()
 
 	emit signal_cancelRequest();		// emit signal as this func can be called from other thread
 
-	QTime time;
+	QElapsedTimer time;
 	time.start();
 
 	while (m_requestInProgress == true && time.elapsed() < 5000)

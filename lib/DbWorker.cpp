@@ -7488,7 +7488,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		protoData.set_fineaperture(q.value(SD_FINE_APERTURE).toDouble());
 		protoData.set_adaptiveaperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
 
-		int protoDataSize = protoData.ByteSize();
+		int protoDataSize = static_cast<int>(protoData.ByteSizeLong());
 
 		protoDataArray.resize(protoDataSize);
 

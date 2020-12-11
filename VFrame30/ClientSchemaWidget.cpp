@@ -177,9 +177,9 @@ namespace VFrame30
 		}
 
 		QByteArray data;
-		data.resize(protoSetMessage.ByteSize());
+		data.resize(static_cast<int>(protoSetMessage.ByteSizeLong()));
 
-		protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
+		protoSetMessage.SerializeToArray(data.data(), static_cast<int>(protoSetMessage.ByteSizeLong()));
 
 		// --
 		//

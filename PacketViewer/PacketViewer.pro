@@ -28,6 +28,7 @@ unix {
 }
 
 SOURCES += main.cpp\
+    ../Proto/serialization.pb.cc \
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
         SourceListWidget.cpp \
@@ -59,6 +60,7 @@ SOURCES += main.cpp\
     ../lib/SimpleMutex.cpp
 
 HEADERS  += SourceListWidget.h \
+    ../Proto/serialization.pb.h \
     ../lib/Address16.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \

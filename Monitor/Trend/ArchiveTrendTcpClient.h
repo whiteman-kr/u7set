@@ -105,7 +105,7 @@ private:
 	Network::GetAppSignalStatesFromArchiveNextRequest m_nextRequest;
 	Network::GetAppSignalStatesFromArchiveNextReply m_nextReply;
 
-	QTime m_startRequestTime;
+	QElapsedTimer m_startRequestTime;
 
 	// Statisctics and state variables
 	//

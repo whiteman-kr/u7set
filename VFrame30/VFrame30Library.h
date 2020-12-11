@@ -4,16 +4,10 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VFrame30Library
-	{
-	public:
-		VFrame30Library();
-		
-		// Initialize VFrame30 Library, must be called before using any library classes
-		//
-		static bool init();
-		static bool shutdown();
-	};
+	// Initialize VFrame30 Library, must be called before using any library classes
+	//
+	VFRAME30LIBSHARED_EXPORT bool init();
+	VFRAME30LIBSHARED_EXPORT bool shutdown();
 }
 
 

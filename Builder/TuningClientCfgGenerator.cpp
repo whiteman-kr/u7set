@@ -294,9 +294,9 @@ namespace Builder
 		// Write number of signals
 		//
 		QByteArray data;
-		data.resize(m_tuningSet.ByteSize());
+		data.resize(static_cast<int>(m_tuningSet.ByteSizeLong()));
 
-		m_tuningSet.SerializeToArray(data.data(), m_tuningSet.ByteSize());
+		m_tuningSet.SerializeToArray(data.data(), static_cast<int>(m_tuningSet.ByteSizeLong()));
 
 		// Write file
 		//

@@ -919,7 +919,7 @@ namespace Hardware
 
 		QByteArray data;
 
-		int size = message.ByteSize();
+		int size = static_cast<int>(message.ByteSizeLong());
 		data.resize(size);
 
 		message.SerializeToArray(data.data(), size);

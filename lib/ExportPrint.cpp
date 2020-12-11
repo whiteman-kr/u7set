@@ -417,7 +417,7 @@ bool ExportPrint::saveArchiveToCsv(QTableView* tableView, QString fileName)
 		QString columnHeader = model->headerData(column, Qt::Horizontal, Qt::DisplayRole).toString();
 		out << columnHeader << ";";
 	}
-	out << endl;
+	out << Qt::endl;
 
 	// Fill table
 	//
@@ -452,7 +452,7 @@ bool ExportPrint::saveArchiveToCsv(QTableView* tableView, QString fileName)
 			out << cellText << ";";
 		}
 
-		out << endl;
+		out << Qt::endl;
 	}
 
 	progressDialog.setValue(rowCount);

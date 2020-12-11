@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -31,15 +31,17 @@
 // Author: kenton@google.com (Kenton Varda)
 
 #include <google/protobuf/stubs/common.h>
-#include <google/protobuf/stubs/once.h>
-#include <stdio.h>
+
+#include <atomic>
 #include <errno.h>
+#include <sstream>
+#include <stdio.h>
 #include <vector>
 
-#include "config.h"
-
 #ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN  // We only need minimal includes
+#endif
 #include <windows.h>
 #define snprintf _snprintf    // see comment in strutil.cc
 #elif defined(HAVE_PTHREAD)
@@ -47,6 +49,19 @@
 #else
 #error "No suitable threading library available."
 #endif
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
+#include <google/protobuf/stubs/callback.h>
+#include <google/protobuf/stubs/logging.h>
+#include <google/protobuf/stubs/once.h>
+#include <google/protobuf/stubs/status.h>
+#include <google/protobuf/stubs/stringpiece.h>
+#include <google/protobuf/stubs/strutil.h>
+#include <google/protobuf/stubs/int128.h>
+
+#include <google/protobuf/port_def.inc>
 
 namespace google {
 namespace protobuf {
@@ -81,7 +96,7 @@ void VerifyVersion(int headerVersion,
   }
 }
 
-string VersionString(int version) {
+std::string VersionString(int version) {
   int major = version / 1000000;
   int minor = (version / 1000) % 1000;
   int micro = version % 1000;
@@ -102,10 +117,55 @@ string VersionString(int version) {
 // ===================================================================
 // emulates google3/base/logging.cc
 
+// If the minimum logging level is not set, we default to logging messages for
+// all levels.
+#ifndef GOOGLE_PROTOBUF_MIN_LOG_LEVEL
+#define GOOGLE_PROTOBUF_MIN_LOG_LEVEL LOGLEVEL_INFO
+#endif
+
 namespace internal {
 
+#if defined(__ANDROID__)
+inline void DefaultLogHandler(LogLevel level, const char* filename, int line,
+                              const std::string& message) {
+  if (level < GOOGLE_PROTOBUF_MIN_LOG_LEVEL) {
+    return;
+  }
+  static const char* level_names[] = {"INFO", "WARNING", "ERROR", "FATAL"};
+
+  static const int android_log_levels[] = {
+      ANDROID_LOG_INFO,   // LOG(INFO),
+      ANDROID_LOG_WARN,   // LOG(WARNING)
+      ANDROID_LOG_ERROR,  // LOG(ERROR)
+      ANDROID_LOG_FATAL,  // LOG(FATAL)
+  };
+
+  // Bound the logging level.
+  const int android_log_level = android_log_levels[level];
+  ::std::ostringstream ostr;
+  ostr << "[libprotobuf " << level_names[level] << " " << filename << ":"
+       << line << "] " << message.c_str();
+
+  // Output the log string the Android log at the appropriate level.
+  __android_log_write(android_log_level, "libprotobuf-native",
+                      ostr.str().c_str());
+  // Also output to std::cerr.
+  fprintf(stderr, "%s", ostr.str().c_str());
+  fflush(stderr);
+
+  // Indicate termination if needed.
+  if (android_log_level == ANDROID_LOG_FATAL) {
+    __android_log_write(ANDROID_LOG_FATAL, "libprotobuf-native",
+                        "terminating.\n");
+  }
+}
+
+#else
 void DefaultLogHandler(LogLevel level, const char* filename, int line,
-                       const string& message) {
+                       const std::string& message) {
+  if (level < GOOGLE_PROTOBUF_MIN_LOG_LEVEL) {
+    return;
+  }
   static const char* level_names[] = { "INFO", "WARNING", "ERROR", "FATAL" };
 
   // We use fprintf() instead of cerr because we want this to work at static
@@ -114,37 +174,40 @@ void DefaultLogHandler(LogLevel level, const char* filename, int line,
           level_names[level], filename, line, message.c_str());
   fflush(stderr);  // Needed on MSVC.
 }
+#endif
 
-void NullLogHandler(LogLevel level, const char* filename, int line,
-                    const string& message) {
+void NullLogHandler(LogLevel /* level */, const char* /* filename */,
+                    int /* line */, const std::string& /* message */) {
   // Nothing.
 }
 
 static LogHandler* log_handler_ = &DefaultLogHandler;
-static int log_silencer_count_ = 0;
+static std::atomic<int> log_silencer_count_ = ATOMIC_VAR_INIT(0);
 
-static Mutex* log_silencer_count_mutex_ = NULL;
-GOOGLE_PROTOBUF_DECLARE_ONCE(log_silencer_count_init_);
-
-void DeleteLogSilencerCount() {
-  delete log_silencer_count_mutex_;
-  log_silencer_count_mutex_ = NULL;
-}
-void InitLogSilencerCount() {
-  log_silencer_count_mutex_ = new Mutex;
-  OnShutdown(&DeleteLogSilencerCount);
-}
-void InitLogSilencerCountOnce() {
-  GoogleOnceInit(&log_silencer_count_init_, &InitLogSilencerCount);
-}
-
-LogMessage& LogMessage::operator<<(const string& value) {
+LogMessage& LogMessage::operator<<(const std::string& value) {
   message_ += value;
   return *this;
 }
 
 LogMessage& LogMessage::operator<<(const char* value) {
   message_ += value;
+  return *this;
+}
+
+LogMessage& LogMessage::operator<<(const StringPiece& value) {
+  message_ += value.ToString();
+  return *this;
+}
+
+LogMessage& LogMessage::operator<<(const util::Status& status) {
+  message_ += status.ToString();
+  return *this;
+}
+
+LogMessage& LogMessage::operator<<(const uint128& value) {
+  std::ostringstream str;
+  str << value;
+  message_ += str.str();
   return *this;
 }
 
@@ -167,10 +230,13 @@ LogMessage& LogMessage::operator<<(const char* value) {
 
 DECLARE_STREAM_OPERATOR(char         , "%c" )
 DECLARE_STREAM_OPERATOR(int          , "%d" )
-DECLARE_STREAM_OPERATOR(uint         , "%u" )
+DECLARE_STREAM_OPERATOR(unsigned int , "%u" )
 DECLARE_STREAM_OPERATOR(long         , "%ld")
 DECLARE_STREAM_OPERATOR(unsigned long, "%lu")
 DECLARE_STREAM_OPERATOR(double       , "%g" )
+DECLARE_STREAM_OPERATOR(void*        , "%p" )
+DECLARE_STREAM_OPERATOR(long long         , "%" PROTOBUF_LL_FORMAT "d")
+DECLARE_STREAM_OPERATOR(unsigned long long, "%" PROTOBUF_LL_FORMAT "u")
 #undef DECLARE_STREAM_OPERATOR
 
 LogMessage::LogMessage(LogLevel level, const char* filename, int line)
@@ -181,8 +247,6 @@ void LogMessage::Finish() {
   bool suppress = false;
 
   if (level_ != LOGLEVEL_FATAL) {
-    InitLogSilencerCountOnce();
-    MutexLock lock(log_silencer_count_mutex_);
     suppress = log_silencer_count_ > 0;
   }
 
@@ -208,9 +272,9 @@ void LogFinisher::operator=(LogMessage& other) {
 LogHandler* SetLogHandler(LogHandler* new_func) {
   LogHandler* old = internal::log_handler_;
   if (old == &internal::NullLogHandler) {
-    old = NULL;
+    old = nullptr;
   }
-  if (new_func == NULL) {
+  if (new_func == nullptr) {
     internal::log_handler_ = &internal::NullLogHandler;
   } else {
     internal::log_handler_ = new_func;
@@ -219,14 +283,10 @@ LogHandler* SetLogHandler(LogHandler* new_func) {
 }
 
 LogSilencer::LogSilencer() {
-  internal::InitLogSilencerCountOnce();
-  MutexLock lock(internal::log_silencer_count_mutex_);
   ++internal::log_silencer_count_;
 };
 
 LogSilencer::~LogSilencer() {
-  internal::InitLogSilencerCountOnce();
-  MutexLock lock(internal::log_silencer_count_mutex_);
   --internal::log_silencer_count_;
 };
 
@@ -240,91 +300,11 @@ namespace internal { FunctionClosure0::~FunctionClosure0() {} }
 void DoNothing() {}
 
 // ===================================================================
-// emulates google3/base/mutex.cc
-
-#ifdef _WIN32
-
-struct Mutex::Internal {
-  CRITICAL_SECTION mutex;
-#ifndef NDEBUG
-  // Used only to implement AssertHeld().
-  DWORD thread_id;
-#endif
-};
-
-Mutex::Mutex()
-  : mInternal(new Internal) {
-  InitializeCriticalSection(&mInternal->mutex);
-}
-
-Mutex::~Mutex() {
-  DeleteCriticalSection(&mInternal->mutex);
-  delete mInternal;
-}
-
-void Mutex::Lock() {
-  EnterCriticalSection(&mInternal->mutex);
-#ifndef NDEBUG
-  mInternal->thread_id = GetCurrentThreadId();
-#endif
-}
-
-void Mutex::Unlock() {
-#ifndef NDEBUG
-  mInternal->thread_id = 0;
-#endif
-  LeaveCriticalSection(&mInternal->mutex);
-}
-
-void Mutex::AssertHeld() {
-#ifndef NDEBUG
-  GOOGLE_DCHECK_EQ(mInternal->thread_id, GetCurrentThreadId());
-#endif
-}
-
-#elif defined(HAVE_PTHREAD)
-
-struct Mutex::Internal {
-  pthread_mutex_t mutex;
-};
-
-Mutex::Mutex()
-  : mInternal(new Internal) {
-  pthread_mutex_init(&mInternal->mutex, NULL);
-}
-
-Mutex::~Mutex() {
-  pthread_mutex_destroy(&mInternal->mutex);
-  delete mInternal;
-}
-
-void Mutex::Lock() {
-  int result = pthread_mutex_lock(&mInternal->mutex);
-  if (result != 0) {
-    GOOGLE_LOG(FATAL) << "pthread_mutex_lock: " << strerror(result);
-  }
-}
-
-void Mutex::Unlock() {
-  int result = pthread_mutex_unlock(&mInternal->mutex);
-  if (result != 0) {
-    GOOGLE_LOG(FATAL) << "pthread_mutex_unlock: " << strerror(result);
-  }
-}
-
-void Mutex::AssertHeld() {
-  // pthreads dosn't provide a way to check which thread holds the mutex.
-  // TODO(kenton):  Maybe keep track of locking thread ID like with WIN32?
-}
-
-#endif
-
-// ===================================================================
 // emulates google3/util/endian/endian.h
 //
 // TODO(xiaofeng): PROTOBUF_LITTLE_ENDIAN is unfortunately defined in
 // google/protobuf/io/coded_stream.h and therefore can not be used here.
-// Maybe move that macro definition here in the furture.
+// Maybe move that macro definition here in the future.
 uint32 ghtonl(uint32 x) {
   union {
     uint32 result;
@@ -335,52 +315,6 @@ uint32 ghtonl(uint32 x) {
   result_array[2] = static_cast<uint8>((x >> 8) & 0xFF);
   result_array[3] = static_cast<uint8>(x & 0xFF);
   return result;
-}
-
-// ===================================================================
-// Shutdown support.
-
-namespace internal {
-
-typedef void OnShutdownFunc();
-vector<void (*)()>* shutdown_functions = NULL;
-Mutex* shutdown_functions_mutex = NULL;
-GOOGLE_PROTOBUF_DECLARE_ONCE(shutdown_functions_init);
-
-void InitShutdownFunctions() {
-  shutdown_functions = new vector<void (*)()>;
-  shutdown_functions_mutex = new Mutex;
-}
-
-inline void InitShutdownFunctionsOnce() {
-  GoogleOnceInit(&shutdown_functions_init, &InitShutdownFunctions);
-}
-
-void OnShutdown(void (*func)()) {
-  InitShutdownFunctionsOnce();
-  MutexLock lock(shutdown_functions_mutex);
-  shutdown_functions->push_back(func);
-}
-
-}  // namespace internal
-
-void ShutdownProtobufLibrary() {
-  internal::InitShutdownFunctionsOnce();
-
-  // We don't need to lock shutdown_functions_mutex because it's up to the
-  // caller to make sure that no one is using the library before this is
-  // called.
-
-  // Make it safe to call this multiple times.
-  if (internal::shutdown_functions == NULL) return;
-
-  for (int i = 0; i < internal::shutdown_functions->size(); i++) {
-    internal::shutdown_functions->at(i)();
-  }
-  delete internal::shutdown_functions;
-  internal::shutdown_functions = NULL;
-  delete internal::shutdown_functions_mutex;
-  internal::shutdown_functions_mutex = NULL;
 }
 
 #if PROTOBUF_USE_EXCEPTIONS

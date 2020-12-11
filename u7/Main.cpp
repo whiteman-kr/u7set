@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "MainWindow.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
@@ -53,7 +54,8 @@ int reportingHook(int, char* userMessage, int*)
 		}
 		else
 		{
-			ignoreMessage = true;
+			//ignoreMessage = true;
+			ignoreMessage = false;
 		}
 
 		// something from our own code?
@@ -94,10 +96,13 @@ int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	//_CrtSetBreakAlloc(171593);
 	// To see all memory leaks, not only in the own code, comment the next line
-	prevHook = _CrtSetReportHook(reportingHook);
+	//prevHook = _CrtSetReportHook(reportingHook);
 #endif
 
+	int result = 0 ;
+{
 	QApplication a(argc, argv);
 
 	// --
@@ -112,7 +117,7 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
 #endif
 
-	VFrame30::VFrame30Library::init();
+	VFrame30::init();
 	Hardware::init();
 	DbController::init();
 	Builder::init();
@@ -155,7 +160,12 @@ int main(int argc, char *argv[])
 
 	dbController.enableProgress();
 
-	int result = a.exec();
+	result = a.exec();
+
+	int* leaktest = new int[1000];
+//	int buf[44];
+//	int* leaktest = new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )(buf) int[4];
+//	leaktest = nullptr;
 
 	delete w;	// Delete main windows before shutown procedures
 
@@ -163,10 +173,12 @@ int main(int argc, char *argv[])
 	//
 	Builder::shutdown();
 	DbController::shutdown();
-	VFrame30::VFrame30Library::shutdown();
+	VFrame30::shutdown();
 	Hardware::shutdown();
 
 	google::protobuf::ShutdownProtobufLibrary();
+}
+	//_CrtDumpMemoryLeaks();
 
 	// Exit
 	//

@@ -613,7 +613,7 @@ namespace Tcp
 
 	bool Server::sendReply(google::protobuf::Message& protobufMessage)
 	{
-		int messageSize = protobufMessage.ByteSize();
+		int messageSize = static_cast<int>(protobufMessage.ByteSizeLong());
 
 		if (messageSize > TCP_MAX_DATA_SIZE)
 		{
@@ -1314,7 +1314,7 @@ namespace Tcp
 
 	bool Client::sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage)
 	{
-		int messageSize = protobufMessage.ByteSize();
+		int messageSize = static_cast<int>(protobufMessage.ByteSizeLong());
 
 		if (messageSize > TCP_MAX_DATA_SIZE)
 		{

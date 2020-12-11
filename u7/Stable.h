@@ -1,5 +1,21 @@
 #pragma once
 
+// For detecting memory leaks
+//
+#if defined (Q_OS_WIN) && defined (Q_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <cstdlib>
+#include <crtdbg.h>
+#ifdef _DEBUG
+	#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+	//#define DBG_NEW new
+	// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+	// allocations to be of _CLIENT_BLOCK type
+#else
+	 #define new DBG_NEW
+#endif
+#endif
+
 // C includes, must be before c++ includes
 //
 #include <assert.h>
@@ -76,14 +92,4 @@
 #endif
 
 
-// For detecting memory leaks
-//
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-   #ifndef DBG_NEW
-	  #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-	  #define new DBG_NEW
-   #endif
-#endif
 

@@ -799,9 +799,7 @@ bool SignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
 		specPropValue.save(protoValue);
 	}
 
-	int size = protoValues.ByteSize();
-
-	protoData->resize(size);
+	protoData->resize(static_cast<int>(protoValues.ByteSizeLong()));
 
 	protoValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(protoData->data()));
 

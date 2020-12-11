@@ -526,9 +526,9 @@ void DialogBusEditor::onCopy()
 	}
 
 	QByteArray data;
-	data.resize(envelopeSet.ByteSize());
+	data.resize(static_cast<int>(envelopeSet.ByteSizeLong()));
 
-	bool result = envelopeSet.SerializeToArray(data.data(), envelopeSet.ByteSize());
+	bool result = envelopeSet.SerializeToArray(data.data(), static_cast<int>(envelopeSet.ByteSizeLong()));
 	if (result == false)
 	{
 		Q_ASSERT(result);
@@ -930,7 +930,7 @@ void DialogBusEditor::onSignalEdit()
 
 	QList<std::shared_ptr<PropertyObject>> editSignalsPointers;
 
-	std::vector<int> editIndexes;
+	std::vector<size_t> editIndexes;
 
 	for (QTreeWidgetItem* item : selectedItems)
 	{
@@ -962,15 +962,15 @@ void DialogBusEditor::onSignalEdit()
 	{
 		// Save data back to bus
 		//
-		if (editIndexes.size() != editSignalsPointers.size())
+		if (static_cast<int>(editIndexes.size()) != editSignalsPointers.size())
 		{
 			assert(false);
 			return;
 		}
 
-		for (int i = 0; i < editIndexes.size(); i++)
+		for (size_t i = 0; i < editIndexes.size(); i++)
 		{
-			int editIndex = editIndexes[i];
+			size_t editIndex = editIndexes[i];
 
 			VFrame30::BusSignal* editSignal = (dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[i].get()));
 			if (editSignal == nullptr)
@@ -984,7 +984,7 @@ void DialogBusEditor::onSignalEdit()
 
 			bool duplicateSignalIds = false;
 
-			for (int j = 0; j < busSignals.size(); j++)
+			for (size_t j = 0; j < busSignals.size(); j++)
 			{
 				if (editIndex != j && busSignals[j].signalId() == editSignal->signalId())
 				{

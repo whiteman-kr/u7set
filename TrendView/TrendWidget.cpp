@@ -136,7 +136,7 @@ namespace TrendLib
 		// Compress data and save to file
 		//
 		std::string serializedString;
-		serializedString.reserve(message.ByteSize());
+		serializedString.reserve(message.ByteSizeLong());
 
 		ok = message.SerializeToString(&serializedString);
 		if (ok == false)
@@ -753,7 +753,7 @@ namespace TrendLib
 	{
 		// While midButton is pressed, this is move mode, don't change zoom
 		//
-		if (event->buttons().testFlag(Qt::MidButton))
+		if (event->buttons().testFlag(Qt::MiddleButton))
 		{
 			return;
 		}

@@ -75,6 +75,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../Proto/serialization.pb.cc \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
@@ -139,6 +140,7 @@ SOURCES += \
 	../lib/SignalProperties.cpp
 
 HEADERS += \
+    ../Proto/serialization.pb.h \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \

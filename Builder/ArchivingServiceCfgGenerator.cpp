@@ -75,7 +75,7 @@ namespace Builder
 			}
 		}
 
-		int size = msg.ByteSize();
+		int size = static_cast<int>(msg.ByteSizeLong());
 
 		char* ptr = new char[size];
 

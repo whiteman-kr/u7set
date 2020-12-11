@@ -578,9 +578,7 @@ void Signal::saveProtoData(QByteArray* protoDataArray) const
 
 	saveProtoData(&protoData);
 
-	int size = protoData.ByteSize();
-
-	protoDataArray->resize(size);
+	protoDataArray->resize(static_cast<int>(protoData.ByteSizeLong()));
 
 	protoData.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(protoDataArray->data()));
 }

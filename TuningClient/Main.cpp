@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
 	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
 #endif
 
-	VFrame30::VFrame30Library::init();
+	VFrame30::init();
 
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
 	delete theSharedMemorySingleApp;
 	theSharedMemorySingleApp = nullptr;
 
-	VFrame30::VFrame30Library::shutdown();
+	VFrame30::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 #if defined (Q_OS_WIN)

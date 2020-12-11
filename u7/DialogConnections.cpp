@@ -720,9 +720,9 @@ void DialogConnections::onCopy()
 	}
 
 	QByteArray data;
-	data.resize(envelopeSet.ByteSize());
+	data.resize(static_cast<int>(envelopeSet.ByteSizeLong()));
 
-	bool result = envelopeSet.SerializeToArray(data.data(), envelopeSet.ByteSize());
+	bool result = envelopeSet.SerializeToArray(data.data(), static_cast<int>(envelopeSet.ByteSizeLong()));
 	if (result == false)
 	{
 		Q_ASSERT(result);

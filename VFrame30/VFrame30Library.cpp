@@ -32,12 +32,7 @@
 
 namespace VFrame30
 {
-	VFrame30Library::VFrame30Library()
-	{
-		qDebug() << Q_FUNC_INFO;
-	}
-
-	bool VFrame30Library::init()
+	bool init()
 	{
 		qDebug() << Q_FUNC_INFO;
 
@@ -90,13 +85,15 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VFrame30Library::shutdown()
+	bool shutdown()
 	{
+		int* leaktest = new int[2000];
+
 		qDebug() << Q_FUNC_INFO;
 
 		SchemaItem::PrintRefCounter("SchemaItem");
 
-		google::protobuf::ShutdownProtobufLibrary();
+		//google::protobuf::ShutdownProtobufLibrary();
 		return true;
 	}
 }

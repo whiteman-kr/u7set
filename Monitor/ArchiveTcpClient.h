@@ -103,7 +103,7 @@ private:
 	ArchiveRequest m_requestData;
 	bool m_needCancelRequest = false;
 
-	QTime m_startRequestTime;
+	QElapsedTimer m_startRequestTime;
 
 	// Protobufer messages
 	//

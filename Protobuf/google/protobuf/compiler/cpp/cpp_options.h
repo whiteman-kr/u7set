@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,24 +35,45 @@
 
 #include <string>
 
-#include <google/protobuf/stubs/common.h>
 namespace google {
 namespace protobuf {
 namespace compiler {
+class AccessInfoMap;
+
 namespace cpp {
 
-// Generator options:
+enum class EnforceOptimizeMode {
+  kNoEnforcement,  // Use the runtime specified by the file specific options.
+  kSpeed,          // Full runtime with a generated code implementation.
+  kCodeSize,       // Full runtime with a reflective implementation.
+  kLiteRuntime,
+};
+
+// Generator options (see generator.cc for a description of each):
 struct Options {
-  Options() : safe_boundary_check(false) {
-  }
-  string dllexport_decl;
-  bool safe_boundary_check;
+  std::string dllexport_decl;
+  bool safe_boundary_check = false;
+  bool proto_h = false;
+  bool transitive_pb_h = true;
+  bool annotate_headers = false;
+  EnforceOptimizeMode enforce_mode = EnforceOptimizeMode::kNoEnforcement;
+  bool table_driven_parsing = false;
+  bool table_driven_serialization = false;
+  bool lite_implicit_weak_fields = false;
+  bool bootstrap = false;
+  bool opensource_runtime = false;
+  bool annotate_accessor = false;
+  bool unused_field_stripping = false;
+  std::string runtime_include_base;
+  int num_cc_files = 0;
+  std::string annotation_pragma_name;
+  std::string annotation_guard_name;
+  const AccessInfoMap* access_info_map = nullptr;
 };
 
 }  // namespace cpp
 }  // namespace compiler
 }  // namespace protobuf
-
-
 }  // namespace google
+
 #endif  // GOOGLE_PROTOBUF_COMPILER_CPP_OPTIONS_H__

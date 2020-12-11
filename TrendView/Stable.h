@@ -1,5 +1,4 @@
-#ifndef STABLE_H
-#define STABLE_H
+#pragma once
 
 // Add C includes here
 //
@@ -49,4 +48,3 @@
 //#include "thirdparty/include/libmain.h"
 #include "../lib/TimeStamp.h"
 
-#endif // STABLE_H

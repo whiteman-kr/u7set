@@ -133,7 +133,7 @@ bool UdpRequest::writeData(const QByteArray& data)
 
 bool UdpRequest::writeData(google::protobuf::Message& protobufMessage)
 {
-	int messageSize = protobufMessage.ByteSize();
+	int messageSize = static_cast<int>(protobufMessage.ByteSizeLong());
 
 	if (m_rawDataSize + messageSize > MAX_DATAGRAM_SIZE)
 	{

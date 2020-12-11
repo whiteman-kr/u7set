@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	VFrame30::VFrame30Library::init();
+	VFrame30::init();
 	//Hardware::Init();
 
 	SoftwareInfo si;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	// Shutting down
 	//
 
-	VFrame30::VFrame30Library::shutdown();
+	VFrame30::shutdown();
 	//Hardware::Shutdwon();
 	google::protobuf::ShutdownProtobufLibrary();
 

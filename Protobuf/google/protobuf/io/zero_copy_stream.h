@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -107,11 +107,14 @@
 #ifndef GOOGLE_PROTOBUF_IO_ZERO_COPY_STREAM_H__
 #define GOOGLE_PROTOBUF_IO_ZERO_COPY_STREAM_H__
 
+
 #include <string>
+
 #include <google/protobuf/stubs/common.h>
+#include <google/protobuf/port_def.inc>
+
 
 namespace google {
-
 namespace protobuf {
 namespace io {
 
@@ -121,10 +124,10 @@ class ZeroCopyOutputStream;
 
 // Abstract interface similar to an input stream but designed to minimize
 // copying.
-class LIBPROTOBUF_EXPORT ZeroCopyInputStream {
+class PROTOBUF_EXPORT ZeroCopyInputStream {
  public:
-  inline ZeroCopyInputStream() {}
-  virtual ~ZeroCopyInputStream();
+  ZeroCopyInputStream() {}
+  virtual ~ZeroCopyInputStream() {}
 
   // Obtains a chunk of data from the stream.
   //
@@ -169,7 +172,7 @@ class LIBPROTOBUF_EXPORT ZeroCopyInputStream {
   virtual bool Skip(int count) = 0;
 
   // Returns the total number of bytes read since this object was created.
-  virtual int64 ByteCount() const = 0;
+  virtual int64_t ByteCount() const = 0;
 
 
  private:
@@ -178,10 +181,10 @@ class LIBPROTOBUF_EXPORT ZeroCopyInputStream {
 
 // Abstract interface similar to an output stream but designed to minimize
 // copying.
-class LIBPROTOBUF_EXPORT ZeroCopyOutputStream {
+class PROTOBUF_EXPORT ZeroCopyOutputStream {
  public:
-  inline ZeroCopyOutputStream() {}
-  virtual ~ZeroCopyOutputStream();
+  ZeroCopyOutputStream() {}
+  virtual ~ZeroCopyOutputStream() {}
 
   // Obtains a buffer into which data can be written.  Any data written
   // into this buffer will eventually (maybe instantly, maybe later on)
@@ -224,7 +227,17 @@ class LIBPROTOBUF_EXPORT ZeroCopyOutputStream {
   virtual void BackUp(int count) = 0;
 
   // Returns the total number of bytes written since this object was created.
-  virtual int64 ByteCount() const = 0;
+  virtual int64_t ByteCount() const = 0;
+
+  // Write a given chunk of data to the output.  Some output streams may
+  // implement this in a way that avoids copying. Check AllowsAliasing() before
+  // calling WriteAliasedRaw(). It will GOOGLE_CHECK fail if WriteAliasedRaw() is
+  // called on a stream that does not allow aliasing.
+  //
+  // NOTE: It is caller's responsibility to ensure that the chunk of memory
+  // remains live until all of the data has been consumed from the stream.
+  virtual bool WriteAliasedRaw(const void* data, int size);
+  virtual bool AllowsAliasing() const { return false; }
 
 
  private:
@@ -233,6 +246,8 @@ class LIBPROTOBUF_EXPORT ZeroCopyOutputStream {
 
 }  // namespace io
 }  // namespace protobuf
-
 }  // namespace google
+
+#include <google/protobuf/port_undef.inc>
+
 #endif  // GOOGLE_PROTOBUF_IO_ZERO_COPY_STREAM_H__

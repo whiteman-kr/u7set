@@ -2,27 +2,12 @@
 
 #include <fstream>
 #include <memory>
-
 #include <QtCore/QUuid>
 #include <QVariant>
 
 #include "PropertyObject.h"
-
-#ifdef Q_OS_WIN
-#pragma warning (push)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4125)
-#pragma warning(disable : 6011)
-#pragma warning(disable : 4267)
-#pragma warning(disable : 4512)
-#pragma warning(disable : 4127)
-#pragma warning(disable : 4996)
-#endif // Q_OS_WIN
-
 #include "../Proto/serialization.pb.h"
-#ifdef Q_OS_WIN
-#pragma warning (pop)
-#endif // Q_OS_WIN
+
 
 
 namespace Proto

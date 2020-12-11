@@ -776,7 +776,7 @@ void ArchiveView::copySelection()
 		return;
 	}
 
-	qSort(selectedIndexes);
+	std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
 	QString str;
 	str.reserve(4096);
@@ -789,7 +789,7 @@ void ArchiveView::copySelection()
 	{
 		if (lastRow != index.row())
 		{
-			out << endl;
+			out << Qt::endl;
 		}
 
 		cellText = archiveModel->data(index, Qt::DisplayRole).toString();
