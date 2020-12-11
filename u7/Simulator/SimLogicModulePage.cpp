@@ -47,6 +47,13 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 	m_armingKeyButton.setFont(font);
 	m_tuningKeyButton.setFont(font);
 
+	m_sorResetSwitchButton.setFont(font);
+	m_sorIsSetLabel.setFont(font);
+
+	m_sorSetSwitch1Button.setFont(font);
+	m_sorSetSwitch2Button.setFont(font);
+	m_sorSetSwitch3Button.setFont(font);
+
 	m_equipmentIdValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	m_subsystemIdValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	m_channelValue.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
@@ -59,11 +66,19 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 	m_armingKeyButton.setCheckable(true);
 	m_tuningKeyButton.setCheckable(true);
 
+	m_sorResetSwitchButton.setCheckable(false);
+	m_sorSetSwitch1Button.setCheckable(true);
+	m_sorSetSwitch2Button.setCheckable(true);
+	m_sorSetSwitch3Button.setCheckable(true);
+
 	m_stateLine.setFrameShape(QFrame::HLine);
 	m_stateLine.setFrameShadow(QFrame::Sunken);
 
 	m_tuningLine.setFrameShape(QFrame::HLine);
 	m_tuningLine.setFrameShadow(QFrame::Sunken);
+
+	m_sorLine.setFrameShape(QFrame::HLine);
+	m_sorLine.setFrameShadow(QFrame::Sunken);
 
 	QStringList schemaListHeader;
 	schemaListHeader << tr("SchemaID");
@@ -124,6 +139,18 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 		layout->addWidget(&m_runtimeModeValue, row, 1, 1, 2);
 		row ++;
 
+		layout->addWidget(&m_sorLine, row, 0, 1, 3);
+		row ++;
+
+		layout->addWidget(&m_sorResetSwitchButton, row, 0, 1, 1);
+		layout->addWidget(&m_sorIsSetLabel, row, 1, 1, 2);
+		row ++;
+
+		layout->addWidget(&m_sorSetSwitch1Button, row, 0, 1, 1);
+		layout->addWidget(&m_sorSetSwitch2Button, row, 1, 1, 1);
+		layout->addWidget(&m_sorSetSwitch3Button, row, 2, 1, 1);
+		row ++;
+
 		layout->addWidget(&m_tuningLine, row, 0, 1, 3);
 		row ++;
 
@@ -138,6 +165,7 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 		layout->addWidget(&m_tuningKeyButton, row, 0, 1, 1);
 		layout->addWidget(&m_tuningKeyStateLabel, row, 1, 1, 1);
 		row ++;
+
 
 		// Add horizontal spacer to column 3 (0-based index)
 		//
@@ -191,6 +219,11 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 	connect(&m_disableButton, &QPushButton::toggled, this, &SimLogicModulePage::powerOff);
 	connect(&m_armingKeyButton, &QPushButton::toggled, this, &SimLogicModulePage::armingKeyToggled);
 	connect(&m_tuningKeyButton, &QPushButton::toggled, this, &SimLogicModulePage::tuningKeyToggled);
+
+	connect(&m_sorResetSwitchButton, &QPushButton::pressed, this, &SimLogicModulePage::sorResetSwitchPressed);
+	connect(&m_sorSetSwitch1Button, &QPushButton::toggled, this, &SimLogicModulePage::sorSwitch1Toggled);
+	connect(&m_sorSetSwitch2Button, &QPushButton::toggled, this, &SimLogicModulePage::sorSwitch2Toggled);
+	connect(&m_sorSetSwitch3Button, &QPushButton::toggled, this, &SimLogicModulePage::sorSwitch3Toggled);
 
 	connect(m_signalsButton, &QPushButton::clicked, this, &SimLogicModulePage::signalsButtonClicked);
 	connect(m_codeButton, &QPushButton::clicked, this, &SimLogicModulePage::codeButtonClicked);
@@ -338,6 +371,51 @@ void SimLogicModulePage::tuningKeyToggled(bool value)
 		lm != nullptr && lm->tuningKey() != value)
 	{
 		lm->setTuningKey(value);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::sorResetSwitchPressed()
+{
+	if (auto lm = logicModule();
+		lm != nullptr)
+	{
+		bool state = lm->testSorResetSwitch(true);
+		Q_UNUSED(state);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::sorSwitch1Toggled(bool value)
+{
+	if (auto lm = logicModule();
+		lm != nullptr && lm->sorSetSwitch1() != value)
+	{
+		lm->setSorSetSwitch1(value);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::sorSwitch2Toggled(bool value)
+{
+	if (auto lm = logicModule();
+		lm != nullptr && lm->sorSetSwitch2() != value)
+	{
+		lm->setSorSetSwitch2(value);
+	}
+
+	return;
+}
+
+void SimLogicModulePage::sorSwitch3Toggled(bool value)
+{
+	if (auto lm = logicModule();
+		lm != nullptr && lm->sorSetSwitch3() != value)
+	{
+		lm->setSorSetSwitch3(value);
 	}
 
 	return;
@@ -579,6 +657,11 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 	bool armingKey = false;
 	bool tuningKey = false;
 
+	bool sorIsSet = false;
+	bool sorSwitch1 = false;
+	bool sorSwitch2 = false;
+	bool sorSwitch3 = false;
+
 	if (std::shared_ptr<Sim::LogicModule> lm = logicModule();
 		lm != nullptr)
 	{
@@ -588,6 +671,11 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 		tuningMode = (runtimeMode == Sim::RuntimeMode::TuningMode);
 		armingKey = lm->armingKey();
 		tuningKey = lm->tuningKey();
+
+		sorIsSet = lm->sorIsSet();
+		sorSwitch1 = lm->sorSetSwitch1();
+		sorSwitch2 = lm->sorSetSwitch2();
+		sorSwitch3 = lm->sorSetSwitch3();
 	}
 
 	if (m_disableButton.isChecked() != disabled)
@@ -640,6 +728,25 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 	m_tuningModeValue.setText(tuningMode ? QStringLiteral("{1}") : QStringLiteral("{0}"));
 	m_armingKeyStateLabel.setText(armingKey ? QStringLiteral("{1}") : QStringLiteral("{0}"));
 	m_tuningKeyStateLabel.setText(tuningKey ? QStringLiteral("{1}") : QStringLiteral("{0}"));
+
+	// Update SOR Switches
+	//
+	if (m_sorSetSwitch1Button.isChecked() != sorSwitch1)
+	{
+		m_sorSetSwitch1Button.setChecked(sorSwitch1);
+	}
+
+	if (m_sorSetSwitch2Button.isChecked() != sorSwitch2)
+	{
+		m_sorSetSwitch2Button.setChecked(sorSwitch2);
+	}
+
+	if (m_sorSetSwitch3Button.isChecked() != sorSwitch3)
+	{
+		m_sorSetSwitch3Button.setChecked(sorSwitch3);
+	}
+
+	m_sorIsSetLabel.setText(tr("SOR is Set: {%1}").arg(sorIsSet ? 1 : 0));
 
 	// State
 	//

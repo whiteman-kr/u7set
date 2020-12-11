@@ -86,6 +86,19 @@ namespace Sim
 		[[nodiscard]] bool tuningKey() const;
 		void setTuningKey(bool value);
 
+		[[nodiscard]] bool sorIsSet() const;
+
+		[[nodiscard]] bool sorSetSwitch1() const;
+		void setSorSetSwitch1(bool value);
+
+		[[nodiscard]] bool sorSetSwitch2() const;
+		void setSorSetSwitch2(bool value);
+
+		[[nodiscard]] bool sorSetSwitch3() const;
+		void setSorSetSwitch3(bool value);
+
+		[[nodiscard]] bool testSorResetSwitch(bool newValue);
+
 	private:
 		Simulator* m_simulator = nullptr;
 		mutable ScopedLog m_log;

@@ -167,13 +167,73 @@ namespace Sim
 					return false;
 				}
 			}
-
-			if (m_device->testTuningApplyCommand(false) == true)
-			{
-				m_device->tuningApplyCommand();
-			}
 		}
 
+		// Set SOR external switches
+		//
+		{
+			// Signal 'Set SOR Chassis' $(PARENT)_SETSORCHASSIS
+			// Writtien by ApplicationLogic
+			//
+			const quint32 setSorChassisOffset =  57782 + 1;
+			const quint16 setSorChassisBit = 0;
+			bool setSorChassisState = m_device->readRamBit(setSorChassisOffset, setSorChassisBit, E::LogicModuleRamAccess::Write);
+
+			// Platform signals:
+			//		'SOR is set' - bit 6
+			//		'Sor Switch 1, 2, 3' - bits 3, 4, 5
+			//		'SOR Reset' - bit 7
+			//
+			const quint32 setSorSwitchOffset = 57526 + 143;		// <TxDiagDataOffset>57526</TxDiagDataOffset>
+			const quint16 setSorSwitchBit = 3;					// 3, 4, 5
+			const quint16 sorIsSetBit = 6;						// Platform signal 'SOR is set'
+			const quint16 resetSorSwitchBit = 7;				// Platform signal 'Reset SOR'
+
+			bool sorSwitch1 = m_device->sorSetSwitch1();
+			bool sorSwitch2 = m_device->sorSetSwitch2();
+			bool sorSwitch3 = m_device->sorSetSwitch3();
+			bool resetSorSwitch = m_device->testSorResetSwitch(false);
+
+			int sorSwitchCount = static_cast<int>(sorSwitch1) +
+								 static_cast<int>(sorSwitch2) +
+								 static_cast<int>(sorSwitch3);
+
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 0, sorSwitch1, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 1, sorSwitch2, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 2, sorSwitch3, E::LogicModuleRamAccess::Read);
+
+			m_device->writeRamBit(setSorSwitchOffset, resetSorSwitchBit, resetSorSwitch, E::LogicModuleRamAccess::Read);
+
+			if (resetSorSwitch == true)
+			{
+				// Reset 'Sor is set'
+				//
+				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 0, E::LogicModuleRamAccess::Read);
+
+				if (m_device->runtimeMode() != RuntimeMode::TuningMode)
+				{
+					m_device->setRuntimeMode(RuntimeMode::RunMode);
+				}
+			}
+
+			if ((sorSwitchCount >= 2) | (setSorChassisState && m_device->runtimeMode() != RuntimeMode::TuningMode))		// Durinmg TuningMode Set SOR Chassis does not have influence on SOR is Set
+			{
+				// Set 'SOR is set'
+				//
+				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 1, E::LogicModuleRamAccess::Read);
+
+				if (m_device->runtimeMode() != RuntimeMode::TuningMode)
+				{
+					m_device->setRuntimeMode(RuntimeMode::RunSafeMode);
+				}
+			}
+
+			quint16 sorIsSet = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit,  E::LogicModuleRamAccess::Read);
+			m_device->setSorIsSet(sorIsSet);
+		}
+
+		// --
+		//
 		bool ok = setRuntimeModeSignals();
 
 		return ok;
