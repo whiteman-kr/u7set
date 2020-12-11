@@ -315,7 +315,7 @@ public:
 		Ohm_Ni_a_617 = 32,
 		Ohm_Raw = 33,
 
-		uA_m10_p10 = 34,
+		uA_m20_p20 = 34,
 	};
 	Q_ENUM(SensorType)
 
