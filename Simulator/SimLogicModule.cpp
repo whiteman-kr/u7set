@@ -315,7 +315,7 @@ namespace Sim
 
 	bool LogicModule::testSorResetSwitch(bool newValue)
 	{
-		return m_device.testSorResetSwitch(true);
+		return m_device.testSorResetSwitch(newValue);
 	}
 
 }

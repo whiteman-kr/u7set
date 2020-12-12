@@ -3888,6 +3888,13 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline bool wordwrap() const;
   inline void set_wordwrap(bool value);
 
+  // optional int32 lineStyle = 12 [default = 1];
+  inline bool has_linestyle() const;
+  inline void clear_linestyle();
+  static const int kLineStyleFieldNumber = 12;
+  inline ::google::protobuf::int32 linestyle() const;
+  inline void set_linestyle(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemRect)
  private:
   inline void set_has_weight();
@@ -3912,6 +3919,8 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline void clear_has_vertalign();
   inline void set_has_wordwrap();
   inline void clear_has_wordwrap();
+  inline void set_has_linestyle();
+  inline void clear_has_linestyle();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3926,9 +3935,10 @@ class SchemaItemRect : public ::google::protobuf::Message {
   bool wordwrap_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
+  ::google::protobuf::int32 linestyle_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4007,20 +4017,70 @@ class SchemaItemLine : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 linecolor() const;
   inline void set_linecolor(::google::protobuf::uint32 value);
 
+  // optional int32 lineStyle = 3 [default = 1];
+  inline bool has_linestyle() const;
+  inline void clear_linestyle();
+  static const int kLineStyleFieldNumber = 3;
+  inline ::google::protobuf::int32 linestyle() const;
+  inline void set_linestyle(::google::protobuf::int32 value);
+
+  // optional int32 lineStyleCap = 7 [default = 16];
+  inline bool has_linestylecap() const;
+  inline void clear_linestylecap();
+  static const int kLineStyleCapFieldNumber = 7;
+  inline ::google::protobuf::int32 linestylecap() const;
+  inline void set_linestylecap(::google::protobuf::int32 value);
+
+  // optional int32 lineCapStart = 4 [default = 0];
+  inline bool has_linecapstart() const;
+  inline void clear_linecapstart();
+  static const int kLineCapStartFieldNumber = 4;
+  inline ::google::protobuf::int32 linecapstart() const;
+  inline void set_linecapstart(::google::protobuf::int32 value);
+
+  // optional int32 lineCapEnd = 5 [default = 0];
+  inline bool has_linecapend() const;
+  inline void clear_linecapend();
+  static const int kLineCapEndFieldNumber = 5;
+  inline ::google::protobuf::int32 linecapend() const;
+  inline void set_linecapend(::google::protobuf::int32 value);
+
+  // optional double lineCapFactor = 6 [default = 2];
+  inline bool has_linecapfactor() const;
+  inline void clear_linecapfactor();
+  static const int kLineCapFactorFieldNumber = 6;
+  inline double linecapfactor() const;
+  inline void set_linecapfactor(double value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemLine)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
   inline void set_has_linecolor();
   inline void clear_has_linecolor();
+  inline void set_has_linestyle();
+  inline void clear_has_linestyle();
+  inline void set_has_linestylecap();
+  inline void clear_has_linestylecap();
+  inline void set_has_linecapstart();
+  inline void clear_has_linecapstart();
+  inline void set_has_linecapend();
+  inline void clear_has_linecapend();
+  inline void set_has_linecapfactor();
+  inline void clear_has_linecapfactor();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   double weight_;
   ::google::protobuf::uint32 linecolor_;
+  ::google::protobuf::int32 linestyle_;
+  ::google::protobuf::int32 linestylecap_;
+  ::google::protobuf::int32 linecapstart_;
+  double linecapfactor_;
+  ::google::protobuf::int32 linecapend_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4099,20 +4159,70 @@ class SchemaItemPath : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 linecolor() const;
   inline void set_linecolor(::google::protobuf::uint32 value);
 
+  // optional int32 lineStyle = 3 [default = 1];
+  inline bool has_linestyle() const;
+  inline void clear_linestyle();
+  static const int kLineStyleFieldNumber = 3;
+  inline ::google::protobuf::int32 linestyle() const;
+  inline void set_linestyle(::google::protobuf::int32 value);
+
+  // optional int32 lineStyleCap = 7 [default = 16];
+  inline bool has_linestylecap() const;
+  inline void clear_linestylecap();
+  static const int kLineStyleCapFieldNumber = 7;
+  inline ::google::protobuf::int32 linestylecap() const;
+  inline void set_linestylecap(::google::protobuf::int32 value);
+
+  // optional int32 lineCapStart = 4 [default = 0];
+  inline bool has_linecapstart() const;
+  inline void clear_linecapstart();
+  static const int kLineCapStartFieldNumber = 4;
+  inline ::google::protobuf::int32 linecapstart() const;
+  inline void set_linecapstart(::google::protobuf::int32 value);
+
+  // optional int32 lineCapEnd = 5 [default = 0];
+  inline bool has_linecapend() const;
+  inline void clear_linecapend();
+  static const int kLineCapEndFieldNumber = 5;
+  inline ::google::protobuf::int32 linecapend() const;
+  inline void set_linecapend(::google::protobuf::int32 value);
+
+  // optional double lineCapFactor = 6 [default = 2];
+  inline bool has_linecapfactor() const;
+  inline void clear_linecapfactor();
+  static const int kLineCapFactorFieldNumber = 6;
+  inline double linecapfactor() const;
+  inline void set_linecapfactor(double value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemPath)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
   inline void set_has_linecolor();
   inline void clear_has_linecolor();
+  inline void set_has_linestyle();
+  inline void clear_has_linestyle();
+  inline void set_has_linestylecap();
+  inline void clear_has_linestylecap();
+  inline void set_has_linecapstart();
+  inline void clear_has_linecapstart();
+  inline void set_has_linecapend();
+  inline void clear_has_linecapend();
+  inline void set_has_linecapfactor();
+  inline void clear_has_linecapfactor();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   double weight_;
   ::google::protobuf::uint32 linecolor_;
+  ::google::protobuf::int32 linestyle_;
+  ::google::protobuf::int32 linestylecap_;
+  ::google::protobuf::int32 linecapstart_;
+  double linecapfactor_;
+  ::google::protobuf::int32 linecapend_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5506,20 +5616,30 @@ class FblItemLine : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 linecolor() const;
   inline void set_linecolor(::google::protobuf::uint32 value);
 
+  // optional int32 lineStyle = 3 [default = 1];
+  inline bool has_linestyle() const;
+  inline void clear_linestyle();
+  static const int kLineStyleFieldNumber = 3;
+  inline ::google::protobuf::int32 linestyle() const;
+  inline void set_linestyle(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblItemLine)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
   inline void set_has_linecolor();
   inline void clear_has_linecolor();
+  inline void set_has_linestyle();
+  inline void clear_has_linestyle();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   double weight_;
   ::google::protobuf::uint32 linecolor_;
+  ::google::protobuf::int32 linestyle_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20478,6 +20598,28 @@ inline void SchemaItemRect::set_wordwrap(bool value) {
   wordwrap_ = value;
 }
 
+// optional int32 lineStyle = 12 [default = 1];
+inline bool SchemaItemRect::has_linestyle() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void SchemaItemRect::set_has_linestyle() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void SchemaItemRect::clear_has_linestyle() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void SchemaItemRect::clear_linestyle() {
+  linestyle_ = 1;
+  clear_has_linestyle();
+}
+inline ::google::protobuf::int32 SchemaItemRect::linestyle() const {
+  return linestyle_;
+}
+inline void SchemaItemRect::set_linestyle(::google::protobuf::int32 value) {
+  set_has_linestyle();
+  linestyle_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // SchemaItemLine
@@ -20526,6 +20668,116 @@ inline void SchemaItemLine::set_linecolor(::google::protobuf::uint32 value) {
   linecolor_ = value;
 }
 
+// optional int32 lineStyle = 3 [default = 1];
+inline bool SchemaItemLine::has_linestyle() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemLine::set_has_linestyle() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemLine::clear_has_linestyle() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemLine::clear_linestyle() {
+  linestyle_ = 1;
+  clear_has_linestyle();
+}
+inline ::google::protobuf::int32 SchemaItemLine::linestyle() const {
+  return linestyle_;
+}
+inline void SchemaItemLine::set_linestyle(::google::protobuf::int32 value) {
+  set_has_linestyle();
+  linestyle_ = value;
+}
+
+// optional int32 lineStyleCap = 7 [default = 16];
+inline bool SchemaItemLine::has_linestylecap() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemLine::set_has_linestylecap() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemLine::clear_has_linestylecap() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemLine::clear_linestylecap() {
+  linestylecap_ = 16;
+  clear_has_linestylecap();
+}
+inline ::google::protobuf::int32 SchemaItemLine::linestylecap() const {
+  return linestylecap_;
+}
+inline void SchemaItemLine::set_linestylecap(::google::protobuf::int32 value) {
+  set_has_linestylecap();
+  linestylecap_ = value;
+}
+
+// optional int32 lineCapStart = 4 [default = 0];
+inline bool SchemaItemLine::has_linecapstart() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemLine::set_has_linecapstart() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemLine::clear_has_linecapstart() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemLine::clear_linecapstart() {
+  linecapstart_ = 0;
+  clear_has_linecapstart();
+}
+inline ::google::protobuf::int32 SchemaItemLine::linecapstart() const {
+  return linecapstart_;
+}
+inline void SchemaItemLine::set_linecapstart(::google::protobuf::int32 value) {
+  set_has_linecapstart();
+  linecapstart_ = value;
+}
+
+// optional int32 lineCapEnd = 5 [default = 0];
+inline bool SchemaItemLine::has_linecapend() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemLine::set_has_linecapend() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemLine::clear_has_linecapend() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemLine::clear_linecapend() {
+  linecapend_ = 0;
+  clear_has_linecapend();
+}
+inline ::google::protobuf::int32 SchemaItemLine::linecapend() const {
+  return linecapend_;
+}
+inline void SchemaItemLine::set_linecapend(::google::protobuf::int32 value) {
+  set_has_linecapend();
+  linecapend_ = value;
+}
+
+// optional double lineCapFactor = 6 [default = 2];
+inline bool SchemaItemLine::has_linecapfactor() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemLine::set_has_linecapfactor() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemLine::clear_has_linecapfactor() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemLine::clear_linecapfactor() {
+  linecapfactor_ = 2;
+  clear_has_linecapfactor();
+}
+inline double SchemaItemLine::linecapfactor() const {
+  return linecapfactor_;
+}
+inline void SchemaItemLine::set_linecapfactor(double value) {
+  set_has_linecapfactor();
+  linecapfactor_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // SchemaItemPath
@@ -20572,6 +20824,116 @@ inline ::google::protobuf::uint32 SchemaItemPath::linecolor() const {
 inline void SchemaItemPath::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
+}
+
+// optional int32 lineStyle = 3 [default = 1];
+inline bool SchemaItemPath::has_linestyle() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemPath::set_has_linestyle() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemPath::clear_has_linestyle() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemPath::clear_linestyle() {
+  linestyle_ = 1;
+  clear_has_linestyle();
+}
+inline ::google::protobuf::int32 SchemaItemPath::linestyle() const {
+  return linestyle_;
+}
+inline void SchemaItemPath::set_linestyle(::google::protobuf::int32 value) {
+  set_has_linestyle();
+  linestyle_ = value;
+}
+
+// optional int32 lineStyleCap = 7 [default = 16];
+inline bool SchemaItemPath::has_linestylecap() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemPath::set_has_linestylecap() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemPath::clear_has_linestylecap() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemPath::clear_linestylecap() {
+  linestylecap_ = 16;
+  clear_has_linestylecap();
+}
+inline ::google::protobuf::int32 SchemaItemPath::linestylecap() const {
+  return linestylecap_;
+}
+inline void SchemaItemPath::set_linestylecap(::google::protobuf::int32 value) {
+  set_has_linestylecap();
+  linestylecap_ = value;
+}
+
+// optional int32 lineCapStart = 4 [default = 0];
+inline bool SchemaItemPath::has_linecapstart() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemPath::set_has_linecapstart() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemPath::clear_has_linecapstart() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemPath::clear_linecapstart() {
+  linecapstart_ = 0;
+  clear_has_linecapstart();
+}
+inline ::google::protobuf::int32 SchemaItemPath::linecapstart() const {
+  return linecapstart_;
+}
+inline void SchemaItemPath::set_linecapstart(::google::protobuf::int32 value) {
+  set_has_linecapstart();
+  linecapstart_ = value;
+}
+
+// optional int32 lineCapEnd = 5 [default = 0];
+inline bool SchemaItemPath::has_linecapend() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemPath::set_has_linecapend() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemPath::clear_has_linecapend() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemPath::clear_linecapend() {
+  linecapend_ = 0;
+  clear_has_linecapend();
+}
+inline ::google::protobuf::int32 SchemaItemPath::linecapend() const {
+  return linecapend_;
+}
+inline void SchemaItemPath::set_linecapend(::google::protobuf::int32 value) {
+  set_has_linecapend();
+  linecapend_ = value;
+}
+
+// optional double lineCapFactor = 6 [default = 2];
+inline bool SchemaItemPath::has_linecapfactor() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemPath::set_has_linecapfactor() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemPath::clear_has_linecapfactor() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemPath::clear_linecapfactor() {
+  linecapfactor_ = 2;
+  clear_has_linecapfactor();
+}
+inline double SchemaItemPath::linecapfactor() const {
+  return linecapfactor_;
+}
+inline void SchemaItemPath::set_linecapfactor(double value) {
+  set_has_linecapfactor();
+  linecapfactor_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -22411,6 +22773,28 @@ inline ::google::protobuf::uint32 FblItemLine::linecolor() const {
 inline void FblItemLine::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
+}
+
+// optional int32 lineStyle = 3 [default = 1];
+inline bool FblItemLine::has_linestyle() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void FblItemLine::set_has_linestyle() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void FblItemLine::clear_has_linestyle() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void FblItemLine::clear_linestyle() {
+  linestyle_ = 1;
+  clear_has_linestyle();
+}
+inline ::google::protobuf::int32 FblItemLine::linestyle() const {
+  return linestyle_;
+}
+inline void FblItemLine::set_linestyle(::google::protobuf::int32 value) {
+  set_has_linestyle();
+  linestyle_ = value;
 }
 
 // -------------------------------------------------------------------

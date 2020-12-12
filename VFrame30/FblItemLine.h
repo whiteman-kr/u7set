@@ -32,8 +32,12 @@ namespace VFrame30
 		QColor lineColor() const;
 		void setLineColor(QColor color);
 
+		E::LineStyle lineStyle() const;
+		void setLineStyle(E::LineStyle value);
+
 	protected:
 		double m_weight;					// Line weight, pixels/inchces depends on UnitDocPt
 		QColor m_lineColor;
+		E::LineStyle m_lineStyle = E::SolidLine;
 	};
 }
