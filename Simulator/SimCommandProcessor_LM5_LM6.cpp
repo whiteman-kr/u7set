@@ -216,16 +216,20 @@ namespace Sim
 				}
 			}
 
-			if ((sorSwitchCount >= 2) | (setSorChassisState && m_device->runtimeMode() != RuntimeMode::TuningMode))		// Durinmg TuningMode Set SOR Chassis does not have influence on SOR is Set
+			if (sorSwitchCount >= 2 ||
+				(setSorChassisState && m_device->runtimeMode() != RuntimeMode::TuningMode))		// Durinmg TuningMode Set SOR Chassis does not have influence on SOR is Set
 			{
 				// Set 'SOR is set'
 				//
 				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 1, E::LogicModuleRamAccess::Read);
+			}
 
-				if (m_device->runtimeMode() != RuntimeMode::TuningMode)
-				{
-					m_device->setRuntimeMode(RuntimeMode::RunSafeMode);
-				}
+			// --
+			//
+			if (quint16 sorIsSetState = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit, E::LogicModuleRamAccess::Read);
+				sorIsSetState == 1 && m_device->runtimeMode() != RuntimeMode::TuningMode)
+			{
+				m_device->setRuntimeMode(RuntimeMode::RunSafeMode);
 			}
 
 			quint16 sorIsSet = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit,  E::LogicModuleRamAccess::Read);
