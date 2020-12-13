@@ -1231,6 +1231,22 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 		double x2 = itemPos->endXDocPt();
 		double y2 = itemPos->endYDocPt();
 
+		// �������� �� ������ ����������� ��������������� ControlBarSizeIn
+		// ��������������, �� ������� ����� ��������� � �������� �������
+		//
+		QRectF controlRectangles[2] = {QRectF{x1 - controlBarSize / 2, y1 - controlBarSize / 2, controlBarSize, controlBarSize},
+									   QRectF{x2 - controlBarSize / 2, y2 - controlBarSize/ 2, controlBarSize, controlBarSize}};
+
+		if (controlRectangles[0].contains(point) == true && schemaItem->isLocked() == false)
+		{
+			return SchemaItemAction::MoveStartLinePoint;
+		}
+
+		if (controlRectangles[1].contains(point) == true && schemaItem->isLocked() == false)
+		{
+			return SchemaItemAction::MoveEndLinePoint;
+		}
+
 		// ���� ������ �� �����, �� SchemaItemAction.MoveItem
 		//
 		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
@@ -1244,29 +1260,6 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			{
 				return SchemaItemAction::NoAction;
 			}
-		}
-
-		if (schemaItem->isLocked() == true)
-		{
-			return SchemaItemAction::NoAction;
-		}
-
-		// �������� �� ������ ����������� ��������������� ControlBarSizeIn
-		// ��������������, �� ������� ����� ��������� � �������� �������
-		//
-		QRectF controlRectangles[2];
-
-		controlRectangles[0] = QRectF(x1 - controlBarSize / 2, y1 - controlBarSize / 2, controlBarSize, controlBarSize);
-		controlRectangles[1] =  QRectF(x2 - controlBarSize / 2, y2 - controlBarSize/ 2, controlBarSize, controlBarSize);
-
-		if (controlRectangles[0].contains(point) == true)
-		{
-			return SchemaItemAction::MoveStartLinePoint;
-		}
-
-		if (controlRectangles[1].contains(point) == true)
-		{
-			return SchemaItemAction::MoveEndLinePoint;
 		}
 
 		return SchemaItemAction::NoAction;
