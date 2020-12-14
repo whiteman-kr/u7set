@@ -312,11 +312,8 @@ namespace Sim
 
 		quint16 word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
 
-		if (applyOverride == true && access() == E::LogicModuleRamAccess::Read)
+		if (applyOverride == true)
 		{
-			// This is read only memory (like incoming data from i/o modules)
-			// Apply override mask for read operations
-			//
 			this->applyOverride(offsetW, 1, &word);	// Apply override to native endian, as it is storen in memory
 		}
 
@@ -459,11 +456,8 @@ namespace Sim
 
 		// Apply override
 		//
-		if (applyOverride == true && access() == E::LogicModuleRamAccess::Read)
+		if (applyOverride == true)
 		{
-			// This is read only memory (like incoming data from i/o modules)
-			// Apply override mask for read operations
-			//
 			this->applyOverride(offsetW, sizeof(TYPE) / 2, reinterpret_cast<quint16*>(&rawValue));
 		}
 

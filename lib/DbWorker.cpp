@@ -4673,7 +4673,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	int nesting = 0;
 
 	std::function<bool(Hardware::DeviceObject*, int)> addDevice =
-			[&addDevice, &db, device, this, &nesting]
+			[&addDevice, &db, this, &nesting]
 			(Hardware::DeviceObject* current, int parentId)
 	{
 		if (nesting >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount) ||
