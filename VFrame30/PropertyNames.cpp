@@ -37,6 +37,11 @@ namespace VFrame30
 	const QString PropertyNames::pinCount{"PinCount"};
 	const QString PropertyNames::showValidityPin{"ValidityPin"};
 
+	const QString PropertyNames::lineCapFactor{"LineCapFactor"};
+	const QString PropertyNames::lineCapStart{"LineCapStart"};
+	const QString PropertyNames::lineCapEnd{"LineCapEnd"};
+	const QString PropertyNames::lineStyle{"LineStyle"};
+	const QString PropertyNames::lineStyleCap{"LineStyleCap"};
 	const QString PropertyNames::lineColor{"LineColor"};
 	const QString PropertyNames::lineWeight{"LineWeight"};
 	const QString PropertyNames::fillColor{"FillColor"};

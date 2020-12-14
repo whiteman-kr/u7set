@@ -331,7 +331,19 @@ namespace Sim
 		[[nodiscard]] bool tuningKey() const;
 		void setTuningKey(bool value);
 
-		[[nodiscard]] bool testTuningApplyCommand(bool newValue);	// Test m_tuningApplyCommand and set new value
+		[[nodiscard]] bool sorIsSet() const;
+		void setSorIsSet(bool value);
+
+		[[nodiscard]] bool sorSetSwitch1() const;
+		void setSorSetSwitch1(bool value);
+
+		[[nodiscard]] bool sorSetSwitch2() const;
+		void setSorSetSwitch2(bool value);
+
+		[[nodiscard]] bool sorSetSwitch3() const;
+		void setSorSetSwitch3(bool value);
+
+		[[nodiscard]] bool testSorResetSwitch(bool newValue);
 
 		// Data
 		//
@@ -376,11 +388,20 @@ namespace Sim
 		//
 		std::atomic<bool> m_armingKey{false};			// External Key
 		std::atomic<bool> m_tuningKey{false};			// Extrenal Key
-		std::atomic<bool> m_tuningApplyCommand{false};	// Flag from tunning comunnication to apply tuning changes
 
 		RamArea	m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
 											// On command 'Apply' RAM memory is copied into this area
 											// On leaving tuning mode this area is copied back to RAM
+
+		// External SOR Set Keys
+		//
+		std::atomic<bool> m_sorIsSet{false};			// Cached value of signal SOR is Set from module RAM
+
+		std::atomic<bool> m_sorSetSwitch1{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch2{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch3{false};		// External Key
+
+		std::atomic<bool> m_sorResetSwitch{false};		// External Key
 
 		// Cached state
 		//

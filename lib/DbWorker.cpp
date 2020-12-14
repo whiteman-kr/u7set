@@ -359,6 +359,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0339.sql", "Upgrade to version 339, Added project property -Run Simulator Tests on Build-, -Simulator Tests Timeout-"},
 	{":/DatabaseUpgrade/Upgrade0340.sql", "Upgrade to version 340, Tags were changed on schema templates, applogic and ufb"},
 	{":/DatabaseUpgrade/Upgrade0341.sql", "Upgrade to version 341, Changes in get_checked_out_files, getting all (inc. dangling) checked out files for root"},
+	{":/DatabaseUpgrade/Upgrade0342.sql", "Upgrade to version 342, Fixed undo_changes, added undo on delete to just added file"},
 };
 
 int DbWorker::counter = 0;

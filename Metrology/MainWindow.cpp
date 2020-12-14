@@ -786,13 +786,20 @@ void MainWindow::loadMeasureKindToolBar()
 
 		for(int kind = 0; kind < MEASURE_KIND_COUNT; kind++)
 		{
-			m_pMeasureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[kind]), kind);
+			if (kind == MEASURE_KIND_MULTI_RACK)
+			{
+				if (theSignalBase.racks().groups().count() == 0)
+				{
+					continue;
+				}
+			}
 
 			if (kind == m_measureKind)
 			{
 				selectedItem = kind;
 			}
 
+			m_pMeasureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[kind]), kind);
 		}
 
 	m_pMeasureKindList->blockSignals(false);
@@ -1562,6 +1569,8 @@ void MainWindow::showRackList()
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save rack groups was unsuccessfully!"));
 		return;
 	}
+
+	loadMeasureKindToolBar();
 
 	theSignalBase.updateRackParam();
 
