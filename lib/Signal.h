@@ -326,7 +326,7 @@ public:
 	Address16 regValidityAddr() const { return m_regValidityAddr; }
 	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
 
-	Address16 actualAddr() const;
+	Address16 actualAddr(E::LogicModuleRamAccess* lmRamAccess = nullptr) const;
 
 	void resetAddresses();
 

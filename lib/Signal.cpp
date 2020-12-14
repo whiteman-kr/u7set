@@ -682,8 +682,13 @@ void Signal::setIoBufAddr(const Address16& addr)
 	m_ioBufAddr = addr;
 }
 
-Address16 Signal::actualAddr() const
+Address16 Signal::actualAddr(E::LogicModuleRamAccess* lmRamAccess) const
 {
+	if (lmRamAccess != nullptr)
+	{
+		*lmRamAccess = m_lmRamAccess;
+	}
+
 	if (m_ualAddr.isValid() == true)
 	{
 		return m_ualAddr;

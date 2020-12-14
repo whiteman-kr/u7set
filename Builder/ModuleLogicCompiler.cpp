@@ -5040,7 +5040,7 @@ namespace Builder
 				break;
 
 			case E::SignalInOutType::Output:
-				s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				s->setLmRamAccess(E::LogicModuleRamAccess::Write);
 				break;
 
 			case E::SignalInOutType::Internal:
@@ -5068,28 +5068,32 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->isConst() == false)
+			QVector<Signal*> refSignals = ualSignal->refSignals();
+
+			if (ualSignal->isConst() == true)
 			{
+				std::for_each(refSignals.begin(), refSignals.end(),
+							[ualSignal](Signal* s) {
+					if (s != nullptr)
+					{
+						s->setIsConst(true);
+						s->setConstValue(ualSignal->constValue());
+						s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
+					}
+				});
+
 				continue;
 			}
 
-			QVector<Signal*> refSignals = ualSignal->refSignals();
-
-			for(Signal* s : refSignals)
+			if (ualSignal->isOutput() == true)
 			{
-				if(s == nullptr)
-				{
-					assert(false);
-					result = false;
-					continue;
-				}
-
-				// set signal's isConst flag and constValue
-				//
-				s->setIsConst(true);
-				s->setConstValue(ualSignal->constValue());
-
-				s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
+				std::for_each(refSignals.begin(), refSignals.end(),
+							[](Signal* s) {
+					if (s != nullptr)
+					{
+						s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+					}
+				});
 			}
 		}
 
@@ -11201,7 +11205,7 @@ namespace Builder
 			cmd.movConst(bitAccAddr, 0);
 			code->append(cmd);
 
-			for(const std::pair<int, Signal*>& pair: sortedWriteSignals)
+			for(const std::pair<int, Signal*> pair: sortedWriteSignals)
 			{
 				Signal* s = pair.second;
 
