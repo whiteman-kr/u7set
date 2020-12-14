@@ -682,6 +682,26 @@ void Signal::setIoBufAddr(const Address16& addr)
 	m_ioBufAddr = addr;
 }
 
+Address16 Signal::actualAddr() const
+{
+	if (m_ualAddr.isValid() == true)
+	{
+		return m_ualAddr;
+	}
+
+	if ((isInput() == true || isOutput() == true) && m_ioBufAddr.isValid() == true)
+	{
+		return m_ioBufAddr;
+	}
+
+	if (isTunable() == true && m_tuningAbsAddr.isValid() == true)
+	{
+		return m_tuningAbsAddr;
+	}
+
+	return Address16();
+}
+
 void Signal::resetAddresses()
 {
 	m_ioBufAddr.reset();

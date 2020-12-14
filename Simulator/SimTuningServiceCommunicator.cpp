@@ -59,7 +59,7 @@ namespace Sim
 
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, timeStamp);
+			m_processingThread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
 		}
 
 		return true;
@@ -68,23 +68,26 @@ namespace Sim
 	void TuningServiceCommunicator::writeConfirmation(std::vector<qint64> confirmedRecords,
 													  const QString& lmEquipmentId,
 													  const QString& portEquipmentId,
-													  const RamArea& ramArea, bool setSorChassisState,
+													  const RamArea& ramArea,
+													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecords, ramArea, timeStamp);
+			m_processingThread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecords,
+												  ramArea, setSorChassisState, timeStamp);
 		}
 	}
 
 	void TuningServiceCommunicator::tuningModeEntered(const QString& lmEquipmentId,
 													  const QString& portEquipmentId,
-													  const RamArea& ramArea, bool setSorChassisState,
+													  const RamArea& ramArea,
+													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
 		if (m_processingThread != nullptr)
 		{
-			m_processingThread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, timeStamp);
+			m_processingThread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
 		}
 	}
 
@@ -200,27 +203,29 @@ namespace Sim
 	void TuningRequestsProcessingThread::updateTuningData(const QString& lmEquipmentID,
 														  const QString& portEquipmentID,
 														  const RamArea& data,
+														  bool setSorChassisState,
 														  TimeStamp timeStamp)
 	{
 		std::shared_ptr<TuningSourceHandler> tsh = getTuningSourceHandler(lmEquipmentID, portEquipmentID);
 
 		if (tsh != nullptr)
 		{
-			tsh->updateTuningData(data, timeStamp);
+			tsh->updateTuningData(data, setSorChassisState, timeStamp);
 		}
 	}
 
-	void TuningRequestsProcessingThread::writeConfirmation(const QString& lmEquipmentID,
+	void TuningRequestsProcessingThread::writeConfirmation(	const QString& lmEquipmentID,
 															const QString& portEquipmentID,
 															const std::vector<qint64>& confirmedRecords,
-														   const RamArea &ramArea,
-														   TimeStamp timeStamp)
+															const RamArea &ramArea,
+															bool setSorChassisState,
+															TimeStamp timeStamp)
 	{
 		std::shared_ptr<TuningSourceHandler> tsh = getTuningSourceHandler(lmEquipmentID, portEquipmentID);
 
 		if (tsh != nullptr)
 		{
-			tsh->updateTuningData(ramArea, timeStamp);
+			tsh->updateTuningData(ramArea, setSorChassisState, timeStamp);
 		}
 
 		m_queueMutex.lock();
@@ -234,13 +239,14 @@ namespace Sim
 	void TuningRequestsProcessingThread::tuningModeEntered(const QString& lmEquipmentId,
 														   const QString& portEquipmentId,
 														   const RamArea& ramArea,
+														   bool setSorChassisState,
 														   TimeStamp timeStamp)
 	{
 		std::shared_ptr<TuningSourceHandler> tsh = getTuningSourceHandler(lmEquipmentId, portEquipmentId);
 
 		if (tsh != nullptr)
 		{
-			tsh->tuningModeEntered(ramArea, timeStamp);
+			tsh->tuningModeEntered(ramArea, setSorChassisState, timeStamp);
 		}
 	}
 
@@ -642,7 +648,7 @@ namespace Sim
 	{
 	}
 
-	void TuningSourceHandler::updateTuningData(const RamArea& data, TimeStamp timeStamp)
+	void TuningSourceHandler::updateTuningData(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		Q_UNUSED(timeStamp);
 
@@ -651,6 +657,8 @@ namespace Sim
 		*m_tuningData.get() = data;
 
 		m_tuningDataMutex.unlock();
+
+		m_setSorChassisState.store(setSorChassisState);
 	}
 
 	bool TuningSourceHandler::writeConfirmation(const std::vector<qint64>& confirmationIDs, RupFotipV2* reply)
@@ -679,6 +687,8 @@ namespace Sim
 
 			// read actual tuning data into reply
 			//
+			m_delayedReply.fotipFrame.header.flags.setSOR = m_setSorChassisState == true ? 1 : 0;
+
 			readFrameData(m_delayedReply.fotipFrame.header.startAddressW,
 						  &m_delayedReply.fotipFrame);
 
@@ -718,9 +728,9 @@ namespace Sim
 		return result;
 	}
 
-	void TuningSourceHandler::tuningModeEntered(const RamArea& ramArea, TimeStamp timeStamp)
+	void TuningSourceHandler::tuningModeEntered(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp)
 	{
-		updateTuningData(ramArea, timeStamp);
+		updateTuningData(ramArea, setSorChassisState, timeStamp);
 
 		m_tuningEnabled.store(true);
 	}
@@ -797,6 +807,8 @@ namespace Sim
 		replyFotipHeader.startAddressW = requestFotipHeader.startAddressW;
 		replyFotipHeader.offsetInFrameW = requestFotipHeader.offsetInFrameW;
 
+		replyFlags.setSOR = m_setSorChassisState == true ? 1 : 0;
+
 		replyFotipHeader.flags = replyFlags;
 
 		memset(replyFotipHeader.reserv, 0, sizeof(replyFotipHeader.reserv));
@@ -812,10 +824,6 @@ namespace Sim
 		}
 
 		bool sendReplyImmediately = true;
-		//
-//				quint16 successfulCheck : 1;
-//			quint16 successfulWrite : 1;
-//			quint16 succesfulApply : 1;
 
 		switch(static_cast<FotipV2::OpCode>(requestFotipHeader.operationCode))
 		{
@@ -834,9 +842,6 @@ namespace Sim
 		default:
 			Q_ASSERT(false);
 		}
-
-			//			quint16 setSOR : 1;				// for non-platform modules 1 in this flag means "WritingDisabled"
-			int to_do_SOR_flag_requesting;
 
 		if (sendReplyImmediately == false)
 		{

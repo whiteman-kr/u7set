@@ -110,17 +110,20 @@ namespace Sim
 		void updateTuningData(const QString& lmEquipmentID,
 							  const QString& portEquipmentID,
 							  const RamArea& data,
+							  bool setSorChassisState,
 							  TimeStamp timeStamp);
 
 		void writeConfirmation(const QString& lmEquipmentID,
 							   const QString& portEquipmentID,
 							   const std::vector<qint64>& confirmedRecords,
 							   const RamArea& ramArea,
+							   bool setSorChassisState,
 							   TimeStamp timeStamp);
 
 		void tuningModeEntered(const QString& lmEquipmentId,
 							   const QString& portEquipmentId,
 							   const RamArea& ramArea,
+							   bool setSorChassisState,
 							   TimeStamp timeStamp);
 
 		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
@@ -200,10 +203,10 @@ namespace Sim
 
 		virtual ~TuningSourceHandler();
 
-		void updateTuningData(const RamArea& data, TimeStamp timeStamp);
+		void updateTuningData(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp);
 		bool writeConfirmation(const std::vector<qint64>& confirmationIDs, RupFotipV2* reply);
 
-		void tuningModeEntered(const RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeEntered(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp);
 		void tuningModeLeft();
 
 		bool processRequest(const RupFotipV2& request, RupFotipV2* nowReply);
@@ -255,6 +258,7 @@ namespace Sim
 
 		QMutex m_tuningDataMutex;
 		std::shared_ptr<RamArea> m_tuningData;
+		std::atomic<bool> m_setSorChassisState = { false };
 
 		std::vector<quint8> m_tuningDataReadBuffer;
 
