@@ -61,10 +61,12 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
 	// Buttons
 
 	QPushButton* buttonCheck = new QPushButton(tr("Check"));
+	QPushButton* buttonSave = new QPushButton(tr("Save"));
 	QPushButton* buttonOK = new QPushButton(tr("OK"));
 	QPushButton* buttonCancel = new QPushButton(tr("Cancel"));
 
 	connect(buttonCheck, &QPushButton::clicked, this, &SimProfileEditor::checkProfiles);
+	connect(buttonSave, &QPushButton::clicked, this, &SimProfileEditor::saveChanges);
 	connect(buttonOK, &QPushButton::clicked, this, &SimProfileEditor::accept);
 	connect(buttonCancel, &QPushButton::clicked, this, &SimProfileEditor::reject);
 
@@ -74,6 +76,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
 
 	buttonLayout->addWidget(buttonCheck);
 	buttonLayout->addStretch();
+	buttonLayout->addWidget(buttonSave);
 	buttonLayout->addWidget(buttonOK);
 	buttonLayout->addWidget(buttonCancel);
 
@@ -159,6 +162,8 @@ bool SimProfileEditor::askForSaveChanged()
 	if (m_textEdit->text() == m_startText)
 	{
 		m_modified = false;
+
+		return true;
 	}
 
 	if (m_modified == false)
@@ -187,6 +192,13 @@ bool SimProfileEditor::askForSaveChanged()
 
 bool SimProfileEditor::saveChanges()
 {
+	if (m_modified == false)
+	{
+		return true;
+	}
+
+	// Check correctness
+
 	Sim::Profiles profiles;
 
 	QString errorMsg;
@@ -201,6 +213,8 @@ bool SimProfileEditor::saveChanges()
 			return false;
 		}
 	}
+
+	// Save
 
 	bool ok = false;
 
@@ -274,6 +288,8 @@ bool SimProfileEditor::saveChanges()
 
 	m_modified = false;
 
+	m_startText = m_textEdit->text();
+
 	return true;
 }
 
@@ -333,6 +349,7 @@ void SimProfileEditor::reject()
 void SimProfileEditor::projectClosed()
 {
 	m_modified = false;
+
 	QDialog::reject();
 
 	return;

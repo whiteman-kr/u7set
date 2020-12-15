@@ -20,9 +20,10 @@ protected:
 
 private:
 	bool askForSaveChanged();
-	bool saveChanges();
 
 private slots:
+	bool saveChanges();
+
 	void checkProfiles();
 
 	void textChanged();
