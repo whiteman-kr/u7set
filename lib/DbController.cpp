@@ -2813,7 +2813,10 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 												   {"ufb", "UFB Schema"},
 												   {"wiring", "Wiring Schema"},
 												   {"in", "Input Signal"},
-												   {"out", "Output Signal"}};
+												   {"out", "Output Signal"},
+												   {"view_linear", "Signal with Linear Grid"},
+												   {"view_log10", "Signal with Logarithmic Grid"},
+												   {"view_period", "Signal with Reactor Period Grid"}};
 
 	std::vector<DbFileInfo> fileList;
 
