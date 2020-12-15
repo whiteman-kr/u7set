@@ -360,6 +360,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0340.sql", "Upgrade to version 340, Tags were changed on schema templates, applogic and ufb"},
 	{":/DatabaseUpgrade/Upgrade0341.sql", "Upgrade to version 341, Changes in get_checked_out_files, getting all (inc. dangling) checked out files for root"},
 	{":/DatabaseUpgrade/Upgrade0342.sql", "Upgrade to version 342, Fixed undo_changes, added undo on delete to just added file"},
+	{":/DatabaseUpgrade/Upgrade0343.sql", "Upgrade to version 343, Add functions get_specific_signals_all_*"},
 };
 
 int DbWorker::counter = 0;
@@ -6295,7 +6296,6 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 	return;
 }
 
-
 void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out)
 {
 	AUTO_COMPLETE
@@ -6368,6 +6368,120 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 	return;
 }
 
+void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<Signal>* out)
+{
+	AUTO_COMPLETE
+
+	TEST_PTR_RETURN(out);
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get specific signals by changeset ID. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_specific_signals_all_by_changeset_id(%1, %2)")
+		.arg(currentUser().userId()).arg(changesetId);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot get specific signals by changeset ID. Query execution error."));
+		return;
+	}
+
+	readSignalsToVector(q, out);
+}
+
+void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out)
+{
+	AUTO_COMPLETE
+
+	TEST_PTR_RETURN(out);
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get specific signals by date. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_specific_signals_all_by_date(%1, '%2'::timestamp with time zone)").
+							arg(currentUser().userId()).
+							arg(date.toString("yyyy-MM-dd HH:mm:ss"));
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot get specific signals by date. Query execution error."));
+		return;
+	}
+
+	readSignalsToVector(q, out);
+}
+
+void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<Signal>* out)
+{
+	TEST_PTR_RETURN(out);
+
+	out->clear();
+
+	int dProgress = 0;
+	int signalCount = q.size();
+
+	if (signalCount != -1)
+	{
+		out->resize(signalCount);
+
+		if (signalCount != 0)
+		{
+			dProgress = signalCount / 20;
+		}
+	}
+
+	int n = 0;
+
+	while(q.next() != false)
+	{
+		if (signalCount != -1)
+		{
+			if (n < signalCount)
+			{
+				getSignalData(q, out->at(n));
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+		}
+		else
+		{
+			getSignalData(q, *out->emplace(out->end()));
+		}
+
+		n++;
+
+		if (dProgress != 0 && (n % dProgress) == 0)
+		{
+			m_progress->setValue((n / dProgress) * 5);
+		}
+	}
+
+	m_progress->setValue(100);
+}
 
 void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
 {

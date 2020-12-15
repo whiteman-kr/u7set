@@ -188,7 +188,13 @@ public slots:
 	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs);
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
+
 	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+
+	void slot_getSpecificSignals(int changesetId, std::vector<Signal>* out);
+	void slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out);
+
+	void readSignalsToVector(QSqlQuery& q, std::vector<Signal>* out);
 
 	void slot_hasCheckedOutSignals(bool* hasCheckedOut);
 
