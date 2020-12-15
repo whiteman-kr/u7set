@@ -598,6 +598,27 @@ AppSignalParam SignalSetProvider::getAppSignalParam(int index)
 	return param;
 }
 
+AppSignalParam SignalSetProvider::getAppSignalParam(QString appSignalId)
+{
+	AppSignalParam param;
+
+	Signal* signal = getSignalByStrID(appSignalId);
+	if (signal == nullptr)
+	{
+		assert(false);
+		return param;
+	}
+
+	if (signal->isLoaded())
+	{
+		signal->cacheSpecPropValues();
+		param.load(*signal);
+		return param;
+	}
+
+	return getAppSignalParam(m_signalSet.keyIndex(signal->ID()));
+}
+
 QVector<int> SignalSetProvider::getSameChannelSignals(int index)
 {
 	QVector<int> sameChannelSignalRows;
