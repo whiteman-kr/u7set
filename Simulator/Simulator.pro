@@ -100,6 +100,7 @@ SOURCES += \
     SimDiagDataLanInterface.cpp \
     SimLanInterface.cpp \
     SimLans.cpp \
+    SimProfiles.cpp \
     SimScopedLog.cpp \
     SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
@@ -161,6 +162,7 @@ HEADERS += \
     SimDiagDataLanInterface.h \
     SimLanInterface.h \
     SimLans.h \
+    SimProfiles.h \
     SimScopedLog.h \
     SimScriptConnection.h \
     SimScriptDevUtils.h \

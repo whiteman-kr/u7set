@@ -65,6 +65,7 @@ protected slots:
 	void stopSimulation(bool stopSimulationThread = false);
 
 	void allowLanCommToggled(bool state);
+	void runSimulationProfilesEditor();
 
 	void showSnapshot();
 	void showFindSignal();
@@ -119,6 +120,8 @@ private:
 	QAction* m_stopAction = nullptr;
 
 	QAction* m_allowLanComm = nullptr;
+
+	QAction* m_profilesEditorAction = nullptr;
 
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;

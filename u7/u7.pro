@@ -103,6 +103,7 @@ SOURCES +=\
     Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
+    Simulator/SimProfileEditor.cpp \
     Simulator/SimSignalInfo.cpp \
     Simulator/SimSelectSchemaPage.cpp \
     Simulator/SimSignalSnapshot.cpp \
@@ -223,6 +224,7 @@ HEADERS  += \
     Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
+    Simulator/SimProfileEditor.h \
     Simulator/SimSignalInfo.h \
     Simulator/SimSelectSchemaPage.h \
     Simulator/SimSignalSnapshot.h \
