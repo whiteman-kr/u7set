@@ -57,6 +57,13 @@ void DialogProjectDiffProgress::onTimer()
 			ui->labelCurrentFile->setText(QString());
 		}
 		break;
+	case ProjectDiffWorker::WorkerStatus::RequestingSignals:
+		{
+			ui->labelCurrentGroup->setText(tr("Requesting Application Signals..."));
+			ui->labelFilesCount->setText(QString());
+			ui->labelCurrentFile->setText(QString());
+		}
+		break;
 	case ProjectDiffWorker::WorkerStatus::Analyzing:
 		{
 			ui->labelCurrentGroup->setText(tr("Analyzing: %1").arg(m_worker->currentSection()));
