@@ -30,14 +30,15 @@ BEGIN
 		SI.SignalInstanceID,
 		SI.ChangesetID,
 		(S.CheckedOutInstanceID IS NOT NULL),	-- CheckedOut
-		S.UserID,				-- signal checked out for user with user_id
+		CH.UserID,
 		S.Created,
 		S.Deleted,
 		SI.Created,				-- InstanceCreated timestamp with time zone,
 		SI.Action				-- InstanceAction
-	FROM Signal AS S, SignalInstance AS SI
+	FROM Signal AS S, SignalInstance AS SI, Changeset AS CH
 	WHERE
 	    SI.SignalID = S.SignalID AND
+		SI.ChangesetID = CH.ChangesetID AND
 		SI.SignalInstanceID IN (
 		    SELECT MAX(SI.signalInstanceID) AS signalInstance
 			    FROM signal AS S, signalInstance AS SI
@@ -49,7 +50,9 @@ $BODY$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION public.get_specific_signals_all_by_date(user_id integer, changeset_date timestamp with time zone)
+CREATE OR REPLACE FUNCTION public.get_specific_signals_all_by_date(
+    user_id integer,
+	changeset_date timestamp with time zone)
   RETURNS SETOF signaldata AS
 $BODY$
 DECLARE
@@ -79,14 +82,15 @@ BEGIN
 		SI.SignalInstanceID,
 		SI.ChangesetID,
 		(S.CheckedOutInstanceID IS NOT NULL),	-- CheckedOut
-		S.UserID,				-- signal checked out for user with user_id
+		CH.UserID,
 		S.Created,
 		S.Deleted,
 		SI.Created,				-- InstanceCreated timestamp with time zone,
 		SI.Action				-- InstanceAction
-	FROM Signal AS S, SignalInstance AS SI
+	FROM Signal AS S, SignalInstance AS SI, Changeset AS CH
 	WHERE
 	    SI.SignalID = S.SignalID AND
+		SI.ChangesetID = CH.ChangesetID AND
 		SI.SignalInstanceID IN (
 		    SELECT MAX(SI.signalInstanceID) AS signalInstance
 			    FROM signal AS S, signalInstance AS SI, changeset AS CS
