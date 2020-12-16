@@ -1,4 +1,4 @@
-#include "EditSchemaWidget.h"
+#include "EditSchemaView.h"
 
 #include "SchemaLayersDialog.h"
 #include "ui_SchemaLayersDialog.h"

@@ -275,9 +275,9 @@ namespace VFrame30
 			return false;
 		}
 
-		if (drawParam->isMonitorMode() == false)
+		if (drawParam->appSignalController() != nullptr)
 		{
-			Q_ASSERT(drawParam->isMonitorMode());
+			Q_ASSERT(drawParam->appSignalController() != nullptr);
 			return false;
 		}
 
@@ -327,9 +327,9 @@ namespace VFrame30
 			return false;
 		}
 
-		if (drawParam->isMonitorMode() == false)
+		if (drawParam->appSignalController() == nullptr)
 		{
-			Q_ASSERT(drawParam->isMonitorMode());
+			Q_ASSERT(drawParam->appSignalController() != nullptr);
 			return false;
 		}
 
@@ -373,11 +373,6 @@ namespace VFrame30
 
 	std::optional<double> SchemaItemIndicator::getSignalState(CDrawParam* drawParam, const QString& appSignalId) const
 	{
-		if (drawParam->isMonitorMode() == false)
-		{
-			return {};
-		}
-
 		bool valid = false;
 		double value = -1;
 

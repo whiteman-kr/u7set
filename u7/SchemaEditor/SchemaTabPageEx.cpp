@@ -1,5 +1,6 @@
 #include "SchemaTabPageEx.h"
 #include "../lib/StandardColors.h"
+#include "../lib/SignalSetProvider.h"
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
@@ -2021,7 +2022,7 @@ int SchemaFileViewEx::parentFileId() const
 // SchemasTabPage
 //
 //
-SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
+SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, SignalSetProvider* signalSetProvider, QWidget* parent) :
 	MainTabPage(dbc, parent)
 {
 	m_tabWidget = new TabWidgetEx{this};
@@ -2046,7 +2047,7 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 
 	// Add control page
 	//
-	m_controlTabPage = new SchemaControlTabPageEx(dbc);
+	m_controlTabPage = new SchemaControlTabPageEx(dbc, signalSetProvider);
 	m_tabWidget->addTab(m_controlTabPage, tr("Schemas Control"));
 
 	m_tabWidget->setTabToolTip(0, tr("Schemas Control\n"
@@ -2188,9 +2189,12 @@ void SchemasTabPageEx::currentTabChanged(int index)
 // SchemaControlTabPage
 //
 //
-SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
-		HasDbController(db)
+SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, SignalSetProvider* signalSetProvider) :
+	HasDbController(db),
+	m_signalSetProvider(signalSetProvider)
 {
+	Q_ASSERT(signalSetProvider);
+
 	// Create controls
 	//
 	m_filesView = new SchemaFileViewEx(db, this);
@@ -2790,7 +2794,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx{tabWidget, vf, fi, db()};
+	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx{tabWidget, vf, fi, db(), m_signalSetProvider};
 
 	connect(editTabPage, &EditSchemaTabPageEx::vcsFileStateChanged, m_filesView, &SchemaFileViewEx::slot_refreshFiles);
 	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
@@ -2899,7 +2903,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 	// Create TabPage and add it to the TabControl
 	//
-	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx{tabWidget, vf, fi, db()};
+	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx{tabWidget, vf, fi, db(), m_signalSetProvider};
 
 	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
@@ -4212,7 +4216,7 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 		return;
 	}
 
-	EditSchemaTabPageEx* compareTabPage = new EditSchemaTabPageEx(tabWidget, target, DbFileInfo(), db());
+	EditSchemaTabPageEx* compareTabPage = new EditSchemaTabPageEx(tabWidget, target, DbFileInfo(), db(), m_signalSetProvider);
 
 	connect(compareTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
 	connect(compareTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
@@ -4771,7 +4775,8 @@ const DbFileInfo& SchemaControlTabPageEx::parentFile() const
 EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 										 std::shared_ptr<VFrame30::Schema> schema,
 										 const DbFileInfo& fileInfo,
-										 DbController* dbcontroller) :
+										 DbController* dbcontroller,
+										 SignalSetProvider* signalSetProvider) :
 	QMainWindow(nullptr, Qt::WindowType::Widget),	// Always created as widget as from start it's attached to TabWidget, later can be switcher to Qt::Window
 	HasDbController(dbcontroller),
 	m_schemaWidget(nullptr),
@@ -4786,7 +4791,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	//
 	schema->setChangeset(fileInfo.changeset());
 
-	m_schemaWidget = new EditSchemaWidget{schema, fileInfo, dbcontroller, this};
+	m_schemaWidget = new EditSchemaWidget{schema, fileInfo, dbcontroller, signalSetProvider, this};
 
 	connect(m_schemaWidget, &EditSchemaWidget::detachOrAttachWindow, this, &EditSchemaTabPageEx::detachOrAttachWindow);
 	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPageEx::closeTab);

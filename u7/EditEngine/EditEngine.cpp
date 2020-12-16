@@ -1,5 +1,5 @@
 #include "EditEngine.h"
-#include "EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaView.h"
 #include "EditEngineAddItem.h"
 #include "EditEngineBatch.h"
 #include "EditEngineSetPoints.h"

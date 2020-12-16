@@ -280,7 +280,7 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::CustomSignalID:
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				text = signal.customSignalId();
 				if (text.isEmpty() == true)
@@ -295,7 +295,7 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::ImpactCustomSignalID:
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				text = impactSignal.customSignalId();
 				if (text.isEmpty() == true)
@@ -310,7 +310,7 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::Caption:
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				text = signal.caption();
 
@@ -326,7 +326,7 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::ImpactCaption:
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				text = impactSignal.caption();
 				if (text.isEmpty() == true)
@@ -342,7 +342,7 @@ namespace VFrame30
 
 		case E::ColumnData::State:
 			{
-				if (drawParam->isMonitorMode() == true)
+				if (drawParam->appSignalController() != nullptr)
 				{
 					if (signalState.m_flags.valid == false)
 					{
@@ -370,7 +370,7 @@ namespace VFrame30
 
 		case E::ColumnData::ImpactState:
 			{
-				if (drawParam->isMonitorMode() == true)
+				if (drawParam->appSignalController() != nullptr)
 				{
 					if (impactSignalState.m_flags.valid == false)
 					{
@@ -450,7 +450,7 @@ namespace VFrame30
 		{
 			text = appSignalIds();
 
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				bool stateOk;
 				AppSignalState signalState = drawParam->appSignalController()->signalState(text, &stateOk);
@@ -497,15 +497,13 @@ namespace VFrame30
 		std::vector<AppSignalState> appSignalStates;
 		appSignalStates.resize(signalIds.size());
 
-		bool isMonitorMode = drawParam->isMonitorMode();
-
 		int signalIndex = 0;
 		for (const QString& id : signalIds)
 		{
 			appSignals[signalIndex].setAppSignalId(id);
 			appSignalStates[signalIndex].m_flags.valid = false;
 
-			if (isMonitorMode == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				// Get signal description/state
 				//
@@ -552,7 +550,7 @@ namespace VFrame30
 		signalIndex = 0;
 		for (const QString& id : impactSignalIds)
 		{
-			if (isMonitorMode == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				// Get signal description/state
 				//
@@ -950,7 +948,7 @@ namespace VFrame30
 		AppSignalState signalState;
 		signalState.m_flags.valid = false;
 
-		if (drawParam->isMonitorMode() == true && isCommented() == false)
+		if (drawParam->appSignalController() != nullptr && isCommented() == false)
 		{
 			if (drawParam->schema()->isUfbSchema() == true)
 			{
@@ -972,7 +970,7 @@ namespace VFrame30
 		AppSignalState impactSignalState;
 		impactSignalState.m_flags.valid = false;
 
-		if (drawParam->isMonitorMode() == true && isCommented() == false)
+		if (drawParam->appSignalController() != nullptr && isCommented() == false)
 		{
 			impactSignal = drawParam->appSignalController()->signalParam(impactAppSignalId, nullptr);
 			impactSignalState = drawParam->appSignalController()->signalState(impactAppSignalId, nullptr);

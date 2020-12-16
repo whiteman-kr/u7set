@@ -253,7 +253,7 @@ namespace VFrame30
 		}
 		else
 		{
-			if (m_text.contains(QLatin1Literal("$(")) == true)
+			if (m_text.contains(QLatin1String("$(")) == true)
 			{
 				// m_text contains some variables, which need to be parsed
 				//
@@ -428,12 +428,6 @@ namespace VFrame30
 			Q_ASSERT(signalParam);
 			Q_ASSERT(appSignalState);
 			Q_ASSERT(tuningSignalState);
-			return false;
-		}
-
-		if (drawParam->isMonitorMode() == false)
-		{
-			Q_ASSERT(drawParam->isMonitorMode());
 			return false;
 		}
 
