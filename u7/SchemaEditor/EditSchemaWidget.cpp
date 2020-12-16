@@ -35,7 +35,6 @@
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/SignalSetProvider.h"
-#include "DialogInputEx.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
 #include <cfloat>
