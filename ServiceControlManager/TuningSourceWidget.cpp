@@ -101,6 +101,8 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
 	{ QStringLiteral("ErrAnalogHighBoundCheck"), [](const Network::TuningSourceState& state) { return QString::number(state.erranaloghighboundcheck()); } },
 
 	{ QStringLiteral("ErrRupCRC"), [](const Network::TuningSourceState& state) { return QString::number(state.errrupcrc()); } },
+
+	{ QStringLiteral("ErrTuningFrameUpdate"), [](const Network::TuningSourceState& state) { return QString::number(state.errtuningframeupdate()); } },
 };
 
 TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, QWidget *parent) :

@@ -151,7 +151,9 @@ public:
 	QVector<int> getSameChannelSignals(int index);
 
 	const Signal& getLoadedSignal(int index);
+
 	AppSignalParam getAppSignalParam(int index);
+	AppSignalParam getAppSignalParam(QString appSignalId);
 
 	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
 	bool isEditableSignal(const Signal& signal) const;

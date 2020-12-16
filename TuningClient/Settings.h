@@ -4,6 +4,7 @@
 #include "../lib/HostAddressPort.h"
 #include "UserManager.h"
 #include "../lib/Tuning/TuningTcpClient.h"
+#include "../lib/SoftwareSettings.h"
 
 // Enable the next line to access the admin functions
 //#define USE_ADMIN_REGISTRY_AREA
@@ -78,58 +79,38 @@ struct SchemaSettings
 
 struct ConfigSettings
 {
-	ConfigConnection tuningServiceAddress;				// Tuning Service connection params
+	TuningClientSettings clientSettings;
 
-	bool autoApply = true;
-
-	LogonMode logonMode = LogonMode::Permanent;
-
-	bool showSignals = true;
-	bool showSchemas = true;
-	bool showSchemasList = true;
-	bool showSchemasTabs = true;
-
-	bool filterByEquipment = true;
-	bool filterBySchema = true;
-
-	QString startSchemaID;
-
-	LmStatusFlagMode lmStatusFlagMode = LmStatusFlagMode::SOR;
-	int loginSessionLength = 120;
-	QStringList usersAccounts;
+	ConfigConnection serviceAddress;				// Tuning Service connection params
 
 	std::vector<SchemaSettings> schemas;
 
 	BuildInfo buildInfo;
 
-	QString globalScript;
-	QString configurationArrivedScript;
+	QString scriptGlobal;
+
+	QString scriptConfigArrived;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 
 	// Warning! Add new values to copy operator!!!
 
+	LmStatusFlagMode lmStatusFlagMode() const
+	{
+		return static_cast<LmStatusFlagMode>(clientSettings.statusFlagFunction);
+	}
+
 	ConfigSettings& operator = (const ConfigSettings& That)
 	{
-		tuningServiceAddress = That.tuningServiceAddress;
-		autoApply = That.autoApply;
-		logonMode = That.logonMode;
-		showSignals = That.showSignals;
-		showSchemas = That.showSchemas;
-		showSchemasList = That.showSchemasList;
-		showSchemasTabs = That.showSchemasTabs;
-		filterByEquipment = That.filterByEquipment;
-		filterBySchema = That.filterBySchema;
-		startSchemaID = That.startSchemaID;
-		lmStatusFlagMode = That.lmStatusFlagMode;
-		loginSessionLength = That.loginSessionLength;
-		usersAccounts = That.usersAccounts;
+		serviceAddress = That.serviceAddress;
+		clientSettings = That.clientSettings;
+
 		schemas = That.schemas;
 		buildInfo = That.buildInfo;
-		globalScript = That.globalScript;
-		configurationArrivedScript = That.configurationArrivedScript;
 
-		//errorMessage = That.errorMessage;
+		scriptGlobal = That.scriptGlobal;
+		scriptConfigArrived = That.scriptConfigArrived;
+
 		return *this;
 	}
 

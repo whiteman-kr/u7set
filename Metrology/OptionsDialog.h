@@ -96,7 +96,7 @@ const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparator information"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Location"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language of interface"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language of application "),
 };
 
 // ----------------------------------------------------------------------------------------------

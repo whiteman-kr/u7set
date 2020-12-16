@@ -25,6 +25,12 @@ protected slots:
 	void powerOff(bool toPowerOff);
 	void armingKeyToggled(bool value);
 	void tuningKeyToggled(bool value);
+
+	void sorResetSwitchPressed();
+	void sorSwitch1Toggled(bool value);
+	void sorSwitch2Toggled(bool value);
+	void sorSwitch3Toggled(bool value);
+
 	void signalsButtonClicked();
 	void codeButtonClicked();
 	void memoryButtonClicked();
@@ -72,6 +78,15 @@ private:
 
 	QLabel m_runtimeModeLabel{tr("Runtime Mode:"), this};
 	QLabel m_runtimeModeValue{tr("{}"), this};
+
+	QFrame m_sorLine{this};
+
+	QPushButton m_sorResetSwitchButton{tr("Reset SOR"), this};
+	QLabel m_sorIsSetLabel{tr("SOR is Set: {0}"), this};
+
+	QPushButton m_sorSetSwitch1Button{tr("SOR Switch 1"), this};
+	QPushButton m_sorSetSwitch2Button{tr("SOR Switch 2"), this};
+	QPushButton m_sorSetSwitch3Button{tr("SOR Switch 3"), this};
 
 	QFrame m_tuningLine{this};
 

@@ -194,61 +194,6 @@ namespace Sim
 		return true;
 	}
 
-	template<typename CONTAINER>
-	bool RamArea::readToBuffer(quint32 offsetW, quint32 countW, CONTAINER* data, bool applyOverride) const noexcept
-	{
-		if (data == nullptr)
-		{
-			assert(data);
-			return false;
-		}
-
-		int countBytes = countW * 2;
-
-		int byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset < 0 ||
-			m_data.size() - byteOffset < countBytes)
-		{
-			// Buffer must be completely inside area
-			//
-			Q_ASSERT(byteOffset >= 0 &&
-					 m_data.size() - byteOffset >= countBytes);
-			return false;
-		}
-
-		if (static_cast<int>(data->size()) != countBytes)
-		{
-			data->resize(countBytes);
-		}
-
-		// Copy memory
-		//
-		std::memcpy(data->data(), m_data.constData() + byteOffset, countBytes);
-
-		// Apply override to just copied memory
-		//
-		if (applyOverride == true &&
-			m_overrideData.empty() == false)
-		{
-			int zeroBasedOffsetW = offsetW - offset();
-
-			if (zeroBasedOffsetW < 0 ||
-				zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
-			{
-				Q_ASSERT(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < static_cast<int>(m_overrideData.size()));
-				return false;
-			}
-
-			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
-			for (quint32 i = 0; i < countW; i++)
-			{
-				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);
-			}
-		}
-
-		return true;
-	}
-
 	bool RamArea::setMem(quint32 offsetW, quint32 sizeW, quint16 data)
 	{
 		//int byteOffset = (offsetW - offset()) * 2;
@@ -367,11 +312,8 @@ namespace Sim
 
 		quint16 word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
 
-		if (applyOverride == true && access() == E::LogicModuleRamAccess::Read)
+		if (applyOverride == true)
 		{
-			// This is read only memory (like incoming data from i/o modules)
-			// Apply override mask for read operations
-			//
 			this->applyOverride(offsetW, 1, &word);	// Apply override to native endian, as it is storen in memory
 		}
 
@@ -514,11 +456,8 @@ namespace Sim
 
 		// Apply override
 		//
-		if (applyOverride == true && access() == E::LogicModuleRamAccess::Read)
+		if (applyOverride == true)
 		{
-			// This is read only memory (like incoming data from i/o modules)
-			// Apply override mask for read operations
-			//
 			this->applyOverride(offsetW, sizeof(TYPE) / 2, reinterpret_cast<quint16*>(&rawValue));
 		}
 

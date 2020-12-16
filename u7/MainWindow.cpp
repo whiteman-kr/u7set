@@ -14,6 +14,7 @@
 #include "DialogConnections.h"
 #include "DialogBusEditor.h"
 #include "DialogTagsEditor.h"
+#include "Simulator/SimProfileEditor.h"
 #include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
@@ -312,6 +313,11 @@ void MainWindow::createActions()
 	m_tagsEditorAction->setEnabled(false);
 	connect(m_tagsEditorAction, &QAction::triggered, this, &MainWindow::runTagsEditor);
 
+	m_simProfilesEditorAction = new QAction(tr("Simulator Profiles Editor..."), this);
+	m_simProfilesEditorAction->setStatusTip(tr("Run Simulator Profiles Editor"));
+	m_simProfilesEditorAction->setEnabled(false);
+	connect(m_simProfilesEditorAction, &QAction::triggered, this, &MainWindow::runSimulationProfilesEditor);
+
 	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs/Busses..."), this);
 	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs/Busses on all schemas"));
 	m_updateUfbsAfbs->setEnabled(false);
@@ -417,6 +423,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
 	pToolsMenu->addAction(m_tagsEditorAction);
+	pToolsMenu->addAction(m_simProfilesEditorAction);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
@@ -653,6 +660,15 @@ void MainWindow::runTagsEditor()
 	d.exec();
 }
 
+void MainWindow::runSimulationProfilesEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	SimProfileEditor::run(dbController(), this);
+}
 
 void MainWindow::updateUfbsAfbsBusses()
 {
@@ -1128,6 +1144,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_tagsEditorAction->setEnabled(true);
+	m_simProfilesEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 	m_AfbLibraryCheck->setEnabled(true);
 
@@ -1171,6 +1188,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_tagsEditorAction->setEnabled(false);
+	m_simProfilesEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 	m_AfbLibraryCheck->setEnabled(false);
 

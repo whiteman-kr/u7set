@@ -79,6 +79,7 @@
         <file>Images/NextIssue.svg</file>
         <file>Images/PreviousIssue.svg</file>
         <file>Images/ClearLog.svg</file>
+        <file>Images/SimProfileEditor.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

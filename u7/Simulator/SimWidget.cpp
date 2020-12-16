@@ -16,6 +16,7 @@
 #include "../../lib/Ui/DialogSignalSearch.h"
 #include "SimSignalSnapshot.h"
 #include "SimSignalInfo.h"
+#include "SimProfileEditor.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -232,6 +233,9 @@ void SimWidget::createToolBar()
 	m_allowLanComm->setChecked(m_simulator->software().enabled());
 	connect(m_allowLanComm, &QAction::toggled, this, &SimWidget::allowLanCommToggled);
 
+	m_profilesEditorAction = new QAction{QIcon(":/Images/Images/SimProfileEditor.svg"), tr("Simulation Profiles Editor"), this};
+	connect(m_profilesEditorAction, &QAction::triggered, this, &SimWidget::runSimulationProfilesEditor);
+
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
 	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
@@ -274,6 +278,8 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_allowLanComm);
+
+	m_toolBar->addAction(m_profilesEditorAction);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_snapshotAction);
@@ -725,6 +731,16 @@ void SimWidget::allowLanCommToggled(bool state)
 {
 	m_simulator->software().setEnabled(state);
 	return;
+}
+
+void SimWidget::runSimulationProfilesEditor()
+{
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	SimProfileEditor::run(db(), this);
 }
 
 void SimWidget::showSnapshot()

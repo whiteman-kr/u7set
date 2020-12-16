@@ -27,24 +27,35 @@ namespace Sim
 	{
 	}
 
-	bool TuningLanInterface::updateTuningRam(const RamArea& ramArea, TimeStamp timeStamp)
+	bool TuningLanInterface::updateTuningRam(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp)
 	{
-		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
+		if (enabled() == false ||
+			m_tuningServiceCommunicator == nullptr)
 		{
 			return false;
 		}
 
-		return m_tuningServiceCommunicator->updateTuningRam(lmEquipmentId(), portEquipmentId(), ramArea, timeStamp);
+		return m_tuningServiceCommunicator->updateTuningRam(lmEquipmentId(), portEquipmentId(), ramArea, setSorChassisState, timeStamp);
 	}
 
-	void TuningLanInterface::tuningModeChanged(bool tuningMode)
+	void TuningLanInterface::tuningModeEntered(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		if (m_tuningServiceCommunicator == nullptr)
 		{
 			return;
 		}
 
-		return m_tuningServiceCommunicator->tuningModeChanged(lmEquipmentId(), tuningMode);
+		return m_tuningServiceCommunicator->tuningModeEntered(lmEquipmentId(), portEquipmentId(), ramArea, setSorChassisState, timeStamp);
+	}
+
+	void TuningLanInterface::tuningModeLeft()
+	{
+		if (m_tuningServiceCommunicator == nullptr)
+		{
+			return;
+		}
+
+		return m_tuningServiceCommunicator->tuningModeLeft(lmEquipmentId(), portEquipmentId());
 	}
 
 	std::queue<TuningRecord> TuningLanInterface::fetchWriteTuningQueue()
@@ -57,5 +68,15 @@ namespace Sim
 		}
 
 		return result;
+	}
+
+	void TuningLanInterface::sendWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp)
+	{
+		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
+		{
+			return;
+		}
+
+		return m_tuningServiceCommunicator->writeConfirmation(std::move(confirmedRecords), lmEquipmentId(), portEquipmentId(), ramArea, setSorChassisState, timeStamp);
 	}
 }

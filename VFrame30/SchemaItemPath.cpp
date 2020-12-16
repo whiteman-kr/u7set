@@ -1,6 +1,7 @@
 #include "SchemaItemPath.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "SchemaItemLine.h"
 
 namespace VFrame30
 {
@@ -18,6 +19,13 @@ namespace VFrame30
 	{
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemPath::weight, SchemaItemPath::setWeight);
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemPath::lineColor, SchemaItemPath::setLineColor);
+
+		ADD_PROPERTY_GET_SET_CAT(E::LineStyle, PropertyNames::lineStyle, PropertyNames::appearanceCategory, true, SchemaItemPath::lineStyle, SchemaItemPath::setLineStyle);
+		ADD_PROPERTY_GET_SET_CAT(E::LineStyleCap, PropertyNames::lineStyleCap, PropertyNames::appearanceCategory, true, SchemaItemPath::lineStyleCap, SchemaItemPath::setLineStyleCap);
+
+		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapStart, PropertyNames::appearanceCategory, true, SchemaItemPath::lineCapStart, SchemaItemPath::setLineCapStart);
+		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapEnd, PropertyNames::appearanceCategory, true, SchemaItemPath::lineCapEnd, SchemaItemPath::setLineCapEnd);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapFactor, PropertyNames::appearanceCategory, true, SchemaItemPath::lineCapFactor, SchemaItemPath::setLineCapFactor);
 
 		// --
 		//
@@ -48,6 +56,13 @@ namespace VFrame30
 
 		path->set_weight(m_weight);
 		path->set_linecolor(m_lineColor.rgba());
+
+		path->set_linestyle(static_cast<int>(m_lineStyle));
+		path->set_linestylecap(static_cast<int>(m_lineStyleCap));
+
+		path->set_linecapstart(static_cast<int>(m_lineCapStart));
+		path->set_linecapend(static_cast<int>(m_lineCapEnd));
+		path->set_linecapfactor(m_lineCapFactor);
 
 		return true;
 	}
@@ -80,6 +95,13 @@ namespace VFrame30
 
 		m_weight = path.weight();
 		m_lineColor = QColor::fromRgba(path.linecolor());
+
+		m_lineStyle = static_cast<E::LineStyle>(path.linestyle());
+		m_lineStyleCap = static_cast<E::LineStyleCap>(path.linestylecap());
+
+		m_lineCapStart = static_cast<E::LineCap>(path.linecapstart());
+		m_lineCapEnd = static_cast<E::LineCap>(path.linecapend());
+		m_lineCapFactor = path.linecapfactor();
 
 		return true;
 	}
@@ -114,9 +136,44 @@ namespace VFrame30
 
 		QPen pen(lineColor());
 		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
-		p->setPen(pen);
+		pen.setStyle(static_cast<Qt::PenStyle>(m_lineStyle));
+		pen.setCapStyle(static_cast<Qt::PenCapStyle>(m_lineStyleCap));
 
+		p->setPen(pen);
 		p->drawPolyline(polyline);
+
+		// Set antializasing for drawing line caps
+		//
+		bool al = p->testRenderHint(QPainter::Antialiasing);	// Save antialising
+		p->setRenderHint(QPainter::Antialiasing);
+
+		if (m_lineCapStart != E::LineCap::NoCap && poinlist.size() > 1)
+		{
+			QPointF p1{*poinlist.begin()};
+			QPointF p2{*(std::next(poinlist.begin()))};
+
+			const double angleRadStart = std::atan2(p2.y() - p1.y(), p2.x() - p1.x());
+
+			p->setPen(Qt::NoPen);
+			p->setBrush(m_lineColor);
+
+			SchemaItemLine::drawLineCap(p, itemUnit(), p1, angleRadStart, m_weight, m_lineCapStart, m_lineCapFactor);
+		}
+
+		if (m_lineCapEnd != E::LineCap::NoCap && poinlist.size() > 1)
+		{
+			QPointF p1{*(std::next(poinlist.rbegin()))};
+			QPointF p2{*poinlist.rbegin()};
+
+			const double angleRadEnd = std::atan2(p1.y() - p2.y(), p1.x() - p2.x());
+
+			p->setPen(Qt::NoPen);
+			p->setBrush(m_lineColor);
+
+			SchemaItemLine::drawLineCap(p, itemUnit(), p2, angleRadEnd, m_weight, m_lineCapEnd, m_lineCapFactor);
+		}
+
+		p->setRenderHint(QPainter::Antialiasing, al);			// Restore antialising
 
 		return;
 	}
@@ -168,6 +225,57 @@ namespace VFrame30
 	{
 		m_lineColor = color;
 	}
+
+	E::LineStyle SchemaItemPath::lineStyle() const
+	{
+		return m_lineStyle;
+	}
+
+	void SchemaItemPath::setLineStyle(E::LineStyle value)
+	{
+		m_lineStyle = value;
+	}
+
+	E::LineStyleCap SchemaItemPath::lineStyleCap() const
+	{
+		return m_lineStyleCap;
+	}
+
+	void SchemaItemPath::setLineStyleCap(E::LineStyleCap value)
+	{
+		m_lineStyleCap = value;
+	}
+
+	E::LineCap SchemaItemPath::lineCapStart() const
+	{
+		return m_lineCapStart;
+	}
+
+	void SchemaItemPath::setLineCapStart(E::LineCap value)
+	{
+		m_lineCapStart = value;
+	}
+
+	E::LineCap SchemaItemPath::lineCapEnd() const
+	{
+		return m_lineCapEnd;
+	}
+
+	void SchemaItemPath::setLineCapEnd(E::LineCap value)
+	{
+		m_lineCapEnd = value;
+	}
+
+	double SchemaItemPath::lineCapFactor() const
+	{
+		return m_lineCapFactor;
+	}
+
+	void SchemaItemPath::setLineCapFactor(double value)
+	{
+		m_lineCapFactor = value;
+	}
+
 
 }
 

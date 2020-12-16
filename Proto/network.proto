@@ -396,6 +396,8 @@ message TuningSourceState
 
 	optional bool writingDisabled = 45 [default = false];
 	optional int64 fotipFlagWritingDisabled = 46 [default = 0];
+
+    optional int64 errTuningFrameUpdate = 47 [default = 0];
 }
 
 message GetTuningSourcesStatesReply

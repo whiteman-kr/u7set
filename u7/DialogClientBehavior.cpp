@@ -705,7 +705,7 @@ bool DialogClientBehavior::saveChanges()
 	}
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, "Client Behavior Editor", "No comment supplied!");
+		QMessageBox::warning(this, "Client Behavior Editor", "No comment supplied! Please provide a comment.");
 		return false;
 	}
 

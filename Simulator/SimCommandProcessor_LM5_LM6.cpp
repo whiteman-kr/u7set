@@ -10,8 +10,6 @@
 
 namespace Sim
 {
-	const int CommandProcessor_LM5_LM6::m_cycleDurationMs;
-
 	CommandProcessor_LM5_LM6::CommandProcessor_LM5_LM6(DeviceEmulator* device) :
 		CommandProcessor(device)
 	{
@@ -157,7 +155,7 @@ namespace Sim
 				bool ok = true;
 				if (tuningMode == 1)
 				{
-					ok = m_device->tuningEnterTuningMode();
+					ok = m_device->tuningEnterTuningMode(TimeStamp{currentTime});
 				}
 				else
 				{
@@ -169,16 +167,89 @@ namespace Sim
 					return false;
 				}
 			}
-
-			if (m_device->testTuningApplyCommand(false) == true)
-			{
-				m_device->tuningApplyCommand();
-			}
 		}
 
+		// Set SOR external switches
+		//
+		{
+			// Signal 'Set SOR Chassis' $(PARENT)_SETSORCHASSIS
+			// Writtien by ApplicationLogic
+			//
+			const quint32 setSorChassisOffset =  57782 + 1;
+			const quint16 setSorChassisBit = 0;
+			bool setSorChassisState = m_device->readRamBit(setSorChassisOffset, setSorChassisBit, E::LogicModuleRamAccess::Write);
+
+			// Platform signals:
+			//		'SOR is set' - bit 6
+			//		'Sor Switch 1, 2, 3' - bits 3, 4, 5
+			//		'SOR Reset' - bit 7
+			//
+			const quint32 setSorSwitchOffset = 57526 + 143;		// <TxDiagDataOffset>57526</TxDiagDataOffset>
+			const quint16 setSorSwitchBit = 3;					// 3, 4, 5
+			const quint16 sorIsSetBit = 6;						// Platform signal 'SOR is set'
+			const quint16 resetSorSwitchBit = 7;				// Platform signal 'Reset SOR'
+
+			bool sorSwitch1 = m_device->sorSetSwitch1();
+			bool sorSwitch2 = m_device->sorSetSwitch2();
+			bool sorSwitch3 = m_device->sorSetSwitch3();
+			bool resetSorSwitch = m_device->testSorResetSwitch(false);
+
+			int sorSwitchCount = static_cast<int>(sorSwitch1) +
+								 static_cast<int>(sorSwitch2) +
+								 static_cast<int>(sorSwitch3);
+
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 0, sorSwitch1, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 1, sorSwitch2, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 2, sorSwitch3, E::LogicModuleRamAccess::Read);
+
+			m_device->writeRamBit(setSorSwitchOffset, resetSorSwitchBit, resetSorSwitch, E::LogicModuleRamAccess::Read);
+
+			if (resetSorSwitch == true)
+			{
+				// Reset 'Sor is set'
+				//
+				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 0, E::LogicModuleRamAccess::Read);
+
+				if (m_device->runtimeMode() != RuntimeMode::TuningMode)
+				{
+					m_device->setRuntimeMode(RuntimeMode::RunMode);
+				}
+			}
+
+			if (sorSwitchCount >= 2 ||
+				(setSorChassisState && m_device->runtimeMode() != RuntimeMode::TuningMode))		// Durinmg TuningMode Set SOR Chassis does not have influence on SOR is Set
+			{
+				// Set 'SOR is set'
+				//
+				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 1, E::LogicModuleRamAccess::Read);
+			}
+
+			// --
+			//
+			if (quint16 sorIsSetState = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit, E::LogicModuleRamAccess::Read);
+				sorIsSetState == 1 && m_device->runtimeMode() != RuntimeMode::TuningMode)
+			{
+				m_device->setRuntimeMode(RuntimeMode::RunSafeMode);
+			}
+
+			quint16 sorIsSet = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit,  E::LogicModuleRamAccess::Read);
+			m_device->setSorIsSet(sorIsSet);
+		}
+
+		// --
+		//
 		bool ok = setRuntimeModeSignals();
 
 		return ok;
+	}
+
+	quint16 CommandProcessor_LM5_LM6::signalSetSorChassis() const
+	{
+		const quint32 inputControllerOffset = 57782;
+		const quint32 setSorChassisOffset = inputControllerOffset + 1;
+		const quint16 setSorChassisBit = 0;
+
+		return m_device->readRamBit(setSorChassisOffset, setSorChassisBit, E::LogicModuleRamAccess::Write);		// Application Logic writes TO this signal
 	}
 
 	bool CommandProcessor_LM5_LM6::setRuntimeModeSignals()
@@ -2820,7 +2891,7 @@ namespace Sim
 
 		quint16 track = instance->param(i_track)->wordValue();
 
-		if (time == 0 || (conf != 1 && conf != 2))
+		if (time < m_cycleDurationMs || (conf != 1 && conf != 2))
 		{
 			// ?????
 			//
@@ -3227,9 +3298,11 @@ namespace Sim
 		AfbComponentParam operand1 = *instance->param(i_1_oprd);
 		AfbComponentParam operand2 = *instance->param(i_2_oprd);
 
+		quint16 confValue = conf->wordValue();
+
 		// Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)
 		//
-		switch (conf->wordValue())
+		switch (confValue)
 		{
 			case 1:
 				operand1.addSignedInteger(operand2);
@@ -3267,11 +3340,23 @@ namespace Sim
 		result.setOpIndex(o_result);
 
 		instance->addParam(result);
-		instance->addParamWord(o_overflow, operand1.mathOverflow());
 		instance->addParamWord(o_underflow, operand1.mathUnderflow());
 		instance->addParamWord(o_zero, operand1.mathZero());
 		instance->addParamWord(o_nan, operand1.mathNan());
 		instance->addParamWord(o_div_by_zero, operand1.mathDivByZero());
+
+		// AFB MATH version 104 has an issue for SI operations +, -, *:
+		// if result is -2'147'483'648 (what is ok) the overflow flag is set to 1 (supposed to be 0 as -2'147'483'648 within valid int32 range)
+		//
+		if (operand1.signedIntValue() == INT_MIN &&
+			(confValue == 1 || confValue == 2 || confValue == 3))
+		{
+			instance->addParamWord(o_overflow, 1);
+		}
+		else
+		{
+			instance->addParamWord(o_overflow, operand1.mathOverflow());
+		}
 
 		return;
 	}

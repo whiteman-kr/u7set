@@ -39,5 +39,7 @@
         <file>icons/Signal.png</file>
         <file>icons/NextSignal.png</file>
         <file>icons/PreviousSignal.png</file>
+        <file>languages/Metrology_ru.qm</file>
+        <file>languages/Metrology_ru.ts</file>
     </qresource>
 </RCC>

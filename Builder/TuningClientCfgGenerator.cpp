@@ -217,7 +217,7 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		bool result = m_settings.readFromDevice(m_context, m_software);
 
 		if (result == false)
 		{

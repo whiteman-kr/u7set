@@ -63,6 +63,43 @@ public:
 	};
 	Q_ENUM(VertAlign)
 
+
+	/** \brief This enum type defines the line styles that can be drawn.
+	 */
+	enum LineStyle
+	{
+		NoPen = Qt::NoPen,						/**< NoPen = 0. No line at all, for example rect fills but does not draw any boundary line.*/
+		SolidLine = Qt::SolidLine,				/**< SolidLine = 1. A plain line.*/
+		DashLine = Qt::DashLine,				/**< DashLine = 2. Dashes separated by a few pixels.*/
+		DotLine = Qt::DotLine,					/**< DotLine = 3. Dots separated by a few pixels.*/
+		DashDotLine = Qt::DashDotLine,			/**< DashDotLine = 4. Alternate dots and dashes.*/
+		DashDotDotLine = Qt::DashDotDotLine,	/**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
+	};
+	Q_ENUM(LineStyle)
+
+	/** \brief This enum type defines the line cap styles that can be drawn at the end of line.
+	 */
+	enum LineCap
+	{
+		NoCap = 0,							/**< NoCap = 0. No cap is drawn. */
+		BarCap = 1,							/**< BarCap = 1. A filled bar at the line end. LineCapFactor can be applied.*/
+		CircleCap = 2,						/**< CircleCap = 2. A filled circle at the line end. LineCapFactor can be applied.*/
+		Arrow1Cap = 3,						/**< Arrow1Cap = 3. An arrow at the line end. LineCapFactor can be applied.*/
+		Arrow2Cap = 4,						/**< Arrow2Cap = 4. An arrow at the line end. LineCapFactor can be applied.*/
+	};
+	Q_ENUM(LineCap)
+
+	/** \brief This enum type defines the line ending style that can be drawn at the end of line.
+	 */
+	enum LineStyleCap
+	{
+		FlatCap = Qt::FlatCap,					/**< FlatCap = 0. A square line end that does not cover the end point of the line.*/
+		SquareCap = Qt::SquareCap,				/**< SquareCap = 16. A square line end that covers the end point and extends beyond it by half the line width.*/
+		RoundCap = Qt::RoundCap,				/**< RoundCap = 32. A rounded line end.*/
+	};
+	Q_ENUM(LineStyleCap)
+
+
 	// UserTextPos
 	//
 	enum class TextPos
@@ -315,7 +352,7 @@ public:
 		Ohm_Ni_a_617 = 32,
 		Ohm_Raw = 33,
 
-		uA_m10_p10 = 34,
+		uA_m20_p20 = 34,
 	};
 	Q_ENUM(SensorType)
 

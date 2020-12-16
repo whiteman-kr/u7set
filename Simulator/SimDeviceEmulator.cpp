@@ -263,6 +263,7 @@ namespace Sim
 			else
 			{
 				Q_ASSERT(m_deviceState == DeviceState::Operate);
+
 				ok = processOperate(currentTime, currentDateTime, workcycle);
 			}
 		}
@@ -319,33 +320,7 @@ namespace Sim
 		//
 		if (runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
 		{
-			quint32 tuningDataOffsetW = m_lmDescription.memory().m_tuningDataOffset;
-
-			auto tuningRamHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, tuningDataOffsetW);
-			if (tuningRamHandle == Ram::InvalidHandle)
-			{
-				m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
-								 .arg(equipmentId())
-								 .arg(tuningDataOffsetW));
-
-				setDeviceState(DeviceState::Fault);
-				return false;
-			}
-
-			const RamArea* ramArea = m_ram.memoryArea(tuningRamHandle);
-			if (ramArea == nullptr)
-			{
-				Q_ASSERT(ramArea);
-
-				m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
-								 .arg(equipmentId())
-								 .arg(tuningDataOffsetW));
-
-				setDeviceState(DeviceState::Fault);
-				return false;
-			}
-
-			m_lans.updateTuningRam(*ramArea, plantTime);
+			m_lans.updateTuningRam(tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 		}
 
 		return ok;
@@ -881,6 +856,37 @@ namespace Sim
 		return getData<quint32>(wordOffset * 2);
 	}
 
+	RamArea DeviceEmulator::tuningRamArea() const
+	{
+		RamArea result{false};
+
+		quint32 tuningDataOffsetW = m_lmDescription.memory().m_tuningDataOffset;
+
+		auto tuningRamHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, tuningDataOffsetW);
+		if (tuningRamHandle == Ram::InvalidHandle)
+		{
+			m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
+							 .arg(equipmentId())
+							 .arg(tuningDataOffsetW));
+			return result;
+		}
+
+		const RamArea* ramArea = m_ram.memoryArea(tuningRamHandle);
+		if (ramArea == nullptr)
+		{
+			Q_ASSERT(ramArea);
+
+			m_log.writeError(tr("Error getting Tuning memory area LM %1, OffsetW %2, E::LogicModuleRamAccess::Read")
+							 .arg(equipmentId())
+							 .arg(tuningDataOffsetW));
+			return result;
+		}
+
+		result = *ramArea;
+
+		return result;
+	}
+
 	bool DeviceEmulator::initMemory()
 	{
 		bool ok = true;
@@ -1311,10 +1317,35 @@ namespace Sim
 		{
 			std::queue<TuningRecord> q = m_lans.fetchWriteTuningQueue();
 
+			std::vector<qint64> confirmedRecords;
+			confirmedRecords.reserve(q.size());
+
 			while (q.empty() == false)
 			{
-				q.front().writeToRam(mutableRam());
+				const TuningRecord& record =  q.front();
+
+				if (record.type == TuningRecord::RecordType::ApplyChanges)
+				{
+					this->tuningApplyCommand();
+				}
+				else
+				{
+					record.writeToRam(mutableRam());
+				}
+
+				confirmedRecords.push_back(record.recordIndex);
+
 				q.pop();
+			}
+
+			// Send confirmations to tuning subsystem
+			//
+			if (confirmedRecords.empty() == false)
+			{
+				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
+				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+
+				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 			}
 		}
 
@@ -1722,7 +1753,7 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::tuningEnterTuningMode()
+	bool DeviceEmulator::tuningEnterTuningMode(TimeStamp timeStamp)
 	{
 		// Device just entered to TuningMode.
 		// The copy of tuning memory is done here
@@ -1743,6 +1774,8 @@ namespace Sim
 		m_tuningRamArea = *tuningRamArea;
 
 		setRuntimeMode(RuntimeMode::TuningMode);
+
+		m_lans.tuningModeEntered(m_tuningRamArea, m_commandProcessor->signalSetSorChassis(), timeStamp);
 
 		return true;
 	}
@@ -1786,8 +1819,24 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = tuningEnterTuningMode();	// it will copy tuning ram area again
-		return ok;
+		// Copy tuning RAM area again
+		//
+		const LmDescription::Memory& memory = lmDescription().memory();
+
+		Ram::Handle ramAreaHandle = m_ram.memoryAreaHandle(E::LogicModuleRamAccess::ReadWrite, memory.m_tuningDataOffset);
+		const RamArea* tuningRamArea = m_ram.memoryArea(ramAreaHandle);
+
+		if (tuningRamArea == nullptr)
+		{
+			fault(QString("Getting tuning ram area error, offset 0x%1")
+					.arg(memory.m_tuningDataOffset, 8, 16, QChar('0')),
+				  "DeviceEmulator::tuningApplyCommand");
+			return false;
+		}
+
+		m_tuningRamArea = *tuningRamArea;
+
+		return true;
 	}
 
 
@@ -1899,12 +1948,11 @@ namespace Sim
 	{
 		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value);
 
-		if ((currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode) ||
-			(currentRuntimeMode != RuntimeMode::TuningMode && value == RuntimeMode::TuningMode))
+		if (currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode)
 		{
-			// Module enters or leaves TuningMode, LAN must be notified
+			// Module leaves TuningMode, LAN must be notified
 			//
-			m_lans.tuningModeChanged(value == RuntimeMode::TuningMode);
+			m_lans.tuningModeLeft();
 		}
 
 		return;
@@ -1939,7 +1987,7 @@ namespace Sim
 
 	bool DeviceEmulator::armingKey() const
 	{
-		return m_armingKey;
+		return m_armingKey.load(std::memory_order::memory_order_relaxed);
 	}
 
 	void DeviceEmulator::setArmingKey(bool value)
@@ -1949,7 +1997,7 @@ namespace Sim
 
 	bool DeviceEmulator::tuningKey() const
 	{
-		return m_tuningKey;
+		return m_tuningKey.load(std::memory_order::memory_order_relaxed);
 	}
 
 	void DeviceEmulator::setTuningKey(bool value)
@@ -1957,8 +2005,49 @@ namespace Sim
 		m_tuningKey = value;
 	}
 
-	bool DeviceEmulator::testTuningApplyCommand(bool value)
+	bool DeviceEmulator::sorIsSet() const
 	{
-		return m_tuningApplyCommand.exchange(value);
+		return m_sorIsSet.load(std::memory_order::memory_order_relaxed);
 	}
+
+	void DeviceEmulator::setSorIsSet(bool value)
+	{
+		m_sorIsSet = value;
+	}
+
+	bool DeviceEmulator::sorSetSwitch1() const
+	{
+		return m_sorSetSwitch1.load(std::memory_order::memory_order_relaxed);
+	}
+
+	void DeviceEmulator::setSorSetSwitch1(bool value)
+	{
+		m_sorSetSwitch1 = value;
+	}
+
+	bool DeviceEmulator::sorSetSwitch2() const
+	{
+		return m_sorSetSwitch2.load(std::memory_order::memory_order_relaxed);
+	}
+
+	void DeviceEmulator::setSorSetSwitch2(bool value)
+	{
+		m_sorSetSwitch2 = value;
+	}
+
+	bool DeviceEmulator::sorSetSwitch3() const
+	{
+		return m_sorSetSwitch3.load(std::memory_order::memory_order_relaxed);
+	}
+
+	void DeviceEmulator::setSorSetSwitch3(bool value)
+	{
+		m_sorSetSwitch3 = value;
+	}
+
+	bool DeviceEmulator::testSorResetSwitch(bool newValue)
+	{
+		return m_sorResetSwitch.exchange(newValue, std::memory_order::memory_order_relaxed);
+	}
+
 }

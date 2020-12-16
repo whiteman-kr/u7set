@@ -3150,7 +3150,13 @@ namespace ExtWidgets
 			return new QWidget(parent);
 		}
 
-		m_cellEditor = m_propertyEditor->createCellRowEditor(p, row, true, p->readOnly() == true || m_propertyEditor->isReadOnly() == true, parent);
+		bool sameValue = m_propertyEditor->propertySameValueFromIndex(index);
+
+		m_cellEditor = m_propertyEditor->createCellRowEditor(p,
+															 row,
+															 sameValue,
+															 p->readOnly() == true || m_propertyEditor->isReadOnly() == true,
+															 parent);
 
 		connect(m_cellEditor, &PropertyEditCellWidget::valueChanged, this, &PropertyEditorDelegate::onValueChanged);
 
@@ -3194,7 +3200,13 @@ namespace ExtWidgets
 			Q_ASSERT(cellEditor);
 			return;
 		}
-		cellEditor->setValue(p, p->readOnly() == true || m_propertyEditor->isReadOnly() == true);
+
+		bool sameValue = m_propertyEditor->propertySameValueFromIndex(index);
+
+		if (sameValue == true)
+		{
+			cellEditor->setValue(p, p->readOnly() == true || m_propertyEditor->isReadOnly() == true);
+		}
 
 		return;
 	}
@@ -3987,6 +3999,20 @@ namespace ExtWidgets
 
 		const PropertyEditorObject& po = it->second;
 		return po.property;
+	}
+
+	bool PropertyEditor::propertySameValueFromIndex(QModelIndex index) const
+	{
+		QString propertyName = m_treeWidget->propertyCaption(index);
+
+		auto it = m_treeObjects.find(propertyName);
+		if (it == m_treeObjects.end())
+		{
+			return false;
+		}
+
+		const PropertyEditorObject& po = it->second;
+		return po.sameValue;
 	}
 
 	// returns -1 if no type is selected or they are different

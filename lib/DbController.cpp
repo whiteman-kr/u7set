@@ -110,7 +110,16 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getMultipleSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getMultipleSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
-	connect(this, &DbController::signal_getSpecificSignals, m_worker, &DbWorker::slot_getSpecificSignals);
+
+	connect(this, static_cast<void(DbController::*)(const std::vector<int>*, int, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(const std::vector<int>*, int, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+
+	connect(this, static_cast<void(DbController::*)(int, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(int, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+
+	connect(this, static_cast<void(DbController::*)(QDateTime, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(QDateTime, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+
 	connect(this, &DbController::signal_hasCheckedOutSignals, m_worker, &DbWorker::slot_hasCheckedOutSignals);
 
 	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
@@ -2584,6 +2593,49 @@ bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int cha
 	return true;
 }
 
+bool DbController::getSpecificSignals(int changesetId, std::vector<Signal>* out, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(out);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificSignals(changesetId, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
+
+	return true;
+}
+
+bool DbController::getSpecificSignals(QDateTime date, std::vector<Signal>* out, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(out);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificSignals(date, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
+
+	return true;
+}
 
 bool DbController::hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget)
 {
@@ -2761,7 +2813,10 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 												   {"ufb", "UFB Schema"},
 												   {"wiring", "Wiring Schema"},
 												   {"in", "Input Signal"},
-												   {"out", "Output Signal"}};
+												   {"out", "Output Signal"},
+												   {"view_linear", "Signal with Linear Grid"},
+												   {"view_log10", "Signal with Logarithmic Grid"},
+												   {"view_period", "Signal with Reactor Period Grid"}};
 
 	std::vector<DbFileInfo> fileList;
 

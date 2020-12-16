@@ -189,6 +189,7 @@ public:
 	// Tuning signal properties
 
 	bool enableTuning() const { return m_enableTuning; }
+	bool isTunable() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	TuningValue tuningDefaultValue() const { return m_tuningDefaultValue; }
@@ -324,6 +325,8 @@ public:
 
 	Address16 regValidityAddr() const { return m_regValidityAddr; }
 	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
+
+	Address16 actualAddr(E::LogicModuleRamAccess* lmRamAccess = nullptr) const;
 
 	void resetAddresses();
 

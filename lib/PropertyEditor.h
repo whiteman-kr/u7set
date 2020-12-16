@@ -694,6 +694,7 @@ namespace ExtWidgets
 		void fillProperties();
 		void createProperty(const PropertyEditorObject& poe);
 		std::shared_ptr<Property> propertyFromIndex(QModelIndex index) const;
+		bool propertySameValueFromIndex(QModelIndex index) const;
 		int getSelectionType();	// returns -1 if no type is selected or they are different
 		void startEditing();
 		void toggleSelected();

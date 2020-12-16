@@ -5015,6 +5015,50 @@ namespace Builder
 	{
 		bool result = true;
 
+		for(Signal* s : m_chassisSignals)
+		{
+			if(s == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			// set signal's E::LogicModuleRamAccess
+			//
+			switch(s->inOutType())
+			{
+			case E::SignalInOutType::Input:
+				if (s->needConversion() == true)
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				}
+				else
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+				}
+				break;
+
+			case E::SignalInOutType::Output:
+				s->setLmRamAccess(E::LogicModuleRamAccess::Write);
+				break;
+
+			case E::SignalInOutType::Internal:
+				if (s->isTunable() == true)
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+				}
+				else
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
 		for(UalSignal* ualSignal : m_ualSignals)
 		{
 			if(ualSignal == nullptr)
@@ -5026,58 +5070,30 @@ namespace Builder
 
 			QVector<Signal*> refSignals = ualSignal->refSignals();
 
-			for(Signal* s : refSignals)
+			if (ualSignal->isConst() == true)
 			{
-				if(s == nullptr)
-				{
-					assert(false);
-					result = false;
-					continue;
-				}
+				std::for_each(refSignals.begin(), refSignals.end(),
+							[ualSignal](Signal* s) {
+					if (s != nullptr)
+					{
+						s->setIsConst(true);
+						s->setConstValue(ualSignal->constValue());
+						s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
+					}
+				});
 
-				// set signal's isConst flag and constValue
-				//
-				if (ualSignal->isConst() == true)
-				{
-					s->setIsConst(true);
-					s->setConstValue(ualSignal->constValue());
-					s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
-					continue;		// !
-				}
+				continue;
+			}
 
-				// set signal's E::LogicModuleRamAccess
-				//
-				switch(s->inOutType())
-				{
-				case E::SignalInOutType::Input:
-					if (s->needConversion() == true)
+			if (ualSignal->isOutput() == true)
+			{
+				std::for_each(refSignals.begin(), refSignals.end(),
+							[](Signal* s) {
+					if (s != nullptr)
 					{
 						s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
 					}
-					else
-					{
-						s->setLmRamAccess(E::LogicModuleRamAccess::Read);
-					}
-					break;
-
-				case E::SignalInOutType::Output:
-					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
-					break;
-
-				case E::SignalInOutType::Internal:
-					if (ualSignal->isTunable() == true)
-					{
-						s->setLmRamAccess(E::LogicModuleRamAccess::Read);
-					}
-					else
-					{
-						s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
-					}
-					break;
-
-				default:
-					assert(false);
-				}
+				});
 			}
 		}
 
@@ -11189,7 +11205,7 @@ namespace Builder
 			cmd.movConst(bitAccAddr, 0);
 			code->append(cmd);
 
-			for(const std::pair<int, Signal*>& pair: sortedWriteSignals)
+			for(const std::pair<int, Signal*> pair: sortedWriteSignals)
 			{
 				Signal* s = pair.second;
 

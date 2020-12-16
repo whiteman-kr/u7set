@@ -532,7 +532,8 @@ namespace Sim
 	{
 		QString appSignalId;
 		QString logicModuleId;
-		Address16 ualAddress{};
+		Address16 actualAddress{};
+		E::LogicModuleRamAccess ramAccess;
 		E::SignalType type{};
 		E::ByteOrder byteOrder{};
 		E::DataFormat analogDataFormat{};
@@ -574,7 +575,8 @@ namespace Sim
 			appSignalId = s.appSignalID();
 			logicModuleId = s.lmEquipmentID();
 			logicModuleHash = ::calcHash(logicModuleId);
-			ualAddress = s.ualAddr();
+			actualAddress = s.actualAddr();
+			ramAccess = s.lmRamAccess();
 			type = s.signalType();
 			byteOrder = s.byteOrder();
 			analogDataFormat = s.dataFormat();
@@ -647,7 +649,7 @@ namespace Sim
 				return state;
 			}
 
-			if (ualAddress.isValid() == false)
+			if (actualAddress.isValid() == false)
 			{
 				state.m_flags.all = 0;
 				// This is can be unused signal, in this case it has non valid addresses
@@ -674,7 +676,7 @@ namespace Sim
 							case 32:
 								{
 									float data = 0;
-									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder, E::LogicModuleRamAccess::Read, applyOverride);
+									if (bool ok = ram.readFloat(actualAddress.offset(), &data, byteOrder, ramAccess, applyOverride);
 										ok == false)
 									{
 										m_log.writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
@@ -699,7 +701,7 @@ namespace Sim
 							case 32:
 								{
 									qint32 data = 0;
-									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder, E::LogicModuleRamAccess::Read, applyOverride);
+									if (bool ok = ram.readSignedInt(actualAddress.offset(), &data, byteOrder, ramAccess, applyOverride);
 										ok == false)
 									{
 										m_log.writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
@@ -728,7 +730,7 @@ namespace Sim
 			case E::SignalType::Discrete:
 				{
 					quint16 data = 0;
-					bool ok = ram.readBit(ualAddress.offset(), ualAddress.bit(), &data, byteOrder, applyOverride);
+					bool ok = ram.readBit(actualAddress.offset(), actualAddress.bit(), &data, byteOrder, ramAccess, applyOverride);
 
 					if (ok == false)
 					{

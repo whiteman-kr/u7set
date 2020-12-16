@@ -79,6 +79,8 @@ namespace Hardware
 
 		Q_INVOKABLE int ssKey(QString subsysId);
 
+		int subsystemKey(const QString& subsystemID);
+
 	private:
 		std::vector<std::shared_ptr<Subsystem>> m_subsystems;
 		const QString fileName = "SubsystemsList.xml";

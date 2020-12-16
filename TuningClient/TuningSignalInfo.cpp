@@ -126,7 +126,7 @@ void TuningSignalInfo::updateInfo()
 	text += tr("WriteInProgress:\t%1\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
 	text += tr("ControlIsEnabled:\t%1\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 
-	if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::AccessKey)
+	if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
 	{
 		text += tr("WritingIsEnabled:\t%1\n").arg(state.writingIsEnabled() == true ? tr("Yes") : tr("No"));
 	}

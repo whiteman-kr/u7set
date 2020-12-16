@@ -63,8 +63,7 @@ namespace Sim
 
 	bool Lans::isAppDataEnabled() const
 	{
-		if (m_simulator->software().enabled() == false ||
-			m_simulator->software().appDataTransmitter().enabled() == false)
+		if (m_simulator->software().enabled() == false)
 		{
 			return false;
 		}
@@ -84,8 +83,7 @@ namespace Sim
 
 	bool Lans::sendAppData(const QByteArray& data, TimeStamp timeStamp)
 	{
-		if (m_simulator->software().enabled() == false ||
-			m_simulator->software().appDataTransmitter().enabled() == false)
+		if (m_simulator->software().enabled() == false)
 		{
 			return false;
 		}
@@ -128,7 +126,7 @@ namespace Sim
 		return false;
 	}
 
-	bool Lans::updateTuningRam(const RamArea& data, TimeStamp timeStamp)
+	bool Lans::updateTuningRam(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		if (m_simulator->software().enabled() == false ||
 			m_logicModuleDevice->runtimeMode() != RuntimeMode::TuningMode)
@@ -150,14 +148,14 @@ namespace Sim
 					continue;
 				}
 
-				ok &= tli->updateTuningRam(data, timeStamp);
+				ok &= tli->updateTuningRam(data, setSorChassisState, timeStamp);
 			}
 		}
 
 		return ok;
 	}
 
-	void Lans::tuningModeChanged(bool tuningMode)
+	void Lans::tuningModeEntered(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
 	{
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
@@ -169,7 +167,24 @@ namespace Sim
 					continue;
 				}
 
-				tli->tuningModeChanged(tuningMode);
+				tli->tuningModeEntered(data, setSorChassisState, timeStamp);
+			}
+		}
+	}
+
+	void Lans::tuningModeLeft()
+	{
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				tli->tuningModeLeft();
 			}
 		}
 	}
@@ -208,6 +223,25 @@ namespace Sim
 		}
 
 		return result;
+	}
+
+	void Lans::sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
+	{
+		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
+		{
+			if (i->isTuning() == true && i->enabled() == true)
+			{
+				TuningLanInterface* tli = i->toTuningLanInterface();
+				if (tli == nullptr)
+				{
+					continue;
+				}
+
+				tli->sendWriteConfirmation(confirmedRecords, data, setSorChassisState, timeStamp);
+			}
+		}
+
+		return;
 	}
 
 	ScopedLog& Lans::log()

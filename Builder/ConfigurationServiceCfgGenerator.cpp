@@ -39,7 +39,7 @@ namespace Builder
 
 	bool ConfigurationServiceCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
+		bool result = m_settings.readFromDevice(m_context, m_software);
 
 		result &= buildClientsList(&m_settings);
 
@@ -151,8 +151,10 @@ namespace Builder
 
 		settings->clients.clear();
 
-		for(Hardware::Software* software : m_softwareList)
+		for(auto p : m_context->m_software)
 		{
+			Hardware::Software* software = p.second;
+
 			if (software == nullptr)
 			{
 				assert(false);

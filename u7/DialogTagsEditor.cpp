@@ -242,7 +242,7 @@ bool DialogTagsEditor::saveChanges()
 	}
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, qAppName(), "No comment supplied!");
+		QMessageBox::warning(this, qAppName(), "No comment supplied! Please provide a comment.");
 		return false;
 	}
 

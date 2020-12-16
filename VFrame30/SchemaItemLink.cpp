@@ -92,7 +92,7 @@ namespace VFrame30
 
 		QPainter* p = drawParam->painter();
 
-		int dpiX = drawParam->dpiX();
+		const int dpiX = drawParam->dpiX();
 
 		// Draw the main part
 		//
@@ -114,18 +114,19 @@ namespace VFrame30
 
 		QPen pen(lineColor());
 		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
-		p->setPen(pen);
+		pen.setStyle(static_cast<Qt::PenStyle>(m_lineStyle));
 
+		p->setPen(pen);
 		p->drawPolyline(polyline);
 
-		// Пины входов/выходов
+		// Pins - ins/outs
 		//
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		QPen redPen(QColor(0xE0D00000));
-		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);			// Don't use getter!
+		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 
-		// вход/выход - рисование красного креста 
+		// in/out - red cross
 		//
 		auto drawPin = [&](SchemaPoint pt)
 			{
@@ -140,7 +141,7 @@ namespace VFrame30
 				}
 				else
 				{
-					// рисование красного креста
+					// Red cross
 					//
 					p->setPen(redPen);
 					DrawPinCross(p, pt.X, pt.Y, pinWidth);

@@ -31,6 +31,10 @@ struct SignalElectricLimit
 	//
 	{   0,		5.1,	E::ElectricUnit::mA,	E::SensorType::V_0_5,			},						// module AIM and Rload
 
+	// micro A
+	//
+	{   -20,	20,		E::ElectricUnit::uA,	E::SensorType::uA_m20_p20,		},						// module MAIM
+
 	// Ohm - types of thermistors
 	//
 	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391,	},	// -200 .. 850		// module non ptaform
@@ -71,10 +75,6 @@ struct SignalElectricLimit
 
 	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,	},						// module TIM
 	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,	},						// module TIM
-
-	// micro A
-	//
-	{   -10,	10,		E::ElectricUnit::uA,	E::SensorType::uA_m10_p10,		},						// module MAIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
@@ -86,13 +86,13 @@ const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(Signa
 const double RLOAD_OHM_LOW_LIMIT = 50;																	// module AIM and Rload
 const double RLOAD_OHM_HIGH_LIMIT = 1000;																// module AIM and Rload
 
-// limits for otput signals of module AOM
+// limits for output signals of module AOM
 //
 const double OUT_PH_LOW_LIMIT = 0;																		// module AOM
 const double OUT_PH_HIGH_LIMIT = 65535;																	// module AOM
 
 
-// limits for otput signals of module ROM
+// limits for output signals of module ROM
 //
 //const double OUT_OHM_LOW_LIMIT = 0;																	// module ROM
 //const double OUT_OHM_HIGH_LIMIT = 2110; // Ohm														// module ROM

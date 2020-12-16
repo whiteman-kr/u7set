@@ -38,7 +38,7 @@ namespace Sim
 
 	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
-		if (enabled() == false)
+		if (softwareEnabled() == false)
 		{
 			return true;
 		}
@@ -55,14 +55,9 @@ namespace Sim
 		//
 	}
 
-	bool AppDataTransmitter::enabled() const
+	bool AppDataTransmitter::softwareEnabled() const
 	{
-		return m_enabled;
-	}
-
-	void AppDataTransmitter::setEnabled(bool value)
-	{
-		m_enabled = value;
+		return m_simulator->software().enabled();
 	}
 
 	void AppDataTransmitter::shutdownTransmitterThread()

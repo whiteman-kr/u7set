@@ -57,7 +57,7 @@ namespace Sim
 		m_byteOrder = signalParam.byteOrder();
 
 		m_dataSizeW = signalParam.sizeW();
-		m_address = signalParam.ualAddr();
+		m_address = signalParam.actualAddr();
 		m_ramAccess = signalParam.lmRamAccess();
 
 		// Checks

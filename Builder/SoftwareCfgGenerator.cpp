@@ -13,10 +13,7 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-	HashedVector<QString, Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
-	HashedVector<QString, Hardware::Software*> SoftwareCfgGenerator::m_softwareList;
 	std::multimap<QString, std::shared_ptr<SoftwareCfgGenerator::SchemaFile>> SoftwareCfgGenerator::m_schemaTagToFile;
-
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
 		m_context(context),
@@ -114,10 +111,6 @@ namespace Builder
 
 		// add general software cfg generation here:
 		//
-		result &= buildLmList(context->m_equipmentSet.get(), log);
-
-		result &= buildSoftwareList(context->m_equipmentSet.get(), log);
-
 		result &= checkLmToSoftwareLinks(context);
 
 		// Add Schemas to Build result
@@ -498,8 +491,6 @@ namespace Builder
 
 	void SoftwareCfgGenerator::clearStaticData()
 	{
-		m_lmList.clear();
-		m_softwareList.clear();
 		m_schemaTagToFile.clear();
 
 		return;
@@ -519,32 +510,6 @@ namespace Builder
 		}
 	}
 
-	void SoftwareCfgGenerator::initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems)
-	{
-		if (subsystemKeyMap == nullptr || subsystems == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		subsystemKeyMap->clear();
-
-		int subsystemsCount = subsystems->count();
-
-		for(int i = 0; i < subsystemsCount; i++)
-		{
-			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems->get(i);
-
-			if (subsystem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			subsystemKeyMap->insert(subsystem->subsystemId(), subsystem->key());
-		}
-	}
-
 	QString SoftwareCfgGenerator::equipmentID() const
 	{
 		if (m_software == nullptr)
@@ -554,107 +519,6 @@ namespace Builder
 		}
 
 		return m_software->equipmentIdTemplate();
-	}
-
-	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)
-	{
-		if (equipment == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		bool result = true;
-
-		m_lmList.clear();
-
-		equipmentWalker(equipment->root(), [&result](Hardware::DeviceObject* currentDevice)
-			{
-				if (currentDevice == nullptr)
-				{
-					assert(false);
-					result = false;
-					return;
-				}
-
-				if (currentDevice->isModule() == false)
-				{
-					return;
-				}
-
-				Hardware::DeviceModule* module = currentDevice->toModule();
-
-				if (module->isLogicModule() == false)
-				{
-					return;
-				}
-
-				m_lmList.insert(module->equipmentId(), module);
-			}
-		);
-
-		if (result == true)
-		{
-			LOG_MESSAGE(log, QString(tr("Logic Modules list building... OK")));
-		}
-		else
-		{
-			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("Can't build Logic Modules list")));
-		}
-
-		return result;
-	}
-
-
-	bool SoftwareCfgGenerator::buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log)
-	{
-		if (equipment == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		bool result = true;
-
-		m_softwareList.clear();
-
-		equipmentWalker(equipment->root(), [&result](Hardware::DeviceObject* currentDevice)
-			{
-				if (currentDevice == nullptr)
-				{
-					assert(false);
-					result = false;
-					return;
-				}
-
-				if (currentDevice->isSoftware() == false)
-				{
-					return;
-				}
-
-				Hardware::Software* software = currentDevice->toSoftware();
-
-				if (software == nullptr)
-				{
-					assert(false);
-					result = false;
-					return;
-				}
-
-				m_softwareList.insert(software->equipmentId(), software);
-			}
-		);
-
-		if (result == true)
-		{
-			LOG_MESSAGE(log, QString(tr("Software list building... OK")));
-		}
-		else
-		{
-			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("Can't build software list")));
-		}
-
-		return result;
 	}
 
 	bool SoftwareCfgGenerator::checkLmToSoftwareLinks(Context* context)
@@ -667,7 +531,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(Hardware::DeviceModule* lm : m_lmList)
+		const std::map<QString, Hardware::Software*>& softwareList = context->m_software;
+
+		for(Hardware::DeviceModule* lm : context->m_lmModules)
 		{
 			std::shared_ptr<LmDescription> lmDescription = context->m_lmDescriptions->get(lm);
 
@@ -705,7 +571,9 @@ namespace Builder
 					}
 					else
 					{
-						if (m_softwareList.contains(lanControllerInfo.tuningServiceID) == false)
+						auto sw = softwareList.find(lanControllerInfo.tuningServiceID);
+
+						if (sw == softwareList.end())
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -715,7 +583,7 @@ namespace Builder
 						}
 						else
 						{
-							software = m_softwareList[lanControllerInfo.tuningServiceID];
+							software = sw->second;
 
 							if (software->type() != E::SoftwareType::TuningService)
 							{
@@ -742,7 +610,9 @@ namespace Builder
 					}
 					else
 					{
-						if (m_softwareList.contains(lanControllerInfo.appDataServiceID) == false)
+						auto sw = softwareList.find(lanControllerInfo.appDataServiceID);
+
+						if (sw == softwareList.end())
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -752,7 +622,7 @@ namespace Builder
 						}
 						else
 						{
-							software = m_softwareList[lanControllerInfo.appDataServiceID];
+							software = sw->second;
 
 							if (software->type() != E::SoftwareType::AppDataService)
 							{
@@ -779,7 +649,9 @@ namespace Builder
 					}
 					else
 					{
-						if (m_softwareList.contains(lanControllerInfo.diagDataServiceID) == false)
+						auto sw = softwareList.find(lanControllerInfo.diagDataServiceID);
+
+						if (sw == softwareList.end())
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -789,7 +661,7 @@ namespace Builder
 						}
 						else
 						{
-							software = m_softwareList[lanControllerInfo.diagDataServiceID];
+							software = sw->second;
 
 							if (software->type() != E::SoftwareType::DiagDataService)
 							{
@@ -1130,103 +1002,6 @@ namespace Builder
 
 		return true;
 	}
-
-	bool SoftwareCfgGenerator::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
-															DataSource::DataType dataType,
-															int adapterNo,
-															E::LanControllerType lanControllerType,
-															const Hardware::EquipmentSet& equipmentSet,
-															const SubsystemKeyMap& subsystemKeyMap,
-															const QHash<QString, quint64>& lmUniqueIdMap,
-															DataSource* ds,
-															Builder::IssueLogger* log)
-	{
-		TEST_PTR_RETURN_FALSE(log);
-		TEST_PTR_LOG_RETURN_FALSE(lm, log);
-		TEST_PTR_LOG_RETURN_FALSE(ds, log);
-
-		ds->setLmDataType(dataType);
-		ds->setLmEquipmentID(lm->equipmentIdTemplate());
-		ds->setLmPresetName(lm->presetName());
-		ds->setLmModuleType(lm->moduleType());
-		ds->setLmCaption(lm->caption());
-
-		bool result = true;
-
-		int lmNumber = 0;
-		QString subsystemChannel;
-		QString subsystemID;
-
-		result &= DeviceHelper::getIntProperty(lm, EquipmentPropNames::LM_NUMBER, &lmNumber, log);
-		result &= DeviceHelper::getStrProperty(lm, EquipmentPropNames::SUBSYSTEM_CHANNEL, &subsystemChannel, log);
-		result &= DeviceHelper::getStrProperty(lm, EquipmentPropNames::SUBSYSTEM_ID, &subsystemID, log);
-
-		ds->setLmNumber(lmNumber);
-		ds->setLmSubsystemChannel(subsystemChannel);
-		ds->setLmSubsystemID(subsystemID);
-
-		if (subsystemKeyMap.contains(subsystemID) == false)
-		{
-			// Subsystem '%1' is not found in subsystem set (Logic Module '%2')
-			//
-			log->errCFG3001(subsystemID, lm->equipmentIdTemplate());
-			return false;
-		}
-
-		ds->setLmSubsystemKey(subsystemKeyMap.value(subsystemID));
-		ds->setLmUniqueID(lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0));
-
-		LanControllerInfo lanControllerInfo;
-
-		result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType, &lanControllerInfo, equipmentSet, log);
-
-		ds->setLmAdapterID(lanControllerInfo.equipmentID);
-
-		switch(dataType)
-		{
-		case DataSource::DataType::App:
-
-			assert(lanControllerType == E::LanControllerType::AppData || lanControllerType == E::LanControllerType::AppAndDiagData);
-
-			ds->setLmDataEnable(lanControllerInfo.appDataEnable);
-			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.appDataIP, lanControllerInfo.appDataPort));
-			ds->setLmDataID(lanControllerInfo.appDataUID);
-			ds->setLmDataSize(lanControllerInfo.appDataSizeBytes);
-			ds->setLmRupFramesQuantity(lanControllerInfo.appDataFramesQuantity);
-			ds->setServiceID(lanControllerInfo.appDataServiceID);
-			break;
-
-		case DataSource::DataType::Diag:
-
-			assert(lanControllerType == E::LanControllerType::DiagData || lanControllerType == E::LanControllerType::AppAndDiagData);
-
-			ds->setLmDataEnable(lanControllerInfo.diagDataEnable);
-			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.diagDataIP, lanControllerInfo.diagDataPort));
-			ds->setLmDataID(lanControllerInfo.diagDataUID);
-			ds->setLmDataSize(lanControllerInfo.diagDataSizeBytes);
-			ds->setLmRupFramesQuantity(lanControllerInfo.diagDataFramesQuantity);
-			ds->setServiceID(lanControllerInfo.diagDataServiceID);
-			break;
-
-		case DataSource::DataType::Tuning:
-
-			assert(lanControllerType == E::LanControllerType::Tuning);
-
-			ds->setLmDataEnable(lanControllerInfo.tuningEnable);
-			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.tuningIP, lanControllerInfo.tuningPort));
-			ds->setLmDataID(0);
-			ds->setLmDataSize(0);
-			ds->setLmRupFramesQuantity(0);
-			ds->setServiceID(lanControllerInfo.tuningServiceID);
-			break;
-
-		default:
-			assert(false);
-		}
-
-		return result;
-	}
-
 }
 
 
