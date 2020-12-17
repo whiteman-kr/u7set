@@ -11,6 +11,7 @@
 
 class EditSchemaTabPageEx;
 class TagSelectorWidget;
+class SignalSetProvider;
 
 //
 //
@@ -266,7 +267,7 @@ class SchemaControlTabPageEx : public QWidget, public HasDbController
 	Q_OBJECT
 
 public:
-	SchemaControlTabPageEx(DbController* db);
+	SchemaControlTabPageEx(DbController* db, SignalSetProvider* signalSetProvider);
 	virtual ~SchemaControlTabPageEx();
 
 public:
@@ -362,6 +363,8 @@ private:
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
 
+	SignalSetProvider* m_signalSetProvider = nullptr;
+
 	int m_lastSelectedNewSchemaForLmFileId = -1;
 };
 
@@ -376,7 +379,7 @@ class SchemasTabPageEx : public MainTabPage
 	Q_OBJECT
 
 public:
-	explicit SchemasTabPageEx(DbController* dbc, QWidget* parent);
+	explicit SchemasTabPageEx(DbController* dbc, SignalSetProvider* signalSetProvider, QWidget* parent);
 	virtual ~SchemasTabPageEx();
 
 public:
@@ -419,9 +422,10 @@ class EditSchemaTabPageEx : public QMainWindow, public HasDbController
 public:
 	EditSchemaTabPageEx() = delete;
 	EditSchemaTabPageEx(QTabWidget* tabWidget,
-					  std::shared_ptr<VFrame30::Schema> schema,
-					  const DbFileInfo& fileInfo,
-					  DbController* db);
+						std::shared_ptr<VFrame30::Schema> schema,
+						const DbFileInfo& fileInfo,
+						DbController* db,
+						SignalSetProvider* signalSetProvider);
 	virtual ~EditSchemaTabPageEx();
 
 protected:

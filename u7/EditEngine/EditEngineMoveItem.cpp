@@ -1,5 +1,5 @@
 #include "EditEngineMoveItem.h"
-#include "EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaView.h"
 
 namespace EditEngine
 {

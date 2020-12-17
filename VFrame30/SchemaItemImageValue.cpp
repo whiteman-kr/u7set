@@ -229,64 +229,6 @@ namespace VFrame30
 		return;
 	}
 
-//	bool SchemaItemImageValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
-//	{
-//		if (drawParam == nullptr ||
-//			signalParam == nullptr ||
-//			appSignalState == nullptr ||
-//			tuningSignalState == nullptr)
-//		{
-//			assert(drawParam);
-//			assert(signalParam);
-//			assert(appSignalState);
-//			assert(tuningSignalState);
-//			return false;
-//		}
-
-//		if (drawParam->isMonitorMode() == false)
-//		{
-//			assert(drawParam->isMonitorMode());
-//			return false;
-//		}
-
-//		bool ok = false;
-
-//		switch (signalSource())
-//		{
-//		case E::SignalSource::AppDataService:
-//			if (drawParam->appSignalController() == nullptr)
-//			{
-//			}
-//			else
-//			{
-//				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-//				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
-//			}
-//			break;
-
-//		case E::SignalSource::TuningService:
-//			if (drawParam->tuningController() == nullptr)
-//			{
-//			}
-//			else
-//			{
-//				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-//				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
-
-//				appSignalState->m_hash = signalParam->hash();
-//				appSignalState->m_flags.valid = tuningSignalState->valid();
-//				appSignalState->m_value = tuningSignalState->value().toDouble();
-//			}
-//			break;
-
-//		default:
-//			assert(false);
-//			ok = false;
-//		}
-
-//		return ok;
-//	}
-
 	void SchemaItemImageValue::drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect)
 	{
 		for (std::shared_ptr<ImageItem> image : m_images)

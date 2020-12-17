@@ -206,12 +206,17 @@ AppSignalParam::AppSignalParam()
 {
 }
 
+AppSignalParam::AppSignalParam(const Signal& signal)
+{
+	load(signal);
+}
+
+
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
 	Signal s;
 
 	s.serializeFrom(message);
-
 	s.cacheSpecPropValues();
 
 	m_hash = message.calcparam().hash();

@@ -1,5 +1,5 @@
 #include "EditEngineNop.h"
-#include "EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaWidget.h"
 
 namespace EditEngine
 {

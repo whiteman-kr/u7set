@@ -7,7 +7,7 @@
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
-#include "SchemaTabPageEx.h"
+#include "SchemaEditor/SchemaTabPageEx.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogSubsystemListEditor.h"
@@ -83,7 +83,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_editSchemaTabPage = new SchemasTabPageEx{db(), this};
+	m_editSchemaTabPage = new SchemasTabPageEx{db(), m_signalSetProvider, this};
 	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);

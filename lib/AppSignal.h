@@ -330,6 +330,7 @@ class AppSignalParam
 public:
 	AppSignalParam();
 	AppSignalParam(const AppSignalParam&) = default;
+	AppSignalParam(const Signal& signal);
 
 	bool load(const Proto::AppSignal& message);
 	void load(const Signal& signal);

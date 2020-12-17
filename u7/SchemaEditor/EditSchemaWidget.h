@@ -13,69 +13,8 @@
 #include "SignalsTabPage.h"
 #include "CreateSignalDialog.h"
 #include "EditConnectionLine.h"
-
-#define ControlBarSizeDisplay		10
-#define ControlBarMm				mm2in(2.4)
-#define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
-
-
-
-enum class MouseState
-{
-	None,								// No state
-	Scrolling,							// Scrolling with middle mouse button
-	Selection,							// Selection items
-	Moving,								// Moving Items
-	SizingTopLeft,						// Resizing ISchemaItemPosRect
-	SizingTop,							// Resizing ISchemaItemPosRect
-	SizingTopRight,						// Resizing ISchemaItemPosRect
-	SizingRight,						// Resizing ISchemaItemPosRect
-	SizingBottomRight,					// Resizing ISchemaItemPosRect
-	SizingBottom,						// Resizing ISchemaItemPosRect
-	SizingBottomLeft,					// Resizing ISchemaItemPosRect
-	SizingLeft,							// Resizing ISchemaItemPosRect
-	MovingStartLinePoint,				// Moving point ISchemaItemPosLine.StartDocPt
-	MovingEndLinePoint,					// Moving point ISchemaItemPosLine.EndDocPt
-	AddSchemaPosLineStartPoint,			// Add item ISchemaPosLine
-	AddSchemaPosLineEndPoint,			// Add item ISchemaPosLine
-	AddSchemaPosRectStartPoint,			// Add item ISchemaPosRect
-	AddSchemaPosRectEndPoint,			// Add item ISchemaPosRect
-	AddSchemaPosConnectionStartPoint,	// Add item ISchemaPosConnectionLine
-	AddSchemaPosConnectionNextPoint,	// Add item ISchemaPosConnectionLine
-	MovingHorizontalEdge,				// Moving horizntal edge ISchemaPosConnectionLine
-	MovingVerticalEdge,					// Moving vertical edge ISchemaPosConnectionLine
-	MovingConnectionLinePoint			// Moving point ISchemaPosConnectionLine
-};
-
-
-// Possible action on SchemaItem
-//
-enum class SchemaItemAction
-{
-	NoAction,							// No Action
-	MoveItem,							// Move Item
-	ChangeSizeTopLeft,					// Change rectangle size (ISchemaPosRect)
-	ChangeSizeTop,						// Change rectangle size (ISchemaPosRect)
-	ChangeSizeTopRight,					// Change rectangle size (ISchemaPosRect)
-	ChangeSizeRight,					// Change rectangle size (ISchemaPosRect)
-	ChangeSizeBottomRight,				// Change rectangle size (ISchemaPosRect)
-	ChangeSizeBottom,					// Change rectangle size (ISchemaPosRect)
-	ChangeSizeBottomLeft,				// Change rectangle size (ISchemaPosRect)
-	ChangeSizeLeft,						// Change rectangle size (ISchemaPosRect)
-	MoveHorizontalEdge,					// Move horizontal edge (ISchemaPosConnection)
-	MoveVerticalEdge,					// Move vertical edge  (ISchemaPosConnection)
-	MoveStartLinePoint,					// Move start point (ISchemaPosLine)
-	MoveEndLinePoint,					// Move end point (ISchemaPosLine)
-	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemaPosConnectionLine)
-};
-
-enum class CompareAction
-{
-	Unmodified,
-	Modified,
-	Added,
-	Deleted
-};
+#include "EditSchemaView.h"
+#include "EditSchemaTypes.h"
 
 
 // Forward declarations
@@ -86,6 +25,7 @@ class SchemaLayersDialog;
 class SchemaItemPropertiesDialog;
 class EditSchemaTabPage;
 class SchemaFindDialog;
+class SignalSetProvider;
 
 
 //
@@ -95,122 +35,6 @@ struct SchemaItemClipboardData
 {
 	static const char* mimeType;	// = "application/x-schemaitem";
 };
-
-//
-//
-// EditSchemaView
-//
-//
-class EditSchemaView : public VFrame30::SchemaView
-{
-	Q_OBJECT
-
-public:
-	explicit EditSchemaView(QWidget* parent = 0);
-	explicit EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent = nullptr);
-
-	virtual ~EditSchemaView();
-
-	// Painting
-	//
-protected:
-	virtual void timerEvent(QTimerEvent* event) override;
-	virtual void paintEvent(QPaintEvent*) override;
-
-	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
-	void drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect);
-	void drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam);
-	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
-	void drawSelectionArea(QPainter* p);
-	void drawMovingItems(VFrame30::CDrawParam* drawParam);
-	void drawRectSizing(VFrame30::CDrawParam* drawParam);
-	void drawMovingLinePoint(VFrame30::CDrawParam* drawParam);
-	void drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam);
-	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect);
-
-	void drawGrid(QPainter* p);
-
-	// Some determine functions
-	//
-protected:
-	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
-
-	QRectF sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos);
-
-	// Signals
-signals:
-	void selectionChanged();
-
-	// Properties
-	//
-public:
-	// Layer props
-	//
-	QUuid activeLayerGuid() const;
-	std::shared_ptr<VFrame30::SchemaLayer> activeLayer();
-	void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
-
-	MouseState mouseState() const;
-	void setMouseState(MouseState state);
-
-	// Selection
-	//
-	const std::vector<SchemaItemPtr>& selectedItems() const;
-	std::vector<SchemaItemPtr> selectedNonLockedItems() const;
-
-	void setSelectedItems(const std::vector<SchemaItemPtr>& items);
-	void setSelectedItems(const std::list<SchemaItemPtr>& items);
-	void setSelectedItem(const SchemaItemPtr& item);
-	void addSelection(const SchemaItemPtr& item, bool emitSectionChanged = true);
-
-	void clearSelection();
-	bool removeFromSelection(const SchemaItemPtr& item, bool emitSectionChanged = true);
-	bool isItemSelected(const SchemaItemPtr& item);
-
-	// Data
-	//
-private:
-	int m_activeLayer;
-	MouseState m_mouseState;
-
-	// Temporary data can be changed in EditSchemaWidget
-	//
-protected:
-	SchemaItemPtr m_newItem;
-	std::vector<SchemaItemPtr> m_selectedItems;
-
-	std::map<QUuid, CompareAction> m_itemsActions;
-	bool m_compareWidget = false;
-	std::shared_ptr<VFrame30::Schema> m_compareSourceSchema;
-	std::shared_ptr<VFrame30::Schema> m_compareTargetSchema;
-
-	// Selection area variables
-	//
-	QPointF m_mouseSelectionStartPoint;
-	QPointF m_mouseSelectionEndPoint;
-
-	// Variables for performing some actions on object (moving, resizing, etc)
-	//
-	QPointF m_editStartDocPt;					// Start Point on some actions (moving, etc)
-	QPointF m_editEndDocPt;						// End Poin on some actions
-	QPointF m_addRectStartPoint;
-	QPointF m_addRectEndPoint;
-
-	// Variables for changing ConnectionLine
-	//
-	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
-	bool m_doNotMoveConnectionLines = false;
-
-	// For updating schema in timerEvent during build
-	//
-	int m_updateDuringBuildTimer = -1;
-	Builder::BuildIssues::Counter m_lastSchemaIssues = {-1, -1};
-
-	// Temporary data can be changed in EditSchemaWidget
-	//
-	friend EditSchemaWidget;
-};
-
 
 //
 //
@@ -228,6 +52,7 @@ public:
 	EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 					 const DbFileInfo& fileInfo,
 					 DbController* dbController,
+					 SignalSetProvider* signalSetProvider,
 					 QWidget* parent);
 	virtual ~EditSchemaWidget();
 	

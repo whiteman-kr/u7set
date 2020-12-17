@@ -13,7 +13,7 @@
 #include "./Forms/CompareDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include "./Forms/DialogUpdateFromPreset.h"
-#include "CreateSignalDialog.h"
+#include "SchemaEditor/CreateSignalDialog.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>

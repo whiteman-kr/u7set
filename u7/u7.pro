@@ -101,6 +101,9 @@ SOURCES +=\
     MainWindow.cpp \
     PasswordService.cpp \
     ProjectDiffGenerator.cpp \
+    SchemaEditor/EditSchemaSignalProvider.cpp \
+    SchemaEditor/EditSchemaTypes.cpp \
+    SchemaEditor/EditSchemaView.cpp \
     Settings.cpp \
     Simulator/SimConnectionPage.cpp \
     Simulator/SimLogicModulePage.cpp \
@@ -133,11 +136,11 @@ SOURCES +=\
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     GlobalMessanger.cpp \
-    EditSchemaWidget.cpp \
-    SchemaPropertiesDialog.cpp \
-    SchemaItemPropertiesDialog.cpp \
-    SchemaLayersDialog.cpp \
-    CreateSchemaDialog.cpp \
+	SchemaEditor/EditSchemaWidget.cpp \
+	SchemaEditor/SchemaPropertiesDialog.cpp \
+	SchemaEditor/SchemaItemPropertiesDialog.cpp \
+	SchemaEditor/SchemaLayersDialog.cpp \
+	SchemaEditor/CreateSchemaDialog.cpp \
     EditEngine/EditEngineSetSchemaProperty.cpp \
     EditEngine/EditEngineSetOrder.cpp \
     UploadTabPage.cpp \
@@ -160,9 +163,9 @@ SOURCES +=\
     Forms/ChooseAfbDialog.cpp \
     IdePropertyEditor.cpp \
     EditEngine/EditEngineSetObject.cpp \
-    EditConnectionLine.cpp \
+	SchemaEditor/EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
-    CreateSignalDialog.cpp \
+	SchemaEditor/CreateSignalDialog.cpp \
     SimulatorTabPage.cpp \
     Simulator/SimIdeSimulator.cpp \
     Simulator/SimSchemaWidget.cpp \
@@ -180,8 +183,7 @@ SOURCES +=\
     Simulator/SimBasePage.cpp \
     SpecificPropertiesEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
-    SchemaTabPageEx.cpp \
-    DialogInputEx.cpp \
+	SchemaEditor/SchemaTabPageEx.cpp \
     DialogAfbLibraryCheck.cpp \
     ../lib/WidgetUtils.cpp \
     Forms/ProjectPropertiesForm.cpp \
@@ -225,6 +227,9 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     ProjectDiffGenerator.h \
+    SchemaEditor/EditSchemaSignalProvider.h \
+    SchemaEditor/EditSchemaTypes.h \
+    SchemaEditor/EditSchemaView.h \
     Settings.h \
     Simulator/SimConnectionPage.h \
     Simulator/SimLogicModulePage.h \
@@ -264,11 +269,11 @@ HEADERS  += \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
     GlobalMessanger.h \
-    EditSchemaWidget.h \
-    SchemaPropertiesDialog.h \
-    SchemaItemPropertiesDialog.h \
-    SchemaLayersDialog.h \
-    CreateSchemaDialog.h \
+	SchemaEditor/EditSchemaWidget.h \
+	SchemaEditor/SchemaPropertiesDialog.h \
+	SchemaEditor/SchemaItemPropertiesDialog.h \
+	SchemaEditor/SchemaLayersDialog.h \
+	SchemaEditor/CreateSchemaDialog.h \
     EditEngine/EditEngineSetSchemaProperty.h \
     EditEngine/EditEngineSetOrder.h \
     UploadTabPage.h \
@@ -292,9 +297,9 @@ HEADERS  += \
     Forms/DialogUpdateFromPreset.h \
     IdePropertyEditor.h \
     EditEngine/EditEngineSetObject.h \
-    EditConnectionLine.h \
+	SchemaEditor/EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
-    CreateSignalDialog.h \
+	SchemaEditor/CreateSignalDialog.h \
     SimulatorTabPage.h \
     Simulator/SimIdeSimulator.h \
     Simulator/SimSchemaWidget.h \
@@ -313,8 +318,7 @@ HEADERS  += \
     SpecificPropertiesEditor.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/DbObjectStorage.h \
-    SchemaTabPageEx.h \
-    DialogInputEx.h \
+	SchemaEditor/SchemaTabPageEx.h \
     DialogAfbLibraryCheck.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
@@ -344,10 +348,10 @@ FORMS    += \
     DialogSubsystemListEditor.ui \
     Forms/ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \
-    CreateSchemaDialog.ui \
-    SchemaLayersDialog.ui \
-    SchemaPropertiesDialog.ui \
-    SchemaItemPropertiesDialog.ui \
+	SchemaEditor/CreateSchemaDialog.ui \
+	SchemaEditor/SchemaLayersDialog.ui \
+	SchemaEditor/SchemaPropertiesDialog.ui \
+	SchemaEditor/SchemaItemPropertiesDialog.ui \
     DialogChoosePreset.ui \
     DialogSettingsConfigurator.ui \
     Forms/ChooseUfbDialog.ui \

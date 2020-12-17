@@ -10,7 +10,7 @@ namespace VFrame30
 	class SchemaItem;
 	class CDrawParam;
 
-	static const double ZoomStep = 10;
+	static constexpr double ZoomStep = 10;
 
 	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
 	{

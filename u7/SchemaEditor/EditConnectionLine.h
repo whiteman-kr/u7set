@@ -1,5 +1,4 @@
-#ifndef EDITCONNECTIONLINE_H
-#define EDITCONNECTIONLINE_H
+#pragma once
 
 #include "../VFrame30/FblItem.h"
 #include "../lib/TypesAndEnums.h"
@@ -157,5 +156,3 @@ private:
 };
 
 
-
-#endif // EDITCONNECTIONLINE_H
