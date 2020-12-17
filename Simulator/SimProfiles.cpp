@@ -29,11 +29,21 @@ namespace Sim
 					*errorMessage += "\n";
 				}
 
-				*errorMessage = QObject::tr("Property %1 not found.").arg(propertyCaption);
+				*errorMessage = QObject::tr("Property %1 not found").arg(propertyCaption);
 			}
 			else
 			{
-				m_savedPropertirs[propertyCaption] = p->value();	// Save old value property
+				QVariant propValue = p->value();
+
+				if ((value.type() == QVariant::String && propValue.type() != QVariant::String) ||
+					(value.type() != QVariant::String && propValue.type() == QVariant::String) ||
+					value.canConvert(propValue.type()) == false)
+				{
+					*errorMessage = QObject::tr("Property %1 has incompatible type").arg(propertyCaption);
+					continue;
+				}
+
+				m_savedPropertirs[propertyCaption] = propValue;		// Save old value property
 				p->setValue(value);
 			}
 		}
