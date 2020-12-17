@@ -5,8 +5,11 @@ namespace Sim
 	//
 	// ProfileProperties
 	//
-	bool ProfileProperties::applyToObject(PropertyObject* object, QString* errorMessage) const
+	bool ProfileProperties::applyToObject(std::shared_ptr<PropertyObject> object, QString* errorMessage)
 	{
+		m_savedObject = object;
+		m_savedPropertirs.clear();
+
 		if (object == nullptr || errorMessage == nullptr)
 		{
 			Q_ASSERT(object);
@@ -30,6 +33,7 @@ namespace Sim
 			}
 			else
 			{
+				m_savedPropertirs[propertyCaption] = p->value();	// Save old value property
 				p->setValue(value);
 			}
 		}
@@ -37,13 +41,43 @@ namespace Sim
 		return errorMessage->isEmpty();
 	}
 
+	bool ProfileProperties::restoreObject()
+	{
+		if (m_savedObject == nullptr)
+		{
+			Q_ASSERT(m_savedObject);
+			return false;
+		}
+
+		bool ok = true;
+
+		for (const auto&[propertyCaption, value] : m_savedPropertirs)
+		{
+			auto p = m_savedObject->propertyByCaption(propertyCaption);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				ok = false;
+			}
+			else
+			{
+				p->setValue(value);
+			}
+		}
+
+		m_savedObject = nullptr;
+		m_savedPropertirs.clear();
+
+		return ok;
+	}
+
 	//
 	// Profile
 	//
-	std::vector<QString> Profile::equipment() const
+	QStringList Profile::equipment() const
 	{
-		std::vector<QString> result;
-		result.reserve(equipmentProperties.size());
+		QStringList result;
+		result.reserve(static_cast<int>(equipmentProperties.size()));
 
 		for(auto const& it: equipmentProperties)
 		{
@@ -53,9 +87,23 @@ namespace Sim
 		return result;
 	}
 
+	bool Profile::applyToObject(QString equipmentId, std::shared_ptr<PropertyObject> object, QString* errorMessage)
+	{
+		auto it = equipmentProperties.find(equipmentId);
+		if (it == equipmentProperties.end())
+		{
+			return false;
+		}
+
+		ProfileProperties& pp = it->second;
+		Q_ASSERT(equipmentId == pp.equipmentId);
+
+		return pp.applyToObject(object, errorMessage);
+	}
+
 	const ProfileProperties& Profile::properties(const QString& equipmentId) const
 	{
-		const auto& itEquipment = equipmentProperties.find(equipmentId);
+		auto itEquipment = equipmentProperties.find(equipmentId);
 
 		if (itEquipment == equipmentProperties.end())
 		{
@@ -66,11 +114,44 @@ namespace Sim
 		return itEquipment->second;
 	}
 
+	ProfileProperties& Profile::properties(const QString& equipmentId)
+	{
+		auto itEquipment = equipmentProperties.find(equipmentId);
+
+		if (itEquipment == equipmentProperties.end())
+		{
+			static ProfileProperties empty;
+			return empty;
+		}
+
+		return itEquipment->second;
+	}
+
+	bool Profile::restoreObjects()
+	{
+		bool ok = true;
+
+		for (auto&[equipmentId, profileProps] : equipmentProperties)
+		{
+			Q_ASSERT(equipmentId == profileProps.equipmentId);
+			Q_UNUSED(equipmentId);
+
+			ok &= profileProps.restoreObject();
+		}
+
+		return ok;
+	}
+
 	//
 	// Profiles
 	//
 	Profiles::Profiles()
 	{
+	}
+
+	void Profiles::clear()
+	{
+		*this = {};
 	}
 
 	bool Profiles::load(const QByteArray& data, QString* errorMsg)
@@ -80,13 +161,15 @@ namespace Sim
 
 	bool Profiles::parse(const QString& string, QString* errorMessage)
 	{
+		clear();
+
 		if (errorMessage == nullptr)
 		{
 			Q_ASSERT(errorMessage);
 			return false;
 		}
 
-		m_profiles.clear();
+		std::map<QString, Profile> profiles;
 
 		QStringList strings = string.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
@@ -180,7 +263,7 @@ namespace Sim
 					}
 				}
 
-				Profile& profile = m_profiles[currentProfile];
+				Profile& profile = profiles[currentProfile];
 				profile.profileName = currentProfile;
 
 				ProfileProperties& eqp = profile.equipmentProperties[equipmentId];
@@ -204,13 +287,15 @@ namespace Sim
 			return false;
 		}
 
+		m_profiles = std::move(profiles);
+
 		return true;
 	}
 
-	std::vector<QString> Profiles::profiles() const
+	QStringList Profiles::profiles() const
 	{
-		std::vector<QString> result;
-		result.reserve(m_profiles.size());
+		QStringList result;
+		result.reserve(static_cast<int>(m_profiles.size()));
 
 		for(auto const& it: m_profiles)
 		{
@@ -232,18 +317,29 @@ namespace Sim
 		return it->second;
 	}
 
+	Profile& Profiles::profile(const QString& profileId)
+	{
+		auto it = m_profiles.find(profileId);
+		if (it == m_profiles.end())
+		{
+			static Profile empty;
+			return empty;
+		}
+
+		return it->second;
+	}
+
 	QString Profiles::dump() const
 	{
 		QString result;
-
-		std::vector<QString> allProfiles = profiles();
+		QStringList allProfiles = profiles();
 
 		for (const QString& profileId: allProfiles)
 		{
 			result += QObject::tr("\nProfile: %1\n").arg(profileId);
 
 			const Profile& p = profile(profileId);
-			std::vector<QString> allEquipment = p.equipment();
+			QStringList allEquipment = p.equipment();
 
 			for (const QString& equipmentId : allEquipment)
 			{

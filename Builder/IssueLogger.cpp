@@ -7352,6 +7352,49 @@ namespace Builder
 				  );
 	}
 
+
+	/// IssueCode: EQP6010
+	///
+	/// IssueType: Error
+	///
+	/// Title: Device Object %1 not found.
+	///
+	/// Parameters:
+	///		%1 DeviceObject EquipmentID
+	///
+	/// Description:
+	///		Some device object is not found in the equipment set.
+	///
+	void IssueLogger::errEQP6010(QString equipmemtId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6010,
+				  tr("Device Object %1 not found.")
+				  .arg(equipmemtId));
+	}
+
+	/// IssueCode: EQP6011
+	///
+	/// IssueType: Error
+	///
+	/// Title: Device Object %1 not found on %2.
+	///
+	/// Parameters:
+	///		%1 DeviceObject EquipmentID
+	///		%2 Build Step
+	///
+	/// Description:
+	///		Some device object is not found in the equipment set.
+	///
+	void IssueLogger::errEQP6011(QString equipmemtId, QString buildStep)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6011,
+				  tr("Device Object %1 not found on %2.")
+				  .arg(equipmemtId)
+				  .arg(buildStep));
+	}
+
 	/// IssueCode: EQP6020
 	///
 	/// IssueType: Error
@@ -7372,6 +7415,28 @@ namespace Builder
 				  6020,
 				  tr("Property LmDescriptionFile is empty, LogicModule %1.")
 				  .arg(lm));
+	}
+
+	/// IssueCode: EQP6030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Applying SimProfile %1 error: %2
+	///
+	/// Parameters:
+	///		%1 SimProfile Name
+	///		%2 Error Message
+	///
+	/// Description:
+	///		Error occured during applying simulator profile to the equipmnet set.
+	///
+	void IssueLogger::errEQP6030(QString profileName, QString errorMessage)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6030,
+				  tr("Applying SimProfile %1 error: %2.")
+				  .arg(profileName)
+				  .arg(errorMessage));
 	}
 
 

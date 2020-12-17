@@ -109,13 +109,13 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
 
 	if (ok == true && fileList.size() == 1)
 	{
 		std::shared_ptr<DbFile> file;
 
-		if (m_db->getLatestVersion(fileList[0], &file, nullptr) == true)
+		if (m_db->getLatestVersion(fileList[0], &file, this) == true)
 		{
 			QString text(file->data());
 
@@ -256,7 +256,7 @@ bool SimProfileEditor::saveChanges()
 	//
 	std::vector<DbFileInfo> fileList;
 
-	ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+	ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
 	if (ok == false || fileList.size() != 1)
 	{
 		// create a file, if it does not exists
@@ -264,12 +264,12 @@ bool SimProfileEditor::saveChanges()
 		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
 		pf->setFileName(Db::File::SimProfilesFileName);
 
-		if (m_db->addFile(pf, m_db->etcFileId(), nullptr) == false)
+		if (m_db->addFile(pf, m_db->etcFileId(), this) == false)
 		{
 			return false;
 		}
 
-		ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+		ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;
@@ -278,7 +278,7 @@ bool SimProfileEditor::saveChanges()
 
 	std::shared_ptr<DbFile> file = nullptr;
 
-	ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
+	ok = m_db->getLatestVersion(fileList[0], &file, this);
 	if (ok == false || file == nullptr)
 	{
 		return false;
@@ -286,7 +286,7 @@ bool SimProfileEditor::saveChanges()
 
 	if (file->state() != VcsState::CheckedOut)
 	{
-		if (m_db->checkOut(fileList[0], nullptr) == false)
+		if (m_db->checkOut(fileList[0], this) == false)
 		{
 			return false;
 		}
@@ -296,12 +296,12 @@ bool SimProfileEditor::saveChanges()
 
 	file->swapData(data);
 
-	if (m_db->setWorkcopy(file, nullptr) == false)
+	if (m_db->setWorkcopy(file, this) == false)
 	{
 		return false;
 	}
 
-	if (m_db->checkIn(fileList[0], comment, nullptr) == false)
+	if (m_db->checkIn(fileList[0], comment, this) == false)
 	{
 		return false;
 	}
