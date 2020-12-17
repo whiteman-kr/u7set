@@ -3,12 +3,47 @@
 namespace Sim
 {
 	//
+	// ProfileProperties
+	//
+	bool ProfileProperties::applyToObject(PropertyObject* object, QString* errorMessage) const
+	{
+		if (object == nullptr || errorMessage == nullptr)
+		{
+			Q_ASSERT(object);
+			Q_ASSERT(errorMessage);
+			return false;
+		}
+
+		errorMessage->clear();
+
+		for (const auto&[propertyCaption, value] : properties)
+		{
+			auto p = object->propertyByCaption(propertyCaption);
+			if (p == nullptr)
+			{
+				if (errorMessage->isEmpty() == false)
+				{
+					*errorMessage += "\n";
+				}
+
+				*errorMessage = QObject::tr("Property %1 not found.").arg(propertyCaption);
+			}
+			else
+			{
+				p->setValue(value);
+			}
+		}
+
+		return errorMessage->isEmpty();
+	}
+
+	//
 	// Profile
 	//
-
 	std::vector<QString> Profile::equipment() const
 	{
 		std::vector<QString> result;
+		result.reserve(equipmentProperties.size());
 
 		for(auto const& it: equipmentProperties)
 		{
@@ -21,9 +56,10 @@ namespace Sim
 	const ProfileProperties& Profile::properties(const QString& equipmentId) const
 	{
 		const auto& itEquipment = equipmentProperties.find(equipmentId);
+
 		if (itEquipment == equipmentProperties.end())
 		{
-			static ProfileProperties empty;
+			static const ProfileProperties empty;
 			return empty;
 		}
 
@@ -33,10 +69,8 @@ namespace Sim
 	//
 	// Profiles
 	//
-
 	Profiles::Profiles()
 	{
-
 	}
 
 	bool Profiles::load(const QByteArray& data, QString* errorMsg)
@@ -44,19 +78,20 @@ namespace Sim
 		return parse(data, errorMsg);
 	}
 
-	bool Profiles::parse(const QString& string, QString* errorMsg)
+	bool Profiles::parse(const QString& string, QString* errorMessage)
 	{
-		if (errorMsg == nullptr)
+		if (errorMessage == nullptr)
 		{
-			Q_ASSERT(errorMsg);
+			Q_ASSERT(errorMessage);
 			return false;
 		}
 
+		m_profiles.clear();
+
 		QStringList strings = string.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
-		QRegExp regExpProfile("\\[[a-zA-Z\\d]+\\]$");
-
-		QRegExp regExpProperty("[A-Z]+.\\w+\\s*=\\s*\"?[\\w.]+\"?;$");
+		QRegExp regExpProfile("\\[[a-zA-Z\\d_]+\\]$");
+		QRegExp regExpProperty("[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w.]+\"?;$");
 
 		QString currentProfile = "Generic";
 
@@ -71,7 +106,6 @@ namespace Sim
 			}
 
 			str = str.trimmed();
-
 			if (str.isEmpty() == true)
 			{
 				continue;
@@ -83,7 +117,7 @@ namespace Sim
 
 				if (str.isEmpty() == true)
 				{
-					*errorMsg = QObject::tr("Can't parse string '%1', profile name is empty").arg(dataStr.trimmed());
+					*errorMessage = QObject::tr("Can't parse string '%1', profile name is empty").arg(dataStr.trimmed());
 					return false;
 				}
 
@@ -104,26 +138,38 @@ namespace Sim
 				{
 					propertyValue.remove(propertyValue.length() - 1, 1);
 				}
+
 				if (propertyValue.endsWith('\"') == true)
 				{
 					propertyValue.remove(propertyValue.length() - 1, 1);
 				}
+
 				if (propertyValue.startsWith('\"') == true)
 				{
 					propertyValue.remove(0, 1);
 				}
 
 				Profile& profile = m_profiles[currentProfile];
+				profile.profileName = currentProfile;
 
 				ProfileProperties& eqp = profile.equipmentProperties[equipmentId];
+				eqp.equipmentId = equipmentId;
+
+				if (eqp.properties.count(propertyName) != 0)
+				{
+					*errorMessage = QObject::tr("Ambiguous property value, property %1, profile %2 Object %3")
+									.arg(propertyName)
+									.arg(currentProfile)
+									.arg(equipmentId);
+					return false;
+				}
 
 				eqp.properties[propertyName] = propertyValue;
 
 				continue;
 			}
 
-			*errorMsg = QObject::tr("Can't parse string '%1'").arg(dataStr.trimmed());
-
+			*errorMessage = QObject::tr("Can't parse string '%1'").arg(dataStr.trimmed());
 			return false;
 		}
 
@@ -133,6 +179,7 @@ namespace Sim
 	std::vector<QString> Profiles::profiles() const
 	{
 		std::vector<QString> result;
+		result.reserve(m_profiles.size());
 
 		for(auto const& it: m_profiles)
 		{
@@ -147,7 +194,7 @@ namespace Sim
 		auto it = m_profiles.find(profileId);
 		if (it == m_profiles.end())
 		{
-			static Profile empty;
+			static const Profile empty;
 			return empty;
 		}
 
@@ -165,7 +212,6 @@ namespace Sim
 			result += QObject::tr("\nProfile: %1\n").arg(profileId);
 
 			const Profile& p = profile(profileId);
-
 			std::vector<QString> allEquipment = p.equipment();
 
 			for (const QString& equipmentId : allEquipment)
