@@ -91,7 +91,8 @@ namespace Sim
 		QStringList strings = string.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
 		QRegExp regExpProfile("\\[[a-zA-Z\\d_]+\\]$");
-		QRegExp regExpProperty("[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w.]+\"?;$");
+		QRegExp regExpProperty("[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-]+\"?;$");
+		QRegExp regExpNumber("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
 
 		QString currentProfile = "Generic";
 
@@ -132,21 +133,51 @@ namespace Sim
 
 				QString equipmentId = str.left(ptPos).trimmed();
 				QString propertyName = str.mid(ptPos + 1, eqPos - ptPos - 1).trimmed();
-				QString propertyValue = str.right(str.length() - eqPos - 1).trimmed();
+				QString propertyString = str.right(str.length() - eqPos - 1).trimmed();
 
-				if (propertyValue.endsWith(';') == true)
+				QVariant propertyValue;
+
+				if (propertyString.endsWith(';') == true)
 				{
-					propertyValue.remove(propertyValue.length() - 1, 1);
+					propertyString.remove(propertyString.length() - 1, 1);
 				}
 
-				if (propertyValue.endsWith('\"') == true)
+				if (propertyString.endsWith('\"') == true && propertyString.startsWith('\"') == true)
 				{
-					propertyValue.remove(propertyValue.length() - 1, 1);
-				}
+					// Property value is string in quotes
+					//
+					propertyString.remove(propertyString.length() - 1, 1);
+					propertyString.remove(0, 1);
 
-				if (propertyValue.startsWith('\"') == true)
+					propertyValue = propertyString;
+				}
+				else
 				{
-					propertyValue.remove(0, 1);
+					// Check if propertyValue is a number or boolean value
+					//
+					if (regExpNumber.exactMatch(propertyString) == true)
+					{
+						propertyValue = propertyString;
+					}
+					else
+					{
+						if (propertyString.compare("true", Qt::CaseInsensitive) == 0)
+						{
+							propertyValue = true;
+						}
+						else
+						{
+							if (propertyString.compare("false", Qt::CaseInsensitive) == 0)
+							{
+								propertyValue = false;
+							}
+							else
+							{
+								*errorMessage = QObject::tr("Can't parse property value '%1'\nin\n'%2'").arg(propertyString).arg(dataStr.trimmed());
+								return false;
+							}
+						}
+					}
 				}
 
 				Profile& profile = m_profiles[currentProfile];

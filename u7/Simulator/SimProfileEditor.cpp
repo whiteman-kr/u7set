@@ -1,5 +1,4 @@
 #include "SimProfileEditor.h"
-#include "SimScopedLog.h"
 #include "../../lib/Ui/UiTools.h"
 #include "GlobalMessanger.h"
 
