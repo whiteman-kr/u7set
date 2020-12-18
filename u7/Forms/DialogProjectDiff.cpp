@@ -65,6 +65,8 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	ui->expertPropertiesCheck->setChecked(m_diffParams.expertProperties == true);
 
+	ui->multipleFilesCheck->setChecked(m_diffParams.multipleFiles == true);
+
 	return;
 
 }
@@ -278,6 +280,8 @@ void DialogProjectDiff::done(int r)
 	}
 
 	m_diffParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
+
+	m_diffParams.multipleFiles = ui->multipleFilesCheck->isChecked() == true;
 
 	QDialog::done(r);
 }

@@ -48,6 +48,8 @@ void DialogProjectDiffProgress::onTimer()
 
 	ProjectDiffWorker::WorkerStatus status = m_worker->currentStatus();
 
+	QString renderingReportName;
+
 	switch (status)
 	{
 	case ProjectDiffWorker::WorkerStatus::Idle:
@@ -82,7 +84,16 @@ void DialogProjectDiffProgress::onTimer()
 		break;
 	case ProjectDiffWorker::WorkerStatus::Rendering:
 		{
-			ui->labelCurrentGroup->setText(tr("Creating report..."));
+			renderingReportName = m_worker->renderingReportName();
+
+			if (renderingReportName.isEmpty() == false)
+			{
+				ui->labelCurrentGroup->setText(tr("Creating report '%1'...").arg(renderingReportName));
+			}
+			else
+			{
+				ui->labelCurrentGroup->setText(tr("Creating report..."));
+			}
 			ui->labelFilesCount->setText(tr("Section: %1 / %2")
 										 .arg(m_worker->sectionIndex()).arg(m_worker->sectionCount()));
 			ui->labelCurrentFile->setText(QString());
@@ -90,7 +101,17 @@ void DialogProjectDiffProgress::onTimer()
 		break;
 	case ProjectDiffWorker::WorkerStatus::Printing:
 		{
-			ui->labelCurrentGroup->setText(tr("Saving report..."));
+			renderingReportName = m_worker->renderingReportName();
+
+			if (renderingReportName.isEmpty() == false)
+			{
+				ui->labelCurrentGroup->setText(tr("Saving report '%1'...").arg(renderingReportName));
+			}
+			else
+			{
+				ui->labelCurrentGroup->setText(tr("Saving report..."));
+			}
+
 			ui->labelFilesCount->setText(tr("Page: %1 / %2")
 										 .arg(m_worker->pageIndex()).arg(m_worker->pagesCount()));
 			ui->labelCurrentFile->setText(QString());

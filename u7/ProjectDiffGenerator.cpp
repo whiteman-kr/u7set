@@ -445,7 +445,7 @@ ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo
 //
 
 ReportGenerator::ReportGenerator(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView):
-	m_pdfWriter(fileName),
+	m_fileName(fileName),
 	m_schemaView(schemaView)
 {
 
@@ -454,6 +454,11 @@ ReportGenerator::ReportGenerator(const QString& fileName, std::shared_ptr<Report
 void ReportGenerator::addMarginItem(const ReportMarginItem& item)
 {
 	m_marginItems.push_back(item);
+}
+
+void ReportGenerator::clearMarginItems()
+{
+	m_marginItems.clear();
 }
 
 void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter)
@@ -471,7 +476,7 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 		return;
 	}
 
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriter->resolution());
+	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
 
 	// The total extent of the content (there are no page margin in this)
 	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
@@ -491,7 +496,7 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 			int page = m_pageIndex;
 			l.unlock();
 
-			drawMarginItems(page, painter);
+			drawMarginItems(page, pdfWriter, painter);
 		}
 
 		// Translate the current rectangle to the area to be printed for the next page
@@ -512,7 +517,12 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 	return;
 }
 
-void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, const std::map<QUuid, CompareAction>& compareActions)
+void ReportGenerator::printSchema(const QRect pageRectPixels,
+								  QTextDocument* textDocument,
+								  QPainter* painter,
+								  ReportSchemaView* schemaView,
+								  std::shared_ptr<VFrame30::Schema> schema,
+								  const std::map<QUuid, CompareAction>& compareActions)
 {
 	if (textDocument == nullptr || painter == nullptr || schemaView == nullptr)
 	{
@@ -530,15 +540,13 @@ void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter
 
 	// Calculate the upper schema offset
 
-	const QRect pageRect = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
-
 	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
 
-	const int schemaTop = contentRect.height() % pageRect.height();
+	const int schemaTop = contentRect.height() % pageRectPixels.height();
 
 	int schemaLeft = 0;
 
-	const int schemaMaxHeight = pageRect.height() - schemaTop;
+	const int schemaMaxHeight = pageRectPixels.height() - schemaTop;
 
 	// Calculate draw parameters
 
@@ -548,10 +556,10 @@ void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter
 	drawParam.setInfoMode(false);
 	drawParam.session() = schemaView->session();
 
-	double schemaWidthInPixel = schema->GetDocumentWidth(m_pdfWriter.resolution(), 100.0);		// Export 100% zoom
-	double schemaHeightInPixel = schema->GetDocumentHeight(m_pdfWriter.resolution(), 100.0);		// Export 100% zoom
+	double schemaWidthInPixel = schema->GetDocumentWidth(m_resolution, 100.0);		// Export 100% zoom
+	double schemaHeightInPixel = schema->GetDocumentHeight(m_resolution, 100.0);		// Export 100% zoom
 
-	double zoom = pageRect.width() / schemaWidthInPixel;
+	double zoom = pageRectPixels.width() / schemaWidthInPixel;
 
 	double schemaHeightInPixelWZoomed = schemaHeightInPixel * zoom;
 
@@ -567,7 +575,7 @@ void ReportGenerator::printSchema(QTextDocument* textDocument, QPainter* painter
 
 		int schemaWidthInPixelZoomed = static_cast<int>(schemaHeightInPixel * zoom + 0.5);
 
-		schemaLeft =  (pageRect.width() - schemaWidthInPixelZoomed) / 2;
+		schemaLeft =  (pageRectPixels.width() - schemaWidthInPixelZoomed) / 2;
 	}
 
 	// Draw rect
@@ -632,18 +640,20 @@ void ReportGenerator::setTextAlignment(Qt::Alignment alignment)
 	m_currentBlockFormat.setAlignment(alignment);
 }
 
-void ReportGenerator::drawMarginItems(int page, QPainter* painter)
+void ReportGenerator::drawMarginItems(int page, QPdfWriter* pdfWriter, QPainter* painter)
 {
-	if (painter == nullptr)
+	if (pdfWriter == nullptr || painter == nullptr)
 	{
+		Q_ASSERT(pdfWriter);
 		Q_ASSERT(painter);
+		return;
 	}
 
-	const QRect fullPageRect = m_pdfWriter.pageLayout().fullRectPixels(m_pdfWriter.resolution());
+	const QRect fullPageRect = pdfWriter->pageLayout().fullRectPixels(m_resolution);
 
-	const QRect pageRect = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
+	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
 
-	QMargins margins = m_pdfWriter.pageLayout().marginsPixels(m_pdfWriter.resolution());
+	QMargins margins = pdfWriter->pageLayout().marginsPixels(m_resolution);
 
 	QRect topRect(fullPageRect.left() + margins.left() / 2,
 				  fullPageRect.top(),
@@ -1043,6 +1053,13 @@ ProjectDiffWorker::ProjectDiffWorker(const QString& fileName,
 	m_userName(userName),
 	m_userPassword(userPassword)
 {
+	// Init fonts
+
+	m_headerFont = QFont("Times", 36, QFont::Bold);
+	m_normalFont = QFont("Times", 24);
+	m_tableFont = QFont("Times", 24);
+	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / m_resolution)));
+
 	return;
 }
 
@@ -1053,9 +1070,14 @@ ProjectDiffWorker::~ProjectDiffWorker()
 
 void ProjectDiffWorker::process()
 {
-	compareProject();
+	std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents;
+
+	compareProject(reportContents);
+
+	renderReport(reportContents);
 
 	emit finished();
+
 	return;
 }
 
@@ -1118,6 +1140,12 @@ int ProjectDiffWorker::pageIndex() const
 	return m_pageIndex;
 }
 
+QString ProjectDiffWorker::renderingReportName() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_renderingReportName;
+}
+
 QString ProjectDiffWorker::currentSection() const
 {
 	QMutexLocker l(&m_statisticsMutex);
@@ -1135,7 +1163,7 @@ DbController* const ProjectDiffWorker::db()
 	return &m_db;
 }
 
-void ProjectDiffWorker::compareProject()
+void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents)
 {
 	{
 		QMutexLocker l(&m_statisticsMutex);
@@ -1213,58 +1241,7 @@ void ProjectDiffWorker::compareProject()
 		m_filesCount = filesCount;
 	}
 
-
-	// Init fonts
-
-	const int documentDPI = 300;
-
-	m_headerFont = QFont("Times", 36, QFont::Bold);
-	m_normalFont = QFont("Times", 24);
-	m_tableFont = QFont("Times", 24);
-	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / documentDPI)));
-
-	// Init document
-
-	m_pdfWriter.setPageSize(QPageSize(QPageSize::A4));
-	m_pdfWriter.setPageOrientation(QPageLayout::Portrait);
-	m_pdfWriter.setPageMargins(QMargins(20, 15, 10, 15), QPageLayout::Unit::Millimeter);
-	m_pdfWriter.setResolution(documentDPI);
-
-	QPainter painter(&m_pdfWriter);
-
-	// Create title page and margins
-	{
-		QTextDocument textDocument;
-
-		QRect pageRectPixels = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
-		textDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
-
-		QTextCursor textCursor(&textDocument);
-
-		m_currentCharFormat = textCursor.charFormat();
-		m_currentBlockFormat = textCursor.blockFormat();
-
-		//QTextCharFormat charFormat = textCursor.charFormat();
-		//charFormat.setFontPointSize(40);
-		//textCursor.setCharFormat(charFormat);
-
-		// Generate title page
-
-		generateTitlePage(&textCursor);
-
-		createMarginItems(&textCursor, m_diffParams.compareData);
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_pageIndex = 1;
-		}
-
-		printDocument(&m_pdfWriter, &textDocument, &painter);
-	}
-
 	// Process Files
-
-	std::vector<std::shared_ptr<ReportSection>> allSections;
 
 	int fileTreeIndex = 0;
 
@@ -1345,82 +1322,24 @@ void ProjectDiffWorker::compareProject()
 		{
 			headerTable->sortByColumn(0);
 
-			allSections.push_back(headerSection);
-
 			std::sort(fileTypeSections.begin(), fileTypeSections.end(), [](const std::shared_ptr<ReportSection>& a, const std::shared_ptr<ReportSection>& b)
 			{
 				return a->caption() < b->caption();
 			});
 
-			allSections.insert(allSections.end(), fileTypeSections.begin(), fileTypeSections.end());
+			fileTypeSections.insert(fileTypeSections.begin(), headerSection);
+
+			if (m_diffParams.multipleFiles == false)
+			{
+				std::vector<std::shared_ptr<ReportSection>>& all = reportContents["ALL"];
+
+				all.insert(all.end(), fileTypeSections.begin(), fileTypeSections.end());
+			}
+			else
+			{
+				reportContents[ft.fileName] = fileTypeSections;
+			}
 		}
-	}
-
-	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_pagesCount = 1;	// + title page
-	}
-
-	// Render all objects to documents
-	//
-	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_currentStatus = WorkerStatus::Rendering;
-
-		m_sectionCount = static_cast<int>(allSections.size());
-	}
-
-	for (std::shared_ptr<ReportSection> section : allSections)
-	{
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_sectionIndex++;
-		}
-
-		QRect pageRectPixels = m_pdfWriter.pageLayout().paintRectPixels(m_pdfWriter.resolution());
-
-		section->render(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_pagesCount += section->pageCount();
-		}
-	}
-
-	// Print PDF
-
-	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_currentStatus = WorkerStatus::Printing;
-
-		m_sectionCount = m_pagesCount;
-	}
-
-	for (std::shared_ptr<ReportSection> section : allSections)
-	{
-		// Print Text Document
-
-		m_pdfWriter.newPage();
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_pageIndex++;
-		}
-
-		printDocument(&m_pdfWriter, section->textDocument(), &painter);
-
-		// Print Schemas
-
-		std::shared_ptr<VFrame30::Schema> schema = section->schema();
-		if (schema != nullptr)
-		{
-			printSchema(section->textDocument(), &painter, m_schemaView.get(), schema, section->compareItemActions());
-		}
-
-		// Clear text document
-
-		section->textDocument()->clear();
-
 	}
 
 	return;
@@ -3222,13 +3141,15 @@ void ProjectDiffWorker::generateTitlePage(QTextCursor* textCursor)
 
 }
 
-void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const CompareData& compareData)
+void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName)
 {
 	if (textCursor == nullptr)
 	{
 		Q_ASSERT(textCursor);
 		return;
 	}
+
+	clearMarginItems();
 
 	// Create headers/footers
 
@@ -3239,7 +3160,14 @@ void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const Compare
 
 	charFormat.setFont(m_marginFont);
 
-	addMarginItem({tr("Project: ") + project.projectName(), 2, -1, Qt::AlignLeft | Qt::AlignTop, charFormat, blockFormat});
+	QString projectNameStr = tr("Project: ") + project.projectName();
+
+	if (m_diffParams.multipleFiles == true && subreportName.isEmpty() == false)
+	{
+		projectNameStr += tr("; Section: %1").arg(subreportName);
+	}
+
+	addMarginItem({projectNameStr, 2, -1, Qt::AlignLeft | Qt::AlignTop, charFormat, blockFormat});
 
 	addMarginItem({tr("%PAGE%"), 2, -1, Qt::AlignRight | Qt::AlignTop, charFormat, blockFormat});
 
@@ -3395,3 +3323,146 @@ QString ProjectDiffWorker::changesetString(const Signal& signal)
 		return tr("#%1 at %2 by %3").arg(signal.changesetID()).arg(signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(signal.userID()));
 	}
 }
+
+void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents)
+{
+	bool multipleFiles = m_diffParams.multipleFiles == true &&
+						 reportContents.size() > 1;
+
+	for (auto it = reportContents.begin(); it != reportContents.end(); it++)
+	{
+		const QString& reportName = it->first;
+		const std::vector<std::shared_ptr<ReportSection>>& reportSections = it->second;
+
+		// Render all objects to documents
+		//
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_currentStatus = WorkerStatus::Rendering;
+
+			m_pagesCount = 1;	// + title page
+			m_sectionCount = static_cast<int>(reportSections.size());
+		}
+
+		// Init PDF document
+
+		QString fileName = m_fileName;
+
+		if (multipleFiles == true)
+		{
+			int pos = fileName.lastIndexOf('.');
+			if (pos != -1)
+			{
+				fileName.insert(pos, tr("_%1").arg(reportName));
+			}
+			else
+			{
+				fileName += tr("_%1.pdf").arg(reportName);
+			}
+
+			QMutexLocker l(&m_statisticsMutex);
+			m_renderingReportName = reportName;
+		}
+
+		QPdfWriter pdfWriter(fileName);
+
+		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
+		pdfWriter.setPageOrientation(QPageLayout::Portrait);
+		pdfWriter.setPageMargins(QMargins(20, 15, 10, 15), QPageLayout::Unit::Millimeter);
+		pdfWriter.setResolution(m_resolution);
+
+		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(m_resolution);
+
+		QPainter painter(&pdfWriter);
+
+		// Create title page and margins
+		//
+		{
+			QTextDocument titleTextDocument;
+
+			titleTextDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+
+			QTextCursor textCursor(&titleTextDocument);
+
+			m_currentCharFormat = textCursor.charFormat();
+			m_currentBlockFormat = textCursor.blockFormat();
+
+			// Generate title page
+
+			generateTitlePage(&textCursor);
+
+			createMarginItems(&textCursor, m_diffParams.compareData, multipleFiles == true ? reportName : QString());
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_pageIndex = 1;
+			}
+
+			printDocument(&pdfWriter, &titleTextDocument, &painter);
+		}
+
+		// Render and Print sections pages
+		//
+		for (std::shared_ptr<ReportSection> section : reportSections)
+		{
+			if (m_stop == true)
+			{
+				return;
+			}
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_sectionIndex++;
+			}
+
+			section->render(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_pagesCount += section->pageCount();
+			}
+
+		}
+
+		// Print PDF
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_currentStatus = WorkerStatus::Printing;
+
+			m_sectionCount = m_pagesCount;
+		}
+
+		for (std::shared_ptr<ReportSection> section : reportSections)
+		{
+			if (m_stop == true)
+			{
+				return;
+			}
+
+			// Print Text Document
+
+			pdfWriter.newPage();
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_pageIndex++;
+			}
+
+			printDocument(&pdfWriter, section->textDocument(), &painter);
+
+			// Print Schemas
+
+			std::shared_ptr<VFrame30::Schema> schema = section->schema();
+			if (schema != nullptr)
+			{
+				printSchema(pageRectPixels, section->textDocument(), &painter, m_schemaView.get(), schema, section->compareItemActions());
+			}
+
+			// Clear text document
+
+			section->textDocument()->clear();
+		}
+	}
+}
+

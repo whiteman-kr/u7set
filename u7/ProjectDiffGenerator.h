@@ -7,7 +7,7 @@
 #include "../VFrame30/SchemaView.h"
 #include "../lib/DbController.h"
 
-#include "EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaWidget.h"
 
 #include <optional>
 
@@ -194,11 +194,17 @@ public:
 
 protected:
 	void addMarginItem(const ReportMarginItem& item);
+	void clearMarginItems();
 
 	// Rendering functions
 
 	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter);
-	void printSchema(QTextDocument* textDocument, QPainter* painter, ReportSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schemas, const std::map<QUuid, CompareAction>& itemActions);
+	void printSchema(const QRect pageRectPixels,
+					 QTextDocument* textDocument,
+					 QPainter* painter,
+					 ReportSchemaView* schemaView,
+					 std::shared_ptr<VFrame30::Schema> schemas,
+					 const std::map<QUuid, CompareAction>& itemActions);
 
 	// Formatting functions
 
@@ -211,10 +217,10 @@ protected:
 	void setTextAlignment(Qt::Alignment alignment);
 
 private:
-	void drawMarginItems(int page, QPainter* painter);
+	void drawMarginItems(int page, QPdfWriter* pdfWriter, QPainter* painter);
 
 protected:
-	QPdfWriter m_pdfWriter;
+	QString m_fileName;
 	std::shared_ptr<ReportSchemaView> m_schemaView;
 
 	QTextCharFormat m_currentCharFormat;
@@ -223,10 +229,14 @@ protected:
 	QTextCharFormat m_currentCharFormatSaved;
 	QTextBlockFormat m_currentBlockFormatSaved;
 
+	int m_resolution = 300;
+
 	mutable QMutex m_statisticsMutex;
 
 	int m_pagesCount = 0;	// Calculated after text rendering
 	int m_pageIndex = 0;
+
+	QString m_renderingReportName;
 
 private:
 	std::vector<ReportMarginItem> m_marginItems;
@@ -322,6 +332,7 @@ struct ProjectDiffParams
 	CompareData compareData;
 	std::vector<ProjectFileType> projectFileTypes;
 	bool expertProperties = false;
+	bool multipleFiles = false;
 };
 
 class ProjectDiffGenerator
@@ -364,8 +375,8 @@ public:
 	enum class WorkerStatus
 	{
 		Idle,
-		RequestingSignals,
 		Analyzing,
+		RequestingSignals,
 		Rendering,
 		Printing
 	};
@@ -385,6 +396,7 @@ public:
 	int pagesCount() const;
 	int pageIndex() const;
 
+	QString renderingReportName() const;
 	QString currentSection() const;
 	QString currentObjectName() const;
 
@@ -394,7 +406,8 @@ signals:
 private:
 	DbController* const db();
 
-	void compareProject();
+	void compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents);
+
 	void compareFilesRecursive(const DbFileTree& filesTree,
 							   const std::shared_ptr<DbFileInfo>& fi,
 							   const CompareData& compareData,
@@ -440,12 +453,14 @@ private:
 	bool isSchemaFile(const QString& fileName) const;
 
 	void generateTitlePage(QTextCursor* textCursor);
-	void createMarginItems(QTextCursor* textCursor, const CompareData& compareData);
+	void createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName);
 
 	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
 
 	QString changesetString(const std::shared_ptr<DbFile>& file);
 	QString changesetString(const Signal& signal);
+
+	void renderReport(std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents);
 
 private:
 	DbController m_db;

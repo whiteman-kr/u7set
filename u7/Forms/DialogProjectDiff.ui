@@ -7,13 +7,130 @@
     <x>0</x>
     <y>0</y>
     <width>395</width>
-    <height>463</height>
+    <height>492</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Project Differences Report</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="3" column="0" rowspan="3" colspan="2">
+    <widget class="QListWidget" name="categoriesList">
+     <property name="modelColumn">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>106</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QGroupBox" name="targetGroupBox">
+     <property name="title">
+      <string>Target Version</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,0,2,0">
+      <item row="0" column="2">
+       <widget class="QLabel" name="targetChangesetLabel">
+        <property name="text">
+         <string>Changeset:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="targetTypeLabel">
+        <property name="text">
+         <string>Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="targetTypeComboBox"/>
+      </item>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="targetChangesetButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="targetDateLabel">
+        <property name="text">
+         <string>Date:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3" colspan="2">
+       <widget class="QDateEdit" name="targetDateEdit">
+        <property name="displayFormat">
+         <string notr="true">dd.MM.yyyy hh:mm:ss</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="targetChangesetLineEdit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="buttonSelectNone">
+     <property name="text">
+      <string>Select None</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="expertPropertiesCheck">
+     <property name="text">
+      <string>Compare Expert properties</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="buttonSelectAll">
+     <property name="text">
+      <string>Select All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>134</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="0" column="0" colspan="3">
     <widget class="QGroupBox" name="sourceGroupBox">
      <property name="title">
@@ -83,59 +200,6 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="QGroupBox" name="targetGroupBox">
-     <property name="title">
-      <string>Target Version</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,0,2,0">
-      <item row="0" column="2">
-       <widget class="QLabel" name="targetChangesetLabel">
-        <property name="text">
-         <string>Changeset:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="targetTypeLabel">
-        <property name="text">
-         <string>Type:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="targetTypeComboBox"/>
-      </item>
-      <item row="0" column="4">
-       <widget class="QPushButton" name="targetChangesetButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="targetDateLabel">
-        <property name="text">
-         <string>Date:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3" colspan="2">
-       <widget class="QDateEdit" name="targetDateEdit">
-        <property name="displayFormat">
-         <string notr="true">dd.MM.yyyy hh:mm:ss</string>
-        </property>
-        <property name="calendarPopup">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="targetChangesetLineEdit"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QLabel" name="label">
      <property name="sizePolicy">
@@ -149,67 +213,10 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" rowspan="3" colspan="2">
-    <widget class="QListWidget" name="categoriesList">
-     <property name="modelColumn">
-      <number>0</number>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
-    <widget class="QPushButton" name="buttonSelectAll">
+   <item row="7" column="0">
+    <widget class="QCheckBox" name="multipleFilesCheck">
      <property name="text">
-      <string>Select All</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="2">
-    <widget class="QPushButton" name="buttonSelectNone">
-     <property name="text">
-      <string>Select None</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>106</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="6" column="0">
-    <widget class="QCheckBox" name="expertPropertiesCheck">
-     <property name="text">
-      <string>Compare Expert properties</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>134</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="7" column="1" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <string>Split Report to Multiple Files</string>
      </property>
     </widget>
    </item>
