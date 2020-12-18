@@ -185,7 +185,10 @@ namespace Sim
 
 		QRegExp regExpProfile("\\[[a-zA-Z\\d_]+\\]$");
 		QRegExp regExpProperty("[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-]+\"?;$");
-		QRegExp regExpNumber("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
+		QRegExp regExpUInt("^(?:0|[1-9][0-9]*)$");
+		QRegExp regExpInt("^-?(?:0|[1-9][0-9]*)$");
+		QRegExp regExpDouble("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
+
 
 		QString currentProfile = "Generic";
 
@@ -228,12 +231,12 @@ namespace Sim
 				QString propertyName = str.mid(ptPos + 1, eqPos - ptPos - 1).trimmed();
 				QString propertyString = str.right(str.length() - eqPos - 1).trimmed();
 
-				QVariant propertyValue;
-
 				if (propertyString.endsWith(';') == true)
 				{
 					propertyString.remove(propertyString.length() - 1, 1);
 				}
+
+				bool quoted = false;
 
 				if (propertyString.endsWith('\"') == true && propertyString.startsWith('\"') == true)
 				{
@@ -242,36 +245,55 @@ namespace Sim
 					propertyString.remove(propertyString.length() - 1, 1);
 					propertyString.remove(0, 1);
 
-					propertyValue = propertyString;
+					quoted = true;
 				}
-				else
+
+				QVariant propertyValue = propertyString;
+
+				// Check if propertyValue is a number or boolean value
+				//
+				do
 				{
-					// Check if propertyValue is a number or boolean value
-					//
-					if (regExpNumber.exactMatch(propertyString) == true)
+					if (regExpUInt.exactMatch(propertyString) == true)
 					{
-						propertyValue = propertyString;
+						propertyValue = propertyValue.toUInt();
+						break;
 					}
-					else
+
+					if (regExpInt.exactMatch(propertyString) == true)
 					{
-						if (propertyString.compare("true", Qt::CaseInsensitive) == 0)
-						{
-							propertyValue = true;
-						}
-						else
-						{
-							if (propertyString.compare("false", Qt::CaseInsensitive) == 0)
-							{
-								propertyValue = false;
-							}
-							else
-							{
-								*errorMessage = QObject::tr("Can't parse property value '%1'\nin\n'%2'").arg(propertyString).arg(dataStr.trimmed());
-								return false;
-							}
-						}
+						propertyValue = propertyValue.toInt();
+						break;
 					}
-				}
+
+					if (regExpDouble.exactMatch(propertyString) == true)
+					{
+						propertyValue = propertyValue.toDouble();
+						break;
+					}
+
+					if (propertyString.compare("true", Qt::CaseInsensitive) == 0)
+					{
+						propertyValue = true;
+						break;
+					}
+
+					if (propertyString.compare("false", Qt::CaseInsensitive) == 0)
+					{
+						propertyValue = false;
+						break;
+					}
+
+					if (quoted == true)
+					{
+						propertyValue = propertyValue.toString();
+						break;
+					}
+
+					*errorMessage = QObject::tr("Can't parse property value '%1'\nin\n'%2'").arg(propertyString).arg(dataStr.trimmed());
+					return false;
+
+				}while(false);
 
 				Profile& profile = profiles[currentProfile];
 				profile.profileName = currentProfile;
