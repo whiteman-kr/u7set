@@ -169,47 +169,34 @@ namespace VFrame30
 			m_rectPen = std::make_shared<QPen>();
 		}
 
-		QColor qlinecolor(lineColor());
-		if (m_rectPen->color() != qlinecolor)
+		if (m_rectPen->color() != m_lineColor)
 		{
-			m_rectPen->setColor(qlinecolor);
+			m_rectPen->setColor(m_lineColor);
 		}
 
-		if (m_fillBrush.get() == nullptr)
+		if (m_fillBrush == nullptr)
 		{
-			m_fillBrush = std::make_shared<QBrush>(Qt::SolidPattern);
+			m_fillBrush = std::make_shared<QBrush>(m_fillColor, Qt::SolidPattern);
+		}
+
+		if (m_fillBrush->color() != m_fillColor)
+		{
+			m_fillBrush->setColor(m_fillColor);
 		}
 						
 		// Calculate rectangle
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001f);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001f);
-		}
+		QRectF r = boundingRectInDocPt(drawParam);
 
 		// Filling rect 
 		//
 		if (fill() == true)
 		{
-			QPainter::RenderHints oldrenderhints = p->renderHints();
-			p->setRenderHint(QPainter::Antialiasing, false);
-
-			QColor qfillcolor(fillColor());
-
-			m_fillBrush->setColor(qfillcolor);
-			p->fillRect(r, *m_fillBrush);		// 22% если использовать Qcolor и намного меньше если использовать готовый Brush
-
-			p->setRenderHints(oldrenderhints);
+			p->setBrush(*m_fillBrush);
+		}
+		else
+		{
+			p->setBrush(Qt::NoBrush);
 		}
 
 		// Drawing rect 
@@ -229,7 +216,8 @@ namespace VFrame30
 
 		// --
 		//
-		p->setPen(textColor());
+		p->setPen(m_textColor);
+
 		DrawHelper::drawText(p,
 							 m_font,
 							 itemUnit(),

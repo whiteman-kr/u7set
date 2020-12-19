@@ -319,6 +319,9 @@ namespace VFrame30
 		double clipWidth = clipRect.width();
 		double clipHeight = clipRect.height();
 
+		QElapsedTimer timer;
+		timer.start();
+
 		for (auto layer : Layers)
 		{
 			Q_ASSERT(layer);
@@ -338,10 +341,10 @@ namespace VFrame30
 			{
 				Q_ASSERT(item);
 
-				item->setDrawParam(drawParam);
-
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
+					item->setDrawParam(drawParam);
+
 					if (drawParam->isMonitorMode() == true)
 					{
 						ClientSchemaView* view = drawParam->clientSchemaView();
@@ -373,6 +376,8 @@ namespace VFrame30
 				item->setDrawParam(nullptr);
 			}
 		}
+
+		//qDebug() << "Schema::Draw " << timer.elapsed();
 
 		return;
 	}

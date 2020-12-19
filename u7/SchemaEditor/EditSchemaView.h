@@ -44,7 +44,7 @@ protected:
 	void drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam);
 	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect);
 
-	void drawGrid(QPainter* p);
+	void drawGrid(QPainter* p, const QRectF& clipRect);
 
 	// Some determine functions
 	//

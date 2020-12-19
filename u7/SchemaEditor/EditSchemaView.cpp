@@ -72,10 +72,33 @@ void EditSchemaView::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
+void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 {
 	// Draw schema
 	//
+	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+
+	if (schema() != nullptr && theSettings.infoMode() == false)
+	{
+		int dpiX = logicalDpiX();
+		int dpiY = logicalDpiY();
+
+		QRect updateRect = paintEvent->rect();
+		updateRect.adjust(-dpiX, -dpiY / 4, dpiX, dpiY / 4);	// -one inch, to draw pin names
+
+		QPointF cls;
+		QPointF clf;
+
+		bool mok = true;
+		mok &= MousePosToDocPoint(updateRect.topLeft(), &cls, dpiX, dpiY);
+		mok &= MousePosToDocPoint(updateRect.bottomRight(), &clf, dpiX, dpiY);
+
+		if (mok == true)
+		{
+			clipRect.setTopLeft(cls);
+			clipRect.setSize({clf.x() - cls.x(), clf.y() - cls.y()});
+		}
+	}
 
 	// VFrame30::SchemaView::paintEvent(pe);
 	//
@@ -92,7 +115,7 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 		drawParam.setAppSignalController(&m_appSignalController);
 
-		draw(drawParam);
+		draw(drawParam, clipRect);
 	}
 
 	// Draw other -- selection, grid, outlines, rulers, etc
@@ -115,8 +138,6 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	// Draw schema
 	//
-	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
 	drawParam.setControlBarSize(
 		schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
@@ -167,9 +188,14 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	p.restore();
 
-	// Draw grid performed in not ajusted painter
+	// Draw grid performed IS NOT AJUSTED PAINTER
 	//
-	drawGrid(&p);
+	{
+		QRect updateRect = paintEvent->rect();
+		updateRect.adjust(-1, -1, 1, 1);
+
+		drawGrid(&p, updateRect);
+	}
 
 	// --
 	//
@@ -968,7 +994,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 
 }
 
-void EditSchemaView::drawGrid(QPainter* p)
+void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 {
 	assert(p);
 
@@ -985,9 +1011,7 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	double frameWidth = schema()->docWidth();
 	double frameHeight = schema()->docHeight();
-
 	double gridSize = schema()->gridSize();
-
 	double scale = zoom() / 100.0;
 
 	// Thin out the grid
@@ -1001,8 +1025,6 @@ void EditSchemaView::drawGrid(QPainter* p)
 	}
 	else
 	{
-		// ��������� ����, ���� ����� ��������� ����� ��� 2 �� ���� � �����
-		//
 		while (gridSize * scale < 2.6 / 25.4)
 		{
 			gridSize *= 2;
@@ -1022,32 +1044,32 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	// Drawing grid
 	//
-	p->setPen(QColor(0x00, 0x00, 0x80, 0xB4));
-	QPointF pt;
-
-	QRegion visiblePart = visibleRegion();
+	p->setPen(QColor{0x00, 0x00, 0x80, 0xB4});
 
 	const double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
 	const double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
 
+	const double dpiXScale = gridSize * dpiX * scale;
+	const double dpiYScale = gridSize * dpiY * scale;
+
 	std::vector<QPointF> points;
 	points.reserve(1024);
 
-	for (int v = 0; v < vertGridCount; v++)
+	QPointF pt;
+
+	for (int v = 0; v < vertGridCount; ++v)
 	{
-		pt.setY(static_cast<double>(v + 1) * gridSize * dpiY * scale);
+		pt.setY(static_cast<double>(v + 1) * dpiYScale);
 		points.clear();
 
-		for (int h = 0; h < horzGridCount; h++)
+		for (int h = 0; h < horzGridCount; ++h)
 		{
-			pt.setX(static_cast<double>(h + 1) * gridSize * dpiX * scale);
+			pt.setX(static_cast<double>(h + 1) * dpiXScale);
 
-			if (visiblePart.contains(pt.toPoint()) == false)
+			if (clipRect.contains(pt) == true)
 			{
-				continue;
+				points.push_back(pt);
 			}
-
-			points.push_back(pt);
 		}
 
 		p->drawPoints(points.data(), static_cast<int>(points.size()));

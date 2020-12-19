@@ -255,9 +255,9 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaView::paintEvent(QPaintEvent*)
+	void SchemaView::paintEvent(QPaintEvent* /*paintEvent*/)
 	{
-		if (schema().get() == nullptr)
+		if (schema() == nullptr)
 		{
 			return;
 		}
@@ -265,12 +265,14 @@ namespace VFrame30
 		QPainter p(this);
 		CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
-		draw(drawParam);
+		QRectF clipRect{0, 0, schema()->docWidth(), schema()->docHeight()};
+
+		draw(drawParam, clipRect);
 
 		return;
 	}
 
-	void SchemaView::draw(CDrawParam& drawParam)
+	void SchemaView::draw(CDrawParam& drawParam, const QRectF& clipRect)
 	{
 		if (schema() == nullptr)
 		{
@@ -306,8 +308,6 @@ namespace VFrame30
 
 		// Draw Schema
 		//
-		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
 		schema()->Draw(&drawParam, clipRect);
 
 		return;

@@ -28,7 +28,7 @@ namespace VFrame30
 		//
 	protected:
 		virtual void paintEvent(QPaintEvent*) override;
-		void draw(CDrawParam& drawParam);
+		void draw(CDrawParam& drawParam, const QRectF& clipRect);
 
 		void Ajust(QPainter* painter, double startX, double startY, double zoom) const;
 
