@@ -77,7 +77,7 @@ namespace VFrame30
 
 		// Draw comment "dim"
 		//
-		virtual void drawCommentDim(CDrawParam* drawParam) const;
+		virtual void drawCommentDim(CDrawParam* drawParam) const override;
 
 		// Determine and Calculation Functions
 		//

@@ -1379,12 +1379,8 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 	{
 		QPointF docPoint = widgetPointToDocument(me->pos(), false);
 
-		// ���� ������� ���� ������, � ���� �� ��������� �������� ����� ������� ��� ��������� �����, ������ � �.�.
-		//
 		if (selectedItems().size() == 1)
 		{
-			// ��������� ����������� �� ����� �� ����� �������� ����� ��������� �������� ������ �������
-			//
 			int movingEdgePointIndex = 0;
 			auto selectedItem = selectedItems()[0];
 
@@ -1401,8 +1397,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 				if (findResult != std::end(m_sizeActionToMouseCursor))
 				{
-					// ������ �������� ����� Xin � Yin ����������� � �����, ��������� ������ ���� ��� ����������� ������� �������� ��� �����
-					//
+
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
 					editSchemaView()->m_editStartDocPt = docPoint;
@@ -1416,14 +1411,10 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				}
 			}
 
-			// ��������� �� ��������� ������ �����
-			//
 			if (dynamic_cast<VFrame30::IPosLine*>(selectedItem.get()) != nullptr)
 			{
 				if (possibleAction == SchemaItemAction::MoveStartLinePoint)
 				{
-					// �������� ����� Xin � Yin ����������� � �����, ��������� ������ ���� ��� ����������� ������� �������� ��� �����
-					//
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
 					editSchemaView()->m_editStartDocPt = docPoint;
@@ -1439,8 +1430,6 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 				if (possibleAction == SchemaItemAction::MoveEndLinePoint)
 				{
-					// �������� ����� Xin � Yin ����������� � �����, ��������� ������ ���� ��� ����������� ������� �������� ��� �����
-					//
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
 					editSchemaView()->m_editStartDocPt = docPoint;
@@ -1455,8 +1444,6 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				}
 			}
 
-			// ��������� �� ��������� ������ � ����� ����������
-			//
 			if (dynamic_cast<VFrame30::IPosConnection*>(selectedItem.get()) != nullptr)
 			{
 				if (possibleAction == SchemaItemAction::MoveHorizontalEdge)
@@ -1521,17 +1508,25 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// ��������� ���������� ��������, �� ����������� ���������� ������� �� �����������
-		//
-		for (auto si = selectedItems().begin(); si != selectedItems().end(); ++si)
+		for (auto si : selectedItems())
 		{
 			int movingEdgePointIndex = 0;
-			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si->get(), docPoint, &movingEdgePointIndex);
+			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si.get(), docPoint, &movingEdgePointIndex);
 
-			if (possibleAction == SchemaItemAction::MoveItem)
+			if (possibleAction == SchemaItemAction::MoveItem &&
+				editSchemaView()->selectedItems().size() > 1 &&
+				si->isType<VFrame30::IPosConnection>() == true)
 			{
-				// ������ �������� ����� Xin � Yin ����������� � �����, ��������� ������ ���� ��� ����������� ������� �������� ��� �����
+				// This SchemaItemAction::MoveItem is for @MOveBar@ of IPosConnection, exclude it for MULTIPLE selection
 				//
+				possibleAction = SchemaItemAction::NoAction;
+			}
+
+			if (possibleAction == SchemaItemAction::MoveItem ||
+				possibleAction == SchemaItemAction::MoveConnectionLinePoint ||
+				possibleAction == SchemaItemAction::MoveHorizontalEdge ||
+				possibleAction == SchemaItemAction::MoveVerticalEdge)
+			{
 				docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
 				editSchemaView()->m_editStartDocPt = docPoint;
@@ -1594,8 +1589,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// ���� ���� �� ����������� ������� ����� ���������� (���������� ��� ������ ������)
-		// �� ������� � ����� ����������� �������
+		// --
 		//
 		auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
@@ -1604,20 +1598,13 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 		{
 			if (std::find(selectedItems().begin(), selectedItems().end(), itemUnderPoint) != selectedItems().end())
 			{
-				// ������� � ����� ����������� ���� ���������� ���������
-				// SelectedItems ��� ��������
-				//
 			}
 			else
 			{
-				// ������� � ����� ����������� ������ ��������
-				//
 				editSchemaView()->clearSelection();
 				editSchemaView()->setSelectedItem(itemUnderPoint);
 			}
 
-			// �������� ����� Xin � Yin ����������� � �����, ��������� ������ ���� ��� ����������� ������� �������� ��� �����
-			//
 			docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
 			editSchemaView()->m_editStartDocPt = docPoint;
@@ -1631,9 +1618,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 		}
 	}
 
-	// ���� ���� ������ ������ ��������� �� �� ���������� � ��������� � ����� ����������� ��������
-	//
-	if (me->modifiers().testFlag(Qt::ShiftModifier) == false)
+	if (shiftIsPressed == false)
 	{
 		editSchemaView()->clearSelection();
 	}
@@ -2516,7 +2501,6 @@ void EditSchemaWidget::mouseMove_Scrolling(QMouseEvent*)
 void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 {
 	QRect oldRect{editSchemaView()->m_mouseSelectionStartPointForUpdate, editSchemaView()->m_mouseSelectionEndPointForUpdate};
-	oldRect = oldRect.normalized();
 
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->m_mouseSelectionEndPointForUpdate = me->pos();
@@ -2529,6 +2513,8 @@ void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 	//
 	QRect updateRect{editSchemaView()->mapFrom(this, newRect.topLeft()),
 					 editSchemaView()->mapFrom(this, newRect.bottomRight())};
+
+	updateRect.adjust(-2, -2, 2, 2);
 
 	editSchemaView()->update(updateRect);
 
@@ -3331,6 +3317,15 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		{
 			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si.get(), docPos, &movingEdgePointIndex);
 
+			if (possibleAction == SchemaItemAction::MoveItem &&
+				editSchemaView()->selectedItems().size() > 1 &&
+				si->isType<VFrame30::IPosConnection>() == true)
+			{
+				// This SchemaItemAction::MoveItem is for @MOveBar@, exclude it for MULTIPLE selection
+				//
+				possibleAction = SchemaItemAction::NoAction;
+			}
+
 			if (possibleAction != SchemaItemAction::NoAction)
 			{
 				// Changing size, is possible for only one selected object
@@ -3349,6 +3344,20 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 						//qDebug() << Q_FUNC_INFO << static_cast<int>(findResult->cursorShape);
 						setCursor(findResult->cursorShape);
 						return;
+					}
+				}
+
+				// Changing any vertexes or ribs of ConnectionLine possible only
+				// for one item
+				//
+				if (si->isType<VFrame30::IPosConnection>() == true &&
+					editSchemaView()->selectedItems().size() > 1)
+				{
+					if (possibleAction == SchemaItemAction::MoveConnectionLinePoint ||
+						possibleAction == SchemaItemAction::MoveHorizontalEdge ||
+						possibleAction == SchemaItemAction::MoveVerticalEdge)
+					{
+						possibleAction = SchemaItemAction::MoveItem;
 					}
 				}
 
