@@ -18,11 +18,44 @@ class SoftwareSettings : public QObject
 {
 public:
 	SoftwareSettings() = default;
-	SoftwareSettings(const SoftwareSettings&);
+	SoftwareSettings(const SoftwareSettings& copy);
+	SoftwareSettings(const QString& profile);
 	virtual ~SoftwareSettings();
+
+	const SoftwareSettings& operator = (const SoftwareSettings& copy);
 
 	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
+
+protected:
+	void writeStartSettings(XmlWriteHelper& xml) const;
+	void writeEndSettings(XmlWriteHelper& xml) const;
+
+	bool readStartSettings(XmlReadHelper& xml);
+
+public:
+	QString profile;
+};
+
+class SoftwareSettingsSet
+{
+public:
+	SoftwareSettingsSet(E::SoftwareType softwareType);
+
+	bool addSettingsProfile(const QString& profile, std::shared_ptr<SoftwareSettings> settings);
+
+	std::shared_ptr<const SoftwareSettings> getSettingsProfile(const QString& profile) const;
+	std::shared_ptr<const SoftwareSettings> getSettingsDefaultProfile() const;
+
+	bool writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
+
+private:
+	std::shared_ptr<SoftwareSettings> createAppropriateSettings();
+
+private:
+	E::SoftwareType m_softwareType;
+	std::map<QString, std::shared_ptr<SoftwareSettings>> m_settings;	// profileName -> SoftwareSettings
 };
 
 #ifdef IS_BUILDER
@@ -169,9 +202,6 @@ public:
 class TuningServiceSettings : public SoftwareSettings
 {
 public:
-	TuningServiceSettings() = default;
-	TuningServiceSettings(const TuningServiceSettings&) = default;
-
 	struct TuningClient
 	{
 		QString equipmentID;
@@ -250,8 +280,6 @@ public:
 
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
-
-	const ArchivingServiceSettings& operator = (const ArchivingServiceSettings& src);
 };
 
 #ifdef IS_BUILDER
@@ -333,8 +361,8 @@ public:
 
 	//
 
-	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-	bool readFromXml(XmlReadHelper& xmlReader) override;
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 };
 
 #ifdef IS_BUILDER
@@ -382,8 +410,8 @@ public:
 
 	//
 
-	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-	bool readFromXml(XmlReadHelper& xmlReader) override;
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 
 	QStringList getSchemaTags() const;
 	QStringList getTuningSources() const;
@@ -437,8 +465,8 @@ public:
 	QString schemaTags;
 
 public:
-	bool writeToXml(XmlWriteHelper& xmlWriter) override;
-	bool readFromXml(XmlReadHelper& xmlReader) override;
+	bool writeToXml(XmlWriteHelper& xml) override;
+	bool readFromXml(XmlReadHelper& xml) override;
 
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;

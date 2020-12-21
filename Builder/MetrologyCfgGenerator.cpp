@@ -168,7 +168,7 @@ namespace Builder
 
 		// Create and write build file MetrologySignals.xml
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -297,7 +297,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;

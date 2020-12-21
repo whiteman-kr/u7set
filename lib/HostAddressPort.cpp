@@ -12,6 +12,16 @@
 
 const char* const HostAddressPort::NOT_SET = "NotSet";
 
+HostAddressPort::HostAddressPort()
+{
+}
+
+HostAddressPort::HostAddressPort(const HostAddressPort& copy)
+{
+	m_hostAddress = copy.m_hostAddress;
+	m_port = copy.m_port;
+}
+
 HostAddressPort::HostAddressPort(const QHostAddress& addr, quint16 port)
 {
 	m_hostAddress = addr;
@@ -64,12 +74,6 @@ HostAddressPort::HostAddressPort(const QString& address, int port)
 
 	m_hostAddress.setAddress(address);
 	m_port = static_cast<quint16>(port);
-}
-
-HostAddressPort::HostAddressPort(const HostAddressPort& copy)
-{
-	m_hostAddress = copy.m_hostAddress;
-	m_port = copy.m_port;
 }
 
 HostAddressPort& HostAddressPort::operator=(const HostAddressPort& other)

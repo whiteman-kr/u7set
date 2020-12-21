@@ -16,6 +16,7 @@ namespace Builder
 								   Hardware::Software* software);
 		~AppDataServiceCfgGenerator();
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
 		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
@@ -33,7 +34,7 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
-		AppDataServiceSettingsGetter m_settings;
+		AppDataServiceSettingsGetter m_settingsGetter;
 
 		//
 

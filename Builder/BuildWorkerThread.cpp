@@ -1454,7 +1454,82 @@ namespace Builder
 
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(context);
 
-		QByteArray softwareXmlData;
+		RETURN_IF_FALSE(result);
+
+		std::map<QString, std::shared_ptr<SoftwareCfgGenerator>> swCfgGens;
+
+		// create SoftwareCfgGenerators and generate "default" profile settings
+		//
+		for(auto p : m_context->m_software)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;;
+			}
+
+			Hardware::Software* software = p.second;
+
+			if (software == nullptr	|| software->isSoftware() == false)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen;
+
+			switch(software->type())
+			{
+			case E::SoftwareType::AppDataService:
+				swCfgGen = std::make_shared<AppDataServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::DiagDataService:
+				swCfgGen = std::make_shared<DiagDataServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::Monitor:
+				swCfgGen = std::make_shared<MonitorCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TuningService:
+				swCfgGen = std::make_shared<TuningServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TuningClient:
+				swCfgGen = std::make_shared<TuningClientCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::ConfigurationService:
+				swCfgGen = std::make_shared<ConfigurationServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::ArchiveService:
+				swCfgGen = std::make_shared<ArchivingServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::Metrology:
+				swCfgGen = std::make_shared<MetrologyCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TestClient:
+				swCfgGen = std::make_shared<TestClientCfgGenerator>(context, software);
+				break;
+
+			default:
+				m_context->m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
+				result = false;
+			}
+
+			if (swCfgGen != nullptr)
+			{
+				swCfgGens.insert({software->equipmentIdTemplate(), swCfgGen});
+				result &= swCfgGen->createSettingsProfile(SettingsProfile::DEFAULT);
+			}
+		}
+
+	/*	QByteArray softwareXmlData;
 		QXmlStreamWriter softwareXml(&softwareXmlData);
 
 		softwareXml.setAutoFormatting(true);
@@ -1463,90 +1538,17 @@ namespace Builder
 
 		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
 
-		equipmentWalker(context->m_equipmentSet->root(),
-			[this, context, &softwareXml, &result](Hardware::DeviceObject* currentDevice)
-			{
-				if (QThread::currentThread()->isInterruptionRequested() == true)
-				{
-					return;
-				}
+		softwareCfgGenerator->writeSoftwareSection(softwareXml, false);	// <Software>
 
-				if (currentDevice->isSoftware() == false)
-				{
-					return;
-				}
+		result &= softwareCfgGenerator->getSettingsXml(softwareXml);
 
-				Hardware::Software* software = dynamic_cast<Hardware::Software*>(currentDevice);
+		softwareXml.writeEndElement();	// </Software>
 
-				if (software == nullptr)
-				{
-					assert(false);
-					return;
-				}
 
-				SoftwareCfgGenerator* softwareCfgGenerator = nullptr;
-
-				switch(software->type())
-				{
-				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new AppDataServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::DiagDataService:
-					softwareCfgGenerator = new DiagDataServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::Monitor:
-					softwareCfgGenerator = new MonitorCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::TuningClient:
-					softwareCfgGenerator = new TuningClientCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::ConfigurationService:
-					softwareCfgGenerator = new ConfigurationServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::ArchiveService:
-					softwareCfgGenerator = new ArchivingServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::Metrology:
-					softwareCfgGenerator = new MetrologyCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::TestClient:
-					softwareCfgGenerator = new TestClientCfgGenerator(context, software);
-					break;
-
-				default:
-					m_context->m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
-					result = false;
-				}
-
-				if (softwareCfgGenerator != nullptr)
-				{
-					result &= softwareCfgGenerator->run();
-
-					softwareCfgGenerator->writeSoftwareSection(softwareXml, false);	// <Software>
-
-					result &= softwareCfgGenerator->getSettingsXml(softwareXml);
-
-					softwareXml.writeEndElement();	// </Software>
-
-					delete softwareCfgGenerator;
-				}
-			}
-		);
 
 		softwareXml.writeEndElement();		// </SoftwareItems>
 
-		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
+		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);*/
 
 		context->m_buildResultWriter->writeConfigurationXmlFiles();
 
@@ -1565,7 +1567,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool BuildWorkerThread::writeFirmwareStatistics(BuildResultWriter& buildResultWriter)
 	{

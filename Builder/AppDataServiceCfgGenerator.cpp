@@ -17,6 +17,16 @@ namespace Builder
 	{
 	}
 
+	bool AppDataServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		if (m_settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addSettingsProfile(profile, std::make_shared<AppDataServiceSettings>(m_settingsGetter));
+	}
+
 	bool AppDataServiceCfgGenerator::generateConfiguration()
 	{
 		bool result = false;
@@ -41,12 +51,12 @@ namespace Builder
 	{
 		XmlWriteHelper xml(xmlWriter);
 
-		return m_settings.writeToXml(xml);
+		return m_settingsSet.writeToXml(xml);
 	}
 
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
+		bool result = m_settingsSet.readFromDevice(m_context, m_software);
 
 		RETURN_IF_FALSE(result);
 
@@ -147,7 +157,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -234,7 +244,7 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{

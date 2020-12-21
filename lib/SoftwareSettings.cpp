@@ -9,17 +9,250 @@
 
 // -------------------------------------------------------------------------------------
 //
-// ServiceSettings class implementation
+// SoftwareSettings class implementation
 //
 // -------------------------------------------------------------------------------------
 
-SoftwareSettings::SoftwareSettings(const SoftwareSettings&)
+SoftwareSettings::SoftwareSettings(const SoftwareSettings& copy) :
+	profile(copy.profile)
+{
+}
+
+SoftwareSettings::SoftwareSettings(const QString& profile) :
+	profile(profile)
 {
 }
 
 SoftwareSettings::~SoftwareSettings()
 {
 }
+
+const SoftwareSettings& SoftwareSettings::operator = (const SoftwareSettings& copy)
+{
+	profile = copy.profile;
+
+	return *this;
+}
+
+void SoftwareSettings::writeStartSettings(XmlWriteHelper& xml) const
+{
+	xml.writeStartElement(XmlElement::SETTINGS);	//	<Settings>
+
+	xml.writeStringAttribute(XmlAttribute::PROFILE, profile);
+}
+
+void SoftwareSettings::writeEndSettings(XmlWriteHelper &xml) const
+{
+	xml.writeEndElement();							//	</Settings>
+}
+
+bool SoftwareSettings::readStartSettings(XmlReadHelper& xml)
+{
+	bool result = xml.findElement(XmlElement::SETTINGS);
+
+	RETURN_IF_FALSE(result);
+
+	result = xml.readStringAttribute(XmlAttribute::PROFILE, &profile);
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
+// SoftwareSettingsSet class implementation
+//
+// -------------------------------------------------------------------------------------
+
+SoftwareSettingsSet::SoftwareSettingsSet(E::SoftwareType softwareType) :
+	m_softwareType(softwareType)
+{
+}
+
+bool SoftwareSettingsSet::addSettingsProfile(const QString& profile, std::shared_ptr<SoftwareSettings> settings)
+{
+	bool result = false;
+
+	switch(m_softwareType)
+	{
+	case E::SoftwareType::Monitor:
+		result = dynamic_cast<MonitorSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::ConfigurationService:
+		result = dynamic_cast<CfgServiceSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::AppDataService:
+		result = dynamic_cast<AppDataServiceSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::ArchiveService:
+		result = dynamic_cast<ArchivingServiceSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::TuningService:
+		result = dynamic_cast<TuningServiceSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::DiagDataService:
+		result = dynamic_cast<DiagDataServiceSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::TuningClient:
+		result = dynamic_cast<TuningClientSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::Metrology:
+		result = dynamic_cast<MetrologySettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::TestClient:
+		result = dynamic_cast<TestClientSettings*>(settings.get()) != nullptr;
+		break;
+
+	case E::SoftwareType::ServiceControlManager:
+	case E::SoftwareType::Unknown:
+	case E::SoftwareType::BaseService:
+	default:
+		Q_ASSERT(false);
+		break;
+	}
+
+	if (result == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	if (m_settings.find(profile) == m_settings.end())
+	{
+		m_settings.insert({profile, settings});
+		return true;
+	}
+
+	Q_ASSERT(false);
+	return false;
+}
+
+std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsProfile(const QString& profile) const
+{
+	auto it = m_settings.find(profile);
+
+	if (it != m_settings.end())
+	{
+		return it->second;
+	}
+
+	return nullptr;
+}
+
+std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsDefaultProfile() const
+{
+	return getSettingsProfile(SettingsProfile::DEFAULT);
+}
+
+bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
+{
+	bool result = true;
+
+	xml.writeStartElement(XmlElement::SETTINGS_SET);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_settings.size()));
+
+	for(auto p : m_settings)
+	{
+		std::shared_ptr<SoftwareSettings> swSettings = p.second;
+
+		if (swSettings == nullptr)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		result &= swSettings->writeToXml(xml);
+	}
+
+	xml.writeEndElement();		// </SettingsSet>
+
+	return result;
+}
+
+bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
+{
+	m_settings.clear();
+
+	bool result = true;
+	int profilesCount = 0;
+
+	result = xml.findElement(XmlElement::SETTINGS_SET);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &profilesCount);
+
+	RETURN_IF_FALSE(result);
+
+	for(int i = 0; i < profilesCount; i++)
+	{
+		std::shared_ptr<SoftwareSettings> settings = createAppropriateSettings();
+
+		if (settings == nullptr)
+		{
+			return false;
+		}
+
+		if (settings->readFromXml(xml) == true)
+		{
+			result &= addSettingsProfile(settings->profile, settings);
+		}
+		else
+		{
+			result = false;
+		}
+	}
+
+	return result;
+}
+
+std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
+{
+	switch(m_softwareType)
+	{
+	case E::SoftwareType::Monitor:
+		return std::make_shared<MonitorSettings>();
+
+	case E::SoftwareType::ConfigurationService:
+		return std::make_shared<CfgServiceSettings>();
+
+	case E::SoftwareType::AppDataService:
+		return std::make_shared<AppDataServiceSettings>();
+
+	case E::SoftwareType::ArchiveService:
+		return std::make_shared<ArchivingServiceSettings>();
+
+	case E::SoftwareType::TuningService:
+		return std::make_shared<TuningServiceSettings>();
+
+	case E::SoftwareType::DiagDataService:
+		return std::make_shared<DiagDataServiceSettings>();
+
+	case E::SoftwareType::TuningClient:
+		return std::make_shared<TuningClientSettings>();
+
+	case E::SoftwareType::Metrology:
+		return std::make_shared<MetrologySettings>();
+
+	case E::SoftwareType::TestClient:
+		return std::make_shared<TestClientSettings>();
+
+	case E::SoftwareType::ServiceControlManager:
+	case E::SoftwareType::Unknown:
+	case E::SoftwareType::BaseService:
+	default:
+		Q_ASSERT(false);
+		break;
+	}
+
+	return nullptr;
+}
+
+
 
 #ifdef IS_BUILDER
 
@@ -307,14 +540,12 @@ SoftwareSettings::~SoftwareSettings()
 
 bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
-
-	xml.writeEndElement();	// </Settings>
 
 	xml.writeStartElement(XmlElement::CLIENTS);
 	xml.writeIntAttribute(XmlAttribute::COUNT, clients.count());
@@ -331,6 +562,8 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeEndElement();	// </Clients>
 
+	writeEndSettings(xml);	// </Settings>
+
 	return true;
 }
 
@@ -340,12 +573,9 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	bool result = false;
 
-	result = xml.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
@@ -441,7 +671,7 @@ QStringList CfgServiceSettings::knownClients()
 
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -468,7 +698,7 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
 							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
 
-	xml.writeEndElement();	// </Settings>
+	writeEndSettings(xml);	// </Settings>
 
 	return true;
 }
@@ -477,12 +707,9 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -587,7 +814,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -609,7 +836,7 @@ bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	xml.writeEndElement();	// </Settings>
+	writeEndSettings(xml);	// </Settings>
 
 	return true;
 }
@@ -618,12 +845,9 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -715,7 +939,7 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	xml.writeStringElement(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
 
@@ -773,7 +997,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeEndElement();			// TUNING_CLIENTS
 
-	xml.writeEndElement();	// </Settings>
+	writeEndSettings(xml);			// </Settings>
 
 	return true;
 }
@@ -782,7 +1006,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -1137,7 +1361,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
@@ -1155,7 +1379,7 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, longTermArchivePeriod);
 	xml.writeStringElement(EquipmentPropNames::ARCHIVE_LOCATION, archiveLocation);
 
-	xml.writeEndElement();	// </Settings>
+	writeEndSettings(xml);		// </Settings>
 
 	return true;
 }
@@ -1164,7 +1388,7 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -1185,25 +1409,6 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringElement(EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, true);
 
 	return result;
-}
-
-const ArchivingServiceSettings& ArchivingServiceSettings::operator = (const ArchivingServiceSettings& src)
-{
-	clientRequestIP = src.clientRequestIP;
-	clientRequestNetmask = src.clientRequestNetmask;
-
-	appDataReceivingIP = src.appDataReceivingIP;
-	appDataReceivingNetmask = src.appDataReceivingNetmask;
-
-	diagDataReceivingIP = src.diagDataReceivingIP;
-	diagDataReceivingNetmask = src.diagDataReceivingNetmask;
-
-	shortTermArchivePeriod = src.shortTermArchivePeriod;
-	longTermArchivePeriod = src.longTermArchivePeriod;
-
-	archiveLocation = src.archiveLocation;
-
-	return *this;
 }
 
 #ifdef IS_BUILDER
@@ -1289,16 +1494,9 @@ const ArchivingServiceSettings& ArchivingServiceSettings::operator = (const Arch
 //
 // -------------------------------------------------------------------------------------
 
-/*const char* TestClientSettings::CFG_SERVICE1_SECTION = "CfgService1";
-const char* TestClientSettings::CFG_SERVICE2_SECTION = "CfgService2";
-const char* TestClientSettings::APP_DATA_SERVICE_SECTION = "AppDataService";
-const char* TestClientSettings::DIAG_DATA_SERVICE_SECTION = "DiagDataService";
-const char* TestClientSettings::ARCH_SERVICE_SECTION = "ArchService";
-const char* TestClientSettings::TUNING_SERVICE_SECTION = "TuningService";*/
-
 bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	//
 
@@ -1364,7 +1562,7 @@ bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
 
 	//
 
-	xml.writeEndElement();	// </Settings>
+	writeEndSettings(xml);	// </Settings>
 
 	return true;
 }
@@ -1373,7 +1571,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	result &= xml.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
+
+	RETURN_IF_FALSE(result);
 
 	result &= xml.findElement(XmlElement::CFG_SERVICE1);
 	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &cfgService1_equipmentID);
@@ -1640,72 +1840,74 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool MetrologySettings::writeToXml(XmlWriteHelper& xmlWriter)
+bool MetrologySettings::writeToXml(XmlWriteHelper& xml)
 {
-	xmlWriter.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
-	xmlWriter.writeStartElement(XmlElement::APP_DATA_SERVICE);
+	xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
 
-		xmlWriter.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, appDataServicePropertyIsValid1);
-		xmlWriter.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID1, appDataServiceID1);
-		xmlWriter.writeStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, appDataServiceIP1);
-		xmlWriter.writeIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, appDataServicePort1);
+	xml.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, appDataServicePropertyIsValid1);
+	xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID1, appDataServiceID1);
+	xml.writeStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, appDataServiceIP1);
+	xml.writeIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, appDataServicePort1);
 
-		xmlWriter.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, appDataServicePropertyIsValid2);
-		xmlWriter.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID2, appDataServiceID2);
-		xmlWriter.writeStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, appDataServiceIP2);
-		xmlWriter.writeIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, appDataServicePort2);
+	xml.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, appDataServicePropertyIsValid2);
+	xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID2, appDataServiceID2);
+	xml.writeStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, appDataServiceIP2);
+	xml.writeIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, appDataServicePort2);
 
-	xmlWriter.writeEndElement();		// </AppDataService>
+	xml.writeEndElement();		// </AppDataService>
 
-	xmlWriter.writeStartElement(XmlElement::TUNING_SERVICE);
+	xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
-		xmlWriter.writeBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, tuningServicePropertyIsValid);
-		xmlWriter.writeStringAttribute(XmlAttribute::SOFTWARE_METROLOGY_ID, softwareMetrologyID);
-		xmlWriter.writeStringAttribute(XmlAttribute::TUNING_SERVICE_IP, tuningServiceIP);
-		xmlWriter.writeIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, tuningServicePort);
+	xml.writeBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, tuningServicePropertyIsValid);
+	xml.writeStringAttribute(XmlAttribute::SOFTWARE_METROLOGY_ID, softwareMetrologyID);
+	xml.writeStringAttribute(XmlAttribute::TUNING_SERVICE_IP, tuningServiceIP);
+	xml.writeIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, tuningServicePort);
 
-	xmlWriter.writeEndElement();		// </TuningService>
+	xml.writeEndElement();		// </TuningService>
 
-	xmlWriter.writeEndElement();		// </Settings>
+	writeEndSettings(xml);		// </Settings>
 
 	return true;
 }
 
-bool MetrologySettings::readFromXml(XmlReadHelper& xmlReader)
+bool MetrologySettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	result &= xmlReader.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
+
+	RETURN_IF_FALSE(result);
 
 	// AppDataService
 	//
-	result &= xmlReader.findElement(XmlElement::APP_DATA_SERVICE);
+	result &= xml.findElement(XmlElement::APP_DATA_SERVICE);
 
 	// primary
 	//
-	result &= xmlReader.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, &appDataServicePropertyIsValid1);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataServiceID1);
+	result &= xml.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, &appDataServicePropertyIsValid1);
+	result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataServiceID1);
 
-	result &= xmlReader.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, &appDataServiceIP1);
-	result &= xmlReader.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, &appDataServicePort1);
+	result &= xml.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP1, &appDataServiceIP1);
+	result &= xml.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT1, &appDataServicePort1);
 
 	// reserve
 	//
-	result &= xmlReader.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, &appDataServicePropertyIsValid2);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataServiceID2);
+	result &= xml.readBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID2, &appDataServicePropertyIsValid2);
+	result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataServiceID2);
 
-	result &= xmlReader.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, &appDataServiceIP2);
-	result &= xmlReader.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, &appDataServicePort2);
+	result &= xml.readStringAttribute(XmlAttribute::APP_DATA_SERVICE_IP2, &appDataServiceIP2);
+	result &= xml.readIntAttribute(XmlAttribute::APP_DATA_SERVICE_PORT2, &appDataServicePort2);
 
 	// TuningService
 	//
-	result &= xmlReader.findElement(XmlElement::TUNING_SERVICE);
+	result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
-	result &= xmlReader.readBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, &tuningServicePropertyIsValid);
-	result &= xmlReader.readStringAttribute(XmlAttribute::SOFTWARE_METROLOGY_ID, &softwareMetrologyID);
-	result &= xmlReader.readStringAttribute(XmlAttribute::TUNING_SERVICE_IP, &tuningServiceIP);
-	result &= xmlReader.readIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, &tuningServicePort);
+	result &= xml.readBoolAttribute(XmlAttribute::TUNING_SERVICE_PROPERTY_IS_VALID, &tuningServicePropertyIsValid);
+	result &= xml.readStringAttribute(XmlAttribute::SOFTWARE_METROLOGY_ID, &softwareMetrologyID);
+	result &= xml.readStringAttribute(XmlAttribute::TUNING_SERVICE_IP, &tuningServiceIP);
+	result &= xml.readIntAttribute(XmlAttribute::TUNING_SERVICE_PORT, &tuningServicePort);
 
 	return result;
 }
@@ -1837,137 +2039,139 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xmlReader)
 //
 // -------------------------------------------------------------------------------------
 
-bool MonitorSettings::writeToXml(XmlWriteHelper& xmlWriter)
+bool MonitorSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xmlWriter.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
 	//
 
-	xmlWriter.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
-	xmlWriter.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
+	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
+	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 
 	//
 
-	xmlWriter.writeStartElement(XmlElement::APP_DATA_SERVICE1);
+	xml.writeStartElement(XmlElement::APP_DATA_SERVICE1);
 
-	xmlWriter.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, appDataServiceID1);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, appDataServiceIP1);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, appDataServicePort1);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, realtimeDataIP1);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, realtimeDataPort1);
+	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, appDataServiceID1);
+	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, appDataServiceIP1);
+	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, appDataServicePort1);
+	xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, realtimeDataIP1);
+	xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, realtimeDataPort1);
 
-	xmlWriter.writeEndElement();			// </AppDataService1>
-
-	//
-
-	xmlWriter.writeStartElement(XmlElement::APP_DATA_SERVICE2);
-
-	xmlWriter.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, appDataServiceID2);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, appDataServiceIP2);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, appDataServicePort2);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, realtimeDataIP2);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, realtimeDataPort2);
-
-	xmlWriter.writeEndElement();			// </AppDataService2>
+	xml.writeEndElement();			// </AppDataService1>
 
 	//
 
-	xmlWriter.writeStartElement(XmlElement::ARCHIVE_SERVICE1);
+	xml.writeStartElement(XmlElement::APP_DATA_SERVICE2);
 
-	xmlWriter.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, archiveServiceID1);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, archiveServiceIP1);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, archiveServicePort1);
+	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, appDataServiceID2);
+	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, appDataServiceIP2);
+	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, appDataServicePort2);
+	xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, realtimeDataIP2);
+	xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, realtimeDataPort2);
 
-	xmlWriter.writeEndElement();			// </ArchiveService1>
-
-	//
-
-	xmlWriter.writeStartElement(XmlElement::ARCHIVE_SERVICE2);
-
-	xmlWriter.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, archiveServiceID2);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, archiveServiceIP2);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, archiveServicePort2);
-
-	xmlWriter.writeEndElement();			// </ArchiveService2>
+	xml.writeEndElement();			// </AppDataService2>
 
 	//
 
-	xmlWriter.writeStartElement(XmlElement::TUNING_SERVICE);
+	xml.writeStartElement(XmlElement::ARCHIVE_SERVICE1);
 
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnabled);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tuningServiceID);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tuningServiceIP);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tuningServicePort);
+	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, archiveServiceID1);
+	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, archiveServiceIP1);
+	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, archiveServicePort1);
 
-	xmlWriter.writeStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, tuningSources);
-
-	xmlWriter.writeEndElement();			// </TuningService>
+	xml.writeEndElement();			// </ArchiveService1>
 
 	//
 
-	xmlWriter.writeEndElement();			// </Settings>
+	xml.writeStartElement(XmlElement::ARCHIVE_SERVICE2);
+
+	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, archiveServiceID2);
+	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, archiveServiceIP2);
+	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, archiveServicePort2);
+
+	xml.writeEndElement();			// </ArchiveService2>
+
+	//
+
+	xml.writeStartElement(XmlElement::TUNING_SERVICE);
+
+	xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnabled);
+	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tuningServiceID);
+	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tuningServiceIP);
+	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tuningServicePort);
+
+	xml.writeStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, tuningSources);
+
+	xml.writeEndElement();			// </TuningService>
+
+	//
+
+	writeEndSettings(xml);;			// </Settings>
 
 	return true;
 }
 
-bool MonitorSettings::readFromXml(XmlReadHelper& xmlReader)
+bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 {
 	clear();
 
 	bool result = true;
 
-	result &= xmlReader.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
+
+	RETURN_IF_FALSE(result);
 
 	//
 
-	result &= xmlReader.findElement(EquipmentPropNames::START_SCHEMA_ID);
-	result &= xmlReader.readStringElement(EquipmentPropNames::START_SCHEMA_ID, &startSchemaId);
+	result &= xml.findElement(EquipmentPropNames::START_SCHEMA_ID);
+	result &= xml.readStringElement(EquipmentPropNames::START_SCHEMA_ID, &startSchemaId);
 
-	result &= xmlReader.findElement(EquipmentPropNames::SCHEMA_TAGS);
-	result &= xmlReader.readStringElement(EquipmentPropNames::SCHEMA_TAGS, &schemaTags);
-
-	//
-
-	result &= xmlReader.findElement(XmlElement::APP_DATA_SERVICE1);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &appDataServiceID1);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &appDataServiceIP1);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataServicePort1);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &realtimeDataIP1);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &realtimeDataPort1);
+	result &= xml.findElement(EquipmentPropNames::SCHEMA_TAGS);
+	result &= xml.readStringElement(EquipmentPropNames::SCHEMA_TAGS, &schemaTags);
 
 	//
 
-	result &= xmlReader.findElement(XmlElement::APP_DATA_SERVICE2);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &appDataServiceID2);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &appDataServiceIP2);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataServicePort2);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &realtimeDataIP2);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &realtimeDataPort2);
+	result &= xml.findElement(XmlElement::APP_DATA_SERVICE1);
+	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &appDataServiceID1);
+	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &appDataServiceIP1);
+	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataServicePort1);
+	result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &realtimeDataIP1);
+	result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &realtimeDataPort1);
 
 	//
 
-	result &= xmlReader.findElement(XmlElement::ARCHIVE_SERVICE1);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveServiceID1);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &archiveServiceIP1);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &archiveServicePort1);
+	result &= xml.findElement(XmlElement::APP_DATA_SERVICE2);
+	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &appDataServiceID2);
+	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &appDataServiceIP2);
+	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataServicePort2);
+	result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &realtimeDataIP2);
+	result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &realtimeDataPort2);
 
 	//
 
-	result &=  xmlReader.findElement(XmlElement::ARCHIVE_SERVICE2);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveServiceID2);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &archiveServiceIP2);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &archiveServicePort2);
+	result &= xml.findElement(XmlElement::ARCHIVE_SERVICE1);
+	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveServiceID1);
+	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &archiveServiceIP1);
+	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &archiveServicePort1);
 
 	//
 
-	result &= xmlReader.findElement(XmlElement::TUNING_SERVICE);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::TUNING_ENABLE, &tuningEnabled);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tuningServiceID);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tuningServiceIP);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningServicePort);
+	result &=  xml.findElement(XmlElement::ARCHIVE_SERVICE2);
+	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveServiceID2);
+	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &archiveServiceIP2);
+	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &archiveServicePort2);
 
-	result &= xmlReader.findElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID);
-	result &= xmlReader.readStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &tuningSources);
+	//
+
+	result &= xml.findElement(XmlElement::TUNING_SERVICE);
+	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_ENABLE, &tuningEnabled);
+	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tuningServiceID);
+	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tuningServiceIP);
+	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningServicePort);
+
+	result &= xml.findElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID);
+	result &= xml.readStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &tuningSources);
 
 	return result;
 }
@@ -2334,65 +2538,67 @@ void MonitorSettings::clear()
 //
 // -------------------------------------------------------------------------------------
 
-bool TuningClientSettings::writeToXml(XmlWriteHelper& xmlWriter)
+bool TuningClientSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xmlWriter.writeStartElement(XmlElement::SETTINGS);
+	writeStartSettings(xml);
 
-	xmlWriter.writeStartElement(XmlElement::TUNING_SERVICE);
+	xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
-	xmlWriter.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tuningServiceID);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tuningServiceIP);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tuningServicePort);
+	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tuningServiceID);
+	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tuningServiceIP);
+	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tuningServicePort);
 
-	xmlWriter.writeEndElement();		// </TuningService>
+	xml.writeEndElement();		// </TuningService>
 
-	xmlWriter.writeStartElement(XmlElement::APPEARANCE);
+	xml.writeStartElement(XmlElement::APPEARANCE);
 
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::AUTO_APPLAY, autoApply);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, showSignals);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, statusFlagFunction);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
-	xmlWriter.writeStringAttribute(EquipmentPropNames::USER_ACCOUNTS, usersAccounts);
-	xmlWriter.writeIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, loginSessionLength);
+	xml.writeBoolAttribute(EquipmentPropNames::AUTO_APPLAY, autoApply);
+	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, showSignals);
+	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
+	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
+	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
+	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, statusFlagFunction);
+	xml.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
+	xml.writeStringAttribute(EquipmentPropNames::USER_ACCOUNTS, usersAccounts);
+	xml.writeIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, loginSessionLength);
 
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, filterByEquipment);
-	xmlWriter.writeBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, filterBySchema);
+	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, filterByEquipment);
+	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, filterBySchema);
 
-	xmlWriter.writeStringAttribute(EquipmentPropNames::START_SCHEMA_ID, startSchemaID);
+	xml.writeStringAttribute(EquipmentPropNames::START_SCHEMA_ID, startSchemaID);
 
-	xmlWriter.writeEndElement();		// </Appearance>
+	xml.writeEndElement();		// </Appearance>
 
-	xmlWriter.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
+	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 
-	xmlWriter.writeEndElement();		// </Settings>
+	writeEndSettings(xml);		// </Settings>
 
 	return true;
 }
 
-bool TuningClientSettings::readFromXml(XmlReadHelper& xmlReader)
+bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	result &= xmlReader.findElement(XmlElement::SETTINGS);
+	result = readStartSettings(xml);
 
-	result &= xmlReader.findElement(XmlElement::TUNING_SERVICE);
+	RETURN_IF_FALSE(result);
 
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tuningServiceID);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tuningServiceIP);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningServicePort);
+	result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
-	result &= xmlReader.findElement(XmlElement::APPEARANCE);
+	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tuningServiceID);
+	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tuningServiceIP);
+	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningServicePort);
 
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::AUTO_APPLAY, &autoApply);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, &showSignals);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, &showSchemas);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, &showSchemasList);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, &showSchemasTabs);
+	result &= xml.findElement(XmlElement::APPEARANCE);
 
-	bool resultStatusFlagFunction = xmlReader.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction);
+	result &= xml.readBoolAttribute(EquipmentPropNames::AUTO_APPLAY, &autoApply);
+	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, &showSignals);
+	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, &showSchemas);
+	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, &showSchemasList);
+	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, &showSchemasTabs);
+
+	bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction);
 	if (resultStatusFlagFunction == false)
 	{
 		// Compatibility loading statusFlagFunction before 10.12.2020
@@ -2402,8 +2608,8 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xmlReader)
 		bool showSOR = false;
 		bool useAccessFlag = false;
 
-		resultStatusFlagFunction = xmlReader.readBoolAttribute(EquipmentPropNames::SHOW_SOR, &showSOR);
-		resultStatusFlagFunction &= xmlReader.readBoolAttribute(EquipmentPropNames::USE_ACCESS_FLAG, &useAccessFlag);
+		resultStatusFlagFunction = xml.readBoolAttribute(EquipmentPropNames::SHOW_SOR, &showSOR);
+		resultStatusFlagFunction &= xml.readBoolAttribute(EquipmentPropNames::USE_ACCESS_FLAG, &useAccessFlag);
 
 		if (resultStatusFlagFunction == true)
 		{
@@ -2423,18 +2629,18 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xmlReader)
 
 	result &= resultStatusFlagFunction;
 
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::USER_ACCOUNTS, &usersAccounts);
-	result &= xmlReader.readIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, &loginSessionLength);
+	result &= xml.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
+	result &= xml.readStringAttribute(EquipmentPropNames::USER_ACCOUNTS, &usersAccounts);
+	result &= xml.readIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, &loginSessionLength);
 
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, &filterByEquipment);
-	result &= xmlReader.readBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, &filterBySchema);
+	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, &filterByEquipment);
+	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, &filterBySchema);
 
-	result &= xmlReader.readStringAttribute(EquipmentPropNames::START_SCHEMA_ID, &startSchemaID);
+	result &= xml.readStringAttribute(EquipmentPropNames::START_SCHEMA_ID, &startSchemaID);
 
-	result &= xmlReader.findElement(EquipmentPropNames::SCHEMA_TAGS);
+	result &= xml.findElement(EquipmentPropNames::SCHEMA_TAGS);
 
-	result &= xmlReader.readStringElement(EquipmentPropNames::SCHEMA_TAGS, &schemaTags);
+	result &= xml.readStringElement(EquipmentPropNames::SCHEMA_TAGS, &schemaTags);
 
 	return result;
 }

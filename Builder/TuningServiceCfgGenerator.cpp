@@ -80,7 +80,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
