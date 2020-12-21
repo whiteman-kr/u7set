@@ -1643,6 +1643,9 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 	editSchemaView()->m_mouseSelectionStartPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->m_mouseSelectionEndPoint = editSchemaView()->m_mouseSelectionStartPoint;
 
+	editSchemaView()->m_mouseSelectionStartPointForUpdate = me->pos();
+	editSchemaView()->m_mouseSelectionEndPointForUpdate = editSchemaView()->m_mouseSelectionStartPointForUpdate;
+
 	setMouseState(MouseState::Selection);
 
 	editSchemaView()->update();
@@ -1843,6 +1846,9 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 	//
 	editSchemaView()->m_mouseSelectionStartPoint = QPoint();
 	editSchemaView()->m_mouseSelectionEndPoint = QPoint();
+
+	editSchemaView()->m_mouseSelectionStartPointForUpdate = QPoint();
+	editSchemaView()->m_mouseSelectionEndPointForUpdate = QPoint();
 
 	resetAction();
 
@@ -2509,10 +2515,22 @@ void EditSchemaWidget::mouseMove_Scrolling(QMouseEvent*)
 
 void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 {
-	// ��������� ����������� ���������.
-	//
+	QRect oldRect{editSchemaView()->m_mouseSelectionStartPointForUpdate, editSchemaView()->m_mouseSelectionEndPointForUpdate};
+	oldRect = oldRect.normalized();
+
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
-	editSchemaView()->update();
+	editSchemaView()->m_mouseSelectionEndPointForUpdate = me->pos();
+
+	QRect newRect{editSchemaView()->m_mouseSelectionStartPointForUpdate, editSchemaView()->m_mouseSelectionEndPointForUpdate};
+	newRect = newRect.normalized();
+	newRect = newRect.united(oldRect);
+
+	// --
+	//
+	QRect updateRect{editSchemaView()->mapFrom(this, newRect.topLeft()),
+					 editSchemaView()->mapFrom(this, newRect.bottomRight())};
+
+	editSchemaView()->update(updateRect);
 
 	return;
 }
@@ -4001,6 +4019,8 @@ void EditSchemaWidget::resetAction()
 	editSchemaView()->m_editConnectionLines.clear();
 	editSchemaView()->m_mouseSelectionStartPoint = QPoint();
 	editSchemaView()->m_mouseSelectionEndPoint = QPoint();
+	editSchemaView()->m_mouseSelectionStartPointForUpdate = QPoint();
+	editSchemaView()->m_mouseSelectionEndPointForUpdate = QPoint();
 	editSchemaView()->m_editStartDocPt = QPointF();
 	editSchemaView()->m_editEndDocPt = QPointF();
 
