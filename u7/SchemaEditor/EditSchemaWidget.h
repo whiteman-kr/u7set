@@ -119,6 +119,7 @@ protected:
 public:
 	QPointF widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const;
 	QPointF snapToGrid(QPointF pt) const;
+	VFrame30::SchemaPoint snapToGrid(VFrame30::SchemaPoint pt) const;
 
 	bool updateAfbsForSchema();
 	bool updateUfbsForSchema();
@@ -132,6 +133,8 @@ protected:
 	QPointF magnetPointToPin(QPointF docPoint);
 
 	void movePosConnectionEndPoint(SchemaItemPtr schemaItem, EditConnectionLine* ecl, QPointF toPoint);
+	void addConnectionLinePoint(SchemaItemPtr schemaItem, QPointF docPoint);
+	void removeConnectionLinePoint(SchemaItemPtr schemaItem, size_t pointIndex);
 
 	// Move ConnectionLinks withFblItemPects' pins
 	//
