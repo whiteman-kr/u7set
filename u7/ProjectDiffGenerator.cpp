@@ -451,6 +451,20 @@ ReportGenerator::ReportGenerator(const QString& fileName, std::shared_ptr<Report
 
 }
 
+
+int ReportGenerator::pagesCount() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_pagesCount;
+}
+
+int ReportGenerator::pageIndex() const
+{
+	QMutexLocker l(&m_statisticsMutex);
+	return m_pageIndex;
+}
+
+
 void ReportGenerator::addMarginItem(const ReportMarginItem& item)
 {
 	m_marginItems.push_back(item);
@@ -1128,18 +1142,6 @@ int ProjectDiffWorker::sectionIndex() const
 	return m_sectionIndex;
 }
 
-int ProjectDiffWorker::pagesCount() const
-{
-	QMutexLocker l(&m_statisticsMutex);
-	return m_pagesCount;
-}
-
-int ProjectDiffWorker::pageIndex() const
-{
-	QMutexLocker l(&m_statisticsMutex);
-	return m_pageIndex;
-}
-
 QString ProjectDiffWorker::renderingReportName() const
 {
 	QMutexLocker l(&m_statisticsMutex);
@@ -1158,7 +1160,7 @@ QString ProjectDiffWorker::currentObjectName() const
 	return m_currentObjectName;
 }
 
-DbController* const ProjectDiffWorker::db()
+DbController* ProjectDiffWorker::db()
 {
 	return &m_db;
 }
@@ -1196,7 +1198,6 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 		m_signalsCount = 0;
 		m_currentSectionName.clear();
 		m_currentObjectName.clear();
-		m_pageIndex = 1;
 	}
 
 	int filesCount = 0;
@@ -1698,7 +1699,7 @@ std::optional<DbChangeset> ProjectDiffWorker::getRecentChangeset(const std::vect
 
 }
 
-std::shared_ptr<Hardware::DeviceObject> ProjectDiffWorker::loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap)
+std::shared_ptr<Hardware::DeviceObject> ProjectDiffWorker::loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const
 {
 	if (deviceObjectMap == nullptr)
 	{
@@ -3100,7 +3101,7 @@ bool ProjectDiffWorker::isSchemaFile(const QString& fileName) const
 	return false;
 }
 
-void ProjectDiffWorker::generateTitlePage(QTextCursor* textCursor)
+void ProjectDiffWorker::generateTitlePage(QTextCursor* textCursor, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName)
 {
 	if (textCursor == nullptr)
 	{
@@ -3108,37 +3109,187 @@ void ProjectDiffWorker::generateTitlePage(QTextCursor* textCursor)
 		return;
 	}
 
-	DbProject project = db()->currentProject();
+	QTextBlockFormat blockCenterFormat = textCursor->blockFormat();
+	blockCenterFormat.setAlignment(Qt::AlignHCenter);
 
-	QTextBlockFormat headerCenterFormat = textCursor->blockFormat();
-	headerCenterFormat.setAlignment(Qt::AlignHCenter);
+	QTextBlockFormat blockLeftFormat = textCursor->blockFormat();
+	blockLeftFormat.setAlignment(Qt::AlignLeft);
 
-	QTextBlockFormat regularFormat = textCursor->blockFormat();
-	regularFormat.setAlignment(Qt::AlignLeft);
+	QTextCharFormat charHeaderFormat = textCursor->charFormat();
+	charHeaderFormat.setFontFamily("Times");
+	charHeaderFormat.setFontPointSize(72.0);
+	//charHeaderFormat.setFontWeight(static_cast<int>(QFont::Bold));
 
-	//QTextCharFormat headerCharFormat = cursor.charFormat();
-	//headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
-	//headerCharFormat.setFontPointSize(12.0);
+	QTextCharFormat charRegularFormat = textCursor->charFormat();
+	charRegularFormat.setFontFamily("Times");
+	charRegularFormat.setFontPointSize(36.0);
 
-	//QTextCharFormat regularCharFormat = cursor.charFormat();
-	//headerCharFormat.setFontPointSize(10.0);
+	// Report Title
 
-	textCursor->setBlockFormat(headerCenterFormat);
-	//m_textCursor.setCharFormat(headerCharFormat);
-	textCursor->insertText(QObject::tr("Project Differrences - %1\n").arg(project.projectName()));
+	textCursor->setBlockFormat(blockCenterFormat);
+
+	textCursor->setCharFormat(charHeaderFormat);
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
 	textCursor->insertText("\n");
 
-	textCursor->setBlockFormat(regularFormat);
-	//m_textCursor.setCharFormat(regularCharFormat);
+	textCursor->insertText(QObject::tr("Differences Report\n"));
+
+	textCursor->insertText("\n");
+
+	textCursor->insertText(QObject::tr("Project: %1\n").arg(projectName));
+
+	textCursor->insertText("\n");
+
+	if (subreportName.isEmpty() == false)
+	{
+		textCursor->insertText(QObject::tr("%1\n").arg(subreportName));
+	}
+	else
+	{
+		textCursor->insertText("\n");
+	}
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+
+	// User name
+
+	textCursor->setBlockFormat(blockLeftFormat);
+
+	textCursor->setCharFormat(charRegularFormat);
+
+	textCursor->insertText(QObject::tr("User Name: %1\n").arg(userName));
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+
+	// Changeset
+
+	QString changesetStr;
+
+	switch(compareData.sourceVersionType)
+	{
+	case CompareVersionType::LatestVersion: changesetStr = tr("Source Changeset: Latest Version"); break;
+	case CompareVersionType::Date: changesetStr = tr("Source Changeset: %1").arg(compareData.sourceDate.toString("dd/MM/yyyy HH:mm:ss")); break;
+	case CompareVersionType::Changeset: changesetStr = tr("Source Changeset: %1").arg(compareData.sourceChangeset); break;
+	}
+
+	textCursor->insertText(tr("%1\n").arg(changesetStr));
+
+	switch(compareData.targetVersionType)
+	{
+	case CompareVersionType::LatestVersion: changesetStr = tr("Target Changeset: Latest Version"); break;
+	case CompareVersionType::Date: changesetStr = tr("Target Changeset: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss")); break;
+	case CompareVersionType::Changeset: changesetStr = tr("Target Changeset: %1").arg(compareData.targetChangeset); break;
+	}
+	textCursor->insertText(tr("%1\n").arg(changesetStr));
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+
+	// Files count
+
+	if (m_filesCount > 0)
+	{
+		textCursor->insertText(tr("Files compared: %1\n").arg(m_filesCount));
+	}
+	else
+	{
+		textCursor->insertText("\n");
+	}
+
+	if (m_signalsCount > 0)
+	{
+		textCursor->insertText(tr("Signals compared: %1\n").arg(m_signalsCount));
+	}
+	else
+	{
+		textCursor->insertText("\n");
+	}
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+
+	// RPCT Version
+
+	textCursor->setBlockFormat(blockCenterFormat);
+
 	textCursor->insertText(tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
-	//cursor.insertText(tr("RPCT: %1\n").arg(m_configuration->softwareEquipmentId));
-	textCursor->insertText("\n");
 
 	textCursor->insertText("\n");
 
-	textCursor->insertText(tr("Total files to compare: %1\n").arg(m_filesCount));
-	textCursor->insertText(tr("Total signals to compare: %1\n").arg(m_signalsCount));
+	textCursor->insertText(tr("%1 version %2\n").arg(qApp->applicationName()).arg(qApp->applicationVersion()));
 
+	return;
+}
+
+void ProjectDiffWorker::generateReportFilesPage(QTextCursor* textCursor, const QStringList& subreportFiles)
+{
+	if (textCursor == nullptr)
+	{
+		Q_ASSERT(textCursor);
+		return;
+	}
+
+	QTextBlockFormat blockCenterFormat = textCursor->blockFormat();
+	blockCenterFormat.setAlignment(Qt::AlignHCenter);
+
+	QTextBlockFormat blockLeftFormat = textCursor->blockFormat();
+	blockLeftFormat.setAlignment(Qt::AlignLeft);
+
+	QTextCharFormat charRegularFormat = textCursor->charFormat();
+	charRegularFormat.setFontFamily("Times");
+	charRegularFormat.setFontPointSize(36.0);
+
+	// Report Title
+
+	textCursor->setBlockFormat(blockCenterFormat);
+
+	textCursor->setCharFormat(charRegularFormat);
+
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+
+	textCursor->insertText(QObject::tr("Content of this report is stored in the following files:\n"));
+
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+	textCursor->insertText("\n");
+
+	textCursor->setBlockFormat(blockLeftFormat);
+
+	for (QString fileName: subreportFiles)
+	{
+		fileName = QDir::toNativeSeparators(fileName);
+
+		int pos = fileName.lastIndexOf(QDir::separator());
+		if (pos != -1)
+		{
+			fileName = fileName.right(fileName.length() - pos - 1);
+		}
+
+		textCursor->insertText(QObject::tr("%1\n").arg(fileName));
+
+		textCursor->insertText("\n");
+	}
+
+	return;
 }
 
 void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName)
@@ -3164,7 +3315,7 @@ void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const Compare
 
 	if (m_diffParams.multipleFiles == true && subreportName.isEmpty() == false)
 	{
-		projectNameStr += tr("; Section: %1").arg(subreportName);
+		projectNameStr += tr("; section: %1").arg(subreportName);
 	}
 
 	addMarginItem({projectNameStr, 2, -1, Qt::AlignLeft | Qt::AlignTop, charFormat, blockFormat});
@@ -3329,9 +3480,11 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 	bool multipleFiles = m_diffParams.multipleFiles == true &&
 						 reportContents.size() > 1;
 
+	QStringList generatedReportFiles;
+
 	for (auto it = reportContents.begin(); it != reportContents.end(); it++)
 	{
-		const QString& reportName = it->first;
+		const QString& subReportName = it->first;
 		const std::vector<std::shared_ptr<ReportSection>>& reportSections = it->second;
 
 		// Render all objects to documents
@@ -3341,7 +3494,10 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 			m_currentStatus = WorkerStatus::Rendering;
 
 			m_pagesCount = 1;	// + title page
+			m_pageIndex = 1;
+
 			m_sectionCount = static_cast<int>(reportSections.size());
+			m_sectionIndex = 0;
 		}
 
 		// Init PDF document
@@ -3353,16 +3509,18 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 			int pos = fileName.lastIndexOf('.');
 			if (pos != -1)
 			{
-				fileName.insert(pos, tr("_%1").arg(reportName));
+				fileName.insert(pos, tr("_%1").arg(subReportName));
 			}
 			else
 			{
-				fileName += tr("_%1.pdf").arg(reportName);
+				fileName += tr("_%1.pdf").arg(subReportName);
 			}
 
 			QMutexLocker l(&m_statisticsMutex);
-			m_renderingReportName = reportName;
+			m_renderingReportName = subReportName;
 		}
+
+		generatedReportFiles.push_back(fileName);
 
 		QPdfWriter pdfWriter(fileName);
 
@@ -3389,19 +3547,14 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 
 			// Generate title page
 
-			generateTitlePage(&textCursor);
+			generateTitlePage(&textCursor, m_diffParams.compareData, m_projectName, m_userName, multipleFiles == true ? subReportName : QString());
 
-			createMarginItems(&textCursor, m_diffParams.compareData, multipleFiles == true ? reportName : QString());
-
-			{
-				QMutexLocker l(&m_statisticsMutex);
-				m_pageIndex = 1;
-			}
+			createMarginItems(&textCursor, m_diffParams.compareData, multipleFiles == true ? subReportName : QString());
 
 			printDocument(&pdfWriter, &titleTextDocument, &painter);
 		}
 
-		// Render and Print sections pages
+		// Render sections pages
 		//
 		for (std::shared_ptr<ReportSection> section : reportSections)
 		{
@@ -3421,7 +3574,6 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 				QMutexLocker l(&m_statisticsMutex);
 				m_pagesCount += section->pageCount();
 			}
-
 		}
 
 		// Print PDF
@@ -3430,7 +3582,7 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 			QMutexLocker l(&m_statisticsMutex);
 			m_currentStatus = WorkerStatus::Printing;
 
-			m_sectionCount = m_pagesCount;
+			m_pageIndex = 1;
 		}
 
 		for (std::shared_ptr<ReportSection> section : reportSections)
@@ -3462,6 +3614,58 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 			// Clear text document
 
 			section->textDocument()->clear();
+		}
+	}
+
+	if (multipleFiles == true)
+	{
+		clearMarginItems();
+
+		// Generate generic report file with all report files description
+
+		QPdfWriter pdfWriter(m_fileName);
+
+		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
+		pdfWriter.setPageOrientation(QPageLayout::Portrait);
+		pdfWriter.setPageMargins(QMargins(20, 15, 10, 15), QPageLayout::Unit::Millimeter);
+		pdfWriter.setResolution(m_resolution);
+
+		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(m_resolution);
+
+		QPainter painter(&pdfWriter);
+
+		{
+
+			QTextDocument titleTextDocument;
+
+			titleTextDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+
+			QTextCursor textCursor(&titleTextDocument);
+
+			// Generate title page
+
+			generateTitlePage(&textCursor, m_diffParams.compareData, m_projectName, m_userName, QString());
+
+			printDocument(&pdfWriter, &titleTextDocument, &painter);
+
+		}
+
+		pdfWriter.newPage();
+
+		{
+
+			QTextDocument titleTextDocument;
+
+			titleTextDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
+
+			QTextCursor textCursor(&titleTextDocument);
+
+			// Generate title page
+
+			generateReportFilesPage(&textCursor, generatedReportFiles);
+
+			printDocument(&pdfWriter, &titleTextDocument, &painter);
+
 		}
 	}
 }

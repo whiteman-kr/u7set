@@ -192,6 +192,10 @@ public:
 	ReportGenerator(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView);
 
 
+public:
+	int pagesCount() const;
+	int pageIndex() const;
+
 protected:
 	void addMarginItem(const ReportMarginItem& item);
 	void clearMarginItems();
@@ -393,9 +397,6 @@ public:
 	int sectionCount() const;
 	int sectionIndex() const;
 
-	int pagesCount() const;
-	int pageIndex() const;
-
 	QString renderingReportName() const;
 	QString currentSection() const;
 	QString currentObjectName() const;
@@ -404,7 +405,7 @@ signals:
 	void finished();
 
 private:
-	DbController* const db();
+	DbController* db();
 
 	void compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents);
 
@@ -431,7 +432,7 @@ private:
 												  const int compareChangeset,
 												  const QDateTime& compareDate) const;
 
-	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap);
+	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const;
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
 							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject, const std::shared_ptr<Hardware::DeviceObject>& targetObject,
@@ -452,7 +453,10 @@ private:
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 
-	void generateTitlePage(QTextCursor* textCursor);
+	void generateTitlePage(QTextCursor* textCursor, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName);
+
+	void generateReportFilesPage(QTextCursor* textCursor, const QStringList& subreportFiles);
+
 	void createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName);
 
 	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
