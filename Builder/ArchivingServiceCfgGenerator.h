@@ -14,7 +14,6 @@ namespace Builder
 		~ArchivingServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 		bool writeSettings();

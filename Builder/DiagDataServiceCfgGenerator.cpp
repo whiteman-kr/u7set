@@ -28,13 +28,6 @@ namespace Builder
 		return result;
 	}
 
-	bool DiagDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
 	bool DiagDataServiceCfgGenerator::writeSettings()
 	{
 		bool result = m_settings.readFromDevice(m_context, m_software);

@@ -41,16 +41,6 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(m_context, m_log);
-
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
 	bool TuningServiceCfgGenerator::writeSettings()
 	{
 		bool result = m_settings.readFromDevice(m_context, m_software);

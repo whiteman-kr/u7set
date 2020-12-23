@@ -37,6 +37,16 @@ public:
 	QString profile;
 };
 
+class CfgServiceSettings;
+class AppDataServiceSettings;
+class DiagDataServiceSettings;
+class ArchivingServiceSettings;
+class TuningServiceSettings;
+class MonitorSettings;
+class TuningClientSettings;
+class TestClientSettings;
+class MetrologySettings;
+
 class SoftwareSettingsSet
 {
 public:
@@ -44,13 +54,23 @@ public:
 
 	bool addSettingsProfile(const QString& profile, std::shared_ptr<SoftwareSettings> settings);
 
-	std::shared_ptr<const SoftwareSettings> getSettingsProfile(const QString& profile) const;
-	std::shared_ptr<const SoftwareSettings> getSettingsDefaultProfile() const;
-
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
+	std::shared_ptr<const CfgServiceSettings> getCfgServiceSettings(const QString& profile = QString());
+	std::shared_ptr<const AppDataServiceSettings> getAppDataServiceSettings(const QString& profile = QString());
+	std::shared_ptr<const DiagDataServiceSettings> getDiagDataServiceSettings(const QString& profile = QString());
+	std::shared_ptr<const ArchivingServiceSettings> getArchivingServiceSettings(const QString& profile = QString());
+	std::shared_ptr<const TuningServiceSettings> getTuningServiceSettings(const QString& profile = QString());
+	std::shared_ptr<const MonitorSettings> getMonitorSettings(const QString& profile = QString());
+	std::shared_ptr<const TuningClientSettings> getTuningClientSettings(const QString& profile = QString());
+	std::shared_ptr<const TestClientSettings> getTestClientSettings(const QString& profile = QString());
+	std::shared_ptr<const MetrologySettings> getMetrologySettings(const QString& profile = QString());
+
 private:
+	std::shared_ptr<const SoftwareSettings> getSettingsProfile(const QString& profile) const;
+	std::shared_ptr<const SoftwareSettings> getSettingsDefaultProfile() const;
+
 	std::shared_ptr<SoftwareSettings> createAppropriateSettings();
 
 private:

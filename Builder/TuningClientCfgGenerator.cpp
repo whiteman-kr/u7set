@@ -102,13 +102,6 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
 	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
 	{
 		if (tuningSet == nullptr ||

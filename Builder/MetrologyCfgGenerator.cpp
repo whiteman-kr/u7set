@@ -30,13 +30,6 @@ namespace Builder
 		return result;
 	}
 
-	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
 	bool MetrologyCfgGenerator::writeDatabaseInfo()
 	{
 		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();

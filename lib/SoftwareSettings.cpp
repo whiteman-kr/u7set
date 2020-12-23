@@ -134,23 +134,6 @@ bool SoftwareSettingsSet::addSettingsProfile(const QString& profile, std::shared
 	return false;
 }
 
-std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsProfile(const QString& profile) const
-{
-	auto it = m_settings.find(profile);
-
-	if (it != m_settings.end())
-	{
-		return it->second;
-	}
-
-	return nullptr;
-}
-
-std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsDefaultProfile() const
-{
-	return getSettingsProfile(SettingsProfile::DEFAULT);
-}
-
 bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
@@ -208,6 +191,68 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 	}
 
 	return result;
+}
+
+std::shared_ptr<const CfgServiceSettings> SoftwareSettingsSet::getCfgServiceSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const CfgServiceSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const AppDataServiceSettings> SoftwareSettingsSet::getAppDataServiceSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const AppDataServiceSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const DiagDataServiceSettings> SoftwareSettingsSet::getDiagDataServiceSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const DiagDataServiceSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const ArchivingServiceSettings> SoftwareSettingsSet::getArchivingServiceSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const ArchivingServiceSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const TuningServiceSettings> SoftwareSettingsSet::getTuningServiceSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const TuningServiceSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const MonitorSettings> SoftwareSettingsSet::getMonitorSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const MonitorSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const TuningClientSettings> SoftwareSettingsSet::getTuningClientSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const TuningClientSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const TestClientSettings> SoftwareSettingsSet::getTestClientSettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const TestClientSettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const MetrologySettings> SoftwareSettingsSet::getMetrologySettings(const QString& profile)
+{
+	return std::dynamic_pointer_cast<const MetrologySettings>(getSettingsProfile(profile));
+}
+
+std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsProfile(const QString& profile) const
+{
+	auto it = m_settings.find(profile);
+
+	if (it != m_settings.end())
+	{
+		return it->second;
+	}
+
+	return nullptr;
+}
+
+std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsDefaultProfile() const
+{
+	return getSettingsProfile(SettingsProfile::DEFAULT);
 }
 
 std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()

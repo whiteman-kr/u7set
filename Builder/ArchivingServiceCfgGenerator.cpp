@@ -31,13 +31,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ArchivingServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
 	bool ArchivingServiceCfgGenerator::writeSettings()
 	{
 		bool result = true;

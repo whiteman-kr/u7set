@@ -16,7 +16,6 @@ namespace Builder
 		TuningClientCfgGenerator(Context* context, Hardware::Software* software);
 
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
 

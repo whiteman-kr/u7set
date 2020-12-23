@@ -47,13 +47,6 @@ namespace Builder
 		return result;
 	}
 
-	bool AppDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settingsSet.writeToXml(xml);
-	}
-
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
 		bool result = m_settingsSet.readFromDevice(m_context, m_software);

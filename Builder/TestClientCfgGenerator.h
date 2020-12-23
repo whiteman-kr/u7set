@@ -11,7 +11,6 @@ namespace Builder
 		TestClientCfgGenerator(Context* context, Hardware::Software* software);
 
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
 		bool writeSettings();

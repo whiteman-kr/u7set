@@ -30,13 +30,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ConfigurationServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
 	bool ConfigurationServiceCfgGenerator::writeSettings()
 	{
 		bool result = m_settings.readFromDevice(m_context, m_software);
