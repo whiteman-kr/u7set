@@ -16,14 +16,8 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
-		bool writeSettings();
 		bool writeBatFile();
 		bool writeShFile();
-
-		bool buildClientsList(CfgServiceSettingsGetter *settings);
-
-	private:
-		CfgServiceSettingsGetter m_settings;
 	};
 
 }

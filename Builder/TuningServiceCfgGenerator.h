@@ -21,15 +21,12 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
-		bool writeSettings();
 		bool writeTuningSources();
 
 		bool writeBatFile();
 		bool writeShFile();
 
 	private:
-		TuningServiceSettingsGetter m_settings;
-
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 
 		QVector<Signal*> m_tuningSignals;

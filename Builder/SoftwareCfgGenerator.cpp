@@ -34,13 +34,16 @@ namespace Builder
 
 	bool SoftwareCfgGenerator::createSettingsProfile(const QString& profile)
 	{
-		// Method should be overrided in classes derived from SoftwareCfgGenerator
+		// Method should be overrided in classes derived from SoftwareCfgGenerator like this:
 		//
-		// Like this:
+		//	Specific_SettingsGetter settingsGetter;
 		//
-		//	Specific_SoftwareSettingsGetter sg;
+		//	if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		//	{
+		//		return false;
+		//	}
 		//
-		//
+		//	return m_settingsSet.addProfile<Specific_Settings>(profile, &settingsGetter);
 		//
 		//
 
@@ -82,6 +85,8 @@ namespace Builder
 					arg(m_software->equipmentIdTemplate()));
 
 		writeSoftwareSection(m_cfgXml->xmlWriter(), true);
+
+		getSettingsXml(m_cfgXml->xmlWriter());
 
 		bool result = true;
 

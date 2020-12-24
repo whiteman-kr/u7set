@@ -44,15 +44,19 @@ namespace Builder
 
 		// write XML via m_cfgXml->xmlWriter()
 		//
-		result &= writeMonitorSettings();
+		result &= initSchemaTagsAndTuningSources();
 
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
 		result &= writeSchemasByTags();
 
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getDefaultProfile<MonitorSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
 		// Generate tuning signals file
 		//
-		if (m_settings.tuningEnabled == true)
+		if (settings->tuningEnabled == true)
 		{
 			result &= writeTuningSignals();
 		}
@@ -80,18 +84,15 @@ namespace Builder
 		return result;
 	}
 
-	bool MonitorCfgGenerator::writeMonitorSettings()
+	bool MonitorCfgGenerator::initSchemaTagsAndTuningSources()
 	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getDefaultProfile<MonitorSettings>();
 
-		if (result == false)
-		{
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-		m_schemaTagList = m_settings.getSchemaTags();
+		m_schemaTagList = settings->getSchemaTags();
 
-		if (m_settings.tuningEnabled == true &&
+		if (settings->tuningEnabled == true &&
 			m_context->m_projectProperties.safetyProject() == true)
 		{
 			// Tuning for Monitor is forbiden for Safety Projects
@@ -101,7 +102,7 @@ namespace Builder
 			return false;
 		}
 
-		m_tuningSources = m_settings.getTuningSources();
+		m_tuningSources = settings->getTuningSources();
 
 		return getSettingsXml(m_cfgXml->xmlWriter());
 	}

@@ -19,7 +19,6 @@ namespace Builder
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeArchSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
@@ -29,18 +28,6 @@ namespace Builder
 		while(false);
 
 		return result;
-	}
-
-	bool ArchivingServiceCfgGenerator::writeSettings()
-	{
-		bool result = true;
-
-		result &= m_settings.readFromDevice(m_context, m_software);
-		result &= m_settings.checkSettings(m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool ArchivingServiceCfgGenerator::writeArchSignalsFile()
@@ -97,7 +84,11 @@ namespace Builder
 			return false;
 		}
 
-		parameters += QString(" -location=%1").arg(m_settings.archiveLocation);
+		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getDefaultProfile<ArchivingServiceSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		parameters += QString(" -location=%1").arg(settings->archiveLocation);
 
 		content += parameters;
 
@@ -123,7 +114,11 @@ namespace Builder
 			return false;
 		}
 
-		parameters += QString(" -location=%1").arg(m_settings.archiveLocation);
+		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getDefaultProfile<ArchivingServiceSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		parameters += QString(" -location=%1").arg(settings->archiveLocation);
 
 		content += parameters;
 

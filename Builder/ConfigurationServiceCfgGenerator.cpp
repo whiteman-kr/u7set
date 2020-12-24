@@ -19,7 +19,6 @@ namespace Builder
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
 
@@ -28,17 +27,6 @@ namespace Builder
 		while(false);
 
 		return result;
-	}
-
-	bool ConfigurationServiceCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		result &= buildClientsList(&m_settings);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool ConfigurationServiceCfgGenerator::writeBatFile()
@@ -131,55 +119,6 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return true;
-	}
-
-	bool ConfigurationServiceCfgGenerator::buildClientsList(CfgServiceSettingsGetter* settings)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
-
-		const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
-		const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
-
-		bool result = true;
-
-		settings->clients.clear();
-
-		for(auto p : m_context->m_software)
-		{
-			Hardware::Software* software = p.second;
-
-			if (software == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (software->equipmentIdTemplate() == equipmentID())
-			{
-				continue;			// exclude yourself
-			}
-
-			QString ID1;
-
-			if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID1) == true)
-			{
-				result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &ID1, m_log);
-			}
-
-			QString ID2;
-
-			if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID2) == true)
-			{
-				result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &ID2, m_log);
-			}
-
-			if (ID1 == m_software->equipmentIdTemplate() || ID2 == m_software->equipmentIdTemplate())
-			{
-				settings->clients.append(QPair<QString, E::SoftwareType>(software->equipmentIdTemplate(), software->type()));
-			}
-		}
-
-		return result;
 	}
 
 }

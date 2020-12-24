@@ -13,12 +13,8 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
-		bool writeSettings();
 		bool linkAppSignalsFile();
 		bool writeBatFile();
 		bool writeShFile();
-
-	private:
-		TestClientSettingsGetter m_settings;
 	};
 }

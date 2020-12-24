@@ -22,7 +22,6 @@ namespace Builder
 	private:
 		bool getAssociatedLMs();
 
-		bool writeSettings();
 		bool writeAppDataSourcesXml();
 		bool writeAppSignalsXml();
 		bool addLinkToAppSignalsFile();
@@ -33,10 +32,6 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
-		AppDataServiceSettingsGetter m_settingsGetter;
-
-		//
-
 		QStringList m_associatedLMs;
 		QHash<QString, bool> m_associatedAppSignals;
 	};

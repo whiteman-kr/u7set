@@ -48,9 +48,9 @@ namespace Builder
 		virtual bool createSettingsProfile(const QString& profile);
 		virtual bool generateConfiguration() = 0;
 
-		bool getSettingsXml(QXmlStreamWriter& xmlWriter);
-
 		bool writeConfiguration();
+
+		bool getSettingsXml(QXmlStreamWriter& xmlWriter);
 
 		static bool generalSoftwareCfgGeneration(Context* context);
 		static bool loadAllSchemas(Context* context);

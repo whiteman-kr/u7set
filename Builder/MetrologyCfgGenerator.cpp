@@ -23,7 +23,6 @@ namespace Builder
 		bool result = true;
 
 		result &= writeDatabaseInfo();
-		result &= writeSettings();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
 
@@ -41,15 +40,6 @@ namespace Builder
 		xmlWriter.writeEndElement();
 
 		return true;
-	}
-
-	bool MetrologyCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result)
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MetrologyCfgGenerator::writeMetrologyItemsXml()

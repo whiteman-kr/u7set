@@ -16,14 +16,10 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
-		bool writeSettings();
 		bool writeArchSignalsFile();
 
 		bool writeBatFile();
 		bool writeShFile();
-
-	private:
-		ArchivingServiceSettingsGetter m_settings;
 	};
 
 }

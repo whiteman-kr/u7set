@@ -37,46 +37,68 @@ public:
 	QString profile;
 };
 
-class CfgServiceSettings;
-class AppDataServiceSettings;
-class DiagDataServiceSettings;
-class ArchivingServiceSettings;
-class TuningServiceSettings;
-class MonitorSettings;
-class TuningClientSettings;
-class TestClientSettings;
-class MetrologySettings;
-
 class SoftwareSettingsSet
 {
 public:
 	SoftwareSettingsSet(E::SoftwareType softwareType);
 
-	bool addSettingsProfile(const QString& profile, std::shared_ptr<SoftwareSettings> settings);
+	template<typename T>
+	bool addProfile(const QString& profile, const SoftwareSettings& settings);
+
+	template<typename T>
+	std::shared_ptr<const T> getProfile(const QString& profile);
+
+	template<typename T>
+	std::shared_ptr<const T> getDefaultProfile();
 
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
-	std::shared_ptr<const CfgServiceSettings> getCfgServiceSettings(const QString& profile = QString());
-	std::shared_ptr<const AppDataServiceSettings> getAppDataServiceSettings(const QString& profile = QString());
-	std::shared_ptr<const DiagDataServiceSettings> getDiagDataServiceSettings(const QString& profile = QString());
-	std::shared_ptr<const ArchivingServiceSettings> getArchivingServiceSettings(const QString& profile = QString());
-	std::shared_ptr<const TuningServiceSettings> getTuningServiceSettings(const QString& profile = QString());
-	std::shared_ptr<const MonitorSettings> getMonitorSettings(const QString& profile = QString());
-	std::shared_ptr<const TuningClientSettings> getTuningClientSettings(const QString& profile = QString());
-	std::shared_ptr<const TestClientSettings> getTestClientSettings(const QString& profile = QString());
-	std::shared_ptr<const MetrologySettings> getMetrologySettings(const QString& profile = QString());
-
 private:
-	std::shared_ptr<const SoftwareSettings> getSettingsProfile(const QString& profile) const;
-	std::shared_ptr<const SoftwareSettings> getSettingsDefaultProfile() const;
-
 	std::shared_ptr<SoftwareSettings> createAppropriateSettings();
+	bool addSharedProfile(const QString& profile, std::shared_ptr<SoftwareSettings> sharedSettings);
 
 private:
-	E::SoftwareType m_softwareType;
-	std::map<QString, std::shared_ptr<SoftwareSettings>> m_settings;	// profileName -> SoftwareSettings
+	E::SoftwareType m_softwareType = E::SoftwareType::Unknown;
+	std::map<QString, std::shared_ptr<SoftwareSettings>> m_settingsMap;	// profileName -> SoftwareSettings*
 };
+
+template<typename T>
+bool SoftwareSettingsSet::addProfile(const QString& profile, const SoftwareSettings& settings)
+{
+	const T* typedPtr = dynamic_cast<const T*>(&settings);
+
+	if (typedPtr == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	std::shared_ptr<T> sharedSettings = std::make_shared<T>(*typedPtr);
+
+	return addSharedProfile(profile, sharedSettings);
+}
+
+template<typename T>
+std::shared_ptr<const T> SoftwareSettingsSet::getProfile(const QString& profile)
+{
+	auto it = m_settingsMap.find(profile);
+
+	if (it != m_settingsMap.end())
+	{
+		return std::dynamic_pointer_cast<const T>(it->second);
+	}
+
+	return nullptr;
+
+}
+
+template<typename T>
+std::shared_ptr<const T> SoftwareSettingsSet::getDefaultProfile()
+{
+	return getProfile<T>(SettingsProfile::DEFAULT);
+}
+
 
 #ifdef IS_BUILDER
 
@@ -140,6 +162,9 @@ public:
 	public:
 		bool readFromDevice(const Builder::Context* context,
 							const Hardware::Software* software) override;
+
+	private:
+		bool buildClientsList(const Builder::Context* context, const Hardware::Software* software);
 	};
 
 #endif
@@ -254,6 +279,8 @@ public:
 
 	//
 
+	//
+
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
 };
@@ -272,9 +299,6 @@ public:
 		bool fillTuningClientsInfo(const Builder::Context* context,
 								   const Hardware::Software* software,
 								   bool singleLmControlEnabled);
-
-	public:
-		QVector<Tuning::TuningSource> tuningSources;
 	};
 
 #endif
@@ -310,6 +334,7 @@ public:
 		bool readFromDevice(const Builder::Context* context,
 							const Hardware::Software* software) override;
 
+	private:
 		bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
 	};
 

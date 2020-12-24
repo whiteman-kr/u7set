@@ -25,7 +25,6 @@ namespace Builder
 		bool createEquipmentList(QStringList* equipmentList);
 		bool createObjectFilters(const QStringList& equipmentList);
 
-		bool writeSettings();
 		bool writeTuningSignals();
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
@@ -41,8 +40,6 @@ namespace Builder
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
-		TuningClientSettingsGetter m_settings;
-
 		::Proto::AppSignalSet m_tuningSet;
 
 		TuningFilterStorage m_tuningFilterStorage;

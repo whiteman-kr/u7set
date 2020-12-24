@@ -63,12 +63,6 @@ namespace Builder
 			return result;
 		}
 
-		result &= writeSettings();
-		if (result == false)
-		{
-			return result;
-		}
-
 		result &= writeTuningSchemas();
 		if (result == false)
 		{
@@ -208,18 +202,6 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
-	}
-
 	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)
 	{
 		bool ok = true;
@@ -333,12 +315,15 @@ namespace Builder
 
 	}
 
-
 	bool TuningClientCfgGenerator::writeTuningSchemas()
 	{
 		bool result = true;
 
-		QStringList schemaTagList = m_settings.getSchemaTags();
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getDefaultProfile<TuningClientSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		QStringList schemaTagList = settings->getSchemaTags();
 
 		std::set<std::shared_ptr<SchemaFile>> tuningSchemas;
 
@@ -547,7 +532,11 @@ namespace Builder
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
 														  const TuningSignalManager& tuningSignalManager)
 	{
-		if (m_settings.filterBySchema == true)
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getDefaultProfile<TuningClientSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		if (settings->filterBySchema == true)
 		{
 			// Filter for Schema
 			//
@@ -596,7 +585,7 @@ namespace Builder
 			m_tuningFilterStorage.add(ofSchema, true);
 		}	 // filterBySchema
 
-		if (m_settings.filterByEquipment == true)
+		if (settings->filterByEquipment == true)
 		{
 			// Filter for EquipmentId
 			//

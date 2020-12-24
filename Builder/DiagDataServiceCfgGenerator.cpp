@@ -15,25 +15,6 @@ namespace Builder
 
 	bool DiagDataServiceCfgGenerator::generateConfiguration()
 	{
-		bool result = true;
-
-		do
-		{
-			if (writeSettings() == false) break;
-
-			result = true;
-		}
-		while(false);
-
-		return result;
-	}
-
-	bool DiagDataServiceCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
+		return true;
 	}
 }

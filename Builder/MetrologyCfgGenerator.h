@@ -19,7 +19,6 @@ namespace Builder
 
 	private:
 		bool writeDatabaseInfo();
-		bool writeSettings();
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
 
@@ -33,7 +32,6 @@ namespace Builder
 		bool testElectricLimit_Input_uA(const Signal& signal);
 
 	private:
-		MetrologySettingsGetter m_settings;
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 	};

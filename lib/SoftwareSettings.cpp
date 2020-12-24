@@ -68,80 +68,15 @@ SoftwareSettingsSet::SoftwareSettingsSet(E::SoftwareType softwareType) :
 {
 }
 
-bool SoftwareSettingsSet::addSettingsProfile(const QString& profile, std::shared_ptr<SoftwareSettings> settings)
-{
-	bool result = false;
-
-	switch(m_softwareType)
-	{
-	case E::SoftwareType::Monitor:
-		result = dynamic_cast<MonitorSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::ConfigurationService:
-		result = dynamic_cast<CfgServiceSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::AppDataService:
-		result = dynamic_cast<AppDataServiceSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::ArchiveService:
-		result = dynamic_cast<ArchivingServiceSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::TuningService:
-		result = dynamic_cast<TuningServiceSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::DiagDataService:
-		result = dynamic_cast<DiagDataServiceSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::TuningClient:
-		result = dynamic_cast<TuningClientSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::Metrology:
-		result = dynamic_cast<MetrologySettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::TestClient:
-		result = dynamic_cast<TestClientSettings*>(settings.get()) != nullptr;
-		break;
-
-	case E::SoftwareType::ServiceControlManager:
-	case E::SoftwareType::Unknown:
-	case E::SoftwareType::BaseService:
-	default:
-		Q_ASSERT(false);
-		break;
-	}
-
-	if (result == false)
-	{
-		Q_ASSERT(false);
-		return false;
-	}
-
-	if (m_settings.find(profile) == m_settings.end())
-	{
-		m_settings.insert({profile, settings});
-		return true;
-	}
-
-	Q_ASSERT(false);
-	return false;
-}
-
 bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
 
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_settings.size()));
+	xml.writeSoftwareTypeAttribute(m_softwareType);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_settingsMap.size()));
 
-	for(auto p : m_settings)
+	for(auto p : m_settingsMap)
 	{
 		std::shared_ptr<SoftwareSettings> swSettings = p.second;
 
@@ -161,12 +96,29 @@ bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 
 bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 {
-	m_settings.clear();
+	m_settingsMap.clear();
 
 	bool result = true;
 	int profilesCount = 0;
 
 	result = xml.findElement(XmlElement::SETTINGS_SET);
+
+	E::SoftwareType swType;
+
+	result &=xml.readSoftwareTypeAttribute(&swType);
+
+	if (result == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	if (m_softwareType != swType)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
 	result &= xml.readIntAttribute(XmlAttribute::COUNT, &profilesCount);
 
 	RETURN_IF_FALSE(result);
@@ -182,7 +134,7 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 
 		if (settings->readFromXml(xml) == true)
 		{
-			result &= addSettingsProfile(settings->profile, settings);
+			result &= addSharedProfile(settings->profile, settings);
 		}
 		else
 		{
@@ -191,68 +143,6 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 	}
 
 	return result;
-}
-
-std::shared_ptr<const CfgServiceSettings> SoftwareSettingsSet::getCfgServiceSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const CfgServiceSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const AppDataServiceSettings> SoftwareSettingsSet::getAppDataServiceSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const AppDataServiceSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const DiagDataServiceSettings> SoftwareSettingsSet::getDiagDataServiceSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const DiagDataServiceSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const ArchivingServiceSettings> SoftwareSettingsSet::getArchivingServiceSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const ArchivingServiceSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const TuningServiceSettings> SoftwareSettingsSet::getTuningServiceSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const TuningServiceSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const MonitorSettings> SoftwareSettingsSet::getMonitorSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const MonitorSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const TuningClientSettings> SoftwareSettingsSet::getTuningClientSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const TuningClientSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const TestClientSettings> SoftwareSettingsSet::getTestClientSettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const TestClientSettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const MetrologySettings> SoftwareSettingsSet::getMetrologySettings(const QString& profile)
-{
-	return std::dynamic_pointer_cast<const MetrologySettings>(getSettingsProfile(profile));
-}
-
-std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsProfile(const QString& profile) const
-{
-	auto it = m_settings.find(profile);
-
-	if (it != m_settings.end())
-	{
-		return it->second;
-	}
-
-	return nullptr;
-}
-
-std::shared_ptr<const SoftwareSettings> SoftwareSettingsSet::getSettingsDefaultProfile() const
-{
-	return getSettingsProfile(SettingsProfile::DEFAULT);
 }
 
 std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
@@ -297,7 +187,18 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	return nullptr;
 }
 
+bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_ptr<SoftwareSettings> sharedSettings)
+{
+	if (m_settingsMap.find(profile) != m_settingsMap.end())
+	{
+		Q_ASSERT(false);
+		return false;
+	}
 
+	m_settingsMap.insert({profile, sharedSettings});
+
+	return true;
+}
 
 #ifdef IS_BUILDER
 
@@ -702,6 +603,59 @@ QStringList CfgServiceSettings::knownClients()
 		result &= DeviceHelper::getIpPortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
 												  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
 		result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
+
+		RETURN_IF_FALSE(result);
+
+		result &= buildClientsList(context, software);
+
+		return result;
+	}
+
+	bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context, const Hardware::Software* cfgService)
+	{
+		const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
+		const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
+
+		Builder::IssueLogger* log = context->m_log;
+
+		bool result = true;
+
+		clients.clear();
+
+		for(auto p : context->m_software)
+		{
+			Hardware::Software* software = p.second;
+
+			if (software == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (software->equipmentIdTemplate() == cfgService->equipmentIdTemplate())
+			{
+				continue;			// exclude yourself
+			}
+
+			QString ID1;
+
+			if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID1) == true)
+			{
+				result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &ID1, log);
+			}
+
+			QString ID2;
+
+			if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID2) == true)
+			{
+				result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &ID2, log);
+			}
+
+			if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
+			{
+				clients.append(QPair<QString, E::SoftwareType>(software->equipmentIdTemplate(), software->type()));
+			}
+		}
 
 		return result;
 	}
@@ -1192,6 +1146,14 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		result &= fillTuningClientsInfo(context, software, singleLmControl);
 
+		if (context->m_projectProperties.safetyProject() == true && singleLmControl == false)
+		{
+			// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+			//
+			log->errEQP6201(software->equipmentIdTemplate());
+			return false;
+		}
+
 		return result;
 	}
 
@@ -1512,6 +1474,10 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
 		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
 		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, log);
+
+		RETURN_IF_FALSE(result);
+
+		result &=checkSettings(software, log);
 
 		return result;
 	}

@@ -13,7 +13,6 @@ namespace Builder
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (linkAppSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
@@ -23,15 +22,6 @@ namespace Builder
 		while(false);
 
 		return result;
-	}
-
-	bool TestClientCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool TestClientCfgGenerator::linkAppSignalsFile()

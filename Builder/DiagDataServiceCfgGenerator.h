@@ -16,11 +16,5 @@ namespace Builder
 		~DiagDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
-
-	private:
-		bool writeSettings();
-
-	private:
-		DiagDataServiceSettingsGetter m_settings;
 	};
 }
