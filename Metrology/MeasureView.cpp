@@ -921,5 +921,329 @@ void MeasureView::copy()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+void MeasureView::showGraph(int graphType)
+{
+	if (graphType < 0 || graphType >= MVG_TYPE_COUNT)
+	{
+		return;
+	}
+
+	int measureCount = m_table.count();
+	if (measureCount == 0)
+	{
+		return;
+	}
+
+	int index = currentIndex().row();
+	if (index < 0 || index >= measureCount)
+	{
+		return;
+	}
+
+	Measurement* pMeasurement = m_table.at(index);
+	if (pMeasurement == nullptr)
+	{
+		return;
+	}
+
+	LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+	if (pLinearityMeasurement == nullptr)
+	{
+		return;
+	}
+
+	// select limit type
+	//
+	int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
+
+	switch (graphType)
+	{
+		case MVG_TYPE_LIN_EL:
+		case MVG_TYPE_20VAL_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
+		case MVG_TYPE_LIN_EN:
+		case MVG_TYPE_20VAL_EN:	limitType = MEASURE_LIMIT_TYPE_ENGINEER;	break;
+		default:				assert(0);									break;
+	}
+
+	if (limitType == MEASURE_LIMIT_TYPE_UNDEFINED)
+	{
+		return;
+	}
+
+	// QChart
+	//
+	QtCharts::QChart *pChart = new QtCharts::QChart();
+	if (pChart == nullptr)
+	{
+		return;
+	}
+
+	pChart->setTitle(pLinearityMeasurement->appSignalID() + " - " + pLinearityMeasurement->caption());
+	pChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+
+	// Add lines
+	//
+	int pointCount = 0;
+
+	switch (graphType)
+	{
+		case MVG_TYPE_LIN_EL:
+		case MVG_TYPE_LIN_EN:
+			{
+				QtCharts::QLineSeries *pNominalSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries *pMeasureSeries = new QtCharts::QLineSeries();
+
+				if (pNominalSeries == nullptr || pMeasureSeries == nullptr)
+				{
+					break;
+				}
+
+				pNominalSeries->setColor(Qt::green);
+				pNominalSeries->setName(tr("Nominal"));
+
+				pMeasureSeries->setColor(Qt::red);
+				pMeasureSeries->setName(tr("Measure"));
+
+				QtCharts::QLineSeries *pLowLimitlSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries *pHighLimitSeries = new QtCharts::QLineSeries();
+
+				if (pLowLimitlSeries == nullptr || pHighLimitSeries == nullptr)
+				{
+					break;
+				}
+
+				pLowLimitlSeries->setPen(QPen(Qt::black, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
+				pLowLimitlSeries->setName(tr("Low limit"));
+
+				pHighLimitSeries->setPen(QPen(Qt::black, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
+				pHighLimitSeries->setName(tr("High limit"));
+
+				for (int i = 0; i < measureCount; i++)
+				{
+					Measurement* pMeasurementI = m_table.at(i);
+					if (pMeasurementI == nullptr)
+					{
+						continue;
+					}
+
+					if (pMeasurementI->signalHash() != pMeasurement->signalHash())
+					{
+						continue;
+					}
+
+					LinearityMeasurement* pLinearityMeasurementI = dynamic_cast<LinearityMeasurement*>(pMeasurementI);
+					if (pLinearityMeasurementI == nullptr)
+					{
+						continue;
+					}
+
+					QPointF pN(pointCount + 1, pLinearityMeasurementI->nominal(limitType));
+					*pNominalSeries << pN;
+
+					QPointF pM(pointCount + 1, pLinearityMeasurementI->measure(limitType));
+					*pMeasureSeries << pM;
+
+					if (pLinearityMeasurement->nominal(limitType) >= 0)
+					{
+						QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE));
+						*pLowLimitlSeries << pLL;
+
+						QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE));
+						*pHighLimitSeries << pHL;
+					}
+					else
+					{
+						QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE));
+						*pLowLimitlSeries << pLL;
+
+						QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE));
+						*pHighLimitSeries << pHL;
+					}
+
+					pointCount ++;
+				}
+
+				pChart->addSeries(pNominalSeries);
+				pChart->addSeries(pMeasureSeries);
+				pChart->addSeries(pHighLimitSeries);
+				pChart->addSeries(pLowLimitlSeries);
+			}
+			break;
+
+		case MVG_TYPE_20VAL_EL:
+		case MVG_TYPE_20VAL_EN:
+			{
+				QtCharts::QLineSeries *pMeasureSeries = new QtCharts::QLineSeries();
+				if (pMeasureSeries == nullptr)
+				{
+					break;
+				}
+
+				pMeasureSeries->setColor(Qt::red);
+				pMeasureSeries->setName(tr("Measure (Nominal = %1)").
+										arg(QString::number(pLinearityMeasurement->nominal(limitType), 'f',
+															pLinearityMeasurement->limitPrecision(limitType))));
+
+				for (int i = 0; i < pLinearityMeasurement->measureCount(); i++)
+				{
+					QPointF pM(pointCount + 1, pLinearityMeasurement->measureItemArray(limitType ,i));
+					*pMeasureSeries << pM;
+
+					pointCount ++;
+				}
+
+				pChart->addSeries(pMeasureSeries);
+			}
+			break;
+
+		default:
+			assert(0);
+			break;
+	}
+
+	if (pointCount == 0)
+	{
+		return;
+	}
+
+	// Asix
+	//
+	pChart->createDefaultAxes();
+
+	QList<QtCharts::QAbstractAxis*> axisXList = pChart->axes(Qt::Horizontal);
+	if (axisXList.isEmpty() == true)
+	{
+		return;
+	}
+
+	QtCharts::QValueAxis *pAxisX = dynamic_cast<QtCharts::QValueAxis*>(axisXList.at(0));
+	if (pAxisX == nullptr)
+	{
+		return;
+	}
+
+	pAxisX->setRange(1, pointCount);
+	pAxisX->setTickCount(pointCount);
+	pAxisX->setLabelFormat("%.0f");
+
+	QList<QtCharts::QAbstractAxis*> axisYList = pChart->axes(Qt::Vertical);
+	if (axisYList.isEmpty() == true)
+	{
+		return;
+	}
+
+	QtCharts::QValueAxis *pAxisY = dynamic_cast<QtCharts::QValueAxis*>(axisYList.at(0));
+	if (pAxisY == nullptr)
+	{
+		return;
+	}
+
+	pAxisY->setLabelFormat(QString("%.%1f").arg(pLinearityMeasurement->limitPrecision(limitType)));
+
+	// QChartView
+	//
+	ChartView *pChartView = new ChartView(pChart);
+	if (pChartView == nullptr)
+	{
+		return;
+	}
+
+	pChartView->setRenderHint(QPainter::Antialiasing);
+
+	// QDialog
+	//
+	QDialog dialog(this, Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+	dialog.setWindowTitle(tr("Graph - %1").arg(pLinearityMeasurement->appSignalID()));
+	dialog.resize(800, 300);
+	dialog.grabGesture(Qt::PanGesture);
+	dialog.grabGesture(Qt::PinchGesture);
+
+	QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+	mainLayout->addWidget(pChartView);
+	dialog.setLayout(mainLayout);
+
+	dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ChartView::ChartView(QtCharts::QChart *chart, QWidget *parent) :
+	QChartView(chart, parent),
+	m_isTouching(false)
+{
+	setRubberBand(QChartView::RectangleRubberBand);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ChartView::viewportEvent(QEvent *event)
+{
+	if (event->type() == QEvent::TouchBegin)
+	{
+		m_isTouching = true;
+
+		chart()->setAnimationOptions(QtCharts::QChart::NoAnimation);
+	}
+
+	return QChartView::viewportEvent(event);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ChartView::mousePressEvent(QMouseEvent *event)
+{
+	if (m_isTouching == true)
+	{
+		return;
+	}
+
+	QChartView::mousePressEvent(event);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ChartView::mouseMoveEvent(QMouseEvent *event)
+{
+	if (m_isTouching == true)
+	{
+		return;
+	}
+
+	QChartView::mouseMoveEvent(event);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ChartView::mouseReleaseEvent(QMouseEvent *event)
+{
+	if (m_isTouching == true)
+	{
+		m_isTouching = false;
+	}
+
+	chart()->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+
+	QChartView::mouseReleaseEvent(event);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+void ChartView::keyPressEvent(QKeyEvent *event)
+{
+	switch (event->key())
+	{
+		case Qt::Key_Plus:	chart()->zoomIn();						break;
+		case Qt::Key_Minus:	chart()->zoomOut();						break;
+		case Qt::Key_Left:	chart()->scroll(-10, 0);				break;
+		case Qt::Key_Right:	chart()->scroll(10, 0);					break;
+		case Qt::Key_Up:	chart()->scroll(0, 10);					break;
+		case Qt::Key_Down:	chart()->scroll(0, -10);				break;
+		default:			QGraphicsView::keyPressEvent(event);	break;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

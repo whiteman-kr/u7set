@@ -13,6 +13,8 @@ QT       += network
 QT       += sql
 QT       += qml
 QT       += xml
+QT       += charts
+
 #axcontainer
 
 TARGET = Metrology

@@ -189,4 +189,14 @@ const int				MVC_CMN_C_INDEX				= 0,
 
 // ==============================================================================================
 
+const int				MVG_TYPE_UNDEFINED			= -1,
+						MVG_TYPE_LIN_EL				= 0,
+						MVG_TYPE_LIN_EN				= 1,
+						MVG_TYPE_20VAL_EL			= 2,
+						MVG_TYPE_20VAL_EN			= 3;
+
+const int				MVG_TYPE_COUNT				= 4;
+
+// ==============================================================================================
+
 #endif // MEASUREVIEWHEADER_H

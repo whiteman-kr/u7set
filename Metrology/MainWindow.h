@@ -68,6 +68,10 @@ private:
 	QAction*				m_pShowTuningSignalListAction = nullptr;
 	QAction*				m_pShowSignalConnectionListAction = nullptr;
 	QAction*				m_pShowStatisticsAction = nullptr;
+	QAction*				m_pShowGraphLinElAction = nullptr;
+	QAction*				m_pShowGraphLinEnAction = nullptr;
+	QAction*				m_pShowGraph20ElAction = nullptr;
+	QAction*				m_pShowGraph20EnAction = nullptr;
 
 							// menu - Tools
 							//
@@ -90,6 +94,7 @@ private:
 	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewPanelMenu = nullptr;
+	QMenu*					m_pViewGraphMenu = nullptr;
 	QMenu*					m_pToolsMenu = nullptr;
 	QMenu*					m_pInfoMenu = nullptr;
 
@@ -255,6 +260,10 @@ private slots:
 	void					showTuningSignalList();
 	void					showSignalConnectionList();
 	void					showStatistics();
+	void					showGraphLinEl();
+	void					showGraphLinEn();
+	void					showGraph20El();
+	void					showGraph20En();
 
 	// menu - Tools
 	//
