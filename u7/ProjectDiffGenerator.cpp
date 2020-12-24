@@ -1314,7 +1314,12 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 
 			const DbFileTree& filesTree = filesTrees[fileTreeIndex++];
 
-			compareFilesRecursive(filesTree, filesTree.rootFile(), m_diffParams.compareData, headerTable.get(), &fileTypeSections);
+			const std::vector<std::shared_ptr<DbFileInfo>>& children = filesTree.children(filesTree.rootFileId());
+
+			for (const auto& child : children)
+			{
+				compareFilesRecursive(filesTree, child, m_diffParams.compareData, headerTable.get(), &fileTypeSections);
+			}
 		}
 
 		// Remove header if no data
@@ -1368,6 +1373,7 @@ void ProjectDiffWorker::compareFilesRecursive(const DbFileTree& filesTree,
 		Q_ASSERT(fi);
 		return;
 	}
+
 
 	compareFile(filesTree, fi, compareData, headerTable, sectionsArray);
 
