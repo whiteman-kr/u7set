@@ -1101,8 +1101,8 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 	// --
 	//
-	double controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
-	bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+	const double controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
+	const bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
 	// SchemaItem position and point are the same units
 	//
@@ -1130,9 +1130,9 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::NoAction;
 		}
 
-		// �������� �� ������ ����������� ��������������� ControlBarSizeIn
+		// --
 		//
-		QRectF itemRectangle;		// ����������������� �������������
+		QRectF itemRectangle;
 
 		itemRectangle.setX(itemPos->leftDocPt());
 		itemRectangle.setY(itemPos->topDocPt());
@@ -1191,9 +1191,6 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 		double x2 = itemPos->endXDocPt();
 		double y2 = itemPos->endYDocPt();
 
-		// �������� �� ������ ����������� ��������������� ControlBarSizeIn
-		// ��������������, �� ������� ����� ��������� � �������� �������
-		//
 		QRectF controlRectangles[2] = {QRectF{x1 - controlBarSize / 2, y1 - controlBarSize / 2, controlBarSize, controlBarSize},
 									   QRectF{x2 - controlBarSize / 2, y2 - controlBarSize/ 2, controlBarSize, controlBarSize}};
 
@@ -1207,8 +1204,6 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::MoveEndLinePoint;
 		}
 
-		// ���� ������ �� �����, �� SchemaItemAction.MoveItem
-		//
 		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
 			if (schemaItem->isLocked() == false ||
@@ -1228,21 +1223,18 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 	if (dynamic_cast<VFrame30::IPosConnection*>(schemaItem) != nullptr)
 	{
-		VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(schemaItem) ;
-
 		if (schemaItem->isLocked() == true)
 		{
 			return SchemaItemAction::NoAction;
 		}
 
-		// �������� �� ������ ����������� ��������������� ControlBarSizeIn
-		//
+		VFrame30::PosConnectionImpl* itemPos = dynamic_cast<VFrame30::PosConnectionImpl*>(schemaItem) ;
 		std::list<VFrame30::SchemaPoint> points = itemPos->GetPointList();
 
 		int pointIndex = 0;
 		for (auto pt = points.begin(); pt != points.end(); pt++, pointIndex++)
 		{
-			QRectF controlRect(pt->X - controlBarSize / 2, pt->Y - controlBarSize / 2, controlBarSize, controlBarSize);
+			QRectF controlRect{pt->X - controlBarSize / 2, pt->Y - controlBarSize / 2, controlBarSize, controlBarSize};
 
 			if (controlRect.contains(point.x(), point.y()) == true)
 			{
@@ -1251,7 +1243,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			}
 		}
 
-		// �������� ���� ��������
+		// --
 		//
 		VFrame30::SchemaPoint lastPoint;
 
@@ -1264,14 +1256,14 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 				continue;
 			}
 
-			// ������������ �����
+			// --
 			//
 			double x1 = std::min(lastPoint.X, pt->X);
 			double y1 = std::min(lastPoint.Y, pt->Y);
 			double x2 = std::max(lastPoint.X, pt->X);
 			double y2 = std::max(lastPoint.Y, pt->Y);
 
-			// ���������� �����
+			// --
 			//
 			if (std::abs(x1 - x2) < std::abs(y1 - y2))
 			{
@@ -1305,6 +1297,20 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			//--
 			//
 			lastPoint = *pt;
+		}
+
+		// Move Item
+		//
+		QRectF br = itemPos->boundingRectInDocPt(nullptr);
+		QRectF moveBarRect = br;
+
+		moveBarRect.setWidth(controlBarSize * 2);
+		moveBarRect.setHeight(controlBarSize * 2);
+		moveBarRect.moveCenter(br.center());
+
+		if (moveBarRect.contains(point.x(), point.y()) == true)
+		{
+			return SchemaItemAction::MoveItem;
 		}
 
 		return SchemaItemAction::NoAction;
