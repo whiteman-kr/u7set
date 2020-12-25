@@ -13,7 +13,7 @@
 
 class DbController;
 
-class ReportGenerator;
+class ReportGeneratorCore;
 
 class ReportSchemaView;
 
@@ -183,18 +183,17 @@ public:
 };
 
 //
-// ReportGenerator
+// ReportGeneratorTools
 //
 
-class ReportGenerator : public QObject
+class ReportGeneratorCore : public QObject
 {
 public:
-	ReportGenerator(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView);
-
+	ReportGeneratorCore(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView);
 
 public:
-	int pagesCount() const;
-	int pageIndex() const;
+	QString fileName() const;
+	int resolution() const;
 
 protected:
 	void addMarginItem(const ReportMarginItem& item);
@@ -202,12 +201,12 @@ protected:
 
 	// Rendering functions
 
-	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter);
-	void printSchema(const QRect pageRectPixels,
+	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter, int* pageIndex, QMutex* pageIndexMutex, int pageCount);
+
+	void printSchema(QPdfWriter* pdfWriter,
 					 QTextDocument* textDocument,
 					 QPainter* painter,
-					 ReportSchemaView* schemaView,
-					 std::shared_ptr<VFrame30::Schema> schemas,
+					 std::shared_ptr<VFrame30::Schema> schema,
 					 const std::map<QUuid, CompareAction>& itemActions);
 
 	// Formatting functions
@@ -220,11 +219,18 @@ protected:
 	void setTextBackground(const QBrush& brush);
 	void setTextAlignment(Qt::Alignment alignment);
 
-private:
-	void drawMarginItems(int page, QPdfWriter* pdfWriter, QPainter* painter);
+	const QTextCharFormat& currentCharFormat() const;
+	const QTextBlockFormat& currentBlockFormat() const;
 
-protected:
+private:
+	void drawMarginItems(int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter);
+
+private:
 	QString m_fileName;
+
+	int m_resolution = 300;
+
+	std::vector<ReportMarginItem> m_marginItems;
 	std::shared_ptr<ReportSchemaView> m_schemaView;
 
 	QTextCharFormat m_currentCharFormat;
@@ -232,19 +238,6 @@ protected:
 
 	QTextCharFormat m_currentCharFormatSaved;
 	QTextBlockFormat m_currentBlockFormatSaved;
-
-	int m_resolution = 300;
-
-	mutable QMutex m_statisticsMutex;
-
-	int m_pagesCount = 0;	// Calculated after text rendering
-	int m_pageIndex = 0;
-
-	QString m_renderingReportName;
-
-private:
-	std::vector<ReportMarginItem> m_marginItems;
-
 };
 
 //
@@ -357,7 +350,7 @@ public:
 // ProjectDiffWorker
 //
 
-class ProjectDiffWorker : public ReportGenerator
+class ProjectDiffWorker : public ReportGeneratorCore
 {
 	Q_OBJECT
 
@@ -397,6 +390,9 @@ public:
 	int sectionCount() const;
 	int sectionIndex() const;
 
+	int pagesCount() const;
+	int pageIndex() const;
+
 	QString renderingReportName() const;
 	QString currentSection() const;
 	QString currentObjectName() const;
@@ -409,19 +405,22 @@ private:
 
 	void compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents);
 
-	void compareFilesRecursive(const DbFileTree& filesTree,
+	void compareFilesRecursive(int rootFileId,
+							   const DbFileTree& filesTree,
 							   const std::shared_ptr<DbFileInfo>& fi,
 							   const CompareData& compareData,
 							   ReportTable* const headerTable,
 							   std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
-	void compareFile(const DbFileTree& filesTree,
+	void compareFile(int rootFileId,
+					 const DbFileTree& filesTree,
 					 const std::shared_ptr<DbFileInfo>& fi,
 					 const CompareData& compareData,
 					 ReportTable* const headerTable,
 					 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
-	void compareFileContents(const std::shared_ptr<DbFile>& sourceFile,
+	void compareFileContents(int rootFileId,
+							 const std::shared_ptr<DbFile>& sourceFile,
 							 const std::shared_ptr<DbFile>& targetFile,
 							 const QString& fileName,
 							 ReportTable* const headerTable,
@@ -436,7 +435,7 @@ private:
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
 							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject, const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-							  ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+							  ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray, bool presets);
 	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 	void compareSchemas(const QString& fileName, const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
@@ -488,6 +487,8 @@ private:
 
 	WorkerStatus m_currentStatus = WorkerStatus::Idle;
 
+	mutable QMutex m_statisticsMutex;
+
 	int m_signalsCount = 0;
 	int m_signalIndex = 0;
 
@@ -497,8 +498,12 @@ private:
 	int m_sectionCount = 0;
 	int m_sectionIndex = 0;
 
+	int m_pagesCount = 0;	// Calculated after text rendering
+	int m_pageIndex = 0;
+
 	QString m_currentSectionName;
 	QString m_currentObjectName;
+	QString m_currentReportName;
 
 	bool m_stop = false;	// Stop processing flag, set by stop()
 
