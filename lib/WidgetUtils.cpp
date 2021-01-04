@@ -180,12 +180,13 @@ void TableDataVisibilityController::checkNewColumns()
 		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
 		if (columnWidth == -1)
 		{
-			m_tableView->setColumnWidth(i, m_tableView->columnWidth(m_tableView->columnWidth(0)));
+			columnWidth = m_tableView->columnWidth(0);
 		}
-		else
+		if (columnWidth == 0)	// Looks like invisible
 		{
-			m_tableView->setColumnWidth(i, columnWidth);
+			columnWidth = 100;
 		}
+		m_tableView->setColumnWidth(i, columnWidth);
 
 		bool visible = m_defaultVisibleColumnSet.contains(i);
 		if (m_showAllDefaultColumns == false)
