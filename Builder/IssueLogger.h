@@ -468,9 +468,14 @@ namespace Builder
 		void errEQP6007(QString subsystemId);	//	All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
 
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
-		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
+		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);	// Property Place must be 0 (Equipment object %1).
 
-		void errEQP6020(QString lm, QUuid lmUuid);		//	Property lmDescriptionFile is empty
+		void errEQP6010(QString equipmemtId);						// Device Object %1 not found.
+		void errEQP6011(QString equipmemtId, QString buildStep);	// Device Object %1 not found on %2.
+
+		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+
+		void errEQP6030(QString profileName, QString errorMessage);	// Applying SimProfile %1 error: %2
 
 
 		// Subset of EQP -- Generation Software Configuration

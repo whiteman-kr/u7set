@@ -25,6 +25,7 @@ private slots:
 	bool saveChanges();
 
 	void checkProfiles();
+	void example();
 
 	void textChanged();
 
@@ -44,6 +45,7 @@ private:
 	QsciScintilla* m_textEdit = nullptr;
 
 	static SimProfileEditor* m_simProfileEditor;
+	static const QString m_exampleText;
 };
 
 

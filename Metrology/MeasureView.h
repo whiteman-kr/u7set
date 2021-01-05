@@ -3,6 +3,11 @@
 
 #include <QTableView>
 #include <QMenu>
+#include <QtCharts/QChart>
+#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QValueAxis>
+#include <QVBoxLayout>
 
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
@@ -79,6 +84,8 @@ private:
 
 	void createContextMenu();
 
+
+
 public:
 
 	int	measureType() const { return m_measureType; }
@@ -103,6 +110,30 @@ public slots:
 	void removeMeasure();
 
 	void copy();
+
+	void showGraph(int graphType);
+};
+
+// ==============================================================================================
+
+class ChartView : public QtCharts::QChartView
+{
+
+public:
+
+	ChartView(QtCharts::QChart *chart, QWidget *parent = nullptr);
+
+protected:
+
+	bool viewportEvent(QEvent *event);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
+	void keyPressEvent(QKeyEvent *event);
+
+private:
+
+	bool m_isTouching = false;
 };
 
 // ==============================================================================================

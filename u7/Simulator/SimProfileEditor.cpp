@@ -1,10 +1,25 @@
 #include "SimProfileEditor.h"
-#include "SimScopedLog.h"
 #include "../../lib/Ui/UiTools.h"
 #include "GlobalMessanger.h"
 
 
 SimProfileEditor* SimProfileEditor::m_simProfileEditor = nullptr;
+
+const QString SimProfileEditor::m_exampleText =
+R"(// Syntaxis:
+//
+// [Profile1]: Define profile "Profile1"
+//
+// EQUIPMENTID.PropertyCaption = "TextValue";	// Set property value to text
+// EQUIPMENTID.PropertyCaption = 10;			// Set property value to num
+//
+// Profile Example:
+//
+[Profile1]
+SYSTEMID_RACKWS_WS00_ADS.AppDataReceivingIP = "127.0.0.1";
+SYSTEMID_RACKWS_WS00_ADS.ClientRequestIP = "127.0.0.1";
+
+)";
 
 void SimProfileEditor::run(DbController* dbController, QWidget* parent)
 {
@@ -20,9 +35,9 @@ void SimProfileEditor::run(DbController* dbController, QWidget* parent)
 	}
 }
 
-SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
-	  m_db(dbController)
+SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	:
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
+	m_db(dbController)
 {
 	if (m_db == nullptr)
 	{
@@ -30,7 +45,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
 		return;
 	}
 
-	setWindowTitle("Simulator Profiles");
+	setWindowTitle(tr("Simulator Profiles"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
@@ -59,22 +74,25 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
 	connect(m_textEdit, &QsciScintilla::textChanged, this, &SimProfileEditor::textChanged);
 
 	// Buttons
-
+	//
 	QPushButton* buttonCheck = new QPushButton(tr("Check"));
+	QPushButton* buttonExample = new QPushButton(tr("Example"));
 	QPushButton* buttonSave = new QPushButton(tr("Save"));
 	QPushButton* buttonOK = new QPushButton(tr("OK"));
 	QPushButton* buttonCancel = new QPushButton(tr("Cancel"));
 
 	connect(buttonCheck, &QPushButton::clicked, this, &SimProfileEditor::checkProfiles);
+	connect(buttonExample, &QPushButton::clicked, this, &SimProfileEditor::example);
 	connect(buttonSave, &QPushButton::clicked, this, &SimProfileEditor::saveChanges);
 	connect(buttonOK, &QPushButton::clicked, this, &SimProfileEditor::accept);
 	connect(buttonCancel, &QPushButton::clicked, this, &SimProfileEditor::reject);
 
 	// Layouts
-
+	//
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
 
 	buttonLayout->addWidget(buttonCheck);
+	buttonLayout->addWidget(buttonExample);
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(buttonSave);
 	buttonLayout->addWidget(buttonOK);
@@ -91,13 +109,13 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
 
 	if (ok == true && fileList.size() == 1)
 	{
 		std::shared_ptr<DbFile> file;
 
-		if (m_db->getLatestVersion(fileList[0], &file, nullptr) == true)
+		if (m_db->getLatestVersion(fileList[0], &file, this) == true)
 		{
 			QString text(file->data());
 
@@ -107,6 +125,11 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)
 
 			m_startText = text;
 		}
+	}
+
+	if (fileList.size() == 0)
+	{
+		m_startText = m_exampleText;
 	}
 
 
@@ -162,7 +185,6 @@ bool SimProfileEditor::askForSaveChanged()
 	if (m_textEdit->text() == m_startText)
 	{
 		m_modified = false;
-
 		return true;
 	}
 
@@ -175,11 +197,7 @@ bool SimProfileEditor::askForSaveChanged()
 
 	if (result == QMessageBox::Yes)
 	{
-		if (saveChanges() == false)
-		{
-			return false;
-		}
-		return true;
+		return saveChanges();
 	}
 
 	if (result == QMessageBox::No)
@@ -198,24 +216,25 @@ bool SimProfileEditor::saveChanges()
 	}
 
 	// Check correctness
-
+	//
 	Sim::Profiles profiles;
-
 	QString errorMsg;
 
 	if (profiles.parse(m_textEdit->text(), &errorMsg) == false)
 	{
-		if (QMessageBox::warning(this,
-								 qAppName(),
-								 tr("There are errors in the document. Are you sure you want to save it anyway?"),
-								 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
+		int mbResult = QMessageBox::warning(this,
+											qAppName(),
+											tr("There are errors in the document. Are you sure you want to save it anyway?"),
+											QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+		if (mbResult == QMessageBox::No)
 		{
 			return false;
 		}
 	}
 
 	// Save
-
+	//
 	bool ok = false;
 
 	QString comment = QInputDialog::getText(this, qAppName(),
@@ -226,9 +245,10 @@ bool SimProfileEditor::saveChanges()
 	{
 		return false;
 	}
+
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, qAppName(), "No comment supplied! Please provide a comment.");
+		QMessageBox::warning(this, qAppName(), tr("No comment supplied! Please provide a comment."));
 		return false;
 	}
 
@@ -236,7 +256,7 @@ bool SimProfileEditor::saveChanges()
 	//
 	std::vector<DbFileInfo> fileList;
 
-	ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+	ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
 	if (ok == false || fileList.size() != 1)
 	{
 		// create a file, if it does not exists
@@ -244,12 +264,12 @@ bool SimProfileEditor::saveChanges()
 		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
 		pf->setFileName(Db::File::SimProfilesFileName);
 
-		if (m_db->addFile(pf, m_db->etcFileId(), nullptr) == false)
+		if (m_db->addFile(pf, m_db->etcFileId(), this) == false)
 		{
 			return false;
 		}
 
-		ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+		ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;
@@ -258,7 +278,7 @@ bool SimProfileEditor::saveChanges()
 
 	std::shared_ptr<DbFile> file = nullptr;
 
-	ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
+	ok = m_db->getLatestVersion(fileList[0], &file, this);
 	if (ok == false || file == nullptr)
 	{
 		return false;
@@ -266,7 +286,7 @@ bool SimProfileEditor::saveChanges()
 
 	if (file->state() != VcsState::CheckedOut)
 	{
-		if (m_db->checkOut(fileList[0], nullptr) == false)
+		if (m_db->checkOut(fileList[0], this) == false)
 		{
 			return false;
 		}
@@ -276,12 +296,12 @@ bool SimProfileEditor::saveChanges()
 
 	file->swapData(data);
 
-	if (m_db->setWorkcopy(file, nullptr) == false)
+	if (m_db->setWorkcopy(file, this) == false)
 	{
 		return false;
 	}
 
-	if (m_db->checkIn(fileList[0], comment, nullptr) == false)
+	if (m_db->checkIn(fileList[0], comment, this) == false)
 	{
 		return false;
 	}
@@ -310,6 +330,20 @@ void SimProfileEditor::checkProfiles()
 		QMessageBox::critical(this, qAppName(), tr("Profiles loading error!\n\n") + errorMsg);
 	}
 
+	return;
+}
+
+void SimProfileEditor::example()
+{
+	if (m_textEdit->text().isEmpty() == false)
+	{
+		m_textEdit->setText(m_textEdit->text() + "\n");
+	}
+
+	m_textEdit->setText(m_textEdit->text() + m_exampleText);
+	//textChanged();
+
+	return;
 }
 
 void SimProfileEditor::textChanged()
@@ -343,6 +377,7 @@ void SimProfileEditor::reject()
 	{
 		QDialog::reject();
 	}
+
 	return;
 }
 

@@ -295,6 +295,16 @@ namespace Builder
 			m_context->m_progress += 10;		// Total progress 65
 
 			//
+			// Load Sim Profiles
+			//
+			loadSimProfiles();
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Generate MATS software configurations
 			//
 			ok = generateSoftwareConfiguration();
@@ -1320,6 +1330,129 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::loadSimProfiles()
+	{
+		Context* context = m_context.get();
+		DbController& db = context->m_db;
+		IssueLogger* log = context->m_log;
+
+		LOG_EMPTY_LINE(log);
+		LOG_MESSAGE(log, QString(tr("Loading Sim Profiles...")));
+
+		m_context->m_simProfiles.clear();
+		QByteArray fileContent;
+
+		std::vector<DbFileInfo> fileList;
+		bool ok = db.getFileList(&fileList, db.etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
+
+		if (ok == false)
+		{
+			log->errPDB2001(db.etcFileId(), Db::File::SimProfilesFileName, db.lastError());
+			return false;
+		}
+
+		if (ok == true && fileList.size() == 1)
+		{
+			std::shared_ptr<DbFile> file;
+
+			ok = db.getLatestVersion(fileList[0], &file, nullptr);
+
+			if (ok == true)
+			{
+				QString errorMessage;
+				fileContent = file->data();
+
+				ok = m_context->m_simProfiles.load(fileContent, &errorMessage);
+
+				if (ok == false)
+				{
+					log->errCMN0010(fileList[0].fileName());
+					return false;
+				}
+			}
+			else
+			{
+				log->errPDB2002(fileList[0].fileId(), fileList[0].fileName(), db.lastError());
+				return false;
+			}
+		}
+
+		// Save file to build
+		//
+		BuildFile* outFile = context->m_buildResultWriter->addFile(Directory::COMMON, Db::File::SimProfilesFileName, fileContent, false);
+		if (outFile == nullptr)
+		{
+			return false;
+		}
+
+		/*
+		// -- EXAMPLE OF USING Sim::SimProfiles: --
+		//
+
+		// Enumerate all profiles
+		//
+		const QStringList profiles = m_context->m_simProfiles.profiles();
+		for (QString profileName : profiles)
+		{
+			Sim::Profile& profile = m_context->m_simProfiles.profile(profileName);
+			Q_ASSERT(profileName == profile.profileName);
+
+			// Enumerate objects in the profile
+			//
+			const QStringList objectList = profile.equipment();
+			bool allAppliedSuccesfully = true;
+
+			for (QString equipmentId : objectList)
+			{
+				// Get device object from the EquipmentSet
+				//
+				std::shared_ptr<Hardware::DeviceObject> object = m_context->m_equipmentSet->deviceObjectSharedPointer(equipmentId);
+				if (object == nullptr)
+				{
+					m_log->errEQP6011(equipmentId, QString("appling %1 SimProfile").arg(profileName));
+					allAppliedSuccesfully = false;
+					continue;
+				}
+
+				Q_ASSERT(object->equipmentId() == equipmentId);
+
+				// Apply profile properties to DeviceObject.
+				// DeviceObject's state is saved here, later it can be restored with Sim::Profile::restoreObjects();
+				//
+				QString errorMessage;
+
+				bool applyOk = profile.applyToObject(equipmentId, object, &errorMessage);
+				if (applyOk == false)
+				{
+					m_log->errEQP6030(profileName, errorMessage);
+					allAppliedSuccesfully = false;
+					continue;
+				}
+			}
+
+			if (allAppliedSuccesfully == false)
+			{
+				continue;
+			}
+
+			// At this point we have m_context->m_equipmentSet with applied profile
+			// Do settings generation here
+			// ....
+			//
+
+			// Restore EquipmentSet state
+			//
+			profile.restoreObjects();
+		}
+
+		// -- END OF EXAMPLE--
+		//
+		*/
+
+		// --
+		//
+		return true;
+	}
 
 	bool BuildWorkerThread::generateSoftwareConfiguration()
 	{

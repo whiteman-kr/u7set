@@ -144,6 +144,7 @@ namespace Sim
 		m_appSignalManager.resetAll();
 		m_connections.clear();
 		m_software.clear();
+		m_profiles.clear();
 
 		return;
 	}
@@ -182,6 +183,42 @@ namespace Sim
 
 				clearImpl();
 				return false;
+			}
+		}
+
+		// Load simulator profiles
+		//
+		{
+			QString profilesFileName = buildPath + Directory::COMMON + "/" + Db::File::SimProfilesFileName;
+			QFile file(profilesFileName);
+
+			if (file.exists() == true)
+			{
+				bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+				if (ok == false)
+				{
+					m_log.writeError(QObject::tr("Open simulator profiles file error. File %1").arg(profilesFileName));
+					clearImpl();
+					return false;
+				}
+
+				QString errorMessage;
+				ok = m_profiles.load(file.readAll(), &errorMessage);
+
+				if (ok == false)
+				{
+					m_log.writeError(QObject::tr("Load simulator profiles file error. File %1. Error %2")
+									 .arg(profilesFileName)
+									 .arg(errorMessage));
+					clearImpl();
+					return false;
+				}
+			}
+			else
+			{
+				// It's ok if the file not exists
+				//
 			}
 		}
 
@@ -590,6 +627,16 @@ namespace Sim
 	const Sim::Software& Simulator::software() const
 	{
 		return m_software;
+	}
+
+	Sim::Profiles& Simulator::profiles()
+	{
+		return m_profiles;
+	}
+
+	const Sim::Profiles& Simulator::profiles() const
+	{
+		return m_profiles;
 	}
 
 	Sim::Control& Simulator::control()

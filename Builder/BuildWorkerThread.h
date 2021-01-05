@@ -89,6 +89,10 @@ namespace Builder
 		//
 		bool compileApplicationLogic();
 
+		// Load Sim Profiles
+		//
+		bool loadSimProfiles();
+
 		// Generate MATS software configurations
 		//
 		bool generateSoftwareConfiguration();

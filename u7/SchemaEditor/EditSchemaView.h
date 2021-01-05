@@ -44,7 +44,7 @@ protected:
 	void drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam);
 	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect);
 
-	void drawGrid(QPainter* p);
+	void drawGrid(QPainter* p, const QRectF& clipRect);
 
 	// Some determine functions
 	//
@@ -108,8 +108,11 @@ protected:
 
 	// Selection area variables
 	//
-	QPointF m_mouseSelectionStartPoint;
-	QPointF m_mouseSelectionEndPoint;
+	QPointF m_mouseSelectionStartPoint;				// Saved in DocPoints
+	QPointF m_mouseSelectionEndPoint;				// Saved in DocPoints
+
+	QPoint m_mouseSelectionStartPointForUpdate;		// Saved in WidgetPoints, just for update right region
+	QPoint m_mouseSelectionEndPointForUpdate;		// Saved in WidgetPoints, just for update right region
 
 	// Variables for performing some actions on object (moving, resizing, etc)
 	//

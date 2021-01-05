@@ -190,6 +190,26 @@ void MainWindow::createActions()
 	m_pShowStatisticsAction->setToolTip(QString());
 	connect(m_pShowStatisticsAction, &QAction::triggered, this, &MainWindow::showStatistics);
 
+	m_pShowGraphLinElAction = new QAction(tr("Linearity: electric range ..."), this);
+	m_pShowGraphLinElAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraphLinElAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraphLinElAction, &QAction::triggered, this, &MainWindow::showGraphLinEl);
+
+	m_pShowGraphLinEnAction = new QAction(tr("Linearity: engineering range ..."), this);
+	m_pShowGraphLinEnAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraphLinEnAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraphLinEnAction, &QAction::triggered, this, &MainWindow::showGraphLinEn);
+
+	m_pShowGraph20ElAction = new QAction(tr("Detail in the point: electric range ..."), this);
+	m_pShowGraph20ElAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraph20ElAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraph20ElAction, &QAction::triggered, this, &MainWindow::showGraph20El);
+
+	m_pShowGraph20EnAction = new QAction(tr("Detail in the point: engineering range ..."), this);
+	m_pShowGraph20EnAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraph20EnAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraph20EnAction, &QAction::triggered, this, &MainWindow::showGraph20En);
+
 	// Tools
 	//
 	m_pCalibratorsAction = new QAction(tr("&Calibrators ..."), this);
@@ -255,6 +275,7 @@ void MainWindow::createMenu()
 	//
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
 	m_pViewPanelMenu = new QMenu(tr("&Panels"), m_pViewMenu);
+	m_pViewGraphMenu = new QMenu(tr("&Graphs of linearity"), m_pViewMenu);
 
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
 	m_pViewMenu->addSeparator();
@@ -266,6 +287,12 @@ void MainWindow::createMenu()
 	m_pViewMenu->addAction(m_pShowSignalConnectionListAction);
 	m_pViewMenu->addSeparator();
 	m_pViewMenu->addAction(m_pShowStatisticsAction);
+	m_pViewGraphMenu->addAction(m_pShowGraphLinElAction);
+	m_pViewGraphMenu->addAction(m_pShowGraphLinEnAction);
+	m_pViewGraphMenu->addSeparator();
+	m_pViewGraphMenu->addAction(m_pShowGraph20ElAction);
+	m_pViewGraphMenu->addAction(m_pShowGraph20EnAction);
+	m_pViewMenu->addMenu(m_pViewGraphMenu);
 
 	// Tools
 	//
@@ -1655,8 +1682,9 @@ void MainWindow::showSignalConnectionList()
 		return;
 	}
 
+	// loadSignalConnectionToolBar call loadRacksOnToolBar() after setCurrentIndex
+	//
 	loadSignalConnectionToolBar();
-	//loadSignalConnectionToolBar call loadRacksOnToolBar() after setCurrentIndex
 
 	theSignalBase.statistics().createSignalList();
 	theSignalBase.statistics().createComparatorList();
@@ -1672,6 +1700,58 @@ void MainWindow::showStatistics()
 	}
 
 	m_pStatisticsPanel->show();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showGraphLinEl()
+{
+	MeasureView* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	emit pView->showGraph(MVG_TYPE_LIN_EL);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showGraphLinEn()
+{
+	MeasureView* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	emit pView->showGraph(MVG_TYPE_LIN_EN);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showGraph20El()
+{
+	MeasureView* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	emit pView->showGraph(MVG_TYPE_20VAL_EL);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showGraph20En()
+{
+	MeasureView* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	emit pView->showGraph(MVG_TYPE_20VAL_EN);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

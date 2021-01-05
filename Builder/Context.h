@@ -16,6 +16,7 @@
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
 #include "../lib/ComparatorSet.h"
+#include "../Simulator/SimProfiles.h"
 
 namespace Builder
 {
@@ -63,6 +64,8 @@ namespace Builder
 		std::vector<Hardware::DeviceModule*> m_lmModules;
 		std::vector<Hardware::DeviceModule*> m_lmAndBvbModules;
 		std::vector<Hardware::DeviceModule*> m_fscModules;
+
+		Sim::Profiles m_simProfiles;
 
 		std::map<QString, Hardware::Software*> m_software;
 

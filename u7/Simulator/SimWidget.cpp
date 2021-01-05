@@ -16,7 +16,6 @@
 #include "../../lib/Ui/DialogSignalSearch.h"
 #include "SimSignalSnapshot.h"
 #include "SimSignalInfo.h"
-#include "SimProfileEditor.h"
 
 
 SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
@@ -233,8 +232,9 @@ void SimWidget::createToolBar()
 	m_allowLanComm->setChecked(m_simulator->software().enabled());
 	connect(m_allowLanComm, &QAction::toggled, this, &SimWidget::allowLanCommToggled);
 
-	m_profilesEditorAction = new QAction{QIcon(":/Images/Images/SimProfileEditor.svg"), tr("Simulation Profiles Editor"), this};
-	connect(m_profilesEditorAction, &QAction::triggered, this, &SimWidget::runSimulationProfilesEditor);
+	m_profilesComboBox = new QComboBox{};
+	m_profilesComboBox->setMinimumContentsLength(15);
+	connect(m_profilesComboBox, &QComboBox::currentTextChanged, this, &SimWidget::profileComboTextChanged);
 
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
@@ -278,8 +278,7 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_allowLanComm);
-
-	m_toolBar->addAction(m_profilesEditorAction);
+	m_toolBar->addWidget(m_profilesComboBox);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_snapshotAction);
@@ -528,23 +527,68 @@ void SimWidget::updateActions()
 {
 	bool projectIsLoaded = m_simulator->isLoaded();
 
-	m_openProjectAction->setEnabled(true);
-	m_closeProjectAction->setEnabled(projectIsLoaded);
+	{
+		m_openProjectAction->setEnabled(true);
+		m_closeProjectAction->setEnabled(projectIsLoaded);
 
-	QString project = db()->currentProject().projectName().toLower();
-	QString lastPath = QSettings().value("SimulatorWidget/ProjectLastPath/" + project).toString();
-	bool lastPathExists = QDir(lastPath).exists() == true && lastPath.isEmpty() == false;
+		QString project = db()->currentProject().projectName().toLower();
+		QString lastPath = QSettings().value("SimulatorWidget/ProjectLastPath/" + project).toString();
+		bool lastPathExists = QDir(lastPath).exists() == true && lastPath.isEmpty() == false;
 
-	m_refreshProjectAction->setEnabled(projectIsLoaded || lastPathExists);
-	m_addWindowAction->setEnabled(projectIsLoaded);
+		m_refreshProjectAction->setEnabled(projectIsLoaded || lastPathExists);
+		m_addWindowAction->setEnabled(projectIsLoaded);
+	}
 
 	// Run, Pause, Stop
 	//
-	m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
-	m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
-	m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+	{
+		m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
+		m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
+		m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
 
-	m_timeIndicator->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+		m_timeIndicator->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+	}
+
+	// Update profile combo box
+	//
+	{
+		m_profilesComboBox->setEnabled(m_simulator->isStopped() == true && projectIsLoaded == true);
+
+		bool hasLastSelected = false;
+		QString lastSelectedProfile;
+
+		if (projectIsLoaded == true)
+		{
+			lastSelectedProfile = QSettings().value(QString("SimWidget/lastSelectedProfile_%1").
+													arg(m_simulator->projectName())).toString();
+		}
+
+		m_profilesComboBox->blockSignals(true);
+		m_profilesComboBox->clear();
+
+		if (projectIsLoaded == true)
+		{
+			QStringList profiles = {"Default"};
+			profiles += m_simulator->profiles().profiles();
+
+			for (QString p : profiles)
+			{
+				m_profilesComboBox->addItem(p, p);
+
+				if (p.compare(lastSelectedProfile, Qt::CaseInsensitive) == 0)
+				{
+					hasLastSelected = true;
+				}
+			}
+		}
+
+		m_profilesComboBox->blockSignals(false);
+
+		if (projectIsLoaded == true && hasLastSelected == true)
+		{
+			m_profilesComboBox->setCurrentText(lastSelectedProfile);
+		}
+	}
 
 	return;
 }
@@ -733,14 +777,14 @@ void SimWidget::allowLanCommToggled(bool state)
 	return;
 }
 
-void SimWidget::runSimulationProfilesEditor()
+void SimWidget::profileComboTextChanged(QString text)
 {
-	if (db()->isProjectOpened() == false)
+	if (m_simulator->isLoaded() == true && text.isEmpty() == false)
 	{
-		return;
+		QSettings{}.setValue(QString("SimWidget/lastSelectedProfile_%1").arg(m_simulator->projectName()), text);
 	}
 
-	SimProfileEditor::run(db(), this);
+	return;
 }
 
 void SimWidget::showSnapshot()
