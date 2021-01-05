@@ -19,6 +19,7 @@
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/FblItemRect.h"
 #include "DialogClientBehavior.h"
+#include "Reports/SchemasReportGenerator.h"
 
 //
 //
@@ -1518,6 +1519,16 @@ void SchemaFileViewEx::createActions()
 	m_importWorkingcopyAction->setStatusTip(tr("Import workingcopy file from disk to project file..."));
 	m_importWorkingcopyAction->setEnabled(false);
 
+	m_exportToPdfAction = new QAction(tr("Export to PDF.."), parent());
+	//m_exportToPdfAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
+	m_exportToPdfAction->setStatusTip(tr("Export selected schemas to PDF files"));
+	m_exportToPdfAction->setEnabled(false);
+
+	m_exportToAlbumAction = new QAction(tr("Export to Album.."), parent());
+	//m_exportToAlbumAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
+	m_exportToAlbumAction->setStatusTip(tr("Export selected schemas to single PDF album"));
+	m_exportToAlbumAction->setEnabled(false);
+
 	// --
 	//
 	m_refreshFileAction = new QAction(tr("Refresh"), parent());
@@ -1584,6 +1595,9 @@ void SchemaFileViewEx::createContextMenu()
 
 	addAction(m_exportWorkingcopyAction);
 	addAction(m_importWorkingcopyAction);
+
+	addAction(m_exportToPdfAction);
+	addAction(m_exportToAlbumAction);
 
 	// --
 	//
@@ -1888,6 +1902,8 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	bool hasAbilityToOpen = false;
 	bool hasViewPossibility = false;
 
+	int canExportToPdf = 0;
+
 	bool canGetWorkcopy = false;
 	int canSetWorkcopy = 0;
 
@@ -1967,6 +1983,13 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 			canGetWorkcopy = true;
 			canSetWorkcopy ++;
 		}
+
+		// hasExportToAlbumPossibility
+		//
+		if (file->directoryAttribute() == false)
+		{
+			canExportToPdf++;
+		}
 	}
 
 	// --
@@ -1986,6 +2009,9 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
 	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
+
+	m_exportToPdfAction->setEnabled(canExportToPdf > 0);
+	m_exportToAlbumAction->setEnabled(canExportToPdf > 1);
 
 	m_propertiesAction->setEnabled(schemaPoperties);			// can set work copy just for one file
 
@@ -2227,6 +2253,9 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, SignalSetProvid
 
 	connect(m_filesView->m_exportWorkingcopyAction, &QAction::triggered, this, &SchemaControlTabPageEx::exportWorkcopy);
 	connect(m_filesView->m_importWorkingcopyAction, &QAction::triggered, this, &SchemaControlTabPageEx::importWorkcopy);
+
+	connect(m_filesView->m_exportToPdfAction, &QAction::triggered, this, &SchemaControlTabPageEx::exportToPdf);
+	connect(m_filesView->m_exportToAlbumAction, &QAction::triggered, this, &SchemaControlTabPageEx::exportToAlbum);
 
 	connect(m_filesView->m_propertiesAction, &QAction::triggered, this, &SchemaControlTabPageEx::showFileProperties);
 
@@ -4358,6 +4387,66 @@ void SchemaControlTabPageEx::importWorkcopy()
 	db()->setWorkcopy(workcopyFiles, this);
 
 	m_filesView->refreshFiles();
+	return;
+}
+
+void SchemaControlTabPageEx::exportToPdf()
+{
+	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
+
+	if (selectedFiles.empty() == true)
+	{
+		return;
+	}
+
+	QString filesPath = QFileDialog::getExistingDirectory(this, QObject::tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (filesPath.isNull() == true || filesPath.isEmpty() == true)
+	{
+		return;
+	}
+
+	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+							 theSettings.serverPort(),
+							 theSettings.serverUsername(),
+							 theSettings.serverPassword(),
+							 db()->currentProject().projectName(),
+							 db()->currentUser().username(),
+							 db()->currentUser().password(),
+							 this);
+
+	r.run(selectedFiles, filesPath, false);
+
+	return;
+}
+
+void SchemaControlTabPageEx::exportToAlbum()
+{
+	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
+
+	if (selectedFiles.empty() == true)
+	{
+		return;
+	}
+
+	QString albumPath = QFileDialog::getSaveFileName(this, qAppName(), "./",QObject::tr("PDF documents (*.pdf)"));
+
+	if (albumPath.isNull() == true || albumPath.isEmpty() == true)
+	{
+		return;
+	}
+
+	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+							 theSettings.serverPort(),
+							 theSettings.serverUsername(),
+							 theSettings.serverPassword(),
+							 db()->currentProject().projectName(),
+							 db()->currentUser().username(),
+							 db()->currentUser().password(),
+							 this);
+
+	r.run(selectedFiles, albumPath, true);
+
 	return;
 }
 

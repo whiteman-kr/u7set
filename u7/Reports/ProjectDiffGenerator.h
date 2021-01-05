@@ -1,244 +1,12 @@
-#ifndef PROJECTDIFFGENERATOR_H
-#define PROJECTDIFFGENERATOR_H
+#pragma once
+
+#include "ReportTools.h"
 
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaView.h"
 #include "../lib/DbController.h"
-
-#include "SchemaEditor/EditSchemaWidget.h"
-
-#include <optional>
-
-class DbController;
-
-class ReportGeneratorCore;
-
-class ReportSchemaView;
-
-struct ReportObjectContext
-{
-	QTextDocument* textDocument = nullptr;
-	QTextCursor* textCursor = nullptr;
-};
-
-//
-// ReportSchemaView
-//
-
-class ReportSchemaView : public VFrame30::SchemaView
-{
-public:
-	ReportSchemaView(QWidget* parent);
-
-	void adjust(QPainter* painter, double startX, double startY, double zoom) const;
-
-	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, CompareAction>& compareActions);
-};
-
-//
-// ReportObject
-//
-
-class ReportObject
-{
-public:
-	ReportObject();	// New page constructor
-	virtual ~ReportObject();
-
-	bool isText() const;
-	bool isSchema() const;
-	bool isTable() const;
-	bool isNewPage() const;
-
-	virtual void render(const ReportObjectContext& context) const = 0;
-};
-
-//
-// ReportTable
-//
-
-class ReportTable : public ReportObject
-{
-public:
-	ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat);
-
-	int columnCount() const;
-	int rowCount() const;
-
-	const QStringList& rowAt(int index) const;
-
-	void insertRow(const QStringList& row);
-
-	void sortByColumn(int column);
-
-	void render(const ReportObjectContext& context) const override;
-
-private:
-
-	QStringList m_headerLabels;
-	std::vector<int> m_columnWidths;
-
-	std::vector<QStringList> m_rows;
-
-	// Format
-	//
-	QTextCharFormat m_charFormat;
-};
-
-//
-// ReportText
-//
-
-class ReportText : public ReportObject
-{
-public:
-	ReportText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
-
-	void render(const ReportObjectContext& context) const override;
-
-private:
-	QString m_text;
-
-	// Format
-	//
-	QTextCharFormat m_charFormat;
-	QTextBlockFormat m_blockCharFormat;
-};
-
-//
-// ReportSection
-//
-
-class ReportSection
-{
-public:
-	ReportSection(const QString& caption);
-	virtual ~ReportSection();
-
-	bool isEmpty() const;
-
-	const QString& caption() const;
-
-	// Add object functions
-
-	void addText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
-
-	void addTable(std::shared_ptr<ReportTable> table);
-	std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat);
-
-	static std::shared_ptr<ReportTable> createTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat);
-
-	// Schema functions
-
-	std::shared_ptr<VFrame30::Schema> schema() const;
-	void setSchema(std::shared_ptr<VFrame30::Schema> schema);
-
-	const std::map<QUuid, CompareAction>& compareItemActions() const;
-	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
-
-	// Render functions
-
-	void render(QSizeF pageSize);
-
-	int pageCount() const;	// filled after render()!!!
-
-	QTextDocument* textDocument();
-
-private:
-	QString m_caption;
-
-	std::vector<std::shared_ptr<ReportObject>> m_objects;
-
-	std::shared_ptr<VFrame30::Schema> m_schema;
-
-	std::map<QUuid, CompareAction> m_itemsActions;
-
-	QTextDocument m_textDocument;
-
-	int m_pageCount = 0; // filled after render()!!!
-};
-
-// ReportPageFooter
-
-class ReportMarginItem
-{
-public:
-	ReportMarginItem(const QString& text, int pageFrom, int pageTo, Qt::Alignment alignment, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
-
-public:
-	int m_pageFrom = -1;
-	int m_pageTo = -1;
-
-	QString m_text;
-
-	Qt::Alignment m_alignment = Qt::AlignTop | Qt::AlignHCenter;
-
-	// Format
-	//
-	QTextCharFormat m_charFormat;
-	QTextBlockFormat m_blockFormat;
-
-};
-
-//
-// ReportGeneratorTools
-//
-
-class ReportGeneratorCore : public QObject
-{
-public:
-	ReportGeneratorCore(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView);
-
-public:
-	QString fileName() const;
-	int resolution() const;
-
-protected:
-	void addMarginItem(const ReportMarginItem& item);
-	void clearMarginItems();
-
-	// Rendering functions
-
-	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter, int* pageIndex, QMutex* pageIndexMutex, int pageCount);
-
-	void printSchema(QPdfWriter* pdfWriter,
-					 QTextDocument* textDocument,
-					 QPainter* painter,
-					 std::shared_ptr<VFrame30::Schema> schema,
-					 const std::map<QUuid, CompareAction>& itemActions);
-
-	// Formatting functions
-
-	void saveFormat();
-	void restoreFormat();
-
-	void setFont(const QFont& font);
-	void setTextForeground(const QBrush& brush);
-	void setTextBackground(const QBrush& brush);
-	void setTextAlignment(Qt::Alignment alignment);
-
-	const QTextCharFormat& currentCharFormat() const;
-	const QTextBlockFormat& currentBlockFormat() const;
-
-private:
-	void drawMarginItems(int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter);
-
-private:
-	QString m_fileName;
-
-	int m_resolution = 300;
-
-	std::vector<ReportMarginItem> m_marginItems;
-	std::shared_ptr<ReportSchemaView> m_schemaView;
-
-	QTextCharFormat m_currentCharFormat;
-	QTextBlockFormat m_currentBlockFormat;
-
-	QTextCharFormat m_currentCharFormatSaved;
-	QTextBlockFormat m_currentBlockFormatSaved;
-};
 
 //
 // FileDiff
@@ -310,9 +78,9 @@ struct PropertyDiff
 	QString newValueText;
 };
 
-struct ProjectFileType
+struct ProjectDiffFileType
 {
-	ProjectFileType(int fileId, const QString& fileName, bool selected)
+	ProjectDiffFileType(int fileId, const QString& fileName, bool selected)
 	{
 		this->fileId = fileId;
 		this->fileName = fileName;
@@ -327,12 +95,12 @@ struct ProjectFileType
 struct ProjectDiffParams
 {
 	CompareData compareData;
-	std::vector<ProjectFileType> projectFileTypes;
+	std::vector<ProjectDiffFileType> projectFileTypes;
 	bool expertProperties = false;
 	bool multipleFiles = false;
 };
 
-class ProjectDiffGenerator
+class ProjectDiffGeneratorThread
 {
 public:
 	static void run(const ProjectDiffParams& settings,
@@ -341,33 +109,39 @@ public:
 					const QString& userPassword,
 					QWidget* parent);
 
-	static std::vector<ProjectFileType> defaultProjectFileTypes(DbController* db);
-
-	static int applicationSignalsTypeId() { return -256; }
 };
 
 //
-// ProjectDiffWorker
+// ProjectDiffGenerator
 //
 
-class ProjectDiffWorker : public ReportGeneratorCore
+class ProjectDiffGenerator : public ReportGenerator
 {
 	Q_OBJECT
 
 public:
-	ProjectDiffWorker(const QString& fileName,
+	ProjectDiffGenerator(const QString& fileName,
 					  const ProjectDiffParams& settings,
-					  std::shared_ptr<ReportSchemaView> schemaView,
+					  ReportSchemaView* schemaView,
 					  const QString& projectName,
 					  const QString& userName,
 					  const QString& userPassword);
-	virtual ~ProjectDiffWorker();
+	virtual ~ProjectDiffGenerator();
+
+	static std::vector<ProjectDiffFileType> defaultProjectFileTypes(DbController* db);
+	static int applicationSignalsTypeId() { return -256; }
 
 public slots:
 	void process();
 	void stop();
 
+	void progressRequested();
+
 public:
+	const QString& filePath() const;
+
+private:
+	// Statistics
 
 	enum class WorkerStatus
 	{
@@ -378,7 +152,6 @@ public:
 		Printing
 	};
 
-	// Statistics
 	WorkerStatus currentStatus() const;
 
 	int signalsCount() const;
@@ -398,6 +171,7 @@ public:
 	QString currentObjectName() const;
 
 signals:
+	void progressChanged(int progress, int progressMin, int progressMax, const QStringList& status);
 	void finished();
 
 private:
@@ -469,6 +243,7 @@ private:
 	DbController m_db;
 
 	ProjectDiffParams m_diffParams;
+	QString m_filePath;
 
 	QString m_projectName;
 	QString m_userName;
@@ -508,5 +283,3 @@ private:
 	bool m_stop = false;	// Stop processing flag, set by stop()
 
 };
-
-#endif // PROJECTDIFFGENERATOR_H

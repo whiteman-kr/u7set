@@ -106,6 +106,8 @@ namespace Builder
 
 		bool buildSoftwareList(Context* context);
 
+		bool createSchemasAlbums();
+
 		// Run simulator-based script tests
 		//
 		bool runSimTests();

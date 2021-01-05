@@ -13,6 +13,7 @@
 #include "MetrologyCfgGenerator.h"
 #include "TestClientCfgGenerator.h"
 #include "../Simulator/Simulator.h"
+//#include "../lib/Reports/SchemasReportGenerator.h"
 
 namespace Builder
 {
@@ -331,6 +332,17 @@ namespace Builder
 			}
 
 			m_context->m_progress += 10;		// Total progress 85
+
+			//
+			// Create Schemas PDF Albums
+			//
+			ok = createSchemasAlbums();
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
 
 			//
 			// Write Firmware Statistics
@@ -1433,7 +1445,6 @@ namespace Builder
 		return result;
 	}
 
-
 	bool BuildWorkerThread::writeFirmwareStatistics(BuildResultWriter& buildResultWriter)
 	{
 		bool result = true;
@@ -1679,6 +1690,47 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool BuildWorkerThread::createSchemasAlbums()
+	{
+		/*
+		Q_ASSERT(m_context);
+
+		if (m_context->m_projectProperties.generateAppLogicDrawings() == false)
+		{
+			return true;
+		}
+
+		LOG_MESSAGE(m_context->m_log, tr(""));
+		LOG_MESSAGE(m_context->m_log, tr("Creating Application Logic Drawings Album..."));
+
+		//std::vector<std::shared_ptr<DbFileInfo>> files;
+
+		std::vector<std::shared_ptr<VFrame30::Schema>> schemas;
+
+		for (std::shared_ptr<VFrame30::LogicSchema> appLogicSchema : m_context->m_appLogicSchemas)
+		{
+			schemas.push_back(appLogicSchema);
+
+		}
+
+		std::vector<std::shared_ptr<QBuffer>> buffers;
+
+		std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(nullptr);
+
+
+		std::shared_ptr<SchemasReportWorker> worker = std::make_shared<SchemasReportWorker>(schemaView,
+																							schemas,
+																							&buffers,
+																							true);
+		worker->process();
+
+		BuildFile* buildFile = m_context->m_buildResultWriter->addFile(QLatin1String("Drawings"), "AppLogic.pdf", buffers[0]->data(), false);
+		assert(buildFile);
+		Q_UNUSED(buildFile);*/
+
+		return true;
 	}
 
 	bool BuildWorkerThread::runSimTests()

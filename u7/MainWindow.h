@@ -15,7 +15,7 @@ class SimulatorTabPage;
 class TestsTabPage;
 class DialogShortcuts;
 class SignalSetProvider;
-class ProjectDiffWorker;
+class ProjectDiffGenerator;
 
 namespace Ui {
 class MainWindow;

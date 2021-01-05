@@ -32,7 +32,7 @@
 #include "../lib/Ui/UiTools.h"
 #include "../lib/SignalSetProvider.h"
 #include "Forms/DialogProjectDiff.h"
-#include "ProjectDiffGenerator.h"
+#include "Reports/ProjectDiffGenerator.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -1109,7 +1109,7 @@ void MainWindow::projectDifference()
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		ProjectDiffGenerator::run(dialog.diffParams(),
+		ProjectDiffGeneratorThread::run(dialog.diffParams(),
 								  db()->currentProject().projectName(),
 								  db()->currentUser().username(),
 								  db()->currentUser().password(),

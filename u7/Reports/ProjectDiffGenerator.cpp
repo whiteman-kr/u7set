@@ -3,763 +3,14 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/Connection.h"
-#include "../VFrame30/DrawParam.h"
 #include "../lib/TypesAndEnums.h"
+#include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 
-#include "Forms/DialogProjectDiffProgress.h"
+#include "../lib/Ui/DialogProgress.h"
 
 #include <QPrinter>
 #include "Settings.h"
-//
-// ReportSchemaView
-//
-
-ReportSchemaView::ReportSchemaView(QWidget* parent):
-	VFrame30::SchemaView(parent)
-{
-}
-
-void ReportSchemaView::adjust(QPainter* painter, double startX, double startY, double zoom) const
-{
-	Ajust(painter, startX, startY, zoom);
-}
-
-void ReportSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, CompareAction>& compareActions)
-{
-	if (drawParam == nullptr)
-	{
-		assert(drawParam != nullptr);
-		return;
-	}
-
-	// Draw items by layers which has Show flag
-	//
-	double clipX = clipRect.left();
-	double clipY = clipRect.top();
-	double clipWidth = clipRect.width();
-	double clipHeight = clipRect.height();
-
-	// Find compile layer
-	//
-	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
-	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->show() == false)
-		{
-			continue;
-		}
-
-		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
-		{
-			const SchemaItemPtr& item = *vi;
-
-			auto actionIt = compareActions.find(item->guid());
-			if (actionIt == compareActions.end())
-			{
-				assert(actionIt != compareActions.end());
-				continue;
-			}
-
-			CompareAction compareAction = actionIt->second;
-
-			QColor color;
-
-			switch (compareAction)
-			{
-			case CompareAction::Unmodified:
-				color = QColor(0, 0, 0, 0);			// Full transparent, as is
-				break;
-			case CompareAction::Modified:
-				color = QColor(0, 0, 0xC0, 128);
-				break;
-			case CompareAction::Added:
-				color = QColor(0, 0xC0, 0, 128);
-				break;
-			case CompareAction::Deleted:
-				color = QColor(0xC0, 0, 0, 128);
-				break;
-			default:
-				assert(false);
-			}
-
-			if (compareAction != CompareAction::Unmodified &&
-				item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
-			{
-				// Draw item issue
-				//
-				item->drawCompareAction(drawParam, color);
-			}
-		}
-	}
-
-}
-
-//
-// ReportObject
-//
-
-ReportObject::ReportObject()
-{
-}
-
-ReportObject::~ReportObject()
-{
-}
-
-bool ReportObject::isText() const
-{
-	return dynamic_cast<const ReportText*>(this) != nullptr;
-}
-
-bool ReportObject::isTable() const
-{
-	return dynamic_cast<const ReportTable*>(this) != nullptr;
-}
-
-//
-// ReportTable
-//
-
-ReportTable::ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat):
-	m_headerLabels(headerLabels),
-	m_columnWidths(columnWidths),
-	m_charFormat(charFormat)
-{
-}
-
-int ReportTable::columnCount() const
-{
-	return static_cast<int>(m_headerLabels.size());
-}
-
-int ReportTable::rowCount() const
-{
-	return static_cast<int>(m_rows.size());
-}
-
-const QStringList& ReportTable::rowAt(int index) const
-{
-	if (index < 0 || index >= rowCount())
-	{
-		Q_ASSERT(false);
-		static QStringList errorsStrings;
-		return errorsStrings;
-	}
-
-	return m_rows[index];
-}
-
-void ReportTable::insertRow(const QStringList& row)
-{
-	if (row.size() != columnCount())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_rows.push_back(row);
-}
-
-void ReportTable::sortByColumn(int column)
-{
-	std::sort(m_rows.begin(), m_rows.end(), [column](const QStringList& a, const QStringList& b){
-
-		if (column >= a.size() || column >= b.size())
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		return a.at(column) < b.at(column);
-	});
-}
-
-void ReportTable::render(const ReportObjectContext& context) const
-{
-	int cols = columnCount();
-	int rows = rowCount();
-
-	if (m_columnWidths.size() != cols || m_headerLabels.size() != cols)
-	{
-		context.textCursor->insertText("Table rendering error!");
-		Q_ASSERT(false);
-		return;
-	}
-
-	QString html = QObject::tr("<html>\
-					<head>\
-					  <style>\
-						table, th, td {\
-							font-family: %1;\
-							font-size: %2pt;\
-							border-collapse: collapse;\
-						}\
-						th{\
-							border: 1px solid black;\
-						   padding: 3px;\
-						}\
-						td {\
-							padding: 3px;\
-						}\
-						tr.d0 td {\
-						  background-color: #e0e0e0;\
-						  color: black;\
-						}\
-						tr.d1 td {\
-						  background-color: #ffffff;\
-						  color: black;\
-						}\
-						</style>\
-					</head>\
-				<body>\
-					<table width=\"100%\">").arg(m_charFormat.fontFamily()).arg(m_charFormat.fontPointSize());
-
-	html += "<thead><tr>";
-	for (int c = 0; c < cols; c++)
-	{
-		const QString& str = m_headerLabels[c];
-
-		html += QObject::tr("<th width=%1%>%2</th>").arg(m_columnWidths[c]).arg(str);
-	}
-	html += "</tr></thead>";
-
-	html += "<tbody>";
-
-	bool alternateRow = (rows & 1) != 0;	// odd number of rows, first is alternate
-
-	for (int r = 0; r < rows; r++)
-	{
-		if (alternateRow == true)
-		{
-			html += "<tr class=\"d0\">";
-		}
-		else
-		{
-			html += "<tr class=\"d1\">";
-		}
-		alternateRow = !alternateRow;
-
-		const QStringList& row = m_rows[r];
-
-		for (int c = 0; c < cols; c++)
-		{
-			const QString str = row[c];
-
-			html += QObject::tr("<td width=%1%>%2</td>").arg(m_columnWidths[c]).arg(str.toHtmlEscaped());
-		}
-
-		html += "</tr>";
-	}
-
-	html += "</tbody>";
-
-	/* footer
-	html += "<tfoot style=\"background: #ffc\">><tr>";
-	for (int c = 0; c < cols; c++)
-	{
-		const QString& str = m_headerLabels[c];
-
-		html += QObject::tr("<th>%1</th>").arg(str);
-	}
-	html += "</tr></tfoot";
-	*/
-
-	html += "</table>\
-			</body>\
-			</html>";
-
-	context.textCursor->insertHtml(html);
-
-	context.textCursor->insertText("\n\n");
-}
-
-//
-// ReportText
-//
-
-ReportText::ReportText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat):
-	m_text(text),
-	m_charFormat(charFormat),
-	m_blockCharFormat(blockFormat)
-{
-}
-
-void ReportText::render(const ReportObjectContext& context) const
-{
-	if (m_charFormat.isValid() == true)
-	{
-		context.textCursor->setCharFormat(m_charFormat);
-	}
-	if (m_blockCharFormat.isValid() == true)
-	{
-		context.textCursor->setBlockFormat(m_blockCharFormat);
-	}
-
-	context.textCursor->insertText(m_text);
-}
-
-//
-// ReportSection
-//
-
-ReportSection::ReportSection(const QString& caption):
-	m_caption(caption)
-{
-}
-
-ReportSection::~ReportSection()
-{
-}
-
-bool ReportSection::isEmpty() const
-{
-	return m_objects.empty() == true && m_schema == nullptr;
-}
-
-const QString& ReportSection::caption() const
-{
-	return m_caption;
-}
-
-void ReportSection::addText(const QString& text, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat)
-{
-	m_objects.push_back(std::make_shared<ReportText>(text, charFormat, blockFormat));
-}
-
-void ReportSection::addTable(std::shared_ptr<ReportTable> table)
-{
-	m_objects.push_back(table);
-}
-
-std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat)
-{
-	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, columnWidths, charFormat);
-	m_objects.push_back(table);
-
-	return table;
-}
-
-std::shared_ptr<ReportTable> ReportSection::createTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const QTextCharFormat& charFormat)
-{
-	std::shared_ptr<ReportTable> table = std::make_shared<ReportTable>(headerLabels, columnWidths, charFormat);
-
-	return table;
-}
-
-void ReportSection::setSchema(std::shared_ptr<VFrame30::Schema> schema)
-{
-	m_schema = schema;
-}
-
-const std::map<QUuid, CompareAction>& ReportSection::compareItemActions() const
-{
-	return m_itemsActions;
-}
-
-void ReportSection::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)
-{
-	m_itemsActions = itemsActions;
-}
-
-std::shared_ptr<VFrame30::Schema> ReportSection::schema() const
-{
-	return m_schema;
-}
-
-void ReportSection::render(QSizeF pageSize)
-{
-	if (m_objects.empty() == true)
-	{
-		if (m_schema != nullptr)
-		{
-			// Document has only schema
-			m_pageCount = 1;
-		}
-
-		return;
-	}
-
-	// Document has content
-
-	m_textDocument.setPageSize(pageSize);
-
-	QTextCursor textCursor(&m_textDocument);
-
-	//int remove_caption = 1;
-	//textCursor.insertText(m_caption);
-
-	QTextCharFormat charFormat = textCursor.charFormat();
-	charFormat.setFontPointSize(40);
-	textCursor.setCharFormat(charFormat);
-
-	for (const std::shared_ptr<ReportObject> object : m_objects)
-	{
-		if (object == nullptr)
-		{
-			Q_ASSERT(object);
-			return;
-		}
-
-		ReportObjectContext context;
-		context.textDocument = &m_textDocument;
-		context.textCursor = &textCursor;
-
-		object->render(context);
-	}
-
-	m_pageCount = m_textDocument.pageCount();
-
-	return;
-}
-
-int ReportSection::pageCount() const
-{
-	return m_pageCount;
-}
-
-QTextDocument* ReportSection::textDocument()
-{
-	return &m_textDocument;
-}
-
-//
-// ReportMarginItem
-//
-
-ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo, Qt::Alignment alignment, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat):
-	m_text(text),
-	m_pageFrom(pageFrom),
-	m_pageTo(pageTo),
-	m_alignment(alignment),
-	m_charFormat(charFormat),
-	m_blockFormat(blockFormat)
-
-{
-
-}
-
-//
-// ReportGenerator
-//
-
-ReportGeneratorCore::ReportGeneratorCore(const QString& fileName, std::shared_ptr<ReportSchemaView> schemaView):
-	m_fileName(fileName),
-	m_schemaView(schemaView)
-{
-	Q_ASSERT(m_currentCharFormat.isValid());
-	Q_ASSERT(m_currentBlockFormat.isValid());
-}
-
-QString ReportGeneratorCore::fileName() const
-{
-	return m_fileName;
-}
-
-int ReportGeneratorCore::resolution() const
-{
-	return m_resolution;
-}
-
-void ReportGeneratorCore::addMarginItem(const ReportMarginItem& item)
-{
-	m_marginItems.push_back(item);
-}
-
-void ReportGeneratorCore::clearMarginItems()
-{
-	m_marginItems.clear();
-}
-
-void ReportGeneratorCore::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter,
-									int* pageIndex, QMutex* pageIndexMutex, int pageCount)
-{
-	if (pdfWriter == nullptr || textDocument == nullptr || painter == nullptr)
-	{
-		Q_ASSERT(pdfWriter);
-		Q_ASSERT(textDocument);
-		Q_ASSERT(painter);
-		return;
-	}
-
-	if (textDocument->isEmpty() == true)
-	{
-		return;
-	}
-
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
-
-	// The total extent of the content (there are no page margin in this)
-	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
-
-	// This is the part of the content we will drop on a page.  It's a sliding window on the content.
-	QRect currentRect(0, 0, pageRect.width(), pageRect.height());
-
-	while (currentRect.intersects(contentRect) == true)
-	{
-		painter->save();
-		painter->translate(0, -currentRect.y());
-		textDocument->drawContents(painter, currentRect);  // draws part of the document
-		painter->restore();
-
-		// Get the page number
-
-		int page = 0;
-
-		if (pageIndex != nullptr)
-		{
-			if (pageIndexMutex != nullptr)
-			{
-				pageIndexMutex->lock();
-			}
-
-			page = *pageIndex;
-
-			if (pageIndexMutex != nullptr)
-			{
-				pageIndexMutex->unlock();
-			}
-		}
-
-		drawMarginItems(page, pageCount, pdfWriter, painter);
-
-		// Translate the current rectangle to the area to be printed for the next page
-		currentRect.translate(0, currentRect.height());
-
-		//Inserting a new page if there is still area left to be printed
-		if (currentRect.intersects(contentRect))
-		{
-			pdfWriter->newPage();
-
-			// Increase the page number
-
-			if (pageIndex != nullptr)
-			{
-				if (pageIndexMutex != nullptr)
-				{
-					pageIndexMutex->lock();
-				}
-
-				(*pageIndex)++;
-
-				if (pageIndexMutex != nullptr)
-				{
-					pageIndexMutex->unlock();
-				}
-			}
-		}
-	}
-
-	return;
-}
-
-void ReportGeneratorCore::printSchema(QPdfWriter* pdfWriter,
-								  QTextDocument* textDocument,
-								  QPainter* painter,
-								  std::shared_ptr<VFrame30::Schema> schema,
-								  const std::map<QUuid, CompareAction>& compareActions)
-{
-	if (pdfWriter == nullptr || textDocument == nullptr || painter == nullptr || m_schemaView == nullptr)
-	{
-		Q_ASSERT(pdfWriter);
-		Q_ASSERT(textDocument);
-		Q_ASSERT(painter);
-		Q_ASSERT(m_schemaView);
-		return;
-	}
-
-	if (schema == nullptr)
-	{
-		Q_ASSERT(schema);
-		return;
-	}
-
-	// Calculate the upper schema offset
-
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
-
-	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
-
-	const int schemaTop = contentRect.height() % pageRect.height();
-
-	int schemaLeft = 0;
-
-	const int schemaMaxHeight = pageRect.height() - schemaTop;
-
-	// Calculate draw parameters
-
-	m_schemaView->setSchema(schema, true);
-
-	VFrame30::CDrawParam drawParam(painter, schema.get(), m_schemaView.get(), schema->gridSize(), schema->pinGridStep());
-	drawParam.setInfoMode(false);
-	drawParam.session() = m_schemaView->session();
-
-	double schemaWidthInPixel = schema->GetDocumentWidth(m_resolution, 100.0);		// Export 100% zoom
-	double schemaHeightInPixel = schema->GetDocumentHeight(m_resolution, 100.0);		// Export 100% zoom
-
-	double zoom = pageRect.width() / schemaWidthInPixel;
-
-	double schemaHeightInPixelWZoomed = schemaHeightInPixel * zoom;
-
-	if (schemaHeightInPixelWZoomed > schemaMaxHeight)
-	{
-		// Reduce schema's height, it does not fit vertically
-
-		double yZoom =  schemaMaxHeight / schemaHeightInPixelWZoomed;
-
-		zoom *= yZoom;
-
-		// Center schema horizontally
-
-		int schemaWidthInPixelZoomed = static_cast<int>(schemaHeightInPixel * zoom + 0.5);
-
-		schemaLeft =  (pageRect.width() - schemaWidthInPixelZoomed) / 2;
-	}
-
-	// Draw rect
-
-	//m_pdfPainter.fillRect(QRectF(0, schemaTop, pageRect.width(), pageRect.height() - schemaTop), QColor(0xB0, 0xB0, 0xB0));
-
-	// Ajust QPainter
-	//
-
-	painter->save();
-
-	painter->setRenderHint(QPainter::Antialiasing);
-
-	m_schemaView->adjust(painter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom
-
-	// Draw Schema
-	//
-	QRectF clipRect(0, 0, schema->docWidth(), schema->docHeight());
-
-	schema->Draw(&drawParam, clipRect);
-
-	drawParam.setControlBarSize(
-		schema->unit() == VFrame30::SchemaUnit::Display ?
-					(4 / zoom) : (mm2in(2.4) / zoom));
-
-	m_schemaView->drawCompareOutlines(&drawParam, clipRect, compareActions);
-
-	painter->restore();
-
-	return;
-}
-
-void ReportGeneratorCore::saveFormat()
-{
-	m_currentCharFormatSaved = m_currentCharFormat;
-	m_currentBlockFormatSaved = m_currentBlockFormat;
-}
-
-void ReportGeneratorCore::restoreFormat()
-{
-	m_currentCharFormat = m_currentCharFormatSaved;
-	m_currentBlockFormat = m_currentBlockFormatSaved;
-}
-
-void ReportGeneratorCore::setFont(const QFont& font)
-{
-	m_currentCharFormat.setFont(font);
-}
-
-void ReportGeneratorCore::setTextForeground(const QBrush& brush)
-{
-	m_currentCharFormat.setForeground(brush);
-}
-
-void ReportGeneratorCore::setTextBackground(const QBrush& brush)
-{
-	m_currentCharFormat.setBackground(brush);
-}
-
-void ReportGeneratorCore::setTextAlignment(Qt::Alignment alignment)
-{
-	m_currentBlockFormat.setAlignment(alignment);
-}
-
-const QTextCharFormat& ReportGeneratorCore::currentCharFormat() const
-{
-	return m_currentCharFormat;
-}
-
-const QTextBlockFormat& ReportGeneratorCore::currentBlockFormat() const
-{
-	return m_currentBlockFormat;
-}
-
-void ReportGeneratorCore::drawMarginItems(int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter)
-{
-	if (pdfWriter == nullptr || painter == nullptr)
-	{
-		Q_ASSERT(pdfWriter);
-		Q_ASSERT(painter);
-		return;
-	}
-
-	const QRect fullPageRect = pdfWriter->pageLayout().fullRectPixels(m_resolution);
-
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
-
-	QMargins margins = pdfWriter->pageLayout().marginsPixels(m_resolution);
-
-	QRect topRect(fullPageRect.left() + margins.left() / 2,
-				  fullPageRect.top(),
-				  pageRect.width() + (margins.left() + margins.right()) / 2,
-				  abs(pageRect.top() - fullPageRect.top()));
-
-	QRect bottomRect(fullPageRect.left() + margins.left() / 2,
-					 pageRect.bottom(),
-					 pageRect.width() + (margins.left() + margins.right()) / 2,
-					 abs(pageRect.bottom() - fullPageRect.bottom()));
-
-	painter->save();
-
-	painter->translate(-pageRect.left(), -pageRect.top());
-
-	for (const ReportMarginItem& item : m_marginItems)
-	{
-		if (item.m_pageFrom != -1 && item.m_pageFrom > page)
-		{
-			continue;
-		}
-		if (item.m_pageTo != -1 && item.m_pageTo < page)
-		{
-			continue;
-		}
-
-		painter->setFont(item.m_charFormat.font());
-
-		QString text = item.m_text;
-
-		if (text == "%PAGE%")
-		{
-			text = tr("Page %1 of %2").arg(page).arg(totalPages);
-		}
-
-		//painter.fillRect(topRect, Qt::green);
-		//painter.fillRect(bottomRect, Qt::yellow);
-
-		if (item.m_alignment & Qt::AlignTop)
-		{
-			int alignment = item.m_alignment & ~Qt::AlignTop;
-
-			painter->drawText(topRect, alignment | Qt::AlignVCenter, text);
-		}
-		else
-		{
-			if (item.m_alignment & Qt::AlignBottom)
-			{
-				int alignment = item.m_alignment & ~Qt::AlignBottom;
-				painter->drawText(bottomRect, alignment | Qt::AlignVCenter, text);
-			}
-		}
-	}
-
-	painter->restore();
-
-}
 
 //
 // FileDiff
@@ -871,12 +122,12 @@ template<typename T> void FileDiff::calculateLcs(const std::vector<T>& source, c
 
 template<typename T>
 void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& target,
-								   const std::vector<T>& lcs,
-								   std::vector<T>* sourceAligned, std::vector<T>* targetAligned,
-								   std::vector<FileDiffAction>* actions,
-								   int* addedCount,
-								   int* removedCount,
-								   int* alignedCount)
+							const std::vector<T>& lcs,
+							std::vector<T>* sourceAligned, std::vector<T>* targetAligned,
+							std::vector<FileDiffAction>* actions,
+							int* addedCount,
+							int* removedCount,
+							int* alignedCount)
 {
 	int sourceIndex = 0;
 	int targetIndex  = 0;
@@ -993,10 +244,10 @@ void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& 
 
 
 //
-// ProjectDiffGenerator
+// ProjectDiffThread
 //
 
-void ProjectDiffGenerator::run(const ProjectDiffParams& settings, const QString& projectName, const QString& userName, const QString& userPassword, QWidget* parent)
+void ProjectDiffGeneratorThread::run(const ProjectDiffParams& settings, const QString& projectName, const QString& userName, const QString& userPassword, QWidget* parent)
 {
 	// Get filename
 	//
@@ -1010,15 +261,15 @@ void ProjectDiffGenerator::run(const ProjectDiffParams& settings, const QString&
 		return;
 	}
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(parent);
+	ReportSchemaView* schemaView = new ReportSchemaView(parent);
 
 	// Create Worker
 
-	std::shared_ptr<ProjectDiffWorker> worker = std::make_shared<ProjectDiffWorker>(fileName, settings, schemaView, projectName, userName, userPassword);
+	ProjectDiffGenerator* worker = new ProjectDiffGenerator(fileName, settings, schemaView, projectName, userName, userPassword);
 
 	// Create Progress Dialog
 
-	DialogProjectDiffProgress* dialogProgress = new DialogProjectDiffProgress(worker, parent);
+	DialogProgress* dialogProgress = new DialogProgress(QObject::tr("Creating Project Differences Report"), 3, parent);
 
 	// Create thread
 
@@ -1026,23 +277,27 @@ void ProjectDiffGenerator::run(const ProjectDiffParams& settings, const QString&
 
 	worker->moveToThread(thread);
 
-	QObject::connect(thread, &QThread::started, worker.get(), &ProjectDiffWorker::process);
+	QObject::connect(thread, &QThread::started, worker, &ProjectDiffGenerator::process);
 
 	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
+	QObject::connect(dialogProgress, &DialogProgress::getProgress, worker, &ProjectDiffGenerator::progressRequested, Qt::DirectConnection);
+
+	QObject::connect(dialogProgress, &DialogProgress::cancelClicked, worker, &ProjectDiffGenerator::stop, Qt::DirectConnection);
+
+	QObject::connect(worker, &ProjectDiffGenerator::progressChanged, dialogProgress, &DialogProgress::setProgressMultiple);
+
 	//  Schedule objects deleting
 
-	QObject::connect(worker.get(), &ProjectDiffWorker::finished, [&thread, &dialogProgress, &worker, &schemaView]()
+	QObject::connect(worker, &ProjectDiffGenerator::finished, [thread, dialogProgress, worker, schemaView]()
 	{
 		thread->quit();
 
-		dialogProgress->deleteLater();	// worker will be destroyed here, because dialog contains shared pointer to worker
+		dialogProgress->deleteLater();
 
-		//worker->deleteLater();
-		//worker = nullptr;
+		worker->deleteLater();
 
-		//schemaView->deleteLater();
-		//schemaView = nullptr;
+		schemaView->deleteLater();
 	});
 
 	// Start thread
@@ -1055,9 +310,41 @@ void ProjectDiffGenerator::run(const ProjectDiffParams& settings, const QString&
 
 }
 
-std::vector<ProjectFileType> ProjectDiffGenerator::defaultProjectFileTypes(DbController* db)
+//
+// ProjectDiffWorker
+//
+
+ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
+									 const ProjectDiffParams& settings,
+									 ReportSchemaView* schemaView,
+									 const QString& projectName,
+									 const QString& userName,
+									 const QString& userPassword):
+	ReportGenerator(schemaView),
+	m_filePath(fileName),
+	m_diffParams(settings),
+	m_projectName(projectName),
+	m_userName(userName),
+	m_userPassword(userPassword)
 {
-	std::vector<ProjectFileType> result;
+	// Init fonts
+
+	m_headerFont = QFont("Times", 36, QFont::Bold);
+	m_normalFont = QFont("Times", 24);
+	m_tableFont = QFont("Times", 24);
+	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / resolution())));
+
+	return;
+}
+
+ProjectDiffGenerator::~ProjectDiffGenerator()
+{
+	qDebug() << "ProjectDiffGenerator deleted";
+}
+
+std::vector<ProjectDiffFileType> ProjectDiffGenerator::defaultProjectFileTypes(DbController* db)
+{
+	std::vector<ProjectDiffFileType> result;
 
 	result.push_back({db->hcFileId(),				QObject::tr("Hardware Configuration"),	true});
 
@@ -1083,38 +370,7 @@ std::vector<ProjectFileType> ProjectDiffGenerator::defaultProjectFileTypes(DbCon
 
 }
 
-//
-// ProjectDiffWorker
-//
-
-ProjectDiffWorker::ProjectDiffWorker(const QString& fileName,
-									 const ProjectDiffParams& settings,
-									 std::shared_ptr<ReportSchemaView> schemaView,
-									 const QString& projectName,
-									 const QString& userName,
-									 const QString& userPassword):
-	ReportGeneratorCore(fileName, schemaView),
-	m_diffParams(settings),
-	m_projectName(projectName),
-	m_userName(userName),
-	m_userPassword(userPassword)
-{
-	// Init fonts
-
-	m_headerFont = QFont("Times", 36, QFont::Bold);
-	m_normalFont = QFont("Times", 24);
-	m_tableFont = QFont("Times", 24);
-	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / resolution())));
-
-	return;
-}
-
-ProjectDiffWorker::~ProjectDiffWorker()
-{
-	qDebug() << "ProjectDiffWorker deleted";
-}
-
-void ProjectDiffWorker::process()
+void ProjectDiffGenerator::process()
 {
 	std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents;
 
@@ -1127,93 +383,176 @@ void ProjectDiffWorker::process()
 	return;
 }
 
-void ProjectDiffWorker::stop()
+void ProjectDiffGenerator::stop()
 {
 	m_stop = true;
 }
 
-ProjectDiffWorker::WorkerStatus ProjectDiffWorker::currentStatus() const
+void ProjectDiffGenerator::progressRequested()
 {
+	QStringList progressText;
+
+	int progress = 0;
+	int progressMax = 0;
+
 	QMutexLocker l(&m_statisticsMutex);
+
+	ProjectDiffGenerator::WorkerStatus status = currentStatus();
+
+	switch (status)
+	{
+	case ProjectDiffGenerator::WorkerStatus::Idle:
+		{
+			progressText.push_back(tr("Idle"));
+		}
+		break;
+	case ProjectDiffGenerator::WorkerStatus::RequestingSignals:
+		{
+			progressText.push_back(tr("Requesting Application Signals..."));
+		}
+		break;
+	case ProjectDiffGenerator::WorkerStatus::Analyzing:
+		{
+			progressText.push_back(tr("Analyzing: %1").arg(currentSection()));
+
+			progressText.push_back(tr("Signals: %1 / %2, Files: %3 / %4")
+								   .arg(signalIndex()).arg(signalsCount())
+								   .arg(fileIndex()).arg(filesCount()));
+
+			QString objectName = currentObjectName();
+			if (objectName.length() > 48)
+			{
+				objectName = "..." + objectName.right(48);
+			}
+
+			progressText.push_back(tr("Current: %1").arg(objectName));
+
+			progress = fileIndex() + signalIndex();
+			progressMax = filesCount() + signalsCount();
+		}
+		break;
+	case ProjectDiffGenerator::WorkerStatus::Rendering:
+		{
+			if (renderingReportName().isEmpty() == false)
+			{
+				progressText.push_back(tr("Creating the report '%1'...").arg(renderingReportName()));
+			}
+			else
+			{
+				progressText.push_back(tr("Creating a report..."));
+			}
+
+			progressText.push_back(tr("Section: %1 / %2").arg(sectionIndex()).arg(sectionCount()));
+
+			progress = sectionIndex();
+			progressMax = sectionCount();
+		}
+		break;
+	case ProjectDiffGenerator::WorkerStatus::Printing:
+		{
+			if (renderingReportName().isEmpty() == false)
+			{
+				progressText.push_back(tr("Saving the report '%1'...").arg(renderingReportName()));
+			}
+			else
+			{
+				progressText.push_back(tr("Saving the report..."));
+			}
+
+			progressText.push_back(tr("Page: %1 / %2").arg(pageIndex()).arg(pagesCount()));
+
+			progress = pageIndex();
+			progressMax = pagesCount();
+		}
+		break;
+	}
+
+	l.unlock();
+
+	emit progressChanged(progress, 0, progressMax, progressText);
+
+	return;
+}
+
+const QString& ProjectDiffGenerator::filePath() const
+{
+	return m_filePath;
+}
+
+ProjectDiffGenerator::WorkerStatus ProjectDiffGenerator::currentStatus() const
+{
 	return m_currentStatus;
 }
 
-int ProjectDiffWorker::signalsCount() const
+int ProjectDiffGenerator::signalsCount() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_signalsCount;
 }
 
-int ProjectDiffWorker::signalIndex() const
+int ProjectDiffGenerator::signalIndex() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_signalIndex;
 }
 
-int ProjectDiffWorker::filesCount() const
+int ProjectDiffGenerator::filesCount() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_filesCount;
 }
 
-int ProjectDiffWorker::fileIndex() const
+int ProjectDiffGenerator::fileIndex() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_fileIndex;
 }
 
-int ProjectDiffWorker::sectionCount() const
+int ProjectDiffGenerator::sectionCount() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_sectionCount;
 }
 
-int ProjectDiffWorker::sectionIndex() const
+int ProjectDiffGenerator::sectionIndex() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_sectionIndex;
 }
 
-int ProjectDiffWorker::pagesCount() const
+int ProjectDiffGenerator::pagesCount() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_pagesCount;
 }
 
-int ProjectDiffWorker::pageIndex() const
+int ProjectDiffGenerator::pageIndex() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_pageIndex;
 }
 
-QString ProjectDiffWorker::renderingReportName() const
+QString ProjectDiffGenerator::renderingReportName() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_currentReportName;
 }
 
-QString ProjectDiffWorker::currentSection() const
+QString ProjectDiffGenerator::currentSection() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_currentSectionName;
 }
 
-QString ProjectDiffWorker::currentObjectName() const
+QString ProjectDiffGenerator::currentObjectName() const
 {
-	QMutexLocker l(&m_statisticsMutex);
 	return m_currentObjectName;
 }
 
-DbController* ProjectDiffWorker::db()
+DbController* ProjectDiffGenerator::db()
 {
 	return &m_db;
 }
 
-void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents)
+void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents)
 {
 	{
 		QMutexLocker l(&m_statisticsMutex);
 		m_currentStatus = WorkerStatus::Analyzing;
+		m_filesCount = 0;
+		m_signalsCount = 0;
+		m_currentSectionName.clear();
+		m_currentObjectName.clear();
 	}
 
 	db()->disableProgress();
@@ -1231,31 +570,37 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 		return;
 	}
 
+	// Place signals to front
+	//
+	for (int i = 0; i < m_diffParams.projectFileTypes.size(); i++)
+	{
+		ProjectDiffFileType ft = m_diffParams.projectFileTypes[i];
+
+		if (ft.fileId == applicationSignalsTypeId() && ft.selected == true && i != 0)
+		{
+			m_diffParams.projectFileTypes.erase(m_diffParams.projectFileTypes.begin() + i);
+			m_diffParams.projectFileTypes.insert(m_diffParams.projectFileTypes.begin(), ft);
+			break;
+		}
+	}
+
 	// Get and count files
 	//
 	m_sourceDeviceObjectMap.clear();
 	m_targetDeviceObjectMap.clear();
 
-	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_filesCount = 0;
-		m_signalsCount = 0;
-		m_currentSectionName.clear();
-		m_currentObjectName.clear();
-	}
-
 	int filesCount = 0;
 
 	std::vector<DbFileTree> filesTrees;
 
-	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
+	for (const ProjectDiffFileType& ft : m_diffParams.projectFileTypes)
 	{
 		if (ft.selected == false)
 		{
 			continue;
 		}
 
-		if (ft.fileId < 0)
+		if (ft.fileId == applicationSignalsTypeId())
 		{
 			// This is not a file
 			continue;
@@ -1290,7 +635,7 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 
 	int fileTreeIndex = 0;
 
-	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
+	for (const ProjectDiffFileType& ft : m_diffParams.projectFileTypes)
 	{
 		if (ft.selected == false)
 		{
@@ -1335,8 +680,8 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 			saveFormat();
 			setFont(m_tableFont);
 			headerTable = headerSection->addTable({tr("Signal"), tr("Status"), tr("Latest Changeset")},
-											{35, 15, 50},
-											currentCharFormat());
+												  {35, 15, 50},
+												  currentCharFormat());
 			restoreFormat();
 
 			compareSignals(m_diffParams.compareData, headerTable.get(), &fileTypeSections);
@@ -1346,8 +691,8 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 			saveFormat();
 			setFont(m_tableFont);
 			headerTable = headerSection->addTable({tr("Object"), tr("Status"), tr("Latest Changeset")},
-											{50, 15, 35},
-											currentCharFormat());
+												  {50, 15, 35},
+												  currentCharFormat());
 			restoreFormat();
 
 			// Compare files
@@ -1388,10 +733,12 @@ void ProjectDiffWorker::compareProject(std::map<QString, std::vector<std::shared
 		}
 	}
 
+	db()->closeProject(nullptr);
+
 	return;
 }
 
-void ProjectDiffWorker::compareFilesRecursive(int rootFileId,
+void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
 											  const DbFileTree& filesTree,
 											  const std::shared_ptr<DbFileInfo>& fi,
 											  const CompareData& compareData,
@@ -1438,7 +785,7 @@ void ProjectDiffWorker::compareFilesRecursive(int rootFileId,
 	return;
 }
 
-void ProjectDiffWorker::compareFile(int rootFileId,
+void ProjectDiffGenerator::compareFile(int rootFileId,
 									const DbFileTree& filesTree,
 									const std::shared_ptr<DbFileInfo>& fi,
 									const CompareData& compareData,
@@ -1565,7 +912,7 @@ void ProjectDiffWorker::compareFile(int rootFileId,
 	return;
 }
 
-void ProjectDiffWorker::compareFileContents(int rootFileId,
+void ProjectDiffGenerator::compareFileContents(int rootFileId,
 											const std::shared_ptr<DbFile>& sourceFile,
 											const std::shared_ptr<DbFile>& targetFile,
 											const QString& fileName,
@@ -1688,10 +1035,10 @@ void ProjectDiffWorker::compareFileContents(int rootFileId,
 	return;
 }
 
-std::optional<DbChangeset> ProjectDiffWorker::getRecentChangeset(const std::vector<DbChangeset>& history,
-																	const CompareVersionType versionType,
-																	const int compareChangeset,
-																	const QDateTime& compareDate) const
+std::optional<DbChangeset> ProjectDiffGenerator::getRecentChangeset(const std::vector<DbChangeset>& history,
+																 const CompareVersionType versionType,
+																 const int compareChangeset,
+																 const QDateTime& compareDate) const
 {
 	// Get source changeset and file contents
 	//
@@ -1750,7 +1097,7 @@ std::optional<DbChangeset> ProjectDiffWorker::getRecentChangeset(const std::vect
 
 }
 
-std::shared_ptr<Hardware::DeviceObject> ProjectDiffWorker::loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const
+std::shared_ptr<Hardware::DeviceObject> ProjectDiffGenerator::loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const
 {
 	if (deviceObjectMap == nullptr)
 	{
@@ -1802,7 +1149,7 @@ std::shared_ptr<Hardware::DeviceObject> ProjectDiffWorker::loadDeviceObject(cons
 	return object;
 }
 
-void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile,
+void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile,
 											 const std::shared_ptr<DbFile>& targetFile,
 											 const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
 											 const std::shared_ptr<Hardware::DeviceObject>& targetObject,
@@ -1878,8 +1225,8 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 		saveFormat();
 		setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = deviceDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																   {15, 15, 35, 35},
-																   currentCharFormat());
+																			 {15, 15, 35, 35},
+																			 currentCharFormat());
 		restoreFormat();
 
 		fillDiffTable(diffTable.get(), diffs);
@@ -1888,7 +1235,7 @@ void ProjectDiffWorker::compareDeviceObjects(const std::shared_ptr<DbFile>& sour
 	return;
 }
 
-void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
+void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
 										const std::shared_ptr<DbFile>& targetFile,
 										ReportTable* const headerTable,
 										std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
@@ -2078,7 +1425,7 @@ void ProjectDiffWorker::compareBusTypes(const std::shared_ptr<DbFile>& sourceFil
 }
 
 
-void ProjectDiffWorker::compareSchemas(const QString& fileName,
+void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 									   const std::shared_ptr<DbFile>& sourceFile,
 									   const std::shared_ptr<DbFile>& targetFile,
 									   ReportTable* const headerTable,
@@ -2138,8 +1485,8 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 	saveFormat();
 	setFont(m_tableFont);
 	std::shared_ptr<ReportTable> schemaItemsDiffTable = ReportSection::createTable({tr("Type"), tr("Label"), tr("Layer"), tr("Status")},
-																						  {25, 35, 25, 15},
-																						  currentCharFormat());
+																				   {25, 35, 25, 15},
+																				   currentCharFormat());
 	restoreFormat();
 
 	// Compare schemas properties
@@ -2151,7 +1498,7 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 
 	// Compare schemas items properties
 
-	std::map<QUuid, CompareAction> itemsActions;
+	std::map<QUuid, ReportSchemaCompareAction> itemsActions;
 
 	std::map<std::shared_ptr<VFrame30::SchemaItem>, std::shared_ptr<ReportTable>> itemsTables;
 
@@ -2183,16 +1530,16 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 
 					if (sourcePoints == targetPoints)
 					{
-						itemsActions[targetItem->guid()] = CompareAction::Unmodified;
+						itemsActions[targetItem->guid()] = ReportSchemaCompareAction::Unmodified;
 					}
 					else
 					{
-						itemsActions[targetItem->guid()] = CompareAction::Modified;
+						itemsActions[targetItem->guid()] = ReportSchemaCompareAction::Modified;
 					}
 				}
 				else
 				{
-					itemsActions[targetItem->guid()] = CompareAction::Modified;
+					itemsActions[targetItem->guid()] = ReportSchemaCompareAction::Modified;
 				}
 
 				// Save properties to table
@@ -2223,7 +1570,7 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 			{
 				// Item was added to targer
 				//
-				itemsActions[targetItem->guid()] = CompareAction::Added;
+				itemsActions[targetItem->guid()] = ReportSchemaCompareAction::Added;
 
 				QString className(targetItem->metaObject()->className());
 				className.remove("VFrame30::");
@@ -2249,7 +1596,7 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 			{
 				// Item is found, so it was deleted in target
 				//
-				itemsActions[sourceItem->guid()] = CompareAction::Deleted;
+				itemsActions[sourceItem->guid()] = ReportSchemaCompareAction::Deleted;
 
 				QString className(sourceItem->metaObject()->className());
 				className.remove("VFrame30::");
@@ -2332,7 +1679,7 @@ void ProjectDiffWorker::compareSchemas(const QString& fileName,
 	}
 }
 
-void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& sourceFile,
+void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sourceFile,
 										   const std::shared_ptr<DbFile>& targetFile,
 										   ReportTable* const headerTable,
 										   std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
@@ -2402,15 +1749,15 @@ void ProjectDiffWorker::compareConnections(const std::shared_ptr<DbFile>& source
 		saveFormat();
 		setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = connectionDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																   {15, 15, 35, 35},
-																   currentCharFormat());
+																				 {15, 15, 35, 35},
+																				 currentCharFormat());
 		restoreFormat();
 
 		fillDiffTable(diffTable.get(), diffs);
 	}
 }
 
-void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
+void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
 										 const std::shared_ptr<DbFile>& targetFile,
 										 ReportTable* const headerTable,
 										 std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
@@ -2481,8 +1828,8 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 		saveFormat();
 		setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = fileDiffSection->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
-																   {10, 40, 10, 40},
-																   currentCharFormat());
+																		   {10, 40, 10, 40},
+																		   currentCharFormat());
 		restoreFormat();
 
 		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
@@ -2549,9 +1896,9 @@ void ProjectDiffWorker::compareFilesData(const std::shared_ptr<DbFile>& sourceFi
 	}
 }
 
-void ProjectDiffWorker::compareSignals(const CompareData& compareData,
-									  ReportTable* const headerTable,
-									  std::vector<std::shared_ptr<ReportSection> >* sectionsArray)
+void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
+									   ReportTable* const headerTable,
+									   std::vector<std::shared_ptr<ReportSection> >* sectionsArray)
 {
 	if (headerTable == nullptr)
 	{
@@ -2851,7 +2198,7 @@ void ProjectDiffWorker::compareSignals(const CompareData& compareData,
 	return;
 }
 
-void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal,
+void ProjectDiffGenerator::compareSignalContents(const Signal& sourceSignal,
 											  const Signal& targetSignal,
 											  ReportTable* const headerTable,
 											  std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
@@ -2924,15 +2271,15 @@ void ProjectDiffWorker::compareSignalContents(const Signal& sourceSignal,
 		saveFormat();
 		setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = signalDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																   {15, 15, 35, 35},
-																   currentCharFormat());
+																			 {15, 15, 35, 35},
+																			 currentCharFormat());
 		restoreFormat();
 
 		fillDiffTable(diffTable.get(), diffs);
 	}
 }
 
-void ProjectDiffWorker::comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const
+void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const
 {
 	if (result == nullptr)
 	{
@@ -3080,7 +2427,7 @@ void ProjectDiffWorker::comparePropertyObjects(const PropertyObject& sourceObjec
 	return;
 }
 
-bool ProjectDiffWorker::isHardwareFile(const QString& fileName) const
+bool ProjectDiffGenerator::isHardwareFile(const QString& fileName) const
 {
 	for (const QString& ext : Hardware::DeviceObjectExtensions)
 	{
@@ -3093,7 +2440,7 @@ bool ProjectDiffWorker::isHardwareFile(const QString& fileName) const
 	return false;
 }
 
-bool ProjectDiffWorker::isBusTypeFile(const QString& fileName) const
+bool ProjectDiffGenerator::isBusTypeFile(const QString& fileName) const
 {
 	if (fileName.endsWith(".bus_type") == true)
 	{
@@ -3103,7 +2450,7 @@ bool ProjectDiffWorker::isBusTypeFile(const QString& fileName) const
 	return false;
 }
 
-bool ProjectDiffWorker::isConnectionFile(const QString& fileName) const
+bool ProjectDiffGenerator::isConnectionFile(const QString& fileName) const
 {
 	if (fileName.endsWith(".ocl") == true)
 	{
@@ -3113,16 +2460,16 @@ bool ProjectDiffWorker::isConnectionFile(const QString& fileName) const
 	return false;
 }
 
-bool ProjectDiffWorker::isTextFile(const QString& fileName) const
+bool ProjectDiffGenerator::isTextFile(const QString& fileName) const
 {
 	const std::array<QString, 5> TextExtensions =
-		{
-			".js",			// Script
-			".xml",			// Xml Document
-			".xsd",			// Xml Schema
-			".csv",			// Table
-			".txt"			// Text
-		};
+	{
+		".js",			// Script
+		".xml",			// Xml Document
+		".xsd",			// Xml Schema
+		".csv",			// Table
+		".txt"			// Text
+	};
 
 	for (const QString& ext : TextExtensions)
 	{
@@ -3135,7 +2482,7 @@ bool ProjectDiffWorker::isTextFile(const QString& fileName) const
 	return false;
 }
 
-bool ProjectDiffWorker::isSchemaFile(const QString& fileName) const
+bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 {
 	const std::array<QString, 10> TextExtensions =
 	{
@@ -3162,7 +2509,7 @@ bool ProjectDiffWorker::isSchemaFile(const QString& fileName) const
 	return false;
 }
 
-void ProjectDiffWorker::generateTitlePage(QTextCursor* textCursor, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName)
+void ProjectDiffGenerator::generateTitlePage(QTextCursor* textCursor, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName)
 {
 	if (textCursor == nullptr)
 	{
@@ -3298,7 +2645,7 @@ void ProjectDiffWorker::generateTitlePage(QTextCursor* textCursor, const Compare
 	return;
 }
 
-void ProjectDiffWorker::generateReportFilesPage(QTextCursor* textCursor, const QStringList& subreportFiles)
+void ProjectDiffGenerator::generateReportFilesPage(QTextCursor* textCursor, const QStringList& subreportFiles)
 {
 	if (textCursor == nullptr)
 	{
@@ -3353,7 +2700,7 @@ void ProjectDiffWorker::generateReportFilesPage(QTextCursor* textCursor, const Q
 	return;
 }
 
-void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName)
+void ProjectDiffGenerator::createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName)
 {
 	if (textCursor == nullptr)
 	{
@@ -3404,7 +2751,7 @@ void ProjectDiffWorker::createMarginItems(QTextCursor* textCursor, const Compare
 
 }
 
-void ProjectDiffWorker::fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs)
+void ProjectDiffGenerator::fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs)
 {
 	if (diffTable == nullptr)
 	{
@@ -3512,7 +2859,7 @@ void ProjectDiffWorker::fillDiffTable(ReportTable* diffTable, const std::vector<
 	return;
 }
 
-QString ProjectDiffWorker::changesetString(const std::shared_ptr<DbFile>& file)
+QString ProjectDiffGenerator::changesetString(const std::shared_ptr<DbFile>& file)
 {
 	if (file->changeset() == 0)
 	{
@@ -3524,7 +2871,7 @@ QString ProjectDiffWorker::changesetString(const std::shared_ptr<DbFile>& file)
 	}
 }
 
-QString ProjectDiffWorker::changesetString(const Signal& signal)
+QString ProjectDiffGenerator::changesetString(const Signal& signal)
 {
 	if (signal.changesetID() == 0)
 	{
@@ -3536,7 +2883,7 @@ QString ProjectDiffWorker::changesetString(const Signal& signal)
 	}
 }
 
-void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents)
+void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents)
 {
 	bool multipleFiles = m_diffParams.multipleFiles == true &&
 						 reportContents.size() > 1;
@@ -3562,27 +2909,29 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 
 		// Init PDF document
 
-		QString fileNameBase = fileName();
+		QString pdfFileName = filePath();
 
 		if (multipleFiles == true)
 		{
-			int pos = fileNameBase.lastIndexOf('.');
+			int pos = pdfFileName.lastIndexOf('.');
 			if (pos != -1)
 			{
-				fileNameBase.insert(pos, tr("_%1").arg(subReportName));
+				pdfFileName.insert(pos, tr("_%1").arg(subReportName));
 			}
 			else
 			{
-				fileNameBase += tr("_%1.pdf").arg(subReportName);
+				pdfFileName += tr("_%1.pdf").arg(subReportName);
 			}
+
+			pdfFileName.replace(' ', '_');
 
 			QMutexLocker l(&m_statisticsMutex);
 			m_currentReportName = subReportName;
 		}
 
-		generatedReportFiles.push_back(fileNameBase);
+		generatedReportFiles.push_back(pdfFileName);
 
-		QPdfWriter pdfWriter(fileNameBase);
+		QPdfWriter pdfWriter(pdfFileName);
 
 		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
 		pdfWriter.setPageOrientation(QPageLayout::Portrait);
@@ -3656,7 +3005,7 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 				m_pageIndex++;
 			}
 
-			printDocument(&pdfWriter, section->textDocument(), &painter, &m_pageIndex, &m_statisticsMutex, pagesCount());
+			printDocument(&pdfWriter, section->textDocument(), &painter, &m_pageIndex, &m_statisticsMutex, m_pagesCount);
 
 			// Print Schemas
 
@@ -3678,7 +3027,7 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 
 		// Generate generic report file with all report files description
 
-		QPdfWriter pdfWriter(fileName());
+		QPdfWriter pdfWriter(filePath());
 
 		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
 		pdfWriter.setPageOrientation(QPageLayout::Portrait);
@@ -3724,4 +3073,3 @@ void ProjectDiffWorker::renderReport(std::map<QString, std::vector<std::shared_p
 		}
 	}
 }
-

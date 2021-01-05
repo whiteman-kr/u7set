@@ -47,7 +47,7 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// Fill file types list
 	//
-	for (const ProjectFileType& ft : m_diffParams.projectFileTypes)
+	for (const ProjectDiffFileType& ft : m_diffParams.projectFileTypes)
 	{
 		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.fileName));
 
