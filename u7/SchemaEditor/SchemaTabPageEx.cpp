@@ -4394,7 +4394,19 @@ void SchemaControlTabPageEx::exportToPdf()
 {
 	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
 
-	if (selectedFiles.empty() == true)
+	std::vector<DbFileInfo> files;
+
+	for (auto f : selectedFiles)
+	{
+		if (f->directoryAttribute() == true)
+		{
+			continue;
+		}
+
+		files.push_back(*f);
+	}
+
+	if (files.empty() == true)
 	{
 		return;
 	}
@@ -4415,7 +4427,7 @@ void SchemaControlTabPageEx::exportToPdf()
 							 db()->currentUser().password(),
 							 this);
 
-	r.run(selectedFiles, filesPath, false);
+	r.run(files, filesPath, false);
 
 	return;
 }
@@ -4424,7 +4436,19 @@ void SchemaControlTabPageEx::exportToAlbum()
 {
 	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
 
-	if (selectedFiles.empty() == true)
+	std::vector<DbFileInfo> files;
+
+	for (auto f : selectedFiles)
+	{
+		if (f->directoryAttribute() == true)
+		{
+			continue;
+		}
+
+		files.push_back(*f);
+	}
+
+	if (files.empty() == true)
 	{
 		return;
 	}
@@ -4445,7 +4469,7 @@ void SchemaControlTabPageEx::exportToAlbum()
 							 db()->currentUser().password(),
 							 this);
 
-	r.run(selectedFiles, albumPath, true);
+	r.run(files, albumPath, true);
 
 	return;
 }

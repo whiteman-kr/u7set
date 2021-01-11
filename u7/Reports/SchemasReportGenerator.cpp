@@ -22,7 +22,7 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 
 }
 
-void SchemasReportGeneratorThread::run(const std::vector<std::shared_ptr<DbFileInfo>>& files, const QString& filePath, bool singleFile)
+void SchemasReportGeneratorThread::run(const std::vector<DbFileInfo>& files, const QString& filePath, bool singleFile)
 {
 	// Create View
 
@@ -64,11 +64,18 @@ void SchemasReportGeneratorThread::run(const std::vector<std::shared_ptr<DbFileI
 
 	//  Schedule objects deleting
 
-	QObject::connect(worker, &SchemasReportGenerator::finished, [thread, dialogProgress, worker, schemaView]()
+	QObject::connect(worker, &SchemasReportGenerator::finished, [thread, dialogProgress, worker, schemaView](const QString& errorMessage)
 	{
 		thread->quit();
 
-		dialogProgress->deleteLater();
+		if (errorMessage.isEmpty() == false)
+		{
+			dialogProgress->setErrorMessage(errorMessage);
+		}
+		else
+		{
+			dialogProgress->deleteLater();
+		}
 
 		worker->deleteLater();
 
@@ -96,7 +103,7 @@ SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
 										 const QString& projectName,
 										 const QString& userName,
 										 const QString& userPassword,
-										 std::vector<std::shared_ptr<DbFileInfo>> files,
+										 std::vector<DbFileInfo> files,
 										 const QString& filePath,
 										 bool singleFile):
 	ReportGenerator(schemaView),
@@ -108,15 +115,12 @@ SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
 	m_userName(userName),
 	m_userPassword(userPassword),
 	m_filePath(filePath),
-	m_singleFile(singleFile)
+	m_singleFile(singleFile),
+	m_files(files)
 {
-	for (std::shared_ptr<DbFileInfo> file : files)
-	{
-		m_files.push_back(*file);
-	}
-
 	return;
 }
+
 
 SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
 										 std::vector<std::shared_ptr<VFrame30::Schema>> schemas,
@@ -134,6 +138,7 @@ SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
 	return;
 }
 
+
 SchemasReportGenerator::~SchemasReportGenerator()
 {
 	qDebug() << "SchemasReportWorker deleted";
@@ -141,9 +146,17 @@ SchemasReportGenerator::~SchemasReportGenerator()
 
 void SchemasReportGenerator::process()
 {
-	createSchemasReport();
+	try
+	{
+		createSchemasReport();
 
-	emit finished();
+		emit finished(QString());
+	}
+
+	catch (QString errorMessage)
+	{
+		emit finished(errorMessage);
+	}
 
 	return;
 }
@@ -256,10 +269,7 @@ void SchemasReportGenerator::createSchemasReport()
 		bool ok = db()->openProject(m_projectName, m_userName, m_userPassword, nullptr);
 		if (ok == false)
 		{
-			int todo_error_message = 1;
-			qDebug() << "Failed to open project!";
-			Q_ASSERT(ok);
-			return;
+			throw(tr("Failed to open project!"));
 		}
 
 		// Get files from the database
@@ -273,10 +283,7 @@ void SchemasReportGenerator::createSchemasReport()
 			ok = db()->getLatestVersion(fi, &f, nullptr);
 			if (ok == false)
 			{
-				int todo_error_message = 1;
-				qDebug() << "Failed to load file " << fi.fileName();
-				Q_ASSERT(ok);
-				continue;
+				throw(tr("Failed to load file %1").arg(fi.fileName()));
 			}
 
 			{
@@ -296,15 +303,34 @@ void SchemasReportGenerator::createSchemasReport()
 			m_schemaIndex = 0;
 		}
 
+		// Calculate if selected files have different parent
+		//
+		bool differentParentId = false;
+		int firstParentId = -1;
+
+		for (std::shared_ptr<DbFile> dbFile : out)
+		{
+			if (firstParentId == -1)
+			{
+				firstParentId = dbFile->parentId();
+				continue;
+			}
+
+			if (firstParentId != dbFile->parentId())
+			{
+				differentParentId = true;
+				break;
+			}
+		}
+
+		// Load schemas from files
+		//
 		for (std::shared_ptr<DbFile> dbFile : out)
 		{
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(dbFile->data());
 			if (schema == nullptr)
 			{
-				int todo_error_message = 1;
-				qDebug() << "Failed to load schema!";
-				Q_ASSERT(false);
-				return;
+				throw(tr("Failed to load schema from '%1'!").arg(dbFile->fileName()));
 			}
 
 			{
@@ -313,7 +339,29 @@ void SchemasReportGenerator::createSchemasReport()
 				m_currentSchemaId = schema->schemaId();
 			}
 
-			m_schemas[dbFile->fileName()] = schema;
+			QString fileName = dbFile->fileName();
+
+			if (differentParentId == true)
+			{
+				// Include full file path
+				//
+				int parentId = dbFile->parentId();
+				while(true)
+				{
+					DbFileInfo parentFileInfo;
+
+					bool result = db()->getFileInfo(parentId, &parentFileInfo, nullptr);
+					if (result == false || parentFileInfo.parentId() == 0)
+					{
+						break;
+					}
+
+					fileName = parentFileInfo.fileName() + '/' + fileName;
+					parentId = parentFileInfo.parentId();
+				};
+			}
+
+			m_schemas[fileName] = schema;
 		}
 
 		db()->closeProject(nullptr);
@@ -395,9 +443,9 @@ void SchemasReportGenerator::createSchemasReport()
 			}
 			else
 			{
-				int todo_what_if_same_filenames_in_different_folders = 1;
-
 				QString fileName = it->first;
+
+				fileName.replace('/', '_');
 
 				int pos = fileName.lastIndexOf('.');
 				if (pos != -1)
@@ -450,7 +498,7 @@ void SchemasReportGenerator::createSchemasReport()
 			}
 		}
 
-		printDocument(pdfWriter, section->textDocument(), painter, nullptr, nullptr, 0);
+		printDocument(pdfWriter, section->textDocument(), painter, QString(), nullptr, nullptr, 0);
 
 		// Print Schemas
 

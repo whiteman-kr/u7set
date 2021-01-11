@@ -172,7 +172,7 @@ private:
 
 signals:
 	void progressChanged(int progress, int progressMin, int progressMax, const QStringList& status);
-	void finished();
+	void finished(const QString& errorMessage);
 
 private:
 	DbController* db();
@@ -200,10 +200,10 @@ private:
 							 ReportTable* const headerTable,
 							 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
-	std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
+	/*std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
 												  const CompareVersionType versionType,
 												  const int compareChangeset,
-												  const QDateTime& compareDate) const;
+												  const QDateTime& compareDate) const;*/
 
 	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const;
 
@@ -233,6 +233,9 @@ private:
 	void createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName);
 
 	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
+
+	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, std::shared_ptr<DbFile> file);
+	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const Signal& signal);
 
 	QString changesetString(const std::shared_ptr<DbFile>& file);
 	QString changesetString(const Signal& signal);

@@ -6,16 +6,15 @@ DialogProgress::DialogProgress(const QString& caption, int statusLinesCount, QWi
 	// Setup UI
 
 	setMinimumWidth(400);
-
 	setWindowTitle(caption);
-
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	m_progressBar = new QProgressBar();
 	m_progressBar->setMinimum(0);
 	m_progressBar->setMaximum(100);
 
 	QPushButton* buttonAbort = new QPushButton(tr("Abort"));
-	connect(buttonAbort, &QPushButton::clicked, this, &DialogProgress::on_cancelButton_clicked);
+	connect(buttonAbort, &QPushButton::clicked, this, &DialogProgress::onCancelClicked);
 
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
 	buttonLayout->addStretch();
@@ -41,12 +40,10 @@ DialogProgress::DialogProgress(const QString& caption, int statusLinesCount, QWi
 
 	// Start timer
 
-	QTimer* timer = new QTimer(this);
-	timer->setInterval(50);
-
-	connect(timer, &QTimer::timeout, this, &DialogProgress::onTimer);
-
-	timer->start();
+	m_timer = new QTimer(this);
+	m_timer->setInterval(100);
+	connect(m_timer, &QTimer::timeout, this, &DialogProgress::onTimer);
+	m_timer->start();
 }
 
 DialogProgress::~DialogProgress()
@@ -56,37 +53,70 @@ DialogProgress::~DialogProgress()
 
 void DialogProgress::setProgressSingle(int progress, int progressMin, int progressMax, const QString& status)
 {
-	if (m_progressMax != progressMax || m_progressMin != progressMin)
-	{
-		m_progressMax = progressMax;
-		m_progressMin = progressMin;
-		m_progressBar->setMaximum(progressMax);
-		m_progressBar->setMinimum(progressMin);
-	}
+	QMutexLocker l(&m_mutex);
 
-	m_progressBar->setValue(progress);
-
-	if (m_labelsStatus.empty() == false)
-	{
-		m_labelsStatus[0]->setText(status);
-	}
+	m_status = status.split('\n', Qt::SkipEmptyParts);
+	m_progressMax = progressMax;
+	m_progressMin = progressMin;
+	m_progressValue = progress;
 }
 
 void DialogProgress::setProgressMultiple(int progress, int progressMin, int progressMax, const QStringList& status)
 {
-	if (m_progressMax != progressMax || m_progressMin != progressMin)
+	QMutexLocker l(&m_mutex);
+
+	m_status = status;
+	m_progressMax = progressMax;
+	m_progressMin = progressMin;
+	m_progressValue = progress;
+}
+
+void DialogProgress::setErrorMessage(const QString& message)
+{
+	QMutexLocker l(&m_mutex);
+	m_errorMessage = message;
+}
+
+void DialogProgress::accept()
+{
+}
+
+void DialogProgress::reject()
+{
+}
+
+void DialogProgress::onTimer()
+{
+	// Display error message and quit
+	//
+	QMutexLocker l(&m_mutex);
+
+	if (m_errorMessage.isEmpty() == false)
 	{
-		m_progressMax = progressMax;
-		m_progressMin = progressMin;
-		m_progressBar->setMaximum(progressMax);
-		m_progressBar->setMinimum(progressMin);
+		QString errorMsg = m_errorMessage;
+
+		l.unlock();
+		m_timer->stop();
+
+		QMessageBox::critical(this, qAppName(), errorMsg);
+
+		QDialog::accept();
+		return;
 	}
 
-	m_progressBar->setValue(progress);
+	// Update progress
+	//
+	if (m_progressMax != m_progressBar->maximum() || m_progressMin != m_progressBar->minimum())
+	{
+		m_progressBar->setMaximum(m_progressMax);
+		m_progressBar->setMinimum(m_progressMin);
+	}
+
+	m_progressBar->setValue(m_progressValue);
 
 	int labelIndex = 0;
 
-	for (const QString& s : status)
+	for (const QString& s : m_status)
 	{
 		if (labelIndex >= m_labelsStatus.size())
 		{
@@ -101,22 +131,14 @@ void DialogProgress::setProgressMultiple(int progress, int progressMin, int prog
 		m_labelsStatus[labelIndex++]->setText(QString());
 	}
 
-}
+	l.unlock();
 
-void DialogProgress::accept()
-{
-}
-
-void DialogProgress::reject()
-{
-}
-
-void DialogProgress::onTimer()
-{
+	// Request progress update
+	//
 	emit getProgress();
 }
 
-void DialogProgress::on_cancelButton_clicked()
+void DialogProgress::onCancelClicked()
 {
 	emit cancelClicked();
 }

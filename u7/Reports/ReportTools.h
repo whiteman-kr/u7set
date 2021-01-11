@@ -202,7 +202,7 @@ protected:
 
 	// Rendering functions
 
-	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter, int* pageIndex, QMutex* pageIndexMutex, int pageCount);
+	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter, const QString& objectName, int* pageIndex, QMutex* pageIndexMutex, int pageCount);
 	void printSchema(QPdfWriter* pdfWriter,
 					 QTextDocument* textDocument,
 					 QPainter* painter,
@@ -223,7 +223,7 @@ protected:
 	const QTextBlockFormat& currentBlockFormat() const;
 
 private:
-	void drawMarginItems(int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter);
+	void drawMarginItems(const QString& objectName, int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter);
 
 private:
 	int m_resolution = 300;

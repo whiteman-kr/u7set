@@ -14,7 +14,7 @@ public:
 						   const QString& userPassword,
 						   QWidget* parent);
 
-	void run(const std::vector<std::shared_ptr<DbFileInfo>>& files, const QString& filePath, bool singleFile);
+	void run(const std::vector<DbFileInfo>& files, const QString& filePath, bool singleFile);
 
 private:
 	QString m_serverIp;
@@ -47,14 +47,16 @@ public:
 						const QString& projectName,
 						const QString& userName,
 						const QString& userPassword,
-						std::vector<std::shared_ptr<DbFileInfo>> files,
+						std::vector<DbFileInfo> files,
 						const QString& filePath,
 						bool singleFile);
+
 
 	SchemasReportGenerator(ReportSchemaView* schemaView,
 						std::vector<std::shared_ptr<VFrame30::Schema>> schemas,
 						std::vector<std::shared_ptr<QBuffer>>* outputBuffers,
 						bool singleFile);
+
 
 	virtual ~SchemasReportGenerator();
 
@@ -65,7 +67,7 @@ public slots:
 
 signals:
 	void progressChanged(int progress, int progressMin, int progressMax, const QString& status);
-	void finished();
+	void finished(const QString& errorMessage);
 
 public:
 	enum class WorkerStatus
@@ -95,7 +97,7 @@ private:
 
 	// Input data (files or pointer to schemas)
 	//
-	std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;
+	std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;	// Key is full path to schema file
 	std::vector<DbFileInfo> m_files;
 
 	// Output data (file path or output buffers)

@@ -466,7 +466,7 @@ void ReportGenerator::clearMarginItems()
 }
 
 void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter,
-									int* pageIndex, QMutex* pageIndexMutex, int pageCount)
+									const QString& objectName, int* pageIndex, QMutex* pageIndexMutex, int pageCount)
 {
 	if (pdfWriter == nullptr || textDocument == nullptr || painter == nullptr)
 	{
@@ -515,7 +515,7 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 			}
 		}
 
-		drawMarginItems(page, pageCount, pdfWriter, painter);
+		drawMarginItems(objectName, page, pageCount, pdfWriter, painter);
 
 		// Translate the current rectangle to the area to be printed for the next page
 		currentRect.translate(0, currentRect.height());
@@ -685,7 +685,7 @@ const QTextBlockFormat& ReportGenerator::currentBlockFormat() const
 	return m_currentBlockFormat;
 }
 
-void ReportGenerator::drawMarginItems(int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter)
+void ReportGenerator::drawMarginItems(const QString& objectName, int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter)
 {
 	if (pdfWriter == nullptr || painter == nullptr)
 	{
@@ -732,6 +732,11 @@ void ReportGenerator::drawMarginItems(int page, int totalPages, QPdfWriter* pdfW
 		if (text == "%PAGE%")
 		{
 			text = tr("Page %1 of %2").arg(page).arg(totalPages);
+		}
+
+		if (text == "%OBJECT%")
+		{
+			text = objectName;
 		}
 
 		//painter.fillRect(topRect, Qt::green);
