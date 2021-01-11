@@ -17,6 +17,18 @@ namespace Builder
 	{
 	}
 
+	bool TuningServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TuningServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TuningServiceSettings>(profile, settingsGetter);
+	}
+
 	bool TuningServiceCfgGenerator::generateConfiguration()
 	{
 		if (m_tuningDataStorage == nullptr)

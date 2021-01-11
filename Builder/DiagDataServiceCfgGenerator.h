@@ -15,6 +15,7 @@ namespace Builder
 		DiagDataServiceCfgGenerator(Context* context, Hardware::Software* software);
 		~DiagDataServiceCfgGenerator();
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
 	};
 }

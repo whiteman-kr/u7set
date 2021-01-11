@@ -34,7 +34,7 @@ namespace Builder
 
 	bool SoftwareCfgGenerator::createSettingsProfile(const QString& profile)
 	{
-		// Method should be overrided in classes derived from SoftwareCfgGenerator like this:
+		// Method should be override in classes derived from SoftwareCfgGenerator like this:
 		//
 		//	Specific_SettingsGetter settingsGetter;
 		//
@@ -58,7 +58,7 @@ namespace Builder
 		return m_settingsSet.writeToXml(xml);
 	}
 
-	bool SoftwareCfgGenerator::writeConfiguration()
+	bool SoftwareCfgGenerator::writeConfigurationXml()
 	{
 		if (m_log == nullptr ||
 			m_dbController == nullptr ||

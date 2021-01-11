@@ -76,6 +76,8 @@ bool SoftwareSettingsSet::addProfile(const QString& profile, const SoftwareSetti
 
 	std::shared_ptr<T> sharedSettings = std::make_shared<T>(*typedPtr);
 
+	sharedSettings->profile = profile;
+
 	return addSharedProfile(profile, sharedSettings);
 }
 

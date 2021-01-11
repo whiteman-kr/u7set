@@ -16,6 +16,18 @@ namespace Builder
 	{
 	}
 
+	bool MonitorCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		MonitorSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<MonitorSettings>(profile, settingsGetter);
+	}
+
 	bool MonitorCfgGenerator::generateConfiguration()
 	{
 		if (m_software == nullptr ||
@@ -42,8 +54,6 @@ namespace Builder
 		//
 		result &= saveScriptProperties("OnConfigurationArrived", "OnConfigurationArrived.js");
 
-		// write XML via m_cfgXml->xmlWriter()
-		//
 		result &= initSchemaTagsAndTuningSources();
 
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
@@ -104,7 +114,7 @@ namespace Builder
 
 		m_tuningSources = settings->getTuningSources();
 
-		return getSettingsXml(m_cfgXml->xmlWriter());
+		return true;
 	}
 
 	bool MonitorCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)

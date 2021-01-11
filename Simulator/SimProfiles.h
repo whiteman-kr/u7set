@@ -18,7 +18,7 @@ namespace Sim
 
 	private:
 		std::shared_ptr<PropertyObject> m_savedObject;	// This property is saved in applyToObject
-		std::map<QString, QVariant> m_savedPropertirs;	// Key - property caption, Value - value to override
+		std::map<QString, QVariant> m_savedProperties;	// Key - property caption, Value - value to override
 	};
 
 	//
@@ -54,6 +54,8 @@ namespace Sim
 		bool parse(const QString& string, QString* errorMessage);
 
 		[[nodiscard]] QStringList profiles() const;
+
+		[[nodiscard]] bool isEmpty() const;
 
 		[[nodiscard]] const Profile& profile(const QString& profileId) const;
 		[[nodiscard]] Profile& profile(const QString& profileId);

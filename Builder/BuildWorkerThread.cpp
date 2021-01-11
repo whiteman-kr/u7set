@@ -1452,6 +1452,10 @@ namespace Builder
 		LOG_MESSAGE(context->m_log, QString(tr("MATS configuration generation...")))
 		LOG_EMPTY_LINE(context->m_log);
 
+		result = checkProfiles();
+
+		RETURN_IF_FALSE(result);
+
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(context);
 
 		RETURN_IF_FALSE(result);
@@ -1529,7 +1533,52 @@ namespace Builder
 			}
 		}
 
-	/*	QByteArray softwareXmlData;
+		QStringList profileIDs = context->m_simProfiles.profiles();
+
+		for(const QString& profileID : profileIDs)
+		{
+			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
+
+			QStringList profileEquipmentIDs = profile.equipment();
+
+			for(const QString& profileEquipmentID : profileEquipmentIDs)
+			{
+				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObjectSharedPointer(profileEquipmentID);
+
+				if (deviceObject == nullptr)
+				{
+					Q_ASSERT(false);	// this error should be detected early in checkProfiles()
+					result = false;
+					break;
+				}
+
+				QString errMsg;
+
+				bool res = profile.applyToObject(profileEquipmentID, deviceObject, &errMsg);
+
+				if (res == false)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, errMsg);
+					result = false;
+					break;
+				}
+			}
+
+			BREAK_IF_FALSE(result);
+
+			for(auto p : swCfgGens)
+			{
+				result &= p.second->createSettingsProfile(profileID);
+			}
+
+			BREAK_IF_FALSE(result);
+
+			profile.restoreObjects();
+		}
+
+		RETURN_IF_FALSE(result);
+
+		QByteArray softwareXmlData;
 		QXmlStreamWriter softwareXml(&softwareXmlData);
 
 		softwareXml.setAutoFormatting(true);
@@ -1538,17 +1587,24 @@ namespace Builder
 
 		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
 
-		softwareCfgGenerator->writeSoftwareSection(softwareXml, false);	// <Software>
+		for(auto p : swCfgGens)
+		{
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
-		result &= softwareCfgGenerator->getSettingsXml(softwareXml);
+			result &= swCfgGen->writeConfigurationXml();		// software Configuration.xml writing
 
-		softwareXml.writeEndElement();	// </Software>
+			// Software.xml writing
 
+			swCfgGen->writeSoftwareSection(softwareXml, false);	// <Software>
 
+			result &= swCfgGen->getSettingsXml(softwareXml);
+
+			softwareXml.writeEndElement();	// </Software>
+		}
 
 		softwareXml.writeEndElement();		// </SoftwareItems>
 
-		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);*/
+		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
 
 		context->m_buildResultWriter->writeConfigurationXmlFiles();
 
@@ -1564,6 +1620,68 @@ namespace Builder
 		}
 
 		SoftwareCfgGenerator::clearStaticData();
+
+		return result;
+	}
+
+	bool BuildWorkerThread::checkProfiles()
+	{
+		Context* context = m_context.get();
+
+		if (context->m_simProfiles.isEmpty() == true)
+		{
+			return true;
+		}
+
+		LOG_MESSAGE(m_log, QString("Settings profiles checking..."));
+
+		bool result = true;
+
+		QStringList profileIDs = context->m_simProfiles.profiles();
+
+		for(const QString& profileID : profileIDs)
+		{
+			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
+
+			QStringList profileEquipmentIDs = profile.equipment();
+
+			for(const QString& profileEquipmentID : profileEquipmentIDs)
+			{
+				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObjectSharedPointer(profileEquipmentID);
+
+				if (deviceObject == nullptr)
+				{
+					// Equipment object %1 is not found (Settings profile - %2).
+					//
+					m_log->errCFG3044(profileEquipmentID,profileID);
+					result = false;
+					continue;
+				}
+
+				const Sim::ProfileProperties& pp = profile.properties(profileEquipmentID);
+
+				for(auto p : pp.properties)
+				{
+					QString propertyName = p.first;
+
+					if (deviceObject->propertyExists(propertyName) == false)
+					{
+						// Property %1.%2 is not found (Settings profile - %3).
+						//
+						m_log->errCFG3045(profileEquipmentID, propertyName, profileID);
+						result = false;
+						continue;
+					}
+				}
+			}
+		}
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString("Ok"));
+		}
+
+		LOG_EMPTY_LINE(m_log);
 
 		return result;
 	}

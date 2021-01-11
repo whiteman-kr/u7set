@@ -13,6 +13,18 @@ namespace Builder
 	{
 	}
 
+	bool ConfigurationServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		CfgServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<CfgServiceSettingsGetter>(profile, settingsGetter);
+	}
+
 	bool ConfigurationServiceCfgGenerator::generateConfiguration()
 	{
 		bool result = false;

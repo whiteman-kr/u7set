@@ -8,7 +8,7 @@ namespace Sim
 	bool ProfileProperties::applyToObject(std::shared_ptr<PropertyObject> object, QString* errorMessage)
 	{
 		m_savedObject = object;
-		m_savedPropertirs.clear();
+		m_savedProperties.clear();
 
 		if (object == nullptr || errorMessage == nullptr)
 		{
@@ -43,7 +43,7 @@ namespace Sim
 					continue;
 				}
 
-				m_savedPropertirs[propertyCaption] = propValue;		// Save old value property
+				m_savedProperties[propertyCaption] = propValue;		// Save old value property
 				p->setValue(value);
 			}
 		}
@@ -61,7 +61,7 @@ namespace Sim
 
 		bool ok = true;
 
-		for (const auto&[propertyCaption, value] : m_savedPropertirs)
+		for (const auto&[propertyCaption, value] : m_savedProperties)
 		{
 			auto p = m_savedObject->propertyByCaption(propertyCaption);
 			if (p == nullptr)
@@ -76,7 +76,7 @@ namespace Sim
 		}
 
 		m_savedObject = nullptr;
-		m_savedPropertirs.clear();
+		m_savedProperties.clear();
 
 		return ok;
 	}
@@ -335,6 +335,11 @@ namespace Sim
 		}
 
 		return result;
+	}
+
+	bool Profiles::isEmpty() const
+	{
+		return m_profiles.size() == 0;
 	}
 
 	const Profile& Profiles::profile(const QString& profileId) const

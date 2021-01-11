@@ -1160,7 +1160,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* context,
 															const Hardware::Software* software)
 	{
-		tuningSources.clear();
+		std::vector<Tuning::TuningSource> tuningSources;
+
 		sources.clear();
 
 		Builder::IssueLogger* log = context->m_log;
@@ -1240,7 +1241,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 					result = false;
 				}
 
-				tuningSources.append(ts);
+				tuningSources.push_back(ts);
 			}
 		}
 

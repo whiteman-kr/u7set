@@ -14,6 +14,18 @@ namespace Builder
 		assert(context);
 	}
 
+	bool TuningClientCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TuningClientSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TuningClientSettings>(profile, settingsGetter);
+	}
+
 	bool TuningClientCfgGenerator::generateConfiguration()
 	{
 		if (m_software == nullptr ||

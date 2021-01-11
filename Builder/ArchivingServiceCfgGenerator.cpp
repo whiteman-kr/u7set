@@ -13,6 +13,18 @@ namespace Builder
 	{
 	}
 
+	bool ArchivingServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		ArchivingServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<ArchivingServiceSettingsGetter>(profile, settingsGetter);
+	}
+
 	bool ArchivingServiceCfgGenerator::generateConfiguration()
 	{
 		bool result = false;

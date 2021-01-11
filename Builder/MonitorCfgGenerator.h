@@ -13,6 +13,7 @@ namespace Builder
 		MonitorCfgGenerator(Context* context, Hardware::Software* software);
 		~MonitorCfgGenerator();
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
 
 	protected:

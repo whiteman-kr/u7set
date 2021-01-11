@@ -13,6 +13,7 @@ namespace Builder
 
 		~ConfigurationServiceCfgGenerator();
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
 
 	private:

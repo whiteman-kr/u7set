@@ -97,6 +97,8 @@ namespace Builder
 		//
 		bool generateSoftwareConfiguration();
 
+		bool checkProfiles();
+
 		bool writeFirmwareStatistics(BuildResultWriter& buildResultWriter);
 
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
