@@ -865,9 +865,23 @@ bool Calibrator::setValue(double value)
 	switch(m_type)
 	{
 		case CALIBRATOR_TYPE_TRXII:
-		case CALIBRATOR_TYPE_CALYS75:
 			{
 				cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion));
+			}
+			break;
+
+		case CALIBRATOR_TYPE_CALYS75:
+			{
+				switch (m_sourceUnit)
+				{
+					case CALIBRATOR_UNIT_HZ:
+						cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value/1000, 'f', 4));
+						break;
+
+					default:
+						cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion));
+						break;
+				}
 			}
 			break;
 
@@ -1001,6 +1015,7 @@ bool Calibrator::stepDown()
 
 			switch(m_sourceUnit)
 			{
+				case CALIBRATOR_UNIT_HZ:		m_sourceValue -= 1;		break;
 				case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue -= 0.01;	break;
 				case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue -= 0.1;	break;
 				default:						m_sourceValue -= 0.001;	break;
@@ -1104,6 +1119,7 @@ bool Calibrator::stepUp()
 
 			switch(m_sourceUnit)
 			{
+				case CALIBRATOR_UNIT_HZ:		m_sourceValue += 1;		break;
 				case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue += 0.01;	break;
 				case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue += 0.1;	break;
 				default:						m_sourceValue += 0.001;	break;
@@ -1433,6 +1449,11 @@ void Calibrator::parseResponse()
 			value.remove(endPos, value.count());
 
 			m_sourceValue = value.toDouble();
+
+			switch (m_sourceUnit)
+			{
+				case CALIBRATOR_UNIT_HZ:	m_sourceValue *= 1000; break;
+			}
 
 			break;
 
