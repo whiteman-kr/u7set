@@ -75,6 +75,10 @@ struct SignalElectricLimit
 
 	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,	},						// module TIM
 	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,	},						// module TIM
+
+	// Hz
+	//
+	{   50,		50000,	E::ElectricUnit::Hz,	E::SensorType::Hz_50_50000,		},						// module FIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
@@ -169,8 +173,10 @@ enum class UnitsConvertModule
 	NonPlatform = 0,
 	AIM = 1,
 	WAIM = 2,
-	TIM = 3,
-	RIM = 4,
+	MAIM = 3,
+	TIM = 4,
+	RIM = 5,
+	FIM = 6,
 };
 
 Q_DECLARE_METATYPE(UnitsConvertModule)

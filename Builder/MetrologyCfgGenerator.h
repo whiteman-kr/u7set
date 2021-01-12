@@ -32,6 +32,7 @@ namespace Builder
 		bool testElectricLimit_Input_Ohm(const Signal& signal);
 		bool testElectricLimit_Input_V(const Signal& signal);
 		bool testElectricLimit_Input_uA(const Signal& signal);
+		bool testElectricLimit_Input_Hz(const Signal& signal);
 
 	private:
 		MetrologySettingsGetter m_settings;
