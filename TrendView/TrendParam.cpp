@@ -194,9 +194,9 @@ namespace TrendLib
 			m_duration = 500_ms;
 		}
 
-		if (m_duration > 24_hours)
+		if (m_duration > 24_hours * 7)
 		{
-			m_duration = 24_hours;
+			m_duration = 24_hours * 7;
 		}
 	}
 
