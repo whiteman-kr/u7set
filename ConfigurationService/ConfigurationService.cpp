@@ -13,7 +13,7 @@
 const char* const ConfigurationServiceWorker::SETTING_AUTOLOAD_BUILD_PATH = "AutoloadBuildPath";
 const char* const ConfigurationServiceWorker::SETTING_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDirectory";
-
+const char* const ConfigurationServiceWorker::SETTING_CURRENT_PROFILE = "CurrentSoftwareSettingsProfile";
 
 ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
 													   const QString& serviceName,
@@ -67,6 +67,7 @@ void ConfigurationServiceWorker::initCmdLineParser()
 	cp.addSingleValueOption("b", SETTING_AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
 	cp.addSingleValueOption("ip", SETTING_CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
 	cp.addSingleValueOption("w", SETTING_WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
+	cp.addSingleValueOption("profile", SETTING_CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
 }
 
 void ConfigurationServiceWorker::loadSettings()
@@ -74,12 +75,14 @@ void ConfigurationServiceWorker::loadSettings()
 	m_autoloadBuildPath = getStrSetting(SETTING_AUTOLOAD_BUILD_PATH);
 	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
 	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
+	m_currentSettingsProfile = getStrSetting(SETTING_CURRENT_PROFILE);
 
 	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CURRENT_PROFILE).arg(m_currentSettingsProfile));
 }
 
 bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath)
@@ -139,6 +142,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  m_autoloadBuildPath,
 															  m_workDirectory,
 															  buildPath,
+															  m_currentSettingsProfile,
 															  m_cfgServiceSettings.knownClients(),
 															  *m_cfgCheckerWorker,
 															  m_logger);

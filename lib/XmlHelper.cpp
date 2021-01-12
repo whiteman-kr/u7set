@@ -1,5 +1,5 @@
 #include "XmlHelper.h"
-#include "ConstStrings.h".h"
+#include "ConstStrings.h"
 #include "WUtils.h"
 
 // -------------------------------------------------------------------------------------

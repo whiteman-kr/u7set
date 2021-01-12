@@ -29,15 +29,35 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
+CfgServer::CfgServer(const SoftwareInfo& softwareInfo,
+					 const QString& buildFolder,
+					 const QString& currentSettingsProfile,
+					 std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileServer(buildFolder, softwareInfo, logger),
+	m_currentSettingsProfile(currentSettingsProfile),
 	m_logger(logger)
 {
 }
 
 CfgServer* CfgServer::getNewInstance()
 {
-	return new CfgServer(localSoftwareInfo(), m_rootFolder, m_logger);
+	return new CfgServer(localSoftwareInfo(), m_rootFolder, m_currentSettingsProfile, m_logger);
+}
+
+void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
+{
+	Q_UNUSED(requestData);
+	Q_UNUSED(requestDataSize);
+
+	switch(requestID)
+	{
+	case RQID_GET_SESSION_PARAMS:
+		processGetSessionParamsRequest();
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
 }
 
 void CfgServer::onServerThreadStarted()
@@ -140,6 +160,15 @@ bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
 	}
 
 	return true;
+}
+
+void CfgServer::processGetSessionParamsRequest()
+{
+	Network::GetSessionParams gsp;
+
+	gsp.set_currentsettingsprofile(m_currentSettingsProfile.toStdString());
+
+	sendReply(gsp);
 }
 
 // -------------------------------------------------------------------------------------
@@ -292,7 +321,7 @@ bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 	return true;
 }
 
-bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr)
+bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString* errorStr)
 {
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
@@ -485,6 +514,42 @@ void CfgLoader::slot_onTimer()
 
 		m_autoDownloadIndex++;
 	}
+}
+
+void CfgLoader::processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+{
+	switch(requestID)
+	{
+	case RQID_GET_SESSION_PARAMS:
+		processGetSessionParamsReply(replyData, replyDataSize);
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+}
+
+void CfgLoader::processGetSessionParamsReply(const char* replyData, quint32 replyDataSize)
+{
+	Network::GetSessionParams gsp;
+
+	bool res = gsp.ParseFromArray(replyData, replyDataSize);
+
+	if (res == false)
+	{
+		Q_ASSERT(false);
+		sendGetSessionParamsRequest();
+		return;
+	}
+
+	m_currentSettingsProfile = QString::fromStdString(gsp.currentsettingsprofile());
+
+	startConfigurationXmlLoading();
+}
+
+void CfgLoader::sendGetSessionParamsRequest()
+{
+	sendRequest(RQID_GET_SESSION_PARAMS);
 }
 
 void CfgLoader::shutdown()
@@ -988,7 +1053,7 @@ bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* file
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
 
-	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);;
+	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
 }
 
 bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
@@ -997,7 +1062,7 @@ bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
 
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getFileByID(fileID, fileData);;
+	return m_cfgLoader->getFileByID(fileID, fileData);
 }
 
 bool CfgLoaderThread::hasFileID(QString fileID) const

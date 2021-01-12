@@ -48,6 +48,9 @@ namespace Builder
 		//
 
 		Q_ASSERT(false);
+
+		Q_UNUSED(profile);
+
 		return true;
 	}
 

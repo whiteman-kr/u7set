@@ -261,7 +261,7 @@ namespace CfgFileId
 
 namespace  SettingsProfile
 {
-	inline const QString DEFAULT("");
+	inline const QString DEFAULT("Default");
 }
 
 namespace Directory

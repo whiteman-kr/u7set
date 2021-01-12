@@ -42,9 +42,14 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 	Q_OBJECT
 
 public:
-	CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger);
+	CfgServer(const SoftwareInfo& softwareInfo,
+			  const QString& buildFolder,
+			  const QString& currentSettingsProfile,
+			  std::shared_ptr<CircularLogger> logger);
 
 	virtual CfgServer* getNewInstance() override;
+
+	virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
@@ -54,13 +59,19 @@ public:
 
 	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
 
+	QString currentSettingsProfile() const { return m_currentSettingsProfile; }
+
+
 private:
 	void readBuildXml();
 
 	bool checkFile(QString& pathFileName, QByteArray& fileData) override;
 
+	void processGetSessionParamsRequest();
+
 private:
 	std::shared_ptr<CircularLogger> m_logger;
+	QString m_currentSettingsProfile;
 
 	QString m_buildXmlPathFileName;
 
@@ -93,10 +104,10 @@ public:
 
 	void changeApp(const QString& appEquipmentID, int appInstance);
 
-	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFile(QString pathFileName, QByteArray* fileData);
 
-	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString* errorStr);
 	bool getFileByID(QString fileID, QByteArray* fileData);
 
 	bool hasFileID(QString fileID) const;
@@ -108,6 +119,7 @@ public:
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
+	QString currentSettingsProfile() const { return m_currentSettingsProfile; }
 	std::shared_ptr<CircularLogger> logger() { return m_logger; }
 
 	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
@@ -133,6 +145,11 @@ private slots:
 	void slot_enableDownloadConfiguration();
 	void slot_getFile(QString fileName, QByteArray *fileData);
 	void slot_onTimer();
+
+protected:
+	virtual void processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+	void processGetSessionParamsReply(const char* replyData, quint32 replyDataSize);
+	void sendGetSessionParamsRequest();
 
 private:
 	void shutdown();
@@ -188,6 +205,8 @@ private:
 
 	int m_appInstance = 0;
 	volatile bool m_enableDownloadConfiguration = false;
+
+	QString m_currentSettingsProfile;
 
 	//
 
@@ -259,10 +278,10 @@ public:
 
 	void enableDownloadConfiguration();
 
-	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
-	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
 	bool getFileByID(const QString& fileID, QByteArray* fileData);
 
 	bool hasFileID(QString fileID) const;
