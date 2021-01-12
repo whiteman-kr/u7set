@@ -247,11 +247,12 @@ namespace TrendLib
 
 		// Calc time grid
 		//
-		static const std::array<qint64, 30> possibleTimeGridIntervals = {5_ms, 10_ms, 20_ms, 25_ms, 50_ms,
+		static const std::array<qint64, 31> possibleTimeGridIntervals = {5_ms, 10_ms, 20_ms, 25_ms, 50_ms,
 																		 100_ms, 200_ms, 250_ms, 500_ms,
 																		 1_sec, 2_sec, 5_sec, 10_sec, 15_sec, 20_sec, 30_sec,
 																		 1_min, 90_sec, 2_min, 5_min, 10_min, 15_min, 20_min, 30_min,
-																		 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours};
+																		 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours,
+																		 24_hours * 7};
 
 		QRectF boundRect;
 		QString estimatedString = (drawParam.duration() < 10_sec) ? "HH:MM:SS.XXX" : "HH:MM:SS";
