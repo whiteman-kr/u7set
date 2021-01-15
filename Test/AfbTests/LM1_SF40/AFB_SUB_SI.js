@@ -81,8 +81,17 @@ function test_AFB_SUB_SI(sim)
 
     return;
 }
+function test_AFB_SUB_SI_2(sim)
 
-
+{
+    sim.overrideSignalValue("#TUN_IN_SI1", 2147483647);
+    sim.overrideSignalValue("#TUN_IN_SI2", -2147483647);
+	sim.startForMs(5);
+    assert(sim.signalValue("#OUT_SUB_SI001") === -2147483648);
+    ssert(sim.signalValue("#OVERFLOW_SUB_SI001") === 1);
+    assert(sim.signalValue("#OUT_ZERO_SUB_SI001") === 1);
+    return;    
+}
 
 	
 	
