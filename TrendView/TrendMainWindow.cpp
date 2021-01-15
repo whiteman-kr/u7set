@@ -255,6 +255,7 @@ namespace TrendLib
 		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
+		m_timeCombo->addItem(tr("1 week"), QVariant::fromValue(24_hours * 7));
 
 		int currentDuartionIndex = 8;
 

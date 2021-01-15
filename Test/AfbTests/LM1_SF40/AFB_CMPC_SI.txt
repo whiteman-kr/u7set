@@ -21,7 +21,7 @@ check #OUT_CMPC_SI_EQ001 == 1
 set #TUN_IN_SI1 = 50
 check #OUT_CMPC_SI_EQ001 == 1
 set #TUN_IN_SI1 = 51
-check #OUT_CMPC_SI_EQ001 == 0
+check #OUT_CMPC_SI_EQ001 == 
 set #TUN_IN_SI1 = 100
 check #OUT_CMPC_SI_EQ001 == 0
 set #TUN_IN_SI1 = 50
@@ -67,7 +67,7 @@ endtest
 test AFB_CMPС_SI_EQ_-24, AFB tests for CMPС_SI_EQ element
 schema AFB_CMPС_SI
 compatible MODULE_LM1SF40
-//const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int SETPOINT = -24   // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
 set #TUN_IN_SI3 = -78
@@ -102,8 +102,8 @@ endtest
 test AFB_CMPС_SI_GR_0, AFB tests for CMPС_SI_GR element
 schema AFB_CMPС_SI
 compatible MODULE_LM1SF40
-const int SETPOINT = 0
-const int HYSTERESIS = 21
+//const int SETPOINT = 0
+//const int HYSTERESIS = 21
 set #TUN_IN_SI1 = 100
 check #OUT_CMPC_SI_GR001 == 1
 set #TUN_IN_SI1 = 75

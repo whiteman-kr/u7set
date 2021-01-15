@@ -347,6 +347,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		case E::ElectricUnit::uA:	calibratorUnit = CALIBRATOR_UNIT_UA;	break;
 		case E::ElectricUnit::mV:	calibratorUnit = CALIBRATOR_UNIT_MV;	break;
 		case E::ElectricUnit::V:	calibratorUnit = CALIBRATOR_UNIT_V;		break;
+		case E::ElectricUnit::Hz:	calibratorUnit = CALIBRATOR_UNIT_HZ;	break;
 		case E::ElectricUnit::Ohm:
 			{
 				// Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm

@@ -193,6 +193,11 @@ namespace VFrame30
 		if (fill() == true)
 		{
 			p->setBrush(*m_fillBrush);
+
+			if (drawRect() == false)
+			{
+				p->fillRect(r, *m_fillBrush);
+			}
 		}
 		else
 		{

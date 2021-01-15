@@ -2257,4 +2257,6 @@ void SignalSet::replaceOrAppendIfNotExists(int signalID, const Signal& s)
 	{
 		append(signalID, new Signal(s));
 	}
+
+	m_strID2IndexMap.insert(s.appSignalID(), keyIndex(signalID));
 }

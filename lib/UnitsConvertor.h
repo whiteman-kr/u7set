@@ -75,6 +75,10 @@ struct SignalElectricLimit
 
 	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,	},						// module TIM
 	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,	},						// module TIM
+
+	// Hz
+	//
+	{   50,		50000,	E::ElectricUnit::Hz,	E::SensorType::Hz_50_50000,		},						// module FIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
@@ -169,8 +173,10 @@ enum class UnitsConvertModule
 	NonPlatform = 0,
 	AIM = 1,
 	WAIM = 2,
-	TIM = 3,
-	RIM = 4,
+	MAIM = 3,
+	TIM = 4,
+	RIM = 5,
+	FIM = 6,
 };
 
 Q_DECLARE_METATYPE(UnitsConvertModule)
@@ -214,10 +220,10 @@ public:
 
 	UnitsConvertModule getModuleType(int unitID, int sensorType);																												// take module type by unit and sensorType
 
-	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// get physical value for blocks of input signals			- module AIM, WAIM (V - AIM and WAIM, mA - only AIM with Rload)
-	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// get physical value for blocks of output signals			- module AOM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// get physical value for blocks of input signals			- module AIM, WAIM, MAIM, FIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// get physical value for blocks of thermocouple signals	- module TIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// get physical value for blocks of thermoresistor signals	- module RIM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// get physical value for blocks of output signals			- module AOM
 };
 
 // ==============================================================================================

@@ -228,6 +228,7 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 				case E::ElectricUnit::uA:
+				case E::ElectricUnit::Hz:
 
 					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 					{
@@ -338,6 +339,7 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 				case E::ElectricUnit::uA:
+				case E::ElectricUnit::Hz:
 
 					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 					{
@@ -674,21 +676,32 @@ UnitsConvertModule UnitsConvertor::getModuleType(int unitID, int sensorType)
 
 	switch (unitID)
 	{
-		case E::ElectricUnit::V:
-
-			switch (sensorType)
-			{
-				case E::SensorType::V_0_5:			moduleType = UnitsConvertModule::AIM;	break;
-				case E::SensorType::V_m10_p10:		moduleType = UnitsConvertModule::WAIM;	break;
-			}
-
-			break;
 
 		case E::ElectricUnit::mA:
 
 			switch (sensorType)
 			{
 				case E::SensorType::V_0_5:			moduleType = UnitsConvertModule::AIM;	break;
+			}
+
+			break;
+
+
+		case E::ElectricUnit::mV:
+
+			switch (sensorType)
+			{
+				case E::SensorType::mV_Type_B:
+				case E::SensorType::mV_Type_E:
+				case E::SensorType::mV_Type_J:
+				case E::SensorType::mV_Type_K:
+				case E::SensorType::mV_Type_N:
+				case E::SensorType::mV_Type_R:
+				case E::SensorType::mV_Type_S:
+				case E::SensorType::mV_Type_T:
+
+				case E::SensorType::mV_Raw_Mul_8:
+				case E::SensorType::mV_Raw_Mul_32:	moduleType = UnitsConvertModule::TIM;	break;
 			}
 
 			break;
@@ -708,21 +721,31 @@ UnitsConvertModule UnitsConvertor::getModuleType(int unitID, int sensorType)
 
 			break;
 
-		case E::ElectricUnit::mV:
+		case E::ElectricUnit::V:
 
 			switch (sensorType)
 			{
-				case E::SensorType::mV_Type_B:
-				case E::SensorType::mV_Type_E:
-				case E::SensorType::mV_Type_J:
-				case E::SensorType::mV_Type_K:
-				case E::SensorType::mV_Type_N:
-				case E::SensorType::mV_Type_R:
-				case E::SensorType::mV_Type_S:
-				case E::SensorType::mV_Type_T:
+				case E::SensorType::V_0_5:			moduleType = UnitsConvertModule::AIM;	break;
+				case E::SensorType::V_m10_p10:		moduleType = UnitsConvertModule::WAIM;	break;
+			}
 
-				case E::SensorType::mV_Raw_Mul_8:
-				case E::SensorType::mV_Raw_Mul_32:	moduleType = UnitsConvertModule::TIM;	break;
+			break;
+
+
+		case E::ElectricUnit::uA:
+
+			switch (sensorType)
+			{
+				case E::SensorType::uA_m20_p20:		moduleType = UnitsConvertModule::MAIM;	break;
+			}
+
+			break;
+
+		case E::ElectricUnit::Hz:
+
+			switch (sensorType)
+			{
+				case E::SensorType::Hz_50_50000:	moduleType = UnitsConvertModule::FIM;	break;
 			}
 
 			break;
@@ -776,74 +799,46 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 
 				return result;
 			}
-
 			break;
 
 		case E::ElectricUnit::uA:
-
-			if (sensorType != E::SensorType::uA_m20_p20)
 			{
-				return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for uA"));
+				if (sensorType != E::SensorType::uA_m20_p20)
+				{
+					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for uA"));
+				}
+
+				UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
+
+				if (result.ok() == true)
+				{
+					return UnitsConvertResult(elVal);
+				}
+
+				return result;
 			}
+			break;
 
-			UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
-
-			if (result.ok() == true)
+		case E::ElectricUnit::Hz:
 			{
-				return UnitsConvertResult(elVal);
+				if (sensorType != E::SensorType::Hz_50_50000)
+				{
+					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Hz"));
+				}
+
+				UnitsConvertResult result = electricLimitIsValid(elVal, electricLowLimit, electricHighLimit, unitID, sensorType);
+
+				if (result.ok() == true)
+				{
+					return UnitsConvertResult(elVal);
+				}
+
+				return result;
 			}
-
-			return result;
-
 			break;
 	}
 
 	return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown unitID"));
-}
-
-UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode)
-{
-	if (elVal < electricLowLimit || elVal > electricHighLimit)
-	{
-		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Function argument is out of range"));
-	}
-
-	double minElectricLowLimit = 0;
-	double maxElectricHighLimit = 0;
-	int waitUnitID = E::ElectricUnit::NoUnit;
-
-	switch(outputMode)
-	{
-		case E::OutputMode::Plus0_Plus5_V:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	waitUnitID = E::ElectricUnit::V;	break;
-		case E::OutputMode::Plus4_Plus20_mA:	minElectricLowLimit = 4;		maxElectricHighLimit = 20;	waitUnitID = E::ElectricUnit::mA;	break;
-		case E::OutputMode::Minus10_Plus10_V:	minElectricLowLimit = -10;		maxElectricHighLimit = 10;	waitUnitID = E::ElectricUnit::V;	break;
-		case E::OutputMode::Plus0_Plus5_mA:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	waitUnitID = E::ElectricUnit::mA;	break;
-		case E::OutputMode::Plus0_Plus20_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 20;	waitUnitID = E::ElectricUnit::mA;	break;
-		case E::OutputMode::Plus0_Plus24_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 24;	waitUnitID = E::ElectricUnit::mA;	break;
-
-		default:
-			assert(false);
-			return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown OutputMode"));
-	}
-
-	if (electricLowLimit < minElectricLowLimit || electricLowLimit > maxElectricHighLimit)
-	{
-		return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, minElectricLowLimit, maxElectricHighLimit);
-	}
-
-	if (electricHighLimit < minElectricLowLimit || electricHighLimit > maxElectricHighLimit)
-	{
-		return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, minElectricLowLimit, maxElectricHighLimit);
-	}
-
-	if (waitUnitID != unitID)
-	{
-		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect electric unit: \"%1\" for mode: \"%2\"").arg(QMetaEnum::fromType<E::ElectricUnit>().key(unitID)).arg(QMetaEnum::fromType<E::OutputMode>().key(outputMode)));
-	}
-
-	double phVal = (elVal - electricLowLimit) * (OUT_PH_HIGH_LIMIT - OUT_PH_LOW_LIMIT) / (electricHighLimit - electricLowLimit) + OUT_PH_LOW_LIMIT;
-
-	return UnitsConvertResult(phVal);
 }
 
 UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType)
@@ -902,6 +897,51 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 	{
 		return result;
 	}
+
+	return UnitsConvertResult(phVal);
+}
+
+UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode)
+{
+	if (elVal < electricLowLimit || elVal > electricHighLimit)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Function argument is out of range"));
+	}
+
+	double minElectricLowLimit = 0;
+	double maxElectricHighLimit = 0;
+	int waitUnitID = E::ElectricUnit::NoUnit;
+
+	switch(outputMode)
+	{
+		case E::OutputMode::Plus0_Plus5_V:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	waitUnitID = E::ElectricUnit::V;	break;
+		case E::OutputMode::Plus4_Plus20_mA:	minElectricLowLimit = 4;		maxElectricHighLimit = 20;	waitUnitID = E::ElectricUnit::mA;	break;
+		case E::OutputMode::Minus10_Plus10_V:	minElectricLowLimit = -10;		maxElectricHighLimit = 10;	waitUnitID = E::ElectricUnit::V;	break;
+		case E::OutputMode::Plus0_Plus5_mA:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	waitUnitID = E::ElectricUnit::mA;	break;
+		case E::OutputMode::Plus0_Plus20_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 20;	waitUnitID = E::ElectricUnit::mA;	break;
+		case E::OutputMode::Plus0_Plus24_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 24;	waitUnitID = E::ElectricUnit::mA;	break;
+
+		default:
+			assert(false);
+			return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown OutputMode"));
+	}
+
+	if (electricLowLimit < minElectricLowLimit || electricLowLimit > maxElectricHighLimit)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, minElectricLowLimit, maxElectricHighLimit);
+	}
+
+	if (electricHighLimit < minElectricLowLimit || electricHighLimit > maxElectricHighLimit)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, minElectricLowLimit, maxElectricHighLimit);
+	}
+
+	if (waitUnitID != unitID)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect electric unit: \"%1\" for mode: \"%2\"").arg(QMetaEnum::fromType<E::ElectricUnit>().key(unitID)).arg(QMetaEnum::fromType<E::OutputMode>().key(outputMode)));
+	}
+
+	double phVal = (elVal - electricLowLimit) * (OUT_PH_HIGH_LIMIT - OUT_PH_LOW_LIMIT) / (electricHighLimit - electricLowLimit) + OUT_PH_LOW_LIMIT;
 
 	return UnitsConvertResult(phVal);
 }

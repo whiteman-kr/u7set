@@ -473,6 +473,7 @@ namespace Hardware
 			WAIM = 0x1800,
 			TIM = 0x1900,
 			RIM = 0x1A00,
+			FIM = 0x1B00,
 			MPS = 0x5100,
 			BVK4 = 0x5300,	// obsolete, for compatibility
 			BP336 = 0x5500,	// obsolete, for compatibility
