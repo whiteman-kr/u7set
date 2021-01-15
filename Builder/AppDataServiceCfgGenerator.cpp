@@ -56,7 +56,7 @@ namespace Builder
 
 		QVector<DataSource> dataSources;
 
-		std::shared_ptr<const AppDataServiceSettings> settings = m_settingsSet.getDefaultProfile<AppDataServiceSettings>();
+		std::shared_ptr<const AppDataServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<AppDataServiceSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

@@ -331,7 +331,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getDefaultProfile<TuningClientSettings>();
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
@@ -544,7 +544,7 @@ namespace Builder
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
 														  const TuningSignalManager& tuningSignalManager)
 	{
-		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getDefaultProfile<TuningClientSettings>();
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

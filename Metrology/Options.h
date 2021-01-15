@@ -1074,7 +1074,9 @@ private:
 
 	SocketOption			m_socket;
 	ProjectInfo				m_projectInfo;
-	MetrologySettings		m_settings;
+
+	SoftwareSettingsSet		m_softwareSettingsSet;
+	std::shared_ptr<const MetrologySettings> m_settings;
 
 	ModuleOption			m_module;
 	LinearityOption			m_linearity;

@@ -46,7 +46,7 @@ void SoftwareSettings::writeEndSettings(XmlWriteHelper &xml) const
 	xml.writeEndElement();							//	</Settings>
 }
 
-bool SoftwareSettings::readStartSettings(XmlReadHelper& xml)
+bool SoftwareSettings::startSettingsReading(XmlReadHelper& xml)
 {
 	bool result = xml.findElement(XmlElement::SETTINGS);
 
@@ -65,6 +65,11 @@ bool SoftwareSettings::readStartSettings(XmlReadHelper& xml)
 
 SoftwareSettingsSet::SoftwareSettingsSet(E::SoftwareType softwareType) :
 	m_softwareType(softwareType)
+{
+}
+
+SoftwareSettingsSet::SoftwareSettingsSet() :
+	m_softwareType(E::SoftwareType::Unknown)
 {
 }
 
@@ -94,6 +99,13 @@ bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 	return result;
 }
 
+bool SoftwareSettingsSet::readFromXml(const QByteArray& xmlData)
+{
+	XmlReadHelper xml(xmlData);
+
+	return readFromXml(xml);
+}
+
 bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 {
 	m_settingsMap.clear();
@@ -113,10 +125,17 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	if (m_softwareType != swType)
+	if (m_softwareType == E::SoftwareType::Unknown)
 	{
-		Q_ASSERT(false);
-		return false;
+		m_softwareType = swType;
+	}
+	else
+	{
+		if (m_softwareType != swType)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
 	}
 
 	result &= xml.readIntAttribute(XmlAttribute::COUNT, &profilesCount);
@@ -143,6 +162,18 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 	}
 
 	return result;
+}
+
+QStringList SoftwareSettingsSet::getSettingsProfiles() const
+{
+	QStringList profiles;
+
+	for(auto pp : m_settingsMap)
+	{
+		profiles.append(pp.first);
+	}
+
+	return profiles;
 }
 
 std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
@@ -519,7 +550,7 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	bool result = false;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -568,7 +599,7 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 	return result;
 }
 
-QStringList CfgServiceSettings::knownClients()
+QStringList CfgServiceSettings::knownClients() const
 {
 	QStringList knownClients;
 
@@ -706,7 +737,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -844,7 +875,7 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -1005,7 +1036,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -1396,7 +1427,7 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -1583,7 +1614,7 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -1888,7 +1919,7 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -2130,7 +2161,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 	bool result = true;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 
@@ -2592,7 +2623,7 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	result = readStartSettings(xml);
+	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
 

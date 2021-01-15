@@ -67,7 +67,7 @@ namespace Tuning
 		m_tuningSimIPStr = getStrSetting(SETTING_TUNING_SIM_IP);
 		m_tuningSimIP.setAddressPortStr(m_tuningSimIPStr, PORT_LM_TUNING);
 
-		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Settings from command line or registry:")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));

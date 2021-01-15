@@ -649,13 +649,12 @@ message RtTrendsGetStateChangesReply
 message GetFileReply
 {
 	required int32 errorCode = 1 [default = 0 /* FileTransferResult::Ok */];	// enum FileTransferResult values
-	required int64 fileSize = 2 [default = 0];
-	required int32 totalParts = 3 [default = 0];
-	required int32 currentPart = 4 [default = 0];			// valid values begins from 1
-	required int32 currentPartSize = 5 [default = 0];
-	required bytes md5 = 6;
-
-	required bytes filePartData = 10;
+	optional int64 fileSize = 2 [default = 0];
+	optional int32 totalParts = 3 [default = 0];
+	optional int32 currentPart = 4 [default = 0];			// valid values begins from 1
+	optional int32 currentPartSize = 5 [default = 0];
+	optional bytes md5 = 6;
+	optional bytes filePartData = 10;
 }
 
 message GetSessionParams

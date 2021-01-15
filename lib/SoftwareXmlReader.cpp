@@ -7,13 +7,58 @@
 //
 // -----------------------------------------------------------------------------------------------
 
+std::shared_ptr<const CfgServiceSettings> SoftwareXmlInfo::cfgServiceSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<CfgServiceSettings>(profile);
+}
+
+std::shared_ptr<const AppDataServiceSettings> SoftwareXmlInfo::appDataServiceSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<AppDataServiceSettings>(profile);
+}
+
+std::shared_ptr<const DiagDataServiceSettings> SoftwareXmlInfo::diagDataServiceSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<DiagDataServiceSettings>(profile);
+}
+
+std::shared_ptr<const ArchivingServiceSettings> SoftwareXmlInfo::archivingServiceSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<ArchivingServiceSettings>(profile);
+}
+
+std::shared_ptr<const TuningServiceSettings> SoftwareXmlInfo::tuningServiceSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<TuningServiceSettings>(profile);
+}
+
+std::shared_ptr<const TestClientSettings> SoftwareXmlInfo::testClientSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<TestClientSettings>(profile);
+}
+
+std::shared_ptr<const MetrologySettings> SoftwareXmlInfo::metrologySettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<MetrologySettings>(profile);
+}
+
+std::shared_ptr<const MonitorSettings> SoftwareXmlInfo::monitorSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<MonitorSettings>(profile);
+}
+
+std::shared_ptr<const TuningClientSettings> SoftwareXmlInfo::tuningClientSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<TuningClientSettings>(profile);
+}
+
+E::SoftwareType SoftwareXmlInfo::softwareType() const
+{
+	return m_settingsSet.softwareType();
+}
+
 bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 {
-	if (m_settings != nullptr)
-	{
-		m_settings = {};
-	}
-
 	if (xmlReader.checkElement(XmlElement::SOFTWARE) == false)
 	{
 		Q_ASSERT(false);
@@ -37,139 +82,13 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 		return false;
 	}
 
-	softwareType = static_cast<E::SoftwareType>(typeInt);
+	m_settingsSet.setSoftwareType(static_cast<E::SoftwareType>(typeInt));
 
-	switch(softwareType)
-	{
-	case E::SoftwareType::Unknown:
-	case E::SoftwareType::BaseService:
-	case E::SoftwareType::ServiceControlManager:
-		// no settings defined for this software for now
-		break;
-
-	case E::SoftwareType::ConfigurationService:
-		m_settings = std::make_shared<CfgServiceSettings>();
-		break;
-
-	case E::SoftwareType::AppDataService:
-		m_settings = std::make_shared<AppDataServiceSettings>();
-		break;
-
-	case E::SoftwareType::DiagDataService:
-		m_settings = std::make_shared<DiagDataServiceSettings>();
-		break;
-
-	case E::SoftwareType::ArchiveService:
-		m_settings = std::make_shared<ArchivingServiceSettings>();
-		break;
-
-	case E::SoftwareType::TuningService:
-		m_settings = std::make_shared<TuningServiceSettings>();
-		break;
-
-	case E::SoftwareType::TestClient:
-		m_settings = std::make_shared<TestClientSettings>();
-		break;
-
-	case E::SoftwareType::Metrology:
-		m_settings = std::make_shared<MetrologySettings>();
-		break;
-
-	case E::SoftwareType::Monitor:
-		m_settings = std::make_shared<MonitorSettings>();
-		break;
-
-	case E::SoftwareType::TuningClient:
-		m_settings = std::make_shared<TuningClientSettings>();
-		break;
-
-	default:
-		Q_ASSERT(false);
-		result = false;
-	}
-
-	if (m_settings == nullptr)
-	{
-		return false;
-	}
-
-	result = m_settings->readFromXml(xmlReader);
+	result = m_settingsSet.readFromXml(xmlReader);
 
 	Q_ASSERT(result == true);
 
 	return result;
-}
-
-const CfgServiceSettings* SoftwareXmlInfo::cfgServiceSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::ConfigurationService);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const CfgServiceSettings*>(m_settings.get());
-}
-
-const AppDataServiceSettings* SoftwareXmlInfo::appDataServiceSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::AppDataService);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const AppDataServiceSettings*>(m_settings.get());
-}
-
-const DiagDataServiceSettings* SoftwareXmlInfo::diagDataServiceSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::DiagDataService);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const DiagDataServiceSettings*>(m_settings.get());
-}
-
-const ArchivingServiceSettings* SoftwareXmlInfo::archivingServiceSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::ArchiveService);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const ArchivingServiceSettings*>(m_settings.get());
-}
-
-const TuningServiceSettings* SoftwareXmlInfo::tuningServiceSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::TuningService);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const TuningServiceSettings*>(m_settings.get());
-}
-
-const TestClientSettings* SoftwareXmlInfo::testClientSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::TestClient);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const TestClientSettings*>(m_settings.get());
-}
-
-const MetrologySettings* SoftwareXmlInfo::metrologySettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::Metrology);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const MetrologySettings*>(m_settings.get());
-}
-
-const MonitorSettings* SoftwareXmlInfo::monitorSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::Monitor);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const MonitorSettings*>(m_settings.get());
-}
-
-const TuningClientSettings* SoftwareXmlInfo::tuningClientSettings() const
-{
-	Q_ASSERT(softwareType == E::SoftwareType::TuningClient);
-	Q_ASSERT(m_settings != nullptr);
-
-	return dynamic_cast<const TuningClientSettings*>(m_settings.get());
 }
 
 // -----------------------------------------------------------------------------------------------

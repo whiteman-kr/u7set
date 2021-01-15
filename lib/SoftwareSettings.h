@@ -24,14 +24,19 @@ public:
 
 	const SoftwareSettings& operator = (const SoftwareSettings& copy);
 
-	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
-	virtual bool readFromXml(XmlReadHelper& xml) = 0;
-
 protected:
 	void writeStartSettings(XmlWriteHelper& xml) const;
 	void writeEndSettings(XmlWriteHelper& xml) const;
 
-	bool readStartSettings(XmlReadHelper& xml);
+	bool startSettingsReading(XmlReadHelper& xml);
+
+private:
+	// this methods should be call by SoftwareSettingsSet only
+	//
+	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
+	virtual bool readFromXml(XmlReadHelper& xml) = 0;
+
+	friend class SoftwareSettingsSet;
 
 public:
 	QString profile;
@@ -41,18 +46,26 @@ class SoftwareSettingsSet
 {
 public:
 	SoftwareSettingsSet(E::SoftwareType softwareType);
+	SoftwareSettingsSet();
 
 	template<typename T>
 	bool addProfile(const QString& profile, const SoftwareSettings& settings);
 
 	template<typename T>
-	std::shared_ptr<const T> getProfile(const QString& profile);
+	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
 
 	template<typename T>
-	std::shared_ptr<const T> getDefaultProfile();
+	std::shared_ptr<const T> getSettingsDefaultProfile() const;
 
 	bool writeToXml(XmlWriteHelper& xml);
+
+	bool readFromXml(const QByteArray& xmlData);
 	bool readFromXml(XmlReadHelper& xml);
+
+	void setSoftwareType(E::SoftwareType softwareType) { m_softwareType = softwareType; }
+	E::SoftwareType softwareType() const { return m_softwareType; }
+
+	QStringList getSettingsProfiles() const;
 
 private:
 	std::shared_ptr<SoftwareSettings> createAppropriateSettings();
@@ -66,6 +79,8 @@ private:
 template<typename T>
 bool SoftwareSettingsSet::addProfile(const QString& profile, const SoftwareSettings& settings)
 {
+	QString profileName = profile.isEmpty() == true ? SettingsProfile::DEFAULT : profile;
+
 	const T* typedPtr = dynamic_cast<const T*>(&settings);
 
 	if (typedPtr == nullptr)
@@ -76,15 +91,15 @@ bool SoftwareSettingsSet::addProfile(const QString& profile, const SoftwareSetti
 
 	std::shared_ptr<T> sharedSettings = std::make_shared<T>(*typedPtr);
 
-	sharedSettings->profile = profile;
+	sharedSettings->profile = profileName;
 
-	return addSharedProfile(profile, sharedSettings);
+	return addSharedProfile(profileName, sharedSettings);
 }
 
 template<typename T>
-std::shared_ptr<const T> SoftwareSettingsSet::getProfile(const QString& profile)
+std::shared_ptr<const T> SoftwareSettingsSet::getSettingsProfile(const QString& profile) const
 {
-	auto it = m_settingsMap.find(profile);
+	auto it = m_settingsMap.find(profile.isEmpty() == true ? SettingsProfile::DEFAULT : profile);
 
 	if (it != m_settingsMap.end())
 	{
@@ -92,13 +107,12 @@ std::shared_ptr<const T> SoftwareSettingsSet::getProfile(const QString& profile)
 	}
 
 	return nullptr;
-
 }
 
 template<typename T>
-std::shared_ptr<const T> SoftwareSettingsSet::getDefaultProfile()
+std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 {
-	return getProfile<T>(SettingsProfile::DEFAULT);
+	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
 
@@ -149,12 +163,16 @@ public:
 
 	QList<QPair<QString, E::SoftwareType>> clients;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
-	QStringList knownClients();
+	friend class SoftwareSettingsSet;
+
+public:
+	QStringList knownClients() const;
 };
 
 #ifdef IS_BUILDER
@@ -193,10 +211,13 @@ public:
 
 	HostAddressPort rtTrendsRequestIP;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };
 
 #ifdef IS_BUILDER
@@ -229,10 +250,13 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };
 
 #ifdef IS_BUILDER
@@ -279,12 +303,13 @@ public:
 	std::vector<TuningSource> sources;
 	std::vector<TuningClient> clients;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
-	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };
 
 #ifdef IS_BUILDER
@@ -322,10 +347,13 @@ public:
 
 	QString archiveLocation;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };
 
 #ifdef IS_BUILDER
@@ -369,10 +397,13 @@ public:
 	HostAddressPort tuningService_clientRequestIP;
 	QStringList		tuningService_tuningSources;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };
 
 #ifdef IS_BUILDER
@@ -406,10 +437,13 @@ public:
 	QString tuningServiceIP;
 	int tuningServicePort = 0;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };
 
 #ifdef IS_BUILDER
@@ -455,11 +489,15 @@ public:
 	int tuningServicePort = 0;
 	QString tuningSources;
 
+private:
+	// this methods should be call by SoftwareSettingsSet only
 	//
-
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
+	friend class SoftwareSettingsSet;
+
+public:
 	QStringList getSchemaTags() const;
 	QStringList getTuningSources() const;
 
@@ -511,10 +549,15 @@ public:
 	QString startSchemaID;
 	QString schemaTags;
 
-public:
+private:
+	// this methods should be call by SoftwareSettingsSet only
+	//
 	bool writeToXml(XmlWriteHelper& xml) override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
+	friend class SoftwareSettingsSet;
+
+public:
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;
 

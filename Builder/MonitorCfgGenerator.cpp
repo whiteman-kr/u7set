@@ -60,7 +60,7 @@ namespace Builder
 		//
 		result &= writeSchemasByTags();
 
-		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getDefaultProfile<MonitorSettings>();
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
@@ -96,7 +96,7 @@ namespace Builder
 
 	bool MonitorCfgGenerator::initSchemaTagsAndTuningSources()
 	{
-		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getDefaultProfile<MonitorSettings>();
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

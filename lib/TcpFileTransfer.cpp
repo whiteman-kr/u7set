@@ -603,6 +603,8 @@ namespace Tcp
 		m_reply.set_currentpart(m_reply.currentpart() + 1);
 		m_reply.set_currentpartsize(size);
 
+		m_reply.set_errorcode(static_cast<int>(FileTransferResult::Ok));
+
 		sendReply(m_reply);
 
 		if (m_reply.currentpart() == m_reply.totalparts())

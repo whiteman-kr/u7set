@@ -54,7 +54,7 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeTuningSources()
 	{
-		std::shared_ptr<const TuningServiceSettings> settings = m_settingsSet.getDefaultProfile<TuningServiceSettings>();
+		std::shared_ptr<const TuningServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningServiceSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

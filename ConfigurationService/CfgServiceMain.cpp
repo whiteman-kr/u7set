@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	si.init(E::SoftwareType::ConfigurationService, "", 1, 0);
 
 	ConfigurationServiceWorker cfgServiceWorker(si,
-												Service::getServiceInstanceName("RPCT Configuration Service", argc, argv),
+												Service::getServiceInstanceName("Configuration Service", argc, argv),
 												argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, cfgServiceWorker, logger);

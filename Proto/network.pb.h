@@ -7677,35 +7677,35 @@ class GetFileReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 errorcode() const;
   inline void set_errorcode(::google::protobuf::int32 value);
 
-  // required int64 fileSize = 2 [default = 0];
+  // optional int64 fileSize = 2 [default = 0];
   inline bool has_filesize() const;
   inline void clear_filesize();
   static const int kFileSizeFieldNumber = 2;
   inline ::google::protobuf::int64 filesize() const;
   inline void set_filesize(::google::protobuf::int64 value);
 
-  // required int32 totalParts = 3 [default = 0];
+  // optional int32 totalParts = 3 [default = 0];
   inline bool has_totalparts() const;
   inline void clear_totalparts();
   static const int kTotalPartsFieldNumber = 3;
   inline ::google::protobuf::int32 totalparts() const;
   inline void set_totalparts(::google::protobuf::int32 value);
 
-  // required int32 currentPart = 4 [default = 0];
+  // optional int32 currentPart = 4 [default = 0];
   inline bool has_currentpart() const;
   inline void clear_currentpart();
   static const int kCurrentPartFieldNumber = 4;
   inline ::google::protobuf::int32 currentpart() const;
   inline void set_currentpart(::google::protobuf::int32 value);
 
-  // required int32 currentPartSize = 5 [default = 0];
+  // optional int32 currentPartSize = 5 [default = 0];
   inline bool has_currentpartsize() const;
   inline void clear_currentpartsize();
   static const int kCurrentPartSizeFieldNumber = 5;
   inline ::google::protobuf::int32 currentpartsize() const;
   inline void set_currentpartsize(::google::protobuf::int32 value);
 
-  // required bytes md5 = 6;
+  // optional bytes md5 = 6;
   inline bool has_md5() const;
   inline void clear_md5();
   static const int kMd5FieldNumber = 6;
@@ -7717,7 +7717,7 @@ class GetFileReply : public ::google::protobuf::Message {
   inline ::std::string* release_md5();
   inline void set_allocated_md5(::std::string* md5);
 
-  // required bytes filePartData = 10;
+  // optional bytes filePartData = 10;
   inline bool has_filepartdata() const;
   inline void clear_filepartdata();
   static const int kFilePartDataFieldNumber = 10;
@@ -16101,7 +16101,7 @@ inline void GetFileReply::set_errorcode(::google::protobuf::int32 value) {
   errorcode_ = value;
 }
 
-// required int64 fileSize = 2 [default = 0];
+// optional int64 fileSize = 2 [default = 0];
 inline bool GetFileReply::has_filesize() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -16123,7 +16123,7 @@ inline void GetFileReply::set_filesize(::google::protobuf::int64 value) {
   filesize_ = value;
 }
 
-// required int32 totalParts = 3 [default = 0];
+// optional int32 totalParts = 3 [default = 0];
 inline bool GetFileReply::has_totalparts() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -16145,7 +16145,7 @@ inline void GetFileReply::set_totalparts(::google::protobuf::int32 value) {
   totalparts_ = value;
 }
 
-// required int32 currentPart = 4 [default = 0];
+// optional int32 currentPart = 4 [default = 0];
 inline bool GetFileReply::has_currentpart() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -16167,7 +16167,7 @@ inline void GetFileReply::set_currentpart(::google::protobuf::int32 value) {
   currentpart_ = value;
 }
 
-// required int32 currentPartSize = 5 [default = 0];
+// optional int32 currentPartSize = 5 [default = 0];
 inline bool GetFileReply::has_currentpartsize() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -16189,7 +16189,7 @@ inline void GetFileReply::set_currentpartsize(::google::protobuf::int32 value) {
   currentpartsize_ = value;
 }
 
-// required bytes md5 = 6;
+// optional bytes md5 = 6;
 inline bool GetFileReply::has_md5() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -16259,7 +16259,7 @@ inline void GetFileReply::set_allocated_md5(::std::string* md5) {
   }
 }
 
-// required bytes filePartData = 10;
+// optional bytes filePartData = 10;
 inline bool GetFileReply::has_filepartdata() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }

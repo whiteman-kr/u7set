@@ -346,7 +346,7 @@ bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
 
 bool CfgLoader::hasFileID(QString fileID) const
 {
-	QMutexLocker l(&m_mutex);
+	AUTO_LOCK(m_mutex);
 
 	return m_fileIDPathMap.contains(fileID);
 }
@@ -355,13 +355,31 @@ Builder::BuildInfo CfgLoader::buildInfo()
 {
 	Builder::BuildInfo buildInfo;
 
-	m_mutex.lock();
+	AUTO_LOCK(m_mutex);
 
 	buildInfo = m_buildInfo;
 
-	m_mutex.unlock();
-
 	return buildInfo;
+}
+
+QString CfgLoader::currentSettingsProfile() const
+{
+	QString profile;
+
+	AUTO_LOCK(m_mutex);
+
+	profile = m_currentSettingsProfile;
+
+	return profile;
+}
+
+QStringList CfgLoader::getSettingsProfiles() const
+{
+	AUTO_LOCK(m_mutex);
+
+	QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+	return profiles;
 }
 
 void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
@@ -490,10 +508,10 @@ void CfgLoader::slot_onTimer()
 
 		if (isCfgFileIsExists(cfi.pathFileName, cfi.md5) == true)
 		{
-			// file exists from previous downloads
-			// nothing to do
+			// file exists from previous downloads, nothing to do
 			//
-			qDebug() << "File " << cfi.pathFileName << " already exists, md5 = " << cfi.md5;
+			DEBUG_LOG_MSG(m_logger, QString("File %1 already exists, md5 = %2").
+										arg(cfi.pathFileName).arg(cfi.md5));
 		}
 		else
 		{
@@ -542,7 +560,15 @@ void CfgLoader::processGetSessionParamsReply(const char* replyData, quint32 repl
 		return;
 	}
 
-	m_currentSettingsProfile = QString::fromStdString(gsp.currentsettingsprofile());
+	QString currentProfile = QString::fromStdString(gsp.currentsettingsprofile());
+
+	DEBUG_LOG_MSG(m_logger, QString("Current software settings profile - %1").arg(currentProfile));
+
+	m_mutex.lock();
+
+	m_currentSettingsProfile = currentProfile;
+
+	m_mutex.unlock();
 
 	startConfigurationXmlLoading();
 }
@@ -644,7 +670,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 		else
 		{
-			qDebug() << "Downloaded Configuration.xml";
+			DEBUG_LOG_MSG(m_logger, "Downloaded Configuration.xml - Ok");
 
 			if (readConfigurationXml() == true)
 			{
@@ -659,15 +685,21 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					bfiArray.append(bfi);
 				}
 
-				qDebug() << "Read Configuration.xml";
+				DEBUG_LOG_MSG(m_logger, "Read Configuration.xml - Ok");
 
 				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData, bfiArray);
+			}
+			else
+			{
+				DEBUG_LOG_ERR(m_logger, "ERROR reading Configuration.xml");
 			}
 		}
 	}
 	else
 	{
-		qDebug() << "Downloaded " << (m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :")  << fileName;
+		DEBUG_LOG_MSG(m_logger, QString("Downloaded %1 %2").
+									arg(m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :").
+									arg(fileName));
 
 		if (m_currentDownloadRequest.isAutoRequest == false)
 		{
@@ -755,6 +787,14 @@ bool CfgLoader::readConfigurationXml()
 	cfi.size = fileData.size();
 	cfi.md5 = Md5Hash::hashStr(fileData);
 	cfi.fileData.swap(fileData);
+
+	bool result = m_settingsSet.readFromXml(fileData);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, "ERROR reading software settings set!");
+		return false;
+	}
 
 	// Configuration.xml info always first item in m_cfgFileInfo
 	//

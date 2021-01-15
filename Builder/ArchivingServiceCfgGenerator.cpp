@@ -96,7 +96,7 @@ namespace Builder
 			return false;
 		}
 
-		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getDefaultProfile<ArchivingServiceSettings>();
+		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<ArchivingServiceSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
@@ -126,7 +126,7 @@ namespace Builder
 			return false;
 		}
 
-		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getDefaultProfile<ArchivingServiceSettings>();
+		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<ArchivingServiceSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 

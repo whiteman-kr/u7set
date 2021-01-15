@@ -1431,13 +1431,14 @@ bool Options::readFromXml(const QByteArray& fileData)
 		return false;
 	}
 
-	XmlReadHelper xmlReader(fileData);
+	result = m_softwareSettingsSet.readFromXml(fileData);
 
-	result = m_settings.readFromXml(xmlReader);
 	if (result == false)
 	{
 		return false;
 	}
+
+	m_settings =
 
 	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
 	{

@@ -77,12 +77,18 @@ void ConfigurationServiceWorker::loadSettings()
 	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
 	m_currentSettingsProfile = getStrSetting(SETTING_CURRENT_PROFILE);
 
-	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
+	if (m_currentSettingsProfile.isEmpty() == true)
+	{
+		m_currentSettingsProfile = SettingsProfile::DEFAULT;
+	}
+
+	DEBUG_LOG_MSG(m_logger, QString("Settings from command line or registry:"));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIPStr));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CURRENT_PROFILE).arg(m_currentSettingsProfile));
+	DEBUG_LOG_MSG(m_logger, QString());
 }
 
 bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath)
@@ -101,18 +107,30 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	cfgXmlFile.close();
 
-	XmlReadHelper xml(cfgXmlData);
+	bool res = softwareSettingsSet().readFromXml(cfgXmlData);
 
-	bool res = m_cfgServiceSettings.readFromXml(xml);
+	m_cfgServiceSettings = softwareSettingsSet().getSettingsProfile<CfgServiceSettings>(m_currentSettingsProfile);
+
+	if (m_cfgServiceSettings == nullptr)
+	{
+		DEBUG_LOG_ERR(m_logger, QString("Error loading settings for profile: %1").arg(m_currentSettingsProfile));
+		return false;
+	}
+
+	DEBUG_LOG_MSG(m_logger, QString());
+	DEBUG_LOG_MSG(m_logger, QString("Loading settings for profile: %1 - Ok").arg(m_currentSettingsProfile));
+	DEBUG_LOG_MSG(m_logger, QString());
 
 	if (m_clientIPStr.isEmpty() == true)
 	{
-		m_clientIP = m_cfgServiceSettings.clientRequestIP;
+		m_clientIP = m_cfgServiceSettings->clientRequestIP;
 	}
 	else
 	{
 		m_clientIP.setAddressPortStr(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 	}
+
+	DEBUG_LOG_MSG(m_logger, QString("%1 is set to %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
 
 	return res;
 }
@@ -143,7 +161,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  m_workDirectory,
 															  buildPath,
 															  m_currentSettingsProfile,
-															  m_cfgServiceSettings.knownClients(),
+															  m_cfgServiceSettings->knownClients(),
 															  *m_cfgCheckerWorker,
 															  m_logger);
 

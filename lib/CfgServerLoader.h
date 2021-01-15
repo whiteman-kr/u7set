@@ -3,6 +3,7 @@
 #include "../lib/TcpFileTransfer.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/BuildInfo.h"
+#include "../lib/SoftwareSettings.h"
 
 
 typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
@@ -88,7 +89,7 @@ private:
 //
 // -------------------------------------------------------------------------------------
 
-class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
+class CfgLoader : public Tcp::FileClient, public CfgServerLoaderBase
 {
 	Q_OBJECT
 
@@ -119,8 +120,16 @@ public:
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
-	QString currentSettingsProfile() const { return m_currentSettingsProfile; }
+	QString currentSettingsProfile() const;
 	std::shared_ptr<CircularLogger> logger() { return m_logger; }
+
+	template<typename T>
+	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
+
+	template<typename T>
+	std::shared_ptr<const T> getCurrentSettingsProfile(const QString& profile) const;
+
+	QStringList getSettingsProfiles() const;
 
 	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
@@ -207,6 +216,7 @@ private:
 	volatile bool m_enableDownloadConfiguration = false;
 
 	QString m_currentSettingsProfile;
+	SoftwareSettingsSet m_settingsSet;
 
 	//
 
@@ -250,6 +260,26 @@ private:
 
 	static bool m_registerTypes;
 };
+
+template<typename T>
+std::shared_ptr<const T> CfgLoader::getSettingsProfile(const QString& profile) const
+{
+	AUTO_LOCK(m_mutex);
+
+	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(profile);
+
+	return settings;
+}
+
+template<typename T>
+std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile(const QString& profile) const
+{
+	AUTO_LOCK(m_mutex);
+
+	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(m_currentSettingsProfile);
+
+	return settings;
+}
 
 
 // -------------------------------------------------------------------------------------

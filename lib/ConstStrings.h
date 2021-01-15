@@ -296,7 +296,5 @@ namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString LINE("-------------------------------------------------------------------------------");
 }
-
-
-

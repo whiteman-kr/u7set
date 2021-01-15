@@ -1942,10 +1942,10 @@ void protobuf_AddDesc_network_2eproto() {
     "tateChangesReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013er"
     "rorString\030\002 \001(\t\022+\n\014signalStates\030\003 \003(\0132\025."
     "Proto.AppSignalState\"\247\001\n\014GetFileReply\022\024\n"
-    "\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030\002 \002(\003:\0010"
-    "\022\025\n\ntotalParts\030\003 \002(\005:\0010\022\026\n\013currentPart\030\004"
-    " \002(\005:\0010\022\032\n\017currentPartSize\030\005 \002(\005:\0010\022\013\n\003m"
-    "d5\030\006 \002(\014\022\024\n\014filePartData\030\n \002(\014\"2\n\020GetSes"
+    "\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010"
+    "\022\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004"
+    " \001(\005:\0010\022\032\n\017currentPartSize\030\005 \001(\005:\0010\022\013\n\003m"
+    "d5\030\006 \001(\014\022\024\n\014filePartData\030\n \001(\014\"2\n\020GetSes"
     "sionParams\022\036\n\026currentSettingsProfile\030\001 \001"
     "(\t", 9482);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
@@ -24233,7 +24233,7 @@ bool GetFileReply::MergePartialFromCodedStream(
         break;
       }
 
-      // required int64 fileSize = 2 [default = 0];
+      // optional int64 fileSize = 2 [default = 0];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -24249,7 +24249,7 @@ bool GetFileReply::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 totalParts = 3 [default = 0];
+      // optional int32 totalParts = 3 [default = 0];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -24265,7 +24265,7 @@ bool GetFileReply::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 currentPart = 4 [default = 0];
+      // optional int32 currentPart = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -24281,7 +24281,7 @@ bool GetFileReply::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 currentPartSize = 5 [default = 0];
+      // optional int32 currentPartSize = 5 [default = 0];
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -24297,7 +24297,7 @@ bool GetFileReply::MergePartialFromCodedStream(
         break;
       }
 
-      // required bytes md5 = 6;
+      // optional bytes md5 = 6;
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -24311,7 +24311,7 @@ bool GetFileReply::MergePartialFromCodedStream(
         break;
       }
 
-      // required bytes filePartData = 10;
+      // optional bytes filePartData = 10;
       case 10: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -24348,33 +24348,33 @@ void GetFileReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->errorcode(), output);
   }
 
-  // required int64 fileSize = 2 [default = 0];
+  // optional int64 fileSize = 2 [default = 0];
   if (has_filesize()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->filesize(), output);
   }
 
-  // required int32 totalParts = 3 [default = 0];
+  // optional int32 totalParts = 3 [default = 0];
   if (has_totalparts()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->totalparts(), output);
   }
 
-  // required int32 currentPart = 4 [default = 0];
+  // optional int32 currentPart = 4 [default = 0];
   if (has_currentpart()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->currentpart(), output);
   }
 
-  // required int32 currentPartSize = 5 [default = 0];
+  // optional int32 currentPartSize = 5 [default = 0];
   if (has_currentpartsize()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->currentpartsize(), output);
   }
 
-  // required bytes md5 = 6;
+  // optional bytes md5 = 6;
   if (has_md5()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
       6, this->md5(), output);
   }
 
-  // required bytes filePartData = 10;
+  // optional bytes filePartData = 10;
   if (has_filepartdata()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
       10, this->filepartdata(), output);
@@ -24393,34 +24393,34 @@ void GetFileReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->errorcode(), target);
   }
 
-  // required int64 fileSize = 2 [default = 0];
+  // optional int64 fileSize = 2 [default = 0];
   if (has_filesize()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->filesize(), target);
   }
 
-  // required int32 totalParts = 3 [default = 0];
+  // optional int32 totalParts = 3 [default = 0];
   if (has_totalparts()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->totalparts(), target);
   }
 
-  // required int32 currentPart = 4 [default = 0];
+  // optional int32 currentPart = 4 [default = 0];
   if (has_currentpart()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->currentpart(), target);
   }
 
-  // required int32 currentPartSize = 5 [default = 0];
+  // optional int32 currentPartSize = 5 [default = 0];
   if (has_currentpartsize()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->currentpartsize(), target);
   }
 
-  // required bytes md5 = 6;
+  // optional bytes md5 = 6;
   if (has_md5()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
         6, this->md5(), target);
   }
 
-  // required bytes filePartData = 10;
+  // optional bytes filePartData = 10;
   if (has_filepartdata()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
@@ -24445,42 +24445,42 @@ int GetFileReply::ByteSize() const {
           this->errorcode());
     }
 
-    // required int64 fileSize = 2 [default = 0];
+    // optional int64 fileSize = 2 [default = 0];
     if (has_filesize()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->filesize());
     }
 
-    // required int32 totalParts = 3 [default = 0];
+    // optional int32 totalParts = 3 [default = 0];
     if (has_totalparts()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->totalparts());
     }
 
-    // required int32 currentPart = 4 [default = 0];
+    // optional int32 currentPart = 4 [default = 0];
     if (has_currentpart()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->currentpart());
     }
 
-    // required int32 currentPartSize = 5 [default = 0];
+    // optional int32 currentPartSize = 5 [default = 0];
     if (has_currentpartsize()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->currentpartsize());
     }
 
-    // required bytes md5 = 6;
+    // optional bytes md5 = 6;
     if (has_md5()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->md5());
     }
 
-    // required bytes filePartData = 10;
+    // optional bytes filePartData = 10;
     if (has_filepartdata()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
@@ -24552,7 +24552,7 @@ void GetFileReply::CopyFrom(const GetFileReply& from) {
 }
 
 bool GetFileReply::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
   return true;
 }

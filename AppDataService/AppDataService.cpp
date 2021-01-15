@@ -107,7 +107,7 @@ void AppDataServiceWorker::loadSettings()
 	m_strCmdLineAppDataReceivingIP = getStrSetting(SETTING_OVERRIDE_APP_DATA_RECEIVING_IP);
 	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
@@ -388,12 +388,13 @@ void AppDataServiceWorker::onTimer()
 {
 }
 
-
 bool AppDataServiceWorker::readConfigurationSettings(const QByteArray& fileData)
 {
-	XmlReadHelper xml(fileData);
+	bool result = softwareSettingsSet().readFromXml(fileData);
 
-	bool result = m_cfgSettings.readFromXml(xml);
+	RETURN_IF_FALSE(result);
+
+	m_cfgSettings = softwareSettingsSet
 
 	if (result == true)
 	{
