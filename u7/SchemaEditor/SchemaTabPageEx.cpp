@@ -4411,13 +4411,6 @@ void SchemaControlTabPageEx::exportToPdf()
 		return;
 	}
 
-	QString filesPath = QFileDialog::getExistingDirectory(this, QObject::tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-	if (filesPath.isNull() == true || filesPath.isEmpty() == true)
-	{
-		return;
-	}
-
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
 							 theSettings.serverPort(),
 							 theSettings.serverUsername(),
@@ -4427,7 +4420,7 @@ void SchemaControlTabPageEx::exportToPdf()
 							 db()->currentUser().password(),
 							 this);
 
-	r.run(files, filesPath, false);
+	r.run(files, false);
 
 	return;
 }
@@ -4453,13 +4446,6 @@ void SchemaControlTabPageEx::exportToAlbum()
 		return;
 	}
 
-	QString albumPath = QFileDialog::getSaveFileName(this, qAppName(), "./",QObject::tr("PDF documents (*.pdf)"));
-
-	if (albumPath.isNull() == true || albumPath.isEmpty() == true)
-	{
-		return;
-	}
-
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
 							 theSettings.serverPort(),
 							 theSettings.serverUsername(),
@@ -4469,7 +4455,7 @@ void SchemaControlTabPageEx::exportToAlbum()
 							 db()->currentUser().password(),
 							 this);
 
-	r.run(files, albumPath, true);
+	r.run(files, true);
 
 	return;
 }

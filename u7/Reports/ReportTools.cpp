@@ -427,14 +427,12 @@ QTextDocument* ReportSection::textDocument()
 // ReportMarginItem
 //
 
-ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo, Qt::Alignment alignment, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat):
+ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo, const QFont& font, Qt::Alignment alignment):
 	m_text(text),
 	m_pageFrom(pageFrom),
 	m_pageTo(pageTo),
-	m_alignment(alignment),
-	m_charFormat(charFormat),
-	m_blockFormat(blockFormat)
-
+	m_font(font),
+	m_alignment(alignment)
 {
 
 }
@@ -450,9 +448,34 @@ ReportGenerator::ReportGenerator(ReportSchemaView* schemaView):
 	Q_ASSERT(m_currentBlockFormat.isValid());
 }
 
+QPageSize ReportGenerator::pageSize() const
+{
+	return m_pageSize;
+}
+
+void ReportGenerator::setPageSize(const QPageSize& size)
+{
+	m_pageSize = size;
+}
+
+QMarginsF ReportGenerator::pageMargins() const
+{
+	return m_pageMargins;
+}
+
+void ReportGenerator::setPageMargins(const QMarginsF& margins)
+{
+	m_pageMargins = margins;
+}
+
 int ReportGenerator::resolution() const
 {
-	return m_resolution;
+	return m_pageResolution;
+}
+
+void ReportGenerator::setResolution(int value)
+{
+	m_pageResolution = value;
 }
 
 void ReportGenerator::addMarginItem(const ReportMarginItem& item)
@@ -466,7 +489,7 @@ void ReportGenerator::clearMarginItems()
 }
 
 void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter,
-									const QString& objectName, int* pageIndex, QMutex* pageIndexMutex, int pageCount)
+									const QString& objectName, int* pageIndex, QMutex* pageIndexMutex, int pageCount) const
 {
 	if (pdfWriter == nullptr || textDocument == nullptr || painter == nullptr)
 	{
@@ -478,10 +501,31 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 
 	if (textDocument->isEmpty() == true)
 	{
+		// Get the page number
+
+		int page = 0;
+
+		if (pageIndex != nullptr)
+		{
+			if (pageIndexMutex != nullptr)
+			{
+				pageIndexMutex->lock();
+			}
+
+			page = *pageIndex;
+
+			if (pageIndexMutex != nullptr)
+			{
+				pageIndexMutex->unlock();
+			}
+		}
+
+		drawMarginItems(objectName, page, pageCount, pdfWriter, painter);
+
 		return;
 	}
 
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
+	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriter->resolution());
 
 	// The total extent of the content (there are no page margin in this)
 	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
@@ -548,48 +592,39 @@ void ReportGenerator::printDocument(QPdfWriter* pdfWriter, QTextDocument* textDo
 }
 
 void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
-								  QTextDocument* textDocument,
 								  QPainter* painter,
 								  std::shared_ptr<VFrame30::Schema> schema,
-								  const std::map<QUuid, ReportSchemaCompareAction>& compareActions)
+								  std::optional<const QTextDocument* const> textDocument,
+								  std::optional<const std::map<QUuid, ReportSchemaCompareAction>* const> compareActions) const
 {
-	if (pdfWriter == nullptr || textDocument == nullptr || painter == nullptr || m_schemaView == nullptr)
+	if ( m_schemaView == nullptr || pdfWriter == nullptr || painter == nullptr || schema == nullptr)
 	{
-		Q_ASSERT(pdfWriter);
-		Q_ASSERT(textDocument);
-		Q_ASSERT(painter);
 		Q_ASSERT(m_schemaView);
-		return;
-	}
-
-	if (schema == nullptr)
-	{
+		Q_ASSERT(pdfWriter);
+		Q_ASSERT(painter);
 		Q_ASSERT(schema);
 		return;
 	}
 
 	// Calculate the upper schema offset
 
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
+	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriter->resolution());
 
-	const QRect contentRect = QRect(QPoint(0, 0), textDocument->size().toSize());
-
-	const int schemaTop = contentRect.height() % pageRect.height();
-
+	int schemaTop = 0;
 	int schemaLeft = 0;
+
+	if (textDocument.has_value() == true && textDocument.value()->isEmpty() == false)
+	{
+		const QRect contentRect = QRect(QPoint(0, 0), textDocument.value()->size().toSize());
+		schemaTop =  contentRect.height() % pageRect.height();
+	}
 
 	const int schemaMaxHeight = pageRect.height() - schemaTop;
 
 	// Calculate draw parameters
 
-	m_schemaView->setSchema(schema, true);
-
-	VFrame30::CDrawParam drawParam(painter, schema.get(), m_schemaView, schema->gridSize(), schema->pinGridStep());
-	drawParam.setInfoMode(false);
-	drawParam.session() = m_schemaView->session();
-
-	double schemaWidthInPixel = schema->GetDocumentWidth(m_resolution, 100.0);		// Export 100% zoom
-	double schemaHeightInPixel = schema->GetDocumentHeight(m_resolution, 100.0);		// Export 100% zoom
+	double schemaWidthInPixel = schema->GetDocumentWidth(pdfWriter->resolution(), 100.0);		// Export 100% zoom
+	double schemaHeightInPixel = schema->GetDocumentHeight(pdfWriter->resolution(), 100.0);		// Export 100% zoom
 
 	double zoom = pageRect.width() / schemaWidthInPixel;
 
@@ -605,7 +640,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 
 		// Center schema horizontally
 
-		int schemaWidthInPixelZoomed = static_cast<int>(schemaHeightInPixel * zoom + 0.5);
+		int schemaWidthInPixelZoomed = static_cast<int>(schemaWidthInPixel * zoom + 0.5);
 
 		schemaLeft =  (pageRect.width() - schemaWidthInPixelZoomed) / 2;
 	}
@@ -614,28 +649,31 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 
 	//m_pdfPainter.fillRect(QRectF(0, schemaTop, pageRect.width(), pageRect.height() - schemaTop), QColor(0xB0, 0xB0, 0xB0));
 
-	// Ajust QPainter
-	//
+	// Draw Schema
 
 	painter->save();
-
 	painter->setRenderHint(QPainter::Antialiasing);
 
+	VFrame30::CDrawParam drawParam(painter, schema.get(), m_schemaView, schema->gridSize(), schema->pinGridStep());
+	drawParam.setInfoMode(false);
+	drawParam.session() = m_schemaView->session();
+
+	m_schemaView->setSchema(schema, true);
 	m_schemaView->adjust(painter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom
 
-	// Draw Schema
-	//
 	QRectF clipRect(0, 0, schema->docWidth(), schema->docHeight());
 
 	schema->Draw(&drawParam, clipRect);
 
-	if (compareActions.empty() == false)
+	if (compareActions.has_value() == true &&
+		compareActions.value() != nullptr &&
+		compareActions.value()->empty() == false)
 	{
 		drawParam.setControlBarSize(
 			schema->unit() == VFrame30::SchemaUnit::Display ?
 						(4 / zoom) : (mm2in(2.4) / zoom));
 
-		m_schemaView->drawCompareOutlines(&drawParam, clipRect, compareActions);
+		m_schemaView->drawCompareOutlines(&drawParam, clipRect, *(compareActions.value()));
 	}
 
 	painter->restore();
@@ -685,7 +723,7 @@ const QTextBlockFormat& ReportGenerator::currentBlockFormat() const
 	return m_currentBlockFormat;
 }
 
-void ReportGenerator::drawMarginItems(const QString& objectName, int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter)
+void ReportGenerator::drawMarginItems(const QString& objectName, int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter) const
 {
 	if (pdfWriter == nullptr || painter == nullptr)
 	{
@@ -694,11 +732,11 @@ void ReportGenerator::drawMarginItems(const QString& objectName, int page, int t
 		return;
 	}
 
-	const QRect fullPageRect = pdfWriter->pageLayout().fullRectPixels(m_resolution);
+	const QRect fullPageRect = pdfWriter->pageLayout().fullRectPixels(pdfWriter->resolution());
 
-	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(m_resolution);
+	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriter->resolution());
 
-	QMargins margins = pdfWriter->pageLayout().marginsPixels(m_resolution);
+	QMargins margins = pdfWriter->pageLayout().marginsPixels(pdfWriter->resolution());
 
 	QRect topRect(fullPageRect.left() + margins.left() / 2,
 				  fullPageRect.top(),
@@ -725,7 +763,7 @@ void ReportGenerator::drawMarginItems(const QString& objectName, int page, int t
 			continue;
 		}
 
-		painter->setFont(item.m_charFormat.font());
+		painter->setFont(item.m_font);
 
 		QString text = item.m_text;
 

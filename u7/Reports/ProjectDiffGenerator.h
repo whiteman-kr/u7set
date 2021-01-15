@@ -109,6 +109,10 @@ public:
 					const QString& userPassword,
 					QWidget* parent);
 
+private:
+	static QPageSize m_albumPageSize;
+	static QPageLayout::Orientation m_albumOrientation;
+	static QMarginsF m_albumMargins;
 };
 
 //
@@ -200,11 +204,6 @@ private:
 							 ReportTable* const headerTable,
 							 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
-	/*std::optional<DbChangeset> getRecentChangeset(const std::vector<DbChangeset>& history,
-												  const CompareVersionType versionType,
-												  const int compareChangeset,
-												  const QDateTime& compareDate) const;*/
-
 	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const;
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
@@ -230,7 +229,7 @@ private:
 
 	void generateReportFilesPage(QTextCursor* textCursor, const QStringList& subreportFiles);
 
-	void createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName);
+	void createMarginItems(const CompareData& compareData, const QString& subreportName);
 
 	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
 

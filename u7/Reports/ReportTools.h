@@ -161,24 +161,17 @@ private:
 
 // ReportPageFooter
 
-class ReportMarginItem
+struct ReportMarginItem
 {
-public:
-	ReportMarginItem(const QString& text, int pageFrom, int pageTo, Qt::Alignment alignment, const QTextCharFormat& charFormat, const QTextBlockFormat& blockFormat);
-
-public:
-	int m_pageFrom = -1;
-	int m_pageTo = -1;
+	ReportMarginItem(const QString& text, int pageFrom, int pageTo, const QFont& font, Qt::Alignment alignment);
 
 	QString m_text;
 
+	int m_pageFrom = -1;
+	int m_pageTo = -1;
+
+	QFont m_font;
 	Qt::Alignment m_alignment = Qt::AlignTop | Qt::AlignHCenter;
-
-	// Format
-	//
-	QTextCharFormat m_charFormat;
-	QTextBlockFormat m_blockFormat;
-
 };
 
 //
@@ -191,7 +184,14 @@ public:
 	ReportGenerator(ReportSchemaView* schemaView);
 
 public:
+	QPageSize pageSize() const;
+	void setPageSize(const QPageSize& size);
+
+	QMarginsF pageMargins() const;
+	void setPageMargins(const QMarginsF& margins);
+
 	int resolution() const;
+	void setResolution(int value);
 
 protected:
 
@@ -202,12 +202,19 @@ protected:
 
 	// Rendering functions
 
-	void printDocument(QPdfWriter* pdfWriter, QTextDocument* textDocument, QPainter* painter, const QString& objectName, int* pageIndex, QMutex* pageIndexMutex, int pageCount);
+	void printDocument(QPdfWriter* pdfWriter,
+					   QTextDocument* textDocument,
+					   QPainter* painter,
+					   const QString& objectName,
+					   int* pageIndex, QMutex*
+					   pageIndexMutex,
+					   int pageCount) const;
+
 	void printSchema(QPdfWriter* pdfWriter,
-					 QTextDocument* textDocument,
 					 QPainter* painter,
 					 std::shared_ptr<VFrame30::Schema> schema,
-					 const std::map<QUuid, ReportSchemaCompareAction>& itemActions);
+					 std::optional<const QTextDocument* const> textDocument,
+					 std::optional<const std::map<QUuid, ReportSchemaCompareAction>* const> compareActions) const;
 
 	// Formatting functions
 
@@ -223,10 +230,15 @@ protected:
 	const QTextBlockFormat& currentBlockFormat() const;
 
 private:
-	void drawMarginItems(const QString& objectName, int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter);
+	void drawMarginItems(const QString& objectName, int page, int totalPages, QPdfWriter* pdfWriter, QPainter* painter) const;
 
 private:
-	int m_resolution = 300;
+	// Page options
+	//
+	QPageSize m_pageSize = QPageSize(QPageSize::A4);
+	QMarginsF m_pageMargins = QMarginsF(10, 10, 10, 10);
+
+	int m_pageResolution = 300;
 
 	std::vector<ReportMarginItem> m_marginItems;
 	ReportSchemaView* m_schemaView = nullptr;

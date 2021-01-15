@@ -14,7 +14,7 @@ public:
 						   const QString& userPassword,
 						   QWidget* parent);
 
-	void run(const std::vector<DbFileInfo>& files, const QString& filePath, bool singleFile);
+	void run(const std::vector<DbFileInfo>& files, bool album);
 
 private:
 	QString m_serverIp;
@@ -28,6 +28,9 @@ private:
 
 	QWidget* m_parent = nullptr;
 
+	static QPageSize m_albumPageSize;
+	static QPageLayout::Orientation m_albumOrientation;
+	static QMarginsF m_albumMargins;
 };
 
 //
@@ -48,20 +51,20 @@ public:
 						const QString& userName,
 						const QString& userPassword,
 						std::vector<DbFileInfo> files,
-						const QString& filePath,
-						bool singleFile);
+						const QString& filePath);
 
 
+	/*
 	SchemasReportGenerator(ReportSchemaView* schemaView,
 						std::vector<std::shared_ptr<VFrame30::Schema>> schemas,
 						std::vector<std::shared_ptr<QBuffer>>* outputBuffers,
-						bool singleFile);
-
+						bool singleFile);*/
 
 	virtual ~SchemasReportGenerator();
 
 public slots:
-	void process();
+	void createPDFs();
+	void createAlbum();
 	void stop();
 	void progressRequested();
 
@@ -90,7 +93,7 @@ private:
 
 	const QString& filePath() const;
 
-	void createSchemasReport();
+	void loadSchemas();
 
 private:
 	DbController m_db;
@@ -107,8 +110,6 @@ private:
 
 	// Report parameters
 
-	bool m_singleFile = false;
-
 	bool m_stop = false;	// Stop processing flag, set by stop()
 
 	// Connection information
@@ -123,6 +124,7 @@ private:
 	QString m_userPassword;
 
 	QFont m_font;
+	QFont m_marginFont;
 
 	// Statistics data
 	//

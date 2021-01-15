@@ -9,6 +9,7 @@
 
 #include "../lib/Ui/DialogProgress.h"
 
+#include <QPageSetupDialog>
 #include <QPrinter>
 #include "Settings.h"
 
@@ -247,6 +248,10 @@ void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& 
 // ProjectDiffThread
 //
 
+QPageSize ProjectDiffGeneratorThread::m_albumPageSize = QPageSize(QPageSize::A4);
+QPageLayout::Orientation ProjectDiffGeneratorThread::m_albumOrientation = QPageLayout::Orientation::Portrait;
+QMarginsF ProjectDiffGeneratorThread::m_albumMargins = QMarginsF(20, 15, 10, 15);
+
 void ProjectDiffGeneratorThread::run(const ProjectDiffParams& settings, const QString& projectName, const QString& userName, const QString& userPassword, QWidget* parent)
 {
 	// Get filename
@@ -261,11 +266,44 @@ void ProjectDiffGeneratorThread::run(const ProjectDiffParams& settings, const QS
 		return;
 	}
 
+	// Ask for page format
+
+	QPrinter printer(QPrinter::HighResolution);
+
+	QPageSize::PageSizeId id = QPageSize::id(m_albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+	if (id == QPageSize::Custom)
+	{
+		id = QPageSize::A4;
+	}
+
+	printer.setFullPage(true);
+	printer.setPageSize(QPageSize(id));
+	printer.setPageOrientation(m_albumOrientation);
+	printer.setPageMargins(m_albumMargins, QPageLayout::Unit::Millimeter);
+
+	QPageSetupDialog d(&printer, parent);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	m_albumPageSize = QPageSize(d.printer()->pageLayout().pageSize());
+	m_albumOrientation = d.printer()->pageLayout().orientation();
+	m_albumMargins = d.printer()->pageLayout().margins();
+
+	// Create schema view
+
 	ReportSchemaView* schemaView = new ReportSchemaView(parent);
+
+	schemaView->session().setProject(projectName);
+	schemaView->session().setUsername(userName);
+	schemaView->session().setHost(QHostInfo::localHostName());
 
 	// Create Worker
 
 	ProjectDiffGenerator* worker = new ProjectDiffGenerator(fileName, settings, schemaView, projectName, userName, userPassword);
+	worker->setPageSize(m_albumPageSize);
+	worker->setPageMargins(m_albumMargins);
 
 	// Create Progress Dialog
 
@@ -2656,22 +2694,11 @@ void ProjectDiffGenerator::generateReportFilesPage(QTextCursor* textCursor, cons
 	return;
 }
 
-void ProjectDiffGenerator::createMarginItems(QTextCursor* textCursor, const CompareData& compareData, const QString& subreportName)
+void ProjectDiffGenerator::createMarginItems(const CompareData& compareData, const QString& subreportName)
 {
-	if (textCursor == nullptr)
-	{
-		Q_ASSERT(textCursor);
-		return;
-	}
-
 	clearMarginItems();
 
 	// Create headers/footers
-
-	QTextCharFormat charFormat = textCursor->charFormat();
-	QTextBlockFormat blockFormat = textCursor->blockFormat();
-
-	charFormat.setFont(m_marginFont);
 
 	QString projectNameStr = tr("Project: ") + m_projectName;
 
@@ -2680,9 +2707,9 @@ void ProjectDiffGenerator::createMarginItems(QTextCursor* textCursor, const Comp
 		projectNameStr += tr("; section: %1").arg(subreportName);
 	}
 
-	addMarginItem({projectNameStr, 2, -1, Qt::AlignLeft | Qt::AlignTop, charFormat, blockFormat});
+	addMarginItem({projectNameStr, 2, -1, m_marginFont, Qt::AlignLeft | Qt::AlignTop});
 
-	addMarginItem({tr("%OBJECT%"), 2, -1, Qt::AlignRight | Qt::AlignTop, charFormat, blockFormat});
+	addMarginItem({tr("%OBJECT%"), 2, -1, m_marginFont, Qt::AlignRight | Qt::AlignTop});
 
 	QString changesetStr;
 
@@ -2700,9 +2727,9 @@ void ProjectDiffGenerator::createMarginItems(QTextCursor* textCursor, const Comp
 	case CompareVersionType::Date: changesetStr += tr("; Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss")); break;
 	}
 
-	addMarginItem({changesetStr, 2, -1, Qt::AlignLeft | Qt::AlignBottom, charFormat, blockFormat});
+	addMarginItem({changesetStr, 2, -1, m_marginFont, Qt::AlignLeft | Qt::AlignBottom});
 
-	addMarginItem({tr("%PAGE%"), 2, -1, Qt::AlignRight | Qt::AlignBottom, charFormat, blockFormat});
+	addMarginItem({tr("%PAGE%"), 2, -1, m_marginFont, Qt::AlignRight | Qt::AlignBottom});
 
 }
 
@@ -2930,9 +2957,9 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 
 		QPdfWriter pdfWriter(pdfFileName);
 
-		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
-		pdfWriter.setPageOrientation(QPageLayout::Portrait);
-		pdfWriter.setPageMargins(QMargins(20, 15, 10, 15), QPageLayout::Unit::Millimeter);
+		pdfWriter.setTitle(m_projectName);
+		pdfWriter.setPageSize(pageSize());
+		pdfWriter.setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
 		pdfWriter.setResolution(resolution());
 
 		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
@@ -2952,7 +2979,7 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 
 			generateTitlePage(&textCursor, m_diffParams.compareData, m_projectName, m_userName, multipleFiles == true ? subReportName : QString());
 
-			createMarginItems(&textCursor, m_diffParams.compareData, multipleFiles == true ? subReportName : QString());
+			createMarginItems(m_diffParams.compareData, multipleFiles == true ? subReportName : QString());
 
 			printDocument(&pdfWriter, &titleTextDocument, &painter, QString(), nullptr, nullptr, 0);
 		}
@@ -3009,7 +3036,7 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 			std::shared_ptr<VFrame30::Schema> schema = section->schema();
 			if (schema != nullptr)
 			{
-				printSchema(&pdfWriter, section->textDocument(), &painter, schema, section->compareItemActions());
+				printSchema(&pdfWriter, &painter, schema, section->textDocument(), &section->compareItemActions());
 			}
 
 			// Clear text document
@@ -3026,9 +3053,9 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 
 		QPdfWriter pdfWriter(filePath());
 
-		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
-		pdfWriter.setPageOrientation(QPageLayout::Portrait);
-		pdfWriter.setPageMargins(QMargins(20, 15, 10, 15), QPageLayout::Unit::Millimeter);
+		pdfWriter.setTitle(m_projectName);
+		pdfWriter.setPageSize(pageSize());
+		pdfWriter.setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
 		pdfWriter.setResolution(resolution());
 
 		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
