@@ -57,12 +57,12 @@ namespace VFrame30
 
 			// Take first signal identifier
 			//
-			var appSignalId = schemaItemValue.SignalIDs[0];
+			let appSignalId = schemaItemValue.SignalIDs[0];
 
 			// Get data from TuningService
 			//
-			var signalParam = tuning.signalParam(appSignalId);
-			var signalState = tuning.signalState(appSignalId);
+			let signalParam = tuning.signalParam(appSignalId);
+			let signalState = tuning.signalState(appSignalId);
 
 			if (signalState == undefined)
 			{

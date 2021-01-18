@@ -72,11 +72,11 @@ namespace VFrame30
 		\code
 		// Get static parameters of the signal "#SIGNALID_001"
 		//
-		var param = signals.signalParam("#SIGNALID_001");
+		let param = signals.signalParam("#SIGNALID_001");
 
 		// Get state of the signal "#SIGNALID_001"
 		//
-		var state = signals.signalState("#SIGNALID_001");
+		let state = signals.signalState("#SIGNALID_001");
 
 		// Check for functions result
 		//
@@ -100,7 +100,7 @@ namespace VFrame30
 
 		if (state.Valid === true)
 		{
-			var text = param.Caption;
+			let text = param.Caption;
 			...
 		}
 		\endcode
