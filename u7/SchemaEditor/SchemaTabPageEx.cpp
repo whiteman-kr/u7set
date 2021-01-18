@@ -4010,6 +4010,11 @@ void SchemaControlTabPageEx::compareSelectedFile()
 
 void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData compareData)
 {
+	if (isVisible() == false)
+	{
+		return;
+	}
+
 	// Can compare only files which are EquipmentObjects
 	//
 	if (object.isFile() == false)

@@ -1631,6 +1631,11 @@ void SignalsTabPage::showError(QString message)
 
 void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
 {
+	if (isVisible() == false)
+	{
+		return;
+	}
+
 	// Can compare only files which are EquipmentObjects
 	//
 	if (object.isSignal() == false)

@@ -84,8 +84,6 @@ namespace Builder
 
 		//--
 		//
-		QJSEngine m_jsEngine;
-
 		std::atomic_int m_progress;			// 0 - 100%
 	};
 

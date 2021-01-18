@@ -5638,15 +5638,15 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
 {
-	// var appSignalId = schemaItemValue.SignalIDs[0];
+	// let appSignalId = schemaItemValue.SignalIDs[0];
 
 	// Get data from AppDataService
-	// var signalParam = signals.signalParam(appSignalId);
-	// var signalState = signals.signalState(appSignalId);
+	// let signalParam = signals.signalParam(appSignalId);
+	// let signalState = signals.signalState(appSignalId);
 
 	// Get data from TuningService
-	// var signalParam = tuning.signalParam(appSignalId);
-	// var signalState = tuning.signalState(appSignalId);
+	// let signalParam = tuning.signalParam(appSignalId);
+	// let signalState = tuning.signalState(appSignalId);
 
 	// Get signal state
 	// if (signalState.Valid == true)
@@ -5793,11 +5793,11 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	QString preDrawScriptTemplateString = R"((function(schemaItemImageValue)
 {
 	// Get signal id by index from schema item
-	var appSignalId = schemaItemImageValue.SignalIDs[0];
+	let appSignalId = schemaItemImageValue.SignalIDs[0];
 
 	// Get data from AppDataService or TuningService sources
-	// var signalState = tuning.signalState(appSignalId);
-	var signalState = signals.signalState(appSignalId);
+	// let signalState = tuning.signalState(appSignalId);
+	let signalState = signals.signalState(appSignalId);
 
 	if (signalState.Valid == false)
 	{

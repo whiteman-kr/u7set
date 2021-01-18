@@ -361,6 +361,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0341.sql", "Upgrade to version 341, Changes in get_checked_out_files, getting all (inc. dangling) checked out files for root"},
 	{":/DatabaseUpgrade/Upgrade0342.sql", "Upgrade to version 342, Fixed undo_changes, added undo on delete to just added file"},
 	{":/DatabaseUpgrade/Upgrade0343.sql", "Upgrade to version 343, Add functions get_specific_signals_all_*"},
+	{":/DatabaseUpgrade/Upgrade0344.sql", "Upgrade to version 344, All configuration scripts use let instead of var declarations"},
 };
 
 int DbWorker::counter = 0;

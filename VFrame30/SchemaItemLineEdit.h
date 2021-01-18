@@ -64,8 +64,8 @@ namespace VFrame30
 		{
 			// Get current signal parameters and state
 			//
-			var param = tuning.signalParam(signalId);
-			var state = tuning.signalState(signalId);
+			let param = tuning.signalParam(signalId);
+			let state = tuning.signalState(signalId);
 
 			// Check if signal exists
 			//
@@ -85,7 +85,7 @@ namespace VFrame30
 
 			// Convert text value to number
 			//
-			var x = Number(text);
+			let x = Number(text);
 
 			if (isNaN(x) == true)
 			{
@@ -97,8 +97,8 @@ namespace VFrame30
 			//
 			if (param.IsAnalog == true)
 			{
-				var lowLimit = param.TuningLowBound;
-				var highLimit = param.TuningHighBound;
+				let lowLimit = param.TuningLowBound;
+				let highLimit = param.TuningHighBound;
 
 				if (x < lowLimit || x > highLimit)
 				{
@@ -129,17 +129,17 @@ namespace VFrame30
 		{
 			// Find widget by its ObjectName
 			//
-			var widget = view.findWidget(objectName);
+			let widget = view.findWidget(objectName);
 			if (widget == null)
 			{
 				return;
 			}
 
-			var enabled = true;
+			let enabled = true;
 
 			// Get signal state and set enabled to false if signal does not exist or is not valid
 			//
-			var state = tuning.signalState(signalId);
+			let state = tuning.signalState(signalId);
 			if (state == undefined || state.Valid == false)
 			{
 				enabled = false;
