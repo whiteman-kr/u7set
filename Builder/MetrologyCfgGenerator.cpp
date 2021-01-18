@@ -235,6 +235,14 @@ namespace Builder
 								hasWrongField = true;
 							}
 							break;
+
+						case E::ElectricUnit::Hz:
+
+							if (testElectricLimit_Input_Hz(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
 					}
 				}
 			}
@@ -684,6 +692,59 @@ namespace Builder
 		else
 		{
 			if (signal.sensorType() != E::SensorType::uA_m20_p20)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::Hz)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::Hz_50_50000)
 			{
 				return false;
 			}

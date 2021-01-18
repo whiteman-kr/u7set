@@ -59,7 +59,7 @@ namespace VFrame30
 		{
 			// Get the state of the signal "#APPSIGNALID01"
 			//
-			var state = signals.signalState("#APPSIGNALID01");
+			let state = signals.signalState("#APPSIGNALID01");
 
 			if (state == undefined || state.Valid == false)
 			{

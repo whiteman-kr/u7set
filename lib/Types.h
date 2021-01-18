@@ -290,6 +290,7 @@ public:
 		Ohm = 3,
 		V = 4,
 		uA = 5,
+		Hz = 6,
 
 		// oder version
 		// NoInputUnit = 1,
@@ -353,6 +354,8 @@ public:
 		Ohm_Raw = 33,
 
 		uA_m20_p20 = 34,
+
+		Hz_50_50000 = 35,
 	};
 	Q_ENUM(SensorType)
 

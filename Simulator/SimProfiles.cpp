@@ -222,6 +222,12 @@ namespace Sim
 				continue;
 			}
 
+			if (currentProfile.compare("Default", Qt::CaseInsensitive) == 0)
+			{
+				*errorMessage = QObject::tr("Profile name 'Default' is reserved, please use another profile name");
+				return false;
+			}
+
 			if (regExpProperty.exactMatch(str) == true)
 			{
 				int ptPos = str.indexOf('.');

@@ -195,6 +195,10 @@ namespace VFrame30
 		//
 		drawText(drawParam, r);
 
+		// Remove brush to draw non-filled rects
+		//
+		p->setBrush(Qt::NoBrush);
+
 		// Drawing frame rect
 		//
 		if (drawRect() == true)

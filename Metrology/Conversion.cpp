@@ -81,6 +81,7 @@ double conversion(double val, ConversionType conversionType, const Metrology::Si
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 				case E::ElectricUnit::uA:
+				case E::ElectricUnit::Hz:
 
 					retVal = (val - param.physicalLowLimit())*(param.electricHighLimit() - param.electricLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.electricLowLimit();
 
@@ -163,6 +164,7 @@ double conversion(double val, ConversionType conversionType, const Metrology::Si
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 				case E::ElectricUnit::uA:
+				case E::ElectricUnit::Hz:
 
 					retVal = (val - param.electricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.electricHighLimit() - param.electricLowLimit()) + param.physicalLowLimit();
 

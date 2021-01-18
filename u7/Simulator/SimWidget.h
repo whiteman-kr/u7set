@@ -65,6 +65,7 @@ protected slots:
 	void stopSimulation(bool stopSimulationThread = false);
 
 	void allowLanCommToggled(bool state);
+	void profileComboTextChanged(QString text);
 
 	void showSnapshot();
 	void showFindSignal();
@@ -119,6 +120,7 @@ private:
 	QAction* m_stopAction = nullptr;
 
 	QAction* m_allowLanComm = nullptr;
+	QComboBox* m_profilesComboBox = nullptr;
 
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
