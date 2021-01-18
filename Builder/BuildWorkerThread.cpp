@@ -1633,7 +1633,7 @@ namespace Builder
 			return true;
 		}
 
-		LOG_MESSAGE(m_log, QString("Settings profiles checking..."));
+		LOG_MESSAGE(m_log, QString("Software settings profiles checking..."));
 
 		bool result = true;
 
