@@ -183,8 +183,8 @@ namespace Sim
 
 		QStringList strings = string.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
-		QRegExp regExpProfile("\\[[a-zA-Z\\d_]+\\]$");
-		QRegExp regExpProperty("[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-]+\"?;$");
+		QRegExp regExpProfile("^\\[[a-zA-Z\\d_]+\\]");
+		QRegExp regExpProperty("^[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-/\\\\:]+\"?;");	// OBJECT1.a_1 = " hello+-./\: ";
 		QRegExp regExpUInt("^(?:0|[1-9][0-9]*)$");
 		QRegExp regExpInt("^-?(?:0|[1-9][0-9]*)$");
 		QRegExp regExpDouble("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
@@ -194,22 +194,23 @@ namespace Sim
 
 		for (const QString& dataStr : strings)
 		{
-			QString str = dataStr;
+			QString str = dataStr.trimmed();
 
-			int commentPos = str.indexOf("//");
-			if (commentPos != -1)
-			{
-				str = str.left(commentPos);
-			}
-
-			str = str.trimmed();
 			if (str.isEmpty() == true)
 			{
 				continue;
 			}
 
-			if (regExpProfile.exactMatch(str) == true)
+			if (str.startsWith("//"))
 			{
+				continue;
+			}
+
+			int pos = regExpProfile.indexIn(str);
+			if (pos != -1 && regExpProfile.capturedTexts().size() == 1)
+			{
+				str = regExpProfile.cap(0);
+
 				str = str.remove(QRegExp("[\\[\\]]"));
 
 				if (str.isEmpty() == true)
@@ -228,8 +229,11 @@ namespace Sim
 				return false;
 			}
 
-			if (regExpProperty.exactMatch(str) == true)
+			pos = regExpProperty.indexIn(str);
+			if (pos != -1 && regExpProperty.capturedTexts().size() == 1)
 			{
+				str = regExpProperty.cap(0);
+
 				int ptPos = str.indexOf('.');
 				int eqPos = str.indexOf('=');
 

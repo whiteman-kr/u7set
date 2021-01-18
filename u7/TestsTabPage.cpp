@@ -2638,6 +2638,11 @@ void TestsWidget::closeDocumentsForDeletedFiles()
 
 void TestsWidget::compareObject(DbChangesetObject object, CompareData compareData)
 {
+	if (isVisible() == false)
+	{
+		return;
+	}
+
 	// Can compare only files which are EquipmentObjects
 	//
 	if (object.isFile() == false)
@@ -2956,7 +2961,7 @@ void TestsWidget::createTestsDock()
 
 	QVBoxLayout* filesLayout = new QVBoxLayout(filesWidget);
 
-	filesLayout->addWidget(new QLabel(tr("Open Files")));
+	filesLayout->addWidget(new QLabel(tr("Opened Files")));
 
 	m_openFilesTreeWidget = new QTreeWidget();
 	QStringList header;
