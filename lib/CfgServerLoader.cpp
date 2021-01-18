@@ -12,14 +12,15 @@
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgServerLoaderBase::m_BuildFileInfoArrayRegistered = false;
+bool CfgServerLoaderBase::m_typesRegistered = false;
 
 CfgServerLoaderBase::CfgServerLoaderBase()
 {
-	if (m_BuildFileInfoArrayRegistered == false)
+	if (m_typesRegistered == false)
 	{
 		qRegisterMetaType<BuildFileInfoArray>("BuildFileInfoArray");
-		m_BuildFileInfoArrayRegistered = true;
+		qRegisterMetaType<std::shared_ptr<const SoftwareSettings>>("std::shared_ptr<const SoftwareSettings>");
+		m_typesRegistered = true;
 	}
 }
 
@@ -368,7 +369,7 @@ QString CfgLoader::currentSettingsProfile() const
 
 	AUTO_LOCK(m_mutex);
 
-	profile = m_currentSettingsProfile;
+	profile = m_currentSettingsProfileID;
 
 	return profile;
 }
@@ -400,7 +401,7 @@ void CfgLoader::onConnection()
 
 	resetStatuses();
 
-	startConfigurationXmlLoading();
+	sendGetSessionParamsRequest();
 }
 
 void CfgLoader::onDisconnection()
@@ -566,7 +567,7 @@ void CfgLoader::processGetSessionParamsReply(const char* replyData, quint32 repl
 
 	m_mutex.lock();
 
-	m_currentSettingsProfile = currentProfile;
+	m_currentSettingsProfileID = currentProfile;
 
 	m_mutex.unlock();
 
@@ -672,6 +673,8 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		{
 			DEBUG_LOG_MSG(m_logger, "Downloaded Configuration.xml - Ok");
 
+			bool result = true;
+
 			if (readConfigurationXml() == true)
 			{
 				m_configurationXmlReady = true;
@@ -685,11 +688,32 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					bfiArray.append(bfi);
 				}
 
-				DEBUG_LOG_MSG(m_logger, "Read Configuration.xml - Ok");
+				std::shared_ptr<const SoftwareSettings> curSettingsProfile = getCurrentSettingsProfile<SoftwareSettings>();
 
-				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData, bfiArray);
+				if (curSettingsProfile != nullptr)
+				{
+					DEBUG_LOG_MSG(m_logger, QString("Current software settings profile '%1' read - Ok").
+												arg(m_currentSettingsProfileID));
+
+					DEBUG_LOG_MSG(m_logger, "Read Configuration.xml - Ok");
+
+					emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData,
+												   bfiArray,
+												   curSettingsProfile);
+				}
+				else
+				{
+					DEBUG_LOG_ERR(m_logger, QString("ERROR reading software settings profile - %1").
+												arg(m_currentSettingsProfileID));
+					result = false;
+				}
 			}
 			else
+			{
+				result = false;
+			}
+
+			if (result == false)
 			{
 				DEBUG_LOG_ERR(m_logger, "ERROR reading Configuration.xml");
 			}
@@ -788,7 +812,7 @@ bool CfgLoader::readConfigurationXml()
 	cfi.md5 = Md5Hash::hashStr(fileData);
 	cfi.fileData.swap(fileData);
 
-	bool result = m_settingsSet.readFromXml(fileData);
+	bool result = m_settingsSet.readFromXml(cfi.fileData);
 
 	if (result == false)
 	{

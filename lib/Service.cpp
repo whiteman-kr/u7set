@@ -226,13 +226,6 @@ void ServiceWorker::processCmdLineSettings()
 
 void ServiceWorker::onThreadStarted()
 {
-	QString swInfo =getSoftwareInfoStr();
-
-	DEBUG_LOG_MSG(m_logger, Separator::LINE);
-	DEBUG_LOG_MSG(m_logger, swInfo);
-	DEBUG_LOG_MSG(m_logger, Separator::LINE);
-	DEBUG_LOG_MSG(m_logger, QString());
-
 	// loading common settings of services
 
 	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
@@ -606,6 +599,13 @@ int ServiceStarter::exec()
 
 int ServiceStarter::privateRun()
 {
+	QString swInfo = m_serviceWorker.getSoftwareInfoStr();
+
+	DEBUG_LOG_MSG(m_logger, Separator::LINE);
+	DEBUG_LOG_MSG(m_logger, swInfo);
+	DEBUG_LOG_MSG(m_logger, Separator::LINE);
+	DEBUG_LOG_MSG(m_logger, QString());
+
 	m_serviceWorker.initAndProcessCmdLineSettings();			// 1. init CommanLineParser
 																// 2. process cmd line args
 																// 3. update and store service settings

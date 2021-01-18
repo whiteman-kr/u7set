@@ -62,9 +62,10 @@ private:
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void onConfigurationReady(const QByteArray configurationXmlData,
+							  const BuildFileInfoArray buildFileInfoArray,
+							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	bool readConfigurationSettings(const QByteArray& fileData);
 	bool readDataSources(const QByteArray& fileData);
 	bool readAppSignals(const QByteArray& fileData);
 
@@ -105,7 +106,8 @@ private:
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	AppDataServiceSettings m_cfgSettings;
+	AppDataServiceSettings m_curSettingsProfile;
+
 	int m_appDataProcessingThreadCount = 0;
 	QString m_strCmdLineAppDataReceivingIP;
 	HostAddressPort m_cmdLineAppDataReceivingIP;

@@ -1421,24 +1421,33 @@ void Options::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool Options::setMetrologySettings(std::shared_ptr<const SoftwareSettings> curSettingsProfile)
+{
+	const MetrologySettings* typedSettingsPtr = dynamic_cast<const MetrologySettings*>(curSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	// making modificable (if required) local copy of settings
+	//
+	m_settings = *typedSettingsPtr;
+
+	return true;
+}
+
 bool Options::readFromXml(const QByteArray& fileData)
 {
 	bool result = false;
 
 	result = m_projectInfo.readFromXml(fileData);
-	if (result == false)
-	{
-		return false;
-	}
-
-	result = m_softwareSettingsSet.readFromXml(fileData);
 
 	if (result == false)
 	{
 		return false;
 	}
-
-	m_settings =
 
 	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
 	{

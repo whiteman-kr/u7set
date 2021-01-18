@@ -365,7 +365,22 @@ namespace Tuning
 
 		bool result = true;
 
-		result &= m_cfgSettings.readFromXml(xml);
+		result = softwareSettingsSet().readFromXml(cfgXmlData);
+
+		if (result == true)
+		{
+			std::shared_ptr<const TuningServiceSettings> typedSettingsPtr =
+					softwareSettingsSet().getSettingsProfile<TuningServiceSettings>(SettingsProfile::DEFAULT);
+
+			if (typedSettingsPtr != nullptr)
+			{
+				m_cfgSettings = *typedSettingsPtr;
+			}
+			else
+			{
+				result = false;
+			}
+		}
 
 		if  (result == true)
 		{
@@ -572,24 +587,26 @@ namespace Tuning
 		return m_tuningSimIP.isSet();
 	}
 
-	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+												   const BuildFileInfoArray buildFileInfoArray,
+												   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 	{
+		Q_UNUSED(configurationXmlData);
+
 		if (m_cfgLoaderThread == nullptr)
 		{
 			return;
 		}
 
-		DEBUG_LOG_MSG(m_logger, QString("Configuration is ready"));
+		const TuningServiceSettings* typedSettingsPtr = dynamic_cast<const TuningServiceSettings*>(curSettingsProfile.get());
 
-		bool result = true;
-
-		result = readConfiguration(configurationXmlData);
-
-		if (result == false)
+		if (typedSettingsPtr == nullptr)
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Configuration reading error"));
+			DEBUG_LOG_MSG(logger(), "Settings casting error!");
 			return;
 		}
+
+		m_cfgSettings = *typedSettingsPtr;
 
 		//
 
@@ -601,6 +618,8 @@ namespace Tuning
 		//
 
 		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
+
+		bool result = true;
 
 		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 		{

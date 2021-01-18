@@ -96,7 +96,9 @@ namespace Tuning
 		bool isSimulationMode() const;
 
 	private slots:
-		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+		void onConfigurationReady(const QByteArray configurationXmlData,
+								  const BuildFileInfoArray buildFileInfoArray,
+								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 	private:
 		QString m_tuningSimIPStr;

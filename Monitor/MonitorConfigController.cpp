@@ -272,8 +272,12 @@ void MonitorConfigController::start()
 	return;
 }
 
-void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
+void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData,
+													  const BuildFileInfoArray buildFileInfoArray,
+													  std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
+	Q_UNUSED(buildFileInfoArray);
+
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 
 	// Get GlobalScript.js file
@@ -368,7 +372,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 			// Settings node
 			//
-			result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
+			result &= applyCurSettingsProfile(curSettingsProfile, &readSettings);
 		}
 
 		// Error handling
@@ -586,25 +590,29 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool MonitorConfigController::xmlReadSettingsSection(const QByteArray& xmlFileData, ConfigSettings* outSetting)
+bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting)
 {
+	if (curSettingsProfile == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
 	if (outSetting == nullptr)
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	XmlReadHelper xmlReader(xmlFileData);
+	const MonitorSettings* typedSettingsPtr = dynamic_cast<const MonitorSettings*>(curSettingsProfile.get());
 
-	MonitorSettings ms;
-
-	bool result = ms.readFromXml(xmlReader);
-
-	if (result == false)
+	if (typedSettingsPtr == nullptr)
 	{
-		outSetting->errorMessage += tr("Error reading <Settings> section from configuration.xml\n");
+		Q_ASSERT(false);
 		return false;
 	}
+
+	const MonitorSettings& ms = *typedSettingsPtr;
 
 	//
 

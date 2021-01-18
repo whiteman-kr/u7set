@@ -67,9 +67,13 @@ public:
 
 private slots:
 
-	void				slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void				slot_configurationReady(const QByteArray configurationXmlData,
+												const BuildFileInfoArray buildFileInfoArray,
+												std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
-	bool				readConfiguration(const QByteArray& fileData);
+	bool				readConfiguration(const QByteArray& fileData,
+										  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
+
 	bool				readMetrologyItems(const QByteArray& fileData);
 	bool				readMetrologySignalSet(const QByteArray& fileData);
 	bool				readComparatorSet(const QByteArray& fileData);

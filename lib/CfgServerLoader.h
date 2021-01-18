@@ -29,7 +29,7 @@ protected:
 	};
 
 private:
-	static bool m_BuildFileInfoArrayRegistered;
+	static bool m_typesRegistered;
 };
 
 // -------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public:
 	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
 
 	template<typename T>
-	std::shared_ptr<const T> getCurrentSettingsProfile(const QString& profile) const;
+	std::shared_ptr<const T> getCurrentSettingsProfile() const;
 
 	QStringList getSettingsProfiles() const;
 
@@ -141,7 +141,9 @@ public:
 
 signals:
 	void signal_enableDownloadConfiguration();
-	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_configurationReady(const QByteArray configurationXmlData,
+								   const BuildFileInfoArray buildFileInfoArray,
+								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 	void signal_getFile(const QString& fileName, QByteArray* fileData);
 	void signal_fileReady();					// emit only for manual requests
 	void signal_configurationChanged();
@@ -215,7 +217,7 @@ private:
 	int m_appInstance = 0;
 	volatile bool m_enableDownloadConfiguration = false;
 
-	QString m_currentSettingsProfile;
+	QString m_currentSettingsProfileID;
 	SoftwareSettingsSet m_settingsSet;
 
 	//
@@ -272,11 +274,11 @@ std::shared_ptr<const T> CfgLoader::getSettingsProfile(const QString& profile) c
 }
 
 template<typename T>
-std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile(const QString& profile) const
+std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile() const
 {
 	AUTO_LOCK(m_mutex);
 
-	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(m_currentSettingsProfile);
+	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(m_currentSettingsProfileID);
 
 	return settings;
 }
@@ -329,7 +331,9 @@ public:
 							 bool enableDownloadConfiguration);
 signals:
 	void signal_configurationChanged();
-	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_configurationReady(const QByteArray configurationXmlData,
+								   const BuildFileInfoArray buildFileInfoArray,
+								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
 	void signal_unknownClient();
 	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);

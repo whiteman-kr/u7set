@@ -201,7 +201,9 @@ void ConfigController::start()
 	return;
 }
 
-void ConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ConfigController::slot_configurationReady(const QByteArray configurationXmlData,
+											   const BuildFileInfoArray buildFileInfoArray,
+											   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
 	// Copy old settings to new settings, EXCEPT schemas information!
 	//
@@ -255,7 +257,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Settings node
 		//
-		result &= xmlReadSettingsSection(configurationXmlData, &readSettings);
+		result &= applyCurSettingsProfile(curSettingsProfile, &readSettings);
 	}
 
 	// Error handling
@@ -605,7 +607,8 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, ConfigSettings* outSetting)
+bool ConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile,
+											   ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr)
 	{
@@ -613,15 +616,15 @@ bool ConfigController::xmlReadSettingsSection(const QByteArray& cfgFiledata, Con
 		return false;
 	}
 
-	XmlReadHelper xmlReader(cfgFiledata);
+	const TuningClientSettings* typedSettingsPtr = dynamic_cast<const TuningClientSettings*>(curSettingsProfile.get());
 
-	bool result = outSetting->clientSettings.readFromXml(xmlReader);
-
-	if (result == false)
+	if (typedSettingsPtr == nullptr)
 	{
-		outSetting->errorMessage += tr("Error reading <Settings> section from file configuration.xml\n");
+		outSetting->errorMessage += tr("Settings applying error!\n");
 		return false;
 	}
+
+	outSetting->clientSettings = *typedSettingsPtr;
 
 	outSetting->serviceAddress = ConfigConnection(outSetting->clientSettings.tuningServiceID,
 														outSetting->clientSettings.tuningServiceIP,

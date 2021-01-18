@@ -101,12 +101,15 @@ public slots:
 	void start();
 
 private slots:
-	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void slot_configurationReady(const QByteArray configurationXmlData,
+								 const BuildFileInfoArray buildFileInfoArray,
+								 std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 private:
 	bool xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
-	bool xmlReadSettingsSection(const QByteArray& xmlFileData, ConfigSettings* outSetting);
+
+	bool applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting);
 
 	// Public properties
 	//
