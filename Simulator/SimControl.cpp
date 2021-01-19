@@ -223,7 +223,7 @@ namespace Sim
 				m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
 			}
 
-			m_simulator->software().startSimulation();
+			m_simulator->software().startSimulation(m_simulator->currentProfileName());
 			break;
 
 		case SimControlState::Run:

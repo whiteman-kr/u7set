@@ -14,6 +14,9 @@
 
 namespace Sim
 {
+	const QString Simulator::DefaultProfileName = "Default";
+
+
 	//
 	// Simulator
 	//
@@ -145,6 +148,7 @@ namespace Sim
 		m_connections.clear();
 		m_software.clear();
 		m_profiles.clear();
+		m_currentProfileName = DefaultProfileName;
 
 		return;
 	}
@@ -637,6 +641,30 @@ namespace Sim
 	const Sim::Profiles& Simulator::profiles() const
 	{
 		return m_profiles;
+	}
+
+	bool Simulator::setCurrentProfile(QString profileName)
+	{
+		if (profiles().hasProfile(profileName) == false)
+		{
+			m_log.writeError(tr("Cannot set profile %1, this profile not found").arg(profileName));
+
+			m_currentProfileName = DefaultProfileName;
+			return false;
+		}
+
+		m_currentProfileName = profileName;
+		return true;
+	}
+
+	QString Simulator::currentProfileName() const
+	{
+		return m_currentProfileName;
+	}
+
+	const Sim::Profile& Simulator::currentProfile() const
+	{
+		return m_profiles.profile(m_currentProfileName);
 	}
 
 	Sim::Control& Simulator::control()

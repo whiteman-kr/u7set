@@ -19,7 +19,7 @@ namespace Sim
 		shutdownTransmitterThread();
 	}
 
-	bool AppDataTransmitter::startSimulation()
+	bool AppDataTransmitter::startSimulation(QString profileName)
 	{
 		TEST_PTR_RETURN_FALSE(m_simulator);
 

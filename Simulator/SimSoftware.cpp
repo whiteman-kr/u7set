@@ -54,17 +54,17 @@ namespace  Sim
 		return ok;
 	}
 
-	bool Software::startSimulation()
+	bool Software::startSimulation(QString profileName)
 	{
 		bool ok = true;
 
-		ok &= m_appDataTransmitter.startSimulation();
+		ok &= m_appDataTransmitter.startSimulation(profileName);
 
 		for (auto&[id, tcs] : m_tuningServiceCommunicators)
 		{
 			Q_UNUSED(id);
 
-			ok &= tcs->startSimulation();
+			ok &= tcs->startSimulation(profileName);
 		}
 
 		return ok;

@@ -27,7 +27,7 @@ namespace Sim
 		stopProcessingThread();
 	}
 
-	bool TuningServiceCommunicator::startSimulation()
+	bool TuningServiceCommunicator::startSimulation(QString profileName)
 	{
 		startProcessingThread();
 

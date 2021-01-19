@@ -97,6 +97,10 @@ namespace Sim
 		[[nodiscard]] Sim::Profiles& profiles();
 		[[nodiscard]] const Sim::Profiles& profiles() const;
 
+		bool setCurrentProfile(QString profileName);
+		[[nodiscard]] QString currentProfileName() const;
+		[[nodiscard]] const Sim::Profile& currentProfile() const;
+
 		[[nodiscard]] Sim::Control& control();
 		[[nodiscard]] const Sim::Control& control() const;
 
@@ -124,7 +128,10 @@ namespace Sim
 
 		// Software profiles - different software settings can be applied via these profiles
 		//
+		static const QString DefaultProfileName;
+
 		Sim::Profiles m_profiles;
+		QString m_currentProfileName = DefaultProfileName;
 
 		// Control thread
 		//
