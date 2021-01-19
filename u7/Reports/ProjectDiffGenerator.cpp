@@ -9,8 +9,6 @@
 
 #include "../lib/Ui/DialogProgress.h"
 
-#include <QPageSetupDialog>
-#include <QPrinter>
 #include "Settings.h"
 
 //
@@ -248,49 +246,13 @@ void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& 
 // ProjectDiffThread
 //
 
-QPageSize ProjectDiffGeneratorThread::m_albumPageSize = QPageSize(QPageSize::A4);
-QPageLayout::Orientation ProjectDiffGeneratorThread::m_albumOrientation = QPageLayout::Orientation::Portrait;
-QMarginsF ProjectDiffGeneratorThread::m_albumMargins = QMarginsF(20, 15, 10, 15);
-
-void ProjectDiffGeneratorThread::run(const ProjectDiffParams& settings, const QString& projectName, const QString& userName, const QString& userPassword, QWidget* parent)
+void ProjectDiffGeneratorThread::run(const QString& fileName,
+									 const ProjectDiffReportParams& settings,
+									 const QString& projectName,
+									 const QString& userName,
+									 const QString& userPassword,
+									 QWidget* parent)
 {
-	// Get filename
-	//
-
-	QString fileName = QFileDialog::getSaveFileName(parent, QObject::tr("Diff Report"),
-													"./",
-													QObject::tr("PDF documents (*.pdf)"));
-
-	if (fileName.isNull() == true)
-	{
-		return;
-	}
-
-	// Ask for page format
-
-	QPrinter printer(QPrinter::HighResolution);
-
-	QPageSize::PageSizeId id = QPageSize::id(m_albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-	if (id == QPageSize::Custom)
-	{
-		id = QPageSize::A4;
-	}
-
-	printer.setFullPage(true);
-	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(m_albumOrientation);
-	printer.setPageMargins(m_albumMargins, QPageLayout::Unit::Millimeter);
-
-	QPageSetupDialog d(&printer, parent);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	m_albumPageSize = QPageSize(d.printer()->pageLayout().pageSize());
-	m_albumOrientation = d.printer()->pageLayout().orientation();
-	m_albumMargins = d.printer()->pageLayout().margins();
-
 	// Create schema view
 
 	ReportSchemaView* schemaView = new ReportSchemaView(parent);
@@ -302,8 +264,6 @@ void ProjectDiffGeneratorThread::run(const ProjectDiffParams& settings, const QS
 	// Create Worker
 
 	ProjectDiffGenerator* worker = new ProjectDiffGenerator(fileName, settings, schemaView, projectName, userName, userPassword);
-	worker->setPageSize(m_albumPageSize);
-	worker->setPageMargins(m_albumMargins);
 
 	// Create Progress Dialog
 
@@ -360,14 +320,14 @@ void ProjectDiffGeneratorThread::run(const ProjectDiffParams& settings, const QS
 //
 
 ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
-									 const ProjectDiffParams& settings,
+									 const ProjectDiffReportParams& settings,
 									 ReportSchemaView* schemaView,
 									 const QString& projectName,
 									 const QString& userName,
 									 const QString& userPassword):
 	ReportGenerator(schemaView),
 	m_filePath(fileName),
-	m_diffParams(settings),
+	m_reportParams(settings),
 	m_projectName(projectName),
 	m_userName(userName),
 	m_userPassword(userPassword)
@@ -387,19 +347,21 @@ ProjectDiffGenerator::~ProjectDiffGenerator()
 	qDebug() << "ProjectDiffGenerator deleted";
 }
 
-std::vector<ProjectDiffFileType> ProjectDiffGenerator::defaultProjectFileTypes(DbController* db)
+std::vector<ProjectDiffFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
 {
-	std::vector<ProjectDiffFileType> result;
+	std::vector<ProjectDiffFileTypeParams> result;
 
 	result.push_back({db->hcFileId(),				QObject::tr("Hardware Configuration"),	true});
 
 	result.push_back({applicationSignalsTypeId(),	QObject::tr("Application Signals"),		true});
 
-	result.push_back({db->mvsFileId(),				QObject::tr("Monitor Schemas"),			true});
-	result.push_back({db->tvsFileId(),				QObject::tr("Tuning Schemas"),			true});
-	result.push_back({db->dvsFileId(),				QObject::tr("Diagnostics Schemas"),		true});
-	result.push_back({db->alFileId(),				QObject::tr("Application Logic"),		true});
-	result.push_back({db->ufblFileId(),				QObject::tr("UFBL Descriptions"),		true});
+
+	//Schemas
+	result.push_back({db->mvsFileId(),				QObject::tr("Monitor Schemas"),			true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
+	result.push_back({db->tvsFileId(),				QObject::tr("Tuning Schemas"),			true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
+	result.push_back({db->dvsFileId(),				QObject::tr("Diagnostics Schemas"),		true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
+	result.push_back({db->alFileId(),				QObject::tr("Application Logic"),		true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
+	result.push_back({db->ufblFileId(),				QObject::tr("UFBL Descriptions"),		true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
 
 	result.push_back({db->busTypesFileId(),			QObject::tr("Busses"),					true});
 	result.push_back({db->connectionsFileId(),		QObject::tr("Connections"),				true});
@@ -417,7 +379,7 @@ std::vector<ProjectDiffFileType> ProjectDiffGenerator::defaultProjectFileTypes(D
 
 void ProjectDiffGenerator::process()
 {
-	std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents;
+	std::map<int, std::vector<std::shared_ptr<ReportSection>>> reportContents;
 
 	try
 	{
@@ -597,7 +559,7 @@ DbController* ProjectDiffGenerator::db()
 	return &m_db;
 }
 
-void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents)
+void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_ptr<ReportSection>>>& reportContents)
 {
 	{
 		QMutexLocker l(&m_statisticsMutex);
@@ -623,14 +585,14 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 	// Place signals to front
 	//
-	for (int i = 0; i < m_diffParams.projectFileTypes.size(); i++)
+	for (int i = 0; i < m_reportParams.fileTypeParams.size(); i++)
 	{
-		ProjectDiffFileType ft = m_diffParams.projectFileTypes[i];
+		ProjectDiffFileTypeParams ft = m_reportParams.fileTypeParams[i];
 
 		if (ft.fileId == applicationSignalsTypeId() && ft.selected == true && i != 0)
 		{
-			m_diffParams.projectFileTypes.erase(m_diffParams.projectFileTypes.begin() + i);
-			m_diffParams.projectFileTypes.insert(m_diffParams.projectFileTypes.begin(), ft);
+			m_reportParams.fileTypeParams.erase(m_reportParams.fileTypeParams.begin() + i);
+			m_reportParams.fileTypeParams.insert(m_reportParams.fileTypeParams.begin(), ft);
 			break;
 		}
 	}
@@ -644,7 +606,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 	std::vector<DbFileTree> filesTrees;
 
-	for (const ProjectDiffFileType& ft : m_diffParams.projectFileTypes)
+	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
 		if (ft.selected == false)
 		{
@@ -659,7 +621,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = ft.fileName;
+			m_currentSectionName = ft.caption;
 		}
 
 		filesTrees.push_back({});
@@ -685,7 +647,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 	int fileTreeIndex = 0;
 
-	for (const ProjectDiffFileType& ft : m_diffParams.projectFileTypes)
+	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
 		if (ft.selected == false)
 		{
@@ -703,7 +665,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = ft.fileName;
+			m_currentSectionName = ft.caption;
 		}
 
 		std::shared_ptr<ReportSection> headerSection = std::make_shared<ReportSection>(QString());
@@ -713,7 +675,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 		saveFormat();
 		setTextAlignment(Qt::AlignHCenter);
 		setFont(m_headerFont);
-		headerSection->addText(tr("%1\n\n").arg(ft.fileName), currentCharFormat(), currentBlockFormat());
+		headerSection->addText(tr("%1\n\n").arg(ft.caption), currentCharFormat(), currentBlockFormat());
 		restoreFormat();
 
 		std::shared_ptr<ReportTable> headerTable;
@@ -734,7 +696,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 												  currentCharFormat());
 			restoreFormat();
 
-			compareSignals(m_diffParams.compareData, headerTable.get(), &fileTypeSections);
+			compareSignals(m_reportParams.compareData, headerTable.get(), &fileTypeSections);
 		}
 		else
 		{
@@ -753,7 +715,7 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 			for (const auto& child : children)
 			{
-				compareFilesRecursive(ft.fileId, filesTree, child, m_diffParams.compareData, headerTable.get(), &fileTypeSections);
+				compareFilesRecursive(ft.fileId, filesTree, child, m_reportParams.compareData, headerTable.get(), &fileTypeSections);
 			}
 		}
 
@@ -779,15 +741,15 @@ void ProjectDiffGenerator::compareProject(std::map<QString, std::vector<std::sha
 
 			fileTypeSections.insert(fileTypeSections.begin(), headerSection);
 
-			if (m_diffParams.multipleFiles == false)
+			if (m_reportParams.multipleFiles == false)
 			{
-				std::vector<std::shared_ptr<ReportSection>>& all = reportContents["ALL"];
+				std::vector<std::shared_ptr<ReportSection>>& all = reportContents[0];
 
 				all.insert(all.end(), fileTypeSections.begin(), fileTypeSections.end());
 			}
 			else
 			{
-				reportContents[ft.fileName] = fileTypeSections;
+				reportContents[ft.fileId] = fileTypeSections;
 			}
 		}
 	}
@@ -2278,7 +2240,7 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 	{
 		// Skip expert properties
 		//
-		if (p->expert() == true && m_diffParams.expertProperties == false)
+		if (p->expert() == true && m_reportParams.expertProperties == false)
 		{
 			continue;
 		}
@@ -2294,7 +2256,7 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 	{
 		// Skip expert properties
 		//
-		if (p->expert() == true && m_diffParams.expertProperties == false)
+		if (p->expert() == true && m_reportParams.expertProperties == false)
 		{
 			continue;
 		}
@@ -2702,7 +2664,7 @@ void ProjectDiffGenerator::createMarginItems(const CompareData& compareData, con
 
 	QString projectNameStr = tr("Project: ") + m_projectName;
 
-	if (m_diffParams.multipleFiles == true && subreportName.isEmpty() == false)
+	if (m_reportParams.multipleFiles == true && subreportName.isEmpty() == false)
 	{
 		projectNameStr += tr("; section: %1").arg(subreportName);
 	}
@@ -2907,22 +2869,18 @@ QString ProjectDiffGenerator::changesetString(const Signal& signal)
 	}
 }
 
-void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents)
+void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_ptr<ReportSection>>> reportContents)
 {
-	bool multipleFiles = m_diffParams.multipleFiles == true &&
-						 reportContents.size() > 1;
-
 	QStringList generatedReportFiles;
 
 	for (auto it = reportContents.begin(); it != reportContents.end(); it++)
 	{
-		const QString& subReportName = it->first;
 		const std::vector<std::shared_ptr<ReportSection>>& sections = it->second;
+
+		// Render all objects to documents
 
 		int sectionsPagesCount = 0;
 
-		// Render all objects to documents
-		//
 		{
 			QMutexLocker l(&m_statisticsMutex);
 			m_currentStatus = WorkerStatus::Rendering;
@@ -2931,34 +2889,83 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 			m_sectionIndex = 0;
 		}
 
-		// Init PDF document
+		// Init PDF file parameters
+
+		QString subreportName;
 
 		QString pdfFileName = filePath();
 
-		if (multipleFiles == true)
+		if (m_reportParams.multipleFiles == true)
 		{
+			int subreportFileType = it->first;
+
+			for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+			{
+				if (ft.fileId == subreportFileType)
+				{
+					subreportName = ft.caption;
+					break;
+				}
+			}
+
+			if (subreportName.isEmpty() == true)
+			{
+				Q_ASSERT(false);
+				subreportName = tr("NoName");
+			}
+
 			int pos = pdfFileName.lastIndexOf('.');
 			if (pos != -1)
 			{
-				pdfFileName.insert(pos, tr("_%1").arg(subReportName));
+				pdfFileName.insert(pos, tr("_%1").arg(subreportName));
 			}
 			else
 			{
-				pdfFileName += tr("_%1.pdf").arg(subReportName);
+				pdfFileName += tr("_%1.pdf").arg(subreportName);
 			}
 
 			pdfFileName.replace(' ', '_');
 
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentReportName = subReportName;
+			m_currentReportName = subreportName;
+
+			// Set subreport page size
+			//
+			bool pageSizeFound = false;
+			for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+			{
+				if (ft.fileId == subreportFileType)
+				{
+					setPageSize(ft.pageSize);
+					setPageOrientation(ft.orientation);
+					setPageMargins(ft.margins);
+
+					pageSizeFound = true;
+					break;
+				}
+			}
+			if (pageSizeFound == false)
+			{
+				Q_ASSERT(false);
+			}
+		}
+		else
+		{
+			// Set full report page size
+			//
+			setPageSize(m_reportParams.albumPageSize);
+			setPageOrientation(m_reportParams.albumOrientation);
+			setPageMargins(m_reportParams.albumMargins);
 		}
 
 		generatedReportFiles.push_back(pdfFileName);
 
-		QPdfWriter pdfWriter(pdfFileName);
+		// Create PDF writer
 
+		QPdfWriter pdfWriter(pdfFileName);
 		pdfWriter.setTitle(m_projectName);
 		pdfWriter.setPageSize(pageSize());
+		pdfWriter.setPageOrientation(pageOrientation());
 		pdfWriter.setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
 		pdfWriter.setResolution(resolution());
 
@@ -2977,9 +2984,9 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 
 			// Generate title page
 
-			generateTitlePage(&textCursor, m_diffParams.compareData, m_projectName, m_userName, multipleFiles == true ? subReportName : QString());
+			generateTitlePage(&textCursor, m_reportParams.compareData, m_projectName, m_userName, subreportName);
 
-			createMarginItems(m_diffParams.compareData, multipleFiles == true ? subReportName : QString());
+			createMarginItems(m_reportParams.compareData, subreportName);
 
 			printDocument(&pdfWriter, &titleTextDocument, &painter, QString(), nullptr, nullptr, 0);
 		}
@@ -3045,16 +3052,21 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 		}
 	}
 
-	if (multipleFiles == true)
+	if (m_reportParams.multipleFiles == true)
 	{
 		clearMarginItems();
 
 		// Generate generic report file with all report files description
 
+		setPageSize(m_reportParams.albumPageSize);
+		setPageOrientation(m_reportParams.albumOrientation);
+		setPageMargins(m_reportParams.albumMargins);
+
 		QPdfWriter pdfWriter(filePath());
 
 		pdfWriter.setTitle(m_projectName);
 		pdfWriter.setPageSize(pageSize());
+		pdfWriter.setPageOrientation(pageOrientation());
 		pdfWriter.setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
 		pdfWriter.setResolution(resolution());
 
@@ -3072,7 +3084,7 @@ void ProjectDiffGenerator::renderReport(std::map<QString, std::vector<std::share
 
 			// Generate title page
 
-			generateTitlePage(&textCursor, m_diffParams.compareData, m_projectName, m_userName, QString());
+			generateTitlePage(&textCursor, m_reportParams.compareData, m_projectName, m_userName, QString());
 
 			printDocument(&pdfWriter, &titleTextDocument, &painter, QString(), nullptr, nullptr, 0);
 

@@ -1519,12 +1519,12 @@ void SchemaFileViewEx::createActions()
 	m_importWorkingcopyAction->setStatusTip(tr("Import workingcopy file from disk to project file..."));
 	m_importWorkingcopyAction->setEnabled(false);
 
-	m_exportToPdfAction = new QAction(tr("Export to PDF.."), parent());
+	m_exportToPdfAction = new QAction(tr("Export to PDF..."), parent());
 	//m_exportToPdfAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
 	m_exportToPdfAction->setStatusTip(tr("Export selected schemas to PDF files"));
 	m_exportToPdfAction->setEnabled(false);
 
-	m_exportToAlbumAction = new QAction(tr("Export to Album.."), parent());
+	m_exportToAlbumAction = new QAction(tr("Export to Album..."), parent());
 	//m_exportToAlbumAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
 	m_exportToAlbumAction->setStatusTip(tr("Export selected schemas to single PDF album"));
 	m_exportToAlbumAction->setEnabled(false);

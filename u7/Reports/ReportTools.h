@@ -187,6 +187,9 @@ public:
 	QPageSize pageSize() const;
 	void setPageSize(const QPageSize& size);
 
+	QPageLayout::Orientation pageOrientation() const;
+	void setPageOrientation(const QPageLayout::Orientation& value);
+
 	QMarginsF pageMargins() const;
 	void setPageMargins(const QMarginsF& margins);
 
@@ -236,6 +239,7 @@ private:
 	// Page options
 	//
 	QPageSize m_pageSize = QPageSize(QPageSize::A4);
+	QPageLayout::Orientation m_pageOrientation = QPageLayout::Orientation::Portrait;
 	QMarginsF m_pageMargins = QMarginsF(10, 10, 10, 10);
 
 	int m_pageResolution = 300;

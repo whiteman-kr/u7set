@@ -4,6 +4,135 @@
 #include <QPageSetupDialog>
 #include <QPrinter>
 
+SchemasReportDialog::SchemasReportDialog(const QString& path, const QPageSize& pageSize, const QPageLayout::Orientation orientation, const QMarginsF& margins, QWidget *parent):
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_reportPath(path),
+	m_pageSize(pageSize),
+	m_orientation(orientation),
+	m_margins(margins)
+{
+	setWindowTitle(tr("Export Schemas to Album"));
+	setMinimumWidth(500);
+
+	QLabel* label = new QLabel(tr("Report file:"));
+	m_editReportPath = new QLineEdit(path);
+
+	QPushButton* browseButton = new QPushButton(tr("Browse..."));
+	connect(browseButton, &QPushButton::clicked, this, &SchemasReportDialog::browseClicked);
+
+	QHBoxLayout* reportPathLayout = new QHBoxLayout();
+	reportPathLayout->addWidget(label);
+	reportPathLayout->addWidget(m_editReportPath);
+	reportPathLayout->addWidget(browseButton);
+
+	QPushButton* okButton = new QPushButton(tr("OK"));
+	connect(okButton, &QPushButton::clicked, this, &SchemasReportDialog::okClicked);
+
+	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
+	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+
+	QPushButton* pageSetupButton = new QPushButton(tr("Page Setup..."));
+	connect(pageSetupButton, &QPushButton::clicked, this, &SchemasReportDialog::pageSetupClicked);
+
+	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	buttonsLayout->addWidget(pageSetupButton);
+	buttonsLayout->addStretch();
+	buttonsLayout->addWidget(okButton);
+	buttonsLayout->addWidget(cancelButton);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->addLayout(reportPathLayout);
+	mainLayout->addLayout(buttonsLayout);
+	setLayout(mainLayout);
+
+	return;
+}
+
+QString SchemasReportDialog::reportPath() const
+{
+	return m_reportPath;
+}
+
+QPageSize SchemasReportDialog::pageSize() const
+{
+	return m_pageSize;
+}
+
+QPageLayout::Orientation SchemasReportDialog::orientation() const
+{
+	return m_orientation;
+}
+
+QMarginsF SchemasReportDialog::margins() const
+{
+	return m_margins;
+}
+
+void SchemasReportDialog::okClicked()
+{
+	if (m_reportPath.isEmpty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please enter the file name!"));
+		m_editReportPath->setFocus();
+		return;
+	}
+
+	m_reportPath = m_editReportPath->text();
+
+	QDialog::accept();
+}
+
+void SchemasReportDialog::browseClicked()
+{
+	QString path = QFileDialog::getSaveFileName(this, qAppName(), "./", QObject::tr("PDF documents (*.pdf)"));
+
+	if (path.isNull() == true || path.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_reportPath = path;
+	m_editReportPath->setText(path);
+
+	return;
+}
+
+void SchemasReportDialog::pageSetupClicked()
+{
+	// Ask for page format
+
+	QPrinter printer(QPrinter::HighResolution);
+
+	QPageSize::PageSizeId id = QPageSize::id(m_pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+	if (id == QPageSize::Custom)
+	{
+		id = QPageSize::A3;
+	}
+
+	printer.setFullPage(true);
+	printer.setPageSize(QPageSize(id));
+	printer.setPageOrientation(m_orientation);
+	printer.setPageMargins(m_margins, QPageLayout::Unit::Millimeter);
+
+	QPageSetupDialog d(&printer, this);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+
+	m_pageSize = QPageSize(id);
+	m_orientation = d.printer()->pageLayout().orientation();
+	m_margins = d.printer()->pageLayout().margins();
+
+	return;
+}
+
+//
+// SchemasReportGeneratorThread
+//
+
 QPageSize SchemasReportGeneratorThread::m_albumPageSize = QPageSize(QPageSize::A3);
 QPageLayout::Orientation SchemasReportGeneratorThread::m_albumOrientation = QPageLayout::Orientation::Landscape;
 QMarginsF SchemasReportGeneratorThread::m_albumMargins = QMarginsF(0, 0, 0, 0);
@@ -36,39 +165,20 @@ void SchemasReportGeneratorThread::run(const std::vector<DbFileInfo>& files, boo
 
 	if (album == true)
 	{
-		// Ask for page format
-
-		QPrinter printer(QPrinter::HighResolution);
-
-		QPageSize::PageSizeId id = QPageSize::id(m_albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-		if (id == QPageSize::Custom)
-		{
-			id = QPageSize::A3;
-		}
-
-		printer.setFullPage(true);
-		printer.setPageSize(QPageSize(id));
-		printer.setPageOrientation(m_albumOrientation);
-		printer.setPageMargins(m_albumMargins, QPageLayout::Unit::Millimeter);
-
-		QPageSetupDialog d(&printer, m_parent);
+		SchemasReportDialog d(QString(), m_albumPageSize, m_albumOrientation, m_albumMargins, m_parent);
 		if (d.exec() != QDialog::Accepted)
 		{
 			return;
 		}
 
-		m_albumPageSize = QPageSize(d.printer()->pageLayout().pageSize());
-		m_albumOrientation = d.printer()->pageLayout().orientation();
-		m_albumMargins = d.printer()->pageLayout().margins();
+		m_albumPageSize = d.pageSize();
+		m_albumOrientation = d.orientation();
+		m_albumMargins = d.margins();
 
-		// Ask for file name
-
-		filePath = QFileDialog::getSaveFileName(m_parent, qAppName(), "./",QObject::tr("PDF documents (*.pdf)"));
+		filePath = d.reportPath();
 	}
 	else
 	{
-		// Ask for file name
-
 		filePath = QFileDialog::getExistingDirectory(m_parent, QObject::tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	}
 
@@ -101,6 +211,7 @@ void SchemasReportGeneratorThread::run(const std::vector<DbFileInfo>& files, boo
 	if (album == true)
 	{
 		worker->setPageSize(m_albumPageSize);
+		worker->setPageOrientation(m_albumOrientation);
 		worker->setPageMargins(m_albumMargins);
 	}
 
@@ -373,6 +484,7 @@ void SchemasReportGenerator::createAlbum()
 
 	pdfWriter->setTitle(m_projectName);
 	pdfWriter->setPageSize(pageSize());
+	pdfWriter->setPageOrientation(pageOrientation());
 	pdfWriter->setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
 	pdfWriter->setResolution(resolution());
 

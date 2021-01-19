@@ -1109,11 +1109,12 @@ void MainWindow::projectDifference()
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		ProjectDiffGeneratorThread::run(dialog.diffParams(),
-								  db()->currentProject().projectName(),
-								  db()->currentUser().username(),
-								  db()->currentUser().password(),
-								  this);
+		ProjectDiffGeneratorThread::run(dialog.fileName(),
+										dialog.reportParams(),
+										db()->currentProject().projectName(),
+										db()->currentUser().username(),
+										db()->currentUser().password(),
+										this);
 	}
 
 	return;

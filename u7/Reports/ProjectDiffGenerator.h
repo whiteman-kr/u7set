@@ -78,41 +78,59 @@ struct PropertyDiff
 	QString newValueText;
 };
 
-struct ProjectDiffFileType
+struct ProjectDiffFileTypeParams
 {
-	ProjectDiffFileType(int fileId, const QString& fileName, bool selected)
+	ProjectDiffFileTypeParams(int fileId, const QString& caption, bool selected)
 	{
 		this->fileId = fileId;
-		this->fileName = fileName;
+		this->caption = caption;
 		this->selected = selected;
 	}
 
+	ProjectDiffFileTypeParams(int fileId, const QString& caption, bool selected, QPageSize pageSize, QPageLayout::Orientation orientation, QMarginsF margins)
+		:ProjectDiffFileTypeParams(fileId, caption, selected)
+	{
+		this->pageSize = pageSize;
+		this->orientation = orientation;
+		this->margins = margins;
+	}
+
 	int fileId = -1;
-	QString fileName;
+	QString caption;
 	bool selected = false;
+
+	// Multiple-file report section page options
+	//
+	QPageSize pageSize = QPageSize(QPageSize::A4);
+	QPageLayout::Orientation orientation = QPageLayout::Orientation::Portrait;
+	QMarginsF margins = QMarginsF(15, 15, 15, 15);
 };
 
-struct ProjectDiffParams
+struct ProjectDiffReportParams
 {
 	CompareData compareData;
-	std::vector<ProjectDiffFileType> projectFileTypes;
+	std::vector<ProjectDiffFileTypeParams> fileTypeParams;
+
 	bool expertProperties = false;
 	bool multipleFiles = false;
+
+	// Single-file report page options
+	//
+	QPageSize albumPageSize = QPageSize(QPageSize::A4);
+	QPageLayout::Orientation albumOrientation = QPageLayout::Orientation::Portrait;
+	QMarginsF albumMargins = QMarginsF(15, 15, 15, 15);
 };
 
 class ProjectDiffGeneratorThread
 {
 public:
-	static void run(const ProjectDiffParams& settings,
+	static void run(const QString& fileName,
+					const ProjectDiffReportParams& settings,
 					const QString& projectName,
 					const QString& userName,
 					const QString& userPassword,
 					QWidget* parent);
 
-private:
-	static QPageSize m_albumPageSize;
-	static QPageLayout::Orientation m_albumOrientation;
-	static QMarginsF m_albumMargins;
 };
 
 //
@@ -125,14 +143,14 @@ class ProjectDiffGenerator : public ReportGenerator
 
 public:
 	ProjectDiffGenerator(const QString& fileName,
-					  const ProjectDiffParams& settings,
+					  const ProjectDiffReportParams& settings,
 					  ReportSchemaView* schemaView,
 					  const QString& projectName,
 					  const QString& userName,
 					  const QString& userPassword);
 	virtual ~ProjectDiffGenerator();
 
-	static std::vector<ProjectDiffFileType> defaultProjectFileTypes(DbController* db);
+	static std::vector<ProjectDiffFileTypeParams> defaultFileTypeParams(DbController* db);
 	static int applicationSignalsTypeId() { return -256; }
 
 public slots:
@@ -181,7 +199,7 @@ signals:
 private:
 	DbController* db();
 
-	void compareProject(std::map<QString, std::vector<std::shared_ptr<ReportSection>>>& reportContents);
+	void compareProject(std::map<int, std::vector<std::shared_ptr<ReportSection> > >& reportContents);
 
 	void compareFilesRecursive(int rootFileId,
 							   const DbFileTree& filesTree,
@@ -239,12 +257,12 @@ private:
 	QString changesetString(const std::shared_ptr<DbFile>& file);
 	QString changesetString(const Signal& signal);
 
-	void renderReport(std::map<QString, std::vector<std::shared_ptr<ReportSection>>> reportContents);
+	void renderReport(std::map<int, std::vector<std::shared_ptr<ReportSection> > > reportContents);
 
 private:
 	DbController m_db;
 
-	ProjectDiffParams m_diffParams;
+	ProjectDiffReportParams m_reportParams;
 	QString m_filePath;
 
 	QString m_projectName;

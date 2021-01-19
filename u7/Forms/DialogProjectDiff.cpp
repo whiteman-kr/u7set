@@ -3,7 +3,182 @@
 #include "../../lib/DbController.h"
 #include "SelectChangesetDialog.h"
 
-ProjectDiffParams DialogProjectDiff::m_diffParams;
+#include <QPageSetupDialog>
+#include <QPrinter>
+
+//
+// DialogProjectDiffSections
+//
+
+DialogProjectDiffSections::DialogProjectDiffSections(const ProjectDiffReportParams& reportParams, QWidget *parent):
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_reportParams(reportParams)
+{
+	setWindowTitle(tr("Report Sections Page Setup"));
+	setMinimumSize(540, 350);
+
+	QGridLayout* gl = new QGridLayout();
+
+	m_treeWidget = new QTreeWidget();
+
+	QStringList l;
+	l << tr("Section");
+	l << tr("Page Size");
+	l << tr("Orientation");
+	l << tr("Margins, mm");
+	m_treeWidget->setHeaderLabels(l);
+
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, [this](QTreeWidgetItem *item, int column){
+		Q_UNUSED(item);
+		Q_UNUSED(column);
+		pageSetup();
+	});
+
+	QPushButton* b = new QPushButton(tr("Page Setup..."));
+	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::pageSetup);
+
+	gl->addWidget(m_treeWidget, 0, 0);
+	gl->addWidget(b, 0, 1, Qt::AlignTop);
+
+	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	buttonsLayout->addStretch();
+
+	b = new QPushButton(tr("OK"));
+	buttonsLayout->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::accept);
+
+	b = new QPushButton(tr("Cancel"));
+	buttonsLayout->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::reject);
+
+	QVBoxLayout* ml = new QVBoxLayout();
+	ml->addLayout(gl);
+	ml->addLayout(buttonsLayout);
+
+	setLayout(ml);
+
+	fillTree();
+
+	return;
+}
+
+ProjectDiffReportParams DialogProjectDiffSections::reportParams() const
+{
+	return m_reportParams;
+}
+
+void DialogProjectDiffSections::pageSetup()
+{
+	QList<QTreeWidgetItem*> selectedItems =  m_treeWidget->selectedItems();
+	if (selectedItems.isEmpty() == true)
+	{
+		return;
+	}
+
+	int firstIndex = m_treeWidget->indexOfTopLevelItem(selectedItems[0]);
+	if (firstIndex < 0 || firstIndex >= m_reportParams.fileTypeParams.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	const ProjectDiffFileTypeParams& firstFt = m_reportParams.fileTypeParams[firstIndex];
+
+	QPageSize pageSize = firstFt.pageSize;
+	QPageLayout::Orientation orientation = firstFt.orientation;
+	QMarginsF margins = firstFt.margins;
+
+	QPrinter printer(QPrinter::HighResolution);
+
+	QPageSize::PageSizeId id = QPageSize::id(pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+	if (id == QPageSize::Custom)
+	{
+		id = QPageSize::A4;
+	}
+
+	printer.setFullPage(true);
+	printer.setPageSize(QPageSize(id));
+	printer.setPageOrientation(orientation);
+	printer.setPageMargins(margins, QPageLayout::Unit::Millimeter);
+
+	QPageSetupDialog d(&printer, this);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+
+	for (QTreeWidgetItem* item : selectedItems)
+	{
+		int itemIndex = m_treeWidget->indexOfTopLevelItem(item);
+		if (itemIndex < 0 || itemIndex >= m_reportParams.fileTypeParams.size())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		ProjectDiffFileTypeParams& ft = m_reportParams.fileTypeParams[firstIndex];
+
+		ft.pageSize = QPageSize(id);
+		ft.orientation = d.printer()->pageLayout().orientation();
+		ft.margins = d.printer()->pageLayout().margins();
+	}
+
+	fillTree();
+
+	return;
+}
+
+void DialogProjectDiffSections::fillTree()
+{
+	if (m_treeWidget->topLevelItemCount() != m_reportParams.fileTypeParams.size())
+	{
+		m_treeWidget->clear();
+
+		for (int i = 0; i < m_reportParams.fileTypeParams.size(); i++)
+		{
+			m_treeWidget->addTopLevelItem(new QTreeWidgetItem());
+		}
+	}
+
+	int itemIndex = 0;
+
+	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+	{
+		QTreeWidgetItem* item = m_treeWidget->topLevelItem(itemIndex++);
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return;
+		}
+
+		QPageSize::PageSizeId id = QPageSize::id(ft.pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+		if (id == QPageSize::Custom)
+		{
+			id = QPageSize::A4;
+		}
+
+		item->setText(0, ft.caption);
+		item->setText(1, QPageSize(id).name());
+		item->setText(2, ft.orientation == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
+		item->setText(3, tr("l%1 t%2 r%3 b%4").arg(ft.margins.left()).arg(ft.margins.top()).arg(ft.margins.right()).arg(ft.margins.bottom()));
+	}
+
+	for (int i = 0; i < m_treeWidget->columnCount(); i++)
+	{
+		m_treeWidget->resizeColumnToContents(i);
+	}
+
+	return;
+}
+
+//
+// DialogProjectDiff
+//
+
+QString DialogProjectDiff::m_fileName;
+ProjectDiffReportParams DialogProjectDiff::m_reportParams;
 
 DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -16,6 +191,8 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// --
 	//
+
+	ui->reportFileEdit->setText(m_fileName);
 
 	QStringList versionTypes;
 
@@ -40,16 +217,16 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// Select default file types if they are not selected
 	//
-	if (m_diffParams.projectFileTypes.empty() == true)
+	if (m_reportParams.fileTypeParams.empty() == true)
 	{
-		m_diffParams.projectFileTypes = ProjectDiffGenerator::defaultProjectFileTypes(db);
+		m_reportParams.fileTypeParams = ProjectDiffGenerator::defaultFileTypeParams(db);
 	}
 
 	// Fill file types list
 	//
-	for (const ProjectDiffFileType& ft : m_diffParams.projectFileTypes)
+	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
-		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.fileName));
+		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption));
 
 		if (ft.selected == true)
 		{
@@ -63,9 +240,9 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 		ui->categoriesList->addItem(item);
 	}
 
-	ui->expertPropertiesCheck->setChecked(m_diffParams.expertProperties == true);
+	ui->expertPropertiesCheck->setChecked(m_reportParams.expertProperties == true);
 
-	ui->multipleFilesCheck->setChecked(m_diffParams.multipleFiles == true);
+	ui->multipleFilesCheck->setChecked(m_reportParams.multipleFiles == true);
 
 	return;
 
@@ -76,9 +253,14 @@ DialogProjectDiff::~DialogProjectDiff()
 	delete ui;
 }
 
-ProjectDiffParams DialogProjectDiff::diffParams() const
+QString DialogProjectDiff::fileName() const
 {
-	return m_diffParams;
+	return m_fileName;
+}
+
+ProjectDiffReportParams DialogProjectDiff::reportParams() const
+{
+	return m_reportParams;
 }
 
 void DialogProjectDiff::showEvent(QShowEvent*)
@@ -190,6 +372,15 @@ void DialogProjectDiff::done(int r)
 		return;
 	}
 
+	m_fileName = ui->reportFileEdit->text();
+
+	if (m_fileName.isEmpty() == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Please enter report file name!"));
+		ui->reportFileEdit->setFocus();
+		return;
+	}
+
 	CompareData compareData;
 
 	// Source
@@ -252,11 +443,11 @@ void DialogProjectDiff::done(int r)
 		return;
 	}
 
-	m_diffParams.compareData = compareData;
+	m_reportParams.compareData = compareData;
 
 	int selectedCount = 0;
 
-	if (ui->categoriesList->count() != m_diffParams.projectFileTypes.size())
+	if (ui->categoriesList->count() != m_reportParams.fileTypeParams.size())
 	{
 		Q_ASSERT(false);
 		return;
@@ -266,8 +457,8 @@ void DialogProjectDiff::done(int r)
 	{
 		QListWidgetItem* item = ui->categoriesList->item(i);
 
-		m_diffParams.projectFileTypes[i].selected = item->checkState() == Qt::Checked;
-		if (m_diffParams.projectFileTypes[i].selected == true)
+		m_reportParams.fileTypeParams[i].selected = item->checkState() == Qt::Checked;
+		if (m_reportParams.fileTypeParams[i].selected == true)
 		{
 			selectedCount++;
 		}
@@ -279,9 +470,8 @@ void DialogProjectDiff::done(int r)
 		return;
 	}
 
-	m_diffParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
-
-	m_diffParams.multipleFiles = ui->multipleFilesCheck->isChecked() == true;
+	m_reportParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
+	m_reportParams.multipleFiles = ui->multipleFilesCheck->isChecked() == true;
 
 	QDialog::done(r);
 }
@@ -302,4 +492,86 @@ void DialogProjectDiff::on_buttonSelectNone_clicked()
 		QListWidgetItem* item = ui->categoriesList->item(i);
 		item->setCheckState(Qt::Unchecked);
 	}
+}
+
+void DialogProjectDiff::on_categoriesList_itemPressed(QListWidgetItem *item)
+{
+	if (item == nullptr)
+	{
+		Q_ASSERT(item);
+		return;
+	}
+
+	if (item->checkState() == Qt::Checked)
+	{
+		item->setCheckState(Qt::Unchecked);
+	}
+	else
+	{
+		item->setCheckState(Qt::Checked);
+	}
+
+	return;
+}
+
+void DialogProjectDiff::on_fileBrowseButton_clicked()
+{
+	// Get filename
+	//
+
+	QString fileName = QFileDialog::getSaveFileName(this, QObject::tr("Diff Report"),
+													"./",
+													QObject::tr("PDF documents (*.pdf)"));
+	if (fileName.isNull() == true)
+	{
+		return;
+	}
+
+	m_fileName = fileName;
+	ui->reportFileEdit->setText(fileName);
+
+	return;
+}
+
+void DialogProjectDiff::on_pageSetupButton_clicked()
+{
+	if (ui->multipleFilesCheck->isChecked() == true)
+	{
+		DialogProjectDiffSections d(m_reportParams, this);
+		if (d.exec() == QDialog::Accepted)
+		{
+			m_reportParams = d.reportParams();
+		}
+	}
+	else
+	{
+		// Single-file report
+
+		QPrinter printer(QPrinter::HighResolution);
+
+		QPageSize::PageSizeId id = QPageSize::id(m_reportParams.albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+		if (id == QPageSize::Custom)
+		{
+			id = QPageSize::A4;
+		}
+
+		printer.setFullPage(true);
+		printer.setPageSize(QPageSize(id));
+		printer.setPageOrientation(m_reportParams.albumOrientation);
+		printer.setPageMargins(m_reportParams.albumMargins, QPageLayout::Unit::Millimeter);
+
+		QPageSetupDialog d(&printer, this);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+
+		m_reportParams.albumPageSize = QPageSize(id);
+		m_reportParams.albumOrientation = d.printer()->pageLayout().orientation();
+		m_reportParams.albumMargins = d.printer()->pageLayout().margins();
+	}
+
+	return;
 }

@@ -458,6 +458,16 @@ void ReportGenerator::setPageSize(const QPageSize& size)
 	m_pageSize = size;
 }
 
+QPageLayout::Orientation ReportGenerator::pageOrientation() const
+{
+	return m_pageOrientation;
+}
+
+void ReportGenerator::setPageOrientation(const QPageLayout::Orientation& value)
+{
+	m_pageOrientation = value;
+}
+
 QMarginsF ReportGenerator::pageMargins() const
 {
 	return m_pageMargins;

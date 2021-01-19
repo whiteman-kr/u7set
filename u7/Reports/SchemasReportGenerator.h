@@ -1,6 +1,33 @@
 #include "ReportTools.h"
 #include "../../lib/DbController.h"
 
+class SchemasReportDialog : public QDialog
+{
+	Q_OBJECT
+public:
+	SchemasReportDialog(const QString& path, const QPageSize& pageSize, const QPageLayout::Orientation orientation, const QMarginsF& margins, QWidget *parent);
+
+public:
+	QString reportPath() const;
+
+	QPageSize pageSize() const;
+	QPageLayout::Orientation orientation() const;
+	QMarginsF margins() const;
+
+private slots:
+	void okClicked();
+	void browseClicked();
+	void pageSetupClicked();
+
+private:
+	QString m_reportPath;
+	QPageSize m_pageSize;
+	QPageLayout::Orientation m_orientation = QPageLayout::Orientation::Portrait;
+	QMarginsF m_margins;
+
+	QLineEdit* m_editReportPath = nullptr;
+};
+
 class SchemasReportGeneratorThread
 {
 public:
