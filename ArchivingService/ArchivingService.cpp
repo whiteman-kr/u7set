@@ -74,7 +74,7 @@ void ArchivingService::loadSettings()
 		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
 	}
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
@@ -234,17 +234,6 @@ void ArchivingService::stopTcpArchiveRequestsServerThread()
 	}
 }
 
-bool ArchivingService::loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings)
-{
-	TEST_PTR_RETURN_FALSE(settings);
-
-	XmlReadHelper xml(fileData);
-
-	bool result = settings->readFromXml(xml);
-
-	return result;
-}
-
 bool ArchivingService::loadArchSignalsProto(const QByteArray& fileData)
 {
 	deleteArchSignalsProto();
@@ -277,27 +266,28 @@ void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
 	}
 }
 
-void ArchivingService::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ArchivingService::onConfigurationReady(const QByteArray configurationXmlData,
+											const BuildFileInfoArray buildFileInfoArray,
+											std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
 	TEST_PTR_RETURN(m_cfgLoaderThread);
 
-	DEBUG_LOG_MSG(logger(), "Trying new configuration loading.");
+	const ArchivingServiceSettings* typedSettingsPtr = dynamic_cast<const ArchivingServiceSettings*>(curSettingsProfile.get());
 
-	ArchivingServiceSettings newServiceSettings;
+	if (typedSettingsPtr == nullptr)
+	{
+		DEBUG_LOG_MSG(logger(), "Settings casting error!");
+		return;
+	}
 
-	bool fileResult = loadConfigurationXml(configurationXmlData, &newServiceSettings);
+	ArchivingServiceSettings newServiceSettings = *typedSettingsPtr;
 
 	if (m_overwriteArchiveLocation.isEmpty() == false)
 	{
 		newServiceSettings.archiveLocation = m_overwriteArchiveLocation;
 	}
 
-	logFileLoadResult(fileResult, "Configuration.xml");
-
-	if (fileResult == false)
-	{
-		return;
-	}
+	bool fileResult = true;
 
 	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
 	{

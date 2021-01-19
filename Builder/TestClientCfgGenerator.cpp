@@ -7,13 +7,24 @@ namespace Builder
 	{
 	}
 
+	bool TestClientCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TestClientSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TestClientSettings>(profile, settingsGetter);
+	}
+
 	bool TestClientCfgGenerator::generateConfiguration()
 	{
 		bool result = false;
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (linkAppSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
@@ -23,22 +34,6 @@ namespace Builder
 		while(false);
 
 		return result;
-	}
-
-	bool TestClientCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
-	bool TestClientCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool TestClientCfgGenerator::linkAppSignalsFile()

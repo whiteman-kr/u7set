@@ -13,18 +13,12 @@ namespace Builder
 
 		~ConfigurationServiceCfgGenerator();
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
-		bool writeSettings();
 		bool writeBatFile();
 		bool writeShFile();
-
-		bool buildClientsList(CfgServiceSettingsGetter *settings);
-
-	private:
-		CfgServiceSettingsGetter m_settings;
 	};
 
 }

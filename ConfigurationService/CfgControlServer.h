@@ -19,6 +19,7 @@ public:
 					 const QString& autoloadBuildPath,
 					 const QString& workDirectory,
 					 const QString& buildPath,
+					 const QString& currentSettingsProfile,
 					 const QStringList& knownClients,
 					 const CfgCheckerWorker& checkerWorker,
 					 std::shared_ptr<CircularLogger> logger);

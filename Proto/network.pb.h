@@ -97,6 +97,8 @@ class RtTrendsManagementRequest;
 class RtTrendsManagementReply;
 class RtTrendsGetStateChangesRequest;
 class RtTrendsGetStateChangesReply;
+class GetFileReply;
+class GetSessionParams;
 
 // ===================================================================
 
@@ -7611,6 +7613,245 @@ class RtTrendsGetStateChangesReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static RtTrendsGetStateChangesReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetFileReply : public ::google::protobuf::Message {
+ public:
+  GetFileReply();
+  virtual ~GetFileReply();
+
+  GetFileReply(const GetFileReply& from);
+
+  inline GetFileReply& operator=(const GetFileReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetFileReply& default_instance();
+
+  void Swap(GetFileReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetFileReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetFileReply& from);
+  void MergeFrom(const GetFileReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 errorCode = 1 [default = 0];
+  inline bool has_errorcode() const;
+  inline void clear_errorcode();
+  static const int kErrorCodeFieldNumber = 1;
+  inline ::google::protobuf::int32 errorcode() const;
+  inline void set_errorcode(::google::protobuf::int32 value);
+
+  // optional int64 fileSize = 2 [default = 0];
+  inline bool has_filesize() const;
+  inline void clear_filesize();
+  static const int kFileSizeFieldNumber = 2;
+  inline ::google::protobuf::int64 filesize() const;
+  inline void set_filesize(::google::protobuf::int64 value);
+
+  // optional int32 totalParts = 3 [default = 0];
+  inline bool has_totalparts() const;
+  inline void clear_totalparts();
+  static const int kTotalPartsFieldNumber = 3;
+  inline ::google::protobuf::int32 totalparts() const;
+  inline void set_totalparts(::google::protobuf::int32 value);
+
+  // optional int32 currentPart = 4 [default = 0];
+  inline bool has_currentpart() const;
+  inline void clear_currentpart();
+  static const int kCurrentPartFieldNumber = 4;
+  inline ::google::protobuf::int32 currentpart() const;
+  inline void set_currentpart(::google::protobuf::int32 value);
+
+  // optional int32 currentPartSize = 5 [default = 0];
+  inline bool has_currentpartsize() const;
+  inline void clear_currentpartsize();
+  static const int kCurrentPartSizeFieldNumber = 5;
+  inline ::google::protobuf::int32 currentpartsize() const;
+  inline void set_currentpartsize(::google::protobuf::int32 value);
+
+  // optional bytes md5 = 6;
+  inline bool has_md5() const;
+  inline void clear_md5();
+  static const int kMd5FieldNumber = 6;
+  inline const ::std::string& md5() const;
+  inline void set_md5(const ::std::string& value);
+  inline void set_md5(const char* value);
+  inline void set_md5(const void* value, size_t size);
+  inline ::std::string* mutable_md5();
+  inline ::std::string* release_md5();
+  inline void set_allocated_md5(::std::string* md5);
+
+  // optional bytes filePartData = 10;
+  inline bool has_filepartdata() const;
+  inline void clear_filepartdata();
+  static const int kFilePartDataFieldNumber = 10;
+  inline const ::std::string& filepartdata() const;
+  inline void set_filepartdata(const ::std::string& value);
+  inline void set_filepartdata(const char* value);
+  inline void set_filepartdata(const void* value, size_t size);
+  inline ::std::string* mutable_filepartdata();
+  inline ::std::string* release_filepartdata();
+  inline void set_allocated_filepartdata(::std::string* filepartdata);
+
+  // @@protoc_insertion_point(class_scope:Network.GetFileReply)
+ private:
+  inline void set_has_errorcode();
+  inline void clear_has_errorcode();
+  inline void set_has_filesize();
+  inline void clear_has_filesize();
+  inline void set_has_totalparts();
+  inline void clear_has_totalparts();
+  inline void set_has_currentpart();
+  inline void clear_has_currentpart();
+  inline void set_has_currentpartsize();
+  inline void clear_has_currentpartsize();
+  inline void set_has_md5();
+  inline void clear_has_md5();
+  inline void set_has_filepartdata();
+  inline void clear_has_filepartdata();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int64 filesize_;
+  ::google::protobuf::int32 errorcode_;
+  ::google::protobuf::int32 totalparts_;
+  ::google::protobuf::int32 currentpart_;
+  ::google::protobuf::int32 currentpartsize_;
+  ::std::string* md5_;
+  ::std::string* filepartdata_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetFileReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetSessionParams : public ::google::protobuf::Message {
+ public:
+  GetSessionParams();
+  virtual ~GetSessionParams();
+
+  GetSessionParams(const GetSessionParams& from);
+
+  inline GetSessionParams& operator=(const GetSessionParams& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetSessionParams& default_instance();
+
+  void Swap(GetSessionParams* other);
+
+  // implements Message ----------------------------------------------
+
+  GetSessionParams* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetSessionParams& from);
+  void MergeFrom(const GetSessionParams& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string currentSettingsProfile = 1;
+  inline bool has_currentsettingsprofile() const;
+  inline void clear_currentsettingsprofile();
+  static const int kCurrentSettingsProfileFieldNumber = 1;
+  inline const ::std::string& currentsettingsprofile() const;
+  inline void set_currentsettingsprofile(const ::std::string& value);
+  inline void set_currentsettingsprofile(const char* value);
+  inline void set_currentsettingsprofile(const char* value, size_t size);
+  inline ::std::string* mutable_currentsettingsprofile();
+  inline ::std::string* release_currentsettingsprofile();
+  inline void set_allocated_currentsettingsprofile(::std::string* currentsettingsprofile);
+
+  // @@protoc_insertion_point(class_scope:Network.GetSessionParams)
+ private:
+  inline void set_has_currentsettingsprofile();
+  inline void clear_has_currentsettingsprofile();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* currentsettingsprofile_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetSessionParams* default_instance_;
 };
 // ===================================================================
 
@@ -15832,6 +16073,334 @@ RtTrendsGetStateChangesReply::signalstates() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
 RtTrendsGetStateChangesReply::mutable_signalstates() {
   return &signalstates_;
+}
+
+// -------------------------------------------------------------------
+
+// GetFileReply
+
+// required int32 errorCode = 1 [default = 0];
+inline bool GetFileReply::has_errorcode() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetFileReply::set_has_errorcode() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetFileReply::clear_has_errorcode() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetFileReply::clear_errorcode() {
+  errorcode_ = 0;
+  clear_has_errorcode();
+}
+inline ::google::protobuf::int32 GetFileReply::errorcode() const {
+  return errorcode_;
+}
+inline void GetFileReply::set_errorcode(::google::protobuf::int32 value) {
+  set_has_errorcode();
+  errorcode_ = value;
+}
+
+// optional int64 fileSize = 2 [default = 0];
+inline bool GetFileReply::has_filesize() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GetFileReply::set_has_filesize() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GetFileReply::clear_has_filesize() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GetFileReply::clear_filesize() {
+  filesize_ = GOOGLE_LONGLONG(0);
+  clear_has_filesize();
+}
+inline ::google::protobuf::int64 GetFileReply::filesize() const {
+  return filesize_;
+}
+inline void GetFileReply::set_filesize(::google::protobuf::int64 value) {
+  set_has_filesize();
+  filesize_ = value;
+}
+
+// optional int32 totalParts = 3 [default = 0];
+inline bool GetFileReply::has_totalparts() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GetFileReply::set_has_totalparts() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GetFileReply::clear_has_totalparts() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetFileReply::clear_totalparts() {
+  totalparts_ = 0;
+  clear_has_totalparts();
+}
+inline ::google::protobuf::int32 GetFileReply::totalparts() const {
+  return totalparts_;
+}
+inline void GetFileReply::set_totalparts(::google::protobuf::int32 value) {
+  set_has_totalparts();
+  totalparts_ = value;
+}
+
+// optional int32 currentPart = 4 [default = 0];
+inline bool GetFileReply::has_currentpart() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void GetFileReply::set_has_currentpart() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void GetFileReply::clear_has_currentpart() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void GetFileReply::clear_currentpart() {
+  currentpart_ = 0;
+  clear_has_currentpart();
+}
+inline ::google::protobuf::int32 GetFileReply::currentpart() const {
+  return currentpart_;
+}
+inline void GetFileReply::set_currentpart(::google::protobuf::int32 value) {
+  set_has_currentpart();
+  currentpart_ = value;
+}
+
+// optional int32 currentPartSize = 5 [default = 0];
+inline bool GetFileReply::has_currentpartsize() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetFileReply::set_has_currentpartsize() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetFileReply::clear_has_currentpartsize() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void GetFileReply::clear_currentpartsize() {
+  currentpartsize_ = 0;
+  clear_has_currentpartsize();
+}
+inline ::google::protobuf::int32 GetFileReply::currentpartsize() const {
+  return currentpartsize_;
+}
+inline void GetFileReply::set_currentpartsize(::google::protobuf::int32 value) {
+  set_has_currentpartsize();
+  currentpartsize_ = value;
+}
+
+// optional bytes md5 = 6;
+inline bool GetFileReply::has_md5() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void GetFileReply::set_has_md5() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void GetFileReply::clear_has_md5() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void GetFileReply::clear_md5() {
+  if (md5_ != &::google::protobuf::internal::kEmptyString) {
+    md5_->clear();
+  }
+  clear_has_md5();
+}
+inline const ::std::string& GetFileReply::md5() const {
+  return *md5_;
+}
+inline void GetFileReply::set_md5(const ::std::string& value) {
+  set_has_md5();
+  if (md5_ == &::google::protobuf::internal::kEmptyString) {
+    md5_ = new ::std::string;
+  }
+  md5_->assign(value);
+}
+inline void GetFileReply::set_md5(const char* value) {
+  set_has_md5();
+  if (md5_ == &::google::protobuf::internal::kEmptyString) {
+    md5_ = new ::std::string;
+  }
+  md5_->assign(value);
+}
+inline void GetFileReply::set_md5(const void* value, size_t size) {
+  set_has_md5();
+  if (md5_ == &::google::protobuf::internal::kEmptyString) {
+    md5_ = new ::std::string;
+  }
+  md5_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetFileReply::mutable_md5() {
+  set_has_md5();
+  if (md5_ == &::google::protobuf::internal::kEmptyString) {
+    md5_ = new ::std::string;
+  }
+  return md5_;
+}
+inline ::std::string* GetFileReply::release_md5() {
+  clear_has_md5();
+  if (md5_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = md5_;
+    md5_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetFileReply::set_allocated_md5(::std::string* md5) {
+  if (md5_ != &::google::protobuf::internal::kEmptyString) {
+    delete md5_;
+  }
+  if (md5) {
+    set_has_md5();
+    md5_ = md5;
+  } else {
+    clear_has_md5();
+    md5_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bytes filePartData = 10;
+inline bool GetFileReply::has_filepartdata() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void GetFileReply::set_has_filepartdata() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void GetFileReply::clear_has_filepartdata() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void GetFileReply::clear_filepartdata() {
+  if (filepartdata_ != &::google::protobuf::internal::kEmptyString) {
+    filepartdata_->clear();
+  }
+  clear_has_filepartdata();
+}
+inline const ::std::string& GetFileReply::filepartdata() const {
+  return *filepartdata_;
+}
+inline void GetFileReply::set_filepartdata(const ::std::string& value) {
+  set_has_filepartdata();
+  if (filepartdata_ == &::google::protobuf::internal::kEmptyString) {
+    filepartdata_ = new ::std::string;
+  }
+  filepartdata_->assign(value);
+}
+inline void GetFileReply::set_filepartdata(const char* value) {
+  set_has_filepartdata();
+  if (filepartdata_ == &::google::protobuf::internal::kEmptyString) {
+    filepartdata_ = new ::std::string;
+  }
+  filepartdata_->assign(value);
+}
+inline void GetFileReply::set_filepartdata(const void* value, size_t size) {
+  set_has_filepartdata();
+  if (filepartdata_ == &::google::protobuf::internal::kEmptyString) {
+    filepartdata_ = new ::std::string;
+  }
+  filepartdata_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetFileReply::mutable_filepartdata() {
+  set_has_filepartdata();
+  if (filepartdata_ == &::google::protobuf::internal::kEmptyString) {
+    filepartdata_ = new ::std::string;
+  }
+  return filepartdata_;
+}
+inline ::std::string* GetFileReply::release_filepartdata() {
+  clear_has_filepartdata();
+  if (filepartdata_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = filepartdata_;
+    filepartdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetFileReply::set_allocated_filepartdata(::std::string* filepartdata) {
+  if (filepartdata_ != &::google::protobuf::internal::kEmptyString) {
+    delete filepartdata_;
+  }
+  if (filepartdata) {
+    set_has_filepartdata();
+    filepartdata_ = filepartdata;
+  } else {
+    clear_has_filepartdata();
+    filepartdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// GetSessionParams
+
+// optional string currentSettingsProfile = 1;
+inline bool GetSessionParams::has_currentsettingsprofile() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetSessionParams::set_has_currentsettingsprofile() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetSessionParams::clear_has_currentsettingsprofile() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetSessionParams::clear_currentsettingsprofile() {
+  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_->clear();
+  }
+  clear_has_currentsettingsprofile();
+}
+inline const ::std::string& GetSessionParams::currentsettingsprofile() const {
+  return *currentsettingsprofile_;
+}
+inline void GetSessionParams::set_currentsettingsprofile(const ::std::string& value) {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  currentsettingsprofile_->assign(value);
+}
+inline void GetSessionParams::set_currentsettingsprofile(const char* value) {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  currentsettingsprofile_->assign(value);
+}
+inline void GetSessionParams::set_currentsettingsprofile(const char* value, size_t size) {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  currentsettingsprofile_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetSessionParams::mutable_currentsettingsprofile() {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  return currentsettingsprofile_;
+}
+inline ::std::string* GetSessionParams::release_currentsettingsprofile() {
+  clear_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = currentsettingsprofile_;
+    currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetSessionParams::set_allocated_currentsettingsprofile(::std::string* currentsettingsprofile) {
+  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
+    delete currentsettingsprofile_;
+  }
+  if (currentsettingsprofile) {
+    set_has_currentsettingsprofile();
+    currentsettingsprofile_ = currentsettingsprofile;
+  } else {
+    clear_has_currentsettingsprofile();
+    currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 

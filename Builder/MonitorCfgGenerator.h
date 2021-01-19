@@ -13,11 +13,11 @@ namespace Builder
 		MonitorCfgGenerator(Context* context, Hardware::Software* software);
 		~MonitorCfgGenerator();
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	protected:
-		bool writeMonitorSettings();
+		bool initSchemaTagsAndTuningSources();
 
 		bool saveScriptProperties(QString scriptProperty, QString fileName);
 
@@ -38,8 +38,6 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-		MonitorSettingsGetter m_settings;
-
 //		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 

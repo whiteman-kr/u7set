@@ -13,34 +13,20 @@ namespace Builder
 	{
 	}
 
+	bool DiagDataServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		DiagDataServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<DiagDataServiceSettings>(profile, settingsGetter);
+	}
+
 	bool DiagDataServiceCfgGenerator::generateConfiguration()
 	{
-		bool result = true;
-
-		do
-		{
-			if (writeSettings() == false) break;
-
-			result = true;
-		}
-		while(false);
-
-		return result;
-	}
-
-	bool DiagDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
-	bool DiagDataServiceCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
+		return true;
 	}
 }

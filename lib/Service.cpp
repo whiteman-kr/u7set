@@ -1,5 +1,6 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
+#include "../lib/ConstStrings.h"
 
 ServiceInfo::ServiceInfo()
 {
@@ -54,7 +55,8 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_argv(argv),
 	m_logger(logger),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
-	m_cmdLineParser(argc, argv)
+	m_cmdLineParser(argc, argv),
+	m_softwareSettingsSet(softwareInfo.softwareType())
 {
 	TEST_PTR_RETURN(argv);
 
@@ -187,6 +189,20 @@ QString ServiceWorker::getCmdLineSetting(const QString& settingName)
 	return  m_cmdLineParser.settingValue(settingName);
 }
 
+QString ServiceWorker::getSoftwareInfoStr() const
+{
+	QString swInfo =
+		QString("%1 %2.%3.%4 (%5) SHA: %6").
+			arg(m_serviceName).
+			arg(m_softwareInfo.majorVersion()).
+			arg(m_softwareInfo.minorVersion()).
+			arg(m_softwareInfo.commitNo()).
+			arg(m_softwareInfo.buildBranch()).
+			arg(m_softwareInfo.commitSHA());
+
+	return swInfo;
+}
+
 void ServiceWorker::init()
 {
 	m_cmdLineParser.addSimpleOption("h", "Print this help.");
@@ -260,6 +276,8 @@ Service::~Service()
 void Service::start()
 {
 	startServiceWorkerThread();
+
+	QThread::msleep(100);
 
 	startBaseRequestSocketThread();
 }
@@ -581,6 +599,13 @@ int ServiceStarter::exec()
 
 int ServiceStarter::privateRun()
 {
+	QString swInfo = m_serviceWorker.getSoftwareInfoStr();
+
+	DEBUG_LOG_MSG(m_logger, Separator::LINE);
+	DEBUG_LOG_MSG(m_logger, swInfo);
+	DEBUG_LOG_MSG(m_logger, Separator::LINE);
+	DEBUG_LOG_MSG(m_logger, QString());
+
 	m_serviceWorker.initAndProcessCmdLineSettings();			// 1. init CommanLineParser
 																// 2. process cmd line args
 																// 3. update and store service settings
@@ -646,20 +671,9 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	//
 	if (cmdLineParser.optionIsSet("v") == true)
 	{
-		const SoftwareInfo& si = m_serviceWorker.softwareInfo();
+		QString swInfo = m_serviceWorker.getSoftwareInfoStr();
 
-		QString versionInfo =
-			QString("\nApplication:\t%1\nVersion:\t%2.%3.%4 (%5)\nCommit SHA:\t%6\n").
-				arg(m_serviceWorker.serviceName()).
-				arg(si.majorVersion()).
-				arg(si.minorVersion()).
-				arg(si.commitNo()).
-				arg(si.buildBranch()).
-				arg(si.commitSHA());
-
-		std::cout << C_STR(versionInfo);
-
-		LOG_MSG(m_logger, QString(tr("Version printed.")))
+		DEBUG_LOG_MSG(m_logger, swInfo);
 
 		pauseAndExit = true;
 		return;

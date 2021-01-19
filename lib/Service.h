@@ -16,6 +16,7 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/CommandLineParser.h"
 #include "../lib/SoftwareInfo.h"
+#include "../lib/SoftwareSettings.h"
 #include "../Proto/network.pb.h"
 
 enum ServiceState
@@ -116,6 +117,11 @@ public:
 	QString getStrSetting(const QString& settingName);
 	QString getCmdLineSetting(const QString& settingName);
 
+	QString getSoftwareInfoStr() const;
+
+	SoftwareSettingsSet& softwareSettingsSet() { return m_softwareSettingsSet; }
+	const SoftwareSettingsSet& softwareSettingsSet() const { return m_softwareSettingsSet; }
+
 signals:
 	void work();
 	void stopped();
@@ -144,6 +150,8 @@ private:
 	HostAddressPort m_cfgServiceIP2;
 
 	SoftwareInfo m_softwareInfo;
+
+	SoftwareSettingsSet m_softwareSettingsSet;
 
 	QString m_serviceName;
 

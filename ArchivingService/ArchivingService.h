@@ -48,15 +48,15 @@ private:
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
-	bool loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings);
-
 	bool loadArchSignalsProto(const QByteArray& fileData);
 	void deleteArchSignalsProto();
 
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
-	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void onConfigurationReady(const QByteArray configurationXmlData,
+							  const BuildFileInfoArray buildFileInfoArray,
+							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 private:
 	QString m_overwriteArchiveLocation;

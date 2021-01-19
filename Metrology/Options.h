@@ -1074,6 +1074,7 @@ private:
 
 	SocketOption			m_socket;
 	ProjectInfo				m_projectInfo;
+
 	MetrologySettings		m_settings;
 
 	ModuleOption			m_module;
@@ -1132,6 +1133,7 @@ public:
 	void					load();
 	void					save();
 
+	bool					setMetrologySettings(std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	bool					readFromXml(const QByteArray& fileData);
 
 	Options&				operator=(const Options& from);

@@ -177,6 +177,10 @@ namespace Builder
 						QString receivingEquipmentID);		// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 
 
+		void errCFG3044(QString equipmentID, QString profileID);	// Equipment object %1 is not found (Settings profile - %2).
+		void errCFG3045(QString equipmentID, QString propertyName, QString profileID);	// Property %1.%2 is not found (Settings profile - %3).
+
+
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);

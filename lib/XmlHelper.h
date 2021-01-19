@@ -31,6 +31,7 @@ public:
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
 	void writeAddress16Attribute(const QString& name, const Address16& addr16);
+	void writeSoftwareTypeAttribute(E::SoftwareType swType);
 
 	void writeString(const QString& str);
 
@@ -68,6 +69,7 @@ public:
 	bool readDoubleAttribute(const QString& name, double* value);
 	bool readFloatAttribute(const QString& name, float* value);
 	bool readAddress16Attribute(const QString& name, Address16* value);
+	bool readSoftwareTypeAttribute(E::SoftwareType* swType);
 
 	bool readStringElement(const QString& elementName, QString* value, bool find = false);
 	bool readIntElement(const QString& elementName, int* value, bool find = false);

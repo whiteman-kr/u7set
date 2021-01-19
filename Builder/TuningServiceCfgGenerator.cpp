@@ -17,6 +17,18 @@ namespace Builder
 	{
 	}
 
+	bool TuningServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TuningServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TuningServiceSettings>(profile, settingsGetter);
+	}
+
 	bool TuningServiceCfgGenerator::generateConfiguration()
 	{
 		if (m_tuningDataStorage == nullptr)
@@ -29,7 +41,6 @@ namespace Builder
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeTuningSources() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
@@ -41,46 +52,25 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(m_context, m_log);
-
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
-	bool TuningServiceCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result);
-
-		if (m_context->m_projectProperties.safetyProject() == true && m_settings.singleLmControl == false)
-		{
-			// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
-			//
-			m_log->errEQP6201(equipmentID());
-			return false;
-		}
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
-	}
-
 	bool TuningServiceCfgGenerator::writeTuningSources()
 	{
+		std::shared_ptr<const TuningServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningServiceSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
 		QByteArray fileData;
 
 		bool result = true;
 
-		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(m_settings.tuningSources, &fileData);
+		QVector<Tuning::TuningSource> tuningSources;
+
+		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
 
 		RETURN_IF_FALSE(result)
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{

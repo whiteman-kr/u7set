@@ -17,13 +17,24 @@ namespace Builder
 	{
 	}
 
+	bool AppDataServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		AppDataServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<AppDataServiceSettings>(profile, settingsGetter);
+	}
+
 	bool AppDataServiceCfgGenerator::generateConfiguration()
 	{
 		bool result = false;
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeAppDataSourcesXml() == false) break;
 			if (writeAppSignalsXml() == false) break;
 			if (addLinkToAppSignalsFile() == false) break;
@@ -37,22 +48,6 @@ namespace Builder
 		return result;
 	}
 
-	bool AppDataServiceCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
-	}
-
-	bool AppDataServiceCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result);
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
-	}
-
 	bool AppDataServiceCfgGenerator::writeAppDataSourcesXml()
 	{
 		bool result = true;
@@ -61,9 +56,13 @@ namespace Builder
 
 		QVector<DataSource> dataSources;
 
-		quint32 receivingNetmask = m_settings.appDataReceivingNetmask.toIPv4Address();
+		std::shared_ptr<const AppDataServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<AppDataServiceSettings>();
 
-		quint32 receivingSubnet = m_settings.appDataReceivingIP.address32() & receivingNetmask;
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		quint32 receivingNetmask = settings->appDataReceivingNetmask.toIPv4Address();
+
+		quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
 
 		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
 		{
@@ -122,7 +121,7 @@ namespace Builder
 					//
 					m_log->errCFG3043(ds.lmAddress().toString(),
 									  ds.lmAdapterID(),
-									  m_settings.appDataReceivingIP.addressStr(),
+									  settings->appDataReceivingIP.addressStr(),
 									  equipmentID());
 					result = false;
 					continue;
@@ -147,7 +146,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -234,7 +233,7 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{

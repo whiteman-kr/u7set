@@ -41,9 +41,9 @@ namespace  Sim
 		{
 			Q_ASSERT(equipmentId == si.equipmentID);
 
-			if (si.softwareType == E::SoftwareType::TuningService)
+			if (si.softwareType() == E::SoftwareType::TuningService)
 			{
-				std::shared_ptr<Sim::TuningServiceCommunicator> tsc = std::make_shared<Sim::TuningServiceCommunicator>(m_simulator, *si.tuningServiceSettings());
+				std::shared_ptr<Sim::TuningServiceCommunicator> tsc = std::make_shared<Sim::TuningServiceCommunicator>(m_simulator, *si.tuningServiceSettings(SettingsProfile::DEFAULT));
 
 				m_tuningServiceCommunicators.emplace(equipmentId, std::move(tsc));
 			}

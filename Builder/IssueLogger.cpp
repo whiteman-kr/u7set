@@ -1491,6 +1491,49 @@ namespace Builder
 								arg(dataSourceIP).arg(dataSourceEquipmentID).arg(dataReceivingIP).arg(receivingEquipmentID));
 	}
 
+	/// IssueCode: CFG3044
+	///
+	/// IssueType: Error
+	///
+	/// Title: Equipment object %1 is not found (Settings profile - %2).
+	///
+	/// Parameters:
+	///         %1 equipmentID
+	///			%2 settings profile ID
+	///
+	/// Description:
+	///			Object with EquipmentID specified in settings profile is not found.
+	///
+	void IssueLogger::errCFG3044(QString equipmentID, QString profileID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3044,
+				  QString(tr("Equipment object %1 is not found (Settings profile - %2).").
+								arg(equipmentID).arg(profileID)));
+	}
+
+	/// IssueCode: CFG3045
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is not found (Settings profile - %3).
+	///
+	/// Parameters:
+	///         %1 equipmentID
+	///         %2 propertyName
+	///			%3 settings profile ID
+	///
+	/// Description:
+	///			Property specified in settings profile is not found.
+	///
+	void IssueLogger::errCFG3045(QString equipmentID, QString propertyName, QString profileID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3045,
+				  QString(tr("Property %1.%2 is not found (Settings profile - %3).").
+								arg(equipmentID).arg(propertyName).arg(profileID)));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

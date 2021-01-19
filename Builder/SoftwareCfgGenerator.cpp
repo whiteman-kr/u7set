@@ -17,12 +17,13 @@ namespace Builder
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
 		m_context(context),
-		m_dbController(&context->m_db),
 		m_software(software),
+		m_dbController(&context->m_db),
 		m_signalSet(context->m_signalSet.get()),
 		m_equipment(context->m_equipmentSet.get()),
 		m_buildResultWriter(context->m_buildResultWriter.get()),
-		m_log(context->m_log)
+		m_log(context->m_log),
+		m_settingsSet(software->type())
 	{
 		assert(context);
 	}
@@ -31,7 +32,40 @@ namespace Builder
 	{
 	}
 
-	bool SoftwareCfgGenerator::run()
+	bool SoftwareCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+
+		// Method should be override in classes derived from SoftwareCfgGenerator like this:
+		//
+		//	Specific_SettingsGetter settingsGetter;
+		//
+		//	if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		//	{
+		//		return false;
+		//	}
+		//
+		//	return m_settingsSet.addProfile<Specific_Settings>(profile, &settingsGetter);
+		//
+		//
+
+		Q_UNUSED(profile);
+
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("Method createSettingsProfile(...) is not implemented for software %1 (type %2)").
+									arg(equipmentID()).arg(E::valueToString<E::SoftwareType>(m_software->type())));
+
+		return false;
+	}
+
+	bool SoftwareCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settingsSet.writeToXml(xml);
+	}
+
+	bool SoftwareCfgGenerator::writeConfigurationXml()
 	{
 		if (m_log == nullptr ||
 			m_dbController == nullptr ||
@@ -44,17 +78,7 @@ namespace Builder
 			return false;
 		}
 
-		m_deviceRoot = m_equipment->root();
-
-		if (m_deviceRoot == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		m_subDir = m_software->equipmentIdTemplate();
-
-		m_cfgXml = m_buildResultWriter->createConfigurationXmlFile(m_subDir);
+		m_cfgXml = m_buildResultWriter->createConfigurationXmlFile(softwareCfgSubdir());
 
 		if (m_cfgXml == nullptr)
 		{
@@ -68,6 +92,8 @@ namespace Builder
 					arg(m_software->equipmentIdTemplate()));
 
 		writeSoftwareSection(m_cfgXml->xmlWriter(), true);
+
+		getSettingsXml(m_cfgXml->xmlWriter());
 
 		bool result = true;
 
@@ -681,113 +707,6 @@ namespace Builder
 		return result;
 	}
 
-	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
-	{
-		BuildInfo&& b = m_buildResultWriter->buildInfo();
-
-		QString comments = "@rem Project: " + b.project + "\n";
-		comments += "@rem BuildNo: " + QString::number(b.id) + "\n";
-		comments += "@rem Date: " + b.dateStr() + "\n";
-		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
-		comments += "@rem User: " + b.user + "\n";
-		comments += "@rem Workstation: " + b.workstation + "\n\n";
-
-		return comments;
-	}
-
-	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
-	{
-		BuildInfo&& b = m_buildResultWriter->buildInfo();
-
-		QString comments = "#!/bin/bash\n\n";
-
-		comments += "# Project: " + b.project + "\n";
-		comments += "# BuildNo: " + QString::number(b.id) + "\n";
-		comments += "# Date: " + b.dateStr() + "\n";
-		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
-		comments += "# User: " + b.user + "\n";
-		comments += "# Workstation: " + b.workstation + "\n\n";
-
-		return comments;
-	}
-
-	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-
-		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
-
-		cfgIP1->clear();
-		cfgIP2->clear();
-
-		QString cfgServiceID1;
-		QString cfgServiceID2;
-
-		HostAddressPort cfgServiceIP1;
-		HostAddressPort cfgServiceIP2;
-
-		bool result = true;
-
-		result = SoftwareSettingsGetter::getCfgServiceConnection(m_equipment, m_software,
-														   &cfgServiceID1, &cfgServiceIP1,
-														   &cfgServiceID2, &cfgServiceIP2,
-														   m_log);
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (cfgServiceID1.isEmpty() == false)
-		{
-			*cfgIP1 = cfgServiceIP1.addressPortStr();
-		}
-
-		if (cfgServiceID2.isEmpty() == false)
-		{
-			*cfgIP2 = cfgServiceIP2.addressPortStr();
-		}
-
-		return true;
-	}
-
-	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
-	{
-		parameters += " -e";
-
-		QString cfgIP1;
-		QString cfgIP2;
-		
-		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
-		{
-			return false;
-		}
-
-		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
-		{
-			m_log->errALC5140(m_software->equipmentIdTemplate());
-			return false;
-		}
-
-		if (cfgIP1.isEmpty() == true)
-		{
-			cfgIP1 = cfgIP2;
-		}
-
-		if (cfgIP2.isEmpty() == true)
-		{
-			cfgIP2 = cfgIP1;
-		}
-
-		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
-
-		parameters += " -id=" + m_software->equipmentIdTemplate();
-
-		return true;
-	}
-
 	bool SoftwareCfgGenerator::joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge)
 	{
 		if (context == nullptr || schema == nullptr || pannel == nullptr)
@@ -999,6 +918,113 @@ namespace Builder
 		}
 
 		file->swapData(*data);
+
+		return true;
+	}
+
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "@rem Project: " + b.project + "\n";
+		comments += "@rem BuildNo: " + QString::number(b.id) + "\n";
+		comments += "@rem Date: " + b.dateStr() + "\n";
+		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "@rem User: " + b.user + "\n";
+		comments += "@rem Workstation: " + b.workstation + "\n\n";
+
+		return comments;
+	}
+
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "#!/bin/bash\n\n";
+
+		comments += "# Project: " + b.project + "\n";
+		comments += "# BuildNo: " + QString::number(b.id) + "\n";
+		comments += "# Date: " + b.dateStr() + "\n";
+		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "# User: " + b.user + "\n";
+		comments += "# Workstation: " + b.workstation + "\n\n";
+
+		return comments;
+	}
+
+	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+
+		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
+
+		cfgIP1->clear();
+		cfgIP2->clear();
+
+		QString cfgServiceID1;
+		QString cfgServiceID2;
+
+		HostAddressPort cfgServiceIP1;
+		HostAddressPort cfgServiceIP2;
+
+		bool result = true;
+
+		result = SoftwareSettingsGetter::getCfgServiceConnection(m_equipment, m_software,
+														   &cfgServiceID1, &cfgServiceIP1,
+														   &cfgServiceID2, &cfgServiceIP2,
+														   m_log);
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (cfgServiceID1.isEmpty() == false)
+		{
+			*cfgIP1 = cfgServiceIP1.addressPortStr();
+		}
+
+		if (cfgServiceID2.isEmpty() == false)
+		{
+			*cfgIP2 = cfgServiceIP2.addressPortStr();
+		}
+
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
+	{
+		parameters += " -e";
+
+		QString cfgIP1;
+		QString cfgIP2;
+
+		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
+		{
+			m_log->errALC5140(m_software->equipmentIdTemplate());
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() == true)
+		{
+			cfgIP1 = cfgIP2;
+		}
+
+		if (cfgIP2.isEmpty() == true)
+		{
+			cfgIP2 = cfgIP1;
+		}
+
+		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
+
+		parameters += " -id=" + m_software->equipmentIdTemplate();
 
 		return true;
 	}

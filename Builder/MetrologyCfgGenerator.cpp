@@ -18,23 +18,27 @@ namespace Builder
 	{
 	}
 
+	bool MetrologyCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		MetrologySettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<MetrologySettings>(profile, settingsGetter);
+	}
+
 	bool MetrologyCfgGenerator::generateConfiguration()
 	{
 		bool result = true;
 
 		result &= writeDatabaseInfo();
-		result &= writeSettings();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
 
 		return result;
-	}
-
-	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
 	}
 
 	bool MetrologyCfgGenerator::writeDatabaseInfo()
@@ -48,15 +52,6 @@ namespace Builder
 		xmlWriter.writeEndElement();
 
 		return true;
-	}
-
-	bool MetrologyCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result)
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MetrologyCfgGenerator::writeMetrologyItemsXml()
@@ -168,7 +163,7 @@ namespace Builder
 
 		// Create and write build file MetrologySignals.xml
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -305,7 +300,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;

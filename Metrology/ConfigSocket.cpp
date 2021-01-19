@@ -108,7 +108,9 @@ void ConfigSocket::reconncect(const QString& equipmentID, const HostAddressPort&
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData,
+										   const BuildFileInfoArray buildFileInfoArray,
+										   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
 	qDebug() << __FUNCTION__ << "File count: " << buildFileInfoArray.count();
 
@@ -125,7 +127,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 	bool result = false;
 
-	result = readConfiguration(configurationXmlData);
+	result = readConfiguration(configurationXmlData, curSettingsProfile);
 	if (result == false)
 	{
 		return;
@@ -175,9 +177,13 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readConfiguration(const QByteArray& fileData)
+bool ConfigSocket::readConfiguration(const QByteArray& fileData,
+									 std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
-	bool result = theOptions.readFromXml(fileData);
+	bool result = true;
+
+	result &= theOptions.setMetrologySettings(curSettingsProfile);
+	result &= theOptions.readFromXml(fileData);
 
 	qDebug() << __FUNCTION__ << (result == true ? "Ok" : "Error!");
 

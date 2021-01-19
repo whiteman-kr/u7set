@@ -35,6 +35,7 @@ SOURCES += MainWindow.cpp \
     ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
     ../lib/ProtoSerialization.cpp \
+	../lib/SoftwareSettings.cpp \
     ScanOptionsWidget.cpp \
 	ScmMain.cpp \
 	ScmTcpAppDataClient.cpp \
@@ -93,6 +94,7 @@ HEADERS  += MainWindow.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/MemLeaksDetection.h \
     ../lib/ProtoSerialization.h \
+    ../lib/SoftwareSettings.h \
     ScanOptionsWidget.h \
     ScmTcpAppDataClient.h \
     ServiceTableModel.h \

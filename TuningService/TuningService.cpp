@@ -67,7 +67,7 @@ namespace Tuning
 		m_tuningSimIPStr = getStrSetting(SETTING_TUNING_SIM_IP);
 		m_tuningSimIP.setAddressPortStr(m_tuningSimIPStr, PORT_LM_TUNING);
 
-		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Settings from command line or registry:")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
@@ -365,7 +365,22 @@ namespace Tuning
 
 		bool result = true;
 
-		result &= m_cfgSettings.readFromXml(xml);
+		result = softwareSettingsSet().readFromXml(cfgXmlData);
+
+		if (result == true)
+		{
+			std::shared_ptr<const TuningServiceSettings> typedSettingsPtr =
+					softwareSettingsSet().getSettingsProfile<TuningServiceSettings>(SettingsProfile::DEFAULT);
+
+			if (typedSettingsPtr != nullptr)
+			{
+				m_cfgSettings = *typedSettingsPtr;
+			}
+			else
+			{
+				result = false;
+			}
+		}
 
 		if  (result == true)
 		{
@@ -572,24 +587,26 @@ namespace Tuning
 		return m_tuningSimIP.isSet();
 	}
 
-	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+												   const BuildFileInfoArray buildFileInfoArray,
+												   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 	{
+		Q_UNUSED(configurationXmlData);
+
 		if (m_cfgLoaderThread == nullptr)
 		{
 			return;
 		}
 
-		DEBUG_LOG_MSG(m_logger, QString("Configuration is ready"));
+		const TuningServiceSettings* typedSettingsPtr = dynamic_cast<const TuningServiceSettings*>(curSettingsProfile.get());
 
-		bool result = true;
-
-		result = readConfiguration(configurationXmlData);
-
-		if (result == false)
+		if (typedSettingsPtr == nullptr)
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Configuration reading error"));
+			DEBUG_LOG_MSG(logger(), "Settings casting error!");
 			return;
 		}
+
+		m_cfgSettings = *typedSettingsPtr;
 
 		//
 
@@ -601,6 +618,8 @@ namespace Tuning
 		//
 
 		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
+
+		bool result = true;
 
 		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 		{

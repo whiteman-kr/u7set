@@ -15,8 +15,8 @@ namespace Builder
 	public:
 		TuningClientCfgGenerator(Context* context, Hardware::Software* software);
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
 
@@ -26,7 +26,6 @@ namespace Builder
 		bool createEquipmentList(QStringList* equipmentList);
 		bool createObjectFilters(const QStringList& equipmentList);
 
-		bool writeSettings();
 		bool writeTuningSignals();
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
@@ -42,8 +41,6 @@ namespace Builder
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
-		TuningClientSettingsGetter m_settings;
-
 		::Proto::AppSignalSet m_tuningSet;
 
 		TuningFilterStorage m_tuningFilterStorage;

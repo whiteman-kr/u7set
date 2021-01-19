@@ -97,6 +97,8 @@ namespace Builder
 		//
 		bool generateSoftwareConfiguration();
 
+		bool checkProfiles();
+
 		bool writeFirmwareStatistics(BuildResultWriter& buildResultWriter);
 
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
@@ -109,8 +111,6 @@ namespace Builder
 		bool writeLogicModulesInfoXml(Context* context);
 
 		bool buildSoftwareList(Context* context);
-
-		bool createSchemasAlbums();
 
 		// Run simulator-based script tests
 		//

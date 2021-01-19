@@ -10,16 +10,12 @@ namespace Builder
 	public:
 		TestClientCfgGenerator(Context* context, Hardware::Software* software);
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
 
 	private:
-		bool writeSettings();
 		bool linkAppSignalsFile();
 		bool writeBatFile();
 		bool writeShFile();
-
-	private:
-		TestClientSettingsGetter m_settings;
 	};
 }

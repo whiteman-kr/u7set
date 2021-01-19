@@ -6,13 +6,12 @@
 #include "../lib/Md5Hash.h"
 #include "../lib/Tcp.h"
 #include "../lib/CircularLogger.h"
+#include "../Proto/network.pb.h"
 
 namespace Tcp
 {
-
 	const quint32	RQID_GET_FILE_START = 400,
 					RQID_GET_FILE_NEXT = 401;
-
 
 	enum class FileTransferResult
 	{
@@ -41,12 +40,7 @@ namespace Tcp
 		InternalError,
 	};
 
-
-	const int MD5_LEN = 128 / 8;		// MD5 code lenght in bytes
-
-	const int FILE_PART_SIZE = 65536;
-
-
+/*
 #pragma pack(push, 1)
 
 	struct GetFileReply
@@ -65,13 +59,12 @@ namespace Tcp
 		void clear();
 	};
 
-#pragma pack(pop)
-
+#pragma pack(pop) */
 
 	class FileTransfer
 	{
-	private:
-		static bool m_FileTransferErrorIsRegistered;
+	public:
+		FileTransfer();
 
 	protected:
 		QString m_rootFolder;
@@ -81,10 +74,13 @@ namespace Tcp
 
 		bool m_transferInProgress = false;
 
-	public:
-		FileTransfer();
-	};
+		const int MD5_LEN = 128 / 8;		// MD5 code lenght in bytes
 
+		const int FILE_PART_SIZE = 65536;
+
+	private:
+		static bool m_FileTransferErrorIsRegistered;
+	};
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -95,33 +91,6 @@ namespace Tcp
 	class FileClient : public Client, public FileTransfer
 	{
 		Q_OBJECT
-
-	private:
-		GetFileReply m_reply;
-
-		FileTransferResult checkLocalFolder();		// check read/write ability for m_rootFolder
-		FileTransferResult createFile();
-
-		void init();
-		void endFileDownload(FileTransferResult errorCode);
-
-		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) final;
-
-		void processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize);
-
-	protected:
-		virtual void onClientThreadStarted() override;
-		virtual void onClientThreadFinished() override;
-		virtual void onReplyTimeout() override;
-
-		QString getErrorStr(FileTransferResult errorCode) const;
-
-	protected slots:
-		void slot_downloadFile(const QString fileName);
-
-	signals:
-		void signal_downloadFile(const QString fileName);
-		void signal_endFileDownload(const QString fileName, FileTransferResult errorCode, const QString md5);
 
 	public:
 		FileClient(const SoftwareInfo& softwareInfo,
@@ -139,11 +108,42 @@ namespace Tcp
 
 		virtual void processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize);
 
-		virtual void onEndFileDownload(const QString fileName, FileTransferResult errorCode, const QString md5);
+		virtual void onEndFileDownload(const QString fileName,
+									   FileTransferResult errorCode,
+									   const QString md5);
 
 		bool isTransferInProgress() { return m_transferInProgress; }
-	};
 
+	protected:
+		virtual void onClientThreadStarted() override;
+		virtual void onClientThreadFinished() override;
+		virtual void onReplyTimeout() override;
+
+		QString getErrorStr(FileTransferResult errorCode) const;
+
+	protected slots:
+		void slot_downloadFile(const QString fileName);
+
+	signals:
+		void signal_downloadFile(const QString fileName);
+
+		void signal_endFileDownload(const QString fileName,
+									FileTransferResult errorCode,
+									const QString md5);
+	private:
+		FileTransferResult checkLocalFolder();		// check read/write ability for m_rootFolder
+		FileTransferResult createFile();
+
+		void init();
+		void faultyFileDownload(FileTransferResult errorCode);
+
+		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) final;
+
+		void processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize);
+
+	private:
+		Network::GetFileReply m_reply;
+	};
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -180,11 +180,9 @@ namespace Tcp
 	private:
 		std::shared_ptr<CircularLogger> m_logger;
 
-		GetFileReply& m_reply;
 		QByteArray m_fileData;
 
-		char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
-		char* m_replyFileData = nullptr;
+		Network::GetFileReply m_reply;
 
 		QTimer m_transmitionFilesTimer;
 	};

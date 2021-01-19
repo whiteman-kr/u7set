@@ -1,4 +1,5 @@
 #include "XmlHelper.h"
+#include "ConstStrings.h"
 #include "WUtils.h"
 
 // -------------------------------------------------------------------------------------
@@ -128,6 +129,11 @@ void XmlWriteHelper::writeFloatAttribute(const QString& name, float value)
 void XmlWriteHelper::writeAddress16Attribute(const QString& name, const Address16& addr16)
 {
 	writeStringAttribute(name, addr16.toString());
+}
+
+void XmlWriteHelper::writeSoftwareTypeAttribute(E::SoftwareType swType)
+{
+	writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString<E::SoftwareType>(swType));
 }
 
 void XmlWriteHelper::writeString(const QString& str)
@@ -385,6 +391,32 @@ bool XmlReadHelper::readAddress16Attribute(const QString& name, Address16* value
 	value->fromString(addr16Str, &result);
 
 	return result;
+}
+
+bool XmlReadHelper::readSoftwareTypeAttribute(E::SoftwareType* swType)
+{
+	TEST_PTR_RETURN_FALSE(swType);
+
+	QString swTypeStr;
+
+	bool result = readStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swTypeStr);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	bool ok = true;
+
+	*swType = E::stringToValue<E::SoftwareType>(swTypeStr, &ok);
+
+	if (ok == false)
+	{
+		*swType = E::SoftwareType::Unknown;
+		return false;
+	}
+
+	return true;
 }
 
 bool XmlReadHelper::readStringElement(const QString& elementName, QString* value, bool find)

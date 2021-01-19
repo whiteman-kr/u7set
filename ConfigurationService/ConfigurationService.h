@@ -52,6 +52,7 @@ private:
 	static const char* const SETTING_AUTOLOAD_BUILD_PATH;
 	static const char* const SETTING_CLIENT_REQUEST_IP;
 	static const char* const SETTING_WORK_DIRECTORY;
+	static const char* const SETTING_CURRENT_PROFILE;
 
 	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
@@ -65,8 +66,9 @@ private:
 	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
 	QString m_workDirectory;
+	QString m_currentSettingsProfile;
 
 	HostAddressPort m_clientIP;
 
-	CfgServiceSettings m_cfgServiceSettings;
+	std::shared_ptr<const CfgServiceSettings> m_cfgServiceSettings;
 };

@@ -45,8 +45,8 @@ ServiceWorker* AppDataServiceWorker::createInstance() const
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+	serviceInfo.set_clientrequestip(m_curSettingsProfile.clientRequestIP.address32());
+	serviceInfo.set_clientrequestport(m_curSettingsProfile.clientRequestIP.port());
 }
 
 bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
@@ -107,7 +107,7 @@ void AppDataServiceWorker::loadSettings()
 	m_strCmdLineAppDataReceivingIP = getStrSetting(SETTING_OVERRIDE_APP_DATA_RECEIVING_IP);
 	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
@@ -123,7 +123,7 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 		return;
 	}
 
-	m_appDataReceiverThread = new AppDataReceiverThread(m_cfgSettings.appDataReceivingIP, m_appDataSourcesIP, logger());
+	m_appDataReceiverThread = new AppDataReceiverThread(m_curSettingsProfile.appDataReceivingIP, m_appDataSourcesIP, logger());
 
 	m_appDataReceiverThread->start();
 }
@@ -184,7 +184,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															 m_appDataReceiverThread,
 															 m_signalStatesProcessingThread);
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_curSettingsProfile.clientRequestIP,
 															tcpAppDataSever,
 															m_appDataSourcesIP,
 															m_appSignals,
@@ -209,14 +209,14 @@ void AppDataServiceWorker::runTcpArchiveClientThread()
 {
 	assert(m_tcpArchiveClientThread == nullptr);
 
-	if (m_cfgSettings.archServiceID.isEmpty() == true)
+	if (m_curSettingsProfile.archServiceID.isEmpty() == true)
 	{
 		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
 		return;
 	}
 
 	TcpArchiveClient* tcpArchiveClient = new TcpArchiveClient(softwareInfo(),
-												m_cfgSettings.archServiceIP,
+												m_curSettingsProfile.archServiceIP,
 												m_signalStatesProcessingThread,
 												logger());
 
@@ -243,7 +243,7 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 {
 	assert(m_rtTrendsServerThread == nullptr);
 
-	m_rtTrendsServerThread = new RtTrends::ServerThread(m_cfgSettings.rtTrendsRequestIP, *this);
+	m_rtTrendsServerThread = new RtTrends::ServerThread(m_curSettingsProfile.rtTrendsRequestIP, *this);
 
 	m_rtTrendsServerThread->start();
 }
@@ -319,7 +319,9 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 	m_cfgLoaderThread = nullptr;
 }
 
-void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+												const BuildFileInfoArray buildFileInfoArray,
+												std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 {
 	DEBUG_LOG_MSG(logger(), "Configuration is ready");
 
@@ -327,19 +329,26 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	//
 	clearConfiguration();
 
-	bool result = readConfigurationSettings(configurationXmlData);
+	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
 
-	if (result == false)
+	if (typedSettingsPtr == nullptr)
 	{
+		DEBUG_LOG_MSG(logger(), "Settings casting error!");
 		return;
 	}
+
+	// making modificable local copy of settings
+	//
+	m_curSettingsProfile = *typedSettingsPtr;
 
 	// replace some cfg settings by command line arguments
 	//
 	if (m_strCmdLineAppDataReceivingIP.isEmpty() == false)
 	{
-		m_cfgSettings.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
+		m_curSettingsProfile.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
 	}
+
+	bool result = true;
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 	{
@@ -387,26 +396,6 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 void AppDataServiceWorker::onTimer()
 {
 }
-
-
-bool AppDataServiceWorker::readConfigurationSettings(const QByteArray& fileData)
-{
-	XmlReadHelper xml(fileData);
-
-	bool result = m_cfgSettings.readFromXml(xml);
-
-	if (result == true)
-	{
-		qDebug() << "Reading settings - OK";
-	}
-	else
-	{
-		qDebug() << "Settings read ERROR!";
-	}
-
-	return result;
-}
-
 
 bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 {
@@ -558,7 +547,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 
 void AppDataServiceWorker::applyNewConfiguration()
 {
-	m_autoArchivingGroupsCount = m_cfgSettings.autoArchiveInterval * 60;
+	m_autoArchivingGroupsCount = m_curSettingsProfile.autoArchiveInterval * 60;
 
 	createAndInitSignalStates();
 	prepareAppDataSources();

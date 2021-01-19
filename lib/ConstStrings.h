@@ -175,6 +175,8 @@ namespace XmlElement
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
+
+	inline const QString SETTINGS_SET("SettingsSet");
 }
 
 namespace XmlAttribute
@@ -186,6 +188,8 @@ namespace XmlAttribute
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");
+
+	inline const QString PROFILE("Profile");
 
 	inline const QString APP_DATA_SERVICE_PROPERTY_IS_VALID1("AppDataServicePropertyIsValid1");
 	inline const QString APP_DATA_SERVICE_ID1("AppDataServiceID1");
@@ -255,6 +259,11 @@ namespace CfgFileId
 	inline const QString METROLOGY_SIGNAL_SET("METROLOGY_SIGNAL_SET");
 }
 
+namespace  SettingsProfile
+{
+	inline const QString DEFAULT("Default");
+}
+
 namespace Directory
 {
 	inline const QString COMMON("Common");
@@ -287,7 +296,5 @@ namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString LINE("-------------------------------------------------------------------------------");
 }
-
-
-

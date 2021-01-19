@@ -32,7 +32,10 @@ unix {
 
 
 SOURCES += \
+    ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/SoftwareSettings.cpp \
+    ../lib/Types.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
@@ -43,12 +46,16 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     ../lib/WUtils.cpp \
+    ../lib/XmlHelper.cpp \
     BaseServiceMain.cpp \
     ../lib/SoftwareInfo.cpp
 
 HEADERS += \
+	../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
     ../lib/SocketIO.h \
+	../lib/SoftwareSettings.h \
+	../lib/Types.h \
     ../lib/UdpSocket.h \
     ../lib/CircularLogger.h \
 	../lib/FscDataFormat.h \
@@ -61,6 +68,7 @@ HEADERS += \
     ../lib/WUtils.h \
     ../lib/SoftwareInfo.h \
     ../lib/OrderedHash.h \
+	../lib/XmlHelper.h \
 	Stable.h
 
 CONFIG += precompile_header
