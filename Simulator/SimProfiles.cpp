@@ -352,6 +352,11 @@ namespace Sim
 		return m_profiles.size() == 0;
 	}
 
+	bool Profiles::hasProfile(QString profileName) const
+	{
+		return m_profiles.find(profileName) != m_profiles.end();
+	}
+
 	const Profile& Profiles::profile(const QString& profileId) const
 	{
 		auto it = m_profiles.find(profileId);

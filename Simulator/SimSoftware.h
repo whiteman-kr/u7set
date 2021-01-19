@@ -15,7 +15,7 @@ namespace  Sim
 		void clear();
 		bool loadSoftwareXml(QString fileName);
 
-		bool startSimulation();
+		bool startSimulation(QString profileName);
 		bool stopSimulation();
 
 		// AppDataService

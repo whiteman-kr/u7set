@@ -23,7 +23,7 @@ namespace Sim
 		virtual ~TuningServiceCommunicator();
 
 	public:
-		bool startSimulation();
+		bool startSimulation(QString profileName);
 		bool stopSimulation();
 
 		Simulator* simulator() const;

@@ -682,6 +682,21 @@ void SimWidget::runSimulation()
 		return;
 	}
 
+	// Set profile tosimulator
+	//
+	Q_ASSERT(m_profilesComboBox);
+
+	QString selectedProfile = m_profilesComboBox->currentText();
+
+	if (bool ok = m_simulator->setCurrentProfile(selectedProfile);
+		ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Profile %1 not found").arg(selectedProfile));
+		return;
+	}
+
+	// --
+	//
 	Sim::Control& mutableControl = m_simulator->control();
 
 	if (m_simulator->isPaused() == true)

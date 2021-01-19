@@ -25,7 +25,7 @@ namespace Sim
 		virtual ~AppDataTransmitter();
 
 	public:
-		bool startSimulation();
+		bool startSimulation(QString profileName);
 		bool stopSimulation();
 		bool sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
 
