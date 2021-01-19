@@ -15,6 +15,7 @@ namespace Builder
 		MetrologyCfgGenerator(Context* context, Hardware::Software* software);
 		virtual ~MetrologyCfgGenerator() override;
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
 
 	private:

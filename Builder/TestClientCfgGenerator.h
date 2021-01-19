@@ -10,6 +10,7 @@ namespace Builder
 	public:
 		TestClientCfgGenerator(Context* context, Hardware::Software* software);
 
+		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfiguration() override;
 
 	private:

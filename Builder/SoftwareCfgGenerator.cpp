@@ -34,6 +34,9 @@ namespace Builder
 
 	bool SoftwareCfgGenerator::createSettingsProfile(const QString& profile)
 	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+
 		// Method should be override in classes derived from SoftwareCfgGenerator like this:
 		//
 		//	Specific_SettingsGetter settingsGetter;
@@ -47,11 +50,12 @@ namespace Builder
 		//
 		//
 
-		Q_ASSERT(false);
-
 		Q_UNUSED(profile);
 
-		return true;
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("Method createSettingsProfile(...) is not implemented for software %1 (type %2)").
+									arg(equipmentID()).arg(E::valueToString<E::SoftwareType>(m_software->type())));
+
+		return false;
 	}
 
 	bool SoftwareCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)

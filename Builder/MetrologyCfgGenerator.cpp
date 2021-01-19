@@ -18,6 +18,18 @@ namespace Builder
 	{
 	}
 
+	bool MetrologyCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		MetrologySettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<MetrologySettings>(profile, settingsGetter);
+	}
+
 	bool MetrologyCfgGenerator::generateConfiguration()
 	{
 		bool result = true;

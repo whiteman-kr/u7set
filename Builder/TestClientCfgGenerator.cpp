@@ -7,6 +7,18 @@ namespace Builder
 	{
 	}
 
+	bool TestClientCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TestClientSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TestClientSettings>(profile, settingsGetter);
+	}
+
 	bool TestClientCfgGenerator::generateConfiguration()
 	{
 		bool result = false;
