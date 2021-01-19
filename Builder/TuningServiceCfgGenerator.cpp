@@ -64,6 +64,83 @@ namespace Builder
 
 		QVector<Tuning::TuningSource> tuningSources;
 
+		quint32 receivingNetmask = settings->tuningDataNetmask.toIPv4Address();
+
+		quint32 receivingSubnet = settings->tuningDataIP.address32() & receivingNetmask;
+
+		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
+		{
+			if (lm == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(lm);
+
+			if (lmDescription == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
+				result = false;
+				continue;
+			}
+
+			const LmDescription::Lan& lan = lmDescription->lan();
+
+			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+			{
+				if (lanController.isProvideTuning() == false)
+				{
+					continue;
+				}
+
+				Tuning::TuningSource ts;
+
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
+													   lanController.m_place,
+													   lanController.m_type,
+													   m_context,
+													   &ts);
+				if (result == false)
+				{
+					continue;
+				}
+
+				if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
+				{
+					continue;
+				}
+
+				if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+				{
+					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+					//
+					m_log->errCFG3043(ts.lmAddress().toString(),
+									  ts.lmAdapterID(),
+									  settings->tuningDataIP.addressStr(),
+									  m_software->equipmentIdTemplate());
+					result = false;
+					continue;
+				}
+
+				Tuning::TuningData* tuningData = m_context->m_tuningDataStorage->value(lm->equipmentId(), nullptr);
+
+				if(tuningData != nullptr)
+				{
+					ts.setTuningData(tuningData);
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Tuning data for LM '%1' is not found")).
+														arg(lm->equipmentIdTemplate()));
+					result = false;
+				}
+
+				tuningSources.push_back(ts);
+			}
+		}
+
 		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
 
 		RETURN_IF_FALSE(result)
