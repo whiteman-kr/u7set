@@ -52,7 +52,7 @@ SOURCES += \
     ../../lib/ProtoSerialization.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/XmlHelper.cpp \
-    ../../lib/ServiceSettings.cpp \
+	../../lib/SoftwareSettings.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../Builder/IssueLogger.cpp \
     ../../lib/DeviceObject.cpp \
@@ -75,6 +75,7 @@ SOURCES += \
 
 HEADERS += \
     ../../lib/Address16.h \
+	../../lib/ConstStrings.h \
 	UalTester.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \
@@ -93,7 +94,7 @@ HEADERS += \
     ../../lib/ProtoSerialization.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/XmlHelper.h \
-    ../../lib/ServiceSettings.h \
+	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
     ../../Builder/IssueLogger.h \
     ../../lib/DeviceObject.h \
