@@ -17,67 +17,10 @@ namespace ExtWidgets
 	QString PropertyEditorBase::m_commonCategoryName = "Common";
 
 	//
-	// ------------ PropertyEditorBase ------------
+	// PropertyTools
 	//
 
-	PropertyEditorBase::PropertyEditorBase()
-	{
-		QSettings s;
-		thePropertyEditorSettings.restore(s);
-	}
-
-	PropertyEditorBase::~PropertyEditorBase()
-	{
-		QSettings s;
-		thePropertyEditorSettings.store(s);
-	}
-
-	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
-	{
-		return new PropertyEditor(parent);
-	}
-
-	PropertyTextEditor* PropertyEditorBase::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
-	{
-		Q_UNUSED(propertyPtr);
-		return new PropertyPlainTextEditor(parent);
-	}
-
-	bool PropertyEditorBase::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
-	{
-		Q_UNUSED(propertyPtr);
-		Q_UNUSED(dialog);
-		return false;
-	}
-
-	bool PropertyEditorBase::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
-	{
-		Q_UNUSED(propertyPtr);
-		Q_UNUSED(dialog);
-		return false;
-	}
-
-	bool PropertyEditorBase::expertMode() const
-	{
-		return m_expertMode;
-	}
-
-	void PropertyEditorBase::setExpertMode(bool expertMode)
-	{
-		m_expertMode = expertMode;
-	}
-
-	bool PropertyEditorBase::isReadOnly() const
-	{
-		return m_readOnly;
-	}
-
-	void PropertyEditorBase::setReadOnly(bool readOnly)
-	{
-		m_readOnly = readOnly;
-	}
-
-	QString PropertyEditorBase::propertyVectorText(QVariant& value)
+	QString PropertyTools::propertyVectorText(QVariant& value)
 	{
 		// PropertyVector
 		//
@@ -112,7 +55,7 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString PropertyEditorBase::stringListText(const QVariant& value)
+	QString PropertyTools::stringListText(const QVariant& value)
 	{
 		if (value.userType() == QVariant::StringList)
 		{
@@ -137,13 +80,13 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString PropertyEditorBase::colorVectorText(QVariant& value)
+	QString PropertyTools::colorVectorText(QVariant& value)
 	{
 		QVector<QColor> v = value.value<QVector<QColor>>();
 		return QString("QVector<QColor> [%1 items]").arg(static_cast<int>(v.size()));
 	}
 
-	QString PropertyEditorBase::propertyValueText(Property* p, int row)
+	QString PropertyTools::propertyValueText(Property* p, int row)
 	{
 		QVariant value = p->value();
 
@@ -188,6 +131,11 @@ namespace ExtWidgets
 		if (type == qMetaTypeId<QVector<QColor>>())
 		{
 			return colorVectorText(value);
+		}
+
+		if (type == qMetaTypeId<QDateTime>())
+		{
+			return value.toString();
 		}
 
 		char numberFormat = p->precision() > 5 ? 'g' : 'f';
@@ -295,6 +243,69 @@ namespace ExtWidgets
 
 		return QString();
 	}
+
+	//
+	// ------------ PropertyEditorBase ------------
+	//
+
+	PropertyEditorBase::PropertyEditorBase()
+	{
+		QSettings s;
+		thePropertyEditorSettings.restore(s);
+	}
+
+	PropertyEditorBase::~PropertyEditorBase()
+	{
+		QSettings s;
+		thePropertyEditorSettings.store(s);
+	}
+
+	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
+	{
+		return new PropertyEditor(parent);
+	}
+
+	PropertyTextEditor* PropertyEditorBase::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
+	{
+		Q_UNUSED(propertyPtr);
+		return new PropertyPlainTextEditor(parent);
+	}
+
+	bool PropertyEditorBase::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+	{
+		Q_UNUSED(propertyPtr);
+		Q_UNUSED(dialog);
+		return false;
+	}
+
+	bool PropertyEditorBase::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+	{
+		Q_UNUSED(propertyPtr);
+		Q_UNUSED(dialog);
+		return false;
+	}
+
+	bool PropertyEditorBase::expertMode() const
+	{
+		return m_expertMode;
+	}
+
+	void PropertyEditorBase::setExpertMode(bool expertMode)
+	{
+		m_expertMode = expertMode;
+	}
+
+	bool PropertyEditorBase::isReadOnly() const
+	{
+		return m_readOnly;
+	}
+
+	void PropertyEditorBase::setReadOnly(bool readOnly)
+	{
+		m_readOnly = readOnly;
+	}
+
+
 
 	QString PropertyEditorBase::colorToText(QColor color)
 	{
@@ -2847,19 +2858,19 @@ namespace ExtWidgets
 
 		if (m_currentValue.userType() == QVariant::StringList)
 		{
-			m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			return;
 		}
 
 		if (m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 		{
-			m_lineEdit->setText(PropertyEditorBase::colorVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::colorVectorText(m_currentValue));
 			return;
 		}
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::propertyVectorText(m_currentValue));
 			return;
 		}
 
@@ -2909,19 +2920,19 @@ namespace ExtWidgets
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::propertyVectorText(m_currentValue));
 		}
 		else
 		{
 			if (m_currentValue.userType() == QVariant::StringList)
 			{
-				m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
+				m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			}
 			else
 			{
 				if ( m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 				{
-					m_lineEdit->setText(PropertyEditorBase::colorVectorText(m_currentValue));
+					m_lineEdit->setText(PropertyTools::colorVectorText(m_currentValue));
 				}
 			}
 		}
@@ -3514,7 +3525,7 @@ namespace ExtWidgets
 
 		if (po.sameValue == true)
 		{
-			text = PropertyEditorBase::propertyValueText(po.property.get(), -1);
+			text = PropertyTools::propertyValueText(po.property.get(), -1);
 		}
 		else
 		{

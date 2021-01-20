@@ -98,6 +98,7 @@ signals:
 	void changeCurrentTab(QWidget* tab);
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
+	void compareProject(CompareData compareData);
 
 public:
 	Builder::BuildIssues& buildIssues();

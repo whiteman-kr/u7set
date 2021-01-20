@@ -15,6 +15,7 @@ class SimulatorTabPage;
 class TestsTabPage;
 class DialogShortcuts;
 class SignalSetProvider;
+class ProjectDiffGenerator;
 
 namespace Ui {
 class MainWindow;
@@ -86,6 +87,7 @@ protected slots:
 	void startBuild();
 	void projectHistory();
 	void projectProperties();
+	void projectDifference();
 	void pendingChanges();
 
 private slots:
@@ -133,6 +135,7 @@ private:
 	QAction* m_startBuildAction = nullptr;
 	QAction* m_projectHistoryAction = nullptr;
 	QAction* m_projectPropertiesAction = nullptr;
+	QAction* m_projectDifferenceAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;

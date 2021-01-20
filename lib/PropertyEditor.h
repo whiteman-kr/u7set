@@ -34,6 +34,20 @@ namespace ExtWidgets
 	};
 
 	//
+	// PropertyTools
+	//
+
+	class PropertyTools
+	{
+	public:
+		static QString propertyVectorText(QVariant& value);
+		static QString stringListText(const QVariant& value);
+		static QString colorVectorText(QVariant& value);
+		static QString propertyValueText(Property* p, int row);	// row is used for StringList
+
+	};
+
+	//
 	// PropertyEditorBase
 	//
 
@@ -59,10 +73,6 @@ namespace ExtWidgets
 	public:
 		//  Base Editor functions used by list and table editors
 		//
-		static QString propertyVectorText(QVariant& value);
-		static QString stringListText(const QVariant& value);
-		static QString colorVectorText(QVariant& value);
-		static QString propertyValueText(Property* p, int row);	// row is used for StringList
 
 		static QString colorToText(QColor color);
 		static QColor colorFromText(const QString& t);

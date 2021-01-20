@@ -10,3 +10,5 @@ public:
 
 	static void openHelp(const QString& file, QWidget* parent);
 };
+
+
