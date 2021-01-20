@@ -93,11 +93,16 @@ SOURCES +=\
     DialogTagsEditor.cpp \
     EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
+    ../lib/Ui/DialogProgress.cpp \
+    Forms/DialogProjectDiff.cpp \
     LoginDialog.cpp \
     Main.cpp \
     MainTabPage.cpp \
     MainWindow.cpp \
     PasswordService.cpp \
+    Reports/ProjectDiffGenerator.cpp \
+    Reports/ReportTools.cpp \
+    Reports/SchemasReportGenerator.cpp \
     SchemaEditor/EditSchemaSignalProvider.cpp \
     SchemaEditor/EditSchemaTypes.cpp \
     SchemaEditor/EditSchemaView.cpp \
@@ -217,10 +222,15 @@ HEADERS  += \
     DialogTagsEditor.h \
     EditEngine/EditEngineNop.h \
     FilesTabPage.h \
+    ../lib/Ui/DialogProgress.h \
+    Forms/DialogProjectDiff.h \
     LoginDialog.h \
     MainTabPage.h \
     MainWindow.h \
     PasswordService.h \
+    Reports/ProjectDiffGenerator.h \
+    Reports/ReportTools.h \
+    Reports/SchemasReportGenerator.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTypes.h \
     SchemaEditor/EditSchemaView.h \
@@ -332,6 +342,7 @@ FORMS    += \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
+    Forms/DialogProjectDiff.ui \
     DialogTagsEditor.ui \
     LoginDialog.ui \
     Simulator/SimSelectBuildDialog.ui \

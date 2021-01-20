@@ -569,7 +569,7 @@ namespace ExtWidgets
 				return QVariant();
 			}
 
-			return PropertyEditorBase::propertyValueText(p.get(), row);
+			return PropertyTools::propertyValueText(p.get(), row);
 		}
 
 		return QVariant();
