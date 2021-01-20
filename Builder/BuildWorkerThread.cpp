@@ -1462,7 +1462,7 @@ namespace Builder
 
 		std::map<QString, std::shared_ptr<SoftwareCfgGenerator>> swCfgGens;
 
-		// create SoftwareCfgGenerators and generate "default" profile settings
+		// create SoftwareCfgGenerators and generate "Default" profile settings
 		//
 		for(auto p : m_context->m_software)
 		{
@@ -1537,6 +1537,11 @@ namespace Builder
 
 		for(const QString& profileID : profileIDs)
 		{
+			if (profileID.isEmpty() == true || profileID == SettingsProfile::DEFAULT)
+			{
+				continue;
+			}
+
 			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
 
 			QStringList profileEquipmentIDs = profile.equipment();

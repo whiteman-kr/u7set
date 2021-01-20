@@ -45,7 +45,6 @@ namespace Sim
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
 	};
 
-
 	class AppDataTransmitterThread : public RunOverrideThread
 	{
 	private:
@@ -80,7 +79,7 @@ namespace Sim
 		};
 
 	public:
-		AppDataTransmitterThread(const Simulator& simulator);
+		AppDataTransmitterThread(const Simulator& simulator, const QString& curProfileName, ScopedLog& log);
 		virtual ~AppDataTransmitterThread();
 
 		bool sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
@@ -93,6 +92,8 @@ namespace Sim
 
 	private:
 		const Simulator& m_simulator;
+		const QString m_curProfileName;
+		ScopedLog m_log;
 
 		mutable SimpleMutex m_appDataQueueMutex;
 		std::queue<ExtAppData> m_appDataQueue;

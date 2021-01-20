@@ -23,7 +23,7 @@ namespace Sim
 	{
 		TEST_PTR_RETURN_FALSE(m_simulator);
 
-		m_transmitterThread = new AppDataTransmitterThread(*m_simulator);
+		m_transmitterThread = new AppDataTransmitterThread(*m_simulator, profileName, m_log);
 		m_transmitterThread->start();
 
 		return true;
@@ -76,8 +76,12 @@ namespace Sim
 	//
 	// --------------------------------------------------------------------------------------------------
 
-	AppDataTransmitterThread::AppDataTransmitterThread(const Simulator& simulator) :
-		m_simulator(simulator)
+	AppDataTransmitterThread::AppDataTransmitterThread(const Simulator& simulator,
+													   const QString& curProfileName,
+													   ScopedLog& log) :
+		m_simulator(simulator),
+		m_curProfileName(curProfileName),
+		m_log(log)
 	{
 	}
 
@@ -177,8 +181,18 @@ namespace Sim
 					adspi.lanSourceIP = QHostAddress(lci.appDataIP);
 					adspi.lanSourcePort = lci.appDataPort;
 
-					adspi.lanDestinationIP = QHostAddress(lci.appDataServiceIP);
-					adspi.lanDestinationPort = lci.appDataServicePort;
+					std::shared_ptr<const AppDataServiceSettings> settings =
+							m_simulator.software().getSettingsProfile<AppDataServiceSettings>(lci.appDataServiceID, m_curProfileName);
+
+					if (settings == nullptr)
+					{
+						m_log.writeError(QString("Settings profile '%1' is not found for AppDataService %2").
+														arg(m_curProfileName).arg(lci.appDataServiceID));
+						continue;
+					}
+
+					adspi.lanDestinationIP = settings->appDataReceivingIP.address();
+					adspi.lanDestinationPort = settings->appDataReceivingIP.port();
 
 					m_appDataSourcePorts.insert({lci.equipmentID, adspi});
 				}
@@ -192,7 +206,6 @@ namespace Sim
 
 		if (item == m_appDataSourcePorts.end())
 		{
-			Q_ASSERT(false);
 			return;
 		}
 

@@ -19,6 +19,9 @@ public:
 	std::shared_ptr<const MonitorSettings> monitorSettings(const QString& profile) const;
 	std::shared_ptr<const TuningClientSettings> tuningClientSettings(const QString& profile) const;
 
+	template<typename T>
+	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
+
 	E::SoftwareType softwareType() const;
 
 private:
@@ -29,6 +32,12 @@ private:
 private:
 	SoftwareSettingsSet m_settingsSet;
 };
+
+template<typename T>
+std::shared_ptr<const T> SoftwareXmlInfo::getSettingsProfile(const QString& profile) const
+{
+	return 	m_settingsSet.getSettingsProfile<T>(profile);
+}
 
 class SoftwareXmlReader
 {
