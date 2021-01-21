@@ -1191,8 +1191,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* context,
 															const Hardware::Software* software)
 	{
-		std::vector<Tuning::TuningSource> tuningSources;
-
 		sources.clear();
 
 		Builder::IssueLogger* log = context->m_log;
@@ -1259,32 +1257,14 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 					continue;
 				}
 
-				Tuning::TuningData* tuningData = context->m_tuningDataStorage->value(lm->equipmentId(), nullptr);
+				TuningServiceSettings::TuningSource tunSrc;
 
-				if(tuningData != nullptr)
-				{
-					ts.setTuningData(tuningData);
-				}
-				else
-				{
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-									   QString(tr("Tuning data for LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
-					result = false;
-				}
+				tunSrc.lmEquipmentID = ts.lmEquipmentID();
+				tunSrc.portEquipmentID = ts.lmAdapterID();
+				tunSrc.tuningDataIP = ts.lmAddressPort();
 
-				tuningSources.push_back(ts);
+				sources.push_back(tunSrc);
 			}
-		}
-
-		for(const Tuning::TuningSource& ts : tuningSources)
-		{
-			TuningServiceSettings::TuningSource tunSrc;
-
-			tunSrc.lmEquipmentID = ts.lmEquipmentID();
-			tunSrc.portEquipmentID = ts.lmAdapterID();
-			tunSrc.tuningDataIP = ts.lmAddressPort();
-
-			sources.push_back(tunSrc);
 		}
 
 		return result;

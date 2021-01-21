@@ -13,7 +13,18 @@ int main(int argc, char *argv[])
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
-	UalTester ualTester(argc, argv);
+	//
+
+	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
+
+	LOGGER_INIT(logger, QString(), QString());
+
+	logger->setLogCodeInfo(false);
+
+	//
+
+	UalTester ualTester(argc, argv, logger);
+
 	if (ualTester.start() == false)
 	{
 		return -1;
@@ -22,6 +33,10 @@ int main(int argc, char *argv[])
 	int result = a.exec();
 
 	ualTester.stop();
+
+	LOGGER_SHUTDOWN(logger);
+
+	QThread::msleep(500);			// waiting while logger flush buffers
 
 	google::protobuf::ShutdownProtobufLibrary();
 

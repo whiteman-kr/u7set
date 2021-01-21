@@ -15,7 +15,7 @@ namespace  Sim
 		void clear();
 		bool loadSoftwareXml(QString fileName);
 
-		bool startSimulation();
+		bool startSimulation(QString profileName);
 		bool stopSimulation();
 
 		// AppDataService
@@ -25,6 +25,9 @@ namespace  Sim
 		// TuningService Communatation
 		//
 		std::shared_ptr<Sim::TuningServiceCommunicator> tuningService(QString equipmentId) const;
+
+		template<typename T>
+		std::shared_ptr<const T> getSettingsProfile(const QString& softwareEquipmentID, const QString& profile) const;
 
 	public:
 		[[nodiscard]] bool enabled() const;
@@ -50,6 +53,19 @@ namespace  Sim
 		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceCommunicators;
 	};
 
+	template<typename T>
+	std::shared_ptr<const T> Software::getSettingsProfile(const QString& softwareEquipmentID, const QString& profile) const
+	{
+		for(const SoftwareXmlInfo& swInfo : m_software)
+		{
+			if (swInfo.equipmentID == softwareEquipmentID)
+			{
+				return swInfo.getSettingsProfile<T>(profile);
+			}
+		}
+
+		return nullptr;
+	}
 }
 
 

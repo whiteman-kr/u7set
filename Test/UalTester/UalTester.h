@@ -1,7 +1,6 @@
-#ifndef UALTESTER_H
-#define UALTESTER_H
+#pragma once
 
-// ==============================================================================================
+// ========================7======================================================================
 
 // Algorithm:
 //
@@ -22,7 +21,7 @@
 #include <QObject>
 
 #include "../../lib/CfgServerLoader.h"
-#include "../../lib/ServiceSettings.h"
+#include "../../lib/SoftwareSettings.h"
 
 #include "CmdLineParam.h"
 #include "SignalBase.h"
@@ -37,76 +36,64 @@ class UalTester : public QObject
 
 public:
 
-	UalTester(int& argc, char** argv);
+	UalTester(int& argc, char** argv, std::shared_ptr<CircularLogger> logger);
 	~UalTester();
 
-private:
-
-	CmdLineParam m_cmdLineParam;
-
-	SignalBase m_signalBase;
-	TuningSourceBase m_tuningSourceBase;
-
-	SoftwareInfo m_softwareInfo;
-
-	// loader to receive signals from CfgSrv
-	//
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-	void runCfgLoaderThread();
-	void stopCfgLoaderThread();
-
-	TestClientSettings m_cfgSettings;
-	bool readConfiguration(const QByteArray& cfgFileData);
-	bool readAppSignals(const QByteArray& cfgFileData);
-
-	// test file
-	//
-	TestFile m_testfile;
-	bool parseTestFile(const QString& testFileName);
-
-	// run SignalStateSocket and TuningSocket
-	//
-	bool runSockets();
-	QTimer m_waitSocketsConnectionTimer;
-
-	//
-	//
-	SignalStateSocket* m_pSignalStateSocket = nullptr;
-	SimpleThread* m_pSignalStateSocketThread = nullptr;
-	bool runSignalStateThread();
-	void stopSignalStateThread();
-	bool signalStateSocketIsConnected();
-
-	TuningSocket* m_pTuningSocket = nullptr;
-	SimpleThread* m_pTuningSocketThread = nullptr;
-	bool runTuningThread();
-	void stopTuningThread();
-	bool tuningSocketIsConnected();
-
-	// run commands from test file
-	//
-	int runTestFile();
-
 public:
-
 	bool start();
 	void stop();
 
 signals:
-
 	void configurationLoaded();
 	void signal_socketsReady();
 
 private slots:
-
-	void slot_loadConfiguration(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void slot_loadConfiguration(const QByteArray configurationXmlData,
+								const BuildFileInfoArray buildFileInfoArray,
+								std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	void slot_parseTestFile();
 
 	void slot_waitSocketsReady();
 	void slot_runTestFile();
 
-public slots:
+private:
+	void runCfgLoaderThread();
+	void stopCfgLoaderThread();
 
+	bool readAppSignals(const QByteArray& cfgFileData);
+
+	bool parseTestFile(const QString& testFileName);
+	bool runSockets();
+
+	bool runSignalStateThread();
+	void stopSignalStateThread();
+	bool signalStateSocketIsConnected();
+
+	bool runTuningThread();
+	void stopTuningThread();
+	bool tuningSocketIsConnected();
+
+	int runTestFile();
+
+private:
+	std::shared_ptr<CircularLogger> m_log;
+	CmdLineParam m_cmdLineParam;
+	SignalBase m_signalBase;
+	TuningSourceBase m_tuningSourceBase;
+	SoftwareInfo m_softwareInfo;
+
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+
+	TestClientSettings m_cfgSettings;
+
+	TestFile m_testfile;
+
+	QTimer m_waitSocketsConnectionTimer;
+
+	SignalStateSocket* m_pSignalStateSocket = nullptr;
+	SimpleThread* m_pSignalStateSocketThread = nullptr;
+
+	TuningSocket* m_pTuningSocket = nullptr;
+	SimpleThread* m_pTuningSocketThread = nullptr;
 };
 
-#endif // UALTESTER_H

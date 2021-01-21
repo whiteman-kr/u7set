@@ -362,6 +362,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0342.sql", "Upgrade to version 342, Fixed undo_changes, added undo on delete to just added file"},
 	{":/DatabaseUpgrade/Upgrade0343.sql", "Upgrade to version 343, Add functions get_specific_signals_all_*"},
 	{":/DatabaseUpgrade/Upgrade0344.sql", "Upgrade to version 344, All configuration scripts use let instead of var declarations"},
+	{":/DatabaseUpgrade/Upgrade0345.sql", "Upgrade to version 345, Simulation properties added to TuningService preset"},
 };
 
 int DbWorker::counter = 0;

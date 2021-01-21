@@ -57,13 +57,15 @@ namespace Sim
 
 		[[nodiscard]] bool isEmpty() const;
 
+		[[nodiscard]] bool hasProfile(QString profileName) const;
+
 		[[nodiscard]] const Profile& profile(const QString& profileId) const;
 		[[nodiscard]] Profile& profile(const QString& profileId);
 
 		QString dump() const;
 
 	private:
-		std::map<QString, Profile> m_profiles;
+		std::map<QString, Profile> m_profiles;		// Key is profile name
 	};
 }
 
