@@ -1019,6 +1019,11 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	connect(action, &QAction::triggered, this, &SignalsTabPage::findAndReplaceSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("Metrology editor"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::openMetrologyEditor);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -1456,6 +1461,25 @@ void SignalsTabPage::viewSignalHistory()
 	SignalHistoryDialog dlg(dbController(), signal.appSignalID(), signal.ID(), this);
 
 	dlg.exec();
+}
+
+void SignalsTabPage::openMetrologyEditor()
+{
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+
+	if (selection.count() == 0)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+		return;
+	}
+
+	QStringList selectedSignalId;
+	for (int i = 0; i < selection.count(); i++)
+	{
+		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		selectedSignalId.append(m_signalSetProvider->getSignalByID(m_signalSetProvider->key(row)).appSignalID());
+	}
+	QMessageBox::information(this, "Metrology editor", selectedSignalId.join("\n"));
 }
 
 void SignalsTabPage::changeLazySignalLoadingSequence()

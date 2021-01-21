@@ -403,6 +403,8 @@ public slots:
 	void checkIn();
 	void viewSignalHistory();
 
+	void openMetrologyEditor();
+
 	void changeLazySignalLoadingSequence();
 
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
