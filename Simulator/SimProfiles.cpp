@@ -157,6 +157,7 @@ namespace Sim
 	//
 	Profiles::Profiles()
 	{
+		m_profiles.insert({"Default", Profile()});
 	}
 
 	void Profiles::clear()
@@ -188,7 +189,6 @@ namespace Sim
 		QRegExp regExpUInt("^(?:0|[1-9][0-9]*)$");
 		QRegExp regExpInt("^-?(?:0|[1-9][0-9]*)$");
 		QRegExp regExpDouble("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
-
 
 		QString currentProfile = "Generic";
 
@@ -330,6 +330,8 @@ namespace Sim
 		}
 
 		m_profiles = std::move(profiles);
+
+		m_profiles.insert({"Default", Profile()});
 
 		return true;
 	}

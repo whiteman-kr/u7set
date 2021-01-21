@@ -568,7 +568,8 @@ void SimWidget::updateActions()
 
 		if (projectIsLoaded == true)
 		{
-			QStringList profiles = {"Default"};
+			QStringList profiles;
+
 			profiles += m_simulator->profiles().profiles();
 
 			for (QString p : profiles)

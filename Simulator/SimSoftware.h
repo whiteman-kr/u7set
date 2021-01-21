@@ -26,6 +26,9 @@ namespace  Sim
 		//
 		std::shared_ptr<Sim::TuningServiceCommunicator> tuningService(QString equipmentId) const;
 
+		template<typename T>
+		std::shared_ptr<const T> getSettingsProfile(const QString& softwareEquipmentID, const QString& profile) const;
+
 	public:
 		[[nodiscard]] bool enabled() const;
 		void setEnabled(bool value);
@@ -50,6 +53,19 @@ namespace  Sim
 		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceCommunicators;
 	};
 
+	template<typename T>
+	std::shared_ptr<const T> Software::getSettingsProfile(const QString& softwareEquipmentID, const QString& profile) const
+	{
+		for(const SoftwareXmlInfo& swInfo : m_software)
+		{
+			if (swInfo.equipmentID == softwareEquipmentID)
+			{
+				return swInfo.getSettingsProfile<T>(profile);
+			}
+		}
+
+		return nullptr;
+	}
 }
 
 
