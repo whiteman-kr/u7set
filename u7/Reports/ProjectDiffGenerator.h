@@ -101,7 +101,7 @@ struct ProjectDiffFileTypeParams
 
 	// Multiple-file report section page options
 	//
-	QPageSize pageSize = QPageSize(QPageSize::A4);
+	QPageSize pageSize = QPageSize(QPageSize::A3);
 	QPageLayout::Orientation orientation = QPageLayout::Orientation::Portrait;
 	QMarginsF margins = QMarginsF(15, 15, 15, 15);
 };
@@ -116,7 +116,7 @@ struct ProjectDiffReportParams
 
 	// Single-file report page options
 	//
-	QPageSize albumPageSize = QPageSize(QPageSize::A4);
+	QPageSize albumPageSize = QPageSize(QPageSize::A3);
 	QPageLayout::Orientation albumOrientation = QPageLayout::Orientation::Portrait;
 	QMarginsF albumMargins = QMarginsF(15, 15, 15, 15);
 };
@@ -243,9 +243,9 @@ private:
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 
-	void generateTitlePage(QTextCursor* textCursor, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName);
+	void generateTitlePage(QTextDocument* textDocument, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName) const;
 
-	void generateReportFilesPage(QTextCursor* textCursor, const QStringList& subreportFiles);
+	void generateReportFilesPage(QTextDocument* textDocument, const QStringList& subreportFiles);
 
 	void createMarginItems(const CompareData& compareData, const QString& subreportName);
 
