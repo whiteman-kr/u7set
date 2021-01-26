@@ -274,9 +274,11 @@ void MonitorConfigController::start()
 
 void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData,
 													  const BuildFileInfoArray buildFileInfoArray,
+													  SessionParams sessionParams,
 													  std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
 	Q_UNUSED(buildFileInfoArray);
+	Q_UNUSED(sessionParams);
 
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 

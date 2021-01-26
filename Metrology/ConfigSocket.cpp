@@ -110,9 +110,12 @@ void ConfigSocket::reconncect(const QString& equipmentID, const HostAddressPort&
 
 void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData,
 										   const BuildFileInfoArray buildFileInfoArray,
+										   SessionParams sessionParams,
 										   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
 	qDebug() << __FUNCTION__ << "File count: " << buildFileInfoArray.count();
+
+	Q_UNUSED(sessionParams);
 
 	if (m_cfgLoaderThread == nullptr)
 	{

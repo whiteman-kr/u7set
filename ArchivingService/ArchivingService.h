@@ -56,6 +56,7 @@ private:
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData,
 							  const BuildFileInfoArray buildFileInfoArray,
+							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 private:
@@ -73,7 +74,4 @@ private:
 	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
-
-	static const char* const SETTING_ARCHIVE_LOCATION;
-	static const char* const SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING;
 };

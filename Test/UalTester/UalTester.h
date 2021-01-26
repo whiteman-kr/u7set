@@ -50,6 +50,7 @@ signals:
 private slots:
 	void slot_loadConfiguration(const QByteArray configurationXmlData,
 								const BuildFileInfoArray buildFileInfoArray,
+								SessionParams sessionParams,
 								std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	void slot_parseTestFile();
 

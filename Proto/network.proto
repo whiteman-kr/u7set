@@ -142,6 +142,8 @@ message AppDataReceiveState
 	optional int64 errSimVersion = 7 [default = 0];
 	optional int64 errUnknownAppDataSourceIP = 8 [default = 0];
 	optional int64 errRupFrameCRC = 9 [default = 0];
+
+	optional int64 errNotExpectedSimPacket = 10 [default = 0];
 }
 
 // Getting Application Data Sources states
@@ -225,6 +227,12 @@ message GetServiceInfoRequest
 {
 }
 
+message SessionParams
+{
+	optional string currentSettingsProfile = 1;
+	optional int32 softwareRunMode = 2 [default = 0 /* E::SoftwareRunMode::Normal */];	// enum E::SoftwareRunMode values
+}
+
 message ServiceInfo
 {
     required SoftwareInfo softwareInfo = 1;
@@ -235,6 +243,8 @@ message ServiceInfo
 
     optional uint32 clientRequestIP = 5 [default = 0];
     optional int32 clientRequestPort = 6 [default = 0];
+
+	optional SessionParams sessionParams = 7;
 }
 
 message GetServiceInfoReply
@@ -657,7 +667,3 @@ message GetFileReply
 	optional bytes filePartData = 10;
 }
 
-message GetSessionParams
-{
-	optional string currentSettingsProfile = 1;
-}

@@ -15,6 +15,7 @@ class AppDataReceiverThread : public RunOverrideThread
 public:
 	AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
 					const AppDataSourcesIP& appDataSourcesIP,
+						  E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
 
 	virtual ~AppDataReceiverThread() override;
@@ -33,6 +34,7 @@ private:
 	HostAddressPort m_dataReceivingIP;
 	const AppDataSourcesIP& m_appDataSourcesIP;
 	CircularLoggerShared m_log;
+	bool m_isSimulationMode = false;
 
 	const QThread* m_thisThread = nullptr;
 
@@ -54,6 +56,7 @@ private:
 	qint64 m_errSimVersion = 0;
 	qint64 m_errUnknownAppDataSourceIP = 0;
 	qint64 m_errRupFrameCRC = 0;
+	qint64 m_errNotExpectedSimPacket = 0;
 
 	//
 

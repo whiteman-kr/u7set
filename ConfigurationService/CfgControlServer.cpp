@@ -12,24 +12,26 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   const QString& autoloadBuildPath,
 								   const QString& workDirectory,
 								   const QString& buildPath,
-								   const QString& currentSettingsProfile,
+								   const SessionParams& sessionParams,
 								   const QStringList& knownClients,
 								   const CfgCheckerWorker& checkerWorker,
 								   std::shared_ptr<CircularLogger> logger) :
-	CfgServer(softwareInfo, buildPath, currentSettingsProfile, logger),
+	CfgServer(softwareInfo, buildPath, sessionParams, logger),
 	m_logger(logger),
 	m_checkerWorker(checkerWorker),
 	m_equipmentID(softwareInfo.equipmentID()),
 	m_autoloadBuildPath(autoloadBuildPath),
 	m_workDirectory(workDirectory),
-	m_knownClients(knownClients)
+	m_knownClients(knownClients),
+	m_sessionParams(sessionParams)
 {
 }
 
 CfgControlServer* CfgControlServer::getNewInstance()
 {
 	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory,
-								m_rootFolder, currentSettingsProfile(), m_knownClients, m_checkerWorker, m_logger);
+								m_rootFolder, m_sessionParams,
+								m_knownClients, m_checkerWorker, m_logger);
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

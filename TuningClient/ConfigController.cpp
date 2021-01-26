@@ -203,8 +203,11 @@ void ConfigController::start()
 
 void ConfigController::slot_configurationReady(const QByteArray configurationXmlData,
 											   const BuildFileInfoArray buildFileInfoArray,
+											   SessionParams sessionParams,
 											   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
+	Q_UNUSED(sessionParams);
+
 	// Copy old settings to new settings, EXCEPT schemas information!
 	//
 	ConfigSettings readSettings = theConfigSettings;

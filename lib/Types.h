@@ -530,6 +530,13 @@ public:
 	};
 	Q_ENUM(AppSignalStateFlagType)
 
+	enum class SoftwareRunMode
+	{
+		Normal,
+		Simulation
+	};
+	Q_ENUM(SoftwareRunMode)
+
 	// For Monitor
 	//
 	enum class ValueViewType

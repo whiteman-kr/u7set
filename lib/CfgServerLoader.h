@@ -5,7 +5,6 @@
 #include "../lib/BuildInfo.h"
 #include "../lib/SoftwareSettings.h"
 
-
 typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
 
 // -------------------------------------------------------------------------------------
@@ -45,7 +44,7 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 public:
 	CfgServer(const SoftwareInfo& softwareInfo,
 			  const QString& buildFolder,
-			  const QString& currentSettingsProfile,
+			  const SessionParams& sessionParams,
 			  std::shared_ptr<CircularLogger> logger);
 
 	virtual CfgServer* getNewInstance() override;
@@ -60,9 +59,6 @@ public:
 
 	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
 
-	QString currentSettingsProfile() const { return m_currentSettingsProfile; }
-
-
 private:
 	void readBuildXml();
 
@@ -72,7 +68,8 @@ private:
 
 private:
 	std::shared_ptr<CircularLogger> m_logger;
-	QString m_currentSettingsProfile;
+
+	SessionParams m_sessionParams;
 
 	QString m_buildXmlPathFileName;
 
@@ -120,16 +117,19 @@ public:
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
-	QString currentSettingsProfile() const;
 	std::shared_ptr<CircularLogger> logger() { return m_logger; }
+
+	SessionParams sessionParams() const;
+	QString curSoftwareSettingsProfileName() const;
+	E::SoftwareRunMode softwareRunMode() const;
+
+	QStringList getSettingsProfiles() const;
 
 	template<typename T>
 	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
 
 	template<typename T>
 	std::shared_ptr<const T> getCurrentSettingsProfile() const;
-
-	QStringList getSettingsProfiles() const;
 
 	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
@@ -143,6 +143,7 @@ signals:
 	void signal_enableDownloadConfiguration();
 	void signal_configurationReady(const QByteArray configurationXmlData,
 								   const BuildFileInfoArray buildFileInfoArray,
+								   SessionParams sessionParams,
 								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 	void signal_getFile(const QString& fileName, QByteArray* fileData);
 	void signal_fileReady();					// emit only for manual requests
@@ -217,7 +218,7 @@ private:
 	int m_appInstance = 0;
 	volatile bool m_enableDownloadConfiguration = false;
 
-	QString m_currentSettingsProfileID;
+	SessionParams m_sessionParams;
 	SoftwareSettingsSet m_settingsSet;
 
 	//
@@ -259,8 +260,6 @@ private:
 	QMap<QString, QString> m_fileIDPathMap;
 
 	bool m_enableSignalUnknownClient = true;
-
-	static bool m_registerTypes;
 };
 
 template<typename T>
@@ -278,7 +277,7 @@ std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile() const
 {
 	AUTO_LOCK(m_mutex);
 
-	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(m_currentSettingsProfileID);
+	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(curSoftwareSettingsProfileName());
 
 	return settings;
 }
@@ -329,10 +328,14 @@ public:
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 bool enableDownloadConfiguration);
+
+	SessionParams sessionParams() const;
+
 signals:
 	void signal_configurationChanged();
 	void signal_configurationReady(const QByteArray configurationXmlData,
 								   const BuildFileInfoArray buildFileInfoArray,
+								   SessionParams sessionParams,
 								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
 	void signal_unknownClient();
