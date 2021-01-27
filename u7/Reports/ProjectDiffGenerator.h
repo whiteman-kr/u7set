@@ -78,47 +78,17 @@ struct PropertyDiff
 	QString newValueText;
 };
 
-struct ProjectDiffFileTypeParams
-{
-	ProjectDiffFileTypeParams(int fileId, const QString& caption, bool selected)
-	{
-		this->fileId = fileId;
-		this->caption = caption;
-		this->selected = selected;
-	}
-
-	ProjectDiffFileTypeParams(int fileId, const QString& caption, bool selected, QPageSize pageSize, QPageLayout::Orientation orientation, QMarginsF margins)
-		:ProjectDiffFileTypeParams(fileId, caption, selected)
-	{
-		this->pageSize = pageSize;
-		this->orientation = orientation;
-		this->margins = margins;
-	}
-
-	int fileId = -1;
-	QString caption;
-	bool selected = false;
-
-	// Multiple-file report section page options
-	//
-	QPageSize pageSize = QPageSize(QPageSize::A3);
-	QPageLayout::Orientation orientation = QPageLayout::Orientation::Portrait;
-	QMarginsF margins = QMarginsF(15, 15, 15, 15);
-};
-
 struct ProjectDiffReportParams
 {
 	CompareData compareData;
-	std::vector<ProjectDiffFileTypeParams> fileTypeParams;
+	std::vector<ReportFileTypeParams> fileTypeParams;
 
 	bool expertProperties = false;
 	bool multipleFiles = false;
 
 	// Single-file report page options
 	//
-	QPageSize albumPageSize = QPageSize(QPageSize::A3);
-	QPageLayout::Orientation albumOrientation = QPageLayout::Orientation::Portrait;
-	QMarginsF albumMargins = QMarginsF(15, 15, 15, 15);
+	QPageLayout m_albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
 };
 
 class ProjectDiffGeneratorThread
@@ -150,7 +120,7 @@ public:
 					  const QString& userPassword);
 	virtual ~ProjectDiffGenerator();
 
-	static std::vector<ProjectDiffFileTypeParams> defaultFileTypeParams(DbController* db);
+	static std::vector<ReportFileTypeParams> defaultFileTypeParams(DbController* db);
 	static int applicationSignalsTypeId() { return -256; }
 
 public slots:

@@ -20,7 +20,7 @@
 #include "../VFrame30/FblItemRect.h"
 #include "DialogClientBehavior.h"
 #include "Reports/SchemasReportGenerator.h"
-
+#include <QPageLayout>
 //
 //
 // SchemaListModelEx
@@ -4416,6 +4416,13 @@ void SchemaControlTabPageEx::exportToPdf()
 		return;
 	}
 
+	QString pdfDirectory = QFileDialog::getExistingDirectory(this, QObject::tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (pdfDirectory.isNull() == true || pdfDirectory.isEmpty() == true)
+	{
+		return;
+	}
+
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
 							 theSettings.serverPort(),
 							 theSettings.serverUsername(),
@@ -4425,7 +4432,7 @@ void SchemaControlTabPageEx::exportToPdf()
 							 db()->currentUser().password(),
 							 this);
 
-	r.run(files, false);
+	r.exportSchemasToPdf(pdfDirectory, files);
 
 	return;
 }
@@ -4451,6 +4458,19 @@ void SchemaControlTabPageEx::exportToAlbum()
 		return;
 	}
 
+	// "Export schemas to album"... page layout and path
+	//
+	QString albumPath = QSettings{}.value("SchemeEditor/Export/AlbumPath", "Schemas.pdf").toString();
+
+	static QPageLayout albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15));
+
+	if (SchemasReportDialog::getReportFileName(&albumPath, &albumPageLayout, this) == false)
+	{
+		return;
+	}
+
+	QSettings{}.setValue("SchemeEditor/Export/AlbumPath", albumPath);
+
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
 							 theSettings.serverPort(),
 							 theSettings.serverUsername(),
@@ -4460,7 +4480,7 @@ void SchemaControlTabPageEx::exportToAlbum()
 							 db()->currentUser().password(),
 							 this);
 
-	r.run(files, true);
+	r.exportSchemasToAlbum(albumPath, files, albumPageLayout);
 
 	return;
 }

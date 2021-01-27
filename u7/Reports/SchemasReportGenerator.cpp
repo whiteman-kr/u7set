@@ -4,18 +4,55 @@
 #include <QPageSetupDialog>
 #include <QPrinter>
 
-SchemasReportDialog::SchemasReportDialog(const QString& path, const QPageSize& pageSize, const QPageLayout::Orientation orientation, const QMarginsF& margins, QWidget *parent):
+bool SchemasReportDialog::getReportFileName(QString* fileName,
+						 QPageLayout* pageLayout,
+						 QWidget *parent)
+{
+	if (fileName == nullptr || pageLayout == nullptr)
+	{
+		Q_ASSERT(fileName);
+		Q_ASSERT(pageLayout);
+		return false;
+	}
+
+	SchemasReportDialog d(fileName, pageLayout, parent);
+	if (d.exec() == QDialog::Accepted)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool SchemasReportDialog::getReportFilesPath(QString* path,
+						 std::vector<ReportFileTypeParams>* reportFileTypeParams,
+						 const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
+						 QWidget *parent)
+{
+	if (path == nullptr || reportFileTypeParams == nullptr)
+	{
+		Q_ASSERT(path);
+		Q_ASSERT(reportFileTypeParams);
+		return false;
+	}
+
+	SchemasReportDialog d(path, reportFileTypeParams, defaultFileTypeParams, parent);
+	if (d.exec() == QDialog::Accepted)
+	{
+		return true;
+	}
+	return false;
+}
+
+SchemasReportDialog::SchemasReportDialog(Type type, QString* path, QWidget *parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_reportPath(path),
-	m_pageSize(pageSize),
-	m_orientation(orientation),
-	m_margins(margins)
+	m_type(type)
 {
 	setWindowTitle(tr("Export Schemas to Album"));
 	setMinimumWidth(500);
 
-	QLabel* label = new QLabel(tr("Report file:"));
-	m_editReportPath = new QLineEdit(path);
+	QLabel* label = new QLabel(m_type == Type::SelectFile ? tr("Report file:") : tr("Report path:"));
+	m_editReportPath = new QLineEdit(*path);
 
 	QPushButton* browseButton = new QPushButton(tr("Browse..."));
 	connect(browseButton, &QPushButton::clicked, this, &SchemasReportDialog::browseClicked);
@@ -44,87 +81,118 @@ SchemasReportDialog::SchemasReportDialog(const QString& path, const QPageSize& p
 	mainLayout->addLayout(reportPathLayout);
 	mainLayout->addLayout(buttonsLayout);
 	setLayout(mainLayout);
+}
+
+SchemasReportDialog::SchemasReportDialog(QString* path, std::vector<ReportFileTypeParams>* reportFileTypeParams, const std::vector<ReportFileTypeParams>& defaultFileTypeParams, QWidget *parent):
+	SchemasReportDialog(Type::SelectPath, path, parent)
+{
+	m_reportFileTypeParams = reportFileTypeParams;
+	m_defaultFileTypeParams = defaultFileTypeParams;
 
 	return;
 }
 
-QString SchemasReportDialog::reportPath() const
+SchemasReportDialog::SchemasReportDialog(QString* fileName, QPageLayout* pageLayout, QWidget *parent):
+	SchemasReportDialog(Type::SelectFile, fileName,  parent)
 {
-	return m_reportPath;
-}
+	m_pageLayout = pageLayout;
 
-QPageSize SchemasReportDialog::pageSize() const
-{
-	return m_pageSize;
-}
-
-QPageLayout::Orientation SchemasReportDialog::orientation() const
-{
-	return m_orientation;
-}
-
-QMarginsF SchemasReportDialog::margins() const
-{
-	return m_margins;
+	return;
 }
 
 void SchemasReportDialog::okClicked()
 {
-	if (m_reportPath.isEmpty() == true)
+	QString text = m_editReportPath->text();
+
+	if (text.isEmpty() == true)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Please enter the file name!"));
 		m_editReportPath->setFocus();
 		return;
 	}
 
-	m_reportPath = m_editReportPath->text();
+	*m_reportPath = text;
 
 	QDialog::accept();
 }
 
 void SchemasReportDialog::browseClicked()
 {
-	QString path = QFileDialog::getSaveFileName(this, qAppName(), "./", QObject::tr("PDF documents (*.pdf)"));
-
-	if (path.isNull() == true || path.isEmpty() == true)
+	if (m_type == Type::SelectFile)
 	{
-		return;
-	}
+		QString path = QFileDialog::getSaveFileName(this, qAppName(), "./", QObject::tr("PDF documents (*.pdf)"));
 
-	m_reportPath = path;
-	m_editReportPath->setText(path);
+		if (path.isNull() == true || path.isEmpty() == true)
+		{
+			return;
+		}
+
+		m_editReportPath->setText(QDir::toNativeSeparators(path));
+	}
+	else
+	{
+		QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+		if (dir.isEmpty() == true)
+		{
+			return;
+		}
+
+		m_editReportPath->setText(QDir::toNativeSeparators(dir));
+	}
 
 	return;
 }
 
 void SchemasReportDialog::pageSetupClicked()
 {
-	// Ask for page format
-
-	QPrinter printer(QPrinter::HighResolution);
-
-	QPageSize::PageSizeId id = QPageSize::id(m_pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-	if (id == QPageSize::Custom)
+	if (m_type == Type::SelectFile)
 	{
-		id = QPageSize::A3;
+		if (m_pageLayout == nullptr)
+		{
+			Q_ASSERT(m_pageLayout);
+			return;
+		}
+
+		// Ask for page format
+
+		QPageSize::PageSizeId id = QPageSize::id(m_pageLayout->pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+		if (id == QPageSize::Custom)
+		{
+			id = QPageSize::A3;
+		}
+
+		QPrinter printer(QPrinter::HighResolution);
+		printer.setFullPage(true);
+		printer.setPageSize(QPageSize(id));
+		printer.setPageOrientation(m_pageLayout->orientation());
+		printer.setPageMargins(m_pageLayout->margins(), QPageLayout::Unit::Millimeter);
+
+		QPageSetupDialog d(&printer, this);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+
+		m_pageLayout->setPageSize(QPageSize(id));
+		m_pageLayout->setOrientation(d.printer()->pageLayout().orientation());
+		m_pageLayout->setMargins(d.printer()->pageLayout().margins());
 	}
-
-	printer.setFullPage(true);
-	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(m_orientation);
-	printer.setPageMargins(m_margins, QPageLayout::Unit::Millimeter);
-
-	QPageSetupDialog d(&printer, this);
-	if (d.exec() != QDialog::Accepted)
+	else
 	{
-		return;
+		if (m_reportFileTypeParams == nullptr)
+		{
+			Q_ASSERT(m_reportFileTypeParams);
+			return;
+		}
+
+		DialogReportFileTypeParams d(*m_reportFileTypeParams, m_defaultFileTypeParams, this);
+		if (d.exec() == QDialog::Accepted)
+		{
+			*m_reportFileTypeParams = d.fileTypeParams();
+		}
 	}
-
-	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-
-	m_pageSize = QPageSize(id);
-	m_orientation = d.printer()->pageLayout().orientation();
-	m_margins = d.printer()->pageLayout().margins();
 
 	return;
 }
@@ -132,10 +200,6 @@ void SchemasReportDialog::pageSetupClicked()
 //
 // SchemasReportGeneratorThread
 //
-
-QPageSize SchemasReportGeneratorThread::m_albumPageSize = QPageSize(QPageSize::A3);
-QPageLayout::Orientation SchemasReportGeneratorThread::m_albumOrientation = QPageLayout::Orientation::Landscape;
-QMarginsF SchemasReportGeneratorThread::m_albumMargins = QMarginsF(0, 0, 0, 0);
 
 SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& serverIp,
 											   int serverPort,
@@ -157,36 +221,27 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 
 }
 
-void SchemasReportGeneratorThread::run(const std::vector<DbFileInfo>& files, bool album)
+void SchemasReportGeneratorThread::exportSchemasToPdf(const QString& pdfPath, const std::vector<DbFileInfo>& files)
 {
-	// Ask for target file/folder
+	run(TaskType::ExportFilesToPdf, pdfPath, files, QPageLayout(), {});
+}
 
-	QString filePath;
+void SchemasReportGeneratorThread::exportSchemasToAlbum(const QString& albumPath, const std::vector<DbFileInfo>& files, const QPageLayout& pageLayout)
+{
+	run(TaskType::ExportFilesToAlbum, albumPath, files, pageLayout, {});
+}
 
-	if (album == true)
-	{
-		SchemasReportDialog d(QString(), m_albumPageSize, m_albumOrientation, m_albumMargins, m_parent);
-		if (d.exec() != QDialog::Accepted)
-		{
-			return;
-		}
+void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& albumPath, const std::vector<ReportFileTypeParams>& reportFileTypeParams)
+{
+	run(TaskType::ExportAllSchemasToAlbum, albumPath, {}, QPageLayout(), reportFileTypeParams);
+}
 
-		m_albumPageSize = d.pageSize();
-		m_albumOrientation = d.orientation();
-		m_albumMargins = d.margins();
-
-		filePath = d.reportPath();
-	}
-	else
-	{
-		filePath = QFileDialog::getExistingDirectory(m_parent, QObject::tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	}
-
-	if (filePath.isNull() == true || filePath.isEmpty() == true)
-	{
-		return;
-	}
-
+void SchemasReportGeneratorThread::run(TaskType task,
+									   const QString& filePath,
+									   const std::vector<DbFileInfo>& files,
+									   const QPageLayout& albumPageLayout,	// Used in ExportFilesToAlbum
+									   const std::vector<ReportFileTypeParams>& albumsFileTypeParams)	// Used in ExportAllSchemasToAlbum
+{
 	// Create View
 
 	ReportSchemaView* schemaView = new ReportSchemaView(m_parent);
@@ -208,11 +263,13 @@ void SchemasReportGeneratorThread::run(const std::vector<DbFileInfo>& files, boo
 																 files,
 																 filePath);
 
-	if (album == true)
+	if (task == TaskType::ExportFilesToAlbum)
 	{
-		worker->setPageSize(m_albumPageSize);
-		worker->setPageOrientation(m_albumOrientation);
-		worker->setPageMargins(m_albumMargins);
+		worker->setPageLayout(albumPageLayout);
+	}
+	if (task == TaskType::ExportAllSchemasToAlbum)
+	{
+		worker->setReportFileTypeParams(albumsFileTypeParams);
 	}
 
 	// Create Progress Dialog
@@ -225,13 +282,24 @@ void SchemasReportGeneratorThread::run(const std::vector<DbFileInfo>& files, boo
 
 	worker->moveToThread(thread);
 
-	if (album == true)
+	switch(task)
 	{
-		QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::createAlbum);
-	}
-	else
-	{
-		QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::createPDFs);
+	case TaskType::ExportFilesToPdf:
+		{
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToPdf);
+		}
+		break;
+	case TaskType::ExportFilesToAlbum:
+		{
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToAlbum);
+		}
+		break;
+	case TaskType::ExportAllSchemasToAlbum:
+		{
+			Q_ASSERT(files.empty() == true);	// No files should be here
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportAllSchemasToAlbum);
+		}
+		break;
 	}
 
 	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
@@ -294,60 +362,61 @@ SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
 	m_userName(userName),
 	m_userPassword(userPassword),
 	m_filePath(filePath),
-	m_files(files)
+	m_inputFiles(files)
 {
 	m_font = QFont("Times", 24);
 	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / resolution())));
-
-	setPageMargins(QMarginsF(0, 0, 0, 0));
 
 	return;
 }
-
-/*
-SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
-										 std::vector<std::shared_ptr<VFrame30::Schema>> schemas,
-										 std::vector<std::shared_ptr<QBuffer>>* outputBuffers,
-										 bool singleFile):
-	ReportGenerator(schemaView),
-	m_outputBuffers(outputBuffers),
-	m_singleFile(singleFile)
-{
-	m_font = QFont("Times", 24);
-	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / resolution())));
-
-	for (std::shared_ptr<VFrame30::Schema> schema : schemas)
-	{
-		m_schemas[schema->schemaId() + ".pdf"] = schema;
-	}
-
-	return;
-}*/
-
 
 SchemasReportGenerator::~SchemasReportGenerator()
 {
 	qDebug() << "SchemasReportWorker deleted";
 }
 
-void SchemasReportGenerator::createPDFs()
+void SchemasReportGenerator::setReportFileTypeParams(const std::vector<ReportFileTypeParams>& reportFileTypeParams)
 {
-	if (m_schemas.empty() == true)
-	{
-		try
-		{
-			loadSchemas();
-		}
+	m_reportFileTypeParams = reportFileTypeParams;
+}
 
-		catch (QString errorMessage)
-		{
-			emit finished(errorMessage);
-		}
-	}
-	else
+std::vector<ReportFileTypeParams> SchemasReportGenerator::defaultFileTypeParams(DbController* db)
+{
+	std::vector<ReportFileTypeParams> result;
+
+	if (db == nullptr || db->isProjectOpened() == false)
 	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_schemasCount = static_cast<int>(m_schemas.size());
+		Q_ASSERT(false);
+		return result;
+	}
+
+	result.push_back({db->mvsFileId(),		QObject::tr("Monitor Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->tvsFileId(),		QObject::tr("Tuning Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->dvsFileId(),		QObject::tr("Diagnostics Schemas"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->alFileId(),		QObject::tr("Application Logic"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->ufblFileId(),		QObject::tr("UFBL Descriptions"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+
+	return result;
+}
+
+void SchemasReportGenerator::exportFilesToPdf()
+{
+	std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+
+	try
+	{
+		openProject();
+
+		loadSchemas(m_inputFiles, &schemas);
+
+		closeProject();
+	}
+
+	catch (QString errorMessage)
+	{
+		closeProject();
+
+		emit finished(errorMessage);
 	}
 
 	{
@@ -359,11 +428,11 @@ void SchemasReportGenerator::createPDFs()
 
 	// Save schemas to PDF
 
-	for (auto it = m_schemas.begin(); it != m_schemas.end(); it++)
+	for (auto it = schemas.begin(); it != schemas.end(); it++)
 	{
 		if (m_stop == true)
 		{
-			return;
+			break;
 		}
 
 		const std::shared_ptr<VFrame30::Schema> schema = it->second;
@@ -375,32 +444,20 @@ void SchemasReportGenerator::createPDFs()
 			m_currentSchemaId = schemaId;
 		}
 
-		std::shared_ptr<QPdfWriter> pdfWriter;
-
 		// Create separate PDF writer
 
-		if (m_outputBuffers != nullptr)
+		QString fileName = it->first;
+
+		fileName.replace('/', '_');
+
+		int pos = fileName.lastIndexOf('.');
+		if (pos != -1)
 		{
-			std::shared_ptr<QBuffer> b = std::make_shared<QBuffer>();
-			m_outputBuffers->push_back(b);
-
-			pdfWriter = std::make_shared<QPdfWriter>(b.get());
+			fileName = fileName.left(pos);
 		}
-		else
-		{
-			QString fileName = it->first;
+		fileName += tr(".pdf");
 
-			fileName.replace('/', '_');
-
-			int pos = fileName.lastIndexOf('.');
-			if (pos != -1)
-			{
-				fileName = fileName.left(pos);
-			}
-			fileName += tr(".pdf");
-
-			pdfWriter = std::make_shared<QPdfWriter>(filePath() + "//" + fileName);
-		}
+		std::shared_ptr<QPdfWriter> pdfWriter = std::make_shared<QPdfWriter>(filePath() + "//" + fileName);
 
 		pdfWriter->setTitle(schema->caption());
 
@@ -437,24 +494,24 @@ void SchemasReportGenerator::createPDFs()
 	return;
 }
 
-void SchemasReportGenerator::createAlbum()
+void SchemasReportGenerator::exportFilesToAlbum()
 {
-	if (m_schemas.empty() == true)
-	{
-		try
-		{
-			loadSchemas();
-		}
+	std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
 
-		catch (QString errorMessage)
-		{
-			emit finished(errorMessage);
-		}
-	}
-	else
+	try
 	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_schemasCount = static_cast<int>(m_schemas.size());
+		openProject();
+
+		loadSchemas(m_inputFiles, &schemas);
+
+		closeProject();
+	}
+
+	catch (QString errorMessage)
+	{
+		closeProject();
+
+		emit finished(errorMessage);
 	}
 
 	{
@@ -464,39 +521,27 @@ void SchemasReportGenerator::createAlbum()
 		m_schemaIndex = 0;
 	}
 
-	// Save schemas to PDF
+	// Init margins
+	clearMarginItems();	// Just for fun
+	addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, m_marginFont, Qt::AlignLeft | Qt::AlignTop});
+	addMarginItem({tr("%OBJECT%"), -1, -1, m_marginFont, Qt::AlignRight | Qt::AlignTop});
 
-	std::shared_ptr<QPdfWriter> pdfWriter;
+	// Create PDF writer
 
-	// Create single PDF writer
-
-	if (m_outputBuffers != nullptr)
-	{
-		std::shared_ptr<QBuffer> b = std::make_shared<QBuffer>();
-		m_outputBuffers->push_back(b);
-
-		pdfWriter = std::make_shared<QPdfWriter>(b.get());
-	}
-	else
-	{
-		pdfWriter = std::make_shared<QPdfWriter>(filePath());
-	}
-
+	std::shared_ptr<QPdfWriter> pdfWriter = std::make_shared<QPdfWriter>(filePath());
 	pdfWriter->setTitle(m_projectName);
-	pdfWriter->setPageSize(pageSize());
-	pdfWriter->setPageOrientation(pageOrientation());
-	pdfWriter->setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
+	pdfWriter->setPageLayout(pageLayout());
 	pdfWriter->setResolution(resolution());
 
 	bool firstSchema = true;
 
 	QPainter painter(pdfWriter.get());
 
-	for (auto it = m_schemas.begin(); it != m_schemas.end(); it++)
+	for (auto it = schemas.begin(); it != schemas.end(); it++)
 	{
 		if (m_stop == true)
 		{
-			return;
+			break;
 		}
 
 		const std::shared_ptr<VFrame30::Schema> schema = it->second;
@@ -517,7 +562,179 @@ void SchemasReportGenerator::createAlbum()
 			pdfWriter->newPage();
 		}
 
+		QTextDocument emptyTextDocument;
+		printDocument(pdfWriter.get(), &emptyTextDocument, &painter, tr("Schema: %1").arg(schemaId), nullptr, nullptr, 0);
+
 		printSchema(pdfWriter.get(), &painter, schema, {}, {});
+	}
+
+	emit finished(QString());
+
+	return;
+}
+
+void SchemasReportGenerator::exportAllSchemasToAlbum()
+{
+	std::vector<SchemaFilesInfo> schemaFilesInfo;
+
+	try
+	{
+		openProject();
+
+		schemaFilesInfo.push_back({db()->alFileId(), tr("ApplicationLogic")});
+		schemaFilesInfo.push_back({db()->mvsFileId(), tr("MonitorSchemas")});
+		schemaFilesInfo.push_back({db()->tvsFileId(), tr("TunungSchemas")});
+		schemaFilesInfo.push_back({db()->dvsFileId(), tr("DiagnosticsSchemas")});
+		schemaFilesInfo.push_back({db()->ufblFileId(), tr("UFBSchemas")});
+
+		for (SchemaFilesInfo& sfi : schemaFilesInfo)
+		{
+			if (m_stop == true)
+			{
+				break;
+			}
+
+			DbFileTree fileTree;
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_currentSchemaType = sfi.caption;
+			}
+
+			bool ok = db()->getFileListTree(&fileTree, sfi.fileId, true/*removeDeleted*/, nullptr);
+			if (ok == false)
+			{
+				throw(tr("DbController::getFileListTree failed on fileId = %1").arg(db()->schemaFileId()));
+			}
+
+			const std::map<int, std::shared_ptr<DbFileInfo>>  files = fileTree.files();
+
+			for (auto it = files.begin(); it != files.end(); it++)
+			{
+				const std::shared_ptr<DbFileInfo>& fi = it->second;
+
+				if (fi->fileName().endsWith("." + QString(Db::File::AlFileExtension)) == false &&
+					fi->fileName().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
+					fi->fileName().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
+					fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false)
+				{
+					continue;
+				}
+
+				sfi.schemasFiles.push_back(*fi);
+			}
+
+			loadSchemas(sfi.schemasFiles, &sfi.schemas);
+
+		}
+
+		closeProject();
+	}
+
+	catch (QString errorMessage)
+	{
+		closeProject();
+
+		emit finished(errorMessage);
+	}
+
+	// Init margins
+	clearMarginItems();	// Just for fun
+	addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, m_marginFont, Qt::AlignLeft | Qt::AlignTop});
+	addMarginItem({tr("%OBJECT%"), -1, -1, m_marginFont, Qt::AlignRight | Qt::AlignTop});
+
+	for (SchemaFilesInfo& sfi : schemaFilesInfo)
+	{
+		if (m_stop == true)
+		{
+			break;
+		}
+
+		if (sfi.schemas.empty() == true)
+		{
+			continue;
+		}
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_currentStatus = WorkerStatus::Rendering;
+			m_currentSchemaType = sfi.caption;
+			m_schemaIndex = 0;
+			m_schemasCount = static_cast<int>(sfi.schemas.size());
+		}
+
+		// Save schemas to PDF
+
+		// Create single PDF writer
+
+		QString fileName = tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(sfi.caption);
+
+		std::shared_ptr<QPdfWriter> pdfWriter = std::make_shared<QPdfWriter>(fileName);
+		pdfWriter->setTitle(m_projectName);
+
+		// Find page layout
+
+		QPageLayout pl = pageLayout();
+
+		bool plFound = false;
+
+		for (const ReportFileTypeParams& rp : m_reportFileTypeParams)
+		{
+			if (rp.fileId == sfi.fileId)
+			{
+				pl = rp.pageLayout;
+
+				plFound = true;
+				break;
+			}
+		}
+
+		if (plFound == false)
+		{
+			// File type was not found
+			Q_ASSERT(false);
+		}
+
+		pdfWriter->setPageLayout(pl);
+
+		pdfWriter->setResolution(resolution());
+
+		// Render schemas
+
+		bool firstSchema = true;
+
+		QPainter painter(pdfWriter.get());
+
+		for (auto it = sfi.schemas.begin(); it != sfi.schemas.end(); it++)
+		{
+			if (m_stop == true)
+			{
+				break;
+			}
+
+			const std::shared_ptr<VFrame30::Schema> schema = it->second;
+			const QString& schemaId = schema->schemaId();
+
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_schemaIndex++;
+				m_currentSchemaId = schemaId;
+			}
+
+			if (firstSchema == true)
+			{
+				firstSchema = false;
+			}
+			else
+			{
+				pdfWriter->newPage();
+			}
+
+			QTextDocument emptyTextDocument;
+			printDocument(pdfWriter.get(), &emptyTextDocument, &painter, tr("Schema: %1").arg(schemaId), nullptr, nullptr, 0);
+
+			printSchema(pdfWriter.get(), &painter, schema, {}, {});
+		}
 	}
 
 	emit finished(QString());
@@ -550,21 +767,42 @@ void SchemasReportGenerator::progressRequested()
 		break;
 	case SchemasReportGenerator::WorkerStatus::Loading:
 		{
-			progressText = tr("Loading schema: %1").arg(currentSchemaId());
+			if (m_currentSchemaType.isEmpty() == false)
+			{
+				progressText = tr("Loading schema: %1/%2").arg(currentSchemaType()).arg(currentSchemaId());
+			}
+			else
+			{
+				progressText = tr("Loading schema: %1").arg(currentSchemaId());
+			}
 			progress = schemaIndex();
 			progressMax = schemasCount();
 		}
 		break;
 	case SchemasReportGenerator::WorkerStatus::Parsing:
 		{
-			progressText = tr("Parsing schema: %1").arg(currentSchemaId());
+			if (m_currentSchemaType.isEmpty() == false)
+			{
+				progressText = tr("Parsing schema: %1/%2").arg(currentSchemaType()).arg(currentSchemaId());
+			}
+			else
+			{
+				progressText = tr("Parsing schema: %1").arg(currentSchemaId());
+			}
 			progress = schemaIndex();
 			progressMax = schemasCount();
 		}
 		break;
 	case SchemasReportGenerator::WorkerStatus::Rendering:
 		{
-			progressText = tr("Rendering schema: %1").arg(currentSchemaId());
+			if (m_currentSchemaType.isEmpty() == false)
+			{
+				progressText = tr("Rendering schema: %1/%2").arg(currentSchemaType()).arg(currentSchemaId());
+			}
+			else
+			{
+				progressText = tr("Rendering schema: %1").arg(currentSchemaId());
+			}
 			progress = schemaIndex();
 			progressMax = schemasCount();
 		}
@@ -593,6 +831,11 @@ int SchemasReportGenerator::schemaIndex() const
 	return m_schemaIndex;
 }
 
+QString SchemasReportGenerator::currentSchemaType() const
+{
+	return m_currentSchemaType;
+}
+
 QString SchemasReportGenerator::currentSchemaId() const
 {
 	return m_currentSchemaId;
@@ -608,15 +851,12 @@ const QString& SchemasReportGenerator::filePath() const
 	return m_filePath;
 }
 
-void SchemasReportGenerator::loadSchemas()
+void SchemasReportGenerator::openProject()
 {
-	// Load schemas from files
+	if (db()->isProjectOpened() == true)
 	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_currentStatus = WorkerStatus::Loading;
-
-		m_schemasCount = static_cast<int>(m_files.size());
-		m_schemaIndex = 0;
+		Q_ASSERT(false);
+		throw(tr("Failed to open project - it is open!"));
 	}
 
 	db()->disableProgress();
@@ -632,15 +872,55 @@ void SchemasReportGenerator::loadSchemas()
 		throw(tr("Failed to open project!"));
 	}
 
+	return;
+}
+
+void SchemasReportGenerator::closeProject()
+{
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	db()->closeProject(nullptr);
+
+	return;
+}
+
+
+void SchemasReportGenerator::loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>* schemas)
+{
+	if (schemas == nullptr)
+	{
+		Q_ASSERT(schemas);
+		throw(tr("internal error: schemas is nullptr"));
+	}
+
+	schemas->clear();
+
+	// Load schemas from files
+	{
+		QMutexLocker l(&m_statisticsMutex);
+		m_currentStatus = WorkerStatus::Loading;
+
+		m_schemasCount = static_cast<int>(files.size());
+		m_schemaIndex = 0;
+	}
+
 	// Get files from the database
 
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	for (const DbFileInfo& fi : m_files)
+	for (const DbFileInfo& fi : files)
 	{
+		if (m_stop == true)
+		{
+			break;
+		}
+
 		std::shared_ptr<DbFile> f;
 
-		ok = db()->getLatestVersion(fi, &f, nullptr);
+		bool ok = db()->getLatestVersion(fi, &f, nullptr);
 		if (ok == false)
 		{
 			throw(tr("Failed to load file %1").arg(fi.fileName()));
@@ -687,6 +967,11 @@ void SchemasReportGenerator::loadSchemas()
 	//
 	for (std::shared_ptr<DbFile> dbFile : out)
 	{
+		if (m_stop == true)
+		{
+			break;
+		}
+
 		std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(dbFile->data());
 		if (schema == nullptr)
 		{
@@ -721,10 +1006,8 @@ void SchemasReportGenerator::loadSchemas()
 			};
 		}
 
-		m_schemas[fileName] = schema;
+		(*schemas)[fileName] = schema;
 	}
-
-	db()->closeProject(nullptr);
 
 	return;
 }

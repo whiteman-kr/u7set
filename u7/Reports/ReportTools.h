@@ -2,6 +2,65 @@
 
 #include "../VFrame30/SchemaView.h"
 
+class DbController;
+
+//
+// ReportFileTypeParams
+//
+
+struct ReportFileTypeParams
+{
+	ReportFileTypeParams(int fileId, const QString& caption, bool selected)
+	{
+		this->fileId = fileId;
+		this->caption = caption;
+		this->selected = selected;
+	}
+
+	ReportFileTypeParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout)
+		:ReportFileTypeParams(fileId, caption, selected)
+	{
+		this->pageLayout = pageLayout;
+	}
+
+	int fileId = -1;
+	QString caption;
+	bool selected = false;
+
+	// Multiple-file report section page options
+	//
+	QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+};
+
+class DialogReportFileTypeParams : public QDialog
+{
+	Q_OBJECT
+
+public:
+	explicit DialogReportFileTypeParams(const std::vector<ReportFileTypeParams>& fileTypeParams, std::vector<ReportFileTypeParams> defaultFileTypeParams, QWidget *parent);
+
+	std::vector<ReportFileTypeParams> fileTypeParams() const;
+
+private slots:
+	void pageSetup();
+	void setToDefault();
+
+private:
+	void fillTree();
+
+private:
+	DbController* m_db = nullptr;
+	QTreeWidget* m_treeWidget = nullptr;
+
+	std::vector<ReportFileTypeParams> m_fileTypeParams;
+
+	std::vector<ReportFileTypeParams> m_defaultFileTypeParams;
+};
+
+//
+// ReportSchemaCompareAction
+//
+
 enum class ReportSchemaCompareAction
 {
 	Unmodified,
@@ -184,14 +243,8 @@ public:
 	ReportGenerator(ReportSchemaView* schemaView);
 
 public:
-	QPageSize pageSize() const;
-	void setPageSize(const QPageSize& size);
-
-	QPageLayout::Orientation pageOrientation() const;
-	void setPageOrientation(const QPageLayout::Orientation& value);
-
-	QMarginsF pageMargins() const;
-	void setPageMargins(const QMarginsF& margins);
+	QPageLayout pageLayout() const;
+	void setPageLayout(const QPageLayout& value);
 
 	int resolution() const;
 	void setResolution(int value);
@@ -238,9 +291,7 @@ private:
 private:
 	// Page options
 	//
-	QPageSize m_pageSize = QPageSize(QPageSize::A4);
-	QPageLayout::Orientation m_pageOrientation = QPageLayout::Orientation::Portrait;
-	QMarginsF m_pageMargins = QMarginsF(10, 10, 10, 10);
+	QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
 
 	int m_pageResolution = 300;
 

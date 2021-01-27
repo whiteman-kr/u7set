@@ -11,28 +11,6 @@ namespace Ui {
 
 class DbController;
 
-class DialogProjectDiffSections : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit DialogProjectDiffSections(const ProjectDiffReportParams& reportParams, DbController* db, QWidget *parent);
-
-	ProjectDiffReportParams reportParams() const;
-
-private slots:
-	void pageSetup();
-	void setToDefault();
-
-private:
-	void fillTree();
-
-private:
-	QTreeWidget* m_treeWidget = nullptr;
-	ProjectDiffReportParams m_reportParams;
-	DbController* m_db = nullptr;
-};
-
 class DialogProjectDiff : public QDialog
 {
 	Q_OBJECT

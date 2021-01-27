@@ -7,226 +7,6 @@
 #include <QPrinter>
 
 //
-// DialogProjectDiffSections
-//
-
-DialogProjectDiffSections::DialogProjectDiffSections(const ProjectDiffReportParams& reportParams, DbController* db, QWidget *parent):
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_reportParams(reportParams),
-	m_db(db)
-{
-	setWindowTitle(tr("Report Sections Page Setup"));
-	setMinimumSize(540, 350);
-
-	m_treeWidget = new QTreeWidget();
-
-	QStringList l;
-	l << tr("Section");
-	l << tr("Page Size");
-	l << tr("Orientation");
-	l << tr("Margins, mm");
-	m_treeWidget->setHeaderLabels(l);
-	m_treeWidget->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
-
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, [this](QTreeWidgetItem *item, int column){
-		Q_UNUSED(item);
-		Q_UNUSED(column);
-		pageSetup();
-	});
-
-	QVBoxLayout* pbLayout = new QVBoxLayout();
-
-	QPushButton* b = new QPushButton(tr("Page Setup..."));
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::pageSetup);
-
-	pbLayout->addWidget(b);
-
-	b = new QPushButton(tr("Set to Default"));
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::setToDefault);
-
-	pbLayout->addWidget(b);
-	pbLayout->addStretch();
-
-	QHBoxLayout* topLayout = new QHBoxLayout();
-
-	topLayout->addWidget(m_treeWidget);
-	topLayout->addLayout(pbLayout);
-
-	QHBoxLayout* buttonsLayout = new QHBoxLayout();
-	buttonsLayout->addStretch();
-
-	b = new QPushButton(tr("OK"));
-	buttonsLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::accept);
-
-	b = new QPushButton(tr("Cancel"));
-	buttonsLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::reject);
-
-	QVBoxLayout* ml = new QVBoxLayout();
-	ml->addLayout(topLayout);
-	ml->addLayout(buttonsLayout);
-
-	setLayout(ml);
-
-	fillTree();
-
-	return;
-}
-
-ProjectDiffReportParams DialogProjectDiffSections::reportParams() const
-{
-	return m_reportParams;
-}
-
-void DialogProjectDiffSections::pageSetup()
-{
-	QList<QTreeWidgetItem*> selectedItems =  m_treeWidget->selectedItems();
-	if (selectedItems.isEmpty() == true)
-	{
-		return;
-	}
-
-	int firstIndex = m_treeWidget->indexOfTopLevelItem(selectedItems[0]);
-	if (firstIndex < 0 || firstIndex >= m_reportParams.fileTypeParams.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	const ProjectDiffFileTypeParams& firstFt = m_reportParams.fileTypeParams[firstIndex];
-
-	QPageSize pageSize = firstFt.pageSize;
-	QPageLayout::Orientation orientation = firstFt.orientation;
-	QMarginsF margins = firstFt.margins;
-
-	QPrinter printer(QPrinter::HighResolution);
-
-	QPageSize::PageSizeId id = QPageSize::id(pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-	if (id == QPageSize::Custom)
-	{
-		id = QPageSize::A4;
-	}
-
-	printer.setFullPage(true);
-	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(orientation);
-	printer.setPageMargins(margins, QPageLayout::Unit::Millimeter);
-
-	QPageSetupDialog d(&printer, this);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-
-	for (QTreeWidgetItem* item : selectedItems)
-	{
-		int itemIndex = m_treeWidget->indexOfTopLevelItem(item);
-		if (itemIndex < 0 || itemIndex >= m_reportParams.fileTypeParams.size())
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		ProjectDiffFileTypeParams& ft = m_reportParams.fileTypeParams[itemIndex];
-
-		ft.pageSize = QPageSize(id);
-		ft.orientation = d.printer()->pageLayout().orientation();
-		ft.margins = d.printer()->pageLayout().margins();
-	}
-
-	fillTree();
-
-	return;
-}
-
-void DialogProjectDiffSections::setToDefault()
-{
-	std::vector<ProjectDiffFileTypeParams> defaultParams = ProjectDiffGenerator::defaultFileTypeParams(m_db);
-
-	QList<QTreeWidgetItem*> selectedItems =  m_treeWidget->selectedItems();
-	if (selectedItems.isEmpty() == true)
-	{
-		for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
-		{
-			selectedItems.push_back(m_treeWidget->topLevelItem(i));
-		}
-	}
-
-	for (QTreeWidgetItem* item : selectedItems)
-	{
-		int itemIndex = m_treeWidget->indexOfTopLevelItem(item);
-		if (itemIndex < 0 || itemIndex >= m_reportParams.fileTypeParams.size())
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		ProjectDiffFileTypeParams& ft = m_reportParams.fileTypeParams[itemIndex];
-
-		for (const ProjectDiffFileTypeParams& dft : defaultParams)
-		{
-			if (dft.fileId == ft.fileId)
-			{
-				ft.pageSize = dft.pageSize;
-				ft.orientation = dft.orientation;
-				ft.margins = dft.margins;
-				break;
-			}
-		}
-	}
-
-	fillTree();
-
-	return;
-}
-
-void DialogProjectDiffSections::fillTree()
-{
-	if (m_treeWidget->topLevelItemCount() != m_reportParams.fileTypeParams.size())
-	{
-		m_treeWidget->clear();
-
-		for (int i = 0; i < m_reportParams.fileTypeParams.size(); i++)
-		{
-			m_treeWidget->addTopLevelItem(new QTreeWidgetItem());
-		}
-	}
-
-	int itemIndex = 0;
-
-	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
-	{
-		QTreeWidgetItem* item = m_treeWidget->topLevelItem(itemIndex++);
-		if (item == nullptr)
-		{
-			Q_ASSERT(item);
-			return;
-		}
-
-		QPageSize::PageSizeId id = QPageSize::id(ft.pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-		if (id == QPageSize::Custom)
-		{
-			id = QPageSize::A4;
-		}
-
-		item->setText(0, ft.caption);
-		item->setText(1, QPageSize(id).name());
-		item->setText(2, ft.orientation == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
-		item->setText(3, tr("l%1 t%2 r%3 b%4").arg(ft.margins.left()).arg(ft.margins.top()).arg(ft.margins.right()).arg(ft.margins.bottom()));
-	}
-
-	for (int i = 0; i < m_treeWidget->columnCount(); i++)
-	{
-		m_treeWidget->resizeColumnToContents(i);
-	}
-
-	return;
-}
-
-//
 // DialogProjectDiff
 //
 
@@ -292,7 +72,7 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// Fill file types list
 	//
-	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
 		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption));
 
@@ -645,7 +425,7 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	QPrinter printer(QPrinter::HighResolution);
 
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 	if (id == QPageSize::Custom)
 	{
 		id = QPageSize::A4;
@@ -653,8 +433,8 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	printer.setFullPage(true);
 	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(m_reportParams.albumOrientation);
-	printer.setPageMargins(m_reportParams.albumMargins, QPageLayout::Unit::Millimeter);
+	printer.setPageOrientation(m_reportParams.m_albumPageLayout.orientation());
+	printer.setPageMargins(m_reportParams.m_albumPageLayout.margins(), QPageLayout::Unit::Millimeter);
 
 	QPageSetupDialog d(&printer, this);
 	if (d.exec() != QDialog::Accepted)
@@ -664,9 +444,9 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 
-	m_reportParams.albumPageSize = QPageSize(id);
-	m_reportParams.albumOrientation = d.printer()->pageLayout().orientation();
-	m_reportParams.albumMargins = d.printer()->pageLayout().margins();
+	m_reportParams.m_albumPageLayout.setPageSize(QPageSize(id));
+	m_reportParams.m_albumPageLayout.setOrientation(d.printer()->pageLayout().orientation());
+	m_reportParams.m_albumPageLayout.setMargins(d.printer()->pageLayout().margins());
 
 	updatePageSizeInfo();
 
@@ -675,33 +455,32 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 void DialogProjectDiff::on_pageSetDefault_clicked()
 {
-	m_reportParams.albumPageSize = QPageSize(QPageSize::A3);
-	m_reportParams.albumOrientation = QPageLayout::Orientation::Portrait;
-	m_reportParams.albumMargins = QMarginsF(15, 15, 15, 15);
-
+	m_reportParams.m_albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
 	updatePageSizeInfo();
+	return;
 }
 
 void DialogProjectDiff::on_multiFilepageSetupButton_clicked()
 {
-	DialogProjectDiffSections d(m_reportParams, m_db, this);
+	DialogReportFileTypeParams d(m_reportParams.fileTypeParams, ProjectDiffGenerator::defaultFileTypeParams(m_db), this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		m_reportParams = d.reportParams();
+		m_reportParams.fileTypeParams = d.fileTypeParams();
 	}
 }
 
 void DialogProjectDiff::updatePageSizeInfo()
 {
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 	if (id == QPageSize::Custom)
 	{
 		id = QPageSize::A4;
 	}
 
-	ui->labelPageSize->setText(tr("Page Size: %1, %2").arg(QPageSize(id).name()).arg(m_reportParams.albumOrientation == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
+	ui->labelPageSize->setText(tr("Page Size: %1, %2").arg(QPageSize(id).name())
+							   .arg(m_reportParams.m_albumPageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
 
-	QMarginsF margins = m_reportParams.albumMargins;
+	QMarginsF margins = m_reportParams.m_albumPageLayout.margins();
 	ui->labelPageMargins->setText(tr("Page margins, mm: l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
 
 	return;

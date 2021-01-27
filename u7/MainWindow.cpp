@@ -33,6 +33,7 @@
 #include "../lib/SignalSetProvider.h"
 #include "Forms/DialogProjectDiff.h"
 #include "Reports/ProjectDiffGenerator.h"
+#include "Reports/SchemasReportGenerator.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -380,6 +381,13 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectDifferenceAction->setEnabled(true);});
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectDifferenceAction->setEnabled(false);});
 
+	m_schemasAlbumAction = new QAction(tr("Create Schemas Albums..."), this);
+	m_schemasAlbumAction->setStatusTip(tr("Create PDF albums with all project schemas"));
+	m_schemasAlbumAction->setEnabled(false);
+	connect(m_schemasAlbumAction, &QAction::triggered, this, &MainWindow::createSchemasAlbums);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_schemasAlbumAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_schemasAlbumAction->setEnabled(false);});
+
 	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setEnabled(false);
 	connect(m_pendingChangesAction, &QAction::triggered, this, &MainWindow::pendingChanges);
@@ -411,6 +419,7 @@ void MainWindow::createMenus()
 	pProjectMenu->addAction(m_pendingChangesAction);
 	pProjectMenu->addAction(m_projectDifferenceAction);
 	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_schemasAlbumAction);
 	pProjectMenu->addAction(m_startBuildAction);
 	pProjectMenu->addSeparator();
 	pProjectMenu->addAction(m_projectPropertiesAction);
@@ -1117,6 +1126,36 @@ void MainWindow::projectDifference()
 										this);
 	}
 
+	return;
+}
+
+void MainWindow::createSchemasAlbums()
+{
+	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
+
+	static std::vector<ReportFileTypeParams> albumFileTypeParams = {};
+	if (albumFileTypeParams.empty() == true)
+	{
+		albumFileTypeParams = SchemasReportGenerator::defaultFileTypeParams(db());
+	}
+
+	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams, SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
+	{
+		return;
+	}
+
+	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
+
+	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+							 theSettings.serverPort(),
+							 theSettings.serverUsername(),
+							 theSettings.serverPassword(),
+							 db()->currentProject().projectName(),
+							 db()->currentUser().username(),
+							 db()->currentUser().password(),
+							 this);
+
+	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
 	return;
 }
 

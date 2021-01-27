@@ -349,9 +349,15 @@ ProjectDiffGenerator::~ProjectDiffGenerator()
 	qDebug() << "ProjectDiffGenerator deleted";
 }
 
-std::vector<ProjectDiffFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
+std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
 {
-	std::vector<ProjectDiffFileTypeParams> result;
+	std::vector<ReportFileTypeParams> result;
+
+	if (db == nullptr || db->isProjectOpened() == false)
+	{
+		Q_ASSERT(false);
+		return result;
+	}
 
 	result.push_back({db->hcFileId(),				QObject::tr("Hardware Configuration"),	true});
 
@@ -359,11 +365,11 @@ std::vector<ProjectDiffFileTypeParams> ProjectDiffGenerator::defaultFileTypePara
 
 
 	//Schemas
-	result.push_back({db->mvsFileId(),				QObject::tr("Monitor Schemas"),			true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
-	result.push_back({db->tvsFileId(),				QObject::tr("Tuning Schemas"),			true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
-	result.push_back({db->dvsFileId(),				QObject::tr("Diagnostics Schemas"),		true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
-	result.push_back({db->alFileId(),				QObject::tr("Application Logic"),		true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
-	result.push_back({db->ufblFileId(),				QObject::tr("UFBL Descriptions"),		true, QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15)});
+	result.push_back({db->mvsFileId(),				QObject::tr("Monitor Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->tvsFileId(),				QObject::tr("Tuning Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->dvsFileId(),				QObject::tr("Diagnostics Schemas"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->alFileId(),				QObject::tr("Application Logic"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->ufblFileId(),				QObject::tr("UFBL Descriptions"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
 
 	result.push_back({db->busTypesFileId(),			QObject::tr("Busses"),					true});
 	result.push_back({db->connectionsFileId(),		QObject::tr("Connections"),				true});
@@ -589,7 +595,7 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 	//
 	for (int i = 0; i < m_reportParams.fileTypeParams.size(); i++)
 	{
-		ProjectDiffFileTypeParams ft = m_reportParams.fileTypeParams[i];
+		ReportFileTypeParams ft = m_reportParams.fileTypeParams[i];
 
 		if (ft.fileId == applicationSignalsTypeId() && ft.selected == true && i != 0)
 		{
@@ -608,7 +614,7 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	std::vector<DbFileTree> filesTrees;
 
-	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
 		if (ft.selected == false)
 		{
@@ -649,7 +655,7 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	int fileTreeIndex = 0;
 
-	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
 		if (ft.selected == false)
 		{
@@ -2966,7 +2972,7 @@ void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_pt
 		{
 			int subreportFileType = it->first;
 
-			for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+			for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 			{
 				if (ft.fileId == subreportFileType)
 				{
@@ -2998,20 +3004,17 @@ void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_pt
 
 			// Set subreport page size
 			//
-			bool pageSizeFound = false;
-			for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+			bool pageLayoutFound = false;
+			for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 			{
 				if (ft.fileId == subreportFileType)
 				{
-					setPageSize(ft.pageSize);
-					setPageOrientation(ft.orientation);
-					setPageMargins(ft.margins);
-
-					pageSizeFound = true;
+					setPageLayout(ft.pageLayout);
+					pageLayoutFound = true;
 					break;
 				}
 			}
-			if (pageSizeFound == false)
+			if (pageLayoutFound == false)
 			{
 				Q_ASSERT(false);
 			}
@@ -3020,9 +3023,7 @@ void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_pt
 		{
 			// Set full report page size
 			//
-			setPageSize(m_reportParams.albumPageSize);
-			setPageOrientation(m_reportParams.albumOrientation);
-			setPageMargins(m_reportParams.albumMargins);
+			setPageLayout(m_reportParams.m_albumPageLayout);
 		}
 
 		generatedReportFiles.push_back(pdfFileName);
@@ -3031,9 +3032,7 @@ void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_pt
 
 		QPdfWriter pdfWriter(pdfFileName);
 		pdfWriter.setTitle(m_projectName);
-		pdfWriter.setPageSize(pageSize());
-		pdfWriter.setPageOrientation(pageOrientation());
-		pdfWriter.setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
+		pdfWriter.setPageLayout(pageLayout());
 		pdfWriter.setResolution(resolution());
 
 		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
@@ -3121,16 +3120,12 @@ void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_pt
 
 		// Generate generic report file with all report files description
 
-		setPageSize(m_reportParams.albumPageSize);
-		setPageOrientation(m_reportParams.albumOrientation);
-		setPageMargins(m_reportParams.albumMargins);
+		setPageLayout(m_reportParams.m_albumPageLayout);
 
 		QPdfWriter pdfWriter(filePath());
 
 		pdfWriter.setTitle(m_projectName);
-		pdfWriter.setPageSize(pageSize());
-		pdfWriter.setPageOrientation(pageOrientation());
-		pdfWriter.setPageMargins(pageMargins(), QPageLayout::Unit::Millimeter);
+		pdfWriter.setPageLayout(pageLayout());
 		pdfWriter.setResolution(resolution());
 
 		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
