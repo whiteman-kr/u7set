@@ -7973,6 +7973,71 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6120
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology connection with signals: %1 and %2, has wrong type of connection.
+	///
+	/// Parameters:
+	///		%1 AppSignalID of source signal
+	///		%2 AppSignalID of destination signal
+	///
+	/// Description:
+	///		Metrology connection with signals: %1 and %2, has wrong type of connection.
+	///
+	void IssueLogger::errEQP6120(QString sourceAppSignalID, QString destinationAppSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6120,
+				  tr("Metrology connection with signals: %1 and %2, has wrong type of connection")
+				  .arg(sourceAppSignalID)
+				  .arg(destinationAppSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6121
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology connections contain a non-existent source signal: %1.
+	///
+	/// Parameters:
+	///		%1 AppSignalID of source signal
+	///
+	/// Description:
+	///		Metrology connections contain a non-existent source signal: %1.
+	///
+	void IssueLogger::errEQP6121(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6121,
+				  tr("Metrology connections contain a non-existent source signal: %1")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6122
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology connections contain a non-existent destination signal: %1.
+	///
+	/// Parameters:
+	///		%1 AppSignalID of destination signal
+	///
+	/// Description:
+	///		Metrology connections contain a non-existent destination signal: %1.
+	///
+	void IssueLogger::errEQP6122(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6122,
+				  tr("Metrology connections contain a non-existent destination signal: %1")
+				  .arg(appSignalID)
+				  );
+	}
+
 	/// IssueCode: EQP6200
 	///
 	/// IssueType: Error

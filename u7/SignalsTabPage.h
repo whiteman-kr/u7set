@@ -7,6 +7,7 @@
 #include <QSortFilterProxyModel>
 #include <QDialog>
 #include <QHash>
+#include "DialogMetrologyConnection.h"
 
 class DbController;
 class QTableView;
@@ -403,7 +404,11 @@ public slots:
 	void checkIn();
 	void viewSignalHistory();
 
-	void openMetrologyEditor();
+	bool createMetrologyDialog();
+	void deleteMetrologyDialog();
+	void openMetrologyConnections();
+	void addMetrologyConnection();
+	void metrologyDialogClosed();
 
 	void changeLazySignalLoadingSequence();
 
@@ -437,6 +442,7 @@ private:
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
 	FindSignalDialog* m_findSignalDialog = nullptr;
+	DialogMetrologyConnection* m_metrologyDialog = nullptr;
 
 	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;

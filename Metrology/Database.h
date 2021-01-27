@@ -49,14 +49,8 @@ const char* const		SqlTabletName[] =
 
 						"ComparatorMeasure",
 
-						"ComplexComparatorMeasure",
-						"ComplexComparatorHysteresis",
-						"ComplexComparatorPoint",
-						"ComplexComparatorSignal",
-
 						"ReportOption",
 						"RackGroup",
-						"SignalConnection",
 };
 
 const int				SQL_TABLE_COUNT							= sizeof(SqlTabletName)/sizeof(SqlTabletName[0]);
@@ -71,13 +65,9 @@ const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_LINEARITY_20_EN				= 6,
 						SQL_TABLE_LINEARITY_POINT				= 7,
 						SQL_TABLE_COMPARATOR					= 8,
-						SQL_TABLE_COMPLEX_COMPARATOR			= 9,
-						SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS	= 10,
-						SQL_TABLE_COMPLEX_COMPARATOR_POINT		= 11,
-						SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL		= 12,
-						SQL_TABLE_REPORT_HEADER					= 13,
-						SQL_TABLE_RACK_GROUP					= 14,
-						SQL_TABLE_SIGNAL_CONNECTION				= 15;
+						SQL_TABLE_REPORT_HEADER					= 9,
+						SQL_TABLE_RACK_GROUP					= 10;
+
 
 // ==============================================================================================
 
@@ -101,14 +91,8 @@ const int				SqlTableVersion[SQL_TABLE_COUNT] =
 
 						0,					//	SQL_TABLE_COMPARATOR
 
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_POINT
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
-
 						0,					//	SQL_TABLE_REPORT_HEADER
 						0,					//	SQL_TABLE_RACK_GROUP
-						0,					//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -133,16 +117,9 @@ const int				SqlObjectID[SQL_TABLE_COUNT] =
 
 						200,		//	SQL_TABLE_COMPARATOR
 
-						300,		//	SQL_TABLE_COMPLEX_COMPARATOR
-						301,		//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
-						310,		//	SQL_TABLE_COMPLEX_COMPARATOR_POINT
-						320,		//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
-
 						400,		//	SQL_TABLE_REPORT_HEADER
 
 						500,		//	SQL_TABLE_RACK_GROUP
-
-						600,		//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -167,14 +144,8 @@ const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 
 						MEASURE_TYPE_COMPARATOR,			//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
 
-						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_COMPLEX_COMPARATOR				// SQL_TABLE_MEASURE_MAIN
-						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS		// SQL_TABLE_MEASURE_SUB
-						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_COMPLEX_COMPARATOR_POINT			// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL			// SQL_TABLE_CONFIG
-
 						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_REPORT_HEADER						// SQL_TABLE_CONFIG
 						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_RACK_GROUP						// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNDEFINED,				//	SQL_TABLE_SIGNAL_CONNECTION					// SQL_TABLE_CONFIG
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -193,14 +164,8 @@ const int				SqlTableAppointType[SQL_TABLE_COUNT] =
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPARATOR
 
-						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPLEX_COMPARATOR
-						SQL_TABLE_IS_SUB,					//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_COMPLEX_COMPARATOR_POINT
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
-
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_REPORT_HEADER
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_RACK_GROUP
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================

@@ -43,7 +43,6 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
-
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
 											1,
 											m_serverAddressPort1,
@@ -225,6 +224,7 @@ bool ConfigSocket::readMetrologyItems(const QByteArray& fileData)
 
 	result &= readRacks(fileData, fileVersion);
 	result &= readTuningSources(fileData, fileVersion);
+	result &= readMetrologyConnections(fileData, fileVersion);
 
 	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
 
@@ -280,8 +280,6 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
-	Metrology::RackParam rack;
-
 	int rackCount = 0;
 	result &= xml.readIntAttribute("Count", &rackCount);
 
@@ -292,6 +290,8 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 			result = false;
 			break;
 		}
+
+		Metrology::RackParam rack;
 
 		result &= rack.readFromXml(xml);
 		if (result == false)
@@ -362,6 +362,60 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 	}
 
 	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int fileVersion)
+{
+	Q_UNUSED(fileVersion)
+
+	bool result = true;
+
+	XmlReadHelper xml(fileData);
+
+	if (xml.findElement("Connections") == false)
+	{
+		qDebug() << __FUNCTION__ << "Connections section not found";
+		return false;
+	}
+
+	int connectionCount = 0;
+	result &= xml.readIntAttribute("Count", &connectionCount);
+
+	for(int c = 0; c < connectionCount; c++)
+	{
+		if (xml.findElement("Connection") == false)
+		{
+			result = false;
+			break;
+		}
+
+		Metrology::SignalConnection connection;
+
+		// read
+		//
+		result &= connection.readFromXml(xml);
+		if (result == false)
+		{
+			continue;
+		}
+
+		// append
+		//
+		theSignalBase.signalConnections().append(connection);
+	}
+
+	if (theSignalBase.signalConnections().count() != connectionCount)
+	{
+		qDebug() << __FUNCTION__ << "Connections loading error, loaded: " << theSignalBase.signalConnections().count() << " from " << connectionCount;
+		assert(false);
+		return false;
+	}
+
+	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.signalConnections().count();
 
 	return result;
 }

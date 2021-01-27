@@ -1,7 +1,7 @@
 #include "StatisticsPanel.h"
 
-#include "ProcessData.h"
 #include "SignalConnectionList.h"
+#include "ProcessData.h"
 #include "ObjectProperties.h"
 #include "Options.h"
 
@@ -122,7 +122,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+		if (si.signalConnectionType() == Metrology::CONNECTION_TYPE_UNDEFINED)
 		{
 			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
@@ -308,7 +308,7 @@ void StatisticsTable::updateSignal(Hash signalHash)
 
 int StatisticsPanel::m_measureType = MEASURE_TYPE_LINEARITY;
 int StatisticsPanel::m_measureKind = MEASURE_TYPE_UNDEFINED;
-int StatisticsPanel::m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+int StatisticsPanel::m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -577,7 +577,7 @@ void StatisticsPanel::measureKindChanged(int kind)
 
 void StatisticsPanel::signalConnectionTypeChanged(int type)
 {
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -604,13 +604,13 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	Metrology::Signal* pSignal = nullptr;
 
-	if(m_signalConnectionType == SIGNAL_CONNECTION_TYPE_UNUSED)
+	if(m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();
+		pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).firstMetrologySignal();
 	}
 	else
 	{
-		pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();
+		pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).firstMetrologySignal();
 	}
 
 	if (pSignal == nullptr)
@@ -792,7 +792,7 @@ void StatisticsPanel::selectSignalForMeasure()
 	//
 	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
-	if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+	if (si.signalConnectionType() == Metrology::CONNECTION_TYPE_UNDEFINED)
 	{
 		if (si.signal() == nullptr || si.signal()->param().isValid() == false)
 		{
@@ -821,13 +821,13 @@ void StatisticsPanel::selectSignalForMeasure()
 			return;
 		}
 
-		if (theSignalBase.signalConnections().save() == false)
-		{
-			QMessageBox::information(this,
-									 windowTitle(),
-									 tr("Attempt to save signal connections was unsuccessfully!"));
-			return;
-		}
+//		if (theSignalBase.signalConnections().save() == false)
+//		{
+//			QMessageBox::information(this,
+//									 windowTitle(),
+//									 tr("Attempt to save signal connections was unsuccessfully!"));
+//			return;
+//		}
 
 		theSignalBase.statistics().createSignalList();
 		theSignalBase.statistics().createComparatorList();
@@ -874,19 +874,19 @@ void StatisticsPanel::selectSignalForMeasure()
 
 	if (pSignal->param().isInput() == false)
 	{
-		int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+		int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, pSignal);
 		if (connectionIndex == -1)
 		{
 			return;
 		}
 
-		const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+		const Metrology::SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
 		if (connection.isValid() == false)
 		{
 			return;
 		}
 
-		pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		pSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 		if (pSignal == nullptr || pSignal->param().isValid() == false)
 		{
 			return;

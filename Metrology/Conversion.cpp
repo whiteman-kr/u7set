@@ -214,12 +214,12 @@ double conversion(double val, ConversionType conversionType, const E::ElectricUn
 
 double conversionCalcVal(double val, ConversionCalcType calcType, int connectionType, const IoSignalParam &ioParam)
 {
-	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (connectionType < 0 || connectionType >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return val;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return val;
@@ -231,7 +231,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 		return val;
 	}
 
-	const Metrology::SignalParam& outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 	if (outParam.isValid() == false)
 	{
 		return val;
@@ -253,7 +253,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 
 			switch (connectionType)
 			{
-				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+				case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
 					{
 						retVal = (val - inParam.lowEngineeringUnits())*
 								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
@@ -262,7 +262,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+				case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 					{
 						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
 								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
@@ -271,7 +271,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+				case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 				{
 					val = (val - outParam.lowEngineeringUnits())*
 							(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
@@ -285,13 +285,13 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 				}
 				break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+				case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 					{
 						retVal = uc.conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+				case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 					{
 						val = (val - outParam.lowEngineeringUnits())*
 								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
@@ -309,7 +309,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 
 			switch (connectionType)
 			{
-				case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
+				case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
 					{
 						retVal = (val - outParam.lowEngineeringUnits())*
 								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
@@ -318,7 +318,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+				case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 					{
 						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
 								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
@@ -327,7 +327,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+				case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 					{
 						val = (val - inParam.lowEngineeringUnits())*
 								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
@@ -341,13 +341,13 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+				case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 					{
 						retVal = uc.conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
 					}
 					break;
 
-				case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+				case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 					{
 						val = (val - inParam.lowEngineeringUnits())*
 								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/

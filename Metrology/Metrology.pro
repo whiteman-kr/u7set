@@ -45,7 +45,12 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
+    ../lib/DbController.cpp \
+    ../lib/DbProgress.cpp \
+    ../lib/DbProgressDialog.cpp \
+    ../lib/DbWorker.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/MetrologyConnectionBase.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -55,6 +60,7 @@ SOURCES += \
     Options.cpp \
     ProcessData.cpp \
     SelectSignalWidget.cpp \
+    SignalConnectionList.cpp \
     StatisticsBase.cpp \
     StatisticsPanel.cpp \
     main.cpp \
@@ -114,15 +120,18 @@ SOURCES += \
     ../lib/UnitsConvertorTable.cpp \
     ../lib/ComparatorSet.cpp \
     ComparatorList.cpp \
-    ComparatorInfoPanel.cpp \
-    SignalConnectionList.cpp \
-    SignalConnectionBase.cpp
+	ComparatorInfoPanel.cpp
 
 #../lib/ExcelHelper.cpp
 
 HEADERS  += \
     ../lib/Address16.h \
+    ../lib/DbController.h \
+    ../lib/DbProgress.h \
+    ../lib/DbProgressDialog.h \
+    ../lib/DbWorker.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/MetrologyConnectionBase.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
@@ -142,6 +151,7 @@ HEADERS  += \
     Calculator.h \
     ProcessData.h \
     SelectSignalWidget.h \
+    SignalConnectionList.h \
     Stable.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
@@ -197,9 +207,7 @@ HEADERS  += \
 #../lib/ExcelHelper.h
     ../lib/ComparatorSet.h \
     ComparatorList.h \
-    ComparatorInfoPanel.h \
-    SignalConnectionList.h \
-    SignalConnectionBase.h
+	ComparatorInfoPanel.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

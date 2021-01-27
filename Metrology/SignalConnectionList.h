@@ -24,7 +24,6 @@
 
 const char* const			SignalConnectionColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type No"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (source)"),
 							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (destination)"),
@@ -32,14 +31,12 @@ const char* const			SignalConnectionColumn[] =
 
 const int					SIGNAL_CONNECTION_COLUMN_COUNT			= sizeof(SignalConnectionColumn)/sizeof(SignalConnectionColumn[0]);
 
-const int					SIGNAL_CONNECTION_COLUMN_TYPE_NO		= 0,
-							SIGNAL_CONNECTION_COLUMN_TYPE			= 1,
-							SIGNAL_CONNECTION_COLUMN_IN_ID			= 2,
-							SIGNAL_CONNECTION_COLUMN_OUT_ID			= 3;
+const int					SIGNAL_CONNECTION_COLUMN_TYPE			= 0,
+							SIGNAL_CONNECTION_COLUMN_IN_ID			= 1,
+							SIGNAL_CONNECTION_COLUMN_OUT_ID			= 2;
 
 const int					SignalConnectionColumnWidth[SIGNAL_CONNECTION_COLUMN_COUNT] =
 {
-							 50,	// SIGNAL_CONNECTION_COLUMN_TYPE_NO
 							150,	// SIGNAL_CONNECTION_COLUMN_TYPE
 							250,	// SIGNAL_CONNECTION_COLUMN_IN_ID
 							250,	// SIGNAL_CONNECTION_COLUMN_OUT_ID
@@ -59,7 +56,7 @@ public:
 private:
 
 	mutable QMutex m_connectionMutex;
-	QVector<SignalConnection> m_connectionList;
+	QVector<Metrology::SignalConnection> m_connectionList;
 
 	int columnCount(const QModelIndex &parent) const;
 	int rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -70,11 +67,11 @@ private:
 public:
 
 	int	connectionCount() const;
-	SignalConnection at(int index) const;
-	void set(const QVector<SignalConnection>& list_add);
+	Metrology::SignalConnection at(int index) const;
+	void set(const QVector<Metrology::SignalConnection>& list_add);
 	void clear();
 
-	QString text(int row, int column, const SignalConnection& connection) const;
+	QString text(int row, int column, const Metrology::SignalConnection& connection) const;
 };
 
 // ==============================================================================================
@@ -86,7 +83,7 @@ class SignalConnectionItemDialog : public QDialog
 public:
 
 	explicit SignalConnectionItemDialog(QWidget *parent = nullptr);
-	explicit SignalConnectionItemDialog(const SignalConnection& signalConnection, QWidget *parent = nullptr);
+	explicit SignalConnectionItemDialog(const Metrology::SignalConnection& signalConnection, QWidget *parent = nullptr);
 	virtual ~SignalConnectionItemDialog();
 
 private:
@@ -101,14 +98,14 @@ private:
 
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	SignalConnection m_signalConnection;
+	Metrology::SignalConnection m_signalConnection;
 
 	void createInterface();
 	void updateSignals();
 
 public:
 
-	SignalConnection connection() const { return m_signalConnection; }
+	Metrology::SignalConnection connection() const { return m_signalConnection; }
 
 private slots:
 
@@ -146,8 +143,8 @@ private:
 	QAction* m_pRemoveAction = nullptr;
 	QAction* m_pMoveUpAction = nullptr;
 	QAction* m_pMoveDownAction = nullptr;
-	QAction* m_pImportAction = nullptr;
 	QAction* m_pExportAction = nullptr;
+	QAction* m_pImportAction = nullptr;
 
 	QAction* m_pFindAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
@@ -158,7 +155,7 @@ private:
 
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	SignalConnectionBase m_connectionBase;
+	Metrology::ConnectionBase m_connectionBase;
 
 	void createInterface();
 	void createContextMenu();
@@ -168,7 +165,7 @@ private:
 
 public:
 
-	SignalConnectionBase&	signalConnections() { return m_connectionBase; }	// signal connections
+	Metrology::ConnectionBase&	signalConnections() { return m_connectionBase; }	// signal connections
 
 public slots:
 
@@ -188,8 +185,8 @@ private slots:
 	void removeConnection();
 	void moveUpConnection();
 	void moveDownConnection();
-	void importConnections();
 	void exportConnections();
+	void importConnections();
 
 		// Edit
 		//

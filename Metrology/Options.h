@@ -601,9 +601,9 @@ public:
 
 private:
 
-	int					m_measureTimeout = 0;									// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
-	int					m_measureKind = MEASURE_KIND_ONE_RACK;					// measure kind: each channel separately - 0 or for all channels together - 1
-	int					m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;	// selected type of connection
+	int					m_measureTimeout = 0;										// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
+	int					m_measureKind = MEASURE_KIND_ONE_RACK;						// measure kind: each channel separately - 0 or for all channels together - 1
+	int					m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;	// selected type of connection
 
 	QString				m_defaultRack;
 	QString				m_defaultSignalId;

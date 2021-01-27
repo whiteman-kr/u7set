@@ -93,7 +93,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const Metrology::SignalParam& inParam = signalParam(row).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = signalParam(row).param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return QVariant();
@@ -244,7 +244,7 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 	int signalCount = m_signalList.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
-		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+		for(int type = 0; type < Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT; type ++)
 		{
 			if (m_signalList[c].param(type).appSignalID() == appSignalID)
 			{
@@ -409,7 +409,7 @@ void ComparatorInfoPanel::measureKindChanged(int kind)
 
 void ComparatorInfoPanel::signalConnectionTypeChanged(int type)
 {
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -484,11 +484,11 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		switch (activeSignal.signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:
-				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);
+			case Metrology::CONNECTION_TYPE_UNUSED:
+				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).metrologySignal(c);
 				break;
 			default:
-				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(c);
+				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).metrologySignal(c);
 				break;
 		}
 
@@ -499,7 +499,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 				maxComparatorCount = pSignal->param().comparatorCount();
 			}
 
-			ioParam.setParam(MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal->param());
+			ioParam.setParam(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, pSignal->param());
 			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
@@ -525,7 +525,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() == Metrology::CONNECTION_TYPE_UNUSED)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -560,7 +560,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		return;

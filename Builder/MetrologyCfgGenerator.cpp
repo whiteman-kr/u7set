@@ -1,6 +1,7 @@
 #include "MetrologyCfgGenerator.h"
 
 #include "../lib/MetrologySignal.h"
+#include "../lib/MetrologyConnectionBase.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
@@ -112,7 +113,7 @@ namespace Builder
 						rack.writeToXml(xml);
 					}
 				}
-				xml.writeEndElement();
+				xml.writeEndElement(); // Metrology::RackParam
 
 
 				// Creating tuning sources list from software property
@@ -153,10 +154,58 @@ namespace Builder
 						xml.writeEndElement();
 					}
 				}
-				xml.writeEndElement();
+				xml.writeEndElement(); // TuningSourceEquipmentID
+
+
+				// Creating metrology connections list from DbController
+				//
+				Metrology::ConnectionBase connectionBase(m_dbController, m_signalSet);
+
+				// Writing metrology connections
+				//
+				xml.writeStartElement("Connections");
+				{
+					int connectionCount = connectionBase.count();
+					xml.writeIntAttribute("Count", connectionCount);
+
+					for(int i = 0; i < connectionCount; i++)
+					{
+						Metrology::SignalConnection connection = connectionBase.connection(i);
+
+						if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
+						{
+							// Metrology connection with signals: %1 and %2, has wrong type of connection
+							//
+							m_log->errEQP6120(connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT),
+											  connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT));
+							return false;
+						}
+
+						Signal* pInSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT));
+						if (pInSignal == nullptr)
+						{
+							// Metrology connections contain a non-existent source signal: %1
+							//
+							m_log->errEQP6121(connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT));
+							return false;
+						}
+
+						Signal* pOutSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT));
+						if (pOutSignal == nullptr)
+						{
+							// Metrology connections contain a non-existent destination signal: %1
+							//
+							m_log->errEQP6122(connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT));
+							return false;
+						}
+
+						connection.writeToXml(xml);
+					}
+				}
+				xml.writeEndElement();  // Metrology::SignalConnection
+
 			}
 			xml.writeEndElement();	// </MetrologyItems>
-
 		}
 		xml.writeEndDocument();
 

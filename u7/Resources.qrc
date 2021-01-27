@@ -80,6 +80,9 @@
         <file>Images/PreviousIssue.svg</file>
         <file>Images/ClearLog.svg</file>
         <file>Images/SimProfileEditor.svg</file>
+        <file>Images/Copy.svg</file>
+        <file>Images/MetrologyConnection.svg</file>
+        <file>Images/SelectAll.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

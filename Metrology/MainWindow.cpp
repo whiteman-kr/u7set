@@ -49,7 +49,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	// load signal base
 	//
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
-	theSignalBase.signalConnections().load();	// load signal connections base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
@@ -185,11 +184,6 @@ void MainWindow::createActions()
 	m_pShowSignalConnectionListAction->setToolTip(QString());
 	connect(m_pShowSignalConnectionListAction, &QAction::triggered, this, &MainWindow::showSignalConnectionList);
 
-	m_pShowStatisticsAction = new QAction(tr("Sta&tistics (Checklist) ..."), this);
-	m_pShowStatisticsAction->setIcon(QIcon(":/icons/Statistics.png"));
-	m_pShowStatisticsAction->setToolTip(QString());
-	connect(m_pShowStatisticsAction, &QAction::triggered, this, &MainWindow::showStatistics);
-
 	m_pShowGraphLinElAction = new QAction(tr("Linearity: electric range ..."), this);
 	m_pShowGraphLinElAction->setIcon(QIcon(":/icons/Graph.png"));
 	m_pShowGraphLinElAction->setToolTip(tr("Show linearity graph"));
@@ -209,6 +203,11 @@ void MainWindow::createActions()
 	m_pShowGraph20EnAction->setIcon(QIcon(":/icons/Graph.png"));
 	m_pShowGraph20EnAction->setToolTip(tr("Show linearity graph"));
 	connect(m_pShowGraph20EnAction, &QAction::triggered, this, &MainWindow::showGraph20En);
+
+	m_pShowStatisticsAction = new QAction(tr("Sta&tistics (Checklist) ..."), this);
+	m_pShowStatisticsAction->setIcon(QIcon(":/icons/Statistics.png"));
+	m_pShowStatisticsAction->setToolTip(QString());
+	connect(m_pShowStatisticsAction, &QAction::triggered, this, &MainWindow::showStatistics);
 
 	// Tools
 	//
@@ -283,16 +282,15 @@ void MainWindow::createMenu()
 	m_pViewMenu->addAction(m_pShowSignalListAction);
 	m_pViewMenu->addAction(m_pShowComparatorsListAction);
 	m_pViewMenu->addAction(m_pShowTuningSignalListAction);
-	m_pViewMenu->addSeparator();
 	m_pViewMenu->addAction(m_pShowSignalConnectionListAction);
 	m_pViewMenu->addSeparator();
-	m_pViewMenu->addAction(m_pShowStatisticsAction);
 	m_pViewGraphMenu->addAction(m_pShowGraphLinElAction);
 	m_pViewGraphMenu->addAction(m_pShowGraphLinEnAction);
 	m_pViewGraphMenu->addSeparator();
 	m_pViewGraphMenu->addAction(m_pShowGraph20ElAction);
 	m_pViewGraphMenu->addAction(m_pShowGraph20EnAction);
 	m_pViewMenu->addMenu(m_pViewGraphMenu);
+	m_pViewMenu->addAction(m_pShowStatisticsAction);
 
 	// Tools
 	//
@@ -853,7 +851,9 @@ void MainWindow::loadSignalConnectionToolBar()
 
 		m_pSignalConnectionTypeList->clear();
 
-		m_pSignalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[SIGNAL_CONNECTION_TYPE_UNUSED]), SIGNAL_CONNECTION_TYPE_UNUSED);
+		m_pSignalConnectionTypeList->addItem(qApp->translate(	"MetrologyConnectionBase.h",
+																Metrology::ConnectionType[Metrology::CONNECTION_TYPE_UNUSED]),
+																Metrology::CONNECTION_TYPE_UNUSED);
 
 		QSet<int> signalConnectionSet;
 
@@ -861,7 +861,7 @@ void MainWindow::loadSignalConnectionToolBar()
 		for(int i = 0; i < connectionCount; i++)
 		{
 			int type = theSignalBase.signalConnections().connection(i).type();
-			if (type < 0 || type > SIGNAL_CONNECTION_TYPE_COUNT)
+			if (type < 0 || type > Metrology::CONNECTION_TYPE_COUNT)
 			{
 				continue;
 			}
@@ -879,17 +879,17 @@ void MainWindow::loadSignalConnectionToolBar()
 		for(int i = 0; i < connectionCount; i++)
 		{
 			int type = signalConnectionList.at(i);
-			if (type < 0 || type > SIGNAL_CONNECTION_TYPE_COUNT)
+			if (type < 0 || type > Metrology::CONNECTION_TYPE_COUNT)
 			{
 				continue;
 			}
 
 			if (type == m_signalConnectionType)
 			{
-				selectedItem = i + 1;	// SIGNAL_CONNECTION_TYPE_UNUSED item has already been added, hence +1
+				selectedItem = i + 1;	// Metrology::CONNECTION_TYPE_UNUSED item has already been added, hence +1
 			}
 
-			m_pSignalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[type]), type);
+			m_pSignalConnectionTypeList->addItem(qApp->translate("MetrologyConnectionBase.h", Metrology::ConnectionType[type]), type);
 		}
 
 	m_pSignalConnectionTypeList->blockSignals(false);
@@ -897,7 +897,7 @@ void MainWindow::loadSignalConnectionToolBar()
 	if (selectedItem == -1)
 	{
 		selectedItem = 0;
-		m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
+		m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
 	}
 
 	m_pSignalConnectionTypeList->setCurrentIndex(selectedItem);
@@ -923,7 +923,7 @@ void MainWindow::loadRacksOnToolBar()
 		return;
 	}
 
-	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (m_signalConnectionType < 0 || m_signalConnectionType >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -990,7 +990,7 @@ void MainWindow::loadSignalsOnToolBar()
 		return;
 	}
 
-	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (m_signalConnectionType < 0 || m_signalConnectionType >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -1132,7 +1132,7 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 		return false;
 	}
 
-	if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
 	{
 		if (tuningSocketIsConnected() == false)
 		{
@@ -1167,7 +1167,7 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	Metrology::Signal* pInSignal = activeSignal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT, Metrology::Channel_0);
+	Metrology::Signal* pInSignal = activeSignal.metrologySignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, Metrology::Channel_0);
 	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
 	{
 		return false;
@@ -1178,24 +1178,24 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	if (activeSignal.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() != Metrology::CONNECTION_TYPE_UNUSED)
 	{
 		return false;
 	}
 
-	int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
+	int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, pInSignal);
 	if (connectionIndex == -1)
 	{
 		return false;
 	}
 
-	const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+	const Metrology::SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
 	if (connection.isValid() == false)
 	{
 		return false;
 	}
 
-	Metrology::Signal* pOutSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::Signal* pOutSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
 	{
 		return false;
@@ -1219,8 +1219,8 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_signalConnectionType)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
-		default:									ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+		case Metrology::CONNECTION_TYPE_UNUSED:	ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);	break;
+		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);	break;
 	}
 
 	if (ioSignal.isEmpty() == true)
@@ -1289,18 +1289,18 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 
 	switch (m_signalConnectionType)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:
-		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		case Metrology::CONNECTION_TYPE_UNUSED:
+		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
+		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
+		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 			break;
 
 		default:
@@ -1377,11 +1377,11 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 
 		switch (activeSignal.signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:
-				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(ch);
+			case Metrology::CONNECTION_TYPE_UNUSED:
+				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).metrologySignal(ch);
 				break;
 			default:
-				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(ch);
+				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).metrologySignal(ch);
 				break;
 		}
 
@@ -1676,11 +1676,6 @@ void MainWindow::showSignalConnectionList()
 	}
 
 	theSignalBase.signalConnections() = dialog.signalConnections();
-	if (theSignalBase.signalConnections().save() == false)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
-		return;
-	}
 
 	// loadSignalConnectionToolBar call loadRacksOnToolBar() after setCurrentIndex
 	//
@@ -1688,18 +1683,6 @@ void MainWindow::showSignalConnectionList()
 
 	theSignalBase.statistics().createSignalList();
 	theSignalBase.statistics().createComparatorList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::showStatistics()
-{
-	if (m_pStatisticsPanel == nullptr)
-	{
-		return;
-	}
-
-	m_pStatisticsPanel->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1752,6 +1735,18 @@ void MainWindow::showGraph20En()
 	}
 
 	emit pView->showGraph(MVG_TYPE_20VAL_EN);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showStatistics()
+{
+	if (m_pStatisticsPanel == nullptr)
+	{
+		return;
+	}
+
+	m_pStatisticsPanel->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1963,7 +1958,7 @@ void MainWindow::setSignalConnectionType(int index)
 	}
 
 	int type = m_pSignalConnectionTypeList->itemData(index).toInt();
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -2040,7 +2035,7 @@ void MainWindow::setAcitiveMeasureSignal(int index)
 
 	// save
 	//
-	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -2162,8 +2157,8 @@ bool MainWindow::setNextMeasureSignalFromModule()
 
 	// if module numbers not equal then disabling selection of next input
 	//
-	if (	currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
-			currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	if (	currentActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().chassis() ||
+			currentActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().module())
 	{
 		return false;
 	}
@@ -2194,7 +2189,7 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 		return;
 	}
 
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
@@ -2219,7 +2214,7 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 	//
 	multiChannelSignal.setMetrologySignal(m_measureKind, channel, pOutputSignal);
 
-	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+	measureSignal.setMultiSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, multiChannelSignal);
 
 	// set
 	//
@@ -2255,7 +2250,7 @@ void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
 		return;
 	}
 
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
@@ -2295,7 +2290,7 @@ void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
 	multiChannelSignal.setMetrologySignal(m_measureKind, channelPrev, pOutputSignalNext);
 	multiChannelSignal.setMetrologySignal(m_measureKind, channelNext, pOutputSignalPrev);
 
-	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+	measureSignal.setMultiSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, multiChannelSignal);
 
 	// set
 	//
@@ -2326,6 +2321,11 @@ void MainWindow::onContextMenu(QPoint)
 
 void MainWindow::calibratorConnectedChanged(int count)
 {
+	if (m_statusCalibratorCount == nullptr)
+	{
+		return;
+	}
+
 	m_statusCalibratorCount->setText(tr(" Connected calibrators: %1 ").arg(count));
 
 	if (count == 0)
@@ -2604,7 +2604,7 @@ void MainWindow::tuningSocketDisconnected()
 
 	if (m_measureThread.isRunning() == true)
 	{
-		if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+		if (m_signalConnectionType == Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
 		{
 			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 		}

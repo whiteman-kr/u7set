@@ -149,7 +149,7 @@ private:
 	bool			m_signalValid = true;									// signal is valid during the measurement
 
 	QString			m_connectionAppSignalID;
-	int				m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int				m_connectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 
 	QString			m_appSignalID;
 	QString			m_customAppSignalID;

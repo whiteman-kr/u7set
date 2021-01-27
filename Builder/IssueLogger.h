@@ -507,6 +507,11 @@ namespace Builder
 		void errEQP6118(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
 		void errEQP6119(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
 
+		void errEQP6120(QString sourceAppSignalID, QString destinationAppSignalID);													//  Metrology connection with signals: %1 and %2, has wrong type of connection.
+		void errEQP6121(QString appSignalID);																						//  Metrology connections contain a non-existent source signal: %1.
+		void errEQP6122(QString appSignalID);																						//  Metrology connections contain a non-existent destination signal: %1.
+
+
 
 		void errEQP6200(QString monotorId);							// Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.
 		void errEQP6201(QString tuningServiceId);					// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.

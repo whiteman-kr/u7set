@@ -75,6 +75,7 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ExportPrint.cpp \
+    ../lib/MetrologyConnectionBase.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -89,6 +90,7 @@ SOURCES +=\
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogClientBehavior.cpp \
+    DialogMetrologyConnection.cpp \
     DialogSettings.cpp \
     DialogTagsEditor.cpp \
     EditEngine/EditEngineNop.cpp \
@@ -203,6 +205,7 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ExportPrint.h \
+    ../lib/MetrologyConnectionBase.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
@@ -218,6 +221,7 @@ HEADERS  += \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogClientBehavior.h \
+    DialogMetrologyConnection.h \
     DialogSettings.h \
     DialogTagsEditor.h \
     EditEngine/EditEngineNop.h \

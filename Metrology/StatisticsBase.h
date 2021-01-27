@@ -4,8 +4,7 @@
 #include <QObject>
 
 #include "../lib/MetrologySignal.h"
-
-#include "SignalConnectionBase.h"
+#include "../lib/MetrologyConnectionBase.h"
 
 // ==============================================================================================
 
@@ -27,7 +26,7 @@ public:
 private:
 
 	Metrology::Signal* m_pSignal = nullptr;
-	int m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 	std::shared_ptr<Metrology::ComparatorEx> m_pComparator = nullptr;
 
 	int m_measureCount = 0;

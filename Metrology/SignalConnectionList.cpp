@@ -86,7 +86,7 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	SignalConnection connection = at(row);
+	Metrology::SignalConnection connection = at(row);
 
 	if (role == Qt::TextAlignmentRole)
 	{
@@ -97,7 +97,7 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == SIGNAL_CONNECTION_COLUMN_TYPE)
 		{
-			if (connection.type() < 0 || connection.type() >= SIGNAL_CONNECTION_TYPE_COUNT)
+			if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -105,7 +105,7 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 
 		if (column == SIGNAL_CONNECTION_COLUMN_IN_ID)
 		{
-			Metrology::Signal* pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+			Metrology::Signal* pSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
@@ -114,7 +114,7 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 
 		if (column == SIGNAL_CONNECTION_COLUMN_OUT_ID)
 		{
-			Metrology::Signal* pSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			Metrology::Signal* pSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
@@ -134,7 +134,7 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalConnectionTable::text(int row, int column, const SignalConnection& connection) const
+QString SignalConnectionTable::text(int row, int column, const Metrology::SignalConnection& connection) const
 {
 	if (row < 0 || row >= connectionCount())
 	{
@@ -160,10 +160,9 @@ QString SignalConnectionTable::text(int row, int column, const SignalConnection&
 
 	switch (column)
 	{
-		case SIGNAL_CONNECTION_COLUMN_TYPE_NO:	result = visible ? QString::number(connection.type()) : QString("");				break;
-		case SIGNAL_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");								break;
-		case SIGNAL_CONNECTION_COLUMN_IN_ID:	result = visible ? connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT): QString();	break;
-		case SIGNAL_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT);						break;
+		case SIGNAL_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");												break;
+		case SIGNAL_CONNECTION_COLUMN_IN_ID:	result = visible ? connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT): QString();	break;
+		case SIGNAL_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);						break;
 		default:								assert(0);
 	}
 
@@ -181,13 +180,13 @@ int SignalConnectionTable::connectionCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnection SignalConnectionTable::at(int index) const
+Metrology::SignalConnection SignalConnectionTable::at(int index) const
 {
 	QMutexLocker l(&m_connectionMutex);
 
 	if (index < 0 || index >= m_connectionList.count())
 	{
-		return SignalConnection();
+		return Metrology::SignalConnection();
 	}
 
 	return m_connectionList[index];
@@ -195,7 +194,7 @@ SignalConnection SignalConnectionTable::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionTable::set(const QVector<SignalConnection>& list_add)
+void SignalConnectionTable::set(const QVector<Metrology::SignalConnection>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -249,7 +248,7 @@ SignalConnectionItemDialog::SignalConnectionItemDialog(QWidget *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnectionItemDialog::SignalConnectionItemDialog(const SignalConnection& signalConnection, QWidget *parent) :
+SignalConnectionItemDialog::SignalConnectionItemDialog(const Metrology::SignalConnection& signalConnection, QWidget *parent) :
 	QDialog(parent)
 {
 	m_signalConnection = signalConnection;
@@ -268,10 +267,11 @@ SignalConnectionItemDialog::~SignalConnectionItemDialog()
 
 void SignalConnectionItemDialog::createInterface()
 {
-	setWindowFlags(Qt::Dialog);
-	setWindowIcon(QIcon(":/icons/Connection.png"));
+	setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
+	resize(400, 100);
+	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
-	if (m_signalConnection.handle().uint64 == 0)
+	if (m_signalConnection.handle().state == Metrology::EMPTY_CONNECTION_HANDLE)
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
 		setWindowTitle(tr("Create connection"));
@@ -301,11 +301,11 @@ void SignalConnectionItemDialog::createInterface()
 		//
 	QHBoxLayout *inputSignalLayout = new QHBoxLayout;
 
-	QLabel* pInputSignalLabel = new QLabel(tr("Source signal"), this);
+	QLabel* pInputSignalLabel = new QLabel(tr("AppSignalID (source)"), this);
 	m_pInputSignalIDEdit = new QLineEdit(QString(), this);
 	m_pInputSignalButton = new QPushButton(tr("Select ..."), this);
 
-	pInputSignalLabel->setFixedWidth(100);
+	pInputSignalLabel->setFixedWidth(150);
 	m_pInputSignalIDEdit->setFixedWidth(200);
 
 	//m_pInputSignalIDEdit->setReadOnly(true);
@@ -314,16 +314,17 @@ void SignalConnectionItemDialog::createInterface()
 	inputSignalLayout->addWidget(pInputSignalLabel);
 	inputSignalLayout->addWidget(m_pInputSignalIDEdit);
 	inputSignalLayout->addWidget(m_pInputSignalButton);
+	inputSignalLayout->addStretch();
 
 		// Output signal
 		//
 	QHBoxLayout *outputSignalLayout = new QHBoxLayout;
 
-	QLabel* pOutputSignalLabel = new QLabel(tr("Destination signal"), this);
+	QLabel* pOutputSignalLabel = new QLabel(tr("AppSignalID (destination)"), this);
 	m_pOutputSignalIDEdit = new QLineEdit(QString(), this);
 	m_pOutputSignalButton = new QPushButton(tr("Select ..."), this);
 
-	pOutputSignalLabel->setFixedWidth(100);
+	pOutputSignalLabel->setFixedWidth(150);
 	m_pOutputSignalIDEdit->setFixedWidth(200);
 
 	//m_pOutputSignalIDEdit->setReadOnly(true);
@@ -332,6 +333,7 @@ void SignalConnectionItemDialog::createInterface()
 	outputSignalLayout->addWidget(pOutputSignalLabel);
 	outputSignalLayout->addWidget(m_pOutputSignalIDEdit);
 	outputSignalLayout->addWidget(m_pOutputSignalButton);
+	outputSignalLayout->addStretch();
 
 
 	signalLayout->addLayout(inputSignalLayout);
@@ -343,16 +345,16 @@ void SignalConnectionItemDialog::createInterface()
 
 	// fill type list
 	//
-	for (int type = 0; type < SIGNAL_CONNECTION_TYPE_COUNT; type++)
+	for (int type = 0; type < Metrology::CONNECTION_TYPE_COUNT; type++)
 	{
-		m_pTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[type]), type);
+		m_pTypeList->addItem(qApp->translate("SignalConnectionBase.h", Metrology::ConnectionType[type]), type);
 	}
-	m_pTypeList->removeItem(SIGNAL_CONNECTION_TYPE_UNUSED);
+	m_pTypeList->removeItem(Metrology::CONNECTION_TYPE_UNUSED);
 
 	int type = m_signalConnection.type() ;
-	if ((type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT) || type == SIGNAL_CONNECTION_TYPE_UNUSED)
+	if ((type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT) || type == Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		type = SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL;
+		type = Metrology::CONNECTION_TYPE_INPUT_INTERNAL;
 		m_signalConnection.setType(type);
 	}
 	m_pTypeList->setCurrentIndex(type - 1);
@@ -370,6 +372,7 @@ void SignalConnectionItemDialog::createInterface()
 
 	mainLayout->addLayout(typeLayout);
 	mainLayout->addWidget(signalGroup);
+	mainLayout->addStretch();
 	mainLayout->addWidget(m_buttonBox);
 
 	setLayout(mainLayout);
@@ -380,7 +383,7 @@ void SignalConnectionItemDialog::createInterface()
 void SignalConnectionItemDialog::updateSignals()
 {
 	int type = m_signalConnection.type();
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -390,15 +393,15 @@ void SignalConnectionItemDialog::updateSignals()
 		return;
 	}
 
-	m_pInputSignalIDEdit->setText(m_signalConnection.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
-	m_pOutputSignalIDEdit->setText(m_signalConnection.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
+	m_pInputSignalIDEdit->setText(m_signalConnection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT));
+	m_pOutputSignalIDEdit->setText(m_signalConnection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT));
 }
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionItemDialog::selectedType(int)
 {
 	int type = m_pTypeList->currentData().toInt() ;
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -410,16 +413,15 @@ void SignalConnectionItemDialog::selectedType(int)
 
 void SignalConnectionItemDialog::selectInputSignal()
 {
-	selectSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	selectSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalConnectionItemDialog::selectOutputSignal()
 {
-	selectSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	selectSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -450,16 +452,16 @@ void SignalConnectionItemDialog::selectSignal(int type)
 		return;
 	}
 
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
 
 	switch (type)
 	{
-		case MEASURE_IO_SIGNAL_TYPE_INPUT:	m_pInputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
-		case MEASURE_IO_SIGNAL_TYPE_OUTPUT: m_pOutputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
-		default:							assert(0);														break;
+		case Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT:	m_pInputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+		case Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT:	m_pOutputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+		default:											assert(0);														break;
 	}
 }
 
@@ -469,17 +471,23 @@ void SignalConnectionItemDialog::selectSignal(int type)
 void SignalConnectionItemDialog::onOk()
 {
 	int type = m_signalConnection.type();
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select connection type!"));
 		m_pTypeList->setFocus();
 		return;
 	}
 
+	//
+	//
+
 	if (m_pInputSignalIDEdit == nullptr || m_pOutputSignalIDEdit == nullptr)
 	{
 		return;
 	}
+
+	//
+	//
 
 	QString inputAppSignalID = m_pInputSignalIDEdit->text();
 	if (inputAppSignalID.isEmpty() == true)
@@ -500,6 +508,19 @@ void SignalConnectionItemDialog::onOk()
 		return;
 	}
 
+	if (pInSignal->param().isAnalog() == false)
+	{
+		QMessageBox::information(this,
+								 windowTitle(),
+								 tr("Signal %1 is not analog.\nPlease, select analog signal!").
+								 arg(inputAppSignalID));
+		m_pInputSignalButton->setFocus();
+		return;
+	}
+
+	//
+	//
+
 	QString outputAppSignalID = m_pOutputSignalIDEdit->text();
 	if (outputAppSignalID.isEmpty() == true)
 	{
@@ -519,14 +540,27 @@ void SignalConnectionItemDialog::onOk()
 		return;
 	}
 
+	if (pOutSignal->param().isAnalog() == false)
+	{
+		QMessageBox::information(this,
+								 windowTitle(),
+								 tr("Signal %1 is not analog.\nPlease, select analog signal!").
+								 arg(inputAppSignalID));
+		m_pOutputSignalButton->setFocus();
+		return;
+	}
+
+	//
+	//
+
 	switch(type)
 	{
-		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
+		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
+		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 
 			if (pInSignal->param().isInput() == false)
 			{
@@ -550,7 +584,7 @@ void SignalConnectionItemDialog::onOk()
 
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
 
 			if (pInSignal->param().isInternal() == false)
 			{
@@ -575,11 +609,14 @@ void SignalConnectionItemDialog::onOk()
 			break;
 	}
 
+	//
+	//
+
 	switch(type)
 	{
-		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
+		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
+		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 
 			if (pOutSignal->param().isInternal() == false)
 			{
@@ -593,10 +630,10 @@ void SignalConnectionItemDialog::onOk()
 
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
+		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
+		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
 
 			if (pOutSignal->param().isOutput() == false)
 			{
@@ -621,8 +658,11 @@ void SignalConnectionItemDialog::onOk()
 			break;
 	}
 
-	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
-	m_signalConnection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pOutSignal);
+	//
+	//
+
+	m_signalConnection.setSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, pInSignal);
+	m_signalConnection.setSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, pOutSignal);
 
 	accept();
 }
@@ -702,13 +742,13 @@ void SignalConnectionDialog::createInterface()
 
 	m_pConnectionMenu->addSeparator();
 
-	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
-	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
-	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
-
 	m_pExportAction = m_pConnectionMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+
+	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
+	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
+	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
 	m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
 	m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
@@ -732,8 +772,8 @@ void SignalConnectionDialog::createInterface()
 	connect(m_pRemoveAction, &QAction::triggered, this, &SignalConnectionDialog::removeConnection);
 	connect(m_pMoveUpAction, &QAction::triggered, this, &SignalConnectionDialog::moveUpConnection);
 	connect(m_pMoveDownAction, &QAction::triggered, this, &SignalConnectionDialog::moveDownConnection);
-	connect(m_pImportAction, &QAction::triggered, this, &SignalConnectionDialog::importConnections);
 	connect(m_pExportAction, &QAction::triggered, this, &SignalConnectionDialog::exportConnections);
+	connect(m_pImportAction, &QAction::triggered, this, &SignalConnectionDialog::importConnections);
 
 	connect(m_pFindAction, &QAction::triggered, this, &SignalConnectionDialog::find);
 	connect(m_pCopyAction, &QAction::triggered, this, &SignalConnectionDialog::copy);
@@ -749,8 +789,6 @@ void SignalConnectionDialog::createInterface()
 	{
 		m_pView->setColumnWidth(column, SignalConnectionColumnWidth[column]);
 	}
-
-	m_pView->hideColumn(SIGNAL_CONNECTION_COLUMN_TYPE_NO);
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
@@ -800,7 +838,7 @@ void SignalConnectionDialog::createContextMenu()
 
 void SignalConnectionDialog::signalBaseLoaded()
 {
-	m_connectionBase.initSignals();
+	m_connectionBase = theSignalBase.signalConnections();
 	updateList();
 }
 
@@ -810,7 +848,7 @@ void SignalConnectionDialog::updateList()
 {
 	m_connectionTable.clear();
 
-	QVector<SignalConnection> connectionList;
+	QVector<Metrology::SignalConnection> connectionList;
 
 	int count = m_connectionBase.count();
 	for(int i = 0; i < count; i++)
@@ -831,23 +869,23 @@ bool SignalConnectionDialog::createConnectionBySignal(Metrology::Signal* pSignal
 		return false;
 	}
 
-	SignalConnection connection;
+	Metrology::SignalConnection connection;
 
-	int ioType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int ioType = Metrology::CONNECTION_TYPE_UNDEFINED;
 
 	switch (pSignal->param().inOutType())
 	{
-		case E::SignalInOutType::Internal:	ioType = SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL;	break;
-		case E::SignalInOutType::Output:	ioType = SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT;	break;
+		case E::SignalInOutType::Internal:	ioType = Metrology::CONNECTION_TYPE_INPUT_INTERNAL;	break;
+		case E::SignalInOutType::Output:	ioType = Metrology::CONNECTION_TYPE_INPUT_OUTPUT;	break;
 	}
 
-	if (ioType == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+	if (ioType == Metrology::CONNECTION_TYPE_UNDEFINED)
 	{
 		return false;
 	}
 
 	connection.setType(ioType);
-	connection.setSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+	connection.setSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, pSignal);
 
 	SignalConnectionItemDialog dialog(connection);
 	if (dialog.exec() != QDialog::Accepted)
@@ -862,7 +900,7 @@ bool SignalConnectionDialog::createConnectionBySignal(Metrology::Signal* pSignal
 		return false;
 	}
 
-	int foundIndex = m_connectionBase.findIndex(connection);
+	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -876,7 +914,7 @@ bool SignalConnectionDialog::createConnectionBySignal(Metrology::Signal* pSignal
 
 	updateList();
 
-	foundIndex = m_connectionBase.findIndex(connection);
+	foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -895,13 +933,13 @@ void SignalConnectionDialog::createConnection()
 		return;
 	}
 
-	SignalConnection connection = dialog.connection();
+	Metrology::SignalConnection connection = dialog.connection();
 	if (connection.isValid() == false)
 	{
 		return;
 	}
 
-	int foundIndex = m_connectionBase.findIndex(connection);
+	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -915,7 +953,7 @@ void SignalConnectionDialog::createConnection()
 
 	updateList();
 
-	foundIndex = m_connectionBase.findIndex(connection);
+	foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -933,25 +971,19 @@ void SignalConnectionDialog::editConnection()
 		return;
 	}
 
-	SignalConnection connection = m_connectionTable.at(index);
-	if (connection.isValid() == false)
-	{
-		return;
-	}
-
-	SignalConnectionItemDialog dialog(connection);
+	SignalConnectionItemDialog dialog(m_connectionTable.at(index));
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	connection = dialog.connection();
+	Metrology::SignalConnection connection = dialog.connection();
 	if (connection.isValid() == false)
 	{
 		return;
 	}
 
-	int foundIndex = m_connectionBase.findIndex(connection);
+	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -965,7 +997,7 @@ void SignalConnectionDialog::editConnection()
 
 	updateList();
 
-	foundIndex = m_connectionBase.findIndex(connection);
+	foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -1016,7 +1048,7 @@ void SignalConnectionDialog::moveUpConnection()
 		return;
 	}
 
-	SignalConnection connection = m_connectionTable.at(index);
+	Metrology::SignalConnection connection = m_connectionTable.at(index);
 	if (connection.isValid() == false)
 	{
 		return;
@@ -1028,13 +1060,13 @@ void SignalConnectionDialog::moveUpConnection()
 		return;
 	}
 
-	SignalConnection connectionPrev = m_connectionTable.at(indexPrev);
+	Metrology::SignalConnection connectionPrev = m_connectionTable.at(indexPrev);
 	if (connectionPrev.isValid() == false)
 	{
 		return;
 	}
 
-	if (connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT) != connectionPrev.signal(MEASURE_IO_SIGNAL_TYPE_INPUT))
+	if (connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT) != connectionPrev.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT))
 	{
 		return;
 	}
@@ -1044,7 +1076,7 @@ void SignalConnectionDialog::moveUpConnection()
 
 	updateList();
 
-	int foundIndex = m_connectionBase.findIndex(connection);
+	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
@@ -1062,7 +1094,7 @@ void SignalConnectionDialog::moveDownConnection()
 		return;
 	}
 
-	SignalConnection connection = m_connectionTable.at(index);
+	Metrology::SignalConnection connection = m_connectionTable.at(index);
 	if (connection.isValid() == false)
 	{
 		return;
@@ -1074,13 +1106,13 @@ void SignalConnectionDialog::moveDownConnection()
 		return;
 	}
 
-	SignalConnection connectionNext = m_connectionTable.at(indexNext);
+	Metrology::SignalConnection connectionNext = m_connectionTable.at(indexNext);
 	if (connectionNext.isValid() == false)
 	{
 		return;
 	}
 
-	if (connection.signal(MEASURE_IO_SIGNAL_TYPE_INPUT) != connectionNext.signal(MEASURE_IO_SIGNAL_TYPE_INPUT))
+	if (connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT) != connectionNext.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT))
 	{
 		return;
 	}
@@ -1090,10 +1122,32 @@ void SignalConnectionDialog::moveDownConnection()
 
 	updateList();
 
-	int foundIndex = m_connectionBase.findIndex(connection);
+	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalConnectionDialog::exportConnections()
+{
+	QString filter = tr("CSV files (*.csv)");
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save file"),
+													Metrology::CONNECTIONS_FILE_NAME,
+													filter);
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	bool result = m_connectionBase.exportToFile(fileName);
+	if (result == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Failed to export!"));
 	}
 }
 
@@ -1124,62 +1178,67 @@ void SignalConnectionDialog::importConnections()
 		return;
 	}
 
-	QVector<SignalConnection> connectionList;
+	QVector<Metrology::SignalConnection> connectionList;
 
 	// read data
 	//
 	QTextStream in(&file);
 	while (in.atEnd() == false)
 	{
-		if (in.pos() == 0) // first line is header
-		{
-			QString header = in.readLine();
-			qDebug() << header;
-			continue;
-		}
-		else
-		{
-			SignalConnection connection;
+		Metrology::SignalConnection connection;
 
-			QStringList line = in.readLine().split(";");
-			for(int column = 0; column < line.count(); column++)
+		QStringList line = in.readLine().split(";");
+		for(int column = 0; column < line.count(); column++)
+		{
+			switch (column)
 			{
-				switch (column)
-				{
-					case SIGNAL_CONNECTION_COLUMN_TYPE_NO:
-						connection.setType(line[column].toInt());
-						break;
-					case SIGNAL_CONNECTION_COLUMN_IN_ID:
-						connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, line[column]);
-						break;
-					case SIGNAL_CONNECTION_COLUMN_OUT_ID:
-						connection.setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, line[column]);
-						break;
-				}
+				case SIGNAL_CONNECTION_COLUMN_TYPE:
+					connection.setType(line[column].toInt());
+					break;
+
+				case SIGNAL_CONNECTION_COLUMN_IN_ID:
+					connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, line[column]);
+					break;
+
+				case SIGNAL_CONNECTION_COLUMN_OUT_ID:
+					connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, line[column]);
+					break;
 			}
+		}
 
-			connection.initSignals();
-
-			if (connection.isValid() == false)
+		// init metrology signals
+		//
+		for(int type = 0; type < Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT; type++)
+		{
+			if (connection.appSignalID(type).isEmpty() == true)
 			{
 				continue;
 			}
 
-			m_connectionBase.append(connection);
+			Metrology::Signal* pSignal = theSignalBase.signalPtr(connection.appSignalID(type));
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			connection.setSignal(type, pSignal);
 		}
+
+		// append
+		//
+		if (m_connectionBase.findConnectionIndex(connection) != -1)
+		{
+			continue;
+		}
+
+		m_connectionBase.append(connection);
 	}
 
 	file.close();
 
+	m_connectionBase.sort();
+
 	updateList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalConnectionDialog::exportConnections()
-{
-	ExportData* dialog = new ExportData(m_pView, true, "SignalConnections");
-	dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

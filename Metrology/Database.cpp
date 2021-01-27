@@ -237,34 +237,6 @@ int SqlFieldBase::init(int objectType, int)
 
 			break;
 
-		case SQL_TABLE_COMPLEX_COMPARATOR:
-
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
-
-			break;
-
-		case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
-
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
-
-			break;
-
-		case SQL_TABLE_COMPLEX_COMPARATOR_POINT:
-
-			append("ObjectID",						QVariant::Int);
-			append("PointID",						QVariant::Int);
-
-			break;
-
-		case SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL:
-
-			append("ObjectID",						QVariant::Int);
-			append("SignalID",						QVariant::Int);
-
-			break;
-
 		case SQL_TABLE_REPORT_HEADER:
 
 			append("ObjectID",						QVariant::Int);
@@ -283,18 +255,6 @@ int SqlFieldBase::init(int objectType, int)
 			append("RackID1",						QVariant::String, 64);
 			append("RackID2",						QVariant::String, 64);
 			append("RackID3",						QVariant::String, 64);
-
-			break;
-
-		case SQL_TABLE_SIGNAL_CONNECTION:
-
-			append("ObjectID",						QVariant::Int);
-			append("SignalID",						QVariant::Int);
-
-			append("SignalConncetionType",			QVariant::Int);
-
-			append("InputAppSignalID",				QVariant::String, 64);
-			append("OutputAppSignalID",				QVariant::String, 64);
 
 			break;
 
@@ -1025,26 +985,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				}
 				break;
 
-			case SQL_TABLE_COMPLEX_COMPARATOR:
-				{
-				}
-				break;
-
-			case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
-				{
-				}
-				break;
-
-			case SQL_TABLE_COMPLEX_COMPARATOR_POINT:
-				{
-				}
-				break;
-
-			case SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL:
-				{
-				}
-				break;
-
 			case SQL_TABLE_REPORT_HEADER:
 				{
 				}
@@ -1067,22 +1007,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					group->setRackID(Metrology::Channel_3, query.value(field++).toString());
 					//group->setRackID(Metrology::Channel_4, query.value(field++).toString());
 					//group->setRackID(Metrology::Channel_5, query.value(field++).toString());
-				}
-				break;
-
-			case SQL_TABLE_SIGNAL_CONNECTION:
-				{
-					SignalConnection* signal = static_cast<SignalConnection*> (pRecord) + readedCount;
-					if (signal == nullptr)
-					{
-						break;
-					}
-
-					signal->setIndex(query.value(field++).toInt());
-
-					signal->setType(query.value(field++).toInt());
-					signal->setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, query.value(field++).toString());
-					signal->setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, query.value(field++).toString());
 				}
 				break;
 
@@ -1476,26 +1400,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				}
 				break;
 
-			case SQL_TABLE_COMPLEX_COMPARATOR:
-				{
-				}
-				break;
-
-			case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
-				{
-				}
-				break;
-
-			case SQL_TABLE_COMPLEX_COMPARATOR_POINT:
-				{
-				}
-				break;
-
-			case SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL:
-				{
-				}
-				break;
-
 			case SQL_TABLE_REPORT_HEADER:
 				{
 				}
@@ -1518,23 +1422,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, group->rackID(Metrology::Channel_3));
 					//query.bindValue(field++, group->rackID(Metrology::Channel_4));
 					//query.bindValue(field++, group->rackID(Metrology::Channel_5));
-				}
-				break;
-
-			case SQL_TABLE_SIGNAL_CONNECTION:
-				{
-					SignalConnection* signal = static_cast<SignalConnection*> (pRecord) + r;
-					if (signal == nullptr)
-					{
-						break;
-					}
-
-					signal->setIndex(lastKey() + 1);
-					query.bindValue(field++, signal->index());
-
-					query.bindValue(field++, signal->type());
-					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
-					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
 				}
 				break;
 

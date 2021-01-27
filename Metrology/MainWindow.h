@@ -39,7 +39,7 @@ private:
 
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int						m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 	int						m_measureTimeout = 0;
 
 	QMap<int, MeasureView*> m_measureViewMap;
@@ -67,11 +67,11 @@ private:
 	QAction*				m_pShowComparatorsListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
 	QAction*				m_pShowSignalConnectionListAction = nullptr;
-	QAction*				m_pShowStatisticsAction = nullptr;
 	QAction*				m_pShowGraphLinElAction = nullptr;
 	QAction*				m_pShowGraphLinEnAction = nullptr;
 	QAction*				m_pShowGraph20ElAction = nullptr;
 	QAction*				m_pShowGraph20EnAction = nullptr;
+	QAction*				m_pShowStatisticsAction = nullptr;
 
 							// menu - Tools
 							//
@@ -259,11 +259,11 @@ private slots:
 	void					showComparatorsList();
 	void					showTuningSignalList();
 	void					showSignalConnectionList();
-	void					showStatistics();
 	void					showGraphLinEl();
 	void					showGraphLinEn();
 	void					showGraph20El();
 	void					showGraph20En();
+	void					showStatistics();
 
 	// menu - Tools
 	//

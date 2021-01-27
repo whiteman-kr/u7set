@@ -28,7 +28,6 @@
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
-
 SignalsDelegate::SignalsDelegate(SignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
 	QStyledItemDelegate(parent),
 	m_signalSetProvider(signalSetProvider),
@@ -764,6 +763,8 @@ SignalsTabPage::~SignalsTabPage()
 		m_findSignalDialog->close();
 		delete m_findSignalDialog;
 	}
+
+	deleteMetrologyDialog();
 }
 
 bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
@@ -1020,10 +1021,16 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("Metrology editor"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::openMetrologyEditor);
-	m_signalsView->addAction(action);
+	m_signalsView->addAction(toolBar->addSeparator());
+
+	action = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("Metrology connections ..."), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::openMetrologyConnections);
 	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("New metrology connection ..."), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::addMetrologyConnection);
+	m_signalsView->addAction(action);
+
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -1080,6 +1087,8 @@ void SignalsTabPage::projectClosed()
 		delete m_findSignalDialog;
 		m_findSignalDialog = nullptr;
 	}
+
+	deleteMetrologyDialog();
 }
 
 void SignalsTabPage::onTabPageChanged()
@@ -1463,23 +1472,118 @@ void SignalsTabPage::viewSignalHistory()
 	dlg.exec();
 }
 
-void SignalsTabPage::openMetrologyEditor()
+bool SignalsTabPage::createMetrologyDialog()
 {
-	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-
-	if (selection.count() == 0)
+	if (m_signalSetProvider == nullptr)
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+		assert(m_signalSetProvider);
+		return false;
+	}
+
+	if (m_metrologyDialog != nullptr)
+	{
+		delete m_metrologyDialog;
+	}
+
+	m_metrologyDialog = new DialogMetrologyConnection(m_signalSetProvider, this);
+	if (m_metrologyDialog == nullptr)
+	{
+		return false;
+	}
+
+	connect(m_metrologyDialog, &QDialog::accepted, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
+	connect(m_metrologyDialog, &QDialog::rejected, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
+
+
+	m_metrologyDialog->setModal(false);
+
+	return true;
+}
+
+void SignalsTabPage::deleteMetrologyDialog()
+{
+	if (m_metrologyDialog == nullptr)
+	{
 		return;
 	}
 
-	QStringList selectedSignalId;
-	for (int i = 0; i < selection.count(); i++)
+	delete	m_metrologyDialog;
+	m_metrologyDialog = nullptr;
+}
+
+void SignalsTabPage::openMetrologyConnections()
+{
+	if (createMetrologyDialog() == false)
 	{
-		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
-		selectedSignalId.append(m_signalSetProvider->getSignalByID(m_signalSetProvider->key(row)).appSignalID());
+		return;
 	}
-	QMessageBox::information(this, "Metrology editor", selectedSignalId.join("\n"));
+
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	m_metrologyDialog->show();
+	m_metrologyDialog->openConnectionBase();
+}
+
+void SignalsTabPage::addMetrologyConnection()
+{
+	if (m_signalSetProvider == nullptr)
+	{
+		assert(m_signalSetProvider);
+		return;
+	}
+
+	if (m_signalsView == nullptr)
+	{
+		assert(m_signalsView);
+		return;
+	}
+
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+	if (selection.count() == 0)
+	{
+		QMessageBox::warning(this, tr("Metrology connections"), tr("No one signal was selected!"));
+		return;
+	}
+
+	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
+	if (row < 0 || row >= m_signalSetProvider->signalCount())
+	{
+		return;
+	}
+
+	Signal signal = m_signalSetProvider->getSignalByID(m_signalSetProvider->key(row));
+	if (signal.isAnalog() == false)
+	{
+		QMessageBox::warning(this, tr("Metrology connections"), tr("Please, select analog signal!"));
+		return;
+	}
+
+	if (createMetrologyDialog() == false)
+	{
+		return;
+	}
+
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	m_metrologyDialog->show();
+	m_metrologyDialog->openConnectionBase();
+	m_metrologyDialog->createConnectionBySignal(&signal);
+}
+
+void SignalsTabPage::metrologyDialogClosed()
+{
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	deleteMetrologyDialog();
 }
 
 void SignalsTabPage::changeLazySignalLoadingSequence()

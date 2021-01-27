@@ -4,10 +4,10 @@
 #include "../lib/Hash.h"
 #include "../lib/Signal.h"
 #include "../lib/MetrologySignal.h"
+#include "../lib/MetrologyConnectionBase.h"
 
 #include "CalibratorManager.h"
 #include "RackBase.h"
-#include "SignalConnectionBase.h"
 #include "TuningSignalBase.h"
 #include "StatisticsBase.h"
 
@@ -37,8 +37,8 @@ private:
 
 	mutable QMutex			m_mutex;
 
-	Metrology::SignalParam	m_param[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
+	Metrology::SignalParam	m_param[Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT];
+	int						m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 
@@ -141,7 +141,7 @@ public:
 // ==============================================================================================
 // class MeasureSignal consists array of two classes MultiChannelSignal: input and output
 //
-// MeasureSignal --- MultiChannelSignal[MEASURE_IO_SIGNAL_TYPE_COUNT] --- Metrology::Signal[Metrology::ChannelCount]
+// MeasureSignal --- MultiChannelSignal[IO_SIGNAL_CONNECTION_TYPE_COUNT] --- Metrology::Signal[Metrology::ChannelCount]
 //
 class MeasureSignal
 {
@@ -155,10 +155,10 @@ private:
 
 	mutable QMutex			m_mutex;
 
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
+	int						m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
 
 	int						m_channelCount = 0;
-	MultiChannelSignal		m_signal[MEASURE_IO_SIGNAL_TYPE_COUNT];
+	MultiChannelSignal		m_signal[Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT];
 
 public:
 
@@ -174,7 +174,7 @@ public:
 	bool					setMultiSignal(int type, const MultiChannelSignal& signal);
 
 	Metrology::Signal*		metrologySignal(int type, int channel) const;
-	bool					setMetrologySignal(int measureKind, const SignalConnectionBase& signalConnections, int signalConnectionType, int channel, Metrology::Signal* pSignal);
+	bool					setMetrologySignal(int measureKind, const Metrology::ConnectionBase& сonnectionBase, int signalConnectionType, int channel, Metrology::Signal* pSignal);
 
 	bool					contains(Metrology::Signal* pSignal) const;
 
@@ -228,9 +228,9 @@ private:
 	mutable QMutex			m_activeSignalMutex;
 	MeasureSignal			m_activeSignal;
 
-	SignalConnectionBase	m_signalConnectionBase;	// signal connections
-	TuningBase				m_tuningBase;			// sources and signals of tuning
-	StatisticsBase			m_statisticsBase;		// statistics of measured signals
+	TuningBase				m_tuningBase;				// sources and signals of tuning
+	Metrology::ConnectionBase m_signalConnectionBase;	// signal connections
+	StatisticsBase			m_statisticsBase;			// statistics of measured signals
 
 public:
 
@@ -292,6 +292,7 @@ public:
 	//
 	void					initSignals();
 	void					updateRackParam();
+	void					initSignalConnections();
 
 	int						createSignalListForMeasure(int measureKind, int signalConnectionType, int rackIndex);
 	void					clearSignalListForMeasure();
@@ -308,9 +309,9 @@ public:
 
 	// other bases
 	//
-	SignalConnectionBase&	signalConnections() { return m_signalConnectionBase; }	// signal connections
-	TuningBase&				tuning() { return m_tuningBase; }						// sources and signals of tuning
-	StatisticsBase&			statistics() { return m_statisticsBase; }				// statistics of measured signals
+	TuningBase&				tuning() { return m_tuningBase; }							// sources and signals of tuning
+	Metrology::ConnectionBase& signalConnections() { return m_signalConnectionBase; }	// signal connections
+	StatisticsBase&			statistics() { return m_statisticsBase; }					// statistics of measured signals
 	
 	// comparators
 	//

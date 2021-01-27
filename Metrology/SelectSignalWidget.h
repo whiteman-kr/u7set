@@ -30,11 +30,11 @@ public:
 
 private:
 
-	int m_index = -1;			// index MeasureSignal in the  SignalBase in the array SignalListForMeasure
-	int m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	int m_index = -1;													// index MeasureSignal in the  SignalBase in the array SignalListForMeasure
+	int m_connectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 
-	QString m_signalId[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	QString m_caption[MEASURE_IO_SIGNAL_TYPE_COUNT];
+	QString m_signalId[Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT];
+	QString m_caption[Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT];
 
 public:
 
