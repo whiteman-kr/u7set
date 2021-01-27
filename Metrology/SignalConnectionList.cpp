@@ -95,18 +95,18 @@ QVariant SignalConnectionTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundRole)
 	{
-		if (column == SIGNAL_CONNECTION_COLUMN_TYPE)
+		if (column == SIGNAL_CONNECTION_COLUMN_IN_ID)
 		{
-			if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
+			Metrology::Signal* pSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
 		}
 
-		if (column == SIGNAL_CONNECTION_COLUMN_IN_ID)
+		if (column == SIGNAL_CONNECTION_COLUMN_TYPE)
 		{
-			Metrology::Signal* pSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
-			if (pSignal == nullptr || pSignal->param().isValid() == false)
+			if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -160,8 +160,8 @@ QString SignalConnectionTable::text(int row, int column, const Metrology::Signal
 
 	switch (column)
 	{
-		case SIGNAL_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");												break;
 		case SIGNAL_CONNECTION_COLUMN_IN_ID:	result = visible ? connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT): QString();	break;
+		case SIGNAL_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");												break;
 		case SIGNAL_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);						break;
 		default:								assert(0);
 	}
@@ -1192,17 +1192,9 @@ void SignalConnectionDialog::importConnections()
 		{
 			switch (column)
 			{
-				case SIGNAL_CONNECTION_COLUMN_TYPE:
-					connection.setType(line[column].toInt());
-					break;
-
-				case SIGNAL_CONNECTION_COLUMN_IN_ID:
-					connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, line[column]);
-					break;
-
-				case SIGNAL_CONNECTION_COLUMN_OUT_ID:
-					connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, line[column]);
-					break;
+				case 0:	connection.setType(line[column].toInt());												break;
+				case 1:	connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, line[column]);	break;
+				case 2:	connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, line[column]);	break;
 			}
 		}
 

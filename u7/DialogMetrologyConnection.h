@@ -28,21 +28,21 @@
 
 const char* const	MetrologyConnectionColumn[] =
 {
-                    QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Type"),
-                    QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "AppSignalID (source)"),
-                    QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "AppSignalID (destination)"),
+					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Source AppSignalID"),
+					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Type"),
+					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Destination AppSignalID"),
 };
 
 const int			METROLOGY_CONNECTION_COLUMN_COUNT		= sizeof(MetrologyConnectionColumn)/sizeof(MetrologyConnectionColumn[0]);
 
-const int			METROLOGY_CONNECTION_COLUMN_TYPE		= 0,
-					METROLOGY_CONNECTION_COLUMN_IN_ID		= 1,
+const int			METROLOGY_CONNECTION_COLUMN_IN_ID		= 0,
+					METROLOGY_CONNECTION_COLUMN_TYPE		= 1,
 					METROLOGY_CONNECTION_COLUMN_OUT_ID		= 2;
 
 const int			ConnectionColumnWidth[METROLOGY_CONNECTION_COLUMN_COUNT] =
 {
-                    150,	// METROLOGY_CONNECTION_COLUMN_TYPE
                     250,	// METROLOGY_CONNECTION_COLUMN_IN_ID
+					150,	// METROLOGY_CONNECTION_COLUMN_TYPE
                     250,	// METROLOGY_CONNECTION_COLUMN_OUT_ID
 };
 

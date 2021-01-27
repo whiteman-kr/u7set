@@ -94,17 +94,17 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 	if (role == Qt::BackgroundRole)
 	{
-		if (column == METROLOGY_CONNECTION_COLUMN_TYPE)
+		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
 		{
-			if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
+			if (connection.handle().inputID == Metrology::SIGNAL_ID_IS_NOT_FOUND)	// if input signal is not exist
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
 		}
 
-		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
+		if (column == METROLOGY_CONNECTION_COLUMN_TYPE)
 		{
-			if (connection.handle().inputID == Metrology::SIGNAL_ID_IS_NOT_FOUND)	// if input signal is not exist
+			if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -157,8 +157,8 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Sig
 
 	switch (column)
 	{
-		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");												break;
 		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID( Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT): QString();	break;
+		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString("");												break;
 		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID( Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);						break;
 		default:									assert(0);
 	}
@@ -277,7 +277,7 @@ void DialogMetrologyConnectionItem::createInterface()
 	//
 	QHBoxLayout *inputSignalLayout = new QHBoxLayout;
 
-	QLabel* pInputSignalLabel = new QLabel(tr("AppSignalID (source)"), this);
+	QLabel* pInputSignalLabel = new QLabel(tr("Source AppSignalID"), this);
 	m_pInputSignalIDEdit = new QLineEdit(QString(), this);
 
 	pInputSignalLabel->setFixedWidth(150);
@@ -291,7 +291,7 @@ void DialogMetrologyConnectionItem::createInterface()
 	//
 	QHBoxLayout *outputSignalLayout = new QHBoxLayout;
 
-	QLabel* pOutputSignalLabel = new QLabel(tr("AppSignalID (destination)"), this);
+	QLabel* pOutputSignalLabel = new QLabel(tr("Destination AppSignalID"), this);
 	m_pOutputSignalIDEdit = new QLineEdit(QString(), this);
 
 	pOutputSignalLabel->setFixedWidth(150);
@@ -743,9 +743,13 @@ void DialogMetrologyConnection::createInterface()
 	//
 	QToolBar *toolBar = new QToolBar(this);
 
+	toolBar->setStyleSheet("QToolButton { padding: 6px; }");
+	toolBar->setIconSize(toolBar->iconSize() * 0.9);
+
 	toolBar->addAction(m_pEditAction);
 	toolBar->addAction(m_pCreateAction);
 	toolBar->addAction(m_pRemoveAction);
+
 
 	toolBar->addSeparator();
 
@@ -773,6 +777,8 @@ void DialogMetrologyConnection::createInterface()
 	m_pView->setModel(&m_connectionTable);
 	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
+	m_pView->verticalHeader()->setHighlightSections(false);
+	m_pView->horizontalHeader()->setHighlightSections(false);
 
 	for(int column = 0; column < METROLOGY_CONNECTION_COLUMN_COUNT; column++)
 	{
@@ -861,64 +867,53 @@ void DialogMetrologyConnection::saveConnectionBase()
 	QString comment = QString();
 	bool fileCheckIn = m_connectionBase.isCheckIn(db);
 
-	// if file is CheckIn, the return
-	//
-	if (fileCheckIn == true)
-	{
-		return;
-	}
 
-	// if file is not CheckIn
-	//
-	int resultQuestion = QMessageBox::question(this,
-									   windowTitle(),
-									   tr("Metrology connections is not Check In!\n"
-										  "Do you want to measure them again?"));
-	if (resultQuestion == QMessageBox::Yes)
-	{
-		// create dialog for comment
-		//
-		QDialog* pCommendDialog = new QDialog(this);
-		pCommendDialog->setWindowTitle(m_windowTitle + tr(" - Check In"));
-		pCommendDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
+//	// if file is not CheckIn
+//	//
+//	{
+//		// create dialog for comment
+//		//
+//		QDialog* pCommendDialog = new QDialog(this);
+//		pCommendDialog->setWindowTitle(m_windowTitle + tr(" - Check In"));
+//		pCommendDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 
-		QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-		pCommendDialog->resize(static_cast<int>(screen.width() * 0.30), static_cast<int>(screen.height() * 0.15));
-		pCommendDialog->move(screen.center() - pCommendDialog->rect().center());
+//		QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+//		pCommendDialog->resize(static_cast<int>(screen.width() * 0.30), static_cast<int>(screen.height() * 0.15));
+//		pCommendDialog->move(screen.center() - pCommendDialog->rect().center());
 
-		QPlainTextEdit* pCommentEdit = new QPlainTextEdit(pCommendDialog);
+//		QPlainTextEdit* pCommentEdit = new QPlainTextEdit(pCommendDialog);
 
-		QHBoxLayout *buttonLayout = new QHBoxLayout;
+//		QHBoxLayout *buttonLayout = new QHBoxLayout;
 
-		QPushButton* pCheckInButton = new QPushButton(tr("Check In"), pCommendDialog);
-		QPushButton* pCancelButton = new QPushButton(tr("Cancel"), pCommendDialog);
+//		QPushButton* pCheckInButton = new QPushButton(tr("Check In"), pCommendDialog);
+//		QPushButton* pCancelButton = new QPushButton(tr("Cancel"), pCommendDialog);
 
-		buttonLayout->addStretch();
-		buttonLayout->addWidget(pCheckInButton);
-		buttonLayout->addWidget(pCancelButton);
+//		buttonLayout->addStretch();
+//		buttonLayout->addWidget(pCheckInButton);
+//		buttonLayout->addWidget(pCancelButton);
 
-		QVBoxLayout *mainLayout = new QVBoxLayout;
+//		QVBoxLayout *mainLayout = new QVBoxLayout;
 
-		mainLayout->addWidget(pCommentEdit);
-		mainLayout->addLayout(buttonLayout);
+//		mainLayout->addWidget(pCommentEdit);
+//		mainLayout->addLayout(buttonLayout);
 
-		pCommendDialog->setLayout(mainLayout);
-		pCommendDialog->setModal(true);
+//		pCommendDialog->setLayout(mainLayout);
+//		pCommendDialog->setModal(true);
 
-		connect(pCheckInButton, &QPushButton::clicked, pCommendDialog, &QDialog::accept);
-		connect(pCancelButton, &QPushButton::clicked, pCommendDialog, &QDialog::reject);
+//		connect(pCheckInButton, &QPushButton::clicked, pCommendDialog, &QDialog::accept);
+//		connect(pCancelButton, &QPushButton::clicked, pCommendDialog, &QDialog::reject);
 
-		int result = pCommendDialog->exec();
-		if (result == QDialog::Accepted)
-		{
-			fileCheckIn = true;
-			comment = pCommentEdit->toPlainText();
-		}
+//		int result = pCommendDialog->exec();
+//		if (result == QDialog::Accepted)
+//		{
+//			fileCheckIn = true;
+//			comment = pCommentEdit->toPlainText();
+//		}
 
-		delete pCommendDialog;
-	}
+//		delete pCommendDialog;
+//	}
 
-	bool resultSave = m_connectionBase.save(db, fileCheckIn, comment);
+	bool resultSave = m_connectionBase.save(db, false, comment);
 	if (resultSave == false)
 	{
 		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save metrology connections file: %1 to database!").arg(Metrology::CONNECTIONS_FILE_NAME));
@@ -1285,17 +1280,9 @@ void DialogMetrologyConnection::importConnections()
 		{
 			switch (column)
 			{
-				case METROLOGY_CONNECTION_COLUMN_TYPE:
-					connection.setType(line[column].toInt());
-					break;
-
-				case METROLOGY_CONNECTION_COLUMN_IN_ID:
-					connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, line[column]);
-					break;
-
-				case METROLOGY_CONNECTION_COLUMN_OUT_ID:
-					connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, line[column]);
-					break;
+				case 0:	connection.setType(line[column].toInt());												break;
+				case 1:	connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, line[column]);	break;
+				case 2:	connection.setAppSignalID(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, line[column]);	break;
 			}
 		}
 
