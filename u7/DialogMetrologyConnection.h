@@ -148,6 +148,7 @@ private:
 	QAction* m_pEditAction = nullptr;
 	QAction* m_pCreateAction = nullptr;
 	QAction* m_pRemoveAction = nullptr;
+	QAction* m_pCheckInAction = nullptr;
 	QAction* m_pExportAction = nullptr;
 	QAction* m_pImportAction = nullptr;
 
@@ -168,6 +169,8 @@ private:
 	void createInterface();
 	void createContextMenu();
 
+	void updateCheckInStateOnToolBar();
+
 	DialogMetrologyConnectionItem* m_dialogConnectionItem = nullptr;
 	void fillConnection(bool newConnection, const Metrology::SignalConnection& connection);
 
@@ -178,7 +181,6 @@ protected:
 public:
 
 	bool openConnectionBase();
-	void saveConnectionBase();
 	bool checkOutConnectionBase();
 
 	void updateList();
@@ -195,6 +197,7 @@ private slots:
 	void newConnection();
 	void connectionChanged();
 	void removeConnection();
+	void checkinConnection();
 	void exportConnections();
 	void importConnections();
 

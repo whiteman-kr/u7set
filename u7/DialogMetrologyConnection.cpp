@@ -709,6 +709,11 @@ void DialogMetrologyConnection::createInterface()
 
 	m_pConnectionMenu->addSeparator();
 
+	m_pCheckInAction = m_pConnectionMenu->addAction(tr("&Check In ..."));
+	m_pCheckInAction->setIcon(QIcon(":/Images/Images/SchemaCheckIn.svg"));
+
+	m_pConnectionMenu->addSeparator();
+
 	m_pExportAction = m_pConnectionMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/Images/Images/SchemaUpload.svg"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
@@ -733,6 +738,7 @@ void DialogMetrologyConnection::createInterface()
 	connect(m_pEditAction, &QAction::triggered, this, &DialogMetrologyConnection::editConnection);
 	connect(m_pCreateAction, &QAction::triggered, this, &DialogMetrologyConnection::newConnection);
 	connect(m_pRemoveAction, &QAction::triggered, this, &DialogMetrologyConnection::removeConnection);
+	connect(m_pCheckInAction, &QAction::triggered, this, &DialogMetrologyConnection::checkinConnection);
 	connect(m_pExportAction, &QAction::triggered, this, &DialogMetrologyConnection::exportConnections);
 	connect(m_pImportAction, &QAction::triggered, this, &DialogMetrologyConnection::importConnections);
 
@@ -750,6 +756,9 @@ void DialogMetrologyConnection::createInterface()
 	toolBar->addAction(m_pCreateAction);
 	toolBar->addAction(m_pRemoveAction);
 
+	toolBar->addSeparator();
+
+	toolBar->addAction(m_pCheckInAction);
 
 	toolBar->addSeparator();
 
@@ -813,6 +822,39 @@ void DialogMetrologyConnection::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void DialogMetrologyConnection::updateCheckInStateOnToolBar()
+{
+	if (m_signalSetProvider == nullptr)
+	{
+		assert(m_signalSetProvider);
+		return;
+	}
+
+	DbController* db = m_signalSetProvider->dbController();
+	if (db == nullptr)
+	{
+		assert(db);
+		return;
+	}
+
+	bool fileIsCheckIn = m_connectionBase.isCheckIn(db);
+
+	// update
+	//
+	m_pCheckInAction->setDisabled(fileIsCheckIn);
+
+	if (fileIsCheckIn == false)
+	{
+		setWindowTitle(m_windowTitle + " - Checked Out");
+	}
+	else
+	{
+		setWindowTitle(m_windowTitle + " - Checked In");
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool DialogMetrologyConnection::openConnectionBase()
 {
 	if (m_signalSetProvider == nullptr)
@@ -844,80 +886,9 @@ bool DialogMetrologyConnection::openConnectionBase()
 
 	updateList();
 
+	updateCheckInStateOnToolBar();
+
 	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogMetrologyConnection::saveConnectionBase()
-{
-	if (m_signalSetProvider == nullptr)
-	{
-		assert(m_signalSetProvider);
-		return;
-	}
-
-	DbController* db = m_signalSetProvider->dbController();
-	if (db == nullptr)
-	{
-		assert(db);
-		return;
-	}
-
-	QString comment = QString();
-	bool fileCheckIn = m_connectionBase.isCheckIn(db);
-
-
-//	// if file is not CheckIn
-//	//
-//	{
-//		// create dialog for comment
-//		//
-//		QDialog* pCommendDialog = new QDialog(this);
-//		pCommendDialog->setWindowTitle(m_windowTitle + tr(" - Check In"));
-//		pCommendDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-
-//		QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-//		pCommendDialog->resize(static_cast<int>(screen.width() * 0.30), static_cast<int>(screen.height() * 0.15));
-//		pCommendDialog->move(screen.center() - pCommendDialog->rect().center());
-
-//		QPlainTextEdit* pCommentEdit = new QPlainTextEdit(pCommendDialog);
-
-//		QHBoxLayout *buttonLayout = new QHBoxLayout;
-
-//		QPushButton* pCheckInButton = new QPushButton(tr("Check In"), pCommendDialog);
-//		QPushButton* pCancelButton = new QPushButton(tr("Cancel"), pCommendDialog);
-
-//		buttonLayout->addStretch();
-//		buttonLayout->addWidget(pCheckInButton);
-//		buttonLayout->addWidget(pCancelButton);
-
-//		QVBoxLayout *mainLayout = new QVBoxLayout;
-
-//		mainLayout->addWidget(pCommentEdit);
-//		mainLayout->addLayout(buttonLayout);
-
-//		pCommendDialog->setLayout(mainLayout);
-//		pCommendDialog->setModal(true);
-
-//		connect(pCheckInButton, &QPushButton::clicked, pCommendDialog, &QDialog::accept);
-//		connect(pCancelButton, &QPushButton::clicked, pCommendDialog, &QDialog::reject);
-
-//		int result = pCommendDialog->exec();
-//		if (result == QDialog::Accepted)
-//		{
-//			fileCheckIn = true;
-//			comment = pCommentEdit->toPlainText();
-//		}
-
-//		delete pCommendDialog;
-//	}
-
-	bool resultSave = m_connectionBase.save(db, false, comment);
-	if (resultSave == false)
-	{
-		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save metrology connections file: %1 to database!").arg(Metrology::CONNECTIONS_FILE_NAME));
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1168,6 +1139,8 @@ void DialogMetrologyConnection::connectionChanged()
 			{
 				m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 			}
+
+			updateCheckInStateOnToolBar();
 		}
 	}
 
@@ -1203,12 +1176,92 @@ void DialogMetrologyConnection::removeConnection()
 				if (checkOutConnectionBase() == true)
 				{
 					m_connectionBase.remove(index);
+
+					updateCheckInStateOnToolBar();
 				}
 			}
 		}
 	}
 
 	updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogMetrologyConnection::checkinConnection()
+{
+	if (m_signalSetProvider == nullptr)
+	{
+		assert(m_signalSetProvider);
+		return;
+	}
+
+	DbController* db = m_signalSetProvider->dbController();
+	if (db == nullptr)
+	{
+		assert(db);
+		return;
+	}
+
+	// if file is CheckIn, then return
+	//
+	if (m_connectionBase.isCheckIn(db) == true)
+	{
+		return;
+	}
+
+	// create dialog for comment
+	//
+	QDialog* pCommendDialog = new QDialog(this);
+	if (pCommendDialog == nullptr)
+	{
+		return;
+	}
+
+	pCommendDialog->setWindowTitle(m_windowTitle + tr(" - Check In"));
+	pCommendDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	pCommendDialog->resize(static_cast<int>(screen.width() * 0.30), static_cast<int>(screen.height() * 0.15));
+	pCommendDialog->move(screen.center() - pCommendDialog->rect().center());
+
+	QPlainTextEdit* pCommentEdit = new QPlainTextEdit(pCommendDialog);
+
+	QHBoxLayout *buttonLayout = new QHBoxLayout;
+
+	QPushButton* pCheckInButton = new QPushButton(tr("Check In"), pCommendDialog);
+	QPushButton* pCancelButton = new QPushButton(tr("Cancel"), pCommendDialog);
+
+	buttonLayout->addStretch();
+	buttonLayout->addWidget(pCheckInButton);
+	buttonLayout->addWidget(pCancelButton);
+
+	QVBoxLayout *mainLayout = new QVBoxLayout;
+
+	mainLayout->addWidget(pCommentEdit);
+	mainLayout->addLayout(buttonLayout);
+
+	pCommendDialog->setLayout(mainLayout);
+	pCommendDialog->setModal(true);
+
+	connect(pCheckInButton, &QPushButton::clicked, pCommendDialog, &QDialog::accept);
+	connect(pCancelButton, &QPushButton::clicked, pCommendDialog, &QDialog::reject);
+
+	int result = pCommendDialog->exec();
+	if (result == QDialog::Accepted)
+	{
+		QString comment = pCommentEdit->toPlainText();
+
+		bool resultSave = m_connectionBase.save(db, true, comment);
+		if (resultSave == false)
+		{
+			QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save metrology connections file: %1 to database!").arg(Metrology::CONNECTIONS_FILE_NAME));
+		}
+
+		updateCheckInStateOnToolBar();
+	}
+
+	delete pCommendDialog;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1447,7 +1500,25 @@ void DialogMetrologyConnection::keyPressEvent(QKeyEvent *e)
 
 void DialogMetrologyConnection::onOk()
 {
-	saveConnectionBase();
+	if (m_signalSetProvider == nullptr)
+	{
+		assert(m_signalSetProvider);
+		return;
+	}
+
+	DbController* db = m_signalSetProvider->dbController();
+	if (db == nullptr)
+	{
+		assert(db);
+		return;
+	}
+
+	bool resultSave = m_connectionBase.save(db, false, QString());
+	if (resultSave == false)
+	{
+		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save metrology connections file: %1 to database!").arg(Metrology::CONNECTIONS_FILE_NAME));
+	}
+
 	accept();
 }
 
