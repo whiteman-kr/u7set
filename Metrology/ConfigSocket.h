@@ -69,6 +69,7 @@ private slots:
 
 	void				slot_configurationReady(const QByteArray configurationXmlData,
 												const BuildFileInfoArray buildFileInfoArray,
+												SessionParams sessionParams,
 												std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 	bool				readConfiguration(const QByteArray& fileData,

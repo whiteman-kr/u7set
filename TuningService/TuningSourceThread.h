@@ -222,6 +222,7 @@ namespace Tuning
 	public:
 		TuningSourceHandler(const TuningServiceSettings& settings,
 						   const TuningSource& source,
+						   E::SoftwareRunMode swRunMode,
 						   CircularLoggerShared logger,
 						   CircularLoggerShared tuningLog);
 		~TuningSourceHandler();
@@ -251,8 +252,6 @@ namespace Tuning
 										const QString& user);
 	private:
 		void initTuningSignals(const TuningData* td);
-
-		bool isSimulationMode() const;
 
 		bool processWaitReply();
 		bool processCommandQueue();
@@ -287,6 +286,8 @@ namespace Tuning
 		CircularLoggerShared m_tuningLog;
 
 		bool m_disableModulesTypeChecking = false;
+
+		bool m_isSimulationMode = false;
 
 		HostAddressPort m_tuningSimIP;
 
@@ -367,9 +368,10 @@ namespace Tuning
 	{
 	public:
 		TuningSourceThread(	const TuningServiceSettings& settings,
-										const TuningSource& source,
-										CircularLoggerShared logger,
-										CircularLoggerShared tuningLog);
+							const TuningSource& source,
+							E::SoftwareRunMode swRunMode,
+							CircularLoggerShared logger,
+							CircularLoggerShared tuningLog);
 
 		void pushReply(const RupFotipV2& reply);
 		void incErrReplySize();
@@ -399,6 +401,7 @@ namespace Tuning
 	private:
 		const TuningServiceSettings& m_settings;
 		const TuningSource& m_source;
+		E::SoftwareRunMode m_swRunMode = E::SoftwareRunMode::Normal;
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
@@ -466,6 +469,8 @@ namespace Tuning
 		qint64 m_errReplySize = 0;
 		qint64 m_errReadSocket = 0;
 		qint64 m_errUnknownTuningSource = 0;
+		qint64 m_errSimVersion = 0;
+		qint64 m_errNotExpectedSimPacket = 0;
 	};
 
 

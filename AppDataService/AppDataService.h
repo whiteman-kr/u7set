@@ -64,6 +64,7 @@ private:
 
 	void onConfigurationReady(const QByteArray configurationXmlData,
 							  const BuildFileInfoArray buildFileInfoArray,
+							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
 	bool readDataSources(const QByteArray& fileData);
@@ -134,11 +135,6 @@ private:
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
-
-	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
-
-	static const char* const SETTING_PROCESSING_THREADS_COUNT;
-	static const char* const SETTING_OVERRIDE_APP_DATA_RECEIVING_IP;
 
 	QTimer m_timer;
 };

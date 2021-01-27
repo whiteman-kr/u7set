@@ -9,9 +9,6 @@
 //
 // -------------------------------------------------------------------------------
 
-const char* const ArchivingService::SETTING_ARCHIVE_LOCATION = "ArchiveLocation";
-const char* const ArchivingService::SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING = "MinQueueSizeForFlushing";
-
 ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
 											   int& argc,
@@ -47,23 +44,24 @@ void ArchivingService::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
-	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+	cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
 	cp.addSingleValueOption("location",
-							SETTING_ARCHIVE_LOCATION,
+							SoftwareSetting::ARCHIVE_LOCATION,
 							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
 	cp.addSingleValueOption("mq",
-							SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING,
-							"Minimum size of signal states queue for flushing to disk.", "");
+							SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING,
+							QString("Minimum size of signal states queue for flushing to disk (default = %1 states).").
+								arg(Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING), "");
 
 }
 
 void ArchivingService::loadSettings()
 {
-	m_overwriteArchiveLocation = QString(getStrSetting(SETTING_ARCHIVE_LOCATION));
+	m_overwriteArchiveLocation = QString(getStrSetting(SoftwareSetting::ARCHIVE_LOCATION));
 
-	QString sizeStr = getStrSetting(SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING);
+	QString sizeStr = getStrSetting(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING);
 
 	bool ok = false;
 
@@ -75,11 +73,13 @@ void ArchivingService::loadSettings()
 	}
 
 	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).
+						arg(cfgServiceIP1().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).
+						arg(cfgServiceIP2().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
 }
 
 void ArchivingService::initialize()
@@ -268,8 +268,11 @@ void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
 
 void ArchivingService::onConfigurationReady(const QByteArray configurationXmlData,
 											const BuildFileInfoArray buildFileInfoArray,
+											SessionParams sessionParams,
 											std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
+	setSessionParams(sessionParams);
+
 	TEST_PTR_RETURN(m_cfgLoaderThread);
 
 	const ArchivingServiceSettings* typedSettingsPtr = dynamic_cast<const ArchivingServiceSettings*>(curSettingsProfile.get());

@@ -48,12 +48,9 @@ private:
 	void startUdpThreads();
 	void stopUdpThreads();
 
-private:
-	static const char* const SETTING_AUTOLOAD_BUILD_PATH;
-	static const char* const SETTING_CLIENT_REQUEST_IP;
-	static const char* const SETTING_WORK_DIRECTORY;
-	static const char* const SETTING_CURRENT_PROFILE;
+	E::SoftwareRunMode getSoftwareRunMode(QString runModeStr);
 
+private:
 	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
@@ -66,7 +63,6 @@ private:
 	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
 	QString m_workDirectory;
-	QString m_currentSettingsProfile;
 
 	HostAddressPort m_clientIP;
 

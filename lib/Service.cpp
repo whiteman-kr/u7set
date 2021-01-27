@@ -38,10 +38,6 @@ ServicesInfo::ServicesInfo()
 //
 // -------------------------------------------------------------------------------------
 
-const char* const ServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
-const char* const ServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
-const char* const ServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
-
 int ServiceWorker::m_instanceNo = 0;
 
 ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
@@ -56,7 +52,8 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_logger(logger),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv),
-	m_softwareSettingsSet(softwareInfo.softwareType())
+	m_softwareSettingsSet(softwareInfo.softwareType()),
+	m_spMutex(QMutex::RecursionMode::Recursive)
 {
 	TEST_PTR_RETURN(argv);
 
@@ -203,6 +200,20 @@ QString ServiceWorker::getSoftwareInfoStr() const
 	return swInfo;
 }
 
+void ServiceWorker::setSessionParams(const SessionParams& sp)
+{
+	AUTO_LOCK(m_spMutex);
+
+	m_sessionParams = sp;
+}
+
+SessionParams ServiceWorker::sessionParams() const
+{
+	AUTO_LOCK(m_spMutex);
+
+	return m_sessionParams;
+}
+
 void ServiceWorker::init()
 {
 	m_cmdLineParser.addSimpleOption("h", "Print this help.");
@@ -228,15 +239,15 @@ void ServiceWorker::onThreadStarted()
 {
 	// loading common settings of services
 
-	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
+	m_equipmentID = getStrSetting(SoftwareSetting::EQUIPMENT_ID);
 
 	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
 
-	m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
+	m_cfgServiceIP1Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP1);
 
 	m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
-	m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
+	m_cfgServiceIP2Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP2);
 
 	m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
@@ -493,6 +504,12 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	serviceInfo.set_servicestate(TO_INT(m_state));
 
+	Network::SessionParams* sp = new Network::SessionParams();
+
+	serviceWorker->sessionParams().saveTo(sp);
+
+	serviceInfo.set_allocated_sessionparams(sp);
+
 	if (m_serviceWorker != nullptr)
 	{
 		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
@@ -623,7 +640,7 @@ int ServiceStarter::privateRun()
 
 	if (startAsRegularApp == true)
 	{
-		if (m_serviceWorker.getStrSetting(ServiceWorker::SETTING_EQUIPMENT_ID).isEmpty() == true)
+		if (m_serviceWorker.getStrSetting(SoftwareSetting::EQUIPMENT_ID).isEmpty() == true)
 		{
 			DEBUG_LOG_MSG(m_logger, "");
 			DEBUG_LOG_ERR(m_logger, QString(tr("EquipmentID of service has NOT SET !!!")));

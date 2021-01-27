@@ -4,6 +4,7 @@
 #include "XmlHelper.h"
 #include "SocketIO.h"
 #include "WUtils.h"
+#include "../Proto/network.pb.h"
 
 #ifdef IS_BUILDER
 
@@ -13,6 +14,15 @@
 #include "../TuningService/TuningSource.h"
 
 #endif
+
+struct SessionParams
+{
+	QString currentSettingsProfile;
+	E::SoftwareRunMode softwareRunMode = E::SoftwareRunMode::Normal;
+
+	void saveTo(Network::SessionParams* sp);
+	void loadFrom(const Network::SessionParams& sp);
+};
 
 class SoftwareSettings : public QObject
 {
@@ -297,9 +307,8 @@ public:
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
-	HostAddressPort tuningSimIP;			// for now this option isn't read from equipment
-	                                        // it can be initialized from TuningService cmd line option -sim
-	                                        // or inside Simulator for run TuningServiceCommunicator
+	HostAddressPort tuningSimIP;
+
 	std::vector<TuningSource> sources;
 	std::vector<TuningClient> clients;
 

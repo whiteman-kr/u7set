@@ -1464,6 +1464,11 @@ namespace Builder
 
 		// create SoftwareCfgGenerators and generate "Default" profile settings
 		//
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
+							arg(SettingsProfile::DEFAULT));
+
 		for(auto p : m_context->m_software)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -1533,6 +1538,8 @@ namespace Builder
 			}
 		}
 
+		LOG_EMPTY_LINE(m_log);
+
 		QStringList profileIDs = context->m_simProfiles.profiles();
 
 		for(const QString& profileID : profileIDs)
@@ -1541,6 +1548,9 @@ namespace Builder
 			{
 				continue;
 			}
+
+			LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
+								arg(profileID));
 
 			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
 
@@ -1579,6 +1589,8 @@ namespace Builder
 			BREAK_IF_FALSE(result);
 
 			profile.restoreObjects();
+
+			LOG_EMPTY_LINE(m_log);
 		}
 
 		RETURN_IF_FALSE(result);

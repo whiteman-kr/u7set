@@ -10,10 +10,11 @@ namespace Sim
 	//
 	// ---------------------------------------------------------------------------------------------------------
 
-	TuningServiceCommunicator::TuningServiceCommunicator(Simulator* simulator, const ::TuningServiceSettings& settings) :
+	TuningServiceCommunicator::TuningServiceCommunicator(Simulator* simulator,
+														 const QString& tuningServiceEquipmentID) :
 		m_simulator(simulator),
-		m_log(m_simulator->log(), "TuningCommunicator"),
-		m_settings(settings)
+		m_tuningServiceEquipmentID(tuningServiceEquipmentID),
+		m_log(m_simulator->log(), "TuningCommunicator")
 	{
 		Q_ASSERT(simulator);
 
@@ -29,7 +30,7 @@ namespace Sim
 
 	bool TuningServiceCommunicator::startSimulation(QString profileName)
 	{
-		startProcessingThread();
+		startProcessingThread(profileName);
 
 		return true;
 	}
@@ -99,6 +100,11 @@ namespace Sim
 		}
 	}
 
+	QString TuningServiceCommunicator::tuningServiceEquipmentID() const
+	{
+		return m_tuningServiceEquipmentID;
+	}
+
 	qint64 TuningServiceCommunicator::applyWrittenChanges(const QString& lmEquipmentId, const QString& portEquipmentId)
 	{
 		return writeTuningRecord(TuningRecord::createApplyChanges(lmEquipmentId, portEquipmentId));
@@ -143,11 +149,11 @@ namespace Sim
 		return r.recordIndex;
 	}
 
-	void TuningServiceCommunicator::startProcessingThread()
+	void TuningServiceCommunicator::startProcessingThread(const QString& curProfileName)
 	{
 		Q_ASSERT(m_processingThread == nullptr);
 
-		m_processingThread = new TuningRequestsProcessingThread(this, m_settings);
+		m_processingThread = new TuningRequestsProcessingThread(*this, curProfileName, m_log);
 		m_processingThread->start();
 	}
 
@@ -182,18 +188,31 @@ namespace Sim
 	//
 	// ---------------------------------------------------------------------------------------------------------
 
-	TuningRequestsProcessingThread::TuningRequestsProcessingThread(TuningServiceCommunicator* tsCommunicator,
-																   const TuningServiceSettings& settings) :
+	TuningRequestsProcessingThread::TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
+																   const QString& curProfileName,
+																   ScopedLog& log) :
 		m_tsCommunicator(tsCommunicator),
-		m_sim(tsCommunicator->simulator()),
-		m_log(m_tsCommunicator->simulator()->log()),
-		m_tuningServiceEquipmentID(settings.equipmentID),
-		m_tuningRequestsReceivingIP(settings.tuningSimIP),
-		m_tuningRepliesSendingIP(settings.tuningDataIP)
+		m_curProfileName(curProfileName),
+		m_sim(*tsCommunicator.simulator()),
+		m_log(log)
 	{
-		m_tuningRequestsReceivingIP.setAddressPortStr(m_tuningRepliesSendingIP.addressStr(), PORT_LM_TUNING);
+		std::shared_ptr<const TuningServiceSettings> settings =
+				m_sim.software().getSettingsProfile<TuningServiceSettings>(m_tsCommunicator.tuningServiceEquipmentID(),
+																			   curProfileName);
 
-		initTuningSourcesHandlers(settings);
+		if (settings == nullptr)
+		{
+			Q_ASSERT(false);
+			m_log.writeError(QString("Settings profile '%1' is not found for AppDataService %2").
+										arg(curProfileName).arg(m_tsCommunicator.tuningServiceEquipmentID()));
+		}
+		else
+		{
+			m_tuningRequestsReceivingIP = settings->tuningSimIP;
+			m_tuningRepliesSendingIP = settings->tuningDataIP;
+
+			initTuningSourcesHandlers(*settings.get());
+		}
 	}
 
 	TuningRequestsProcessingThread::~TuningRequestsProcessingThread()
@@ -263,7 +282,7 @@ namespace Sim
 	void TuningRequestsProcessingThread::run()
 	{
 		m_log.writeMessage(QString("Tuning simulation is started (EquipmentID %1, receiving IP %2, sending IP %3)").
-						arg(m_tuningServiceEquipmentID).
+						arg(m_tsCommunicator.tuningServiceEquipmentID()).
 						arg(m_tuningRequestsReceivingIP.addressPortStr()).
 						arg(m_tuningRepliesSendingIP.addressPortStr()));
 
@@ -271,7 +290,7 @@ namespace Sim
 
 		while(isQuitRequested() == false)
 		{
-			if (m_tsCommunicator->softwareEnabled() == false)
+			if (m_tsCommunicator.softwareEnabled() == false)
 			{
 				msleep(10);
 				continue;
@@ -290,7 +309,7 @@ namespace Sim
 		closeSocket();
 
 		m_log.writeMessage(QString("TuningRequestsProcessingThread is finished (EquipmentID %1)").
-							arg(m_tuningServiceEquipmentID));
+							arg(m_tsCommunicator.tuningServiceEquipmentID()));
 	}
 
 	void TuningRequestsProcessingThread::initTuningSourcesHandlers(const TuningServiceSettings& settings)
@@ -300,7 +319,7 @@ namespace Sim
 
 		for(const TuningServiceSettings::TuningSource& ts : settings.sources)
 		{
-			std::shared_ptr<LogicModule> lm = m_sim->logicModule(ts.lmEquipmentID);
+			std::shared_ptr<LogicModule> lm = m_sim.logicModule(ts.lmEquipmentID);
 
 			if (lm == nullptr)
 			{
@@ -355,7 +374,7 @@ namespace Sim
 
 		while(isQuitRequested() == false)
 		{
-			if (m_tsCommunicator->softwareEnabled() == false)
+			if (m_tsCommunicator.softwareEnabled() == false)
 			{
 				return false;
 			}
@@ -430,7 +449,7 @@ namespace Sim
 
 		while(isQuitRequested() == false)
 		{
-			if (m_tsCommunicator->softwareEnabled() == false)
+			if (m_tsCommunicator.softwareEnabled() == false)
 			{
 				break;
 			}
@@ -599,7 +618,7 @@ namespace Sim
 	//
 	// ---------------------------------------------------------------------------------------------------------
 
-	TuningSourceHandler::TuningSourceHandler(TuningServiceCommunicator* tsCommunicator,
+	TuningSourceHandler::TuningSourceHandler(TuningServiceCommunicator& tsCommunicator,
 												 const QString& lmEquipmentID,
 												 const QString& portEquipmentID,
 												 const HostAddressPort& ip,
@@ -613,7 +632,7 @@ namespace Sim
 		m_subsystemKey(logicModuleInfo.subsystemKey),
 		m_lmUniqueID(logicModuleInfo.lmUniqueID)
 	{
-		std::shared_ptr<LogicModule> lm = m_tsCommunicator->simulator()->logicModule(m_lmEquipmentID);
+		std::shared_ptr<LogicModule> lm = m_tsCommunicator.simulator()->logicModule(m_lmEquipmentID);
 
 		TEST_PTR_RETURN(lm);
 
@@ -1014,7 +1033,7 @@ namespace Sim
 				{
 					replyFlags.successfulCheck = 1;
 
-					m_waitingConfirmationID = m_tsCommunicator->writeTuningSignedInt32(m_lmEquipmentID,
+					m_waitingConfirmationID = m_tsCommunicator.writeTuningSignedInt32(m_lmEquipmentID,
 																					   m_portEquipmentID,
 																					   writeAddrW,
 																					   value);
@@ -1062,7 +1081,7 @@ namespace Sim
 				{
 					replyFlags.successfulCheck = 1;
 
-					m_waitingConfirmationID = m_tsCommunicator->writeTuningFloat(m_lmEquipmentID,
+					m_waitingConfirmationID = m_tsCommunicator.writeTuningFloat(m_lmEquipmentID,
 																				 m_portEquipmentID,
 																				 writeAddrW,
 																				 value);
@@ -1098,7 +1117,7 @@ namespace Sim
 				quint32 value = reverseUint32(request.write.discreteValue);
 				quint32 mask = reverseUint32(request.write.bitMask);
 
-				m_waitingConfirmationID = m_tsCommunicator->writeTuningDword(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value, mask);
+				m_waitingConfirmationID = m_tsCommunicator.writeTuningDword(m_lmEquipmentID, m_portEquipmentID, writeAddrW, value, mask);
 
 				replyFlags.successfulCheck = 1;
 
@@ -1123,7 +1142,7 @@ namespace Sim
 	{
 		TEST_PTR_RETURN(sendReplyImmediately);
 
-		m_waitingConfirmationID = m_tsCommunicator->applyWrittenChanges(m_lmEquipmentID, m_portEquipmentID);
+		m_waitingConfirmationID = m_tsCommunicator.applyWrittenChanges(m_lmEquipmentID, m_portEquipmentID);
 
 		*sendReplyImmediately = false;
 	}

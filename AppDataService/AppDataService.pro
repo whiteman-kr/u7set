@@ -82,6 +82,7 @@ SOURCES += \
 
 HEADERS += \
     ../lib/Address16.h \
+	../lib/ConstStrings.h \
     ../lib/LanControllerInfo.h \
 	../lib/MemLeaksDetection.h \
 	Stable.h \

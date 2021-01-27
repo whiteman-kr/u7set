@@ -63,11 +63,6 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	static const char* const SETTING_EQUIPMENT_ID;
-	static const char* const SETTING_CFG_SERVICE_IP1;
-	static const char* const SETTING_CFG_SERVICE_IP2;
-
-public:
 	ServiceWorker(const SoftwareInfo& softwareInfo,
 				  const QString& serviceInstanceName,
 				  int& argc,
@@ -122,6 +117,9 @@ public:
 	SoftwareSettingsSet& softwareSettingsSet() { return m_softwareSettingsSet; }
 	const SoftwareSettingsSet& softwareSettingsSet() const { return m_softwareSettingsSet; }
 
+	void setSessionParams(const SessionParams& sp);
+	SessionParams sessionParams() const;
+
 signals:
 	void work();
 	void stopped();
@@ -164,6 +162,9 @@ private:
 	CommandLineParser m_cmdLineParser;
 
 	Service* m_service = nullptr;
+
+	mutable QMutex m_spMutex;
+	SessionParams m_sessionParams;
 
 	static int m_instanceNo;
 };

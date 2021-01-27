@@ -11,11 +11,14 @@
 
 AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
 								 const AppDataSourcesIP& appDataSourcesIP,
+								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
 	m_dataReceivingIP(dataReceivingIP),
 	m_appDataSourcesIP(appDataSourcesIP),
 	m_log(log)
 {
+	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
+
 	setPriority(QThread::Priority::HighPriority);
 }
 
@@ -36,6 +39,8 @@ void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState
 	adrs->set_errsimversion(m_errSimVersion);
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
 	adrs->set_errrupframecrc(m_errRupFrameCRC);
+
+	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
 }
 
 void AppDataReceiverThread::run()
@@ -208,6 +213,19 @@ void AppDataReceiverThread::receivePackets()
 		}
 		else
 		{
+			if (m_isSimulationMode == false)
+			{
+				m_errNotExpectedSimPacket++;
+
+				if ((m_errNotExpectedSimPacket % 1000) == 0)
+				{
+					qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
+									  arg(m_errNotExpectedSimPacket));
+				}
+
+				continue;
+			}
+
 			if (size == sizeof(Rup::SimFrame))
 			{
 				quint16 simVersion = reverseUint16(simFrame.simVersion);

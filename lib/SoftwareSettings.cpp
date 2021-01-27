@@ -9,6 +9,26 @@
 
 // -------------------------------------------------------------------------------------
 //
+// SessionParams struct implementation
+//
+// -------------------------------------------------------------------------------------
+
+void SessionParams::saveTo(Network::SessionParams* sp)
+{
+	TEST_PTR_RETURN(sp);
+
+	sp->set_currentsettingsprofile(currentSettingsProfile.toStdString());
+	sp->set_softwarerunmode(static_cast<int>(softwareRunMode));
+}
+
+void SessionParams::loadFrom(const Network::SessionParams& sp)
+{
+	currentSettingsProfile = QString::fromStdString(sp.currentsettingsprofile());
+	softwareRunMode = static_cast<E::SoftwareRunMode>(sp.softwarerunmode());
+}
+
+// -------------------------------------------------------------------------------------
+//
 // SoftwareSettings class implementation
 //
 // -------------------------------------------------------------------------------------
@@ -1168,6 +1188,12 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 												EquipmentPropNames::TUNING_DATA_NETMASK,
 												&tuningDataNetmask, false, "", log);
 
+		result &= DeviceHelper::getIpPortProperty(software,
+												  EquipmentPropNames::TUNING_SIM_IP,
+												  EquipmentPropNames::TUNING_SIM_PORT,
+												  &tuningSimIP, true, Socket::IP_LOCALHOST,
+												  PORT_LM_TUNING, log);
+
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
 
@@ -1674,10 +1700,6 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										true, Socket::IP_NULL,
 										PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ConfigurationService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1689,10 +1711,6 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										true, Socket::IP_NULL,
 										PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ConfigurationService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		if (cfgService1_equipmentID.isEmpty() == true && cfgService2_equipmentID.isEmpty() == true)
 		{
@@ -1711,13 +1729,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 										&appDataService_equipmentID,
 										&appDataService_appDataReceivingIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_APP_DATA_SERVICE_DATA,
 										E::SoftwareType::AppDataService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1726,13 +1740,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
 										&appDataService_equipmentID,
 										&appDataService_clientRequestIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::AppDataService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		const Hardware::Software* appDataService = DeviceHelper::getSoftware(equipment, appDataService_equipmentID);
 
@@ -1751,13 +1761,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 										&archService_equipmentID,
 										&archService_appDataReceivingIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_APP_DATA,
 										E::SoftwareType::ArchiveService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										appDataService,
@@ -1766,13 +1772,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
 										&archService_equipmentID,
 										&archService_diagDataReceivingIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_DIAG_DATA,
 										E::SoftwareType::ArchiveService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										appDataService,
@@ -1781,13 +1783,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
 										&archService_equipmentID,
 										&archService_clientRequestIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ArchiveService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		// Get TuningService connection
 
@@ -1798,13 +1796,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::TUNING_DATA_PORT,
 										&tuningService_equipmentID,
 										&tuningService_tuningDataIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_TUNING_SERVICE_DATA,
 										E::SoftwareType::TuningService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1813,17 +1807,13 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
 										&tuningService_equipmentID,
 										&tuningService_clientRequestIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_TUNING_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::TuningService, log);
 
 		result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
 												   &tuningService_tuningSources, log);
 
-		if (result == false)
-		{
-			return false;
-		}
 
 		// Get DiagDataService connection
 
@@ -1837,10 +1827,6 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										true, Socket::IP_NULL,
 										PORT_DIAG_DATA_SERVICE_DATA,
 										E::SoftwareType::DiagDataService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
