@@ -253,9 +253,9 @@ DialogMetrologyConnectionItem::~DialogMetrologyConnectionItem()
 
 void DialogMetrologyConnectionItem::createInterface()
 {
-	setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint | Qt::WindowCloseButtonHint);
+	setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(static_cast<int>(screen.width() * 0.20), static_cast<int>(screen.height() * 0.08));
+	resize(static_cast<int>(screen.width() * 0.25), static_cast<int>(screen.height() * 0.08));
 	move(screen.center() - rect().center());
 
 	// signal connection type
@@ -280,12 +280,9 @@ void DialogMetrologyConnectionItem::createInterface()
 	QLabel* pInputSignalLabel = new QLabel(tr("Source AppSignalID"), this);
 	m_pInputSignalIDEdit = new QLineEdit(QString(), this);
 
-	pInputSignalLabel->setFixedWidth(150);
-	m_pInputSignalIDEdit->setFixedWidth(200);
 
 	inputSignalLayout->addWidget(pInputSignalLabel);
 	inputSignalLayout->addWidget(m_pInputSignalIDEdit);
-	inputSignalLayout->addStretch();
 
 	// Output signal
 	//
@@ -294,13 +291,9 @@ void DialogMetrologyConnectionItem::createInterface()
 	QLabel* pOutputSignalLabel = new QLabel(tr("Destination AppSignalID"), this);
 	m_pOutputSignalIDEdit = new QLineEdit(QString(), this);
 
-	pOutputSignalLabel->setFixedWidth(150);
-	m_pOutputSignalIDEdit->setFixedWidth(200);
-
 
 	outputSignalLayout->addWidget(pOutputSignalLabel);
 	outputSignalLayout->addWidget(m_pOutputSignalIDEdit);
-	outputSignalLayout->addStretch();
 
 
 	signalLayout->addLayout(inputSignalLayout);
